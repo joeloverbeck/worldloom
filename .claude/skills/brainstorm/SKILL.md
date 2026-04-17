@@ -132,3 +132,24 @@ When the brainstorm is triggered by frustration indicators ("huge mistake", "wro
 1. **Validate the diagnosis before accepting it.** The user may be catastrophizing after a bad run, or missing that the system is more salvageable than they think. Present what exploration revealed — both what's broken AND what's working — before agreeing with a scorched-earth instinct.
 2. **Focus confidence on "what's actually broken?"** before "what's the fix?" The confidence target shifts from requirements discovery to failure-mode agreement. Key gaps to close: is the problem structural (architecture) or tactical (configuration, content design, missing inputs)? Is the user's frustration proportional to the evidence?
 3. **Always include a radical option.** When proposing approaches (Step 3), ensure at least one option represents the user's most aggressive instinct (strip, delete, rebuild). Even if you recommend a less radical path, validating the radical option as a real choice respects the user's judgment and prevents the feeling of being talked out of something.
+
+## Step 3: Propose Approaches
+
+Present **2-3 distinct approaches** with:
+
+- **Name**: A short descriptive label
+- **How it works**: 2-4 sentences
+- **Tradeoffs**: What you gain, what you give up
+- **Recommendation**: Lead with your recommended option and explain why
+
+**If canon-related** (not tooling-adjacent): For each approach, note which FOUNDATIONS.md principles it aligns with or tensions it creates. Use format: `Foundations: <principle name> (aligns), <principle name> (tensions — [reason])`. Example: `Foundations: Canon Layering (aligns), Validation Rule 3 — No Specialness Inflation (tensions — proposed feature adds exceptional capability without integrating consequences).`
+
+**If the problem space is fully constrained** (e.g., a reference document provides a proven design, or requirements eliminate alternatives), state why only one approach exists and present it directly. Do not invent artificial alternatives. In plan mode with a single viable approach, the approach rationale may be embedded in the plan file's Context section rather than presented as a separate conversational step.
+
+**For triage/analysis brainstorms** where the deliverable is a set of work items (tickets, specs) derived from evaluating a report or findings, the "approaches" step may be replaced by presenting the triage recommendation: which items warrant action, which are dismissed, and why. The user's approval of the triage recommendation serves the same gating purpose as choosing an approach.
+
+When triage produces **multiple deliverables** (N specs, N tickets, or a mix), the single triage approval gates all N — do not re-prompt for approval per deliverable. Each deliverable still independently satisfies its own format requirements (spec-drafting-rules.md for specs, `tickets/_TEMPLATE.md` for tickets), but no per-item user approval is required. The Step 6 Next Steps menu is presented once per triage, summarizing all N produced deliverables. For spec deliverables, `specs/IMPLEMENTATION-ORDER.md` (if the file exists; see Step 5 for fallback handling) gets a single update encompassing all N specs (typically a new Adjunct Wave — see Step 5 spec-deliverable branch).
+
+**If the user challenges an option's dismissal**, do a fresh analysis from first principles rather than defending the prior reasoning. If the new analysis reverses the dismissal, state explicitly where the prior reasoning was incomplete. A revised approach (e.g., phased combination) is a valid output of this re-analysis.
+
+**Wait for user to choose or ask questions.** Do not proceed until the user picks an approach (or asks you to refine/combine).
