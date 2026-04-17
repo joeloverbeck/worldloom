@@ -153,3 +153,27 @@ When triage produces **multiple deliverables** (N specs, N tickets, or a mix), t
 **If the user challenges an option's dismissal**, do a fresh analysis from first principles rather than defending the prior reasoning. If the new analysis reverses the dismissal, state explicitly where the prior reasoning was incomplete. A revised approach (e.g., phased combination) is a valid output of this re-analysis.
 
 **Wait for user to choose or ask questions.** Do not proceed until the user picks an approach (or asks you to refine/combine).
+
+## Step 4: Present Design
+
+**Plan mode**: Skip per-section gates. Present key decisions in 1-2 messages with conversation-level checkpoints, then write to plan file. See plan-mode details at the end of this section.
+
+**Classification pivot check**: If the design reveals a deliverable type that differs from the Step 1 classification (e.g., "tooling configuration" now requires a new world-file type, or a spec now includes live code changes), re-state the refined classification to the user before presenting Section 1 of the design. Downstream sections (testing strategy, FOUNDATIONS alignment) follow the refined classification.
+
+Once an approach is chosen, present the design **section by section**. Scale each section to its complexity — a sentence for trivial parts, up to 200 words for nuanced parts.
+
+Sections to cover (skip irrelevant ones):
+
+1. **Overview**: What this design achieves in 1-2 sentences
+2. **Architecture / Structure**: How the pieces fit together
+3. **Key decisions**: Important choices and why
+4. **Data flow / Process**: How information moves through the system
+5. **Edge cases**: Known tricky scenarios and how they're handled
+6. **Testing strategy**: How to verify this works (if canon-related or tooling-adjacent)
+7. **FOUNDATIONS.md alignment**: Table of relevant principles and how the design respects them. Mandatory for canon-related. Optional for tooling-adjacent — include when the design touches canon-handling logic, world-file persistence, canon-validation surfaces, or other concepts mapped to specific FOUNDATIONS principles; a 3–5 row table is usually sufficient. Omit when truly irrelevant (e.g., cosmetic CLI tweaks).
+
+Section names are suggestions. Rename or combine sections to match the topic's natural structure. The key requirement is per-section approval, not specific section names.
+
+**After each section**, ask: "Does this section look right?" Wait for confirmation before presenting the next section. If the user pushes back, revise that section before continuing. If the user approves 3+ sections consecutively without pushback or revisions, batch remaining sections into groups of 2-3, pausing for approval after each group rather than each section. Under auto mode, this threshold may shift to 2 consecutive approvals to reduce round-trips. Exception: keep a remaining section standalone if it is substantially more complex or higher-risk than the prior ones. Announce the batching: "You're clearly aligned — I'll present the remaining sections in groups."
+
+**If plan mode is active**: Per-section approval is replaced by whole-plan approval via `ExitPlanMode`. Present the key design decisions inline in the conversation before writing the plan file, so the user can course-correct before the plan is finalized. For complex designs, present in 1-2 messages, grouping related sections. Pause after the first message to check for course corrections before continuing. The goal is conversation-level checkpoints, not per-section gates. In plan mode, the confidence-reached announcement and approach proposal may be folded into the same message as the design presentation when the approach is architecturally constrained (single viable option).
