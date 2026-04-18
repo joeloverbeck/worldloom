@@ -160,6 +160,27 @@ audit trail.
 
 ## Synthesis (Phase 6b)
 
+<!-- Main agent's integration of the six critic reports. Follow this lightweight
+     structure so synthesis is consistent across adjudications:
+
+     **Convergent concerns**: <numbered list; each item names the critics that
+     converge and the concern they share — e.g., "1. Rule 3 specialness-
+     inflation via <surface> (Continuity Archivist, Politics/Institution,
+     Theme/Tone, Mystery Curator)">
+
+     **Productive tensions resolved**: <numbered list; each item names the
+     tension between critics and how it was reconciled — e.g., "1. Critic A
+     (Charter-Era consolidation reading) vs Critic B (antiquity mystery):
+     resolved by distinguishing <X> from <Y>">
+
+     **Required CF-language commitments arising from synthesis**: <bulleted
+     list of specific sentences or clauses the CF record or domain-file
+     patches must carry to address the convergent concerns; feeds Phase 9
+     repair pass>
+
+     Keep the synthesis tight — the critic reports themselves are appended
+     above this section and carry the detail. -->
+
 ---
 
 # Resubmission Menu (conditional — REVISE_AND_RESUBMIT only)

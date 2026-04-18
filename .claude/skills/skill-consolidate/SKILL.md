@@ -138,7 +138,7 @@ For non-redundant instructions (those surviving Steps 2-5), tighten prose:
 
 ### Step 7: Rewrite
 
-Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Keep total pre-write summary under ~15 lines. Not the full diff summary.
+Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Match Step 9's zero-count convention — include any category with no findings as a brief one-line note so the reader sees the category was considered. Keep total pre-write summary under ~15 lines. Not the full diff summary.
 
 Write the consolidated SKILL.md in-place at `<skill-path>/SKILL.md`.
 
@@ -152,7 +152,7 @@ The rewritten file must:
 
 ### Step 8: Spot-Check Preservation
 
-After writing, spot-check 3-5 unique instructions from the original (preferring instructions from different sections) to confirm each survives in the consolidated output. If any instruction was lost, restore it before presenting the diff summary.
+After writing, spot-check 3-5 unique instructions from the original (preferring instructions from different sections) to confirm each survives in the consolidated output. Prefer `Grep` with an alternation pattern of distinctive phrases over re-reading — one call can verify several unique instructions at once. For restructured passages (e.g., a paragraph broken into bullets), grep a distinctive phrase from each element to confirm per-element preservation. If any instruction was lost, restore it before presenting the diff summary.
 
 Also verify frontmatter byte-identical: re-read the frontmatter from the rewritten file and confirm every YAML field (name, description, arguments, user-invocable, and any others) matches the original character-for-character. Any difference fails the preservation check and must be repaired before Step 9.
 
@@ -182,7 +182,7 @@ After writing, present a structured summary in the conversation:
 
 ### Wording Tightened
 - <N> instructions shortened for conciseness (no semantic changes)
-- Examples: "<before>" → "<after>" (include 2-3 representative samples)
+- Examples: 2-3 representative samples — literal "<before>" → "<after>" when the change is a single-string substitution, or descriptive ("<phrase> — <what changed and why>") when the change is a multi-sentence restructure.
 
 ### Cross-reference Hygiene (<count>)
 - "<before>" → "<after>" — reason (e.g., "Section 1 no longer exists in this file; target now lives in SKILL.md Step 1", or "added 'see Output § Diegetic artifact file' when removing duplicated canon-file list from Guardrails")

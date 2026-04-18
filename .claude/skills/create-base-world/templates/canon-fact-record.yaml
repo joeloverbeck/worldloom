@@ -41,6 +41,18 @@ truth_scope:
   diegetic_status: objective               # objective | believed | disputed | propagandistic | legendary
 
 domains_affected:                          # at least one — Rule 2 (No Pure Cosmetics)
+                                           # CANONICAL ENUM (from FOUNDATIONS §Rule 2, normalized to snake_case):
+                                           #   labor | embodiment | social_norms | architecture | mobility | law
+                                           #   trade | war | kinship | religion | language | status_signaling
+                                           #   ecology | daily_routine
+                                           # ESTABLISHED LEDGER EXTENSIONS (in active use; acceptable):
+                                           #   economy (alias for trade) | settlement_life | memory_and_myth
+                                           #   magic | medicine | status_order (alias for status_signaling)
+                                           #   warfare (alias for war) | taboo_and_pollution
+                                           # Prefer canonical labels where applicable; use established extensions
+                                           # only when the canonical list does not cover the fact's attachment
+                                           # surface. Labels outside canonical + extensions pass the non-empty
+                                           # test but degrade grep-discoverability across CFs.
   - labor
   # - warfare
   # - economy
@@ -62,6 +74,13 @@ costs_and_limits: []                       # stabilizers preventing universaliza
 visible_consequences: []                   # ordinary-life signals this fact produces — Rule 5 (No Consequence Evasion)
 
 required_world_updates: []                 # world files that reflect this fact
+                                           # Do NOT list CANON_LEDGER.md here — the CF record IS the ledger
+                                           # entry, and self-reference is redundant. required_world_updates
+                                           # is the list of DOMAIN files the fact's consequences must touch,
+                                           # parallel to downstream_updates in the change-log-entry template.
+                                           # At genesis, create-base-world writes all 13 mandatory files
+                                           # together; this field still names only the domain files whose
+                                           # prose reflects this CF's consequences (not CANON_LEDGER.md itself).
   # - INSTITUTIONS.md
   # - ECONOMY_AND_RESOURCES.md
   # - EVERYDAY_LIFE.md
