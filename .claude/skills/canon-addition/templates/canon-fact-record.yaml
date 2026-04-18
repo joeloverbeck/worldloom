@@ -4,6 +4,12 @@
 # to create-base-world/templates/canon-fact-record.yaml so that ledger entries
 # across skills remain uniform.
 #
+# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
+# to create-base-world/templates/canon-fact-record.yaml. Comments and example
+# values may differ per skill context. When adding, removing, or reshaping any
+# field — including extending the `type:` enum — update BOTH templates in the
+# same change so grep-based ledger discovery works uniformly.
+#
 # canon-addition emits one record of this shape per accepted fact at Phase 13a.
 # The record is appended to worlds/<world-slug>/CANON_LEDGER.md at Phase 15a
 # after HARD-GATE approval. For repair-split verdicts (multiple narrower facts),
@@ -22,7 +28,9 @@
 id: CF-0000                                # allocated at pre-flight via scan-and-increment of existing CANON_LEDGER.md
 title: ""                                  # short human label
 status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
-type: ""                                   # capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
+type: ""                                   # common enum: capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
+                                           # additional values from FOUNDATIONS.md §Ontology Categories are permitted: historical_process | text_tradition | hazard | craft
+                                           # (draw verbatim from FOUNDATIONS so ledger-wide grep discovery works uniformly)
 statement: >
   Natural-language statement of the fact. One paragraph maximum.
   Must be unambiguous enough to be cited in later adjudication.
@@ -75,3 +83,29 @@ notes: >
   Free-form notes: adjudication reasoning, scope-narrowing decisions,
   stabilizers added during Phase 9 repair pass, Mystery Reserve interactions,
   any latent burdens flagged by Phase 8 classification.
+  When this CF is modified by a subsequent canon-addition run, append a
+  standardized line of the form:
+    Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <one-sentence summary>.
+  Do NOT use HTML-comment attribution (<!-- ... -->) inside YAML — that
+  syntax is invalid here and is reserved for markdown prose patches in
+  domain files.
+
+# OPTIONAL: structured modification trace. Use when richer modification
+# history is desired (e.g., a CF that has been qualified multiple times).
+# Each entry records the change_id (CH-NNNN), originating CF id (the new
+# CF that prompted the modification), date, and summary. The notes-field
+# convention above remains the primary trace; modification_history is a
+# machine-readable supplement.
+#
+# Retrofit rule: when modifying a CF that previously had notes-field
+# modification traces but no `modification_history` array, retrofit all
+# prior notes-documented modifications into `modification_history`
+# alongside the new one, so the machine-readable trace is complete. A
+# partially-populated `modification_history` (listing only the current
+# modification while the notes field references earlier ones) is an
+# audit-trail gap.
+modification_history: []
+  # - change_id: CH-0002
+  #   originating_cf: CF-0021
+  #   date: 2026-04-18
+  #   summary: "qualification: marginal modern crafter stream acknowledged"

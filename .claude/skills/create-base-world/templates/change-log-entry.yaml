@@ -1,6 +1,14 @@
 # Change Log Entry — template
 #
 # Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+#
+# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
+# to canon-addition/templates/change-log-entry.yaml. Comments and example
+# values may differ per skill context. When adding, removing, or reshaping any
+# field — including extending the `change_type:` enum or adding new audit
+# fields like `latent_burdens_introduced` — update BOTH templates in the same
+# change so future ledger tooling parses both uniformly.
+#
 # create-base-world emits exactly ONE entry of this shape at Phase 16 — the
 # CH-0001 genesis entry. Subsequent canon-mutating skills must extend this
 # log; silent edits are forbidden.
@@ -45,6 +53,10 @@ retcon_policy_checks:                      # must all be true for acceptance (FO
   no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
   net_contradictions_not_increased: true
   world_identity_preserved: true           # genesis defines identity; trivially preserved
+
+latent_burdens_introduced: []              # OPTIONAL: empty for the CH-0001 genesis entry (no design carryover at world birth).
+                                           # Future canon-addition runs populate this from Phase 8 "Latent Burden" classifications.
+                                           # Schema-uniform with canon-addition/templates/change-log-entry.yaml.
 
 notes: >
   Optional free-form notes: world creation rationale, which optional premise items

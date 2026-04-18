@@ -4,6 +4,13 @@
 # Structurally identical to create-base-world/templates/change-log-entry.yaml
 # so that change logs across skills remain uniform.
 #
+# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
+# to create-base-world/templates/change-log-entry.yaml. Comments and example
+# values may differ per skill context. When adding, removing, or reshaping any
+# field — including extending the `change_type:` enum or adding new audit
+# fields like `latent_burdens_introduced` — update BOTH templates in the same
+# change so future ledger tooling parses both uniformly.
+#
 # canon-addition emits one entry of this shape at Phase 13a (accept branch),
 # appended to the change log section of worlds/<world-slug>/CANON_LEDGER.md at
 # Phase 15a after HARD-GATE approval. Non-accept branches (REVISE_AND_RESUBMIT /
@@ -15,11 +22,20 @@ change_id: CH-NNNN                         # allocated at pre-flight via scan-an
 date: ""                                   # ISO date of the change
 
 change_type: addition                      # addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
-                                           # canon-addition uses "addition" by default; routes to *_retcon if Phase 2 required an
-                                           # invariant revision or Phase 9 repair narrowed an existing fact's scope/cost.
+                                           # Use the change_type of the DOMINANT action:
+                                           #   - "addition" when the dominant action is appending new CFs (even if paired with
+                                           #     qualifications or extensions to existing CFs — those are documented in summary
+                                           #     and notes, not by switching change_type)
+                                           #   - "*_retcon" only when the dominant action is modifying an existing CF's scope,
+                                           #     cost, perspective, chronology, or ontology
+                                           #   - "clarification" for pure annotation/note additions with no field changes
+                                           #   - "de_canonization" for explicit removal of a previously-accepted fact
 
-affected_fact_ids: []                      # full list of CF ids created or modified by this change
-  # - CF-0047
+affected_fact_ids: []                      # full list of CF ids touched by this change (new + modified + extended).
+                                           # Document each id's role (added / qualified / extended / clarified) in the
+                                           # summary and notes fields, since the YAML field itself does not distinguish.
+  # - CF-0047                               #   added — new fact
+  # - CF-0023                               #   qualified — existing fact narrowed in scope
 
 summary: >
   One-paragraph natural-language summary of what this change is, why it was
@@ -52,6 +68,14 @@ retcon_policy_checks:                      # must all be true for acceptance (FO
   no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
   net_contradictions_not_increased: true
   world_identity_preserved: true           # Phase 10 thematic-fit check must have passed
+
+latent_burdens_introduced: []              # OPTIONAL: one-line entries for every Phase 8 "Latent Burden" classification.
+                                           # These are mandatory future lore items the change creates — questions or
+                                           # commitments that must be resolved by future canon work. Populate from Phase 8.
+                                           # Future canon-addition runs should grep this field across past Change Log
+                                           # Entries when planning work that may interact with prior burdens.
+  # - "detection asymmetry: can wards/inspectors distinguish modern from Maker-Age artifacts? unresolved"
+  # - "guild internal-schism naming: which faction inside containment-wright lineages broke charter? unresolved"
 
 notes: >
   Optional free-form notes: which repair options were considered and declined,

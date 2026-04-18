@@ -1,6 +1,13 @@
 # Canon Fact Record — template
 #
 # Matches docs/FOUNDATIONS.md §"Canon Fact Record Schema".
+#
+# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
+# to canon-addition/templates/canon-fact-record.yaml. Comments and example
+# values may differ per skill context. When adding, removing, or reshaping any
+# field — including extending the `type:` enum — update BOTH templates in the
+# same change so grep-based ledger discovery works uniformly.
+#
 # create-base-world emits one record of this shape per accepted hard canon
 # fact at Phase 14. The full set is concatenated into
 # worlds/<world-slug>/CANON_LEDGER.md.
@@ -17,7 +24,9 @@
 id: CF-0000                                # canonical fact ID, monotonic within this world
 title: ""                                  # short human label
 status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
-type: ""                                   # capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
+type: ""                                   # common enum: capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
+                                           # additional values from FOUNDATIONS.md §Ontology Categories are permitted: historical_process | text_tradition | hazard | craft
+                                           # (draw verbatim from FOUNDATIONS so ledger-wide grep discovery works uniformly)
 statement: >
   Natural-language statement of the fact. One paragraph maximum.
   Must be unambiguous enough to be cited in later adjudication.
@@ -69,3 +78,15 @@ contradiction_risk:
 notes: >
   Free-form notes: adjudication reasoning, scope-narrowing decisions,
   stabilizers added during equilibrium explanation, mystery-reserve interactions.
+  When a future canon-addition run modifies this CF, that run is responsible
+  for appending a standardized line:
+    Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <one-sentence summary>.
+  create-base-world does not modify CFs (it only creates the genesis set);
+  this guidance is preserved here for schema uniformity with the
+  canon-addition skill.
+
+# OPTIONAL: structured modification trace. Empty for the genesis CF set
+# produced by create-base-world; populated by future canon-addition runs
+# when the CF is qualified or extended. Schema-uniform with
+# canon-addition/templates/canon-fact-record.yaml.
+modification_history: []

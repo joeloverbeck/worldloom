@@ -3,14 +3,34 @@ Adjudication Report — template
 
 Emitted by canon-addition at Phase 13a (accept branch) or Phase 12b (non-accept
 branch). One report per proposal, filename: PA-NNNN-<verdict>.md under
-worlds/<world-slug>/adjudications/. <verdict> is one of: accept,
-accept-with-required-updates, accept-as-local-exception, accept-as-contested-belief,
-revise-and-resubmit, reject.
+worlds/<world-slug>/adjudications/. <verdict> uses underscore-separated form
+matching established filesystem precedent: accept, accept_with_required_updates,
+accept_as_local_exception, accept_as_contested_belief, revise_and_resubmit,
+reject. (Example files on disk: PA-0001-accept_with_required_updates.md,
+PA-0002-accept_with_required_updates.md, PA-0003-accept_with_required_updates.md.)
 
 Matches canon-addition/SKILL.md §"Record Schemas". Sections marked (required)
 must be present in every report. Sections marked (conditional) appear only
 under the named condition.
 -->
+
+# Discovery (required)
+
+<!--
+This top-of-file index makes the adjudication record grep-discoverable by
+future canon-addition runs. Populate at Phase 13a from the proposal's actual
+touch surfaces. List one item per line under each tag so future runs can
+grep `worlds/<world-slug>/adjudications/*.md` for "M-2", "ONT-1", "CF-0021",
+etc. and find every prior adjudication that touched the same surface.
+-->
+
+- **mystery_reserve_touched**: [M-?, M-?]   <!-- e.g., [M-1, M-2, M-5, M-6] -->
+- **invariants_touched**: [???-?, ???-?]    <!-- e.g., [ONT-1, ONT-2, CAU-1, SOC-4, AES-3] -->
+- **cf_records_touched**: [CF-????]         <!-- new + modified, e.g., [CF-0021, CF-0022, CF-0023, CF-0003, CF-0004, CF-0008, CF-0019] -->
+- **open_questions_touched**: [???]         <!-- list of OPEN_QUESTIONS.md sections committed or newly added -->
+- **change_id**: CH-NNNN                    <!-- the Change Log Entry id this adjudication produced (accept branches only) -->
+
+---
 
 # Proposal (required)
 
@@ -83,6 +103,31 @@ under the named condition.
 ### Options Adopted (and what they preserve vs sacrifice)
 
 ## Phase 10: Narrative and Thematic Fit
+
+---
+
+# Phase 14a Validation Checklist (required for accept branches; conditional for non-accept)
+
+<!--
+Required for any accept-branch outcome (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES /
+ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). For non-accept outcomes,
+populate the subset that was actually evaluated (Phase 13b runs a smaller checklist).
+
+Each line records one of the 9 Phase 14a tests as PASS or FAIL with a one-line
+rationale. A PASS without rationale is treated as FAIL. The user reads this
+section at Phase 15a HARD-GATE; absent or undocumented validation breaks the
+audit trail.
+-->
+
+- Test 1 (Rule 2 / domains_affected non-empty): PASS — <one-line rationale>
+- Test 2 (Rule 1 / prerequisites + costs_and_limits + visible_consequences populated): PASS — <one-line rationale>
+- Test 3 (Rule 4 / capability/artifact distribution.why_not_universal populated): PASS — <one-line rationale>
+- Test 4 (Rule 5 / Phase 6 2nd+3rd-order consequences appear in CF or required_world_updates): PASS — <one-line rationale>
+- Test 5 (Rule 6 / Change Log Entry retcon_policy_checks all true): PASS — <one-line rationale>
+- Test 6 (Rule 7 / no unrepaired forbidden-answer collisions): PASS — <one-line rationale>
+- Test 7 (Phase 12a checklist + Phase 13a patches present for every required_world_updates entry): PASS — <one-line rationale>
+- Test 8 (Phase 7 stabilizers name concrete mechanisms; no hand-waves): PASS — <one-line rationale>
+- Test 9 (Verdict reasoning cites specific phase findings; not vague): PASS — <one-line rationale>
 
 ---
 

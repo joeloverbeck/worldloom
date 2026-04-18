@@ -56,7 +56,7 @@ Step 8: Next-steps menu
 
 1. **FOUNDATIONS.md — always.** Read the whole file. You will cite specific sections during drafting (Canon Layers, Validation Rules, Canon Fact Record Schema, Tooling Recommendation).
 2. **Reference proposal — if `reference_path` provided.** Read fully. Extract: Purpose, Inputs (Required/Optional), Output, Phase list, Rules, Validation/Rejection tests, YAML schemas, Final Rule. Note which sections are missing — those become gap-filler targets in Step 4.
-3. **skill-creator's own reference templates — when the target pipeline is canon-mutating and may emit Canon Fact Records or Change Log Entries.** Read `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`. These are the canonical generic references that Step 7.2 copies into every new skill's `templates/` directory. Sibling skills (e.g., `create-base-world`) ship specialized copies of these templates with per-skill phase references and comments — treat those as illustrative, not as ancestors. Step 7.2's "copy and trim" must land against these generic references, not against any sibling's specialization.
+3. **skill-creator's own reference templates — when (a) the target pipeline is canon-mutating and may emit Canon Fact Records or Change Log Entries, OR (b) the target is canon-reading and its output schema is intentionally parallel to the CF Record Schema for downstream canon-addition compatibility.** Read `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`. These are the canonical generic references that Step 7.2 copies into every new skill's `templates/` directory. Sibling skills (e.g., `create-base-world`) ship specialized copies of these templates with per-skill phase references and comments — treat those as illustrative, not as ancestors. Step 7.2's "copy and trim" must land against these generic references, not against any sibling's specialization.
 4. **Sibling skills.** List `.claude/skills/`. For each existing skill, note its inputs, outputs, and interop hooks — the new skill likely consumes or feeds one of them.
 5. **Exemplar proposals — fresh mode only.** Read 1-2 proposals from `brainstorming/` whose classification matches the target. They are structural templates, not content sources.
 
@@ -117,6 +117,8 @@ Gaps: [list of remaining unknowns]
 
 Target 95%. Announce the transition when reached: "I'm at 95% confidence. Moving to design."
 
+**Auto mode compression**: Under auto mode, routine gaps (slug, user-invocable flag, sibling interop names, INDEX semantics, examples yes/no, conventional argument naming, character-slug derivation rule, and similar operational-not-substantive choices) may be pre-filled as confirmable assumptions alongside a single substantive question — the user can override any assumption in the same reply. This honors "one substantive question per message" while respecting auto mode's "minimize interruptions" directive. Non-routine gaps (Validation Rules subset, HARD-GATE policy, output schema, Canon Safety Check shape, prerequisite-file list, world-scope declaration) stay strict single-question.
+
 ### Mandatory Gaps to Close
 
 Ask about every gap that has not already been answered by the proposal or prior context:
@@ -126,10 +128,11 @@ Ask about every gap that has not already been answered by the proposal or prior 
 - **World-State Prerequisites (mandatory per FOUNDATIONS)** — exact list of files read before the skill acts. Examples: `WORLD_KERNEL.md`, `INVARIANTS.md`, `CANON_LEDGER.md`, `MYSTERY_RESERVE.md`, specific domain files. This is non-negotiable per FOUNDATIONS §Tooling Recommendation. **Bootstrap-skill carve-out**: for skills that create initial world state from nothing (pipeline heads like `create-base-world`), the block declares: (a) `docs/FOUNDATIONS.md`, (b) any pre-flight existence/collision checks on the target directory, (c) the user-input file if applicable. The absence of prior state IS the prerequisite, and this framing satisfies the "lists real files (not vague)" conformance check.
 - **World scoping** — does this skill operate on a single scoped world (under `worlds/<world-slug>/`), on all worlds, or on the canon-pipeline meta-level (ignoring specific worlds)? For single-world canon-mutating or canon-reading skills, a required `world_slug` argument identifies the target world, and ALL world-file reads and writes MUST be rooted at `worlds/<world-slug>/` — never at repo root. For bootstrap skills, the world-slug is derived from a `world_name` argument and the target directory must not already exist. This gap closes a class of silent-global-write bugs that would otherwise hit every future canon-mutating and canon-reading skill.
 - **Sibling interop** — which existing skills produce inputs this skill consumes; which will consume this skill's outputs. Name them explicitly.
-- **Validation Rules applied** — which of FOUNDATIONS' 7 Validation Rules this skill enforces, and at which phase. At least 3 must be named for canon-mutating skills.
+- **Validation Rules applied** — which of FOUNDATIONS' 7 Validation Rules this skill enforces, and at which phase. At least 3 must be named for canon-mutating skills. For canon-reading skills whose output carries in-world knowledge, beliefs, or capabilities, at least Rule 7 is required; name additional Rules (2/3/4/5) wherever they are structurally or procedurally enforced. Rule 1 (No Floating Facts), when enforced structurally by required output-schema fields rather than a dedicated phase, should appear in the FOUNDATIONS Alignment table rather than in the Validation Rules list.
 - **HARD-GATE need** — required for canon-mutating; optional for others.
 - **Change-log policy** — canon-mutating skills must emit Change Log Entries (see `templates/change-log-entry.yaml`).
 - **Canon Fact Record usage** — canon-mutating skills that emit new facts must produce records matching FOUNDATIONS §Canon Fact Record Schema.
+- **Batch vs single-artifact output** — if the skill emits multiple artifacts per invocation (a batch), ask: (a) batch size default + user override semantics; (b) fill-priority order when requested size is below slot count; (c) empty-slot policy (preserve empty as a diagnostic signal, or substitute from another slot); (d) batch-manifest file vs inline-batch file; (e) batch-level safety check as a peer of per-artifact checks, not a replacement.
 - **Examples** — select 1-2 concrete worked inputs (optional, but usually worth it for complex pipelines).
 
 ### Starting Confidence (compile mode)
@@ -138,15 +141,19 @@ Before asking the first gap-filler question, compute initial confidence from the
 
 **Base**: 80%
 
-**Deduct 5% for each missing**:
-- YAML record schema(s) for outputs the skill emits
+**Deduct 5% for each fully-missing item; deduct 2% for each partially-present item** (list below). Judgment rule: an item is PARTIAL when the proposal gestures at the element but doesn't satisfy the runnable-skill bar — e.g., a quality checklist where numbered validation tests were specified; rules stated in some phases but not others; a record schema sketched in prose rather than as YAML. Name each partial call explicitly ("Validation tests: PARTIAL — proposal has Artifact Quality Checklist but no numbered tests; deducting 2%") so the user can override before the first gap-filler question.
+
+Items:
+- YAML record schema(s) for outputs the skill emits — applies equally to canon-reading skills whose outputs are structured candidate records consumed by downstream skills (e.g., proposal cards consumed by `canon-addition`). A bullet-list template where YAML frontmatter would be needed for downstream parsing counts as PARTIAL.
 - Numbered phase list with per-phase scope
 - Validation / rejection tests
 - Per-phase rules or FOUNDATIONS cross-references
 
-**Add 5% if both present**:
+**Add 5% for each of these present** (max +10%; bonus items do not take half-credit — they are either present or absent):
 - At least one fully-worked example (input → output)
 - A single-sentence Final Rule stating the pipeline's discipline
+
+Each item — deduction OR bonus — is independently earned.
 
 **Floor**: 50%. **Ceiling**: 90%. (95% is reached via gap-filler answers, never from the proposal alone.)
 
@@ -156,7 +163,7 @@ Announce the computed starting confidence to the user in the first gap-filler me
 
 Present the draft in this order. Get user approval per section. After 2 consecutive approvals under auto mode (3 otherwise), batch remaining sections into groups of 2-3. Keep any substantially higher-risk section standalone.
 
-**Phase breakdown exception**: The section order (below) lists "Phase breakdown" as a single item, but canon-mutating pipelines routinely have 10+ phases plus branch logic. When the phase breakdown exceeds ~8 phases OR contains explicit branch logic (e.g., accept / non-accept), split it into at most 2 presentations (e.g., pre-adjudication phases vs post-adjudication + branches). Use a natural pipeline seam as the split boundary (pre/post escalation gate, pre/post adjudication), not an arbitrary phase number.
+**Phase breakdown exception**: The section order (below) lists "Phase breakdown" as a single item, but pipelines routinely have 10+ phases plus branch logic regardless of class — canon-mutating pipelines grow from consequence-propagation branches, canon-reading skills grow from multi-sub-check Canon Safety phases, and meta-tooling audits grow from per-severity repair menus. When the phase breakdown exceeds ~8 phases OR contains explicit branch logic (e.g., accept / non-accept, pre/post-audit, pre/post Canon Safety Check), split it into at most 2 presentations (e.g., generation track vs validation+commit track, or pre-adjudication vs post-adjudication + branches). Use a natural pipeline seam as the split boundary — pre/post Canon Safety Check [canon-reading with in-world output; canon-mutating], pre/post adjudication [canon-mutating], or pre/post escalation gate [canon-mutating with multi-critic phases] — not an arbitrary phase number.
 
 ### Generated SKILL.md Template
 
@@ -210,7 +217,20 @@ If any precondition fails, the skill aborts before Phase 0.>
 ## Phase 0..N
 <Phases lifted from the proposal. Each phase includes a "Rule" subsection
 where the proposal specifies one, and FOUNDATIONS cross-references inline
-where a Validation Rule enforcement lives.>
+where a Validation Rule enforcement lives. For canon-reading skills whose
+output carries in-world content, and for canon-mutating skills, a Canon
+Safety Check phase (see below) fits as the last phase before Commit;
+the generated skill numbers it concretely based on its own phase count.>
+
+## Canon Safety Check phase             [canon-reading with in-world output; recommended for canon-mutating]
+<Placed after the last operational phase and before Commit. Per-artifact sub-phases:
+ - Invariant conformance (vs INVARIANTS.md) — record tested invariant ids
+ - Mystery Reserve firewall (vs MYSTERY_RESERVE.md) — record every checked MR id, overlap or not
+ - Distribution/scope conformance (vs CANON_LEDGER.md distribution blocks)
+ Repair Sub-Pass on any fail; unrepairable → loop to earliest relevant phase.
+ For batch-producing skills: add a batch-level check as a peer sub-phase catching
+ cross-artifact collisions (e.g., two artifacts jointly resolving a Mystery Reserve
+ entry that neither alone would).>
 
 ## Phase N+1: Commit / Write            [canon-mutating — after final validation phase]
 <The HARD-GATE enforcement point. This phase:
@@ -234,6 +254,7 @@ where a Validation Rule enforcement lives.>
 | Principle | Phase | Mechanism |
 |-----------|-------|-----------|
 | ...       | ...   | ...       |
+| <Principle that does not apply to this skill's class> | N/A | Not applicable — <one-line reason + handoff path to the sibling skill that handles this>. |
 
 ## Guardrails
 - <cross-skill discipline>
@@ -258,12 +279,24 @@ where a Validation Rule enforcement lives.>
 
 ### Presentation Format (per section)
 
-Each section presentation must end with a short `**Notes on the shape:**` bullet list (2-4 bullets) explaining *why* the concrete choices were made — especially:
+Each section presentation must end with a `**Notes on the shape:**` bullet list explaining *why* the concrete choices were made — especially:
 - deviations from sibling skills (what was borrowed vs what was changed and why)
 - design decisions that fell out of gap-filler answers (cite the question number or topic)
 - rationales that would not be obvious from the section text alone
 
+**Bullet count**: typically 2-4 bullets for short sections (frontmatter, HARD-GATE, short Guardrails). Expand to up to 8 bullets for sections presenting 5+ concrete design decisions — e.g., a phase breakdown with 6+ phases, a FOUNDATIONS Alignment table with multiple N/A rows, a dense Validation Rules section citing multiple enforcement phases per rule. The intent is one substantive rationale per non-obvious decision. Compression that hides reasoning to hit a bullet count defeats the purpose of the rule; padding to reach a minimum also defeats it. Match the count to the number of decisions made.
+
 This makes approval gating substantive rather than ceremonial. The user should be able to accept or push back on each design decision, not just on the wording. A section presented without rationale notes is an invitation to rubber-stamp approval — avoid it.
+
+### FOUNDATIONS Alignment N/A Rows
+
+Some principles legitimately do not apply to a given skill's class — e.g., `Change Control Policy` for canon-reading skills (no Change Log Entry emitted); `Rule 5 (No Consequence Evasion)` for meta-tooling audit skills (no canon facts produced); `Rule 6 (No Silent Retcons)` for canon-reading skills. When a row is N/A, mark it explicitly in this form:
+
+```
+| Change Control Policy | N/A | Not applicable — canon-reading skill does not emit Change Log Entries; handoff to `canon-addition` for world-level canon changes. |
+```
+
+Never omit N/A rows silently — an empty row is indistinguishable from an oversight. The explicit `N/A + reason + sibling-handoff` form shows the reader that the principle was considered and deliberately skipped, and names the sibling skill that DOES honor it. This makes the alignment table a complete audit of all FOUNDATIONS principles, not a partial one.
 
 ## Step 6: FOUNDATIONS Conformance Check
 
@@ -292,8 +325,9 @@ Before any file is written, audit the draft against class-specific requirements.
 ### canon-reading Additional Checks
 
 - [ ] Contains an explicit rule: "This skill MUST NOT write to world files, `CANON_LEDGER.md`, or `INVARIANTS.md`."
-- [ ] If diegetic (produces in-world texts): includes a Canon Safety Check phase preventing accidental mystery resolution, restricted-knowledge leaks, or silent canon creation (Rule 7: Preserve Mystery Deliberately).
+- [ ] If the output carries in-world knowledge, beliefs, or capabilities (diegetic texts, character data, faction profiles, event seeds, option cards, or any artifact whose content could leak Mystery Reserve forbidden answers): includes a Canon Safety Check phase preventing accidental mystery resolution, restricted-knowledge leaks, or silent canon creation (Rule 7: Preserve Mystery Deliberately). This gate matches the failure mode it catches: any artifact carrying in-world content, not only text artifacts.
 - [ ] If proposal-generating (produces candidate facts): explicit note that output is NOT canon until it passes the canon-addition skill.
+- [ ] If the output carries in-world content: Rule 7 is explicitly listed in the generated skill's "Validation Rules This Skill Upholds" section (the Canon Safety Check phase satisfies the structural check above; listing Rule 7 in the Validation Rules section is the separate documentation check).
 - [ ] **World-scope declaration**: the skill names exactly one of {single-world, all-worlds, meta} as its operating scope. If single-world, a required `world_slug` argument is declared, and all world-file reads are rooted at `worlds/<world-slug>/` — never at repo root.
 
 ### meta-tooling Additional Checks
@@ -317,10 +351,11 @@ FOUNDATIONS Conformance Check — <slug> — class: <class>
 Only reachable if Step 6 passes clean AND all design sections were user-approved.
 
 1. Write `.claude/skills/<slug>/SKILL.md`.
-2. Write `.claude/skills/<slug>/templates/*.yaml` for any record schemas the skill references. **Start from skill-creator's own `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`** — these are the canonical generic references (already loaded into context at Step 1). Do NOT start from a sibling skill's templates (e.g., `create-base-world/templates/*.yaml`) — those are specialized copies that have drifted from the generic by design, and re-deriving from them propagates per-sibling comments into new skills. Copy the generic, then trim fields that do not apply and adjust phase references to match the new skill's numbering.
-3. Write `.claude/skills/<slug>/examples/*.md` for approved worked examples (max 2). Skip if none were selected.
-4. **Compile mode only**: move the source `brainstorming/<slug>.md` to `archive/brainstorming/<slug>.md`. If `archive/brainstorming/` does not yet exist, run `mkdir -p archive/brainstorming/` first. Then `git mv brainstorming/<slug>.md archive/brainstorming/<slug>.md`. Using `git mv` preserves rename history so the proposal-to-skill lineage stays legible in `git log --follow`. In fresh mode the proposal stays in `brainstorming/` as the durable spec.
-5. Report paths written. Do NOT commit.
+2. Write `.claude/skills/<slug>/templates/*.yaml` for each Canon Fact Record or Change Log Entry schema the skill references. **Start from skill-creator's own `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`** — these are the canonical generic references (already loaded into context at Step 1). Do NOT start from a sibling skill's templates (e.g., `create-base-world/templates/*.yaml`) — those are specialized copies that have drifted from the generic by design, and re-deriving from them propagates per-sibling comments into new skills. Copy the generic, then trim fields that do not apply and adjust phase references to match the new skill's numbering.
+3. Write `.claude/skills/<slug>/templates/<output-type>.md` (or `.yaml`) if the skill has a primary output format that is neither a Canon Fact Record nor a Change Log Entry — e.g., a character dossier, a diegetic artifact, an adjudication report, a triage file. **These are original templates authored from scratch to match the skill's Output specification**, not copies from skill-creator's references. Examples: `character-generation/templates/character-dossier.md`, `diegetic-artifact-generation/templates/diegetic-artifact.md`. Canon-reading skills with in-world outputs almost always need one of these; canon-mutating skills may need one in addition to the CF/Change Log templates. **CF-schema parity**: when a canon-reading skill's output is a *candidate record* for downstream `canon-addition` (e.g., proposal cards), the original template's frontmatter should be structurally parallel to FOUNDATIONS §Canon Fact Record Schema where possible — matching fields like `type`, `scope` / `recommended_scope`, `domains_affected` / `domains_touched`, `distribution`, `source_basis` — so the downstream skill's acceptance becomes a field-copy rather than a field-re-derivation. Document the parity intent in a frontmatter comment so future maintainers preserve it across schema evolution.
+4. Write `.claude/skills/<slug>/examples/*.md` for approved worked examples (max 2). Skip if none were selected.
+5. **Compile mode only**: move the source `brainstorming/<slug>.md` to `archive/brainstorming/<slug>.md`. If `archive/brainstorming/` does not yet exist, run `mkdir -p archive/brainstorming/` first. Then `git mv brainstorming/<slug>.md archive/brainstorming/<slug>.md`. Using `git mv` preserves rename history so the proposal-to-skill lineage stays legible in `git log --follow`. In fresh mode the proposal stays in `brainstorming/` as the durable spec.
+6. Report paths written. Do NOT commit.
 
 ## Step 8: Next-Steps Menu
 
@@ -344,7 +379,7 @@ When the pipeline's class is ambiguous, apply these heuristics in order:
 
 1. **Does the output include file writes to any of `WORLD_KERNEL.md`, `INVARIANTS.md`, `ONTOLOGY.md`, `CANON_LEDGER.md`, or named world-state files?** → canon-mutating.
 2. **Does the output include new Canon Fact Record entries (even candidates)?** → If the skill itself applies them: canon-mutating. If it only proposes them for separate adjudication: canon-reading.
-3. **Does the output include diegetic artifacts (in-world texts)?** → canon-reading. Diegetic texts are NOT canon; they are voices from within canon.
+3. **Does the output include in-world artifacts that are not world-level canon (diegetic texts, character data, faction profiles, option cards, event seeds, or other artifacts whose content could leak canon-adjacent state)?** → canon-reading. These artifacts are NOT canon; they are voices or instances from within canon.
 4. **Does the output include only reports, severity findings, or repair menus?** → meta-tooling.
 5. **Does the skill accept/reject/revise existing canon?** → canon-mutating, even if its typical output is rejection.
 
@@ -352,12 +387,12 @@ When the pipeline's class is ambiguous, apply these heuristics in order:
 
 - The generated `SKILL.md` must be self-contained — a reader should not need skill-creator to run it.
 - Do NOT duplicate FOUNDATIONS.md content inline. Cross-reference: "see FOUNDATIONS.md §Validation Rules".
-- Keep generated `SKILL.md` under ~400 lines. If a proposal is long (e.g., 500+ lines), push verbose phase prose into `templates/` or trim to the enforceable core; the skill file is a runtime contract, not a recapitulation of the proposal.
+- Generated `SKILL.md` target sizes differ by class: ~300 lines for meta-tooling; ~400 lines for canon-reading without diegetic in-world content; ~500 lines for canon-reading with diegetic in-world content (Rule 7 firewall triples the safety-check surface) or canon-mutating. These are targets, not hard caps — a canon-mutating skill with consequence-propagation across many domains may reasonably land at 550+ lines. If a proposal is long (e.g., 500+ lines), push verbose phase prose into `templates/` or trim to the enforceable core; the skill file is a runtime contract, not a recapitulation of the proposal. Do NOT delete required structural elements (HARD-GATE, World-State Prerequisites, Validation Rules upheld, FOUNDATIONS Alignment table) to hit a target size.
 - skill-creator NEVER edits `docs/FOUNDATIONS.md`. FOUNDATIONS lives outside this tool's authority.
 - skill-creator NEVER writes world-state files (`WORLD_KERNEL.md` etc.). Those are the jobs of canon-mutating skills, not the meta-skill.
 - No scope inflation: generate one skill per invocation. If the user asks for a suite, confirm each individually.
 - Worktree discipline: if in a worktree, all paths resolve from the worktree root.
-- One question per message during interviews. Never batch.
+- One question per message during interviews. Never batch substantive questions. (Routine confirmable assumptions under auto mode may accompany a single substantive question — see Step 4 Protocol §Auto mode compression.)
 - Respect early exit ("just go", "that's enough"): announce current confidence, list assumptions, proceed. Mark assumptions in the design so the user can correct them during section approval.
 - The HARD-GATE at the top of this skill is absolute. No `Write` or `Edit` to skill files until design approval AND conformance-check pass.
 

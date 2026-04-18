@@ -113,7 +113,7 @@ Phase 15a: Commit (HARD-GATE -> atomic write of
 **Accept branch** (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF):
 - New Canon Fact Record(s) appended to `worlds/<world-slug>/CANON_LEDGER.md` — one per accepted fact, matching `templates/canon-fact-record.yaml`. `ACCEPT_AS_LOCAL_EXCEPTION` → `status: soft_canon`; `ACCEPT_AS_CONTESTED_BELIEF` → `status: contested_canon`.
 - New Change Log Entry appended to the change log section of `CANON_LEDGER.md`, matching `templates/change-log-entry.yaml`, linking to new CF ids.
-- Domain-file edits to every file in `required_world_updates` — prose additions and targeted revisions, each carrying an inline `<!-- added by CF-NNNN -->` attribution.
+- Domain-file edits to every file in `required_world_updates` — prose additions and targeted revisions, each carrying an inline `<!-- added by CF-NNNN -->` attribution (markdown prose only; for in-place YAML CF modifications, use the `notes`-field convention in Phase 13a).
 - Adjudication record: `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md` with full phase-by-phase analysis.
 
 **Non-accept branch** (REVISE_AND_RESUBMIT / REJECT):
@@ -146,10 +146,34 @@ If `worlds/<world-slug>/` is missing, or any of the six mandatory world files is
 5. Scan `worlds/<world-slug>/CANON_LEDGER.md` for the highest existing `CF-NNNN`; allocate `next_cf_id = highest + 1`.
 6. Scan `worlds/<world-slug>/adjudications/*.md` (if the directory exists) for the highest existing `PA-NNNN`; allocate `next_pa_id = highest + 1`. If absent, `next_pa_id = PA-0001`.
 7. Scan the Change Log section of `CANON_LEDGER.md` for the highest existing `CH-NNNN`; allocate `next_ch_id = highest + 1`.
+8. Load the skill's own templates into working context: `templates/canon-fact-record.yaml`, `templates/change-log-entry.yaml`, `templates/adjudication-report.md`. Also load `templates/critic-prompt.md` and `templates/critic-report-format.md` when escalation is likely (>3 domains named in the proposal, user-stated novelty level is high, or the proposal's underlying world-change touches an invariant). Loading templates upfront avoids mid-flow template reads and keeps the reference schema visible during drafting. If escalation turns out not to fire, the critic templates remain unused — cost is a single extra read.
 
 ## Phase 0: Normalize the Proposal
 
 Parse `proposal_path` if provided; otherwise interview the user. Extract: **statement** (one paragraph), **underlying world-change** (operational change, not surface sentence), **canon fact type(s)** (ontological rule / capability / artifact / species trait / institution / ritual / law / historical event / social practice / taboo / technology / metaphysical claim / resource distribution / hidden truth / local anomaly / contested belief), **user-stated constraints** (preferred scope, rarity, access pattern, novelty, dramatic purpose, revision appetite).
+
+**Template `type` mapping**: The Phase 0 conceptual labels above feed into a single `type` value in the `canon-fact-record.yaml` template. The common enum is `capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule`; additional values are permitted when drawn from FOUNDATIONS.md §Ontology Categories and are in use in the existing ledger (notably `historical_process`, `text_tradition`, `hazard`, `craft`). Mapping:
+
+- `ontological rule` / `metaphysical claim` → `metaphysical_rule`
+- `capability` → `capability`
+- `artifact` → `artifact`
+- `species trait` → `species`
+- `institution` → `institution`
+- `ritual` → `ritual`
+- `law` → `law`
+- `historical event` → `event` (for a discrete occurrence); use `historical_process` when the fact is an ongoing process or residue of past events rather than a single event
+- `taboo` → `taboo`
+- `technology` → `technology`
+- `craft` → `craft` (the learned production-skill sense; FOUNDATIONS.md §Ontology Categories)
+- `resource distribution` → `resource_distribution`
+- `hidden truth` → `hidden_truth`
+- `local anomaly` → `local_anomaly`
+- `contested belief` → `belief` (with `status: contested_canon`)
+- `social practice` → one of `belief` (doctrinal), `ritual` (ceremonial), `institution` (organized), or `law` (codified) — choose by the practice's dominant expression
+- `text / tradition` → `text_tradition` (for a fact about texts, fragmentary corpora, translation status; FOUNDATIONS.md §Ontology Categories)
+- `hazard` → `hazard` (for a recurring environmental or bodily danger fact; FOUNDATIONS.md §Ontology Categories)
+
+Each CF record gets exactly one `type` value. If the proposal straddles categories, split into multiple CFs (see Phase 9 split rubric). When using a value outside the common enum, draw it verbatim from FOUNDATIONS.md §Ontology Categories so ledger-wide grep discovery works across CFs.
 
 Then selectively load additional world files based on fact type (see World-State Prerequisites for the mapping).
 
@@ -214,7 +238,7 @@ Evaluate triggers from Phase 2 and Phase 6:
 - **Theme/Tone Critic** — `WORLD_KERNEL.md` genre/tonal contract.
 - **Mystery Curator** — `MYSTERY_RESERVE.md` and `OPEN_QUESTIONS.md`; flags forbidden-answer collisions and mystery-trivialization risks.
 
-Each sub-agent receives: the full proposal, the Phase 0–6 outputs, `docs/FOUNDATIONS.md`, and the specific world-state slice its role needs. Each returns a concise critique report. Sub-agents never write files.
+Each sub-agent receives: the full proposal, the Phase 0–6 outputs, `docs/FOUNDATIONS.md`, and the specific world-state slice its role needs. Each returns a concise critique report. Sub-agents never write files. Use `templates/critic-prompt.md` to construct each per-role prompt and `templates/critic-report-format.md` to specify the required report structure — this keeps critic outputs uniform across runs and across roles.
 
 **Phase 6b: Multi-Critic Synthesis** — the main agent reads all six reports, resolves conflicts (noting productive tensions), and produces an integrated critique that feeds Phases 7–10. Sub-agent reports are appended to the adjudication record at commit time.
 
@@ -243,6 +267,8 @@ Using Phase 2 + Phase 6 output, classify every detected conflict:
 
 If promising but destabilizing, propose repairs: reduce scope / reduce reproducibility / add cost / add side effects / add bottlenecks / localize geographically or temporally / make it recent / make it heritable to a narrow group / make it taboo / shift to contested belief / split into narrower facts / move into Mystery Reserve.
 
+**Split rubric** (for the "split into narrower facts" option): Choose a split when sub-facts have materially distinct (a) canon-fact-types under the template enum (see Phase 0 mapping), (b) Mystery Reserve exposure profiles requiring different firewall commitments, (c) `distribution` shapes that cannot share a single `who_can_do_it` / `who_cannot_easily_do_it` / `why_not_universal` block, or (d) `domains_affected` sets that would force an overly-broad coverage on a bundled record. Otherwise keep as a single CF with subtypes documented in `statement` and `visible_consequences` — unnecessary splitting fragments the fact's integrity and produces redundant `source_basis.derived_from` chains.
+
 **Rule**: Repairs must preserve the user's dramatic intent. Surface each option with its trade-off (preserved vs sacrificed) in the Phase 15a summary.
 
 ## Phase 10: Narrative and Thematic Fit
@@ -270,31 +296,67 @@ The verdict must cite the specific phase findings that drove it. Vague verdicts 
 
 ### Phase 12a: Required Update List
 
-For every file in the new CF record's `required_world_updates`, specify: what must be added; what must be revised; what new questions arise (route to `OPEN_QUESTIONS.md`); what ordinary-life consequences must now be visible (route to `EVERYDAY_LIFE.md`).
+Produce a verifiable one-line-per-file checklist. For every file in the new CF record's `required_world_updates` plus every file modified by an existing-CF qualification, write a single line of the form:
 
-**Rule**: No canon addition is complete until these updates are drafted as concrete patches against the current file contents. "TODO: update INSTITUTIONS.md" is not acceptable.
+```
+- <FILE.md> — <one-sentence summary of what changes>
+```
+
+For files with multiple distinct subsection updates, the line may be extended with a trailing semicolon-separated subsection list:
+
+```
+- <FILE.md> — <one-sentence summary>; <subsection-1>: <change>; <subsection-2>: <change>; ...
+```
+
+The summary remains a single sentence; the subsection list is optional structured detail that preserves audit-trail granularity for large deliveries without fragmenting the checklist into multi-line entries.
+
+The checklist is the *gate* that opens Phase 13a: drafting may only begin once every required-updates entry has a corresponding checklist line. This separation prevents both silent merging (drafting without enumerating) and duplicated drafting (writing prose twice).
+
+For each line, the summary must name: what is added; what is revised; what new questions arise (route to `OPEN_QUESTIONS.md`); what ordinary-life consequences must now be visible (route to `EVERYDAY_LIFE.md`).
+
+**Rule**: No canon addition is complete until these updates are drafted as concrete patches against the current file contents in Phase 13a. "TODO: update INSTITUTIONS.md" is not acceptable in either Phase 12a checklist or Phase 13a patch.
 
 **FOUNDATIONS cross-ref**: Change Control Policy.
 
 ### Phase 13a: Deliverable Assembly
 
-1. **CF Record(s)** matching `templates/canon-fact-record.yaml`. `source_basis.direct_user_approval: false` until Phase 15a. Repair-splits produce multiple records linked via `source_basis.derived_from`.
-2. **Change Log Entry** matching `templates/change-log-entry.yaml`. `change_id: CH-NNNN`. `affected_fact_ids` lists all new CF ids. `downstream_updates` lists every Phase 12a file. If Phase 2 routed to invariant-revision, `change_type` is `ontology_retcon` / `cost_retcon` / `perspective_retcon` / `chronology_retcon` / `scope_retcon`; otherwise `addition`. `retcon_policy_checks` all true.
-3. **Domain-file patches** — concrete prose edits, each carrying `<!-- added by CF-NNNN -->` attribution.
-4. **Adjudication record** at `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md` — original proposal + full Phase 0–11 analysis + verdict + phase-cited justifications + declined repair options + (if escalation fired) six critic sub-agent reports verbatim.
+Phase 13a may begin only after the Phase 12a checklist is complete. Drafting produces five artifact classes:
+
+1. **New CF Record(s)** matching `templates/canon-fact-record.yaml`. The `source_basis.direct_user_approval` flag is a logical gate: it must NOT be `true` in any file on disk until the user has explicitly approved the Phase 15a deliverable summary. In practice: if drafts are persisted to disk before approval (e.g., scratch files, preview commits), set `direct_user_approval: false`; if the CF is assembled only in working memory and written once at Phase 15a after approval, setting `true` in that single atomic write is compliant. What is forbidden is persisting a CF with `true` to any file (especially `CANON_LEDGER.md`) before the HARD-GATE has been released. Repair-splits produce multiple records linked via `source_basis.derived_from`.
+
+2. **Modifications to Existing CF Records** (when Phase 8 / Phase 9 require qualifying or extending an existing CF rather than appending a new one):
+   - Edit the existing YAML record in place. Update affected fields (statement, distribution, costs_and_limits, visible_consequences, contradiction_risk) to reflect the qualification.
+   - Append a standardized line to the modified CF's `notes` field, in the form: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <one-sentence summary of the qualification and its rationale>.` Use the new CF's id (the one that prompted the modification) inside the parentheses.
+   - Optionally, if richer modification trace is desired, populate the optional `modification_history` array (see template).
+   - YAML CF records do NOT carry `<!-- added by CF-NNNN -->` HTML-comment attribution — that syntax is invalid inside YAML and is reserved for markdown prose patches in domain files (see artifact 4 below).
+
+3. **Change Log Entry** matching `templates/change-log-entry.yaml`. `change_id: CH-NNNN`. `affected_fact_ids` lists every CF id touched (new + modified); document each id's role (added / qualified / extended) in the `summary` and `notes` fields. `downstream_updates` lists every Phase 12a checklist file. `change_type` is `addition` for any change whose dominant action is appending new CFs (even when paired with qualifications to existing CFs); use `*_retcon` only when the dominant action is modifying an existing CF's scope, cost, perspective, chronology, or ontology. `retcon_policy_checks` all true. Populate `latent_burdens_introduced` (see template) with one-line entries for every Phase 8 "Latent Burden" classification — these become the searchable trace of mandatory future lore work this change creates.
+
+4. **Domain-file patches** — concrete prose edits to the files in the Phase 12a checklist. Each markdown-prose addition or revision carries an inline `<!-- added by CF-NNNN -->` HTML-comment attribution. The attribution applies to markdown prose only; YAML CF modifications use the `notes`-field convention from artifact 2 above.
+
+5. **Adjudication record** at `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md` — original proposal + full Phase 0–11 analysis + verdict + phase-cited justifications + declined repair options + (if escalation fired) six critic sub-agent reports verbatim. Populate the Discovery section at the top of the report (see `templates/adjudication-report.md`) with the lists of `mystery_reserve_touched`, `invariants_touched`, and `cf_records_touched` — these enable future canon-addition runs to grep `worlds/<world-slug>/adjudications/*.md` for prior guidance on the same surfaces. Populate the Phase 14a Validation Checklist section (see template) before the verdict; this becomes the auditable record of validation pass/fail per test.
 
 ### Phase 14a: Validation and Rejection Tests
 
-Halt and loop if any holds:
-- new fact's `domains_affected` is empty (Rule 2).
-- new fact has no `prerequisites`, `costs_and_limits`, or `visible_consequences` (Rule 1).
-- capability/artifact fact has empty `distribution.why_not_universal` (Rule 4).
-- Phase 6 second- or third-order consequences absent from `visible_consequences` or `required_world_updates` (Rule 5).
-- Change Log Entry `retcon_policy_checks` has any false value (Rule 6).
-- Phase 10 flagged a forbidden-answer collision that was not repaired (Rule 7).
-- `required_world_updates` lists a file but Phase 12a provides no concrete patch for it.
-- stated stabilizer (Phase 7) is a hand-wave with no named mechanism.
-- verdict reasoning does not cite specific phase findings.
+Run all 9 tests below and record each as PASS / FAIL with a one-line rationale into the adjudication record's "Phase 14a Validation Checklist" section (see `templates/adjudication-report.md`). The checklist becomes the auditable record of validation. Any FAIL halts and loops back to the originating phase; do NOT proceed to Phase 15a until every test records PASS.
+
+1. New fact's `domains_affected` is non-empty (Rule 2).
+2. New fact has populated `costs_and_limits` and `visible_consequences` (Rule 1). `prerequisites` is populated for `capability`, `artifact`, `technology`, `institution`, `ritual`, `event`, `craft`, and `resource_distribution` types whose manifestation has operational preconditions; it may be empty for `metaphysical_rule`, `belief`, `hazard`, `historical_process`, `text_tradition`, `local_anomaly`, `hidden_truth`, `species`, `law`, and `taboo` types whose truth-value has no operational precondition — but empty `prerequisites: []` must be accompanied either by an inline comment stating why (e.g., `# metaphysical rule; no operational precondition`) OR by an explicit `notes`-field sentence naming the type-based exemption. Existing ledger precedent for empty prerequisites includes CF-0002, CF-0003, CF-0005, CF-0014, CF-0016, CF-0022.
+3. Capability / artifact fact has populated `distribution.why_not_universal` (Rule 4).
+4. Phase 6 second- and third-order consequences appear in either `visible_consequences` or `required_world_updates` (Rule 5).
+5. Change Log Entry `retcon_policy_checks` are all true (Rule 6).
+6. Phase 10 flagged no forbidden-answer collision, OR every flagged collision was repaired in Phase 9 (Rule 7).
+7. Every file in `required_world_updates` has a corresponding Phase 12a checklist entry AND a concrete Phase 13a patch.
+8. Every stated stabilizer (Phase 7) names a concrete mechanism; no hand-waves.
+9. Verdict reasoning cites specific phase findings; vague verdicts fail.
+
+Recording format per test (one row of the checklist section):
+
+```
+- Test N (Rule R / topic): PASS — <one-line rationale>
+```
+
+A PASS without rationale is treated as FAIL. The recorded checklist is what the user reads at Phase 15a HARD-GATE; absent or undocumented validation breaks the audit trail.
 
 ### Phase 15a: Commit (accept branch)
 
@@ -307,9 +369,27 @@ Present the deliverable summary to the user:
 6. Critic synthesis summary (if escalation gate fired)
 7. Adjudication record filename
 
+**Large-change two-tier presentation**: For large deliveries (>3 new CFs OR >7 downstream files OR escalation gate fired), present a two-tier summary:
+
+- **Tier 1 (overview)**: verdict + phase-cited justification + totals (new CFs, qualified CFs, downstream files, new Mystery Reserve entries, latent burdens introduced) + the three-to-five most load-bearing Phase 9 tradeoffs. Enough for an informed approve / revise / reject decision on its own.
+- **Tier 2 (per-artifact detail)**: the full 7-item list above, rendered per artifact. Presented immediately if the user asks for it, or if the Tier 1 overview leaves material ambiguity (e.g., a load-bearing firewall is named but not explained).
+
+For smaller deliveries, Tier 1 and Tier 2 collapse into a single summary matching the 7-item list above — no staging needed.
+
 **HARD-GATE fires here**: no file is written until the user explicitly approves. User may (a) approve, (b) request specific revisions (loop back to named phase), (c) reject and convert to non-accept branch.
 
-On approval, atomic write of: CF record(s) to `CANON_LEDGER.md`; Change Log Entry to `CANON_LEDGER.md`; every domain-file patch to its target; `adjudications/PA-NNNN-<verdict>.md`. Set each CF's `source_basis.direct_user_approval: true` before write. All writes happen or none do. Report paths. Do NOT commit to git.
+On approval, write the deliverable in this order — sequencing matters because the tool environment cannot guarantee true transactional atomicity, and a deterministic order makes partial-state recovery tractable:
+
+1. **Domain-file patches first**. Apply every Phase 13a patch to its target file. Each markdown-prose addition or revision carries its inline `<!-- added by CF-NNNN -->` HTML-comment attribution. (HTML-comment attribution applies only to markdown prose; YAML CF modifications use the `notes`-field convention from Phase 13a.)
+2. **Adjudication record next**. Write `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md`, including the populated Discovery section and Phase 14a Validation Checklist.
+3. **CANON_LEDGER.md last**. Within this file, apply the three sub-steps in strict order — this makes partial-failure detection tractable, because an interrupted run at any sub-step leaves the ledger in a predictable state:
+   1. **CF qualifications first** — apply all in-place YAML edits with `notes`-field modification trace and `modification_history` entries. Completing this sub-step before appending new CFs means an interrupted run has consistent qualifications without unresolved new CFs referencing them.
+   2. **Append new CF record(s)** — to the CFs section, before the `## Change Log` header. Set each new CF's `source_basis.direct_user_approval: true` immediately before these appends — this is the moment of canon mutation, and the flag must reflect that the user has approved the deliverable.
+   3. **Append the Change Log Entry last** — at the tail of the change log section. The newest change entry is always the last YAML block in the file, which makes grep-and-tail discovery of "what changed most recently" a one-liner for future canon-addition runs.
+
+The "ledger-last" sequencing means a partial-failure state has domain-file edits + an adjudication record but no canon-ledger commit — easy to detect (the new CF id is missing from `CANON_LEDGER.md`) and easy to roll back (revert the domain files; delete the orphan adjudication). The inverse — canon record without supporting consequence web — would silently fail Rule 5 and be much harder to detect.
+
+Report all written paths. Do NOT commit to git.
 
 ## Branch: Non-Accept Path
 
@@ -342,14 +422,16 @@ On approval, atomic write of `worlds/<world-slug>/adjudications/PA-NNNN-<verdict
 - **Rule 3: No Specialness Inflation** — Phase 7 (Counterfactual Pressure Test refuses hand-wave stabilizers) + Phase 14a (rejection test: stabilizer must name concrete mechanism).
 - **Rule 4: No Globalization by Accident** — Phase 1 (Scope Detection) + Phase 14a (rejection test: capability/artifact facts must specify `distribution.why_not_universal`).
 - **Rule 5: No Consequence Evasion** — Phase 6 (three-layer propagation) + Phase 14a (rejection test: 2nd/3rd-order consequences must appear in CF or `required_world_updates`).
-- **Rule 6: No Silent Retcons** — Phase 13a (Change Log Entry) + Phase 14a (`retcon_policy_checks` all true) + Phase 15a (inline `<!-- added by CF-NNNN -->` attribution).
+- **Rule 6: No Silent Retcons** — Phase 13a (Change Log Entry + CF modification `notes`-field trace) + Phase 14a (`retcon_policy_checks` all true) + Phase 15a (inline `<!-- added by CF-NNNN -->` attribution on markdown prose; `notes`-field convention on YAML CF modifications).
 - **Rule 7: Preserve Mystery Deliberately** — Phase 2 (`MYSTERY_RESERVE.md` loaded; forbidden-answer collisions detected) + Phase 10 (trivialization flagged) + Phase 14a (unrepaired collision halts).
 
 ## Record Schemas
 
 - **Canon Fact Record** → `templates/canon-fact-record.yaml` (same schema as create-base-world; FOUNDATIONS §Canon Fact Record Schema).
 - **Change Log Entry** → `templates/change-log-entry.yaml` (same schema as create-base-world; FOUNDATIONS §Change Control Policy).
-- **Adjudication Report** → `templates/adjudication-report.md` (original to this skill). Named sections: `# Proposal`, `# Phase 0–11 Analysis`, `# Verdict`, `# Justification`, `# Critic Reports` (if escalation fired), `# Resubmission Menu` (for REVISE) OR `# Why This Cannot Be Repaired` (for REJECT).
+- **Adjudication Report** → `templates/adjudication-report.md` (original to this skill). Named sections: `# Discovery` (top-of-file index for grep-searchability), `# Proposal`, `# Phase 0–11 Analysis`, `# Phase 14a Validation Checklist`, `# Verdict`, `# Justification`, `# Critic Reports` (if escalation fired), `# Resubmission Menu` (for REVISE) OR `# Why This Cannot Be Repaired` (for REJECT).
+- **Critic Prompt** → `templates/critic-prompt.md` (used at Escalation Gate when dispatching the six parallel sub-agents).
+- **Critic Report Format** → `templates/critic-report-format.md` (specifies the required report structure each critic returns).
 
 ## FOUNDATIONS Alignment
 
