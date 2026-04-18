@@ -221,3 +221,23 @@ The design doc should consolidate all approved sections into a clean document. I
 Do NOT commit the file. Leave it for user review.
 
 **Post-implementation plan update**: If the brainstorm was in plan mode and implementation changed the deliverable set (new tickets created, scope expanded beyond the original plan), update the plan file's deliverable list before the final summary to the user. The plan file should reflect what was actually delivered, not just what was planned. This applies even when the original plan was approved via ExitPlanMode — the plan is a living document during implementation.
+
+## Step 6: Next Steps Menu
+
+Present the user with options for what to do next:
+
+```
+Design doc written to docs/plans/YYYY-MM-DD-<topic>-design.md
+
+What would you like to do next?
+1. Write an implementation plan (invoke writing-plans skill)
+2. Create a spec from this design (write to specs/)
+3. Start implementing directly
+4. Done for now — I'll review the design doc later
+```
+
+Use AskUserQuestion when its schema is already available in the session. Inline numbered options (as shown above) are an acceptable fallback when AskUserQuestion is deferred and fetching its schema would add friction. If the user picks an option that invokes another skill, invoke it. If they pick "done", end the session.
+
+**If plan mode is active**: Call `ExitPlanMode` instead of presenting the next-steps menu. The user will direct next steps after approving the plan.
+
+**If implementation was completed inline**: If the task was simple enough that implementation was completed during or immediately after design approval, skip the menu and summarize what was done.
