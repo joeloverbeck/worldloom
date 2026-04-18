@@ -189,7 +189,37 @@ For each `high`-value diagnosis finding from Phase 1, map to one or more enrichm
 - I: Story Engine Injection → Families 2, 9
 - J: Mystery Seeding → opens new unknowns rather than filling existing gaps
 
-Apply user parameters: filter to `enrichment_types` if specified; exclude findings touching `taboo_areas`; honor `novelty_range` (conservative favors A/C; bold favors H/J; moderate balances).
+**Proposal Families (1–10)** — the 10 named families used to tag each seed's `proposal_family` frontmatter field. Source: the skill's reference brainstorming doc, archived at `archive/brainstorming/propose-new-canon-facts.md`.
+
+1. **Hidden Cost Facts** — prevent systems from becoming frictionless.
+2. **Institutionalization Facts** — show how the world adapts to its own realities.
+3. **Residue Facts** — make history visible.
+4. **Local Practice Facts** — make settings feel inhabited.
+5. **Boundary Facts** — define who can and cannot do something.
+6. **Misinterpretation Facts** — introduce useful false beliefs.
+7. **Scarcity Facts** — clarify why something has not gone universal.
+8. **Cross-Species Consequence Facts** — make embodiment socially real.
+9. **Ritual / Law Coupling Facts** — bind metaphysics to governance.
+10. **Material Culture Facts** — show values and constraints through objects and habits.
+
+A seed may legitimately carry multiple family tags when its intent spans families (e.g., a local artisanal-guild subsection that encodes cross-species embodiment touches families 4, 10, and 8). The `proposal_family` frontmatter field accepts an integer or a list of integers.
+
+**User label → A–J mapping** — Phase 0 extracts `enrichment_types` using the 10-value user-facing taxonomy declared in the arguments frontmatter (`darker`, `stranger`, etc.); Phase 2 maps each user label to the internal A–J analytical framework via the table below. Free-form user labels outside this table should be mapped by lexical-semantic fit or routed to Category F (Cross-Domain Coupling) by default.
+
+| User label (`enrichment_types`) | Activates A–J categories |
+|---|---|
+| `darker` | B, I |
+| `stranger` | H, J, D |
+| `more_political` | C, I |
+| `more_local_texture` | E, G |
+| `more_danger` | B, I |
+| `more_religious_depth` | H, I |
+| `more_economic_realism` | B, C, F |
+| `more_archaeology` | D, H |
+| `more_species_differentiation` | A, E, G |
+| `more_travel_texture` | E, G |
+
+Apply user parameters: filter to `enrichment_types` if specified (map each label per the table above, then union the resulting A–J set); exclude findings touching `taboo_areas`; honor `novelty_range` (conservative favors A/C; bold favors H/J; moderate balances).
 
 **Rule**: At least one target per `high`-value finding unless that finding is in `taboo_areas`. `medium`-value findings are targeted only if `batch_size` permits after high-value slots are filled.
 
@@ -377,6 +407,15 @@ Present the deliverable summary:
 
 **HARD-GATE fires here**: no file is written until the user explicitly approves. User may (a) approve as-is, (b) approve with a drop-list of card-IDs to exclude, (c) request specific revisions (loop to named phase), (d) reject and abort.
 
+### Drop-list behavior
+
+If the user's Phase 9 approval includes a drop-list:
+
+- **Surviving cards retain their originally-allocated PR-NNNN IDs**. No renumbering. Dropped PR-NNNN IDs become permanent gaps in the monotonic sequence — pre-flight on the next batch scans existing cards for `highest_pr`, adds 1, and does not reuse the dropped IDs. Retention preserves audit-trail traceability between Phase 3 seeds, Phase 4/5/7 traces, and the manifest's `dropped_card_ids` entries; renumbering would break cross-references inside the manifest body.
+- **Slots formerly filled by dropped cards become empty in the Phase 6 Diversification Audit** table of the written manifest, with `user-drop at Phase 9` cited as the rationale. No regeneration fires; empty-slot discipline (see Guardrails §Empty slots in a batch are features, not bugs) applies. The empty slot is a diagnostic signal that the user chose to defer that enrichment slot for this batch — a future batch or a targeted single-card run can fill it if desired.
+- **Phase 7d trace in the written manifest covers all card-pairs tested at generation time, including pairs involving dropped cards**. Dropped-pair results are retained as audit evidence that the full batch passed 7d before the drop-list was applied. The manifest may additionally present a surviving-pair sub-trace for quick reading, but the full trace is the proof-of-work.
+- **Phase 5 Rejected-Seed Log is not affected by drops**. Drops are editorial selection at Phase 9, not Phase 5 rejection. The `dropped_card_ids` frontmatter field is the audit trail for drops; the `Phase 5 Rejected-Seed Log` remains the audit trail for generation-time rejections. Do not merge the two.
+
 On approval, write in this order — sequencing matters because the tool environment cannot guarantee transactional atomicity, and a deterministic order makes partial-state recovery tractable:
 
 1. **Each non-dropped card first**: `worlds/<world-slug>/proposals/PR-NNNN-<slug>.md`. Set `source_basis.user_approved: true` on each card immediately before its write. This is the moment of card commitment; a card's `user_approved: true` means it was reviewed and kept in the batch, NOT that it has been accepted as canon.
@@ -397,7 +436,7 @@ Report all written paths. Do NOT commit to git.
 
 ## Record Schemas
 
-- **Proposal Card** → `templates/proposal-card.md` (hybrid YAML frontmatter + markdown body; original to this skill). Frontmatter fields: `proposal_id`, `batch_id`, `slug`, `title`, `canon_fact_statement`, `proposed_status` (`hard_canon` | `soft_canon` | `contested_canon` | `mystery_reserve` | `invariant_revision`), `type` (capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule), `enrichment_category` (A–J), `proposal_family` (1–10), `domains_touched`, `recommended_scope` (geographic / temporal / social), `why_not_universal`, `scores` (coherence, propagation_value, story_yield, distinctiveness, ordinary_life_relevance, mystery_preservation, integration_burden, redundancy_risk — each 1–5), `score_aggregate`, `immediate_consequences`, `longer_term_consequences`, `likely_required_downstream_updates`, `risks`, `canon_safety_check` (with `invariants_respected`, `mystery_reserve_firewall`, `distribution_discipline.canon_facts_consulted`), `source_basis` (with `world_slug`, `batch_id`, `generated_date`, `user_approved`, `derived_from_cfs`), `notes`. Markdown body sections: What It Deepens, Why It Fits This World, Immediate Consequences (prose), Longer-Term Consequences (prose), Risks, Likely Burden If Accepted, Likely Story Yield, Would This Be Better As, Canon Safety Check Trace.
+- **Proposal Card** → `templates/proposal-card.md` (hybrid YAML frontmatter + markdown body; original to this skill). Frontmatter fields: `proposal_id`, `batch_id`, `slug`, `title`, `canon_fact_statement`, `proposed_status` (`hard_canon` | `soft_canon` | `contested_canon` | `mystery_reserve` | `invariant_revision` — note: no separate `derived_canon` status; FOUNDATIONS's Derived Canon layer is represented by populating `source_basis.derived_from_cfs` with parent CFs while using `hard_canon` or `soft_canon` per the derivation's layer weight. The derivation audit trail is the field, not the status), `type` (capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule), `enrichment_category` (A–J), `proposal_family` (1–10), `domains_touched`, `recommended_scope` (geographic / temporal / social), `why_not_universal`, `scores` (coherence, propagation_value, story_yield, distinctiveness, ordinary_life_relevance, mystery_preservation, integration_burden, redundancy_risk — each 1–5), `score_aggregate`, `immediate_consequences`, `longer_term_consequences`, `likely_required_downstream_updates`, `risks`, `canon_safety_check` (with `invariants_respected`, `mystery_reserve_firewall`, `distribution_discipline.canon_facts_consulted`), `source_basis` (with `world_slug`, `batch_id`, `generated_date`, `user_approved`, `derived_from_cfs`), `notes`. Markdown body sections: What It Deepens, Why It Fits This World, Immediate Consequences (prose), Longer-Term Consequences (prose), Risks, Likely Burden If Accepted, Likely Story Yield, Would This Be Better As, Canon Safety Check Trace.
 
 - **Batch Manifest** → `templates/batch-manifest.md` (hybrid YAML frontmatter + markdown body; original to this skill). Frontmatter fields: `batch_id`, `world_slug`, `generated_date`, `parameters` (with `batch_size`, `novelty_range`, `enrichment_types`, `taboo_areas`, `upstream_audit_path`), `diagnosis_summary`, `card_ids`, `dropped_card_ids`, `user_approved`. Markdown body sections: Diagnosis Dossier, Enrichment Targets, Seed Generation Log, Phase 4 Score Matrix, Phase 5 Rejected-Seed Log, Phase 6 Diversification Audit (slot × card table), Phase 7d Batch-level Check Trace, Phase 7e Repair Log, Phase 8 Test Results.
 
