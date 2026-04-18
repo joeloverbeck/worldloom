@@ -241,3 +241,15 @@ Use AskUserQuestion when its schema is already available in the session. Inline 
 **If plan mode is active**: Call `ExitPlanMode` instead of presenting the next-steps menu. The user will direct next steps after approving the plan.
 
 **If implementation was completed inline**: If the task was simple enough that implementation was completed during or immediately after design approval, skip the menu and summarize what was done.
+
+## Guardrails
+
+- **YAGNI ruthlessly**: Remove unnecessary features from all designs. If a proposed approach has optional extras, strip them unless the user explicitly asked for them.
+- **One question at a time**: Never batch questions. This is non-negotiable.
+- **No implementation before approval**: The hard gate at the top means exactly what it says.
+- **FOUNDATIONS.md is authoritative**: For canon-related topics, if a proposed approach violates a Foundation principle, flag it immediately. Do not propose approaches that violate Foundations without explicitly calling out the violation and getting user sign-off.
+- **Worktree discipline**: If working in a worktree, all file paths use the worktree root.
+- **No scope inflation**: The design covers what was asked for. Resist the urge to add "while we're at it" improvements.
+- **Respect early exit**: If the user wants to skip ahead, let them. List your assumptions clearly.
+- **Blocker discovery during implementation**: If implementation reveals a worldloom limitation or architectural issue that blocks the brainstorm's deliverable, present the blocker, options, and recommendation. If the fix is small enough to do inline (< 50 lines of change), fix it and continue. If the fix is a separate architectural concern, create a ticket and either (a) work around the limitation in the current deliverable with a documented constraint, or (b) implement the fix if the user approves the scope expansion. Update the plan file to reflect the expanded deliverable set.
+- **Auto mode interaction**: Under auto mode, (a) present the Next Steps menu unless implementation was already completed inline, (b) approach selection and section approval gates still hold — auto mode does not bypass user alignment, (c) the batching threshold in Step 4 may shift from 3 to 2 consecutive approvals to reduce round-trips. The HARD-GATE at the top of the skill is never relaxed by auto mode.
