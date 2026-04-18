@@ -140,8 +140,8 @@ Rationale for this default: the previous "tag to include" pattern created incons
   2. Read user request: partial ("implement 1, 3") vs. full ("implement all" / "implement recommended" — synonymous).
   3. Apply edits in document order (top → bottom); scan each for **cascades** before applying.
   4. Re-read all edited files; run the **post-edit verification** pass (5 checks for non-meta-tooling targets; 6 checks when the target is a meta-tooling skill).
-  5. Present the **post-implementation summary** table (Finding | Severity | Status).
-  6. If cross-skill terminology or convention changed, run the **cross-skill sibling scan** and document it in the summary.
+  5. Present the **post-implementation summary**: per-batch cascade-scan line FIRST — confirms the scan ran even when it found nothing; see the `Per-finding cascade scan visibility` sub-rule below — THEN the table (Finding | Severity | Status). Placing the cascade-scan line AFTER the table breaks the audit-trail ordering: readers should see scan discipline confirmed before they interpret table rows.
+  6. If a stated structural-identity claim in the target forces a sibling-file mirror, apply the **cross-skill cascade** (keyed `N.cascade` in the summary). AND, separately, if the target is meta-tooling and any edit touched shared terminology or conventions, run the **cross-skill sibling scan** (with a named scan method) and document both in the summary. The two operations are independent — see Guardrails §Cross-skill consistency for the distinction.
 
   The sub-rules below are the full specification — use this checklist to orient, then consult the sub-rules (Re-evaluation, Partial implementation, Edit ordering, Cascade edits, Post-implementation summary, Post-edit verification) for edge cases and worked examples.
 
@@ -198,6 +198,13 @@ Rationale for this default: the previous "tag to include" pattern created incons
 
   If any check fails, fix the offending edit(s), then re-run the full verification pass. Do not selectively re-check — a fix in one area can introduce issues in another.
 - **Cross-skill consistency** — If the target skill is part of a multi-skill workflow AND any finding affects interfaces shared with sibling skills, scan sibling skills for inconsistencies. Report cross-skill inconsistencies as Issues. Skip when all findings are internal to the target skill.
+
+  **Two distinct sibling-skill operations are governed by this guardrail — they are independent and either, both, or neither may apply on any given implementation:**
+
+  - **Cross-skill cascade** applies to ANY target skill (meta-tooling or canon-mutating) when a stated structural-identity claim in the target (e.g., a template comment reading "structurally identical to `<sibling>/templates/...`") makes a sibling edit mandatory to preserve the claim. Keyed `N.cascade` in the post-implementation summary; sub-rule lives in the Quick-Reference row-keying section under `Cross-skill cascade vs cross-skill parallel`. The sibling edit follows the target edit's content — no independent drift-check is needed because the content is dictated.
+  - **Cross-skill sibling scan** applies ONLY to meta-tooling targets (brainstorm, skill-creator, skill-audit, skill-consolidate, and similar) as a defensive drift-check across sibling meta-tooling skills. Runs grep / read / diff across meta-tooling siblings to confirm the change doesn't leave sibling skills inconsistent with the target. Scan method must be named in the announcement; an unexecuted scan must be announced as `Scan not performed — <reason>`, not fabricated as executed.
+
+  A single implementation may require cross-skill cascade, cross-skill sibling scan, both, or neither. The two are operationally independent: cascade is about mirroring dictated content to preserve a claim; scan is about verifying the absence of drift. Confusing them — escalating a simple cascade into a full sibling-scan protocol, or skipping a mandatory cascade because "scan is meta-tooling only" — has been a real source of friction. The sub-rules below elaborate each operation.
 
   **Concrete shared-surface triggers**: A finding affects a shared surface when it changes any of the following:
   - `docs/plans/*.md` design-doc output path or frontmatter conventions (produced by `brainstorm`)

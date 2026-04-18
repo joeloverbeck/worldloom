@@ -52,7 +52,7 @@ domains_affected:                          # at least one — Rule 2 (No Pure Co
 
 prerequisites: []                          # knowledge / tools / materials / conditions needed for fact to manifest
 
-distribution:                              # required for capability/artifact facts — Rule 4 (No Globalization by Accident)
+distribution:                              # required whenever scope.geographic is non-`global` OR scope.social is non-`public` — Rule 4 (No Globalization by Accident); type-independent
   who_can_do_it: []
   who_cannot_easily_do_it: []
   why_not_universal: []
