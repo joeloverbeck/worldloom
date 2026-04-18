@@ -1,10 +1,10 @@
 # Accept Path: Phases 12a-15a
 
-Load this reference when Phase 11 produces any accept verdict (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). This reference covers the required-update checklist, deliverable assembly, validation tests, and the commit procedure with its HARD-GATE.
+Load this reference when Phase 11 produces any accept verdict (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). This reference covers the Required Update List, deliverable assembly, validation tests, and the commit procedure with its HARD-GATE.
 
 ## Phase 12a: Required Update List
 
-Produce a verifiable one-line-per-file checklist. For every file in the new CF record's `required_world_updates` plus every file modified by an existing-CF qualification, write a single line:
+Produce a verifiable one-line-per-file Required Update List. For every file in the new CF record's `required_world_updates` plus every file modified by an existing-CF qualification, write a single line:
 
 ```
 - <FILE.md> — <one-sentence summary of what changes>
@@ -16,13 +16,13 @@ For files with multiple distinct subsection updates, the line may be extended wi
 - <FILE.md> — <one-sentence summary>; <subsection-1>: <change>; <subsection-2>: <change>; ...
 ```
 
-The summary remains a single sentence; the subsection list is optional structured detail that preserves audit-trail granularity for large deliveries without fragmenting the checklist into multi-line entries.
+The summary remains a single sentence; the subsection list is optional structured detail that preserves audit-trail granularity for large deliveries without fragmenting the Required Update List into multi-line entries.
 
-The checklist is the *gate* that opens Phase 13a: drafting may only begin once every required-updates entry has a corresponding one-sentence summary present *somewhere* in the accept-branch artifacts. This separation prevents both silent merging (drafting without enumerating) and duplicated drafting (writing prose twice).
+The Required Update List is the *gate* that opens Phase 13a: drafting may only begin once every required-updates entry has a corresponding one-sentence summary present *somewhere* in the accept-branch artifacts. This separation prevents both silent merging (drafting without enumerating) and duplicated drafting (writing prose twice).
 
-**Placement flexibility (a / b / c)**: The Phase 12a "checklist" is a discipline, not a mandated standalone artifact. The required information content — one-sentence summary per affected file — may be carried by any of:
+**Placement flexibility (a / b / c)**: The Phase 12a Required Update List is a discipline, not a mandated standalone artifact. The required information content — one-sentence summary per affected file — may be carried by any of:
 
-- **(a)** a dedicated "Phase 12a Checklist" block in the adjudication record or deliverable summary (most explicit form);
+- **(a)** a dedicated "Phase 12a Required Update List" block in the adjudication record or deliverable summary (most explicit form);
 - **(b)** the Phase 15a deliverable summary's per-artifact one-paragraph summaries (when those summaries name-and-describe each file's patch);
 - **(c)** an expanded `required_world_updates` list in the CF record where each entry carries a trailing "— <one-sentence summary>" after the filename.
 
@@ -30,25 +30,25 @@ Whatever form is chosen, the reader of the deliverable summary must be able to p
 
 For each summary, the content must name: what is added; what is revised; what new questions arise (route to `OPEN_QUESTIONS.md`); what ordinary-life consequences must now be visible (route to `EVERYDAY_LIFE.md`).
 
-**Rule**: No canon addition is complete until these updates are drafted as concrete patches against the current file contents in Phase 13a. "TODO: update INSTITUTIONS.md" is not acceptable in either Phase 12a checklist or Phase 13a patch.
+**Rule**: No canon addition is complete until these updates are drafted as concrete patches against the current file contents in Phase 13a. "TODO: update INSTITUTIONS.md" is not acceptable in either Phase 12a Required Update List or Phase 13a patch.
 
 **FOUNDATIONS cross-ref**: Change Control Policy.
 
 ## Phase 13a: Deliverable Assembly
 
-Phase 13a may begin only after the Phase 12a discipline is satisfied — every file in `required_world_updates` has an identified one-sentence summary in whichever placement the drafter has chosen (a / b / c — see Phase 12a). For placement (c) where the summary lives in the CF record's `required_world_updates` list, the Phase 12a discipline is satisfied as part of Phase 13a artifact class 1 drafting itself; the checklist and the CF record converge in the same artifact. Drafting produces five artifact classes:
+Phase 13a may begin only after the Phase 12a discipline is satisfied — every file in `required_world_updates` has an identified one-sentence summary in whichever placement the drafter has chosen (a / b / c — see Phase 12a). For placement (c) where the summary lives in the CF record's `required_world_updates` list, the Phase 12a discipline is satisfied as part of Phase 13a artifact class 1 drafting itself; the Required Update List and the CF record converge in the same artifact. Drafting produces five artifact classes:
 
 1. **New CF Record(s)** matching `templates/canon-fact-record.yaml`. The `source_basis.direct_user_approval` flag is a logical gate: it must NOT be `true` in any file on disk until the user has explicitly approved the Phase 15a deliverable summary. In practice: if drafts are persisted to disk before approval (e.g., scratch files, preview commits), set `direct_user_approval: false`; if the CF is assembled only in working memory and written once at Phase 15a after approval, setting `true` in that single atomic write is compliant. What is forbidden is persisting a CF with `true` to any file (especially `CANON_LEDGER.md`) before the HARD-GATE has been released. Repair-splits produce multiple records linked via `source_basis.derived_from`.
 
 2. **Modifications to Existing CF Records** (when Phase 8 / Phase 9 require qualifying or extending an existing CF rather than appending a new one):
    - Edit the existing YAML record in place. Update affected fields (statement, distribution, costs_and_limits, visible_consequences, contradiction_risk) to reflect the qualification.
    - Append a standardized line to the modified CF's `notes` field: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <one-sentence summary of the qualification and its rationale>.` Use the new CF's id (the one that prompted the modification) inside the parentheses.
-   - Optionally, if richer modification trace is desired, populate the optional `modification_history` array (see template).
+   - Populate the `modification_history` array with a new entry for the current change (`change_id`, `originating_cf`, `date`, `summary`). Both the notes-field line and the modification_history entry are REQUIRED TOGETHER whenever the CF is identified by the Phase 12a modification_history scan (SKILL.md Procedure step 5 — CFs appearing in the proposal's `derived_from_cfs`, in Phase 8 soft-contradiction findings, OR substantively extended under Phase 9 repairs). The notes-field line carries the human-readable trace; the modification_history entry is the machine-readable complement. Omitting the array entry when the scan identifies the CF is a Rule 6 (No Silent Retcons) audit-trail gap even when the notes-field line is correctly appended.
    - YAML CF records do NOT carry `<!-- added by CF-NNNN -->` HTML-comment attribution — that syntax is invalid inside YAML and is reserved for markdown prose patches (see artifact 4 below).
 
-3. **Change Log Entry** matching `templates/change-log-entry.yaml`. `change_id: CH-NNNN`. `affected_fact_ids` lists every CF id touched (new + modified); document each id's role (added / qualified / extended) in the `summary` and `notes` fields. `downstream_updates` lists every Phase 12a checklist file. `change_type` is `addition` for any change whose dominant action is appending new CFs (even when paired with qualifications to existing CFs); use `*_retcon` only when the dominant action is modifying an existing CF's scope, cost, perspective, chronology, or ontology. `retcon_policy_checks` all true. Populate `latent_burdens_introduced` (see template) with one-line entries for every Phase 8 "Latent Burden" classification — these become the searchable trace of mandatory future lore work this change creates.
+3. **Change Log Entry** matching `templates/change-log-entry.yaml`. `change_id: CH-NNNN`. `affected_fact_ids` lists every CF id touched (new + modified); document each id's role (added / qualified / extended) in the `summary` and `notes` fields. `downstream_updates` lists every Phase 12a Required Update List file. `change_type` is `addition` for any change whose dominant action is appending new CFs (even when paired with qualifications to existing CFs); use `*_retcon` only when the dominant action is modifying an existing CF's scope, cost, perspective, chronology, or ontology. `retcon_policy_checks` all true. Populate `latent_burdens_introduced` (see template) with one-line entries for every Phase 8 "Latent Burden" classification — these become the searchable trace of mandatory future lore work this change creates.
 
-4. **Domain-file patches** — concrete prose edits to the files named in the Phase 12a discipline. Each markdown-prose addition or revision carries an inline `<!-- added by CF-NNNN -->` HTML-comment attribution.
+4. **Domain-file patches** — concrete prose edits to the files named in the Phase 12a Required Update List. Each markdown-prose addition or revision carries an inline `<!-- added by CF-NNNN -->` HTML-comment attribution.
 
    **Placement convention**: the attribution opens the element it introduces — not mid-sentence, not end-of-line. Per element type:
    - **Bullets** in existing lists: attribution immediately after list marker and whitespace.
@@ -58,6 +58,17 @@ Phase 13a may begin only after the Phase 12a discipline is satisfied — every f
    - **Table rows** with prior-CF attribution: append the new attribution inside the existing comment block in chronological order (e.g., `<!-- added by CF-0025; annotated by CF-0031 -->`) rather than adding a second comment to the same row.
 
    Applies to markdown prose only; YAML CF modifications use the `notes`-field convention from artifact 2 above.
+
+   **Mystery Reserve extension convention**: Patches that extend an existing `MYSTERY_RESERVE.md` entry with a cross-application firewall — typically when a new CF's scope overlaps an M-N entry's domain and needs an explicit "this CF does not violate M-N, and here is how" clause — follow a canonical form paralleling the section-level placement rule. Place the attribution on its own line, then open the extension block with a bolded header that names the change id and the firewall purpose, then describe the cross-application, then (when the extension adds a forbidden answer) append an "Added to disallowed cheap answers:" clause, and close with the firewall-holds confirmation sentence. Canonical form:
+
+   ```
+   <!-- added by CF-NNNN -->
+   **Extension (CH-NNNN) — <descriptor>**: <body explaining the cross-application and why the M-N firewall is preserved>. Added to disallowed cheap answers: *"<short phrasing> — forbidden reveal."* The M-N firewall holds with this cross-application clause.
+   ```
+
+   The "Added to disallowed cheap answers" clause is included only when the extension manufactures a new forbidden reveal; cross-references that merely acknowledge the CF's commitment without adding a new disallowed answer may omit it and close with the firewall-holds sentence directly. The "M-N firewall holds with this cross-application clause" sentence is load-bearing — it is the explicit audit-trail marker that future canon-addition runs grep for to confirm the extension was applied with firewall discipline rather than as an accidental narrowing. Precedent exemplar: the CF-0033 CH-0007 extensions on M-6, M-7, M-8, M-9, and M-11 in the animalia world ledger instantiate this form across five MR entries in a single CH.
+
+   When a new CF manufactures an entirely NEW Mystery Reserve entry (per Phase 9 Rule 7 obligation), the entry is a full H2 section inserted at the tail of MYSTERY_RESERVE.md with attribution on its own line immediately preceding the heading; the entry must include all standard MR fields (`**Status**`, `**Knowns**`, `**Unknowns**`, `**Common in-world interpretations**`, `**Disallowed cheap answers**`, `**Why this stays unresolved**`, `**Domains touched**`, `**Future-resolution safety**`) per FOUNDATIONS.md §Canon Layers §Mystery Reserve schema.
 
 5. **Adjudication record** at `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md` — original proposal + full Phase 0–11 analysis + verdict + phase-cited justifications + declined repair options + (if escalation fired) six critic sub-agent reports verbatim. Populate the Discovery section at the top of the report (see `templates/adjudication-report.md`) with the lists of `mystery_reserve_touched`, `invariants_touched`, and `cf_records_touched` — these enable future canon-addition runs to grep `worlds/<world-slug>/adjudications/*.md` for prior guidance on the same surfaces. Populate the Phase 14a Validation Checklist section (see template) before the verdict; this becomes the auditable record of validation pass/fail per test.
 
@@ -110,7 +121,7 @@ On approval, write the deliverable in this order — sequencing matters because 
 1. **Domain-file patches first**. Apply every Phase 13a patch to its target file with inline attribution per Phase 13a artifact 4 placement convention.
 2. **Adjudication record next**. Write `worlds/<world-slug>/adjudications/PA-NNNN-<verdict>.md`, including the populated Discovery section and Phase 14a Validation Checklist.
 3. **CANON_LEDGER.md last**. Within this file, apply three sub-steps in strict order — this makes partial-failure detection tractable:
-   1. **CF qualifications first** — apply all in-place YAML edits with `notes`-field modification trace and `modification_history` entries. Completing this before appending new CFs means an interrupted run has consistent qualifications without unresolved new CFs referencing them.
+   1. **CF qualifications first** — apply all in-place YAML edits with `notes`-field modification trace and `modification_history` entries. Completing this before appending new CFs means an interrupted run has consistent qualifications without unresolved new CFs referencing them. **Empty-array edge case**: if the target CF's current `modification_history` is in empty inline-flow form (`modification_history: []`), replace the entire line with block-form — `modification_history:` on its own line followed by indented `-` entries. Do not leave both `[]` and block entries coexisting; the result is invalid YAML and breaks future ledger tooling that parses the field. Conversely, when the target CF already has a populated `modification_history:` block-form array, append the new entry to the array; do NOT reset to `[]` first.
    2. **Append new CF record(s)** to the CFs section, before the `## Change Log` header. Set each new CF's `source_basis.direct_user_approval: true` immediately before these appends — this is the moment of canon mutation.
    3. **Append the Change Log Entry last** at the tail of the change log section. The newest change entry is always the last YAML block in the file, which makes grep-and-tail discovery of "what changed most recently" a one-liner for future canon-addition runs.
 

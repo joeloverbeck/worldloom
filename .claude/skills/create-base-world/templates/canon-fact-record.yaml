@@ -104,8 +104,16 @@ notes: >
   this guidance is preserved here for schema uniformity with the
   canon-addition skill.
 
-# OPTIONAL: structured modification trace. Empty for the genesis CF set
-# produced by create-base-world; populated by future canon-addition runs
-# when the CF is qualified or extended. Schema-uniform with
-# canon-addition/templates/canon-fact-record.yaml.
+# CONDITIONALLY MANDATORY (schema-uniform with canon-addition):
+# structured modification trace. create-base-world ALWAYS leaves this
+# empty at genesis — the genesis set has no prior modifications to
+# record. Future canon-addition runs are REQUIRED to populate this
+# array with an entry for every modification the Phase 12a scan
+# identifies (per canon-addition/templates/canon-fact-record.yaml and
+# canon-addition/references/accept-path.md artifact 2); the notes-field
+# "Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ..." line and the
+# modification_history entry are required together whenever the scan
+# identifies the CF. Schema-uniform with canon-addition's paired
+# template (FIELD STRUCTURE identical; framing and discipline comments
+# harmonized).
 modification_history: []

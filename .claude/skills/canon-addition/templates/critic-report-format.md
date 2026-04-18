@@ -28,7 +28,7 @@ Word budget: each report should fit under 600 words. Conciseness is a feature.
 
 <!-- Concrete prose changes the proposal forces in the file(s) this critic
      owns. List per-file. The format used here is what the main agent will
-     translate into Phase 12a checklist entries and Phase 13a patches. -->
+     translate into Phase 12a Required Update List entries and Phase 13a patches. -->
 
 ## Critical Risks (required)
 

@@ -125,7 +125,7 @@ audit trail.
 - Test 4 (Rule 5 / Phase 6 2nd+3rd-order consequences appear in CF or required_world_updates): PASS — <one-line rationale>
 - Test 5 (Rule 6 / Change Log Entry retcon_policy_checks all true): PASS — <one-line rationale>
 - Test 6 (Rule 7 / no unrepaired forbidden-answer collisions): PASS — <one-line rationale>
-- Test 7 (Phase 12a checklist + Phase 13a patches present for every required_world_updates entry): PASS — <one-line rationale>
+- Test 7 (Phase 12a Required Update List + Phase 13a patches present for every required_world_updates entry): PASS — <one-line rationale>
 - Test 8 (Phase 7 stabilizers name concrete mechanisms; no hand-waves): PASS — <one-line rationale>
 - Test 9 (Verdict reasoning cites specific phase findings; not vague): PASS — <one-line rationale>
 

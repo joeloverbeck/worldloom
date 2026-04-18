@@ -111,12 +111,20 @@ notes: >
   syntax is invalid here and is reserved for markdown prose patches in
   domain files.
 
-# OPTIONAL: structured modification trace. Use when richer modification
-# history is desired (e.g., a CF that has been qualified multiple times).
-# Each entry records the change_id (CH-NNNN), originating CF id (the new
-# CF that prompted the modification), date, and summary. The notes-field
-# convention above remains the primary trace; modification_history is a
-# machine-readable supplement.
+# CONDITIONALLY MANDATORY: structured modification trace. Required for
+# every CF identified by the Phase 12a modification_history scan (see
+# SKILL.md Procedure step 5) — i.e., every CF that appears in the
+# proposal's derived_from_cfs, in Phase 8 soft-contradiction findings,
+# OR whose stabilizer / scope / consequence / standing role is
+# substantively extended by the new CF per Phase 9 repairs. The
+# notes-field "Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ..." line above
+# carries the human-readable trace; modification_history is the
+# machine-readable complement, and BOTH are required together whenever
+# the scan identifies the CF (per Rule 6 / No Silent Retcons and ledger
+# convention). Each entry records the change_id (CH-NNNN), originating
+# CF id (the new CF that prompted the modification), date, and summary.
+# The array stays empty (`[]`) only until the first qualifying
+# modification — genesis CFs begin empty.
 #
 # Retrofit rule: when modifying a CF that previously had notes-field
 # modification traces but no `modification_history` array, retrofit all
