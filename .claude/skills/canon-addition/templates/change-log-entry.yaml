@@ -1,0 +1,59 @@
+# Change Log Entry — template
+#
+# Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+# Structurally identical to create-base-world/templates/change-log-entry.yaml
+# so that change logs across skills remain uniform.
+#
+# canon-addition emits one entry of this shape at Phase 13a (accept branch),
+# appended to the change log section of worlds/<world-slug>/CANON_LEDGER.md at
+# Phase 15a after HARD-GATE approval. Non-accept branches (REVISE_AND_RESUBMIT /
+# REJECT) do not emit Change Log Entries — no canon was mutated.
+#
+# All fields below are required unless explicitly marked optional.
+
+change_id: CH-NNNN                         # allocated at pre-flight via scan-and-increment of existing change log section
+date: ""                                   # ISO date of the change
+
+change_type: addition                      # addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
+                                           # canon-addition uses "addition" by default; routes to *_retcon if Phase 2 required an
+                                           # invariant revision or Phase 9 repair narrowed an existing fact's scope/cost.
+
+affected_fact_ids: []                      # full list of CF ids created or modified by this change
+  # - CF-0047
+
+summary: >
+  One-paragraph natural-language summary of what this change is, why it was
+  accepted, and which world-state files it touches. Cites the verdict from
+  Phase 11 (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION /
+  ACCEPT_AS_CONTESTED_BELIEF) and the adjudication record filename.
+
+reason:                                    # why the change is being made (dramatic intent, world-deepening rationale, etc.)
+  - ""
+
+scope:
+  local_or_global: local                   # local | global (within the scope of this world)
+  changes_ordinary_life: false             # true if EVERYDAY_LIFE.md is in downstream_updates
+  creates_new_story_engines: false         # true if the fact introduces new conflict / journey / betrayal engines
+  mystery_reserve_effect: unchanged        # unchanged | expands | narrows
+
+downstream_updates: []                     # every file in the Phase 12a required-updates list; Phase 14a rejects mismatch between this list and actual patches
+  # - INSTITUTIONS.md
+  # - EVERYDAY_LIFE.md
+  # - TIMELINE.md
+
+impact_on_existing_texts: []               # re-contextualized diegetic artifacts, if any (names of in-world texts whose meaning shifts)
+
+severity_before_fix: 0                     # 0-5; for pure addition entries: 0
+severity_after_fix: 0                      # post-change severity; for accept outcomes that resolve a prior contradiction, name the delta
+
+retcon_policy_checks:                      # must all be true for acceptance (FOUNDATIONS Rule 6) — enforced at Phase 14a
+  no_silent_edit: true
+  replacement_noted: true                  # if change_type is *_retcon: the replaced fact must be noted in summary
+  no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
+  net_contradictions_not_increased: true
+  world_identity_preserved: true           # Phase 10 thematic-fit check must have passed
+
+notes: >
+  Optional free-form notes: which repair options were considered and declined,
+  which critic sub-agents flagged concerns that were overridden, any user
+  verdict-override at Phase 14b that produced this accept outcome.

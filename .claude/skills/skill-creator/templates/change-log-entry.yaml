@@ -1,0 +1,51 @@
+# Change Log Entry — template
+#
+# Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+# Every canon-mutating skill MUST emit a Change Log Entry for each accepted
+# change. Silent edits are forbidden.
+#
+# Copy this file into the generated skill's templates/ directory. All fields
+# below are required unless explicitly marked optional.
+
+change_id: CH-0000                         # canonical change ID, monotonic
+date: ""                                   # ISO date, e.g. 2026-04-18
+
+change_type: addition                      # addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
+
+affected_fact_ids: []                      # list of CF ids touched by this change
+  # - CF-0102
+
+summary: >
+  One-paragraph natural-language summary of what changed.
+  Must be legible without reading the full fact records.
+
+reason:                                    # why the change is being made
+  - ""                                     # e.g., "prior diffusion implications became world-breaking"
+
+scope:
+  local_or_global: local                   # local | global
+  changes_ordinary_life: false             # does this visibly alter daily life per FOUNDATIONS §Change Control Policy
+  creates_new_story_engines: false
+  mystery_reserve_effect: none             # none | narrows | expands
+
+downstream_updates: []                     # files that must be updated as part of this change
+  # - INSTITUTIONS.md
+  # - GEOGRAPHY.md
+  # - DIEGETIC_TEXTS/relic_manuals.md
+
+impact_on_existing_texts: []               # any diegetic artifacts now re-contextualized
+  # - "travelogue DA-0014 now treated as regional overgeneralization"
+
+severity_before_fix: 0                     # 0-5 (see continuity-audit §Contradiction Severity Levels)
+severity_after_fix: 0
+
+retcon_policy_checks:                      # must all be true for acceptance (FOUNDATIONS Rule 6)
+  no_silent_edit: true
+  replacement_noted: true                  # if anything was deleted, note what replaces it
+  no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+
+notes: >
+  Optional free-form notes: adjudication trace, repair-pass reasoning,
+  flagged downstream risks that will require future audit passes.

@@ -1,0 +1,52 @@
+# Change Log Entry — template
+#
+# Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+# create-base-world emits exactly ONE entry of this shape at Phase 16 — the
+# CH-0001 genesis entry. Subsequent canon-mutating skills must extend this
+# log; silent edits are forbidden.
+#
+# All fields below are required unless explicitly marked optional.
+
+change_id: CH-0001                         # CH-0001 is reserved for the genesis entry of a world
+date: ""                                   # ISO date of world creation, e.g. 2026-04-18
+
+change_type: addition                      # for genesis: always "addition". Subsequent entries may be: addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
+
+affected_fact_ids: []                      # genesis entry: the full list of CF ids created by create-base-world
+  # - CF-0001
+  # - CF-0002
+
+summary: >
+  One-paragraph natural-language summary of what this change is.
+  For the CH-0001 genesis entry: the initial creation of the world — its kernel,
+  invariants, and baseline canon — produced by create-base-world.
+
+reason:                                    # why the change is being made
+  - "initial world creation"
+
+scope:
+  local_or_global: global                  # CH-0001 is global within the scope of this world
+  changes_ordinary_life: true              # genesis defines ordinary life; subsequent retcons only sometimes
+  creates_new_story_engines: true          # genesis installs the initial engines
+  mystery_reserve_effect: expands          # genesis installs the initial mystery reserve (from nothing, it expands)
+
+downstream_updates: []                     # genesis: empty. Subsequent entries list files updated to match the change.
+  # - INSTITUTIONS.md
+  # - GEOGRAPHY.md
+
+impact_on_existing_texts: []               # genesis: empty. Later entries note re-contextualized diegetic artifacts.
+
+severity_before_fix: 0                     # 0-5 (see continuity-audit §Contradiction Severity Levels)
+severity_after_fix: 0                      # genesis has no prior severity
+
+retcon_policy_checks:                      # must all be true for acceptance (FOUNDATIONS Rule 6)
+  no_silent_edit: true
+  replacement_noted: true                  # genesis replaces nothing, so trivially true
+  no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
+  net_contradictions_not_increased: true
+  world_identity_preserved: true           # genesis defines identity; trivially preserved
+
+notes: >
+  Optional free-form notes: world creation rationale, which optional premise items
+  were elicited via Phase 0 interview vs provided via premise_path, flagged
+  downstream risks that will require future audit passes.
