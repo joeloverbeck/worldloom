@@ -29,7 +29,9 @@ id: CF-0000                                # allocated at pre-flight via scan-an
 title: ""                                  # short human label
 status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
 type: ""                                   # common enum: capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
-                                           # additional values from FOUNDATIONS.md §Ontology Categories are permitted: historical_process | text_tradition | hazard | craft
+                                           # additional values from FOUNDATIONS.md §Ontology Categories are permitted and in active ledger use: historical_process | text_tradition | hazard | craft | place | polity | route | person | faction | entity | region | resource | magic_practice | social_role | ecological_system | bodily_condition
+                                           # FOUNDATIONS §Ontology Categories is the authoritative list (25 categories); the common + additional above cover the most-used values but are NOT exhaustive — when in doubt, consult FOUNDATIONS directly.
+                                           # For composite-type facts (e.g., a named city is place + polity + institution + historical_process + route; see proposal-normalization.md §Place-type / Polity Composite Handling for the named-landmark worked example), set type: to the PRIMARY category (the one that most determines the CF's stabilizer chain and required_world_updates footprint) and enumerate secondary categories in notes.
                                            # (draw verbatim from FOUNDATIONS so ledger-wide grep discovery works uniformly)
 statement: >
   Natural-language statement of the fact. One paragraph maximum.

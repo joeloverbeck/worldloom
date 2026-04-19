@@ -42,6 +42,19 @@ If promising but destabilizing, propose repairs: reduce scope / reduce reproduci
 
 **Rule of thumb**: if splitting would force you to write "see also CF-X, CF-Y, CF-Z" three times in a single CF's `notes` field, the phenomenon is tightly coupled and wants one composite CF. If the split CFs naturally diverge at Phase 6 consequence propagation (touching different files with little overlap), the split is honest.
 
+**Merged vs. separate Mystery Reserve entries (for the "create a new MR entry" repair option)**: when a proposal manufactures multiple parallel bounded unknowns (e.g., origin of two adjacent infrastructure elements, cause of two related phenomena, mechanism of two distinct but surface-similar effects), decide between ONE merged entry vs. SEPARATE parallel entries before drafting. Prefer **one merged entry** when:
+- The **relationship between the unknowns is itself contested** and part of the bounded unknown (e.g., "are the canals and the tunnels integrated infrastructure or two separate constructions?" — the relationship-question IS one of the in-world readings the MR entry holds).
+- The **same in-world readings apply to both** (ancestral-consortium / Maker-substrate / divine-gift / composite readings apply identically; splitting would force redundant enumeration across two entries).
+- **Resolution of one would constrain resolution of the other** (a reveal that answers one unknown would partial-constrain the other — the unknowns are not independent).
+- The **disallowed cheap answers would overlap** (the same forbidden-reveal pattern — e.g., definitive Maker-Age attribution — would appear in both entries' disallowed lists).
+
+Prefer **separate entries** when:
+- The **in-world readings diverge mechanism-by-mechanism** (different sect-theoretical positions apply to each; splitting clarifies rather than duplicates).
+- **One unknown belongs to an existing MR surface** (M-1 / M-2 / etc.) while the other manufactures a genuinely new one — the first is handled by an Extension clause on the existing MR; the second gets its own new MR entry.
+- The **domains_touched differ substantively** — an entry with only partial-overlap disallowed answers and distinct domain scope is cleaner separated.
+
+Worked precedent (CH-0013 / CF-0038 Brinewick): the proposal manufactured two bounded unknowns (canal-network origin; outskirts-estate underground-tunnel origin). Mystery Curator critic initially proposed M-19 + M-20 (separate parallel entries). Phase 6b synthesis merged them into one M-19 because (a) the relationship between canal and tunnel origin IS contested (are they integrated infrastructure or separate constructions?); (b) the same four readings apply (ancestral-consortium / lost-polity / composite / Maker-substrate); (c) a Maker-substrate reveal on one would partial-constrain the other; (d) the disallowed cheap answers overlap (definitive Maker-Age attribution forbidden in both). Merged M-19 captures "Brinewick Canal and Underground Network Origin" as one bounded-unknown surface.
+
 **Rule**: Repairs must preserve the user's dramatic intent. Surface each option with its trade-off (preserved vs sacrificed) in the Phase 15a summary.
 
 ## Phase 10: Narrative and Thematic Fit
@@ -51,6 +64,15 @@ Evaluate: deepens identity? creates tensions? trivializes struggle? universalize
 **Rule**: Reject technically consistent but dramatically flattening facts.
 
 **FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — collision with `MYSTERY_RESERVE.md` `disallowed cheap answers` → REJECT or repair toward Mystery Reserve placement.
+
+**OPEN_QUESTIONS pressure scan (required)**: on `OPEN_QUESTIONS.md`, grep `^## ` to enumerate every section heading. For each heading, classify under this proposal as one of:
+
+- **UNCHANGED** — no pressure from the proposal; the deferral scope is unaffected.
+- **PRESSURED** — the proposal narrows the deferral scope, adds a cross-reference annotation, extends the caution clause, or otherwise touches the item without resolving the question. Pressured items receive an annotation in the domain-file patch set at Phase 13a and appear in the adjudication record's `open_questions_touched` Discovery field.
+- **NEW** — the proposal creates a deferred item that this adjudication appends to `OPEN_QUESTIONS.md` as a new section. The new section lists alongside pressured items in `open_questions_touched`.
+- **RESOLVED** — the proposal commits on a previously-deferred question (rare). Treat with Phase 10 narrative-fit scrutiny — a resolved OQ is a deliberate commitment, not a silent one, and its resolution must be justified in the adjudication record's Justification section. Silent OQ resolution violates Rule 6 (No Silent Retcons).
+
+Record the full list (every OQ section named, with classification) in the adjudication record's Discovery section `open_questions_touched` field — PRESSURED and NEW items populate the field; UNCHANGED items are the unstated complement (do not enumerate them in the Discovery field, but the scan itself MUST cover them to produce the PRESSURED / NEW list correctly). Missing this scan produces silent OQ drift: a pressured item that receives no annotation carries a reader of OPEN_QUESTIONS into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
 
 ## Phase 11: Adjudication
 

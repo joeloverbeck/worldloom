@@ -113,7 +113,7 @@ Required for any accept-branch outcome (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES /
 ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). For non-accept outcomes,
 populate the subset that was actually evaluated (Phase 13b runs a smaller checklist).
 
-Each line records one of the 9 Phase 14a tests as PASS or FAIL with a one-line
+Each line records one of the 10 Phase 14a tests as PASS or FAIL with a one-line
 rationale. A PASS without rationale is treated as FAIL. The user reads this
 section at Phase 15a HARD-GATE; absent or undocumented validation breaks the
 audit trail.
@@ -128,6 +128,7 @@ audit trail.
 - Test 7 (Phase 12a Required Update List + Phase 13a patches present for every required_world_updates entry): PASS — <one-line rationale>
 - Test 8 (Phase 7 stabilizers name concrete mechanisms; no hand-waves): PASS — <one-line rationale>
 - Test 9 (Verdict reasoning cites specific phase findings; not vague): PASS — <one-line rationale>
+- Test 10 (Rule 3 / no unmotivated superlative or ordinal claims in statement/visible_consequences/distribution; superlatives are either stabilizer-backed or softened to pragmatic-scale): PASS — <one-line rationale>
 
 ---
 
