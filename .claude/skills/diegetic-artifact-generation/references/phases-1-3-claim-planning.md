@@ -1,0 +1,60 @@
+# Phases 1-3: Claim Planning
+
+Build the Author's epistemic horizon (Phase 1), apply the in-world genre conventions of the artifact type (Phase 2), then build and tag the artifact's claim list (Phase 3). These three phases produce the claim substrate that Phases 4-6 will compose into text.
+
+## Phase 1: Epistemic Horizon
+
+For the bound Author at the bound date/place, determine what they can:
+- **know directly** (witnessed, experienced, handled — cross-reference `TIMELINE.md` events within lifetime; `GEOGRAPHY.md` places within mobility; `EVERYDAY_LIFE.md` practices within class/region/profession)
+- **infer plausibly** (from training, literacy, access)
+- **repeat secondhand** (rumor, sermon, merchant gossip, bardic transmission)
+- **get wrong** (folk theories; inherited propaganda; professional blind spots — cross-reference `INSTITUTIONS.md` religious/ideological material, `EVERYDAY_LIFE.md` common beliefs)
+- **intentionally conceal** (given `political_dependency`, `desired_relation_to_truth`, `taboo_censorship_conditions`)
+- **never know** (cross-reference `MYSTERY_RESERVE.md` `what is unknown` blocks; `OPEN_QUESTIONS.md` items; CAU-3-style restricted vocabulary)
+
+Each candidate claim for the artifact body must be tagged with ONE of these six statuses:
+- `witnessed`
+- `learned_from_authority`
+- `inherited_tradition`
+- `common_rumor`
+- `contested_scholarship`
+- `impossible_for_narrator_to_verify`
+
+**Rule (from proposal)**: This phase prevents lore-dumping. A narrator who "knows" everything the author-Claude knows is an omniscient voice in costume.
+
+**FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — Phase 1's `never_know` list is the first Rule 7 enforcement point; Phase 7b is the audit gate.
+
+## Phase 2: Genre Convention Pass
+
+Apply the in-world conventions of the bound `artifact_type`. The proposal enumerates conventions for chronicle, sermon, travelogue, herbal, myth. For any artifact_type not in the proposal's enumeration, derive conventions from the world's own tradition:
+- Which `INSTITUTIONS.md` bodies produce this artifact type (temple, guild, court, school, itinerant performer, prison, private correspondence)?
+- What `EVERYDAY_LIFE.md` practices establish its conventional form (length, register, rhetorical moves, permitted topics, material support)?
+- What tonal register does `WORLD_KERNEL.md` permit for this institutional producer (grim / comic / tragic / lyrical / pulp / mythic)?
+
+Record conventions in frontmatter `genre_conventions` as a list of the specific moves this artifact will honor or deliberately break. A deliberate break must be justified in `notes` by the author's motive.
+
+**Rule**: Conventions are constraints, not suggestions. An artifact that ignores its genre's conventional moves reads as anachronistic pastiche. An artifact that slavishly honors them reads as genre exercise. The craft is calibrated deviation.
+
+**FOUNDATIONS cross-ref**: World Kernel §Tonal Contract.
+
+## Phase 3: Claim Selection
+
+Build the artifact's claim list. For each claim, record:
+
+| Field | Values |
+|---|---|
+| `claim` | the assertion, in the author's voice (not paraphrased neutrally) |
+| `canon_status` | `canonically_true` \| `canonically_false` \| `partially_true` \| `contested` \| `mystery_adjacent` \| `prohibited_for_this_artifact` |
+| `narrator_belief` | `true` \| `false` \| `uncertain` \| `performed_belief` |
+| `source` | one of the six Phase 1 tags |
+| `contradiction_risk` | `none` \| `soft` \| `hard` |
+| `mode` | `direct` \| `implied` \| `symbolic` |
+| `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve in `CANON_LEDGER.md`; null otherwise |
+| `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve in `MYSTERY_RESERVE.md`; null otherwise |
+| `repair_trace` | null by default; populated by Phase 7f with `{repair_type, reason}` when the claim is retagged, rescoped, moved, or removed |
+
+Every claim with `canon_status: canonically_true` must populate `cf_id` with a CF-id from `CANON_LEDGER.md`. Every claim with `canon_status: mystery_adjacent` must populate `mr_id` with an MR-id from `MYSTERY_RESERVE.md`. Every claim repaired at Phase 7f must record the repair under `repair_trace`. Every claim tagged `prohibited_for_this_artifact` is **removed from the artifact body** — it stays in the record as an audit trail of what was considered and rejected.
+
+**Rule (from proposal Phase 3)**: The `truth_status` taxonomy is the firewall against Rule 7 failures by commission. A claim that would resolve a mystery must be tagged `prohibited_for_this_artifact` here, not caught at Phase 7b.
+
+**FOUNDATIONS cross-refs**: Canon Layers (each claim's `canon_status` maps to a layer); Canon Fact Record Schema (CF references must be real); Rule 7 (prohibited claims are pre-filtered, not post-filtered).

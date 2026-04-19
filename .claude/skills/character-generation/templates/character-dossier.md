@@ -10,7 +10,7 @@
 # every field. Do NOT leave placeholders — Phase 8 Test 9 (Schema completeness)
 # rejects any field left as TODO, empty-where-content-required, or placeholder.
 #
-# Field-level notes live alongside the fields below. The three blocks under
+# Field-level notes live alongside the fields below. The five blocks under
 # `world_consistency` are the Canon Safety Check audit trail — they are not
 # decorative. Silent empty lists fail Phase 8 Tests 5 and 7.
 
@@ -31,13 +31,14 @@ major_local_pressures: []                    # cross-ref GEOGRAPHY / ECONOMY / I
 intended_narrative_role: ""                  # protagonist / witness / antagonist / foil / narrator / background
 
 # --- Canon Safety Check audit trail (Phase 7 output) ---
-# These four lists ARE the audit trail. Empty lists are suspicious by default;
+# These five lists ARE the audit trail. Empty lists are suspicious by default;
 # Phase 8 Tests 5 and 7 reject empty-where-non-empty-is-required.
 world_consistency:
   canon_facts_consulted: []                  # CF ids from CANON_LEDGER.md consulted during Phases 5 and 7c
   invariants_respected: []                   # invariant ids from INVARIANTS.md tested at Phase 7a
   mystery_reserve_firewall: []               # MR entry ids from MYSTERY_RESERVE.md checked at Phase 7b (non-empty required if MR has touching entries)
   distribution_exceptions: []                # entries of form "<CF-id>: <justification citing Phase 2 embedding>"
+  continuity_checked_with: []                # CHAR-ids of existing dossiers read at Pre-flight step 6 for continuity-preservation; empty if no existing dossiers name this character
 
 source_basis:
   world_slug: ""                             # the world this character belongs to

@@ -74,6 +74,7 @@ For each block, determine one of three categories:
     - Conditional: "If the skill mutates canon-level files, load `references/hard-gate-discipline.md`."
 - **Phase-structured source skills**: If the source skill is structured as numbered phases (Phase 0 / Phase 1 / ... as H2 sections) instead of a pre-existing Procedure list, collapse contiguous phases into a small number of Procedure steps — each carrying a load instruction to the reference doc covering those phases. Reference docs preserve the original phase H2 headers for traceability (see Step 5). Example: `"Phases 7-11: Counterfactual, Contradiction, Repair, Narrative Fit, Adjudication. Load \`references/counterfactual-and-verdict.md\`."` Renumbering happens only at the thin SKILL.md orchestration layer; reference doc body prose continues to use the original phase/step labels per the Step-numbering continuity rule below.
 - Non-workflow core sections (e.g., invocation details, background context, diagrams) stay inline as regular markdown sections. The numbered step list covers only the procedural/orchestration flow.
+- **Commit / HARD-GATE phases stay inline**: phases encoding HARD-GATE approval + deterministic write-ordering (typically the Commit / Phase-N step in canon-mutating and content-generating skills) stay inline — the skill's safety-and-sequencing contract must be visible in the thin SKILL.md, not loaded from a reference doc. Drop-list behavior, partial-failure recovery notes, and the ordered write sequence belong in the thin SKILL's procedure list, even when the step runs 20+ lines. This parallels skill-creator's convention that the Commit / Write phase is a distinct structural element following the final validation phase.
 - **Step-numbering continuity**: If the thin SKILL's orchestration list renumbers the original steps (e.g., original Steps 0–8 collapsed to 1–7, or original Phases 0–15 collapsed to Procedure steps 1–5), avoid numeric cross-references in reference doc *body prose* that would point at the *old* numbering. Prefer descriptive phrasing ("the dump-reading step", "the triage checkpoint") over numeric references ("Step 2", "Step 3"). If a numeric reference is unavoidable, tie it to the thin SKILL's numbering so readers toggling between files see consistent step numbers. (This does not conflict with Step 5's guidance on preserving original step or phase numbers in reference doc *section headings* for traceability — headings label source provenance, body prose should track current structure.)
 - **Preserve** universal hard rules as a short section at the bottom.
 - The thin SKILL.md should read as a clear, scannable orchestration sequence — not a wall of checklists.
@@ -85,7 +86,7 @@ After rewriting, verify that every H2/H3 section from the original SKILL.md appe
 
 ### 9. Cross-Skill Reference Check
 
-Run two separate greps across `.claude/skills/*/SKILL.md`: (a) for the target skill's name verbatim (e.g., `canon-addition`), (b) for its directory path prefix (e.g., `.claude/skills/canon-addition/`). Report each result independently — two zero-match lines are more auditable than a single compound alternation negative. If the target skill has uniquely named sections, run a third grep for those. Skip generic headers (e.g., "Hard Rules", "Procedure") that would produce false positives. If any match is found, note them in the output summary as "references that may need updating" so the user can fix external pointers.
+Run two separate greps across `.claude/skills/*/SKILL.md`: (a) for the target skill's name verbatim (e.g., `canon-addition`), (b) for its directory path prefix (e.g., `.claude/skills/canon-addition/`). Report each result independently — two zero-match lines are more auditable than a single compound alternation negative. If the target skill has uniquely named sections, run a third grep for those. Skip generic headers (e.g., "Hard Rules", "Procedure") that would produce false positives. Always record the result in the Step 10 output summary, not just when matches are found: zero-match runs produce a `Cross-skill references: 0 matches` line so the audit trail reflects that the scan ran; match runs list the files (e.g., `Cross-skill references: 3 matches in foo/SKILL.md, bar/SKILL.md`) and flag them as references that may need updating so the user can fix external pointers.
 
 ### 10. Output Summary
 
@@ -97,6 +98,8 @@ References:
 - references/foo.md (always)
 - references/bar.md (conditional: when X)
 - references/baz.md (always)
+
+Cross-skill references: N matches [in <file-list>].
 ```
 
 ## Hard Rules

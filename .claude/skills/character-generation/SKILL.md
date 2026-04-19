@@ -7,7 +7,7 @@ arguments:
     description: "Directory slug of an existing world under worlds/<world-slug>/. The skill aborts if the directory is missing or any mandatory world file (WORLD_KERNEL.md, INVARIANTS.md, ONTOLOGY.md, PEOPLES_AND_SPECIES.md, GEOGRAPHY.md, INSTITUTIONS.md, ECONOMY_AND_RESOURCES.md, EVERYDAY_LIFE.md, TIMELINE.md, CANON_LEDGER.md, MYSTERY_RESERVE.md, OPEN_QUESTIONS.md) is unreadable."
     required: true
   - name: character_brief_path
-    description: "Path to a markdown file containing the required inputs (current_location, place_of_origin, date, species, age band, social position, profession, kinship situation, religious/ideological environment, major local pressures, intended narrative role) and optional inputs (central contradiction, desired emotional tone, desired arc type, taboo/limit themes to avoid). If place_of_origin is unspecified, it defaults to current_location; it may be recorded as 'deliberately withheld' when origin is non-narratively-active. If omitted, Phase 0 interviews the user. If provided but thin, Phase 0 runs a targeted gap-filler."
+    description: "Path to a markdown file containing the required inputs (current_location, place_of_origin, date, species, age band, social position, profession, kinship situation, religious/ideological environment, major local pressures, intended narrative role) and optional inputs (central contradiction, desired emotional tone, desired arc type, taboo/limit themes to avoid). If place_of_origin is unspecified, Phase 0 applies a two-part test: default to current_location when the silence is incidental (character self-concept would plausibly include origin detail); record as 'deliberately withheld' when origin is non-narratively-active (brief AND self-concept both silent, or explicit severance). If omitted, Phase 0 interviews the user. If provided but thin, Phase 0 runs a targeted gap-filler."
     required: false
 ---
 
@@ -86,7 +86,7 @@ Phase 9: Commit (HARD-GATE approval --> atomic write of
 - `world_slug` — string — directory slug of an existing world under `worlds/<world-slug>/`. Pre-flight verifies the directory exists, all 13 mandatory files (docs/FOUNDATIONS.md + 12 world files) are readable, and no dossier exists at the target character slug.
 
 ### Optional
-- `character_brief_path` — filesystem path — markdown brief containing the required inputs (current_location, place_of_origin, date, species, age band, social position, profession, kinship situation, religious/ideological environment, major local pressures, intended narrative role) and optional inputs (central contradiction, desired emotional tone, desired arc type, taboo/limit themes to avoid). If `place_of_origin` is unspecified, it defaults to `current_location` or may be recorded as "deliberately withheld" in `notes` when origin is non-narratively-active. If omitted, Phase 0 interviews the user. If provided but thin, Phase 0 runs a targeted gap-filler.
+- `character_brief_path` — filesystem path — markdown brief containing the required inputs (current_location, place_of_origin, date, species, age band, social position, profession, kinship situation, religious/ideological environment, major local pressures, intended narrative role) and optional inputs (central contradiction, desired emotional tone, desired arc type, taboo/limit themes to avoid). If `place_of_origin` is unspecified, Phase 0 applies a two-part test (see Phase 0 §Required inputs): default to `current_location` when silence is incidental; record as "deliberately withheld" in `notes` when origin is non-narratively-active (brief AND self-concept both silent, or explicit severance). If omitted, Phase 0 interviews the user. If provided but thin, Phase 0 runs a targeted gap-filler.
 
 ## Output
 
@@ -99,6 +99,17 @@ Phase 9: Commit (HARD-GATE approval --> atomic write of
 
 Before this skill acts, it MUST load (per FOUNDATIONS §Tooling Recommendation — non-negotiable):
 
+### Reading mature world files
+
+As worlds mature, any world file can cross the Read tool's token limit — `CANON_LEDGER.md` is the first to do so (it accumulates one entry per accepted CF), but `INSTITUTIONS.md`, `MYSTERY_RESERVE.md`, `EVERYDAY_LIFE.md`, and later `TIMELINE.md` and `GEOGRAPHY.md` follow the same trajectory as modification-history annotations accumulate from each accepted CF.
+
+When a prescribed Read returns a token-limit error, use this pattern:
+1. **Grep for structural anchors** to enumerate the file's section layout — `^##[^#]` for top-level sections; `^### ` for subsections; `^id:` for CF entries in `CANON_LEDGER.md`; `^## M-` for Mystery Reserve entries; filename-appropriate patterns otherwise.
+2. **Read targeted ranges** with `offset`/`limit` for the sections most relevant to the character's brief — the CFs whose `who_can_do_it` distributions bear on the character's capabilities; the INSTITUTIONS axes that embed the character's profession, law-exposure, and religion; the Mystery Reserve entries whose `what is unknown` blocks plausibly touch the character's epistemic surface.
+3. **Do not attempt a single full Read** when the size warning triggers — selective reading is the expected mode once enough canon accumulates, and the audit trail (what sections were read, why) is as load-bearing as any other Phase 7 record.
+
+This pattern applies uniformly across every file in §World-State Prerequisites. The CANON_LEDGER.md entry below cross-references it but does not repeat the mechanism.
+
 ### Mandatory — always loaded at Pre-flight
 - `docs/FOUNDATIONS.md` — cited throughout (Rule 2 at Phases 1/2/5; Rule 3 at Phase 5; Rule 4 at Phase 7c; Rule 7 at Phase 7b; Canon Layers at Phase 7; Ontology Categories at Phase 5).
 - `worlds/<world-slug>/WORLD_KERNEL.md` — genre/tonal/chronotope contract (Phase 0 input validation against world identity; Phase 6 voice register calibration).
@@ -110,7 +121,7 @@ Before this skill acts, it MUST load (per FOUNDATIONS §Tooling Recommendation �
 - `worlds/<world-slug>/ECONOMY_AND_RESOURCES.md` — Phase 1 (food, possessions, access restrictions, debts) + Phase 2 (employer/guild/lord relations).
 - `worlds/<world-slug>/EVERYDAY_LIFE.md` — Phase 1 + Phase 3 (the ordinary-life backdrop this character inhabits or departs from; vocabulary/categories available to ordinary people in this region/class/species cluster).
 - `worlds/<world-slug>/TIMELINE.md` — Phase 3 (what history the character lived through or learned about; what residues remain in their region).
-- `worlds/<world-slug>/CANON_LEDGER.md` — Phase 5 (capability facts and their `distribution` blocks) + Phase 7c (distribution/scope conformance check). **Note on mature worlds**: this file may exceed the Read tool's token limit. Prescribed pattern when it does: grep for `^id:` (or equivalent CF-index marker) to enumerate CF IDs, then Read by line-range for the CFs relevant to the character's capabilities and brief. Do not attempt a single full Read when the size warning triggers — selective reading is the expected mode once enough CFs accumulate.
+- `worlds/<world-slug>/CANON_LEDGER.md` — Phase 5 (capability facts and their `distribution` blocks) + Phase 7c (distribution/scope conformance check). Large mature ledgers exceed the Read tool's token limit; use the selective-reading pattern in §Reading mature world files above, grepping `^id:` to enumerate CF IDs and then reading by line-range for the CFs relevant to the character's capabilities and brief.
 - `worlds/<world-slug>/MYSTERY_RESERVE.md` — Phase 7b firewall (non-negotiable — each entry's `disallowed cheap answers` and `what is unknown` blocks are the literal test material).
 - `worlds/<world-slug>/OPEN_QUESTIONS.md` — Phase 3 (so the character does not "know" things the world has deliberately not yet decided).
 
@@ -133,8 +144,9 @@ Before this skill acts, it MUST load (per FOUNDATIONS §Tooling Recommendation �
 3. Load `docs/FOUNDATIONS.md` into working context.
 4. Load the 12 mandatory world files.
 5. Scan `worlds/<world-slug>/characters/` for the highest existing `CHAR-NNNN` by grepping `^character_id:` across dossier frontmatters (filenames encode slugs, not IDs, so a grep over dossier files is required — directory listing alone is not sufficient). Allocate `next_char_id = highest + 1`. If the directory does not exist or contains no dossiers, `next_char_id = CHAR-0001`.
-6. Derive `<char-slug>` from the character's intended in-world name (kebab-case, lowercase, punctuation-stripped). If the character name is not yet known, defer slug derivation to the end of Phase 0.
-7. If `worlds/<world-slug>/characters/<char-slug>.md` already exists, abort: "Character slug collision — supply a different in-world name. This skill never overwrites an existing dossier."
+6. **Continuity-preservation read**. If the provided `character_brief_path` or the Phase 0 interview names any existing characters — detected by grepping the brief for the dossier slugs present in `characters/INDEX.md` and for any proper-noun names appearing in existing dossiers' frontmatter `name:` fields — read those dossiers' frontmatter and `notes` blocks into working context. Record the set of CHAR-ids read into the new character's draft `world_consistency.continuity_checked_with` list. Any commitments recorded in an existing dossier's `notes`, `source_basis`, or `Likely Story Hooks` about the new character (e.g., "silver-split already honored," "operation was CF-0006 extraction not CF-0021 creation," "Rill is seventeen") are continuity constraints that Phase 1-6 work must not contradict without explicit user acknowledgment at Phase 9. If the directory does not exist or contains no dossiers, `continuity_checked_with = []` and this step is a no-op.
+7. Derive `<char-slug>` from the character's intended in-world name, per the slug convention in Phase 0 §Slug derivation (kebab-case, lowercase, punctuation-stripped; personal-name-first for epithets; match existing-dossier precedent in `characters/`). If the character name is not yet known, defer slug derivation to the end of Phase 0.
+8. If `worlds/<world-slug>/characters/<char-slug>.md` already exists, abort: "Character slug collision — supply a different in-world name. This skill never overwrites an existing dossier."
 
 ## Phase 0: Normalize Character Brief
 
@@ -142,7 +154,7 @@ Parse `character_brief_path` if provided; otherwise interview the user. Extract:
 
 **Required inputs** (abort Phase 0 if any remain unresolved after interview):
 - `current_location` — bound to a specific region or settlement in `GEOGRAPHY.md`; where the character is at the dossier's recorded `date`
-- `place_of_origin` — bound to a `GEOGRAPHY.md` region or settlement. If unspecified in the brief, defaults to `current_location`; may be recorded as "deliberately withheld" in the dossier `notes` when origin is a non-narratively-active element (e.g., a character who has severed ties with their origin town and treats it as outside the narrative)
+- `place_of_origin` — bound to a `GEOGRAPHY.md` region or settlement. Default-resolution test when the brief does not commit one: (a) **default to `current_location`** when the brief is silent AND the character's self-concept would plausibly include origin detail (parents, home-town, birth-village) that the author has simply not yet specified — i.e., the silence is incidental; (b) **record as "deliberately withheld" in the dossier `notes`** when EITHER the brief does not commit an origin AND the character's self-concept does not reference one (the character treats origin as outside the narrative frame), OR the brief explicitly notes the character has severed origin ties. The two-part test disambiguates the silence-plus-self-concept case from the silence-alone case; applying (a) when (b) fits produces a false origin-claim, and applying (b) when (a) fits loses a small but real piece of character grounding
 - `date` — resolved against the world's chronotope and `TIMELINE.md`
 - `species` — bound to a cluster in `PEOPLES_AND_SPECIES.md`
 - `age_band` — free-form but must be plausible for the species's lifespan per PEOPLES
@@ -161,9 +173,11 @@ Parse `character_brief_path` if provided; otherwise interview the user. Extract:
 
 **Conditional world-file load**: if any declared input touches magical or technological capability (checked against `MAGIC_OR_TECH_SYSTEMS.md` system names, `ONTOLOGY.md` magic-practice / technology categories, or `CANON_LEDGER.md` capability CFs), load `worlds/<world-slug>/MAGIC_OR_TECH_SYSTEMS.md` into working context. Skip otherwise.
 
-**Slug derivation** (if not yet done at Pre-flight): kebab-case the character's in-world name. Re-run the slug-collision check from Pre-flight step 7.
+**Slug derivation** (if not yet done at Pre-flight): kebab-case the character's in-world name (lowercase, punctuation-stripped). When the character's name contains a nickname, epithet, or professional sobriquet (a quoted nickname in the brief, a professional byname, a title-as-name), default to **personal-name-first** kebab-case — e.g., `melissa-threadscar` rather than `threadscar-melissa`; `vespera-nightwhisper` rather than `nightwhisper-vespera`. If the world's existing `characters/` directory uses a different convention, match precedent; the convention must be stable within a world for INDEX.md alphabetic ordering to remain semantically coherent over time. If no existing dossiers exist yet, personal-name-first is the default. Re-run the slug-collision check from Pre-flight step 8.
 
 **Rule**: Never advance to Phase 1 with an unresolved required input or an input that cannot be bound to a specific entity in the loaded world files. A "generic farmer" cannot exist; "a third-generation bondmaid in the Marsh Courts" can.
+
+**Rule (continuity)**: If Pre-flight step 6 loaded existing-dossier continuity constraints (commitments about the new character recorded in other dossiers' `notes`, `source_basis`, or `Likely Story Hooks`), those constraints are non-negotiable for Phases 1-6. Examples from prior sessions: a silver-split already recorded as "honored" in another dossier cannot be re-opened here; an operation another dossier classifies as CF-0006 extraction cannot be re-classified here as CF-0021 crafter-attempt; a referenced character's age or species-cluster cannot be contradicted. If Phase 1-6 work would require contradicting a constraint, escalate to the user at Phase 9 as a named continuity-conflict item — do not silently override.
 
 **FOUNDATIONS cross-ref**: Tooling Recommendation (Phase 0 is the binding step between user intent and loaded world state — non-negotiable for every subsequent phase's coherence).
 
@@ -357,8 +371,9 @@ Present the deliverable summary to the user:
 1. Full character dossier (frontmatter + markdown body)
 2. Canon Safety Check Trace (9 test results with rationales)
 3. Phase 7d repair sub-passes that fired (if any), each framed as "preserved: <user intent> / sacrificed: <what was narrowed or reclassified>"
-4. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`
-5. Target write paths: `worlds/<world-slug>/characters/<char-slug>.md` and `worlds/<world-slug>/characters/INDEX.md`
+4. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with`
+5. Continuity-constraint summary (if Pre-flight step 6 loaded any existing dossiers): one line per dossier consulted, naming the CHAR-id and the specific commitments honored (e.g., "CHAR-0001 Vespera Nightwhisper: 12 Kiln Lane framed as CF-0006 extraction; silver-split already honored; Rill age 17"). If any Phase 1-6 work would have required contradicting a constraint, list it here as a named continuity-conflict item for user adjudication.
+6. Target write paths: `worlds/<world-slug>/characters/<char-slug>.md` and `worlds/<world-slug>/characters/INDEX.md`
 
 **HARD-GATE fires here**: no file is written until the user explicitly approves. User may (a) approve, (b) request specific revisions (loop back to named phase), (c) reject and abort (no file written).
 
@@ -367,7 +382,7 @@ On approval, write in this order — sequencing matters because the tool environ
 1. **Character dossier first**. Write `worlds/<world-slug>/characters/<char-slug>.md`. Set `source_basis.user_approved: true` immediately before this write — this is the moment of artifact commitment.
 2. **INDEX.md second**. Read existing `worlds/<world-slug>/characters/INDEX.md` (create with header `# Characters — <World-Slug-TitleCased>` followed by one blank line if absent), append or replace the character's line in the form `- [<name>](<slug>.md) — <age_band> <species> <social_position> / <profession>, <current_location>`, re-sort alphabetically by slug, write back.
 
-The "dossier-first" sequencing means a partial-failure state has a dossier without an index entry — easy to detect (grep INDEX.md for the slug). **Recovery is manual**, not automatic: because Pre-flight step 7 aborts on an existing dossier, re-running the skill with the same slug will NOT update the index. To recover, the operator must either (a) manually append the character's INDEX.md line in the format above, or (b) delete the orphaned dossier and re-run the skill from Phase 0 to regenerate both files. The inverse partial-failure state — an index entry pointing to a non-existent dossier — is harder to detect in future runs and requires the same manual approach (delete the orphaned index line, or create the missing dossier by hand).
+The "dossier-first" sequencing means a partial-failure state has a dossier without an index entry — easy to detect (grep INDEX.md for the slug). **Recovery is manual**, not automatic: because Pre-flight step 8 aborts on an existing dossier, re-running the skill with the same slug will NOT update the index. To recover, the operator must either (a) manually append the character's INDEX.md line in the format above, or (b) delete the orphaned dossier and re-run the skill from Phase 0 to regenerate both files. The inverse partial-failure state — an index entry pointing to a non-existent dossier — is harder to detect in future runs and requires the same manual approach (delete the orphaned index line, or create the missing dossier by hand).
 
 Report all written paths. Do NOT commit to git.
 
@@ -380,7 +395,7 @@ Report all written paths. Do NOT commit to git.
 
 ## Record Schemas
 
-- **Character Dossier** → `templates/character-dossier.md` (hybrid YAML frontmatter + markdown body; original to this skill). Frontmatter fields: `character_id`, `slug`, `name`, `species`, `age_band`, `place_of_origin`, `current_location`, `date`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`, `world_consistency` (with `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`), `source_basis` (with `world_slug`, `generated_date`, `user_approved`), `notes`. Markdown body sections: Material Reality, Institutional Embedding, Epistemic Position, Goals and Pressures, Capabilities, Voice and Perception, Contradictions and Tensions, Likely Story Hooks, Canon Safety Check Trace.
+- **Character Dossier** → `templates/character-dossier.md` (hybrid YAML frontmatter + markdown body; original to this skill). Frontmatter fields: `character_id`, `slug`, `name`, `species`, `age_band`, `place_of_origin`, `current_location`, `date`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`, `world_consistency` (with `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with`), `source_basis` (with `world_slug`, `generated_date`, `user_approved`), `notes`. Markdown body sections: Material Reality, Institutional Embedding, Epistemic Position, Goals and Pressures, Capabilities, Voice and Perception, Contradictions and Tensions, Likely Story Hooks, Canon Safety Check Trace.
 
 No Canon Fact Record emitted. No Change Log Entry emitted. This skill does not mutate world-level canon.
 
