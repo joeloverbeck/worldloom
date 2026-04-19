@@ -43,6 +43,14 @@ Record `author_character_id` in frontmatter.
 
 **Chronology coherence (when artifact date differs from dossier-present)**: If the artifact date precedes or succeeds the character's dossier-present (the dossier typically captures a narrative-relevant moment; the artifact may be a letter, travelogue, chronicle, or testimony from an earlier or later point in the character's life), audit the dossier's life-events for temporal coherence — specifically: private-myth crises, formative incidents, named relationships, trauma markers, and institutional affiliations that may not yet exist or may be in a different state at artifact-date. The character dossier remains authoritative for events at its marked present; the artifact must not retroject later dossier facts into earlier character experience, nor invent earlier character capabilities that the dossier's life-history doesn't support. Record any chronology-fix (incident swapped for an earlier plausible analog; relationship framed as prior-stage; trauma marker absent because not yet acquired) in frontmatter `notes` under a "Chronology coherence" line.
 
+**Back-projection math (when artifact age or era differs from dossier-present)**: When the brief specifies an age-band or era ("in her early thirties," "during his apprenticeship years," "the summer before the ordination") that differs from the dossier's marked present:
+
+1. **Compute the delta explicitly**: brief-age minus dossier-age (e.g., "artifact-age 32, dossier-age 42, delta = 10 years before dossier-present") OR era-to-era gap (e.g., "artifact-date precedes dossier-present by ~15 years, placing it in late Layer 3 rather than Layer 4").
+2. **Cross-reference TIMELINE layers against the delta**: if dossier-present anchors to a specific TIMELINE layer, work out which layer the delta lands in, naming adjacent transitions explicitly (e.g., "late Layer 3 Incident Wave / early Layer 4 transition"; "middle Layer 2 Charter Era, two generations before the Incident Wave opens").
+3. **Name the delta in the frontmatter `date` field**: "approximately N years before CHAR-NNNN dossier-present" plus the TIMELINE-layer anchor. This makes the back-projection reconstructable for any future reader without requiring them to re-derive it from two files.
+4. **Identify the network-and-events absences**: dossier-later events (operations, apprenticeships, relationship formations) that have not yet occurred at artifact-date; dossier-network members (mentors, apprentices, patrons, adversaries) not yet encountered at artifact-date; dossier-later adjustments (risk aversions, specialty retirements, contract refusals) not yet set in. Record these absences in frontmatter `notes` under "Chronology coherence" so the HARD-GATE deliverable exposes the back-projection reasoning.
+5. **Cross-reference against the artifact's network footprint**: any named figure referenced in the artifact body that belongs to a dossier-network-member must pass the delta-gate (the figure's relationship-to-author must be consistent with the stage-at-artifact-date, not with the dossier-present stage).
+
 If `character_path` NOT provided: generate each author field from brief + world state. Every generated field must cite the world file it sources from. "A temple-charter scholar" is not an author; "a third-generation cultist-turned-scribe in the Port Serekh temple charter, age 47, literate in trade-tongue and ritual script, dependent on the charter for patronage" is. Set `author_character_id: null`.
 
 **Rule (from proposal Phase 0)**: No omniscient artifact authors unless the artifact itself is a divine or impossible object and the world permits that. If the brief specifies an impossible-object artifact, verify permission against `INVARIANTS.md` and `WORLD_KERNEL.md` — if the world's genre contract forbids divine voice, abort with "world does not permit impossible-object authorship; revise the artifact_type or the author."
@@ -50,3 +58,37 @@ If `character_path` NOT provided: generate each author field from brief + world 
 **Slug derivation** (if not yet done at Pre-flight step 8): kebab-case the artifact title. Re-run the collision check.
 
 **FOUNDATIONS cross-ref**: Tooling Recommendation (Phase 0 is the binding step — every subsequent phase depends on author + artifact being bound to world state).
+
+## Phase 0c: Cast Construction at Artifact Scope
+
+The brief may reference named figures OTHER than the author — crew members, dead comrades, named officials, named witnesses, named victims, named adversaries, named recipients — without fully committing their number, identity, or characterization. These figures are author-personal-scope per Phase 7d.1 (the "No silent canon creation" rule's allowance for bounded personal-scope naming: grandmother in a letter, tavern-nickname in a travelogue, dead-comrade named for kin-of-record in an after-action report). They are NOT larger-scope canon; they do NOT create new institutions, species clusters, polities, or rituals.
+
+Phase 0c commits these figures BEFORE draft composition so the HARD-GATE deliverable exposes them for user review, rather than surfacing them only after the full body is drafted.
+
+### Sizing rule — track the brief's numerical anchors literally
+
+- Explicit count: if the brief gives a number, use it.
+- "A couple" → 2. "A handful" → 3–5. "Several" → 3–5. "A few" → 2–4. Choose the lower end unless the brief's texture (corridor-seasonal contract, siege-line muster, multi-faction summit) warrants higher.
+- Unsized plurals ("other contractors," "the officials," "witnesses from the village") → choose the minimum plausible count consistent with the brief's event-logistics, plus one-line rationale recorded in frontmatter `notes` under "Cast construction."
+- When an event's internal arithmetic requires specific counts (a bandit-camp fight, a summit, a duel, a shipwreck crew), work the count out from event-physics (attackers/defenders, chamber sizes, boat sizes, hall capacities, march-order spacing) and record the derivation in `notes`.
+
+### Naming rule — author-personal-scope only
+
+- Species assignments per `PEOPLES_AND_SPECIES.md` clusters (Cluster A / B / C / D proportions should match the artifact's place-and-era per `GEOGRAPHY.md` regional-asymmetry clauses and `DIS-3` mythical-species-rare invariant).
+- Institutional roles bound to `INSTITUTIONS.md` terminology (magistrate's second, posting-clerk senior, senior hunter-officer, charter-defense clergy-witness) rather than inventing new titles. Titled roles are institutional-positions; the person filling them is author-personal-scope.
+- Avoid proper-noun faction names, capitalized doctrinal titles, or any naming convention that would convert a bounded-scope figure into a larger-scope recurring entity.
+- For dead figures named for kin-of-record or memorial purposes (ARRs, letters, funerary inscriptions), include species + kin-of-record-location (village, waterstation, household) at the minimum level needed for the artifact's procedural function — not biography.
+
+### Record rule — expose the cast in frontmatter
+
+Record each constructed figure in frontmatter `notes` under a "Cast construction" block naming:
+- count (with derivation if inferred from brief-anchor),
+- names (all author-personal-scope — no proper-noun larger-scope entities),
+- species assignments (cluster + specific species per `PEOPLES_AND_SPECIES.md`) and role/armament/profession bindings (per relevant CF and INSTITUTIONS terminology),
+- any notable narrative weight (who dies, who speaks, who witnesses, whose kin receives payout).
+
+The HARD-GATE deliverable summary (Phase 9) exposes the full cast block so the user can review and course-correct before writes commit.
+
+**Rule**: Cast construction is a Phase 0 commitment, not a Phase 6 draft-time improvisation. A cast member named for the first time in the body without a corresponding Phase 0c entry fails Phase 7d.1.
+
+**FOUNDATIONS cross-ref**: Rule 3 (No Specialness Inflation — cast construction stays at ordinary-stratum unless the brief specifically asks otherwise); Rule 4 (No Globalization by Accident — named figures stay author-personal-scope, never drift into larger-scope canon).

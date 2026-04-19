@@ -39,7 +39,9 @@ Phase 0: Normalize Brief + Author Reality Construction
            dossier + world state; else generate world-embedded Author
            from brief + world state;
            detect whether MAGIC_OR_TECH_SYSTEMS.md must be selectively loaded;
-           bind author to INSTITUTIONS / PEOPLES / GEOGRAPHY entities)
+           bind author to INSTITUTIONS / PEOPLES / GEOGRAPHY entities;
+           construct cast-at-artifact-scope for figures the brief under-
+           specifies — author-personal-scope per Phase 7d.1)
       |
       v
 Phase 1: Epistemic Horizon          (author's known firsthand / inferable /
@@ -120,7 +122,7 @@ Phase 9: Commit (HARD-GATE approval --> atomic write of
 
 1. **Pre-flight Check.** Verify `worlds/<world-slug>/` exists, all 13 mandatory files are readable, `brief_path` (and `character_path` if provided) resolve correctly, allocate next `DA-NNNN`, derive `<da-slug>`, check slug-collision, load FOUNDATIONS + template + 12 mandatory world files. Load `references/preflight-and-prerequisites.md` for the file-load manifest (mandatory + selectively-loaded), abort conditions, and the 9 numbered pre-flight steps.
 
-2. **Phase 0: Normalize Brief + Author Reality Construction.** Parse the brief's 7 HARD + 8 SOFT inputs; interview on unresolved HARD inputs; default-and-note SOFT inputs; bind HARD inputs to specific world entities; lift the Author's 15-field profile from `character_path` if provided (else generate from brief + world state with every field citing its world file); selectively load `MAGIC_OR_TECH_SYSTEMS.md` if triggered. Load `references/phase-0-normalize-and-author.md`.
+2. **Phase 0: Normalize Brief + Author Reality Construction.** Parse the brief's 7 HARD + 8 SOFT inputs; interview on unresolved HARD inputs; default-and-note SOFT inputs; bind HARD inputs to specific world entities; lift the Author's 15-field profile from `character_path` if provided (else generate from brief + world state with every field citing its world file); selectively load `MAGIC_OR_TECH_SYSTEMS.md` if triggered; construct cast-at-artifact-scope (Phase 0c) for crew, dead comrades, named officials, or other figures the brief under-specifies, at author-personal-scope per Phase 7d.1. Load `references/phase-0-normalize-and-author.md`.
 
 3. **Phases 1-3: Claim Planning.** Build the Author's epistemic horizon (Phase 1: six source tags — `witnessed`, `learned_from_authority`, `inherited_tradition`, `common_rumor`, `contested_scholarship`, `impossible_for_narrator_to_verify`), apply in-world genre conventions (Phase 2), build the tagged claim list (Phase 3: `canon_status`, `narrator_belief`, `source`, `contradiction_risk`, `mode`, `cf_id`, `mr_id`, `repair_trace`). Load `references/phases-1-3-claim-planning.md`.
 

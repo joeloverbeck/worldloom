@@ -129,7 +129,7 @@ Ask about every gap that has not already been answered by the proposal or prior 
 - **World scoping** — does this skill operate on a single scoped world (under `worlds/<world-slug>/`), on all worlds, or on the canon-pipeline meta-level (ignoring specific worlds)? For single-world canon-mutating or canon-reading skills, a required `world_slug` argument identifies the target world, and ALL world-file reads and writes MUST be rooted at `worlds/<world-slug>/` — never at repo root. For bootstrap skills, the world-slug is derived from a `world_name` argument and the target directory must not already exist. This gap closes a class of silent-global-write bugs that would otherwise hit every future canon-mutating and canon-reading skill.
 - **Sibling interop** — which existing skills produce inputs this skill consumes; which will consume this skill's outputs. Name them explicitly.
 - **Validation Rules applied** — which of FOUNDATIONS' 7 Validation Rules this skill enforces, and at which phase. At least 3 must be named for canon-mutating skills. For canon-reading skills whose output carries in-world knowledge, beliefs, or capabilities, at least Rule 7 is required; name additional Rules (2/3/4/5) wherever they are structurally or procedurally enforced. Rule 1 (No Floating Facts), when enforced structurally by required output-schema fields rather than a dedicated phase, should appear in the FOUNDATIONS Alignment table rather than in the Validation Rules list.
-- **HARD-GATE need** — required for canon-mutating; optional for others.
+- **HARD-GATE need** — required for canon-mutating; recommended for canon-reading and meta-tooling whose deliverable exceeds ~3 files or requires explicit user review before write; optional otherwise.
 - **Change-log policy** — canon-mutating skills must emit Change Log Entries (see `templates/change-log-entry.yaml`).
 - **Canon Fact Record usage** — canon-mutating skills that emit new facts must produce records matching FOUNDATIONS §Canon Fact Record Schema.
 - **Batch vs single-artifact output** — if the skill emits multiple artifacts per invocation (a batch), ask: (a) batch size default + user override semantics; (b) fill-priority order when requested size is below slot count; (c) empty-slot policy (preserve empty as a diagnostic signal, or substitute from another slot); (d) batch-manifest file vs inline-batch file; (e) batch-level safety check as a peer of per-artifact checks, not a replacement.
@@ -141,7 +141,7 @@ Before asking the first gap-filler question, compute initial confidence from the
 
 **Base**: 80%
 
-**Deduct 5% for each fully-missing item; deduct 2% for each partially-present item** (list below). Judgment rule: an item is PARTIAL when the proposal gestures at the element but doesn't satisfy the runnable-skill bar — e.g., a quality checklist where numbered validation tests were specified; rules stated in some phases but not others; a record schema sketched in prose rather than as YAML. Name each partial call explicitly ("Validation tests: PARTIAL — proposal has Artifact Quality Checklist but no numbered tests; deducting 2%") so the user can override before the first gap-filler question.
+**Deduct 5% for each fully-missing item; deduct 2% for each partially-present item** (list below). Judgment rule: an item is PARTIAL when the proposal gestures at the element but doesn't satisfy the runnable-skill bar — e.g., a quality checklist where numbered validation tests were specified; rules stated in some phases but not others; a record schema sketched in prose rather than as YAML; or a **delegation-by-reference** where the proposal names a concrete existing artifact (a shipping sibling SKILL.md, a published schema, or a referenced file path) whose content IS the missing element. Delegation-by-reference counts as PARTIAL (not MISSING) because the element is knowable — the executor can load the referenced artifact — but the proposal still didn't restate it, so a gap-filler is still required to confirm adoption. Example: a proposal saying "the output format aligns with how `propose-new-canon-facts` produces proposal cards" delegates the schema legitimately → PARTIAL, not MISSING. Name each partial call explicitly ("Validation tests: PARTIAL — proposal has Artifact Quality Checklist but no numbered tests; deducting 2%") so the user can override before the first gap-filler question.
 
 Items:
 - YAML record schema(s) for outputs the skill emits — applies equally to canon-reading skills whose outputs are structured candidate records consumed by downstream skills (e.g., proposal cards consumed by `canon-addition`). A bullet-list template where YAML frontmatter would be needed for downstream parsing counts as PARTIAL.
@@ -182,8 +182,12 @@ arguments:
 
 <One-sentence purpose>
 
-<HARD-GATE>   [canon-mutating only]
-Do NOT <specific write action> until <user-approval condition>.
+<HARD-GATE>   [required for canon-mutating; recommended for canon-reading and meta-tooling whose deliverable exceeds ~3 files or requires explicit user review]
+Do NOT <specific write action(s)> until: (a) <pre-flight condition>;
+(b) <validation-phase condition>; (c) <final-gate condition>;
+(d) the user has explicitly approved the <deliverable> summary.
+This gate is authoritative under Auto Mode or any other autonomous-execution
+context — invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
 
 ## Process Flow
@@ -205,7 +209,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - <file> — <why this skill needs it>
 - ...
 
-## Pre-flight Check                      [canon-mutating — before Phase 0]
+## Pre-flight Check                      [canon-mutating, and meta-tooling skills that read world state or allocate monotonic IDs — before Phase 0]
 <Precondition checks that run before any pipeline phase:
  - load docs/FOUNDATIONS.md into working context
  - for single-world skills: resolve `worlds/<world-slug>/` from the world_slug argument
@@ -335,6 +339,9 @@ Before any file is written, audit the draft against class-specific requirements.
 - [ ] Output is report-shaped (findings, severity tables, repair menus) — not canon-write-shaped.
 - [ ] Contains an explicit rule: "This skill proposes changes; it does not apply them."
 - [ ] If audit-class: uses severity levels (Cosmetic → Canon Break) matching FOUNDATIONS §Continuity or locally defined.
+- [ ] If the skill reads world state OR allocates monotonic IDs for output artifacts: includes a **Pre-flight Check** section before Phase 0 that loads `docs/FOUNDATIONS.md`, verifies required world files are readable, and allocates/reserves any monotonic IDs the skill emits.
+- [ ] **World-scope declaration**: the skill names exactly one of {single-world, all-worlds, meta} as its operating scope. If single-world, a required `world_slug` argument is declared and all world-file reads are rooted at `worlds/<world-slug>/` — never at repo root.
+- [ ] **ID allocation discipline** (if outputs use monotonic IDs like AU-NNNN, RP-NNNN): IDs allocated at pre-flight by scanning the existing output directory; collisions abort with a specific-id error; dropped IDs (from user drop-list at commit) become permanent gaps and are never reused.
 
 Report results in this format:
 
@@ -346,15 +353,26 @@ FOUNDATIONS Conformance Check — <slug> — class: <class>
   - <section>: <specific gap>
 ```
 
+When the Blocking findings count is zero (the clean-audit case), replace the last two lines with a single `✅ No blocking findings.` line on its own. The `❌ Blocking findings:` bullet-list form is reserved for non-empty findings — using it with "none" creates a visual contradiction between the ❌ mark and the empty state.
+
 ## Step 7: Write Files
 
 Only reachable if Step 6 passes clean AND all design sections were user-approved.
 
 1. Write `.claude/skills/<slug>/SKILL.md`.
 2. Write `.claude/skills/<slug>/templates/*.yaml` for each Canon Fact Record or Change Log Entry schema the skill references. **Start from skill-creator's own `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`** — these are the canonical generic references (already loaded into context at Step 1). Do NOT start from a sibling skill's templates (e.g., `create-base-world/templates/*.yaml`) — those are specialized copies that have drifted from the generic by design, and re-deriving from them propagates per-sibling comments into new skills. Copy the generic, then trim fields that do not apply and adjust phase references to match the new skill's numbering.
-3. Write `.claude/skills/<slug>/templates/<output-type>.md` (or `.yaml`) if the skill has a primary output format that is neither a Canon Fact Record nor a Change Log Entry — e.g., a character dossier, a diegetic artifact, an adjudication report, a triage file. **These are original templates authored from scratch to match the skill's Output specification**, not copies from skill-creator's references. Examples: `character-generation/templates/character-dossier.md`, `diegetic-artifact-generation/templates/diegetic-artifact.md`. Canon-reading skills with in-world outputs almost always need one of these; canon-mutating skills may need one in addition to the CF/Change Log templates. **CF-schema parity**: when a canon-reading skill's output is a *candidate record* for downstream `canon-addition` (e.g., proposal cards), the original template's frontmatter should be structurally parallel to FOUNDATIONS §Canon Fact Record Schema where possible — matching fields like `type`, `scope` / `recommended_scope`, `domains_affected` / `domains_touched`, `distribution`, `source_basis` — so the downstream skill's acceptance becomes a field-copy rather than a field-re-derivation. Document the parity intent in a frontmatter comment so future maintainers preserve it across schema evolution.
+3. Write `.claude/skills/<slug>/templates/<output-type>.md` (or `.yaml`) if the skill has a primary output format that is neither a Canon Fact Record nor a Change Log Entry — e.g., a character dossier, a diegetic artifact, a proposal card, an adjudication report, a triage file. These are NOT copies of skill-creator's generic CF/Change-Log references (those apply only when the skill emits CF records or Change Log Entries directly — covered by step 2). Two sub-classes with different authoring disciplines:
+   - **(a) Templates structurally parallel to a sibling skill's downstream input format** — e.g., a proposal card that `canon-addition` consumes, a retcon-proposal card, or any candidate-record whose fields a downstream sibling will field-copy. **Derive from that sibling's template**: copy the structure, adjust phase references to match the new skill's numbering, add skill-specific fields, and preserve CF-schema parity fields (`type`, `scope` / `recommended_scope`, `domains_affected` / `domains_touched`, `distribution`, `source_basis`) byte-for-byte so downstream acceptance is a field-copy rather than a field-re-derivation. Document the parity intent in a frontmatter comment so future maintainers preserve it across schema evolution. Examples: `propose-new-canon-facts/templates/proposal-card.md`, `canon-facts-from-diegetic-artifacts/templates/proposal-card.md`.
+   - **(b) Templates for output formats unique to this skill** — no downstream sibling consumer, no CF-schema parity obligation. **Authored from scratch** against the skill's Output specification. Examples: `character-generation/templates/character-dossier.md`, `diegetic-artifact-generation/templates/diegetic-artifact.md`.
+
+   Canon-reading skills with in-world outputs almost always need sub-class (b); canon-reading skills producing candidate records for adjudication need sub-class (a); canon-mutating skills may need either or both in addition to the CF/Change-Log templates. Sibling derivation (sub-class a) is the correct pattern where CF-schema parity matters — "from scratch" applies only to sub-class (b), not as a blanket rule.
 4. Write `.claude/skills/<slug>/examples/*.md` for approved worked examples (max 2). Skip if none were selected.
-5. **Compile mode only**: move the source `brainstorming/<slug>.md` to `archive/brainstorming/<slug>.md`. If `archive/brainstorming/` does not yet exist, run `mkdir -p archive/brainstorming/` first. Then `git mv brainstorming/<slug>.md archive/brainstorming/<slug>.md`. Using `git mv` preserves rename history so the proposal-to-skill lineage stays legible in `git log --follow`. In fresh mode the proposal stays in `brainstorming/` as the durable spec.
+5. **Compile mode only**: move the source file from `brainstorming/` to `archive/brainstorming/` **preserving its original filename** — do NOT rename on archival even if the final skill slug differs from the source filename (the source filename is a separate identifier from the skill slug, and preserving it keeps the authored-name audit trail intact). If `archive/brainstorming/` does not yet exist, run `mkdir -p archive/brainstorming/` first. Choose the move command by tracked-state:
+   - **When the source is tracked**: use `git mv brainstorming/<source-filename> archive/brainstorming/<source-filename>` — it preserves rename history so the proposal-to-skill lineage stays legible in `git log --follow`.
+   - **When the source is untracked** (the common case for fresh brainstorming files produced by the `brainstorm` skill or authored outside git's index): use plain `mv brainstorming/<source-filename> archive/brainstorming/<source-filename>`. An untracked file has no rename history to preserve, and `git mv` will fail with `fatal: not under version control`.
+   - **Detection pattern**: `git ls-files --error-unmatch brainstorming/<source-filename>` exits zero when tracked. On non-zero exit, fall back to plain `mv`. Alternatively, try `git mv` first and fall back to `mv` on the specific "not under version control" error — both patterns are acceptable.
+
+   In fresh mode the proposal stays in `brainstorming/` as the durable spec.
 6. Report paths written. Do NOT commit.
 
 ## Step 8: Next-Steps Menu
@@ -387,7 +405,7 @@ When the pipeline's class is ambiguous, apply these heuristics in order:
 
 - The generated `SKILL.md` must be self-contained — a reader should not need skill-creator to run it.
 - Do NOT duplicate FOUNDATIONS.md content inline. Cross-reference: "see FOUNDATIONS.md §Validation Rules".
-- Generated `SKILL.md` target sizes differ by class: ~300 lines for meta-tooling; ~400 lines for canon-reading without diegetic in-world content; ~500 lines for canon-reading with diegetic in-world content (Rule 7 firewall triples the safety-check surface) or canon-mutating. These are targets, not hard caps — a canon-mutating skill with consequence-propagation across many domains may reasonably land at 550+ lines. If a proposal is long (e.g., 500+ lines), push verbose phase prose into `templates/` or trim to the enforceable core; the skill file is a runtime contract, not a recapitulation of the proposal. Do NOT delete required structural elements (HARD-GATE, World-State Prerequisites, Validation Rules upheld, FOUNDATIONS Alignment table) to hit a target size.
+- Generated `SKILL.md` target sizes differ by class: ~300 lines for meta-tooling; ~400 lines for canon-reading without diegetic in-world content; ~500 lines for canon-reading with diegetic in-world content (Rule 7 firewall triples the safety-check surface) or canon-mutating. These are targets, not hard caps — a canon-mutating skill with consequence-propagation across many domains, OR an audit-class meta-tooling skill with many category sub-passes plus layered validation (e.g., 10+ sub-categories × severity classification × multi-phase validation gates), may reasonably land at 550+ lines. If a proposal is long (e.g., 500+ lines), push verbose phase prose into `templates/` or trim to the enforceable core; the skill file is a runtime contract, not a recapitulation of the proposal. Do NOT delete required structural elements (HARD-GATE, World-State Prerequisites, Validation Rules upheld, FOUNDATIONS Alignment table) to hit a target size.
 - skill-creator NEVER edits `docs/FOUNDATIONS.md`. FOUNDATIONS lives outside this tool's authority.
 - skill-creator NEVER writes world-state files (`WORLD_KERNEL.md` etc.). Those are the jobs of canon-mutating skills, not the meta-skill.
 - No scope inflation: generate one skill per invocation. If the user asks for a suite, confirm each individually.

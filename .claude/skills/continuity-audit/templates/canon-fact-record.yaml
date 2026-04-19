@@ -1,0 +1,81 @@
+# Canon Fact Record — reference template (CONSUMED, not emitted, by continuity-audit)
+#
+# Matches docs/FOUNDATIONS.md §"Canon Fact Record Schema".
+#
+# This skill READS existing CF records in CANON_LEDGER.md during Phases 4, 6, and 8
+# to detect contradictions, scope drift, and burden debt. It does NOT emit new CF
+# records — canon-addition emits CFs when an RP-NNNN card is accepted.
+#
+# This template is bundled for two structural purposes:
+#   1. Phase 8 schema-parity: the retcon-proposal-card.md frontmatter is
+#      structurally parallel to this file, so canon-addition's adjudicator
+#      can field-copy from an accepted RP-NNNN card into a new CF record
+#      rather than field-re-derive.
+#   2. Phase 12 test 3 (CF-schema parity): every retcon card's frontmatter is
+#      checked against this schema for required-field presence.
+#
+# A record missing any of the required-structural fields violates Rule 1
+# (No Floating Facts): id, title, status, type, statement, scope, truth_scope,
+# domains_affected, source_basis, required_world_updates.
+
+id: CF-0000                                # canonical fact ID, monotonic
+title: ""                                  # short human label
+status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
+type: ""                                   # capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
+statement: >
+  Natural-language statement of the fact. One paragraph maximum.
+  Must be unambiguous enough to be cited in later adjudication or audit.
+
+scope:
+  geographic: local                        # local | regional | global | cosmic
+  temporal: current                        # ancient | historical | current | future | cyclical
+  social: public                           # restricted_group | public | elite | secret | rumor
+
+truth_scope:
+  world_level: true                        # true | false | uncertain
+  diegetic_status: objective               # objective | believed | disputed | propagandistic | legendary
+
+domains_affected:                          # at least one — Rule 2 (No Pure Cosmetics)
+  - labor
+  # - warfare
+  # - economy
+  # - settlement_life
+  # - kinship
+  # - religion
+  # - language
+  # - law
+
+prerequisites: []                          # knowledge / tools / materials / conditions needed for fact to manifest
+
+distribution:                              # required for capability/artifact facts — Rule 4 (No Globalization by Accident)
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal: []
+
+costs_and_limits: []                       # stabilizers preventing universalization — Rule 3 (No Specialness Inflation)
+                                           # Continuity-audit Phase 6 (Burden Debt) checks whether subsequent
+                                           # CFs actually enforce the costs listed here.
+
+visible_consequences: []                   # ordinary-life signals this fact produces — Rule 5 (No Consequence Evasion)
+                                           # Continuity-audit Phase 4e/4f checks whether INSTITUTIONS.md and
+                                           # EVERYDAY_LIFE.md reflect these consequences.
+
+required_world_updates: []                 # list of world files that must be updated if this fact is accepted
+  # - INSTITUTIONS.md
+  # - ECONOMY_AND_RESOURCES.md
+  # - EVERYDAY_LIFE.md
+  # - TIMELINE.md
+
+source_basis:
+  direct_user_approval: false              # true once user explicitly accepts this fact
+  derived_from: []                         # list of parent CF ids if this is derived canon
+
+contradiction_risk:
+  hard: false
+  soft: false
+
+notes: >
+  Free-form notes: adjudication reasoning, scope-narrowing decisions,
+  stabilizers added during Repair Pass, mystery-reserve interactions.
+  Continuity-audit Phase 4g (Tone/Identity Drift) scans this field for
+  tonal drift relative to WORLD_KERNEL.md.
