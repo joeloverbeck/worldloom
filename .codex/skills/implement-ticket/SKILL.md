@@ -20,6 +20,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
+- In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
@@ -68,6 +69,7 @@ Check:
 - every path in `Deps`, `Files to Touch`, `Verification Layers`, `Test Plan`, and prose references
 - every skill, tool, hook, validator, schema, or doc section named by the ticket
 - every drafted algorithm, tree-shape, parser-behavior, or data-flow claim the ticket relies on; verify these against the live substrate instead of trusting spec prose
+- for `world-index` content tickets that mention adjudication YAML placement or `unexpected_yaml_section`, inspect `tools/world-index/src/parse/yaml.ts` before trusting any ticket claim about a canonical adjudication YAML section; the live parser may treat all adjudication fenced YAML as out-of-section
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
@@ -159,6 +161,7 @@ Update the active ticket before finishing:
 - `## Verification Result`
 - optional `## Deviations`
 - compare the landed diff against `Files to Touch` and `Test Plan` / `New/Modified Tests`, then patch the ticket if any touched file or exercised proof surface is still missing
+- if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
