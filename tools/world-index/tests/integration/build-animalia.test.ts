@@ -157,6 +157,22 @@ function countValidationRows(db: Database.Database, code: string): number {
   ).count;
 }
 
+function loadUnresolvedModifiedByRefs(
+  db: Database.Database
+): Array<{ target_unresolved_ref: string; count: number }> {
+  return db
+    .prepare(
+      `
+        SELECT target_unresolved_ref, COUNT(*) AS count
+        FROM edges
+        WHERE edge_type = 'modified_by' AND target_unresolved_ref IS NOT NULL
+        GROUP BY target_unresolved_ref
+        ORDER BY target_unresolved_ref
+      `
+    )
+    .all() as Array<{ target_unresolved_ref: string; count: number }>;
+}
+
 function expectedIndexableFiles(root: string): string[] {
   return enumerate(path.join(root, "worlds", WORLD_SLUG)).indexable;
 }
@@ -180,6 +196,12 @@ test("build succeeds, writes the current schema version, and matches source-deri
     try {
       assert.deepEqual(loadActualNodeCounts(db), expectedCounts);
       assert.equal(countValidationRows(db, "unresolved_attribution_target"), 0);
+      assert.deepEqual(
+        loadUnresolvedModifiedByRefs(db).filter((row) =>
+          ["CH-0010", "CH-0013", "CH-0014", "CH-0015"].includes(row.target_unresolved_ref)
+        ),
+        []
+      );
     } finally {
       db.close();
     }

@@ -160,6 +160,24 @@ test("missing required statement records a yaml_parse_integrity warning and keep
   assert.equal(parseIssue.code, "missing_required_field:statement");
 });
 
+test("schema-incomplete change-log entries keep their CH identity and warning surface", () => {
+  const { source, filePath } = loadFixture("fixture-yaml-change-log-missing-field.md");
+  const { tree, lines } = parseMarkdown(source);
+  const { nodes, parseIssues } = extractYamlNodes(tree, lines, filePath);
+
+  assert.equal(nodes.length, 1);
+  assert.equal(parseIssues.length, 1);
+
+  const node = nodes[0];
+  const parseIssue = parseIssues[0];
+  assert.ok(node);
+  assert.ok(parseIssue);
+  assert.equal(node.node_type, "change_log_entry");
+  assert.equal(node.node_id, "CH-0099");
+  assert.equal(parseIssue.severity, "warn");
+  assert.equal(parseIssue.code, "missing_required_field:reason");
+});
+
 test("unknown top-level fields are preserved in the parsed YAML-backed node contract", () => {
   const { source, filePath } = loadFixture("fixture-yaml-unknown-field.md");
   const { tree, lines } = parseMarkdown(source);

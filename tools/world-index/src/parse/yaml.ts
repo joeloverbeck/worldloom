@@ -12,6 +12,7 @@ import type {
 } from "../schema/types";
 
 type SectionKind = "canon_fact_records" | "change_log" | "other";
+const CHANGE_LOG_ID_REGEX = /^CH-\d+$/;
 
 interface HeadingInfo {
   depth: number;
@@ -109,6 +110,7 @@ export function extractYamlNodes(
         }
 
         const narrowed = narrowToChangeLogEntry(parsed);
+        const salvagedChangeId = salvageChangeLogId(parsed);
         nodes.push(
           createNodeRow({
             codeNode,
@@ -117,7 +119,10 @@ export function extractYamlNodes(
             worldSlug,
             headingPath,
             nodeType: kindNodeType,
-            nodeId: narrowed?.change_id ?? syntheticNodeId(worldSlug, filePath, lineStart, lineEnd),
+            nodeId:
+              narrowed?.change_id ??
+              salvagedChangeId ??
+              syntheticNodeId(worldSlug, filePath, lineStart, lineEnd),
             body: rawYaml,
             contentHash: contentHashForYaml(parsed)
           })
@@ -298,6 +303,15 @@ function narrowToChangeLogEntry(raw: unknown): ChangeLogEntry | null {
   }
 
   return raw as ChangeLogEntry;
+}
+
+function salvageChangeLogId(raw: unknown): string | null {
+  if (!isRecord(raw) || typeof raw.change_id !== "string") {
+    return null;
+  }
+
+  const changeId = raw.change_id.trim();
+  return CHANGE_LOG_ID_REGEX.test(changeId) ? changeId : null;
 }
 
 function missingCanonFactFields(raw: unknown): string[] {

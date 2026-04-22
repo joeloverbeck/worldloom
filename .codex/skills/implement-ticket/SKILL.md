@@ -21,6 +21,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
+- If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
 - Archive only when the user explicitly asks for full ticket completion or archival.
@@ -71,6 +72,7 @@ Check:
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
+- for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
 
 Load `references/mismatch-handling.md`.
 
@@ -128,6 +130,8 @@ For end-to-end validation tickets, if the drafted acceptance story assumes the c
 If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
 
 If a broader proof copies a live world tree or fixture and inherits generated state, clean or account for that copied state before treating the failure as ticket evidence. Record that harness correction in `Assumption Reassessment` or `## Deviations` when it materially changes the proof story.
+
+If the drafted proof uses a CLI, confirm the command's working-directory contract before recording it in the ticket. If the CLI resolves paths from `process.cwd()` or another ambient root, either run it from the truthful root or switch to a narrower direct probe that exercises the same owned seam.
 
 Worldloom verification surfaces usually include:
 
