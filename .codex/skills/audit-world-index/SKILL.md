@@ -22,6 +22,7 @@ This skill is audit-and-ticket only. Do not modify `worlds/<slug>/` canon files,
 - Snapshot the worktree with `git status --short` before rebuilding so you can distinguish your ticket edits from unrelated local state.
 - Rebuild before trusting any query result. Do not audit a checked-in `_index/world.db` that has not just been regenerated from the current code.
 - Run producer and proof lanes sequentially, not in parallel: package build, then world-index build, then audit queries.
+- For Codex specifically, do not use parallel tool wrappers for the rebuild lane. `npm run build`, `build <world_slug>`, and `verify <world_slug>` are a strict serial dependency chain, and an overlapped run is not a trustworthy proof surface.
 - Treat stale checked-in index artifacts as non-issues once a fresh rebuild clears them.
 - If a discovered issue is already owned by an active ticket, cite that ticket instead of creating a duplicate.
 
@@ -93,6 +94,8 @@ Typical checks:
 - nonzero `validation_results`
 - bad path normalization or malformed sentinel metadata for synthetic rows
 - indexed-file coverage through `file_versions`
+
+When checking file coverage, compare the rebuilt `file_versions` rows against the current enumerator contract, not a naive count of every `*.md` file under `worlds/<slug>/`. In the current live package, `INDEX.md` files are intentionally excluded, so missing `INDEX.md` rows alone are a truthful no-issue rather than an index defect.
 
 If these are clean, say so explicitly and move on. Do not inflate a semantic-quality issue into a structural-corruption claim.
 
