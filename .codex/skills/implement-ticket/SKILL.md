@@ -35,7 +35,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 
 ### 0. Classify the ticket shape
 
-Load `references/ticket-classification.md`.
+Load `references/ticket-classification.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 
 Classify the ticket before coding:
 
@@ -84,7 +84,7 @@ Check:
 - when replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path; do not scan a broader substrate ad hoc and treat that result as equivalent evidence
 - when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
 
-Load `references/mismatch-handling.md`.
+Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
@@ -131,7 +131,7 @@ For skill tickets, verify:
 
 ### 5. Verify at the right boundary
 
-Load `references/verification-closeout.md`.
+Load `references/verification-closeout.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 
 Run the narrowest correct verification first, then broaden as needed.
 

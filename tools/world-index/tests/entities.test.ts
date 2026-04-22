@@ -168,3 +168,67 @@ test("heuristic extraction ignores structural markdown carriers but keeps free-p
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("heuristic extraction stoplists workflow labels and world-kernel headings", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+
+    const registry = loadOntologyRegistry(ontologyPath);
+    const source = [
+      "## Discovery",
+      "",
+      "Continuity Archivist requested Required Updates.",
+      "Mystery Curator rejected No Silent Retcons drift.",
+      "Primary Difference and Natural Story Engines remain template labels.",
+      "Mystery Reserve is a worldbuilding contract, not an entity.",
+      "Copper Weir still matters as a real place."
+    ].join("\n");
+    const { tree } = parseMarkdown(source);
+    const proseNodes: NodeRow[] = [
+      {
+        node_id: "animalia:fixtures.md:Workflow Labels:0",
+        world_slug: "animalia",
+        file_path: path.join(tempRoot, "fixtures.md"),
+        heading_path: "Workflow Labels",
+        byte_start: 0,
+        byte_end: 0,
+        line_start: 1,
+        line_end: source.split("\n").length,
+        node_type: "section",
+        body: source,
+        content_hash: contentHashForProse(source),
+        anchor_checksum: contentHashForProse(source),
+        summary: null,
+        created_at_index_version: CURRENT_INDEX_VERSION
+      }
+    ];
+
+    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
+    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+
+    for (const banned of [
+      "Continuity Archivist",
+      "Required Updates",
+      "Mystery Curator",
+      "No Silent Retcons",
+      "Primary Difference",
+      "Natural Story Engines",
+      "Mystery Reserve"
+    ]) {
+      assert.equal(
+        mentions.some((mention) => mention.entity_name === banned),
+        false,
+        `${banned} should be stoplisted`
+      );
+      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
+    }
+
+    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
+    assert.equal(entityNames.has("Copper Weir"), true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});

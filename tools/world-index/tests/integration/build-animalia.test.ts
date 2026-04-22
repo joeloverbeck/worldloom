@@ -183,6 +183,38 @@ function loadUnresolvedRequiredWorldUpdateRefs(
     .all() as Array<{ target_unresolved_ref: string; count: number }>;
 }
 
+function countNamedEntityRows(db: Database.Database, entityName: string): number {
+  return (
+    db
+      .prepare(
+        `
+          SELECT COUNT(*) AS count
+          FROM nodes
+          WHERE world_slug = ?
+            AND node_type = 'named_entity'
+            AND body LIKE ?
+        `
+      )
+      .get(WORLD_SLUG, `Canonical name: ${entityName} |%`) as { count: number }
+  ).count;
+}
+
+function countEntityMentionsForNodeType(db: Database.Database, nodeType: NodeType): number {
+  return (
+    db
+      .prepare(
+        `
+          SELECT COUNT(*) AS count
+          FROM entity_mentions em
+          INNER JOIN nodes n ON n.node_id = em.node_id
+          WHERE n.world_slug = ?
+            AND n.node_type = ?
+        `
+      )
+      .get(WORLD_SLUG, nodeType) as { count: number }
+  ).count;
+}
+
 function loadDerivedFromRefsTo(
   db: Database.Database,
   targetId: string
@@ -332,6 +364,48 @@ test("build resolves animalia DA-0001 references through the canonical whole-fil
       assert.equal(derivedFromRows.length, 3);
       assert.equal(derivedFromRows.every((row) => row.target_node_id === "DA-0001"), true);
       assert.equal(derivedFromRows.every((row) => row.target_unresolved_ref === null), true);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build removes audited workflow-label entities while keeping real animalia entities", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      for (const banned of [
+        "Mystery Reserve",
+        "Continuity Archivist",
+        "Mystery Curator",
+        "Change Log Entry",
+        "Primary Difference",
+        "Natural Story Engines",
+        "Required Updates",
+        "No Silent Retcons"
+      ]) {
+        assert.equal(countNamedEntityRows(db, banned), 0, `${banned} should not persist as a named_entity`);
+      }
+
+      for (const retained of [
+        "Vespera Nightwhisper",
+        "Melissa Threadscar",
+        "Copper Weir",
+        "Ash-Seal commercial-company Brinewick anomaly"
+      ]) {
+        assert.equal(countNamedEntityRows(db, retained), 1, `${retained} should remain queryable`);
+      }
+
+      assert.equal(countEntityMentionsForNodeType(db, "adjudication_record"), 0);
+      assert.equal(countEntityMentionsForNodeType(db, "audit_record"), 0);
+      assert.equal(countValidationRows(db, "content_hash_drift"), 0);
+      assert.equal(countValidationRows(db, "yaml_parse_integrity"), 0);
     } finally {
       db.close();
     }

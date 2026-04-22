@@ -32,7 +32,6 @@ import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from ".
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
   "mystery_reserve_entry",
   "open_question_entry",
-  "adjudication_record",
   "invariant",
   "ontology_category",
   "section",
@@ -44,8 +43,7 @@ export const ENTITY_SOURCE_NODE_TYPES = new Set([
   "proposal_batch",
   "character_proposal_card",
   "character_proposal_batch",
-  "retcon_proposal_card",
-  "audit_record"
+  "retcon_proposal_card"
 ]);
 
 export interface ParsedFileResult {
