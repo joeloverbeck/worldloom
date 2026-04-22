@@ -1,0 +1,3 @@
+# Index
+
+Excluded navigation file.

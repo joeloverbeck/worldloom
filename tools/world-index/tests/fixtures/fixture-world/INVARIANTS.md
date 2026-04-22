@@ -1,0 +1,3 @@
+# Invariants
+
+Fixture invariants.

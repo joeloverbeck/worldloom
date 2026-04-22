@@ -128,6 +128,7 @@ Update the active ticket before finishing:
 - `## Outcome`
 - `## Verification Result`
 - optional `## Deviations`
+- after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 
