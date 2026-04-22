@@ -42,6 +42,8 @@ Classify the ticket before coding:
 
 Use the classification to choose which repo surfaces must be read and which verification layers are required.
 
+If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.

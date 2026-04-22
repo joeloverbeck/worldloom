@@ -1,0 +1,31 @@
+INSERT INTO nodes (
+    node_id,
+    world_slug,
+    file_path,
+    heading_path,
+    byte_start,
+    byte_end,
+    line_start,
+    line_end,
+    node_type,
+    body,
+    content_hash,
+    anchor_checksum,
+    summary,
+    created_at_index_version
+) VALUES (
+    'node-1',
+    'fixture-world',
+    'WORLD_KERNEL.md',
+    'Kernel',
+    0,
+    12,
+    1,
+    1,
+    'section',
+    'foo bar',
+    'hash-1',
+    'anchor-1',
+    'seed row',
+    1
+);
