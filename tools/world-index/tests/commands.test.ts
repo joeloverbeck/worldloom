@@ -24,6 +24,30 @@ function cleanup(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
+function unresolvedAttributionRows(root: string): Array<{
+  code: string;
+  message: string;
+  file_path: string | null;
+}> {
+  const dbPath = path.join(root, "worlds", "fixture-world", "_index", "world.db");
+  const db = new Database(dbPath, { readonly: true });
+  try {
+    return db
+      .prepare(
+        `
+          SELECT code, message, file_path
+          FROM validation_results
+          WHERE world_slug = 'fixture-world'
+            AND code = 'unresolved_attribution_target'
+          ORDER BY result_id
+        `
+      )
+      .all() as Array<{ code: string; message: string; file_path: string | null }>;
+  } finally {
+    db.close();
+  }
+}
+
 function withCapturedOutput<T>(run: () => T): { result: T; stdout: string; stderr: string } {
   const stdoutChunks: string[] = [];
   const stderrChunks: string[] = [];
@@ -57,6 +81,7 @@ test("build, inspect, stats, sync, and verify work against the fixture world", a
   try {
     const buildExit = build(root, "fixture-world");
     assert.equal(buildExit, 0);
+    assert.deepEqual(unresolvedAttributionRows(root), []);
 
     const dbPath = path.join(root, "worlds", "fixture-world", "_index", "world.db");
     const db = new Database(dbPath, { readonly: true });
@@ -106,6 +131,42 @@ test("build, inspect, stats, sync, and verify work against the fixture world", a
 
     const driftResult = withCapturedOutput(() => verify(root, "fixture-world"));
     assert.equal(driftResult.result, 1);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("unresolved attribution warnings are recomputed after full-world resolution and clear on sync", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const institutionsPath = path.join(root, "worlds", "fixture-world", "INSTITUTIONS.md");
+    writeFileSync(
+      institutionsPath,
+      `${readFileSync(institutionsPath, "utf8")}\nThe watch now rings a third bell.\n<!-- added by CF-9999 -->\n`,
+      "utf8"
+    );
+
+    assert.equal(build(root, "fixture-world"), 0);
+
+    const unresolvedAfterBuild = unresolvedAttributionRows(root);
+    assert.equal(unresolvedAfterBuild.length, 1);
+    assert.equal(unresolvedAfterBuild[0]?.file_path, "INSTITUTIONS.md");
+    assert.match(unresolvedAfterBuild[0]?.message ?? "", /still unresolved after full-world edge resolution/);
+
+    const ledgerPath = path.join(root, "worlds", "fixture-world", "CANON_LEDGER.md");
+    const existingLedger = readFileSync(ledgerPath, "utf8");
+    writeFileSync(
+      ledgerPath,
+      existingLedger.replace(
+        "## Change Log",
+        `\`\`\`yaml\nid: CF-9999\ntitle: Third harbor bell\nstatus: hard_canon\ntype: institution\nstatement: Brinewick rings a third harbor bell at dusk.\nscope:\n  geographic: local\n  temporal: current\n  social: public\ntruth_scope:\n  world_level: true\n  diegetic_status: objective\ndomains_affected:\n  - institutions\nrequired_world_updates:\n  - INSTITUTIONS.md\nsource_basis:\n  direct_user_approval: true\n\`\`\`\n\n## Change Log`
+      ),
+      "utf8"
+    );
+
+    assert.equal(sync(root, "fixture-world"), 0);
+    assert.deepEqual(unresolvedAttributionRows(root), []);
   } finally {
     cleanup(root);
   }

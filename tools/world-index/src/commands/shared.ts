@@ -314,6 +314,7 @@ function reindexAllFiles(
 
   finalizeEntityState(db, worldRoot, worldSlug);
   resolveUnresolvedEdges(db);
+  refreshUnresolvedAttributionDiagnostics(db, worldSlug);
 
   const totalNodeCount = countAllNodes(db, worldSlug);
   if (fullBuild || shouldRebuildFts(changedNodeCount, totalNodeCount)) {
@@ -357,6 +358,67 @@ function loadPersistedProseNodes(db: Database.Database, worldSlug: string): Node
     .all(worldSlug) as NodeRow[];
 
   return rows.filter((row) => PROSE_NODE_TYPES.has(row.node_type));
+}
+
+function refreshUnresolvedAttributionDiagnostics(
+  db: Database.Database,
+  worldSlug: string
+): void {
+  db.prepare(
+    `
+      DELETE FROM validation_results
+      WHERE world_slug = ?
+        AND validator_name = 'semantic_edge_extraction'
+        AND code = 'unresolved_attribution_target'
+    `
+  ).run(worldSlug);
+
+  const rows = db
+    .prepare(
+      `
+        SELECT
+          source.file_path AS file_path,
+          source.line_start AS line_start,
+          source.line_end AS line_end,
+          source.node_id AS node_id,
+          edges.target_unresolved_ref AS target_ref
+        FROM edges
+        INNER JOIN nodes AS source
+          ON source.node_id = edges.source_node_id
+        WHERE source.world_slug = ?
+          AND edges.edge_type IN ('patched_by', 'clarified_by')
+          AND edges.target_unresolved_ref IS NOT NULL
+        ORDER BY source.file_path, source.line_start, source.node_id, edges.edge_id
+      `
+    )
+    .all(worldSlug) as Array<{
+    file_path: string;
+    line_start: number | null;
+    line_end: number | null;
+    node_id: string;
+    target_ref: string;
+  }>;
+
+  if (rows.length === 0) {
+    return;
+  }
+
+  insertValidationResults(
+    db,
+    rows.map((row, index) => ({
+      result_id: index + 1,
+      world_slug: worldSlug,
+      validator_name: "semantic_edge_extraction",
+      severity: "warn",
+      code: "unresolved_attribution_target",
+      message: `Attribution target '${row.target_ref}' is still unresolved after full-world edge resolution.`,
+      node_id: row.node_id,
+      file_path: row.file_path,
+      line_range_start: row.line_start,
+      line_range_end: row.line_end,
+      created_at: new Date().toISOString()
+    }))
+  );
 }
 
 function countNodesForFile(db: Database.Database, worldSlug: string, relativeFilePath: string): number {

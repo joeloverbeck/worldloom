@@ -138,18 +138,6 @@ export function extractSemanticEdges(
     }
 
     pushEdge(createRefEdge(sourceNode.node_id, edgeType, targetRef, existingNodeIds));
-
-    if (!existingNodeIds.has(targetRef)) {
-      parseIssues.push(
-        createParseIssue({
-          filePath,
-          lineStart: node.position?.start.line ?? null,
-          lineEnd: node.position?.end.line ?? null,
-          code: "unresolved_attribution_target",
-          message: `Attribution target '${targetRef}' is not present in the current parsed node set.`
-        })
-      );
-    }
   });
 
   return { edges, parseIssues };

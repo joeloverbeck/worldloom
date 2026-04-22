@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -52,6 +52,10 @@ function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-animalia-"));
   const target = path.join(root, "worlds", WORLD_SLUG);
   cpSync(ANIMALIA_SOURCE, target, { recursive: true });
+  const copiedIndexPath = path.join(target, "_index");
+  if (existsSync(copiedIndexPath)) {
+    rmSync(copiedIndexPath, { recursive: true, force: true });
+  }
   return root;
 }
 
@@ -138,6 +142,21 @@ function loadFileVersions(db: Database.Database): Map<string, string> {
   return new Map(rows.map((row) => [row.file_path, row.last_indexed_at]));
 }
 
+function countValidationRows(db: Database.Database, code: string): number {
+  return (
+    db
+      .prepare(
+        `
+          SELECT COUNT(*) AS count
+          FROM validation_results
+          WHERE world_slug = ?
+            AND code = ?
+        `
+      )
+      .get(WORLD_SLUG, code) as { count: number }
+  ).count;
+}
+
 function expectedIndexableFiles(root: string): string[] {
   return enumerate(path.join(root, "worlds", WORLD_SLUG)).indexable;
 }
@@ -160,6 +179,7 @@ test("build succeeds, writes the current schema version, and matches source-deri
     const db = openBuiltDb(root);
     try {
       assert.deepEqual(loadActualNodeCounts(db), expectedCounts);
+      assert.equal(countValidationRows(db, "unresolved_attribution_target"), 0);
     } finally {
       db.close();
     }

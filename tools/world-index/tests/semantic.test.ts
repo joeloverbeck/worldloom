@@ -78,10 +78,7 @@ test("semantic extraction emits typed YAML edges and attribution edges without d
     false
   );
 
-  assert.deepEqual(
-    parseIssues.map((issue) => issue.code).sort(),
-    ["malformed_attribution_target", "unresolved_attribution_target"]
-  );
+  assert.deepEqual(parseIssues.map((issue) => issue.code).sort(), ["malformed_attribution_target"]);
 });
 
 function buildFixtureProseNodes(source: string, filePath: string): NodeRow[] {
