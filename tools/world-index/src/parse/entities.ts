@@ -19,6 +19,8 @@ export interface EntityRegistry {
 }
 
 const CAPITALIZED_MULTIWORD_REGEX = /\b([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+){1,3})\b/g;
+const VIRTUAL_ENTITY_LINE = 1;
+const VIRTUAL_ENTITY_BYTE = 0;
 
 export function loadOntologyRegistry(ontologyPath: string): EntityRegistry {
   const source = readFileSync(ontologyPath, "utf8");
@@ -41,7 +43,7 @@ export function loadOntologyRegistry(ontologyPath: string): EntityRegistry {
     }
   }
 
-  return { sourcePath: ontologyPath, entries };
+  return { sourcePath: path.basename(ontologyPath), entries };
 }
 
 export function extractEntities(
@@ -128,10 +130,12 @@ export function extractEntities(
       world_slug: prototypeNode?.world_slug ?? deriveWorldSlug(ontologyRegistry.sourcePath),
       file_path: ontologyRegistry.sourcePath,
       heading_path: null,
-      byte_start: 0,
-      byte_end: 0,
-      line_start: 0,
-      line_end: 0,
+      // Virtual entity nodes are anchored to the ontology registry file with a sentinel
+      // zero-width span at the start of the file, rather than malformed all-zero provenance.
+      byte_start: VIRTUAL_ENTITY_BYTE,
+      byte_end: VIRTUAL_ENTITY_BYTE,
+      line_start: VIRTUAL_ENTITY_LINE,
+      line_end: VIRTUAL_ENTITY_LINE,
       node_type: "named_entity",
       body,
       content_hash: contentHashForProse(body),

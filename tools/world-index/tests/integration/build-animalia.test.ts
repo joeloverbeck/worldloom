@@ -383,6 +383,57 @@ test("build is deterministic across fresh runs", () => {
   }
 });
 
+test("build normalizes virtual named_entity provenance to relative ontology paths and valid sentinel spans", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      const absolutePathRows = (
+        db
+          .prepare(
+            `
+              SELECT COUNT(*) AS count
+              FROM nodes
+              WHERE world_slug = ?
+                AND node_type = 'named_entity'
+                AND file_path GLOB '/*'
+            `
+          )
+          .get(WORLD_SLUG) as { count: number }
+      ).count;
+      const invalidSentinelRows = (
+        db
+          .prepare(
+            `
+              SELECT COUNT(*) AS count
+              FROM nodes
+              WHERE world_slug = ?
+                AND node_type = 'named_entity'
+                AND (
+                  file_path != 'ONTOLOGY.md'
+                  OR line_start != 1
+                  OR line_end != 1
+                  OR byte_start != 0
+                  OR byte_end != 0
+                )
+            `
+          )
+          .get(WORLD_SLUG) as { count: number }
+      ).count;
+
+      assert.equal(absolutePathRows, 0);
+      assert.equal(invalidSentinelRows, 0);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
 test("sync reparses only the touched file", async () => {
   const root = createTempRepoRoot();
 

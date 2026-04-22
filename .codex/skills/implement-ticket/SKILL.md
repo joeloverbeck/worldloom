@@ -153,6 +153,10 @@ Worldloom verification surfaces usually include:
 
 Pick the surface that actually proves the owned invariant. A command that merely touches the area does not count as proof.
 
+For tool/index/schema tickets, package-local readonly DB queries and inline `node -e` probes count as `targeted tool command` proof when they directly assert the owned invariant against the real artifact or a truthful temp-copy rebuild.
+
+If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence. Use the isolated result to decide whether the broad lane is current-ticket fallout or unrelated noise.
+
 ### 6. Close out the ticket honestly
 
 Update the active ticket before finishing:

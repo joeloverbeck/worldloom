@@ -64,6 +64,38 @@ test("ontology registry parsing plus heuristic entities emits virtual nodes and 
     assert.equal(entityNodes.some((node) => node.node_id === "entity:brinewick"), true);
     assert.equal(entityNodes.some((node) => node.node_id === "entity:salt-wardens"), true);
     assert.equal(entityNodes.some((node) => node.node_id === "entity:harbor-watch"), true);
+    assert.deepEqual(
+      entityNodes.map((node) => ({
+        file_path: node.file_path,
+        line_start: node.line_start,
+        line_end: node.line_end,
+        byte_start: node.byte_start,
+        byte_end: node.byte_end
+      })),
+      [
+        {
+          file_path: "fixture-ontology.md",
+          line_start: 1,
+          line_end: 1,
+          byte_start: 0,
+          byte_end: 0
+        },
+        {
+          file_path: "fixture-ontology.md",
+          line_start: 1,
+          line_end: 1,
+          byte_start: 0,
+          byte_end: 0
+        },
+        {
+          file_path: "fixture-ontology.md",
+          line_start: 1,
+          line_end: 1,
+          byte_start: 0,
+          byte_end: 0
+        }
+      ]
+    );
     assert.equal(
       edges.some(
         (edge) =>
