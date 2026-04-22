@@ -60,6 +60,8 @@ Start with these surfaces:
 - file coverage via `file_versions`
 - semantic surfaces most likely to rot downstream consumers, especially `named_entity` and `entity_mentions`
 
+Before writing deeper semantic queries, inspect the live table columns you will rely on. Do not assume concentration fields live directly on `entity_mentions`; derive source node type and file family through `entity_mentions.node_id -> nodes.node_id` when that is the current schema.
+
 If the issue looks semantic rather than structural, trace it back to exact source node types, file families, and representative rows before drafting a ticket.
 
 ### 3. Separate issue classes
@@ -106,6 +108,8 @@ For `named_entity` / `entity_mentions`, inspect:
 - source-node-type concentration
 - file-family concentration
 - representative false positives with exact source rows
+
+If the live schema lacks direct concentration columns on `entity_mentions`, compute those views by joining back to `nodes` instead of treating the query failure as an index defect.
 
 When a result looks suspicious, trace it to concrete examples. A good ticket seam has:
 
