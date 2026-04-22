@@ -22,6 +22,7 @@ This skill is audit-and-ticket only. Do not modify `worlds/<slug>/` canon files,
 
 - Resolve `world_slug` to the exact live path under `worlds/`.
 - Snapshot the worktree with `git status --short` before rebuilding so you can distinguish your ticket edits from unrelated local state.
+- If dirty paths already touch `tools/world-index` or an adjacent `SPEC-01*` ticket/archive move, treat that as live ownership context before drafting a new ticket. Do not create a duplicate follow-up until you confirm the seam is not already being worked in the current checkout.
 - Rebuild before trusting any query result. Do not audit a checked-in `_index/world.db` that has not just been regenerated from the current code.
 - Run producer and proof lanes sequentially, not in parallel: package build, then world-index build, then audit queries.
 - For Codex specifically, do not use parallel tool wrappers for the rebuild lane. `npm run build`, `build <world_slug>`, and `verify <world_slug>` are a strict serial dependency chain, and an overlapped run is not a trustworthy proof surface.
@@ -55,7 +56,7 @@ Audit the rebuilt `worlds/<world_slug>/_index/world.db`, not memory and not a te
 
 Start with these surfaces:
 
-- CLI summary: `stats <world_slug>`
+- CLI summary: `stats <world_slug>` from the repo root, because the current CLI resolves the world root from `process.cwd()` just like `build` and `verify`
 - SQLite schema shape and table presence
 - node counts by `node_type`
 - edge counts by `edge_type`, including unresolved targets

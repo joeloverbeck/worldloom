@@ -88,6 +88,8 @@ Load `references/mismatch-handling.md` from this skill directory (`.codex/skills
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
+When reassessment cleanly narrows the owned delta before coding, patch the ticket's `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
+
 Required-consequence fallout does **not** require escalation when all of the following are true:
 
 - the added work stays inside the same architectural seam the ticket already owns
@@ -138,6 +140,8 @@ Run the narrowest correct verification first, then broaden as needed.
 For end-to-end validation tickets, if the drafted acceptance story assumes the composed command already passes, the first narrow proof may be the real package-local command itself or a minimal direct probe of that command's failing seam.
 
 If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
+
+If the symptom is already reproduced but multiple same-seam fixes remain plausible, run a narrow source-to-emission probe before editing so the patch stays minimal and the ticket does not overclaim a broader implementation shape.
 
 If a broader proof copies a live world tree or fixture and inherits generated state, clean or account for that copied state before treating the failure as ticket evidence. Record that harness correction in `Assumption Reassessment` or `## Deviations` when it materially changes the proof story.
 

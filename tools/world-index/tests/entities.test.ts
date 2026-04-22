@@ -347,3 +347,62 @@ test("heuristic extraction blocks embedded checkpoint prose from whole-file reco
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("heuristic extraction blocks inline document-reference labels and truncated heading fragments", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+
+    const registry = loadOntologyRegistry(ontologyPath);
+    const source = [
+      "Copper Weir remains a real place.",
+      "Comparable to the river-market benchmark per Trade Flows and per Inequality Patterns.",
+      "The canal-jurisdiction issue remains deferred to OPEN_QUESTIONS.md §Ruin Ownership and Jurisdiction.",
+      "Finder compensation remains deferred to OPEN_QUESTIONS.md §Mundane-Tier Finder-Fee Wage Schedule.",
+      "Brinewick routing details remain deferred to OPEN_QUESTIONS.md §Brinewick Trunk-Canal-Count Specifics.",
+      "Contract pressure still appears in Breakage Points when corridor insurance fails."
+    ].join("\n");
+    const { tree } = parseMarkdown(source);
+    const proseNodes: NodeRow[] = [
+      {
+        node_id: "animalia:fixtures.md:Inline References:0",
+        world_slug: "animalia",
+        file_path: path.join(tempRoot, "fixtures.md"),
+        heading_path: "Inline References",
+        byte_start: 0,
+        byte_end: 0,
+        line_start: 1,
+        line_end: source.split("\n").length,
+        node_type: "section",
+        body: source,
+        content_hash: contentHashForProse(source),
+        anchor_checksum: contentHashForProse(source),
+        summary: null,
+        created_at_index_version: CURRENT_INDEX_VERSION
+      }
+    ];
+
+    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
+    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+
+    for (const banned of [
+      "Trade Flows",
+      "Inequality Patterns",
+      "Ruin Ownership",
+      "Breakage Point",
+      "Tier Finder",
+      "Fee Wage Schedule",
+      "Count Specifics"
+    ]) {
+      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
+      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
+    }
+
+    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
+    assert.equal(entityNames.has("Copper Weir"), true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
