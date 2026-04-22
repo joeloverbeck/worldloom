@@ -22,6 +22,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
+- If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
 - Archive only when the user explicitly asks for full ticket completion or archival.
@@ -73,6 +74,7 @@ Check:
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
 - for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
+- when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
 
 Load `references/mismatch-handling.md`.
 

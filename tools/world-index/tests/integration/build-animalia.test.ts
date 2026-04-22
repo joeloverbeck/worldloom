@@ -173,6 +173,27 @@ function loadUnresolvedModifiedByRefs(
     .all() as Array<{ target_unresolved_ref: string; count: number }>;
 }
 
+function loadDerivedFromRefsTo(
+  db: Database.Database,
+  targetId: string
+): Array<{ source_node_id: string; target_node_id: string | null; target_unresolved_ref: string | null }> {
+  return db
+    .prepare(
+      `
+        SELECT source_node_id, target_node_id, target_unresolved_ref
+        FROM edges
+        WHERE edge_type = 'derived_from'
+          AND (target_node_id = ? OR target_unresolved_ref = ?)
+        ORDER BY source_node_id
+      `
+    )
+    .all(targetId, targetId) as Array<{
+    source_node_id: string;
+    target_node_id: string | null;
+    target_unresolved_ref: string | null;
+  }>;
+}
+
 function expectedIndexableFiles(root: string): string[] {
   return enumerate(path.join(root, "worlds", WORLD_SLUG)).indexable;
 }
@@ -202,6 +223,43 @@ test("build succeeds, writes the current schema version, and matches source-deri
         ),
         []
       );
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build resolves animalia DA-0001 references through the canonical whole-file node id", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      const artifactRow = db
+        .prepare(
+          `
+            SELECT node_id, file_path
+            FROM nodes
+            WHERE world_slug = ?
+              AND node_type = 'diegetic_artifact_record'
+              AND file_path = 'diegetic-artifacts/a-season-on-the-circuit.md'
+          `
+        )
+        .get(WORLD_SLUG) as { node_id: string; file_path: string };
+
+      assert.deepEqual(artifactRow, {
+        node_id: "DA-0001",
+        file_path: "diegetic-artifacts/a-season-on-the-circuit.md"
+      });
+
+      const derivedFromRows = loadDerivedFromRefsTo(db, "DA-0001");
+      assert.equal(derivedFromRows.length, 3);
+      assert.equal(derivedFromRows.every((row) => row.target_node_id === "DA-0001"), true);
+      assert.equal(derivedFromRows.every((row) => row.target_unresolved_ref === null), true);
     } finally {
       db.close();
     }

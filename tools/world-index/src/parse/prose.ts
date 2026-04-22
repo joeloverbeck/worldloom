@@ -1,5 +1,6 @@
 import path from "node:path";
 import type { Content, Heading, List, Parent, Root, RootContent, Root as MdastRoot } from "mdast";
+import YAML from "yaml";
 
 import { anchorChecksum, contentHashForProse } from "./canonical";
 import { CURRENT_INDEX_VERSION } from "../schema/version";
@@ -14,6 +15,16 @@ const FILE_RECORD_TYPES = new Map<string, NodeType>([
   ["character-proposals", "character_proposal_card"],
   ["audits", "audit_record"]
 ]);
+
+const WHOLE_FILE_ID_FIELDS = new Map<string, string>([
+  ["characters", "character_id"],
+  ["diegetic-artifacts", "artifact_id"],
+  ["proposals", "proposal_id"],
+  ["character-proposals", "proposal_id"],
+  ["audits", "audit_id"]
+]);
+
+const CANONICAL_ID_REGEX = /^(DA|CHAR|PR|NCP|AU)-\d+$/;
 
 interface HeadingNode {
   depth: number;
@@ -113,6 +124,8 @@ function createWholeFileRecord(
     return null;
   }
 
+  const canonicalNodeId = canonicalWholeFileNodeId(lines, firstSegment);
+
   return createNodeRow({
     worldSlug,
     relativeFilePath,
@@ -122,7 +135,8 @@ function createWholeFileRecord(
     lineEnd: lines.length,
     body: lines.join("\n"),
     lines,
-    occurrenceIndex: 0
+    occurrenceIndex: 0,
+    preferredNodeId: canonicalNodeId
   });
 }
 
@@ -312,13 +326,12 @@ function createNodeRow(args: {
   body: string;
   lines: string[];
   occurrenceIndex: number;
+  preferredNodeId?: string | null;
 }): NodeRow {
-  const nodeId = structuredIdForPath(args.relativeFilePath) ?? syntheticNodeId(
-    args.worldSlug,
-    args.relativeFilePath,
-    args.headingPath,
-    args.occurrenceIndex
-  );
+  const nodeId =
+    args.preferredNodeId ??
+    structuredIdForPath(args.relativeFilePath) ??
+    syntheticNodeId(args.worldSlug, args.relativeFilePath, args.headingPath, args.occurrenceIndex);
 
   return {
     node_id: nodeId,
@@ -341,6 +354,46 @@ function createNodeRow(args: {
 function structuredIdForPath(relativeFilePath: string): string | null {
   const match = path.basename(relativeFilePath).match(STRUCTURED_ID_REGEX);
   return match?.[0] ?? null;
+}
+
+function canonicalWholeFileNodeId(lines: string[], firstSegment: string): string | null {
+  const idField = WHOLE_FILE_ID_FIELDS.get(firstSegment);
+  if (!idField) {
+    return null;
+  }
+
+  const frontmatter = parseOpeningFrontmatter(lines);
+  if (!frontmatter || typeof frontmatter !== "object") {
+    return null;
+  }
+
+  const candidate = frontmatter[idField];
+  if (typeof candidate !== "string") {
+    return null;
+  }
+
+  const trimmed = candidate.trim();
+  return CANONICAL_ID_REGEX.test(trimmed) ? trimmed : null;
+}
+
+function parseOpeningFrontmatter(lines: string[]): Record<string, unknown> | null {
+  if (lines[0] !== "---") {
+    return null;
+  }
+
+  const closingIndex = lines.findIndex((line, index) => index > 0 && line === "---");
+  if (closingIndex <= 0) {
+    return null;
+  }
+
+  try {
+    const parsed = YAML.parse(lines.slice(1, closingIndex).join("\n"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function syntheticNodeId(
