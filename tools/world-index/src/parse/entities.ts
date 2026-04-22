@@ -18,7 +18,7 @@ export interface EntityRegistry {
   entries: EntityRegistryEntry[];
 }
 
-const CAPITALIZED_MULTIWORD_REGEX = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b/g;
+const CAPITALIZED_MULTIWORD_REGEX = /\b([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+){1,3})\b/g;
 
 export function loadOntologyRegistry(ontologyPath: string): EntityRegistry {
   const source = readFileSync(ontologyPath, "utf8");
@@ -198,17 +198,21 @@ function countOccurrences(body: string, canonicalName: string): number {
 
 function collectHeuristicCandidates(body: string): string[] {
   const candidates: string[] = [];
-  let match: RegExpExecArray | null;
+  const proseLines = body.split(/\r?\n/).filter((line) => !line.trimStart().startsWith("#"));
 
-  for (;;) {
-    match = CAPITALIZED_MULTIWORD_REGEX.exec(body);
-    if (!match) {
-      break;
-    }
+  for (const line of proseLines) {
+    CAPITALIZED_MULTIWORD_REGEX.lastIndex = 0;
 
-    const candidate = match[1];
-    if (candidate) {
-      candidates.push(candidate);
+    for (;;) {
+      const match = CAPITALIZED_MULTIWORD_REGEX.exec(line);
+      if (!match) {
+        break;
+      }
+
+      const candidate = match[1];
+      if (candidate) {
+        candidates.push(candidate);
+      }
     }
   }
 

@@ -49,11 +49,12 @@ If one primary class also changes a real shared contract, keep the primary class
 1. Read the target ticket file.
 2. Read every directly relevant reference it names: spec files, docs, skill files, tool files, templates, examples, or archived tickets/specs.
 3. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
-4. If the invocation uses a glob, shorthand, or near-match typo, resolve the first exact live ticket path before doing anything else.
-5. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-6. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-7. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-8. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+4. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
+5. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
+6. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+7. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+8. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+9. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -105,6 +106,8 @@ For skill tickets, verify:
 Load `references/verification-closeout.md`.
 
 Run the narrowest correct verification first, then broaden as needed.
+
+If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
 
 Worldloom verification surfaces usually include:
 
