@@ -116,12 +116,10 @@ export function insertEntityMentions(
   db.transaction((batch: EntityMentionRow[]) => {
     const statement = db.prepare(`
       INSERT INTO entity_mentions (
-        mention_id,
         node_id,
         entity_name,
         entity_kind
       ) VALUES (
-        @mention_id,
         @node_id,
         @entity_name,
         @entity_kind
@@ -141,7 +139,6 @@ export function insertValidationResults(
   db.transaction((batch: ValidationResultRow[]) => {
     const statement = db.prepare(`
       INSERT INTO validation_results (
-        result_id,
         world_slug,
         validator_name,
         severity,
@@ -153,7 +150,6 @@ export function insertValidationResults(
         line_range_end,
         created_at
       ) VALUES (
-        @result_id,
         @world_slug,
         @validator_name,
         @severity,

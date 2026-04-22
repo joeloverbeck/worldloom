@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { CURRENT_INDEX_VERSION } from "../schema/version";
@@ -49,9 +49,9 @@ function readRecordedVersion(versionFilePath: string): string | null {
 }
 
 export function openIndex(worldRoot: string, worldSlug: string): Database.Database {
-  const indexDirectory = path.resolve(worldRoot, "worlds", worldSlug, "_index");
-  const databasePath = path.join(indexDirectory, "world.db");
-  const versionFilePath = path.join(indexDirectory, "index_version.txt");
+  const indexDirectory = indexDirectoryForWorld(worldRoot, worldSlug);
+  const databasePath = databasePathForWorld(worldRoot, worldSlug);
+  const versionFilePath = versionFilePathForWorld(worldRoot, worldSlug);
 
   mkdirSync(indexDirectory, { recursive: true });
 
@@ -83,4 +83,31 @@ export function openIndex(worldRoot: string, worldSlug: string): Database.Databa
     db.close();
     throw error;
   }
+}
+
+export function indexDirectoryForWorld(worldRoot: string, worldSlug: string): string {
+  return path.resolve(worldRoot, "worlds", worldSlug, "_index");
+}
+
+export function databasePathForWorld(worldRoot: string, worldSlug: string): string {
+  return path.join(indexDirectoryForWorld(worldRoot, worldSlug), "world.db");
+}
+
+export function versionFilePathForWorld(worldRoot: string, worldSlug: string): string {
+  return path.join(indexDirectoryForWorld(worldRoot, worldSlug), "index_version.txt");
+}
+
+export function hasIndex(worldRoot: string, worldSlug: string): boolean {
+  return (
+    existsSync(databasePathForWorld(worldRoot, worldSlug)) &&
+    existsSync(versionFilePathForWorld(worldRoot, worldSlug))
+  );
+}
+
+export function openExistingIndex(worldRoot: string, worldSlug: string): Database.Database {
+  if (!hasIndex(worldRoot, worldSlug)) {
+    throw new Error(`Index missing for world '${worldSlug}'.`);
+  }
+
+  return openIndex(worldRoot, worldSlug);
 }

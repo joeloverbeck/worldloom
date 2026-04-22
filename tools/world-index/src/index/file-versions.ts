@@ -40,3 +40,29 @@ export function upsertFileVersion(
     )
     .run(worldSlug, filePath, contentHash, new Date().toISOString());
 }
+
+export function listIndexedFiles(db: Database.Database, worldSlug: string): string[] {
+  return (
+    db
+      .prepare(
+        `
+          SELECT file_path
+          FROM file_versions
+          WHERE world_slug = ?
+          ORDER BY file_path
+        `
+      )
+      .all(worldSlug) as Array<{ file_path: string }>
+  ).map((row) => row.file_path);
+}
+
+export function removeFileVersion(
+  db: Database.Database,
+  worldSlug: string,
+  filePath: string
+): void {
+  db.prepare("DELETE FROM file_versions WHERE world_slug = ? AND file_path = ?").run(
+    worldSlug,
+    filePath
+  );
+}

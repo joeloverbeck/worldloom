@@ -6,13 +6,11 @@ export function insertEdges(db: Database.Database, rows: EdgeRow[]): void {
   db.transaction((batch: EdgeRow[]) => {
     const statement = db.prepare(`
       INSERT INTO edges (
-        edge_id,
         source_node_id,
         target_node_id,
         target_unresolved_ref,
         edge_type
       ) VALUES (
-        @edge_id,
         @source_node_id,
         @target_node_id,
         @target_unresolved_ref,

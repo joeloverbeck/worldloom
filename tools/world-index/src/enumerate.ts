@@ -6,7 +6,7 @@ export interface FileEnumeration {
   unexpected: string[];
 }
 
-const MANDATORY_WORLD_FILES = new Set([
+export const MANDATORY_WORLD_FILES = new Set([
   "WORLD_KERNEL.md",
   "INVARIANTS.md",
   "ONTOLOGY.md",

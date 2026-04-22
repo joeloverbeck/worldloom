@@ -74,6 +74,19 @@ Load `references/mismatch-handling.md`.
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
+Required-consequence fallout does **not** require escalation when all of the following are true:
+
+- the added work stays inside the same architectural seam the ticket already owns
+- the extra edit is necessary to make the ticket's stated outcome truthful or functional
+- no new user-facing capability family, workflow boundary, or sibling ticket ownership is being claimed
+
+Escalate with 1-3-1 when the fallout crosses a real ownership boundary even if it was discovered during reassessment.
+
+Examples:
+
+- same-seam / no escalation: a CLI ticket also needs the missing parser/helper module that the CLI path cannot function without
+- boundary growth / escalate: a CLI ticket appears to require MCP wiring, hook orchestration, or a sibling validator/spec family that the active ticket did not already own
+
 ### 3. Extract the real implementation slice
 
 Before editing code or docs, name the actual owned delta:
@@ -97,6 +110,7 @@ For skill tickets, verify:
 - Keep changes surgical and aligned with the ticket's owned boundary.
 - Prefer existing repo contracts over ad hoc patterns.
 - Do not broaden into unrelated cleanup unless reassessment proves it is required consequence fallout.
+- If reassessment proves required consequence fallout, keep the implementation inside the same owned seam and record the widened-but-still-owned boundary in the ticket before closeout.
 - After package-manager, lockfile, formatter, generator, or codegen commands, re-read the touched contract files and confirm the generated diff still satisfies ticket invariants before closeout.
 - If the ticket touches world-level canon-writing workflows, preserve append-only canon discipline and documented gates.
 - If the ticket only changes docs, tickets, or skills, do not invent runtime/tool changes just to satisfy the original draft.
