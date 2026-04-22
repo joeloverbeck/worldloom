@@ -101,6 +101,7 @@ export function parseWorldFile(
     tree,
     lines,
     relativeFilePath,
+    worldSlug,
     yamlNodes,
     proseNodes
   );

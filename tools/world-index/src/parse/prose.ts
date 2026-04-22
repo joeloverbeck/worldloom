@@ -3,6 +3,7 @@ import type { Content, Heading, List, Parent, Root, RootContent, Root as MdastRo
 import YAML from "yaml";
 
 import { anchorChecksum, contentHashForProse } from "./canonical";
+import { MANDATORY_WORLD_FILES } from "../enumerate";
 import { CURRENT_INDEX_VERSION } from "../schema/version";
 import type { NodeRow, NodeType } from "../schema/types";
 
@@ -47,6 +48,7 @@ export function extractProseNodes(
   relativeFilePath: string,
   worldSlug: string
 ): NodeRow[] {
+  const domainFileRecord = createDomainFileRecord(lines, relativeFilePath, worldSlug);
   const fileRecord = createWholeFileRecord(lines, relativeFilePath, worldSlug);
   if (fileRecord) {
     return [fileRecord];
@@ -58,7 +60,7 @@ export function extractProseNodes(
   const allSpans = [...spans, ...bulletClusters];
   const occurrences = new Map<string, number>();
 
-  return allSpans.map((span) =>
+  const proseNodes = allSpans.map((span) =>
     createNodeRow({
       worldSlug,
       relativeFilePath,
@@ -71,6 +73,31 @@ export function extractProseNodes(
       occurrenceIndex: nextOccurrenceIndex(occurrences, span.headingPath)
     })
   );
+
+  return domainFileRecord ? [domainFileRecord, ...proseNodes] : proseNodes;
+}
+
+function createDomainFileRecord(
+  lines: string[],
+  relativeFilePath: string,
+  worldSlug: string
+): NodeRow | null {
+  if (!MANDATORY_WORLD_FILES.has(relativeFilePath)) {
+    return null;
+  }
+
+  return createNodeRow({
+    worldSlug,
+    relativeFilePath,
+    nodeType: "domain_file",
+    headingPath: [relativeFilePath],
+    lineStart: 1,
+    lineEnd: lines.length,
+    body: lines.join("\n"),
+    lines,
+    occurrenceIndex: 0,
+    preferredNodeId: domainFileNodeId(worldSlug, relativeFilePath)
+  });
 }
 
 function createWholeFileRecord(
@@ -354,6 +381,10 @@ function createNodeRow(args: {
 function structuredIdForPath(relativeFilePath: string): string | null {
   const match = path.basename(relativeFilePath).match(STRUCTURED_ID_REGEX);
   return match?.[0] ?? null;
+}
+
+export function domainFileNodeId(worldSlug: string, relativeFilePath: string): string {
+  return `${worldSlug}:${relativeFilePath}:__file__`;
 }
 
 function canonicalWholeFileNodeId(lines: string[], firstSegment: string): string | null {

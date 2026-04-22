@@ -1,6 +1,8 @@
 import YAML from "yaml";
 import type { Html, Root, RootContent } from "mdast";
 
+import { MANDATORY_WORLD_FILES } from "../enumerate";
+import { domainFileNodeId } from "./prose";
 import type { CanonFactRecord, ChangeLogEntry, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/g;
@@ -10,6 +12,7 @@ export function extractSemanticEdges(
   tree: Root,
   lines: string[],
   filePath: string,
+  worldSlug: string,
   yamlNodes: NodeRow[],
   proseNodes: NodeRow[]
 ): { edges: EdgeRow[]; parseIssues: ValidationResultRow[] } {
@@ -37,11 +40,11 @@ export function extractSemanticEdges(
       }
 
       for (const target of parsed.required_world_updates ?? []) {
-        const resolvedNode = resolveWorldUpdateTarget(target, proseNodes);
+        const resolvedTargetNodeId = resolveWorldUpdateTarget(worldSlug, target);
         pushEdge({
           source_node_id: node.node_id,
-          target_node_id: resolvedNode?.node_id ?? null,
-          target_unresolved_ref: resolvedNode ? null : target,
+          target_node_id: resolvedTargetNodeId,
+          target_unresolved_ref: resolvedTargetNodeId ? null : target,
           edge_type: "required_world_update"
         });
       }
@@ -199,18 +202,13 @@ function extractFirewallTargets(body: string): string[] {
   return [...targets];
 }
 
-function resolveWorldUpdateTarget(targetPath: string, proseNodes: NodeRow[]): NodeRow | null {
+function resolveWorldUpdateTarget(worldSlug: string, targetPath: string): string | null {
   const normalizedTarget = targetPath.replace(/^.*[\\/]/, "");
+  if (!MANDATORY_WORLD_FILES.has(normalizedTarget)) {
+    return null;
+  }
 
-  const candidates = proseNodes
-    .filter(
-      (node) =>
-        (node.node_type === "section" || node.node_type === "subsection") &&
-        node.file_path.replace(/^.*[\\/]/, "") === normalizedTarget
-    )
-    .sort((left, right) => left.line_start - right.line_start);
-
-  return candidates[0] ?? null;
+  return domainFileNodeId(worldSlug, normalizedTarget);
 }
 
 function resolveAttributionSourceNode(htmlNode: Html, proseNodes: NodeRow[]): NodeRow | null {

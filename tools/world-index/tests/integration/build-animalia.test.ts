@@ -173,6 +173,22 @@ function loadUnresolvedModifiedByRefs(
     .all() as Array<{ target_unresolved_ref: string; count: number }>;
 }
 
+function loadUnresolvedRequiredWorldUpdateRefs(
+  db: Database.Database
+): Array<{ target_unresolved_ref: string; count: number }> {
+  return db
+    .prepare(
+      `
+        SELECT target_unresolved_ref, COUNT(*) AS count
+        FROM edges
+        WHERE edge_type = 'required_world_update' AND target_unresolved_ref IS NOT NULL
+        GROUP BY target_unresolved_ref
+        ORDER BY target_unresolved_ref
+      `
+    )
+    .all() as Array<{ target_unresolved_ref: string; count: number }>;
+}
+
 function loadDerivedFromRefsTo(
   db: Database.Database,
   targetId: string
@@ -217,6 +233,7 @@ test("build succeeds, writes the current schema version, and matches source-deri
     try {
       assert.deepEqual(loadActualNodeCounts(db), expectedCounts);
       assert.equal(countValidationRows(db, "unresolved_attribution_target"), 0);
+      assert.deepEqual(loadUnresolvedRequiredWorldUpdateRefs(db), []);
       assert.deepEqual(
         loadUnresolvedModifiedByRefs(db).filter((row) =>
           ["CH-0010", "CH-0013", "CH-0014", "CH-0015"].includes(row.target_unresolved_ref)

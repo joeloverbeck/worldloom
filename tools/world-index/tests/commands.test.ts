@@ -92,6 +92,25 @@ test("build, inspect, stats, sync, and verify work against the fixture world", a
       assert.equal(cfRow.node_id, "CF-0001");
       assert.equal(cfRow.node_type, "canon_fact_record");
 
+      const domainFileRow = db
+        .prepare("SELECT node_id, node_type FROM nodes WHERE file_path = 'INSTITUTIONS.md' AND node_type = 'domain_file'")
+        .get() as { node_id: string; node_type: string };
+      assert.equal(domainFileRow.node_id, "fixture-world:INSTITUTIONS.md:__file__");
+      assert.equal(domainFileRow.node_type, "domain_file");
+
+      const requiredUpdateEdge = db
+        .prepare(
+          `
+            SELECT target_node_id, target_unresolved_ref
+            FROM edges
+            WHERE source_node_id = 'CF-0001'
+              AND edge_type = 'required_world_update'
+          `
+        )
+        .get() as { target_node_id: string | null; target_unresolved_ref: string | null };
+      assert.equal(requiredUpdateEdge.target_node_id, "fixture-world:INSTITUTIONS.md:__file__");
+      assert.equal(requiredUpdateEdge.target_unresolved_ref, null);
+
       const entityRow = db
         .prepare("SELECT node_id FROM nodes WHERE node_type = 'named_entity' AND node_id = 'entity:brinewick'")
         .get() as { node_id: string };

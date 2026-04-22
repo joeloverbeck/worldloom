@@ -8,6 +8,7 @@ export const NODE_TYPES = [
   "change_log_entry",
   "mystery_reserve_entry",
   "open_question_entry",
+  "domain_file",
   "adjudication_record",
   "invariant",
   "ontology_category",
