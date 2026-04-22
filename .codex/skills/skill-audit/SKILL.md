@@ -1,29 +1,35 @@
 ---
 name: skill-audit
-description: "Audit a skill file against the current Codex session's actual work. Use when asked to review a skill under `.codex/skills/` or `.claude/skills/` for quality, missing guidance, unclear steps, or repo-rule alignment without editing it."
+description: "Audit a skill under `.codex/skills/` or `.claude/skills/` against the current Codex session's actual work. Use when asked to review skill quality, missing guidance, unclear steps, or repo-rule alignment without editing the target skill."
+user-invocable: true
+arguments:
+  - name: skill_path
+    description: "Path to the target skill directory or its `SKILL.md`."
+    required: true
 ---
 
 # Skill Audit
 
-Analyze a skill against the work done in the current Codex session and report where the skill is unclear, incomplete, inconsistent, or misaligned with repo rules. Report only. Do not modify the target skill unless the user explicitly asks for follow-up edits after the audit.
+Audit a Worldloom skill against the work done in the current Codex session and report where the skill is unclear, incomplete, inconsistent, or misaligned with repo rules. Report only. Do not edit the target skill unless the user explicitly asks for follow-up changes after the audit.
 
-Read [AGENTS.md](../../../AGENTS.md) and [docs/FOUNDATIONS.md](../../../docs/FOUNDATIONS.md) before producing findings if they were not already read earlier in this session.
+Read `AGENTS.md` and `docs/FOUNDATIONS.md` before producing findings if they were not already read earlier in this session.
 
 ## Workflow
 
 ### 1. Load the target skill
 
-1. Read the target skill's `SKILL.md`.
-2. Parse its `name`, `description`, and workflow/guardrail sections.
-3. If the provided path is not a skill directory or `SKILL.md` is missing, stop and report the error.
+1. Resolve `skill_path` to the exact skill directory and read its `SKILL.md`.
+2. Parse the skill's `name`, `description`, workflow steps, and guardrails.
+3. If the path is not a skill directory and does not point to a `SKILL.md`, stop and report the error.
 
 ### 2. Load alignment context
 
-1. Read [AGENTS.md](../../../AGENTS.md) if it was not already read earlier in this session.
-2. Read [docs/FOUNDATIONS.md](../../../docs/FOUNDATIONS.md) if it was not already read earlier in this session.
-3. If the target is a Codex skill under `.codex/skills/`, keep Codex skill structure expectations in mind:
+1. Read `AGENTS.md` if it was not already read earlier in this session.
+2. Read `docs/FOUNDATIONS.md` if it was not already read earlier in this session.
+3. If the target is a workflow skill, keep `docs/WORKFLOWS.md` in mind as the repo's quick-reference contract.
+4. For Codex skills under `.codex/skills/`, check basic fit:
    - concise `SKILL.md`
-   - trigger description that clearly states when to use the skill
+   - trigger text that clearly states when to use the skill
    - references or scripts only when they reduce repeated agent work
 
 ### 3. Reflect on session evidence
@@ -41,15 +47,15 @@ For self-audits, default to `No issues identified` unless a gap was directly obs
 ### 4. Cross-check alignment
 
 For each observed gap, check whether the skill:
-- contradicts or omits repo rules from [AGENTS.md](../../../AGENTS.md)
-- suggests behavior that would violate a principle in [docs/FOUNDATIONS.md](../../../docs/FOUNDATIONS.md)
+- contradicts or omits repo rules from `AGENTS.md`
+- suggests behavior that would violate `docs/FOUNDATIONS.md`
 - uses stale Claude-specific assumptions when the target is meant for Codex
-- would create repo-specific operational hazards such as dirtying tracked worktree paths, colliding with special directories, or leaving cleanup obligations implicit
+- weakens hard-gate or canon-mutation discipline for workflows that touch world canon
 
 Reference concrete rule sources in findings:
 - `AGENTS.md` section names
-- FOUNDATIONS principle numbers
-- relevant repo paths or tracked-state evidence when the hazard is operational rather than purely textual
+- `docs/FOUNDATIONS.md` section names
+- relevant repo paths when the hazard is operational rather than purely textual
 
 ### 5. Classify findings
 
@@ -115,7 +121,7 @@ Return the report in the conversation using this structure:
 
 ## Summary
 
-**Total**: N issues, N improvements, N features — N CRITICAL, N HIGH, N MEDIUM, N LOW
+**Total**: N issues, N improvements, N features - N CRITICAL, N HIGH, N MEDIUM, N LOW
 ```
 
 ## Guardrails
@@ -123,7 +129,7 @@ Return the report in the conversation using this structure:
 - Report only during the audit phase. Do not edit the target skill unless the user explicitly asks for implementation after seeing the report.
 - Do not speculate. If a step was not exercised this session, place it under `Not Exercised` instead of turning it into a finding.
 - Every Issue and Improvement must be backed by concrete session evidence.
-- Reject any proposed suggestion that would violate [docs/FOUNDATIONS.md](../../../docs/FOUNDATIONS.md).
+- Reject any proposed suggestion that would violate `docs/FOUNDATIONS.md`.
 - Keep scope discipline. Audit the skill as written; do not expand it into a different tool.
 - If the skill participates in a multi-skill workflow, check sibling skills for conflicting terminology, paths, or handoff assumptions and report concrete inconsistencies.
 - When follow-up edits are requested, apply them in document order and then re-read the changed sections to confirm the workflow still reads coherently.
