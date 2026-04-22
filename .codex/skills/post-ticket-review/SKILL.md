@@ -28,6 +28,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and note unrelated dirty paths before review.
+- Classify dirty paths into: reviewed-ticket implementation state, review-created edits, and unrelated noise. Only the reviewed-ticket implementation state should drive archival readiness unless another dirty path changes the ticket's factual closeout.
 - Review the local implementation state as it exists now, committed or not.
 - Compare the ticket's closeout against what actually landed, not against the original plan.
 - Keep follow-up creation evidence-backed and tightly bounded.
@@ -37,10 +38,11 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 ### 1. Resolve the target ticket
 
 1. Use the provided `ticket_path`.
-2. If the path is a glob, shorthand, or near-match typo, resolve it to the exact live ticket path before continuing.
-3. If the ticket already lives under `archive/tickets/`, review the archived handoff in place rather than recreating it.
-4. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-5. Record whether the ticket is tracked or untracked so archival reporting stays truthful.
+2. If `ticket_path` is omitted, first look for one unambiguous just-finished ticket in the current session/worktree and use that exact live path. If there is no single unambiguous candidate, stop and ask the user for the exact ticket path instead of guessing.
+3. If the path is a glob, shorthand, or near-match typo, resolve it to the exact live ticket path before continuing.
+4. If the ticket already lives under `archive/tickets/`, review the archived handoff in place rather than recreating it.
+5. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+6. Record whether the ticket is tracked or untracked so archival reporting stays truthful.
 
 ### 2. Check closeout and archival readiness
 
@@ -116,6 +118,7 @@ Before creating a new ticket:
 1. inspect adjacent active tickets in the same family
 2. inspect nearby active specs or plans only if the completed ticket changed their live assumptions unambiguously
 3. confirm the concern is not already owned elsewhere
+4. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
 
 ### 6. Author follow-up tickets
 

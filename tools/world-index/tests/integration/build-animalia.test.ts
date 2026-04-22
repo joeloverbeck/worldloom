@@ -434,6 +434,60 @@ test("build normalizes virtual named_entity provenance to relative ontology path
   }
 });
 
+test("build filters audited operational-label false positives from animalia named_entity output", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      const bannedRows = db
+        .prepare(
+          `
+            SELECT body
+            FROM nodes
+            WHERE world_slug = ?
+              AND node_type = 'named_entity'
+              AND body IN (
+                'Canonical name: Adds Mystery Reserve | Kind: unknown | Mentions: 2',
+                'Canonical name: All Phase | Kind: unknown | Mentions: 1',
+                'Canonical name: Age Details | Kind: unknown | Mentions: 15',
+                'Canonical name: Action Report | Kind: unknown | Mentions: 2',
+                'Canonical name: Access Path | Kind: unknown | Mentions: 1'
+              )
+          `
+        )
+        .all(WORLD_SLUG) as Array<{ body: string }>;
+      const retainedRows = db
+        .prepare(
+          `
+            SELECT body
+            FROM nodes
+            WHERE world_slug = ?
+              AND node_type = 'named_entity'
+              AND body IN (
+                'Canonical name: Atreia Selviss | Kind: unknown | Mentions: 2',
+                'Canonical name: Bent Willow | Kind: unknown | Mentions: 3'
+              )
+            ORDER BY body
+          `
+        )
+        .all(WORLD_SLUG) as Array<{ body: string }>;
+
+      assert.deepEqual(bannedRows, []);
+      assert.deepEqual(retainedRows, [
+        { body: "Canonical name: Atreia Selviss | Kind: unknown | Mentions: 2" },
+        { body: "Canonical name: Bent Willow | Kind: unknown | Mentions: 3" }
+      ]);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
 test("sync reparses only the touched file", async () => {
   const root = createTempRepoRoot();
 

@@ -202,7 +202,7 @@ function countOccurrences(body: string, canonicalName: string): number {
 
 function collectHeuristicCandidates(body: string): string[] {
   const candidates: string[] = [];
-  const proseLines = body.split(/\r?\n/).filter((line) => !line.trimStart().startsWith("#"));
+  const proseLines = heuristicScanLines(body);
 
   for (const line of proseLines) {
     CAPITALIZED_MULTIWORD_REGEX.lastIndex = 0;
@@ -221,6 +221,33 @@ function collectHeuristicCandidates(body: string): string[] {
   }
 
   return candidates;
+}
+
+function heuristicScanLines(body: string): string[] {
+  const lines = stripHeuristicNoise(body).split(/\r?\n/);
+  return lines.filter((line) => {
+    const trimmed = line.trim();
+    return trimmed.length > 0 && !trimmed.startsWith("#") && !looksLikeTableRow(trimmed);
+  });
+}
+
+function stripHeuristicNoise(body: string): string {
+  let normalized = body;
+
+  normalized = normalized.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, "");
+  normalized = normalized.replace(/```[\s\S]*?```/g, "\n");
+  normalized = normalized.replace(/<!--[\s\S]*?-->/g, "");
+
+  return normalized;
+}
+
+function looksLikeTableRow(line: string): boolean {
+  if (!line.includes("|")) {
+    return false;
+  }
+
+  const trimmed = line.trim();
+  return trimmed.startsWith("|") || /^\|?[\s:-]+\|[\s|:-]*$/.test(trimmed);
 }
 
 function incrementEntityCount(

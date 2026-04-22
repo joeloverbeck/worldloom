@@ -110,3 +110,61 @@ test("ontology registry parsing plus heuristic entities emits virtual nodes and 
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("heuristic extraction ignores structural markdown carriers but keeps free-prose entities", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    writeFileSync(ontologyPath, "- Brinewick (polity)\n", "utf8");
+
+    const registry = loadOntologyRegistry(ontologyPath);
+    const source = [
+      "---",
+      'title: "After-Action Report on the Harrowgate Contract"',
+      "---",
+      "",
+      "## Access Path",
+      "",
+      "| Gate | Result |",
+      "| --- | --- |",
+      "| 4 | All Phase 6 consequences drafted |",
+      "",
+      "Adds Mystery Reserve entry M-6 in the summary block.",
+      "",
+      "Althea Greystone met Atreia Selviss in free prose."
+    ].join("\n");
+    const { tree } = parseMarkdown(source);
+    const proseNodes: NodeRow[] = [
+      {
+        node_id: "animalia:fixtures.md:Structural Noise:0",
+        world_slug: "animalia",
+        file_path: path.join(tempRoot, "fixtures.md"),
+        heading_path: "Structural Noise",
+        byte_start: 0,
+        byte_end: 0,
+        line_start: 1,
+        line_end: source.split("\n").length,
+        node_type: "adjudication_record",
+        body: source,
+        content_hash: contentHashForProse(source),
+        anchor_checksum: contentHashForProse(source),
+        summary: null,
+        created_at_index_version: CURRENT_INDEX_VERSION
+      }
+    ];
+
+    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
+    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+
+    assert.equal(mentions.some((mention) => mention.entity_name === "Access Path"), false);
+    assert.equal(mentions.some((mention) => mention.entity_name === "Action Report"), false);
+    assert.equal(mentions.some((mention) => mention.entity_name === "All Phase"), false);
+    assert.equal(mentions.some((mention) => mention.entity_name === "Althea Greystone"), true);
+    assert.equal(mentions.some((mention) => mention.entity_name === "Atreia Selviss"), true);
+    assert.equal(entityNames.has("Althea Greystone"), true);
+    assert.equal(entityNames.has("Atreia Selviss"), true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});

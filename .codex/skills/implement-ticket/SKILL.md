@@ -81,6 +81,7 @@ Check:
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
 - for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
+- when replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path; do not scan a broader substrate ad hoc and treat that result as equivalent evidence
 - when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
 
 Load `references/mismatch-handling.md`.
@@ -156,6 +157,8 @@ Pick the surface that actually proves the owned invariant. A command that merely
 For tool/index/schema tickets, package-local readonly DB queries and inline `node -e` probes count as `targeted tool command` proof when they directly assert the owned invariant against the real artifact or a truthful temp-copy rebuild.
 
 If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence. Use the isolated result to decide whether the broad lane is current-ticket fallout or unrelated noise.
+
+If an isolated JS/TS `node --test` lane still fails without surfacing the owned seam, rerun the exact assertion logic outside the test harness with a direct package-local probe that exercises the same invariant against the same rebuilt artifact root. When that direct probe is the clearest truthful boundary, record it as the acceptance surface and classify the still-opaque harness lane as noisy/non-acceptance proof instead of overclaiming it.
 
 ### 6. Close out the ticket honestly
 
