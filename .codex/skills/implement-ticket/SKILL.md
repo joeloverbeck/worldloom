@@ -23,7 +23,9 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
+- If verification uses an exported function, inline `node -e` probe, or other package-local runtime entrypoint, run it from the package root when module resolution depends on package-local dependencies.
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
+- Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
@@ -63,6 +65,8 @@ If one primary class also changes a real shared contract, keep the primary class
 ### 2. Reassess assumptions before coding
 
 Validate the ticket against the live repo, not against the spec draft alone.
+
+If a prior review reopened this same ticket by blocking archival on an owned issue, treat that review finding as current reassessment evidence. Resume the same ticket rather than creating a new one, fix the owned blocker, rerun the final proof, and only then restore `COMPLETED` / archive-ready closeout text.
 
 Check:
 

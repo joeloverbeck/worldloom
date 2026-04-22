@@ -20,6 +20,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - Verify exact command shapes before recording them in the ticket.
 - Run dependent verification commands in dependency order, not in parallel. If a test command consumes compiled artifacts, generated files, or other build outputs, finish and confirm the producer step first, then run the dependent proof command.
 - For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
+- If verification uses an exported function or inline runtime probe, confirm the command is launched from a root where package-local modules actually resolve before treating any failure as ticket evidence.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
@@ -32,6 +33,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Assumption Reassessment` captures the final boundary
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
+- draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape

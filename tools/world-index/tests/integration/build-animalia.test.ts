@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -9,6 +9,7 @@ import Database from "better-sqlite3";
 import type { NodeRow, NodeType } from "../../src/schema/types";
 
 import { build } from "../../src/commands/build";
+import { stats } from "../../src/commands/stats";
 import { sync } from "../../src/commands/sync";
 import { verify } from "../../src/commands/verify";
 import { enumerate } from "../../src/enumerate";
@@ -157,6 +158,20 @@ function countValidationRows(db: Database.Database, code: string): number {
   ).count;
 }
 
+function loadSchemaObjects(db: Database.Database): string[] {
+  return db
+    .prepare(
+      `
+        SELECT name
+        FROM sqlite_master
+        WHERE type IN ('table', 'view')
+        ORDER BY name
+      `
+    )
+    .all()
+    .map((row) => (row as { name: string }).name);
+}
+
 function loadUnresolvedModifiedByRefs(
   db: Database.Database
 ): Array<{ target_unresolved_ref: string; count: number }> {
@@ -214,6 +229,33 @@ function expectedIndexableFiles(root: string): string[] {
   return enumerate(path.join(root, "worlds", WORLD_SLUG)).indexable;
 }
 
+function withCapturedOutput<T>(run: () => T): { result: T; stdout: string; stderr: string } {
+  const stdoutChunks: string[] = [];
+  const stderrChunks: string[] = [];
+  const stdoutWrite = process.stdout.write.bind(process.stdout);
+  const stderrWrite = process.stderr.write.bind(process.stderr);
+
+  process.stdout.write = ((chunk: string | Uint8Array) => {
+    stdoutChunks.push(String(chunk));
+    return true;
+  }) as typeof process.stdout.write;
+  process.stderr.write = ((chunk: string | Uint8Array) => {
+    stderrChunks.push(String(chunk));
+    return true;
+  }) as typeof process.stderr.write;
+
+  try {
+    return {
+      result: run(),
+      stdout: stdoutChunks.join(""),
+      stderr: stderrChunks.join("")
+    };
+  } finally {
+    process.stdout.write = stdoutWrite;
+    process.stderr.write = stderrWrite;
+  }
+}
+
 test("build succeeds, writes the current schema version, and matches source-derived node counts", () => {
   const root = createTempRepoRoot();
 
@@ -243,6 +285,40 @@ test("build succeeds, writes the current schema version, and matches source-deri
     } finally {
       db.close();
     }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build recreates a usable animalia index when a stale version marker exists without world.db", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const indexRoot = path.join(root, "worlds", WORLD_SLUG, "_index");
+    mkdirSync(indexRoot, { recursive: true });
+    writeFileSync(path.join(indexRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
+
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      const schemaObjects = loadSchemaObjects(db);
+      assert.equal(schemaObjects.includes("nodes"), true);
+      assert.equal(schemaObjects.includes("edges"), true);
+      assert.equal(schemaObjects.includes("file_versions"), true);
+      assert.equal(schemaObjects.includes("validation_results"), true);
+      assert.equal(schemaObjects.includes("fts_nodes"), true);
+    } finally {
+      db.close();
+    }
+
+    const statsResult = withCapturedOutput(() => stats(root, WORLD_SLUG));
+    assert.equal(statsResult.result, 0);
+    assert.match(statsResult.stdout, /World: animalia/);
+    assert.match(statsResult.stdout, /Node counts:/);
+
+    const verifyResult = withCapturedOutput(() => verify(root, WORLD_SLUG));
+    assert.equal(verifyResult.result, 0);
   } finally {
     cleanup(root);
   }

@@ -52,6 +52,7 @@ export function openIndex(worldRoot: string, worldSlug: string): Database.Databa
   const indexDirectory = indexDirectoryForWorld(worldRoot, worldSlug);
   const databasePath = databasePathForWorld(worldRoot, worldSlug);
   const versionFilePath = versionFilePathForWorld(worldRoot, worldSlug);
+  const databaseExists = existsSync(databasePath);
 
   mkdirSync(indexDirectory, { recursive: true });
 
@@ -63,7 +64,7 @@ export function openIndex(worldRoot: string, worldSlug: string): Database.Databa
     db.pragma("foreign_keys = ON");
 
     const recordedVersion = readRecordedVersion(versionFilePath);
-    if (recordedVersion === null) {
+    if (!databaseExists || recordedVersion === null) {
       const migrationSql = readFileSync(MIGRATION_FILE, "utf8");
       db.exec(migrationSql);
       writeFileSync(versionFilePath, `${CURRENT_INDEX_VERSION}\n`, "utf8");
