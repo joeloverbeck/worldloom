@@ -406,3 +406,62 @@ test("heuristic extraction blocks inline document-reference labels and truncated
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("heuristic extraction blocks hyphen-split heading suffix fragments", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+
+    const registry = loadOntologyRegistry(ontologyPath);
+    const source = [
+      "Maker-Age Linguistic Recovery remains an open-question heading, not an entity.",
+      "Post-Career Contractor Pension and Stigma remains a deferred institutional question.",
+      "Both Subsection-Seal Fraud Precedent stays deferred to open questions.",
+      "Crafter-Attempt Sub-Stream remains a timeline label.",
+      "The Phase 12 Rejected-Candidate Log remains workflow residue.",
+      "Bardic Register for Mutated-Beast Cycles vs Bandit-Captain Cycles remains a heading.",
+      "Copper Weir remains a real place."
+    ].join("\n");
+    const { tree } = parseMarkdown(source);
+    const proseNodes: NodeRow[] = [
+      {
+        node_id: "animalia:fixtures.md:Hyphen Fragments:0",
+        world_slug: "animalia",
+        file_path: path.join(tempRoot, "fixtures.md"),
+        heading_path: "Hyphen Fragments",
+        byte_start: 0,
+        byte_end: 0,
+        line_start: 1,
+        line_end: source.split("\n").length,
+        node_type: "section",
+        body: source,
+        content_hash: contentHashForProse(source),
+        anchor_checksum: contentHashForProse(source),
+        summary: null,
+        created_at_index_version: CURRENT_INDEX_VERSION
+      }
+    ];
+
+    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
+    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+
+    for (const banned of [
+      "Age Linguistic Recovery",
+      "Career Contractor Pension",
+      "Both Subsection",
+      "Attempt Sub",
+      "Candidate Log",
+      "Captain Cycles"
+    ]) {
+      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
+      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
+    }
+
+    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
+    assert.equal(entityNames.has("Copper Weir"), true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
