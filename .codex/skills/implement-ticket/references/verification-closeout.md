@@ -18,6 +18,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 ## Verification discipline
 
 - Verify exact command shapes before recording them in the ticket.
+- For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
