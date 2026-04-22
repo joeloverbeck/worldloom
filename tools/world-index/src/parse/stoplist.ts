@@ -6,17 +6,23 @@ export const CAPITALIZED_MULTIWORD_STOPLIST = new Set<string>([
   "Access Path",
   "Action Report",
   "Age Details",
+  "Breakage Points",
   "Change Log Entry",
   "Continuity Archivist",
   "Core Pressures",
+  "Distribution Discipline",
   "Genre Contract",
   "Mystery Curator",
   "Mystery Reserve",
   "Natural Story Engines",
   "No Silent Retcons",
   "Primary Difference",
+  "Regional Asymmetry",
   "Required Updates",
-  "Tone Contract"
+  "Repairs Applied",
+  "Tone Contract",
+  "Value Stores",
+  "World Laundering"
 ]);
 
 export function isStoplistedEntityCandidate(candidate: string): boolean {

@@ -167,6 +167,7 @@ If an isolated JS/TS `node --test` lane still fails without surfacing the owned 
 Update the active ticket before finishing:
 
 - `Status`
+- `Engine Changes`
 - `Assumption Reassessment`
 - `What to Change` / `Files to Touch` if reassessment changed scope
 - `Acceptance Criteria` / `Test Plan` if the real proof surface changed

@@ -21,6 +21,31 @@ export interface EntityRegistry {
 const CAPITALIZED_MULTIWORD_REGEX = /\b([A-Z][a-z]+(?:[ \t]+[A-Z][a-z]+){1,3})\b/g;
 const VIRTUAL_ENTITY_LINE = 1;
 const VIRTUAL_ENTITY_BYTE = 0;
+const FRAGMENT_LEAD_WORDS = new Set([
+  "A",
+  "An",
+  "As",
+  "At",
+  "By",
+  "For",
+  "From",
+  "In",
+  "Into",
+  "Of",
+  "On",
+  "To",
+  "Under",
+  "Upon",
+  "With",
+  "Without"
+]);
+const PROPOSAL_NODE_TYPES = new Set([
+  "proposal_card",
+  "proposal_batch",
+  "character_proposal_card",
+  "character_proposal_batch",
+  "retcon_proposal_card"
+]);
 
 export function loadOntologyRegistry(ontologyPath: string): EntityRegistry {
   const source = readFileSync(ontologyPath, "utf8");
@@ -86,7 +111,7 @@ export function extractEntities(
       linkedEntities.add(entry.canonicalName);
     }
 
-    for (const candidate of collectHeuristicCandidates(proseNode.body)) {
+    for (const candidate of collectHeuristicCandidates(proseNode.body, proseNode.node_type)) {
       if (isStoplistedEntityCandidate(candidate)) {
         continue;
       }
@@ -200,9 +225,9 @@ function countOccurrences(body: string, canonicalName: string): number {
   }
 }
 
-function collectHeuristicCandidates(body: string): string[] {
+function collectHeuristicCandidates(body: string, nodeType: string): string[] {
   const candidates: string[] = [];
-  const proseLines = heuristicScanLines(body);
+  const proseLines = heuristicScanLines(body, nodeType);
 
   for (const line of proseLines) {
     CAPITALIZED_MULTIWORD_REGEX.lastIndex = 0;
@@ -214,7 +239,7 @@ function collectHeuristicCandidates(body: string): string[] {
       }
 
       const candidate = match[1];
-      if (candidate) {
+      if (candidate && !looksLikePhraseFragment(candidate)) {
         candidates.push(candidate);
       }
     }
@@ -223,20 +248,29 @@ function collectHeuristicCandidates(body: string): string[] {
   return candidates;
 }
 
-function heuristicScanLines(body: string): string[] {
-  const lines = stripHeuristicNoise(body).split(/\r?\n/);
+function heuristicScanLines(body: string, nodeType: string): string[] {
+  const lines = stripHeuristicNoise(body, nodeType).split(/\r?\n/);
   return lines.filter((line) => {
     const trimmed = line.trim();
-    return trimmed.length > 0 && !trimmed.startsWith("#") && !looksLikeTableRow(trimmed);
+    return (
+      trimmed.length > 0 &&
+      !trimmed.startsWith("#") &&
+      !looksLikeTableRow(trimmed) &&
+      !looksLikeStandaloneLabel(trimmed)
+    );
   });
 }
 
-function stripHeuristicNoise(body: string): string {
+function stripHeuristicNoise(body: string, nodeType: string): string {
   let normalized = body;
 
   normalized = normalized.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/, "");
   normalized = normalized.replace(/```[\s\S]*?```/g, "\n");
   normalized = normalized.replace(/<!--[\s\S]*?-->/g, "");
+  if (PROPOSAL_NODE_TYPES.has(nodeType)) {
+    normalized = normalized.replace(/^\*\*Phase\s+\d+[a-z]?(?:\s+\([^*\n]+\))?\*\*:?.*$/gim, "");
+    normalized = normalized.replace(/^\*\*Phase\s+\d+[a-z]?(?:\s+[^*\n]+)?\*\*:?.*$/gim, "");
+  }
 
   return normalized;
 }
@@ -248,6 +282,15 @@ function looksLikeTableRow(line: string): boolean {
 
   const trimmed = line.trim();
   return trimmed.startsWith("|") || /^\|?[\s:-]+\|[\s|:-]*$/.test(trimmed);
+}
+
+function looksLikePhraseFragment(candidate: string): boolean {
+  const [firstWord] = candidate.trim().split(/\s+/);
+  return firstWord ? FRAGMENT_LEAD_WORDS.has(firstWord) : false;
+}
+
+function looksLikeStandaloneLabel(line: string): boolean {
+  return /^\*\*[^*\n]+\*\*:?\s*$/.test(line.trim());
 }
 
 function incrementEntityCount(

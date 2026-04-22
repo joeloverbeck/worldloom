@@ -387,6 +387,14 @@ test("build removes audited workflow-label entities while keeping real animalia 
         "Change Log Entry",
         "Primary Difference",
         "Natural Story Engines",
+        "Distribution Discipline",
+        "Repairs Applied",
+        "World Laundering",
+        "Breakage Points",
+        "Regional Asymmetry",
+        "Value Stores",
+        "In Brinewick",
+        "An Ash",
         "Required Updates",
         "No Silent Retcons"
       ]) {
