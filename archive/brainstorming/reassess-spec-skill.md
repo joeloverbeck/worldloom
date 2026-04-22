@@ -1,0 +1,3 @@
+# Reassess Spec Skill
+
+Now that we have specs to implement in specs/* and that we're going to add tools and code to the repository, we need a proper reassess-spec skill in .claude/skills/* . I've brought in .claude/skills/reassess-spec-worldwake/* from another repository. I want you to use it as reference to create our repository-local .claude/skills/reassess-spec/* . reassess-spec-worldwake is very mature but also extremely-specific to the other repository; I want you to adapt the hard-won core logic for our repository-local reassess-spec without adopting anything extraneous.
