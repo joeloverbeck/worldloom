@@ -152,8 +152,20 @@ Analyze the spec and identify discrete work units:
 - Ensure **every spec deliverable is covered** — no silent skipping. If a deliverable seems wrong or unnecessary, flag it using the 1-problem / 3-options / 1-recommendation format rather than omitting it. Deliverables that explicitly state no changes are needed (e.g., "No new skill", "No new hook") do not require tickets; note their existence in the Step 4 summary if non-obvious.
 - Use the spec's **"Out of Scope"** or equivalent non-goals section to populate each ticket's Out of Scope field — these are pre-validated non-goals.
 - When multiple spec deliverables share the same file set and cannot be implemented independently, merge them into a single ticket. Note merged deliverables in the Step 4 summary table Notes column.
-- When all deliverables modify the **same file**, decompose by logical section or feature, not by file boundary. Each ticket targeting a different section of the same file is a valid reviewable diff. Note the shared file in the Step 4 summary rather than repeating it per-ticket.
-- When tests or end-to-end validation exercise multiple deliverables simultaneously and cannot be split per-deliverable, a single validation ticket depending on all implementation tickets is a valid decomposition. Note the multi-dependency.
+- When all deliverables modify the **same file** OR land under the **same new package/directory**, decompose by logical section or module, not by file or directory boundary. Each ticket targeting a different section/module is a valid reviewable diff. Note the shared file or package in the Step 4 summary rather than repeating it per-ticket.
+- When tests or end-to-end validation exercise multiple deliverables simultaneously and cannot be split per-deliverable, a single validation ticket depending on all implementation tickets is a valid decomposition. When a serial dependency DAG allows such a validation ticket to depend on the transitive-head ticket that composes all upstream work (e.g., a CLI ticket that wires every parser and CRUD module), listing just that transitive head as the validation ticket's sole `Deps` is acceptable and recommended over enumerating every upstream ticket — the DAG structure is already reconcilable from the upstream tickets' own `Deps` fields. Note the multi-dependency (or transitive-head dependency) in the Step 4 summary. See §Spec-Integration Ticket Shape below for the structural pattern this case instantiates.
+
+### Spec-Integration Ticket Shape
+
+Phase-level integration tickets — whose scope IS the spec's §Verification section, exercising every prior implementation ticket end-to-end — are a recurring worldloom pattern (one capstone per spec across the SPEC-01..SPEC-08 bundle; analogous capstones for SPEC-09 and future specs). Name the shape explicitly when decomposing:
+
+- **What it is**: a single trailing ticket whose acceptance criteria enumerate the spec's §Verification bullets as test sub-cases. It introduces no new production code; it exercises the pipeline composed by the earlier tickets.
+- **What it must contain**:
+  - A fixture-world copy strategy that keeps the real `worlds/<slug>/` tree untouched (e.g., `fs.cpSync` to a temp root) so the test never mutates canon.
+  - Re-enumerated expected counts (not hardcoded), computed from the fixture at test start. Hardcoded counts become stale as canon grows; re-enumeration stays valid over time.
+  - One assertion per spec §Verification bullet (counts, determinism, incremental, drift, schema stability — whichever the spec names). Treat the spec's bullets as the capstone ticket's test matrix.
+  - A wall-clock perf assertion when the spec names a performance gate (e.g., SPEC-08 Phase 1's <30s threshold); leave the spec's aspirational target as a dev-loop expectation rather than a CI gate.
+- **How `Deps` resolves**: prefer the transitive-head convention above (single `Deps: <transitive-head-ticket>`) over enumerating every upstream ticket. The DAG already records the full chain.
 
 ## Step 4: Present Summary for Approval
 
@@ -170,7 +182,7 @@ Column roles:
 - **Effort** — Small / Medium / Large.
 - **Deps** — other tickets in this batch or pre-existing tickets/specs. If all tickets are independent, state this once rather than repeating `None`.
 - **FND** — populate only for tickets with notable FOUNDATIONS concerns (e.g., Rule 5 consequence propagation, Rule 7 Mystery Reserve firewall). Use `—` otherwise.
-- **Notes** — merged deliverables, shared file sets, multi-dependency validation tickets, or other decomposition-relevant details.
+- **Notes** — merged deliverables, shared file sets or shared package/directory, multi-dependency (or transitive-head) validation tickets, or other decomposition-relevant details.
 
 **Wait for user approval or adjustments.** Do not write files until the user confirms.
 
@@ -183,7 +195,7 @@ For each approved ticket, compose its full content following `tickets/_TEMPLATE.
 - **Status**: PENDING
 - **Priority**: HIGH / MEDIUM / LOW (based on dependency order and criticality)
 - **Effort**: Small / Medium / Large
-- **Engine Changes**: None or a list of affected areas (for worldloom: which skills, tools, hooks, or docs are touched)
+- **Engine Changes**: None or a list of affected or newly-introduced areas (for worldloom: which skills, tools, hooks, packages, or docs are touched or added). For tickets that introduce (rather than modify) a pipeline piece, still populate `Engine Changes: Yes` with the introduced piece named; follow with "no impact on existing <X>" when the new piece lives in isolation.
 - **Deps**: Other tickets or specs this depends on
 - **Problem**: What user-facing or architecture problem this solves
 - **Assumption Reassessment** (with today's date): items 1–3 always required; items 4+ from `tickets/_TEMPLATE.md` are a menu — select only those matching the ticket's scope and **renumber surviving items sequentially starting from 4**. Lists like `1, 2, 3, 14` are malformed output.
@@ -211,7 +223,7 @@ After writing all files:
 
 1. **Verify cross-ticket dependency consistency**: For each `Deps` reference, confirm the depended-on ticket actually produces what the dependent ticket needs (types, skills, modules, files). If a dependency is broken (e.g., ticket 005 depends on a skill output from 003 but 003's scope doesn't define it), flag the inconsistency.
 
-2. **Deliverable coverage mapping**: List each spec deliverable and the ticket that covers it (e.g., `D1→001, D2→001, D3→002`). Verify all spec deliverables are accounted for. If any deliverable is missing, flag it. If the spec uses phases or named sections instead of numbered deliverables (e.g., `Phase 2a`, `Part B`), adapt the mapping to use the spec's organizational scheme.
+2. **Deliverable coverage mapping**: List each spec deliverable and the ticket that covers it (e.g., `D1→001, D2→001, D3→002`). Verify all spec deliverables are accounted for. If any deliverable is missing, flag it. If the spec uses phases or named sections instead of numbered deliverables (e.g., `Phase 2a`, `Part B`), adapt the mapping to use the spec's organizational scheme — for named sections, use section names directly (e.g., `§Package location → 001, §SQLite schema → 002`).
 
 3. List:
    - All ticket files created (paths).

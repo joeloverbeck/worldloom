@@ -3,7 +3,7 @@
 **Status**: PENDING
 **Priority**: <LOW|MEDIUM|HIGH>
 **Effort**: <Small|Medium|Large>
-**Engine Changes**: <None|Yes — list affected skills, tools, hooks, or docs>
+**Engine Changes**: <None|Yes — list affected or newly-introduced skills, tools, hooks, packages, or docs>
 **Deps**: <ticket/spec dependencies that currently exist>
 
 ## Problem

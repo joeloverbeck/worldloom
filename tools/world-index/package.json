@@ -1,0 +1,29 @@
+{
+  "name": "@worldloom/world-index",
+  "version": "0.1.0",
+  "description": "Structure-aware SQLite index over worldloom markdown world files",
+  "private": true,
+  "bin": {
+    "world-index": "dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test dist/tests/*.test.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.2.0",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.0",
+    "yaml": "2.8.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "24.7.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
