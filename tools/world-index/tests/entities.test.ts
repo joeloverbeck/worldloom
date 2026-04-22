@@ -290,3 +290,60 @@ test("heuristic extraction strips proposal workflow labels and phrase fragments"
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test("heuristic extraction blocks embedded checkpoint prose from whole-file records", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    writeFileSync(ontologyPath, "- Charter Hall (place)\n", "utf8");
+
+    const registry = loadOntologyRegistry(ontologyPath);
+    const source = [
+      "# Canon Safety Check Trace",
+      "",
+      "1. **World-Truth Check** PASS — every claim cites a stable source.",
+      "2. **Narrator-Truth Check** PASS — every sentence stays in register.",
+      "Primary Rule-3 risk: preserve ordinary procedural cadence.",
+      "Per Phase 3 narrator-reliability mapping, this stays soft canon.",
+      "Charter Hall remains a real place."
+    ].join("\n");
+    const { tree } = parseMarkdown(source);
+    const proseNodes: NodeRow[] = [
+      {
+        node_id: "animalia:artifacts:DA-0099:0",
+        world_slug: "animalia",
+        file_path: path.join(tempRoot, "DA-0099.md"),
+        heading_path: "DA-0099",
+        byte_start: 0,
+        byte_end: 0,
+        line_start: 1,
+        line_end: source.split("\n").length,
+        node_type: "diegetic_artifact_record",
+        body: source,
+        content_hash: contentHashForProse(source),
+        anchor_checksum: contentHashForProse(source),
+        summary: null,
+        created_at_index_version: CURRENT_INDEX_VERSION
+      }
+    ];
+
+    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
+    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+
+    for (const banned of [
+      "Canon Safety Check Trace",
+      "Truth Check",
+      "Primary Rule",
+      "Per Phase"
+    ]) {
+      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
+      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
+    }
+
+    assert.equal(mentions.some((mention) => mention.entity_name === "Charter Hall"), true);
+    assert.equal(entityNames.has("Charter Hall"), true);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});

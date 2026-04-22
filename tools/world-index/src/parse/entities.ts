@@ -33,6 +33,7 @@ const FRAGMENT_LEAD_WORDS = new Set([
   "Into",
   "Of",
   "On",
+  "Per",
   "To",
   "Under",
   "Upon",

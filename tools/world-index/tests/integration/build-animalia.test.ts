@@ -384,17 +384,21 @@ test("build removes audited workflow-label entities while keeping real animalia 
         "Mystery Reserve",
         "Continuity Archivist",
         "Mystery Curator",
+        "Canon Safety Check Trace",
         "Change Log Entry",
         "Primary Difference",
+        "Primary Rule",
         "Natural Story Engines",
         "Distribution Discipline",
         "Repairs Applied",
+        "Truth Check",
         "World Laundering",
         "Breakage Points",
         "Regional Asymmetry",
         "Value Stores",
         "In Brinewick",
         "An Ash",
+        "Per Phase",
         "Required Updates",
         "No Silent Retcons"
       ]) {
@@ -404,6 +408,7 @@ test("build removes audited workflow-label entities while keeping real animalia 
       for (const retained of [
         "Vespera Nightwhisper",
         "Melissa Threadscar",
+        "Charter Hall",
         "Copper Weir",
         "Ash-Seal commercial-company Brinewick anomaly"
       ]) {

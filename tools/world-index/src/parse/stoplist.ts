@@ -7,6 +7,7 @@ export const CAPITALIZED_MULTIWORD_STOPLIST = new Set<string>([
   "Action Report",
   "Age Details",
   "Breakage Points",
+  "Canon Safety Check Trace",
   "Change Log Entry",
   "Continuity Archivist",
   "Core Pressures",
@@ -17,10 +18,12 @@ export const CAPITALIZED_MULTIWORD_STOPLIST = new Set<string>([
   "Natural Story Engines",
   "No Silent Retcons",
   "Primary Difference",
+  "Primary Rule",
   "Regional Asymmetry",
   "Required Updates",
   "Repairs Applied",
   "Tone Contract",
+  "Truth Check",
   "Value Stores",
   "World Laundering"
 ]);
