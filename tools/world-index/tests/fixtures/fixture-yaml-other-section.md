@@ -1,0 +1,5 @@
+## Foo
+
+```yaml
+foo: bar
+```
