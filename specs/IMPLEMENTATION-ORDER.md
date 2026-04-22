@@ -1,12 +1,12 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
-This document sequences the spec bundle (`SPEC-01` through `SPEC-08`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
+This document sequences the spec bundle (`SPEC-01` through `SPEC-10`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle (SPEC-01…SPEC-08): foundation (index), then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
 
 ## Implementation order (for builders)
 
@@ -37,7 +37,10 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-01` World Index — completed 2026-04-22; implementation landed at `tools/world-index/`, spec archived at `archive/specs/SPEC-01-world-index.md`
 - `SPEC-07 Part A` docs updates (may proceed in parallel with code — docs describe the target architecture)
 
-**Tier 2 (depends on Tier 1)**:
+**Tier 1.5 (depends on SPEC-01)**:
+- `SPEC-10` Entity Surface Redesign — required before entity-sensitive retrieval consumers rely on `named_entity`, `mentions_entity`, `find_named_entities`, or `find_impacted_fragments`
+
+**Tier 2 (depends on Tier 1.5)**:
 - `SPEC-02` MCP Retrieval Server — full tool surface with `submit_patch_plan` stubbed
 - `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent)
 
@@ -133,6 +136,8 @@ Phase 1 (Read Path)
   │
   ├── SPEC-01 World Index ─────────┐
   │                                ▼
+  ├── SPEC-10 Entity Surface Redesign ─┤
+  │                                ▼
   ├── SPEC-02 MCP Server ──────────┤
   │                                ▼
   ├── SPEC-05 Hooks 1,2,4 ─────────┤
@@ -180,8 +185,9 @@ Phase 4 (Deferred: Prose Fragmentization) — separate spec + approval
 Estimates assume a single builder working at ~half-time; scale accordingly.
 
 - **Phase 0**: 1 session (spec bundle landed; gitignore; scaffold)
-- **Phase 1**: 4–6 sessions
+- **Phase 1**: 5–7 sessions
   - SPEC-01 (index + parser + CLI): 2 sessions
+  - SPEC-10 (entity-surface remediation): 0.5–1 session
   - SPEC-02 (MCP server + tools): 1 session
   - SPEC-05 Part A (3 hooks): 1 session
   - SPEC-06 Part A (canon-addition read-side): 1 session
@@ -228,6 +234,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-07 Docs Updates | ✓ specified |
 | SPEC-08 Migration & Phasing | ✓ specified |
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
+| SPEC-10 Entity Surface Redesign | ✓ specified |
 | IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10 is a later architectural remediation of SPEC-01's entity surface after repeated live `named_entity` audit failures showed that the original heuristic/entity contract was too broad.
