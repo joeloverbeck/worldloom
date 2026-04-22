@@ -14,7 +14,7 @@ import { sync } from "../../src/commands/sync";
 import { verify } from "../../src/commands/verify";
 import { enumerate } from "../../src/enumerate";
 import { extractEntities, loadOntologyRegistry } from "../../src/parse/entities";
-import { parseWorldFile } from "../../src/commands/shared";
+import { ENTITY_SOURCE_NODE_TYPES, parseWorldFile } from "../../src/commands/shared";
 import { CURRENT_INDEX_VERSION } from "../../src/schema/version";
 
 const WORLD_SLUG = "animalia";
@@ -28,27 +28,6 @@ const ANIMALIA_SOURCE = path.resolve(
   "worlds",
   WORLD_SLUG
 );
-const NON_ENTITY_NODE_TYPES = new Set<NodeType>([
-  "canon_fact_record",
-  "change_log_entry",
-  "mystery_reserve_entry",
-  "open_question_entry",
-  "adjudication_record",
-  "invariant",
-  "ontology_category",
-  "section",
-  "subsection",
-  "bullet_cluster",
-  "character_record",
-  "diegetic_artifact_record",
-  "proposal_card",
-  "proposal_batch",
-  "character_proposal_card",
-  "character_proposal_batch",
-  "retcon_proposal_card",
-  "audit_record"
-]);
-
 function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-animalia-"));
   const target = path.join(root, "worlds", WORLD_SLUG);
@@ -86,7 +65,7 @@ function loadExpectedNodeCounts(root: string): Map<NodeType, number> {
     const parsed = parseWorldFile(root, WORLD_SLUG, relativePath);
     for (const node of parsed.nodes) {
       counts.set(node.node_type, (counts.get(node.node_type) ?? 0) + 1);
-      if (NON_ENTITY_NODE_TYPES.has(node.node_type)) {
+      if (ENTITY_SOURCE_NODE_TYPES.has(node.node_type)) {
         proseNodes.push(node);
       }
     }

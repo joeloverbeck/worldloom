@@ -29,7 +29,7 @@ import { extractSemanticEdges } from "../parse/semantic";
 import { extractYamlNodes } from "../parse/yaml";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
-const PROSE_NODE_TYPES = new Set([
+export const ENTITY_SOURCE_NODE_TYPES = new Set([
   "mystery_reserve_entry",
   "open_question_entry",
   "adjudication_record",
@@ -358,7 +358,7 @@ function loadPersistedProseNodes(db: Database.Database, worldSlug: string): Node
     )
     .all(worldSlug) as NodeRow[];
 
-  return rows.filter((row) => PROSE_NODE_TYPES.has(row.node_type));
+  return rows.filter((row) => ENTITY_SOURCE_NODE_TYPES.has(row.node_type));
 }
 
 function refreshUnresolvedAttributionDiagnostics(

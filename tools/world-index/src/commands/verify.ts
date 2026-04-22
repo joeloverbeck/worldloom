@@ -105,7 +105,9 @@ function loadStoredFileNodes(
       `
         SELECT node_id, content_hash
         FROM nodes
-        WHERE world_slug = ? AND file_path = ?
+        WHERE world_slug = ?
+          AND file_path = ?
+          AND node_type != 'named_entity'
         ORDER BY node_id
       `
     )

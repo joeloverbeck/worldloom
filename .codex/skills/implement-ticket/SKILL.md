@@ -158,6 +158,8 @@ For tool/index/schema tickets, package-local readonly DB queries and inline `nod
 
 If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence. Use the isolated result to decide whether the broad lane is current-ticket fallout or unrelated noise.
 
+If the broad `node --test <file>` lane remains file-opaque but isolated subtests pass, run the compiled test file directly from the same package root before classifying the broad lane as noisy. Direct execution can expose subtest-local TAP output or assertion traces that the harness-level invocation did not surface.
+
 If an isolated JS/TS `node --test` lane still fails without surfacing the owned seam, rerun the exact assertion logic outside the test harness with a direct package-local probe that exercises the same invariant against the same rebuilt artifact root. When that direct probe is the clearest truthful boundary, record it as the acceptance surface and classify the still-opaque harness lane as noisy/non-acceptance proof instead of overclaiming it.
 
 ### 6. Close out the ticket honestly
