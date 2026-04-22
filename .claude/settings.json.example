@@ -1,0 +1,83 @@
+{
+  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks activate progressively across phases per specs/SPEC-08-migration-and-phasing.md. Each hook's implementation lives at tools/hooks/dist/*.js, built from tools/hooks/src/*.ts (see specs/SPEC-05-hooks-discipline.md).",
+
+  "_phase_gating": {
+    "phase_1_active_hooks": ["hook1-user-prompt-context", "hook2-guard-large-read", "hook4-subagent-localization"],
+    "phase_2_active_hooks": ["hook3-guard-direct-edit", "hook5-validate-after-patch"],
+    "activation_note": "In Phase 1, leave hook3 and hook5 entries removed (or comment them out in the actual settings.json). In Phase 2, uncomment/add them after SPEC-03 (patch engine) and SPEC-04 (validators) ship."
+  },
+
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "_phase": 1,
+        "_spec": "SPEC-05 Hook 1",
+        "_purpose": "Inject context preface: world slug, top relevant node ids, named entities, size warnings",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/hook1-user-prompt-context.js"
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "_phase": 1,
+        "_spec": "SPEC-05 Hook 2",
+        "_purpose": "Block full Read of CANON_LEDGER.md (always) and other protected files when >300 lines; redirect to mcp__worldloom__get_context_packet",
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/hook2-guard-large-read.js"
+          }
+        ]
+      },
+      {
+        "_phase": 2,
+        "_spec": "SPEC-05 Hook 3",
+        "_purpose": "Block direct Edit/Write on engine-only surfaces (13 mandatory files, characters/, diegetic-artifacts/, adjudications/); redirect to mcp__worldloom__submit_patch_plan",
+        "_remove_until_phase_2": true,
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/hook3-guard-direct-edit.js"
+          }
+        ]
+      }
+    ],
+
+    "SubagentStart": [
+      {
+        "_phase": 1,
+        "_spec": "SPEC-05 Hook 4",
+        "_purpose": "Bootstrap localization sub-agents with retrieval discipline (exact ids > entity names > heading paths > backlinks > lexical; no semantic-only)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/hook4-subagent-localization.js"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "_phase": 2,
+        "_spec": "SPEC-05 Hook 5",
+        "_purpose": "Auto-run structural validators after successful submit_patch_plan; log and surface fails via system reminder",
+        "_remove_until_phase_2": true,
+        "matcher": "mcp__worldloom__submit_patch_plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/hooks/dist/hook5-validate-after-patch.js"
+          }
+        ]
+      }
+    ]
+  }
+}

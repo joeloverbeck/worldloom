@@ -13,6 +13,7 @@ Verify the following before any mining work begins:
 5. **Load FOUNDATIONS + world files + artifact**: load FOUNDATIONS.md and the 13 world files into working context per the oversize-file protocol below; load the source artifact body.
 6. **ID allocation**: allocate `next_batch_id` by scanning `worlds/<world-slug>/proposals/batches/` for existing BATCH-NNNN frontmatter; allocate `next_pr_id` by scanning `worlds/<world-slug>/proposals/` for existing PR-NNNN frontmatter. Never reuse a dropped ID.
 7. **Existing INDEX read**: read `worlds/<world-slug>/proposals/INDEX.md` if present (for append at Phase 8).
+8. **Prior-batch positional-flag scan**: if the source artifact's frontmatter declares `author_character_id` OR a named `author`, scan existing batch manifests in `worlds/<world-slug>/proposals/batches/` for `mr_positional_flags` entries referencing the same author (by character-id or name). Surface any prior flags to the user in the Phase 8 deliverable summary as an elevated-positional-vigilance signal for this mining run. Do NOT auto-reject cards on that basis — the flag is informational; the user weighs whether 6d.3 scrutiny needs strengthening. A clean prior-batch scan (zero flags matching the author) is recorded in the batch manifest notes as confirmation; if prior flags are found, each matching flag's batch-id + MR-id overlap is listed in the Phase 8 summary so the user can cross-reference before approving cards.
 
 ## Oversize-File Protocol
 

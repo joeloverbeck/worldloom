@@ -22,12 +22,25 @@ future canon-addition runs. Populate at Phase 13a from the proposal's actual
 touch surfaces. List one item per line under each tag so future runs can
 grep `worlds/<world-slug>/adjudications/*.md` for "M-2", "ONT-1", "CF-0021",
 etc. and find every prior adjudication that touched the same surface.
+
+Semantics of "touched" (applies uniformly to all four "_touched" fields):
+list only items SUBSTANTIVELY AFFECTED by this proposal — items receiving a
+CH-NNNN clarification annotation, a firewall addition, an extension block,
+a new entry, a mod_history entry, a pressured-deferral annotation, or a
+compatibility-with-explicit-stabilizer-language commitment. Do NOT list
+items merely tested-and-found-compatible or merely referenced. Over-listing
+dilutes grep signal for future runs: a grep for prior ONT-1 adjudications
+should return records that substantively touched ONT-1, not records that
+ran Phase 2 invariant checks against every invariant and logged the full
+list. When Phase 2 / Phase 6b / Phase 10 testing finds an item compatible
+without any adjudication-produced language change, that item is NOT touched
+for Discovery-field purposes.
 -->
 
-- **mystery_reserve_touched**: [M-?, M-?]   <!-- e.g., [M-1, M-2, M-5, M-6] -->
-- **invariants_touched**: [???-?, ???-?]    <!-- e.g., [ONT-1, ONT-2, CAU-1, SOC-4, AES-3] -->
-- **cf_records_touched**: [CF-????]         <!-- new + modified, e.g., [CF-0021, CF-0022, CF-0023, CF-0003, CF-0004, CF-0008, CF-0019] -->
-- **open_questions_touched**: [???]         <!-- list of OPEN_QUESTIONS.md sections committed or newly added -->
+- **mystery_reserve_touched**: [M-?, M-?]   <!-- M-N entries substantively touched — firewall extensions, narrowings, new entry additions, or explicit cross-application commitments this adjudication; e.g., [M-1, M-2, M-5, M-6]. Do NOT list entries merely checked-and-preserved with no language change. -->
+- **invariants_touched**: [???-?, ???-?]    <!-- invariants substantively touched — CH-NNNN clarification annotations, firewall additions, extension blocks, or explicit stabilizer-language commitments this adjudication; e.g., [ONT-1, ONT-2, CAU-1, SOC-4, AES-3]. Do NOT list invariants merely tested-and-found-compatible during Phase 2. -->
+- **cf_records_touched**: [CF-????]         <!-- CF-NNNN ids new + modified this adjudication; e.g., [CF-0021, CF-0022, CF-0023, CF-0003, CF-0004, CF-0008, CF-0019] -->
+- **open_questions_touched**: [???]         <!-- OPEN_QUESTIONS.md sections committed, newly added, or pressured this adjudication (per references/counterfactual-and-verdict.md OQ disposition categories: NEW, PRESSURED, RESOLVED). Do NOT list UNCHANGED items merely visited during analysis. -->
 - **change_id**: CH-NNNN                    <!-- the Change Log Entry id this adjudication produced (accept branches only) -->
 
 ---

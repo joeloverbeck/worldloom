@@ -75,7 +75,10 @@ why_not_universal: []                        # required UNLESS social=rumor — 
 narrator_reliability_basis:                  # Phase 3 mapping audit trail
   stance: ""                                 # firsthand | secondhand | propagandistic | legendary | outside_horizon
   central_to_artifact: false                 # true if the claim is central to artifact's purpose
-  cross_referenced_in_canon: false           # true if Phase 6d.1 evidence-breadth found supporting evidence
+  cross_referenced_in_canon: false           # true ONLY if Phase 6d.1 evidence-breadth found FULL support for the
+                                             # specific operational detail (pass verdict); false if 6d.1 found only
+                                             # partial support for the underlying mechanic (partial verdict → soft_canon
+                                             # via sole-source-for-the-specification mapping per Phase 3 reference).
   mapping_rationale: >
     One-paragraph explanation of why Phase 3 produced this proposed_status.
 

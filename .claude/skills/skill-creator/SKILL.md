@@ -135,6 +135,10 @@ Ask about every gap that has not already been answered by the proposal or prior 
 - **Batch vs single-artifact output** — if the skill emits multiple artifacts per invocation (a batch), ask: (a) batch size default + user override semantics; (b) fill-priority order when requested size is below slot count; (c) empty-slot policy (preserve empty as a diagnostic signal, or substitute from another slot); (d) batch-manifest file vs inline-batch file; (e) batch-level safety check as a peer of per-artifact checks, not a replacement.
 - **Examples** — select 1-2 concrete worked inputs (optional, but usually worth it for complex pipelines).
 
+### Out-of-scope concerns raised during interview
+
+If the user raises a concern during the gap-filler interview that names a downstream sibling skill's behavior as a risk factor (e.g., "my worry is that `<sibling>` will drop this content," "I'm concerned `<sibling>`'s schema won't preserve X"), and the concern is out-of-scope for this skill (per the one-skill-per-invocation guardrail), (a) document the concern in the generated skill's Guardrails as a "Known concern to surface to maintainers" note naming the downstream sibling + the specific risk + why this skill's design minimizes but does not eliminate the risk, and (b) surface it at Step 8 Next-Steps as an explicit follow-up option ("Run `skill-audit` on `<sibling>` to address the <risk>"). This keeps out-of-scope concerns auditable rather than scattered, and makes the interop contract maintainable by naming the sibling that needs attention.
+
 ### Starting Confidence (compile mode)
 
 Before asking the first gap-filler question, compute initial confidence from the reference proposal:
@@ -161,7 +165,7 @@ Announce the computed starting confidence to the user in the first gap-filler me
 
 ## Step 5: Draft Skill Design (Section-by-Section)
 
-Present the draft in this order. Get user approval per section. After 2 consecutive approvals under auto mode (3 otherwise), batch remaining sections into groups of 2-3. Keep any substantially higher-risk section standalone.
+Present the draft in this order. Get user approval per section. After 2 consecutive approvals under auto mode (3 otherwise), batch remaining sections into groups of 2-3. Keep any substantially higher-risk section standalone. Under auto mode, after 5+ consecutive approvals with no substantive pushback, single-message batches covering all remaining sections are acceptable provided no section is higher-risk AND the Notes-on-the-shape discipline is preserved per section (rationale notes must still appear for each section in the batch). The "groups of 2-3" rule remains the default; the 5+-sustained-approval case is the explicit relaxation for prolonged agreement.
 
 **Phase breakdown exception**: The section order (below) lists "Phase breakdown" as a single item, but pipelines routinely have 10+ phases plus branch logic regardless of class — canon-mutating pipelines grow from consequence-propagation branches, canon-reading skills grow from multi-sub-check Canon Safety phases, and meta-tooling audits grow from per-severity repair menus. When the phase breakdown exceeds ~8 phases OR contains explicit branch logic (e.g., accept / non-accept, pre/post-audit, pre/post Canon Safety Check), split it into at most 2 presentations (e.g., generation track vs validation+commit track, or pre-adjudication vs post-adjudication + branches). Use a natural pipeline seam as the split boundary — pre/post Canon Safety Check [canon-reading with in-world output; canon-mutating], pre/post adjudication [canon-mutating], or pre/post escalation gate [canon-mutating with multi-critic phases] — not an arbitrary phase number.
 
@@ -209,6 +213,17 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - <file> — <why this skill needs it>
 - ...
 
+<Multi-directory aggregate pattern — optional sub-section. If the skill's Pre-flight
+ assembles a conceptual registry by reading across multiple sub-directories (e.g.,
+ a Person Registry from `characters/` + `diegetic-artifacts/` + `adjudications/`;
+ an Artifact Corpus from every `diegetic-artifacts/*.md`; a Retcon History from
+ `adjudications/PA-NNNN-accept*.md` across all worlds), declare the registry as
+ a peer sub-section to the flat world-file list, naming it explicitly (e.g.,
+ "### Mandatory Person Registry — always loaded at Pre-flight"). This keeps
+ multi-directory aggregates structurally visible rather than scattered across
+ line-item entries, and lets the Step 6 conformance check verify the aggregate
+ was loaded. Omit this sub-section for skills with only flat-file prerequisites.>
+
 ## Pre-flight Check                      [canon-mutating, and meta-tooling skills that read world state or allocate monotonic IDs — before Phase 0]
 <Precondition checks that run before any pipeline phase:
  - load docs/FOUNDATIONS.md into working context
@@ -236,12 +251,12 @@ the generated skill numbers it concretely based on its own phase count.>
  cross-artifact collisions (e.g., two artifacts jointly resolving a Mystery Reserve
  entry that neither alone would).>
 
-## Phase N+1: Commit / Write            [canon-mutating — after final validation phase]
+## Phase N+1: Commit / Write            [canon-mutating — after final validation phase; canon-reading with HARD-GATE — after final validation phase]
 <The HARD-GATE enforcement point. This phase:
  - presents the complete deliverable summary to the user
  - waits for explicit user approval (HARD-GATE fires here)
  - on approval: atomic write of all output files under `worlds/<world-slug>/` (or the declared scope)
- - emits the Change Log Entry per `templates/change-log-entry.yaml`
+ - emits the Change Log Entry per `templates/change-log-entry.yaml`  [canon-mutating only]
  - reports paths written; does NOT commit to git>
 
 
@@ -332,6 +347,7 @@ Before any file is written, audit the draft against class-specific requirements.
 - [ ] If the output carries in-world knowledge, beliefs, or capabilities (diegetic texts, character data, faction profiles, event seeds, option cards, or any artifact whose content could leak Mystery Reserve forbidden answers): includes a Canon Safety Check phase preventing accidental mystery resolution, restricted-knowledge leaks, or silent canon creation (Rule 7: Preserve Mystery Deliberately). This gate matches the failure mode it catches: any artifact carrying in-world content, not only text artifacts.
 - [ ] If proposal-generating (produces candidate facts): explicit note that output is NOT canon until it passes the canon-addition skill.
 - [ ] If the output carries in-world content: Rule 7 is explicitly listed in the generated skill's "Validation Rules This Skill Upholds" section (the Canon Safety Check phase satisfies the structural check above; listing Rule 7 in the Validation Rules section is the separate documentation check).
+- [ ] **Commit / Write phase (conditional on HARD-GATE)**: if the skill declares a HARD-GATE (recommended for canon-reading whose deliverable exceeds ~3 files or requires explicit user review), it must also declare an explicit **Commit / Write phase** *after* the final validation phase where the gate fires on user approval and atomic writes happen. A HARD-GATE without a named Commit phase has nowhere to fire and fails this check. Canon-reading skills without a HARD-GATE (rare — e.g., single-file generators with trivial deliverables) are exempt.
 - [ ] **World-scope declaration**: the skill names exactly one of {single-world, all-worlds, meta} as its operating scope. If single-world, a required `world_slug` argument is declared, and all world-file reads are rooted at `worlds/<world-slug>/` — never at repo root.
 
 ### meta-tooling Additional Checks
@@ -362,11 +378,11 @@ Only reachable if Step 6 passes clean AND all design sections were user-approved
 1. Write `.claude/skills/<slug>/SKILL.md`.
 2. Write `.claude/skills/<slug>/templates/*.yaml` for each Canon Fact Record or Change Log Entry schema the skill references. **Start from skill-creator's own `.claude/skills/skill-creator/templates/canon-fact-record.yaml` and `.claude/skills/skill-creator/templates/change-log-entry.yaml`** — these are the canonical generic references (already loaded into context at Step 1). Do NOT start from a sibling skill's templates (e.g., `create-base-world/templates/*.yaml`) — those are specialized copies that have drifted from the generic by design, and re-deriving from them propagates per-sibling comments into new skills. Copy the generic, then trim fields that do not apply and adjust phase references to match the new skill's numbering.
 3. Write `.claude/skills/<slug>/templates/<output-type>.md` (or `.yaml`) if the skill has a primary output format that is neither a Canon Fact Record nor a Change Log Entry — e.g., a character dossier, a diegetic artifact, a proposal card, an adjudication report, a triage file. These are NOT copies of skill-creator's generic CF/Change-Log references (those apply only when the skill emits CF records or Change Log Entries directly — covered by step 2). Two sub-classes with different authoring disciplines:
-   - **(a) Templates structurally parallel to a sibling skill's downstream input format** — e.g., a proposal card that `canon-addition` consumes, a retcon-proposal card, or any candidate-record whose fields a downstream sibling will field-copy. **Derive from that sibling's template**: copy the structure, adjust phase references to match the new skill's numbering, add skill-specific fields, and preserve CF-schema parity fields (`type`, `scope` / `recommended_scope`, `domains_affected` / `domains_touched`, `distribution`, `source_basis`) byte-for-byte so downstream acceptance is a field-copy rather than a field-re-derivation. Document the parity intent in a frontmatter comment so future maintainers preserve it across schema evolution. Examples: `propose-new-canon-facts/templates/proposal-card.md`, `canon-facts-from-diegetic-artifacts/templates/proposal-card.md`.
-   - **(b) Templates for output formats unique to this skill** — no downstream sibling consumer, no CF-schema parity obligation. **Authored from scratch** against the skill's Output specification. Examples: `character-generation/templates/character-dossier.md`, `diegetic-artifact-generation/templates/diegetic-artifact.md`.
+   - **(a) Templates structurally parallel to a sibling skill's downstream input format** — e.g., a proposal card that `canon-addition` consumes (CF-schema parity), a retcon-proposal card, a character proposal card that `character-generation` consumes (character-brief-schema parity), or any candidate-record whose fields a downstream sibling will field-copy at parse time. **Derive from that sibling's template**: copy the structure, adjust phase references to match the new skill's numbering, add skill-specific fields, and **preserve the downstream sibling's parse-time field schema byte-for-byte** so downstream acceptance is a field-copy rather than a field-re-derivation. The specific fields to preserve depend on the consumer: for `canon-addition` consumers, preserve CF-schema parity (`type`, `scope` / `recommended_scope`, `domains_affected` / `domains_touched`, `distribution`, `source_basis`); for `character-generation` consumers, preserve its Phase 0 required+optional input fields (`current_location`, `place_of_origin`, `date`, `species`, `age_band`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`, `major_local_pressures`, `intended_narrative_role`, + optional `central_contradiction` / `desired_emotional_tone` / `desired_arc_type` / `taboo_limit_themes`); for other siblings, preserve whatever schema their parse-time step consumes. Document the parity intent + named consumer in a frontmatter comment so future maintainers preserve it across schema evolution. Examples: `propose-new-canon-facts/templates/proposal-card.md` (canon-addition consumer), `canon-facts-from-diegetic-artifacts/templates/proposal-card.md` (canon-addition consumer), `propose-new-characters/templates/proposal-card.md` (character-generation consumer).
+   - **(b) Templates for output formats unique to this skill** — no downstream sibling consumer, no parse-time parity obligation. **Authored from scratch** against the skill's Output specification. Examples: `character-generation/templates/character-dossier.md`, `diegetic-artifact-generation/templates/diegetic-artifact.md`.
 
-   Canon-reading skills with in-world outputs almost always need sub-class (b); canon-reading skills producing candidate records for adjudication need sub-class (a); canon-mutating skills may need either or both in addition to the CF/Change-Log templates. Sibling derivation (sub-class a) is the correct pattern where CF-schema parity matters — "from scratch" applies only to sub-class (b), not as a blanket rule.
-4. Write `.claude/skills/<slug>/examples/*.md` for approved worked examples (max 2). Skip if none were selected.
+   Canon-reading skills with in-world outputs that have no downstream-sibling consumer need sub-class (b) (e.g., character dossiers, diegetic artifacts written for world-level storage); canon-reading skills producing candidate records consumed by a downstream sibling need sub-class (a) (whether the consumer is `canon-addition` for CF proposals, `character-generation` for character proposal cards, or any future sibling with a parse-time schema); canon-mutating skills may need either or both in addition to the CF/Change-Log templates. Sibling derivation (sub-class a) is the correct pattern whenever the template's consumer is a named downstream skill — "from scratch" applies only to sub-class (b), not as a blanket rule.
+4. Write `.claude/skills/<slug>/examples/*.md` for approved worked examples (max 2). Skip if none were selected. **Skeletal-to-hybrid expansion**: If the source proposal's example is in a skeletal register (YAML-only, frontmatter-only, prose-fragment-only, or structured-fields-without-body) and the generated skill's output format is richer (hybrid frontmatter + markdown body, multi-section, multi-file), expand the example faithfully — derive body prose from the skeletal fields plus the proposal's phase definitions, preserving the example's semantic content and scaling each field into the section or subsection that field maps to. Flag the expansion in the example's header comment ("Adapted from the source proposal's <NNNN> example: YAML-only source expanded to hybrid format per this skill's Phase <N> output schema") so a maintainer can trace derived-from-source. Do NOT invent new semantic content during expansion — limit additions to what the skeletal source implies or what the skill's own phase definitions dictate.
 5. **Compile mode only**: move the source file from `brainstorming/` to `archive/brainstorming/` **preserving its original filename** — do NOT rename on archival even if the final skill slug differs from the source filename (the source filename is a separate identifier from the skill slug, and preserving it keeps the authored-name audit trail intact). If `archive/brainstorming/` does not yet exist, run `mkdir -p archive/brainstorming/` first. Choose the move command by tracked-state:
    - **When the source is tracked**: use `git mv brainstorming/<source-filename> archive/brainstorming/<source-filename>` — it preserves rename history so the proposal-to-skill lineage stays legible in `git log --follow`.
    - **When the source is untracked** (the common case for fresh brainstorming files produced by the `brainstorm` skill or authored outside git's index): use plain `mv brainstorming/<source-filename> archive/brainstorming/<source-filename>`. An untracked file has no rename history to preserve, and `git mv` will fail with `fatal: not under version control`.
@@ -386,8 +402,11 @@ What would you like to do next?
 1. Invoke the new skill to test it on real input
 2. Create another skill from a different proposal
 3. Run `skill-audit` on the new skill (structural audit, no invocation)
-4. Done for now — I'll review the skill file later
+[N]. Run `skill-audit` on `<downstream-sibling>` to address <out-of-scope concern>   [conditional — only appears when out-of-scope concerns were raised during the interview per Step 4 §Out-of-scope concerns raised during interview]
+<N+1>. Done for now — I'll review the skill file later
 ```
+
+**Conditional out-of-scope-concern option**: If the user raised a concern about a downstream sibling skill during the gap-filler interview (per Step 4 §Out-of-scope concerns raised during interview), insert a menu item naming that sibling and the concern. The item's purpose is to give the user a concrete follow-up path without re-typing the concern from scratch. Omit the item entirely when no out-of-scope concerns were raised. The numbering shifts: "Done for now" is always the last item.
 
 If the user invokes a sibling skill, the session ends cleanly — skill-creator does not chain.
 

@@ -79,6 +79,8 @@ Three batch-wide tests over surviving cards:
 - **Mutual-contradiction**: no two cards assert incompatible facts. Iterate all C(N,2) card-pairs. Any hit → drop one card via 6f.
 - **Single-narrator concentration**: if **> 3** cards hinge on the artifact's sole testimony (i.e., fail 6d.1 individually but pass via `proposed_status` demotion), flag in manifest `single_narrator_concentration_flag` with count + per-card contribution. Not auto-reject; HARD-GATE surfaces this. If **> 6** sole-testimony cards (i.e., 7 or more), loop to Phase 3 with user decision. The 4-6 range is flag-only; 7+ triggers loop.
 
+  **Post-drop-list re-evaluation.** After Phase 8 HARD-GATE drop-list application, re-evaluate the concentration count against the post-drop card count before final manifest write. If the post-drop count falls below the 4-card flag threshold, set `triggered: false` and record both counts in the `rationale` field (e.g., "pre-drop count 5 in 4-6 flag band; post-drop count 3 sub-threshold after user-drop of PR-NNNN, PR-MMMM"). If the post-drop count remains in the 4-6 band, leave `triggered: true` with the updated count and an analogous rationale. Do NOT preserve a pre-drop `triggered: true` with a sub-threshold count — that state is internally contradictory. Joint-closure and mutual-contradiction checks may be left in their pre-drop evaluation state, since dropping cards can only REDUCE pair-coverage and cannot introduce new hits; dropped-pair results are retained as audit evidence per existing drop-list behavior (see `phases-7-8-validate-and-commit.md` Drop-list behavior).
+
 ## Phase 6f Repair Sub-Pass
 
 Fires on any 6a-6e fail. Four repair types, applied in preference order:

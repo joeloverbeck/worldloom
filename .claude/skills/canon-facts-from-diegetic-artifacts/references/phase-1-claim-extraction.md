@@ -26,7 +26,16 @@ Extract at **independent-factual-assertion granularity**: one claim per independ
 - Purely descriptive or tonal prose without an institutional or world-level claim (e.g., *"Gresh vomited"*, *"The tracking took five days"* where the day-count is texture not institutional) does NOT produce a claim row unless the detail asserts a canonizable fact (*"Tracking took five days"* IS a claim row if the day-count implies tracking-difficulty texture that downstream phases will consider).
 - Direct speech reported by the narrator is **one claim per speech-act** (the leader shouted *"nothing but meat"*), tagged `asserted` for the speech-act-occurred claim; the speech-act's CONTENT is not a separate claim at Phase 1 (content-reading is a Phase 6 diegetic-to-world-laundering concern).
 
-**Expected counts calibration**: For a well-composed chronicle-length artifact of ~2500-3500 words in institutional-deposition register, expect 80-130 claims. Significantly fewer (< 50) suggests under-extraction or the artifact is unusually texture-dense; significantly more (> 160) suggests over-extraction of voice/flavor that Phase 5 R10 will winnow. Use these as sanity signals, not hard thresholds — a voice-heavy travelogue may legitimately produce 40 claims, and a dense charter-recital may produce 200.
+**Expected counts calibration**: Use the table below as a sanity signal, not a hard threshold. Over-extraction is cheap; R10 (Phase 5) winnows voice/flavor later. Under-extraction is the costly error because missed claims cannot be recovered downstream.
+
+| Artifact shape | Length | Expected claim count |
+|---|---|---|
+| Chronicle / institutional deposition / charter recital | ~2500-3500 words | 80-130 |
+| Dense charter-recital or after-action report (institutional register) | 3500+ words | 150-200 |
+| Short voice-heavy artifact (travelogue, sermon, personal letter) | < 2000 words | 40-100 — the higher count reflects independent-assertion granularity on voice-rich prose where rhetorical flourishes and narrator asides each produce claim rows that Phase 5 R10 later winnows |
+| Fragmentary myth / inscription / short legal decree | < 500 words | 10-40 |
+
+Counts well below the low band suggest under-extraction; counts well above the high band suggest a Phase 5 R10 surge is coming but is not itself a problem at Phase 1.
 
 ## Factual-vs-Voice Distinction
 
@@ -41,6 +50,23 @@ Distinguish factual assertions (canonizable candidates) from voice/flavor (autho
 | *"He did not say this in the register of apology. He said it in the register of procedure."* | Yes — register-distinction fact about institutional ritual form |
 
 When in doubt, record the claim. Over-extraction is cheap; under-extraction loses canonizable material that cannot be recovered downstream.
+
+## Leveraging Source-Artifact Self-Checks
+
+When the source artifact ships with its own Canon Safety Check Trace (Phase 7a-7e for `diegetic-artifact-generation`-authored artifacts), the trace is INFORMATIONAL for this skill's mining purposes — it pre-validates the artifact's claim_map against canon at the time of artifact-generation, but does NOT substitute for this skill's per-candidate Phase 6 CSC.
+
+**What the self-check informs**:
+
+- Phase 2 classification: claims the artifact tagged `canonically_true` with CF-refs are likely `grounded`; claims tagged `partially_true` with CF-refs are likely `partially_grounded`. Treat these as hints; verify against current canon state (the artifact's self-check reflects canon state at generation time, which may have drifted).
+- Phase 6a / 6b speed: invariants the artifact explicitly tested and passed can be spot-checked rather than fully re-derived; MR entries the artifact explicitly firewalled can be confirmed-absent-of-touch quickly rather than exhaustively re-audited. The per-card 6a and 6b records must still enumerate every invariant and every MR id — you are accelerating confirmation, not skipping enumeration.
+
+**What the self-check does NOT substitute**:
+
+- Phase 6d.1 evidence-breadth, 6d.2 epistemic-horizon, and 6d.3 MR positional sub-tests are mining-specific and have no parallel in the artifact's own self-check. Each surviving card must carry its own complete Phase 6d trace.
+- Phase 6e batch-level checks (joint-closure, mutual-contradiction, single-narrator concentration) operate across the mined cards, not across the artifact's own claim_map. Re-derive from scratch.
+- Every emitted card must carry its own complete Phase 6 CSC trace; the source artifact's self-check is not copied through.
+
+Hand-authored artifacts without a self-check section are handled identically — Phase 6 is per-card authoritative regardless of source. The absence of a self-check is not a defect; it simply means no speed-up is available for 6a / 6b verification, and every invariant and MR id is derived fresh.
 
 ## Why This Phase is Load-Bearing
 

@@ -1,0 +1,233 @@
+# Implementation Order — Structure-Aware Retrieval & Surgical Edits
+
+This document sequences the spec bundle (`SPEC-01` through `SPEC-08`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
+
+## Design read order (for reviewers)
+
+`SPEC-01` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+
+This order builds conceptual understanding for the structure-aware retrieval bundle (SPEC-01…SPEC-08): foundation (index), then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+
+## Implementation order (for builders)
+
+### Phase 0 — Prep (Completed 2026-04-22)
+
+1. Land this spec bundle in `specs/` (completed)
+2. Create `tools/` directory tree scaffold (completed)
+3. Update `.gitignore` (completed):
+   - `worlds/*/_index/`
+   - `worlds/*/_source/`
+   - `tools/*/dist/`
+   - `tools/*/node_modules/`
+   - `tools/world-mcp/.secret`
+   - `tools/hooks/logs/`
+4. Create `.claude/settings.json.example` (completed)
+
+**Completion gate**: Passed on 2026-04-22 via Phase 0 structural acceptance check:
+- `specs/` bundle present, including `IMPLEMENTATION-ORDER.md` and `SPEC-08`
+- `tools/` scaffold present with `world-index`, `world-mcp`, `patch-engine`, `validators`, and `hooks`
+- `.claude/settings.json.example` present
+- `.gitignore` contains all Phase 0 machine-layer ignore entries
+
+### Phase 1 — Read Path + canon-addition Pilot
+
+Parallelizable order (within each tier, items may proceed in parallel):
+
+**Tier 1 (no dependencies)**:
+- `SPEC-01` World Index — full package at `tools/world-index/`
+- `SPEC-07 Part A` docs updates (may proceed in parallel with code — docs describe the target architecture)
+
+**Tier 2 (depends on Tier 1)**:
+- `SPEC-02` MCP Retrieval Server — full tool surface with `submit_patch_plan` stubbed
+- `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent)
+
+**Tier 3 (depends on Tier 2)**:
+- `SPEC-06 Part A` canon-addition read-side rewrite
+
+**Phase 1 completion gate**: `SPEC-08 Phase 1 acceptance criteria` pass. Specifically:
+- `world-index build animalia` succeeds
+- `world-validate animalia --structural` reports zero fails
+- Sample canon-addition run on animalia: ≥50% token reduction vs baseline
+- Hook 2 blocks ≥1 raw `Read CANON_LEDGER.md` during the test run
+- Sibling skills continue to work unchanged
+
+### Phase 2 — Write Path + All-Skill Migration
+
+Parallelizable order:
+
+**Tier 1 (no new dependencies beyond Phase 1)**:
+- `SPEC-04` Validator Framework — shippable as CLI first, integrated into engine after
+- `SPEC-07 Part B` docs updates (HARD-GATE-DISCIPLINE.md write-order rewrite; CLAUDE.md phrasing refinement)
+
+**Tier 2 (depends on Tier 1)**:
+- `SPEC-03` Patch Engine — requires SPEC-04 for pre-apply gate
+- `SPEC-02` update: enable `submit_patch_plan` (previously stubbed); wire through to `SPEC-03`
+
+**Tier 3 (depends on Tier 2)**:
+- `SPEC-05 Part B` Hooks 3, 5 (edit-side + auto-validate)
+- `SPEC-06 Part B` canon-addition write-side completion
+
+**Tier 4 (depends on Tier 3)**:
+- `SPEC-06 Part B continued` — remaining 7 skill rewrites:
+  - Suggested sub-order (may parallelize within):
+    1. `create-base-world` (lightest; good second pilot)
+    2. `character-generation` + `diegetic-artifact-generation` (similar pattern)
+    3. `propose-new-canon-facts` + `canon-facts-from-diegetic-artifacts` (similar pattern)
+    4. `propose-new-characters` (biggest; best done last once pattern is proven)
+    5. `continuity-audit` (complex reasoning; done last for main-orchestrator side)
+
+**Phase 2 completion gate**: `SPEC-08 Phase 2 acceptance criteria` pass. Specifically:
+- All 8 skills end-to-end via engine
+- Canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on protected surfaces
+- `world-validate animalia --all` reports zero Rule 1–7 fails
+- ≥70% token reduction vs Phase 0 baseline
+- Atomicity injection tests pass
+- Concurrency test passes
+
+### Phase 2.5 — Canon-Safety Expansion (independent track, SPEC-09)
+
+Lands after Phase 2 completes, or in parallel with Phase 3 if pursued. Independent of the structure-aware retrieval bundle's read-path / write-path sequencing; depends only on SPEC-04 (validator framework) and SPEC-06 (canon-addition rewrite) from the bundle.
+
+Order (single tier; internal parallelization minimal):
+
+1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause)
+2. **canon-addition skill updates** (Tests 11 & 12, template extension, Phase 12 block-authoring)
+3. **continuity-audit skill updates** (Silent-Area Canonization check)
+4. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
+5. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`)
+6. **docs/WORKFLOWS.md pointer** for the new tests
+
+**Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
+- `world-validate animalia --all` reports zero new failures on historical CFs (grandfather clause holds structurally)
+- Synthetic capability CF without `exception_governance` FAILS Test 12
+- Synthetic geography CF with `exception_governance: { n_a: "..." }` PASSES
+- Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
+- `create-base-world` genesis test world emits CF-0001 with both blocks correctly populated or N/A'd per fact-type
+
+### Phase 3 — Optional: Atomic Source for CF/CH Records (conditional)
+
+Only ship after Phase 2 stable ≥4 weeks AND user separate approval.
+
+1. Build atomization tooling at `tools/source-migration/`
+2. Implement engine's `compile_ledger` post-step
+3. One-time animalia migration script
+4. `SPEC-07 Part C` FOUNDATIONS.md schema updates
+5. Verify byte-identical round-trip on animalia
+
+**Phase 3 completion gate**: `SPEC-08 Phase 3 acceptance criteria` pass.
+
+### Phase 4 — Deferred: High-Churn Prose Fragmentization
+
+Separate spec (not in this bundle). Ship only if Phase 3 proven AND user separate approval.
+
+## Cross-phase dependency tree
+
+```
+Phase 0 (Prep)
+  │
+  ├── tools/ scaffold ─────────┐
+  ├── .gitignore updates       │
+  └── specs/ bundle            │
+                               ▼
+Phase 1 (Read Path)
+  │
+  ├── SPEC-01 World Index ─────────┐
+  │                                ▼
+  ├── SPEC-02 MCP Server ──────────┤
+  │                                ▼
+  ├── SPEC-05 Hooks 1,2,4 ─────────┤
+  │                                ▼
+  ├── SPEC-07 Part A (docs) ──────┤
+  │                                ▼
+  └── SPEC-06 Part A (canon-addition read) ─┐
+                                             ▼
+Phase 2 (Write Path)
+  │
+  ├── SPEC-04 Validators ──────────┐
+  │                                ▼
+  ├── SPEC-03 Patch Engine ────────┤
+  │                                ▼
+  ├── SPEC-02 submit_patch_plan ───┤
+  │                                ▼
+  ├── SPEC-05 Hooks 3,5 ───────────┤
+  │                                ▼
+  ├── SPEC-07 Part B (docs) ──────┤
+  │                                ▼
+  └── SPEC-06 Part B (7 skills + canon-addition writes) ─┐
+                                                         ▼
+Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 + SPEC-06
+  │
+  ├── FOUNDATIONS.md edits (Rules 11/12, schema blocks, relations, default-reality paragraph)
+  ├── canon-addition skill updates (Tests 11/12, template, Phase 12 block authoring)
+  ├── continuity-audit skill update (silent-area-canonization check)
+  ├── diegetic-artifact-generation template cleanup
+  ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
+  └── docs/WORKFLOWS.md pointer
+
+                                                         ▼
+Phase 3 (Optional: Atomic Source) — separate approval
+  │
+  ├── Atomization tooling
+  ├── Engine compile_ledger step
+  ├── Animalia migration
+  └── SPEC-07 Part C (docs)  ← rebases onto SPEC-09's extended schema
+
+Phase 4 (Deferred: Prose Fragmentization) — separate spec + approval
+```
+
+## Expected calendar
+
+Estimates assume a single builder working at ~half-time; scale accordingly.
+
+- **Phase 0**: 1 session (spec bundle landed; gitignore; scaffold)
+- **Phase 1**: 4–6 sessions
+  - SPEC-01 (index + parser + CLI): 2 sessions
+  - SPEC-02 (MCP server + tools): 1 session
+  - SPEC-05 Part A (3 hooks): 1 session
+  - SPEC-06 Part A (canon-addition read-side): 1 session
+  - SPEC-07 Part A (docs): may run in parallel with above
+  - Animalia bootstrap + measurement: 0.5 session
+- **Phase 2**: 6–10 sessions
+  - SPEC-04 (14 validators): 2 sessions
+  - SPEC-03 (patch engine + 13 ops): 2 sessions
+  - SPEC-05 Part B (2 hooks): 0.5 session
+  - SPEC-06 Part B (7 skills + canon-addition writes): 3–4 sessions
+  - SPEC-07 Part B: 0.5 session
+  - Animalia re-validation + cleanup: 1 session
+- **Phase 3** (if pursued): 2–3 sessions
+- **Phase 4** (deferred): TBD
+
+## Measurement baseline
+
+Before Phase 1 begins, capture baseline measurements on animalia:
+- Tool-input tokens for a representative canon-addition run (narrow proposal + large delivery; average)
+- Elapsed time per phase
+- Number of Edit tool calls per delivery
+- Maximum context-window usage in a large delivery
+
+These baseline numbers anchor the ≥50% (Phase 1) and ≥70% (Phase 2) reduction targets.
+
+## Risk-adjusted re-sequencing options
+
+If Phase 1 reveals that Hook 2 is too aggressive (false-positives on legitimate reads), SPEC-05 Part A may tighten thresholds before proceeding to Phase 2.
+
+If SPEC-06 Phase 2 skill rewrites reveal systematic reasoning gaps (judgment being lost), pause Phase 2 and revisit SPEC-06's "what stays in each skill" table.
+
+If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further token-reduction wins live in the context-packet budget tuning (SPEC-02) rather than in deeper mechanism moves.
+
+## Deliverable status
+
+| Spec | Status |
+|---|---|
+| SPEC-01 World Index | ✓ specified; Phase 0 complete (this bundle) |
+| SPEC-02 Retrieval MCP Server | ✓ specified |
+| SPEC-03 Patch Engine | ✓ specified |
+| SPEC-04 Validator Framework | ✓ specified |
+| SPEC-05 Hooks Discipline | ✓ specified |
+| SPEC-06 Skill Rewrite Patterns | ✓ specified |
+| SPEC-07 Docs Updates | ✓ specified |
+| SPEC-08 Migration & Phasing | ✓ specified |
+| SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
+
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above.

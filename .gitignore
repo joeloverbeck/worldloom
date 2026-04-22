@@ -143,3 +143,14 @@ briefs/*
 !briefs/.gitkeep
 worlds/*
 !worlds/.gitkeep
+
+# Machine-facing layer (per specs/SPEC-08 Phase 0)
+# Note: worlds/*/_index/ and worlds/*/_source/ are already covered by the
+# worlds/* rule above, but listed here explicitly for discoverability
+# (users reading the gitignore will see the layer's artifacts called out).
+worlds/*/_index/
+worlds/*/_source/
+tools/*/dist/
+tools/*/node_modules/
+tools/world-mcp/.secret
+tools/hooks/logs/

@@ -64,7 +64,7 @@ Ambiguous responses default to asking for clarification, not to option (a).
 
 ### Drop-list behavior
 
-Same as sibling `propose-new-canon-facts`: surviving cards retain their originally-allocated PR-NNNN IDs (no renumbering), dropped IDs become permanent gaps, dropped cards are recorded in manifest `dropped_card_ids` with per-card rationale from the user's response, and the Phase 6e trace retains dropped-pair results as audit evidence.
+Same as sibling `propose-new-canon-facts`: surviving cards retain their originally-allocated PR-NNNN IDs (no renumbering), dropped IDs become permanent gaps, dropped cards are recorded in manifest `dropped_card_ids` with per-card rationale from the user's response, and the Phase 6e trace retains dropped-pair results as audit evidence. **Post-drop re-evaluation**: the Phase 6e `single_narrator_concentration_flag` is re-evaluated against the post-drop card count before final manifest write — see `phase-6-canon-safety-check.md` §Single-narrator concentration, Post-drop-list re-evaluation. Joint-closure and mutual-contradiction trace results stay in their pre-drop state as dropped-pair audit evidence.
 
 ### Empty-batch behavior
 
