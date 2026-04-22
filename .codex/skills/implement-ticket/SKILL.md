@@ -46,11 +46,12 @@ Use the classification to choose which repo surfaces must be read and which veri
 
 1. Read the target ticket file.
 2. Read every directly relevant reference it names: spec files, docs, skill files, tool files, templates, examples, or archived tickets/specs.
-3. If the invocation uses a glob, shorthand, or near-match typo, resolve the first exact live ticket path before doing anything else.
-4. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-5. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-6. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-7. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+3. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
+4. If the invocation uses a glob, shorthand, or near-match typo, resolve the first exact live ticket path before doing anything else.
+5. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+6. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+7. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+8. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -90,6 +91,7 @@ For skill tickets, verify:
 - Keep changes surgical and aligned with the ticket's owned boundary.
 - Prefer existing repo contracts over ad hoc patterns.
 - Do not broaden into unrelated cleanup unless reassessment proves it is required consequence fallout.
+- After package-manager, lockfile, formatter, generator, or codegen commands, re-read the touched contract files and confirm the generated diff still satisfies ticket invariants before closeout.
 - If the ticket touches world-level canon-writing workflows, preserve append-only canon discipline and documented gates.
 - If the ticket only changes docs, tickets, or skills, do not invent runtime/tool changes just to satisfy the original draft.
 
