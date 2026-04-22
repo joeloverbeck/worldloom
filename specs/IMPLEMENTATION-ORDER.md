@@ -34,7 +34,7 @@ This order builds conceptual understanding for the structure-aware retrieval bun
 Parallelizable order (within each tier, items may proceed in parallel):
 
 **Tier 1 (no dependencies)**:
-- `SPEC-01` World Index — full package at `tools/world-index/`
+- `SPEC-01` World Index — completed 2026-04-22; implementation landed at `tools/world-index/`, spec archived at `archive/specs/SPEC-01-world-index.md`
 - `SPEC-07 Part A` docs updates (may proceed in parallel with code — docs describe the target architecture)
 
 **Tier 2 (depends on Tier 1)**:
@@ -219,7 +219,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 
 | Spec | Status |
 |---|---|
-| SPEC-01 World Index | ✓ specified; Phase 0 complete (this bundle) |
+| SPEC-01 World Index | ✓ implemented 2026-04-22; archived at `archive/specs/SPEC-01-world-index.md` |
 | SPEC-02 Retrieval MCP Server | ✓ specified |
 | SPEC-03 Patch Engine | ✓ specified |
 | SPEC-04 Validator Framework | ✓ specified |

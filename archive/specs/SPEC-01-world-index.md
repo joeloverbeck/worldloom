@@ -2,6 +2,8 @@
 
 # SPEC-01: World Index — Schema, Parser, and Build Pipeline
 
+**Status**: COMPLETED
+
 **Phase**: 1
 **Depends on**: none
 **Blocks**: SPEC-02, SPEC-03, SPEC-04, SPEC-05, SPEC-06, SPEC-09
@@ -14,7 +16,7 @@ Worldloom skills currently load 6+ world files totaling 2,800–12,000 lines at 
 - `CANON_LEDGER.md` — 8,624 lines, 47 CF records, 18 CH records
 - `MYSTERY_RESERVE.md` — 899 lines, 20 M-N entries
 - Thirteen mandatory world files — 12,111 lines total
-- Plus 17 PA-NNNN adjudications, 2 character dossiers, 2 diegetic artifacts, 12 proposal cards (PR-NNNN) with 3 BATCH-NNNN manifests, 7 character-proposal cards (NCP-NNNN) with 1 NCB-NNNN manifest, 1 audit record (AU-NNNN), and 0 retcon-proposal cards (RP-NNNN) (the RP surface is named by `continuity-audit` but has no current emissions in animalia).
+- Plus 17 PA-NNNN adjudications, 2 character dossiers, 2 diegetic artifacts, 12 proposal cards (PR-NNNN) with 3 BATCH-NNNN manifests, 7 character-proposal cards (NCP-NNNN) with 1 NCB-NNNN manifest, 1 audit record (AU-NNNN), and 1 retcon-proposal card (RP-NNNN).
 
 **Source context**: `brainstorming/structure-aware-retrieval.md` §1 ("Introduce a local structure-aware world index") and §2 ("Build the index with a markdown parser, not regex spaghetti"). Brainstorm decisions: TypeScript + `unified`/`remark`; SQLite + FTS5; embeddings deferred to an optional later phase; index is derived, markdown remains source of truth in Phase 1.
 
@@ -331,7 +333,7 @@ Anything else under `worlds/<slug>/` is ignored with a warning-severity row in `
 ## Verification
 
 - **Unit**: parser passes tested against fixture markdown (3-4 small worlds covering all 19 node types)
-- **Integration**: `world-index build animalia` succeeds; node counts match manual enumeration at the time of the run (as of 2026-04-22: 47 CF records, 18 CH entries, 20 MR entries, 17 PA adjudications, 2 characters, 2 diegetic artifacts, 12 proposal cards + 3 BATCH manifests, 7 character-proposal cards + 1 NCB manifest, 1 audit record, 0 retcon-proposal cards, plus sections/subsections). Counts are not frozen — they grow as canon is added; the test re-enumerates before asserting.
+- **Integration**: `world-index build animalia` succeeds; node counts match manual enumeration at the time of the run (as of 2026-04-22: 47 CF records, 18 CH entries, 20 MR entries, 17 PA adjudications, 2 characters, 2 diegetic artifacts, 12 proposal cards + 3 BATCH manifests, 7 character-proposal cards + 1 NCB manifest, 1 audit record, 1 retcon-proposal card, plus sections/subsections). Counts are not frozen — they grow as canon is added; the test re-enumerates before asserting.
 - **Incremental**: touch `CANON_LEDGER.md` → `world-index sync animalia` reparses only that file (verified by elapsed time + per-file log lines)
 - **Determinism**: `world-index build` run twice produces identical `content_hash` values across all nodes
 - **Drift detection**: `world-index verify` after manual markdown edit flags the edited node
@@ -356,3 +358,10 @@ Anything else under `worlds/<slug>/` is ignored with a warning-severity row in `
 - **Large-file parse time** on 8,624-line `CANON_LEDGER.md`: should parse in <2s on commodity hardware; verified in integration test. If slower, implement streaming parse.
 - **SPEC-09 CF-schema extension (forward-compat)**: SPEC-09 Phase 2.5 adds two conditionally-mandatory CF blocks (`exception_governance`, and the Rule-11 `action_space` surface) under a grandfather clause — historical CFs remain valid; new CFs meet the strict regime. SPEC-01's permissive unknown-field posture (Pass 2) absorbs this without re-work; the `CanonFactRecord` interface gains optional fields when SPEC-09 lands, and the validator-rule-12 trace-register query reads them from the node body. No breaking migration.
 - **CLAUDE.md ID Allocation drift**: NCP-NNNN / NCB-NNNN are emitted by `propose-new-characters` (confirmed: 7 NCP + 1 NCB in animalia) but are not yet listed in `CLAUDE.md` §ID Allocation Conventions. SPEC-01 indexes them regardless (per §File-enumeration inventory). Closing the CLAUDE.md gap is out of scope for this spec; flagged for the next docs update (SPEC-07 or a separate ticket).
+
+## Outcome
+
+- Completion date: 2026-04-22
+- What changed: `tools/world-index/` landed with the CLI, parser, schema, SQLite index, incremental sync, verify flow, and the animalia-scale integration proof in `tools/world-index/tests/integration/build-animalia.test.ts`.
+- Deviations from original plan: the truthful completion path also required a narrow YAML-recovery pass for real ledger prose list items and a deterministic synthetic-ID fix in `src/commands/shared.ts` so fresh builds under different temp roots produce stable node identities.
+- Verification results: `cd tools/world-index && npm run build`, `cd tools/world-index && node --test dist/tests/yaml.test.js`, and `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js` all passed on 2026-04-22.

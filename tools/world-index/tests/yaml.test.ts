@@ -100,6 +100,50 @@ test("malformed YAML records a warn parse issue and still emits a partial node",
   assert.equal(node.content_hash, contentHashForProse("foo: [bar"));
 });
 
+test("ledger list items with prose scalars recover without downgrading the node to prose hashing", () => {
+  const source = `## Canon Fact Records
+
+\`\`\`yaml
+id: CF-0099
+title: Ledger recovery fixture
+status: hard_canon
+type: institution
+statement: Recovery path stays inside YAML parsing.
+scope:
+  geographic: local
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - institutions
+visible_consequences:
+  - "halfbreed" plot conveniences do not exist in this world
+costs_and_limits:
+  - marriage-broker catechism extensions in adopting-region households:
+    "is the stop kept in the family?"
+required_world_updates:
+  - EVERYDAY_LIFE.md
+source_basis:
+  direct_user_approval: true
+\`\`\`
+`;
+
+  const filePath = "/tmp/worlds/animalia/CANON_LEDGER.md";
+  const { tree, lines } = parseMarkdown(source);
+  const { nodes, parseIssues } = extractYamlNodes(tree, lines, filePath);
+
+  assert.equal(parseIssues.length, 0);
+  assert.equal(nodes.length, 1);
+  const node = nodes[0];
+  assert.ok(node);
+  assert.equal(node.node_type, "canon_fact_record");
+  assert.equal(node.node_id, "CF-0099");
+  assert.notEqual(node.content_hash, contentHashForProse(node.body));
+  assert.throws(() => YAML.parse(node.body));
+});
+
 test("missing required statement records a yaml_parse_integrity warning and keeps CF routing", () => {
   const { source, filePath } = loadFixture("fixture-yaml-missing-field.md");
   const { tree, lines } = parseMarkdown(source);

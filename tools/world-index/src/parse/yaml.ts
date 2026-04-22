@@ -56,7 +56,7 @@ export function extractYamlNodes(
     }
 
     try {
-      const parsed = YAML.parse(rawYaml) as unknown;
+      const parsed = parseYamlWithRecovery(rawYaml) as unknown;
       const kindNodeType = nodeTypeForSection(section);
 
       if (section === "canon_fact_records") {
@@ -171,6 +171,94 @@ export function extractYamlNodes(
   }
 
   return { nodes, parseIssues };
+}
+
+function parseYamlWithRecovery(rawYaml: string): unknown {
+  try {
+    return YAML.parse(rawYaml) as unknown;
+  } catch (originalError) {
+    let candidate = rawYaml;
+
+    for (let attempt = 0; attempt < 16; attempt += 1) {
+      const lineNumber = extractYamlErrorLine(originalError);
+      if (lineNumber === null) {
+        break;
+      }
+
+      const recovered = recoverSequenceScalarAtLine(candidate, lineNumber);
+      if (recovered === candidate) {
+        break;
+      }
+
+      candidate = recovered;
+
+      try {
+        return YAML.parse(candidate) as unknown;
+      } catch (nextError) {
+        if (nextError instanceof Error) {
+          originalError = nextError;
+          continue;
+        }
+
+        break;
+      }
+    }
+
+    throw originalError;
+  }
+}
+
+function extractYamlErrorLine(error: unknown): number | null {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const match = error.message.match(/line (\d+), column \d+/);
+  if (!match) {
+    return null;
+  }
+
+  return Number.parseInt(match[1] ?? "", 10);
+}
+
+function recoverSequenceScalarAtLine(rawYaml: string, lineNumber: number): string {
+  const lines = rawYaml.split("\n");
+  const targetIndex = lineNumber - 1;
+
+  for (let index = targetIndex; index >= 0; index -= 1) {
+    const line = lines[index];
+    if (line === undefined) {
+      continue;
+    }
+
+    const match = line.match(/^(\s*)- (.+)$/);
+    if (!match) {
+      continue;
+    }
+
+    const indentation = match[1] ?? "";
+    const itemBody = match[2] ?? "";
+    if (itemBody.length === 0) {
+      return rawYaml;
+    }
+
+    if (itemBody.startsWith(">-") || itemBody.startsWith(">") || itemBody.startsWith("|")) {
+      return rawYaml;
+    }
+
+    if (looksLikeMappingSequenceItem(itemBody)) {
+      return rawYaml;
+    }
+
+    lines.splice(index, 1, `${indentation}- >-`, `${indentation}  ${itemBody}`);
+    return lines.join("\n");
+  }
+
+  return rawYaml;
+}
+
+function looksLikeMappingSequenceItem(itemBody: string): boolean {
+  return /^[A-Za-z0-9_-]+:\s*(?:.*)?$/.test(itemBody);
 }
 
 function findContainingSection(codeNode: Code, tree: Root): SectionKind {

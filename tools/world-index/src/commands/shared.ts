@@ -84,7 +84,7 @@ export function parseWorldFile(
   const { nodes: rawYamlNodes, parseIssues: rawYamlIssues } = extractYamlNodes(
     tree,
     lines,
-    absolutePath
+    relativeFilePath
   );
   const proseNodes = extractProseNodes(tree, lines, relativeFilePath, worldSlug);
   const yamlNodes = rawYamlNodes.map((node) => ({
