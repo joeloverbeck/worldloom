@@ -14,6 +14,8 @@ Audit the live world-index output for one world by rebuilding first, querying th
 
 Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/_TEMPLATE.md`, and `tickets/README.md` before drafting tickets. For World Index work, also read the recent active/archived `SPEC-01*` tickets relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner.
 
+In this checkout, prefer live `.codex/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
+
 This skill is audit-and-ticket only. Do not modify `worlds/<slug>/` canon files, and do not implement indexer fixes as part of this workflow unless the user explicitly pivots to implementation.
 
 ## Always First
@@ -61,7 +63,7 @@ Start with these surfaces:
 - file coverage via `file_versions`
 - semantic surfaces most likely to rot downstream consumers, especially `named_entity` and `entity_mentions`
 
-Before writing deeper semantic queries, inspect the live table columns you will rely on. Do not assume concentration fields live directly on `entity_mentions`; derive source node type and file family through `entity_mentions.node_id -> nodes.node_id` when that is the current schema.
+Before writing deeper semantic queries, inspect the live table columns you will rely on. In the current live schema, virtual `named_entity` rows live in `nodes` with `node_type='named_entity'`; there is no separate `named_entity` table. Do not assume concentration fields live directly on `entity_mentions`; derive source node type and file family through `entity_mentions.node_id -> nodes.node_id` when that is the current schema.
 
 If the issue looks semantic rather than structural, trace it back to exact source node types, file families, and representative rows before drafting a ticket.
 
@@ -112,7 +114,7 @@ For `named_entity` / `entity_mentions`, inspect:
 - file-family concentration
 - representative false positives with exact source rows
 
-If the live schema lacks direct concentration columns on `entity_mentions`, compute those views by joining back to `nodes` instead of treating the query failure as an index defect.
+If the live schema lacks direct concentration columns on `entity_mentions`, compute those views by joining back to `nodes` instead of treating the query failure as an index defect. When counting top entity names or typed-vs-unknown splits, use `entity_mentions.entity_name` / `entity_mentions.entity_kind` as the primary aggregation surface. Use `nodes WHERE node_type='named_entity'` for virtual-entity counts, provenance checks, and targeted body inspections rather than assuming the serialized node `body` matches `entity_mentions.entity_name` exactly.
 
 When a result looks suspicious, trace it to concrete examples. A good ticket seam has:
 
