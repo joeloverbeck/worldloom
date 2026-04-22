@@ -4,7 +4,7 @@ description: "Implement or reassess a worldloom ticket. Use when asked to work f
 user-invocable: true
 arguments:
   - name: ticket_path
-    description: "Path to the ticket file (for example `tickets/SPEC-01-003.md`). Globs or obvious near-matches must be resolved to the exact live path before use."
+    description: "Path to the ticket file (for example `tickets/SPEC-01-004.md`). Globs or obvious near-matches must be resolved to the exact live path before use."
     required: true
 ---
 
@@ -144,7 +144,7 @@ If archival is in scope, follow `docs/archival-workflow.md` exactly and update a
 ## Example Usage
 
 ```text
-/implement-ticket tickets/SPEC-01-003.md
+/implement-ticket tickets/SPEC-01-004.md
 /implement-ticket tickets/SPEC-01-00*
 /implement-ticket .claude/worktrees/my-branch/tickets/SPEC-04-002.md
 ```
