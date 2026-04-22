@@ -66,6 +66,7 @@ Check:
 - every drafted algorithm, tree-shape, parser-behavior, or data-flow claim the ticket relies on; verify these against the live substrate instead of trusting spec prose
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
+- for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 
 Load `references/mismatch-handling.md`.

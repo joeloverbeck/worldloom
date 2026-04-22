@@ -45,18 +45,21 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 ### 2. Check closeout and archival readiness
 
 1. Read the target ticket and confirm its current status and owned boundary.
-2. Confirm the ticket's closeout sections truthfully describe what landed:
+2. Confirm the ticket header summary is truthful for the landed state:
+   - `Status`
+   - summary fields such as `Engine Changes` and `Deps` when reassessment or partial implementation changed the real owned boundary
+3. Confirm the ticket's closeout sections truthfully describe what landed:
    - `Assumption Reassessment`
    - `What to Change` / `Files to Touch` when reassessment changed scope
    - `Acceptance Criteria` / `Test Plan` when the real proof surface changed
    - `## Outcome`
    - `## Verification Result`
    - optional `## Deviations`
-3. Fix factual, unambiguous handoff drift directly in the ticket.
-4. If in-scope deliverables are still missing, stop and report archival as blocked. Do not hide unfinished owned work inside a follow-up ticket.
-5. If the ticket is already archived, validate the archived handoff content instead of reopening it.
-6. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
-7. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
+4. Fix factual, unambiguous handoff drift directly in the ticket.
+5. If in-scope deliverables are still missing, stop and report archival as blocked. Do not hide unfinished owned work inside a follow-up ticket.
+6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
+7. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
+8. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
 
 ### 3. Establish the review surface
 
