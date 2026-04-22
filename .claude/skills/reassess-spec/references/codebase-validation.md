@@ -16,6 +16,7 @@ Substep applicability is determined by the Pre-Process classification:
 | 3.7 Package-boundary validation | ✓ | if boundaries shift | if boundaries shift | skip |
 | 3.8 Upstream spec references | ✓ | ✓ | ✓ | skip |
 | 3.9 FOUNDATIONS-contract fidelity | ✓ | if canon-pipeline semantics touched | skip | skip |
+| 3.10 Project-convention drift (CLAUDE.md) | ✓ | if new ID conventions or project-level conventions introduced | skip | if the landed work introduced new conventions |
 
 ## 3.0 Cross-Package Scope Establishment
 
@@ -73,7 +74,7 @@ Three sub-checks:
 
 - **Spec dependencies**: Verify each `Depends on:` or `Blocks:` entry resolves to a file in `specs/` or `archive/specs/`. Note specs listed as incomplete but since archived.
 - **Skill dependencies**: Verify `.claude/skills/<name>/` directories referenced in the spec exist. For specs proposing to consume a skill's output, verify the skill's SKILL.md `Output` section describes the format the spec expects.
-- **npm dependencies**: For tooling specs that propose importing a new npm package, verify `package.json` declares it (or will need to declare it). Flag proposals that silently add transitive-only packages.
+- **npm dependencies**: For tooling specs that propose importing a new npm package, verify `package.json` declares it (or will need to declare it) AND compare the spec's declared deps against the package's `README.md` (Step 2 extracts both surfaces). The README often names concrete packages (`better-sqlite3`, `remark-gfm`) where the spec's prose only names umbrella frameworks (`SQLite`, `remark`); any package in the README not surfaced in the spec — or vice versa — is a drift finding at MEDIUM severity. Flag proposals that silently add transitive-only packages.
 
 ## 3.5 Skill-Structure Validation
 
@@ -113,6 +114,8 @@ Grep active specs in `specs/` **and archived specs in `archive/specs/`** for ref
 
 Archived-spec matches are informational (the dependency already landed) — use them to refresh the Dependencies section, Motivating Evidence, and any "this spec depends on X" prose with accurate archival paths. Archived matches do not block reassessment; they catch stale "X has not landed yet" claims and surface forward-references that the archived sibling made back to this spec.
 
+**Forward-compat with blocked specs**: For specs that define parsers, validators, or schemas AND whose `Blocks:` list includes later specs in the bundle, read each blocked spec for extensions to the current spec's schemas/interfaces/parser contracts. Common extension shapes: new conditionally-mandatory schema fields (e.g., SPEC-09's `exception_governance` extending the CF record schema from SPEC-01's parser); new validator codes the current spec's `validation_results` table must accommodate; new node types, edge types, or node-ID prefixes the current spec's regex / enum must accept. If a blocked spec proposes additions the current spec's parser, validator, or schema would silently reject — strict shape validation, closed enums, missing unknown-field tolerance — flag a forward-compat Improvement at MEDIUM severity. This is a Rule-5 (No Consequence Evasion) check generalized to bundle-forward-compat: the current spec's design must acknowledge, or be resilient to, the downstream additions its `Blocks` list implicates. Skip this check when the spec has no `Blocks:` entries or when the blocked specs do not extend the current spec's data surfaces (pure hook / orchestration dependencies, for example, don't trigger this check).
+
 ## 3.9 FOUNDATIONS-Contract Fidelity
 
 For deliverables that touch canon-pipeline semantics (patch-engine write paths, validator thresholds, hook enforcement, canon-safety expansions, MCP tools that mediate canon reads/writes):
@@ -134,6 +137,17 @@ Guidelines:
 - Spot-check agent claims with direct Grep/Read before including in findings — agent results are leads, not facts. Especially spot-check when an agent reports a referenced type as "does not exist" or "needs to be created" — verify whether the spec used a wrong name for an existing type before accepting the agent's conclusion.
 - Inversely, spot-check when an agent reports a spec-referenced method or type as *existing* — grep the exact symbol to confirm. Agents sometimes confabulate existence to match the spec's Before/After framing. When two agents agree a symbol is absent and a third reports it present, trust the absence-reporters and verify with direct Grep.
 - For structural refactor specs (type c), direct agents toward discrepancy checking (counts, symbol existence, blast radius) rather than broad exploration.
+
+## 3.10 Project-Convention Drift (CLAUDE.md)
+
+For specs that reference structured-ID conventions (CF, CH, PA, CHAR, DA, PR, BATCH, NCP, NCB, AU, RP, or any new spec-introduced prefix), HARD-GATE semantics, worktree discipline, or any other project-level convention documented in `CLAUDE.md`:
+
+- Read `CLAUDE.md` §ID Allocation Conventions (and any other relevant convention tables).
+- For each structured-ID prefix the spec uses (extracted at Step 2 under "Structured-ID prefixes"), grep `CLAUDE.md` for the prefix. A prefix the spec uses that `CLAUDE.md` does not document is a MEDIUM Improvement finding — the reassessed spec should either (a) add a `CLAUDE.md` docs-gap ticket reference in its Risks section, or (b) extend `CLAUDE.md` as a separate deliverable (only when the spec's scope legitimately covers pipeline-level convention documentation; otherwise (a) is preferred to keep scope contained).
+- For HARD-GATE-affecting deliverables, verify the spec's description is consistent with `CLAUDE.md`'s §HARD-GATE Discipline block and with `docs/HARD-GATE-DISCIPLINE.md`. Silent divergence between `CLAUDE.md` and a spec is a Rule-6 (No Silent Retcons) risk at the pipeline level.
+- For worktree-discipline-affecting deliverables (specs that prescribe how hooks, skills, or tools resolve paths), verify the spec honors `CLAUDE.md`'s worktree-root resolution rule. A spec that assumes main-repo-root paths without a worktree carve-out is a HIGH Issue.
+
+Skip this substep when the spec's deliverables do not interact with any `CLAUDE.md`-documented convention.
 
 ## Conditional Deliverable Validation
 

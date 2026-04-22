@@ -45,7 +45,7 @@ Step 1: Mandatory reads (spec file + FOUNDATIONS.md)
 Step 2: Extract references (file paths, types, functions, deps, code examples)
        |
        v
-Step 3: Codebase validation (9 substeps — load references/codebase-validation.md first)
+Step 3: Codebase validation (11 substeps — load references/codebase-validation.md first)
        |
        v
 Step 4: FOUNDATIONS alignment check (load references/foundations-alignment.md first)
@@ -91,6 +91,7 @@ Before this skill acts, it MUST read (per FOUNDATIONS.md §Tooling Recommendatio
 - `<spec_path>` — the target spec file, entire contents.
 - `docs/FOUNDATIONS.md` — the non-negotiable design contract. Skip if read earlier in this session and unmodified.
 - `docs/HARD-GATE-DISCIPLINE.md` — when a deliverable touches skill HARD-GATE semantics or canon-write ordering. Loaded on demand at Step 3.5 (skill-structure validation).
+- `CLAUDE.md` (repository-root instructions) — when the spec references structured-ID conventions (CF, CH, PA, CHAR, DA, PR, BATCH, NCP, NCB, AU, RP, etc.), HARD-GATE semantics, worktree discipline, or any other project-level convention that CLAUDE.md documents. Loaded on demand at Step 3.10 (project-convention drift). Skip if read earlier in this session and unmodified.
 - Every file path, skill directory, spec reference, and package.json extracted at Step 2 — read as part of Step 3 validation.
 - `specs/IMPLEMENTATION-ORDER.md` — read at Step 2 (for dependency context) and re-read at Step 8 only when classification (d) retroactive triggers reconciliation.
 
@@ -108,11 +109,11 @@ If plan mode is active, load `references/plan-mode.md`.
 
 Before beginning Steps 2-3, classify the spec into exactly one of four classes. Classification drives which Step 3 substeps apply.
 
-- **(a) New component** — introduces a new tool/package (new `tools/<name>/` directory), a new skill (new `.claude/skills/<name>/`), a new hook, or a new validator. Full Step 3 checklist (3.0-3.9) applies.
-- **(b) Extension** — extends an existing tool, skill, validator, or hook without introducing a new one. Steps 3.1-3.8 apply. 3.5 (skill-structure validation) applies only when the deliverable modifies a SKILL.md. 3.9 (FOUNDATIONS-contract fidelity) applies only when the deliverable touches canon-pipeline semantics (patch-engine write paths, validator thresholds, hook enforcement, canon-safety checks).
-- **(c) Refactor** — structural restructuring with no behavioral change (re-exports, module splits, SKILL.md consolidation without rule changes, docs reorganization). Steps 3.0-3.4 apply. Skip 3.5 unless the refactor moves content between SKILL.md files; skip 3.7 unless package boundaries shift; skip 3.9. Focus on symbol existence, count accuracy, blast radius.
+- **(a) New component** — introduces a new tool/package (new `tools/<name>/` directory), a new skill (new `.claude/skills/<name>/`), a new hook, or a new validator. Full Step 3 checklist (3.0-3.10) applies. A pre-existing placeholder at the deliverable's target path — a scaffold `README.md`, an empty `src/` tree, a type-stub file, or a Phase-0 directory scaffold — does NOT shift the classification toward (d). Phase-0 scaffolding is (a)-compatible; classification shifts to (d) only when the substantive deliverables (parser, CLI, migrations, schema) verify as implemented in code, per the (d) gate below.
+- **(b) Extension** — extends an existing tool, skill, validator, or hook without introducing a new one. Steps 3.1-3.8 apply. 3.5 (skill-structure validation) applies only when the deliverable modifies a SKILL.md. 3.9 (FOUNDATIONS-contract fidelity) applies only when the deliverable touches canon-pipeline semantics (patch-engine write paths, validator thresholds, hook enforcement, canon-safety checks). 3.10 (project-convention drift) applies only when the deliverable introduces new ID conventions or project-level conventions.
+- **(c) Refactor** — structural restructuring with no behavioral change (re-exports, module splits, SKILL.md consolidation without rule changes, docs reorganization). Steps 3.0-3.4 apply. Skip 3.5 unless the refactor moves content between SKILL.md files; skip 3.7 unless package boundaries shift; skip 3.9; skip 3.10. Focus on symbol existence, count accuracy, blast radius.
 - **(d) Retroactive reassessment** — validation concludes (via Step 3 evidence) that all deliverables already landed through downstream commits or sibling specs. **Not pre-selected** — activates only when every deliverable verifies as implemented in code. The user hint "I suspect this already landed" is a soft signal, not a classification by itself; only Step 3 evidence can confirm (d).
-  - Steps 3.1-3.4 apply rigorously to prove landing; cite file paths + line numbers as evidence. Skip Steps 3.5-3.9 (ripple/consumer substeps) — the work has already shipped.
+  - Steps 3.1-3.4 apply rigorously to prove landing; cite file paths + line numbers as evidence. Skip Steps 3.5-3.9 (ripple/consumer substeps) — the work has already shipped. 3.10 (project-convention drift) applies only when the landed work introduced new ID conventions or project-level conventions that may need documenting in CLAUDE.md.
   - **Step 7 output shape switches to Outcome population + archival**, not deliverable refinement.
   - **Step 8 switches to archival flow** — move spec to `archive/specs/`, reconcile `specs/IMPLEMENTATION-ORDER.md`.
   - Classification shift from (a)/(b)/(c) → (d) is a legitimate and common outcome when a spec is reassessed after downstream work ships. Name the shift explicitly in Step 8.
@@ -150,6 +151,8 @@ Extract every concrete codebase reference from the spec:
 - **Spec or skill dependencies** — referenced at Dependencies, Blocks, or in prose
 - **Code examples** (inline TypeScript, SQL, YAML, JSON schema snippets, JSONSchema blocks) — extract for fidelity checking
 - **Hook, validator, or MCP tool configuration** referenced by the spec — extract threshold values, severity mappings, exit codes
+- **Package dependencies** — for specs that introduce a new `tools/<name>/` package or modify an existing one, also extract the dependency list from the accompanying `tools/<name>/README.md` (and `tools/<name>/package.json` if present). README-declared deps often name concrete packages (`better-sqlite3`, `remark-gfm`) where the spec's prose only names umbrella frameworks (`SQLite`, `remark`); Step 3.4 compares the two surfaces for drift.
+- **Structured-ID prefixes** — every structured-ID prefix the spec uses (`CF`, `CH`, `PA`, `CHAR`, `DA`, `PR`, `BATCH`, `NCP`, `NCB`, `AU`, `RP`, or spec-introduced new prefixes). Step 3.10 compares these against `CLAUDE.md` §ID Allocation Conventions.
 
 Build a validation checklist. For specs with >15 references, use `TaskCreate` to add a checklist item per reference and `TaskUpdate` to mark each `validated | drifted | missing`. For specs with ≤15 references, mental tracking is acceptable.
 
