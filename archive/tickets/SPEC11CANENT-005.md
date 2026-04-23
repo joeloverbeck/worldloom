@@ -1,6 +1,6 @@
 # SPEC11CANENT-005: Exempt `ONTOLOGY.md` named-entity registry YAML from ledger-only `yaml_parse_integrity`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index` YAML extraction and verification surfaces need to stop misclassifying the post-SPEC-11 ontology registry block as ledger noise.
@@ -34,6 +34,7 @@ The defect is therefore not stale artifact noise and not a world-content problem
 5. Rebuilt-live evidence shows the bug survives fresh producer output: repo-root `build animalia` and `verify animalia` both succeed, yet readonly DB query of `validation_results` still reports `unexpected_yaml_section` on `ONTOLOGY.md` line range `9-23`.
 6. Archived ownership search found no active ticket already covering this seam. The closest archived owners are `SPEC11CANENT-002` for the registry contract and `SPEC11CANENT-004` for fixture proof alignment; neither owns the current validator-routing regression.
 7. Mismatch + correction: the current capstone proof assumes total `validation_results` equals the single Melissa `malformed_authority_source` warning. That assumption was truthful before the registry YAML became a first-class non-ledger fenced block, but it is now false in live `animalia`.
+8. Additional mismatch + correction from command dry run: `tools/world-index/tests/integration/build-animalia.test.ts` also now contains a stale registry-fixture subtest. The copied live `animalia` fixture already has a `## Named Entity Registry`, so `appendNamedEntityRegistry(...)` creates a duplicate-registry case that correctly emits no canonical rows from the ontology registry. This ticket absorbs that same-seam proof correction by switching the subtest to replace the copied registry instead of appending a second one.
 
 ## Architecture Check
 
@@ -72,7 +73,6 @@ Tighten tests around this boundary so the live corpus and fixture coverage agree
 - `tools/world-index/src/parse/yaml.ts` (modify)
 - `tools/world-index/tests/yaml.test.ts` (modify)
 - `tools/world-index/tests/integration/build-animalia.test.ts` (modify)
-- `tools/world-index/tests/integration/spec10-verification.sh` (modify if the proof needs an explicit registry-noise assertion rather than only the total-count invariant)
 
 ## Out of Scope
 
@@ -100,7 +100,7 @@ Tighten tests around this boundary so the live corpus and fixture coverage agree
 
 1. `tools/world-index/tests/yaml.test.ts` — prove the ontology registry fenced block is exempt from `unexpected_yaml_section` while true stray YAML still reports correctly.
 2. `tools/world-index/tests/integration/build-animalia.test.ts` — prove rebuilt live `animalia` records only the known Melissa authority warning and zero `yaml_parse_integrity` rows.
-3. `tools/world-index/tests/integration/spec10-verification.sh` — prove the package capstone passes on the rebuilt live corpus with the truthful validation count.
+3. `tools/world-index/tests/integration/build-animalia.test.ts` — replace the copied registry in the registry-fixture subtest rather than appending a duplicate `## Named Entity Registry`, so the proof keeps asserting the live SPEC-11 registry contract instead of duplicate-registry rejection behavior.
 
 ### Commands
 
@@ -109,3 +109,23 @@ Tighten tests around this boundary so the live corpus and fixture coverage agree
 3. `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js`
 4. `cd tools/world-index && npm run test:spec10-verification`
 5. `cd /home/joeloverbeck/projects/worldloom && sqlite3 worlds/animalia/_index/world.db "SELECT severity, code, validator_name, file_path FROM validation_results ORDER BY severity, code, file_path;"`
+
+## Outcome
+
+- Completed 2026-04-23.
+- `tools/world-index/src/parse/yaml.ts` now exempts the fenced YAML block under `ONTOLOGY.md` `## Named Entity Registry` from ledger-only `yaml_parse_integrity` noise while leaving genuine non-ledger stray YAML behavior unchanged elsewhere.
+- `tools/world-index/tests/yaml.test.ts` now proves the named-entity registry block stays routable without emitting `unexpected_yaml_section`.
+- `tools/world-index/tests/integration/build-animalia.test.ts` now keeps the registry-fixture proof truthful by replacing the copied `animalia` registry instead of appending a duplicate registry section to a world that already has one.
+- Rebuilt live `animalia` now records only the known Melissa `frontmatter_parse` / `malformed_authority_source` warning, so the package capstone proof again matches the live validation surface.
+
+## Verification Result
+
+- Passed `cd tools/world-index && npm run build`
+- Passed `cd tools/world-index && node --test dist/tests/yaml.test.js`
+- Passed `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js`
+- Passed `cd tools/world-index && npm run test:spec10-verification`
+- Passed `cd /home/joeloverbeck/projects/worldloom && sqlite3 worlds/animalia/_index/world.db "SELECT severity, validator_name, code, file_path, line_range_start, line_range_end, message FROM validation_results ORDER BY result_id;"` and confirmed the only remaining row is `warn | frontmatter_parse | malformed_authority_source | characters/melissa-threadscar.md`
+
+## Deviations
+
+- Reassessment found an additional stale proof in `build-animalia.test.ts` beyond the drafted `yaml_parse_integrity` mismatch. Because that fixture edit lived in the same parser/proof seam, the ticket absorbed it without widening into a new ownership boundary.

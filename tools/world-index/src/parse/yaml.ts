@@ -40,7 +40,7 @@ export function extractYamlNodes(
     const headingPath = findHeadingPathForLine(lineStart, headings);
     const rawYaml = codeNode.value;
 
-    if (section === "other") {
+    if (section === "other" && !isNamedEntityRegistryYaml(filePath, headingPath)) {
       parseIssues.push(
         createParseIssue({
           worldSlug,
@@ -524,6 +524,14 @@ function deriveWorldSlug(filePath: string): string {
 
 function normalizeHeadingText(value: string): string {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function isNamedEntityRegistryYaml(filePath: string, headingPath: string | null): boolean {
+  if (!/(^|\/)ONTOLOGY\.md$/.test(filePath)) {
+    return false;
+  }
+
+  return headingPath?.endsWith("Named Entity Registry") ?? false;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

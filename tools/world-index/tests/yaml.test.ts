@@ -210,6 +210,29 @@ test("YAML outside canonical ledger sections is routed as a generic section node
   assert.equal(parseIssue.code, "unexpected_yaml_section");
 });
 
+test("ONTOLOGY named-entity registry YAML stays routable without ledger-noise warnings", () => {
+  const source = `# ONTOLOGY
+
+## Named Entity Registry
+
+\`\`\`yaml
+named_entities:
+  - canonical_name: Brinewick
+    entity_kind: place
+\`\`\`
+`;
+
+  const filePath = "/tmp/worlds/animalia/ONTOLOGY.md";
+  const { tree, lines } = parseMarkdown(source);
+  const { nodes, parseIssues } = extractYamlNodes(tree, lines, filePath);
+
+  assert.equal(nodes.length, 1);
+  const node = nodes[0];
+  assert.ok(node);
+  assert.equal(node.node_type, "section");
+  assert.equal(parseIssues.length, 0);
+});
+
 test("section ancestry determines CF versus CH routing even for identical raw YAML", () => {
   const { source, filePath } = loadFixture("fixture-yaml-section-routing.md");
   const { tree, lines } = parseMarkdown(source);

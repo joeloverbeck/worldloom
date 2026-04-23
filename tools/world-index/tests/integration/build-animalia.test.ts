@@ -43,10 +43,15 @@ function cleanup(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
-function appendNamedEntityRegistry(root: string, registryBlock: string): void {
+function replaceNamedEntityRegistry(root: string, registryBlock: string): void {
   const ontologyPath = path.join(root, "worlds", WORLD_SLUG, "ONTOLOGY.md");
-  const existing = readFileSync(ontologyPath, "utf8").replace(/\s*$/, "");
-  writeFileSync(ontologyPath, `${existing}\n\n${registryBlock}\n`, "utf8");
+  const existing = readFileSync(ontologyPath, "utf8");
+  const updated = existing.replace(
+    /## Named Entity Registry\s+```yaml[\s\S]*?```/,
+    registryBlock
+  );
+  assert.notEqual(updated, existing, "expected copied animalia ONTOLOGY.md to contain a named-entity registry");
+  writeFileSync(ontologyPath, updated, "utf8");
 }
 
 function openBuiltDb(root: string): Database.Database {
@@ -529,7 +534,7 @@ test("build promotes explicit ontology registry declarations from the copied wor
   const root = createTempRepoRoot();
 
   try {
-    appendNamedEntityRegistry(
+    replaceNamedEntityRegistry(
       root,
       [
         "## Named Entity Registry",
