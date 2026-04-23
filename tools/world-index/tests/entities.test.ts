@@ -127,6 +127,41 @@ test("stage A builds canonical entities from registry and structured whole-file 
   }
 });
 
+test("ontology registry only accepts explicit structured entries and rejects explanatory notes", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(
+      ontologyPath,
+      [
+        "## Notes on Use",
+        "- A canon fact may attach to multiple categories (a ward-breach event is both **event** and **hazard**; a chartered guild is both **institution** and **faction** in some polities).",
+        "- Mythical-species sentients are **species**, not **artifact**, even though M-5 (Mystery Reserve) entertains the heretical possibility otherwise.",
+        "- Artifact-mutated non-sentient beasts (CF-0035) attach to **hazard** + **species** (non-sentient fauna sub-category).",
+        "- Maker-Age artifact destruction-resistance (CF-0039) attaches to **metaphysical_rule** + **artifact** (as a property of the artifact-as-locus).",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    const registry = loadOntologyRegistry(ontologyPath);
+
+    assert.deepEqual(registry.entries, [
+      {
+        canonicalName: "Artifact-mutated non-sentient beasts",
+        kind: "hazard"
+      },
+      {
+        canonicalName: "Maker-Age artifact destruction-resistance",
+        kind: "metaphysical_rule"
+      }
+    ]);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("stage B emits exact structured aliases and suppresses identical normalized aliases", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 

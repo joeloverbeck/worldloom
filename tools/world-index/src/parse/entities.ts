@@ -465,7 +465,7 @@ function parseRegistryLine(line: string): EntityRegistryEntry | null {
     return canonicalName ? { canonicalName, kind } : null;
   }
 
-  const attachesMatch = line.match(/^(.+?)\s+attaches to\s+\*\*([^*]+)\*\*/i);
+  const attachesMatch = line.match(/^(.+?)\s+attach(?:es)? to\s+\*\*([^*]+)\*\*/i);
   if (attachesMatch) {
     const [, rawName, rawKind] = attachesMatch;
     if (!rawName || !rawKind) {
@@ -476,8 +476,7 @@ function parseRegistryLine(line: string): EntityRegistryEntry | null {
     return canonicalName ? { canonicalName, kind } : null;
   }
 
-  const canonicalName = sanitizeName(line);
-  return canonicalName ? { canonicalName, kind: null } : null;
+  return null;
 }
 
 function sanitizeName(rawName: string | undefined): string {

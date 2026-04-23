@@ -87,11 +87,17 @@ const BANNED_CANONICALS = [
   "An Ash",
   "Per Phase",
   "Required Updates",
-  "No Silent Retcons"
+  "No Silent Retcons",
+  "A canon fact may attach to multiple categories (a ward-breach event is both event and hazard; a chartered guild is both institution and faction in some polities).",
+  "Mythical-species sentients are species, not artifact, even though M-5 (Mystery Reserve) entertains the heretical possibility otherwise. The category attachment reflects what the world treats as true; mystery entries hold the disquieting alternatives.",
+  "The magic practice category is intentionally narrow in Animalia — there is no spellcraft. All entries here are artifact-handling practices.",
+  "Artifact-mutated non-sentient beasts attach to hazard + species (non-sentient fauna sub-category) + optionally local_anomaly (for specific named zones) + historical_process (for the centuries-accumulated phenomenon). They do NOT attach to `person`, `faction`, or any sentient-entity category. They are categorically DISTINCT from Cluster D mythic-species sentient folk (DIS-3) and from Maker-Age guardian constructions (CF-0029; distinct-origin firewall). The surface-similar appearance (chimeric / anomalous morphology) must not collapse the taxonomy.",
+  "Mundane-tier Maker-Age artifacts attach to artifact (mundane-subclass) + resource_distribution + hazard (low-tier CAU-1 cost). NOT a new distribution tier — explicit naming of DIS-1 \"most inert junk\" band. Attach to daily_routine for ordinary-life encounter contexts."
 ];
 const KEPT_CANONICALS = [
   "Vespera Nightwhisper",
   "Atreia Selviss",
+  "Maker-Age artifact destruction-resistance",
   "A Season on the Circuit: Dispatches from Vespera Nightwhisper",
   "After-Action Report on the Harrowgate Contract"
 ];

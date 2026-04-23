@@ -25,6 +25,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - If verification uses an exported function, inline `node -e` probe, or other package-local runtime entrypoint, run it from the package root when module resolution depends on package-local dependencies.
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
+- If the ticket claims it will add or expand a script/test proof surface, verify whether the named file or package-script already exists and already runs before treating that proof work as live delta.
 - For JS/TS package-local schema, type, or contract tickets, verify whether the drafted compile gate is package-wide (`src/**/*`, `tests/**/*`, or equivalent) before treating it as a narrow proof surface; if downstream consumers compile in the same lane, reassess the owned boundary before coding.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
@@ -78,6 +79,7 @@ Check:
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
+- for tickets that claim to add or expand a script/test proof surface, whether the named script file, shell entrypoint, or package-script already exists and already runs; if it does, narrow the ticket to tightening the existing proof surface before code edits
 - for staged ticket families, whether the active ticket is independently landable at its drafted acceptance boundary or whether live same-seam fallout makes the family decomposition false; if downstream consumers in the same package or seam must move together for `docs/FOUNDATIONS.md` closeout to stay truthful, widen the active ticket before coding
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
