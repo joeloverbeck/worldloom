@@ -4,9 +4,9 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 1 (read side; `submit_patch_plan` stubbed until Phase 2)
-**Status**: Phase 1 scaffold landed; tool implementations land in subsequent tickets
+**Status**: Phase 1 read-side server landed; stdio MCP entrypoint registers all 10 tools in `src/server.ts`
 
-## Planned tools
+## Tools
 
 - `mcp__worldloom__search_nodes(query, filters)`
 - `mcp__worldloom__get_node(node_id)`
@@ -30,3 +30,17 @@ HMAC-signed; single-use; 5-minute expiry. Secret at `tools/world-mcp/.secret` (g
 ## Configuration
 
 Registered via `.mcp.json`. See `specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
+
+The built stdio entrypoint is `dist/src/server.js`, so a local MCP config uses:
+
+```json
+{
+  "mcpServers": {
+    "worldloom": {
+      "command": "node",
+      "args": ["tools/world-mcp/dist/src/server.js"],
+      "env": {}
+    }
+  }
+}
+```

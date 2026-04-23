@@ -28,6 +28,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
 - If the ticket claims it will add or expand a script/test proof surface, verify whether the named file or package-script already exists and already runs before treating that proof work as live delta.
 - If the ticket names a checked-in fixture path for proof, verify that the fixture actually exists. When the drafted fixture is missing but the package already has a live temp-seeded or generated-fixture harness, rewrite the ticket to that truthful proof surface before coding instead of treating proof as absent.
+- If a drafted inventory or count proof relies on grep over inline literals, verify whether the live implementation routes those names through exported constants, registries, or helper tables first. When registration is indirect, prefer a runtime probe or exported introspection helper over stale grep-count proof.
 - For JS/TS package-local schema, type, or contract tickets, verify whether the drafted compile gate is package-wide (`src/**/*`, `tests/**/*`, or equivalent) before treating it as a narrow proof surface; if downstream consumers compile in the same lane, reassess the owned boundary before coding.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
@@ -197,6 +198,8 @@ If a fixture-backed command or integration test fails after a contract shift, fi
 If the drafted proof uses a CLI, confirm the command's working-directory contract before recording it in the ticket. If the CLI resolves paths from `process.cwd()` or another ambient root, either run it from the truthful root or switch to a narrower direct probe that exercises the same owned seam.
 
 If the ticket adds a runnable shell script or npm-script proof surface, apply the same package-root discipline inside the script itself: embedded `node`, `node -e`, or similar package-local probes must launch from the root where local dependencies actually resolve, even when the artifact under inspection lives elsewhere in the repo.
+
+If an MCP, stdio, or similar transport-client lane is itself unstable or environment-noisy, first prove that the client/tooling issue is outside the owned seam. When it is, keep handler/protocol correctness on the strongest truthful in-process or package-local seam, and narrow the transport proof to entrypoint lifecycle or child-process startup/shutdown behavior unless a known-good end-to-end transport lane exists.
 
 Worldloom verification surfaces usually include:
 
