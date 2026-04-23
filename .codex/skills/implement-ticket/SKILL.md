@@ -97,7 +97,7 @@ Load `references/mismatch-handling.md` from this skill directory (`.codex/skills
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
-When reassessment cleanly narrows the owned delta before coding, patch the ticket's `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
+When reassessment cleanly narrows the owned delta before coding, patch the ticket's `Problem`, stale evidence-backed statements in `Assumption Reassessment`, `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
 
 If early probing shows that a drafted broad package/workspace proof lane is already failing for reasons outside the owned seam, remove it from the active acceptance surface before implementation and rewrite the ticket to the strongest truthful narrower proof boundary. Keep the broader lane only as contextual noise or follow-up evidence, not as an active acceptance gate.
 
@@ -203,6 +203,8 @@ If the broad `node --test <file>` lane remains file-opaque but isolated subtests
 
 If an isolated JS/TS `node --test` lane still fails without surfacing the owned seam, rerun the exact assertion logic outside the test harness with a direct package-local probe that exercises the same invariant against the same rebuilt artifact root. When that direct probe is the clearest truthful boundary, record it as the acceptance surface and classify the still-opaque harness lane as noisy/non-acceptance proof instead of overclaiming it.
 
+When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
+
 ### 6. Close out the ticket honestly
 
 Update the active ticket before finishing:
@@ -217,6 +219,7 @@ Update the active ticket before finishing:
 - optional `## Deviations`
 - compare the landed diff against `Files to Touch` and `Test Plan` / `New/Modified Tests`, then patch the ticket if any touched file or exercised proof surface is still missing
 - if the ticket changed a shared contract or canonical authority surface, re-check same-seam proof scripts/fixtures referenced by the repo or adjacent tests and make their expectations truthful before finishing
+- if the ticket changed a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness sets, and neighboring same-seam assertions from the final post-fix artifact so the closeout does not preserve stale pre-fix evidence
 - compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording

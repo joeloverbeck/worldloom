@@ -223,6 +223,28 @@ function loadUnresolvedRequiredWorldUpdateRefs(
     .all() as Array<{ target_unresolved_ref: string; count: number }>;
 }
 
+function loadSemanticEdgeCounts(
+  db: Database.Database
+): Record<"affected_fact" | "derived_from" | "modified_by" | "required_world_update", number> {
+  const rows = db
+    .prepare(
+      `
+        SELECT edge_type, COUNT(*) AS count
+        FROM edges
+        WHERE edge_type IN ('affected_fact', 'derived_from', 'modified_by', 'required_world_update')
+        GROUP BY edge_type
+      `
+    )
+    .all() as Array<{ edge_type: "affected_fact" | "derived_from" | "modified_by" | "required_world_update"; count: number }>;
+
+  return {
+    affected_fact: rows.find((row) => row.edge_type === "affected_fact")?.count ?? 0,
+    derived_from: rows.find((row) => row.edge_type === "derived_from")?.count ?? 0,
+    modified_by: rows.find((row) => row.edge_type === "modified_by")?.count ?? 0,
+    required_world_update: rows.find((row) => row.edge_type === "required_world_update")?.count ?? 0
+  };
+}
+
 function countNamedEntityRows(db: Database.Database, entityName: string): number {
   return (
     db
@@ -401,7 +423,7 @@ test("build resolves animalia DA-0001 references through the canonical whole-fil
       });
 
       const derivedFromRows = loadDerivedFromRefsTo(db, "DA-0001");
-      assert.equal(derivedFromRows.length, 3);
+      assert.equal(derivedFromRows.length, 4);
       assert.equal(derivedFromRows.every((row) => row.target_node_id === "DA-0001"), true);
       assert.equal(derivedFromRows.every((row) => row.target_unresolved_ref === null), true);
     } finally {
@@ -750,6 +772,29 @@ test("build filters audited operational-label false positives while preserving e
         { canonical_name: "Atreia Selviss", provenance_scope: "proposal", entity_kind: "person" },
         { canonical_name: "Vespera Nightwhisper", provenance_scope: "world", entity_kind: "person" }
       ]);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build preserves recovery-parsed animalia semantic edge totals", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const buildExit = build(root, WORLD_SLUG);
+    assert.equal(buildExit, 0);
+
+    const db = openBuiltDb(root);
+    try {
+      assert.deepEqual(loadSemanticEdgeCounts(db), {
+        affected_fact: 127,
+        derived_from: 87,
+        modified_by: 80,
+        required_world_update: 283
+      });
     } finally {
       db.close();
     }

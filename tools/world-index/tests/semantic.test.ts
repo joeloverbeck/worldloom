@@ -100,6 +100,99 @@ test("semantic extraction emits typed YAML edges and attribution edges without d
   assert.deepEqual(parseIssues.map((issue) => issue.code).sort(), ["malformed_attribution_target"]);
 });
 
+test("semantic extraction preserves YAML-derived edges for recovery-parsed Canon Fact records", () => {
+  const source = `## Canon Fact Records
+
+\`\`\`yaml
+id: CF-0099
+title: Recovery edge fixture
+status: hard_canon
+type: institution
+statement: Recovery-only YAML still emits semantic edges.
+scope:
+  geographic: local
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - institutions
+visible_consequences:
+  - "halfbreed" plot conveniences do not exist in this world
+costs_and_limits:
+  - marriage-broker catechism extensions in adopting-region households:
+    "is the stop kept in the family?"
+required_world_updates:
+  - INSTITUTIONS.md
+source_basis:
+  direct_user_approval: false
+  derived_from:
+    - CF-0001
+modification_history:
+  - change_id: CH-0099
+    originating_cf: CF-0001
+    date: 2026-04-23
+    summary: Preserved recovered semantic edges.
+\`\`\`
+`;
+
+  const filePath = "/tmp/worlds/animalia/CANON_LEDGER.md";
+  const { tree, lines } = parseMarkdown(source);
+  const { nodes: yamlNodes, parseIssues: yamlIssues } = extractYamlNodes(tree, lines, filePath);
+  assert.equal(yamlIssues.length, 0);
+
+  const proseNodes = [
+    makeProseNode({
+      nodeId: domainFileNodeId("animalia", "INSTITUTIONS.md"),
+      filePath,
+      headingPath: "INSTITUTIONS.md",
+      lineStart: 1,
+      lineEnd: lines.length,
+      nodeType: "domain_file",
+      body: source
+    })
+  ];
+
+  const { edges, parseIssues } = extractSemanticEdges(
+    tree,
+    lines,
+    filePath,
+    "animalia",
+    yamlNodes,
+    proseNodes
+  );
+
+  assert.deepEqual(parseIssues, []);
+  assert.equal(
+    edges.some(
+      (edge) =>
+        edge.edge_type === "derived_from" &&
+        edge.source_node_id === "CF-0099" &&
+        edge.target_unresolved_ref === "CF-0001"
+    ),
+    true
+  );
+  assert.equal(
+    edges.some(
+      (edge) =>
+        edge.edge_type === "required_world_update" &&
+        edge.source_node_id === "CF-0099" &&
+        edge.target_node_id === domainFileNodeId("animalia", "INSTITUTIONS.md")
+    ),
+    true
+  );
+  assert.equal(
+    edges.some(
+      (edge) =>
+        edge.edge_type === "modified_by" &&
+        edge.source_node_id === "CF-0099" &&
+        edge.target_unresolved_ref === "CH-0099"
+    ),
+    true
+  );
+});
+
 function buildFixtureProseNodes(source: string, filePath: string): NodeRow[] {
   const lines = source.split(/\r?\n/);
   const domainHistoryStart = findLine(lines, "## Domain History");

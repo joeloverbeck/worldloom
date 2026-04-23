@@ -178,7 +178,7 @@ export function extractYamlNodes(
   return { nodes, parseIssues };
 }
 
-function parseYamlWithRecovery(rawYaml: string): unknown {
+export function parseYamlWithRecovery(rawYaml: string): unknown {
   try {
     return YAML.parse(rawYaml) as unknown;
   } catch (originalError) {

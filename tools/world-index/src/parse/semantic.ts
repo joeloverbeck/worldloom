@@ -1,8 +1,8 @@
-import YAML from "yaml";
 import type { Html, Root, RootContent } from "mdast";
 
 import { MANDATORY_WORLD_FILES } from "../enumerate";
 import { domainFileNodeId } from "./prose";
+import { parseYamlWithRecovery } from "./yaml";
 import type { CanonFactRecord, ChangeLogEntry, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\b/g;
@@ -162,7 +162,7 @@ function createRefEdge(
 
 function safeParseYaml<T>(body: string): T | null {
   try {
-    return YAML.parse(body) as T;
+    return parseYamlWithRecovery(body) as T;
   } catch {
     return null;
   }
