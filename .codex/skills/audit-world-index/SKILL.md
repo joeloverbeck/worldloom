@@ -61,7 +61,7 @@ Start with these surfaces:
 - SQLite schema shape and table presence
 - node counts by `node_type`
 - edge counts by `edge_type`, including unresolved targets
-- `validation_results` grouped by `severity`, `code`, and `file_path`
+- `validation_results` grouped by `validator_name`, `severity`, `code`, and `file_path`
 - file coverage via `file_versions`
 - semantic surfaces most likely to rot downstream consumers, especially `entities`, `entity_aliases`, `entity_mentions`, and virtual `named_entity` nodes
 
@@ -134,6 +134,15 @@ In this repo, the main non-entity example is `CANON_LEDGER.md` YAML-derived sema
 - `required_world_updates` -> `required_world_update`
 - `modification_history[].change_id` -> `modified_by`
 - `affected_fact_ids` -> `affected_fact`
+
+If you need a truthful authored-count baseline for those fields, prefer using the live built parser against `worlds/<slug>/CANON_LEDGER.md` instead of hand-counting YAML blocks. A representative pattern is:
+
+```bash
+cd /path/to/repo && node -e 'const fs=require("fs"); const {parseYamlWithRecovery}=require("./tools/world-index/dist/src/parse/yaml.js"); const text=fs.readFileSync("worlds/<world_slug>/CANON_LEDGER.md","utf8"); const blocks=[...text.matchAll(/```yaml\\n([\\s\\S]*?)```/g)].map(m=>m[1]); const counts={derived_from:0,required_world_updates:0,modified_by:0,affected_fact:0}; for (const block of blocks) { let doc; try { doc=parseYamlWithRecovery(block); } catch { continue; } if (!doc || typeof doc !== "object") continue; if (Array.isArray(doc.required_world_updates)) counts.required_world_updates += doc.required_world_updates.length; if (doc.source_basis && Array.isArray(doc.source_basis.derived_from)) counts.derived_from += doc.source_basis.derived_from.length; if (Array.isArray(doc.modification_history)) counts.modified_by += doc.modification_history.filter(x => x && typeof x.change_id === "string").length; if (Array.isArray(doc.affected_fact_ids)) counts.affected_fact += doc.affected_fact_ids.length; } console.log(JSON.stringify(counts, null, 2));'
+cd /path/to/repo && sqlite3 -header -column worlds/<world_slug>/_index/world.db "SELECT edge_type, COUNT(*) AS count FROM edges WHERE edge_type IN ('derived_from','required_world_update','modified_by','affected_fact') GROUP BY edge_type ORDER BY edge_type;"
+```
+
+Use the first command as the source-of-truth authored baseline and the second as the rebuilt DB count. If they differ after rebuild, treat that as a reproduced semantic completeness defect rather than a guess about parser behavior.
 
 If a deterministic source surface says the DB should contain more rows than it actually does, classify that as a real semantic indexing defect even if:
 
