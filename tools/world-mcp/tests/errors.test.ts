@@ -5,6 +5,7 @@ import { MCP_ERROR_CODES } from "../src/errors";
 
 test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
   assert.deepEqual(MCP_ERROR_CODES, [
+    "invalid_input",
     "index_missing",
     "index_version_mismatch",
     "stale_index",
@@ -21,4 +22,3 @@ test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
     "phase1_stub"
   ]);
 });
-

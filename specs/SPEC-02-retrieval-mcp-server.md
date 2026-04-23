@@ -260,6 +260,7 @@ Structured error codes returned by MCP tools (mirrors SPEC-03's naming style):
 | Code | Returned by | Meaning |
 |------|-------------|---------|
 | `index_missing` | all tools | `worlds/<slug>/_index/world.db` does not exist |
+| `invalid_input` | tools with structured argument validation | malformed tool arguments or missing required fields |
 | `index_version_mismatch` | all tools | `index_version.txt` does not match server's expected schema |
 | `stale_index` | all tools | filesystem drift detected vs. `file_versions` |
 | `empty_index` | all tools | index exists but contains zero nodes |

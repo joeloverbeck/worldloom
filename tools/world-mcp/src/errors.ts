@@ -1,4 +1,5 @@
 export const MCP_ERROR_CODES = [
+  "invalid_input",
   "index_missing",
   "index_version_mismatch",
   "stale_index",
@@ -30,4 +31,3 @@ export function createMcpError(
 ): McpError {
   return details === undefined ? { code, message } : { code, message, details };
 }
-

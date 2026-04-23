@@ -232,3 +232,129 @@ export function rankSearchRows(
     return leftRank - rightRank;
   });
 }
+
+export interface PatchOperationEnvelope {
+  op: string;
+  target_world: string;
+  target_file: string;
+  target_node_id?: string;
+  expected_content_hash?: string;
+  expected_anchor_checksum?: string;
+  payload: unknown;
+  attribution?: {
+    kind: "added" | "clarified" | "modified";
+    id: string;
+    date?: string;
+  };
+  failure_mode?: "strict" | "relocate_on_miss";
+}
+
+export interface PatchPlanEnvelope {
+  plan_id: string;
+  target_world: string;
+  approval_token: string;
+  verdict: string;
+  originating_skill: string;
+  originating_cf_ids?: string[];
+  originating_ch_id?: string;
+  originating_pa_id?: string;
+  expected_id_allocations: Record<string, unknown>;
+  patches: PatchOperationEnvelope[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function invalidInput(message: string, field: string): McpError {
+  return createMcpError("invalid_input", message, { field });
+}
+
+export function validatePatchPlanEnvelopeShape(plan: unknown): McpError | null {
+  if (!isRecord(plan)) {
+    return invalidInput("patch_plan must be an object.", "patch_plan");
+  }
+
+  if (!isNonEmptyString(plan.plan_id)) {
+    return invalidInput("patch_plan.plan_id must be a non-empty string.", "patch_plan.plan_id");
+  }
+
+  if (!isNonEmptyString(plan.target_world)) {
+    return invalidInput(
+      "patch_plan.target_world must be a non-empty string.",
+      "patch_plan.target_world"
+    );
+  }
+
+  if (!isNonEmptyString(plan.approval_token)) {
+    return invalidInput(
+      "patch_plan.approval_token must be a non-empty string.",
+      "patch_plan.approval_token"
+    );
+  }
+
+  if (!isNonEmptyString(plan.verdict)) {
+    return invalidInput("patch_plan.verdict must be a non-empty string.", "patch_plan.verdict");
+  }
+
+  if (!isNonEmptyString(plan.originating_skill)) {
+    return invalidInput(
+      "patch_plan.originating_skill must be a non-empty string.",
+      "patch_plan.originating_skill"
+    );
+  }
+
+  if (!isRecord(plan.expected_id_allocations)) {
+    return invalidInput(
+      "patch_plan.expected_id_allocations must be an object.",
+      "patch_plan.expected_id_allocations"
+    );
+  }
+
+  if (!Array.isArray(plan.patches) || plan.patches.length === 0) {
+    return invalidInput(
+      "patch_plan.patches must be a non-empty array.",
+      "patch_plan.patches"
+    );
+  }
+
+  for (const [index, patch] of plan.patches.entries()) {
+    if (!isRecord(patch)) {
+      return invalidInput(`patch_plan.patches[${index}] must be an object.`, `patch_plan.patches[${index}]`);
+    }
+
+    if (!isNonEmptyString(patch.op)) {
+      return invalidInput(
+        `patch_plan.patches[${index}].op must be a non-empty string.`,
+        `patch_plan.patches[${index}].op`
+      );
+    }
+
+    if (!isNonEmptyString(patch.target_world)) {
+      return invalidInput(
+        `patch_plan.patches[${index}].target_world must be a non-empty string.`,
+        `patch_plan.patches[${index}].target_world`
+      );
+    }
+
+    if (!isNonEmptyString(patch.target_file)) {
+      return invalidInput(
+        `patch_plan.patches[${index}].target_file must be a non-empty string.`,
+        `patch_plan.patches[${index}].target_file`
+      );
+    }
+
+    if (!("payload" in patch)) {
+      return invalidInput(
+        `patch_plan.patches[${index}].payload is required.`,
+        `patch_plan.patches[${index}].payload`
+      );
+    }
+  }
+
+  return null;
+}

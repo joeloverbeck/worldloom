@@ -15,8 +15,8 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__find_impacted_fragments(node_ids)`
 - `mcp__worldloom__find_named_entities(names)`
 - `mcp__worldloom__find_edit_anchors(targets)`
-- `mcp__worldloom__validate_patch_plan(patch_plan)` *(Phase 1: delegates to validator CLI)*
-- `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(Phase 2)*
+- `mcp__worldloom__validate_patch_plan(patch_plan)` *(Phase 1: returns `validator_unavailable` until SPEC-04 lands)*
+- `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(Phase 1: returns `phase1_stub` until SPEC-03 lands)*
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)`
 
 ## Retrieval policy
