@@ -132,8 +132,11 @@ Before writing a new ticket:
 1. Search `tickets/` and `archive/tickets/` for the same seam.
 2. Read the most relevant active or recent ticket/spec records for that seam.
 3. Confirm whether the issue is a regression, a new adjacent seam, or already owned work.
+4. Check the most relevant current verification surface for that seam before drafting a ticket. For `tools/world-index`, that often means the closest package-level integration or capstone proof already covering the rebuilt live corpus.
 
 If the seam was already fixed but the fresh rebuild still reproduces it, cite the archived ticket or spec in the new ticket's reassessment as regression context. For entity-surface issues after SPEC-10, check `archive/specs/SPEC-10-entity-surface-redesign.md` plus archived `SPEC10ENTSUR-*` tickets before drafting a new owner.
+
+If the reproduced defect already fails the current verification surface, cite that proof lane in the audit and keep the new ticket focused on the implementation seam unless a separate active owner already exists. If the reproduced defect survives current proof because the verification surface does not check that class yet, say so explicitly and include the missing proof-surface coverage as part of the same ticket only when it is a required consequence of that seam.
 
 ### 7. Draft new tickets only when warranted
 
