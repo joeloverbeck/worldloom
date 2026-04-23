@@ -1,6 +1,6 @@
 # SPEC11CANENT-004: Update fixture-world command proof to the registry-first canonical entity contract
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index` fixture-world command proof is updated to match the post-SPEC-11 canonical entity authority contract.
@@ -16,7 +16,8 @@
 2. `archive/tickets/SPEC11CANENT-002.md` truthfully records the landed contract change: legacy ontology bullets no longer create canonical entities, and explicit fenced-YAML registry declarations are now the world-level authority surface.
 3. Shared boundary under audit: the fixture-world command proof in `tools/world-index/tests/commands.test.ts`, the fixture-world source files under `tools/world-index/tests/fixtures/fixture-world/`, and the canonical entity contract exercised by `build`, `inspect`, `stats`, `sync`, and `verify`.
 4. `docs/FOUNDATIONS.md` `Core Principle`, `Ontology Categories`, and `Tooling Recommendation` support explicit structured authority surfaces rather than incidental prose/bullet promotion.
-5. Mismatch + correction: the command test should be updated to assert against the registry-first contract or an intentionally declared fixture authority source, not against the removed legacy bullet path.
+5. Reassessment of `tools/world-index/tests/commands.test.ts` shows the direct `entity:brinewick` assertions are still truthful under SPEC-11 because registry-backed entities keep the same canonical slug/id shape; the stale part is the fixture source, not the test logic.
+6. Mismatch + correction: the minimal truthful fix is to declare `Brinewick` in the fixture `ONTOLOGY.md` registry and keep the existing command assertions as the proof surface for registry-backed canonical entity inspection.
 
 ## Architecture Check
 
@@ -34,16 +35,16 @@
 
 ### 1. Reassess the fixture authority source
 
-Determine the minimal truthful way for fixture-world to expose the canonical entity expected by `commands.test.ts` under the registry-first contract.
+Make fixture-world declare `Brinewick` through the live `## Named Entity Registry` fenced-YAML authority surface so the existing command proof exercises the registry-first contract.
 
 ### 2. Update the command proof
 
-Patch `tools/world-index/tests/commands.test.ts` and any required fixture-world source files so the command lane proves the intended canonical entity behavior without depending on removed ontology bullet scraping.
+Keep `tools/world-index/tests/commands.test.ts` as the registry-backed proof surface if reassessment confirms its assertions already match the post-SPEC-11 entity id contract; only patch fixture-world source files that still rely on removed ontology bullet scraping.
 
 ## Files to Touch
 
-- `tools/world-index/tests/commands.test.ts` (modify)
-- `tools/world-index/tests/fixtures/fixture-world/ONTOLOGY.md` (modify) if explicit registry declarations are required
+- `tools/world-index/tests/fixtures/fixture-world/ONTOLOGY.md` (modify)
+- `tickets/SPEC11CANENT-004.md` (modify)
 
 ## Out of Scope
 
@@ -69,10 +70,27 @@ Patch `tools/world-index/tests/commands.test.ts` and any required fixture-world 
 
 ### New/Modified Tests
 
-1. `tools/world-index/tests/commands.test.ts` — align fixture-world command proof with the live canonical entity authority contract.
+1. `tools/world-index/tests/fixtures/fixture-world/ONTOLOGY.md` — declare the fixture canonical entity through the live registry surface used by `commands.test.ts`.
 
 ### Commands
 
 1. `cd tools/world-index && npm run build`
 2. `cd tools/world-index && node --test dist/tests/commands.test.js`
 3. `cd tools/world-index && npm test` — rerun only after the focused command lane is green to confirm the package-level suite is restored truthfully.
+
+## Outcome
+
+- Completed: 2026-04-23
+- `tools/world-index/tests/fixtures/fixture-world/ONTOLOGY.md` now declares `Brinewick` in the live `## Named Entity Registry` fenced-YAML block, so the fixture exposes a canonical world entity through the SPEC-11 registry-first authority path.
+- `tools/world-index/tests/commands.test.ts` did not require code changes after reassessment; its existing `entity:brinewick` assertions remain truthful once the fixture authority source is explicit.
+- The ticket boundary was narrowed to fixture proof alignment, not parser or command implementation changes.
+
+## Verification Result
+
+- Passed `cd tools/world-index && npm run build`
+- Passed `cd tools/world-index && node --test dist/tests/commands.test.js`
+- Passed `cd tools/world-index && npm test`
+
+## Deviations
+
+- Reassessment showed the drafted `commands.test.ts` edit was unnecessary because registry-backed entities preserve the same canonical slug/id shape. The landed fix is fixture-world source alignment only.

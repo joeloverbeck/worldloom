@@ -2,6 +2,8 @@
 
 # SPEC-11: Canonical Entity Authority Surfaces — Explicit Registry, Malformed-Source Discipline, Exact Alias Declarations
 
+**Status**: COMPLETED
+
 **Phase**: 1.75 remediation; lands after SPEC-10 and before entity-sensitive consumers treat the current canonical surface as complete
 **Depends on**: SPEC-10
 **Blocks**: SPEC-02 `find_named_entities` completeness expectations, SPEC-02 `search_nodes.entity_name` trust boundary, SPEC-06 any skill that assumes current canonical entities cover the intended named world model
@@ -202,3 +204,19 @@ No tension with FOUNDATIONS was found. The proposal narrows ambiguity without we
 1. Should the explicit `ONTOLOGY.md` registry support a future `source_note` or `scope_note` field, or should v1 stay at `canonical_name`, `entity_kind`, and `aliases` only?
 2. Should malformed authority-source validation remain a warning, or should `verify` hard-fail when authority-bearing whole-file records are malformed?
 3. Should proposal-local `character_proposal_card.title` ever support an explicit split between display title and canonical name alias, or should that remain the responsibility of `aliases: []` only?
+
+## Outcome
+
+Completion date: 2026-04-23
+
+- SPEC-11 landed through `archive/tickets/SPEC11CANENT-001.md`, `archive/tickets/SPEC11CANENT-002.md`, `archive/tickets/SPEC11CANENT-003.md`, and `archive/tickets/SPEC11CANENT-004.md`.
+- `tools/world-index/src/parse/entities.ts` now reads canonical world entities only from a fenced-YAML `## Named Entity Registry` block in `ONTOLOGY.md`, emits `frontmatter_parse` / `malformed_authority_source` warnings for malformed authority-bearing whole-file records, accepts exact whole-file `aliases: []` declarations, and keeps same-name registry/whole-file entities distinct.
+- `tools/world-index` proof surfaces now cover the delivered authority contract across unit, integration, spec10 verification, and fixture-command lanes, including the registry-first `Brinewick` fixture authority path in `tools/world-index/tests/fixtures/fixture-world/ONTOLOGY.md`.
+- Deviations from original plan: the spec landed as four bounded tickets rather than one pass; the command-proof portion narrowed to fixture authority alignment because `tools/world-index/tests/commands.test.ts` already matched the live canonical entity id contract once the fixture source was made explicit.
+- Verification results:
+  - `cd tools/world-index && npm run build`
+  - `cd tools/world-index && node --test dist/tests/entities.test.js`
+  - `cd tools/world-index && node dist/tests/integration/build-animalia.test.js`
+  - `cd tools/world-index && npm run test:spec10-verification`
+  - `cd tools/world-index && node --test dist/tests/commands.test.js`
+  - `cd tools/world-index && npm test`

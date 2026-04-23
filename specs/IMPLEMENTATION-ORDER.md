@@ -41,7 +41,7 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-10` Entity Surface Redesign — completed 2026-04-23; implementation landed via `archive/tickets/SPEC10ENTSUR-001.md`, `archive/tickets/SPEC10ENTSUR-007.md`, and `archive/tickets/SPEC10ENTSUR-008.md`; spec archived at `archive/specs/SPEC-10-entity-surface-redesign.md`
 
 **Tier 1.75 (depends on Tier 1.5)**:
-- `SPEC-11` Canonical Entity Authority Surfaces — specified; formalizes explicit machine-readable world-entity authority, malformed-authority-source discipline, and exact alias declarations before entity-sensitive consumers assume the current canonical surface is complete
+- `SPEC-11` Canonical Entity Authority Surfaces — completed 2026-04-23; implementation landed via `archive/tickets/SPEC11CANENT-001.md`, `archive/tickets/SPEC11CANENT-002.md`, `archive/tickets/SPEC11CANENT-003.md`, and `archive/tickets/SPEC11CANENT-004.md`; spec archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md`
 
 **Tier 2 (depends on Tier 1.5)**:
 - `SPEC-02` MCP Retrieval Server — full tool surface with `submit_patch_plan` stubbed
@@ -240,7 +240,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-08 Migration & Phasing | ✓ specified |
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
-| SPEC-11 Canonical Entity Authority Surfaces | ✓ specified |
+| SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
 | IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
 
 SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10 is a later architectural remediation of SPEC-01's entity surface after repeated live `named_entity` audit failures showed that the original heuristic/entity contract was too broad.

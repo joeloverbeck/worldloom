@@ -88,6 +88,7 @@ Check:
 - when reassessment narrows or rewrites a shared contract, whether existing same-seam proof scripts, fixtures, or verification docs still encode the old contract; if they do, treat truthful proof-surface upkeep inside that seam as required consequence fallout rather than optional cleanup
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
+- for fixture-backed command or integration tests, verify whether the assertion shape is still truthful before editing the test harness; if the live contract still matches the assertion, check whether the copied fixture source is stale and narrow the ticket to fixture-proof alignment instead of rewriting a still-correct test
 - for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
 - when replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path; do not scan a broader substrate ad hoc and treat that result as equivalent evidence
 - when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
@@ -176,6 +177,8 @@ If an initial broad package/workspace lane fails and the failure is already clea
 If the symptom is already reproduced but multiple same-seam fixes remain plausible, run a narrow source-to-emission probe before editing so the patch stays minimal and the ticket does not overclaim a broader implementation shape.
 
 If a broader proof copies a live world tree or fixture and inherits generated state, clean or account for that copied state before treating the failure as ticket evidence. Record that harness correction in `Assumption Reassessment` or `## Deviations` when it materially changes the proof story.
+
+If a fixture-backed command or integration test fails after a contract shift, first decide whether the assertion itself is stale or whether the fixture no longer declares the authority source that the assertion expects. When the assertion still matches the live contract, prefer fixing the fixture input and record the ticket as fixture-proof alignment rather than test-harness logic change.
 
 If the drafted proof uses a CLI, confirm the command's working-directory contract before recording it in the ticket. If the CLI resolves paths from `process.cwd()` or another ambient root, either run it from the truthful root or switch to a narrower direct probe that exercises the same owned seam.
 
