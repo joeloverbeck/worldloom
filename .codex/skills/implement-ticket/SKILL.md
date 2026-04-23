@@ -32,6 +32,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - For JS/TS package-local schema, type, or contract tickets, verify whether the drafted compile gate is package-wide (`src/**/*`, `tests/**/*`, or equivalent) before treating it as a narrow proof surface; if downstream consumers compile in the same lane, reassess the owned boundary before coding.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
+- In Codex, do not use `multi_tool_use.parallel` for build-then-test, generate-then-verify, or similar producer/consumer lanes; wait for the producer command to finish before launching dependent commands.
 - When a consumer package depends on a local sibling package via a workspace or `file:` dependency, refresh the consumer's installed dependency view after producer-side package/export changes and before consumer proof; do not assume the consumer is exercising the newly built public surface until that refresh has happened.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
@@ -80,6 +81,7 @@ Check:
 - every path in `Deps`, `Files to Touch`, `Verification Layers`, `Test Plan`, and prose references
 - if a `Deps` entry is a symbolic ticket/spec id rather than a resolvable live path, do not treat it as a missing-file blocker by default; resolve it against the live seam first (code, active specs, archived specs, or sibling tickets) and record the symbolic-id mismatch in `Assumption Reassessment`
 - every skill, tool, hook, validator, schema, or doc section named by the ticket
+- for tickets that depend on a third-party or vendor-owned API, hook system, protocol schema, or tool contract, verify the current primary documentation before trusting the ticket/spec wording; if the live contract differs, record that drift in reassessment and truth the local config/docs to the actual API
 - every drafted algorithm, tree-shape, parser-behavior, or data-flow claim the ticket relies on; verify these against the live substrate instead of trusting spec prose
 - for `world-index` content tickets that mention adjudication YAML placement or `unexpected_yaml_section`, inspect `tools/world-index/src/parse/yaml.ts` before trusting any ticket claim about a canonical adjudication YAML section; the live parser may treat all adjudication fenced YAML as out-of-section
 - every FOUNDATIONS claim or rule reference the ticket relies on

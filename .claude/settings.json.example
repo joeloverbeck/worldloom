@@ -1,5 +1,5 @@
 {
-  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks activate progressively across phases per specs/SPEC-08-migration-and-phasing.md. Each hook's implementation lives at tools/hooks/dist/*.js, built from tools/hooks/src/*.ts (see specs/SPEC-05-hooks-discipline.md).",
+  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. Hooks activate progressively across phases per specs/SPEC-08-migration-and-phasing.md. Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see specs/SPEC-05-hooks-discipline.md).",
 
   "_phase_gating": {
     "phase_1_active_hooks": ["hook1-user-prompt-context", "hook2-guard-large-read", "hook4-subagent-localization"],
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/hooks/dist/hook1-user-prompt-context.js"
+            "command": "node tools/hooks/dist/src/hook1-user-prompt-context.js"
           }
         ]
       }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/hooks/dist/hook2-guard-large-read.js"
+            "command": "node tools/hooks/dist/src/hook2-guard-large-read.js"
           }
         ]
       },
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/hooks/dist/hook3-guard-direct-edit.js"
+            "command": "node tools/hooks/dist/src/hook3-guard-direct-edit.js"
           }
         ]
       }
@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/hooks/dist/hook4-subagent-localization.js"
+            "command": "node tools/hooks/dist/src/hook4-subagent-localization.js"
           }
         ]
       }
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node tools/hooks/dist/hook5-validate-after-patch.js"
+            "command": "node tools/hooks/dist/src/hook5-validate-after-patch.js"
           }
         ]
       }

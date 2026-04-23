@@ -2,7 +2,7 @@
 
 MCP retrieval server exposing the world index (`tools/world-index/`) as a structured API. Skills consume `mcp__worldloom__*` tools instead of reading raw markdown.
 
-**Design**: `specs/SPEC-02-retrieval-mcp-server.md`
+**Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 1 (read side; `submit_patch_plan` stubbed until Phase 2)
 **Status**: Phase 1 read-side server landed; stdio MCP entrypoint registers all 10 tools in `src/server.ts`
 
@@ -29,7 +29,7 @@ HMAC-signed; single-use; 5-minute expiry. Secret at `tools/world-mcp/.secret` (g
 
 ## Configuration
 
-Registered via `.mcp.json`. See `specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
+Registered via `.mcp.json`. See `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
 
 The built stdio entrypoint is `dist/src/server.js`, so a local MCP config uses:
 

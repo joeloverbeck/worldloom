@@ -44,8 +44,8 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-11` Canonical Entity Authority Surfaces — completed 2026-04-23; implementation landed via `archive/tickets/SPEC11CANENT-001.md`, `archive/tickets/SPEC11CANENT-002.md`, `archive/tickets/SPEC11CANENT-003.md`, and `archive/tickets/SPEC11CANENT-004.md`; spec archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md`
 
 **Tier 2 (depends on Tier 1.5)**:
-- `SPEC-02` MCP Retrieval Server — full tool surface with `submit_patch_plan` stubbed
-- `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent)
+- `SPEC-02` MCP Retrieval Server — completed 2026-04-24; implementation landed at `tools/world-mcp/`, with `submit_patch_plan` intentionally stubbed per the Phase 1 contract; spec archived at `archive/specs/SPEC-02-retrieval-mcp-server.md`
+- `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent) — completed 2026-04-24; implementation landed at `tools/hooks/` and `.claude/settings.json.example`; Hooks 3 and 5 remain Phase 2 work
 
 **Tier 3 (depends on Tier 2)**:
 - `SPEC-06 Part A` canon-addition read-side rewrite
@@ -231,10 +231,10 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | Spec | Status |
 |---|---|
 | SPEC-01 World Index | ✓ implemented 2026-04-22; archived at `archive/specs/SPEC-01-world-index.md` |
-| SPEC-02 Retrieval MCP Server | ✓ specified |
+| SPEC-02 Retrieval MCP Server | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-02-retrieval-mcp-server.md` |
 | SPEC-03 Patch Engine | ✓ specified |
 | SPEC-04 Validator Framework | ✓ specified |
-| SPEC-05 Hooks Discipline | ✓ specified |
+| SPEC-05 Hooks Discipline | Part A implemented 2026-04-24 at `tools/hooks/` and `.claude/settings.json.example`; Part B remains specified |
 | SPEC-06 Skill Rewrite Patterns | ✓ specified |
 | SPEC-07 Docs Updates | Part A implemented 2026-04-23 at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`; Parts B and C remain specified |
 | SPEC-08 Migration & Phasing | ✓ specified |

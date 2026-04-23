@@ -4,7 +4,7 @@ Claude Code hooks that make retrieval and mutation discipline structural rather 
 
 **Design**: `specs/SPEC-05-hooks-discipline.md`
 **Phase**: 1 (Hooks 1, 2, 4) + Phase 2 (Hooks 3, 5)
-**Status**: not yet implemented
+**Status**: Hooks 1, 2, and 4 implemented on 2026-04-24 in `src/`; Hooks 3 and 5 remain Phase 2 work. Built hook entrypoints land at `dist/src/*.js`.
 
 ## Hook inventory
 
@@ -30,4 +30,4 @@ Hook 2 has an `ALLOW_FULL_READ` prompt-level override for human-driven review. H
 
 ## Testing
 
-Each hook has integration tests spinning up a sandboxed fixture world and simulating synthetic tool calls via Claude Code's hook test harness.
+`npm test` builds the package and runs compiled-script tests for Hooks 1, 2, and 4 against synthetic hook payloads and fixture worlds.

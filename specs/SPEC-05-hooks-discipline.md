@@ -5,6 +5,7 @@
 **Phase**: Hooks 1, 2, 4 ship in Phase 1; Hooks 3, 5 ship in Phase 2
 **Depends on**: SPEC-01 (index for Hook 1 context), SPEC-02 (MCP server for redirects), SPEC-03 (Hook 3 policy), SPEC-04 (Hook 5 validators)
 **Blocks**: SPEC-06 (skills rely on hooks to make discipline structural)
+**Status (2026-04-24)**: Part A is implemented at `tools/hooks/` and wired in `.claude/settings.json.example`. Hooks 3 and 5 remain specified-only Phase 2 work.
 
 ## Problem Statement
 
@@ -14,7 +15,7 @@ Current worldloom discipline ("don't over-read", "don't bypass the gate", "use g
 
 ## Approach
 
-Five hooks in `.claude/settings.json`, each a small TypeScript script at `tools/hooks/*.ts` compiled to `tools/hooks/dist/*.js`. Hooks return structured decisions (allow / deny / rewrite) per Claude Code's hook API. Graceful degrade: if the world index is missing or the MCP server is down, hooks pass through silently rather than breaking Claude.
+Five hooks in `.claude/settings.json`, each a small TypeScript script under `tools/hooks/src/` compiled to `tools/hooks/dist/src/*.js`. Hooks return structured decisions (allow / deny / rewrite) per Claude Code's hook API. Graceful degrade: if the world index is missing or the MCP server is down, hooks pass through silently rather than breaking Claude.
 
 ## Deliverables
 
@@ -29,18 +30,23 @@ tools/hooks/
 ├── src/
 │   ├── hook1-user-prompt-context.ts
 │   ├── hook2-guard-large-read.ts
-│   ├── hook3-guard-direct-edit.ts
 │   ├── hook4-subagent-localization.ts
-│   ├── hook5-validate-after-patch.ts
 │   └── lib/
 │       ├── detect-world.ts              # infer world_slug from prompt / path
+│       ├── hook-io.ts                   # stdin/stdout helpers for Claude hook JSON
 │       ├── index-query.ts               # thin wrapper for hook-time index reads
+│       ├── pathing.ts                   # repo/world path resolution
 │       ├── size-thresholds.ts           # per-file protection thresholds
 │       └── logging.ts                   # hook decisions logged to tools/hooks/logs/
 ├── tests/
-│   └── integration/
+│   ├── _shared.ts
+│   ├── hook1-user-prompt-context.test.ts
+│   ├── hook2-guard-large-read.test.ts
+│   └── hook4-subagent-localization.test.ts
 └── dist/                                # compiled JS; gitignored
 ```
+
+Phase 2 will add `hook3-guard-direct-edit.ts` and `hook5-validate-after-patch.ts`.
 
 ### Hook inventory
 
@@ -50,19 +56,18 @@ tools/hooks/
 
 **Behavior**:
 1. Detect `world_slug` from prompt keywords (explicit mention of world name; slash-command argument; `worlds/<slug>/` path in prompt)
-2. If detected, query index for:
-   - Top 5 relevant node ids (ranked per SPEC-02 default profile)
-   - Named entities found in prompt
-   - Size-class warnings (any protected file the prompt might cause a raw read of)
-3. Inject preface as system reminder (budget ≤500 tokens):
+2. If detected, query the local world index opportunistically for:
+   - Structured ids explicitly named in the prompt
+   - Exact named entities found in the prompt
+   - Up to 5 relevant node ids from exact-id, entity-source, and lexical fallback matches
+   - Size-class warnings for protected files explicitly named in the prompt
+3. Inject a factual `additionalContext` preface (budget ≤500 tokens):
 
 ```
-<system-reminder>
 Worldloom context: world=animalia (13 files, 12111 lines total; CANON_LEDGER.md=8624 lines).
-Recent entities detected: Brinewick, Maker Civilization.
+Named entities detected: Brinewick.
 Top relevant nodes: CF-0038, CF-0031, M-1, PA-0017.
-Size warning: CANON_LEDGER.md > threshold — use mcp__worldloom__get_context_packet instead of raw Read.
-</system-reminder>
+Size warnings: CANON_LEDGER.md is always protected; prefer mcp__worldloom__get_context_packet or targeted node reads.
 ```
 
 **Graceful degrade**: if no world detected or index missing, no preface injected.
@@ -76,7 +81,7 @@ Size warning: CANON_LEDGER.md > threshold — use mcp__worldloom__get_context_pa
 **Policy**:
 - **Always protected** (deny full-file reads regardless of size): `CANON_LEDGER.md`
 - **Threshold-protected** (deny when >300 lines): `MYSTERY_RESERVE.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, `GEOGRAPHY.md`
-- **Always allowed**: reads with `offset` + `limit`; reads of small mandatory files (`WORLD_KERNEL.md`, `INVARIANTS.md`, `ONTOLOGY.md`, `PEOPLES_AND_SPECIES.md` until they cross threshold); reads of any file under `characters/`, `diegetic-artifacts/`, `proposals/`, `adjudications/`, `audits/`, `character-proposals/`, `briefs/`
+- **Always allowed**: reads with explicit `offset` or `limit`; reads of small mandatory files outside the protected list; reads of any file under `characters/`, `diegetic-artifacts/`, `proposals/`, `adjudications/`, `audits/`, `character-proposals/`, `briefs/`
 
 **On block** — return `permissionDecision: deny` with message:
 
@@ -89,9 +94,9 @@ Full Read of CANON_LEDGER.md is blocked. Use instead:
 If you genuinely need the full file, include the token ALLOW_FULL_READ in your next prompt.
 ```
 
-**Override**: if the user's most recent prompt contains `ALLOW_FULL_READ`, hook passes through.
+**Override**: if the recent transcript tail contains `ALLOW_FULL_READ`, hook passes through.
 
-**Exit codes**: `0` allow, `2` deny (per Claude Code hook convention).
+**Exit codes**: `0` on allow and on structured `permissionDecision: deny`; non-zero only on unexpected runtime failure.
 
 #### Hook 3 — PreToolUse on Edit/Write: Block Direct Mutation *(Phase 2)*
 
@@ -127,22 +132,19 @@ The approval_token is issued at HARD-GATE user approval; see docs/HARD-GATE-DISC
 
 #### Hook 4 — SubagentStart: Localization-Agent Bootstrap *(Phase 1)*
 
-**Trigger**: `Agent` tool invocation.
+**Trigger**: `SubagentStart`.
 
-**Behavior**: inject a system reminder into the sub-agent's opening context:
+**Behavior**: inject `additionalContext` into the sub-agent's opening context:
 
 ```
-<system-reminder>
-You are a worldloom localization sub-agent. Retrieval discipline:
-  1. Search exact ids first (CF-NNNN, CH-NNNN, PA-NNNN, M-N, DA-NNNN, CHAR-NNNN, PR-NNNN, BATCH-NNNN, AU-NNNN, RP-NNNN)
-  2. Search exact entity names second (people, places, polities, artifacts, organizations)
-  3. Match heading paths third
-  4. Backlink/dependency expansion fourth
-  5. Lexical search fifth
-  6. Never semantic-only.
-Tool preference: mcp__worldloom__search_nodes > mcp__worldloom__get_node > mcp__worldloom__get_neighbors.
-Do not open large files wholesale. Return node ids and structured evidence bundles, not narrative summaries, unless the main agent requests prose.
-</system-reminder>
+Worldloom localization subagent discipline:
+1. Search exact ids first.
+2. Search exact entity names second.
+3. Match heading paths third.
+4. Expand backlinks or dependencies fourth.
+5. Use lexical search fifth; never semantic-only.
+Preferred tool order: mcp__worldloom__search_nodes, then mcp__worldloom__get_node, then mcp__worldloom__get_neighbors.
+Avoid wholesale reads of large world files. Return node ids and structured evidence bundles unless prose is explicitly requested.
 ```
 
 **Graceful degrade**: if MCP server unavailable, fall back to instructions about `grep`-then-targeted-`Read` pattern.
@@ -183,7 +185,7 @@ This should not normally happen — pre-apply gate should have caught it. Please
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "node tools/hooks/dist/hook1-user-prompt-context.js" }
+          { "type": "command", "command": "node tools/hooks/dist/src/hook1-user-prompt-context.js" }
         ]
       }
     ],
@@ -191,20 +193,20 @@ This should not normally happen — pre-apply gate should have caught it. Please
       {
         "matcher": "Read",
         "hooks": [
-          { "type": "command", "command": "node tools/hooks/dist/hook2-guard-large-read.js" }
+          { "type": "command", "command": "node tools/hooks/dist/src/hook2-guard-large-read.js" }
         ]
       },
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "node tools/hooks/dist/hook3-guard-direct-edit.js" }
+          { "type": "command", "command": "node tools/hooks/dist/src/hook3-guard-direct-edit.js" }
         ]
       }
     ],
     "SubagentStart": [
       {
         "hooks": [
-          { "type": "command", "command": "node tools/hooks/dist/hook4-subagent-localization.js" }
+          { "type": "command", "command": "node tools/hooks/dist/src/hook4-subagent-localization.js" }
         ]
       }
     ],
@@ -212,7 +214,7 @@ This should not normally happen — pre-apply gate should have caught it. Please
       {
         "matcher": "mcp__worldloom__submit_patch_plan",
         "hooks": [
-          { "type": "command", "command": "node tools/hooks/dist/hook5-validate-after-patch.js" }
+          { "type": "command", "command": "node tools/hooks/dist/src/hook5-validate-after-patch.js" }
         ]
       }
     ]
@@ -222,15 +224,15 @@ This should not normally happen — pre-apply gate should have caught it. Please
 
 ### Testing strategy
 
-Each hook has integration tests that:
+The landed Part A package has compiled-script tests that:
 1. Spin up a sandboxed worldloom directory with a small fixture world
-2. Simulate synthetic tool calls (Read, Edit, Agent, submit_patch_plan) via Claude Code's hook test harness
-3. Assert hook decisions (allow/deny/inject) and side effects (log entries, system reminders)
+2. Feed synthetic hook payloads over stdin to the compiled hook entrypoints
+3. Assert hook decisions or injected context for Hooks 1, 2, and 4
 
 Fixture worlds cover:
-- Empty world (no index)
-- Small world (3-file, Hook 2 thresholds don't fire)
-- Large world (mirror of animalia's structural shape with synthetic content)
+- No-world-detected / no-output behavior for Hook 1
+- A large protected-file world shape for Hook 2 thresholds and overrides
+- Subagent bootstrap output for Hook 4
 
 ## FOUNDATIONS Alignment
 
@@ -246,7 +248,7 @@ Fixture worlds cover:
 ## Verification
 
 - **Unit**: each hook's decision function tested in isolation
-- **Integration**: synthetic Claude Code sessions verify hook decisions in realistic tool-call sequences
+- **Integration**: `cd tools/hooks && npm test` passes on 2026-04-24, covering Hook 1 context injection, Hook 2 deny/allow/override behavior, and Hook 4 subagent bootstrap
 - **Performance**: hook execution time <100ms to avoid user-visible latency (target <20ms for Hook 1/4 since every prompt hits them)
 - **Graceful degrade**: delete `_index/world.db`; verify hooks don't break Claude (pass through silently)
 - **Override discipline**: `ALLOW_FULL_READ` in prompt bypasses Hook 2; no equivalent for Hook 3 (verify no backdoor exists)

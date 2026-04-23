@@ -1,5 +1,7 @@
 <!-- spec-drafting-rules.md not present; using default structure: Problem Statement, Approach, Deliverables, FOUNDATIONS Alignment, Verification, Out of Scope, Risks & Open Questions. -->
 
+**Status**: COMPLETED
+
 # SPEC-02: Retrieval MCP Server
 
 **Phase**: 1
@@ -282,7 +284,7 @@ Structured error codes returned by MCP tools (mirrors SPEC-03's naming style):
   "mcpServers": {
     "worldloom": {
       "command": "node",
-      "args": ["tools/world-mcp/dist/server.js"],
+      "args": ["tools/world-mcp/dist/src/server.js"],
       "env": {}
     }
   }
@@ -346,3 +348,11 @@ This addition extends SPEC-01's public contract by one surface (types re-export)
   - **SPEC-03 edit required**: SPEC-03 should declare the `approval_tokens_consumed` table schema inside `worlds/<slug>/_index/world.db` and formally assign row-write ownership to the patch engine. This is a narrow cross-spec edit that must land before Phase 2 write-path activation.
   - **SPEC-01 public contract extension**: the types-only public entry at `tools/world-index/src/public/types.ts` is a one-line extension to SPEC-01 §Public contract ("world-index is a pure producer; it does not export a programmatic query library"). The types re-export is not a query library, but the contract wording should be updated to name the narrow types-only exception.
   - **CLAUDE.md ID conventions drift**: `M`, `NCP`, `NCB` are absent from CLAUDE.md §ID Allocation Conventions despite being live ID classes SPEC-01 indexes and this spec allocates. Closing the doc gap is SPEC-07 Part B territory; SPEC-02 conforms to the implementation surface and flags the drift here.
+
+## Outcome
+
+- Completed: 2026-04-24
+- What changed: `tools/world-mcp/` now exists as the Phase 1 retrieval MCP package with all 10 tools, per-tool tests, ranking/context-packet/approval modules, README, and server/integration proof including the SPEC-02 capstone and token-reduction lanes.
+- Deviations from original plan: none at the spec boundary. The delivered Phase 1 contract remains read-side complete while `validate_patch_plan` still returns `validator_unavailable` and `submit_patch_plan` still returns `phase1_stub` until the SPEC-04/SPEC-03 Phase 2 path lands, exactly as this spec defined.
+- Verification results:
+  - `cd tools/world-mcp && npm test`
