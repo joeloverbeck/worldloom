@@ -10,6 +10,8 @@ import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts";
 import {
   deleteNodesByFile,
   insertAnchorChecksums,
+  insertEntities,
+  insertEntityAliases,
   insertEntityMentions,
   insertNodes,
   insertValidationResults
@@ -30,18 +32,22 @@ import { extractYamlNodes } from "../parse/yaml";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
+  "ontology_category",
+  "character_record",
+  "diegetic_artifact_record",
+  "character_proposal_card"
+]);
+
+export const MENTION_EVIDENCE_SOURCE_NODE_TYPES = new Set([
+  ...ENTITY_SOURCE_NODE_TYPES,
   "mystery_reserve_entry",
   "open_question_entry",
   "invariant",
-  "ontology_category",
   "section",
   "subsection",
   "bullet_cluster",
-  "character_record",
-  "diegetic_artifact_record",
   "proposal_card",
   "proposal_batch",
-  "character_proposal_card",
   "character_proposal_batch",
   "retcon_proposal_card"
 ]);
@@ -125,7 +131,7 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
   const proseNodes = loadPersistedProseNodes(db, worldSlug);
   const ontologyPath = path.join(resolveWorldDirectory(worldRoot, worldSlug), "ONTOLOGY.md");
   const registry = loadOntologyRegistry(ontologyPath);
-  const { entityNodes, mentions, edges } = extractEntities(
+  const { entityNodes, entities, aliases, mentions, edges } = extractEntities(
     { type: "root", children: [] },
     proseNodes,
     registry
@@ -143,6 +149,14 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
         checksum: node.anchor_checksum
       }))
     );
+  }
+
+  if (entities.length > 0) {
+    insertEntities(db, entities);
+  }
+
+  if (aliases.length > 0) {
+    insertEntityAliases(db, aliases);
   }
 
   if (mentions.length > 0) {
@@ -256,6 +270,8 @@ function reindexAllFiles(
   let yamlBlockCount = 0;
   let yamlFailureCount = 0;
 
+  clearEntityState(db);
+
   for (const relativeFilePath of indexable) {
     const parsed = parseWorldFile(worldRoot, worldSlug, relativeFilePath);
     const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
@@ -337,6 +353,8 @@ function buildAnchorRows(nodes: NodeRow[]): AnchorChecksumRow[] {
 
 function clearEntityState(db: Database.Database): void {
   db.prepare("DELETE FROM entity_mentions").run();
+  db.prepare("DELETE FROM entity_aliases").run();
+  db.prepare("DELETE FROM entities").run();
   db.prepare("DELETE FROM edges WHERE edge_type = 'mentions_entity'").run();
   db.prepare("DELETE FROM anchor_checksums WHERE node_id IN (SELECT node_id FROM nodes WHERE node_type = 'named_entity')").run();
   db.prepare("DELETE FROM nodes WHERE node_type = 'named_entity'").run();
@@ -356,7 +374,7 @@ function loadPersistedProseNodes(db: Database.Database, worldSlug: string): Node
     )
     .all(worldSlug) as NodeRow[];
 
-  return rows.filter((row) => ENTITY_SOURCE_NODE_TYPES.has(row.node_type));
+  return rows.filter((row) => MENTION_EVIDENCE_SOURCE_NODE_TYPES.has(row.node_type));
 }
 
 function refreshUnresolvedAttributionDiagnostics(

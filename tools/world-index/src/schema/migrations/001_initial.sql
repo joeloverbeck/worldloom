@@ -30,14 +30,45 @@ CREATE TABLE edges (
 CREATE INDEX idx_edges_source ON edges(source_node_id, edge_type);
 CREATE INDEX idx_edges_target ON edges(target_node_id, edge_type);
 
+CREATE TABLE entities (
+    entity_id TEXT PRIMARY KEY,
+    world_slug TEXT NOT NULL,
+    canonical_name TEXT NOT NULL,
+    entity_kind TEXT,
+    provenance_scope TEXT NOT NULL,
+    authority_level TEXT NOT NULL,
+    source_node_id TEXT NOT NULL,
+    source_field TEXT,
+    FOREIGN KEY (entity_id) REFERENCES nodes(node_id),
+    FOREIGN KEY (source_node_id) REFERENCES nodes(node_id)
+);
+CREATE INDEX idx_entities_name ON entities(world_slug, canonical_name);
+CREATE INDEX idx_entities_scope ON entities(world_slug, provenance_scope);
+
+CREATE TABLE entity_aliases (
+    alias_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_id TEXT NOT NULL,
+    alias_text TEXT NOT NULL,
+    alias_kind TEXT NOT NULL,
+    source_node_id TEXT NOT NULL,
+    FOREIGN KEY (entity_id) REFERENCES entities(entity_id),
+    FOREIGN KEY (source_node_id) REFERENCES nodes(node_id)
+);
+CREATE UNIQUE INDEX idx_entity_alias_unique ON entity_aliases(entity_id, alias_text);
+CREATE INDEX idx_entity_alias_text ON entity_aliases(alias_text);
+
 CREATE TABLE entity_mentions (
     mention_id INTEGER PRIMARY KEY AUTOINCREMENT,
     node_id TEXT NOT NULL,
-    entity_name TEXT NOT NULL,
-    entity_kind TEXT,
-    FOREIGN KEY (node_id) REFERENCES nodes(node_id)
+    surface_text TEXT NOT NULL,
+    resolved_entity_id TEXT,
+    resolution_kind TEXT NOT NULL,
+    extraction_method TEXT NOT NULL,
+    FOREIGN KEY (node_id) REFERENCES nodes(node_id),
+    FOREIGN KEY (resolved_entity_id) REFERENCES entities(entity_id)
 );
-CREATE INDEX idx_entity_name ON entity_mentions(entity_name);
+CREATE INDEX idx_entity_mentions_surface ON entity_mentions(surface_text);
+CREATE INDEX idx_entity_mentions_resolved ON entity_mentions(resolved_entity_id);
 
 CREATE TABLE file_versions (
     world_slug TEXT NOT NULL,

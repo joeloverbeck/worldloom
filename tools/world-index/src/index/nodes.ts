@@ -2,7 +2,9 @@ import type Database from "better-sqlite3";
 
 import type {
   AnchorChecksumRow,
+  EntityAliasRow,
   EntityMentionRow,
+  EntityRow,
   NodeRow,
   ValidationResultRow
 } from "../schema/types";
@@ -75,6 +77,8 @@ export function deleteNodesByFile(
 
     db.prepare(`DELETE FROM anchor_checksums WHERE node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM entity_mentions WHERE node_id IN (${placeholders})`).run(...nodeIds);
+    db.prepare(`DELETE FROM entity_aliases WHERE source_node_id IN (${placeholders})`).run(...nodeIds);
+    db.prepare(`DELETE FROM entities WHERE source_node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(
       `
         DELETE FROM edges
@@ -109,6 +113,60 @@ export function insertAnchorChecksums(
   })(rows);
 }
 
+export function insertEntities(db: Database.Database, rows: EntityRow[]): void {
+  db.transaction((batch: EntityRow[]) => {
+    const statement = db.prepare(`
+      INSERT INTO entities (
+        entity_id,
+        world_slug,
+        canonical_name,
+        entity_kind,
+        provenance_scope,
+        authority_level,
+        source_node_id,
+        source_field
+      ) VALUES (
+        @entity_id,
+        @world_slug,
+        @canonical_name,
+        @entity_kind,
+        @provenance_scope,
+        @authority_level,
+        @source_node_id,
+        @source_field
+      )
+    `);
+
+    for (const row of batch) {
+      statement.run(row);
+    }
+  })(rows);
+}
+
+export function insertEntityAliases(db: Database.Database, rows: EntityAliasRow[]): void {
+  db.transaction((batch: EntityAliasRow[]) => {
+    const statement = db.prepare(`
+      INSERT INTO entity_aliases (
+        alias_id,
+        entity_id,
+        alias_text,
+        alias_kind,
+        source_node_id
+      ) VALUES (
+        @alias_id,
+        @entity_id,
+        @alias_text,
+        @alias_kind,
+        @source_node_id
+      )
+    `);
+
+    for (const row of batch) {
+      statement.run(row);
+    }
+  })(rows);
+}
+
 export function insertEntityMentions(
   db: Database.Database,
   rows: EntityMentionRow[]
@@ -116,13 +174,19 @@ export function insertEntityMentions(
   db.transaction((batch: EntityMentionRow[]) => {
     const statement = db.prepare(`
       INSERT INTO entity_mentions (
+        mention_id,
         node_id,
-        entity_name,
-        entity_kind
+        surface_text,
+        resolved_entity_id,
+        resolution_kind,
+        extraction_method
       ) VALUES (
+        @mention_id,
         @node_id,
-        @entity_name,
-        @entity_kind
+        @surface_text,
+        @resolved_entity_id,
+        @resolution_kind,
+        @extraction_method
       )
     `);
 

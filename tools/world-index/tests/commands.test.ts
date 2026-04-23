@@ -123,6 +123,13 @@ test("build, inspect, stats, sync, and verify work against the fixture world", a
     assert.equal(inspectResult.result, 0);
     assert.match(inspectResult.stdout, /"node_id": "CF-0001"/);
     assert.match(inspectResult.stdout, /"worldSlug": "fixture-world"/);
+    assert.match(inspectResult.stdout, /"entity_record": null/);
+    assert.match(inspectResult.stdout, /"entity_aliases": \[\]/);
+
+    const entityInspect = withCapturedOutput(() => inspect(root, "entity:brinewick"));
+    assert.equal(entityInspect.result, 0);
+    assert.match(entityInspect.stdout, /"entity_record": \{/);
+    assert.match(entityInspect.stdout, /"canonical_name": "Brinewick"/);
 
     const statsResult = withCapturedOutput(() => stats(root, "fixture-world"));
     assert.equal(statsResult.result, 0);

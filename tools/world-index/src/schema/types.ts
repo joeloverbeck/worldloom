@@ -217,8 +217,29 @@ export interface EdgeRow {
 export interface EntityMentionRow {
   mention_id: number;
   node_id: string;
-  entity_name: string;
+  surface_text: string;
+  resolved_entity_id: string | null;
+  resolution_kind: "canonical" | "alias" | "unresolved";
+  extraction_method: "exact_canonical" | "exact_alias" | "heuristic_phrase";
+}
+
+export interface EntityRow {
+  entity_id: string;
+  world_slug: string;
+  canonical_name: string;
   entity_kind: string | null;
+  provenance_scope: "world" | "proposal" | "diegetic" | "audit";
+  authority_level: "structured_anchor" | "explicit_assertion";
+  source_node_id: string;
+  source_field: string | null;
+}
+
+export interface EntityAliasRow {
+  alias_id: number;
+  entity_id: string;
+  alias_text: string;
+  alias_kind: "exact_structured" | "explicit_alias" | "normalized_form";
+  source_node_id: string;
 }
 
 export interface FileVersionRow {

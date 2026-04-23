@@ -1,3 +1,5 @@
+// SPEC-10 Stage C stoplist: these phrases suppress heuristic mention-evidence emission only.
+// They must not block authority-backed canonical entities or exact canonical/alias mention resolution.
 export const CAPITALIZED_MULTIWORD_STOPLIST = new Set<string>([
   "The Maker",
   "The Makers",

@@ -4,463 +4,309 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { parseMarkdown } from "../src/parse/markdown";
-import { contentHashForProse } from "../src/parse/canonical";
 import { extractEntities, loadOntologyRegistry } from "../src/parse/entities";
+import { contentHashForProse } from "../src/parse/canonical";
 import { CURRENT_INDEX_VERSION } from "../src/schema/version";
-import type { NodeRow } from "../src/schema/types";
+import type { NodeRow, NodeType } from "../src/schema/types";
 
-test("ontology registry parsing plus heuristic entities emits virtual nodes and mention rows", () => {
+function makeNode(nodeId: string, nodeType: NodeType, body: string, filePath = "fixtures.md"): NodeRow {
+  return {
+    node_id: nodeId,
+    world_slug: "animalia",
+    file_path: filePath,
+    heading_path: path.basename(filePath, ".md"),
+    byte_start: 0,
+    byte_end: body.length,
+    line_start: 1,
+    line_end: body.split("\n").length,
+    node_type: nodeType,
+    body,
+    content_hash: contentHashForProse(body),
+    anchor_checksum: contentHashForProse(`anchor:${body}`),
+    summary: null,
+    created_at_index_version: CURRENT_INDEX_VERSION
+  };
+}
+
+function entityNames(rows: Array<{ canonical_name: string }>): string[] {
+  return rows.map((row) => row.canonical_name).sort();
+}
+
+test("stage A builds canonical entities from registry and structured whole-file records", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(
-      ontologyPath,
-      "- Brinewick (polity, coastal)\n- Salt Wardens (institution)\n",
-      "utf8"
-    );
-
-    const registry = loadOntologyRegistry(ontologyPath);
-    assert.deepEqual(registry.entries, [
-      { canonicalName: "Brinewick", kind: "polity" },
-      { canonicalName: "Salt Wardens", kind: "institution" }
-    ]);
-
-    const source = [
-      "## Harbor Notes",
-      "",
-      "The watchmen of Brinewick reported to the Salt Wardens.",
-      "Later, Brinewick sent for Harbor Watch.",
-      "Once Upon the quay, nobody named a new polity."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:INSTITUTIONS.md:Harbor Notes:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "INSTITUTIONS.md"),
-        heading_path: "Harbor Notes",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: 5,
-        node_type: "section",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
-    ];
-
-    const { entityNodes, mentions, edges } = extractEntities(tree, proseNodes, registry);
-
-    assert.equal(mentions.filter((mention) => mention.entity_name === "Brinewick").length, 2);
-    assert.equal(mentions.filter((mention) => mention.entity_name === "Salt Wardens").length, 1);
-    assert.equal(mentions.filter((mention) => mention.entity_name === "Harbor Watch").length, 1);
-    assert.equal(mentions.some((mention) => mention.entity_name === "Once Upon"), false);
-
-    assert.equal(entityNodes.some((node) => node.node_id === "entity:brinewick"), true);
-    assert.equal(entityNodes.some((node) => node.node_id === "entity:salt-wardens"), true);
-    assert.equal(entityNodes.some((node) => node.node_id === "entity:harbor-watch"), true);
-    assert.deepEqual(
-      entityNodes.map((node) => ({
-        file_path: node.file_path,
-        line_start: node.line_start,
-        line_end: node.line_end,
-        byte_start: node.byte_start,
-        byte_end: node.byte_end
-      })),
-      [
-        {
-          file_path: "fixture-ontology.md",
-          line_start: 1,
-          line_end: 1,
-          byte_start: 0,
-          byte_end: 0
-        },
-        {
-          file_path: "fixture-ontology.md",
-          line_start: 1,
-          line_end: 1,
-          byte_start: 0,
-          byte_end: 0
-        },
-        {
-          file_path: "fixture-ontology.md",
-          line_start: 1,
-          line_end: 1,
-          byte_start: 0,
-          byte_end: 0
-        }
-      ]
-    );
-    assert.equal(
-      edges.some(
-        (edge) =>
-          edge.edge_type === "mentions_entity" &&
-          edge.source_node_id === "animalia:INSTITUTIONS.md:Harbor Notes:0" &&
-          edge.target_node_id === "entity:brinewick"
-      ),
-      true
-    );
-    assert.equal(edges.filter((edge) => edge.edge_type === "mentions_entity").length, 3);
-  } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
-  }
-});
-
-test("heuristic extraction ignores structural markdown carriers but keeps free-prose entities", () => {
-  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
-
-  try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
     writeFileSync(ontologyPath, "- Brinewick (polity)\n", "utf8");
 
     const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "---",
-      'title: "After-Action Report on the Harrowgate Contract"',
-      "---",
-      "",
-      "## Access Path",
-      "",
-      "| Gate | Result |",
-      "| --- | --- |",
-      "| 4 | All Phase 6 consequences drafted |",
-      "",
-      "Adds Mystery Reserve entry M-6 in the summary block.",
-      "",
-      "Althea Greystone met Atreia Selviss in free prose."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:fixtures.md:Structural Noise:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "fixtures.md"),
-        heading_path: "Structural Noise",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "adjudication_record",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
+    const proseNodes = [
+      makeNode(
+        "CHAR-0001",
+        "character_record",
+        "---\nname: Melissa Threadscar\nslug: threadscar-melissa\n---\nCharacter body\n",
+        "characters/melissa-threadscar.md"
+      ),
+      makeNode(
+        "NCP-0001",
+        "character_proposal_card",
+        "---\nname: Vespera Nightwhisper\nslug: vespera-nightwhisper\n---\nProposal body\n",
+        "character-proposals/vespera-nightwhisper.md"
+      ),
+      makeNode(
+        "DA-0001",
+        "diegetic_artifact_record",
+        "---\ntitle: A Season on the Circuit\nartifact_type: travelogue\n---\nArtifact body\n",
+        "diegetic-artifacts/a-season-on-the-circuit.md"
+      ),
+      makeNode(
+        "animalia:INSTITUTIONS.md:Harbor Notes:0",
+        "section",
+        "Brinewick and Melissa Threadscar both appear in ordinary prose."
+      )
     ];
 
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+    const { entities, entityNodes } = extractEntities({ type: "root", children: [] }, proseNodes, registry);
 
-    assert.equal(mentions.some((mention) => mention.entity_name === "Access Path"), false);
-    assert.equal(mentions.some((mention) => mention.entity_name === "Action Report"), false);
-    assert.equal(mentions.some((mention) => mention.entity_name === "All Phase"), false);
-    assert.equal(mentions.some((mention) => mention.entity_name === "Althea Greystone"), true);
-    assert.equal(mentions.some((mention) => mention.entity_name === "Atreia Selviss"), true);
-    assert.equal(entityNames.has("Althea Greystone"), true);
-    assert.equal(entityNames.has("Atreia Selviss"), true);
+    assert.deepEqual(entityNames(entities), [
+      "A Season on the Circuit",
+      "Brinewick",
+      "Melissa Threadscar",
+      "Vespera Nightwhisper"
+    ]);
+    assert.equal(
+      entities.find((row) => row.canonical_name === "Brinewick")?.provenance_scope,
+      "world"
+    );
+    assert.equal(
+      entities.find((row) => row.canonical_name === "Melissa Threadscar")?.entity_kind,
+      "person"
+    );
+    assert.equal(
+      entities.find((row) => row.canonical_name === "Vespera Nightwhisper")?.provenance_scope,
+      "proposal"
+    );
+    assert.equal(
+      entities.find((row) => row.canonical_name === "A Season on the Circuit")?.entity_kind,
+      "text/tradition"
+    );
+
+    const ontologyNode = entityNodes.find((row) => row.node_id === "entity:brinewick");
+    assert.deepEqual(
+      ontologyNode && {
+        file_path: ontologyNode.file_path,
+        line_start: ontologyNode.line_start,
+        line_end: ontologyNode.line_end,
+        byte_start: ontologyNode.byte_start,
+        byte_end: ontologyNode.byte_end
+      },
+      {
+        file_path: "ONTOLOGY.md",
+        line_start: 1,
+        line_end: 1,
+        byte_start: 0,
+        byte_end: 0
+      }
+    );
+
+    const characterNode = entityNodes.find((row) => row.node_id === "entity:melissa-threadscar");
+    assert.deepEqual(
+      characterNode && {
+        file_path: characterNode.file_path,
+        line_start: characterNode.line_start,
+        line_end: characterNode.line_end
+      },
+      {
+        file_path: "characters/melissa-threadscar.md",
+        line_start: 1,
+        line_end: 6
+      }
+    );
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
 
-test("heuristic extraction stoplists workflow labels and world-kernel headings", () => {
+test("stage B emits exact structured aliases and suppresses identical normalized aliases", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
 
-    const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "## Discovery",
-      "",
-      "Continuity Archivist requested Required Updates.",
-      "Mystery Curator rejected No Silent Retcons drift.",
-      "Primary Difference and Natural Story Engines remain template labels.",
-      "Mystery Reserve is a worldbuilding contract, not an entity.",
-      "Copper Weir still matters as a real place."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:fixtures.md:Workflow Labels:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "fixtures.md"),
-        heading_path: "Workflow Labels",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "section",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
+    const proseNodes = [
+      makeNode(
+        "CHAR-0001",
+        "character_record",
+        "---\nname: Threadscar Melissa\nslug: threadscar-melissa\n---\nCharacter body\n",
+        "characters/threadscar-melissa.md"
+      ),
+      makeNode(
+        "CHAR-0002",
+        "character_record",
+        "---\nname: Copper Weir\nslug: Copper Weir\n---\nCharacter body\n",
+        "characters/copper-weir.md"
+      )
     ];
 
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+    const { aliases } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
 
-    for (const banned of [
-      "Continuity Archivist",
-      "Required Updates",
-      "Mystery Curator",
-      "No Silent Retcons",
-      "Primary Difference",
-      "Natural Story Engines",
-      "Mystery Reserve"
-    ]) {
-      assert.equal(
-        mentions.some((mention) => mention.entity_name === banned),
-        false,
-        `${banned} should be stoplisted`
-      );
-      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
-    }
-
-    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
-    assert.equal(entityNames.has("Copper Weir"), true);
+    assert.equal(
+      aliases.some(
+        (row) => row.alias_text === "threadscar-melissa" && row.alias_kind === "exact_structured"
+      ),
+      true
+    );
+    assert.equal(aliases.some((row) => row.alias_text === "Copper Weir"), false);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
 
-test("heuristic extraction strips proposal workflow labels and phrase fragments", () => {
+test("stage C emits exact canonical, exact alias, and unresolved heuristic mentions", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
 
-    const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "**Phase 6c (Distribution Discipline)**: CFs consulted: CF-0001.",
-      "**Phase 6d (Diegetic-to-World Laundering)**:",
-      "**Phase 6f Repairs Applied**: none fired.",
-      "",
-      "In Brinewick the wardens still speak of Copper Weir.",
-      "An Ash-Seal technician returned after dusk.",
-      "Copper Weir remains a real place."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:proposals:PR-0099:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "PR-0099.md"),
-        heading_path: "PR-0099",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "proposal_card",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
+    const proseNodes = [
+      makeNode(
+        "CHAR-0001",
+        "character_record",
+        "---\nname: Melissa Threadscar\nslug: threadscar-melissa\n---\nCharacter body\n",
+        "characters/melissa-threadscar.md"
+      ),
+      makeNode(
+        "animalia:INSTITUTIONS.md:Harbor Notes:0",
+        "section",
+        "Melissa Threadscar met threadscar-melissa beside Copper Weir."
+      )
     ];
 
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+    const { entities, aliases, mentions, edges } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
 
-    for (const banned of [
-      "Distribution Discipline",
-      "World Laundering",
-      "Repairs Applied",
-      "In Brinewick",
-      "An Ash"
-    ]) {
-      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
-      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
-    }
-
-    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
-    assert.equal(entityNames.has("Copper Weir"), true);
+    const melissa = entities.find((row) => row.canonical_name === "Melissa Threadscar");
+    assert.ok(melissa);
+    assert.equal(
+      aliases.some((row) => row.entity_id === melissa.entity_id && row.alias_text === "threadscar-melissa"),
+      true
+    );
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "Melissa Threadscar" &&
+          row.extraction_method === "exact_canonical" &&
+          row.resolution_kind === "canonical"
+      ),
+      true
+    );
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "threadscar-melissa" &&
+          row.extraction_method === "exact_alias" &&
+          row.resolution_kind === "alias"
+      ),
+      true
+    );
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "Copper Weir" &&
+          row.extraction_method === "heuristic_phrase" &&
+          row.resolution_kind === "unresolved"
+      ),
+      true
+    );
+    assert.equal(
+      edges.some((row) => row.target_node_id === melissa.entity_id && row.edge_type === "mentions_entity"),
+      true
+    );
+    assert.equal(edges.some((row) => row.target_node_id === "entity:copper-weir"), false);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
 
-test("heuristic extraction blocks embedded checkpoint prose from whole-file records", () => {
+test("stoplist only suppresses heuristic phrases and does not block exact canonical matches", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(ontologyPath, "- Charter Hall (place)\n", "utf8");
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "- Mystery Reserve (belief)\n", "utf8");
 
-    const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "# Canon Safety Check Trace",
-      "",
-      "1. **World-Truth Check** PASS — every claim cites a stable source.",
-      "2. **Narrator-Truth Check** PASS — every sentence stays in register.",
-      "Primary Rule-3 risk: preserve ordinary procedural cadence.",
-      "Per Phase 3 narrator-reliability mapping, this stays soft canon.",
-      "Charter Hall remains a real place."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:artifacts:DA-0099:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "DA-0099.md"),
-        heading_path: "DA-0099",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "diegetic_artifact_record",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
+    const proseNodes = [
+      makeNode(
+        "animalia:INSTITUTIONS.md:Labels:0",
+        "section",
+        "Mystery Reserve remains explicit here. Continuity Archivist remains workflow noise."
+      )
     ];
 
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+    const { mentions, edges } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
 
-    for (const banned of [
-      "Canon Safety Check Trace",
-      "Truth Check",
-      "Primary Rule",
-      "Per Phase"
-    ]) {
-      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
-      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
-    }
-
-    assert.equal(mentions.some((mention) => mention.entity_name === "Charter Hall"), true);
-    assert.equal(entityNames.has("Charter Hall"), true);
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "Mystery Reserve" &&
+          row.extraction_method === "exact_canonical" &&
+          row.resolution_kind === "canonical"
+      ),
+      true
+    );
+    assert.equal(mentions.some((row) => row.surface_text === "Continuity Archivist"), false);
+    assert.equal(edges.length, 1);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
 
-test("heuristic extraction blocks inline document-reference labels and truncated heading fragments", () => {
+test("mystery reserve headings remain noncanonical and can only surface as unresolved evidence", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
 
-    const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "Copper Weir remains a real place.",
-      "Comparable to the river-market benchmark per Trade Flows and per Inequality Patterns.",
-      "The canal-jurisdiction issue remains deferred to OPEN_QUESTIONS.md §Ruin Ownership and Jurisdiction.",
-      "Finder compensation remains deferred to OPEN_QUESTIONS.md §Mundane-Tier Finder-Fee Wage Schedule.",
-      "Brinewick routing details remain deferred to OPEN_QUESTIONS.md §Brinewick Trunk-Canal-Count Specifics.",
-      "Contract pressure still appears in Breakage Points when corridor insurance fails."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:fixtures.md:Inline References:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "fixtures.md"),
-        heading_path: "Inline References",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "section",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
+    const proseNodes = [
+      makeNode("M-0001", "mystery_reserve_entry", "## The Lost Hour\n\nUnknown origin.\n", "MYSTERY_RESERVE.md"),
+      makeNode(
+        "animalia:INSTITUTIONS.md:Rumors:0",
+        "section",
+        "The Lost Hour returned in tavern gossip."
+      )
     ];
 
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
+    const { entities, mentions, edges } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
 
-    for (const banned of [
-      "Trade Flows",
-      "Inequality Patterns",
-      "Ruin Ownership",
-      "Breakage Point",
-      "Tier Finder",
-      "Fee Wage Schedule",
-      "Count Specifics"
-    ]) {
-      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
-      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
-    }
-
-    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
-    assert.equal(entityNames.has("Copper Weir"), true);
-  } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
-  }
-});
-
-test("heuristic extraction blocks hyphen-split heading suffix fragments", () => {
-  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
-
-  try {
-    const ontologyPath = path.join(tempRoot, "fixture-ontology.md");
-    writeFileSync(ontologyPath, "- Copper Weir (place)\n", "utf8");
-
-    const registry = loadOntologyRegistry(ontologyPath);
-    const source = [
-      "Maker-Age Linguistic Recovery remains an open-question heading, not an entity.",
-      "Post-Career Contractor Pension and Stigma remains a deferred institutional question.",
-      "Both Subsection-Seal Fraud Precedent stays deferred to open questions.",
-      "Crafter-Attempt Sub-Stream remains a timeline label.",
-      "The Phase 12 Rejected-Candidate Log remains workflow residue.",
-      "Bardic Register for Mutated-Beast Cycles vs Bandit-Captain Cycles remains a heading.",
-      "Copper Weir remains a real place."
-    ].join("\n");
-    const { tree } = parseMarkdown(source);
-    const proseNodes: NodeRow[] = [
-      {
-        node_id: "animalia:fixtures.md:Hyphen Fragments:0",
-        world_slug: "animalia",
-        file_path: path.join(tempRoot, "fixtures.md"),
-        heading_path: "Hyphen Fragments",
-        byte_start: 0,
-        byte_end: 0,
-        line_start: 1,
-        line_end: source.split("\n").length,
-        node_type: "section",
-        body: source,
-        content_hash: contentHashForProse(source),
-        anchor_checksum: contentHashForProse(source),
-        summary: null,
-        created_at_index_version: CURRENT_INDEX_VERSION
-      }
-    ];
-
-    const { entityNodes, mentions } = extractEntities(tree, proseNodes, registry);
-    const entityNames = new Set(entityNodes.map((node) => node.body.match(/^Canonical name: (.+?) \|/)?.[1] ?? ""));
-
-    for (const banned of [
-      "Age Linguistic Recovery",
-      "Career Contractor Pension",
-      "Both Subsection",
-      "Attempt Sub",
-      "Candidate Log",
-      "Captain Cycles"
-    ]) {
-      assert.equal(mentions.some((mention) => mention.entity_name === banned), false, `${banned} should not be emitted`);
-      assert.equal(entityNames.has(banned), false, `${banned} should not produce a named_entity`);
-    }
-
-    assert.equal(mentions.some((mention) => mention.entity_name === "Copper Weir"), true);
-    assert.equal(entityNames.has("Copper Weir"), true);
+    assert.equal(entities.some((row) => row.canonical_name === "The Lost Hour"), false);
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "The Lost Hour" &&
+          row.extraction_method === "heuristic_phrase" &&
+          row.resolution_kind === "unresolved"
+      ),
+      true
+    );
+    assert.equal(edges.length, 0);
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }

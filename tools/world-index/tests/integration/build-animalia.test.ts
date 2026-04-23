@@ -420,12 +420,40 @@ test("build removes audited workflow-label entities while keeping real animalia 
 
       for (const retained of [
         "Vespera Nightwhisper",
-        "Melissa Threadscar",
-        "Charter Hall",
-        "Copper Weir",
+        "Atreia Selviss",
         "Ash-Seal commercial-company Brinewick anomaly"
       ]) {
         assert.equal(countNamedEntityRows(db, retained), 1, `${retained} should remain queryable`);
+      }
+
+      for (const noncanonical of [
+        "Melissa Threadscar",
+        "Charter Hall",
+        "Copper Weir",
+        "Bent Willow"
+      ]) {
+        assert.equal(
+          countNamedEntityRows(db, noncanonical),
+          0,
+          `${noncanonical} should remain noncanonical without a structured authority source`
+        );
+      }
+
+      for (const unresolved of ["Melissa Threadscar", "Charter Hall", "Copper Weir", "Bent Willow"]) {
+        const unresolvedCount = (
+          db
+            .prepare(
+              `
+                SELECT COUNT(*) AS count
+                FROM entity_mentions
+                WHERE surface_text = ?
+                  AND resolution_kind = 'unresolved'
+                  AND extraction_method = 'heuristic_phrase'
+              `
+            )
+            .get(unresolved) as { count: number }
+        ).count;
+        assert.ok(unresolvedCount > 0, `${unresolved} should still be queryable as unresolved evidence`);
       }
 
       assert.equal(countEntityMentionsForNodeType(db, "adjudication_record"), 0);
@@ -462,7 +490,7 @@ test("build is deterministic across fresh runs", () => {
   }
 });
 
-test("build normalizes virtual named_entity provenance to relative ontology paths and valid sentinel spans", () => {
+test("build keeps ontology-backed named_entity rows virtual and file-backed rows source-aligned", () => {
   const root = createTempRepoRoot();
 
   try {
@@ -491,9 +519,9 @@ test("build normalizes virtual named_entity provenance to relative ontology path
               FROM nodes
               WHERE world_slug = ?
                 AND node_type = 'named_entity'
+                AND file_path = 'ONTOLOGY.md'
                 AND (
-                  file_path != 'ONTOLOGY.md'
-                  OR line_start != 1
+                  line_start != 1
                   OR line_end != 1
                   OR byte_start != 0
                   OR byte_end != 0
@@ -502,9 +530,43 @@ test("build normalizes virtual named_entity provenance to relative ontology path
           )
           .get(WORLD_SLUG) as { count: number }
       ).count;
+      const invalidBackedRows = (
+        db
+          .prepare(
+            `
+              SELECT COUNT(*) AS count
+              FROM nodes
+              WHERE world_slug = ?
+                AND node_type = 'named_entity'
+                AND file_path != 'ONTOLOGY.md'
+                AND (
+                  line_start < 1
+                  OR line_end < line_start
+                  OR byte_start < 0
+                  OR byte_end < byte_start
+                )
+            `
+          )
+          .get(WORLD_SLUG) as { count: number }
+      ).count;
+      const backedRowCount = (
+        db
+          .prepare(
+            `
+              SELECT COUNT(*) AS count
+              FROM nodes
+              WHERE world_slug = ?
+                AND node_type = 'named_entity'
+                AND file_path != 'ONTOLOGY.md'
+            `
+          )
+          .get(WORLD_SLUG) as { count: number }
+      ).count;
 
       assert.equal(absolutePathRows, 0);
       assert.equal(invalidSentinelRows, 0);
+      assert.equal(invalidBackedRows, 0);
+      assert.ok(backedRowCount > 0);
     } finally {
       db.close();
     }
@@ -513,7 +575,7 @@ test("build normalizes virtual named_entity provenance to relative ontology path
   }
 });
 
-test("build filters audited operational-label false positives from animalia named_entity output", () => {
+test("build filters audited operational-label false positives while preserving explicit canonical entities", () => {
   const root = createTempRepoRoot();
 
   try {
@@ -541,23 +603,22 @@ test("build filters audited operational-label false positives from animalia name
       const retainedRows = db
         .prepare(
           `
-            SELECT body
-            FROM nodes
-            WHERE world_slug = ?
-              AND node_type = 'named_entity'
-              AND body IN (
-                'Canonical name: Atreia Selviss | Kind: unknown | Mentions: 2',
-                'Canonical name: Bent Willow | Kind: unknown | Mentions: 3'
-              )
-            ORDER BY body
+            SELECT canonical_name, provenance_scope, entity_kind
+            FROM entities
+            WHERE canonical_name IN ('Atreia Selviss', 'Vespera Nightwhisper')
+            ORDER BY canonical_name
           `
         )
-        .all(WORLD_SLUG) as Array<{ body: string }>;
+        .all() as Array<{
+        canonical_name: string;
+        provenance_scope: string;
+        entity_kind: string | null;
+      }>;
 
       assert.deepEqual(bannedRows, []);
       assert.deepEqual(retainedRows, [
-        { body: "Canonical name: Atreia Selviss | Kind: unknown | Mentions: 2" },
-        { body: "Canonical name: Bent Willow | Kind: unknown | Mentions: 3" }
+        { canonical_name: "Atreia Selviss", provenance_scope: "proposal", entity_kind: "person" },
+        { canonical_name: "Vespera Nightwhisper", provenance_scope: "world", entity_kind: "person" }
       ]);
     } finally {
       db.close();

@@ -49,6 +49,8 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         [
           "anchor_checksums",
           "edges",
+          "entities",
+          "entity_aliases",
           "entity_mentions",
           "file_versions",
           "fts_nodes",
@@ -73,7 +75,12 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         [
           "idx_edges_source",
           "idx_edges_target",
-          "idx_entity_name",
+          "idx_entities_name",
+          "idx_entities_scope",
+          "idx_entity_alias_text",
+          "idx_entity_alias_unique",
+          "idx_entity_mentions_resolved",
+          "idx_entity_mentions_surface",
           "idx_nodes_file",
           "idx_nodes_world_type"
         ]

@@ -25,6 +25,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - If verification uses an exported function, inline `node -e` probe, or other package-local runtime entrypoint, run it from the package root when module resolution depends on package-local dependencies.
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
+- For JS/TS package-local schema, type, or contract tickets, verify whether the drafted compile gate is package-wide (`src/**/*`, `tests/**/*`, or equivalent) before treating it as a narrow proof surface; if downstream consumers compile in the same lane, reassess the owned boundary before coding.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
@@ -77,6 +78,7 @@ Check:
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
+- for staged ticket families, whether the active ticket is independently landable at its drafted acceptance boundary or whether live same-seam fallout makes the family decomposition false; if downstream consumers in the same package or seam must move together for `docs/FOUNDATIONS.md` closeout to stay truthful, widen the active ticket before coding
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
@@ -96,6 +98,14 @@ Required-consequence fallout does **not** require escalation when all of the fol
 - the extra edit is necessary to make the ticket's stated outcome truthful or functional
 - no new user-facing capability family, workflow boundary, or sibling ticket ownership is being claimed
 
+If `docs/FOUNDATIONS.md` or the live package/test boundary makes the drafted split itself untruthful, same-seam widening is still allowed when all of the following are true:
+
+- the active ticket and the immediate fallout live in one shared package, schema, or workflow seam
+- downstream consumers must move together for the change to compile, run, or close out truthfully
+- the widening does not cross into a separate user-facing capability family or unrelated sibling seam
+
+When this happens, rewrite the active ticket as the truthful owner before code edits. Name any absorbed sibling tickets explicitly in `Assumption Reassessment`, then update or archive those sibling tickets during closeout if the user asked for full completion or archival.
+
 Escalate with 1-3-1 when the fallout crosses a real ownership boundary even if it was discovered during reassessment.
 
 Examples:
@@ -111,6 +121,12 @@ Before editing code or docs, name the actual owned delta:
 - what still needs to change
 - what the ticket no longer owns
 - what follow-up ticket or spec owns adjacent remaining work, if any
+
+If a numbered family's decomposition failed during reassessment, also name:
+
+- which sibling tickets are being absorbed into the active ticket
+- why the original split was not independently landable
+- which sibling tickets remain unabsorbed and why
 
 For shared schemas, templates, or cross-skill contracts, inspect consumers before assuming the change is local.
 
@@ -183,6 +199,12 @@ Update the active ticket before finishing:
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
+
+If reassessment widened the active ticket by absorbing sibling tickets, make the sibling records truthful too:
+
+- update each absorbed sibling ticket to state that its work landed via the active ticket
+- archive absorbed siblings when archival is in scope and the user asked for full completion or archival
+- leave unabsorbed siblings active and untouched except for reference fixes that are necessary to keep ownership truthful
 
 If archival is in scope, follow `docs/archival-workflow.md` exactly and update any roadmap/spec references that still point at the active ticket path.
 

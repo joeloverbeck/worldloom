@@ -5,6 +5,8 @@ interface InspectPayload {
   node: Record<string, unknown>;
   outgoing_edges: Array<Record<string, unknown>>;
   incoming_edges: Array<Record<string, unknown>>;
+  entity_record: Record<string, unknown> | null;
+  entity_aliases: Array<Record<string, unknown>>;
   entity_mentions: Array<Record<string, unknown>>;
 }
 
@@ -34,6 +36,20 @@ export function inspect(worldRoot: string, nodeId: string): number {
           .all(nodeId) as Array<Record<string, unknown>>,
         incoming_edges: opened
           .prepare("SELECT * FROM edges WHERE target_node_id = ? ORDER BY edge_id")
+          .all(nodeId) as Array<Record<string, unknown>>,
+        entity_record:
+          (opened.prepare("SELECT * FROM entities WHERE entity_id = ?").get(nodeId) as
+            | Record<string, unknown>
+            | undefined) ?? null,
+        entity_aliases: opened
+          .prepare(
+            `
+              SELECT *
+              FROM entity_aliases
+              WHERE entity_id = ?
+              ORDER BY alias_id
+            `
+          )
           .all(nodeId) as Array<Record<string, unknown>>,
         entity_mentions: opened
           .prepare("SELECT * FROM entity_mentions WHERE node_id = ? ORDER BY mention_id")
