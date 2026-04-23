@@ -12,7 +12,7 @@ arguments:
 
 Implement a worldloom ticket against the live repository, not against stale assumptions.
 
-Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, `tickets/_TEMPLATE.md`, and `tickets/README.md` before editing. Read `docs/archival-workflow.md` before archiving or when the ticket mentions archival. If the ticket changes skill HARD-GATE semantics, canon-write ordering, or Mystery Reserve firewall enforcement/gate behavior, also read `docs/HARD-GATE-DISCIPLINE.md` before finalizing reassessment. Read-only retrieval or visibility work that merely surfaces Mystery Reserve constraints does not require that extra read by default.
+Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, `tickets/_TEMPLATE.md`, and `tickets/README.md` before editing. Read `docs/archival-workflow.md` when archival is actually in scope for the active run: before archiving, when the user explicitly asked for full ticket completion or archival, or when the remaining owned work includes archive/update steps rather than incidental archival references in the ticket/spec prose. If the ticket changes skill HARD-GATE semantics, canon-write ordering, or Mystery Reserve firewall enforcement/gate behavior, also read `docs/HARD-GATE-DISCIPLINE.md` before finalizing reassessment. Read-only retrieval or visibility work that merely surfaces Mystery Reserve constraints does not require that extra read by default.
 
 Reassess first, then implement. Do not treat the ticket as mechanically executable until its assumptions match the current repo.
 
