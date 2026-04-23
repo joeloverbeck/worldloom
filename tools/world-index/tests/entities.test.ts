@@ -37,7 +37,21 @@ test("stage A builds canonical entities from registry and structured whole-file 
 
   try {
     const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
-    writeFileSync(ontologyPath, "- Brinewick (polity)\n", "utf8");
+    writeFileSync(
+      ontologyPath,
+      [
+        "## Named Entity Registry",
+        "```yaml",
+        "named_entities:",
+        "  - canonical_name: Brinewick",
+        "    entity_kind: polity",
+        "    aliases:",
+        "      - Brinewick Charter City",
+        "```",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
 
     const registry = loadOntologyRegistry(ontologyPath);
     const proseNodes = [
@@ -66,7 +80,11 @@ test("stage A builds canonical entities from registry and structured whole-file 
       )
     ];
 
-    const { entities, entityNodes } = extractEntities({ type: "root", children: [] }, proseNodes, registry);
+    const { entities, entityNodes, aliases } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      registry
+    );
 
     assert.deepEqual(entityNames(entities), [
       "A Season on the Circuit",
@@ -89,6 +107,12 @@ test("stage A builds canonical entities from registry and structured whole-file 
     assert.equal(
       entities.find((row) => row.canonical_name === "A Season on the Circuit")?.entity_kind,
       "text/tradition"
+    );
+    assert.equal(
+      aliases.some(
+        (row) => row.alias_text === "Brinewick Charter City" && row.alias_kind === "exact_structured"
+      ),
+      true
     );
 
     const ontologyNode = entityNodes.find((row) => row.node_id === "entity:brinewick");
@@ -127,7 +151,7 @@ test("stage A builds canonical entities from registry and structured whole-file 
   }
 });
 
-test("ontology registry only accepts explicit structured entries and rejects explanatory notes", () => {
+test("ontology registry ignores prose bullets when the explicit registry heading is absent", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 
   try {
@@ -147,16 +171,47 @@ test("ontology registry only accepts explicit structured entries and rejects exp
 
     const registry = loadOntologyRegistry(ontologyPath);
 
-    assert.deepEqual(registry.entries, [
-      {
-        canonicalName: "Artifact-mutated non-sentient beasts",
-        kind: "hazard"
-      },
-      {
-        canonicalName: "Maker-Age artifact destruction-resistance",
-        kind: "metaphysical_rule"
-      }
-    ]);
+    assert.deepEqual(registry.entries, []);
+    assert.deepEqual(registry.issues, []);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("registry heading without a fenced YAML block emits a validation result", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(
+      ontologyPath,
+      ["## Named Entity Registry", "", "Registry prose without a fenced YAML block.", ""].join("\n"),
+      "utf8"
+    );
+
+    const { entities, validationResults } = extractEntities(
+      { type: "root", children: [] },
+      [makeNode("animalia:ONTOLOGY.md:Notes:0", "ontology_category", "Brinewick remains prose only.", "ONTOLOGY.md")],
+      loadOntologyRegistry(ontologyPath)
+    );
+
+    assert.deepEqual(entities, []);
+    assert.deepEqual(
+      validationResults.map((row) => ({
+        validator_name: row.validator_name,
+        severity: row.severity,
+        code: row.code,
+        file_path: row.file_path
+      })),
+      [
+        {
+          validator_name: "ontology_registry",
+          severity: "warn",
+          code: "missing_named_entity_registry_block",
+          file_path: "ONTOLOGY.md"
+        }
+      ]
+    );
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -197,6 +252,155 @@ test("stage B emits exact structured aliases and suppresses identical normalized
       true
     );
     assert.equal(aliases.some((row) => row.alias_text === "Copper Weir"), false);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("whole-file aliases declarations resolve exact mentions without creating duplicate canonical entities", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
+
+    const proseNodes = [
+      makeNode(
+        "NCP-0006",
+        "character_proposal_card",
+        [
+          "---",
+          "name: Canon Althea Greystone",
+          "slug: althea-greystone",
+          "aliases:",
+          "  - Althea Greystone",
+          "  - althea-greystone",
+          "  - Canon Althea Greystone",
+          "---",
+          "Althea Greystone signs the notice herself."
+        ].join("\n"),
+        "character-proposals/althea-greystone.md"
+      )
+    ];
+
+    const { entities, aliases, mentions, edges } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
+
+    const altheaRows = entities.filter((row) => row.canonical_name === "Canon Althea Greystone");
+    assert.equal(altheaRows.length, 1);
+
+    const aliasRows = aliases.filter((row) => row.entity_id === altheaRows[0]?.entity_id);
+    assert.deepEqual(
+      aliasRows
+        .filter((row) => row.alias_kind === "exact_structured")
+        .map((row) => row.alias_text)
+        .sort(),
+      ["althea-greystone", "Althea Greystone"].sort()
+    );
+    assert.equal(
+      aliasRows.some((row) => row.alias_kind === "exact_structured" && row.alias_text === "Canon Althea Greystone"),
+      false
+    );
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "Althea Greystone" &&
+          row.resolution_kind === "alias" &&
+          row.extraction_method === "exact_alias"
+      ),
+      true
+    );
+    assert.equal(
+      edges.some((row) => row.target_node_id === altheaRows[0]?.entity_id && row.edge_type === "mentions_entity"),
+      true
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("diegetic artifact aliases declarations emit exact structured aliases", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
+
+    const { aliases } = extractEntities(
+      { type: "root", children: [] },
+      [
+        makeNode(
+          "DA-0001",
+          "diegetic_artifact_record",
+          [
+            "---",
+            "title: A Season on the Circuit",
+            "artifact_type: travelogue",
+            "aliases:",
+            "  - Season on the Circuit",
+            "  - season on the circuit",
+            "---",
+            "Artifact body"
+          ].join("\n"),
+          "diegetic-artifacts/a-season-on-the-circuit.md"
+        )
+      ],
+      loadOntologyRegistry(ontologyPath)
+    );
+
+    assert.deepEqual(
+      aliases
+        .filter((row) => row.alias_kind === "exact_structured")
+        .map((row) => row.alias_text),
+      ["Season on the Circuit"]
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("registry and whole-file authority sources with the same canonical name remain distinct entities", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(
+      ontologyPath,
+      [
+        "## Named Entity Registry",
+        "```yaml",
+        "named_entities:",
+        "  - canonical_name: Brinewick",
+        "    entity_kind: place",
+        "```",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    const { entities } = extractEntities(
+      { type: "root", children: [] },
+      [
+        makeNode(
+          "NCP-0001",
+          "character_proposal_card",
+          "---\nname: Brinewick\nslug: brinewick-proposal\n---\nProposal body\n",
+          "character-proposals/brinewick.md"
+        )
+      ],
+      loadOntologyRegistry(ontologyPath)
+    );
+
+    const brinewickRows = entities.filter((row) => row.canonical_name === "Brinewick");
+    assert.equal(brinewickRows.length, 2);
+    assert.equal(new Set(brinewickRows.map((row) => row.entity_id)).size, 2);
+    assert.deepEqual(
+      brinewickRows.map((row) => row.provenance_scope).sort(),
+      ["proposal", "world"]
+    );
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -340,7 +544,19 @@ test("stoplist only suppresses heuristic phrases and does not block exact canoni
 
   try {
     const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
-    writeFileSync(ontologyPath, "- Mystery Reserve (belief)\n", "utf8");
+    writeFileSync(
+      ontologyPath,
+      [
+        "## Named Entity Registry",
+        "```yaml",
+        "named_entities:",
+        "  - canonical_name: Mystery Reserve",
+        "    entity_kind: belief",
+        "```",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
 
     const proseNodes = [
       makeNode(

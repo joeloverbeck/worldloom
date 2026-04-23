@@ -29,6 +29,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and note unrelated dirty paths before review.
 - Classify dirty paths into: reviewed-ticket implementation state, review-created edits, and unrelated noise. Only the reviewed-ticket implementation state should drive archival readiness unless another dirty path changes the ticket's factual closeout.
+- Treat follow-up tickets created during the review as `review-created edits`. Report them explicitly in the handoff, but do not let their presence block archival unless they prove unfinished owned work inside the reviewed ticket.
 - Review the local implementation state as it exists now, committed or not.
 - Compare the ticket's closeout against what actually landed, not against the original plan.
 - Keep follow-up creation evidence-backed and tightly bounded.
@@ -113,6 +114,7 @@ Decision rule:
 - if an active ticket already owns the concern, cite it and do not duplicate
 - if an active ticket partially owns it but is now stale, update that ticket factually
 - if no active ticket owns it, create one bounded follow-up ticket
+- if the reviewed ticket's owned invariant is complete but a broader shared proof surface is stale because adjacent family work changed the contract, archive the reviewed ticket and create a separate bounded follow-up instead of treating the stale proof lane as unfinished owned work
 
 Before creating a new ticket:
 1. inspect adjacent active tickets in the same family

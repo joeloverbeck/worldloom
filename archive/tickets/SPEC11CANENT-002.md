@@ -1,6 +1,6 @@
 # SPEC11CANENT-002: Replace ad hoc `ONTOLOGY.md` bullet scraping with an explicit named-entity registry
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-index` gains a machine-readable `ONTOLOGY.md` named-entity authority contract for world-level canonical entities.
@@ -12,13 +12,15 @@ World-level canonical entities currently depend on `loadOntologyRegistry()` scra
 
 ## Assumption Reassessment (2026-04-23)
 
-1. `tools/world-index/src/parse/entities.ts` currently reads `ONTOLOGY.md` line-by-line and only accepts `- Name (kind)` or `- Name attaches to **kind**` bullet shapes.
+1. `tools/world-index/src/parse/entities.ts` originally read `ONTOLOGY.md` line-by-line and only accepted `- Name (kind)` or `- Name attaches to **kind**` bullet shapes; the landed change replaces that with a fenced-YAML registry under `## Named Entity Registry`.
 2. `worlds/animalia/ONTOLOGY.md` expresses many named world entities in the main ontology table and descriptive notes, but those shapes are not machine-readable by the current registry parser.
 3. Shared boundary under audit: the world-level named-entity authority contract inside `ONTOLOGY.md`, plus the parser that converts that contract into canonical `entities` / `named_entity` rows.
 4. `docs/FOUNDATIONS.md` `Mandatory World Files` and `Ontology Categories` make `ONTOLOGY.md` the truthful home for explicit world-entity declarations. Adding a new mandatory file would be broader than necessary.
 5. This ticket should preserve SPEC-10's precision-first posture: explicit declarations expand canonical authority; incidental prose still does not.
 6. **Registry-first commitment (Q2(c) from spec reassessment)**: no parallel-run transition. Legacy bullet parsing is removed in the same ticket that lands the registry. Bullets remain available as Stage C mention evidence via the existing `MENTION_EVIDENCE_SOURCE_NODE_TYPES` scan over `ontology_category` bodies; no canonical promotion path remains for bullets.
 7. **Registry format lock**: fenced YAML block under a stable `## Named Entity Registry` level-2 heading. No alternative embedding (HTML-commented inline, sibling file, or other) is considered in this ticket.
+8. **Mismatch + correction**: SPEC-11's broader family also covered malformed authority-source warnings and exact structured aliases, but the live repo already ships those paths in `tools/world-index/src/parse/entities.ts` (`parseAuthorityFrontmatter()`, `validator_name='frontmatter_parse'`, `code='malformed_authority_source'`, `stageBGenerateAliases()`). This ticket is therefore narrowed to the remaining delta: explicit `ONTOLOGY.md` registry parsing plus truthful proof updates for that contract.
+9. **Verification-time fallout absorbed in-ticket**: the draft assumed same-name registry/whole-file collisions already disambiguated via `canonicalEntitySlug()`. Live code only disambiguated when different names collapsed to the same base slug; exact same-name collisions reused the same slug. Because collision allocation lives in the same canonical-entity seam, this ticket absorbed the required fix so registry and whole-file authorities with the same `canonical_name` now persist as distinct entities.
 
 ## Architecture Check
 
@@ -61,10 +63,11 @@ Add proof that:
 
 ## Files to Touch
 
+- `tickets/SPEC11CANENT-002.md` (modify)
 - `tools/world-index/src/parse/entities.ts` (modify)
 - `tools/world-index/tests/entities.test.ts` (modify)
-- `tools/world-index/tests/integration/build-animalia.test.ts` and/or `tools/world-index/tests/integration/spec10-verification.sh` (modify)
-- `docs/WORKFLOWS.md` or adjacent docs only if the new authoring contract needs a pointer
+- `tools/world-index/tests/integration/build-animalia.test.ts` (modify)
+- `tools/world-index/tests/integration/spec10-verification.sh` (modify)
 
 ## Out of Scope
 
@@ -96,7 +99,8 @@ Add proof that:
 ### New/Modified Tests
 
 1. `tools/world-index/tests/entities.test.ts` — explicit ontology registry parsing and negative descriptive-prose cases.
-2. `tools/world-index/tests/integration/build-animalia.test.ts` and/or `tools/world-index/tests/integration/spec10-verification.sh` — live-corpus declaration-path assertions.
+2. `tools/world-index/tests/integration/build-animalia.test.ts` — temp-copy/live-corpus declaration-path assertions for the new registry contract.
+3. `tools/world-index/tests/integration/spec10-verification.sh` — existing proof script updated so bullet-derived canonicals are now banned and the known malformed authority-source warning remains the only accepted validation row.
 
 ### Commands
 
@@ -104,3 +108,22 @@ Add proof that:
 2. `cd tools/world-index && node --test dist/tests/entities.test.js`
 3. `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js`
 4. `cd tools/world-index && npm run test:spec10-verification`
+
+## Outcome
+
+- Completed: 2026-04-23
+- `loadOntologyRegistry()` now reads only a fenced YAML `named_entities` block under `## Named Entity Registry`, carries registry-shape issues forward as `ontology_registry` validation results, and ignores legacy bullet prose entirely.
+- Registry entries can declare exact `aliases`, which now flow through the existing structured-alias path for world-scoped entities.
+- Same-name collisions between registry-backed and whole-file-backed canonical entities now disambiguate to distinct `entity_id` values instead of silently merging.
+- Unit, integration, and spec10 verification proofs now reflect the registry-first contract: legacy ontology bullets are non-canonical, temp-copy registry declarations become canonical, and the existing malformed authority-source warning remains the only accepted validation row in live `animalia`.
+
+## Verification Result
+
+- Passed `cd tools/world-index && npm run build`
+- Passed `cd tools/world-index && node --test dist/tests/entities.test.js`
+- Passed `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js`
+- Passed `cd tools/world-index && npm run test:spec10-verification`
+
+## Deviations
+
+- The draft treated same-name registry/whole-file collisions as already handled by the existing slug fallback. Reassessment and proof showed that exact same-name collisions still merged, so the ticket absorbed that canonical-slug allocation fix as required same-seam fallout.

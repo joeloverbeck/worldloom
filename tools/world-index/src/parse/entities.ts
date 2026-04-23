@@ -19,11 +19,20 @@ import type {
 export interface EntityRegistryEntry {
   canonicalName: string;
   kind: string | null;
+  aliases: string[];
+}
+
+interface EntityRegistryIssue {
+  code: string;
+  message: string;
+  lineStart: number | null;
+  lineEnd: number | null;
 }
 
 export interface EntityRegistry {
   sourcePath: string;
   entries: EntityRegistryEntry[];
+  issues: EntityRegistryIssue[];
 }
 
 export interface EntityExtractionOutput {
@@ -98,26 +107,8 @@ const MENTION_EVIDENCE_SOURCE_NODE_TYPES = new Set([
 
 export function loadOntologyRegistry(ontologyPath: string): EntityRegistry {
   const source = readFileSync(ontologyPath, "utf8");
-  const entries: EntityRegistryEntry[] = [];
-
-  for (const rawLine of source.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line.startsWith("- ")) {
-      continue;
-    }
-
-    const withoutBullet = line.slice(2).replace(/<!--.*?-->/g, "").trim();
-    if (withoutBullet.length === 0) {
-      continue;
-    }
-
-    const entry = parseRegistryLine(withoutBullet);
-    if (entry) {
-      entries.push(entry);
-    }
-  }
-
-  return { sourcePath: path.basename(ontologyPath), entries };
+  const { entries, issues } = parseOntologyRegistrySource(source);
+  return { sourcePath: path.basename(ontologyPath), entries, issues };
 }
 
 export function extractEntities(
@@ -166,11 +157,31 @@ function stageAConstructCanonicalEntities(
   const entities: EntityRow[] = [];
   const authoritySources = new Map<string, AuthoritySource>();
   const validationResults: ValidationResultRow[] = [];
-  const usedSlugs = new Map<string, string>();
+  const usedSlugs = new Set<string>();
   const worldSlug = proseNodes[0]?.world_slug ?? "__unknown__";
 
+  for (const issue of ontologyRegistry.issues) {
+    validationResults.push({
+      result_id: 0,
+      world_slug: worldSlug,
+      validator_name: "ontology_registry",
+      severity: "warn",
+      code: issue.code,
+      message: issue.message,
+      node_id: null,
+      file_path: ontologyRegistry.sourcePath,
+      line_range_start: issue.lineStart,
+      line_range_end: issue.lineEnd,
+      created_at: new Date().toISOString()
+    });
+  }
+
   for (const entry of ontologyRegistry.entries) {
-    const entityId = `entity:${canonicalEntitySlug(entry.canonicalName, usedSlugs)}`;
+    const entityId = `entity:${canonicalEntitySlug(
+      entry.canonicalName,
+      `registry:${ontologyRegistry.sourcePath}:${entry.canonicalName}`,
+      usedSlugs
+    )}`;
     authoritySources.set(entityId, {
       node: null,
       sourceField: null,
@@ -178,7 +189,7 @@ function stageAConstructCanonicalEntities(
       entityKind: entry.kind,
       provenanceScope: "world",
       authorityLevel: "structured_anchor",
-      aliasTexts: []
+      aliasTexts: entry.aliases
     });
     entities.push({
       entity_id: entityId,
@@ -225,7 +236,11 @@ function stageAConstructCanonicalEntities(
       continue;
     }
 
-    const entityId = `entity:${canonicalEntitySlug(source.canonicalName, usedSlugs)}`;
+    const entityId = `entity:${canonicalEntitySlug(
+      source.canonicalName,
+      source.node?.node_id ?? `${source.provenanceScope}:${source.canonicalName}`,
+      usedSlugs
+    )}`;
     authoritySources.set(entityId, source);
     entities.push({
       entity_id: entityId,
@@ -406,6 +421,7 @@ function authoritySourceForNode(
     }
 
     const slugAlias = firstNonEmptyString(frontmatter.slug);
+    const declaredAliases = parseExactAliasList(frontmatter.aliases);
     return {
       node,
       sourceField: "name",
@@ -413,7 +429,7 @@ function authoritySourceForNode(
       entityKind: "person",
       provenanceScope: node.node_type === "character_record" ? "world" : "proposal",
       authorityLevel: "structured_anchor",
-      aliasTexts: slugAlias ? [slugAlias] : []
+      aliasTexts: mergeExactAliases(slugAlias ? [slugAlias] : [], declaredAliases)
     };
   }
 
@@ -430,7 +446,7 @@ function authoritySourceForNode(
       entityKind: classifyArtifactKind(frontmatter),
       provenanceScope: "diegetic",
       authorityLevel: "structured_anchor",
-      aliasTexts: []
+      aliasTexts: parseExactAliasList(frontmatter.aliases)
     };
   }
 
@@ -481,41 +497,205 @@ function createBackedEntityNode(entityId: string, sourceNode: NodeRow): NodeRow 
   };
 }
 
-function parseRegistryLine(line: string): EntityRegistryEntry | null {
-  const simpleMatch = line.match(/^(.+?)\s+\(([^)]+)\)\s*$/);
-  if (simpleMatch) {
-    const [, rawName, rawKind] = simpleMatch;
-    if (!rawName || !rawKind) {
-      return null;
-    }
-    const canonicalName = sanitizeName(rawName);
-    const kind = rawKind.split(",")[0]?.trim() ?? null;
-    return canonicalName ? { canonicalName, kind } : null;
+function parseOntologyRegistrySource(source: string): {
+  entries: EntityRegistryEntry[];
+  issues: EntityRegistryIssue[];
+} {
+  const lines = source.split(/\r?\n/);
+  const headingIndexes = lines
+    .map((line, index) => (line.trim() === "## Named Entity Registry" ? index : -1))
+    .filter((index) => index >= 0);
+
+  if (headingIndexes.length === 0) {
+    return { entries: [], issues: [] };
   }
 
-  const attachesMatch = line.match(/^(.+?)\s+attach(?:es)? to\s+\*\*([^*]+)\*\*/i);
-  if (attachesMatch) {
-    const [, rawName, rawKind] = attachesMatch;
-    if (!rawName || !rawKind) {
-      return null;
-    }
-    const canonicalName = sanitizeName(rawName);
-    const kind = rawKind.trim();
-    return canonicalName ? { canonicalName, kind } : null;
+  if (headingIndexes.length > 1) {
+    return {
+      entries: [],
+      issues: [
+        {
+          code: "duplicate_named_entity_registry",
+          message:
+            "ONTOLOGY.md declares more than one '## Named Entity Registry' section; canonical entity emission from the ontology registry was skipped.",
+          lineStart: headingIndexes[0]! + 1,
+          lineEnd: headingIndexes[headingIndexes.length - 1]! + 1
+        }
+      ]
+    };
   }
 
-  return null;
+  const block = extractNamedEntityRegistryBlock(lines, headingIndexes[0]!);
+  if (!block) {
+    return {
+      entries: [],
+      issues: [
+        {
+          code: "missing_named_entity_registry_block",
+          message:
+            "ONTOLOGY.md declares '## Named Entity Registry' without an immediately following fenced YAML block.",
+          lineStart: headingIndexes[0]! + 1,
+          lineEnd: headingIndexes[0]! + 1
+        }
+      ]
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = YAML.parse(block.content);
+  } catch {
+    return {
+      entries: [],
+      issues: [
+        {
+          code: "invalid_named_entity_registry_yaml",
+          message:
+            "ONTOLOGY.md named-entity registry YAML could not be parsed; canonical entity emission from the ontology registry was skipped.",
+          lineStart: block.startLine,
+          lineEnd: block.endLine
+        }
+      ]
+    };
+  }
+
+  if (!isRecord(parsed) || !Array.isArray(parsed.named_entities)) {
+    return {
+      entries: [],
+      issues: [
+        {
+          code: "invalid_named_entity_registry_shape",
+          message:
+            "ONTOLOGY.md named-entity registry must define a top-level 'named_entities' array.",
+          lineStart: block.startLine,
+          lineEnd: block.endLine
+        }
+      ]
+    };
+  }
+
+  const entries: EntityRegistryEntry[] = [];
+  const issues: EntityRegistryIssue[] = [];
+
+  for (const [index, rawEntry] of parsed.named_entities.entries()) {
+    const entryLine = block.startLine + index + 1;
+    if (!isRecord(rawEntry)) {
+      issues.push({
+        code: "invalid_named_entity_registry_entry",
+        message: `ONTOLOGY.md named-entity registry entry ${index + 1} must be a mapping with canonical_name and entity_kind fields.`,
+        lineStart: entryLine,
+        lineEnd: entryLine
+      });
+      continue;
+    }
+
+    const canonicalName = firstNonEmptyString(rawEntry.canonical_name);
+    const kind = firstNonEmptyString(rawEntry.entity_kind);
+    const aliases = parseRegistryAliases(rawEntry.aliases);
+    if (!canonicalName || !kind || aliases === null) {
+      issues.push({
+        code: "invalid_named_entity_registry_entry",
+        message: `ONTOLOGY.md named-entity registry entry ${index + 1} must provide string canonical_name and entity_kind fields, and aliases must be an array of non-empty strings when present.`,
+        lineStart: entryLine,
+        lineEnd: entryLine
+      });
+      continue;
+    }
+
+    entries.push({ canonicalName, kind, aliases });
+  }
+
+  return { entries, issues };
 }
 
-function sanitizeName(rawName: string | undefined): string {
-  if (!rawName) {
-    return "";
+function extractNamedEntityRegistryBlock(
+  lines: string[],
+  headingIndex: number
+): { content: string; startLine: number; endLine: number } | null {
+  let lineIndex = headingIndex + 1;
+  while (lineIndex < lines.length && lines[lineIndex]?.trim() === "") {
+    lineIndex += 1;
   }
 
-  return rawName
-    .replace(/\s+\((?:CF|CH|PA|M|DA|CHAR|PR|BATCH|NCP|NCB|AU|RP)-\d+\)/g, "")
-    .replace(/\*\*/g, "")
-    .trim();
+  if (!lines[lineIndex]?.trim().startsWith("```yaml")) {
+    return null;
+  }
+
+  const blockStart = lineIndex + 1;
+  lineIndex += 1;
+  while (lineIndex < lines.length && lines[lineIndex]?.trim() !== "```") {
+    lineIndex += 1;
+  }
+
+  if (lineIndex >= lines.length) {
+    return null;
+  }
+
+  return {
+    content: lines.slice(blockStart, lineIndex).join("\n"),
+    startLine: blockStart + 1,
+    endLine: lineIndex + 1
+  };
+}
+
+function parseRegistryAliases(value: unknown): string[] | null {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const aliases: string[] = [];
+  const seen = new Set<string>();
+
+  for (const alias of value) {
+    const normalized = firstNonEmptyString(alias);
+    if (!normalized) {
+      return null;
+    }
+
+    const key = normalizeLookupKey(normalized);
+    if (!seen.has(key)) {
+      seen.add(key);
+      aliases.push(normalized);
+    }
+  }
+
+  return aliases;
+}
+
+function parseExactAliasList(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return dedupeNormalizedAliases(value.flatMap((alias) => {
+    const normalized = firstNonEmptyString(alias);
+    return normalized ? [normalized] : [];
+  }));
+}
+
+function mergeExactAliases(...aliasGroups: string[][]): string[] {
+  return dedupeNormalizedAliases(aliasGroups.flat());
+}
+
+function dedupeNormalizedAliases(aliases: string[]): string[] {
+  const deduped: string[] = [];
+  const seen = new Set<string>();
+
+  for (const alias of aliases) {
+    const key = normalizeLookupKey(alias);
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    deduped.push(alias);
+  }
+
+  return deduped;
 }
 
 function collectHeuristicCandidates(body: string, nodeType: string): string[] {
@@ -586,21 +766,33 @@ function looksLikeStandaloneLabel(line: string): boolean {
   return /^\*\*[^*\n]+\*\*:?\s*$/.test(line.trim());
 }
 
-function canonicalEntitySlug(name: string, usedSlugs: Map<string, string>): string {
+function canonicalEntitySlug(name: string, uniqueKey: string, usedSlugs: Set<string>): string {
   const base = name
     .normalize("NFC")
     .toLocaleLowerCase("en-US")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   const fallbackBase = base.length > 0 ? base : "entity";
-  const existing = usedSlugs.get(fallbackBase);
-
-  if (!existing || existing === name) {
-    usedSlugs.set(fallbackBase, name);
+  if (!usedSlugs.has(fallbackBase)) {
+    usedSlugs.add(fallbackBase);
     return fallbackBase;
   }
 
-  return `${fallbackBase}-${sha256Hex(name).slice(0, 8)}`;
+  const suffixed = `${fallbackBase}-${sha256Hex(uniqueKey).slice(0, 8)}`;
+  if (!usedSlugs.has(suffixed)) {
+    usedSlugs.add(suffixed);
+    return suffixed;
+  }
+
+  let length = 10;
+  for (;;) {
+    const extended = `${fallbackBase}-${sha256Hex(`${uniqueKey}:${length}`).slice(0, length)}`;
+    if (!usedSlugs.has(extended)) {
+      usedSlugs.add(extended);
+      return extended;
+    }
+    length += 2;
+  }
 }
 
 function parseAuthorityFrontmatter(body: string):

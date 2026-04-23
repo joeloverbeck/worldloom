@@ -92,12 +92,13 @@ const BANNED_CANONICALS = [
   "Mythical-species sentients are species, not artifact, even though M-5 (Mystery Reserve) entertains the heretical possibility otherwise. The category attachment reflects what the world treats as true; mystery entries hold the disquieting alternatives.",
   "The magic practice category is intentionally narrow in Animalia — there is no spellcraft. All entries here are artifact-handling practices.",
   "Artifact-mutated non-sentient beasts attach to hazard + species (non-sentient fauna sub-category) + optionally local_anomaly (for specific named zones) + historical_process (for the centuries-accumulated phenomenon). They do NOT attach to `person`, `faction`, or any sentient-entity category. They are categorically DISTINCT from Cluster D mythic-species sentient folk (DIS-3) and from Maker-Age guardian constructions (CF-0029; distinct-origin firewall). The surface-similar appearance (chimeric / anomalous morphology) must not collapse the taxonomy.",
-  "Mundane-tier Maker-Age artifacts attach to artifact (mundane-subclass) + resource_distribution + hazard (low-tier CAU-1 cost). NOT a new distribution tier — explicit naming of DIS-1 \"most inert junk\" band. Attach to daily_routine for ordinary-life encounter contexts."
+  "Mundane-tier Maker-Age artifacts attach to artifact (mundane-subclass) + resource_distribution + hazard (low-tier CAU-1 cost). NOT a new distribution tier — explicit naming of DIS-1 \"most inert junk\" band. Attach to daily_routine for ordinary-life encounter contexts.",
+  "Ash-Seal commercial-company Brinewick anomaly",
+  "Maker-Age artifact destruction-resistance"
 ];
 const KEPT_CANONICALS = [
   "Vespera Nightwhisper",
   "Atreia Selviss",
-  "Maker-Age artifact destruction-resistance",
   "A Season on the Circuit: Dispatches from Vespera Nightwhisper",
   "After-Action Report on the Harrowgate Contract"
 ];
@@ -225,6 +226,10 @@ const mysteryReserveFirewall = Object.fromEntries(
 
 const integrity = {
   validation_results: count("SELECT COUNT(*) AS count FROM validation_results WHERE world_slug = ?", worldSlug),
+  malformed_authority_source: count(
+    "SELECT COUNT(*) AS count FROM validation_results WHERE world_slug = ? AND code = 'malformed_authority_source'",
+    worldSlug
+  ),
   unresolved_edges: count("SELECT COUNT(*) AS count FROM edges WHERE target_unresolved_ref IS NOT NULL"),
   dangling_entity_mentions: count(
     `
@@ -321,6 +326,22 @@ for (const [title, entityCount] of Object.entries(mysteryReserveFirewall)) {
 }
 
 for (const [name, value] of Object.entries(integrity)) {
+  if (name === "malformed_authority_source") {
+    if (value !== 1) {
+      failures.push(`expected exactly one malformed authority-source warning, found ${value}`);
+    }
+    continue;
+  }
+
+  if (name === "validation_results") {
+    if (value !== integrity.malformed_authority_source) {
+      failures.push(
+        `integrity check failed for validation_results: ${value} total rows vs ${integrity.malformed_authority_source} expected malformed-authority rows`
+      );
+    }
+    continue;
+  }
+
   if (value !== 0) {
     failures.push(`integrity check failed for ${name}: ${value}`);
   }

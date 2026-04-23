@@ -43,6 +43,12 @@ function cleanup(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
+function appendNamedEntityRegistry(root: string, registryBlock: string): void {
+  const ontologyPath = path.join(root, "worlds", WORLD_SLUG, "ONTOLOGY.md");
+  const existing = readFileSync(ontologyPath, "utf8").replace(/\s*$/, "");
+  writeFileSync(ontologyPath, `${existing}\n\n${registryBlock}\n`, "utf8");
+}
+
 function openBuiltDb(root: string): Database.Database {
   return new Database(path.join(root, "worlds", WORLD_SLUG, "_index", "world.db"), {
     readonly: true
@@ -401,7 +407,7 @@ test("build resolves animalia DA-0001 references through the canonical whole-fil
   }
 });
 
-test("build removes audited workflow-label entities while keeping real animalia entities", () => {
+test("build removes audited workflow-label entities and legacy ontology bullets while keeping file-backed entities", () => {
   const root = createTempRepoRoot();
 
   try {
@@ -452,13 +458,19 @@ test("build removes audited workflow-label entities while keeping real animalia 
         assert.equal(countNamedEntityRows(db, banned), 0, `${banned} should not persist as a named_entity`);
       }
 
-      for (const retained of [
-        "Vespera Nightwhisper",
-        "Atreia Selviss",
+      for (const retained of ["Vespera Nightwhisper", "Atreia Selviss"]) {
+        assert.equal(countNamedEntityRows(db, retained), 1, `${retained} should remain queryable`);
+      }
+
+      for (const bulletDerived of [
         "Ash-Seal commercial-company Brinewick anomaly",
         "Maker-Age artifact destruction-resistance"
       ]) {
-        assert.equal(countNamedEntityRows(db, retained), 1, `${retained} should remain queryable`);
+        assert.equal(
+          countNamedEntityRows(db, bulletDerived),
+          0,
+          `${bulletDerived} should no longer become canonical from legacy ontology bullets`
+        );
       }
 
       for (const noncanonical of [
@@ -505,6 +517,74 @@ test("build removes audited workflow-label entities while keeping real animalia 
       assert.equal(countEntityMentionsForNodeType(db, "audit_record"), 0);
       assert.equal(countValidationRows(db, "content_hash_drift"), 0);
       assert.equal(countValidationRows(db, "yaml_parse_integrity"), 0);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build promotes explicit ontology registry declarations from the copied world fixture", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    appendNamedEntityRegistry(
+      root,
+      [
+        "## Named Entity Registry",
+        "```yaml",
+        "named_entities:",
+        "  - canonical_name: Brinewick",
+        "    entity_kind: place",
+        "    aliases:",
+        "      - Brinewick Charter City",
+        "  - canonical_name: Ash-Seal",
+        "    entity_kind: institution",
+        "```"
+      ].join("\n")
+    );
+
+    assert.equal(build(root, WORLD_SLUG), 0);
+
+    const db = openBuiltDb(root);
+    try {
+      const registryRows = db
+        .prepare(
+          `
+            SELECT canonical_name, entity_kind, provenance_scope
+            FROM entities
+            WHERE canonical_name IN ('Ash-Seal', 'Brinewick')
+            ORDER BY canonical_name
+          `
+        )
+        .all() as Array<{
+        canonical_name: string;
+        entity_kind: string | null;
+        provenance_scope: string;
+      }>;
+      const aliasRows = db
+        .prepare(
+          `
+            SELECT alias_text, alias_kind
+            FROM entity_aliases ea
+            INNER JOIN entities e ON e.entity_id = ea.entity_id
+            WHERE e.canonical_name = 'Brinewick'
+            ORDER BY alias_text
+          `
+        )
+        .all() as Array<{ alias_text: string; alias_kind: string }>;
+
+      assert.deepEqual(registryRows, [
+        { canonical_name: "Ash-Seal", entity_kind: "institution", provenance_scope: "world" },
+        { canonical_name: "Brinewick", entity_kind: "place", provenance_scope: "world" }
+      ]);
+      assert.equal(
+        aliasRows.some(
+          (row) => row.alias_text === "Brinewick Charter City" && row.alias_kind === "exact_structured"
+        ),
+        true
+      );
     } finally {
       db.close();
     }

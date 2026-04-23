@@ -20,6 +20,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
+- If dirty paths overlap the ticket's seam, inspect the live diffs before coding and classify them as unrelated local edits, partial implementation of the active ticket, or in-flight sibling-ticket work.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
@@ -62,7 +63,8 @@ If one primary class also changes a real shared contract, keep the primary class
 6. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
 7. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
 8. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-9. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+9. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+10. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -81,7 +83,9 @@ Check:
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
 - for tickets that claim to add or expand a script/test proof surface, whether the named script file, shell entrypoint, or package-script already exists and already runs; if it does, narrow the ticket to tightening the existing proof surface before code edits
 - for staged ticket families, whether the active ticket is independently landable at its drafted acceptance boundary or whether live same-seam fallout makes the family decomposition false; if downstream consumers in the same package or seam must move together for `docs/FOUNDATIONS.md` closeout to stay truthful, widen the active ticket before coding
+- when dirty same-seam edits already exist in files the ticket would touch, whether those edits belong to an in-flight sibling ticket or broader family slice; if they do, narrow, widen, or rewrite the active ticket boundary before code edits instead of treating the seam as clean ownership
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
+- when reassessment narrows or rewrites a shared contract, whether existing same-seam proof scripts, fixtures, or verification docs still encode the old contract; if they do, treat truthful proof-surface upkeep inside that seam as required consequence fallout rather than optional cleanup
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
 - for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
@@ -93,6 +97,8 @@ Load `references/mismatch-handling.md` from this skill directory (`.codex/skills
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
 When reassessment cleanly narrows the owned delta before coding, patch the ticket's `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
+
+If early probing shows that a drafted broad package/workspace proof lane is already failing for reasons outside the owned seam, remove it from the active acceptance surface before implementation and rewrite the ticket to the strongest truthful narrower proof boundary. Keep the broader lane only as contextual noise or follow-up evidence, not as an active acceptance gate.
 
 Required-consequence fallout does **not** require escalation when all of the following are true:
 
@@ -165,6 +171,8 @@ For end-to-end validation tickets, if the drafted acceptance story assumes the c
 
 If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
 
+If an initial broad package/workspace lane fails and the failure is already clearly outside the owned seam, do not leave that lane in `Acceptance Criteria` or `Test Plan` while implementing. Rewrite the ticket immediately to the honest narrower proof boundary, then continue.
+
 If the symptom is already reproduced but multiple same-seam fixes remain plausible, run a narrow source-to-emission probe before editing so the patch stays minimal and the ticket does not overclaim a broader implementation shape.
 
 If a broader proof copies a live world tree or fixture and inherits generated state, clean or account for that copied state before treating the failure as ticket evidence. Record that harness correction in `Assumption Reassessment` or `## Deviations` when it materially changes the proof story.
@@ -205,6 +213,7 @@ Update the active ticket before finishing:
 - `## Verification Result`
 - optional `## Deviations`
 - compare the landed diff against `Files to Touch` and `Test Plan` / `New/Modified Tests`, then patch the ticket if any touched file or exercised proof surface is still missing
+- if the ticket changed a shared contract or canonical authority surface, re-check same-seam proof scripts/fixtures referenced by the repo or adjacent tests and make their expectations truthful before finishing
 - compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
