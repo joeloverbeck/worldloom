@@ -57,6 +57,19 @@ interface SeedAnchorInput {
   checksum?: string;
 }
 
+interface SeedValidationResultInput {
+  world_slug: string;
+  validator_name: string;
+  severity: string;
+  code: string;
+  message: string;
+  node_id?: string | null;
+  file_path?: string | null;
+  line_range_start?: number | null;
+  line_range_end?: number | null;
+  created_at?: string;
+}
+
 export interface SeedWorldInput {
   worldSlug: string;
   nodes: SeedNodeInput[];
@@ -65,6 +78,7 @@ export interface SeedWorldInput {
   aliases?: SeedAliasInput[];
   mentions?: SeedMentionInput[];
   anchors?: SeedAnchorInput[];
+  validationResults?: SeedValidationResultInput[];
 }
 
 export function createTempRepoRoot(): string {
@@ -252,6 +266,36 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
           ) VALUES (?, ?, ?)
         `
       ).run(anchor.node_id, anchor.anchor_form, anchor.checksum ?? hashValue(anchor.anchor_form));
+    }
+
+    for (const result of input.validationResults ?? []) {
+      db.prepare(
+        `
+          INSERT INTO validation_results (
+            world_slug,
+            validator_name,
+            severity,
+            code,
+            message,
+            node_id,
+            file_path,
+            line_range_start,
+            line_range_end,
+            created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `
+      ).run(
+        result.world_slug,
+        result.validator_name,
+        result.severity,
+        result.code,
+        result.message,
+        result.node_id ?? null,
+        result.file_path ?? null,
+        result.line_range_start ?? null,
+        result.line_range_end ?? null,
+        result.created_at ?? "2026-04-23T00:00:00Z"
+      );
     }
   } finally {
     db.close();
