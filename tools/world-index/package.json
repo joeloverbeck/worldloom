@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "test:spec10-verification": "bash tests/integration/spec10-verification.sh",
     "test": "node --test dist/tests/*.test.js",
     "clean": "rm -rf dist"
   },

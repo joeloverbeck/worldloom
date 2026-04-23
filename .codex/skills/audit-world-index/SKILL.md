@@ -12,7 +12,7 @@ arguments:
 
 Audit the live world-index output for one world by rebuilding first, querying the fresh SQLite artifact, and creating only evidence-backed follow-up tickets.
 
-Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/_TEMPLATE.md`, and `tickets/README.md` before drafting tickets. For World Index work, also read the recent active/archived `SPEC-01*` tickets relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner.
+Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/_TEMPLATE.md`, and `tickets/README.md` before drafting tickets. For World Index work, also read the recent active/archived ticket family relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner. In this repo that often means both older `SPEC-01*` cleanup tickets and the archived `SPEC10ENTSUR-*` / `SPEC-10` redesign records.
 
 In this checkout, prefer live `.codex/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
 
@@ -62,9 +62,9 @@ Start with these surfaces:
 - edge counts by `edge_type`, including unresolved targets
 - `validation_results` grouped by `severity`, `code`, and `file_path`
 - file coverage via `file_versions`
-- semantic surfaces most likely to rot downstream consumers, especially `named_entity` and `entity_mentions`
+- semantic surfaces most likely to rot downstream consumers, especially `entities`, `entity_aliases`, `entity_mentions`, and virtual `named_entity` nodes
 
-Before writing deeper semantic queries, inspect the live table columns you will rely on. In the current live schema, virtual `named_entity` rows live in `nodes` with `node_type='named_entity'`; there is no separate `named_entity` table. Do not assume concentration fields live directly on `entity_mentions`; derive source node type and file family through `entity_mentions.node_id -> nodes.node_id` when that is the current schema.
+Before writing deeper semantic queries, inspect the live table columns you will rely on. In the current live schema, virtual `named_entity` rows live in `nodes` with `node_type='named_entity'`; there is no separate `named_entity` table. Canonical names, kinds, and provenance now live on `entities`, exact alternates live on `entity_aliases`, and raw or resolved mention evidence lives on `entity_mentions(surface_text, resolved_entity_id, resolution_kind, extraction_method)`. Derive source node type and file family through joins back to `nodes` when that is the current schema.
 
 If the issue looks semantic rather than structural, trace it back to exact source node types, file families, and representative rows before drafting a ticket.
 
@@ -106,16 +106,17 @@ If these are clean, say so explicitly and move on. Do not inflate a semantic-qua
 
 Focus on surfaces that downstream tooling will consume directly.
 
-For `named_entity` / `entity_mentions`, inspect:
+For the post-SPEC-10 entity surfaces, inspect:
 
-- total `named_entity` count
-- typed vs `Kind: unknown`
-- top entity names by mention count
-- source-node-type concentration
+- total canonical `entities` count and virtual `named_entity` count
+- `entities.entity_kind` and `entities.provenance_scope` distribution
+- `entity_mentions` split by `resolution_kind` / `extraction_method`
+- top unresolved `surface_text` rows by mention count
+- source-node-type concentration for suspicious unresolved evidence or suspicious canonical entities
 - file-family concentration
-- representative false positives with exact source rows
+- representative false positives or mis-promoted canonicals with exact source rows
 
-If the live schema lacks direct concentration columns on `entity_mentions`, compute those views by joining back to `nodes` instead of treating the query failure as an index defect. When counting top entity names or typed-vs-unknown splits, use `entity_mentions.entity_name` / `entity_mentions.entity_kind` as the primary aggregation surface. Use `nodes WHERE node_type='named_entity'` for virtual-entity counts, provenance checks, and targeted body inspections rather than assuming the serialized node `body` matches `entity_mentions.entity_name` exactly.
+If the live schema lacks direct concentration columns on the surface you need, compute those views by joining back to `nodes` or `entities` instead of treating the query failure as an index defect. Use `entities` as the primary canonical aggregation surface, `entity_mentions.surface_text` plus `resolution_kind` / `extraction_method` for evidence aggregation, and `nodes WHERE node_type='named_entity'` for virtual-entity counts and targeted body inspections rather than assuming serialized node `body` is the canonical source of truth.
 
 When a result looks suspicious, trace it to concrete examples. A good ticket seam has:
 
@@ -129,10 +130,10 @@ When a result looks suspicious, trace it to concrete examples. A good ticket sea
 Before writing a new ticket:
 
 1. Search `tickets/` and `archive/tickets/` for the same seam.
-2. Read the most relevant active or recent `SPEC-01*` tickets.
+2. Read the most relevant active or recent ticket/spec records for that seam.
 3. Confirm whether the issue is a regression, a new adjacent seam, or already owned work.
 
-If the seam was already fixed but the fresh rebuild still reproduces it, cite that archived ticket in the new ticket's reassessment as regression context.
+If the seam was already fixed but the fresh rebuild still reproduces it, cite the archived ticket or spec in the new ticket's reassessment as regression context. For entity-surface issues after SPEC-10, check `archive/specs/SPEC-10-entity-surface-redesign.md` plus archived `SPEC10ENTSUR-*` tickets before drafting a new owner.
 
 ### 7. Draft new tickets only when warranted
 

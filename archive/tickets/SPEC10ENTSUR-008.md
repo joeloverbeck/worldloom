@@ -1,22 +1,23 @@
 # SPEC10ENTSUR-008: Fresh-rebuild + verification capstone on `animalia`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: None — this ticket exercises the pipeline landed via SPEC10ENTSUR-001, including the work originally drafted in SPEC10ENTSUR-003 through -006. It introduces no new production code; its acceptance surface is the spec §Verification bullets run end-to-end against the live `animalia` corpus.
+**Engine Changes**: Yes — add a `tools/world-index` capstone verification script plus one package `npm run` entry to execute the SPEC-10 shell-level acceptance surface against rebuilt `animalia`.
 **Deps**: SPEC10ENTSUR-001
 
 ## Problem
 
 SPEC-10 §Verification names seven acceptance behaviors the rebuilt `animalia` index must exhibit after the entity-surface redesign ships: (1) fresh rebuild + verify succeed, (2) post-migration schema shape is the three-surface set, (3) SPEC-01-020..025 false-positive classes no longer materialize as canonical `named_entity` rows, (4) structured anchors (ONTOLOGY, character, artifact) remain canonical, (5) exact-phrase retrieval still returns noncanonical evidence, (6) `find_impacted_fragments`-shaped queries over `mentions_entity` no longer depend on unresolved heuristic phrases, (7) no per-string stoplist expansion is needed for currently-reproduced residual fragments. Upstream tickets -001 through -006 each prove a slice of this; none proves the composition. A capstone spec-integration ticket exists precisely to run the live-corpus composition check and surface regressions that would otherwise hide in per-ticket green-ness.
 
-## Assumption Reassessment (2026-04-22)
+## Assumption Reassessment (2026-04-23)
 
-1. `worlds/animalia/` is the reference corpus and is present on disk. `tools/world-index/src/cli.ts` exposes `build` and `verify` commands. `SPEC10ENTSUR-001`'s absorbed test rewrite already exercises much of this through `tests/integration/build-animalia.test.ts`; the capstone's job is to enforce that the composition holds via shell-level invocations that match the spec's own §Verification bullet text verbatim.
-2. `specs/SPEC-10-entity-surface-redesign.md` §Verification is the authoritative test matrix for this ticket. Each bullet maps to one capstone acceptance criterion.
-3. Shared boundary under audit: the rebuilt `worlds/animalia/_index/world.db` plus the prose text of SPEC-10 §Verification. The capstone binds the two: rebuilt DB shape must satisfy every §Verification bullet, and any drift between them is a regression caught at this ticket's acceptance gate.
-4. `docs/FOUNDATIONS.md` §Tooling Recommendation requires canon consumers to operate against structured world state, not raw prose. The capstone verifies that the redesigned entity surface delivers that: `entities` exists as the structured canonical source; `entity_mentions` exists as the recall-oriented evidence source; they are queryable independently.
-5. Mystery Reserve firewall (§Rule 7): `tests/integration/build-animalia.test.ts` (rewritten under SPEC10ENTSUR-001's absorbed seam) already encodes the zero-MR-as-canonical assertion. The capstone additionally runs a freestanding shell-level query as a belt-and-suspenders check — the rewritten test + the capstone command together guarantee the firewall holds after every rebuild, not just after the one rebuild `node --test` happens to run.
+1. `worlds/animalia/` is the live reference corpus and `tools/world-index/src/cli.ts` still exposes `build` and `verify`. No existing `tools/world-index` capstone script or package-script entry covered SPEC-10's shell-level composition check, so the ticket's owned delta remained real.
+2. `specs/SPEC-10-entity-surface-redesign.md` `## Verification` is the authoritative acceptance matrix for this ticket. The new capstone script maps each spec bullet to a concrete assertion over rebuilt `worlds/animalia/_index/world.db`.
+3. Shared boundary under audit: the rebuilt `animalia` index artifact, the `tools/world-index` package entrypoint surface, and the SPEC-10 verification prose. This ticket owns only the shell-level composition proof; it does not reopen the underlying entity-surface implementation from `SPEC10ENTSUR-001`.
+4. `docs/FOUNDATIONS.md` `Tooling Recommendation` requires canon consumers to operate against structured world state rather than raw prose. The capstone proves that separation directly by asserting the canonical `entities` surface, the recall-oriented `entity_mentions` surface, and the canonical-only graph edge behavior against the live rebuilt corpus.
+5. `archive/tickets/SPEC10ENTSUR-001.md` still truthfully leaves `SPEC10ENTSUR-008` active as a separate shell-level capstone beyond the passing integration-test surface, so no sibling absorption was required here.
+6. The package-local runtime probe needed to execute from `tools/world-index`, not repo root, because `better-sqlite3` resolves from the package's local dependencies. The script was corrected to keep the DB probe package-local while still targeting the rebuilt repo-level `animalia` artifact.
 
 ## Architecture Check
 
@@ -25,13 +26,13 @@ SPEC-10 §Verification names seven acceptance behaviors the rebuilt `animalia` i
 
 ## Verification Layers
 
-1. Fresh build succeeds cleanly on `animalia`. -> `node tools/world-index/dist/src/cli.js build animalia` exits 0.
-2. Fresh verify succeeds on `animalia`. -> `node tools/world-index/dist/src/cli.js verify animalia` exits 0.
-3. Post-migration schema shape: `entities`, `entity_aliases`, and redesigned `entity_mentions` exist with the right columns and indexes. -> readonly DB introspection command.
-4. SPEC-01-020..025 false-positive classes: zero `named_entity` rows whose canonical name matches the union of audit-record banned phrases. -> readonly DB query.
-5. Structured-anchor retention: `Vespera Nightwhisper`, `Atreia Selviss`, and at least two known diegetic-artifact titles are canonical. -> readonly DB query filtered by `entities.provenance_scope`.
-6. Noncanonical evidence retrieval: `Copper Weir` OR `Charter Hall` (prose-only) returns ≥1 `entity_mentions` row with `resolution_kind='unresolved'`, AND zero `mentions_entity` edges reference them. -> readonly DB query.
-7. Mystery Reserve firewall: zero canonical entities whose `canonical_name` equals any Mystery Reserve entry's title on `animalia`. -> readonly DB query.
+1. Fresh build succeeds cleanly on `animalia`. -> `cd /home/joeloverbeck/projects/worldloom && node tools/world-index/dist/src/cli.js build animalia` exits 0, run by the capstone script.
+2. Fresh verify succeeds on `animalia`. -> `cd /home/joeloverbeck/projects/worldloom && node tools/world-index/dist/src/cli.js verify animalia` exits 0, run by the capstone script.
+3. Post-migration schema shape: `entities`, `entity_aliases`, and redesigned `entity_mentions` exist with the right columns and indexes. -> readonly DB introspection inside `tools/world-index/tests/integration/spec10-verification.sh`.
+4. SPEC-01-020..025 false-positive classes: zero canonical `entities.canonical_name` rows match the consolidated banned phrase set. -> readonly DB query inside the capstone script.
+5. Structured-anchor retention: `Vespera Nightwhisper`, `Atreia Selviss`, and two known diegetic-artifact titles remain canonical. -> readonly DB query inside the capstone script.
+6. Noncanonical evidence retrieval: `Melissa Threadscar`, `Charter Hall`, `Copper Weir`, and `Bent Willow` remain unresolved evidence only, with zero canonical entities and zero `mentions_entity` edges. -> readonly DB query inside the capstone script.
+7. Mystery Reserve firewall: zero canonical entities whose `canonical_name` equals any rebuilt Mystery Reserve entry title on `animalia`. -> readonly DB query inside the capstone script.
 
 ## What to Change
 
@@ -92,9 +93,20 @@ Per the skill's spec-integration guidance, the script re-enumerates expected set
 ### New/Modified Tests
 
 1. `tools/world-index/tests/integration/spec10-verification.sh` — new. Composes every upstream ticket's work into a single live-corpus acceptance run.
+2. `tools/world-index/package.json` — modified. Adds `test:spec10-verification` so the capstone is rerunnable in package-local regression sweeps.
 
 ### Commands
 
 1. `cd tools/world-index && npm run build`
 2. `cd tools/world-index && npm run test:spec10-verification`
 3. Narrower command scope: the capstone itself IS the full-pipeline verification boundary for SPEC-10; running per-test-file commands is the right iteration loop during implementation of -001 through -006, but the capstone is the ticket-acceptance gate.
+
+## Outcome
+
+- **Completion date**: 2026-04-23
+- **What changed**: Added `tools/world-index/tests/integration/spec10-verification.sh` and wired `tools/world-index/package.json` with `npm run test:spec10-verification`. The new capstone rebuilds and verifies `animalia`, then emits a single JSON report asserting the SPEC-10 verification surface: required schema tables/indexes/columns, banned canonical false positives absent, structured anchors retained, unresolved evidence preserved without canonical promotion or `mentions_entity` edges, Mystery Reserve titles blocked from canonical promotion, and zero integrity/dangling-reference counts.
+- **Deviations from original plan**: The first draft of the capstone script launched its inline Node DB probe from repo root, which broke package-local `better-sqlite3` resolution. The landed script now runs the probe from `tools/world-index` while still reading the rebuilt repo-level `worlds/animalia/_index/world.db`, which is the truthful command shape for this package-local verification surface.
+- **Verification results**:
+  1. Ran `cd tools/world-index && npm run build`
+  2. Ran `cd tools/world-index && npm run test:spec10-verification`
+  3. Confirmed the capstone script internally ran `node tools/world-index/dist/src/cli.js build animalia` and `node tools/world-index/dist/src/cli.js verify animalia` successfully before the DB assertions

@@ -2,6 +2,7 @@
 
 # SPEC-10: Entity Surface Redesign — Authority-Backed Entities, Separate Mention Evidence
 
+**Status**: COMPLETED
 **Phase**: 1.5 remediation; lands after SPEC-01 and before entity-sensitive consumers rely on the graph
 **Depends on**: SPEC-01
 **Blocks**: SPEC-02 `find_named_entities` final contract, SPEC-02 `find_impacted_fragments` final contract, SPEC-02 `search_nodes.entity_name` filter semantics, SPEC-06 pre-figuring/entity-sensitive retrieval flows
@@ -353,3 +354,15 @@ This spec does **not** force a FOUNDATIONS schema change now. It defines the arc
 
 4. **Should canonical entity generation eventually include accepted CF titles/statements?**
    Current answer: not without an explicit assertion seam. CF prose is still prose; the redesign is specifically about stopping implicit semantic promotion from prose shape alone.
+
+## Outcome
+
+- **Completion date**: 2026-04-23
+- **What changed**: The SPEC-10 entity-surface redesign is now implemented across the live repo. The schema and `tools/world-index` entity pipeline landed via `archive/tickets/SPEC10ENTSUR-001.md`, with the direct same-seam write-path, extraction, inspect-payload, and test fallout from drafted tickets `SPEC10ENTSUR-003` through `SPEC10ENTSUR-006` absorbed there. Downstream SPEC-02 consumer-contract updates landed via `archive/tickets/SPEC10ENTSUR-007.md`, and the shell-level `animalia` capstone verification landed via `archive/tickets/SPEC10ENTSUR-008.md`.
+- **Deviations from original plan**: The originally drafted decomposition proved too narrow for the same-package breaking contract. `SPEC10ENTSUR-003` through `SPEC10ENTSUR-006` were absorbed into `SPEC10ENTSUR-001` as required-consequence fallout, while `SPEC10ENTSUR-002` was closed separately once live reassessment showed its narrower substrate change was no longer needed. `SPEC10ENTSUR-007` and `SPEC10ENTSUR-008` remained separate because they owned downstream docs and shell-level capstone proof rather than the package-local implementation seam itself.
+- **Verification results**:
+  1. `cd tools/world-index && npm run build`
+  2. `cd tools/world-index && node --test dist/tests/schema.test.js dist/tests/entities.test.js dist/tests/crud.test.js dist/tests/commands.test.js`
+  3. `cd tools/world-index && node --test dist/tests/integration/build-animalia.test.js`
+  4. `cd tools/world-index && npm test`
+  5. `cd tools/world-index && npm run test:spec10-verification`
