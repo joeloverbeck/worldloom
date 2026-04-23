@@ -4,9 +4,9 @@ This document sequences the spec bundle (`SPEC-01` through `SPEC-10`) for implem
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-10` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
 
 ## Implementation order (for builders)
 
@@ -39,6 +39,9 @@ Parallelizable order (within each tier, items may proceed in parallel):
 
 **Tier 1.5 (depends on SPEC-01)**:
 - `SPEC-10` Entity Surface Redesign — completed 2026-04-23; implementation landed via `archive/tickets/SPEC10ENTSUR-001.md`, `archive/tickets/SPEC10ENTSUR-007.md`, and `archive/tickets/SPEC10ENTSUR-008.md`; spec archived at `archive/specs/SPEC-10-entity-surface-redesign.md`
+
+**Tier 1.75 (depends on Tier 1.5)**:
+- `SPEC-11` Canonical Entity Authority Surfaces — specified; formalizes explicit machine-readable world-entity authority, malformed-authority-source discipline, and exact alias declarations before entity-sensitive consumers assume the current canonical surface is complete
 
 **Tier 2 (depends on Tier 1.5)**:
 - `SPEC-02` MCP Retrieval Server — full tool surface with `submit_patch_plan` stubbed
@@ -138,6 +141,8 @@ Phase 1 (Read Path)
   │                                ▼
   ├── SPEC-10 Entity Surface Redesign ─┤
   │                                ▼
+  ├── SPEC-11 Canonical Entity Authority Surfaces ─┤
+  │                                ▼
   ├── SPEC-02 MCP Server ──────────┤
   │                                ▼
   ├── SPEC-05 Hooks 1,2,4 ─────────┤
@@ -235,6 +240,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-08 Migration & Phasing | ✓ specified |
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
+| SPEC-11 Canonical Entity Authority Surfaces | ✓ specified |
 | IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
 
 SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10 is a later architectural remediation of SPEC-01's entity surface after repeated live `named_entity` audit failures showed that the original heuristic/entity contract was too broad.

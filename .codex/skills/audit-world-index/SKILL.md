@@ -12,7 +12,7 @@ arguments:
 
 Audit the live world-index output for one world by rebuilding first, querying the fresh SQLite artifact, and creating only evidence-backed follow-up tickets.
 
-Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/_TEMPLATE.md`, and `tickets/README.md` before drafting tickets. For World Index work, also read the recent active/archived ticket family relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner. In this repo that often means both older `SPEC-01*` cleanup tickets and the archived `SPEC10ENTSUR-*` / `SPEC-10` redesign records.
+Read `AGENTS.md` and `docs/FOUNDATIONS.md` before starting the audit. Read `tickets/_TEMPLATE.md` and `tickets/README.md` only if a reproduced defect actually warrants drafting a new ticket. For World Index work, also read the recent active/archived ticket family relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner. In this repo that often means both older `SPEC-01*` cleanup tickets and the archived `SPEC10ENTSUR-*` / `SPEC-10` redesign records.
 
 In this checkout, prefer live `.codex/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
 
@@ -135,6 +135,14 @@ Before writing a new ticket:
 4. Check the most relevant current verification surface for that seam before drafting a ticket. For `tools/world-index`, that often means the closest package-level integration or capstone proof already covering the rebuilt live corpus.
 
 If the seam was already fixed but the fresh rebuild still reproduces it, cite the archived ticket or spec in the new ticket's reassessment as regression context. For entity-surface issues after SPEC-10, check `archive/specs/SPEC-10-entity-surface-redesign.md` plus archived `SPEC10ENTSUR-*` tickets before drafting a new owner.
+
+For post-SPEC-10 entity-surface audits, explicitly run the current capstone proof lane before drafting a new entity-seam ticket when rebuild, `verify`, and direct DB probes look clean:
+
+```bash
+cd tools/world-index && npm run test:spec10-verification
+```
+
+If that capstone passes and the suspicious rows remain unresolved evidence only (not canonical `entities` / `named_entity` rows and not `mentions_entity` edges), classify the result as a truthful no-issue unless you have a separate reproduced seam outside the capstone's coverage.
 
 If the reproduced defect already fails the current verification surface, cite that proof lane in the audit and keep the new ticket focused on the implementation seam unless a separate active owner already exists. If the reproduced defect survives current proof because the verification surface does not check that class yet, say so explicitly and include the missing proof-surface coverage as part of the same ticket only when it is a required consequence of that seam.
 

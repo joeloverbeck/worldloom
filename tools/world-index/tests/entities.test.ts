@@ -202,6 +202,69 @@ test("stage B emits exact structured aliases and suppresses identical normalized
   }
 });
 
+test("malformed authority-bearing frontmatter emits a validation result and preserves evidence-only indexing", () => {
+  const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
+
+  try {
+    const ontologyPath = path.join(tempRoot, "ONTOLOGY.md");
+    writeFileSync(ontologyPath, "", "utf8");
+
+    const proseNodes = [
+      makeNode(
+        "CHAR-0002",
+        "character_record",
+        "---\nname: \"Threadscar\" Melissa\nslug: melissa-threadscar\n---\nCharacter body\n",
+        "characters/melissa-threadscar.md"
+      ),
+      makeNode(
+        "animalia:INSTITUTIONS.md:Harbor Notes:0",
+        "section",
+        "Melissa Threadscar is still discussed in ordinary prose."
+      )
+    ];
+
+    const { entities, mentions, validationResults } = extractEntities(
+      { type: "root", children: [] },
+      proseNodes,
+      loadOntologyRegistry(ontologyPath)
+    );
+
+    assert.equal(
+      entities.some((row) => row.canonical_name === "Melissa Threadscar"),
+      false
+    );
+    assert.deepEqual(
+      validationResults.map((row) => ({
+        validator_name: row.validator_name,
+        severity: row.severity,
+        code: row.code,
+        node_id: row.node_id,
+        file_path: row.file_path
+      })),
+      [
+        {
+          validator_name: "frontmatter_parse",
+          severity: "warn",
+          code: "malformed_authority_source",
+          node_id: "CHAR-0002",
+          file_path: "characters/melissa-threadscar.md"
+        }
+      ]
+    );
+    assert.equal(
+      mentions.some(
+        (row) =>
+          row.surface_text === "Melissa Threadscar" &&
+          row.resolution_kind === "unresolved" &&
+          row.extraction_method === "heuristic_phrase"
+      ),
+      true
+    );
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
 test("stage C emits exact canonical, exact alias, and unresolved heuristic mentions", () => {
   const tempRoot = mkdtempSync(path.join(os.tmpdir(), "world-index-entities-"));
 

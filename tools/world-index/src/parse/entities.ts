@@ -7,7 +7,14 @@ import { contentHashForProse } from "./canonical";
 import { isStoplistedEntityCandidate } from "./stoplist";
 import { sha256Hex } from "../hash/content";
 import { CURRENT_INDEX_VERSION } from "../schema/version";
-import type { EdgeRow, EntityAliasRow, EntityMentionRow, EntityRow, NodeRow } from "../schema/types";
+import type {
+  EdgeRow,
+  EntityAliasRow,
+  EntityMentionRow,
+  EntityRow,
+  NodeRow,
+  ValidationResultRow
+} from "../schema/types";
 
 export interface EntityRegistryEntry {
   canonicalName: string;
@@ -25,6 +32,7 @@ export interface EntityExtractionOutput {
   aliases: EntityAliasRow[];
   mentions: EntityMentionRow[];
   edges: EdgeRow[];
+  validationResults: ValidationResultRow[];
 }
 
 interface AuthoritySource {
@@ -140,7 +148,8 @@ export function extractEntities(
     entities: stageA.entities,
     aliases,
     mentions: stageC.mentions,
-    edges: stageC.edges
+    edges: stageC.edges,
+    validationResults: stageA.validationResults
   };
 }
 
@@ -151,10 +160,12 @@ function stageAConstructCanonicalEntities(
   entityNodes: NodeRow[];
   entities: EntityRow[];
   authoritySources: Map<string, AuthoritySource>;
+  validationResults: ValidationResultRow[];
 } {
   const entityNodes: NodeRow[] = [];
   const entities: EntityRow[] = [];
   const authoritySources = new Map<string, AuthoritySource>();
+  const validationResults: ValidationResultRow[] = [];
   const usedSlugs = new Map<string, string>();
   const worldSlug = proseNodes[0]?.world_slug ?? "__unknown__";
 
@@ -187,12 +198,29 @@ function stageAConstructCanonicalEntities(
       continue;
     }
 
-    const frontmatter = parseFrontmatter(node.body);
-    if (!frontmatter) {
+    const frontmatter = parseAuthorityFrontmatter(node.body);
+    if (frontmatter.status === "malformed") {
+      validationResults.push({
+        result_id: 0,
+        world_slug: node.world_slug,
+        validator_name: "frontmatter_parse",
+        severity: "warn",
+        code: "malformed_authority_source",
+        message: `Authority-bearing ${node.node_type} has malformed frontmatter; canonical entity emission was skipped.`,
+        node_id: node.node_id,
+        file_path: node.file_path,
+        line_range_start: node.line_start,
+        line_range_end: node.line_end,
+        created_at: new Date().toISOString()
+      });
       continue;
     }
 
-    const source = authoritySourceForNode(node, frontmatter);
+    if (frontmatter.status !== "parsed") {
+      continue;
+    }
+
+    const source = authoritySourceForNode(node, frontmatter.frontmatter);
     if (!source) {
       continue;
     }
@@ -212,7 +240,7 @@ function stageAConstructCanonicalEntities(
     entityNodes.push(createBackedEntityNode(entityId, node));
   }
 
-  return { entityNodes, entities, authoritySources };
+  return { entityNodes, entities, authoritySources, validationResults };
 }
 
 function stageBGenerateAliases(
@@ -575,17 +603,22 @@ function canonicalEntitySlug(name: string, usedSlugs: Map<string, string>): stri
   return `${fallbackBase}-${sha256Hex(name).slice(0, 8)}`;
 }
 
-function parseFrontmatter(body: string): Record<string, unknown> | null {
+function parseAuthorityFrontmatter(body: string):
+  | { status: "missing" }
+  | { status: "malformed" }
+  | { status: "parsed"; frontmatter: Record<string, unknown> } {
   const match = body.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
   if (!match?.[1]) {
-    return null;
+    return { status: "missing" };
   }
 
   try {
     const parsed = YAML.parse(match[1]);
-    return isRecord(parsed) ? parsed : null;
+    return isRecord(parsed)
+      ? { status: "parsed", frontmatter: parsed }
+      : { status: "malformed" };
   } catch {
-    return null;
+    return { status: "malformed" };
   }
 }
 

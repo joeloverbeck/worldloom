@@ -131,7 +131,7 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
   const proseNodes = loadPersistedProseNodes(db, worldSlug);
   const ontologyPath = path.join(resolveWorldDirectory(worldRoot, worldSlug), "ONTOLOGY.md");
   const registry = loadOntologyRegistry(ontologyPath);
-  const { entityNodes, entities, aliases, mentions, edges } = extractEntities(
+  const { entityNodes, entities, aliases, mentions, edges, validationResults } = extractEntities(
     { type: "root", children: [] },
     proseNodes,
     registry
@@ -165,6 +165,10 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
 
   if (edges.length > 0) {
     insertEdges(db, edges);
+  }
+
+  if (validationResults.length > 0) {
+    insertValidationResults(db, validationResults);
   }
 }
 
@@ -356,6 +360,13 @@ function clearEntityState(db: Database.Database): void {
   db.prepare("DELETE FROM entity_aliases").run();
   db.prepare("DELETE FROM entities").run();
   db.prepare("DELETE FROM edges WHERE edge_type = 'mentions_entity'").run();
+  db.prepare(
+    `
+      DELETE FROM validation_results
+      WHERE validator_name = 'frontmatter_parse'
+        AND code = 'malformed_authority_source'
+    `
+  ).run();
   db.prepare("DELETE FROM anchor_checksums WHERE node_id IN (SELECT node_id FROM nodes WHERE node_type = 'named_entity')").run();
   db.prepare("DELETE FROM nodes WHERE node_type = 'named_entity'").run();
 }

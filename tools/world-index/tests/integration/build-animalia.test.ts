@@ -137,6 +137,35 @@ function countValidationRows(db: Database.Database, code: string): number {
   ).count;
 }
 
+function loadValidationRowsByCode(
+  db: Database.Database,
+  code: string
+): Array<{
+  validator_name: string;
+  severity: string;
+  code: string;
+  node_id: string | null;
+  file_path: string | null;
+}> {
+  return db
+    .prepare(
+      `
+        SELECT validator_name, severity, code, node_id, file_path
+        FROM validation_results
+        WHERE world_slug = ?
+          AND code = ?
+        ORDER BY result_id
+      `
+    )
+    .all(WORLD_SLUG, code) as Array<{
+    validator_name: string;
+    severity: string;
+    code: string;
+    node_id: string | null;
+    file_path: string | null;
+  }>;
+}
+
 function loadSchemaObjects(db: Database.Database): string[] {
   return db
     .prepare(
@@ -461,6 +490,16 @@ test("build removes audited workflow-label entities while keeping real animalia 
         ).count;
         assert.ok(unresolvedCount > 0, `${unresolved} should still be queryable as unresolved evidence`);
       }
+
+      assert.deepEqual(loadValidationRowsByCode(db, "malformed_authority_source"), [
+        {
+          validator_name: "frontmatter_parse",
+          severity: "warn",
+          code: "malformed_authority_source",
+          node_id: "animalia:melissa-threadscar.md:melissa-threadscar:0",
+          file_path: "characters/melissa-threadscar.md"
+        }
+      ]);
 
       assert.equal(countEntityMentionsForNodeType(db, "adjudication_record"), 0);
       assert.equal(countEntityMentionsForNodeType(db, "audit_record"), 0);
