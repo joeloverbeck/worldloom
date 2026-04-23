@@ -1,9 +1,9 @@
 # SPEC02RETMCPSER-006: Entity/anchor tools — find_impacted_fragments, find_named_entities, find_edit_anchors
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — introduces `tools/world-mcp/src/tools/find-impacted-fragments.ts`, `src/tools/find-named-entities.ts`, `src/tools/find-edit-anchors.ts` and their per-tool tests.
+**Engine Changes**: Yes — adds `tools/world-mcp/src/tools/find-impacted-fragments.ts`, `src/tools/find-named-entities.ts`, `src/tools/find-edit-anchors.ts` plus their per-tool tests under `tools/world-mcp/tests/tools/`.
 **Deps**: SPEC02RETMCPSER-003, SPEC02RETMCPSER-004
 
 ## Problem
@@ -12,10 +12,12 @@ Skills need three typed lookups over the entity and anchor surfaces: (1) which d
 
 ## Assumption Reassessment (2026-04-23)
 
-1. SPEC-10 and SPEC-11 landed: `entities`, `entity_aliases`, `entity_mentions` tables all exist in world-index's schema (`archive/specs/SPEC-10-entity-surface-redesign.md` §Deliverable 1 lines 96–157). Anchor data is split across `nodes.anchor_checksum` (denormalized) and `anchor_checksums` table (authoritative `anchor_form` text per `archive/specs/SPEC-01-world-index.md` §SQLite schema lines 130–135).
-2. `specs/SPEC-02-retrieval-mcp-server.md` §Tool surface §5–7 (lines 90–126) is the authoritative source. Tool 5 `find_impacted_fragments` uses `required_world_update` + canonical `mentions_entity` edges only; Tool 6 `find_named_entities` returns `{canonical_matches, surface_matches}` per SPEC-10 Deliverable 6; Tool 7 `find_edit_anchors` reads `anchor_checksums.anchor_form` per the reassessed spec's M3 clarification. `archive/specs/SPEC-10-entity-surface-redesign.md` §Deliverable 6 remains authoritative for the precision/recall surface.
-3. Cross-artifact boundary: the entity model's split (canonical entities backed by authority sources; entity aliases; unresolved mention evidence) is the contract these tools must preserve. `find_impacted_fragments` MUST NOT silently add phrase-search results without an explicit `noncanonical_fallback` flag (spec §Tool surface Tool 5 lines 94–95).
-6. Extends existing output schema? No — these tools are consumers of the SPEC-10 schema, not extenders. Any change to `entities.canonical_name` or `entity_aliases.alias_text` column names requires a coordinated update in SPEC-10, not here.
+1. SPEC-10 and SPEC-11 landed: `entities`, `entity_aliases`, and `entity_mentions` already exist in the live world-index schema (`tools/world-index/src/schema/migrations/001_initial.sql`; typed in `tools/world-index/src/schema/types.ts`). Anchor data is split across `nodes.anchor_checksum` (denormalized checksum) and `anchor_checksums.anchor_form` (authoritative text).
+2. `specs/SPEC-02-retrieval-mcp-server.md` §Tool surface Tools 5-7 remains the authoritative contract: `find_impacted_fragments` is canonical-edge-only, `find_named_entities` separates `{canonical_matches, surface_matches}`, and `find_edit_anchors` must join `anchor_checksums` for `anchor_form`.
+3. Cross-artifact boundary under audit: the SPEC-10 entity split between canonical entities, aliases, and unresolved mention evidence. This ticket is a read-only MCP consumer of that contract; it does not own schema changes.
+4. Live repo reassessment showed the drafted ownership boundary was still real: `tools/world-mcp/src/tools/` only had `search-nodes.ts`, `get-node.ts`, `get-neighbors.ts`, plus shared helpers; the three entity/anchor tools and their tests were absent.
+5. The truthful package-local proof surface is `cd tools/world-mcp && npm run build` followed by compiled Node test lanes from that package root. Those command shapes work unchanged in the live package.
+6. Extends existing output schema? No. The landed code consumes the existing SPEC-10 / SPEC-01 schema and returns new tool-local response objects only.
 
 ## Architecture Check
 
@@ -25,10 +27,10 @@ Skills need three typed lookups over the entity and anchor surfaces: (1) which d
 
 ## Verification Layers
 
-1. `find_impacted_fragments` uses canonical edges only → grep-proof: `grep -nE "surface_text|heuristic_phrase" tools/world-mcp/src/tools/find-impacted-fragments.ts` returns zero matches; unit test confirms no unresolved mention contributes to the impact set.
-2. `find_named_entities` split precision/recall per SPEC-10 → unit test constructs a fixture with one canonical entity `Brinewick`, one alias `Brinewick-the-Port`, one unresolved phrase `Brinewicker` (not a canonical match); asserts the canonical and alias land in `canonical_matches`, the unresolved phrase lands in `surface_matches` labeled `noncanonical`.
-3. `find_edit_anchors` reads `anchor_checksums.anchor_form` → grep-proof: `grep -nE "anchor_checksums" tools/world-mcp/src/tools/find-edit-anchors.ts` returns ≥ 1 match; unit test confirms returned `anchor_form` strings match the authoritative table.
-4. Default sort order for `find_named_entities` matches SPEC-10 Deliverable 6 line 261 → unit test constructs inputs triggering all three bands and asserts order: canonical exact name → canonical exact alias → unresolved exact surface text.
+1. `find_impacted_fragments` uses canonical edges only -> codebase grep-proof + targeted tool test: `grep -nE "surface_text|heuristic_phrase" tools/world-mcp/src/tools/find-impacted-fragments.ts` returns zero matches, and `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts` proves unresolved mention evidence does not contribute to the impact set.
+2. `find_named_entities` preserves SPEC-10's precision/recall split -> targeted tool test: `tools/world-mcp/tests/tools/find-named-entities.test.ts` covers canonical exact-name, exact-alias, unresolved exact-surface, and canonical-before-alias ordering.
+3. `find_edit_anchors` reads authoritative anchor text from `anchor_checksums` -> codebase grep-proof + targeted tool test: `grep -nE "anchor_checksums" tools/world-mcp/src/tools/find-edit-anchors.ts` returns a live join, and `tools/world-mcp/tests/tools/find-edit-anchors.test.ts` proves batch and missing-node behavior.
+4. The landed tool behavior stays inside FOUNDATIONS' machine-facing read boundary -> FOUNDATIONS alignment check: the new tools are read-only SQLite consumers under `tools/world-mcp/`; they do not mutate canon files or world content.
 
 ## What to Change
 
@@ -90,7 +92,7 @@ Export async `findEditAnchors(args: {world_slug, targets}): Promise<{anchors: Ed
 
 ### Tests That Must Pass
 
-1. `cd tools/world-mcp && npm test` — all three entity-tool tests pass.
+1. `cd tools/world-mcp && npm test` — package test suite passes with the three new entity/anchor tool lanes included.
 2. `find_impacted_fragments({node_ids: ['CF-0042']})` returns only fragments reachable via `required_world_update` or canonical `mentions_entity` edges; no unresolved surface-text contributions.
 3. `find_named_entities({names: ['Brinewick']})` returns `canonical_matches` populated when a canonical entity or alias exists; `surface_matches` populated only when an unresolved surface phrase exists; both are empty arrays when neither is present.
 4. `find_edit_anchors({targets: ['CF-0042']})` returns a record with non-null `content_hash`, `anchor_checksum`, `anchor_form` for an existing node; returns `node_not_found` for a bogus target.
@@ -105,12 +107,37 @@ Export async `findEditAnchors(args: {world_slug, targets}): Promise<{anchors: Ed
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts` — 3 scenarios (canonical impact, canonical-mentions_entity impact, empty input).
-2. `tools/world-mcp/tests/tools/find-named-entities.test.ts` — 4 scenarios (canonical name match, alias match, unresolved surface match, sort order).
-3. `tools/world-mcp/tests/tools/find-edit-anchors.test.ts` — 3 scenarios (existing node, missing node, batch lookup).
+1. `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts` — canonical edge-only impact resolution, empty input, and missing-node error.
+2. `tools/world-mcp/tests/tools/find-named-entities.test.ts` — canonical exact-name, alias, unresolved surface, and canonical-before-alias ordering.
+3. `tools/world-mcp/tests/tools/find-edit-anchors.test.ts` — existing node, missing node, and batch lookup.
 
 ### Commands
 
-1. `cd tools/world-mcp && npm run build && node --test dist/tests/tools/find-*.test.js`
-2. SPEC-10 precision grep-proof: `grep -nE "surface_text|heuristic_phrase" tools/world-mcp/src/tools/find-impacted-fragments.ts` returns zero matches.
-3. Anchor-table grep-proof: `grep -nE "anchor_checksums" tools/world-mcp/src/tools/find-edit-anchors.ts` returns ≥ 1 match.
+1. `cd tools/world-mcp && npm run build`
+2. `cd tools/world-mcp && node --test dist/tests/tools/find-impacted-fragments.test.js dist/tests/tools/find-named-entities.test.js dist/tests/tools/find-edit-anchors.test.js`
+3. `cd tools/world-mcp && npm test`
+4. SPEC-10 precision grep-proof: `grep -nE "surface_text|heuristic_phrase" tools/world-mcp/src/tools/find-impacted-fragments.ts` returns zero matches.
+5. Anchor-table grep-proof: `grep -nE "anchor_checksums" tools/world-mcp/src/tools/find-edit-anchors.ts` returns >= 1 match.
+
+## Outcome
+
+- Completion date: 2026-04-23
+- What changed:
+  - Implemented `find-impacted-fragments.ts` to union direct `required_world_update` targets with other nodes connected through canonical `mentions_entity` edges only, returning a stable `fallback: 'canonical'` marker for every Phase 1 hit.
+  - Implemented `find-named-entities.ts` to expose exact-match canonical-name and alias hits as `canonical_matches`, unresolved exact surface-text evidence as `surface_matches`, and canonical-before-alias ordering.
+  - Implemented `find-edit-anchors.ts` to join `nodes` with `anchor_checksums` so `anchor_form` comes from the authoritative table, with batch lookup and `node_not_found` behavior covered by tests.
+- Deviations from original plan: none after reassessment; the landed seam matched the active ticket's `tools/world-mcp` ownership boundary.
+- Verification results:
+  - `cd tools/world-mcp && npm run build`
+  - `cd tools/world-mcp && node --test dist/tests/tools/find-impacted-fragments.test.js dist/tests/tools/find-named-entities.test.js dist/tests/tools/find-edit-anchors.test.js`
+  - `cd tools/world-mcp && npm test`
+  - `cd tools/world-mcp && grep -nE "surface_text|heuristic_phrase" src/tools/find-impacted-fragments.ts`
+  - `cd tools/world-mcp && grep -nE "anchor_checksums" src/tools/find-edit-anchors.ts`
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm run build`
+2. `cd tools/world-mcp && node --test dist/tests/tools/find-impacted-fragments.test.js dist/tests/tools/find-named-entities.test.js dist/tests/tools/find-edit-anchors.test.js`
+3. `cd tools/world-mcp && npm test`
+4. `cd tools/world-mcp && grep -nE "surface_text|heuristic_phrase" src/tools/find-impacted-fragments.ts` returned no matches.
+5. `cd tools/world-mcp && grep -nE "anchor_checksums" src/tools/find-edit-anchors.ts` returned the expected join.
