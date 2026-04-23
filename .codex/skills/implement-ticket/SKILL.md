@@ -122,6 +122,12 @@ Before editing code or docs, name the actual owned delta:
 - what the ticket no longer owns
 - what follow-up ticket or spec owns adjacent remaining work, if any
 
+Before the first file edit, give the user a concise checkpoint naming:
+
+- the ticket classification / discrepancy class
+- the authoritative boundary you are treating as the ticket's owner
+- whether any sibling scope was absorbed, excluded, or left untouched
+
 If a numbered family's decomposition failed during reassessment, also name:
 
 - which sibling tickets are being absorbed into the active ticket
@@ -195,6 +201,7 @@ Update the active ticket before finishing:
 - `## Verification Result`
 - optional `## Deviations`
 - compare the landed diff against `Files to Touch` and `Test Plan` / `New/Modified Tests`, then patch the ticket if any touched file or exercised proof surface is still missing
+- compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 

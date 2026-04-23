@@ -3,7 +3,7 @@
 # SPEC-02: Retrieval MCP Server
 
 **Phase**: 1
-**Depends on**: SPEC-01
+**Depends on**: SPEC-01, SPEC-10
 **Blocks**: SPEC-03 (submit_patch_plan delegation), SPEC-05 (hooks redirect here), SPEC-06 (skills call these tools)
 
 ## Problem Statement
@@ -63,6 +63,7 @@ tools/world-mcp/
 #### 1. `mcp__worldloom__search_nodes(query, filters)`
 
 - **Input**: `query: string`, `filters: { world_slug?, node_type?, file_path?, entity_name? }`
+- **`entity_name` semantics**: exact match against `entities.canonical_name` OR `entity_aliases.alias_text` only. It never matches unresolved `entity_mentions.surface_text`; callers that need unresolved surface-phrase recall should use `find_named_entities(names).surface_matches` instead. SPEC-10 §Deliverable 6 is authoritative for this contract.
 - **Behavior**: Run ranking pipeline; return top 20 nodes with id, node_type, heading_path, summary, body-truncated-to-200-chars
 - **Used by**: open-ended localization
 
@@ -87,13 +88,18 @@ tools/world-mcp/
 #### 5. `mcp__worldloom__find_impacted_fragments(node_ids)`
 
 - **Input**: `node_ids: string[]` (proposed mutation targets)
-- **Output**: list of downstream domain-file nodes likely affected (computed via `required_world_update` + `mentions_entity` edges)
+- **Output**: list of downstream domain-file nodes likely affected (computed via `required_world_update` + canonical `mentions_entity` edges only)
+- **Fallback semantics**: if an implementation adds phrase-search fallback, fallback-derived results must be explicitly flagged `noncanonical_fallback` and must not share the same ranking weight as canonical entity-link hits. SPEC-10 §Deliverable 6 is authoritative for this contract.
 - **Used by**: canon-addition Phase 12a (required_world_updates list generation)
 
 #### 6. `mcp__worldloom__find_named_entities(names)`
 
 - **Input**: `names: string[]`
-- **Output**: for each name, list of nodes mentioning it (grouped by `node_type`, sorted by mention strength)
+- **Output**: `{ canonical_matches, surface_matches }`
+  - `canonical_matches`: exact canonical-name or alias matches, grouped by entity and then by mentioning `node_type`
+  - `surface_matches`: unresolved exact surface-text matches, grouped by `node_type` and labeled `noncanonical`
+  - Default sort order: canonical exact name, canonical exact alias, unresolved exact surface text
+- **Contract source**: SPEC-10 §Deliverable 6 is authoritative for this split precision-vs-recall surface.
 - **Used by**: canon-addition's pre-figuring scan (CF proposals naming specific entities)
 
 #### 7. `mcp__worldloom__find_edit_anchors(targets)`

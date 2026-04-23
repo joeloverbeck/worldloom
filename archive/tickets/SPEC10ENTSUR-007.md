@@ -1,6 +1,6 @@
 # SPEC10ENTSUR-007: Update SPEC-02 consumer contracts for new entity surface
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `specs/SPEC-02-retrieval-mcp-server.md` documentation update of three tool contracts (`find_named_entities`, `find_impacted_fragments`, `search_nodes.entity_name` filter) to match the three-surface split defined in SPEC-10.
@@ -16,13 +16,14 @@ SPEC-02 specifies the MCP server tool surface that skills will consume for world
 
 Without this update, SPEC-02 and SPEC-10 silently contradict each other — a Rule-6-at-pipeline-level risk (silent retcon across specs).
 
-## Assumption Reassessment (2026-04-22)
+## Assumption Reassessment (2026-04-23)
 
-1. `specs/SPEC-02-retrieval-mcp-server.md` exists at the cited paths; `specs/IMPLEMENTATION-ORDER.md:41-42` sequences SPEC-02 as Tier 2, after SPEC-10 Tier 1.5, so updating SPEC-02 before its implementation begins is the correct intervention order.
-2. `specs/SPEC-10-entity-surface-redesign.md` §Deliverable 6 is the authoritative source for the three contract updates; this ticket mechanically mirrors its text into SPEC-02.
-3. Shared boundary under audit: the cross-spec contract between SPEC-10's derived entity surface and SPEC-02's tool-surface description. No code boundary — both specs are pre-implementation. The correctness of this ticket is a prose-fidelity check against SPEC-10 §D6.
-4. `docs/FOUNDATIONS.md` Rule 6 No Silent Retcons, at the pipeline level: cross-spec contradictions are a form of silent retcon because downstream implementers read specs as authoritative. Explicit update of SPEC-02 to cite SPEC-10 as its entity-contract source removes the silent-retcon risk.
-8. No adjacent contradictions exposed. SPEC-06's references to `find_named_entities` (lines 71, 101, 146) describe WHO calls the tool (canon-addition pre-figuring / character-generation evidence) rather than HOW the tool shapes its output, so they remain truthful after SPEC-02's contract tightens. No SPEC-06 edit required.
+1. `specs/SPEC-02-retrieval-mcp-server.md` still carried the pre-SPEC-10 contract at the live seam under `mcp__worldloom__search_nodes`, `mcp__worldloom__find_impacted_fragments`, and `mcp__worldloom__find_named_entities`; the ticket premise remained live at implementation time.
+2. `specs/SPEC-10-entity-surface-redesign.md` Deliverable 6 is the authoritative source for the three contract updates: the canonical-vs-surface split for `find_named_entities`, canonical-only `mentions_entity` semantics plus explicit `noncanonical_fallback` wording for `find_impacted_fragments`, and canonical-name-or-alias-only semantics for `search_nodes.entity_name`.
+3. Shared boundary under audit: the cross-spec contract between SPEC-10's entity-surface redesign and SPEC-02's MCP tool-surface description. This ticket remains prose-only; no runtime/tool implementation boundary is claimed.
+4. `docs/FOUNDATIONS.md` Rule 6 No Silent Retcons is the governing principle for this ticket: leaving SPEC-02 on the deprecated entity contract would silently instruct future implementation work to diverge from the already-landed spec authority in SPEC-10.
+5. `specs/IMPLEMENTATION-ORDER.md:41-47` still sequences SPEC-10 (Tier 1.5) before SPEC-02 (Tier 2), so updating SPEC-02's dependency line from `SPEC-01` to `SPEC-01, SPEC-10` is the truthful contract correction rather than a scope expansion.
+6. No adjacent contradiction required follow-up. `specs/SPEC-06-skill-rewrite-patterns.md` references the affected tools only at the caller/workflow level, not with stale output-shape semantics, so no SPEC-06 edit was needed.
 
 ## Architecture Check
 
@@ -31,8 +32,9 @@ Without this update, SPEC-02 and SPEC-10 silently contradict each other — a Ru
 
 ## Verification Layers
 
-1. Each of the three contract subsections in SPEC-02 matches SPEC-10 §D6 text verbatim for the normative claims (output shape, filter semantics, fallback flag). -> side-by-side read of SPEC-02 and SPEC-10 §D6 post-edit.
-2. SPEC-02's §Verification and §FOUNDATIONS Alignment sections do not contradict the updated contract. -> full re-read of SPEC-02 post-edit; flag any residual inconsistency for a follow-up finding.
+1. `search_nodes.entity_name`, `find_impacted_fragments`, and `find_named_entities` in SPEC-02 state the same normative contract as SPEC-10 Deliverable 6 for filter semantics, fallback labeling, and split precision-vs-recall output. -> codebase grep-proof plus side-by-side manual review of `specs/SPEC-02-retrieval-mcp-server.md` against `specs/SPEC-10-entity-surface-redesign.md`
+2. SPEC-02's `Depends on:` line truthfully reflects the new contract authority boundary. -> codebase grep-proof on `specs/SPEC-02-retrieval-mcp-server.md`
+3. SPEC-02's `## FOUNDATIONS Alignment` and `## Verification` sections remain non-contradictory after the contract update. -> manual review of the full SPEC-02 document
 
 ## What to Change
 
@@ -69,9 +71,9 @@ If SPEC-02's front matter does not already list SPEC-10 as a dependency (reasses
 
 ### Tests That Must Pass
 
-1. No automated tests — documentation-only ticket. Verification is command-based: `grep "canonical_matches\|surface_matches\|noncanonical_fallback" specs/SPEC-02-retrieval-mcp-server.md` returns ≥3 lines; `grep -c "SPEC-10" specs/SPEC-02-retrieval-mcp-server.md` returns ≥2 (one for each updated subsection's authoritative-source citation).
-2. `grep -n "entity_name? }\|entity_name?$" specs/SPEC-02-retrieval-mcp-server.md` returns one line, and the paragraph immediately following that line contains the canonical-OR-alias semantics.
-3. Manual review: SPEC-02's §FOUNDATIONS Alignment and §Verification sections contain no residual contradiction with the three updated contracts.
+1. Documentation-only proof: `grep -n "canonical_matches\|surface_matches\|noncanonical_fallback\|SPEC-10" specs/SPEC-02-retrieval-mcp-server.md` returns the updated output/fallback/source lines.
+2. `grep -n "entity_name" specs/SPEC-02-retrieval-mcp-server.md` returns the input line plus the immediately following canonical-or-alias-only semantics line.
+3. Manual review confirms SPEC-02's `## FOUNDATIONS Alignment` and `## Verification` sections contain no residual contradiction with the updated entity-surface contract.
 
 ### Invariants
 
@@ -90,3 +92,13 @@ If SPEC-02's front matter does not already list SPEC-10 as a dependency (reasses
 1. `grep -n "canonical_matches\|surface_matches\|noncanonical_fallback\|SPEC-10" /home/joeloverbeck/projects/worldloom/specs/SPEC-02-retrieval-mcp-server.md`
 2. `grep -n "entity_name" /home/joeloverbeck/projects/worldloom/specs/SPEC-02-retrieval-mcp-server.md`
 3. Narrower command scope is correct: documentation-only ticket has no pipeline-level verification surface.
+
+## Outcome
+
+- **Completion date**: 2026-04-23
+- **What changed**: Updated `specs/SPEC-02-retrieval-mcp-server.md` so its entity-sensitive MCP contracts now align with SPEC-10: `search_nodes.entity_name` is canonical-name-or-alias exact match only, `find_impacted_fragments` is canonical-edge-only with explicit `noncanonical_fallback` wording for any future phrase-search fallback, `find_named_entities` now exposes `{ canonical_matches, surface_matches }`, and SPEC-02 now declares `SPEC-10` in its dependency chain.
+- **Deviations from original plan**: No scope change beyond factual closeout truthing. The implementation remained documentation-only and did not require SPEC-06 or runtime/tool edits.
+- **Verification results**:
+  1. Ran `grep -n "canonical_matches\|surface_matches\|noncanonical_fallback\|SPEC-10" /home/joeloverbeck/projects/worldloom/specs/SPEC-02-retrieval-mcp-server.md`
+  2. Ran `grep -n "entity_name" /home/joeloverbeck/projects/worldloom/specs/SPEC-02-retrieval-mcp-server.md`
+  3. Re-read the updated SPEC-02 entity-tool subsections plus its `## FOUNDATIONS Alignment` and `## Verification` sections against `specs/SPEC-10-entity-surface-redesign.md` Deliverable 6
