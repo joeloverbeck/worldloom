@@ -15,6 +15,7 @@ Audit the live world-index output for one world by rebuilding first, querying th
 Read `AGENTS.md` and `docs/FOUNDATIONS.md` before starting the audit. Read `tickets/_TEMPLATE.md` and `tickets/README.md` only if a reproduced defect actually warrants drafting a new ticket. For World Index work, also read the recent active/archived ticket family relevant to the seam you uncover so you do not reopen already-fixed issues or duplicate an active owner. In this repo that often means both older `SPEC-01*` cleanup tickets, the archived `SPEC10ENTSUR-*` / `SPEC-10` redesign records, and for authority-surface or registry-validation seams the archived `SPEC11CANENT-*` tickets plus `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md`.
 
 In this checkout, prefer live `.codex/skills/...` paths when you need to inspect sibling Codex workflow skills. Do not assume a parallel `.claude/skills/...` copy exists unless you verify it.
+If you consult `docs/WORKFLOWS.md` as a quick-reference index, treat any `.claude/skills/...` wording there as a stale pointer unless the path is verified live in this checkout.
 
 This skill is audit-and-ticket only. Do not modify `worlds/<slug>/` canon files, and do not implement indexer fixes as part of this workflow unless the user explicitly pivots to implementation.
 
@@ -124,6 +125,26 @@ When a result looks suspicious, trace it to concrete examples. A good ticket sea
 - source node types or files causing the pollution
 - proof that the issue reproduces after rebuild
 - a bounded likely ownership seam in `tools/world-index`
+
+Do not stop at entity-surface plausibility when the index owns other deterministic parser surfaces. For any surface where the current live parser contract makes source-vs-DB comparison truthful, check whether the DB stores the full authored payload instead of only checking for corruption or unresolved targets.
+
+In this repo, the main non-entity example is `CANON_LEDGER.md` YAML-derived semantic edges. When auditing semantic completeness, read the live parser symbols first and, where appropriate, compare the authored source counts against the rebuilt DB counts for deterministic edge-bearing fields such as:
+
+- `source_basis.derived_from` -> `derived_from`
+- `required_world_updates` -> `required_world_update`
+- `modification_history[].change_id` -> `modified_by`
+- `affected_fact_ids` -> `affected_fact`
+
+If a deterministic source surface says the DB should contain more rows than it actually does, classify that as a real semantic indexing defect even if:
+
+- `verify` passes
+- the DB is structurally clean
+- entity surfaces look healthy
+
+When this kind of completeness gap appears, cite both sides of the reproducer in the audit:
+
+- the exact live parser/file contract that says the source data is in-scope
+- the rebuilt DB query that proves the stored rows are missing or undercounted
 
 ### 6. Reassess against existing ticket ownership
 
