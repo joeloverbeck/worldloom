@@ -29,3 +29,5 @@ export {
   ATTRIBUTION_EDGE_TYPES,
   ENTITY_EDGE_TYPES
 } from "../schema/types.js";
+
+export { CURRENT_INDEX_VERSION } from "../schema/version.js";

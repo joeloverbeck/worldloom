@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   ATTRIBUTION_EDGE_TYPES,
+  CURRENT_INDEX_VERSION,
   EDGE_TYPES,
   ENTITY_EDGE_TYPES,
   NODE_TYPES,
@@ -38,6 +39,7 @@ import {
   NODE_TYPES as SOURCE_NODE_TYPES,
   YAML_EDGE_TYPES as SOURCE_YAML_EDGE_TYPES
 } from "../src/schema/types";
+import { CURRENT_INDEX_VERSION as SOURCE_SCHEMA_VERSION } from "../src/schema/version";
 
 type Assert<T extends true> = T;
 type IsEqual<A, B> =
@@ -78,6 +80,7 @@ type _ChangeLogScopeShape = Assert<
 type _ChangeLogEntryShape = Assert<ChangeLogEntry extends { change_id: string } ? true : false>;
 
 test("public types re-export the expected runtime constants", () => {
+  assert.equal(CURRENT_INDEX_VERSION, SOURCE_SCHEMA_VERSION);
   assert.deepEqual(NODE_TYPES, SOURCE_NODE_TYPES);
   assert.deepEqual(EDGE_TYPES, SOURCE_EDGE_TYPES);
   assert.deepEqual(YAML_EDGE_TYPES, SOURCE_YAML_EDGE_TYPES);
@@ -95,6 +98,7 @@ test("package self-import resolves without import-time IO", () => {
 
   try {
     const publicTypes = require("@worldloom/world-index/public/types");
+    assert.equal(publicTypes.CURRENT_INDEX_VERSION, CURRENT_INDEX_VERSION);
     assert.equal(publicTypes.NODE_TYPES, NODE_TYPES);
     assert.equal(publicTypes.EDGE_TYPES, EDGE_TYPES);
     assert.equal(publicTypes.YAML_EDGE_TYPES, YAML_EDGE_TYPES);

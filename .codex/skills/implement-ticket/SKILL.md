@@ -30,6 +30,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - For JS/TS package-local schema, type, or contract tickets, verify whether the drafted compile gate is package-wide (`src/**/*`, `tests/**/*`, or equivalent) before treating it as a narrow proof surface; if downstream consumers compile in the same lane, reassess the owned boundary before coding.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
+- When a consumer package depends on a local sibling package via a workspace or `file:` dependency, refresh the consumer's installed dependency view after producer-side package/export changes and before consumer proof; do not assume the consumer is exercising the newly built public surface until that refresh has happened.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
 - Archive only when the user explicitly asks for full ticket completion or archival.
@@ -82,7 +83,7 @@ Check:
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
 - for scaffold, package, or build-surface tickets, every drafted built-artifact path, compiled entrypoint, or registration/config target named by the ticket or spec; verify it against the package's actual `tsconfig.json`, build script, and emitted output shape before implementation so example config and acceptance text do not point at a speculative path
-- for package public-surface tickets that add or change `package.json` `exports`, verify that the drafted export conditions (`require`, `import`, `default`, `types`) match the package's real emitted module format and the ticket's recorded proof commands; do not trust an `exports` snippet that was written against a different module system than the live build
+- for package public-surface tickets that add or change `package.json` `exports`, verify the full producer-consumer contract before trusting the drafted snippet: `require` / `import` / `default` / `types` conditions match the real emitted module format, the producer build actually emits the advertised runtime artifact and `.d.ts` artifact, and the intended consumer package's resolver settings (`moduleResolution`, export-map support, package root) can import that public entry without falling back to a private path
 - for tickets that claim to add or expand a script/test proof surface, whether the named script file, shell entrypoint, or package-script already exists and already runs; if it does, narrow the ticket to tightening the existing proof surface before code edits
 - for staged ticket families, whether the active ticket is independently landable at its drafted acceptance boundary or whether live same-seam fallout makes the family decomposition false; if downstream consumers in the same package or seam must move together for `docs/FOUNDATIONS.md` closeout to stay truthful, widen the active ticket before coding
 - when dirty same-seam edits already exist in files the ticket would touch, whether those edits belong to an in-flight sibling ticket or broader family slice; if they do, narrow, widen, or rewrite the active ticket boundary before code edits instead of treating the seam as clean ownership
@@ -173,6 +174,12 @@ Run the narrowest correct verification first, then broaden as needed.
 For end-to-end validation tickets, if the drafted acceptance story assumes the composed command already passes, the first narrow proof may be the real package-local command itself or a minimal direct probe of that command's failing seam.
 
 If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
+
+For shared package-export tickets, use this quick pre-proof checklist before trusting the consumer lane:
+
+1. producer exports are truthful in `package.json`
+2. producer build emits the runtime file and declaration file named by that export
+3. consumer proof runs from the real package root after refreshing any local sibling dependency link/install state
 
 If an initial broad package/workspace lane fails and the failure is already clearly outside the owned seam, do not leave that lane in `Acceptance Criteria` or `Test Plan` while implementing. Rewrite the ticket immediately to the honest narrower proof boundary, then continue.
 
