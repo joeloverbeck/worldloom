@@ -35,7 +35,7 @@ Parallelizable order (within each tier, items may proceed in parallel):
 
 **Tier 1 (no dependencies)**:
 - `SPEC-01` World Index — completed 2026-04-22; implementation landed at `tools/world-index/`, spec archived at `archive/specs/SPEC-01-world-index.md`
-- `SPEC-07 Part A` docs updates (may proceed in parallel with code — docs describe the target architecture)
+- `SPEC-07 Part A` docs updates — completed 2026-04-23; implementation landed at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`
 
 **Tier 1.5 (depends on SPEC-01)**:
 - `SPEC-10` Entity Surface Redesign — completed 2026-04-23; implementation landed via `archive/tickets/SPEC10ENTSUR-001.md`, `archive/tickets/SPEC10ENTSUR-007.md`, and `archive/tickets/SPEC10ENTSUR-008.md`; spec archived at `archive/specs/SPEC-10-entity-surface-redesign.md`
@@ -196,7 +196,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-02 (MCP server + tools): 1 session
   - SPEC-05 Part A (3 hooks): 1 session
   - SPEC-06 Part A (canon-addition read-side): 1 session
-  - SPEC-07 Part A (docs): may run in parallel with above
+  - SPEC-07 Part A (docs): completed 2026-04-23 in parallel with Phase 1 code work
   - Animalia bootstrap + measurement: 0.5 session
 - **Phase 2**: 6–10 sessions
   - SPEC-04 (14 validators): 2 sessions
@@ -236,7 +236,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-04 Validator Framework | ✓ specified |
 | SPEC-05 Hooks Discipline | ✓ specified |
 | SPEC-06 Skill Rewrite Patterns | ✓ specified |
-| SPEC-07 Docs Updates | ✓ specified |
+| SPEC-07 Docs Updates | Part A implemented 2026-04-23 at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`; Parts B and C remain specified |
 | SPEC-08 Migration & Phasing | ✓ specified |
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |

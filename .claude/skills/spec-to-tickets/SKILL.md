@@ -215,7 +215,7 @@ For each approved ticket, compose its full content following `tickets/_TEMPLATE.
 
 Send **one assistant message containing one Write tool call per ticket**, not N sequential messages. Each ticket file write is independent because each creates a new file, so they can run concurrently. A single message with N Write calls costs one round-trip; N sequential messages cost N round-trips. Compose every ticket's full content first, then emit all Write calls in one batch.
 
-After the parallel batch returns, verify every ticket file was created. If any Write call failed (typo in path, permissions error, or other I/O failure), retry that ticket with the corrected argument immediately — do not proceed to Step 6 until all ticket files exist at their intended paths.
+After the parallel batch returns, verify every ticket file was created. If any Write call failed (typo in path, permissions error, or other I/O failure), retry that ticket with the corrected argument immediately — do not proceed to Step 6 until all ticket files exist at their intended paths. If a system-reminder or external tool indicates that a ticket file was modified between your Write call and Step 6 (e.g., by a linter hook, a user keystroke, or a parallel editor save), treat the external edits as authoritative — do not revert them. Step 6's cross-ticket dependency verification must run against the edited content, and any sibling ticket whose path, symbol, or count references the externally-edited ticket may need follow-up adjustment before the final summary is emitted.
 
 ## Step 6: Final Summary
 
@@ -223,13 +223,16 @@ After writing all files:
 
 1. **Verify cross-ticket dependency consistency**: For each `Deps` reference, confirm the depended-on ticket actually produces what the dependent ticket needs (types, skills, modules, files). If a dependency is broken (e.g., ticket 005 depends on a skill output from 003 but 003's scope doesn't define it), flag the inconsistency.
 
-2. **Deliverable coverage mapping**: List each spec deliverable and the ticket that covers it (e.g., `D1→001, D2→001, D3→002`). Verify all spec deliverables are accounted for. If any deliverable is missing, flag it. If the spec uses phases or named sections instead of numbered deliverables (e.g., `Phase 2a`, `Part B`), adapt the mapping to use the spec's organizational scheme — for named sections, use section names directly (e.g., `§Package location → 001, §SQLite schema → 002`).
+2. **Template fidelity check**: for each written ticket, confirm (a) every required section from `tickets/_TEMPLATE.md` is present (Status, Priority, Effort, Engine Changes, Deps, Problem, Assumption Reassessment, Architecture Check, Verification Layers, What to Change, Files to Touch, Out of Scope, Acceptance Criteria, Test Plan), and (b) the Assumption Reassessment section uses sequential numbering starting at 1. Grep: `awk '/^## Assumption Reassessment/,/^## Architecture Check/' tickets/<NAMESPACE>-NNN.md | grep -oE '^[0-9]+\.' | awk -F. '{print $1}'` should produce a strictly sequential integer sequence `1 2 3 ...`. Any gap (e.g., `1 2 3 6`) is a malformed Assumption Reassessment — the Step 5 template-menu rule ("renumber surviving items sequentially starting from 4") was not applied. Fix the offending ticket's numbering before emitting the final summary.
 
-3. List:
+3. **Deliverable coverage mapping**: List each spec deliverable and the ticket that covers it (e.g., `D1→001, D2→001, D3→002`). Verify all spec deliverables are accounted for. If any deliverable is missing, flag it. If the spec uses phases or named sections instead of numbered deliverables (e.g., `Phase 2a`, `Part B`), adapt the mapping to use the spec's organizational scheme — for named sections, use section names directly (e.g., `§Package location → 001, §SQLite schema → 002`).
+
+4. List:
    - All ticket files created (paths).
    - The dependency graph (which tickets block which).
    - Suggested implementation order.
-   - Deferred `/reassess-spec` findings, if any, noted as "may warrant separate tickets."
+   - **Deferred `/reassess-spec` findings**, if any, noted as "may warrant separate tickets" (findings the user explicitly chose to defer at reassessment time).
+   - **Cross-spec follow-ups**, if any, surfaced by the spec's Risks section or discovered during decomposition — concerns requiring action in other specs or artifacts, not in this batch. The two categories are distinct: deferred findings may become tickets after user disposition; cross-spec follow-ups require routing through `/reassess-spec` on a DIFFERENT spec, or through a separate skill/docs edit.
 
 Do NOT commit. Leave files for user review.
 

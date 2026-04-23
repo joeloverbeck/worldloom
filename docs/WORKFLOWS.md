@@ -24,3 +24,11 @@ Quick reference for invoking each skill. For detailed skill behavior, see the sk
 - **Explore a new pipeline before building it**: `/brainstorm` with a request. Writes design docs to `docs/plans/`.
 - **Turn a brainstorming proposal into a skill**: `/skill-creator` with the `brainstorming/*.md` path.
 - **Maintain an existing skill**: `/skill-audit` (evaluate quality), `/skill-consolidate` (remove redundancies), `/skill-extract-references` (refactor a bloated `SKILL.md` into `references/` docs).
+
+## Machine-facing layer CLI
+
+- **Build or refresh a world's index**: `world-index build <world-slug>` for a full rebuild, `world-index sync <world-slug>` for an incremental refresh.
+- **Inspect index state**: `world-index stats <world-slug>` for counts and freshness; `world-index inspect <node-id>` for a single-node dump.
+- **Verify index integrity**: `world-index verify <world-slug>` re-hashes indexed nodes and reports drift.
+- **Validate a world's state**: `world-validate <world-slug>` is the planned validator CLI; `--structural` narrows to structural checks and `--rules=1,6` targets specific rule sets.
+- **MCP retrieval surface**: Claude Code will use `.mcp.json` plus `tools/world-mcp/` to expose `mcp__worldloom__*` retrieval tools. If a workflow reports stale-index errors, refresh the index before debugging the skill itself.

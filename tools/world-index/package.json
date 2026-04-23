@@ -6,6 +6,13 @@
   "bin": {
     "world-index": "dist/src/cli.js"
   },
+  "exports": {
+    "./public/types": {
+      "import": "./dist/src/public/types.js",
+      "require": "./dist/src/public/types.js",
+      "types": "./dist/src/public/types.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test:spec10-verification": "bash tests/integration/spec10-verification.sh",

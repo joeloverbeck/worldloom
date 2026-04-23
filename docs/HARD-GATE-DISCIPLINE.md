@@ -9,8 +9,18 @@ Every canon-mutating or content-generating skill in `.claude/skills/` begins wit
 3. **Validation / Rejection tests** — numbered; each must record PASS with a one-line rationale. A bare "PASS" is treated as FAIL per the skill's own contract.
 4. **Present deliverable summary** — to the user, in the conversation, before any write.
 5. **Wait for explicit user approval** — before any `Write` or `Edit` to `worlds/<slug>/`.
-6. **Write in the skill's prescribed order** — the order encodes partial-failure recovery semantics; see below.
+6. **Write via the active mutation path** — today, most skills still write in their prescribed order. On machine-layer-enabled worlds, HARD-GATE approval produces an `approval_token`, the skill submits a patch plan, and the engine enforces write order internally.
 7. **Never `git commit` from inside a skill** — writes land in the working tree; the user reviews the diff and commits.
+
+## Approval token discipline
+
+On machine-layer-enabled worlds, HARD-GATE approval is tied to an `approval_token` bound to the exact patch plan the user approved.
+
+- Single-use: once consumed, the token cannot authorize a second write.
+- Expiry-bound: tokens expire quickly and must be reissued after the approval window lapses.
+- Plan-bound: if the patch plan changes after approval, the old token is invalid and the skill must re-present the updated plan.
+
+This keeps "user approved the plan" and "engine wrote the plan" as the same event rather than two loosely related steps.
 
 ## Why write order matters
 

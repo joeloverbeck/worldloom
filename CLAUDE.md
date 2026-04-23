@@ -18,10 +18,19 @@ docs/WORKFLOWS.md                ← how to invoke each skill
 docs/HARD-GATE-DISCIPLINE.md     ← HARD-GATE execution pattern and partial-failure semantics
 docs/plans/                      ← design docs output by the brainstorm skill
 .claude/skills/<slug>/           ← runnable skills; each has SKILL.md + optional templates/references/
+tools/                           ← machine-facing layer (compiled dist/ gitignored)
+  ├── world-index/               ← SQLite-backed index builder + CLI
+  ├── world-mcp/                 ← retrieval MCP server + context packets
+  ├── patch-engine/              ← deterministic patch applier
+  ├── validators/                ← executable Rule 1-7 + structural validators
+  └── hooks/                     ← Claude Code hooks
+.claude/settings.json            ← local hook configuration
 brainstorming/                   ← user-authored proposals for new skills / pipelines
 briefs/                          ← user-authored briefs feeding content-generation skills (contents gitignored; folder preserved via .gitkeep)
 worlds/<world-slug>/             ← generated world bundles (contents gitignored; folder preserved)
   ├── <13 mandatory .md files>
+  ├── _index/world.db            ← derived index artifact (gitignored)
+  ├── _source/                   ← reserved for Phase 3 atomic source
   ├── characters/                ← character dossiers + INDEX.md
   ├── diegetic-artifacts/        ← in-world texts + INDEX.md
   ├── proposals/                 ← PR-NNNN proposal cards + batches/BATCH-NNNN manifests
@@ -52,13 +61,24 @@ Skills divide into three categories, and these distinctions are load-bearing.
 - `skill-creator` — turns a `brainstorming/*.md` proposal into `.claude/skills/<slug>/SKILL.md` + templates. Structurally enforces FOUNDATIONS alignment at generation time.
 - `skill-audit`, `skill-consolidate`, `skill-extract-references` — maintenance on existing skills.
 
+### Machine-facing layer integration
+
+The three skill categories remain load-bearing, but the migration path now has a machine-facing retrieval and mutation contract beside the human-facing skill prose.
+
+- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation on machine-layer-enabled workflows; `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
+- **Localization**: `mcp__worldloom__search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, and `find_impacted_fragments` localize relevant world state without full-file reads.
+- **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path for world-level edits on machine-layer-enabled worlds.
+- **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks into executable gates; `world-validate` is the CLI surface.
+
+Meta skills (`brainstorm`, `skill-creator`, `skill-audit`, `skill-consolidate`, `skill-extract-references`) remain outside the world-index / patch-engine mutation path unless they are explicitly operating on those tool packages themselves.
+
 ## HARD-GATE Discipline
 
 Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` block. Gates are **absolute under Auto Mode** — invoking a skill is not approval of its deliverable. See `docs/HARD-GATE-DISCIPLINE.md` for the execution pattern, partial-failure semantics, and why write order matters.
 
 ## ID Allocation Conventions
 
-IDs are append-only, allocated at pre-flight by scanning the existing ledger or directory. Never reuse or overwrite an ID; if a pre-flight allocation would collide, abort and ask the user to resolve.
+IDs are append-only. On machine-layer-enabled workflows, allocate them at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class)`, which scans the indexed world state for the highest id of that class and returns the next. On legacy workflows that have not yet moved to the MCP surface, the skill still scans the live ledger or directory directly. Never reuse or overwrite an ID; if allocation would collide, abort and ask the user to resolve.
 
 - `CF-NNNN` — Canon Fact Records (in `CANON_LEDGER.md`)
 - `CH-NNNN` — Change Log Entries (in `CANON_LEDGER.md`; `CH-0001` is always the genesis entry)
@@ -77,6 +97,8 @@ See `docs/WORKFLOWS.md` for how to invoke each skill with arguments and expected
 ## Non-Negotiables When Working Here
 
 - **Never bypass a HARD-GATE.** If you think the gate is in the way, you are about to make a mistake. Auto Mode does not override gates.
+- **Never bypass the patch engine for machine-layer world writes.** On machine-layer-enabled worlds, mandatory world files plus `characters/`, `diegetic-artifacts/`, and `adjudications/` are engine-only surfaces. Hook 3 is the enforcement path; direct `Edit`/`Write` is not an acceptable substitute.
+- **Never read protected world files past the size threshold when the read hooks are active.** Hook 2 is designed to block full reads of `CANON_LEDGER.md` and other protected files once they exceed the configured threshold. Use `mcp__worldloom__get_context_packet` or typed retrieval instead of convenience full-file reads.
 - **Never write world-level canon files from a canon-reading skill.** Character dossiers, diegetic artifacts, proposals, audits, and adjudications live in sub-directories for a reason — the separation is what keeps Rule 6 (No Silent Retcons) enforceable.
 - **Never delete or overwrite an existing `worlds/<slug>/` file.** The ledger is append-only; existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal.
 - **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding.

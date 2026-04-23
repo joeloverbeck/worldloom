@@ -108,6 +108,8 @@ At minimum, maintain:
 - `OPEN_QUESTIONS.md`
 - `MYSTERY_RESERVE.md`
 
+> **Derived artifacts**: `worlds/<slug>/_index/world.db` is a derived, gitignored artifact produced by `world-index build`. `worlds/<slug>/_source/` is reserved for the Phase 3 atomic-source layout (`CF-NNNN.yaml`, `CH-NNNN.yaml`). Neither is a mandatory world file in the human-facing sense; both are machine-facing infrastructure.
+
 For larger worlds, split by domain and region.
 
 ---
@@ -417,4 +419,20 @@ They should always receive:
 - unresolved contradictions list
 - mystery reserve entries touching the same domain
 
-This is non-negotiable.
+This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_packet`) is the machine-facing mechanism for delivering this set with completeness guarantees; raw file reads alone cannot enforce the contract.
+
+---
+
+## Machine-Facing Layer
+
+The "LLM agents should never operate on prose alone" commitment in §Tooling Recommendation is realized by a phased machine-facing layer beside the human-facing markdown:
+
+1. **World Index** (`worlds/<slug>/_index/world.db`) — SQLite + FTS5 index of parsed nodes, typed edges, entity mentions, and anchor checksums. Derived, deterministic, and regenerable from markdown. See `tools/world-index/` and `specs/SPEC-01-world-index.md`.
+2. **Retrieval MCP Server** (`mcp__worldloom__*` tools) — structured read API over the world index. It replaces ad hoc raw-file loading with typed retrieval and context-packet assembly. See `tools/world-mcp/` and `specs/SPEC-02-retrieval-mcp-server.md`.
+3. **Patch Engine** (`mcp__worldloom__submit_patch_plan`) — deterministic world-edit applier with typed operations, anchor-hash anchoring, append-only vocabulary, and engine-controlled write ordering. This is the Phase 2 mutation path for machine-layer-enabled worlds. See `tools/patch-engine/` and `specs/SPEC-03-patch-engine.md`.
+4. **Validator Framework** (`world-validate` CLI; engine pre-apply gate; Hook 5 post-apply) — executable enforcement of Rules 1–7 plus structural invariants such as id uniqueness, attribution compliance, and anchor integrity. Structural-only use begins in Phase 1; the full enforcement path lands with SPEC-04 and Phase 2 engine integration.
+5. **Hooks** (`.claude/settings.json`) — Claude Code enforcement points for context preface injection, large-read guards, engine-only mutation guards, subagent bootstrap, and post-write validation. See `tools/hooks/` and `specs/SPEC-05-hooks-discipline.md`.
+
+Once the retrieval surface is active, every "skills should always receive X" item above is delivered by `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`. The packet's five layers are documented in [docs/CONTEXT-PACKET-CONTRACT.md](/home/joeloverbeck/projects/worldloom/docs/CONTEXT-PACKET-CONTRACT.md).
+
+For the operational overview, rollout boundaries, and troubleshooting guidance, see [docs/MACHINE-FACING-LAYER.md](/home/joeloverbeck/projects/worldloom/docs/MACHINE-FACING-LAYER.md).

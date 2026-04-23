@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 1 (read side; `submit_patch_plan` stubbed until Phase 2)
-**Status**: not yet implemented
+**Status**: Phase 1 scaffold landed; tool implementations land in subsequent tickets
 
 ## Planned tools
 

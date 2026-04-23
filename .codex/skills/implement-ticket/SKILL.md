@@ -81,6 +81,8 @@ Check:
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
+- for scaffold, package, or build-surface tickets, every drafted built-artifact path, compiled entrypoint, or registration/config target named by the ticket or spec; verify it against the package's actual `tsconfig.json`, build script, and emitted output shape before implementation so example config and acceptance text do not point at a speculative path
+- for package public-surface tickets that add or change `package.json` `exports`, verify that the drafted export conditions (`require`, `import`, `default`, `types`) match the package's real emitted module format and the ticket's recorded proof commands; do not trust an `exports` snippet that was written against a different module system than the live build
 - for tickets that claim to add or expand a script/test proof surface, whether the named script file, shell entrypoint, or package-script already exists and already runs; if it does, narrow the ticket to tightening the existing proof surface before code edits
 - for staged ticket families, whether the active ticket is independently landable at its drafted acceptance boundary or whether live same-seam fallout makes the family decomposition false; if downstream consumers in the same package or seam must move together for `docs/FOUNDATIONS.md` closeout to stay truthful, widen the active ticket before coding
 - when dirty same-seam edits already exist in files the ticket would touch, whether those edits belong to an in-flight sibling ticket or broader family slice; if they do, narrow, widen, or rewrite the active ticket boundary before code edits instead of treating the seam as clean ownership
@@ -223,6 +225,7 @@ Update the active ticket before finishing:
 - compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
+- after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 

@@ -160,7 +160,7 @@ Prioritize references most likely to have drifted: import paths, function signat
 
 ## Step 3: Codebase Validation
 
-**Read `references/codebase-validation.md` now, with the Read tool, before any validation work.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded codebase-validation.md — top section is "3.0 Cross-Package Scope Establishment"`. A bare "Loaded: codebase-validation.md" is treated as a skipped load.
+**Read `references/codebase-validation.md` now, with the Read tool, before classification-driven substep selection.** Surface validation (listing directories, reading sibling specs, confirming referenced paths exist) may proceed in parallel with this load; the reference is required before the classification-sensitive work begins (which substeps apply per (a)/(b)/(c)/(d), specialized sub-checks per substep, agent-delegation guidance). Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded codebase-validation.md — top section is "3.0 Cross-Package Scope Establishment"`. A bare "Loaded: codebase-validation.md" is treated as a skipped load.
 
 Then validate every reference from Step 2, applying the substep subset determined by the Pre-Process classification (a/b/c/d + hybrids).
 
@@ -168,13 +168,13 @@ Do not present findings yet. Collect everything for Step 4.
 
 ## Step 4: FOUNDATIONS.md Alignment Check
 
-**Read `references/foundations-alignment.md` now, with the Read tool, before checking alignment.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded foundations-alignment.md — opens with "4.0 Internal Contradictions"`. A bare "Loaded: foundations-alignment.md" is treated as a skipped load.
+**Read `references/foundations-alignment.md` now, with the Read tool, before alignment classification begins.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded foundations-alignment.md — opens with "4.0 Internal Contradictions"`. A bare "Loaded: foundations-alignment.md" is treated as a skipped load.
 
 Then check spec alignment against all applicable FOUNDATIONS principles (Canon Layers, 7 Validation Rules, Canon Fact Record Schema, Change Control Policy, Tooling Recommendation).
 
 ## Steps 5-6: Classify and Present Findings
 
-**Read `references/findings-and-questions.md` now, with the Read tool, before classifying.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded findings-and-questions.md — opens with "Step 5: Classify Findings"`. A bare "Loaded: findings-and-questions.md" is treated as a skipped load.
+**Read `references/findings-and-questions.md` now, with the Read tool, before findings classification begins.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded findings-and-questions.md — opens with "Step 5: Classify Findings"`. A bare "Loaded: findings-and-questions.md" is treated as a skipped load.
 
 Classify all findings from Steps 3-4 into Issues (CRITICAL / HIGH / MEDIUM / LOW severity), Improvements, Additions, and Questions. Present to the user using the template in `references/findings-and-questions.md`.
 
@@ -196,19 +196,19 @@ Example:
 |---------|-------|--------|
 | I1 | `grep -n "submit_patch_plan" tools/world-mcp/src/tools/` | 3 matches in `tools/world-mcp/src/tools/submit-patch-plan.ts` — confirms tool surface exists |
 | I2 | `test -f specs/SPEC-04-validator-framework.md` | file exists — dependency path valid |
-| M3 | FND-§Change Control Policy + FND-§Rule 6 reasoning; Q2 delegated | selected option (a): spec's Outcome section must cite delivering-commit IDs — Rule 6 No Silent Retcons requires the attribution chain |
+| M3 | Judgment — FND-§Change Control Policy + FND-§Rule 6 reasoning; Q2 delegated (no codebase symbol to grep) | selected option (a): spec's Outcome section must cite delivering-commit IDs — Rule 6 No Silent Retcons requires the attribution chain |
 
 **Mismatch classification** — if a check reveals a finding/codebase mismatch:
 
 - **Recommendation-changing mismatch**: the pre-apply check invalidates the finding's *recommendation* — the approved fix no longer applies, the target has moved, or a different fix is now warranted. Re-present the corrected finding to the user and wait for confirmation before applying any edit **for that finding**. Pure retractions (no substitute fix) require transparent `retracted: <reason>` notation in the table but do not require fresh re-approval.
 - **Evidence-refining mismatch**: the pre-apply check refines *supporting evidence* but the recommendation still holds unchanged. Note the refinement inline in the Result column (e.g., "partial invalidation: symbol exists at `tools/world-index/src/parse/semantic.ts:412`, not at spec-claimed location — recommendation unchanged") and proceed.
-- **Scope-extending mismatch**: the approved recommendation still applies, but fulfilling it requires a new deliverable, migration, or package-boundary change not discussed at question time. Note the scope extension inline in the Result column (e.g., "scope-extending: requires new D4 to relocate `NodeType` from world-index to a shared schema package so world-mcp can import it — recommendation unchanged") and proceed. Additionally, surface the scope extension in the Step 8 summary under a dedicated line. If the scope extension constitutes a cross-package type migration, also apply the Pre-Process "Emergent migration at Step 7" guidance and run 3.6 cross-package consumer analysis before finalizing edits.
+- **Scope-extending mismatch**: the approved recommendation still applies, but fulfilling it requires a new deliverable, migration, or package-boundary change not discussed at question time. Note the scope extension inline in the Result column (e.g., "scope-extending: requires new D4 to relocate `NodeType` from world-index to a shared schema package so world-mcp can import it — recommendation unchanged") and proceed. Additionally, surface the scope extension in the Step 8 summary under a dedicated line. If a Step 6 Question's option description explicitly named the scope-extending consequence (e.g., "requires follow-up edit to SPEC-X"), the user's approval of that option carries scope acknowledgement — cite the question in the Result column (e.g., `scope-extending: pre-declared in Q2`) rather than framing the extension as freshly discovered; the Step 8 dedicated line still applies. If the scope extension constitutes a cross-package type migration, also apply the Pre-Process "Emergent migration at Step 7" guidance and run 3.6 cross-package consumer analysis before finalizing edits.
 
 The `Finding` column tier tag (`evidence-refining`, `recommendation-changing`, `scope-extending`) is required only when the pre-apply check detects a mismatch. Rows that confirm the finding exactly as written may use the compact descriptive form shown in the first example.
 
 **Bundled-answer consistency check**: When a single user response resolves multiple interdependent questions (e.g., "1) a, 2) b, 3) a" in one message), verify before building the verification table that the combined answers are internally consistent — no contradictory routing (the same symbol referenced by two answers is routed to the same destination), no dangling type references (a type referenced in one answer is defined by another), no split-brain conditions (a decision in one answer does not leave a remnant addressed by a different answer). Flag any detected contradiction as a recommendation-changing mismatch and re-present for a follow-up round before proceeding.
 
-**Read `references/spec-writing-rules.md` now, with the Read tool, before writing.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded spec-writing-rules.md — opens with "Pre-Apply Verification"`. A bare "Loaded: spec-writing-rules.md" is treated as a skipped load. Then apply all approved changes.
+**Read `references/spec-writing-rules.md` now, with the Read tool, before writing begins.** Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded spec-writing-rules.md — opens with "Pre-Apply Verification"`. A bare "Loaded: spec-writing-rules.md" is treated as a skipped load. Then apply all approved changes.
 
 ### Retroactive Branch (classification (d))
 
