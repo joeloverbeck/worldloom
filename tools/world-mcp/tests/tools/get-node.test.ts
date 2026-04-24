@@ -31,6 +31,49 @@ function buildSeededWorld(root: string): void {
         file_path: "ONTOLOGY.md",
         node_type: "named_entity",
         body: "Brinewick"
+      },
+      {
+        node_id: "CHAR-0002",
+        world_slug: "seeded",
+        file_path: "characters/melissa-threadscar.md",
+        node_type: "character_record",
+        body: "---\nname: Melissa Threadscar\n---\nMelissa lives in Mudbrook-on-the-Bend.\n"
+      },
+      {
+        node_id: "DA-0002",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/after-action-report.md",
+        node_type: "diegetic_artifact_record",
+        body: "---\nauthor_character_id: CHAR-0002\n---\nFiled by Melissa.\n"
+      },
+      {
+        node_id: "seeded:EVERYDAY_LIFE.md:Quiet-Market:0",
+        world_slug: "seeded",
+        file_path: "EVERYDAY_LIFE.md",
+        heading_path: "Quiet Market",
+        node_type: "section",
+        body: "Vendors trade quietly at dawn."
+      },
+      {
+        node_id: "CHAR-0002#scoped:mudbrook:0",
+        world_slug: "seeded",
+        file_path: "characters/melissa-threadscar.md",
+        node_type: "scoped_reference",
+        body: "Mudbrook"
+      },
+      {
+        node_id: "CHAR-0002#scoped:rill:1",
+        world_slug: "seeded",
+        file_path: "characters/melissa-threadscar.md",
+        node_type: "scoped_reference",
+        body: "Rill"
+      },
+      {
+        node_id: "DA-0002#scoped:melissa-threadscar:0",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/after-action-report.md",
+        node_type: "scoped_reference",
+        body: "Melissa Threadscar"
       }
     ],
     edges: [
@@ -43,6 +86,11 @@ function buildSeededWorld(root: string): void {
         source_node_id: "seeded:GEOGRAPHY.md:Brinewick:0",
         target_node_id: "entity:brinewick",
         edge_type: "mentions_entity"
+      },
+      {
+        source_node_id: "DA-0002",
+        target_node_id: "CHAR-0002",
+        edge_type: "references_record"
       }
     ],
     entities: [
@@ -61,6 +109,41 @@ function buildSeededWorld(root: string): void {
         resolved_entity_id: "entity:brinewick",
         resolution_kind: "canonical",
         extraction_method: "exact_canonical"
+      }
+    ],
+    scopedReferences: [
+      {
+        reference_id: "CHAR-0002#scoped:mudbrook:0",
+        world_slug: "seeded",
+        display_name: "Mudbrook",
+        reference_kind: "place",
+        relation: "current_location",
+        source_node_id: "CHAR-0002"
+      },
+      {
+        reference_id: "CHAR-0002#scoped:rill:1",
+        world_slug: "seeded",
+        display_name: "Rill",
+        reference_kind: "person",
+        relation: "apprentice_candidate",
+        source_node_id: "CHAR-0002"
+      },
+      {
+        reference_id: "DA-0002#scoped:melissa-threadscar:0",
+        world_slug: "seeded",
+        display_name: "Melissa Threadscar",
+        reference_kind: "person",
+        relation: "author_character_id",
+        source_node_id: "DA-0002",
+        source_field: "author_character_id",
+        target_node_id: "CHAR-0002",
+        authority_level: "exact_structured_edge"
+      }
+    ],
+    scopedReferenceAliases: [
+      {
+        reference_id: "CHAR-0002#scoped:mudbrook:0",
+        alias_text: "Mudbrook-on-the-Bend"
       }
     ],
     anchors: [
@@ -91,6 +174,8 @@ test("getNode returns a fully populated YAML-backed canon fact record", async ()
     assert.equal(result.entity_mentions[0]?.entity_kind, "place");
     assert.equal(result.edges.length, 1);
     assert.equal(result.edges[0]?.edge_type, "required_world_update");
+    assert.deepEqual(result.structured_links, []);
+    assert.deepEqual(result.scoped_references, []);
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -110,6 +195,8 @@ test("getNode returns a prose-backed structural node", async () => {
     assert.equal(result.node_type, "section");
     assert.equal(result.file_path, "GEOGRAPHY.md");
     assert.equal(result.heading_path, "Brinewick");
+    assert.deepEqual(result.structured_links, []);
+    assert.deepEqual(result.scoped_references, []);
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -142,6 +229,106 @@ test("getNode returns node_not_found when the node is missing", async () => {
 
     assert.ok("code" in result);
     assert.equal(result.code, "node_not_found");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getNode exposes explicit scoped references with aliases", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getNode({ node_id: "CHAR-0002", world_slug: "seeded" })
+    );
+
+    assert.ok("id" in result);
+    assert.equal(result.id, "CHAR-0002");
+    assert.deepEqual(result.structured_links, []);
+    assert.deepEqual(result.scoped_references, [
+      {
+        reference_id: "CHAR-0002#scoped:mudbrook:0",
+        display_name: "Mudbrook",
+        reference_kind: "place",
+        relation: "current_location",
+        authority_level: "explicit_scoped_reference",
+        target_node_id: null,
+        aliases: ["Mudbrook-on-the-Bend"]
+      },
+      {
+        reference_id: "CHAR-0002#scoped:rill:1",
+        display_name: "Rill",
+        reference_kind: "person",
+        relation: "apprentice_candidate",
+        authority_level: "explicit_scoped_reference",
+        target_node_id: null,
+        aliases: []
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getNode exposes structured links and structured-edge scoped references while preserving edges", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getNode({ node_id: "DA-0002", world_slug: "seeded" })
+    );
+
+    assert.ok("id" in result);
+    assert.deepEqual(result.structured_links, [
+      {
+        edge_id: result.structured_links[0]!.edge_id,
+        edge_type: "references_record",
+        target_node_id: "CHAR-0002",
+        target_unresolved_ref: null,
+        source_field: "author_character_id"
+      }
+    ]);
+    assert.deepEqual(result.scoped_references, [
+      {
+        reference_id: "DA-0002#scoped:melissa-threadscar:0",
+        display_name: "Melissa Threadscar",
+        reference_kind: "person",
+        relation: "author_character_id",
+        authority_level: "exact_structured_edge",
+        target_node_id: "CHAR-0002",
+        aliases: []
+      }
+    ]);
+    assert.equal(
+      result.edges.filter((edge) => edge.edge_type === "references_record").length,
+      1
+    );
+    assert.equal(
+      result.edges.find((edge) => edge.edge_type === "references_record")?.other_node_id,
+      "CHAR-0002"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getNode returns empty structured retrieval arrays when the node has no scoped data", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getNode({ node_id: "seeded:EVERYDAY_LIFE.md:Quiet-Market:0", world_slug: "seeded" })
+    );
+
+    assert.ok("id" in result);
+    assert.deepEqual(result.structured_links, []);
+    assert.deepEqual(result.scoped_references, []);
   } finally {
     destroyTempRepoRoot(root);
   }

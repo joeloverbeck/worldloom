@@ -28,6 +28,24 @@ export interface NodeMention {
   entity_kind: string | null;
 }
 
+export interface StructuredLink {
+  edge_id: number;
+  edge_type: "references_record";
+  target_node_id: string | null;
+  target_unresolved_ref: string | null;
+  source_field: string;
+}
+
+export interface NodeScopedReference {
+  reference_id: string;
+  display_name: string;
+  reference_kind: string | null;
+  relation: string;
+  authority_level: "explicit_scoped_reference" | "exact_structured_edge";
+  target_node_id: string | null;
+  aliases: string[];
+}
+
 export interface NodeDetail {
   id: string;
   world_slug: string;
@@ -42,6 +60,8 @@ export interface NodeDetail {
   anchor_form: string | null;
   edges: NodeEdge[];
   entity_mentions: NodeMention[];
+  structured_links: StructuredLink[];
+  scoped_references: NodeScopedReference[];
 }
 
 interface NodeRow {
@@ -146,6 +166,72 @@ export async function getNode(args: GetNodeArgs): Promise<NodeDetail | McpError>
       )
       .all(args.node_id) as NodeMention[];
 
+    const structuredLinks = opened.db
+      .prepare(
+        `
+          SELECT
+            e.edge_id,
+            e.edge_type,
+            e.target_node_id,
+            e.target_unresolved_ref,
+            sr.source_field
+          FROM edges e
+          INNER JOIN scoped_references sr
+            ON sr.source_node_id = e.source_node_id
+           AND sr.authority_level = 'exact_structured_edge'
+           AND sr.target_node_id = e.target_node_id
+          WHERE e.source_node_id = ?
+            AND e.edge_type = 'references_record'
+          ORDER BY e.edge_id, sr.reference_id
+        `
+      )
+      .all(args.node_id) as StructuredLink[];
+
+    const scopedReferences = opened.db
+      .prepare(
+        `
+          SELECT
+            reference_id,
+            display_name,
+            reference_kind,
+            relation,
+            authority_level,
+            target_node_id
+          FROM scoped_references
+          WHERE source_node_id = ?
+          ORDER BY reference_id
+        `
+      )
+      .all(args.node_id) as Array<Omit<NodeScopedReference, "aliases">>;
+
+    const aliasesByReferenceId = new Map<string, string[]>();
+
+    if (scopedReferences.length > 0) {
+      const placeholders = scopedReferences.map(() => "?").join(", ");
+      const aliasRows = opened.db
+        .prepare(
+          `
+            SELECT reference_id, alias_text
+            FROM scoped_reference_aliases
+            WHERE reference_id IN (${placeholders})
+            ORDER BY alias_id
+          `
+        )
+        .all(...scopedReferences.map((reference) => reference.reference_id)) as Array<{
+        reference_id: string;
+        alias_text: string;
+      }>;
+
+      for (const aliasRow of aliasRows) {
+        const aliases = aliasesByReferenceId.get(aliasRow.reference_id);
+        if (aliases === undefined) {
+          aliasesByReferenceId.set(aliasRow.reference_id, [aliasRow.alias_text]);
+        } else {
+          aliases.push(aliasRow.alias_text);
+        }
+      }
+    }
+
     const anchorRow = opened.db
       .prepare(
         `
@@ -185,7 +271,12 @@ export async function getNode(args: GetNodeArgs): Promise<NodeDetail | McpError>
           target_unresolved_ref: edge.target_unresolved_ref
         }))
       ],
-      entity_mentions: entityMentions
+      entity_mentions: entityMentions,
+      structured_links: structuredLinks,
+      scoped_references: scopedReferences.map((reference) => ({
+        ...reference,
+        aliases: aliasesByReferenceId.get(reference.reference_id) ?? []
+      }))
     };
   } finally {
     opened.db.close();
