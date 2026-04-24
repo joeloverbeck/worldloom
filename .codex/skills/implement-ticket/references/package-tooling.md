@@ -17,7 +17,7 @@ Before final response for a package/tool ticket, inspect adjacent same-package u
 - package-local usage snippets or command examples
 - scripts that document or wrap the changed command/API
 
-For each stale same-seam surface, either truth it in the active ticket or record why it belongs to a separate follow-up. Do not leave known stale package docs/examples unmentioned after changing package-local behavior.
+For each stale same-seam surface, either truth it in the active ticket or record why it belongs to a separate follow-up. When the stale package doc, entrypoint, script, or example is real but outside the active ticket, name the existing owner or create/recommend a bounded follow-up ticket unless the user requested implementation-only with no follow-up drafting; in that case, record the excluded drift in `Assumption Reassessment` or `## Deviations`. Do not leave known stale package docs/examples unmentioned after changing package-local behavior.
 
 ## Verification
 

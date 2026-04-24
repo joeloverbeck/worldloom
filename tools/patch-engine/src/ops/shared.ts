@@ -5,10 +5,11 @@ import path from "node:path";
 import YAML from "yaml";
 
 import type { IdAllocations, OperationKind } from "../envelope/schema.js";
-import type { OpContext, StagedWrite } from "./types.js";
+import { resolveHybridFilePath, type OpContext, type StagedWrite } from "./types.js";
 
 export type PatchEngineOpErrorCode =
   | "field_path_invalid"
+  | "file_already_exists"
   | "invalid_record_id"
   | "invalid_extension_payload"
   | "invalid_modification_history_entry"
@@ -19,6 +20,8 @@ export type PatchEngineOpErrorCode =
   | "record_not_found"
   | "retcon_attestation_required"
   | "target_world_mismatch"
+  | "target_file_missing"
+  | "target_file_outside_world"
   | "unsupported_operation"
   | "unsupported_section_prefix";
 
@@ -55,6 +58,10 @@ export function serializeStableYaml(value: unknown): string {
 
 export function contentHashForYaml(value: unknown): string {
   return sha256Hex(serializeStableYaml(value));
+}
+
+export function contentHashForText(value: string): string {
+  return sha256Hex(value);
 }
 
 export function tempPathForTarget(targetFilePath: string, planId: string): string {
@@ -122,6 +129,63 @@ export async function stageNewRecordFile(params: {
     temp_file_path: tempFilePath,
     new_content: newContent,
     new_hash: contentHashForYaml(params.record),
+    op_kind: params.opKind
+  };
+}
+
+export async function stageNewHybridFile(params: {
+  planId: string;
+  envelopeTargetWorld: string;
+  opTargetWorld: string;
+  opKind: OperationKind;
+  targetFile: string | undefined;
+  expectedPrefix: string;
+  frontmatter: unknown;
+  bodyMarkdown: string;
+  ctx: OpContext;
+}): Promise<StagedWrite> {
+  if (params.opTargetWorld !== params.envelopeTargetWorld) {
+    throw new PatchEngineOpError({
+      code: "target_world_mismatch",
+      message: `${params.opKind} target_world must match envelope target_world`,
+      op_kind: params.opKind
+    });
+  }
+
+  const resolvedPath = resolveHybridFilePath(
+    params.ctx.worldRoot,
+    params.envelopeTargetWorld,
+    params.targetFile,
+    params.expectedPrefix
+  );
+  if (typeof resolvedPath !== "string") {
+    throw new PatchEngineOpError({
+      code: resolvedPath.code,
+      message: resolvedPath.detail,
+      op_kind: params.opKind
+    });
+  }
+
+  if (await pathExists(resolvedPath)) {
+    throw new PatchEngineOpError({
+      code: "file_already_exists",
+      message: `${params.targetFile} already exists`,
+      target_file: resolvedPath,
+      op_kind: params.opKind
+    });
+  }
+
+  const newContent = `---\n${serializeStableYaml(params.frontmatter)}---\n${params.bodyMarkdown}\n`;
+  const tempFilePath = tempPathForTarget(resolvedPath, params.planId);
+
+  await mkdir(path.dirname(tempFilePath), { recursive: true });
+  await writeFile(tempFilePath, newContent, "utf8");
+
+  return {
+    target_file_path: resolvedPath,
+    temp_file_path: tempFilePath,
+    new_content: newContent,
+    new_hash: contentHashForText(newContent),
     op_kind: params.opKind
   };
 }
@@ -287,7 +351,7 @@ function sha256Hex(input: string): string {
   return createHash("sha256").update(input.normalize("NFC"), "utf8").digest("hex");
 }
 
-async function pathExists(filePath: string): Promise<boolean> {
+export async function pathExists(filePath: string): Promise<boolean> {
   try {
     await access(filePath);
     return true;

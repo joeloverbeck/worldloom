@@ -10,6 +10,8 @@ import type {
   SectionRecord
 } from "@worldloom/world-index/public/types";
 
+import type { AdjudicationFrontmatter } from "../ops/append-adjudication-record.js";
+
 export interface IdAllocations {
   cf_ids?: string[];
   ch_ids?: string[];
@@ -118,7 +120,10 @@ export type PatchOperation =
         summary: string;
       }
     >
-  | OperationBase<"append_adjudication_record", { verdict: string; body: string; filename: string }>
+  | OperationBase<
+      "append_adjudication_record",
+      { adjudication_frontmatter: AdjudicationFrontmatter; body_markdown: string; filename?: string }
+    >
   | OperationBase<
       "append_character_record",
       { char_record: CharacterDossier; body_markdown: string; filename: string }

@@ -63,6 +63,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
 7. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
 8. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
+9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Repair dependency references to the archived path when the completed ticket is now the prerequisite; leave ordinary historical mentions alone unless they would mislead an active handoff.
 
 ### 3. Establish the review surface
 
@@ -144,6 +145,7 @@ Use this structure. In `Verification And Handoff`, use severity-shaped entries o
 **Ticket**: <path>
 **Review date**: YYYY-MM-DD
 **Implementation state reviewed**: <working tree / index / committed summary, including tracked vs untracked ticket state when relevant>
+**Dirty path classification**: <reviewed-ticket implementation state; review-created edits; unrelated noise>
 
 ## Archival Status
 

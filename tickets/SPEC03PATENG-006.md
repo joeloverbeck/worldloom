@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — introduces `tools/patch-engine/src/apply.ts` (top-level orchestrator), `src/commit/{order,temp-file,rename}.ts` (commit subtree), and a per-world file lock. No impact on existing world-index or world-mcp code beyond their published interfaces (read-side DB handle, sync CLI).
-**Deps**: SPEC03PATENG-002, SPEC03PATENG-003, SPEC03PATENG-004, SPEC03PATENG-005
+**Deps**: SPEC03PATENG-002, SPEC03PATENG-003, archive/tickets/SPEC03PATENG-004.md, SPEC03PATENG-005
 
 ## Problem
 

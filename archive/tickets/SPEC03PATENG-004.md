@@ -1,6 +1,6 @@
 # SPEC03PATENG-004: Hybrid-file op modules (3 per-file writers)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds 3 per-op modules under `tools/patch-engine/src/ops/` for writing hybrid YAML-frontmatter + markdown-body per-file artifacts (characters, diegetic artifacts, adjudications). No impact on existing world-index or world-mcp code.
@@ -13,10 +13,11 @@ SPEC-03's Hybrid-file ops table (post-reassessment spec lines 94–98) defines 3
 ## Assumption Reassessment (2026-04-24)
 
 1. Current hybrid-file formats: `CharacterDossier` frontmatter + prose body per `.claude/skills/character-generation` output; `DiegeticArtifactFrontmatter` + body per `.claude/skills/diegetic-artifact-generation` output; adjudication records per `.claude/skills/canon-addition` output. All three write to `worlds/<slug>/{characters,diegetic-artifacts,adjudications}/` directories per CLAUDE.md §Repository Layout.
-2. Hybrid-file frontmatter shapes (`CharacterDossier`, `DiegeticArtifactFrontmatter`) are available as TypeScript interfaces via `@worldloom/world-index` public types after ticket 001. Adjudications use a simpler shape — currently ad-hoc per canon-addition's template; ticket 001's interface-addition scope does not cover this. This ticket introduces a lightweight `AdjudicationFrontmatter` interface colocated with the op module.
+2. Hybrid-file frontmatter shapes (`CharacterDossier`, `DiegeticArtifactFrontmatter`) are available as TypeScript interfaces via `@worldloom/world-index` public types after ticket 001. Adjudications use a simpler shape — currently ad-hoc per canon-addition's template; ticket 001's interface-addition scope does not cover this. This ticket introduces a lightweight `AdjudicationFrontmatter` interface colocated with the op module and updates `tools/patch-engine/src/envelope/schema.ts` so `append_adjudication_record` can carry typed frontmatter.
 3. Shared boundary: world-index parses hybrid files in its lexical-plus-structured pipeline (`tools/world-index/src/parse/markdown.ts` handles frontmatter + body splitting). The engine writes hybrid files via direct file I/O without reading back through world-index's parser — composition is forward-only (frontmatter YAML + `---\n` + body markdown). Post-apply `world-index sync` (ticket 006) re-parses the new file into the index.
 4. FOUNDATIONS principle under audit: **Rule 6 No Silent Retcons** remains enforced via engine-layer append-only discipline; hybrid files are per-file new writes (`append_*`), never in-place edits. There is no `update_character_record` or `replace_character_dossier` op.
 5. Schema extension posture: the `AdjudicationFrontmatter` interface is new in this ticket (colocated with the op) rather than in world-index/types.ts. Rationale: adjudications are authored exclusively by canon-addition; no validator or MCP tool currently reads their frontmatter as a typed surface, so the interface's natural home is the op that emits it. If SPEC-04 validators later need to type adjudications, the interface can move to world-index as a follow-up ticket.
+6. Reassessment correction: `tools/patch-engine/src/envelope/schema.ts` already declares the three hybrid op names but still has the older `append_adjudication_record` payload `{verdict, body, filename}`. The live op contract uses `op.target_file` for addressing and typed frontmatter in payload, so this ticket owns the schema update as same-seam fallout. Package `README.md` and `package.json` still contain broader pre-SPEC-13/apply-entrypoint drift, but `npm run build` currently passes and those surfaces are outside this three-op module ticket.
 
 ## Architecture Check
 
@@ -84,6 +85,8 @@ Export `resolveHybridFilePath(worldRoot: string, worldSlug: string, targetFile: 
 - `tools/patch-engine/src/ops/append-character-record.ts` (new)
 - `tools/patch-engine/src/ops/append-diegetic-artifact-record.ts` (new)
 - `tools/patch-engine/src/ops/types.ts` (modify — add `resolveHybridFilePath` helper; already introduced in ticket 002)
+- `tools/patch-engine/src/ops/shared.ts` (modify — add hybrid-file error codes and shared file-existence helper export)
+- `tools/patch-engine/src/envelope/schema.ts` (modify — update `append_adjudication_record` payload to typed frontmatter + markdown body)
 
 ## Out of Scope
 
@@ -98,8 +101,8 @@ Export `resolveHybridFilePath(worldRoot: string, worldSlug: string, targetFile: 
 ### Tests That Must Pass
 
 1. `cd tools/patch-engine && npm run build` exits 0 with all 3 new files compiled.
-2. `grep -c "^export function stageAppend" tools/patch-engine/src/ops/append-adjudication-record.ts tools/patch-engine/src/ops/append-character-record.ts tools/patch-engine/src/ops/append-diegetic-artifact-record.ts` returns 3.
-3. `grep -c "^export function resolveHybridFilePath\|^export interface AdjudicationFrontmatter" tools/patch-engine/src/ops/types.ts tools/patch-engine/src/ops/append-adjudication-record.ts` returns 2.
+2. `grep -h "^export function stageAppend" tools/patch-engine/src/ops/append-adjudication-record.ts tools/patch-engine/src/ops/append-character-record.ts tools/patch-engine/src/ops/append-diegetic-artifact-record.ts | wc -l` returns 3.
+3. `grep -h -E "^export function resolveHybridFilePath|^export interface AdjudicationFrontmatter" tools/patch-engine/src/ops/types.ts tools/patch-engine/src/ops/append-adjudication-record.ts | wc -l` returns 2.
 
 ### Invariants
 
@@ -118,5 +121,34 @@ Export `resolveHybridFilePath(worldRoot: string, worldSlug: string, targetFile: 
 ### Commands
 
 1. `cd tools/patch-engine && npm run build` (targeted: confirms all 3 hybrid-file op modules + helper compile).
-2. `grep -c "target_file" tools/patch-engine/src/ops/append-*.ts` should equal 3 (confirms all three use `target_file`, not `target_record_id`).
-3. `grep -c "expected_anchor_checksum" tools/patch-engine/src/ops/append-*.ts` should equal ≥0 — anchor-checksum verification is delegated to the orchestrator; op modules accept the field on the input type but do not check it themselves.
+2. `grep -h "targetFile: op.target_file" tools/patch-engine/src/ops/append-adjudication-record.ts tools/patch-engine/src/ops/append-character-record.ts tools/patch-engine/src/ops/append-diegetic-artifact-record.ts | wc -l` should equal 3 (confirms all three use `target_file`, not `target_record_id`).
+3. `node -e "const { resolveHybridFilePath } = require('./dist/src/ops/types.js'); const ok = resolveHybridFilePath('/tmp/worldloom-patch-engine-probe', 'demo', 'characters/ada.md', 'characters'); const escape = resolveHybridFilePath('/tmp/worldloom-patch-engine-probe', 'demo', '../../etc/passwd', 'characters'); const wrong = resolveHybridFilePath('/tmp/worldloom-patch-engine-probe', 'demo', 'adjudications/PA-0001.md', 'characters'); if (typeof ok !== 'string' || escape.code !== 'target_file_outside_world' || wrong.code !== 'target_file_outside_world') process.exit(1); console.log(JSON.stringify({ok, escape: escape.code, wrong: wrong.code}));"` from `tools/patch-engine` after build (targeted path traversal + prefix proof).
+
+## Outcome
+
+Completion date: 2026-04-24.
+
+Implemented the three hybrid-file staging modules:
+
+1. `append_adjudication_record` writes typed adjudication frontmatter + markdown body under `adjudications/`.
+2. `append_character_record` writes `CharacterDossier` frontmatter + markdown body under `characters/`.
+3. `append_diegetic_artifact_record` writes `DiegeticArtifactFrontmatter` frontmatter + markdown body under `diegetic-artifacts/`.
+
+Added `resolveHybridFilePath` for world-root containment and expected-subdirectory validation, exported shared text hashing and file-existence helpers, and updated the patch envelope type so adjudication ops carry typed frontmatter.
+
+## Verification Result
+
+Passed:
+
+1. `cd tools/patch-engine && npm run build`
+2. `grep -h "^export function stageAppend" tools/patch-engine/src/ops/append-adjudication-record.ts tools/patch-engine/src/ops/append-character-record.ts tools/patch-engine/src/ops/append-diegetic-artifact-record.ts | wc -l` -> `3`
+3. `grep -h -E "^export function resolveHybridFilePath|^export interface AdjudicationFrontmatter" tools/patch-engine/src/ops/types.ts tools/patch-engine/src/ops/append-adjudication-record.ts | wc -l` -> `2`
+4. `node -e ...` direct probe from `tools/patch-engine` verified accepted `characters/` target, rejected `../../etc/passwd`, and rejected the wrong `adjudications/` prefix for a character path.
+5. `node -e ...` direct staging probe from `tools/patch-engine` called `stageAppendCharacterRecord`, read the staged temp file, and verified the frontmatter/body layout plus temp-file path shape. Post-ticket review reran this probe under `/tmp/worldloom-patch-engine-review-stage-probe` and cleaned that temp root before archival.
+
+## Deviations
+
+1. Added `tools/patch-engine/src/envelope/schema.ts` to the owned file set because the live schema still typed adjudications as `{verdict, body, filename}`; the new op module needs `adjudication_frontmatter` + `body_markdown` to compile truthfully.
+2. Added `tools/patch-engine/src/ops/shared.ts` to the owned file set for shared hybrid-file error codes, content hashing, and file-existence checking.
+3. Did not update the broader stale package `README.md` or missing `apply.ts` entrypoint drift. `npm run build` passes, and those surfaces are outside this three-op module ticket.
+4. Post-ticket review created `tickets/SPEC03PATENG-010.md` for the remaining SPEC-03 prose drift around the adjudication payload shape; the code and ticket-004 proof surface are complete without that spec-only cleanup.
