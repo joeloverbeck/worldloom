@@ -1,14 +1,14 @@
 # SPEC12SKIRELRET-003: Structured record-edge adapters
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small-Medium
-**Engine Changes**: Yes — adds adapter functions in `tools/world-index` that emit `references_record` edges + corresponding `scoped_references` rows (with `authority_level='exact_structured_edge'`) from existing id-bearing frontmatter fields. Also adds a negative-invariant test in `tools/world-mcp` proving `find_impacted_fragments` does not traverse the new edges.
+**Engine Changes**: Yes — adds the missing structured-edge extraction stage in `tools/world-index`, emits backing `scoped_reference` nodes required by the live schema, clears/rebuilds `references_record` edges alongside the existing scoped-reference refresh path, and adds focused regression tests in `tools/world-index` + `tools/world-mcp`.
 **Deps**: SPEC12SKIRELRET-001
 
 ## Problem
 
-Per SPEC-12 D3, the retrieval graph must materialize exact id-bearing cross-record links already present in frontmatter (`author_character_id` on diegetic artifacts, `source_artifact_id` on mining-batch manifests, `batch_id` on proposal cards and character proposal cards). Without adapters, these links stay invisible to `get_neighbors`, ranking, and packet assembly — even though they carry higher trust than lexical search. The observed production failure (DA-0002 visibly carries `author_character_id: CHAR-0002` but the retrieval graph treats them as unrelated) is this gap made concrete. This ticket emits structured edges from those fields and confirms the SPEC-12 D2 invariant that `find_impacted_fragments` does NOT traverse the new edges.
+Per SPEC-12 D3, the retrieval graph must materialize exact id-bearing cross-record links already present in frontmatter (`author_character_id` on diegetic artifacts, `source_artifact_id` on mining-batch manifests, `batch_id` on proposal cards and character proposal cards). The shared scoped-reference substrate from ticket 002 is already live, but the actual adapter stage that turns those fields into `references_record` edges plus `scoped_references` rows is still missing. As a result, DA-0002-style exact links remain invisible to `get_neighbors`, ranking, and packet assembly even though they carry higher trust than lexical search. This ticket lands the missing adapter stage and adds a regression test that keeps SPEC-12 D2's canonical-only `find_impacted_fragments` traversal explicit.
 
 ## Assumption Reassessment (2026-04-24)
 
@@ -18,6 +18,8 @@ Per SPEC-12 D3, the retrieval graph must materialize exact id-bearing cross-reco
 2. Mining batches vs general proposal batches: only mining batches (from `canon-facts-from-diegetic-artifacts`) carry `source_artifact_id`; general proposal batches (from `propose-new-canon-facts`) do not. Adapter must no-op cleanly when the field is absent on a given batch.
 3. Cross-package contract under audit: structured-edge rows share the `scoped_references` table with ticket 002's frontmatter-declared rows. The `authority_level` column disambiguates: `'exact_structured_edge'` for this ticket vs `'explicit_scoped_reference'` for 002. Consumers (004-008) read the table filtered by `authority_level` when they need tier-specific behavior.
 4. FOUNDATIONS §Rule 7 (Preserve Mystery Deliberately) enforcement surface under audit: `find_impacted_fragments` currently traverses only `mentions_entity` + `required_world_update` edges (`tools/world-mcp/src/tools/find-impacted-fragments.ts:88-105`). SPEC-12 D2 Invariants require this traversal set to stay canonical-only in v1; widening to `references_record` / `references_scoped_name` would silently extend impact surfaces and risk Rule 7 MR-firewall drift. This ticket adds a negative-invariant test proving the current traversal remains unchanged.
+5. Reassessment mismatch: parts of the original drafted scope already landed before this run. `tools/world-index/src/schema/types.ts` already exports `scoped_reference`, `references_record`, and `exact_structured_edge`; `tools/world-index/src/index/nodes.ts` already persists `scoped_references`; and `tools/world-index/src/commands/shared.ts` already rebuilds explicit scoped references. The remaining owned delta is the missing structured-edge extractor plus the rebuild-path wiring that clears/reinserts `references_record` edges alongside the existing derived-state refresh.
+6. Live-schema consequence: `tools/world-index/src/schema/migrations/002_scoped_references.sql` already enforces `scoped_references.reference_id` as a foreign key to `nodes(node_id)`. Exact structured rows therefore need backing `scoped_reference` nodes too; treating them as table-only rows would violate the existing contract instead of landing this ticket truthfully.
 
 ## Architecture Check
 
@@ -59,7 +61,7 @@ When the source field is absent on a record (e.g., general proposal batch withou
 
 ### 3. Wire into the index-build pipeline
 
-Persist emitted `scoped_references` rows and `references_record` edges alongside ticket 002's output in the same index-write pass.
+Persist emitted `scoped_references` rows and `references_record` edges alongside ticket 002's output in the same derived-state refresh path, and clear prior `references_record` edges during rebuild so re-indexes stay truthful.
 
 ### 4. Negative invariant: `find_impacted_fragments` does not traverse new edges
 
@@ -68,8 +70,8 @@ Add a unit test in `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts`
 ## Files to Touch
 
 - `tools/world-index/src/parse/structured-edges.ts` (new)
-- `tools/world-index/src/index/nodes.ts` or sibling index-write module (modify — persist structured-edge rows alongside 002's output)
-- `tools/world-index/tests/parse/structured-edges.test.ts` (new)
+- `tools/world-index/src/commands/shared.ts` (modify — rebuild-path wiring/cleanup for structured edges)
+- `tools/world-index/tests/structured-edges.test.ts` (new)
 - `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts` (modify — add negative invariant)
 
 ## Out of Scope
@@ -88,7 +90,7 @@ Add a unit test in `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts`
 4. General proposal batch fixture WITHOUT `source_artifact_id` emits 0 edges for that field.
 5. Unresolvable fixture (e.g., `batch_id: BATCH-9999` with no matching batch) emits 1 edge with `target_node_id=null` and `target_unresolved_ref='BATCH-9999'`.
 6. `findImpactedFragments` on a fixture whose seed has only `references_record` and `references_scoped_name` edges returns `impacted: []`.
-7. `pnpm --filter @worldloom/world-index test` + `pnpm --filter @worldloom/world-mcp test` pass.
+7. Focused package proof passes at the truthful boundary: build `@worldloom/world-index`, run `dist/tests/structured-edges.test.js`, build `@worldloom/world-mcp`, then run its targeted impacted-fragments test.
 
 ### Invariants
 
@@ -100,11 +102,30 @@ Add a unit test in `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts`
 
 ### New/Modified Tests
 
-1. `tools/world-index/tests/parse/structured-edges.test.ts` — fixture-based tests for 5 adapter cases + unresolvable + absent-field.
+1. `tools/world-index/tests/structured-edges.test.ts` — fixture-based tests for the adapter cases plus DB persistence of structured rows/edges.
 2. `tools/world-mcp/tests/tools/find-impacted-fragments.test.ts` — add negative-invariant test per §Verification Layers bullet 6.
 
 ### Commands
 
-1. `pnpm --filter @worldloom/world-index test tests/parse/structured-edges.test.ts`
-2. `pnpm --filter @worldloom/world-mcp test tests/tools/find-impacted-fragments.test.ts`
-3. `pnpm -r test`
+1. `pnpm --filter @worldloom/world-index build`
+2. `pnpm --filter @worldloom/world-index exec node --test dist/tests/structured-edges.test.js`
+3. `pnpm --filter @worldloom/world-mcp build`
+4. `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/find-impacted-fragments.test.js`
+
+## Outcome
+
+- Completion date: 2026-04-24
+- Added `extractStructuredRecordEdges` in `tools/world-index/src/parse/structured-edges.ts` for the four SPEC-12 adapter cases: diegetic artifact `author_character_id`, mining-batch `source_artifact_id`, proposal-card `batch_id`, and character-proposal-card `batch_id`.
+- Wired the extractor into `tools/world-index/src/commands/shared.ts` so derived-state refresh now emits backing `scoped_reference` nodes, `scoped_references` rows with `authority_level='exact_structured_edge'`, and `references_record` edges, while also clearing stale `references_record` edges on rebuild.
+- Added focused `world-index` tests proving resolved, missing-field, and unresolved structured-edge behavior plus DB persistence, and added a `world-mcp` regression test proving `findImpactedFragments` still ignores `references_record` and `references_scoped_name`.
+
+## Verification Result
+
+- Passed: `pnpm --filter @worldloom/world-index build`
+- Passed: `pnpm --filter @worldloom/world-index exec node --test dist/tests/structured-edges.test.js`
+- Passed: `pnpm --filter @worldloom/world-mcp build`
+- Passed: `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/find-impacted-fragments.test.js`
+
+## Deviations
+
+- The original draft treated exact structured rows as table rows plus direct record edges only. The live schema already requires every `scoped_references.reference_id` to exist in `nodes`, so the truthful landed shape emits backing `scoped_reference` nodes for structured rows as required consequence fallout within the same owned seam.

@@ -152,3 +152,56 @@ test("findImpactedFragments returns node_not_found for a missing source node", a
     destroyTempRepoRoot(root);
   }
 });
+
+test("findImpactedFragments does not traverse structured or scoped reference edges", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "DA-0002",
+          world_slug: "seeded",
+          file_path: "diegetic-artifacts/report.md",
+          node_type: "diegetic_artifact_record",
+          body: "After Action Report"
+        },
+        {
+          node_id: "CHAR-0002",
+          world_slug: "seeded",
+          file_path: "characters/melissa.md",
+          node_type: "character_record",
+          body: "Melissa Threadscar"
+        },
+        {
+          node_id: "DA-0002#scoped:mudbrook:0",
+          world_slug: "seeded",
+          file_path: "diegetic-artifacts/report.md",
+          node_type: "scoped_reference",
+          body: "Mudbrook"
+        }
+      ],
+      edges: [
+        {
+          source_node_id: "DA-0002",
+          target_node_id: "CHAR-0002",
+          edge_type: "references_record"
+        },
+        {
+          source_node_id: "DA-0002",
+          target_node_id: "DA-0002#scoped:mudbrook:0",
+          edge_type: "references_scoped_name"
+        }
+      ]
+    });
+
+    const result = await withRepoRoot(root, () =>
+      findImpactedFragments({ world_slug: "seeded", node_ids: ["DA-0002"] })
+    );
+
+    assert.deepEqual(result, { impacted: [] });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

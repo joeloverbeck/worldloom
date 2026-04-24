@@ -30,6 +30,7 @@ import { parseMarkdown } from "../parse/markdown";
 import { extractEntities, loadOntologyRegistry } from "../parse/entities";
 import { extractProseNodes } from "../parse/prose";
 import { extractScopedReferences } from "../parse/scoped";
+import { extractStructuredRecordEdges } from "../parse/structured-edges";
 import { extractSemanticEdges } from "../parse/semantic";
 import { extractYamlNodes } from "../parse/yaml";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
@@ -140,6 +141,7 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
     registry
   );
   const scoped = extractScopedReferences(proseNodes);
+  const structured = extractStructuredRecordEdges(proseNodes);
 
   clearEntityState(db);
 
@@ -167,6 +169,18 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
     );
   }
 
+  if (structured.scopedNodes.length > 0) {
+    insertNodes(db, structured.scopedNodes);
+    insertAnchorChecksums(
+      db,
+      structured.scopedNodes.map((node) => ({
+        node_id: node.node_id,
+        anchor_form: node.body,
+        checksum: node.anchor_checksum
+      }))
+    );
+  }
+
   if (entities.length > 0) {
     insertEntities(db, entities);
   }
@@ -177,6 +191,10 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
 
   if (scoped.scopedReferences.length > 0) {
     insertScopedReferences(db, scoped.scopedReferences);
+  }
+
+  if (structured.scopedReferences.length > 0) {
+    insertScopedReferences(db, structured.scopedReferences);
   }
 
   if (scoped.scopedReferenceAliases.length > 0) {
@@ -193,6 +211,10 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
 
   if (scoped.edges.length > 0) {
     insertEdges(db, scoped.edges);
+  }
+
+  if (structured.edges.length > 0) {
+    insertEdges(db, structured.edges);
   }
 
   if (validationResults.length > 0) {
@@ -395,8 +417,9 @@ function clearEntityState(db: Database.Database): void {
   db.prepare("DELETE FROM scoped_references").run();
   db.prepare("DELETE FROM edges WHERE edge_type = 'mentions_entity'").run();
   db.prepare("DELETE FROM edges WHERE edge_type = 'references_scoped_name'").run();
+  db.prepare("DELETE FROM edges WHERE edge_type = 'references_record'").run();
   db.prepare(
-    `
+      `
       DELETE FROM validation_results
       WHERE validator_name = 'frontmatter_parse'
         AND code = 'malformed_authority_source'
