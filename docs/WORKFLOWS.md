@@ -29,6 +29,6 @@ Quick reference for invoking each skill. For detailed skill behavior, see the sk
 
 - **Build or refresh a world's index**: `world-index build <world-slug>` for a full rebuild, `world-index sync <world-slug>` for an incremental refresh.
 - **Inspect index state**: `world-index stats <world-slug>` for counts and freshness; `world-index inspect <node-id>` for a single-node dump.
-- **Verify index integrity**: `world-index verify <world-slug>` re-hashes indexed nodes and reports drift.
+- **Verify index integrity**: `world-index verify <world-slug>` re-parses disk-backed indexed files, skips synthetic atomic logical rows for retired root markdown concerns, and reports drift.
 - **Validate a world's state**: `world-validate <world-slug>` is the planned validator CLI; `--structural` narrows to structural checks and `--rules=1,6` targets specific rule sets.
 - **MCP retrieval surface**: Claude Code will use `.mcp.json` plus `tools/world-mcp/` to expose `mcp__worldloom__*` retrieval tools. If a workflow reports stale-index errors, refresh the index before debugging the skill itself.

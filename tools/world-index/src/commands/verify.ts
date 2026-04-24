@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import type Database from "better-sqlite3";
 
 import { insertValidationResults } from "../index/nodes";
+import { ATOMIC_LOGICAL_WORLD_FILES, parseAtomicSourceFile } from "../parse/atomic";
 import type { NodeRow, ValidationResultRow } from "../schema/types";
 import { openExistingWorldIndex, parseWorldFile, resolveWorldDirectory } from "./shared";
 
@@ -15,28 +16,35 @@ export function verify(worldRoot: string, worldSlug: string): number {
   try {
     const fileRows = opened.prepare(
       `
-        SELECT file_path
+        SELECT file_path, content_hash
         FROM file_versions
         WHERE world_slug = ?
         ORDER BY file_path
       `
-    ).all(worldSlug) as Array<{ file_path: string }>;
+    ).all(worldSlug) as Array<{ file_path: string; content_hash: string }>;
 
     const results: ValidationResultRow[] = [];
     let resultId = 1;
 
     for (const row of fileRows) {
       const absolutePath = `${resolveWorldDirectory(worldRoot, worldSlug)}/${row.file_path}`;
+      if (isAtomicLogicalFile(row.file_path) && !existsSync(absolutePath)) {
+        continue;
+      }
+
       if (!existsSync(absolutePath)) {
         results.push(createDriftResult(resultId, worldSlug, row.file_path, null, "Indexed file is missing on disk."));
         resultId += 1;
         continue;
       }
 
-      const parsed = parseWorldFile(worldRoot, worldSlug, row.file_path);
+      const parsed = row.file_path.startsWith("_source/")
+        ? parseAtomicSourceFile(worldRoot, worldSlug, row.file_path)
+        : parseWorldFile(worldRoot, worldSlug, row.file_path);
       const storedNodes = loadStoredFileNodes(opened, worldSlug, row.file_path);
       const storedById = new Map(storedNodes.map((node) => [node.node_id, node]));
       const parsedById = new Map(parsed.nodes.map((node) => [node.node_id, node]));
+      const fileResultStart = results.length;
 
       for (const parsedNode of parsed.nodes) {
         const stored = storedById.get(parsedNode.node_id);
@@ -82,7 +90,22 @@ export function verify(worldRoot: string, worldSlug: string): number {
           resultId += 1;
         }
       }
+
+      if (results.length === fileResultStart && row.content_hash !== parsed.contentHash) {
+        results.push(
+          createDriftResult(
+            resultId,
+            worldSlug,
+            row.file_path,
+            null,
+            `Stored file hash ${row.content_hash} does not match computed hash ${parsed.contentHash}.`
+          )
+        );
+        resultId += 1;
+      }
     }
+
+    clearPreviousDriftResults(opened, worldSlug);
 
     if (results.length > 0) {
       insertValidationResults(opened, results);
@@ -93,6 +116,20 @@ export function verify(worldRoot: string, worldSlug: string): number {
   } finally {
     opened.close();
   }
+}
+
+function isAtomicLogicalFile(filePath: string): boolean {
+  return (ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath);
+}
+
+function clearPreviousDriftResults(db: Database.Database, worldSlug: string): void {
+  db.prepare(
+    `
+      DELETE FROM validation_results
+      WHERE world_slug = ?
+        AND validator_name = 'drift_check'
+    `
+  ).run(worldSlug);
 }
 
 function loadStoredFileNodes(
@@ -107,7 +144,11 @@ function loadStoredFileNodes(
         FROM nodes
         WHERE world_slug = ?
           AND file_path = ?
-          AND node_type NOT IN ('named_entity', 'scoped_reference')
+          AND node_type != 'scoped_reference'
+          AND (
+            node_type != 'named_entity'
+            OR (file_path LIKE '_source/entities/%' AND node_id NOT LIKE 'entity:%')
+          )
         ORDER BY node_id
       `
     )

@@ -1,6 +1,6 @@
 # world-index
 
-SQLite-backed structure-aware index over worldloom markdown world files. Parsed nodes, typed edges, entity mentions, anchor checksums — the machine-facing view that every other tool in `tools/` consumes.
+SQLite-backed structure-aware index over worldloom world sources. Parsed nodes, typed edges, entity mentions, anchor checksums — the machine-facing view that every other tool in `tools/` consumes.
 
 **Design**: `archive/specs/SPEC-01-world-index.md`
 **Phase**: 1
@@ -13,7 +13,7 @@ world-index build <world-slug>           # full rebuild
 world-index sync <world-slug>            # incremental
 world-index inspect <node-id>            # JSON dump of a single node
 world-index stats <world-slug>           # counts by node_type; file freshness
-world-index verify <world-slug>          # re-hash all nodes; flag drift
+world-index verify <world-slug>          # re-parse disk-backed indexed files; skip synthetic atomic logical rows; flag drift
 ```
 
 ## Planned package layout
@@ -33,4 +33,4 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 
 ## Output location per world
 
-`worlds/<slug>/_index/world.db` (gitignored; regenerable from markdown).
+`worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown and `_source/*.yaml` atomic records).

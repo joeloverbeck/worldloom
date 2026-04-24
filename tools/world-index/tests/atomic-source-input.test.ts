@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -7,6 +7,7 @@ import test from "node:test";
 import Database from "better-sqlite3";
 
 import { build } from "../src/commands/build";
+import { verify } from "../src/commands/verify";
 
 function createAtomicRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "world-index-atomic-"));
@@ -149,6 +150,35 @@ function cleanup(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
+function loadDriftRows(
+  root: string
+): Array<{ validator_name: string; severity: string; code: string; node_id: string | null; file_path: string | null }> {
+  const db = new Database(path.join(root, "worlds", "atomic-world", "_index", "world.db"), {
+    readonly: true
+  });
+  try {
+    return db
+      .prepare(
+        `
+          SELECT validator_name, severity, code, node_id, file_path
+          FROM validation_results
+          WHERE world_slug = 'atomic-world'
+            AND validator_name = 'drift_check'
+          ORDER BY result_id
+        `
+      )
+      .all() as Array<{
+      validator_name: string;
+      severity: string;
+      code: string;
+      node_id: string | null;
+      file_path: string | null;
+    }>;
+  } finally {
+    db.close();
+  }
+}
+
 test("build reads SPEC-13 atomic source records without retired root markdown files", () => {
   const root = createAtomicRepoRoot();
 
@@ -255,6 +285,46 @@ test("legacy fixture still uses markdown when _source has no recognized atomic Y
     } finally {
       db.close();
     }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("verify skips atomic logical rows and detects drift in disk-backed atomic records", () => {
+  const root = createAtomicRepoRoot();
+
+  try {
+    assert.equal(build(root, "atomic-world"), 0);
+    assert.equal(verify(root, "atomic-world"), 0);
+    assert.deepEqual(loadDriftRows(root), []);
+
+    const sourcePath = path.join(
+      root,
+      "worlds",
+      "atomic-world",
+      "_source",
+      "institutions",
+      "SEC-INS-001.yaml"
+    );
+    writeFileSync(
+      sourcePath,
+      readFileSync(sourcePath, "utf8").replace(
+        "body: Brinewick wardens keep the public salt measures.",
+        "body: Brinewick wardens keep the public salt measures and bells."
+      ),
+      "utf8"
+    );
+
+    assert.equal(verify(root, "atomic-world"), 1);
+    assert.deepEqual(loadDriftRows(root), [
+      {
+        validator_name: "drift_check",
+        severity: "fail",
+        code: "content_hash_drift",
+        node_id: "SEC-INS-001",
+        file_path: "_source/institutions/SEC-INS-001.yaml"
+      }
+    ]);
   } finally {
     cleanup(root);
   }

@@ -33,7 +33,7 @@ function renderHelp(): string {
     "  sync <world-slug>     incremental sync",
     "  inspect <node-id>     dump one node as JSON",
     "  stats <world-slug>    print node counts and file freshness",
-    "  verify <world-slug>   re-parse files and flag content-hash drift",
+    "  verify <world-slug>   re-parse disk-backed indexed files and flag content-hash drift",
     "",
     "Options:",
     "  --help     Show this help message",
