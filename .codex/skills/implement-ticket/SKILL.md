@@ -63,6 +63,8 @@ Use the classification to choose which repo surfaces must be read and which veri
 
 If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
 
+If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.
@@ -99,6 +101,7 @@ Check:
 - whether a repo-level doc under `docs/` is the real authority or a tested consumer for the seam you are changing; if tests, helpers, or examples parse that doc directly, treat it as same-seam owned fallout even when the draft ticket excluded it
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
+- for staged tool/schema tickets that compare persisted hashes, checksums, canonical serialization, or drift markers across packages, inspect the producer of the stored value and reuse its canonicalization algorithm or record the intentional difference before coding
 - for staged tool/schema tickets that emit derived rows into an existing table, inspect the live schema for foreign keys and companion-artifact requirements before coding; if the row must also emit a backing `nodes` record, alias row, cleanup path, or other dependent artifact to satisfy the current contract, treat that as same-seam owned fallout and record it in reassessment
 - for staged tool/schema tickets, every drafted structured error code, error taxonomy table, and error enum named by the ticket or spec; verify the live authority (`errors.ts`, shared error docs, or package-local contract surface) before assuming malformed-input or sentinel-error behavior is already representable
 - for staged tool/schema or retrieval tickets that emit backing `nodes` rows as implementation detail, verify whether default user-facing tools should surface those backing nodes directly, suppress them, or surface only their source records; record the intended visibility contract in reassessment before coding so synthetic nodes do not leak into default result sets by accident
@@ -262,7 +265,7 @@ Update the active ticket before finishing:
 - if package-manager commands emitted security, deprecation, or funding warnings that were not repaired because they were outside scope, mention them in `## Verification Result` or `## Deviations` so closeout does not imply a cleaner dependency state than was observed
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 - after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
-- for `tool or script implementation` tickets whose landed behavior changes a package-local contract, inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly (for example: `README.md`, `.mcp.json.example`, package-local usage snippets, or command examples) and truth those surfaces before finishing
+- for `tool or script implementation` tickets whose landed behavior changes a package-local contract, perform the package/tool closeout hard stop in `references/package-tooling.md`: inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly, then either truth them or record why they are outside the active seam
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 

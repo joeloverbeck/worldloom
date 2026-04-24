@@ -1,14 +1,14 @@
 # SPEC03PATENG-003: Update/append op modules + retcon_attestation gate
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — adds 4 per-op modules under `tools/patch-engine/src/ops/` for in-place atomic-record mutation. No impact on existing world-index or world-mcp code.
+**Engine Changes**: Yes — adds 4 per-op modules under `tools/patch-engine/src/ops/` for in-place atomic-record mutation and extends shared patch-engine staging/error helpers. No impact on existing world-mcp code.
 **Deps**: SPEC03PATENG-001
 
 ## Problem
 
-SPEC-03's Update ops table (post-reassessment spec lines 81–88) defines 4 op types for mutating existing atomic records: `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`. Unlike the Create ops in ticket 002 (which always write fresh files), these ops read an existing `_source/*.yaml` record, mutate its parsed representation, and stage a temp-file replacement. The `update_record_field` op additionally enforces SPEC-03's retcon-attestation discipline (spec lines 97–99): structural-field mutations on accepted CFs require an explicit `retcon_attestation`, while `notes` / `modification_history` / `extensions` fields are freely appendable.
+SPEC-03's Update ops table in `specs/SPEC-03-patch-engine.md` defines 4 op types for mutating existing atomic records: `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`. Unlike the Create ops in ticket 002 (which always write fresh files), these ops read an existing `_source/*.yaml` record, mutate its parsed representation, and stage a temp-file replacement. The `update_record_field` op additionally enforces SPEC-03's retcon-attestation discipline: structural-field mutations on accepted CFs require an explicit `retcon_attestation`, while `notes` / `modification_history` / `extensions` fields are freely appendable.
 
 ## Assumption Reassessment (2026-04-24)
 
@@ -16,7 +16,9 @@ SPEC-03's Update ops table (post-reassessment spec lines 81–88) defines 4 op t
 2. `CanonFactRecord.modification_history` is the structural surface for CF retcon attribution; `notes` is the prose/free-form surface. Both are append-only in the SPEC-03 discipline. The `extensions[]` array lives on INV/M/OQ/SEC records (per the interfaces added in ticket 001), not on CF — CF uses `modification_history[]` for structural attribution and `notes` for prose-format attribution lines.
 3. Shared boundary: the retcon-attestation taxonomy (`retcon_type: 'A' | 'B' | 'C' | 'D' | 'E' | 'F'`) mirrors the continuity-audit skill's classification surface. The engine does not validate WHICH retcon type is appropriate — that's continuity-audit's job. The engine only verifies the attestation is present on structural mutations.
 4. FOUNDATIONS principle under audit: **Rule 6 No Silent Retcons** (docs/FOUNDATIONS.md §376). The `update_record_field` gate structurally enforces Rule 6 at the engine layer by refusing structural mutations without `retcon_attestation`. SPEC-04's `rule6_no_silent_retcons` validator provides the downstream check (CH entry exists, `modification_history` entry exists, extension-record exists); this ticket provides the upstream engine gate.
-5. Adjacent contradictions: none. SPEC-04 is an independent validator that runs pre-apply (see ticket 006 Phase A step 5); its existence reinforces rather than duplicates the engine-level gate.
+5. User-supplied reference path `specs/SPEC-03-phase2-tooling.md` was stale for this ticket; the live authority is `specs/SPEC-03-patch-engine.md`. `specs/SPEC-02-phase2-tooling.md` exists but is a different SPEC-02 surface, not this patch-engine contract.
+6. Same-seam correction: `tools/world-index/src/hash/content.ts` computes record `content_hash` with the `yaml` package and `sortMapEntries: true`. The patch-engine shared serializer previously used `js-yaml`, which could make disk recomputation disagree with the index. This ticket updates `tools/patch-engine/src/ops/shared.ts` and the package manifest/lockfile to use the same stable YAML serializer before implementing update-op drift checks.
+7. Adjacent contradictions: none. SPEC-04 is an independent validator that runs pre-apply (see ticket 006 Phase A step 5); its existence reinforces rather than duplicates the engine-level gate.
 
 ## Architecture Check
 
@@ -38,9 +40,9 @@ SPEC-03's Update ops table (post-reassessment spec lines 81–88) defines 4 op t
 ### 1. Create `tools/patch-engine/src/ops/update-record-field.ts`
 
 Export `stageUpdateRecordField(env: PatchPlanEnvelope, op: PatchOperation & {op: 'update_record_field'}, ctx: OpContext): Promise<StagedWrite>`. Steps:
-- Resolve `op.target_record_id` → `file_path` via `ctx.db` query on `nodes` table.
+- Resolve `op.payload.target_record_id` → `file_path` via `ctx.db` query on `nodes` table.
 - Read file; parse YAML; compute `current_hash`.
-- If `op.expected_content_hash !== current_hash`, return `{code: 'record_hash_drift', target_record_id, expected: op.expected_content_hash, actual: current_hash}`.
+- If `op.expected_content_hash !== current_hash`, throw a structured `PatchEngineOpError` with `{code: 'record_hash_drift', record_id, op_kind}`.
 - Classify the field path:
   - **Freely-appendable fields**: `['notes']`, `['modification_history']`, `['extensions']`, `['touched_by_cf']` (on SEC records). Operation kinds `'append_list'` and `'append_text'` allowed without retcon attestation.
   - **Structural fields**: anything else on CF records (`['statement']`, `['scope']`, `['domains_affected']`, `['distribution', '*']`, `['visible_consequences']`, etc.) + structural fields on INV/M/OQ/SEC.
@@ -51,7 +53,7 @@ Export `stageUpdateRecordField(env: PatchPlanEnvelope, op: PatchOperation & {op:
 ### 2. Create `tools/patch-engine/src/ops/append-extension.ts`
 
 Export `stageAppendExtension(env: PatchPlanEnvelope, op: PatchOperation & {op: 'append_extension'}, ctx: OpContext): Promise<StagedWrite>`. Steps:
-- Resolve `op.target_record_id` → `file_path`; read; parse; hash-check.
+- Resolve `op.payload.target_record_id` → `file_path`; read; parse; hash-check.
 - Reject if target is a CF record — CF uses `modification_history[]`, not `extensions[]`. Error: `{code: 'op_target_class_mismatch', target_record_id, expected_classes: ['invariant','mystery_reserve_entry','open_question_entry','section']}`.
 - Push `op.payload.extension` to the record's `extensions[]` array. Validate extension shape: `{originating_cf, change_id, date, label, body}` all present and non-empty.
 - Serialize; stage temp-file.
@@ -61,15 +63,15 @@ This op does NOT auto-add `append_touched_by_cf` — the orchestrator (ticket 00
 ### 3. Create `tools/patch-engine/src/ops/append-touched-by-cf.ts`
 
 Export `stageAppendTouchedByCf(env: PatchPlanEnvelope, op: PatchOperation & {op: 'append_touched_by_cf'}, ctx: OpContext): Promise<StagedWrite>`. Steps:
-- Resolve `op.target_sec_id` → `file_path`; read; parse; hash-check.
+- Resolve `op.payload.target_sec_id` → `file_path`; read; parse; hash-check.
 - Reject if target is not a SEC record: `{code: 'op_target_class_mismatch', target_record_id, expected_class: 'section'}`.
-- If `op.cf_id` already present in `touched_by_cf[]`, return `{ok: true, noop: true}` staged write with unchanged content — the caller (orchestrator in ticket 006) treats noops as success and skips the rename.
-- Otherwise push `op.cf_id`; serialize; stage temp-file.
+- If `op.payload.cf_id` already present in `touched_by_cf[]`, return a staged write with unchanged content and `noop: true` — the caller (orchestrator in ticket 006) treats noops as success and can skip the rename.
+- Otherwise push `op.payload.cf_id`; serialize; stage temp-file.
 
 ### 4. Create `tools/patch-engine/src/ops/append-modification-history-entry.ts`
 
 Export `stageAppendModificationHistoryEntry(env: PatchPlanEnvelope, op: PatchOperation & {op: 'append_modification_history_entry'}, ctx: OpContext): Promise<StagedWrite>`. Steps:
-- Resolve `op.target_cf_id` → `file_path`; read; parse; hash-check.
+- Resolve `op.payload.target_cf_id` → `file_path`; read; parse; hash-check.
 - Reject if target is not a CF record.
 - Push `{change_id, originating_cf, date, summary}` from `op.payload` to `modification_history[]`. Validate all four fields non-empty and `change_id` matches `CH-\d{4}`.
 - Serialize; stage temp-file.
@@ -82,6 +84,10 @@ This op does NOT require retcon attestation — `modification_history` is the ca
 - `tools/patch-engine/src/ops/append-extension.ts` (new)
 - `tools/patch-engine/src/ops/append-touched-by-cf.ts` (new)
 - `tools/patch-engine/src/ops/append-modification-history-entry.ts` (new)
+- `tools/patch-engine/src/ops/shared.ts` (modify — existing-record load/stage helpers, stable YAML serializer, op error codes)
+- `tools/patch-engine/src/ops/types.ts` (modify — optional `noop` marker on `StagedWrite`)
+- `tools/patch-engine/package.json` (modify — direct `yaml` dependency for serializer parity with world-index)
+- `tools/patch-engine/package-lock.json` (modify)
 
 ## Out of Scope
 
@@ -96,7 +102,7 @@ This op does NOT require retcon attestation — `modification_history` is the ca
 ### Tests That Must Pass
 
 1. `cd tools/patch-engine && npm run build` exits 0 with all 4 new files compiled.
-2. `grep -c "^export function stage" tools/patch-engine/src/ops/update-record-field.ts tools/patch-engine/src/ops/append-extension.ts tools/patch-engine/src/ops/append-touched-by-cf.ts tools/patch-engine/src/ops/append-modification-history-entry.ts` returns 4 (one export per file).
+2. `grep -h "^export .*function stage" tools/patch-engine/src/ops/update-record-field.ts tools/patch-engine/src/ops/append-extension.ts tools/patch-engine/src/ops/append-touched-by-cf.ts tools/patch-engine/src/ops/append-modification-history-entry.ts | wc -l` returns 4 (one export per file).
 3. Each op type-checks against `PatchOperation` discriminated union per its `op` narrow.
 
 ### Invariants
@@ -118,3 +124,28 @@ This op does NOT require retcon attestation — `modification_history` is the ca
 1. `cd tools/patch-engine && npm run build` (targeted: confirms all 4 op modules compile).
 2. `grep -c "retcon_attestation" tools/patch-engine/src/ops/update-record-field.ts` should be ≥2 (at least the gate check + error construction).
 3. `grep "append_touched_by_cf" tools/patch-engine/src/ops/append-extension.ts | wc -l` should be 0 (confirms the auto-add is NOT implemented at the op layer — it's the orchestrator's job in ticket 006).
+
+## Outcome
+
+Completion date: 2026-04-24.
+
+Implemented the four update/append op modules and the shared existing-record staging substrate:
+
+1. `stageUpdateRecordField` resolves indexed records, recomputes disk YAML hashes, applies `set` / `append_list` / `append_text`, rejects invalid field paths, and requires valid retcon attestation for structural mutations.
+2. `stageAppendExtension`, `stageAppendTouchedByCf`, and `stageAppendModificationHistoryEntry` enforce target-class checks, payload shape checks, hash drift checks, and staged temp-file output.
+3. `append_touched_by_cf` is idempotent via an unchanged staged write marked `noop: true`.
+4. Patch-engine YAML serialization now uses the same `yaml` serializer settings as `world-index` so update-op drift checks compare against the actual indexed `content_hash` contract.
+
+## Verification Result
+
+1. `cd tools/patch-engine && npm run build` — passed.
+2. `grep -h "^export .*function stage" tools/patch-engine/src/ops/update-record-field.ts tools/patch-engine/src/ops/append-extension.ts tools/patch-engine/src/ops/append-touched-by-cf.ts tools/patch-engine/src/ops/append-modification-history-entry.ts | wc -l` — returned `4`.
+3. `grep -c "retcon_attestation" tools/patch-engine/src/ops/update-record-field.ts` — returned `3`.
+4. `grep "append_touched_by_cf" tools/patch-engine/src/ops/append-extension.ts | wc -l` — returned `0`.
+
+`npm install` for the direct `yaml` dependency reported 10 funding notices and 1 moderate vulnerability; dependency-audit remediation is outside this ticket.
+
+## Deviations
+
+1. Corrected stale user reference `specs/SPEC-03-phase2-tooling.md` to the live authority `specs/SPEC-03-patch-engine.md`.
+2. Added `tools/patch-engine/src/ops/shared.ts`, `tools/patch-engine/src/ops/types.ts`, `tools/patch-engine/package.json`, and `tools/patch-engine/package-lock.json` to the touched set because stable disk-hash recomputation and noop staging are required by the update-op contract.

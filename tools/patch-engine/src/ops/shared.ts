@@ -1,17 +1,25 @@
 import { createHash } from "node:crypto";
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import yaml from "js-yaml";
+import YAML from "yaml";
 
 import type { IdAllocations, OperationKind } from "../envelope/schema.js";
-import type { StagedWrite } from "./types.js";
+import type { OpContext, StagedWrite } from "./types.js";
 
 export type PatchEngineOpErrorCode =
+  | "field_path_invalid"
   | "invalid_record_id"
+  | "invalid_extension_payload"
+  | "invalid_modification_history_entry"
   | "missing_expected_id_allocation"
+  | "op_target_class_mismatch"
+  | "record_hash_drift"
   | "record_already_exists"
+  | "record_not_found"
+  | "retcon_attestation_required"
   | "target_world_mismatch"
+  | "unsupported_operation"
   | "unsupported_section_prefix";
 
 export interface PatchEngineOpErrorDetails {
@@ -39,10 +47,9 @@ export class PatchEngineOpError extends Error {
 }
 
 export function serializeStableYaml(value: unknown): string {
-  return yaml.dump(value, {
-    lineWidth: -1,
-    noRefs: true,
-    sortKeys: true
+  return YAML.stringify(value, {
+    lineWidth: 0,
+    sortMapEntries: true
   });
 }
 
@@ -117,6 +124,126 @@ export async function stageNewRecordFile(params: {
     new_hash: contentHashForYaml(params.record),
     op_kind: params.opKind
   };
+}
+
+export interface ExistingRecord {
+  node_id: string;
+  node_type: string;
+  file_path: string;
+  absolute_file_path: string;
+  record: Record<string, unknown>;
+  current_hash: string;
+}
+
+export async function loadExistingRecord(params: {
+  ctx: OpContext;
+  targetWorld: string;
+  targetRecordId: string;
+  expectedContentHash: string | undefined;
+  opKind: OperationKind;
+}): Promise<ExistingRecord> {
+  const row = params.ctx.db
+    .prepare(
+      `
+        SELECT node_id, node_type, file_path
+        FROM nodes
+        WHERE world_slug = ? AND node_id = ?
+      `
+    )
+    .get(params.targetWorld, params.targetRecordId) as
+    | { node_id: string; node_type: string; file_path: string }
+    | undefined;
+
+  if (!row) {
+    throw new PatchEngineOpError({
+      code: "record_not_found",
+      message: `${params.targetRecordId} was not found in the world index`,
+      op_kind: params.opKind,
+      record_id: params.targetRecordId
+    });
+  }
+
+  const absoluteFilePath = path.isAbsolute(row.file_path)
+    ? row.file_path
+    : path.join(params.ctx.worldRoot, "worlds", params.targetWorld, row.file_path);
+  const source = await readFile(absoluteFilePath, "utf8");
+  const parsed = YAML.parse(source) as unknown;
+
+  if (!isRecord(parsed)) {
+    throw new PatchEngineOpError({
+      code: "field_path_invalid",
+      message: `${params.targetRecordId} record YAML must be a mapping`,
+      target_file: absoluteFilePath,
+      record_id: params.targetRecordId,
+      op_kind: params.opKind
+    });
+  }
+
+  const currentHash = contentHashForYaml(parsed);
+  if (params.expectedContentHash !== currentHash) {
+    throw new PatchEngineOpError({
+      code: "record_hash_drift",
+      message: `${params.targetRecordId} content hash drifted`,
+      target_file: absoluteFilePath,
+      record_id: params.targetRecordId,
+      op_kind: params.opKind
+    });
+  }
+
+  return {
+    node_id: row.node_id,
+    node_type: row.node_type,
+    file_path: row.file_path,
+    absolute_file_path: absoluteFilePath,
+    record: parsed,
+    current_hash: currentHash
+  };
+}
+
+export async function stageExistingRecordFile(params: {
+  planId: string;
+  opKind: OperationKind;
+  targetFilePath: string;
+  record: Record<string, unknown>;
+  noop?: boolean;
+}): Promise<StagedWrite> {
+  const newContent = serializeStableYaml(params.record);
+  const tempFilePath = tempPathForTarget(params.targetFilePath, params.planId);
+
+  await mkdir(path.dirname(tempFilePath), { recursive: true });
+  await writeFile(tempFilePath, newContent, "utf8");
+
+  const stagedWrite: StagedWrite = {
+    target_file_path: params.targetFilePath,
+    temp_file_path: tempFilePath,
+    new_content: newContent,
+    new_hash: contentHashForYaml(params.record),
+    op_kind: params.opKind
+  };
+  if (params.noop !== undefined) {
+    stagedWrite.noop = params.noop;
+  }
+  return stagedWrite;
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function requireTargetWorldMatch(params: {
+  envelopeTargetWorld: string;
+  opTargetWorld: string;
+  opKind: OperationKind;
+  recordId: string;
+}): void {
+  if (params.opTargetWorld !== params.envelopeTargetWorld) {
+    throw new PatchEngineOpError({
+      code: "target_world_mismatch",
+      message: `${params.opKind} target_world must match envelope target_world`,
+      op_kind: params.opKind,
+      record_id: params.recordId
+    });
+  }
 }
 
 export function sectionSubdirForId(recordId: string): string {

@@ -13,4 +13,5 @@ export interface StagedWrite {
   new_content: string;
   new_hash: string;
   op_kind: OperationKind;
+  noop?: boolean;
 }
