@@ -14,6 +14,8 @@ import {
   insertEntityAliases,
   insertEntityMentions,
   insertNodes,
+  insertScopedReferenceAliases,
+  insertScopedReferences,
   insertValidationResults
 } from "../index/nodes";
 import { getFileVersion, listIndexedFiles, removeFileVersion, upsertFileVersion } from "../index/file-versions";
@@ -27,6 +29,7 @@ import {
 import { parseMarkdown } from "../parse/markdown";
 import { extractEntities, loadOntologyRegistry } from "../parse/entities";
 import { extractProseNodes } from "../parse/prose";
+import { extractScopedReferences } from "../parse/scoped";
 import { extractSemanticEdges } from "../parse/semantic";
 import { extractYamlNodes } from "../parse/yaml";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
@@ -136,6 +139,7 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
     proseNodes,
     registry
   );
+  const scoped = extractScopedReferences(proseNodes);
 
   clearEntityState(db);
 
@@ -151,12 +155,32 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
     );
   }
 
+  if (scoped.scopedNodes.length > 0) {
+    insertNodes(db, scoped.scopedNodes);
+    insertAnchorChecksums(
+      db,
+      scoped.scopedNodes.map((node) => ({
+        node_id: node.node_id,
+        anchor_form: node.body,
+        checksum: node.anchor_checksum
+      }))
+    );
+  }
+
   if (entities.length > 0) {
     insertEntities(db, entities);
   }
 
   if (aliases.length > 0) {
     insertEntityAliases(db, aliases);
+  }
+
+  if (scoped.scopedReferences.length > 0) {
+    insertScopedReferences(db, scoped.scopedReferences);
+  }
+
+  if (scoped.scopedReferenceAliases.length > 0) {
+    insertScopedReferenceAliases(db, scoped.scopedReferenceAliases);
   }
 
   if (mentions.length > 0) {
@@ -167,8 +191,16 @@ export function finalizeEntityState(db: Database.Database, worldRoot: string, wo
     insertEdges(db, edges);
   }
 
+  if (scoped.edges.length > 0) {
+    insertEdges(db, scoped.edges);
+  }
+
   if (validationResults.length > 0) {
     insertValidationResults(db, validationResults);
+  }
+
+  if (scoped.validationResults.length > 0) {
+    insertValidationResults(db, scoped.validationResults);
   }
 }
 
@@ -359,7 +391,10 @@ function clearEntityState(db: Database.Database): void {
   db.prepare("DELETE FROM entity_mentions").run();
   db.prepare("DELETE FROM entity_aliases").run();
   db.prepare("DELETE FROM entities").run();
+  db.prepare("DELETE FROM scoped_reference_aliases").run();
+  db.prepare("DELETE FROM scoped_references").run();
   db.prepare("DELETE FROM edges WHERE edge_type = 'mentions_entity'").run();
+  db.prepare("DELETE FROM edges WHERE edge_type = 'references_scoped_name'").run();
   db.prepare(
     `
       DELETE FROM validation_results
@@ -367,8 +402,24 @@ function clearEntityState(db: Database.Database): void {
         AND code = 'malformed_authority_source'
     `
   ).run();
-  db.prepare("DELETE FROM anchor_checksums WHERE node_id IN (SELECT node_id FROM nodes WHERE node_type = 'named_entity')").run();
-  db.prepare("DELETE FROM nodes WHERE node_type = 'named_entity'").run();
+  db.prepare(
+    `
+      DELETE FROM validation_results
+      WHERE validator_name = 'scoped_reference_parse'
+        AND code = 'malformed_scoped_reference'
+    `
+  ).run();
+  db.prepare(
+    `
+      DELETE FROM anchor_checksums
+      WHERE node_id IN (
+        SELECT node_id
+        FROM nodes
+        WHERE node_type IN ('named_entity', 'scoped_reference')
+      )
+    `
+  ).run();
+  db.prepare("DELETE FROM nodes WHERE node_type IN ('named_entity', 'scoped_reference')").run();
 }
 
 function loadPersistedProseNodes(db: Database.Database, worldSlug: string): NodeRow[] {

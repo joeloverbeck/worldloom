@@ -54,8 +54,8 @@ Step 4: Present decomposition summary table in chat; await user approval
        +-- [HARD-GATE fires here — see top of skill]
        |
        v
-Step 5: Batched ticket writes (one assistant message, N Write tool calls,
-        one per ticket at tickets/<NAMESPACE>-<NNN>.md)
+Step 5: Batched ticket writes (one or a few assistant messages, N Write tool
+        calls in parallel, one per ticket at tickets/<NAMESPACE>-<NNN>.md)
        |
        v
 Step 6: Final summary (cross-ticket dependency verification, deliverable
@@ -125,7 +125,8 @@ Before decomposing, validate the spec's assumptions against the actual worldloom
 - **Grep** for every skill name, tool name, MCP tool name, hook name, validator name, and YAML schema key referenced in the spec — confirm they are real and current.
 - **Grep** for every FOUNDATIONS principle, Validation Rule, or Canon Fact Record field the spec cites — confirm the section/rule still exists in `docs/FOUNDATIONS.md` with the claimed semantics.
 - **Check** cross-spec dependencies (`Dependencies` / `Blocks` fields) resolve to real spec paths under `specs/` or `archive/specs/`.
-- **Flag** any stale reference, missing file, renamed entity, or FOUNDATIONS-violating assumption as an **Issue**.
+- **Command-surface verification**: grep the relevant `package.json` / Makefile / justfile for every script/command name referenced in the spec's Verification section OR likely to land in tickets' Commands sections (e.g., `pnpm --filter <pkg> test`, `npm run typecheck`, `cargo test`). Flag non-existent scripts before ticket drafting so Commands sections don't reference vaporware.
+- **Flag** any stale reference, missing file, renamed entity, non-existent script, or FOUNDATIONS-violating assumption as an **Issue**.
 - Present Issues to the user before proceeding to Step 3. For each Issue, obtain an explicit disposition: fix-before-decomposition, defer-to-follow-up-ticket (with a named dependency), or reject-with-rationale.
 
 ### Abbreviated Spot-Check Path (when `/reassess-spec` ran in-session)
@@ -137,8 +138,9 @@ If `/reassess-spec` was run on this spec in the current session and all findings
 - **(c) Sibling specs**: no new specs added under `specs/` reference the same skills or tools.
 - **(d) Additive extension check**: for specs extending an existing output schema, consumers of that schema have been updated, or the extension is additive-only (new optional field with a default).
 - **(e) Rename/removal blast radius**: for tickets renaming/removing a skill, tool, hook, validator, or schema field, grep pipeline-wide (`tools/`, `.claude/skills/`, `docs/`, `specs/`) for every symbol being renamed/removed. If any area has >0 matches but is not in the ticket's Files to Touch, either (i) add it to Files to Touch, or (ii) split those sites into a follow-up ticket with an explicit dependency.
+- **(f) Command-surface verification**: grep the relevant `package.json` / Makefile / justfile for every script/command name referenced in the spec's Verification section OR likely to land in tickets' Commands sections (e.g., `pnpm --filter <pkg> test`, `npm run typecheck`, `cargo test`). Flag non-existent scripts before ticket drafting so Commands sections don't reference vaporware. Example failure this catches: a spec lists `pnpm --filter @worldloom/world-mcp typecheck` as a verification command, but the package's `scripts` block defines only `build`, `test`, `clean` — the `typecheck` reference would silently survive decomposition and surface only when an implementer tries to run the ticket's Commands section.
 
-After spot-checks, render the exercised sub-checks as a compact inline list before moving to Step 3 (e.g., `Spot-checks: (a) ✓, (b) ✓, (c) skipped — no new sibling specs, (d) ✓, (e) N/A — no renames`). This proves each applicable sub-check ran and surfaces N/A cases explicitly.
+After spot-checks, render the exercised sub-checks as a compact inline list before moving to Step 3 (e.g., `Spot-checks: (a) ✓, (b) ✓, (c) skipped — no new sibling specs, (d) ✓, (e) N/A — no renames, (f) ✓`). This proves each applicable sub-check ran and surfaces N/A cases explicitly.
 
 If `/reassess-spec` was run but some findings were **deferred** by the user, treat deferred items as out-of-scope for ticket decomposition. Note them in the Step 6 final summary as "deferred reassessment findings that may warrant separate tickets." Do not silently incorporate deferred findings into ticket scope.
 
@@ -213,9 +215,9 @@ For each approved ticket, compose its full content following `tickets/_TEMPLATE.
 
 ### Batch All Write Calls in One Message
 
-Send **one assistant message containing one Write tool call per ticket**, not N sequential messages. Each ticket file write is independent because each creates a new file, so they can run concurrently. A single message with N Write calls costs one round-trip; N sequential messages cost N round-trips. Compose every ticket's full content first, then emit all Write calls in one batch.
+Send **a small number of assistant messages containing parallel Write tool calls (one per ticket)**, not N sequential one-Write-per-message sends. For typical spec sizes (4-8 tickets), a single batched message is the target; for 10+ tickets, 2-3 batched messages are acceptable so long as no per-ticket round-trip occurs. Each ticket file write is independent because each creates a new file, so they can run concurrently. A single batched message with N Write calls costs one round-trip; N sequential one-Write-per-message sends cost N round-trips — the ban is on per-ticket sequential messaging, not on any multi-batch approach. Compose every ticket's full content first, then emit all Write calls in batched messages.
 
-After the parallel batch returns, verify every ticket file was created. If any Write call failed (typo in path, permissions error, or other I/O failure), retry that ticket with the corrected argument immediately — do not proceed to Step 6 until all ticket files exist at their intended paths. If a system-reminder or external tool indicates that a ticket file was modified between your Write call and Step 6 (e.g., by a linter hook, a user keystroke, or a parallel editor save), treat the external edits as authoritative — do not revert them. Step 6's cross-ticket dependency verification must run against the edited content, and any sibling ticket whose path, symbol, or count references the externally-edited ticket may need follow-up adjustment before the final summary is emitted.
+After the parallel batch returns, verify every ticket file was created. If any Write call failed (typo in path, permissions error, or other I/O failure), retry that ticket with the corrected argument immediately — do not proceed to Step 6 until all ticket files exist at their intended paths. If a system-reminder or external tool indicates that a ticket file was modified between your Write call and Step 6 (e.g., by a linter hook, a user keystroke, or a parallel editor save), treat the external edits as authoritative — do not revert them. Step 6's cross-ticket dependency verification must run against the edited content, and any sibling ticket whose path, symbol, or count references the externally-edited ticket may need follow-up adjustment before the final summary is emitted. The follow-up adjustment also applies when the external edit corrects a stale codebase assumption (missing file, non-existent script, renamed symbol) that sibling tickets independently share — not just when siblings lexically reference the edited ticket. The trigger is "does the corrected assumption affect the sibling's truthfulness?", not "does the sibling mention the edited ticket by name?". Record the parallel-stale-assumption correction in the Step 6 final summary under a dedicated line alongside the external-edit note so the audit trail captures both the triggering edit and the proactive sibling cleanup.
 
 ## Step 6: Final Summary
 

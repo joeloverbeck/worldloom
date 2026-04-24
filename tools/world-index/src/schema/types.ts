@@ -248,6 +248,25 @@ export interface EntityAliasRow {
   source_node_id: string;
 }
 
+export interface ScopedReferenceRow {
+  reference_id: string;
+  world_slug: string;
+  display_name: string;
+  reference_kind: string | null;
+  provenance_scope: "world" | "proposal" | "diegetic" | "audit";
+  relation: string;
+  source_node_id: string;
+  source_field: string;
+  target_node_id: string | null;
+  authority_level: "explicit_scoped_reference" | "exact_structured_edge";
+}
+
+export interface ScopedReferenceAliasRow {
+  alias_id: number;
+  reference_id: string;
+  alias_text: string;
+}
+
 export interface FileVersionRow {
   world_slug: string;
   file_path: string;

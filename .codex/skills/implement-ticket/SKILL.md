@@ -24,6 +24,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
+- When a ticket mixes package-local build/test commands with a CLI that reads repo-root state via `process.cwd()` or a similar ambient root, split the proof surface truthfully: keep build/type/test commands at the package root, but run the CLI smoke check from the repo root that owns the world/artifact state. Do not force both onto one `cwd`.
 - If verification uses an exported function, inline `node -e` probe, or other package-local runtime entrypoint, run it from the package root when module resolution depends on package-local dependencies.
 - If the ticket already records runnable verification commands, dry-run the drafted command shape early enough to correct the ticket before implementation, not only during final proof.
 - If the ticket claims it will add or expand a script/test proof surface, verify whether the named file or package-script already exists and already runs before treating that proof work as live delta.
@@ -63,12 +64,13 @@ If one primary class also changes a real shared contract, keep the primary class
 2. Read every directly relevant reference it names: spec files, docs, skill files, tool files, templates, examples, or archived tickets/specs.
 3. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
 4. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
-5. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
-6. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-7. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-8. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-9. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
-10. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+5. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
+6. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
+7. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+8. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+9. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+10. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+11. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -90,6 +92,7 @@ Check:
 - for staged tool/schema tickets, every drafted structured error code, error taxonomy table, and error enum named by the ticket or spec; verify the live authority (`errors.ts`, shared error docs, or package-local contract surface) before assuming malformed-input or sentinel-error behavior is already representable
 - for staged tool/schema tickets whose public API omits a scope parameter but whose current helper layer is scope-bound (for example: a world-agnostic public tool over a world-scoped DB opener), verify whether the missing scope can be derived internally before broadening the public contract; if it can, keep the public API stable and record the helper-vs-tool mismatch in reassessment
 - for scaffold, package, or build-surface tickets, every drafted built-artifact path, compiled entrypoint, or registration/config target named by the ticket or spec; verify it against the package's actual `tsconfig.json`, build script, and emitted output shape before implementation so example config and acceptance text do not point at a speculative path
+- for tickets that name runnable package commands or CLIs, inspect adjacent same-package usage docs/examples early enough to confirm command shape and `cwd` expectations before treating the drafted proof lane as truthful
 - for package public-surface tickets that add or change `package.json` `exports`, verify the full producer-consumer contract before trusting the drafted snippet: `require` / `import` / `default` / `types` conditions match the real emitted module format, the producer build actually emits the advertised runtime artifact and `.d.ts` artifact, and the intended consumer package's resolver settings (`moduleResolution`, export-map support, package root) can import that public entry without falling back to a private path
 - for tickets that claim to add or expand a script/test proof surface, whether the named script file, shell entrypoint, or package-script already exists and already runs; if it does, narrow the ticket to tightening the existing proof surface before code edits
 - for tickets that claim a checked-in fixture-backed proof surface, whether the named fixture file actually exists and whether the package already uses a different live seeding harness; if the fixture path is stale but the harness is real, rewrite the ticket to the live harness before code edits

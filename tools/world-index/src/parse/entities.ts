@@ -766,7 +766,7 @@ function looksLikeStandaloneLabel(line: string): boolean {
   return /^\*\*[^*\n]+\*\*:?\s*$/.test(line.trim());
 }
 
-function canonicalEntitySlug(name: string, uniqueKey: string, usedSlugs: Set<string>): string {
+export function canonicalEntitySlug(name: string, uniqueKey: string, usedSlugs: Set<string>): string {
   const base = name
     .normalize("NFC")
     .toLocaleLowerCase("en-US")
@@ -795,7 +795,7 @@ function canonicalEntitySlug(name: string, uniqueKey: string, usedSlugs: Set<str
   }
 }
 
-function parseAuthorityFrontmatter(body: string):
+export function parseAuthorityFrontmatter(body: string):
   | { status: "missing" }
   | { status: "malformed" }
   | { status: "parsed"; frontmatter: Record<string, unknown> } {
@@ -857,7 +857,7 @@ function classifyArtifactKind(frontmatter: Record<string, unknown>): EntityRow["
     : "artifact";
 }
 
-function normalizeSurface(text: string): string {
+export function normalizeSurface(text: string): string {
   return text.normalize("NFC").replace(/\s+/g, " ").trim();
 }
 
@@ -865,7 +865,7 @@ function normalizeLookupKey(text: string): string {
   return normalizeSurface(text).toLocaleLowerCase("en-US");
 }
 
-function firstNonEmptyString(value: unknown): string | null {
+export function firstNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? normalizeSurface(value) : null;
 }
 

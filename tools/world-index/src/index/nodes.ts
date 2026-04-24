@@ -6,6 +6,8 @@ import type {
   EntityMentionRow,
   EntityRow,
   NodeRow,
+  ScopedReferenceAliasRow,
+  ScopedReferenceRow,
   ValidationResultRow
 } from "../schema/types";
 
@@ -79,6 +81,17 @@ export function deleteNodesByFile(
     db.prepare(`DELETE FROM entity_mentions WHERE node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM entity_aliases WHERE source_node_id IN (${placeholders})`).run(...nodeIds);
     db.prepare(`DELETE FROM entities WHERE source_node_id IN (${placeholders})`).run(...nodeIds);
+    db.prepare(`DELETE FROM scoped_reference_aliases WHERE reference_id IN (${placeholders})`).run(
+      ...nodeIds
+    );
+    db.prepare(
+      `
+        DELETE FROM scoped_references
+        WHERE reference_id IN (${placeholders})
+           OR source_node_id IN (${placeholders})
+           OR target_node_id IN (${placeholders})
+      `
+    ).run(...nodeIds, ...nodeIds, ...nodeIds);
     db.prepare(
       `
         DELETE FROM edges
@@ -158,6 +171,66 @@ export function insertEntityAliases(db: Database.Database, rows: EntityAliasRow[
         @alias_text,
         @alias_kind,
         @source_node_id
+      )
+    `);
+
+    for (const row of batch) {
+      statement.run(row);
+    }
+  })(rows);
+}
+
+export function insertScopedReferences(
+  db: Database.Database,
+  rows: ScopedReferenceRow[]
+): void {
+  db.transaction((batch: ScopedReferenceRow[]) => {
+    const statement = db.prepare(`
+      INSERT INTO scoped_references (
+        reference_id,
+        world_slug,
+        display_name,
+        reference_kind,
+        provenance_scope,
+        relation,
+        source_node_id,
+        source_field,
+        target_node_id,
+        authority_level
+      ) VALUES (
+        @reference_id,
+        @world_slug,
+        @display_name,
+        @reference_kind,
+        @provenance_scope,
+        @relation,
+        @source_node_id,
+        @source_field,
+        @target_node_id,
+        @authority_level
+      )
+    `);
+
+    for (const row of batch) {
+      statement.run(row);
+    }
+  })(rows);
+}
+
+export function insertScopedReferenceAliases(
+  db: Database.Database,
+  rows: ScopedReferenceAliasRow[]
+): void {
+  db.transaction((batch: ScopedReferenceAliasRow[]) => {
+    const statement = db.prepare(`
+      INSERT INTO scoped_reference_aliases (
+        alias_id,
+        reference_id,
+        alias_text
+      ) VALUES (
+        @alias_id,
+        @reference_id,
+        @alias_text
       )
     `);
 
