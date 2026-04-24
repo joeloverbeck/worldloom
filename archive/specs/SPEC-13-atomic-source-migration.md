@@ -2,6 +2,7 @@
 
 # SPEC-13: Atomic-Source Migration
 
+**Status**: COMPLETED
 **Phase**: 1.5 (between Phase 1 read-path and Phase 2 write-path; supersedes SPEC-08 Phase 3 and Phase 4)
 **Depends on**: SPEC-01 (index can read atomic sources), SPEC-10 / SPEC-11 / SPEC-12 (entity and retrieval remediations)
 **Blocks**: SPEC-03 (op vocabulary rewrites against atomic records), SPEC-04 (validators consume atomic YAML), SPEC-06 Phase 2 skill rewrites (skills read/write atomic records), SPEC-08 Phase 2 completion gate
@@ -405,3 +406,29 @@ Executed in a follow-up session after this spec and its siblings land. The proce
 - **Authors hand-edit `_source/*.yaml` and introduce malformed YAML**. Mitigation: Hook 5 PostToolUse runs `record_schema_compliance` on any `_source/*.yaml` write; malformed YAML surfaces immediately with structured error messages pointing at the specific file and field.
 - **Git history across the migration is discontinuous**. `git log --follow _source/canon/CF-0035.yaml` does not cross the migration boundary; the pre-migration history of that CF lives in `CANON_LEDGER.md`'s git log. Mitigation: the migration commit message explicitly inventories what moved where; a brief migration-history note in `docs/archival-workflow.md` (or similar existing doc) records the discontinuity with a pointer to the migration commit's SHA for future archaeology.
 - **Reversibility relies on git + snapshot, not byte-identical compile round-trip**. Without a migration tool producing a reverse-compile, the assurance of "no information lost" rests on human review and structural verification (`world-index build` succeeds, `world-validate --structural` passes). Mitigation: the pre-migration snapshot directory is retained for one week post-commit; structural discrepancies surfaced in that window trigger supplementary manual reconciliation.
+
+## Outcome
+
+Completed on 2026-04-24.
+
+SPEC-13's Phase 1.5 contract is now the live repository contract:
+
+- `docs/FOUNDATIONS.md` and `docs/MACHINE-FACING-LAYER.md` describe `_source/` atomic YAML as the canonical storage form for the eleven atomized concerns on machine-layer-enabled worlds, while `WORLD_KERNEL.md` and `ONTOLOGY.md` remain root primary-authored files.
+- The Animalia world-content repository was migrated in user-owned commit `99f6a97` (`Atomized animalia.`, committed `2026-04-24 18:55:41 +0200`): `worlds/animalia/_source/` contains 225 YAML records, and the root now contains only `WORLD_KERNEL.md` and `ONTOLOGY.md`.
+- `tools/world-index` now builds, syncs, verifies, and enumerates the atomic-source form. Legacy successful world-build dispatch for the eleven retired root markdown files has been removed; worlds without recognized SPEC-13 `_source/*.yaml` records fail with exit code 3 and an actionable migration/create-base-world message.
+- The SPEC-13 ticket family is complete through `SPEC13ATOSRCMIG-005` and archived. `tickets/SPEC13ATOSRCMIG-006.md` remains active as the explicit one-week delayed cleanup for `.pre-migration-snapshot/animalia/`; that retained restore snapshot is temporary local safety state, not incomplete canonical migration work.
+
+Deviations from the original spec:
+
+- `world-validate animalia --structural` was not the final proof lane because the validator framework remains Phase 2 work. The truthful Phase 1.5 proof is `world-index` build/test/verify coverage plus direct source-shape checks.
+- The post-commit snapshot cleanup is intentionally deferred for one week by `SPEC13ATOSRCMIG-006`.
+- Phase 2 work remains as planned: validators, patch engine, hook write discipline, MCP write/tool updates, skill rewrites, and `create-base-world` atomic emission.
+
+Verification:
+
+- `find worlds/animalia/_source -type f -name '*.yaml' | wc -l` returned 225.
+- `find worlds/animalia -maxdepth 1 -type f | sort` showed only `ONTOLOGY.md` and `WORLD_KERNEL.md` at the root.
+- `git -C worlds show -s --format='%h%n%ci%n%s' 99f6a97` confirmed the user-owned Animalia migration commit.
+- `cd tools/world-index && npm run build` passed.
+- `cd tools/world-index && npm test` passed.
+- `cd tools/world-index && node --test dist/tests/atomic-source-input.test.js dist/tests/commands.test.js dist/tests/enumerate.test.js` passed.

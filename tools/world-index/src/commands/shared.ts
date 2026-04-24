@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import type { Root } from "mdast";
 
-import { enumerate, MANDATORY_WORLD_FILES } from "../enumerate";
+import { enumerate } from "../enumerate";
 import { sha256Hex } from "../hash/content";
 import { insertEdges, resolveUnresolvedEdges } from "../index/edges";
 import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts";
@@ -27,7 +27,7 @@ import {
   SchemaVersionMismatchError
 } from "../index/open";
 import { parseMarkdown } from "../parse/markdown";
-import { extractEntities, loadOntologyRegistry } from "../parse/entities";
+import { extractEntities } from "../parse/entities";
 import { extractProseNodes } from "../parse/prose";
 import { extractScopedReferences } from "../parse/scoped";
 import { extractStructuredRecordEdges } from "../parse/structured-edges";
@@ -142,10 +142,7 @@ export function parseWorldFile(
 export function finalizeEntityState(db: Database.Database, worldRoot: string, worldSlug: string): void {
   const proseNodes = loadPersistedProseNodes(db, worldSlug);
   const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
-  const ontologyPath = path.join(worldDirectory, "ONTOLOGY.md");
-  const registry = hasAtomicSourceRecords(worldDirectory)
-    ? loadAtomicEntityRegistry(worldDirectory)
-    : loadOntologyRegistry(ontologyPath);
+  const registry = loadAtomicEntityRegistry(worldDirectory);
   const { entityNodes, entities, aliases, mentions, edges, validationResults } = extractEntities(
     { type: "root", children: [] },
     proseNodes,
@@ -278,6 +275,17 @@ export function buildWorldIndex(worldRoot: string, worldSlug: string): BuildLike
     return { exitCode: 2, changedNodeCount: 0, totalNodeCount: 0 };
   }
 
+  const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
+  if (!hasAtomicSourceRecords(worldDirectory)) {
+    console.error(missingAtomicSourceMessage(worldSlug));
+    return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+  }
+  const missingMandatory = findMissingMandatoryFiles(worldDirectory);
+  if (missingMandatory.length > 0) {
+    console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
+    return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+  }
+
   const dbPath = databasePathForWorld(worldRoot, worldSlug);
   if (existsSync(dbPath)) {
     deleteFile(dbPath);
@@ -286,15 +294,6 @@ export function buildWorldIndex(worldRoot: string, worldSlug: string): BuildLike
   const db = openIndex(worldRoot, worldSlug);
 
   try {
-    const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
-    const missingMandatory = findMissingMandatoryFiles(
-      worldDirectory,
-      hasAtomicSourceRecords(worldDirectory)
-    );
-    if (missingMandatory.length > 0) {
-      console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
-      return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
-    }
     return reindexAllFiles(db, worldRoot, worldSlug, true);
   } finally {
     db.close();
@@ -320,10 +319,11 @@ export function syncWorldIndex(worldRoot: string, worldSlug: string): BuildLikeR
 
   try {
     const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
-    const missingMandatory = findMissingMandatoryFiles(
-      worldDirectory,
-      hasAtomicSourceRecords(worldDirectory)
-    );
+    if (!hasAtomicSourceRecords(worldDirectory)) {
+      console.error(missingAtomicSourceMessage(worldSlug));
+      return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+    }
+    const missingMandatory = findMissingMandatoryFiles(worldDirectory);
     if (missingMandatory.length > 0) {
       console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
       return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
@@ -622,12 +622,18 @@ function deleteFile(filePath: string): void {
   unlinkSync(filePath);
 }
 
-function findMissingMandatoryFiles(worldDirectory: string, atomicMode: boolean): string[] {
-  const requiredFiles = atomicMode ? ["ONTOLOGY.md", "WORLD_KERNEL.md"] : [...MANDATORY_WORLD_FILES];
-
+function findMissingMandatoryFiles(worldDirectory: string): string[] {
+  const requiredFiles = ["ONTOLOGY.md", "WORLD_KERNEL.md"];
   return requiredFiles
     .filter((fileName) => !existsSync(path.join(worldDirectory, fileName)))
     .sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+function missingAtomicSourceMessage(worldSlug: string): string {
+  return [
+    `World '${worldSlug}' has no recognized SPEC-13 atomic source records under '_source/'.`,
+    "Run the SPEC-13 migration for legacy worlds, or create new worlds with the atomic-source create-base-world flow."
+  ].join(" ");
 }
 
 export function listWorldSlugs(worldRoot: string): string[] {

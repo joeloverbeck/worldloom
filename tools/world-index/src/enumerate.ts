@@ -22,6 +22,8 @@ export const MANDATORY_WORLD_FILES = new Set([
   "MYSTERY_RESERVE.md"
 ]);
 
+const PRIMARY_AUTHORED_ROOT_FILES = new Set(["WORLD_KERNEL.md", "ONTOLOGY.md"]);
+
 export function enumerate(worldRoot: string): FileEnumeration {
   const indexable: string[] = [];
   const unexpected: string[] = [];
@@ -100,7 +102,7 @@ function isIndexablePath(relativePath: string): boolean {
   }
 
   if (segments.length === 1) {
-    return MANDATORY_WORLD_FILES.has(basename);
+    return PRIMARY_AUTHORED_ROOT_FILES.has(basename);
   }
 
   if (segments.length === 2) {

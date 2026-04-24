@@ -25,18 +25,7 @@ test("enumerate returns every expected indexable path and no unexpected paths fo
     const result = enumerate(worldRoot);
 
     assert.deepEqual(result.indexable, [
-      "CANON_LEDGER.md",
-      "ECONOMY_AND_RESOURCES.md",
-      "EVERYDAY_LIFE.md",
-      "GEOGRAPHY.md",
-      "INSTITUTIONS.md",
-      "INVARIANTS.md",
-      "MAGIC_OR_TECH_SYSTEMS.md",
-      "MYSTERY_RESERVE.md",
       "ONTOLOGY.md",
-      "OPEN_QUESTIONS.md",
-      "PEOPLES_AND_SPECIES.md",
-      "TIMELINE.md",
       "WORLD_KERNEL.md",
       "adjudications/PA-0001-sample.md",
       "audits/AU-0001-sample.md",
@@ -48,7 +37,19 @@ test("enumerate returns every expected indexable path and no unexpected paths fo
       "proposals/PR-0001-sample.md",
       "proposals/batches/BATCH-0001.md"
     ]);
-    assert.deepEqual(result.unexpected, []);
+    assert.deepEqual(result.unexpected, [
+      "CANON_LEDGER.md",
+      "ECONOMY_AND_RESOURCES.md",
+      "EVERYDAY_LIFE.md",
+      "GEOGRAPHY.md",
+      "INSTITUTIONS.md",
+      "INVARIANTS.md",
+      "MAGIC_OR_TECH_SYSTEMS.md",
+      "MYSTERY_RESERVE.md",
+      "OPEN_QUESTIONS.md",
+      "PEOPLES_AND_SPECIES.md",
+      "TIMELINE.md"
+    ]);
     assert.deepEqual(
       result.indexable.filter((filePath) => result.unexpected.includes(filePath)),
       []

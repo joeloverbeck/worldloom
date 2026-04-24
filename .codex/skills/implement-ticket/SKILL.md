@@ -89,7 +89,8 @@ Check:
 - for tickets that depend on a third-party or vendor-owned API, hook system, protocol schema, or tool contract, verify the current primary documentation before trusting the ticket/spec wording; if the live contract differs, record that drift in reassessment and truth the local config/docs to the actual API
 - every drafted algorithm, tree-shape, parser-behavior, or data-flow claim the ticket relies on; verify these against the live substrate instead of trusting spec prose
 - for tickets where filesystem presence controls dispatch, mode selection, migration state, or feature activation, inspect whether existing fixtures, generated artifacts, ignored files, placeholders, or legacy worlds already contain that sentinel path before accepting the drafted condition; prefer the narrowest truthful marker, such as recognized record files, over bare directory existence when placeholders would misroute the live seam
-- for `world-index` content tickets that mention adjudication YAML placement or `unexpected_yaml_section`, inspect `tools/world-index/src/parse/yaml.ts` before trusting any ticket claim about a canonical adjudication YAML section; the live parser may treat all adjudication fenced YAML as out-of-section
+- for cleanup/removal tickets, distinguish removing a live activation path, compatibility mode, or dispatch branch from deleting all related parser utilities, fixtures, or low-level helpers; if tests or hybrid surfaces still lawfully use those utilities, rewrite the ticket to the true removal seam before coding
+- for `world-index` / index-backed tickets, also load `references/world-index.md` from this skill directory and apply its focused reassessment and verification checks
 - for markdown-to-record or legacy-world atomization tickets, check for attribution/comment markers that sit immediately before headings in the source and become orphaned at generated record boundaries; compare against any pre-migration snapshot before removing or reattaching them so a cosmetic cleanup does not hide real content loss
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a repo-level doc under `docs/` is the real authority or a tested consumer for the seam you are changing; if tests, helpers, or examples parse that doc directly, treat it as same-seam owned fallout even when the draft ticket excluded it
@@ -109,13 +110,8 @@ Check:
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 - when reassessment narrows or rewrites a shared contract, whether existing same-seam proof scripts, fixtures, or verification docs still encode the old contract; if they do, treat truthful proof-surface upkeep inside that seam as required consequence fallout rather than optional cleanup
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
-- for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
 - for fixture-backed command or integration tests, verify whether the assertion shape is still truthful before editing the test harness; if the live contract still matches the assertion, check whether the copied fixture source is stale and narrow the ticket to fixture-proof alignment instead of rewriting a still-correct test
-- for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
-- for atomic-source `world-index verify` tickets, remember that retired logical file names such as `INSTITUTIONS.md` can be synthetic in atomic worlds but real disk-backed files in legacy fixtures; skip or special-case them only after proving the backing file is absent or the fixture mode is truly atomic
 - when the ticket repairs malformed authority-bearing frontmatter on whole-file records, rerun a post-fix node-id probe before final closeout; fixing the frontmatter can change the truthful record-node shape from a fallback path-style id to the structured record id now emitted by the parser
-- when replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path; do not scan a broader substrate ad hoc and treat that result as equivalent evidence
-- when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
 
 Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 
@@ -214,6 +210,8 @@ If the drafted proof uses a CLI, confirm the command's working-directory contrac
 
 If the ticket adds a runnable shell script or npm-script proof surface, apply the same package-root discipline inside the script itself: embedded `node`, `node -e`, or similar package-local probes must launch from the root where local dependencies actually resolve, even when the artifact under inspection lives elsewhere in the repo.
 
+For precondition failure, unsupported-mode, or rejection-path tickets, prove not only the exit code/message but also that the command fails before creating or mutating derived artifacts, indexes, caches, or other side-effect surfaces unless the ticket explicitly owns that mutation.
+
 Worldloom verification surfaces usually include:
 
 - codebase grep-proof
@@ -227,11 +225,11 @@ Pick the surface that actually proves the owned invariant. A command that merely
 
 For tool/index/schema tickets, package-local readonly DB queries and inline `node -e` probes count as `targeted tool command` proof when they directly assert the owned invariant against the real artifact or a truthful temp-copy rebuild.
 
+For `world-index` / index-backed proof, apply the focused checks in `references/world-index.md`.
+
 For compiled TS packages, opaque `node --test` lanes, and transport-client noise, apply the narrowing guidance in `references/verification-closeout.md` instead of expanding the acceptance boundary blindly.
 
 When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
-
-When the fix changes emitted derived node types or other synthetic index artifacts, inspect adjacent build/count/verify helpers and existing integration expectations in the same seam. Existing proof code may need to count those derived rows explicitly or exempt them from parser-vs-index drift checks just as it already does for older synthetic artifacts. For atomic-source record checks, do not filter solely by `node_type`: primary `_source/entities/*.yaml` records can emit `named_entity` nodes that are disk-backed source rows, while derived helper entities such as `entity:*` are synthetic and may need different visibility or drift treatment.
 
 ### 6. Close out the ticket honestly
 
@@ -252,11 +250,12 @@ Update the active ticket before finishing:
 - compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket contains embedded code snippets, pseudocode, or literal algorithm sketches, compare them against the landed seam before finishing; update or remove any snippet that no longer matches the truthful final implementation boundary
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
+- if verification rebuilt a live-world index or other derived artifact, classify the resulting dirty state explicitly as expected derived dirt, cleaned state, or unexpected source fallout before finalizing
 - after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 - after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
 - for `tool or script implementation` tickets whose landed behavior changes a package-local contract, inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly (for example: `README.md`, `.mcp.json.example`, package-local usage snippets, or command examples) and truth those surfaces before finishing
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
-- when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; do not leave dead predecessor modules in place unless the ticket truthfully says they remain
+- when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 

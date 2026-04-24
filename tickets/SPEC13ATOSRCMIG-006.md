@@ -1,6 +1,6 @@
 # SPEC13ATOSRCMIG-006: Remove Animalia pre-migration snapshot after commit soak
 
-**Status**: PENDING
+**Status**: BLOCKED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None — local cleanup of the temporary migration restore snapshot
@@ -16,7 +16,8 @@
 2. Public-repo `.gitignore` ignores `worlds/*` and `.pre-migration-snapshot/`, so the restore copy and world content are intentionally invisible to public-repo `git status`; the private `worlds/` repo owns Animalia source tracking.
 3. Cross-artifact boundary: this ticket is local cleanup only. It must not delete or modify `worlds/animalia/_source/**`, `WORLD_KERNEL.md`, `ONTOLOGY.md`, or hybrid content directories.
 4. FOUNDATIONS principle under audit: none directly. The snapshot is not canonical storage; it is a temporary restore aid for the migration window.
-5. This ticket is blocked until the user-owned migration commit exists and at least one week of post-migration use confirms the migration is stable.
+5. The user-owned private-world migration commit now exists as `99f6a97` (`Atomized animalia.`, committed `2026-04-24 18:55:41 +0200` in `worlds/`). The one-week post-migration stability window has not elapsed on `2026-04-24`, so cleanup remains blocked.
+6. `worlds/animalia/_source/` currently contains 225 YAML records and the Animalia root contains only `WORLD_KERNEL.md` and `ONTOLOGY.md`, matching the SPEC-13 atomic-source storage contract. Private `worlds/` status shows only derived `_index/world.db` / WAL / SHM state, not canonical source deletions.
 
 ## Architecture Check
 
@@ -79,3 +80,19 @@ Confirm `_source/` record counts and public/private repo status after cleanup.
 2. `git check-ignore -v .pre-migration-snapshot/animalia`.
 3. `find worlds/animalia/_source -type f -name '*.yaml' | wc -l`.
 4. `git status --short` from `worlds/`.
+
+## Outcome
+
+Not executed. The ignored restore snapshot remains in place because the required one-week post-migration stability window has not elapsed since private-world commit `99f6a97` on `2026-04-24`.
+
+## Verification Result
+
+1. `test -d .pre-migration-snapshot/animalia && find .pre-migration-snapshot/animalia -maxdepth 2 -type f | sort | sed -n '1,80p'` — snapshot exists and contains the expected pre-migration restore files.
+2. `git check-ignore -v .pre-migration-snapshot/animalia` — snapshot is ignored by the public pipeline repo via `.gitignore:151`.
+3. `git -C worlds show -s --format='%h%n%ci%n%s%n%b' 99f6a97` — migration commit exists but is dated `2026-04-24 18:55:41 +0200`, so the one-week window is not satisfied.
+4. `find worlds/animalia/_source -type f -name '*.yaml' | wc -l` — canonical atomic source contains 225 YAML records.
+5. `git -C worlds status --short --untracked-files=all` — no canonical Animalia source deletion is present; only derived `_index` DB/WAL/SHM state is dirty.
+
+## Deviations
+
+- The drafted deletion was intentionally not performed because the ticket's own precondition and SPEC-13 §E step 17 require one week of confirmed stable post-migration use before removing `.pre-migration-snapshot/`.
