@@ -32,8 +32,22 @@ export interface SurfaceMatch {
   count: number;
 }
 
+export interface ScopedMatch {
+  query: string;
+  reference_id: string;
+  display_name: string;
+  reference_kind: string | null;
+  relation: string;
+  provenance_scope: "world" | "proposal" | "diegetic" | "audit";
+  source_node_id: string;
+  target_node_id: string | null;
+  match_kind: "display_name" | "alias_text";
+  matched_text: string;
+}
+
 export interface FindNamedEntitiesResponse {
   canonical_matches: CanonicalMatch[];
+  scoped_matches: ScopedMatch[];
   surface_matches: SurfaceMatch[];
 }
 
@@ -42,6 +56,16 @@ interface CanonicalEntityRow {
   canonical_name: string;
   entity_kind: string | null;
   provenance_scope: "world" | "proposal" | "diegetic" | "audit";
+}
+
+interface ScopedReferenceRow {
+  reference_id: string;
+  display_name: string;
+  reference_kind: string | null;
+  relation: string;
+  provenance_scope: "world" | "proposal" | "diegetic" | "audit";
+  source_node_id: string;
+  target_node_id: string | null;
 }
 
 function unique(values: readonly string[]): string[] {
@@ -79,10 +103,11 @@ export async function findNamedEntities(
   try {
     const names = unique(args.names);
     if (names.length === 0) {
-      return { canonical_matches: [], surface_matches: [] };
+      return { canonical_matches: [], scoped_matches: [], surface_matches: [] };
     }
 
     const canonicalMatches: CanonicalMatch[] = [];
+    const scopedMatches: ScopedMatch[] = [];
     const surfaceMatches: SurfaceMatch[] = [];
 
     for (const name of names) {
@@ -146,6 +171,80 @@ export async function findNamedEntities(
         });
       }
 
+      const scopedDisplayNameRows = opened.db
+        .prepare(
+          `
+            SELECT
+              reference_id,
+              display_name,
+              reference_kind,
+              relation,
+              provenance_scope,
+              source_node_id,
+              target_node_id
+            FROM scoped_references
+            WHERE world_slug = ?
+              AND display_name = ?
+            ORDER BY display_name, reference_id
+          `
+        )
+        .all(args.world_slug, name) as ScopedReferenceRow[];
+
+      for (const row of scopedDisplayNameRows) {
+        scopedMatches.push({
+          query: name,
+          reference_id: row.reference_id,
+          display_name: row.display_name,
+          reference_kind: row.reference_kind,
+          relation: row.relation,
+          provenance_scope: row.provenance_scope,
+          source_node_id: row.source_node_id,
+          target_node_id: row.target_node_id,
+          match_kind: "display_name",
+          matched_text: row.display_name
+        });
+      }
+
+      const scopedAliasRows = opened.db
+        .prepare(
+          `
+            SELECT
+              sr.reference_id,
+              sr.display_name,
+              sr.reference_kind,
+              sr.relation,
+              sr.provenance_scope,
+              sr.source_node_id,
+              sr.target_node_id,
+              sra.alias_text
+            FROM scoped_reference_aliases sra
+            INNER JOIN scoped_references sr ON sr.reference_id = sra.reference_id
+            WHERE sr.world_slug = ?
+              AND sra.alias_text = ?
+            ORDER BY sr.display_name, sr.reference_id
+          `
+        )
+        .all(args.world_slug, name) as Array<
+        ScopedReferenceRow & {
+          alias_text: string;
+        }
+      >;
+
+      for (const row of scopedAliasRows) {
+        scopedMatches.push({
+          query: name,
+          reference_id: row.reference_id,
+          display_name: row.display_name,
+          reference_kind: row.reference_kind,
+          relation: row.relation,
+          provenance_scope: row.provenance_scope,
+          source_node_id: row.source_node_id,
+          target_node_id: row.target_node_id,
+          match_kind: "alias_text",
+          matched_text: row.alias_text
+        });
+      }
+
       const unresolvedRows = opened.db
         .prepare(
           `
@@ -190,6 +289,24 @@ export async function findNamedEntities(
       return left.entity_id.localeCompare(right.entity_id);
     });
 
+    scopedMatches.sort((left, right) => {
+      const leftRank = left.match_kind === "display_name" ? 0 : 1;
+      const rightRank = right.match_kind === "display_name" ? 0 : 1;
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
+
+      if (left.query !== right.query) {
+        return left.query.localeCompare(right.query);
+      }
+
+      if (left.display_name !== right.display_name) {
+        return left.display_name.localeCompare(right.display_name);
+      }
+
+      return left.reference_id.localeCompare(right.reference_id);
+    });
+
     surfaceMatches.sort((left, right) => {
       if (left.query !== right.query) {
         return left.query.localeCompare(right.query);
@@ -200,6 +317,7 @@ export async function findNamedEntities(
 
     return {
       canonical_matches: canonicalMatches,
+      scoped_matches: scopedMatches,
       surface_matches: surfaceMatches
     };
   } finally {

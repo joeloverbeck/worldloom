@@ -43,6 +43,24 @@ interface SeedAliasInput {
   source_node_id: string;
 }
 
+interface SeedScopedReferenceInput {
+  reference_id: string;
+  world_slug: string;
+  display_name: string;
+  reference_kind?: string | null;
+  provenance_scope?: "world" | "proposal" | "diegetic" | "audit";
+  relation: string;
+  source_node_id: string;
+  source_field?: string;
+  target_node_id?: string | null;
+  authority_level?: "explicit_scoped_reference" | "exact_structured_edge";
+}
+
+interface SeedScopedReferenceAliasInput {
+  reference_id: string;
+  alias_text: string;
+}
+
 interface SeedMentionInput {
   node_id: string;
   surface_text: string;
@@ -76,6 +94,8 @@ export interface SeedWorldInput {
   edges?: SeedEdgeInput[];
   entities?: SeedEntityInput[];
   aliases?: SeedAliasInput[];
+  scopedReferences?: SeedScopedReferenceInput[];
+  scopedReferenceAliases?: SeedScopedReferenceAliasInput[];
   mentions?: SeedMentionInput[];
   anchors?: SeedAnchorInput[];
   validationResults?: SeedValidationResultInput[];
@@ -114,19 +134,19 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   mkdirSync(indexRoot, { recursive: true });
   writeFileSync(path.join(indexRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
 
-  const migrationPath = path.join(
+  const schemaRoot = path.join(
     "/home/joeloverbeck/projects/worldloom",
     "tools",
     "world-index",
     "src",
     "schema",
-    "migrations",
-    "001_initial.sql"
+    "migrations"
   );
   const db = new Database(path.join(indexRoot, "world.db"));
 
   try {
-    db.exec(readFileSync(migrationPath, "utf8"));
+    db.exec(readFileSync(path.join(schemaRoot, "001_initial.sql"), "utf8"));
+    db.exec(readFileSync(path.join(schemaRoot, "002_scoped_references.sql"), "utf8"));
 
     for (const node of input.nodes) {
       const absolutePath = path.join(worldRoot, node.file_path);
@@ -234,6 +254,47 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
         alias.alias_kind ?? "exact_structured",
         alias.source_node_id
       );
+    }
+
+    for (const scopedReference of input.scopedReferences ?? []) {
+      db.prepare(
+        `
+          INSERT INTO scoped_references (
+            reference_id,
+            world_slug,
+            display_name,
+            reference_kind,
+            provenance_scope,
+            relation,
+            source_node_id,
+            source_field,
+            target_node_id,
+            authority_level
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `
+      ).run(
+        scopedReference.reference_id,
+        scopedReference.world_slug,
+        scopedReference.display_name,
+        scopedReference.reference_kind ?? null,
+        scopedReference.provenance_scope ?? "world",
+        scopedReference.relation,
+        scopedReference.source_node_id,
+        scopedReference.source_field ?? "scoped_references",
+        scopedReference.target_node_id ?? null,
+        scopedReference.authority_level ?? "explicit_scoped_reference"
+      );
+    }
+
+    for (const scopedReferenceAlias of input.scopedReferenceAliases ?? []) {
+      db.prepare(
+        `
+          INSERT INTO scoped_reference_aliases (
+            reference_id,
+            alias_text
+          ) VALUES (?, ?)
+        `
+      ).run(scopedReferenceAlias.reference_id, scopedReferenceAlias.alias_text);
     }
 
     for (const mention of input.mentions ?? []) {
