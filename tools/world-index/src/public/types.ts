@@ -20,7 +20,16 @@ export type {
   CanonFactRecord,
   ChangeType,
   ChangeLogScope,
-  ChangeLogEntry
+  ChangeLogEntry,
+  ExtensionEntry,
+  InvariantCategory,
+  InvariantRecord,
+  MysteryRecord,
+  OpenQuestionRecord,
+  NamedEntityRecord,
+  SectionRecord,
+  CharacterDossier,
+  DiegeticArtifactFrontmatter
 } from "../schema/types.js";
 
 export {

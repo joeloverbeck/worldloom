@@ -3,7 +3,13 @@
 # SPEC-03: Patch Engine & Edit Contract
 
 **Phase**: 2
-**Depends on**: SPEC-01 (record-level index data), SPEC-02 (MCP `submit_patch_plan` delegates here), SPEC-04 (validator gate), **SPEC-13 (atomic-source storage contract — patch engine writes atomic records, not monolithic files)**
+**Depends on**:
+- SPEC-01 (record-level index data)
+- archived SPEC-02 retrieval MCP server (the `submit_patch_plan` tool is stubbed at `tools/world-mcp/src/tools/submit-patch-plan.ts`; see `archive/specs/SPEC-02-retrieval-mcp-server.md`)
+- **SPEC-02 Phase 2 tooling update per SPEC-13 §C (scheduled in `specs/IMPLEMENTATION-ORDER.md` Phase 2 Tier 2; not a separate spec file): enables `submit_patch_plan` delegation to the engine, adds `mcp__worldloom__get_record` / `find_sections_touched_by` / `get_compiled_view`, and extends `allocate_next_id` to INV per-category / OQ / ENT / SEC per-file-class. Pre-apply step 4 (envelope allocation verification) cannot succeed for INV/OQ/ENT/SEC creates until this update lands — `tools/world-mcp/src/tools/allocate-next-id.ts` currently supports only CF, CH, PA, CHAR, DA, PR, BATCH, NCP, NCB, AU, RP, M.**
+- SPEC-04 (validator gate)
+- **SPEC-13 (atomic-source storage contract — patch engine writes atomic records, not monolithic files)**
+
 **Blocks**: SPEC-05 Phase 2 hooks (Hook 3 enforces engine-only writes on `_source/`), SPEC-06 Phase 2 skills (all writes through engine)
 
 ## Problem Statement
@@ -59,6 +65,24 @@ tools/patch-engine/
 │   └── integration/
 │       └── end-to-end-canon-addition.test.ts
 ```
+
+### Record-type TypeScript interfaces
+
+The create-ops and hybrid-file ops below type their payloads against record-class interfaces colocated with the existing `NODE_TYPES` enum in `tools/world-index/src/schema/types.ts` and re-exported from `tools/world-index/src/public/types.ts`. This placement (chosen over defining them inside the patch-engine package) keeps the definitions shared with SPEC-04 validators (`record_schema_compliance` loads the same types) and with SPEC-02 MCP retrieval tools (e.g., `get_record`), and respects the package-boundary rule that `tools/patch-engine` consumes `tools/world-index`'s public API.
+
+| Interface | Status | Corresponding atomic file | Corresponding `NODE_TYPES` entry |
+|---|---|---|---|
+| `CanonFactRecord` | already present at `tools/world-index/src/schema/types.ts:131` | `_source/canon/CF-NNNN.yaml` | `canon_fact_record` |
+| `ChangeLogEntry` | already present at `tools/world-index/src/schema/types.ts:180` | `_source/change-log/CH-NNNN.yaml` | `change_log_entry` |
+| `InvariantRecord` | **added by SPEC-03 delivery** | `_source/invariants/<INV-ID>.yaml` | `invariant` |
+| `MysteryRecord` | **added by SPEC-03 delivery** | `_source/mystery-reserve/M-NNNN.yaml` | `mystery_reserve_entry` |
+| `OpenQuestionRecord` | **added by SPEC-03 delivery** | `_source/open-questions/OQ-NNNN.yaml` | `open_question_entry` |
+| `NamedEntityRecord` | **added by SPEC-03 delivery** | `_source/entities/ENT-NNNN.yaml` | `named_entity` |
+| `SectionRecord` | **added by SPEC-03 delivery** | `_source/<file-subdir>/SEC-<PREFIX>-NNN.yaml` | `section` |
+| `CharacterDossier` | **added by SPEC-03 delivery** (frontmatter shape) | `characters/<char-slug>.md` frontmatter | `character_record` |
+| `DiegeticArtifactFrontmatter` | **added by SPEC-03 delivery** | `diegetic-artifacts/<da-slug>.md` frontmatter | `diegetic_artifact_record` |
+
+Field shapes mirror the atomic YAML schemas per SPEC-13 §B 1:1 (CF, CH, INV, M, OQ, ENT, SEC); hybrid-file frontmatter interfaces mirror the YAML frontmatter block above the `---` fence in each per-file artifact. These interfaces are the compile-time surface the ops below reference (`{cf_record: CanonFactRecord}`, `{inv_record: InvariantRecord}`, etc.). Runtime schema compliance is enforced by SPEC-04's `record_schema_compliance` validator against the corresponding JSON Schemas.
 
 ### Operation vocabulary (post-SPEC-13)
 
@@ -218,11 +242,20 @@ interface PatchReceipt {
   id_allocations_consumed: {
     cf_ids?: string[];
     ch_ids?: string[];
+    inv_ids?: string[];
+    m_ids?: string[];
+    oq_ids?: string[];
+    ent_ids?: string[];
+    sec_ids?: string[];
     pa_ids?: string[];
+    char_ids?: string[];
+    da_ids?: string[];
   };
   index_sync_duration_ms: number;
 }
 ```
+
+**Supersession note**: `PatchReceipt` is owned by `tools/patch-engine` and re-exported by `tools/world-mcp` as part of SPEC-03 delivery. The shape declared above supersedes the Phase 1 stub at `tools/world-mcp/src/tools/submit-patch-plan.ts:8–28`, which declares only the narrow `{cf_ids?, ch_ids?, pa_ids?}` variant under `id_allocations_consumed`. On SPEC-03 landing, the stub's local type declaration is replaced by an import from `@worldloom/patch-engine` (matching the existing TODO at `submit-patch-plan.ts:61–63`), and `id_allocations_consumed` mirrors the ten-class surface of `expected_id_allocations` in the envelope.
 
 ## FOUNDATIONS Alignment
 
@@ -233,6 +266,7 @@ interface PatchReceipt {
 | §Canonical Storage Layer (SPEC-13) | Engine writes atomic records to `_source/`; preserves per-file append-only discipline; compiled views don't exist to maintain |
 | §Mandatory World Files | Preserved; engine creates atomic YAML records under `_source/` subdirectories and per-file hybrid artifacts (characters, diegetic artifacts, adjudications) |
 | §Canon Fact Record Schema | `create_cf_record` payload typed against `CanonFactRecord` TypeScript interface; schema drift caught at compile time + runtime via `record_schema_compliance` validator |
+| Rule 7 Preserve Mystery Deliberately | MR firewall enforced pre-apply via SPEC-04 `rule7_mystery_reserve_preservation`; engine exposes no MR-resolution op; append-only `extensions[]` on M records preserves Mystery Reserve entries structurally |
 | HARD-GATE discipline | `approval_token` ties user consent to specific plan bytes; no unsigned submission succeeds |
 
 ## Verification
@@ -244,6 +278,7 @@ interface PatchReceipt {
 - **Hybrid anchor drift**: mutate a target character / diegetic-artifact / adjudication file between plan authoring and submit; verify engine rejects with `anchor_drift` code
 - **Approval token**: unsigned, expired, tampered, replayed tokens all rejected
 - **Write-order**: submit a plan with patches in pathological order (Tier 3 ops first, Tier 1 ops last); verify engine reorders internally and final state matches canonical 3-tier order
+- **Post-apply sync integration**: apply a patch plan creating a new CF record and a new SEC record; run `world-index sync <world-slug>`; verify both records appear in the index with correct `node_type`, `content_hash`, and `file_path`; verify a subsequent `find_sections_touched_by(<new-cf-id>)` (per SPEC-02 Phase 2 update) returns the new SEC
 - **Append-only**: attempt to construct a hypothetical `replace_cf_record` or `delete_cf_record` op; verify compile-time rejection (op not in union) and runtime rejection (schema validator)
 - **Retcon attestation**: attempt `update_record_field` against a CF's `statement` field without `retcon_attestation`; verify engine rejects
 - **Attribution**: submit a plan creating a CF and appending extensions to three SEC records; verify all `extensions[]` entries are structurally present with correct `originating_cf` / `change_id` / `date` / `label` / `body`; verify `touched_by_cf[]` auto-updated on each SEC
@@ -264,3 +299,4 @@ interface PatchReceipt {
 - **Approval token replay vs legitimate retry**: a network failure between `submit_patch_plan` and receipt may leave the skill unsure whether the plan applied. Mitigation: tokens are single-use but receipts are queryable by `plan_id` via a new `mcp__worldloom__get_patch_receipt` tool (added if needed in Phase 2 retrospection).
 - **Attribution canonicalization**: date format across skills must match. Mitigation: engine owns the date format (`YYYY-MM-DD`, UTC); skills never supply dates.
 - **Large-plan performance**: a canon-addition delivery with 6 domain files + 4 modification_history + 3 MR firewalls = ~13 ops. Target apply time <2s. If slower, profile hot paths.
+- **Hook 3 coordination (SPEC-05 Phase 2 Part B)**: the engine writes atomic records to `_source/` via `fs.writeFile` (bypassing Claude's Edit/Write tools, per §Approach). SPEC-05 Hook 3 is absent today (Phase 1 landed Hooks 1, 2, 4 only) and must be designed to exclude engine `fs.writeFile` calls from interception. If Hook 3's eventual implementation intercepts by file-path-pattern without a caller-process carve-out, engine writes break. Mitigation: SPEC-05 Part B design reviews this spec's `fs.writeFile` target list (`_source/<subdir>/*.yaml`, `characters/*.md`, `diegetic-artifacts/*.md`, `adjudications/*.md`) before finalizing Hook 3 block rules; the carve-out discriminator can be either process-identity (Hook 3 runs in Claude's tool-use lifecycle, engine runs out-of-process) or a per-write marker file, whichever SPEC-05 Part B selects.

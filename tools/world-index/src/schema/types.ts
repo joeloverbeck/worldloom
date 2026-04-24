@@ -195,6 +195,128 @@ export interface ChangeLogEntry {
   [key: string]: unknown;
 }
 
+export interface ExtensionEntry {
+  originating_cf: string;
+  change_id: string;
+  date: string;
+  label: string;
+  body: string;
+  [key: string]: unknown;
+}
+
+export type InvariantCategory =
+  | "ontological"
+  | "causal"
+  | "distribution"
+  | "social"
+  | "aesthetic_thematic";
+
+export interface InvariantRecord {
+  id: string;
+  category: InvariantCategory;
+  title: string;
+  statement: string;
+  rationale: string;
+  examples: string[];
+  non_examples: string[];
+  break_conditions: string;
+  revision_difficulty: "low" | "medium" | "high";
+  extensions: ExtensionEntry[];
+  [key: string]: unknown;
+}
+
+export interface MysteryRecord {
+  id: string;
+  title: string;
+  status: string;
+  knowns: string[];
+  unknowns: string[];
+  common_interpretations: string[];
+  disallowed_cheap_answers: string[];
+  domains_touched: string[];
+  future_resolution_safety: "low" | "medium" | "high" | string;
+  extensions: ExtensionEntry[];
+  [key: string]: unknown;
+}
+
+export interface OpenQuestionRecord {
+  id: string;
+  topic: string;
+  body: string;
+  when_to_resolve: string;
+  caution?: string;
+  extensions: ExtensionEntry[];
+  [key: string]: unknown;
+}
+
+export interface NamedEntityRecord {
+  id: string;
+  canonical_name: string;
+  entity_kind: string;
+  aliases: string[];
+  originating_cf: string | null;
+  scope_notes: string;
+  [key: string]: unknown;
+}
+
+export interface SectionRecord {
+  id: string;
+  file_class: string;
+  order?: number;
+  heading: string;
+  heading_level?: number;
+  body: string;
+  touched_by_cf: string[];
+  extensions: ExtensionEntry[];
+  [key: string]: unknown;
+}
+
+export interface CharacterDossier {
+  character_id: string;
+  slug: string;
+  name: string;
+  species: string;
+  age_band: string;
+  place_of_origin: string;
+  current_location: string;
+  scoped_references?: unknown[];
+  date: string;
+  social_position: string;
+  profession: string;
+  kinship_situation: string;
+  religious_ideological_environment: string;
+  major_local_pressures: string[];
+  intended_narrative_role: string;
+  world_consistency: Record<string, unknown>;
+  source_basis?: Record<string, unknown>;
+  notes?: string;
+  [key: string]: unknown;
+}
+
+export interface DiegeticArtifactFrontmatter {
+  artifact_id: string;
+  slug: string;
+  title: string;
+  artifact_type: string;
+  author: string;
+  author_character_id: string | null;
+  date: string;
+  place: string;
+  audience: string;
+  communicative_purpose: string;
+  desired_relation_to_truth: string;
+  genre_conventions?: Record<string, unknown>;
+  author_profile: Record<string, unknown>;
+  epistemic_horizon: Record<string, unknown>;
+  claim_map: unknown[];
+  canon_links?: string[];
+  cannot_know?: string[];
+  world_consistency: Record<string, unknown>;
+  source_basis: Record<string, unknown>;
+  notes?: string;
+  [key: string]: unknown;
+}
+
 export interface NodeRow {
   node_id: string;
   world_slug: string;

@@ -1,0 +1,27 @@
+{
+  "name": "@worldloom/patch-engine",
+  "version": "0.1.0",
+  "description": "Deterministic atomic-record patch applier (SPEC-03).",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/src/apply.js",
+  "types": "dist/src/apply.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@worldloom/world-index": "file:../world-index",
+    "better-sqlite3": "12.2.0",
+    "js-yaml": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "24.7.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
