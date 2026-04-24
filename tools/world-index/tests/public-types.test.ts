@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ATOMIC_LOGICAL_WORLD_FILES,
   ATTRIBUTION_EDGE_TYPES,
   CURRENT_INDEX_VERSION,
   EDGE_TYPES,
@@ -34,6 +35,7 @@ import type {
   ScopedEdgeType,
   YamlEdgeType
 } from "../src/public/types";
+import { ATOMIC_LOGICAL_WORLD_FILES as SOURCE_ATOMIC_LOGICAL_WORLD_FILES } from "../src/parse/atomic";
 import {
   ATTRIBUTION_EDGE_TYPES as SOURCE_ATTRIBUTION_EDGE_TYPES,
   EDGE_TYPES as SOURCE_EDGE_TYPES,
@@ -86,6 +88,7 @@ type _ChangeLogScopeShape = Assert<
 type _ChangeLogEntryShape = Assert<ChangeLogEntry extends { change_id: string } ? true : false>;
 
 test("public types re-export the expected runtime constants", () => {
+  assert.deepEqual(ATOMIC_LOGICAL_WORLD_FILES, SOURCE_ATOMIC_LOGICAL_WORLD_FILES);
   assert.equal(CURRENT_INDEX_VERSION, SOURCE_SCHEMA_VERSION);
   assert.deepEqual(NODE_TYPES, SOURCE_NODE_TYPES);
   assert.deepEqual(EDGE_TYPES, SOURCE_EDGE_TYPES);
@@ -105,6 +108,7 @@ test("package self-import resolves without import-time IO", () => {
 
   try {
     const publicTypes = require("@worldloom/world-index/public/types");
+    assert.equal(publicTypes.ATOMIC_LOGICAL_WORLD_FILES, ATOMIC_LOGICAL_WORLD_FILES);
     assert.equal(publicTypes.CURRENT_INDEX_VERSION, CURRENT_INDEX_VERSION);
     assert.equal(publicTypes.NODE_TYPES, NODE_TYPES);
     assert.equal(publicTypes.EDGE_TYPES, EDGE_TYPES);

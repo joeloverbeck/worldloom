@@ -41,4 +41,5 @@ export {
   SCOPED_EDGE_TYPES
 } from "../schema/types.js";
 
+export { ATOMIC_LOGICAL_WORLD_FILES } from "../parse/atomic.js";
 export { CURRENT_INDEX_VERSION } from "../schema/version.js";

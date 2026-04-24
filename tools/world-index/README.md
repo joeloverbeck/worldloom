@@ -27,9 +27,9 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 - `unified` + `remark-parse` + `remark-gfm` (markdown AST)
 - `yaml` (YAML parse/serialize)
 
-## Public types entry
+## Public contract entry
 
-`@worldloom/world-index/public/types` is a narrow types-only public surface for `tools/world-mcp/`. It re-exports the schema types and enum constants from `src/schema/types.ts` so retrieval tooling can typecheck SQLite rows against the exact world-index contract. It does not expose a query library, runtime helper, or any broader programmatic read surface.
+`@worldloom/world-index/public/types` is a narrow public contract surface for `tools/world-mcp/`. It re-exports schema types, enum constants, the current index version, and the atomic logical-file list so retrieval tooling can typecheck SQLite rows and share lifecycle constants against the exact world-index contract. It does not expose a query library, runtime helper, or any broader programmatic read surface.
 
 ## Output location per world
 

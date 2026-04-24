@@ -333,8 +333,12 @@ test("SPEC-02 capstone: context packet shape still matches the canonical contrac
   }
 });
 
-test("SPEC-02 capstone: types-only world-index public export imports cleanly", () => {
-  const exported = require("@worldloom/world-index/public/types") as { CURRENT_INDEX_VERSION?: unknown };
+test("SPEC-02 capstone: world-index public contract export imports cleanly", () => {
+  const exported = require("@worldloom/world-index/public/types") as {
+    ATOMIC_LOGICAL_WORLD_FILES?: unknown;
+    CURRENT_INDEX_VERSION?: unknown;
+  };
+  assert.ok(Array.isArray(exported.ATOMIC_LOGICAL_WORLD_FILES));
   assert.equal(typeof exported.CURRENT_INDEX_VERSION, "number");
 });
 

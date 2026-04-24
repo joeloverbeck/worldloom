@@ -205,6 +205,7 @@ For shared package-export tickets, use this quick pre-proof checklist before tru
 2. producer build emits the runtime file and declaration file named by that export
 3. consumer proof runs from the real package root after refreshing any local sibling dependency link/install state
 4. the consumer's installed dependency artifact contains the new or changed symbols that the proof is meant to exercise
+5. existing public-surface tests with import-time IO or side-effect guards still pass, or are extended to cover the new export
 
 If an initial broad package/workspace lane fails and the failure is already clearly outside the owned seam, do not leave that lane in `Acceptance Criteria` or `Test Plan` while implementing. Rewrite the ticket immediately to the honest narrower proof boundary, then continue.
 

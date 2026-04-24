@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
+import { ATOMIC_LOGICAL_WORLD_FILES, CURRENT_INDEX_VERSION } from "@worldloom/world-index/public/types";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
@@ -7,19 +7,7 @@ import { createHash } from "node:crypto";
 import { createMcpError, type McpError } from "../errors";
 import { resolveIndexVersionPath, resolveWorldDbPath, resolveWorldDirectory } from "./path";
 
-const ATOMIC_LOGICAL_WORLD_FILES = new Set([
-  "CANON_LEDGER.md",
-  "INVARIANTS.md",
-  "MYSTERY_RESERVE.md",
-  "OPEN_QUESTIONS.md",
-  "EVERYDAY_LIFE.md",
-  "INSTITUTIONS.md",
-  "MAGIC_OR_TECH_SYSTEMS.md",
-  "GEOGRAPHY.md",
-  "ECONOMY_AND_RESOURCES.md",
-  "PEOPLES_AND_SPECIES.md",
-  "TIMELINE.md"
-]);
+const ATOMIC_LOGICAL_WORLD_FILE_SET = new Set<string>(ATOMIC_LOGICAL_WORLD_FILES);
 
 export interface OpenIndexDbSuccess {
   db: Database.Database;
@@ -68,7 +56,7 @@ function hasAtomicSourceDirectory(worldDirectory: string): boolean {
 }
 
 function isSyntheticAtomicLogicalFile(worldDirectory: string, filePath: string): boolean {
-  return hasAtomicSourceDirectory(worldDirectory) && ATOMIC_LOGICAL_WORLD_FILES.has(filePath);
+  return hasAtomicSourceDirectory(worldDirectory) && ATOMIC_LOGICAL_WORLD_FILE_SET.has(filePath);
 }
 
 function findDriftedFiles(
