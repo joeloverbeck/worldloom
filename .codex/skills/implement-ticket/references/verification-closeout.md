@@ -21,9 +21,17 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - Run dependent verification commands in dependency order, not in parallel. If a test command consumes compiled artifacts, generated files, or other build outputs, finish and confirm the producer step first, then run the dependent proof command.
 - For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
 - If verification uses an exported function or inline runtime probe, confirm the command is launched from a root where package-local modules actually resolve before treating any failure as ticket evidence.
+- For TS packages that run tests from compiled output such as `dist/tests/*.test.js`, treat new test-time file reads as part of the proof contract: verify that fixtures, SQL files, and other disk reads resolve from the compiled test runtime, or anchor them explicitly from the source tree / repo root.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
+
+## Common narrowings
+
+- If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence.
+- If isolated subtests pass but the broad lane still fails opaquely, run the compiled test file directly from the same package root when that exposes clearer TAP output or assertion traces.
+- If a compiled TS test imports runtime data or reads files from disk, check the emitted test's runtime location before assuming the implementation is wrong; `dist/tests/...` often changes the relative path contract.
+- If an MCP, stdio, or transport-client lane is noisy, first prove whether the instability is outside the owned seam; keep acceptance on the strongest truthful in-process or package-local surface unless a known-good end-to-end lane exists.
 
 ## Ticket closeout
 

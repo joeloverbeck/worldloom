@@ -1,19 +1,23 @@
 import Database from "better-sqlite3";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { CURRENT_INDEX_VERSION } from "../schema/version";
 
-const MIGRATION_FILE = path.resolve(
+const MIGRATIONS_DIRECTORY = path.resolve(
   __dirname,
   "..",
   "..",
   "..",
   "src",
   "schema",
-  "migrations",
-  "001_initial.sql"
+  "migrations"
 );
+
+interface MigrationFile {
+  version: number;
+  filePath: string;
+}
 
 export class SchemaVersionMismatchError extends Error {
   readonly expectedVersion: number;
@@ -48,6 +52,48 @@ function readRecordedVersion(versionFilePath: string): string | null {
   }
 }
 
+function listMigrationFiles(): MigrationFile[] {
+  const files = readdirSync(MIGRATIONS_DIRECTORY)
+    .map((entry) => {
+      const match = /^(\d+)_.*\.sql$/.exec(entry);
+      if (match === null) {
+        return null;
+      }
+
+      return {
+        version: Number(match[1]),
+        filePath: path.join(MIGRATIONS_DIRECTORY, entry)
+      };
+    })
+    .filter((entry): entry is MigrationFile => entry !== null)
+    .sort((left, right) => left.version - right.version);
+
+  if (files.length !== CURRENT_INDEX_VERSION) {
+    throw new Error(
+      `Expected ${CURRENT_INDEX_VERSION} migration files but found ${files.length} in ${MIGRATIONS_DIRECTORY}.`
+    );
+  }
+
+  files.forEach((file, index) => {
+    const expectedVersion = index + 1;
+    if (file.version !== expectedVersion) {
+      throw new Error(
+        `Expected migration version ${expectedVersion} but found ${file.version} at ${file.filePath}.`
+      );
+    }
+  });
+
+  return files;
+}
+
+function applyMigrations(db: Database.Database, fromVersionExclusive: number): void {
+  const pending = listMigrationFiles().filter((file) => file.version > fromVersionExclusive);
+
+  for (const migration of pending) {
+    db.exec(readFileSync(migration.filePath, "utf8"));
+  }
+}
+
 export function openIndex(worldRoot: string, worldSlug: string): Database.Database {
   const indexDirectory = indexDirectoryForWorld(worldRoot, worldSlug);
   const databasePath = databasePathForWorld(worldRoot, worldSlug);
@@ -65,18 +111,27 @@ export function openIndex(worldRoot: string, worldSlug: string): Database.Databa
 
     const recordedVersion = readRecordedVersion(versionFilePath);
     if (!databaseExists || recordedVersion === null) {
-      const migrationSql = readFileSync(MIGRATION_FILE, "utf8");
-      db.exec(migrationSql);
+      applyMigrations(db, 0);
       writeFileSync(versionFilePath, `${CURRENT_INDEX_VERSION}\n`, "utf8");
       return db;
     }
 
-    if (recordedVersion !== String(CURRENT_INDEX_VERSION)) {
+    const recordedVersionNumber = Number(recordedVersion);
+    if (!Number.isInteger(recordedVersionNumber) || recordedVersionNumber < 1) {
+      throw new SchemaVersionMismatchError(versionFilePath, CURRENT_INDEX_VERSION, recordedVersion);
+    }
+
+    if (recordedVersionNumber > CURRENT_INDEX_VERSION) {
       throw new SchemaVersionMismatchError(
         versionFilePath,
         CURRENT_INDEX_VERSION,
         recordedVersion
       );
+    }
+
+    if (recordedVersionNumber < CURRENT_INDEX_VERSION) {
+      applyMigrations(db, recordedVersionNumber);
+      writeFileSync(versionFilePath, `${CURRENT_INDEX_VERSION}\n`, "utf8");
     }
 
     return db;

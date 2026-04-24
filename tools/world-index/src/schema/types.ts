@@ -23,7 +23,8 @@ export const NODE_TYPES = [
   "character_proposal_batch",
   "retcon_proposal_card",
   "audit_record",
-  "named_entity"
+  "named_entity",
+  "scoped_reference"
 ] as const;
 
 export type NodeType = (typeof NODE_TYPES)[number];
@@ -51,10 +52,15 @@ export const ENTITY_EDGE_TYPES = ["mentions_entity"] as const;
 
 export type EntityEdgeType = (typeof ENTITY_EDGE_TYPES)[number];
 
+export const SCOPED_EDGE_TYPES = ["references_scoped_name", "references_record"] as const;
+
+export type ScopedEdgeType = (typeof SCOPED_EDGE_TYPES)[number];
+
 export const EDGE_TYPES = [
   ...YAML_EDGE_TYPES,
   ...ATTRIBUTION_EDGE_TYPES,
-  ...ENTITY_EDGE_TYPES
+  ...ENTITY_EDGE_TYPES,
+  ...SCOPED_EDGE_TYPES
 ] as const;
 
 export type EdgeType = (typeof EDGE_TYPES)[number];

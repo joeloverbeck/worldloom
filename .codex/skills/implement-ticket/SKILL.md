@@ -201,8 +201,6 @@ If the drafted proof uses a CLI, confirm the command's working-directory contrac
 
 If the ticket adds a runnable shell script or npm-script proof surface, apply the same package-root discipline inside the script itself: embedded `node`, `node -e`, or similar package-local probes must launch from the root where local dependencies actually resolve, even when the artifact under inspection lives elsewhere in the repo.
 
-If an MCP, stdio, or similar transport-client lane is itself unstable or environment-noisy, first prove that the client/tooling issue is outside the owned seam. When it is, keep handler/protocol correctness on the strongest truthful in-process or package-local seam, and narrow the transport proof to entrypoint lifecycle or child-process startup/shutdown behavior unless a known-good end-to-end transport lane exists.
-
 Worldloom verification surfaces usually include:
 
 - codebase grep-proof
@@ -216,11 +214,7 @@ Pick the surface that actually proves the owned invariant. A command that merely
 
 For tool/index/schema tickets, package-local readonly DB queries and inline `node -e` probes count as `targeted tool command` proof when they directly assert the owned invariant against the real artifact or a truthful temp-copy rebuild.
 
-If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence. Use the isolated result to decide whether the broad lane is current-ticket fallout or unrelated noise.
-
-If the broad `node --test <file>` lane remains file-opaque but isolated subtests pass, run the compiled test file directly from the same package root before classifying the broad lane as noisy. Direct execution can expose subtest-local TAP output or assertion traces that the harness-level invocation did not surface.
-
-If an isolated JS/TS `node --test` lane still fails without surfacing the owned seam, rerun the exact assertion logic outside the test harness with a direct package-local probe that exercises the same invariant against the same rebuilt artifact root. When that direct probe is the clearest truthful boundary, record it as the acceptance surface and classify the still-opaque harness lane as noisy/non-acceptance proof instead of overclaiming it.
+For compiled TS packages, opaque `node --test` lanes, and transport-client noise, apply the narrowing guidance in `references/verification-closeout.md` instead of expanding the acceptance boundary blindly.
 
 When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
 

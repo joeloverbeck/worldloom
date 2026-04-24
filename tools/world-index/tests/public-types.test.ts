@@ -7,6 +7,7 @@ import {
   EDGE_TYPES,
   ENTITY_EDGE_TYPES,
   NODE_TYPES,
+  SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES
 } from "../src/public/types";
 import type {
@@ -30,6 +31,7 @@ import type {
   EntityEdgeType,
   ModificationHistoryEntry,
   NodeType,
+  ScopedEdgeType,
   YamlEdgeType
 } from "../src/public/types";
 import {
@@ -37,6 +39,7 @@ import {
   EDGE_TYPES as SOURCE_EDGE_TYPES,
   ENTITY_EDGE_TYPES as SOURCE_ENTITY_EDGE_TYPES,
   NODE_TYPES as SOURCE_NODE_TYPES,
+  SCOPED_EDGE_TYPES as SOURCE_SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES as SOURCE_YAML_EDGE_TYPES
 } from "../src/schema/types";
 import { CURRENT_INDEX_VERSION as SOURCE_SCHEMA_VERSION } from "../src/schema/version";
@@ -53,6 +56,9 @@ type _AttributionEdgeTypeMatchesTuple = Assert<
 >;
 type _EntityEdgeTypeMatchesTuple = Assert<
   IsEqual<EntityEdgeType, (typeof ENTITY_EDGE_TYPES)[number]>
+>;
+type _ScopedEdgeTypeMatchesTuple = Assert<
+  IsEqual<ScopedEdgeType, (typeof SCOPED_EDGE_TYPES)[number]>
 >;
 type _CanonFactStatusIsString = Assert<CanonFactStatus extends string ? true : false>;
 type _CanonScopeGeographicIsString = Assert<CanonScopeGeographic extends string ? true : false>;
@@ -86,6 +92,7 @@ test("public types re-export the expected runtime constants", () => {
   assert.deepEqual(YAML_EDGE_TYPES, SOURCE_YAML_EDGE_TYPES);
   assert.deepEqual(ATTRIBUTION_EDGE_TYPES, SOURCE_ATTRIBUTION_EDGE_TYPES);
   assert.deepEqual(ENTITY_EDGE_TYPES, SOURCE_ENTITY_EDGE_TYPES);
+  assert.deepEqual(SCOPED_EDGE_TYPES, SOURCE_SCOPED_EDGE_TYPES);
 });
 
 test("package self-import resolves without import-time IO", () => {
@@ -104,6 +111,7 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.YAML_EDGE_TYPES, YAML_EDGE_TYPES);
     assert.equal(publicTypes.ATTRIBUTION_EDGE_TYPES, ATTRIBUTION_EDGE_TYPES);
     assert.equal(publicTypes.ENTITY_EDGE_TYPES, ENTITY_EDGE_TYPES);
+    assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
   } finally {
     fs.statSync = originalStatSync;
   }

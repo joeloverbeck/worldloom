@@ -4,6 +4,7 @@ export type {
   YamlEdgeType,
   AttributionEdgeType,
   EntityEdgeType,
+  ScopedEdgeType,
   CanonFactStatus,
   CanonScopeGeographic,
   CanonScopeTemporal,
@@ -27,7 +28,8 @@ export {
   EDGE_TYPES,
   YAML_EDGE_TYPES,
   ATTRIBUTION_EDGE_TYPES,
-  ENTITY_EDGE_TYPES
+  ENTITY_EDGE_TYPES,
+  SCOPED_EDGE_TYPES
 } from "../schema/types.js";
 
 export { CURRENT_INDEX_VERSION } from "../schema/version.js";

@@ -1,12 +1,12 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
-This document sequences the spec bundle (`SPEC-01` through `SPEC-10`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
+This document sequences the active spec bundle (`SPEC-01` through `SPEC-12`, plus `SPEC-08` / `SPEC-09`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then read surface (MCP), then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
 
 ## Implementation order (for builders)
 
@@ -47,7 +47,10 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-02` MCP Retrieval Server — completed 2026-04-24; implementation landed at `tools/world-mcp/`, with `submit_patch_plan` intentionally stubbed per the Phase 1 contract; spec archived at `archive/specs/SPEC-02-retrieval-mcp-server.md`
 - `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent) — completed 2026-04-24; implementation landed at `tools/hooks/` and `.claude/settings.json.example`; Hooks 3 and 5 remain Phase 2 work
 
-**Tier 3 (depends on Tier 2)**:
+**Tier 2.25 (depends on Tier 2)**:
+- `SPEC-12` Skill-Reliable Retrieval — proposed; must land before downstream skills treat the current MCP surface as production-ready. Scope: scoped references, structured cross-record edges, trust-tier-aware ranking, and packet-v2 completeness discipline.
+
+**Tier 3 (depends on Tier 2.25)**:
 - `SPEC-06 Part A` canon-addition read-side rewrite
 
 **Phase 1 completion gate**: `SPEC-08 Phase 1 acceptance criteria` pass. Specifically:
@@ -145,6 +148,8 @@ Phase 1 (Read Path)
   │                                ▼
   ├── SPEC-02 MCP Server ──────────┤
   │                                ▼
+  ├── SPEC-12 Skill-Reliable Retrieval ─┤
+  │                                ▼
   ├── SPEC-05 Hooks 1,2,4 ─────────┤
   │                                ▼
   ├── SPEC-07 Part A (docs) ──────┤
@@ -194,6 +199,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-01 (index + parser + CLI): 2 sessions
   - SPEC-10 (entity-surface remediation): 0.5–1 session
   - SPEC-02 (MCP server + tools): 1 session
+  - SPEC-12 (retrieval reliability + packet-v2): 1–2 sessions
   - SPEC-05 Part A (3 hooks): 1 session
   - SPEC-06 Part A (canon-addition read-side): 1 session
   - SPEC-07 Part A (docs): completed 2026-04-23 in parallel with Phase 1 code work
@@ -241,6 +247,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
 | SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
+| SPEC-12 Skill-Reliable Retrieval | proposed; active at `specs/SPEC-12-skill-reliable-retrieval.md` |
 | IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10 is a later architectural remediation of SPEC-01's entity surface after repeated live `named_entity` audit failures showed that the original heuristic/entity contract was too broad.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are later architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and now downstream-skill retrieval reliability is being formalized as a separate scoped-reference and packet-completeness layer.

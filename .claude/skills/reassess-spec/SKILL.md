@@ -197,6 +197,9 @@ Example:
 | I1 | `grep -n "submit_patch_plan" tools/world-mcp/src/tools/` | 3 matches in `tools/world-mcp/src/tools/submit-patch-plan.ts` — confirms tool surface exists |
 | I2 | `test -f specs/SPEC-04-validator-framework.md` | file exists — dependency path valid |
 | M3 | Judgment — FND-§Change Control Policy + FND-§Rule 6 reasoning; Q2 delegated (no codebase symbol to grep) | selected option (a): spec's Outcome section must cite delivering-commit IDs — Rule 6 No Silent Retcons requires the attribution chain |
+| I4 | User answer Q1 = (a): drop v1 wholesale; v2 replaces | Apply as: D6 Migration Posture section states v1 removed outright, no backcompat shim, CONTEXT-PACKET-CONTRACT.md regenerated |
+
+**User-answered rows**: when the user explicitly answers a Step 6 Question with an option label, put the answer in the Check column (format: `User answer Q<N> = (<option>): <one-line paraphrase of the chosen option>`); put the resulting spec edit in the Result column (format: `Apply as: <concise edit description>`). Judgment-prefix is not required — the Question + answer IS the check. This row shape is parallel to command-backed and `Judgment — …` rows, not a subset of either; see `references/spec-writing-rules.md` §Pre-Apply Verification for the row-shape taxonomy. When the user delegates resolution to the reassessor's reasoning ("you decide based on FOUNDATIONS") rather than answering with an option label, use the `Judgment — …; Q<N> delegated` shape shown in the M3 example instead.
 
 **Mismatch classification** — if a check reveals a finding/codebase mismatch:
 

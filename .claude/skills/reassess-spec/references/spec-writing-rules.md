@@ -6,7 +6,11 @@ After all findings are resolved and approved:
 
 Run targeted checks to confirm each finding still holds (grep confirming symbol presence/absence, count validation, path-exists, file-read of the target line). Emit the verification table in chat before any Write/Edit call — a vague "I checked the findings" is not sufficient.
 
-**Judgment-only rows**: findings whose recommendation is purely analytical (arithmetic re-derivation, judgment-based refinement, no codebase symbol being referenced) may be rowed as `Judgment — <restated rationale>` in the Check column with no command field; the Result column still captures the outcome. Use sparingly — the default is a command-backed row; prefer a command-backed row whenever any symbol named in the finding can be grepped. A bare `Judgment` without the restated rationale is treated as a skipped check, parallel to how a bare acknowledgment is treated as a skipped reference load.
+**Row-shape taxonomy**: three row shapes are valid in the pre-apply table, each with its own trigger:
+
+- **Command-backed row** (default): `Finding | <grep / test / file-read command> | <result>`. Use whenever any symbol named in the finding can be grepped, any path can be `test -f`'d, or any line can be read.
+- **Judgment-only row**: `Finding | Judgment — <restated rationale> | <result>`. Use for findings whose recommendation is purely analytical (arithmetic re-derivation, judgment-based refinement, no codebase symbol being referenced) OR when the user delegates resolution to the reassessor's reasoning ("you decide based on FOUNDATIONS"); in the latter case, append `; Q<N> delegated` to the rationale so the delegation is auditable. Use sparingly — prefer command-backed whenever a symbol is greppable. A bare `Judgment` without the restated rationale is treated as a skipped check, parallel to how a bare acknowledgment is treated as a skipped reference load.
+- **User-answered row**: `Finding | User answer Q<N> = (<option>): <one-line paraphrase of the chosen option> | Apply as: <concise edit description>`. Use when the user explicitly answers a Step 6 Question with an option label. The Question + answer IS the check; do NOT prefix with `Judgment —` (the Judgment shape is reserved for analytical rationale or delegated resolution, not for user-selected options). See the SKILL.md pre-apply-table example (I4 row) for the canonical form.
 
 Classify any mismatch between check and finding into one of three tiers:
 

@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -7,6 +14,11 @@ import test from "node:test";
 import Database from "better-sqlite3";
 
 import { openIndex, SchemaVersionMismatchError } from "../src/index/open";
+
+const INITIAL_MIGRATION_SQL = readFileSync(
+  path.resolve(__dirname, "..", "..", "src", "schema", "migrations", "001_initial.sql"),
+  "utf8"
+);
 
 function createTempRoot(): string {
   return mkdtempSync(path.join(os.tmpdir(), "world-index-schema-"));
@@ -18,6 +30,23 @@ function cleanup(root: string): void {
 
 function openFixtureIndex(root: string): Database.Database {
   return openIndex(root, "fixture-world");
+}
+
+function createVersionOneIndex(root: string): void {
+  const indexDirectory = path.join(root, "worlds", "fixture-world", "_index");
+  const databasePath = path.join(indexDirectory, "world.db");
+  const versionPath = path.join(indexDirectory, "index_version.txt");
+
+  mkdirSync(indexDirectory, { recursive: true });
+
+  const db = new Database(databasePath);
+  try {
+    db.exec(INITIAL_MIGRATION_SQL);
+  } finally {
+    db.close();
+  }
+
+  writeFileSync(versionPath, "1\n", "utf8");
 }
 
 test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () => {
@@ -37,7 +66,7 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
       );
 
       assert.equal(existsSync(dbPath), true);
-      assert.equal(readFileSync(versionPath, "utf8"), "1\n");
+      assert.equal(readFileSync(versionPath, "utf8"), "2\n");
 
       const tables = db
         .prepare(
@@ -59,6 +88,8 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
           "fts_nodes_docsize",
           "fts_nodes_idx",
           "nodes",
+          "scoped_reference_aliases",
+          "scoped_references",
           "sqlite_sequence",
           "summaries",
           "validation_results"
@@ -82,7 +113,11 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
           "idx_entity_mentions_resolved",
           "idx_entity_mentions_surface",
           "idx_nodes_file",
-          "idx_nodes_world_type"
+          "idx_nodes_world_type",
+          "idx_scoped_reference_alias_text",
+          "idx_scoped_reference_alias_unique",
+          "idx_scoped_references_name",
+          "idx_scoped_references_source"
         ]
       );
 
@@ -153,6 +188,40 @@ test("FTS triggers keep insert, delete, and update search results coherent", () 
   }
 });
 
+test("openIndex upgrades a version-1 index to version 2", () => {
+  const root = createTempRoot();
+
+  try {
+    createVersionOneIndex(root);
+
+    const db = openFixtureIndex(root);
+    try {
+      const versionPath = path.join(root, "worlds", "fixture-world", "_index", "index_version.txt");
+      assert.equal(readFileSync(versionPath, "utf8"), "2\n");
+
+      const tables = db
+        .prepare(
+          `
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+              AND name IN ('scoped_references', 'scoped_reference_aliases')
+            ORDER BY name
+          `
+        )
+        .all() as Array<{ name: string }>;
+      assert.deepEqual(tables.map(({ name }) => name), [
+        "scoped_reference_aliases",
+        "scoped_references"
+      ]);
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
 test("version mismatches raise SchemaVersionMismatchError", () => {
   const root = createTempRoot();
 
@@ -161,14 +230,14 @@ test("version mismatches raise SchemaVersionMismatchError", () => {
     db.close();
 
     const versionPath = path.join(root, "worlds", "fixture-world", "_index", "index_version.txt");
-    writeFileSync(versionPath, "2\n", "utf8");
+    writeFileSync(versionPath, "3\n", "utf8");
 
     assert.throws(
       () => openFixtureIndex(root),
       (error: unknown) =>
         error instanceof SchemaVersionMismatchError &&
-        error.expectedVersion === 1 &&
-        error.actualVersion === "2"
+        error.expectedVersion === 2 &&
+        error.actualVersion === "3"
     );
   } finally {
     cleanup(root);
