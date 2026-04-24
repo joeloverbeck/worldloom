@@ -145,11 +145,10 @@ worlds/*
 !worlds/.gitkeep
 
 # Machine-facing layer (per specs/SPEC-08 Phase 0)
-# Note: worlds/*/_index/ and worlds/*/_source/ are already covered by the
-# worlds/* rule above, but listed here explicitly for discoverability
-# (users reading the gitignore will see the layer's artifacts called out).
+# Note: all worlds/* content is ignored by the public pipeline repo.
+# Canonical _source/ files are tracked by the private world-content repo.
 worlds/*/_index/
-worlds/*/_source/
+.pre-migration-snapshot/
 tools/*/dist/
 tools/*/node_modules/
 tools/world-mcp/.secret

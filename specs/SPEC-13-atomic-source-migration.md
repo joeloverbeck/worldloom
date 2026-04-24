@@ -71,7 +71,7 @@ worlds/<slug>/
 **Retired root-level files** (deleted during migration; no compiled replacement):
 `CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, `PEOPLES_AND_SPECIES.md`, `TIMELINE.md`.
 
-**`.gitignore` changes**: remove `worlds/*/_source/` from ignore list (it's now source of truth and must be tracked). `worlds/*/_index/` remains ignored (derived).
+**Repository visibility**: `_source/` is now canonical source and must be tracked by the repository that owns world content. In the standard split checkout, that is the private `worlds/` repository, not the public pipeline repository. The public repo continues to ignore `worlds/*`; `worlds/*/_index/` remains ignored as derived state.
 
 ### §B — Atomic record schemas
 
@@ -257,7 +257,7 @@ Add 3 tools: `mcp__worldloom__get_record(record_id)` (generalizes `get_node` acr
 Part C (previously: Phase 3 docs updates for compiled-ledger-from-atomic-source) retired — SPEC-13 handles the FOUNDATIONS revision directly. Part B content remains (HARD-GATE-DISCIPLINE.md write-order rewrite for the new engine, CLAUDE.md phrasing refinement).
 
 #### SPEC-08 (Migration & Phasing)
-Phase 3 ("Atomic Source for CF/CH Records") and Phase 4 ("High-Churn Prose Fragmentization") are both superseded by SPEC-13's Phase 1.5 scope. The `worlds/*/_source/` `.gitignore` entry installed in Phase 0 is reversed during Phase 1.5.
+Phase 3 ("Atomic Source for CF/CH Records") and Phase 4 ("High-Churn Prose Fragmentization") are both superseded by SPEC-13's Phase 1.5 scope. `_source/` is tracked in the world-content repository that owns `worlds/<slug>/`; the public pipeline repository still ignores `worlds/*`.
 
 #### SPEC-01 (World Index)
 No spec rewrite required — already archived. Parser refresh lands as a Phase 1.5 execution ticket under IMPLEMENTATION-ORDER.md: the index parser reads `_source/*.yaml` as primary input; markdown files at the world root are no longer parsed for records (only WORLD_KERNEL.md and ONTOLOGY.md remain as prose inputs to the index's lexical layer).
@@ -333,7 +333,7 @@ Executed in a follow-up session after this spec and its siblings land. The proce
 
 11. **Delete monolithic files** — once all `_source/` records are authored, delete the 11 retired root-level markdown files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, `PEOPLES_AND_SPECIES.md`, `TIMELINE.md`).
 
-12. **Update `.gitignore`** — remove `worlds/*/_source/` from the ignore list.
+12. **Verify repository boundary** — ensure `worlds/animalia/_source/**` is visible to the private world-content repository while the public pipeline repository continues to ignore `worlds/*`. Do not unignore `_source/` in the public repo.
 
 13. **Rebuild index** — run `world-index build animalia` against the new source of truth. Must succeed; every YAML parses; IDs unique; cross-refs resolve.
 

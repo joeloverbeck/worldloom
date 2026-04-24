@@ -4,15 +4,15 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-index` (parser; removes legacy monolithic-markdown parse code-paths for the 11 retired file classes; `WORLD_KERNEL.md` and `ONTOLOGY.md` prose-parsing retained)
-**Deps**: 003
+**Deps**: SPEC13ATOSRCMIG-003 archived and user-owned migration commit created
 
 ## Problem
 
-SPEC13ATOSRCMIG-002 landed the atomic-YAML input path with legacy monolithic-markdown parsing preserved for the transition window. SPEC13ATOSRCMIG-003 committed animalia's migration to `_source/`. With no machine-layer-enabled world remaining in monolithic form, legacy parse code-paths for the 11 retired file classes are dead code. `specs/IMPLEMENTATION-ORDER.md` Phase 1.5 Stream C Phase B directs their removal once Stream B commits; this ticket executes that cleanup.
+SPEC13ATOSRCMIG-002 landed the atomic-YAML input path with legacy monolithic-markdown parsing preserved for the transition window. SPEC13ATOSRCMIG-003 migrated animalia to `_source/` and left the final migration commit for user review, per `AGENTS.md`. Once that user-owned migration commit exists, no machine-layer-enabled world remains in monolithic form and legacy parse code-paths for the 11 retired file classes are dead code. `specs/IMPLEMENTATION-ORDER.md` Phase 1.5 Stream C Phase B directs their removal once Stream B commits; this ticket executes that cleanup.
 
 ## Assumption Reassessment (2026-04-24)
 
-1. Verified SPEC13ATOSRCMIG-003 must merge before this ticket runs (Deps: 003 enforces the gate). No machine-layer-enabled world remains in monolithic form after Stream B; `create-base-world` (Phase 2 SPEC-06) will emit `_source/` directly for future worlds.
+1. Verified SPEC13ATOSRCMIG-003 must be archived and the user-owned migration commit must exist before this ticket runs. No machine-layer-enabled world remains in monolithic form after Stream B is committed; `create-base-world` (Phase 2 SPEC-06) will emit `_source/` directly for future worlds.
 2. Verified `tools/world-index` parser dispatch (installed by SPEC13ATOSRCMIG-002) currently routes to legacy path when `_source/` is absent; this ticket simplifies dispatch to an assertion that `_source/` exists.
 3. Cross-artifact boundary: parser output node schema remains unchanged; removing legacy parse functions is an internal code-cleanliness refactor that does not touch any downstream consumer (`world-mcp` query layer, context-packet assembler, future Phase 2 validators and patch engine).
 4. FOUNDATIONS principle under audit: none directly — internal cleanup. Indirectly supports `§Canonical Storage Layer` by making atomic-source the sole parser input path.

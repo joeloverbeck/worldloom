@@ -112,7 +112,7 @@ At minimum, every world model must express all thirteen concerns below. On machi
 
 The thirteen concerns remain load-bearing. The **storage form** is atomic-YAML-under-`_source/` for the eleven compiled concerns plus the Named Entity Registry. There are no compiled-markdown views at the world root for atomized concerns — the `_source/` tree is the sole canonical form. Humans read atomic records directly in their IDE (file-tree view over `_source/` subdirectories) or on-demand via `world-index render <world-slug> [--file <class>]` CLI for a merged view.
 
-> **Derived artifacts**: `worlds/<slug>/_index/world.db` is a derived, gitignored artifact produced by `world-index build`. `worlds/<slug>/_source/` is the canonical source-of-truth layer (tracked in git).
+> **Derived artifacts**: `worlds/<slug>/_index/world.db` is a derived, gitignored artifact produced by `world-index build`. `worlds/<slug>/_source/` is the canonical source-of-truth layer and should be tracked in the private world-content repository, not in the public pipeline repository when those repositories are split.
 
 For larger worlds, split by domain and region within the appropriate `_source/` subdirectory.
 

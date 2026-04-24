@@ -22,6 +22,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
 - If verification uses an exported function or inline runtime probe, confirm the command is launched from a root where package-local modules actually resolve before treating any failure as ticket evidence.
 - For TS packages that run tests from compiled output such as `dist/tests/*.test.js`, treat new test-time file reads as part of the proof contract: verify that fixtures, SQL files, and other disk reads resolve from the compiled test runtime, or anchor them explicitly from the source tree / repo root.
+- For atomic-source `world-index` tickets, confirm `world-index verify` understands synthetic logical rows before using it as acceptance proof. If it treats retired root markdown paths as disk paths or otherwise reports atomic-mode drift, use `build`, focused validators, and direct DB checks as the truthful proof surface, then record the verify limitation.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.

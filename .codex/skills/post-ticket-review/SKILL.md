@@ -4,8 +4,8 @@ description: "Review a just-finished worldloom ticket, validate that its closeou
 user-invocable: true
 arguments:
   - name: ticket_path
-    description: "Path to the completed ticket file (for example `tickets/SPEC-01-003.md`). Globs or obvious near-matches must be resolved to the exact live path before use."
-    required: true
+    description: "Optional path to the completed ticket file (for example `tickets/SPEC-01-003.md`). If omitted, use the single unambiguous just-finished ticket from the current session/worktree; otherwise ask for the exact path. Globs or obvious near-matches must be resolved to the exact live path before use."
+    required: false
 ---
 
 # Post-Ticket Review
@@ -115,6 +115,7 @@ Decision rule:
 - if an active ticket partially owns it but is now stale, update that ticket factually
 - if no active ticket owns it, create one bounded follow-up ticket
 - if the reviewed ticket's owned invariant is complete but a broader shared proof surface is stale because adjacent family work changed the contract, archive the reviewed ticket and create a separate bounded follow-up instead of treating the stale proof lane as unfinished owned work
+- if downstream tickets depend on a user-owned commit, release, manual approval, or other post-review gate that the reviewed ticket intentionally did not perform, update those dependency chains to name both the archived/completed ticket state and the remaining user-owned gate
 
 Before creating a new ticket:
 1. inspect adjacent active tickets in the same family
@@ -135,7 +136,7 @@ Create high-confidence tickets directly. If scope or dependency ordering is genu
 
 ### 7. Present the report
 
-Use this structure:
+Use this structure. In `Verification And Handoff`, use severity-shaped entries only when a real handoff gap remains; if verification is clean, concise evidence bullets are acceptable.
 
 ```markdown
 # Post-Ticket Review: <ticket-id>
@@ -181,6 +182,10 @@ Use this structure:
    - **Evidence**: <verification surface or handoff evidence>
    - **Gap**: <what remains weak or confirm no gap>
    - **Follow-up**: <ticket id or no ticket needed>
+
+Or, when there is no remaining gap:
+
+- <verification or handoff evidence confirmed>
 
 ## Ticket Actions
 
