@@ -66,7 +66,7 @@ Skills divide into three categories, and these distinctions are load-bearing.
 The three skill categories remain load-bearing, but the migration path now has a machine-facing retrieval and mutation contract beside the human-facing skill prose.
 
 - **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation on machine-layer-enabled workflows; `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
-- **Localization**: `mcp__worldloom__search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, and `find_impacted_fragments` localize relevant world state without full-file reads.
+- **Localization**: `mcp__worldloom__search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, and `find_impacted_fragments` localize relevant world state without full-file reads, with a scoped-reference middle tier sitting between canonical entity retrieval and lexical evidence fallback for source-local names.
 - **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path for world-level edits on machine-layer-enabled worlds.
 - **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks into executable gates; `world-validate` is the CLI surface.
 

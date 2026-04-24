@@ -1,6 +1,6 @@
 # SPEC12SKIRELRET-009: Docs updates (FOUNDATIONS, MACHINE-FACING-LAYER, CLAUDE.md)
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — documentation updates across three remaining files (`docs/FOUNDATIONS.md`, `docs/MACHINE-FACING-LAYER.md`, `CLAUDE.md`). `docs/CONTEXT-PACKET-CONTRACT.md` already landed via `SPEC12SKIRELRET-008`. No code changes.
@@ -15,8 +15,9 @@ Per SPEC-12 D8, when the new retrieval surface lands, the remaining documentatio
 <!-- Items 1-3 always required. Items 4+ are a menu; include only those matching this ticket's scope and renumber surviving items sequentially starting from 4. Lists like 1, 2, 3, 14 are malformed output. -->
 
 1. `docs/FOUNDATIONS.md:422` currently says `mcp__worldloom__get_context_packet` is "the machine-facing mechanism for delivering this set with completeness guarantees" — wording that implies current sufficiency regardless of authoring-surface state. SPEC-12 D8 flags this for tightening.
-2. `docs/CONTEXT-PACKET-CONTRACT.md` no longer belongs to this ticket's remaining scope: `SPEC12SKIRELRET-008` already regenerated it to the v2 packet shape during implementation and updated its own ticket closeout accordingly. Leaving that file in 009 would now be duplicate ownership, not useful follow-up work.
-3. Cross-artifact contract under audit: the remaining docs must reflect the code actually shipped by ticket 008 in the same delivery window. Out-of-sync docs between ticket 008's branch and these three doc surfaces are a Rule 6 retcon risk — a future reader who lands on the v2 code but reads pre-SPEC-12 prose would silently mis-learn the contract.
+2. `SPEC12SKIRELRET-008` is now archived at `archive/tickets/SPEC12SKIRELRET-008.md`, and its closeout records `docs/CONTEXT-PACKET-CONTRACT.md` as already regenerated to the v2 packet shape. This ticket therefore owns only the three remaining stale doc surfaces; treating `docs/CONTEXT-PACKET-CONTRACT.md` as active scope here would be duplicate ownership.
+3. Cross-artifact contract under audit: the remaining docs must reflect the code and packet contract already shipped by archived ticket 008 in the same delivery window. Out-of-sync prose between `archive/tickets/SPEC12SKIRELRET-008.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, and these three doc surfaces is a Rule 6 retcon risk — a future reader who lands on the v2 code but reads pre-SPEC-12 prose would silently mis-learn the contract.
+4. Live verification drift corrected before implementation: `CLAUDE.md` contains no `scoped.reference` string today, so the drafted grep command is not a truthful proof surface. The real invariant is that the Machine-facing layer integration block names the scoped-reference middle tier explicitly, which is better proved with a broader `scoped reference|scoped-reference` grep.
 
 ## Architecture Check
 
@@ -27,16 +28,16 @@ Per SPEC-12 D8, when the new retrieval surface lands, the remaining documentatio
 
 ## Verification Layers
 
-1. `CLAUDE.md` contains the scoped-reference middle-tier sentence -> codebase grep-proof (`grep -n 'scoped.reference' CLAUDE.md` matches in §Machine-facing-layer integration).
-2. `docs/MACHINE-FACING-LAYER.md` localization table or section includes scoped-reference tier -> codebase grep-proof.
-3. `docs/FOUNDATIONS.md:422` wording reflects the revised completeness-guarantee framing -> manual review (single-sentence diff).
-4. `docs/CONTEXT-PACKET-CONTRACT.md` already matches packet v2 and is therefore excluded from this ticket's remaining owned delta -> manual review against archived ticket 008 closeout and the live file.
+1. `CLAUDE.md` names the scoped-reference middle tier in §Machine-facing layer integration -> codebase grep-proof.
+2. `docs/MACHINE-FACING-LAYER.md` includes scoped-reference retrieval surfaces and a four-tier trust model -> codebase grep-proof.
+3. `docs/FOUNDATIONS.md` no longer implies `get_context_packet` alone guarantees downstream sufficiency independent of authoring surfaces -> manual review.
+4. `docs/CONTEXT-PACKET-CONTRACT.md` already matches packet v2 and is therefore excluded from this ticket's remaining owned delta -> manual review against `archive/tickets/SPEC12SKIRELRET-008.md` closeout and the live file.
 
 ## What to Change
 
 ### 1. Tighten `docs/FOUNDATIONS.md` §Tooling Recommendation wording
 
-In `docs/FOUNDATIONS.md:422`, tighten the sentence about `mcp__worldloom__get_context_packet` to acknowledge that completeness guarantees depend on BOTH the retrieval surface AND the authoring surfaces (canonical entity declarations in `ONTOLOGY.md`'s Named Entity Registry; scoped-reference frontmatter blocks on authority-bearing records). Minimal edit — one sentence reworded or a qualifying clause appended. Preserve the "non-negotiable" framing.
+In `docs/FOUNDATIONS.md`, tighten the sentence about `mcp__worldloom__get_context_packet` to acknowledge that completeness guarantees depend on BOTH the retrieval surface AND the authoring surfaces (canonical entity declarations in `ONTOLOGY.md`'s Named Entity Registry; scoped-reference frontmatter blocks on authority-bearing records). Minimal edit — one sentence reworded or a qualifying clause appended. Preserve the "non-negotiable" framing.
 
 ### 2. Update `docs/MACHINE-FACING-LAYER.md`
 
@@ -46,11 +47,11 @@ Add a short "Trust tiers" section (3-5 lines) naming the four tiers (canonical e
 
 ### 3. Update `CLAUDE.md` §Machine-facing-layer integration
 
-Add a sentence naming the scoped-reference middle tier alongside the existing localization surfaces (`search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`) so future readers of the CLAUDE.md project-level file understand the tier layering. Placement: append after the existing "Localization" bullet in the §Machine-facing-layer integration block.
+Add a sentence or sentence fragment naming the scoped-reference middle tier alongside the existing localization surfaces (`search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`) so future readers of the CLAUDE.md project-level file understand the tier layering. Placement: the existing "Localization" bullet in the §Machine-facing-layer integration block.
 
 ## Files to Touch
 
-- `docs/FOUNDATIONS.md` (modify — single-sentence tightening at line 422)
+- `docs/FOUNDATIONS.md` (modify — single-sentence tightening in §Tooling Recommendation)
 - `docs/MACHINE-FACING-LAYER.md` (modify — add table row + short section)
 - `CLAUDE.md` (modify — add single sentence)
 
@@ -65,9 +66,9 @@ Add a sentence naming the scoped-reference middle tier alongside the existing lo
 
 ### Tests That Must Pass
 
-1. `grep -n 'scoped_references\|reference_name\|scoped_matches' docs/MACHINE-FACING-LAYER.md` returns matches in the localization table and the new Trust tiers section.
-2. `grep -n 'scoped.reference' CLAUDE.md` returns a match in the §Machine-facing-layer integration block.
-3. `docs/FOUNDATIONS.md:422` wording tightened (manual review — single-sentence diff).
+1. `grep -n 'scoped_references\|reference_name\|scoped_matches\|Trust tiers' docs/MACHINE-FACING-LAYER.md` returns matches in the localization table and the new Trust tiers section.
+2. `grep -En 'scoped reference|scoped-reference' CLAUDE.md` returns a match in the §Machine-facing-layer integration block.
+3. `docs/FOUNDATIONS.md` wording is tightened to state that `get_context_packet` completeness guarantees depend on explicit authoring surfaces as well as the retrieval API (manual review).
 4. `docs/CONTEXT-PACKET-CONTRACT.md` remains truthful to the packet-v2 implementation after 008 archived; this ticket does not re-own that file.
 
 ### Invariants
@@ -84,6 +85,20 @@ Add a sentence naming the scoped-reference middle tier alongside the existing lo
 
 ### Commands
 
-1. `grep -n 'scoped' CLAUDE.md`
-2. `grep -n 'Trust tiers' docs/MACHINE-FACING-LAYER.md`
+1. `grep -En 'scoped reference|scoped-reference' CLAUDE.md`
+2. `grep -n 'scoped_references\|reference_name\|scoped_matches\|Trust tiers' docs/MACHINE-FACING-LAYER.md`
 3. `grep -n 'mcp__worldloom__get_context_packet' docs/FOUNDATIONS.md`
+
+## Outcome
+
+- Completed: 2026-04-24
+- Tightened `docs/FOUNDATIONS.md` so the packet completeness guarantee now depends on the retrieval API and the explicit authoring surfaces that feed it.
+- Updated `docs/MACHINE-FACING-LAYER.md` to name the scoped-reference retrieval surfaces and the four trust tiers.
+- Updated `CLAUDE.md` so the project-level machine-facing guidance names the scoped-reference middle tier explicitly.
+
+## Verification Result
+
+- Reviewed `archive/tickets/SPEC12SKIRELRET-008.md` and live `docs/CONTEXT-PACKET-CONTRACT.md` to confirm packet-v2 ownership stayed with 008.
+- `grep -En 'scoped reference|scoped-reference' CLAUDE.md`
+- `grep -n 'scoped_references\|reference_name\|scoped_matches\|Trust tiers' docs/MACHINE-FACING-LAYER.md`
+- `grep -n 'mcp__worldloom__get_context_packet' docs/FOUNDATIONS.md`

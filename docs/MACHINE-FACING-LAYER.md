@@ -50,9 +50,19 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
 | Localize a specific node, entity, or neighborhood | `search_nodes`, `get_node`, `get_neighbors`, `find_named_entities` |
+| Localize source-local names that are not world-level canonical entities | `find_named_entities.scoped_matches`, `get_node.scoped_references`, and `search_nodes` with `reference_name` or `include_scoped_references` |
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
 | Prove structural integrity | `world-validate <world> --structural` |
+
+## Trust tiers
+
+Retrieval now distinguishes four trust tiers instead of flattening everything into either canonical entities or lexical hits:
+
+1. **Canonical entity** — world-level ontology or other declared canonical authority.
+2. **Exact structured record edge** — deliberate record-to-record linkage already present in structured ids or fields.
+3. **Scoped reference** — explicit source-local retrieval anchor declared on an authority-bearing record without promoting it to world-level ontology.
+4. **Lexical evidence** — unresolved phrase evidence used for recall and debugging, not authority.
 
 ## Troubleshooting
 
