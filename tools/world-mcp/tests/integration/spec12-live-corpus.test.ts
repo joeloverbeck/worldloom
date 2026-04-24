@@ -173,7 +173,7 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
       );
     });
 
-    await t.test("context packets keep locality-first retained classes under the live 8000-token budget", async () => {
+    await t.test("context packets fit locality-first classes under the live 8000-token budget", async () => {
       const melissa = await withRepoRoot(root, () =>
         getContextPacket({
           task_type: "character_generation",
@@ -191,17 +191,20 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
         })
       );
 
-      assert.ok("code" in melissa);
-      assert.equal(melissa.code, "packet_incomplete_required_classes");
-      assert.deepEqual(melissa.details?.retained_classes, ["local_authority", "scoped_local_context"]);
+      assert.ok(!("code" in melissa));
+      assert.equal(melissa.task_header.token_budget.requested, 8000);
+      assert.ok(melissa.task_header.token_budget.allocated <= 8000);
+      assert.ok(melissa.local_authority.nodes.some((node) => node.id === "CHAR-0002"));
+      assert.ok(melissa.scoped_local_context.nodes.length > 0);
+      assert.ok(melissa.governing_world_context.nodes.length > 0);
 
-      assert.ok("code" in artifact);
-      assert.equal(artifact.code, "packet_incomplete_required_classes");
-      assert.deepEqual(artifact.details?.retained_classes, [
-        "local_authority",
-        "exact_record_links",
-        "scoped_local_context"
-      ]);
+      assert.ok(!("code" in artifact));
+      assert.equal(artifact.task_header.token_budget.requested, 8000);
+      assert.ok(artifact.task_header.token_budget.allocated <= 8000);
+      assert.ok(artifact.local_authority.nodes.some((node) => node.id === "DA-0002"));
+      assert.ok(artifact.exact_record_links.nodes.some((node) => node.id === "CHAR-0002"));
+      assert.ok(artifact.scoped_local_context.nodes.length > 0);
+      assert.ok(artifact.governing_world_context.nodes.length > 0);
     });
   } finally {
     destroyTempRepoRoot(root);

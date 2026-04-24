@@ -228,6 +228,38 @@ test("openIndexDb honors WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK for unchanged mtime
   }
 });
 
+test("openIndexDb ignores missing atomized logical files when atomic source records are present", () => {
+  const root = createTempRepoRoot();
+  const dbPath = createSeededIndex(root, "seeded");
+  mkdirSync(path.join(root, "worlds", "seeded", "_source", "canon"), { recursive: true });
+  writeFileSync(path.join(root, "worlds", "seeded", "_source", "canon", "CF-0001.yaml"), "id: CF-0001\n", "utf8");
+
+  const db = new Database(dbPath);
+  try {
+    db.prepare(
+      `
+        INSERT INTO file_versions (world_slug, file_path, content_hash, last_indexed_at)
+        VALUES (?, ?, ?, ?)
+      `
+    ).run(
+      "seeded",
+      "CANON_LEDGER.md",
+      hashFileContents("Logical atomized world concern: CANON_LEDGER.md"),
+      "2026-04-01T00:00:00.000Z"
+    );
+  } finally {
+    db.close();
+  }
+
+  try {
+    const result = withRepoRoot(root, () => openIndexDb("seeded"));
+    assert.ok("db" in result);
+    result.db.close();
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("openIndexDb returns a read-only handle when all lifecycle checks pass", () => {
   const root = createTempRepoRoot();
   createSeededIndex(root, "seeded", {

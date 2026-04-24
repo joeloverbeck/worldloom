@@ -34,6 +34,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 
 - If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence.
 - If isolated subtests pass but the broad lane still fails opaquely, run the compiled test file directly from the same package root when that exposes clearer TAP output or assertion traces.
+- If `node --test dist/path/to/test.js` reports only a wrapper failure for a compiled test module that itself uses `node:test`, run `node dist/path/to/test.js` as a diagnostic command to expose nested TAP/subtest assertion details. Still rerun the accepted `node --test ...` proof before closeout if the ticket records that command.
 - If a compiled TS test imports runtime data or reads files from disk, check the emitted test's runtime location before assuming the implementation is wrong; `dist/tests/...` often changes the relative path contract.
 - If an MCP, stdio, or transport-client lane is noisy, first prove whether the instability is outside the owned seam; keep acceptance on the strongest truthful in-process or package-local surface unless a known-good end-to-end lane exists.
 
@@ -46,6 +47,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
+- preserved original failure evidence is clearly historical, not phrased as a current-state claim after the ticket is complete
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape

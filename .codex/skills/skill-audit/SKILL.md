@@ -52,10 +52,12 @@ For each observed gap, check whether the skill:
 - uses stale Claude-specific assumptions when the target is meant for Codex
 - weakens hard-gate or canon-mutation discipline for workflows that touch world canon
 
-Reference concrete rule sources in findings:
+Reference concrete rule sources for alignment or rule-risk findings:
 - `AGENTS.md` section names
 - `docs/FOUNDATIONS.md` section names
 - relevant repo paths when the hazard is operational rather than purely textual
+
+For purely operational skill-quality findings that do not implicate repo rules, cite concrete session behavior and relevant repo paths instead of forcing an `AGENTS.md` or `docs/FOUNDATIONS.md` citation.
 
 ### 5. Classify findings
 
@@ -132,4 +134,4 @@ Return the report in the conversation using this structure:
 - Reject any proposed suggestion that would violate `docs/FOUNDATIONS.md`.
 - Keep scope discipline. Audit the skill as written; do not expand it into a different tool.
 - If the skill participates in a multi-skill workflow, check sibling skills for conflicting terminology, paths, or handoff assumptions and report concrete inconsistencies.
-- When follow-up edits are requested, apply them in document order and then re-read the changed sections to confirm the workflow still reads coherently.
+- When follow-up edits are requested, snapshot `git status --short`, distinguish pre-existing dirty work from the skill-edit ownership, apply suggestions in document order, and then re-read the changed sections to confirm the workflow still reads coherently. Final-report only the skill files changed by the follow-up, while noting any pre-existing unrelated dirt was left untouched.

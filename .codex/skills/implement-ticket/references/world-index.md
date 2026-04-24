@@ -1,10 +1,11 @@
 # World-Index Ticket Checks
 
-Use these focused checks for `world-index`, index-backed build/sync/verify, and atomic-source parser tickets. They supplement the main implement-ticket workflow.
+Use these focused checks for `world-index`, index-backed build/sync/verify, atomic-source parser tickets, and `world-mcp` tickets whose behavior depends on index freshness or `file_versions` rows. They supplement the main implement-ticket workflow.
 
 ## Reassessment
 
 - For `world-index` content tickets that mention adjudication YAML placement or `unexpected_yaml_section`, inspect `tools/world-index/src/parse/yaml.ts` before trusting any ticket claim about a canonical adjudication YAML section; the live parser may treat all adjudication fenced YAML as out-of-section.
+- For `world-mcp` stale-index or live-corpus tickets, inspect both the retrieval-side stale-index check and the index producer that writes the rows under review. In particular, distinguish disk-backed file rows from synthetic atomic logical rows such as retired root markdown concern names.
 - For end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path. Strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout.
 - For cleanup/removal tickets, separate parser utility deletion from dispatch/mode removal. A ticket can remove legacy world-build activation while retaining markdown/YAML parser utilities, fixtures, or tests that still exercise hybrid documents or direct parser contracts.
 - For staged tool/schema tickets whose public API is world-agnostic but helper code is world-scoped, verify whether the missing scope can be derived internally before broadening the public contract.

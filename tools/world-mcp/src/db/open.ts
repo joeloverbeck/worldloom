@@ -7,6 +7,20 @@ import { createHash } from "node:crypto";
 import { createMcpError, type McpError } from "../errors";
 import { resolveIndexVersionPath, resolveWorldDbPath, resolveWorldDirectory } from "./path";
 
+const ATOMIC_LOGICAL_WORLD_FILES = new Set([
+  "CANON_LEDGER.md",
+  "INVARIANTS.md",
+  "MYSTERY_RESERVE.md",
+  "OPEN_QUESTIONS.md",
+  "EVERYDAY_LIFE.md",
+  "INSTITUTIONS.md",
+  "MAGIC_OR_TECH_SYSTEMS.md",
+  "GEOGRAPHY.md",
+  "ECONOMY_AND_RESOURCES.md",
+  "PEOPLES_AND_SPECIES.md",
+  "TIMELINE.md"
+]);
+
 export interface OpenIndexDbSuccess {
   db: Database.Database;
 }
@@ -49,6 +63,14 @@ function shouldForceFullHashCheck(): boolean {
   return process.env.WORLDLOOM_MCP_FULL_HASH_DRIFT_CHECK === "1";
 }
 
+function hasAtomicSourceDirectory(worldDirectory: string): boolean {
+  return existsSync(path.join(worldDirectory, "_source"));
+}
+
+function isSyntheticAtomicLogicalFile(worldDirectory: string, filePath: string): boolean {
+  return hasAtomicSourceDirectory(worldDirectory) && ATOMIC_LOGICAL_WORLD_FILES.has(filePath);
+}
+
 function findDriftedFiles(
   db: Database.Database,
   worldSlug: string
@@ -71,6 +93,10 @@ function findDriftedFiles(
   for (const row of rows) {
     const absolutePath = path.join(worldDirectory, row.file_path);
     if (!existsSync(absolutePath)) {
+      if (isSyntheticAtomicLogicalFile(worldDirectory, row.file_path)) {
+        continue;
+      }
+
       driftedFiles.push(row.file_path);
       continue;
     }
@@ -165,4 +191,3 @@ export function openIndexDb(worldSlug: string): OpenIndexDbResult {
     throw error;
   }
 }
-

@@ -23,4 +23,5 @@ For each stale same-seam surface, either truth it in the active ticket or record
 
 - Run producer commands before consumer proofs.
 - Run package-local builds/tests from the package root when module resolution depends on package-local dependencies.
-- When a proof depends on installed sibling package artifacts, refresh the consumer dependency view and verify the installed artifact exposes the changed runtime or declaration surface.
+- When a consumer package depends on a local sibling package via a workspace or `file:` dependency, refresh the consumer's installed dependency view after producer-side package/export changes and before consumer proof; do not assume the consumer is exercising the newly built public surface until that refresh has happened.
+- After refreshing a local workspace or `file:` dependency, verify the installed dependency artifact that the consumer will actually resolve contains the new runtime or declaration surface when that surface is the proof target. For TypeScript type/export tickets, this may mean grepping the consumer's installed `.d.ts` file before rerunning the consumer build.

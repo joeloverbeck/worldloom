@@ -63,7 +63,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
 7. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
 8. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
-9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions alone unless they claim a live path or would mislead implementation.
+9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
 
 ### 3. Establish the review surface
 
@@ -134,12 +134,13 @@ When a new ticket is warranted:
 3. Name exact files, skills, schemas, docs, validators, hooks, or workflow boundaries.
 4. Keep the ticket to one coherent concern.
 5. Set `Deps` only for real blockers or strong sequencing dependencies.
+6. Before final report, compare the drafted ticket against the required sections in `tickets/_TEMPLATE.md` and `tickets/README.md`; fix missing, malformed, or stale placeholder sections before handing it off.
 
 Create high-confidence tickets directly. If scope or dependency ordering is genuinely ambiguous, use the 1-3-1 rule instead of guessing.
 
 ### 7. Verify review edits
 
-When the reviewed ticket's narrow proof is cheap and local, rerun it after factual closeout edits, follow-up ticket creation, or archival. If rerunning it is expensive, flaky, destructive, or outside the review boundary, skip it and state why in the report.
+When the reviewed ticket's narrow proof is cheap and local, rerun it after implementation-affecting review edits or closeout edits that change claimed verification. Pure archival moves, dependency-reference repairs, or follow-up ticket creation do not require rerunning the implementation proof when they cannot affect the reviewed code path; if you skip the rerun for that reason, state it in the report. If rerunning is expensive, flaky, destructive, or outside the review boundary, skip it and state why in the report.
 
 ### 8. Present the report
 
