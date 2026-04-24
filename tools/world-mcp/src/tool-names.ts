@@ -1,6 +1,7 @@
 export const MCP_TOOL_NAMES = {
   search_nodes: "mcp__worldloom__search_nodes",
   get_node: "mcp__worldloom__get_node",
+  get_record: "mcp__worldloom__get_record",
   get_neighbors: "mcp__worldloom__get_neighbors",
   get_context_packet: "mcp__worldloom__get_context_packet",
   find_impacted_fragments: "mcp__worldloom__find_impacted_fragments",
@@ -17,6 +18,7 @@ export type McpToolName = (typeof MCP_TOOL_NAMES)[ToolKey];
 export const MCP_TOOL_ORDER: McpToolName[] = [
   MCP_TOOL_NAMES.search_nodes,
   MCP_TOOL_NAMES.get_node,
+  MCP_TOOL_NAMES.get_record,
   MCP_TOOL_NAMES.get_neighbors,
   MCP_TOOL_NAMES.get_context_packet,
   MCP_TOOL_NAMES.find_impacted_fragments,

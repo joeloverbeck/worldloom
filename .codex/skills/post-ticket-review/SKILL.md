@@ -63,7 +63,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
 7. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
 8. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
-9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Repair dependency references to the archived path when the completed ticket is now the prerequisite; leave ordinary historical mentions alone unless they would mislead an active handoff.
+9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions alone unless they claim a live path or would mislead implementation.
 
 ### 3. Establish the review surface
 
@@ -122,7 +122,9 @@ Before creating a new ticket:
 1. inspect adjacent active tickets in the same family
 2. inspect nearby active specs or plans only if the completed ticket changed their live assumptions unambiguously
 3. confirm the concern is not already owned elsewhere
-4. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
+4. scan active and archived same-family ticket IDs before choosing the follow-up ID
+5. use the next non-colliding append-only ID, and record any gap or collision reason in the ticket or report when it affects handoff clarity
+6. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
 
 ### 6. Author follow-up tickets
 
@@ -135,7 +137,11 @@ When a new ticket is warranted:
 
 Create high-confidence tickets directly. If scope or dependency ordering is genuinely ambiguous, use the 1-3-1 rule instead of guessing.
 
-### 7. Present the report
+### 7. Verify review edits
+
+When the reviewed ticket's narrow proof is cheap and local, rerun it after factual closeout edits, follow-up ticket creation, or archival. If rerunning it is expensive, flaky, destructive, or outside the review boundary, skip it and state why in the report.
+
+### 8. Present the report
 
 Use this structure. In `Verification And Handoff`, use severity-shaped entries only when a real handoff gap remains; if verification is clean, concise evidence bullets are acceptable.
 

@@ -8,6 +8,8 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, and 
 - For end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path. Strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout.
 - For cleanup/removal tickets, separate parser utility deletion from dispatch/mode removal. A ticket can remove legacy world-build activation while retaining markdown/YAML parser utilities, fixtures, or tests that still exercise hybrid documents or direct parser contracts.
 - For staged tool/schema tickets whose public API is world-agnostic but helper code is world-scoped, verify whether the missing scope can be derived internally before broadening the public contract.
+- For markdown-to-record or legacy-world atomization tickets, check for attribution/comment markers that sit immediately before headings in the source and become orphaned at generated record boundaries. Compare against any pre-migration snapshot before removing or reattaching them so cosmetic cleanup does not hide content loss.
+- When a ticket repairs malformed authority-bearing frontmatter on whole-file records, rerun a post-fix node-id probe before final closeout; fixing the frontmatter can change the truthful record-node shape from a fallback path-style id to the structured record id now emitted by the parser.
 
 ## Verification
 
@@ -22,3 +24,4 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, and 
 - If final verification intentionally uses a live world instead of a temp copy, inspect the private `worlds/` repo status and classify any `_index/` changes as expected derived dirt, cleaned state, or unexpected source fallout.
 - If synthetic logical nodes or derived helper rows change, inspect adjacent build/count/verify helpers and expectations in the same seam. Existing proof code may need to count those derived rows explicitly or exempt them from parser-vs-index drift checks just as it already does for older synthetic artifacts.
 - For atomic-source record checks, do not filter solely by `node_type`: primary `_source/entities/*.yaml` records can emit `named_entity` nodes that are disk-backed source rows, while derived helper entities such as `entity:*` are synthetic and may need different visibility or drift treatment.
+- If a ticket mechanically atomized or split markdown into record files, inspect generated records for orphaned source comments or attribution markers at body ends, before YAML-only fields, or before carried separators. Resolve each marker against the source snapshot before final verification.

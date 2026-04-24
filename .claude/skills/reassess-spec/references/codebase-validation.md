@@ -17,6 +17,7 @@ Substep applicability is determined by the Pre-Process classification:
 | 3.8 Upstream spec references | ✓ | ✓ | ✓ | skip |
 | 3.9 FOUNDATIONS-contract fidelity | ✓ | if canon-pipeline semantics touched | skip | skip |
 | 3.10 Project-convention drift (CLAUDE.md) | ✓ | if new ID conventions or project-level conventions introduced | skip | if the landed work introduced new conventions |
+| 3.11 New-deliverable consumer verification | ✓ | ✓ | skip | skip |
 
 ## 3.0 Cross-Package Scope Establishment
 
@@ -149,6 +150,27 @@ For specs that reference structured-ID conventions (CF, CH, PA, CHAR, DA, PR, BA
 - For worktree-discipline-affecting deliverables (specs that prescribe how hooks, skills, or tools resolve paths), verify the spec honors `CLAUDE.md`'s worktree-root resolution rule. A spec that assumes main-repo-root paths without a worktree carve-out is a HIGH Issue.
 
 Skip this substep when the spec's deliverables do not interact with any `CLAUDE.md`-documented convention.
+
+## 3.11 New-Deliverable Consumer Verification
+
+For each proposed new deliverable (new MCP tool, new CLI command, new validator, new skill output surface, new type made public to other packages, new reference-file section), verify at least one identifiable consumer exists or is explicitly planned. This is a Rule-5-adjacent check generalized to deliverable-level existence justification: the spec's second-order-effects discipline applied to the deliverable itself, not only to its side-effects. It complements 3.3 (which asks "does this proposal duplicate existing functionality?") and 3.6 (which asks "what consumes the *modified* symbols?") by asking the missing third question: "does anything consume what this new deliverable *produces*?"
+
+For each new deliverable, grep for references to it by name across:
+
+- `.claude/skills/*/SKILL.md` and `.claude/skills/*/references/*.md` — would any skill invoke or consume this?
+- `specs/*.md` and `archive/specs/*.md` — does any spec cite it as a prerequisite, name it as a dependency, or reference it in its Problem Statement or Motivating Evidence?
+- `tickets/*.md` and `archive/tickets/*.md` — does any pending or landed ticket exercise it?
+- `docs/*.md` — does any design doc describe a consumer-side workflow that would use it?
+
+Also inspect the spec's own Problem Statement and Approach: does the spec name a concrete consumer-side workflow the deliverable enables? "Used primarily for X" where X is a speculative use case (future skill, hypothetical HARD-GATE preview, "skills assembling a preview of...") without a pending consumer spec or ticket is a red flag — the justification is aspirational, not operational.
+
+**Outcome classification**:
+
+- **≥1 consumer found** (grep match in skills / specs / tickets / docs, OR a concrete consumer-side workflow named in the spec and traceable to a pending spec or ticket): deliverable is justified. Record the consumers in Step 6 presentation for audit-trail visibility so the reader can reconstruct why the deliverable earned its place.
+- **Zero consumers found AND no pending consumer is named by the spec**: flag as a HIGH Issue. Present at Step 6 as a Question with three options: (a) drop the deliverable per YAGNI; (b) keep with explicit rationale naming a near-term consumer (force the spec to document the consumer inline); (c) defer to a separate consumer-driven spec (drop here, re-introduce there when the consumer is concrete).
+- **Inherited-commitment case** (deliverable originates from a parent, archived, or superseded spec's commitment but no surviving consumer exists in current work): this is the "ghost deliverable" pattern. Treat as the zero-consumers case — the archived commitment does not justify carrying forward if the consumer path evaporated. Cite the archived-spec anchor (e.g., `archive/specs/SPEC-NN-foo.md §C`) in the finding so the retcon of the archived commitment is surfaced per Rule 6 (No Silent Retcons); dropping silently would be a silent retcon of the archived commitment.
+
+When the consumer check surfaces a zero-consumers deliverable, **defer the decision to the Step 6 Question path** — do not silently drop the deliverable at Step 3. The user is the one to confirm the drop or to name the consumer that the grep missed. The reassessor's job is to surface the question, not to answer it unilaterally.
 
 ## Conditional Deliverable Validation
 

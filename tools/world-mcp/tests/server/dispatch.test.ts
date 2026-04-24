@@ -64,10 +64,30 @@ function seedServerWorld(root: string): void {
       {
         node_id: "CF-0001",
         world_slug: "seeded",
-        file_path: "CANON_LEDGER.md",
+        file_path: "_source/canon/CF-0001.yaml",
         heading_path: "CF-0001",
         node_type: "canon_fact_record",
-        body: "Brinewick maintains the northern lighthouse."
+        body: [
+          "id: CF-0001",
+          "title: Brinewick Lighthouse",
+          "status: hard_canon",
+          "type: geography",
+          "statement: Brinewick maintains the northern lighthouse.",
+          "scope:",
+          "  geographic: regional",
+          "  temporal: current",
+          "  social: public",
+          "truth_scope:",
+          "  world_level: true",
+          "  diegetic_status: objective",
+          "domains_affected:",
+          "  - geography",
+          "required_world_updates:",
+          "  - GEOGRAPHY.md",
+          "source_basis:",
+          "  direct_user_approval: true",
+          ""
+        ].join("\n")
       },
       {
         node_id: "M-1",
@@ -175,6 +195,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.get_record,
+        args: { record_id: "CF-0001", world_slug: "seeded" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.get_neighbors,
         args: { node_id: "CF-0001", world_slug: "seeded", depth: 1 },
         expectError: false
@@ -245,6 +270,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       const invalidCalls = [
       { name: MCP_TOOL_NAMES.search_nodes, args: {} },
       { name: MCP_TOOL_NAMES.get_node, args: {} },
+      { name: MCP_TOOL_NAMES.get_record, args: {} },
       { name: MCP_TOOL_NAMES.get_neighbors, args: { world_slug: "seeded", depth: 1 } },
       { name: MCP_TOOL_NAMES.get_context_packet, args: { world_slug: "seeded", seed_nodes: ["CF-0001"] } },
       { name: MCP_TOOL_NAMES.find_impacted_fragments, args: { node_ids: ["CF-0001"] } },

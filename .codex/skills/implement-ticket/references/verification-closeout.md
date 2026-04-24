@@ -19,6 +19,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 
 - Verify exact command shapes before recording them in the ticket.
 - When a proof command counts matches across a file glob, dry-run the exact command and confirm it emits the scalar value the ticket claims. Some tools, such as `grep -c file-*`, emit one count per file unless forced through `grep -h`, `wc -l`, `awk`, or another explicit aggregation.
+- If a grep-count proof is brittle or counts incidental spelling rather than behavior, rewrite the ticket to a stronger truthful proof surface instead of adding marker text solely to satisfy the count. Prefer exported registries, list/dispatch tests, direct tool calls, or focused runtime probes when they better prove the invariant.
 - Run dependent verification commands in dependency order, not in parallel. If a test command consumes compiled artifacts, generated files, or other build outputs, finish and confirm the producer step first, then run the dependent proof command.
 - For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
 - If verification uses an exported function or inline runtime probe, confirm the command is launched from a root where package-local modules actually resolve before treating any failure as ticket evidence.

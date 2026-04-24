@@ -20,6 +20,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
+- Keep a compact dirty-worktree ledger while working: `pre-existing unrelated`, `pre-existing same-seam`, `owned edits`, and `new/untracked owned files`. Refresh it before final response so untracked ticket/code files are not silently omitted.
 - If dirty paths overlap the ticket's seam, inspect the live diffs before coding and classify them as unrelated local edits, partial implementation of the active ticket, or in-flight sibling-ticket work.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
@@ -96,7 +97,6 @@ Check:
 - for tickets where filesystem presence controls dispatch, mode selection, migration state, or feature activation, inspect whether existing fixtures, generated artifacts, ignored files, placeholders, or legacy worlds already contain that sentinel path before accepting the drafted condition; prefer the narrowest truthful marker, such as recognized record files, over bare directory existence when placeholders would misroute the live seam
 - for cleanup/removal tickets, distinguish removing a live activation path, compatibility mode, or dispatch branch from deleting all related parser utilities, fixtures, or low-level helpers; if tests or hybrid surfaces still lawfully use those utilities, rewrite the ticket to the true removal seam before coding
 - for `world-index` / index-backed tickets, also load `references/world-index.md` from this skill directory and apply its focused reassessment and verification checks
-- for markdown-to-record or legacy-world atomization tickets, check for attribution/comment markers that sit immediately before headings in the source and become orphaned at generated record boundaries; compare against any pre-migration snapshot before removing or reattaching them so a cosmetic cleanup does not hide real content loss
 - every FOUNDATIONS claim or rule reference the ticket relies on
 - whether a repo-level doc under `docs/` is the real authority or a tested consumer for the seam you are changing; if tests, helpers, or examples parse that doc directly, treat it as same-seam owned fallout even when the draft ticket excluded it
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
@@ -120,8 +120,6 @@ Check:
 - when reassessment narrows or rewrites a shared contract, whether existing same-seam proof scripts, fixtures, or verification docs still encode the old contract; if they do, treat truthful proof-surface upkeep inside that seam as required consequence fallout rather than optional cleanup
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
 - for fixture-backed command or integration tests, verify whether the assertion shape is still truthful before editing the test harness; if the live contract still matches the assertion, check whether the copied fixture source is stale and narrow the ticket to fixture-proof alignment instead of rewriting a still-correct test
-- when the ticket repairs malformed authority-bearing frontmatter on whole-file records, rerun a post-fix node-id probe before final closeout; fixing the frontmatter can change the truthful record-node shape from a fallback path-style id to the structured record id now emitted by the parser
-
 Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
@@ -257,7 +255,6 @@ Update the active ticket before finishing:
 - compare the landed file set against `Files to Touch` and `Test Plan` / `New/Modified Tests`, using both `git diff --name-only` and `git status --short` so newly-created untracked files are not missed; then patch the ticket if any touched file or exercised proof surface is still missing
 - if the ticket changed a shared contract or canonical authority surface, re-check same-seam proof scripts/fixtures referenced by the repo or adjacent tests and make their expectations truthful before finishing
 - if the ticket changed a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness sets, and neighboring same-seam assertions from the final post-fix artifact so the closeout does not preserve stale pre-fix evidence
-- if the ticket mechanically atomized or split markdown into record files, inspect generated records for orphaned source comments or attribution markers at body ends, before YAML-only fields, or before carried separators; resolve each one against the source snapshot before final verification
 - compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
 - if the ticket contains embedded code snippets, pseudocode, or literal algorithm sketches, compare them against the landed seam before finishing; update or remove any snippet that no longer matches the truthful final implementation boundary
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
@@ -267,6 +264,7 @@ Update the active ticket before finishing:
 - after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
 - for `tool or script implementation` tickets whose landed behavior changes a package-local contract, perform the package/tool closeout hard stop in `references/package-tooling.md`: inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly, then either truth them or record why they are outside the active seam
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
+- refresh the dirty-worktree ledger and explicitly distinguish pre-existing unrelated dirt from owned edits and new/untracked owned files in the final response or ticket closeout
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.

@@ -4,12 +4,13 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 1 (read side; `submit_patch_plan` stubbed until Phase 2)
-**Status**: Phase 1 read-side server landed; stdio MCP entrypoint registers all 10 tools in `src/server.ts`
+**Status**: Phase 2 retrieval additions in progress; stdio MCP entrypoint registers 11 tools in `src/server.ts`
 
 ## Tools
 
 - `mcp__worldloom__search_nodes(query, filters)`
 - `mcp__worldloom__get_node(node_id)`
+- `mcp__worldloom__get_record(record_id)`
 - `mcp__worldloom__get_neighbors(node_id, edge_types, depth)`
 - `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`
 - `mcp__worldloom__find_impacted_fragments(node_ids)`

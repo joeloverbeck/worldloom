@@ -13,6 +13,7 @@ import { findNamedEntities } from "./tools/find-named-entities";
 import { getContextPacket } from "./tools/get-context-packet";
 import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
+import { getRecord } from "./tools/get-record";
 import { searchNodes } from "./tools/search-nodes";
 import { submitPatchPlan } from "./tools/submit-patch-plan";
 import { validatePatchPlan } from "./tools/validate-patch-plan";
@@ -74,6 +75,11 @@ const searchNodesInputSchema = z.object({
 
 const getNodeInputSchema = z.object({
   node_id: z.string().min(1),
+  world_slug: z.string().min(1).optional()
+});
+
+const getRecordInputSchema = z.object({
+  record_id: z.string().min(1),
   world_slug: z.string().min(1).optional()
 });
 
@@ -178,6 +184,13 @@ export function createServer(): McpServer {
     "Fetch a node with body, edges, mentions, hashes, and anchor details.",
     getNodeInputSchema,
     async (args) => getNode(args as unknown as Parameters<typeof getNode>[0])
+  );
+  registerWrappedTool(
+    server,
+    "get_record",
+    "get_record: Fetch an atomic record's parsed YAML content with content_hash and file_path.",
+    getRecordInputSchema,
+    async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
   registerWrappedTool(
     server,

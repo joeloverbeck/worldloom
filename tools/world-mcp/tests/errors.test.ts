@@ -12,6 +12,7 @@ test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
     "empty_index",
     "world_not_found",
     "node_not_found",
+    "record_not_found",
     "token_invalid",
     "token_expired",
     "token_consumed",
