@@ -37,8 +37,8 @@ Read-side work can stop after the retrieval layer. Write-side work adds validato
 ## Phase Boundaries
 
 - **Phase 1 live surface**: `world-index` is implemented; the docs now reserve the retrieval and hook contract that SPEC-02, SPEC-05 Part A, and SPEC-06 Part A target.
+- **Phase 1.5 canonical storage layer**: on machine-layer-enabled worlds, `_source/` atomic YAML is the sole source-of-truth for atomized CF / CH / INV / M / OQ / ENT / SEC records. The retired root-level files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, and `PEOPLES_AND_SPECIES.md`) do not exist on those worlds. Merged markdown views are produced on demand by `world-index render <world-slug> [--file <class>]` and `mcp__worldloom__get_compiled_view`; they are read-only and are not persisted. See SPEC-13 and `docs/FOUNDATIONS.md` §Canonical Storage Layer for the full contract.
 - **Phase 2 live surface**: patch-engine writes, validator gating, and engine-only mutation guards become active.
-- **Phase 3 optional surface**: `_source/` becomes the canonical storage layer for atomic canon records, with `CANON_LEDGER.md` potentially becoming a compiled artifact.
 
 The docs describe the intended steady-state contract, but any workflow should still be read against the phase it is actually running in.
 

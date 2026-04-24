@@ -239,7 +239,7 @@ touched_by_cf: [<CF-ID>, ...]                   # reverse index: CFs whose requi
 SPEC-13 is an umbrella that drives targeted edits in the following existing specs. The edits land in those specs directly (not duplicated here); SPEC-13 references them authoritatively.
 
 #### SPEC-03 (Patch Engine)
-Op vocabulary rewrite. Retire 7 markdown-anchor ops (`insert_before_node`, `insert_after_node`, `replace_node`, `insert_under_heading`, `append_bullet_cluster`, `append_heading_section`, `insert_attribution_comment`). Add 7 `create_*` ops for the new record classes (`create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`). Repurpose 3 ops (`update_record_field`, `append_extension`, `append_touched_by_cf`). Retain 3 ops unchanged (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`, plus `append_modification_history_entry`). Remove Phase B compile step (no compiled views to maintain). Simplify write-order to three tiers (create-all, update-all, adjudication-record) since no monolithic ledger serialization constraint remains. Retire anchor-hash machinery (`expected_anchor_checksum` retained only for hybrid files — characters and diegetic artifacts).
+Op vocabulary rewrite. Retire 7 markdown-anchor ops (`insert_before_node`, `insert_after_node`, `replace_node`, `insert_under_heading`, `append_bullet_cluster`, `append_heading_section`, `insert_attribution_comment`). Add 7 `create_*` ops for the new record classes (`create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`). Repurpose 3 ops (`update_record_field`, `append_extension`, `append_touched_by_cf`). Retain 4 ops unchanged (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`, `append_modification_history_entry`). Remove Phase B compile step (no compiled views to maintain). Simplify write-order to three tiers (create-all, update-all, adjudication-record) since no monolithic ledger serialization constraint remains. Retire anchor-hash machinery (`expected_anchor_checksum` retained only for hybrid files — characters and diegetic artifacts).
 
 #### SPEC-04 (Validator Framework)
 Retire 2 validators (`attribution_comment` — attribution is now a record field, no HTML-comment authoring surface; `anchor_integrity` — no anchors on atomic records). Add 2 validators (`record_schema_compliance`, `touched_by_cf_completeness`). Rule 1–7 validators unchanged in logic; simpler input (per-record YAML instead of parsed fenced-YAML blocks). `yaml_parse_integrity` now operates across every `_source/*.yaml` file.
@@ -251,7 +251,7 @@ Skill-body size estimates revise downward by an additional 15–25% per skill be
 Hook 2 (PreToolUse on Read) block list covers `_source/` subdirectories (oversize YAML-directory reads redirected to MCP retrieval). Hook 3 (PreToolUse on Edit/Write) block list covers `_source/` subdirectories. Explicitly allowed direct edits: `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, `characters/*`, `diegetic-artifacts/*`, `proposals/*`, `audits/*`, `adjudications/*`. Compiled-file detection machinery retired (no compiled files exist).
 
 #### SPEC-02 (MCP Retrieval Server)
-Add 3 tools: `mcp__worldloom__get_record(record_id)` (generalizes `get_node` across all atomic record classes), `mcp__worldloom__find_sections_touched_by(cf_id)` (reverse-index lookup), `mcp__worldloom__get_compiled_view(file_class, sections?)` (on-demand render for HARD-GATE deliverable summaries; not stored on disk). `allocate_next_id` extends to new classes (INV per-category, M, OQ, ENT, SEC per-file-class).
+Add 3 tools: `mcp__worldloom__get_record(record_id)` (generalizes `get_node` across all atomic record classes), `mcp__worldloom__find_sections_touched_by(cf_id)` (reverse-index lookup), `mcp__worldloom__get_compiled_view(file_class, sections?)` (on-demand render for HARD-GATE deliverable summaries; not stored on disk). `get_compiled_view` dispatches to the same render implementation used by the `world-index render` CLI (§A) so both surfaces produce byte-identical merged views. `allocate_next_id` extends to new classes (INV per-category, M, OQ, ENT, SEC per-file-class).
 
 #### SPEC-07 (Docs Updates)
 Part C (previously: Phase 3 docs updates for compiled-ledger-from-atomic-source) retired — SPEC-13 handles the FOUNDATIONS revision directly. Part B content remains (HARD-GATE-DISCIPLINE.md write-order rewrite for the new engine, CLAUDE.md phrasing refinement).
@@ -262,9 +262,9 @@ Phase 3 ("Atomic Source for CF/CH Records") and Phase 4 ("High-Churn Prose Fragm
 #### SPEC-01 (World Index)
 No spec rewrite required — already archived. Parser refresh lands as a Phase 1.5 execution ticket under IMPLEMENTATION-ORDER.md: the index parser reads `_source/*.yaml` as primary input; markdown files at the world root are no longer parsed for records (only WORLD_KERNEL.md and ONTOLOGY.md remain as prose inputs to the index's lexical layer).
 
-### §D — FOUNDATIONS.md revision scope
+### §D — FOUNDATIONS.md and related docs revision scope
 
-Three surgical edits:
+Surgical edits:
 
 **1. §Mandatory World Files** — reclassify as follows (count of 13 preserved; roles shift):
 
@@ -293,6 +293,8 @@ The thirteen files remain "mandatory" in the sense that every world model must e
 **4. §Tooling Recommendation** closing paragraph — update to reference the atomic-source contract: "skills should always receive X" items are delivered via `mcp__worldloom__get_context_packet` against atomic records.
 
 Rules 1–7, Canon Layers, Invariants taxonomy, Ontology Categories, Relation Types, Acceptance Tests, Core Principle, Change Control Policy — unchanged.
+
+**5. `docs/MACHINE-FACING-LAYER.md` §Phase Boundaries** — rewrite the "Phase 3 optional surface" bullet (currently at `docs/MACHINE-FACING-LAYER.md:41`) so it no longer describes `_source/` as optional, no longer describes `CANON_LEDGER.md` as a potential compiled artifact, and no longer places atomic-source storage in Phase 3. Replace with a "Phase 1.5 canonical storage layer" bullet stating that `_source/` atomic YAML is the sole source-of-truth for atomized concerns on machine-layer-enabled worlds; the retired root-level files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, plus the five large prose files, plus `TIMELINE.md`) do not exist on such worlds; merged markdown views are produced on-demand via `world-index render <world-slug> [--file <class>]` (read-only; not persisted). This is a Stream A deliverable landing alongside the FOUNDATIONS.md edits above. `docs/CONTEXT-PACKET-CONTRACT.md` is intentionally not updated — its contract is storage-form-agnostic (packet shape is type-driven, not derived from file layout).
 
 ### §E — Migration Procedure (animalia, one-time, manual)
 
@@ -374,7 +376,7 @@ Executed in a follow-up session after this spec and its siblings land. The proce
 - **Invariant / M / OQ / ENT / SEC count parity**: spot-checked per file class; discrepancies investigated.
 - **`touched_by_cf[]` coverage**: for every CF with non-empty `required_world_updates`, at least one SEC under the corresponding `file_class` directory has that CF in `touched_by_cf[]`. Gaps investigated case-by-case.
 - **Cross-reference integrity**: every `derived_from`, `affected_fact_ids`, `originating_cf`, `change_id` resolves to an indexed record.
-- **Monolithic file absence**: no dangling references to the 11 retired files in any `.claude/skills/**/SKILL.md`, `specs/**/*.md`, `docs/**/*.md`, or `CLAUDE.md` post-migration. (Pre-execution grep sweep is part of Stream A's spec-drafting verification; Stream B execution repeats the sweep.)
+- **Monolithic file absence**: no dangling references to the 11 retired files in `specs/**/*.md`, `docs/**/*.md`, or `CLAUDE.md` post-migration. (Pre-execution grep sweep is part of Stream A's spec-drafting verification; Stream B execution repeats the sweep.) Skill SKILL.md references to retired filenames are acknowledged as transient and are explicitly out of scope for the Phase 1.5 sweep — those references are rewritten end-to-end when skills are migrated against atomic-source retrieval as part of SPEC-06 Phase 2. Between the Phase 1.5 migration commit and the completion of SPEC-06 Phase 2, `.claude/skills/**/SKILL.md` files will carry dangling filename references; this is intentional and does not block Phase 1.5 landing.
 - **Hybrid-file preservation**: characters, diegetic artifacts, adjudications, proposals, audits unchanged on disk; their structured frontmatter continues to be indexed.
 - **ONTOLOGY.md integrity**: after strip, Categories / Relation Types / Notes sections remain byte-identical to pre-migration.
 - **WORLD_KERNEL.md integrity**: unchanged.

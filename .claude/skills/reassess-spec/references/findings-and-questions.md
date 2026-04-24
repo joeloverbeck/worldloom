@@ -65,7 +65,7 @@ Redesign count: <N/total> deliverables materially changed (<above | below> 50% t
 1. <question>
 ```
 
-**Finding-key convention**: In Step 7's Pre-Apply Verification table and Step 8's status reporting, Issues are keyed `I1, I2, …`; Improvements are keyed `M1, M2, …`; Additions are keyed `A1, A2, …`. Preserve the within-category number from this section (e.g., the third Improvement listed here becomes `M3` in Step 7).
+**Finding-key convention**: In Step 7's Pre-Apply Verification table and Step 8's status reporting, Issues are keyed `I1, I2, …`; Improvements are keyed `M1, M2, …`; Additions are keyed `A1, A2, …`. Preserve the within-category number from this section (e.g., the third Improvement listed here becomes `M3` in Step 7). Candidate findings that get merged into another finding's recommendation during Step 6 drafting do NOT receive a Step 7 key — they dissolve into the consolidating finding's row. Key Step 7 strictly from Step 6's presented list: the first presented Improvement is `M1` regardless of any internal drafting-time labels you used before consolidation.
 
 ## Question Handling
 
