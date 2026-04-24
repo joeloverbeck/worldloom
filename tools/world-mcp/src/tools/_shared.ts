@@ -15,6 +15,8 @@ export interface SearchNodeFilters {
   node_type?: NodeType;
   file_path?: string;
   entity_name?: string;
+  include_scoped_references?: boolean;
+  reference_name?: string;
 }
 
 export interface SearchNodesArgs {
@@ -30,6 +32,12 @@ export interface SearchNodeResult {
   heading_path: string | null;
   summary: string | null;
   body_preview: string;
+  match_basis:
+    | "exact_id"
+    | "canonical_entity"
+    | "structured_record_edge"
+    | "scoped_reference"
+    | "lexical_evidence";
 }
 
 export interface SearchNodesResponse {
@@ -47,6 +55,8 @@ export interface SearchRow {
   lexical_score?: number | null;
   exact_entity_match_in_target_field?: number | null;
   exact_id_match?: number | null;
+  exact_structured_record_edge_match?: number | null;
+  exact_scoped_reference_match?: number | null;
 }
 
 export interface QueryContext {
@@ -178,6 +188,19 @@ export function applyFilters(
       )
     `);
     params.push(filters.entity_name, filters.entity_name);
+  }
+
+  if (filters.reference_name !== undefined) {
+    clauses.push(`
+      EXISTS (
+        SELECT 1
+        FROM scoped_references sr
+        LEFT JOIN scoped_reference_aliases sra ON sra.reference_id = sr.reference_id
+        WHERE sr.source_node_id = n.node_id
+          AND (sr.display_name = ? OR sra.alias_text = ?)
+      )
+    `);
+    params.push(filters.reference_name, filters.reference_name);
   }
 
   const sql = `

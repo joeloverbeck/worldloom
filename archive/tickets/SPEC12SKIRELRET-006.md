@@ -1,10 +1,10 @@
 # SPEC12SKIRELRET-006: `search_nodes` filters + match_basis
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-mcp/src/tools/{search-nodes.ts, _shared.ts}` with two new filters (`include_scoped_references`, `reference_name`) and a required `match_basis` field on `SearchNodeResult`.
-**Deps**: SPEC12SKIRELRET-002, SPEC12SKIRELRET-003
+**Deps**: archive/tickets/SPEC12SKIRELRET-002.md, archive/tickets/SPEC12SKIRELRET-003.md
 
 ## Problem
 
@@ -18,6 +18,8 @@ Per SPEC-12 D4, `search_nodes` must gain two new surfaces: (a) an `include_scope
 2. SPEC-12 D4 pre-declared filter interaction: `include_scoped_references` defaults to `false` (preserves existing SPEC-02 callers); `reference_name` presence implicitly sets `include_scoped_references=true` for that call. `entity_name` filter semantics unchanged — stays canonical-only.
 3. Cross-package contract under audit: `match_basis` is consumed by ranking logic in ticket 007 (informing band priority visibility) and by downstream skills (SPEC-06 Part A). It is a required field on every `SearchNodeResult` — tests and typechecks in both `tools/world-mcp` and any future consumer must be updated alongside the interface change.
 4. Extends existing output schema (`SearchNodeResult`): the `match_basis` field is REQUIRED on every result (not optional). No production consumer reads `SearchNodeResult` via a specific shape assertion today (verified: grep for `SearchNodeResult` across `tools/` and `.claude/skills/` returns only `tools/world-mcp/` internal uses and test assertions). Tests in `tests/tools/search-nodes.test.ts` need updating alongside the interface; this ticket bundles both.
+5. Dependency-path mismatch: the drafted `Deps` entries are symbolic ids. The live authority surfaces are now [archive/tickets/SPEC12SKIRELRET-002.md](/home/joeloverbeck/projects/worldloom/archive/tickets/SPEC12SKIRELRET-002.md) and [archive/tickets/SPEC12SKIRELRET-003.md](/home/joeloverbeck/projects/worldloom/archive/tickets/SPEC12SKIRELRET-003.md), both already completed. This ticket therefore narrows to the remaining `tools/world-mcp` search-layer work on top of that landed substrate.
+6. The drafted targeted proof command is stale for the live package layout. `pnpm --filter @worldloom/world-mcp test tests/tools/search-nodes.test.ts` runs `node --test tests/tools/search-nodes.test.ts` through the package script and fails with `ERR_UNKNOWN_FILE_EXTENSION`. The truthful narrow proof surface is `pnpm --filter @worldloom/world-mcp build` followed by `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/search-nodes.test.js`.
 
 ## Architecture Check
 
@@ -99,7 +101,7 @@ To support ticket 007's `sqlToCandidates` extension, extend the main SELECT in `
 3. `search_nodes({query: "", filters: {world_slug: "animalia", reference_name: "Mudbrook"}})` returns Melissa's record with `match_basis='scoped_reference'`.
 4. Every result in every response has `match_basis` populated with one of the 5 union values.
 5. Existing `entity_name` filter semantics unchanged (queries with `entity_name='Threadscar Melissa'` remain canonical-only; scoped hits do not leak in).
-6. `pnpm --filter @worldloom/world-mcp test tests/tools/search-nodes.test.ts` passes.
+6. `pnpm --filter @worldloom/world-mcp build` and `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/search-nodes.test.js` pass.
 
 ### Invariants
 
@@ -116,6 +118,31 @@ To support ticket 007's `sqlToCandidates` extension, extend the main SELECT in `
 
 ### Commands
 
-1. `pnpm --filter @worldloom/world-mcp test tests/tools/search-nodes.test.ts`
-2. `pnpm --filter @worldloom/world-mcp test`
-3. `pnpm --filter @worldloom/world-mcp build` (build runs `tsc -p tsconfig.json`, which is the typecheck surface; the `world-mcp` package does not ship a separate `typecheck` script)
+1. `pnpm --filter @worldloom/world-mcp build`
+2. `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/search-nodes.test.js`
+3. `pnpm --filter @worldloom/world-mcp test`
+
+## Outcome
+
+Completion date: 2026-04-24.
+
+`tools/world-mcp/src/tools/_shared.ts` now exposes the new `SearchNodeFilters` fields (`include_scoped_references`, `reference_name`) plus a required `match_basis` on every `SearchNodeResult`. It also adds the exact structured/scoped signal columns needed to classify each result against the SPEC-12 trust tiers.
+
+`tools/world-mcp/src/tools/search-nodes.ts` now threads the new filter surface through search execution. Exact `reference_name` filters match `scoped_references` / `scoped_reference_aliases`, blank-query exact filter calls return the filtered source records truthfully, open-text search can opt into source-record scoped-reference matching, and result projection now sets `match_basis` as `exact_id`, `canonical_entity`, `structured_record_edge`, `scoped_reference`, or `lexical_evidence`.
+
+The landed search path also suppresses synthetic backing `scoped_reference` nodes from generic lexical results unless the caller explicitly requests `node_type='scoped_reference'`. That keeps the new search surface aligned with this ticket's acceptance target: source records should become searchable through scoped references without polluting default result sets with implementation-detail nodes.
+
+`tools/world-mcp/tests/tools/search-nodes.test.ts` now covers the new scoped-reference gate, default-off behavior, blank-query `reference_name` behavior, structured-edge `match_basis`, and the required `match_basis` field on existing search results.
+
+## Verification Result
+
+1. Failed as drafted during reassessment: `pnpm --filter @worldloom/world-mcp test tests/tools/search-nodes.test.ts` -> `ERR_UNKNOWN_FILE_EXTENSION` because the package script forwards the `.ts` path directly to `node --test`.
+2. Passed: `pnpm --filter @worldloom/world-mcp build`
+3. Passed: `pnpm --filter @worldloom/world-mcp exec node --test dist/tests/tools/search-nodes.test.js`
+4. Passed: `pnpm --filter @worldloom/world-mcp test`
+
+## Deviations
+
+The drafted targeted proof command was rewritten to the truthful compiled-test form used by the live `world-mcp` package.
+
+The live scoped-reference substrate exposed one additional same-seam consequence not spelled out in the draft: generic lexical search was returning the backing `node_type='scoped_reference'` rows themselves. This ticket absorbed the required consequence fix inside the same search seam by suppressing those synthetic nodes from generic search results unless the caller explicitly filters for `scoped_reference`.
