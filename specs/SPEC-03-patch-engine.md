@@ -117,7 +117,7 @@ Atomization under SPEC-13 simplifies the op surface substantially. Retired ops w
 
 | Op | Semantics | Payload |
 |---|---|---|
-| `append_adjudication_record` | Write a new `adjudications/PA-NNNN-<verdict>.md` file | `{verdict, body, filename}` |
+| `append_adjudication_record` | Write a new `adjudications/PA-NNNN-<verdict>.md` file | `{adjudication_frontmatter: AdjudicationFrontmatter, body_markdown: string, filename?: string}`. `op.target_file` is the engine-resolved path; `filename` is optional helper metadata only. |
 | `append_character_record` | Write a new `characters/<char-slug>.md` file (YAML frontmatter + prose body) | `{char_record: CharacterDossier, body_markdown: string, filename}` |
 | `append_diegetic_artifact_record` | Write a new `diegetic-artifacts/<da-slug>.md` file | `{da_record: DiegeticArtifactFrontmatter, body_markdown: string, filename}` |
 
