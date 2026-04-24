@@ -129,7 +129,7 @@ const submitPatchPlanInputSchema = z.object({
   approval_token: z.string().min(1)
 });
 
-const ID_CLASSES = [
+export const ID_CLASSES = [
   "CF",
   "CH",
   "PA",
@@ -141,7 +141,21 @@ const ID_CLASSES = [
   "NCB",
   "AU",
   "RP",
-  "M"
+  "M",
+  "ONT",
+  "CAU",
+  "DIS",
+  "SOC",
+  "AES",
+  "OQ",
+  "ENT",
+  "SEC-ELF",
+  "SEC-INS",
+  "SEC-MTS",
+  "SEC-GEO",
+  "SEC-ECR",
+  "SEC-PAS",
+  "SEC-TML"
 ] as const;
 
 const allocateNextIdInputSchema = z.object({

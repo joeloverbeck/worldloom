@@ -13,7 +13,21 @@ export const ID_CLASS_FORMATS = {
   NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
-  M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ }
+  M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
+  ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
+  CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
+  DIS: { width: 1, zeroPad: false, regex: /^DIS-(\d+)$/ },
+  SOC: { width: 1, zeroPad: false, regex: /^SOC-(\d+)$/ },
+  AES: { width: 1, zeroPad: false, regex: /^AES-(\d+)$/ },
+  OQ: { width: 4, zeroPad: true, regex: /^OQ-(\d{4})$/ },
+  ENT: { width: 4, zeroPad: true, regex: /^ENT-(\d{4})$/ },
+  "SEC-ELF": { width: 3, zeroPad: true, regex: /^SEC-ELF-(\d{3})$/ },
+  "SEC-INS": { width: 3, zeroPad: true, regex: /^SEC-INS-(\d{3})$/ },
+  "SEC-MTS": { width: 3, zeroPad: true, regex: /^SEC-MTS-(\d{3})$/ },
+  "SEC-GEO": { width: 3, zeroPad: true, regex: /^SEC-GEO-(\d{3})$/ },
+  "SEC-ECR": { width: 3, zeroPad: true, regex: /^SEC-ECR-(\d{3})$/ },
+  "SEC-PAS": { width: 3, zeroPad: true, regex: /^SEC-PAS-(\d{3})$/ },
+  "SEC-TML": { width: 3, zeroPad: true, regex: /^SEC-TML-(\d{3})$/ }
 } as const;
 
 export type IdClass = keyof typeof ID_CLASS_FORMATS;

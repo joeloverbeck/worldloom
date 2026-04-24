@@ -7,6 +7,7 @@ import {
   type AllocateNextIdArgs,
   type IdClass
 } from "../../src/tools/allocate-next-id";
+import { ID_CLASSES } from "../../src/server";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
 
@@ -22,7 +23,21 @@ const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }
   { idClass: "NCB", highest: "NCB-0001", expected: "NCB-0002" },
   { idClass: "AU", highest: "AU-0002", expected: "AU-0003" },
   { idClass: "RP", highest: "RP-0005", expected: "RP-0006" },
-  { idClass: "M", highest: "M-20", expected: "M-21" }
+  { idClass: "M", highest: "M-20", expected: "M-21" },
+  { idClass: "ONT", highest: "ONT-3", expected: "ONT-4" },
+  { idClass: "CAU", highest: "CAU-2", expected: "CAU-3" },
+  { idClass: "DIS", highest: "DIS-1", expected: "DIS-2" },
+  { idClass: "SOC", highest: "SOC-4", expected: "SOC-5" },
+  { idClass: "AES", highest: "AES-3", expected: "AES-4" },
+  { idClass: "OQ", highest: "OQ-0014", expected: "OQ-0015" },
+  { idClass: "ENT", highest: "ENT-0029", expected: "ENT-0030" },
+  { idClass: "SEC-ELF", highest: "SEC-ELF-006", expected: "SEC-ELF-007" },
+  { idClass: "SEC-INS", highest: "SEC-INS-011", expected: "SEC-INS-012" },
+  { idClass: "SEC-MTS", highest: "SEC-MTS-002", expected: "SEC-MTS-003" },
+  { idClass: "SEC-GEO", highest: "SEC-GEO-018", expected: "SEC-GEO-019" },
+  { idClass: "SEC-ECR", highest: "SEC-ECR-005", expected: "SEC-ECR-006" },
+  { idClass: "SEC-PAS", highest: "SEC-PAS-007", expected: "SEC-PAS-008" },
+  { idClass: "SEC-TML", highest: "SEC-TML-001", expected: "SEC-TML-002" }
 ];
 
 function seedAllocationWorld(root: string): void {
@@ -49,7 +64,7 @@ function seedAllocationWorld(root: string): void {
   });
 }
 
-test("allocateNextId returns the next id for all 12 classes", async () => {
+test("allocateNextId returns the next id for all supported classes", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -95,19 +110,29 @@ test("allocateNextId returns first-run ids for missing classes", async () => {
     const mysteryResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "empty-fixture", id_class: "M" })
     );
+    const aesResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "empty-fixture", id_class: "AES" })
+    );
+    const secResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "empty-fixture", id_class: "SEC-GEO" })
+    );
 
     assert.ok(!("code" in cfResult));
     assert.ok(!("code" in ncpResult));
     assert.ok(!("code" in mysteryResult));
+    assert.ok(!("code" in aesResult));
+    assert.ok(!("code" in secResult));
     assert.equal(cfResult.next_id, "CF-0001");
     assert.equal(ncpResult.next_id, "NCP-0001");
     assert.equal(mysteryResult.next_id, "M-1");
+    assert.equal(aesResult.next_id, "AES-1");
+    assert.equal(secResult.next_id, "SEC-GEO-001");
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("allocateNextId exposes all 12 id classes with non-padded M formatting", () => {
+test("allocateNextId exposes all 26 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -120,10 +145,35 @@ test("allocateNextId exposes all 12 id classes with non-padded M formatting", ()
     "NCB",
     "AU",
     "RP",
-    "M"
+    "M",
+    "ONT",
+    "CAU",
+    "DIS",
+    "SOC",
+    "AES",
+    "OQ",
+    "ENT",
+    "SEC-ELF",
+    "SEC-INS",
+    "SEC-MTS",
+    "SEC-GEO",
+    "SEC-ECR",
+    "SEC-PAS",
+    "SEC-TML"
   ]);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 26);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
+  assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
+  assert.match("OQ-0001", ID_CLASS_FORMATS.OQ.regex);
+  assert.equal(ID_CLASS_FORMATS.AES.zeroPad, false);
+  assert.match("AES-1", ID_CLASS_FORMATS.AES.regex);
+  assert.equal(ID_CLASS_FORMATS["SEC-GEO"].width, 3);
+  assert.match("SEC-GEO-001", ID_CLASS_FORMATS["SEC-GEO"].regex);
+});
+
+test("allocateNextId class formats stay in lockstep with the MCP input enum", () => {
+  assert.deepEqual([...Object.keys(ID_CLASS_FORMATS)].sort(), [...ID_CLASSES].sort());
 });
 
 test("allocateNextId rejects unsupported id classes in the direct module API", async () => {

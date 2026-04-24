@@ -262,7 +262,7 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
-        args: { world_slug: "seeded", id_class: "CF" },
+        args: { world_slug: "seeded", id_class: "SEC-GEO" },
         expectError: false
       }
     ] as const;
@@ -315,5 +315,17 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       assert.equal(result.isError, true);
       assert.match(textContent(result), /invalid|required/i);
     }
+  });
+});
+
+test("unsupported id classes fail at the MCP validation boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "NOT_A_CLASS" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /invalid/i);
   });
 });

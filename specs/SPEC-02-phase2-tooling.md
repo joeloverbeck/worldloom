@@ -100,7 +100,7 @@ Extend `ID_CLASS_FORMATS` to support:
 
 Existing classes (`CF`, `CH`, `PA`, `CHAR`, `DA`, `PR`, `BATCH`, `NCP`, `NCB`, `AU`, `RP`) remain unchanged.
 
-**Design rule for `id_class` values**: each `id_class` value is the literal prefix of the allocated ID — `ONT` → `ONT-7`, `SEC-GEO` → `SEC-GEO-004`. INV uses five category prefixes directly (no compound `INV-*` shape — there is no `INV` class value on the tool's input). SEC uses seven compound prefixes that encode the file class (each is a distinct `id_class` value). After this deliverable, `ID_CLASS_FORMATS` grows from 12 entries to 24 (12 existing + 5 INV sub-classes + 7 SEC sub-classes).
+**Design rule for `id_class` values**: each `id_class` value is the literal prefix of the allocated ID — `ONT` → `ONT-7`, `SEC-GEO` → `SEC-GEO-004`. INV uses five category prefixes directly (no compound `INV-*` shape — there is no `INV` class value on the tool's input). SEC uses seven compound prefixes that encode the file class (each is a distinct `id_class` value). After this deliverable, `ID_CLASS_FORMATS` grows from 12 entries to 26 (12 existing + 5 INV sub-classes + OQ + ENT + 7 SEC sub-classes).
 
 **Zod schema at `tools/world-mcp/src/server.ts:120-138`** (the MCP tool arg validator) must be updated in lockstep — the `ID_CLASSES` closed-union enum rejects any id_class not in its list.
 
