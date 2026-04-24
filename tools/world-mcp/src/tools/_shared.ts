@@ -224,6 +224,10 @@ export function sqlToCandidates(rows: SearchRow[], context: QueryContext): Ranki
       row.exact_id_match === 1 || row.node_id === normalizedQuery ? 1 : 0,
     exact_entity_match_in_target_field:
       row.exact_entity_match_in_target_field === 1 ? 1 : 0,
+    exact_structured_record_edge_match:
+      row.exact_structured_record_edge_match === 1 ? 1 : 0,
+    exact_scoped_reference_match:
+      row.exact_scoped_reference_match === 1 ? 1 : 0,
     heading_path_match:
       row.heading_path !== null &&
       row.heading_path.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase())

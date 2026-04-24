@@ -12,6 +12,8 @@ function createCandidate(overrides: Partial<RankingCandidate>): RankingCandidate
     file_path: "worlds/animalia/WORLD_KERNEL.md",
     exact_id_match: 0,
     exact_entity_match_in_target_field: 0,
+    exact_structured_record_edge_match: 0,
+    exact_scoped_reference_match: 0,
     heading_path_match: 0,
     graph_distance_from_seed: 4,
     fts5_bm25_score: 0,
@@ -71,6 +73,133 @@ test("Band E2 outranks Band W even when the weighted candidate scores higher", (
 
   assert.equal(ranked[0]?.node_id, "entity-match");
   assert.equal(ranked[1]?.node_id, "weighted");
+});
+
+test("5-band ranking preserves exact > canonical > structured > scoped > lexical ordering", () => {
+  const ranked = rankCandidates(
+    [
+      createCandidate({
+        node_id: "lexical-only",
+        heading_path_match: 1
+      }),
+      createCandidate({
+        node_id: "scoped-reference",
+        exact_scoped_reference_match: 1
+      }),
+      createCandidate({
+        node_id: "structured-record-edge",
+        exact_structured_record_edge_match: 1
+      }),
+      createCandidate({
+        node_id: "canonical-entity",
+        exact_entity_match_in_target_field: 1
+      }),
+      createCandidate({
+        node_id: "exact-id",
+        exact_id_match: 1
+      })
+    ],
+    getRankingProfile("default")
+  );
+
+  assert.deepEqual(
+    ranked.map((candidate) => candidate.node_id),
+    [
+      "exact-id",
+      "canonical-entity",
+      "structured-record-edge",
+      "scoped-reference",
+      "lexical-only"
+    ]
+  );
+});
+
+test("Band 2 structured-edge outranks band 1 scoped-reference", () => {
+  const ranked = rankCandidates(
+    [
+      createCandidate({
+        node_id: "scoped-reference",
+        exact_scoped_reference_match: 1
+      }),
+      createCandidate({
+        node_id: "structured-record-edge",
+        exact_structured_record_edge_match: 1
+      })
+    ],
+    getRankingProfile("default")
+  );
+
+  assert.deepEqual(
+    ranked.map((candidate) => candidate.node_id),
+    ["structured-record-edge", "scoped-reference"]
+  );
+});
+
+test("Within band 0, authority-bearing nodes get a locality bonus", () => {
+  const ranked = rankCandidates(
+    [
+      createCandidate({
+        node_id: "non-authority",
+        node_type: "domain_file",
+        heading_path_match: 1
+      }),
+      createCandidate({
+        node_id: "authority-bearing",
+        node_type: "character_record",
+        heading_path_match: 1
+      })
+    ],
+    getRankingProfile("default")
+  );
+
+  assert.deepEqual(
+    ranked.map((candidate) => candidate.node_id),
+    ["authority-bearing", "non-authority"]
+  );
+});
+
+test("Within band 0, references_record edge locality bonus outranks an otherwise identical candidate", () => {
+  const ranked = rankCandidates(
+    [
+      createCandidate({
+        node_id: "unlinked",
+        heading_path_match: 1
+      }),
+      createCandidate({
+        node_id: "structured-linked",
+        heading_path_match: 1,
+        edge_types_to_candidate: ["references_record"]
+      })
+    ],
+    getRankingProfile("default")
+  );
+
+  assert.deepEqual(
+    ranked.map((candidate) => candidate.node_id),
+    ["structured-linked", "unlinked"]
+  );
+});
+
+test("Within band 0, references_scoped_name edge locality bonus outranks an otherwise identical candidate", () => {
+  const ranked = rankCandidates(
+    [
+      createCandidate({
+        node_id: "unlinked",
+        heading_path_match: 1
+      }),
+      createCandidate({
+        node_id: "scoped-linked",
+        heading_path_match: 1,
+        edge_types_to_candidate: ["references_scoped_name"]
+      })
+    ],
+    getRankingProfile("default")
+  );
+
+  assert.deepEqual(
+    ranked.map((candidate) => candidate.node_id),
+    ["scoped-linked", "unlinked"]
+  );
 });
 
 test("Within a band, higher weighted score wins", () => {

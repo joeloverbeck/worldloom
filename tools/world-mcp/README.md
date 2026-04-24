@@ -21,7 +21,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 ## Retrieval policy
 
-Exact id > exact entity > heading-path > backlink expansion > FTS5 lexical > semantic (future fallback). Per-task-type ranking profiles in `src/ranking/profiles/`.
+Exact id > exact canonical entity > exact structured record edge > exact scoped reference > weighted lexical. Lexical-only candidates can still be nudged by locality bonuses (authority-bearing node types plus `references_record` / `references_scoped_name` edges), but those bonuses never outrank a higher trust-tier band. Per-task-type ranking profiles live in `src/ranking/profiles/`.
 
 ## Approval token
 
