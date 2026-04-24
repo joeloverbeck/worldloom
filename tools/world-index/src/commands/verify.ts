@@ -107,7 +107,7 @@ function loadStoredFileNodes(
         FROM nodes
         WHERE world_slug = ?
           AND file_path = ?
-          AND node_type != 'named_entity'
+          AND node_type NOT IN ('named_entity', 'scoped_reference')
         ORDER BY node_id
       `
     )

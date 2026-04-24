@@ -2,7 +2,7 @@
 
 # SPEC-12: Skill-Reliable Retrieval — Scoped References, Structured Cross-Record Edges, and Locality-First Context Packets
 
-**Status**: PROPOSED
+**Status**: COMPLETED
 **Phase**: 1.9 remediation; lands after SPEC-02 and before downstream skills rely on the current MCP surface as production-ready
 **Depends on**: SPEC-01, SPEC-02, SPEC-10, SPEC-11, SPEC-07 Part A
 **Blocks**: SPEC-06 any skill migration or read-side reliance that assumes the current MCP surface is sufficiently complete for truthful downstream work
@@ -450,3 +450,10 @@ No conflict with FOUNDATIONS was found. The point of the spec is to make the mac
 
 1. Should `scoped_references` support a future `scope_note` or `confidence_note`, or should v1 remain exact-name + relation only? (Deferred to a later spec.)
 2. Which additional whole-file record types beyond the initial four should gain `scoped_references` in v1, and which should wait for a later spec? (Deferred to a later spec when real cases arise.)
+
+## Outcome
+
+- Completion date: 2026-04-24.
+- What actually changed: landed the `SPEC12SKIRELRET-*` ticket family covering the scoped-reference schema/types substrate, frontmatter-declared scoped-reference extraction, exact structured record-edge extraction, trust-tier-aware `find_named_entities`, `get_node`, `search_nodes`, and ranking updates, locality-first context packet v2, and the live-corpus animalia proof capstone; updated the live `animalia` corpus records needed for truthful Phase 1 proof and repaired adjacent `world-index` verification/build expectations exposed by that proof.
+- Deviations from original plan: the spec’s consumer-doc update surface did not land as a broad same-pass doc rewrite. The live implementation completed the retrieval/index/MCP contract and corpus proof first, while `specs/IMPLEMENTATION-ORDER.md` is updated in this archival pass to reflect that SPEC-12 is now implemented and archived.
+- Verification results: the archived `SPEC12SKIRELRET-*` tickets record the detailed proof lanes; capstone verification included `pnpm --filter @worldloom/world-index build`, `node tools/world-index/dist/src/cli.js build animalia`, `sqlite3 worlds/animalia/_index/world.db "SELECT COUNT(*) FROM scoped_references WHERE world_slug='animalia'"` returning `37`, `node --test dist/tests/integration/build-animalia.test.js` from `tools/world-index/`, `pnpm --filter @worldloom/world-mcp build`, and `node --test dist/tests/integration/spec12-live-corpus.test.js` from `tools/world-mcp/`.

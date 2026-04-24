@@ -14,7 +14,9 @@ import { sync } from "../../src/commands/sync";
 import { verify } from "../../src/commands/verify";
 import { enumerate } from "../../src/enumerate";
 import { extractEntities, loadOntologyRegistry } from "../../src/parse/entities";
-import { ENTITY_SOURCE_NODE_TYPES, parseWorldFile } from "../../src/commands/shared";
+import { extractScopedReferences } from "../../src/parse/scoped";
+import { extractStructuredRecordEdges } from "../../src/parse/structured-edges";
+import { parseWorldFile } from "../../src/commands/shared";
 import { CURRENT_INDEX_VERSION } from "../../src/schema/version";
 
 const WORLD_SLUG = "animalia";
@@ -76,16 +78,17 @@ function loadExpectedNodeCounts(root: string): Map<NodeType, number> {
     const parsed = parseWorldFile(root, WORLD_SLUG, relativePath);
     for (const node of parsed.nodes) {
       counts.set(node.node_type, (counts.get(node.node_type) ?? 0) + 1);
-      if (ENTITY_SOURCE_NODE_TYPES.has(node.node_type)) {
-        proseNodes.push(node);
-      }
+      proseNodes.push(node);
     }
   }
 
   const ontologyPath = path.join(worldRoot, "ONTOLOGY.md");
   const registry = loadOntologyRegistry(ontologyPath);
   const { entityNodes } = extractEntities({ type: "root", children: [] }, proseNodes, registry);
+  const scoped = extractScopedReferences(proseNodes);
+  const structured = extractStructuredRecordEdges(proseNodes);
   counts.set("named_entity", entityNodes.length);
+  counts.set("scoped_reference", scoped.scopedNodes.length + structured.scopedNodes.length);
 
   return counts;
 }
@@ -485,9 +488,24 @@ test("build removes audited workflow-label entities and legacy ontology bullets 
         assert.equal(countNamedEntityRows(db, banned), 0, `${banned} should not persist as a named_entity`);
       }
 
-      for (const retained of ["Vespera Nightwhisper", "Atreia Selviss"]) {
+      for (const retained of ['"Threadscar" Melissa', "Vespera Nightwhisper", "Atreia Selviss"]) {
         assert.equal(countNamedEntityRows(db, retained), 1, `${retained} should remain queryable`);
       }
+
+      const melissaAliasCount = (
+        db
+          .prepare(
+            `
+              SELECT COUNT(*) AS count
+              FROM entity_aliases ea
+              INNER JOIN entities e ON e.entity_id = ea.entity_id
+              WHERE e.canonical_name = '"Threadscar" Melissa'
+                AND ea.alias_text = 'Melissa Threadscar'
+            `
+          )
+          .get() as { count: number }
+      ).count;
+      assert.equal(melissaAliasCount, 1, "Melissa Threadscar should resolve through an exact structured alias");
 
       for (const bulletDerived of [
         "Ash-Seal commercial-company Brinewick anomaly",
@@ -500,12 +518,7 @@ test("build removes audited workflow-label entities and legacy ontology bullets 
         );
       }
 
-      for (const noncanonical of [
-        "Melissa Threadscar",
-        "Charter Hall",
-        "Copper Weir",
-        "Bent Willow"
-      ]) {
+      for (const noncanonical of ["Charter Hall", "Copper Weir", "Bent Willow"]) {
         assert.equal(
           countNamedEntityRows(db, noncanonical),
           0,
@@ -513,7 +526,7 @@ test("build removes audited workflow-label entities and legacy ontology bullets 
         );
       }
 
-      for (const unresolved of ["Melissa Threadscar", "Charter Hall", "Copper Weir", "Bent Willow"]) {
+      for (const unresolved of ["Charter Hall", "Copper Weir", "Bent Willow"]) {
         const unresolvedCount = (
           db
             .prepare(
@@ -530,15 +543,7 @@ test("build removes audited workflow-label entities and legacy ontology bullets 
         assert.ok(unresolvedCount > 0, `${unresolved} should still be queryable as unresolved evidence`);
       }
 
-      assert.deepEqual(loadValidationRowsByCode(db, "malformed_authority_source"), [
-        {
-          validator_name: "frontmatter_parse",
-          severity: "warn",
-          code: "malformed_authority_source",
-          node_id: "animalia:melissa-threadscar.md:melissa-threadscar:0",
-          file_path: "characters/melissa-threadscar.md"
-        }
-      ]);
+      assert.deepEqual(loadValidationRowsByCode(db, "malformed_authority_source"), []);
 
       assert.equal(countEntityMentionsForNodeType(db, "adjudication_record"), 0);
       assert.equal(countEntityMentionsForNodeType(db, "audit_record"), 0);

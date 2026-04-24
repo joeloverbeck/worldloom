@@ -48,7 +48,7 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-05 Part A` Hooks 1, 2, 4 (read-side + subagent) — completed 2026-04-24; implementation landed at `tools/hooks/` and `.claude/settings.json.example`; Hooks 3 and 5 remain Phase 2 work
 
 **Tier 2.25 (depends on Tier 2)**:
-- `SPEC-12` Skill-Reliable Retrieval — proposed; must land before downstream skills treat the current MCP surface as production-ready. Scope: scoped references, structured cross-record edges, trust-tier-aware ranking, and packet-v2 completeness discipline.
+- `SPEC-12` Skill-Reliable Retrieval — completed 2026-04-24; implementation landed via the archived `SPEC12SKIRELRET-*` ticket family plus live-corpus animalia proof, and the spec is archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md`.
 
 **Tier 3 (depends on Tier 2.25)**:
 - `SPEC-06 Part A` canon-addition read-side rewrite
@@ -199,7 +199,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-01 (index + parser + CLI): 2 sessions
   - SPEC-10 (entity-surface remediation): 0.5–1 session
   - SPEC-02 (MCP server + tools): 1 session
-  - SPEC-12 (retrieval reliability + packet-v2): 1–2 sessions
+  - SPEC-12 (retrieval reliability + packet-v2): completed 2026-04-24
   - SPEC-05 Part A (3 hooks): 1 session
   - SPEC-06 Part A (canon-addition read-side): 1 session
   - SPEC-07 Part A (docs): completed 2026-04-23 in parallel with Phase 1 code work
@@ -247,7 +247,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
 | SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
-| SPEC-12 Skill-Reliable Retrieval | proposed; active at `specs/SPEC-12-skill-reliable-retrieval.md` |
+| SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
 | IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are later architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and now downstream-skill retrieval reliability is being formalized as a separate scoped-reference and packet-completeness layer.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are later architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer.

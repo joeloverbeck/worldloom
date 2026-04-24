@@ -110,6 +110,7 @@ Check:
 - for end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path; strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout
 - for fixture-backed command or integration tests, verify whether the assertion shape is still truthful before editing the test harness; if the live contract still matches the assertion, check whether the copied fixture source is stale and narrow the ticket to fixture-proof alignment instead of rewriting a still-correct test
 - for index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup
+- when the ticket repairs malformed authority-bearing frontmatter on whole-file records, rerun a post-fix node-id probe before final closeout; fixing the frontmatter can change the truthful record-node shape from a fallback path-style id to the structured record id now emitted by the parser
 - when replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path; do not scan a broader substrate ad hoc and treat that result as equivalent evidence
 - when proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof
 
@@ -226,6 +227,8 @@ For tool/index/schema tickets, package-local readonly DB queries and inline `nod
 For compiled TS packages, opaque `node --test` lanes, and transport-client noise, apply the narrowing guidance in `references/verification-closeout.md` instead of expanding the acceptance boundary blindly.
 
 When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
+
+When the fix changes emitted derived node types or other synthetic index artifacts, inspect adjacent build/count/verify helpers and existing integration expectations in the same seam. Existing proof code may need to count those derived rows explicitly or exempt them from parser-vs-index drift checks just as it already does for older synthetic artifacts.
 
 ### 6. Close out the ticket honestly
 
