@@ -77,7 +77,7 @@ Ticket 006's scope includes rewriting the pre-SPEC-13 README. This ticket's impl
 - Engine apply orchestration — ticket 006.
 - Per-op tests — ticket 008.
 - Integration / acceptance tests — ticket 009.
-- SPEC-02 Phase 2 tooling update (adds `get_record`, extends `allocate_next_id`) — separate work per SPEC-03 Dependencies; required for ticket 009 end-to-end tests but not for this ticket's isolated rewire.
+- SPEC-02 Phase 2 tooling update (adds `get_record`, `find_sections_touched_by`, extends `allocate_next_id`) — completed separately via archived `archive/specs/SPEC-02-phase2-tooling.md`; required for ticket 009 end-to-end tests but not for this ticket's isolated rewire.
 
 ## Acceptance Criteria
 

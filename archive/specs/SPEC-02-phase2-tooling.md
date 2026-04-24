@@ -2,6 +2,7 @@
 
 # SPEC-02-PHASE2: Retrieval-MCP Phase 2 Tooling Update
 
+**Status**: COMPLETED
 **Phase**: 2
 **Depends on**:
 - archived SPEC-02 (Phase 1 retrieval-MCP surface at `tools/world-mcp/`; this spec extends that server; see `archive/specs/SPEC-02-retrieval-mcp-server.md`)
@@ -17,7 +18,7 @@
 
 > **Ticket-decomposition directive (load-bearing; do not skip)**
 >
-> When this spec is decomposed via `/spec-to-tickets` (in a future session), the resulting ticket IDs MUST be added as `Deps` entries to **both** `tickets/SPEC03PATENG-005.md` AND `tickets/SPEC03PATENG-009.md` before the SPEC-02-PHASE2 batch is considered complete.
+> When this spec is decomposed via `/spec-to-tickets`, the resulting ticket IDs MUST be added as `Deps` entries to `tickets/SPEC03PATENG-009.md`, and must also be added to `tickets/SPEC03PATENG-005.md` only if this spec's ticket batch delivers approval-token issuance or a concrete shared HMAC contract surface. This dependency handoff must be complete before the SPEC-02-PHASE2 batch is considered complete.
 >
 > Concretely:
 > - If this spec is decomposed under namespace `SPEC02PH2TOOL` (or similar), update `SPEC03PATENG-005.md`'s `**Deps**:` line to include the ticket(s) delivering the approval-token issuance / HMAC contract (if that work lands here; otherwise leave 005 unchanged).
@@ -153,3 +154,21 @@ Dropping the `get_compiled_view` commitment leaves stale references in repositor
 - **Animalia ID-space assumptions**: the `allocate_next_id` extensions assume the existing animalia `_source/` ID-pattern conventions (unpadded `M-N`, unpadded per-category invariants like `ONT-7`, padded `SEC-GEO-003`) remain stable. If a future migration changes padding or prefix rules, this spec's enum must be updated.
 - **Ticket-decomposition divergence**: if the future `/reassess-spec` run surfaces a design-level objection to one of the three MCP deliverables, the user's explicit dispositioning path applies — this spec is reassessable. The ticket-decomposition directive above remains load-bearing regardless of which deliverable lands under which package: the commitment is that SPEC-03 ticket 005 and 009 MUST reference the specific tickets that deliver their prerequisites.
 - **`get_compiled_view` re-introduction risk**: if a future Phase 2+ skill surfaces a genuine merged-view need, re-introducing `get_compiled_view` requires (a) resurrecting the render-implementation-location decision (shared module? world-index package? world-mcp?), (b) restoring the docs at `docs/MACHINE-FACING-LAYER.md:40` (Part B removed one reference), and (c) re-entering SPEC-13's original byte-identical-with-CLI parity commitment. Mitigation: any such re-introduction runs through its own reassessment + brainstorm, not as an inline extension here.
+
+## Outcome
+
+Completed: 2026-04-25.
+
+Implemented via the archived `SPEC02PHA2TOO-*` ticket family:
+
+- `archive/tickets/SPEC02PHA2TOO-001.md` delivered `mcp__worldloom__get_record`.
+- `archive/tickets/SPEC02PHA2TOO-002.md` delivered `mcp__worldloom__find_sections_touched_by`.
+- `archive/tickets/SPEC02PHA2TOO-003.md` extended `allocate_next_id` to INV / OQ / ENT / SEC classes.
+- `archive/tickets/SPEC02PHA2TOO-004.md` validated the Part B docs cleanup for the dropped `get_compiled_view` commitment.
+- `archive/tickets/SPEC02PHA2TOO-005.md` updated SPEC03PATENG-009's dependency chain and corrected this spec's 005-vs-009 directive wording.
+- `archive/tickets/SPEC02PHA2TOO-006.md` restored the broader `world-mcp` package test lane after live-corpus stale-index fallout.
+- `archive/tickets/SPEC02PHA2TOO-007.md` removed the duplicated atomic logical-file freshness contract between `world-index` and `world-mcp`.
+
+Deviations from the original SPEC-13 amendment were intentional and recorded in this spec: `mcp__worldloom__get_compiled_view` was not delivered because reassessment found no active MCP consumer; the human-facing `world-index render` CLI reference remains aspirational and out of scope. Approval-token issuance also remains outside this spec, so `tickets/SPEC03PATENG-005.md` was not given SPEC02PHA2TOO dependencies.
+
+Verification completed across the ticket family included package-local `world-mcp` builds/tests, focused compiled `node --test` lanes for the new tools and dispatch surfaces, grep proof that docs no longer expose `get_compiled_view`, and dependency-chain proof that `tickets/SPEC03PATENG-009.md` now lists archived SPEC02PHA2TOO 001/002/003 prerequisites.

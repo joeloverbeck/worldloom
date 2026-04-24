@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds `tools/patch-engine/tests/integration/end-to-end-canon-addition.test.ts` plus supporting fixtures. No production code changes; exercises the pipeline composed by tickets 001–007 end-to-end via the world-mcp `submit_patch_plan` path.
-**Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields)
+**Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields), archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, archive/tickets/SPEC02PHA2TOO-003.md (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
 
 ## Problem
 
@@ -13,7 +13,7 @@ SPEC-03 §Verification enumerates 10 acceptance bullets beyond the per-op unit t
 ## Assumption Reassessment (2026-04-24)
 
 1. `worlds/animalia/_source/` is the migrated atomic-source canonical state (migration completed 2026-04-24 per SPEC-13; confirmed at reassessment). This ticket copies animalia via `fs.cpSync` to a temp root at test start — the real `worlds/animalia/` tree is never mutated. Re-enumeration of expected counts (CFs, CHs, INVs, Ms, OQs, ENTs, SECs) happens at test setup time from the fixture copy, not hardcoded, so the tests remain valid as animalia's canon grows.
-2. SPEC-02 Phase 2 tooling update (adds `get_record`, `find_sections_touched_by`, extends `allocate_next_id` to INV/OQ/ENT/SEC) is a gating dependency for the post-apply sync integration test: the test verifies `find_sections_touched_by(new_cf_id)` returns the new SEC after apply, which requires the MCP tool to exist. This ticket blocks on the SPEC-02 Phase 2 update landing first; if it hasn't, the post-apply sync assertion must be skipped or stubbed. **Decision at implementation time**: if SPEC-02 Phase 2 has not landed, split this ticket into 009a (SPEC-02-independent assertions) and 009b (post-apply sync integration requiring `find_sections_touched_by`). Flag at implementation as scope-extending.
+2. SPEC-02 Phase 2 tooling update (adds `get_record`, `find_sections_touched_by`, extends `allocate_next_id` to INV/OQ/ENT/SEC) is a gating dependency for the post-apply sync integration test: the test verifies `find_sections_touched_by(new_cf_id)` returns the new SEC after apply, which requires the MCP tool to exist. This dependency is now satisfied by archived SPEC02PHA2TOO tickets 001, 002, and 003, listed on this ticket's `Deps:` line.
 3. Shared boundary: this ticket exercises `world-mcp` → `@worldloom/patch-engine` → `world-index sync` end-to-end. Failures surface at the MCP response shape (`PatchReceipt` fields populated correctly) and at the post-apply index state (verifiable via `get_record` / `find_sections_touched_by`).
 4. FOUNDATIONS principles under audit: **Rule 6 No Silent Retcons** via the retcon-attestation and `append_touched_by_cf` auto-add assertions; **HARD-GATE discipline** via the approval-token rejection matrix (unsigned / expired / tampered / replayed tokens).
 5. This ticket does not weaken the Mystery Reserve firewall. MR-related assertions are limited to verifying that `append_extension` on M records is accepted (preserves MR append-only authorship) without touching disallowed-answer semantics — SPEC-04's `rule7_mystery_reserve_preservation` owns that check.
@@ -84,7 +84,7 @@ Add `"test:integration": "npm run build && node --test dist/tests/integration/*.
 
 - Per-op unit tests — ticket 008.
 - SPEC-04 validator unit tests — SPEC-04's suite.
-- SPEC-02 Phase 2 tooling implementation (`get_record`, `find_sections_touched_by`, extended `allocate_next_id`) — separate work per SPEC-03 Dependencies. This ticket EXERCISES that tooling but does not implement it; if the Phase 2 update has not landed when implementation begins, split per Assumption Reassessment item 2.
+- SPEC-02 Phase 2 tooling implementation (`get_record`, `find_sections_touched_by`, extended `allocate_next_id`) — completed separately via archived SPEC02PHA2TOO tickets. This ticket EXERCISES that tooling but does not implement it.
 - CI-infrastructure wiring (adding the integration suite to the GitHub Actions matrix, wall-clock variance tuning) — separate ops ticket.
 - Fault-injection library (the simplest approach uses `t.mock.method()` from `node:test`'s built-in mock; no new framework needed).
 

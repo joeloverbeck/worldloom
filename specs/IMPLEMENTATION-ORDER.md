@@ -110,7 +110,7 @@ The original structural-validator gate is not used as the Phase 1.5 closeout pro
 - **SPEC-03** patch engine — new atomic-record op vocabulary (7 retired markdown-anchor ops; 7 new `create_*` ops for CF/CH/INV/M/OQ/ENT/SEC; 3 repurposed ops `update_record_field` / `append_extension` / `append_touched_by_cf`; `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` / `append_modification_history_entry` retained). No compile step; simplified 3-tier write order (create-all → update-all → adjudication); anchor-hash machinery retained only for hybrid files (characters, diegetic artifacts).
 - **SPEC-04** validator framework — 2 retired (`attribution_comment`, `anchor_integrity`); 2 added (`record_schema_compliance`, `touched_by_cf_completeness`). Input shift from parsed-markdown to per-record YAML.
 - **SPEC-05 Part B** Hooks 3, 5 — block list covers `_source/` subdirectories; explicitly allowed direct edits on `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, and per-file hybrid artifacts (characters, diegetic artifacts, adjudications, proposals, audits); Hook 5 runs `record_schema_compliance` on any `_source/*.yaml` write.
-- **SPEC-02-PHASE2** retrieval-MCP Phase 2 tooling update (formalized in `specs/SPEC-02-phase2-tooling.md`): adds `get_record(record_id)`, `find_sections_touched_by(cf_id)`, `get_compiled_view(file_class, sections?)`; extends `allocate_next_id` to INV per-category / OQ / ENT / SEC per-file-class. The `submit_patch_plan` rewire (removing the Phase 1 stub, importing from `@worldloom/patch-engine`) stays with SPEC-03 ticket 007 — conceptually a SPEC-02 surface touch, but mechanically owned by SPEC-03 since it consumes the engine package.
+- **SPEC-02-PHASE2** retrieval-MCP Phase 2 tooling update — completed 2026-04-25 and archived at `archive/specs/SPEC-02-phase2-tooling.md`: added `get_record(record_id)` and `find_sections_touched_by(cf_id)`; extended `allocate_next_id` to INV per-category / OQ / ENT / SEC per-file-class; dropped `get_compiled_view` per YAGNI reassessment. The `submit_patch_plan` rewire (removing the Phase 1 stub, importing from `@worldloom/patch-engine`) stays with SPEC-03 ticket 007 — conceptually a SPEC-02 surface touch, but mechanically owned by SPEC-03 since it consumes the engine package.
 - **SPEC-06** all-skill migration — all 8 canon-mutating / canon-reading skills (`canon-addition`, `character-generation`, `diegetic-artifact-generation`, `continuity-audit`, `propose-new-canon-facts`, `canon-facts-from-diegetic-artifacts`, `propose-new-characters`, `create-base-world`) rewritten against atomic source. SPEC-06 Part A / Part B distinction collapses since atomic-source landed in Phase 1.5. `create-base-world` updated to emit `_source/` directly for new worlds.
 - **SPEC-07 Part B** — HARD-GATE-DISCIPLINE.md write-order rewrite (engine's new 3-tier ordering); CLAUDE.md phrasing refinement for Hook 3 / atomic-source non-negotiables.
 
@@ -122,7 +122,7 @@ The original structural-validator gate is not used as the Phase 1.5 closeout pro
 
 **Tier 2 (depends on Tier 1)**:
 - `SPEC-03` patch engine — atomic-record op vocabulary; requires SPEC-04 for pre-apply gate
-- `SPEC-02-PHASE2` retrieval-MCP tooling update (see `specs/SPEC-02-phase2-tooling.md`): new retrieval tools + `allocate_next_id` extensions. The `submit_patch_plan` stub removal itself lands under SPEC-03 ticket 007.
+- `SPEC-02-PHASE2` retrieval-MCP tooling update — completed 2026-04-25; spec archived at `archive/specs/SPEC-02-phase2-tooling.md`; ticket family archived under `archive/tickets/SPEC02PHA2TOO-*.md`. The `submit_patch_plan` stub removal itself remains under SPEC-03 ticket 007.
 
 **Tier 3 (depends on Tier 2)**:
 - `SPEC-05 Part B` Hooks 3, 5 (edit-side `_source/` discipline + auto-validate)
@@ -265,7 +265,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
 - **Phase 2**: 5–8 sessions (reduced vs. original estimate; atomic-source simplifies patch engine and validator scope)
   - SPEC-04 (atomic-YAML validators, 15 validators net): 1.5–2 sessions
   - SPEC-03 (atomic-record patch engine, simplified op vocabulary): 1.5 sessions
-  - SPEC-02-PHASE2 (retrieval-MCP tooling update per `specs/SPEC-02-phase2-tooling.md`): 0.5 session
+  - SPEC-02-PHASE2 (retrieval-MCP tooling update): completed 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`
   - SPEC-05 Part B (2 hooks, `_source/` discipline): 0.5 session
   - SPEC-06 (all 8 skills against atomic source): 2.5–3 sessions
   - SPEC-07 Part B: 0.5 session
@@ -298,7 +298,7 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 |---|---|
 | SPEC-01 World Index | ✓ implemented 2026-04-22; archived at `archive/specs/SPEC-01-world-index.md` |
 | SPEC-02 Retrieval MCP Server | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-02-retrieval-mcp-server.md` |
-| SPEC-02-PHASE2 Retrieval-MCP Phase 2 Tooling Update | ✓ specified 2026-04-24 at `specs/SPEC-02-phase2-tooling.md`; lifts SPEC-13 §C line 255 commitments (3 new retrieval tools + `allocate_next_id` extensions) into decomposable form; SPEC-03 ticket decomposition flags this as a prerequisite for SPEC03PATENG-005 and SPEC03PATENG-009 |
+| SPEC-02-PHASE2 Retrieval-MCP Phase 2 Tooling Update | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`; delivered `get_record`, `find_sections_touched_by`, and INV/OQ/ENT/SEC `allocate_next_id` extensions via archived `SPEC02PHA2TOO-*` tickets; `get_compiled_view` intentionally dropped; SPEC03PATENG-009 now depends on archived SPEC02PHA2TOO 001/002/003 |
 | SPEC-03 Patch Engine | ✓ specified; decomposed 2026-04-24 into `tickets/SPEC03PATENG-001.md` through `tickets/SPEC03PATENG-009.md` |
 | SPEC-04 Validator Framework | ✓ specified |
 | SPEC-05 Hooks Discipline | Part A implemented 2026-04-24 at `tools/hooks/` and `.claude/settings.json.example`; Part B remains specified |

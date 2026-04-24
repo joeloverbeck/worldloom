@@ -1,24 +1,25 @@
 # SPEC02PHA2TOO-005: Cross-ticket Deps update — SPEC03PATENG-009 references SPEC02PHA2TOO tickets
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — edits `tickets/SPEC03PATENG-009.md` (single-line `Deps:` field update). No code changes; ticket-metadata-only.
+**Engine Changes**: Yes — edits `tickets/SPEC03PATENG-009.md` (single-line `Deps:` field update) and truths the same-seam SPEC-02-PHASE2 directive wording. No code changes; ticket/spec-metadata-only.
 **Deps**: archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, archive/tickets/SPEC02PHA2TOO-003.md
 
 ## Problem
 
 SPEC-02-PHASE2's load-bearing Ticket-decomposition directive (spec lines 17-25) mandates that when this spec is decomposed via `/spec-to-tickets`, the resulting ticket IDs MUST be added as `Deps` entries to `tickets/SPEC03PATENG-009.md` (and conditionally to `tickets/SPEC03PATENG-005.md` when token issuance lands here — it does not, so 005 is left unchanged).
 
-Today `tickets/SPEC03PATENG-009.md:7` reads: `**Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own Deps fields)`. 009's acceptance criterion enumerates bullet 12 "Post-apply sync integration" which explicitly exercises `mcp__worldloom__get_record(new_cf_id)` and `find_sections_touched_by(new_cf_id)` — both delivered by tickets 001 and 002 here. 009's plan-creation test matrix also exercises the extended `allocate_next_id` classes — delivered by ticket 003. Without the cross-ref update, 009 will surface the missing prerequisite only at implementation time, defeating the directive's explicit Rule-5 intent ("the dependency chain must be visible in BOTH directions once tickets exist on both sides").
+At intake, `tickets/SPEC03PATENG-009.md:7` read: `**Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own Deps fields)`. 009's acceptance criterion enumerates bullet 12 "Post-apply sync integration" which explicitly exercises `mcp__worldloom__get_record(new_cf_id)` and `find_sections_touched_by(new_cf_id)` — both delivered by tickets 001 and 002 here. 009's plan-creation test matrix also exercises the extended `allocate_next_id` classes — delivered by ticket 003. Without the cross-ref update, 009 would surface the missing prerequisite only at implementation time, defeating the directive's explicit Rule-5 intent ("the dependency chain must be visible in BOTH directions once tickets exist on both sides").
 
 ## Assumption Reassessment (2026-04-25)
 
-1. `tickets/SPEC03PATENG-009.md:7` currently declares `**Deps**: SPEC03PATENG-007 (transitive head — ...)`. Confirmed via pre-flight grep (`grep -n "Deps" tickets/SPEC03PATENG-009.md` at Step 2 of this batch's spec-to-tickets run). The edit adds `archive/tickets/SPEC02PHA2TOO-001.md`, `archive/tickets/SPEC02PHA2TOO-002.md`, and `archive/tickets/SPEC02PHA2TOO-003.md` to this line without removing the existing SPEC03PATENG-007 anchor. Reassessment correction from post-ticket review: tickets 001, 002, and 003 are now archived, so those dependencies should resolve to their archived paths.
+1. At intake, `tickets/SPEC03PATENG-009.md:7` declared only `**Deps**: SPEC03PATENG-007 (transitive head — ...)`. The edit adds `archive/tickets/SPEC02PHA2TOO-001.md`, `archive/tickets/SPEC02PHA2TOO-002.md`, and `archive/tickets/SPEC02PHA2TOO-003.md` to this line without removing the existing SPEC03PATENG-007 anchor. Reassessment correction from post-ticket review: tickets 001, 002, and 003 are now archived, so those dependencies resolve to their archived paths.
 2. `tickets/SPEC03PATENG-005.md:7` declares `**Deps**: SPEC03PATENG-001`. SPEC-02-PHASE2 §Out of Scope explicitly says token issuance is NOT delivered here, so 005's Deps weakens only to "shared HMAC contract definition" (already implicit in 005's existing architectural notes). 005 is left unchanged per the spec's directive; this ticket does NOT edit 005.
 3. Shared boundary: the ticket-level dependency graph. `Deps:` fields are the audit trail for cross-ticket ordering; a missing cross-ref means future implementation of 009 has no machine-readable signal that 001/002/003 must land first. Updating the line preserves graph integrity.
 4. FOUNDATIONS principle under audit: Rule 5 (No Consequence Evasion). The spec's directive cites Rule 5 by name: "the dependency chain must be visible in BOTH directions once tickets exist on both sides." This ticket is the execution of that directive — declining to land it would leave a Rule-5 gap the spec author explicitly flagged.
-5. Rename/removal blast radius: this ticket does NOT rename or remove any ticket, skill, tool, or schema field. It adds 3 cross-references. Pipeline-wide grep for SPEC03PATENG-009 (`grep -rn "SPEC03PATENG-009" tickets/ specs/ .claude/skills/ docs/`) confirms no downstream consumer would be broken by the Deps-line extension — they reference the ticket by ID, not by its specific Deps list.
+5. Same-seam reference truthing: `specs/SPEC-02-phase2-tooling.md` contained a broad directive saying resulting ticket IDs must be added to both 005 and 009, followed immediately by the narrower concrete rule that 005 changes only if token issuance or a concrete HMAC contract lands here. The spec wording was tightened to match this ticket's boundary: 009 always gains the SPEC02PHA2TOO deps; 005 remains conditional and unchanged for this batch.
+6. Rename/removal blast radius: this ticket does NOT rename or remove any ticket, skill, tool, or schema field. It adds 3 cross-references. Pipeline-wide grep for SPEC03PATENG-009 (`grep -rn "SPEC03PATENG-009" tickets/ specs/ .claude/skills/ docs/`) confirms no downstream consumer would be broken by the Deps-line extension — they reference the ticket by ID, not by its specific Deps list.
 
 ## Architecture Check
 
@@ -28,10 +29,11 @@ Today `tickets/SPEC03PATENG-009.md:7` reads: `**Deps**: SPEC03PATENG-007 (transi
 
 ## Verification Layers
 
-1. 009's Deps line includes all three new prerequisites → codebase grep-proof (`grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|archive/tickets/SPEC02PHA2TOO-002.md\|archive/tickets/SPEC02PHA2TOO-003.md" tickets/SPEC03PATENG-009.md` returns ≥3 matches on the `**Deps**:` line).
+1. 009's Deps line includes all three new prerequisites → codebase grep-proof (`grep -o "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md | wc -l` returns `3`).
 2. 009's existing SPEC03PATENG-007 transitive-head anchor is preserved → codebase grep-proof (`grep -n "SPEC03PATENG-007" tickets/SPEC03PATENG-009.md` still returns ≥1 match on the `**Deps**:` line).
 3. 005 is NOT edited → codebase grep-proof (`git diff tickets/SPEC03PATENG-005.md` returns empty after this ticket lands).
 4. Rule 5 alignment → FOUNDATIONS alignment check: SPEC-02-PHASE2's Ticket-decomposition directive citation resolves; 009's prerequisite chain is now bidirectionally visible.
+5. SPEC-02-PHASE2 directive no longer overstates 005 → codebase grep-proof/manual review (`grep -n "resulting ticket IDs MUST" specs/SPEC-02-phase2-tooling.md` shows 009 as mandatory and 005 as conditional).
 
 ## What to Change
 
@@ -48,6 +50,8 @@ Post-ticket-review correction: because tickets 001, 002, and 003 are archived, t
 ## Files to Touch
 
 - `tickets/SPEC03PATENG-009.md` (modify — single-line Deps-field update)
+- `specs/SPEC-02-phase2-tooling.md` (modify — same-seam directive truthing)
+- `archive/tickets/SPEC02PHA2TOO-005.md` (modify — closeout after archival)
 
 ## Out of Scope
 
@@ -60,18 +64,20 @@ Post-ticket-review correction: because tickets 001, 002, and 003 are archived, t
 
 ### Tests That Must Pass
 
-1. `grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|archive/tickets/SPEC02PHA2TOO-002.md\|archive/tickets/SPEC02PHA2TOO-003.md" tickets/SPEC03PATENG-009.md` returns ≥3 matches on `**Deps**:` line 7.
+1. `grep -o "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md | wc -l` returns `3`.
 2. `grep -n "SPEC03PATENG-007" tickets/SPEC03PATENG-009.md` still returns ≥1 match on line 7 (existing transitive-head anchor preserved).
 3. `git diff tickets/SPEC03PATENG-005.md` returns empty (005 NOT edited).
 4. `git diff tickets/SPEC03PATENG-006.md` returns empty (006 NOT edited).
 5. `grep -n "SPEC02PHA2TOO" tickets/SPEC03PATENG-*.md` returns matches ONLY in `tickets/SPEC03PATENG-009.md` (no accidental cross-refs elsewhere).
+6. `grep -n "resulting ticket IDs MUST" specs/SPEC-02-phase2-tooling.md` shows 009 as mandatory and 005 as conditional.
 
 ### Invariants
 
 1. 009's existing SPEC03PATENG-007 transitive-head reference is preserved — not replaced.
-2. 005 and 006 are untouched by this ticket — only 009 is modified.
+2. 005 and 006 are untouched by this ticket — among SPEC03PATENG tickets, only 009 is modified.
 3. The cross-reference direction is one-way: 009 (the consumer) gains Deps on 001/002/003 (the prerequisites). The prerequisite tickets do NOT gain reciprocal Deps on 009.
 4. Rule-5 bidirectional visibility is achieved: tickets 001/002/003 already declare Blocks context via SPEC-02-PHASE2's Blocks section prose; 009 now declares the reciprocal Deps at the machine-readable ticket-metadata level.
+5. SPEC03PATENG-005 remains unchanged because SPEC02PHA2TOO did not deliver token issuance or a concrete HMAC contract surface for 005 to consume.
 
 ## Test Plan
 
@@ -82,5 +88,29 @@ Post-ticket-review correction: because tickets 001, 002, and 003 are archived, t
 ### Commands
 
 1. `grep -n "Deps" tickets/SPEC03PATENG-009.md` — expect the line-7 match including all three new ticket IDs.
-2. `grep -c "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md` — expect 3, with tickets 001, 002, and 003 represented as archived paths.
+2. `grep -o "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md | wc -l` — expect 3, with tickets 001, 002, and 003 represented as archived paths.
 3. `git diff --stat tickets/SPEC03PATENG-005.md tickets/SPEC03PATENG-006.md tickets/SPEC03PATENG-009.md` — expect modifications ONLY in 009; 005 and 006 must show zero changes.
+4. `grep -n "resulting ticket IDs MUST" specs/SPEC-02-phase2-tooling.md` — expect mandatory 009 and conditional 005 wording.
+
+## Outcome
+
+Completed: 2026-04-25.
+
+Updated `tickets/SPEC03PATENG-009.md` so its `Deps:` line preserves the existing SPEC03PATENG-007 transitive-head anchor and adds archived SPEC02PHA2TOO tickets 001, 002, and 003 as explicit prerequisites.
+
+Also tightened the same-seam Ticket-decomposition directive in `specs/SPEC-02-phase2-tooling.md` so it no longer says all resulting tickets must be added to both 005 and 009. The final wording matches the implemented boundary: 009 is mandatory; 005 is conditional on token issuance or a concrete HMAC contract surface, which this batch did not deliver.
+
+## Verification Result
+
+Passed:
+
+1. `grep -n "Deps" tickets/SPEC03PATENG-009.md`
+2. `grep -o "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md | wc -l`
+3. `grep -n "SPEC03PATENG-007" tickets/SPEC03PATENG-009.md`
+4. `git diff --stat tickets/SPEC03PATENG-005.md tickets/SPEC03PATENG-006.md tickets/SPEC03PATENG-009.md`
+5. `grep -n "SPEC02PHA2TOO" tickets/SPEC03PATENG-*.md`
+6. `grep -n "resulting ticket IDs MUST" specs/SPEC-02-phase2-tooling.md`
+
+## Deviations
+
+The original ticket listed only `tickets/SPEC03PATENG-009.md` as a touched file. Reassessment found the user-supplied reference spec carried the same seam's over-broad "both 005 and 009" wording, so this implementation also truths `specs/SPEC-02-phase2-tooling.md` and records that file in the closeout.
