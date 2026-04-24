@@ -3,21 +3,23 @@
 # SPEC-04: Validator Framework
 
 **Phase**: 2 (structural validators activate in Phase 1)
-**Depends on**: SPEC-01
+**Depends on**: SPEC-01, **SPEC-13 (atomic-source contract — validators consume atomic YAML records directly)**
 **Blocks**: SPEC-03 (engine pre-apply gate), SPEC-05 Hook 5 (PostToolUse), SPEC-06 (skills replace Phase 14a rubric with validator calls)
 
 ## Problem Statement
 
-FOUNDATIONS.md Rules 1–7 currently live as prose assertions in `canon-addition/references/foundations-and-rules-alignment.md`. Phase 14a's 10-test rubric lives as prose in `canon-addition/SKILL.md` Validation Tests. Structural invariants (fenced-code integrity, id uniqueness, anchor match) have no enforcement at all — they're implicit. Every skill must re-read the rubric, and the model re-interprets it every run.
+FOUNDATIONS.md Rules 1–7 currently live as prose assertions in `canon-addition/references/foundations-and-rules-alignment.md`. Phase 14a's 10-test rubric lives as prose in `canon-addition/SKILL.md` Validation Tests. Structural invariants (YAML parse integrity, id uniqueness, record-schema compliance) have no enforcement at all — they're implicit. Every skill must re-read the rubric, and the model re-interprets it every run.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators). Brainstorm decision: executable validators replace prose assertions; validator = code, not prompt.
+**Post-SPEC-13 context**: validators consume atomic YAML records from `worlds/<slug>/_source/` directly. No markdown parse step is needed for CF / CH / INV / M / OQ / ENT / SEC records. Hybrid files (characters, diegetic artifacts, adjudications) continue to be parsed for their YAML frontmatter. The validator inputs are simpler, typed, and schema-validatable.
+
+**Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions; validator = code, not prompt.
 
 ## Approach
 
 One TypeScript module per validator, running in three contexts:
-1. **Patch engine pre-apply gate** (SPEC-03 Phase A step 4) — `mode: 'pre-apply'`, input is `(current_world_state + proposed_patch_plan)`
+1. **Patch engine pre-apply gate** (SPEC-03 Phase A step 5) — `mode: 'pre-apply'`, input is `(current_world_state + proposed_patch_plan)`
 2. **Standalone CLI** (`world-validate`) — `mode: 'full-world'`, input is a world slug
-3. **Hook 5 PostToolUse** (SPEC-05) — `mode: 'incremental'`, input is a list of just-mutated file paths
+3. **Hook 5 PostToolUse** (SPEC-05) — `mode: 'incremental'`, input is a list of just-mutated `_source/*.yaml` or hybrid-file paths
 
 A validator is a function `(input, context) => Verdict[]`. Verdicts have uniform shape. The framework runs validators in parallel per input, aggregates verdicts, and writes them to `validation_results` table in the index.
 
@@ -48,15 +50,19 @@ tools/validators/
 │   │   ├── yaml-parse-integrity.ts
 │   │   ├── id-uniqueness.ts
 │   │   ├── cross-file-reference.ts
-│   │   ├── attribution-comment.ts
+│   │   ├── record-schema-compliance.ts
+│   │   ├── touched-by-cf-completeness.ts
 │   │   ├── modification-history-retrofit.ts
-│   │   ├── adjudication-discovery-fields.ts
-│   │   └── anchor-integrity.ts
+│   │   └── adjudication-discovery-fields.ts
 │   └── cli/
 │       └── world-validate.ts       # standalone CLI entry
 ├── tests/
 └── fixtures/                       # small worlds with known-good and known-bad states
 ```
+
+**Retired vs pre-SPEC-13**: `attribution-comment.ts` retired (attribution is now a structural field on records, not an HTML-comment authoring surface); `anchor-integrity.ts` retired (atomic records don't have prose-anchor drift; hybrid-file anchor drift is handled by the patch engine directly in SPEC-03's anchor-miss handling for hybrid files).
+
+**Added post-SPEC-13**: `record-schema-compliance.ts` (validates each `_source/*.yaml` file against its record type's JSON Schema — one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class); `touched-by-cf-completeness.ts` (bidirectional CF↔SEC mapping check — for each SEC with `touched_by_cf: [CF-X]`, verifies CF-X's `required_world_updates` includes this SEC's `file_class`; for each CF with `required_world_updates: [FILE_CLASS]`, verifies at least one SEC under `_source/<file-subdir>/` has this CF in `touched_by_cf` or in an `extensions[].originating_cf`).
 
 ### Validator inventory (14)
 
@@ -76,13 +82,13 @@ tools/validators/
 
 | Validator | Checks |
 |---|---|
-| `yaml_parse_integrity` | Every fenced YAML block in `CANON_LEDGER.md` parses; required fields present per `CanonFactRecord` / `ChangeLogEntry` schemas; trimmed fields trimmed cleanly |
-| `id_uniqueness` | No duplicate CF-NNNN / CH-NNNN / PA-NNNN / M-N / CHAR-NNNN / DA-NNNN / PR-NNNN / BATCH-NNNN / AU-NNNN / RP-NNNN across any world |
-| `cross_file_reference` | Every id referenced in `derived_from`, `required_world_updates`, `affected_fact_ids`, `modification_history.originating_cf` resolves to an indexed node; no orphan references |
-| `attribution_comment` | Every new prose paragraph in a domain file (identified by change-log downstream_updates) carries `<!-- added by CF-NNNN -->` or `<!-- clarified by CH-NNNN -->`; every modified CF's notes field has `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN):` line; no hand-written attribution in YAML fields (HTML comments invalid in YAML) |
+| `yaml_parse_integrity` | Every `_source/*.yaml` file parses as valid YAML; required top-level keys present per record type; trimmed fields trimmed cleanly. Hybrid-file frontmatter (characters, diegetic artifacts) also parsed. |
+| `id_uniqueness` | No duplicate CF-NNNN / CH-NNNN / INV-IDs / M-NNNN / OQ-NNNN / ENT-NNNN / SEC-* / PA-NNNN / CHAR-NNNN / DA-NNNN / PR-NNNN / BATCH-NNNN / AU-NNNN / RP-NNNN within a world; cross-record-class uniqueness not required but intra-class uniqueness strict. |
+| `cross_file_reference` | Every id referenced in CF `derived_from`, CF `required_world_updates` (now a `file_class` list), CH `affected_fact_ids`, `modification_history[].originating_cf`, `extensions[].originating_cf`, `extensions[].change_id`, SEC `touched_by_cf[]` resolves to an indexed record. No orphan references. |
+| `record_schema_compliance` | Every `_source/*.yaml` file validates against its record type's JSON Schema (one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class). Field types, enum values, required-field presence all enforced structurally. |
+| `touched_by_cf_completeness` | For each SEC with `touched_by_cf: [CF-X, CF-Y]`, verify each listed CF's `required_world_updates` includes this SEC's `file_class`. For each CF with `required_world_updates: [FILE_CLASS]`, verify at least one SEC under `_source/<file-subdir-for-file-class>/` has this CF in `touched_by_cf[]` OR in an `extensions[].originating_cf`. Discrepancies in either direction are fails. |
 | `modification_history_retrofit` | Any CF with notes-field modification lines (`Modified YYYY-MM-DD by CH-NNNN`) has a matching populated `modification_history` array entry; partial population (array has only current modification while notes reference earlier ones) is a fail |
 | `adjudication_discovery_fields` | Every `adjudications/PA-NNNN-*.md` Discovery block uses canonical field names (`mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`); ad-hoc names (`New CF`, `Modifications`, `Critics dispatched`) fail |
-| `anchor_integrity` | Every `expected_anchor_checksum` in a patch plan matches current index state (pre-apply mode only; skipped in full-world mode) |
 
 ### Verdict schema
 
@@ -169,14 +175,20 @@ Before Phase 2 (patch engine + edit-guards) activates, run `world-validate anima
 export const rule1NoFloatingFacts: Validator = {
   name: 'rule1_no_floating_facts',
   severity_mode: 'fail',
-  applies_to: (ctx) => ctx.run_mode !== 'incremental' || ctx.touched_files.some(f => f.endsWith('CANON_LEDGER.md')),
+  applies_to: (ctx) => ctx.run_mode !== 'incremental' || ctx.touched_files.some(f => f.match(/_source\/canon\/CF-\d+\.yaml$/)),
   run: async (input, ctx) => {
     const verdicts: Verdict[] = [];
-    const cfNodes = await ctx.index.query({ node_type: 'canon_fact_record', world_slug: input.world_slug });
-    for (const cf of cfNodes) {
-      const parsed = parseYaml(cf.body);
-      if (!parsed.domains_affected || parsed.domains_affected.length === 0) {
-        verdicts.push({ validator: 'rule1_no_floating_facts', severity: 'fail', code: 'rule1.missing_domains_affected', message: `CF ${parsed.id} has empty domains_affected`, location: { file: cf.file_path, node_id: cf.node_id, line_range: [cf.line_start, cf.line_end] } });
+    const cfRecords = await ctx.index.query({ record_type: 'canon_fact_record', world_slug: input.world_slug });
+    for (const cf of cfRecords) {
+      // cf.parsed is pre-parsed YAML; no markdown parsing step needed
+      if (!cf.parsed.domains_affected || cf.parsed.domains_affected.length === 0) {
+        verdicts.push({
+          validator: 'rule1_no_floating_facts',
+          severity: 'fail',
+          code: 'rule1.missing_domains_affected',
+          message: `CF ${cf.parsed.id} has empty domains_affected`,
+          location: { file: cf.file_path, record_id: cf.parsed.id },
+        });
       }
       // ... other checks ...
     }
@@ -184,6 +196,8 @@ export const rule1NoFloatingFacts: Validator = {
   },
 };
 ```
+
+The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the index (one file = one record = one parse). Pre-SPEC-13 validators had to locate fenced YAML blocks within a monolithic markdown file, extract them, and parse each — now every atomic file is already in parsed form in the index.
 
 ## FOUNDATIONS Alignment
 

@@ -3,9 +3,15 @@
 # SPEC-05: Claude Code Hooks Discipline
 
 **Phase**: Hooks 1, 2, 4 ship in Phase 1; Hooks 3, 5 ship in Phase 2
-**Depends on**: SPEC-01 (index for Hook 1 context), SPEC-02 (MCP server for redirects), SPEC-03 (Hook 3 policy), SPEC-04 (Hook 5 validators)
+**Depends on**: SPEC-01 (index for Hook 1 context), SPEC-02 (MCP server for redirects), SPEC-03 (Hook 3 policy), SPEC-04 (Hook 5 validators), **SPEC-13 (atomic-source contract — Hook 2/3 scope shifts to `_source/` subdirectories and primary-authored files)**
 **Blocks**: SPEC-06 (skills rely on hooks to make discipline structural)
 **Status (2026-04-24)**: Part A is implemented at `tools/hooks/` and wired in `.claude/settings.json.example`. Hooks 3 and 5 remain specified-only Phase 2 work.
+
+## SPEC-13 amendment summary
+
+- **Hook 2 (PreToolUse on Read)** block list post-SPEC-13 covers `_source/` subdirectories (oversize directory-read attempts redirect to MCP retrieval). The pre-SPEC-13 monolithic-filename guards (`CANON_LEDGER.md`, `INVARIANTS.md`, etc.) are retired because those files don't exist on migrated worlds. `WORLD_KERNEL.md` and `ONTOLOGY.md` remain freely readable (primary-authored; read cover-to-cover is the point).
+- **Hook 3 (PreToolUse on Edit/Write)** block list covers `_source/` subdirectories. Any direct `Edit` or `Write` against an `_source/*.yaml` file is blocked; mutations must route through `mcp__worldloom__submit_patch_plan`. Explicitly allowed direct edits: `WORLD_KERNEL.md`, `ONTOLOGY.md`, per-subdirectory `_source/<subdir>/README.md`, `characters/*`, `diegetic-artifacts/*`, `proposals/*`, `audits/*`, `adjudications/*` (engine-only discipline on hybrid per-file artifacts is enforced via the skills' HARD-GATE patterns, not via Hook 3 filename match). Compiled-file detection machinery (the DO-NOT-EDIT-header check) is retired since no compiled files exist on migrated worlds.
+- **Hook 5 (PostToolUse auto-validate)** runs `record_schema_compliance` + `id_uniqueness` + `cross_file_reference` + `touched_by_cf_completeness` on any `_source/*.yaml` write (expected only via the patch engine; direct Edit is blocked). On hybrid-file writes (characters, diegetic artifacts, adjudications), runs frontmatter schema checks only.
 
 ## Problem Statement
 

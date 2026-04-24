@@ -8,7 +8,7 @@ Worldloom is a **prose-and-YAML worldbuilding pipeline**, not a software project
 
 ## Authoritative Source of Truth
 
-`docs/FOUNDATIONS.md` is the **non-negotiable design contract**. It defines Canon Layers (hard / derived / soft / contested / mystery-reserve), the 13 mandatory world files, the Canon Fact Record (`CF-NNNN`) and Change Log Entry (`CH-NNNN`) schemas, and the Seven Validation Rules. Skills load it automatically in their pre-flight checks; if a workflow doesn't, the workflow is incomplete.
+`docs/FOUNDATIONS.md` is the **non-negotiable design contract**. It defines Canon Layers (hard / derived / soft / contested / mystery-reserve), the thirteen mandatory world concerns and their storage form (see §Mandatory World Files for the atomic-source classification per SPEC-13), the Canon Fact Record (`CF-NNNN`) and Change Log Entry (`CH-NNNN`) schemas, the Seven Validation Rules, and the §Canonical Storage Layer contract. Skills load it automatically in their pre-flight checks; if a workflow doesn't, the workflow is incomplete.
 
 ## Repository Layout
 
@@ -28,11 +28,25 @@ tools/                           ← machine-facing layer (compiled dist/ gitign
 brainstorming/                   ← user-authored proposals for new skills / pipelines
 briefs/                          ← user-authored briefs feeding content-generation skills (contents gitignored; folder preserved via .gitkeep)
 worlds/<world-slug>/             ← generated world bundles (contents gitignored; folder preserved)
-  ├── <13 mandatory .md files>
+  ├── WORLD_KERNEL.md            ← primary-authored narrative summary (only narrative root file)
+  ├── ONTOLOGY.md                ← primary-authored (Categories + Relation Types + Notes); Named Entity Registry atomized to _source/entities/
+  ├── _source/                   ← canonical atomic-YAML storage (SPEC-13); tracked in git
+  │   ├── canon/                 ← CF-NNNN.yaml (one file per Canon Fact Record)
+  │   ├── change-log/            ← CH-NNNN.yaml
+  │   ├── invariants/            ← <ID>.yaml (ONT-N, CAU-N, SOC-N, AES-N, DIS-N)
+  │   ├── mystery-reserve/       ← M-NNNN.yaml
+  │   ├── open-questions/        ← OQ-NNNN.yaml
+  │   ├── entities/              ← ENT-NNNN.yaml (named entity registry)
+  │   ├── everyday-life/         ← SEC-ELF-NNN.yaml (per-H2-section records)
+  │   ├── institutions/          ← SEC-INS-NNN.yaml
+  │   ├── magic-or-tech-systems/ ← SEC-MTS-NNN.yaml
+  │   ├── geography/             ← SEC-GEO-NNN.yaml
+  │   ├── economy-and-resources/ ← SEC-ECR-NNN.yaml
+  │   ├── peoples-and-species/   ← SEC-PAS-NNN.yaml
+  │   └── timeline/              ← SEC-TML-NNN.yaml (per-historical-Layer records)
   ├── _index/world.db            ← derived index artifact (gitignored)
-  ├── _source/                   ← reserved for Phase 3 atomic source
-  ├── characters/                ← character dossiers + INDEX.md
-  ├── diegetic-artifacts/        ← in-world texts + INDEX.md
+  ├── characters/                ← CHAR-NNNN hybrid YAML-frontmatter + prose body per file + INDEX.md
+  ├── diegetic-artifacts/        ← DA-NNNN hybrid files + INDEX.md
   ├── proposals/                 ← PR-NNNN proposal cards + batches/BATCH-NNNN manifests
   ├── audits/                    ← AU-NNNN audit reports + retcon-proposal sub-dirs
   └── adjudications/             ← PA-NNNN-<verdict>.md canon-addition records
@@ -45,11 +59,11 @@ Only the pipeline (skills, foundations, docs) is version-controlled. Each user m
 
 Skills divide into three categories, and these distinctions are load-bearing.
 
-**Canon-mutating** (write to world-level files; all begin with a `<HARD-GATE>` block requiring explicit user approval before any write):
-- `create-base-world` — bootstraps a new world's 13 mandatory files + genesis `CH-0001`. Refuses to overwrite an existing world directory.
-- `canon-addition` — evaluates a proposed canon fact. On accept: appends `CF-NNNN` to `CANON_LEDGER.md`, logs `CH-NNNN`, patches affected domain files, writes an adjudication. On non-accept: writes only the adjudication record. Append-only — the only way to change an accepted fact is another run producing an explicit retcon entry.
+**Canon-mutating** (write to world-level records under `_source/`; all begin with a `<HARD-GATE>` block requiring explicit user approval before any write):
+- `create-base-world` — bootstraps a new world's full `_source/` tree + WORLD_KERNEL.md + ONTOLOGY.md + genesis `CF-0001` and `CH-0001` records. Refuses to overwrite an existing world directory. Emits atomic `_source/` form directly (post-SPEC-13).
+- `canon-addition` — evaluates a proposed canon fact. On accept: creates a new `_source/canon/CF-NNNN.yaml` record, a new `_source/change-log/CH-NNNN.yaml` record, appends extensions to affected invariant / mystery / open-question / section records, auto-updates `touched_by_cf[]` on affected sections, writes an adjudication. On non-accept: writes only the adjudication record. Append-only — the only way to change an accepted fact is another run producing an explicit retcon entry with retcon attestation.
 
-**Canon-reading** (read world state; write only under sub-directories of `worlds/<slug>/` — never mutate `WORLD_KERNEL.md`, `INVARIANTS.md`, `CANON_LEDGER.md`, or any other world-level file):
+**Canon-reading** (read world state; write only under sub-directories of `worlds/<slug>/` — never mutate `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/*.yaml` record):
 - `character-generation` — writes `characters/<char-slug>.md` + updates `characters/INDEX.md`. Enforces a Mystery Reserve firewall and CF distribution conformance.
 - `diegetic-artifact-generation` — writes `diegetic-artifacts/<da-slug>.md` + updates `diegetic-artifacts/INDEX.md`. Same canon-safety posture.
 - `propose-new-canon-facts` — writes `proposals/PR-NNNN-*.md` + `proposals/batches/BATCH-NNNN.md` + updates `proposals/INDEX.md`. Each card's path is directly consumable as `canon-addition`'s `proposal_path`.
@@ -63,12 +77,12 @@ Skills divide into three categories, and these distinctions are load-bearing.
 
 ### Machine-facing layer integration
 
-The three skill categories remain load-bearing, but the migration path now has a machine-facing retrieval and mutation contract beside the human-facing skill prose.
+The three skill categories remain load-bearing, but the machine-facing retrieval and mutation contract sits beside the human-facing skill prose. Post-SPEC-13, canonical storage is atomic YAML under `_source/`; the machine layer reads and writes atomic records directly.
 
-- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation on machine-layer-enabled workflows; `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
-- **Localization**: `mcp__worldloom__search_nodes`, `get_node`, `get_neighbors`, `find_named_entities`, and `find_impacted_fragments` localize relevant world state without full-file reads, with a scoped-reference middle tier sitting between canonical entity retrieval and lexical evidence fallback for source-local names.
-- **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path for world-level edits on machine-layer-enabled worlds.
-- **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks into executable gates; `world-validate` is the CLI surface.
+- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation (extends across all record classes: CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
+- **Localization**: `mcp__worldloom__search_nodes`, `get_record`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`, `find_sections_touched_by` localize relevant world state via per-record retrieval, with scoped-reference middle tier between canonical entity retrieval and lexical evidence fallback for source-local names.
+- **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path. Ops are record-ID-addressed: `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, plus hybrid-file ops (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`).
+- **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks (including `record_schema_compliance` and `touched_by_cf_completeness`) into executable gates; `world-validate` is the CLI surface.
 
 Meta skills (`brainstorm`, `skill-creator`, `skill-audit`, `skill-consolidate`, `skill-extract-references`) remain outside the world-index / patch-engine mutation path unless they are explicitly operating on those tool packages themselves.
 
@@ -78,10 +92,15 @@ Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` blo
 
 ## ID Allocation Conventions
 
-IDs are append-only. On machine-layer-enabled workflows, allocate them at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class)`, which scans the indexed world state for the highest id of that class and returns the next. On legacy workflows that have not yet moved to the MCP surface, the skill still scans the live ledger or directory directly. Never reuse or overwrite an ID; if allocation would collide, abort and ask the user to resolve.
+IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class)`, which scans the indexed world state for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan). Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation detects and aborts.
 
-- `CF-NNNN` — Canon Fact Records (in `CANON_LEDGER.md`)
-- `CH-NNNN` — Change Log Entries (in `CANON_LEDGER.md`; `CH-0001` is always the genesis entry)
+- `CF-NNNN` — Canon Fact Records (`worlds/<slug>/_source/canon/CF-NNNN.yaml`)
+- `CH-NNNN` — Change Log Entries (`worlds/<slug>/_source/change-log/CH-NNNN.yaml`; `CH-0001` is always the genesis entry)
+- `<INV-ID>` — Invariants (`worlds/<slug>/_source/invariants/<ID>.yaml`) — IDs follow category convention: `ONT-N` (ontological), `CAU-N` (causal), `DIS-N` (distribution), `SOC-N` (social), `AES-N` (aesthetic/thematic). New worlds use category-prefix + 1-based counter per category.
+- `M-NNNN` — Mystery Reserve entries (`worlds/<slug>/_source/mystery-reserve/M-NNNN.yaml`)
+- `OQ-NNNN` — Open Questions (`worlds/<slug>/_source/open-questions/OQ-NNNN.yaml`)
+- `ENT-NNNN` — Named Entities (`worlds/<slug>/_source/entities/ENT-NNNN.yaml`)
+- `SEC-<PREFIX>-NNN` — Prose Sections (`worlds/<slug>/_source/<file-subdir>/SEC-<PREFIX>-NNN.yaml`); prefix per file class: `ELF` (everyday life), `INS` (institutions), `MTS` (magic or tech systems), `GEO` (geography), `ECR` (economy and resources), `PAS` (peoples and species), `TML` (timeline)
 - `PA-NNNN` — adjudication records (`worlds/<slug>/adjudications/`)
 - `CHAR-NNNN` — character dossiers (stored in the dossier's frontmatter `character_id`; filenames use kebab-case slugs)
 - `DA-NNNN` — diegetic artifacts (same pattern as characters)
@@ -97,11 +116,11 @@ See `docs/WORKFLOWS.md` for how to invoke each skill with arguments and expected
 ## Non-Negotiables When Working Here
 
 - **Never bypass a HARD-GATE.** If you think the gate is in the way, you are about to make a mistake. Auto Mode does not override gates.
-- **Never bypass the patch engine for machine-layer world writes.** On machine-layer-enabled worlds, mandatory world files plus `characters/`, `diegetic-artifacts/`, and `adjudications/` are engine-only surfaces. Hook 3 is the enforcement path; direct `Edit`/`Write` is not an acceptable substitute.
-- **Never read protected world files past the size threshold when the read hooks are active.** Hook 2 is designed to block full reads of `CANON_LEDGER.md` and other protected files once they exceed the configured threshold. Use `mcp__worldloom__get_context_packet` or typed retrieval instead of convenience full-file reads.
-- **Never write world-level canon files from a canon-reading skill.** Character dossiers, diegetic artifacts, proposals, audits, and adjudications live in sub-directories for a reason — the separation is what keeps Rule 6 (No Silent Retcons) enforceable.
-- **Never delete or overwrite an existing `worlds/<slug>/` file.** The ledger is append-only; existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal.
-- **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding.
+- **Never bypass the patch engine for `_source/` writes.** On machine-layer-enabled worlds (post-SPEC-13), `worlds/<slug>/_source/` subdirectories plus `characters/`, `diegetic-artifacts/`, and `adjudications/` are engine-only surfaces. Hook 3 is the enforcement path; direct `Edit`/`Write` on any `_source/*.yaml` file or on a hybrid per-file artifact is not an acceptable substitute. `WORLD_KERNEL.md` and `ONTOLOGY.md` remain directly editable at the world root.
+- **Never read `_source/` subdirectories in bulk.** Use `mcp__worldloom__get_record(record_id)` / `get_context_packet(task_type, seed_nodes, token_budget)` / `find_sections_touched_by(cf_id)` / other typed retrieval tools. Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. The `ALLOW_FULL_READ` override exists for human-driven review sessions, not for skill convenience.
+- **Never write world-level canon records from a canon-reading skill.** Character dossiers, diegetic artifacts, proposals, audits, and adjudications live in their own sub-directories — the separation is what keeps Rule 6 (No Silent Retcons) enforceable. Only canon-mutating skills may create / update `_source/` records via the patch engine.
+- **Never delete or overwrite an existing atomic record.** `_source/*.yaml` files are append-only in structural fields (mutation happens in `notes`, `modification_history[]`, `extensions[]`); existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal + retcon attestation on the patch op.
+- **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding. Post-SPEC-13, FOUNDATIONS.md §Canonical Storage Layer + §Mandatory World Files (atomic-source classification) are authoritative alongside Rules 1-7 and the CF schema.
 - **Validation test PASS entries require a one-line rationale.** A bare "PASS" without justification is treated as FAIL per the skills' own contracts.
 - **Do not `git commit` from inside a skill.** Writes land in the working tree; the user reviews the diff and commits.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.

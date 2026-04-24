@@ -2,9 +2,18 @@
 
 # SPEC-08: Migration & Phasing Plan
 
-**Phase**: meta (orchestrates Phases 0–4)
-**Depends on**: SPEC-01 through SPEC-07 (defines what ships per phase)
+**Phase**: meta (orchestrates Phases 0 through 2.5)
+**Depends on**: SPEC-01 through SPEC-07, **SPEC-13 (atomic-source migration — inserts Phase 1.5 and supersedes old Phase 3 + Phase 4)**
 **Blocks**: nothing (this spec is the overview)
+
+## SPEC-13 amendment summary
+
+- **Phase 1.5** (Atomic-Source Migration) inserted between Phase 1 and Phase 2. Scope: storage-form change from monolithic markdown to atomic YAML under `worlds/<slug>/_source/` for 11 of 13 mandatory concerns (CF, CH, invariants, mystery reserve, open questions, named entities, and the seven prose-file concerns: everyday life, institutions, magic or tech systems, geography, economy and resources, peoples and species, timeline). WORLD_KERNEL.md and (reduced) ONTOLOGY.md remain primary-authored at the world root. No compiled views. See SPEC-13 for the full migration contract and the `worlds/animalia/` migration procedure.
+- **Phase 3** ("Atomic Source for CF/CH Records"): **SUPERSEDED**. SPEC-13's Phase 1.5 scope is broader (all 11 atomized concerns, not just CF/CH) and lands earlier (before Phase 2 write path, not after Phase 2 stability). Phase 3 as a separate phase slot is retired.
+- **Phase 4** ("High-Churn Prose Fragmentization"): **SUPERSEDED**. Prose fragmentization is incorporated into SPEC-13's Phase 1.5 scope via per-H2-section SEC records. Phase 4 as a separate phase slot is retired.
+- **Phase 2 completion gate lifts from ≥70% to ≥80% token reduction** (per SPEC-13 §C amendment to SPEC-06).
+- **`.gitignore` Phase 0 entry for `worlds/*/_source/` is reversed during Phase 1.5** — `_source/` is now source-of-truth and must be tracked in git.
+- **Animalia bootstrap detailed steps Phase 3 block** (below) is also superseded; see SPEC-13 §E Migration Procedure for the authoritative animalia migration steps.
 
 ## Problem Statement
 
@@ -112,41 +121,13 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 - Skills retain Phase 2 rewrites but can opt to route writes around engine if critical bug discovered
 - No data loss; existing writes remain on disk
 
-### Phase 3 — Optional: Atomic Source for CF/CH Records
+### Phase 3 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
-**Condition**: only ship if Phase 2 stable for ≥4 weeks AND user separately approves.
+Phase 3 previously covered optional atomic-source migration for CF/CH records only, conditionally deferred to Phase 2 stability-plus-four-weeks-plus-user-approval. SPEC-13 pulls a broader atomization forward into Phase 1.5 before Phase 2, retiring Phase 3 as a separate slot. See SPEC-13 for the authoritative migration scope and `worlds/animalia/` procedure.
 
-**Scope**:
-- Split `CANON_LEDGER.md` CF blocks into `worlds/<slug>/_source/canon/CF-NNNN.yaml`
-- Split CH blocks into `worlds/<slug>/_source/change-log/CH-NNNN.yaml`
-- Adjudications already per-file — no change
-- Compile `CANON_LEDGER.md` as derived artifact from `_source/` on every write (engine adds a `compile_ledger` post-step)
-- Update FOUNDATIONS.md §Canon Fact Record Schema + §Mandatory World Files per SPEC-07 Part C
-- One-time animalia migration script: produces 47 CF files + 18 CH files from existing ledger; verify byte-identical ledger after compile
+### Phase 4 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
-**Acceptance criteria**:
-- Animalia migration completes without data loss (47 CF files + 18 CH files created; compiled ledger matches pre-migration ledger exactly)
-- Engine's compile step runs in <1s for animalia-scale worlds
-- New worlds created post-Phase-3 start in atomic-source form directly
-- `world-validate animalia` reports zero new fails
-
-**Rollback**:
-- Recompile ledger from `_source/` one final time
-- Delete `_source/` directories
-- Update `.gitignore` to stop excluding `_source/`
-- Engine's compile step becomes a no-op; fenced-YAML-in-ledger is the source of truth again
-- Zero data loss
-
-### Phase 4 — Deferred: Fragmentize High-Churn Prose
-
-**Condition**: only ship if Phase 3 proven AND user separately approves. Separate spec required (not in this bundle).
-
-**Scope** (summary only; detailed in a future spec):
-- Split `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `OPEN_QUESTIONS.md`, `MYSTERY_RESERVE.md` into per-section fragments
-- Heading-scoped fragments, not sentence-level
-- Compile published markdown from fragments
-
-**Deferral rationale**: these files are less structurally regular than the ledger; fragment boundaries require more care to preserve narrative coherence. Phase 3 atomization buys most of the scalability win; Phase 4 is only needed if empirical token counts show these files as the remaining bottleneck.
+Phase 4 previously covered optional high-churn-prose fragmentization, further-deferred and requiring a separate spec. SPEC-13's Phase 1.5 scope incorporates per-H2-section atomization of the seven prose concerns (EVERYDAY_LIFE, INSTITUTIONS, MAGIC_OR_TECH_SYSTEMS, GEOGRAPHY, ECONOMY_AND_RESOURCES, PEOPLES_AND_SPECIES, TIMELINE) directly. Phase 4 as a separate slot is retired.
 
 ### Animalia bootstrap detailed steps
 
@@ -174,10 +155,17 @@ Phase 2:
 6. Restart Claude Code session
 7. Run a sample canon-addition on animalia with a large delivery; measure token counts and verify Hook 3 enforcement
 
-Phase 3 (optional):
-1. Run migration script: `world-index migrate-to-atomic-source animalia`
-2. Verify `CANON_LEDGER.md` re-compiles byte-identical to pre-migration
-3. Check git diff is intended (addition of `_source/`; ledger compile artifact may or may not be committed based on user preference)
+Phase 1.5 (SPEC-13 animalia migration) — **authoritative procedure at SPEC-13 §E**. Summary:
+1. Pre-migration snapshot (`.pre-migration-snapshot/` gitignored)
+2. Manual file-class-by-file-class atomic record authoring (CF/CH mechanical extraction; INV/M/OQ/SEC careful authoring; ENT atomization)
+3. ONTOLOGY.md stripping (Named Entity Registry removed, rest preserved)
+4. Delete 11 retired monolithic markdown files
+5. Reverse `worlds/*/_source/` `.gitignore` entry
+6. `world-index build animalia` + `world-validate animalia --structural` must succeed
+7. Human git-diff review
+8. Single migration commit
+
+Phase 3 and Phase 4 (old): superseded — not executed separately.
 
 ### Rollback posture summary
 
@@ -185,23 +173,23 @@ Phase 3 (optional):
 |---|---|---|---|
 | 0 | Trivial (revert commit) | None | None (no changes yet) |
 | 1 | Low (delete `_index/`, revert 1 skill) | None | Pre-Phase-1 behavior |
-| 2 | Moderate (disable 2 hooks, all skills still functional on engine) | None | Phase 1 wins (index, MCP, read hooks) |
-| 3 | Low (recompile ledger, delete `_source/`) | None | Phase 1+2 wins |
-| 4 | Not yet defined | Not yet defined | Not yet defined |
+| 1.5 (SPEC-13) | Low (`git revert` of migration commit; pre-migration snapshot available for 1 week) | None | Phase 1 wins (index, MCP, read hooks) |
+| 2 | Moderate (disable 2 hooks, all skills still functional on engine) | None | Phase 1 + 1.5 wins |
+| 3 / 4 (old) | N/A — superseded | N/A | N/A |
 
 ### Greenfield caveats
 
-- Phase 1+2 apply to the existing `animalia` world AND any future worlds
-- Phase 3+4 apply only to worlds after user-initiated migration; no automatic migration
-- A new world created post-Phase-3 starts in atomic-source form directly (no legacy compatibility burden)
-- A new world created during Phase 1 or 2 uses fenced-YAML-in-ledger (same as animalia) until Phase 3 migration
+- Phase 1 + 1.5 + 2 apply to the existing `animalia` world; the atomic-source migration in Phase 1.5 is manual (Claude-authored per SPEC-13 §E), not toolchain-driven
+- Animalia is the only legacy-form world; no other legacy exists to migrate
+- A new world created post-Phase-1.5 starts in atomic-source form directly via `create-base-world` (which is updated in Phase 2 to emit `_source/` directly); no legacy storage accumulates after the animalia migration
+- A new world created between Phase 1 and Phase 1.5 (there shouldn't be any) would use the pre-migration fenced-YAML-in-ledger form and require a subsequent SPEC-13-style migration; this edge case is avoided by coordinating world creation around the Phase 1.5 timeline
 
 ## FOUNDATIONS Alignment
 
 | Principle | Alignment |
 |---|---|
 | §Change Control Policy | Each phase is a change; acceptance criteria act as the "change is complete" test |
-| §Mandatory World Files | 13 files preserved through Phase 2; Phase 3 adds `_source/` as derived-source without removing the human-facing ledger view |
+| §Mandatory World Files | 13 concerns preserved in count and semantics through all phases; Phase 1.5 (SPEC-13) relocates storage form from monolithic markdown to atomic YAML under `_source/` for 11 of 13 concerns; WORLD_KERNEL and (stripped) ONTOLOGY remain primary-authored |
 | §Acceptance Tests | Each phase's acceptance criteria are measurable, not aspirational — honoring FOUNDATIONS' standard for "a world model is not ready until…" |
 | Rule 6 No Silent Retcons | Migration is logged; animalia structural fails that get grandfathered receive explicit `info` validation_results entries |
 
@@ -210,7 +198,7 @@ Phase 3 (optional):
 - **Phase 0 acceptance**: structural repo-state check passes for the required `specs/`, `tools/`, `.claude/settings.json.example`, and `.gitignore` Phase 0 entries; Phase 0 completion is then recorded in `specs/IMPLEMENTATION-ORDER.md`
 - **Phase 1 acceptance**: measured token reduction ≥50%; zero structural fails; sibling skills regression-tested
 - **Phase 2 acceptance**: measured token reduction ≥70%; zero Rule 1–7 fails; atomicity injection tests pass
-- **Phase 3 acceptance** (if shipped): byte-identical ledger round-trip; zero new validator fails
+- **Phase 1.5 acceptance** (SPEC-13): `world-index build animalia` succeeds against `_source/`; `world-validate animalia --structural` reports zero fails; no dangling references to retired monolithic filenames in skills / specs / docs (see SPEC-13 §Verification)
 - **Cross-phase stability**: each phase's acceptance test is re-run at every subsequent phase to catch regressions (e.g., Phase 1's token count should not regress in Phase 2)
 
 ## Out of Scope
@@ -220,7 +208,7 @@ Phase 3 (optional):
 - Automated world-health monitoring
 - Distribution / packaging (tools run from source in Phase 1–4; packaging deferred)
 - Cross-repo / cross-machine sync (local development assumption)
-- Phase 4 detailed spec (separate spec when prioritized)
+- Phase 3 / Phase 4 (old) separate slots (superseded by Phase 1.5 / SPEC-13)
 
 ## Risks & Open Questions
 

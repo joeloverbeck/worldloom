@@ -1,12 +1,12 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
-This document sequences the active spec bundle (`SPEC-01` through `SPEC-12`, plus `SPEC-08` / `SPEC-09`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08`.
+This document sequences the active spec bundle (`SPEC-01` through `SPEC-13`, plus `SPEC-09`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by `SPEC-13`.
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-13` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then write surface (engine + validators), then enforcement (hooks), then consumption (skill rewrites), then contract updates (docs), then sequencing (migration plan). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then the **atomic-source migration** that moves canonical storage from monolithic markdown to per-record YAML (SPEC-13 — foundational for understanding how SPEC-03/04/05/06 now operate), then write surface (engine + validators, both reoriented to atomic records), then enforcement (hooks, reoriented to `_source/` discipline), then consumption (skill rewrites against atomic records), then contract updates (docs), then sequencing (migration plan, amended by SPEC-13). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
 
 ## Implementation order (for builders)
 
@@ -51,51 +51,99 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - `SPEC-12` Skill-Reliable Retrieval — completed 2026-04-24; implementation landed via the archived `SPEC12SKIRELRET-*` ticket family plus live-corpus animalia proof, and the spec is archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md`.
 
 **Tier 3 (depends on Tier 2.25)**:
-- `SPEC-06 Part A` canon-addition read-side rewrite
+- ~~`SPEC-06 Part A` canon-addition read-side rewrite~~ — **SKIPPED**, folded into Phase 2. Rationale per SPEC-13: rewriting canon-addition's read-side against the monolithic ledger and then re-rewriting it against atomic records two phases later is wasteful. The Phase 1 pilot's token-reduction evidence has already landed via SPEC-12's live-corpus verification.
 
-**Phase 1 completion gate**: `SPEC-08 Phase 1 acceptance criteria` pass. Specifically:
-- `world-index build animalia` succeeds
+**Phase 1 completion gate**: substantially met via the landed tickets for SPEC-01 / SPEC-02 / SPEC-05 Part A / SPEC-07 Part A / SPEC-10 / SPEC-11 / SPEC-12. The SPEC-06 Part A pilot gate is retired per SPEC-13; its token-reduction measurement rolls into Phase 2's ≥80% target against atomic-source state.
+
+### Phase 1.5 — Atomic-Source Migration (SPEC-13)
+
+**Supersedes** the previously-deferred SPEC-08 Phase 3 ("Atomic Source for CF/CH Records") and SPEC-08 Phase 4 ("High-Churn Prose Fragmentization") by pulling both forward into a single migration phase that precedes Phase 2 write-path work. Rationale: Phase 2's patch engine, validators, and skill rewrites should land against the final storage form, not against a monolithic ledger that will be retired weeks later. Landing atomic-source first eliminates rework.
+
+**Scope**:
+- Draft `SPEC-13` umbrella spec (done as part of the session that produced this amendment)
+- Amendments to `SPEC-03`, `SPEC-04`, `SPEC-06`, `SPEC-07`, `SPEC-08` per SPEC-13 §C
+- `docs/FOUNDATIONS.md` revision per SPEC-13 §D (§Mandatory World Files reclassification, new §Canonical Storage Layer, §Canon Fact Record Schema storage note)
+- `CLAUDE.md` updates (repository layout, non-negotiables, ID allocation conventions)
+- Manual migration of `worlds/animalia/` per SPEC-13 §E — authored by Claude in a follow-up session (no migration tool; single-world one-time transformation)
+- SPEC-01 world-index parser refresh: read `_source/*.yaml` as primary input; retire markdown-record parsing for the 11 atomized files (WORLD_KERNEL.md and ONTOLOGY.md remain as prose inputs to the lexical layer)
+- `.gitignore` update: reverse `worlds/*/_source/` entry (now tracked in git)
+
+**Streams**:
+
+- **Stream A — Spec drafting** (lands in one session with human review at the commit gate):
+  - SPEC-13
+  - Sibling spec amendments (SPEC-03/04/06/07/08)
+  - FOUNDATIONS.md revisions
+  - CLAUDE.md updates
+  - IMPLEMENTATION-ORDER.md re-sequencing (this file)
+
+- **Stream B — Animalia migration execution** (follow-up session; user-initiated; specs from Stream A must be merged first):
+  - Pre-migration snapshot
+  - File-class-by-file-class atomic record authoring per SPEC-13 §E steps 1–10
+  - Monolithic file deletion (step 11) + `.gitignore` update (step 12)
+  - `world-index build animalia` (step 13) + `world-validate animalia --structural` (step 14)
+  - Human review (step 15) + single migration commit (step 16)
+  - Snapshot retention for one week, then cleanup (step 17)
+
+- **Stream C — SPEC-01 parser refresh**: lands as a small execution ticket within Stream B or immediately after. Parser must support both legacy (pre-Stream-B) and atomic-source (post-Stream-B) form during the transition window; legacy support removed once Stream B commits.
+
+**Phase 1.5 completion gate**:
+- SPEC-13 and sibling amendments merged
+- FOUNDATIONS.md, CLAUDE.md, IMPLEMENTATION-ORDER.md reflect atomic-source contract
+- `worlds/animalia/_source/` fully populated
+- `worlds/animalia/` monolithic files deleted (11 files)
+- `world-index build animalia` succeeds against `_source/`
 - `world-validate animalia --structural` reports zero fails
-- Sample canon-addition run on animalia: ≥50% token reduction vs baseline
-- Hook 2 blocks ≥1 raw `Read CANON_LEDGER.md` during the test run
-- Sibling skills continue to work unchanged
+- No dangling references to retired filenames in skills / specs / docs (sweep verified)
+- Hybrid-file artifacts (characters, diegetic artifacts, adjudications, proposals, audits) unchanged on disk
 
 ### Phase 2 — Write Path + All-Skill Migration
 
-Parallelizable order:
+**Depends on**: Phase 1.5 complete (atomic-source migration landed on animalia; `_source/` is the only storage surface; legacy markdown retired).
 
-**Tier 1 (no new dependencies beyond Phase 1)**:
-- `SPEC-04` Validator Framework — shippable as CLI first, integrated into engine after
-- `SPEC-07 Part B` docs updates (HARD-GATE-DISCIPLINE.md write-order rewrite; CLAUDE.md phrasing refinement)
+**Scope** (content revised per SPEC-13 Tier 2 amendments):
+- **SPEC-03** patch engine — new atomic-record op vocabulary (7 retired markdown-anchor ops; 7 new `create_*` ops for CF/CH/INV/M/OQ/ENT/SEC; 3 repurposed ops `update_record_field` / `append_extension` / `append_touched_by_cf`; `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` / `append_modification_history_entry` retained). No compile step; simplified 3-tier write order (create-all → update-all → adjudication); anchor-hash machinery retained only for hybrid files (characters, diegetic artifacts).
+- **SPEC-04** validator framework — 2 retired (`attribution_comment`, `anchor_integrity`); 2 added (`record_schema_compliance`, `touched_by_cf_completeness`). Input shift from parsed-markdown to per-record YAML.
+- **SPEC-05 Part B** Hooks 3, 5 — block list covers `_source/` subdirectories; explicitly allowed direct edits on `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, and per-file hybrid artifacts (characters, diegetic artifacts, adjudications, proposals, audits); Hook 5 runs `record_schema_compliance` on any `_source/*.yaml` write.
+- **SPEC-02** update: enable `submit_patch_plan` (previously stubbed); wire to SPEC-03. Add tools: `get_record(record_id)`, `find_sections_touched_by(cf_id)`, `get_compiled_view(file_class, sections?)`. Extend `allocate_next_id` to new classes.
+- **SPEC-06** all-skill migration — all 8 canon-mutating / canon-reading skills (`canon-addition`, `character-generation`, `diegetic-artifact-generation`, `continuity-audit`, `propose-new-canon-facts`, `canon-facts-from-diegetic-artifacts`, `propose-new-characters`, `create-base-world`) rewritten against atomic source. SPEC-06 Part A / Part B distinction collapses since atomic-source landed in Phase 1.5. `create-base-world` updated to emit `_source/` directly for new worlds.
+- **SPEC-07 Part B** — HARD-GATE-DISCIPLINE.md write-order rewrite (engine's new 3-tier ordering); CLAUDE.md phrasing refinement for Hook 3 / atomic-source non-negotiables.
+
+**Parallelizable order**:
+
+**Tier 1 (no new dependencies beyond Phase 1.5)**:
+- `SPEC-04` validator framework — atomic-YAML inputs; shippable as CLI first, engine-integrated after
+- `SPEC-07 Part B` docs updates
 
 **Tier 2 (depends on Tier 1)**:
-- `SPEC-03` Patch Engine — requires SPEC-04 for pre-apply gate
-- `SPEC-02` update: enable `submit_patch_plan` (previously stubbed); wire through to `SPEC-03`
+- `SPEC-03` patch engine — atomic-record op vocabulary; requires SPEC-04 for pre-apply gate
+- `SPEC-02` update: enable `submit_patch_plan` + new tools; wire to SPEC-03
 
 **Tier 3 (depends on Tier 2)**:
-- `SPEC-05 Part B` Hooks 3, 5 (edit-side + auto-validate)
-- `SPEC-06 Part B` canon-addition write-side completion
+- `SPEC-05 Part B` Hooks 3, 5 (edit-side `_source/` discipline + auto-validate)
 
 **Tier 4 (depends on Tier 3)**:
-- `SPEC-06 Part B continued` — remaining 7 skill rewrites:
-  - Suggested sub-order (may parallelize within):
-    1. `create-base-world` (lightest; good second pilot)
-    2. `character-generation` + `diegetic-artifact-generation` (similar pattern)
-    3. `propose-new-canon-facts` + `canon-facts-from-diegetic-artifacts` (similar pattern)
-    4. `propose-new-characters` (biggest; best done last once pattern is proven)
-    5. `continuity-audit` (complex reasoning; done last for main-orchestrator side)
+- `SPEC-06` all-skill migration. Suggested sub-order (may parallelize within):
+  1. `canon-addition` (proven pattern; migrate first as the fullest-surface pilot)
+  2. `create-base-world` (update to emit `_source/` directly for new worlds)
+  3. `character-generation` + `diegetic-artifact-generation` (similar pattern)
+  4. `propose-new-canon-facts` + `canon-facts-from-diegetic-artifacts` (similar pattern)
+  5. `propose-new-characters` (biggest; last once pattern is proven)
+  6. `continuity-audit` (complex reasoning; done last on the main-orchestrator side)
 
-**Phase 2 completion gate**: `SPEC-08 Phase 2 acceptance criteria` pass. Specifically:
-- All 8 skills end-to-end via engine
-- Canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on protected surfaces
+**Phase 2 completion gate** (revised per SPEC-13):
+- All 8 skills end-to-end via engine against `_source/` atomic records
+- canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on `_source/` surfaces
 - `world-validate animalia --all` reports zero Rule 1–7 fails
-- ≥70% token reduction vs Phase 0 baseline
-- Atomicity injection tests pass
-- Concurrency test passes
+- **≥80% token reduction** vs Phase 0 baseline (lifted from SPEC-08's ≥70% target — atomic-source retrieval enables the higher target; measured across 3 representative runs per skill)
+- Atomicity injection tests pass (two-phase commit holds; no partial writes)
+- Concurrency test passes (per-world write lock serializes same-world plans)
+- Every `create_*` / `update_record_field` / `append_extension` / `append_touched_by_cf` op fixture-tested
+- `touched_by_cf_completeness` validator passes on animalia post-Phase-2 state
 
 ### Phase 2.5 — Canon-Safety Expansion (independent track, SPEC-09)
 
-Lands after Phase 2 completes, or in parallel with Phase 3 if pursued. Independent of the structure-aware retrieval bundle's read-path / write-path sequencing; depends only on SPEC-04 (validator framework) and SPEC-06 (canon-addition rewrite) from the bundle.
+Lands after Phase 2 completes. Independent of the structure-aware retrieval bundle's read-path / write-path sequencing; depends only on SPEC-04 (validator framework) and SPEC-06 (canon-addition rewrite) from the bundle.
 
 Order (single tier; internal parallelization minimal):
 
@@ -113,32 +161,24 @@ Order (single tier; internal parallelization minimal):
 - Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
 - `create-base-world` genesis test world emits CF-0001 with both blocks correctly populated or N/A'd per fact-type
 
-### Phase 3 — Optional: Atomic Source for CF/CH Records (conditional)
+### Phase 3 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
-Only ship after Phase 2 stable ≥4 weeks AND user separate approval.
+Previously: "Atomic Source for CF/CH Records" — deferred, optional, conditional on Phase 2 stability. **Superseded** by SPEC-13 Atomic-Source Migration, which pulls CF/CH atomization plus the full 11-file atomization forward into Phase 1.5 ahead of Phase 2. Phase 3 slot is retired.
 
-1. Build atomization tooling at `tools/source-migration/`
-2. Implement engine's `compile_ledger` post-step
-3. One-time animalia migration script
-4. `SPEC-07 Part C` FOUNDATIONS.md schema updates
-5. Verify byte-identical round-trip on animalia
+### Phase 4 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
-**Phase 3 completion gate**: `SPEC-08 Phase 3 acceptance criteria` pass.
-
-### Phase 4 — Deferred: High-Churn Prose Fragmentization
-
-Separate spec (not in this bundle). Ship only if Phase 3 proven AND user separate approval.
+Previously: "High-Churn Prose Fragmentization" — deferred, separate spec. **Superseded** by SPEC-13, which incorporates per-H2-section atomization of the five prose files (plus TIMELINE and PEOPLES_AND_SPECIES) into Phase 1.5's scope. Phase 4 slot is retired.
 
 ## Cross-phase dependency tree
 
 ```
-Phase 0 (Prep)
+Phase 0 (Prep) — COMPLETE
   │
   ├── tools/ scaffold ─────────┐
   ├── .gitignore updates       │
   └── specs/ bundle            │
                                ▼
-Phase 1 (Read Path)
+Phase 1 (Read Path) — SUBSTANTIALLY COMPLETE; Tier 3 pilot folded into Phase 2
   │
   ├── SPEC-01 World Index ─────────┐
   │                                ▼
@@ -152,24 +192,39 @@ Phase 1 (Read Path)
   │                                ▼
   ├── SPEC-05 Hooks 1,2,4 ─────────┤
   │                                ▼
-  ├── SPEC-07 Part A (docs) ──────┤
-  │                                ▼
-  └── SPEC-06 Part A (canon-addition read) ─┐
-                                             ▼
-Phase 2 (Write Path)
+  └── SPEC-07 Part A (docs) ──────┐
+                                   ▼
+Phase 1.5 (Atomic-Source Migration, SPEC-13) ← NEW; supersedes old Phase 3 + Phase 4
   │
-  ├── SPEC-04 Validators ──────────┐
-  │                                ▼
-  ├── SPEC-03 Patch Engine ────────┤
-  │                                ▼
-  ├── SPEC-02 submit_patch_plan ───┤
-  │                                ▼
-  ├── SPEC-05 Hooks 3,5 ───────────┤
-  │                                ▼
-  ├── SPEC-07 Part B (docs) ──────┤
-  │                                ▼
-  └── SPEC-06 Part B (7 skills + canon-addition writes) ─┐
-                                                         ▼
+  ├── Stream A: spec drafting
+  │     ├── SPEC-13 umbrella
+  │     ├── SPEC-03/04/06/07/08 amendments
+  │     ├── FOUNDATIONS.md revision (§Mandatory World Files, §Canonical Storage Layer, §Canon Fact Record Schema)
+  │     ├── CLAUDE.md updates (repo layout, non-negotiables)
+  │     └── IMPLEMENTATION-ORDER.md re-sequencing (this file)
+  │
+  ├── Stream B: animalia migration execution (manual, Claude-authored; single commit)
+  │     ├── Pre-migration snapshot
+  │     ├── File-class atomization (CF/CH/INV/M/OQ/ENT/SEC)
+  │     ├── Monolithic file deletion + .gitignore update
+  │     └── world-index build animalia + world-validate --structural
+  │
+  └── Stream C: SPEC-01 parser refresh (read _source/ as primary; retire legacy record-parsing)
+                                   ▼
+Phase 2 (Write Path + All-Skill Migration) — revised per SPEC-13
+  │
+  ├── SPEC-04 Validators (atomic-YAML inputs) ──────────┐
+  │                                                      ▼
+  ├── SPEC-07 Part B (docs) ───────────────────────────┤
+  │                                                      ▼
+  ├── SPEC-03 Patch Engine (atomic-record op vocabulary)┤
+  │                                                      ▼
+  ├── SPEC-02 submit_patch_plan + new tools ───────────┤
+  │                                                      ▼
+  ├── SPEC-05 Hooks 3,5 (_source/ discipline) ─────────┤
+  │                                                      ▼
+  └── SPEC-06 all-skill migration (8 skills, atomic-source) ─┐
+                                                              ▼
 Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 + SPEC-06
   │
   ├── FOUNDATIONS.md edits (Rules 11/12, schema blocks, relations, default-reality paragraph)
@@ -179,40 +234,39 @@ Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 
   ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
   └── docs/WORKFLOWS.md pointer
 
-                                                         ▼
-Phase 3 (Optional: Atomic Source) — separate approval
-  │
-  ├── Atomization tooling
-  ├── Engine compile_ledger step
-  ├── Animalia migration
-  └── SPEC-07 Part C (docs)  ← rebases onto SPEC-09's extended schema
-
-Phase 4 (Deferred: Prose Fragmentization) — separate spec + approval
+Phase 3 (old: Optional Atomic Source for CF/CH) ← SUPERSEDED by Phase 1.5 (SPEC-13)
+Phase 4 (old: High-Churn Prose Fragmentization) ← SUPERSEDED by Phase 1.5 (SPEC-13)
 ```
 
 ## Expected calendar
 
 Estimates assume a single builder working at ~half-time; scale accordingly.
 
-- **Phase 0**: 1 session (spec bundle landed; gitignore; scaffold)
-- **Phase 1**: 5–7 sessions
-  - SPEC-01 (index + parser + CLI): 2 sessions
-  - SPEC-10 (entity-surface remediation): 0.5–1 session
-  - SPEC-02 (MCP server + tools): 1 session
+- **Phase 0**: 1 session (spec bundle landed; gitignore; scaffold) — COMPLETE
+- **Phase 1**: 5–7 sessions — SUBSTANTIALLY COMPLETE
+  - SPEC-01 (index + parser + CLI): 2 sessions — completed 2026-04-22
+  - SPEC-10 (entity-surface remediation): 0.5–1 session — completed 2026-04-23
+  - SPEC-11 (canonical entity authority surfaces): 0.5–1 session — completed 2026-04-23
+  - SPEC-02 (MCP server + tools): 1 session — completed 2026-04-24
   - SPEC-12 (retrieval reliability + packet-v2): completed 2026-04-24
-  - SPEC-05 Part A (3 hooks): 1 session
-  - SPEC-06 Part A (canon-addition read-side): 1 session
+  - SPEC-05 Part A (3 hooks): 1 session — completed 2026-04-24
+  - ~~SPEC-06 Part A (canon-addition read-side): 1 session~~ — SKIPPED per SPEC-13; folded into Phase 2
   - SPEC-07 Part A (docs): completed 2026-04-23 in parallel with Phase 1 code work
-  - Animalia bootstrap + measurement: 0.5 session
-- **Phase 2**: 6–10 sessions
-  - SPEC-04 (14 validators): 2 sessions
-  - SPEC-03 (patch engine + 13 ops): 2 sessions
-  - SPEC-05 Part B (2 hooks): 0.5 session
-  - SPEC-06 Part B (7 skills + canon-addition writes): 3–4 sessions
+- **Phase 1.5** (SPEC-13 atomic-source migration): 2–3 sessions
+  - Stream A (spec drafting): 1 session
+  - Stream B (manual animalia migration): 1 session
+  - Stream C (SPEC-01 parser refresh): 0.5 session (may overlap with Stream B)
+- **Phase 2**: 5–8 sessions (reduced vs. original estimate; atomic-source simplifies patch engine and validator scope)
+  - SPEC-04 (atomic-YAML validators, 15 validators net): 1.5–2 sessions
+  - SPEC-03 (atomic-record patch engine, simplified op vocabulary): 1.5 sessions
+  - SPEC-02 (enable submit_patch_plan + new tools): 0.5 session
+  - SPEC-05 Part B (2 hooks, `_source/` discipline): 0.5 session
+  - SPEC-06 (all 8 skills against atomic source): 2.5–3 sessions
   - SPEC-07 Part B: 0.5 session
-  - Animalia re-validation + cleanup: 1 session
-- **Phase 3** (if pursued): 2–3 sessions
-- **Phase 4** (deferred): TBD
+  - Animalia re-validation + cleanup: 0.5 session
+- **Phase 2.5** (SPEC-09 canon-safety expansion): 1–2 sessions
+- **Phase 3** (old atomic-source): SUPERSEDED — not a separate phase
+- **Phase 4** (old prose fragmentization): SUPERSEDED — not a separate phase
 
 ## Measurement baseline
 
@@ -248,6 +302,7 @@ If Phase 2 acceptance criteria fall short of ≥70%, investigate whether further
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
 | SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
 | SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
-| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered |
+| SPEC-13 Atomic-Source Migration | ✓ specified 2026-04-24 (this spec's Stream A deliverable); Stream B (animalia migration execution) pending user-initiated follow-up session |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13 |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are later architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots.

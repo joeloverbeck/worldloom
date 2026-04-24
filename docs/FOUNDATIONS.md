@@ -92,25 +92,29 @@ Mystery Reserve entries must define:
 
 ## Mandatory World Files
 
-At minimum, maintain:
+At minimum, every world model must express all thirteen concerns below. On machine-layer-enabled worlds (per SPEC-13 Atomic-Source Migration), their **storage form** is split between primary-authored files at the world root and atomic YAML records under `worlds/<slug>/_source/`:
 
-- `WORLD_KERNEL.md`
-- `INVARIANTS.md`
-- `ONTOLOGY.md`
-- `TIMELINE.md`
-- `GEOGRAPHY.md`
-- `PEOPLES_AND_SPECIES.md`
-- `INSTITUTIONS.md`
-- `ECONOMY_AND_RESOURCES.md`
-- `MAGIC_OR_TECH_SYSTEMS.md`
-- `EVERYDAY_LIFE.md`
-- `CANON_LEDGER.md`
-- `OPEN_QUESTIONS.md`
-- `MYSTERY_RESERVE.md`
+| Concern | Storage form |
+|---|---|
+| `WORLD_KERNEL.md` | **Primary-authored** (root-level) — narrative summary; read cover-to-cover |
+| `ONTOLOGY.md` | **Primary-authored** (root-level) — Categories in Use, Relation Types in Use, Notes on Use. Named Entity Registry atomized to `_source/entities/`. |
+| Canon Ledger | Atomized: `_source/canon/CF-NNNN.yaml` + `_source/change-log/CH-NNNN.yaml` |
+| Invariants | Atomized: `_source/invariants/<ID>.yaml` (one file per invariant, category preserved in the record) |
+| Mystery Reserve | Atomized: `_source/mystery-reserve/M-NNNN.yaml` |
+| Open Questions | Atomized: `_source/open-questions/OQ-NNNN.yaml` |
+| Timeline | Atomized: `_source/timeline/SEC-TML-NNN.yaml` (one record per historical Layer) |
+| Geography | Atomized: `_source/geography/SEC-GEO-NNN.yaml` (one record per H2 section) |
+| Peoples and Species | Atomized: `_source/peoples-and-species/SEC-PAS-NNN.yaml` |
+| Institutions | Atomized: `_source/institutions/SEC-INS-NNN.yaml` |
+| Economy and Resources | Atomized: `_source/economy-and-resources/SEC-ECR-NNN.yaml` |
+| Magic or Tech Systems | Atomized: `_source/magic-or-tech-systems/SEC-MTS-NNN.yaml` |
+| Everyday Life | Atomized: `_source/everyday-life/SEC-ELF-NNN.yaml` |
 
-> **Derived artifacts**: `worlds/<slug>/_index/world.db` is a derived, gitignored artifact produced by `world-index build`. `worlds/<slug>/_source/` is reserved for the Phase 3 atomic-source layout (`CF-NNNN.yaml`, `CH-NNNN.yaml`). Neither is a mandatory world file in the human-facing sense; both are machine-facing infrastructure.
+The thirteen concerns remain load-bearing. The **storage form** is atomic-YAML-under-`_source/` for the eleven compiled concerns plus the Named Entity Registry. There are no compiled-markdown views at the world root for atomized concerns — the `_source/` tree is the sole canonical form. Humans read atomic records directly in their IDE (file-tree view over `_source/` subdirectories) or on-demand via `world-index render <world-slug> [--file <class>]` CLI for a merged view.
 
-For larger worlds, split by domain and region.
+> **Derived artifacts**: `worlds/<slug>/_index/world.db` is a derived, gitignored artifact produced by `world-index build`. `worlds/<slug>/_source/` is the canonical source-of-truth layer (tracked in git).
+
+For larger worlds, split by domain and region within the appropriate `_source/` subdirectory.
 
 ---
 
@@ -311,6 +315,8 @@ notes: >
   Accepted only with limiting conditions and downstream updates.
 ```
 
+> **Canonical storage (machine-layer-enabled worlds, per SPEC-13)**: Canon Fact Records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-NNNN.yaml` — one record per file. The `notes` field and `modification_history[]` array are the authorized in-place mutation surfaces for an accepted CF; structural fields (`statement`, `scope`, `domains_affected`, `distribution`, etc.) are append-only in practice (changing them requires an explicit retcon attestation through the patch engine).
+
 ---
 
 ## World Queries Every Tool Must Be Able To Answer
@@ -436,3 +442,17 @@ The "LLM agents should never operate on prose alone" commitment in §Tooling Rec
 Once the retrieval surface is active, every "skills should always receive X" item above is delivered by `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`. The packet's five layers are documented in [docs/CONTEXT-PACKET-CONTRACT.md](/home/joeloverbeck/projects/worldloom/docs/CONTEXT-PACKET-CONTRACT.md).
 
 For the operational overview, rollout boundaries, and troubleshooting guidance, see [docs/MACHINE-FACING-LAYER.md](/home/joeloverbeck/projects/worldloom/docs/MACHINE-FACING-LAYER.md).
+
+---
+
+## Canonical Storage Layer
+
+Canonical storage for world state is atomic YAML under `worlds/<slug>/_source/` — one file per record, per the classification in §Mandatory World Files. There are no compiled-markdown views at the world root for atomized concerns. The `_source/` tree is the sole source-of-truth for CF / CH / INV / M / OQ / ENT / SEC records. The retired root-level markdown files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, and the five large prose files) do not exist on machine-layer-enabled worlds.
+
+**Write discipline**: `worlds/<slug>/_source/` is an engine-only write surface. Direct `Edit`/`Write` on any `_source/*.yaml` file is blocked by Hook 3; mutations route through `mcp__worldloom__submit_patch_plan` with typed record-ops (per SPEC-03 op vocabulary: `create_cf_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, etc.). The append-only ledger discipline of Rule 6 is preserved per-file: a CF's YAML file is append-only in its structural fields; mutations happen only in `notes`, `modification_history[]`, and `extensions[]`.
+
+**Read discipline**: Skills read atomic records via `mcp__worldloom__get_record(record_id)` or `get_context_packet(task_type, seed_nodes, token_budget)`. Raw reads of `_source/` subdirectories via the `Read` tool are redirected to MCP retrieval by Hook 2. Humans read atomic records directly (IDE file-tree) or via `world-index render <world-slug> [--file <class>]` for a merged markdown view (read-only; not persisted to disk).
+
+**Authored-primary surfaces**: `WORLD_KERNEL.md` and the reduced `ONTOLOGY.md` (Categories / Relation Types / Notes) remain directly editable at the world root. `characters/`, `diegetic-artifacts/`, `proposals/`, `audits/`, `adjudications/` continue as hybrid YAML-frontmatter-plus-markdown per-file artifacts (skill-owned mutation via engine ops; not atomized further).
+
+**Migration history**: the one-time migration of `worlds/animalia/` from monolithic markdown to atomic YAML is documented in SPEC-13 Atomic-Source Migration. Worlds created after the migration (via `create-base-world`) start in atomic-source form directly; no legacy form accumulates.

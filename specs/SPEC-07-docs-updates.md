@@ -2,9 +2,15 @@
 
 # SPEC-07: FOUNDATIONS.md, CLAUDE.md, and Pipeline Docs Updates
 
-**Phase**: Part A in Phase 1 (foundational additions); Part B in Phase 2 (edit-side updates); Part C in Phase 3 (atomic-source schema shift)
-**Depends on**: SPEC-01 through SPEC-06 (specifies what the design contract must acknowledge)
+**Phase**: Part A in Phase 1 (foundational additions, **complete 2026-04-23**); Part B in Phase 2 (edit-side updates); ~~Part C in Phase 3~~ **— Part C retired per SPEC-13**
+**Depends on**: SPEC-01 through SPEC-06, **SPEC-13 (atomic-source contract — SPEC-13 handles its own FOUNDATIONS revision directly)**
 **Blocks**: SPEC-08 Phase 1 acceptance (contract must be updated before skills reference new mechanisms)
+
+## SPEC-13 amendment summary
+
+- **Part C retired.** The pre-SPEC-13 Part C covered FOUNDATIONS.md schema updates for Phase 3 compiled-ledger-from-atomic-source (`worlds/<slug>/_source/canon/CF-NNNN.yaml` paired with compiled `CANON_LEDGER.md`). SPEC-13 supersedes this: FOUNDATIONS.md revision for atomic-source storage (§Mandatory World Files reclassification, new §Canonical Storage Layer, §Canon Fact Record Schema storage note) is authored directly by SPEC-13 Stream A, not by a future Part C.
+- **Part B content updated.** The `HARD-GATE-DISCIPLINE.md` write-order rewrite targets the **post-SPEC-13 3-tier engine ordering** (create-all → update-all → adjudication), not the pre-SPEC-13 monolithic-ledger sub-sequence. CLAUDE.md Non-Negotiables Hook 3 phrasing refinement covers `_source/` discipline, not compiled-file protection.
+- **Part A already landed.** The §Machine-Facing Layer addition, §Mandatory World Files initial note (which SPEC-13 replaces), §Tooling Recommendation upgrade, CLAUDE.md repository-layout and non-negotiables updates, HARD-GATE-DISCIPLINE.md approval-token discipline, WORKFLOWS.md CLI section, and the two new docs (`docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`) all shipped on 2026-04-23.
 
 ## Problem Statement
 
@@ -162,21 +168,9 @@ Once Hook 3 is live, the prose non-negotiable "Never bypass a HARD-GATE" is stil
 - **Never bypass a HARD-GATE.** Structurally enforced by Hook 3 + approval_token discipline for all canon-mutating skills. The prose non-negotiable remains authoritative for any case where mechanism is absent (new skills in development, worlds without an index, repos without hooks configured).
 ```
 
-### Part C — Phase 3 updates (deferred; ship only if Phase 3 approved)
+### Part C — RETIRED per SPEC-13
 
-#### `docs/FOUNDATIONS.md`
-
-**§Canon Fact Record Schema** — add note:
-
-```markdown
-> **Canonical storage (Phase 3 onward)**: Canon fact records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-NNNN.yaml`. The `CANON_LEDGER.md` human-facing view is a compiled artifact derived from these source files. Skills MUST write to atomic source files (via patch engine); direct edits to the compiled ledger are engine-blocked. Worlds created before Phase 3 may still use fenced-YAML-in-ledger form; their migration is user-initiated.
-```
-
-**§Mandatory World Files** — add:
-
-```markdown
-> **Published ledger as compiled artifact (Phase 3)**: `CANON_LEDGER.md` may be a generated artifact rather than source. Its source of truth in migrated worlds lives under `_source/canon/` and `_source/change-log/`.
-```
+Part C previously covered FOUNDATIONS.md schema updates for a Phase 3 world in which `CANON_LEDGER.md` would be a compiled artifact derived from `_source/canon/` and `_source/change-log/`. SPEC-13 supersedes this design: compiled views don't exist post-migration — `_source/` is the sole canonical form for canon, change log, invariants, mystery reserve, open questions, entities, and prose sections. Rather than landing Part C later as originally planned, SPEC-13 Stream A authors the FOUNDATIONS.md revision directly (§Mandatory World Files reclassification, new §Canonical Storage Layer subsection, §Canon Fact Record Schema storage note). See SPEC-13 §D.
 
 ### New docs
 
@@ -206,14 +200,14 @@ Target length: ≤200 lines.
 
 ### Docs update summary table
 
-| Doc | Part A (Phase 1) | Part B (Phase 2) | Part C (Phase 3) |
+| Doc | Part A (Phase 1, COMPLETE) | Part B (Phase 2) | Part C (RETIRED per SPEC-13) |
 |---|---|---|---|
-| `docs/FOUNDATIONS.md` | New §Machine-Facing Layer; §Mandatory World Files note; §Tooling Recommendation upgrade | — | §Canon Fact Record Schema atomic-source note; §Mandatory World Files compiled-ledger note |
-| `CLAUDE.md` | §Repository Layout tools/ tree; §Skill Architecture machine-layer subsection; §Non-Negotiables two new items; §ID Allocation update | §Non-Negotiables phrasing refinement | — |
-| `docs/HARD-GATE-DISCIPLINE.md` | §Execution pattern step 6/7 revision; new §Approval token discipline | §Why write order matters rewrite | — |
-| `docs/WORKFLOWS.md` | New §Machine-facing layer CLI section | — | — |
-| `docs/MACHINE-FACING-LAYER.md` | **New doc** | — | — |
-| `docs/CONTEXT-PACKET-CONTRACT.md` | **New doc** | — | — |
+| `docs/FOUNDATIONS.md` | New §Machine-Facing Layer; §Mandatory World Files initial note; §Tooling Recommendation upgrade | — | Retired — superseded by SPEC-13 §D (§Mandatory World Files reclassification, new §Canonical Storage Layer, §Canon Fact Record Schema storage note) |
+| `CLAUDE.md` | §Repository Layout tools/ tree; §Skill Architecture machine-layer subsection; §Non-Negotiables two new items; §ID Allocation update | §Non-Negotiables phrasing refinement (atomic-source discipline; Hook 3 on `_source/`) | Retired |
+| `docs/HARD-GATE-DISCIPLINE.md` | §Execution pattern step 6/7 revision; new §Approval token discipline | §Why write order matters rewrite for 3-tier engine ordering | Retired |
+| `docs/WORKFLOWS.md` | New §Machine-facing layer CLI section | — | Retired |
+| `docs/MACHINE-FACING-LAYER.md` | **New doc** (shipped 2026-04-23) | — | Retired |
+| `docs/CONTEXT-PACKET-CONTRACT.md` | **New doc** (shipped 2026-04-23) | — | Retired |
 
 ## FOUNDATIONS Alignment
 

@@ -3,18 +3,20 @@
 # SPEC-03: Patch Engine & Edit Contract
 
 **Phase**: 2
-**Depends on**: SPEC-01 (anchor data), SPEC-02 (MCP `submit_patch_plan` delegates here), SPEC-04 (validator gate)
-**Blocks**: SPEC-05 Phase 2 hooks (Hook 3 enforces engine-only writes), SPEC-06 Phase 2 skills (all writes through engine)
+**Depends on**: SPEC-01 (record-level index data), SPEC-02 (MCP `submit_patch_plan` delegates here), SPEC-04 (validator gate), **SPEC-13 (atomic-source storage contract — patch engine writes atomic records, not monolithic files)**
+**Blocks**: SPEC-05 Phase 2 hooks (Hook 3 enforces engine-only writes on `_source/`), SPEC-06 Phase 2 skills (all writes through engine)
 
 ## Problem Statement
 
-Large canon-addition deliveries fire 25+ Edit tool calls per run, each vulnerable to anchor drift (file changed between Read and Edit), and partial failures leave `CANON_LEDGER.md` and domain files in inconsistent states with no structured rollback. Rule 6 (No Silent Retcons) attribution stamping (`<!-- added by CF-NNNN -->`, `<!-- clarified by CH-NNNN -->`, notes-field `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN):` lines) is hand-formatted per-skill and drifts over time. The current `canon-addition/SKILL.md` carries explicit Phase 15a inter-step checkpoint grep commands (per `references/phase-15a-checkpoint-grep-reference.md`) as a band-aid for the lack of engine-level atomicity.
+Large canon-addition deliveries fire 25+ Edit tool calls per run, each vulnerable to anchor drift (file changed between Read and Edit), and partial failures leave world files in inconsistent states with no structured rollback. Rule 6 (No Silent Retcons) attribution stamping was hand-formatted per-skill in the pre-SPEC-13 form and drifted over time. The pre-SPEC-13 `canon-addition/SKILL.md` carried explicit Phase 15a inter-step checkpoint grep commands (per `references/phase-15a-checkpoint-grep-reference.md`) as a band-aid for the lack of engine-level atomicity.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §4 (deterministic patch engine), §13 (edit contract). Brainstorm decision: skills emit structured patch plans; code applies; engine fails closed on stale anchors.
+**Post-SPEC-13 context**: canonical storage is atomic YAML under `worlds/<slug>/_source/` (one file per CF / CH / INV / M / OQ / ENT / SEC record). The 11 monolithic mandatory-markdown files are retired; no compiled views exist. The patch engine operates on atomic records directly — markdown-anchor navigation is replaced by record-ID addressing, and attribution is a structured field on the target record rather than an HTML-comment inserted into prose.
+
+**Source context**: `brainstorming/structure-aware-retrieval.md` §4 (deterministic patch engine), §13 (edit contract), and SPEC-13 §C (amendments to this spec). Brainstorm decision: skills emit structured patch plans; code applies; engine fails closed on missing/malformed records.
 
 ## Approach
 
-A deterministic Node.js patch applier, invoked via `mcp__worldloom__submit_patch_plan` (SPEC-02), that consumes a JSON patch-plan envelope and writes files directly via `fs.writeFile` (bypassing Claude's Edit/Write tools, so SPEC-05 Hook 3 does not fire on engine writes). Two-phase commit: validate-all then apply-all; atomic per file via temp-write + rename. Any failed op aborts the entire plan and leaves disk unchanged.
+A deterministic Node.js patch applier, invoked via `mcp__worldloom__submit_patch_plan` (SPEC-02), that consumes a JSON patch-plan envelope and writes atomic YAML files (plus the hybrid character / diegetic-artifact / adjudication markdown files) directly via `fs.writeFile` (bypassing Claude's Edit/Write tools, so SPEC-05 Hook 3 does not fire on engine writes). Two-phase commit: validate-all then apply-all; atomic per file via temp-write + rename. Any failed op aborts the entire plan and leaves disk unchanged. No compile step — atomic records are the canonical form.
 
 ## Deliverables
 
@@ -29,27 +31,25 @@ tools/patch-engine/
 ├── src/
 │   ├── apply.ts                     # top-level two-phase commit
 │   ├── ops/
-│   │   ├── insert-before-node.ts
-│   │   ├── insert-after-node.ts
-│   │   ├── replace-node.ts
-│   │   ├── insert-under-heading.ts
-│   │   ├── replace-yaml-field.ts
-│   │   ├── append-list-item.ts
+│   │   ├── create-cf-record.ts
+│   │   ├── create-ch-record.ts
+│   │   ├── create-inv-record.ts
+│   │   ├── create-m-record.ts
+│   │   ├── create-oq-record.ts
+│   │   ├── create-ent-record.ts
+│   │   ├── create-sec-record.ts
+│   │   ├── update-record-field.ts
+│   │   ├── append-extension.ts
+│   │   ├── append-touched-by-cf.ts
 │   │   ├── append-modification-history-entry.ts
-│   │   ├── append-cf-record.ts
-│   │   ├── append-bullet-cluster.ts
-│   │   ├── append-heading-section.ts
-│   │   ├── insert-attribution-comment.ts
-│   │   ├── append-change-log-entry.ts
-│   │   └── append-adjudication-record.ts
+│   │   ├── append-adjudication-record.ts
+│   │   ├── append-character-record.ts
+│   │   └── append-diegetic-artifact-record.ts
 │   ├── envelope/
 │   │   ├── schema.ts                # envelope + per-op schema
 │   │   └── validate.ts              # structural envelope validation
-│   ├── attribution/
-│   │   ├── stamp.ts                 # auto-generate HTML comments + notes lines
-│   │   └── templates.ts             # canonical attribution formats
 │   ├── commit/
-│   │   ├── order.ts                 # apply-order enforcement
+│   │   ├── order.ts                 # 3-tier apply-order enforcement
 │   │   ├── temp-file.ts             # per-file temp-write
 │   │   └── rename.ts                # atomic rename orchestration
 │   └── approval/
@@ -60,42 +60,44 @@ tools/patch-engine/
 │       └── end-to-end-canon-addition.test.ts
 ```
 
-### Operation vocabulary (13)
+### Operation vocabulary (post-SPEC-13)
 
-**Generic structural ops**
+Atomization under SPEC-13 simplifies the op surface substantially. Retired ops were artifacts of monolithic-file storage (markdown-anchor navigation, HTML-comment attribution authoring); atomic records replace those with ID addressing and structured fields.
 
-| Op | Semantics | Payload |
-|---|---|---|
-| `insert_before_node` | Insert content immediately before target node | `{body: string, attribution?: {kind, id}}` |
-| `insert_after_node` | Insert content immediately after target node | same |
-| `replace_node` | Replace target node's body (**not** used for CF records — ledger is append-only) | same |
-| `insert_under_heading` | Insert a new section under an existing heading | `{new_heading_level, new_heading_text, body, attribution?}` |
+**Retired ops** (pre-SPEC-13): `insert_before_node`, `insert_after_node`, `replace_node`, `insert_under_heading`, `append_bullet_cluster`, `append_heading_section`, `insert_attribution_comment`, `append_cf_record`, `append_change_log_entry`, `replace_yaml_field`, `append_list_item` — all retired. Markdown-anchor navigation disappears with atomic records. Attribution-comment generation is retired because attribution is now a first-class field on records (`extensions[].originating_cf`, etc.). The legacy `append_cf_record` / `append_change_log_entry` ops are replaced by `create_cf_record` / `create_ch_record`. `replace_yaml_field` / `append_list_item` merge into the generic `update_record_field`.
 
-**YAML-record ops**
+**Create ops** (one per atomic record class; writes a new `_source/*.yaml` file):
 
 | Op | Semantics | Payload |
 |---|---|---|
-| `replace_yaml_field` | Update a single field in a YAML record's parsed tree (e.g., CF notes) | `{field_path: string[], new_value: any}` |
-| `append_list_item` | Append to a YAML list field (e.g., `visible_consequences`) | `{field_path, new_item}` |
-| `append_modification_history_entry` | Append a typed entry to a CF's `modification_history` array | `{change_id, originating_cf, date, summary}` |
-| `append_cf_record` | Append a new CF YAML block to `CANON_LEDGER.md`'s CFs section, before `## Change Log` header | `{cf_record: CanonFactRecord}` |
+| `create_cf_record` | Write a new CF record to `_source/canon/CF-NNNN.yaml` | `{cf_record: CanonFactRecord}` |
+| `create_ch_record` | Write a new CH record to `_source/change-log/CH-NNNN.yaml` | `{ch_record: ChangeLogEntry}` |
+| `create_inv_record` | Write a new invariant to `_source/invariants/<ID>.yaml` | `{inv_record: InvariantRecord}` |
+| `create_m_record` | Write a new Mystery Reserve entry to `_source/mystery-reserve/M-NNNN.yaml` | `{m_record: MysteryRecord}` |
+| `create_oq_record` | Write a new Open Question to `_source/open-questions/OQ-NNNN.yaml` | `{oq_record: OpenQuestionRecord}` |
+| `create_ent_record` | Write a new Named Entity to `_source/entities/ENT-NNNN.yaml` | `{ent_record: NamedEntityRecord}` |
+| `create_sec_record` | Write a new Prose Section to `_source/<file-subdir>/SEC-<PREFIX>-NNN.yaml` | `{sec_record: SectionRecord}` |
 
-**Markdown prose ops**
-
-| Op | Semantics | Payload |
-|---|---|---|
-| `append_bullet_cluster` | Append a sub-bullet to a named bullet cluster | `{body, attribution?}` |
-| `append_heading_section` | Append a new heading + body at a prescribed location within a file | `{heading_level, heading_text, body, attribution?}` |
-| `insert_attribution_comment` | Engine-internal op — inserts `<!-- added by CF-NNNN -->` at payload-specified location (normally auto-generated from the `attribution` field of other ops, but callable directly when retrofitting) | `{kind: 'added' \| 'clarified' \| 'modified', id: string}` |
-
-**Cross-file ops**
+**Update ops** (mutate an existing atomic record):
 
 | Op | Semantics | Payload |
 |---|---|---|
-| `append_change_log_entry` | Append a CH entry at the tail of `CANON_LEDGER.md`'s Change Log section | `{change_log_entry: ChangeLogEntry}` |
+| `update_record_field` | Set or append a field on an existing record by ID + field path | `{target_record_id, field_path: string[], operation: 'set' \| 'append_list' \| 'append_text', new_value: any, retcon_attestation?: RetconAttestation}` |
+| `append_extension` | Append an entry to any record's `extensions[]` array (uniform Rule 6 attribution surface across INV / M / OQ / SEC) | `{target_record_id, extension: {originating_cf, change_id, date, label, body}}` |
+| `append_touched_by_cf` | Append a CF-ID to a SEC record's `touched_by_cf[]` array | `{target_sec_id, cf_id}`. **Engine auto-adds** this op whenever `append_extension` targets a SEC with a new `originating_cf`; the op is also callable directly during migration or retrofit. |
+| `append_modification_history_entry` | Append a typed entry to a CF's `modification_history` array | `{target_cf_id, change_id, originating_cf, date, summary}` |
+
+**Retcon discipline on `update_record_field`**: the `notes` field and `modification_history` array are freely appendable on accepted CFs without retcon attestation. The `extensions` array on any record is freely appendable. Any other structural-field mutation (e.g., changing `statement`, `scope`, `domains_affected`, `distribution`, `visible_consequences`) requires `retcon_attestation` with `{retcon_type: <A-F per continuity-audit taxonomy>, originating_ch: CH-NNNN, rationale: string}`. Validator `rule6_no_silent_retcons` enforces.
+
+**Hybrid-file ops** (per-file artifacts; unchanged from pre-SPEC-13 behavior):
+
+| Op | Semantics | Payload |
+|---|---|---|
 | `append_adjudication_record` | Write a new `adjudications/PA-NNNN-<verdict>.md` file | `{verdict, body, filename}` |
+| `append_character_record` | Write a new `characters/<char-slug>.md` file (YAML frontmatter + prose body) | `{char_record: CharacterDossier, body_markdown: string, filename}` |
+| `append_diegetic_artifact_record` | Write a new `diegetic-artifacts/<da-slug>.md` file | `{da_record: DiegeticArtifactFrontmatter, body_markdown: string, filename}` |
 
-**Not included (deliberate)**: there is no `replace_cf_record` op, no `delete_*` op, no `move_*` op. The ledger is append-only; mutation of an accepted CF happens only via `replace_yaml_field` on its `notes` or `modification_history` — never on its structural fields.
+**Not included (deliberate)**: no `replace_*` op, no `delete_*` op, no `move_*` op for atomic records. Append-only discipline is structural: a CF's YAML file is never removed or wholesale-replaced; updates happen only through `update_record_field` / `append_extension` / `append_modification_history_entry`. The only legitimate delete is via `git revert`.
 
 ### Edit contract envelope
 
@@ -112,80 +114,85 @@ interface PatchPlanEnvelope {
   expected_id_allocations: {
     cf_ids?: string[];
     ch_ids?: string[];
+    inv_ids?: string[];
+    m_ids?: string[];
+    oq_ids?: string[];
+    ent_ids?: string[];
+    sec_ids?: string[];
     pa_ids?: string[];
     char_ids?: string[];
     da_ids?: string[];
-    // etc.
   };
   patches: PatchOperation[];
 }
 
 interface PatchOperation {
-  op: OperationKind;                    // one of the 13
+  op: OperationKind;
   target_world: string;
-  target_file: string;                  // path relative to worlds/<slug>/
-  target_node_id?: string;              // for ops that target an existing node
-  expected_content_hash?: string;       // content_hash from index at plan-authoring time
-  expected_anchor_checksum?: string;    // anchor_checksum from index at plan-authoring time
+  target_record_id?: string;            // for update / append_* ops targeting an existing record
+  target_file?: string;                 // for hybrid-file ops (adjudication, character, diegetic-artifact)
+  expected_content_hash?: string;       // content_hash of the target record at plan-authoring time (atomic records)
+  expected_anchor_checksum?: string;    // retained only for hybrid-file ops (body-prose anchor integrity)
   payload: OperationPayload;            // shape varies per op
-  attribution?: {
-    kind: 'added' | 'clarified' | 'modified';
-    id: string;                         // CF-NNNN or CH-NNNN
-    date?: string;                      // ISO date; engine defaults to today
+  retcon_attestation?: {                // required on update_record_field against structural fields of accepted CFs
+    retcon_type: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+    originating_ch: string;             // CH-NNNN
+    rationale: string;
   };
   failure_mode?: 'strict' | 'relocate_on_miss';  // default 'strict'
 }
 ```
 
-### Write-order discipline (engine-enforced)
+### Write-order discipline (engine-enforced, 3 tiers)
 
-The current `canon-addition/SKILL.md` Phase 15a sub-step order is load-bearing for partial-failure recovery semantics (see `docs/HARD-GATE-DISCIPLINE.md`). The engine preserves it **by reordering patches internally** before apply, regardless of the plan's patch-list order:
+Atomization collapses the pre-SPEC-13 write-order from the 3-sub-step ledger-sequence into a simpler 3-tier order. Because there's no monolithic ledger to serialize writes against, the tiers are commutative within; only the inter-tier order is constrained.
 
-1. **All domain-file ops** — `append_bullet_cluster`, `insert_under_heading`, `append_heading_section`, `insert_before_node`, `insert_after_node`, `replace_node`, and their auto-stamped attribution comments (not including the ledger or adjudication record)
-2. **`append_adjudication_record`** — write the PA-NNNN file (per-file artifact, side-effect-free w.r.t. existing world state)
-3. **`CANON_LEDGER.md` operations** in strict sub-order:
-   - **3a**: `replace_yaml_field` + `append_modification_history_entry` — in-place CF qualifications (touches existing CF notes / arrays)
-   - **3b**: `append_cf_record` — new CFs appended to CFs section (before `## Change Log` header)
-   - **3c**: `append_change_log_entry` — new CH at tail of Change Log
+The engine preserves tier order **by reordering patches internally** before apply, regardless of the plan's patch-list order:
 
-If the engine crashes between steps 2 and 3a, the ledger reflects pre-operation state; future runs recover cleanly. Inverse ordering (CF-first, domain-patches-last) would leave orphaned references — hence the internal reorder is non-negotiable.
+1. **Tier 1 — All `create_*` ops** (in parallel; independent per-file writes). Includes `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`.
+2. **Tier 2 — All `update_record_field` / `append_extension` / `append_touched_by_cf` / `append_modification_history_entry` ops** (in parallel; targets created in Tier 1 or pre-existing records). The engine auto-adds `append_touched_by_cf` for any `append_extension` targeting a SEC where the extension's `originating_cf` isn't already in `touched_by_cf[]`.
+3. **Tier 3 — `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` ops** (per-file hybrid artifacts). Written last because their content references Tier 1/2 record IDs; writing them after the referenced records exist keeps the on-disk graph consistent.
+
+If the engine crashes between Tier 2 and Tier 3, the atomic records reflect post-operation state but the adjudication / character / artifact references to them have not yet been written; future runs recover cleanly (reference-free ids are acceptable pre-state). Inverse ordering (adjudication-first) would leave orphaned references and is structurally forbidden.
+
+Within a tier, ops are independent and apply in parallel — there's no inter-op dependency within Tier 1 (each op writes a different new file), within Tier 2 (each op targets a distinct record or a distinct field path), or within Tier 3 (each op writes a different new per-file artifact).
 
 ### Atomicity model (two-phase commit)
 
 **Phase A — Validate (no writes)**:
 1. Verify `approval_token` (signature + expiry + single-use-not-yet-consumed)
-2. Verify every op's `expected_content_hash` and `expected_anchor_checksum` match current index state
-3. Verify every op's `expected_id_allocations` still match `allocate_next_id` for the relevant classes (detect race)
-4. Delegate to SPEC-04 validator framework with `mode: 'pre-apply'`
-5. Any failure → abort; return structured error; no write
+2. Verify every op's `expected_content_hash` matches current index state (for atomic records, hash is computed over the record's canonical-YAML serialization; for hybrid files, over the full file contents)
+3. Verify every hybrid-file op's `expected_anchor_checksum` matches (atomic-record ops don't use anchor checksums — the `target_record_id` is itself the anchor)
+4. Verify every op's `expected_id_allocations` still match `allocate_next_id` for the relevant classes (detect race)
+5. Delegate to SPEC-04 validator framework with `mode: 'pre-apply'`
+6. Any failure → abort; return structured error; no write
 
 **Phase B — Apply**:
-1. For each unique `target_file`, create a temp file: `<file>.patch-engine.<plan_id>.tmp`
-2. Build the final content for each temp file by applying all ops targeting it (in engine-order)
+1. For each unique `target_file` (atomic record path or hybrid-file path), create a temp file: `<file>.patch-engine.<plan_id>.tmp`
+2. Build the final content for each temp file by applying all ops targeting it (in engine-order per the 3-tier write order; within a tier, ops on the same file are sequenced deterministically by op insertion order in the envelope)
 3. For each temp file, fsync and `rename()` to final path (atomic on POSIX)
-4. For new files (`append_adjudication_record`), write directly + fsync + rename from temp
-5. Mark `approval_token` consumed
-6. Return patch receipt + trigger index sync (`world-index sync <world-slug>`)
+4. Mark `approval_token` consumed
+5. Return patch receipt + trigger index sync (`world-index sync <world-slug>`)
 
-If step 2 or 3 fails for any file, unlink all `.patch-engine.<plan_id>.tmp` files and return error; disk is unchanged from Phase A start.
+If step 2 or 3 fails for any file, unlink all `.patch-engine.<plan_id>.tmp` files and return error; disk is unchanged from Phase A start. Note: no Phase B compile step is needed — atomic records are the canonical form; there are no compiled views to regenerate.
 
-### Anchor-miss handling
+### Anchor-miss handling (hybrid files only)
 
-On `expected_anchor_checksum` mismatch:
-- `failure_mode: 'strict'` (default): return structured error `{code: 'anchor_drift', node_id, expected_checksum, actual_checksum, drift_size_estimate}`. No fuzzy match; skill's recourse is to re-call `get_context_packet` / `find_edit_anchors` for fresh anchors and resubmit.
-- `failure_mode: 'relocate_on_miss'`: reserved for future use; not implemented in Phase 2
+Atomic-record ops don't have anchor drift because the target is a whole record addressed by ID. Content-hash mismatch on an atomic record means another plan mutated the record between plan-authoring and submission, triggering `{code: 'record_hash_drift', target_record_id, expected_hash, actual_hash}` — skill re-retrieves and resubmits.
 
-### Attribution auto-stamping
+For hybrid-file ops (character / diegetic-artifact / adjudication, which mix YAML frontmatter with prose body), anchor-miss handling retains the pre-SPEC-13 semantics:
+- `failure_mode: 'strict'` (default): return structured error `{code: 'anchor_drift', target_file, expected_checksum, actual_checksum, drift_size_estimate}`. No fuzzy match; skill re-fetches and resubmits.
+- `failure_mode: 'relocate_on_miss'`: reserved for future use; not implemented.
 
-Every op carrying an `attribution` field causes the engine to auto-generate the correct artifact:
+### Attribution (structural, not generated)
 
-| `attribution.kind` | Generated artifact |
-|---|---|
-| `added` (domain file, new prose) | `<!-- added by CF-NNNN -->` inserted immediately after the new prose node |
-| `clarified` (domain file, correction) | `<!-- clarified by CH-NNNN -->` |
-| `modified` (CF's notes field) | Appends line: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <summary>` |
+Attribution is a field on the target record, not an HTML-comment generated into prose. The engine does not auto-stamp HTML comments.
 
-Skills never hand-format these. If a skill submits a plan with manually-written attribution markers in the body, the validator framework (`attribution_comment_validator`) rejects it.
+- New CF records carry their own `source_basis.direct_user_approval` and `source_basis.derived_from` fields per the CF schema.
+- Modifications to an existing record append to `extensions[]` (for INV / M / OQ / SEC) or `modification_history[]` (for CF) or `notes` (for CF, via `update_record_field` on the `notes` field with `operation: 'append_text'` and a standardized `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <summary>` format). The engine does not format these lines; the skill assembles them from the CH record.
+- The legacy `<!-- added by CF-NNNN -->` / `<!-- clarified by CH-NNNN -->` HTML-comment pattern is no longer an authoring surface. On pre-SPEC-13 worlds (none exist post-migration), the patterns were generated by the engine; on atomic-source worlds, they exist only in the rendered output of `world-index render` (read-only compile for human review), assembled from `extensions[]` entries at render time.
+
+Validator `rule6_no_silent_retcons` (SPEC-04) enforces: every CF modification has a CH entry with matching `affected_fact_ids`, a `modification_history` entry on the modified CF, and an extension entry (for INV / M / OQ / SEC) or notes-field append (for CF) — all structural, all checkable against parsed YAML.
 
 ### Integration with SPEC-02 approval token
 
@@ -221,22 +228,26 @@ interface PatchReceipt {
 
 | Principle | Alignment |
 |---|---|
-| Rule 6 No Silent Retcons | Every mutation carries explicit `attribution`; engine stamps the audit trail deterministically; append-only op vocabulary encodes the invariant |
+| Rule 6 No Silent Retcons | Every mutation carries explicit structural attribution (`extensions[].originating_cf`, `modification_history[].change_id`); append-only op vocabulary encodes the invariant; retcon on structural CF fields requires explicit `retcon_attestation` |
 | §Change Control Policy | Patch plan IS the downstream-updates commitment; receipt IS the completion record |
-| §Mandatory World Files | Preserved; engine writes to existing files, creates new per-file artifacts only for PA/CHAR/DA/PR/etc. |
-| §Canon Fact Record Schema | `append_cf_record` payload typed against `CanonFactRecord` TypeScript interface; schema drift caught at compile time |
+| §Canonical Storage Layer (SPEC-13) | Engine writes atomic records to `_source/`; preserves per-file append-only discipline; compiled views don't exist to maintain |
+| §Mandatory World Files | Preserved; engine creates atomic YAML records under `_source/` subdirectories and per-file hybrid artifacts (characters, diegetic artifacts, adjudications) |
+| §Canon Fact Record Schema | `create_cf_record` payload typed against `CanonFactRecord` TypeScript interface; schema drift caught at compile time + runtime via `record_schema_compliance` validator |
 | HARD-GATE discipline | `approval_token` ties user consent to specific plan bytes; no unsigned submission succeeds |
 
 ## Verification
 
-- **Unit**: each of 13 ops tested against fixture files (before/after snapshots)
-- **Integration**: replay a historical `canon-addition` delivery (e.g., CH-0013's five parallel named-polity-instance commitments on animalia) as a patch plan; verify byte-identical output to the hand-written version
+- **Unit**: each op tested against fixture files (before/after snapshots)
+- **Integration**: replay a historical `canon-addition` delivery (e.g., CH-0013's five parallel named-polity-instance commitments on animalia, post-migration) as a patch plan; verify the resulting `_source/` tree state matches the expected post-delivery state record-by-record
 - **Atomicity**: inject failure at various points (Phase A validate, Phase B temp-write, Phase B rename); verify no partial write on disk
-- **Anchor drift**: mutate target file between plan authoring and submit; verify engine rejects with `anchor_drift` code
+- **Record-hash drift**: mutate a target atomic record between plan authoring and submit; verify engine rejects with `record_hash_drift` code
+- **Hybrid anchor drift**: mutate a target character / diegetic-artifact / adjudication file between plan authoring and submit; verify engine rejects with `anchor_drift` code
 - **Approval token**: unsigned, expired, tampered, replayed tokens all rejected
-- **Write-order**: submit a plan with patches in pathological order (ledger ops first, domain ops last); verify engine reorders internally and final state matches canonical order
-- **Append-only**: attempt to construct a `replace_cf_record` payload; verify compile-time rejection (op not in union) and runtime rejection (schema validator)
-- **Attribution**: submit a plan; verify all `<!-- added by CF-NNNN -->` and notes-field lines are engine-generated; hand-written attribution in body rejected by validator
+- **Write-order**: submit a plan with patches in pathological order (Tier 3 ops first, Tier 1 ops last); verify engine reorders internally and final state matches canonical 3-tier order
+- **Append-only**: attempt to construct a hypothetical `replace_cf_record` or `delete_cf_record` op; verify compile-time rejection (op not in union) and runtime rejection (schema validator)
+- **Retcon attestation**: attempt `update_record_field` against a CF's `statement` field without `retcon_attestation`; verify engine rejects
+- **Attribution**: submit a plan creating a CF and appending extensions to three SEC records; verify all `extensions[]` entries are structurally present with correct `originating_cf` / `change_id` / `date` / `label` / `body`; verify `touched_by_cf[]` auto-updated on each SEC
+- **`append_touched_by_cf` auto-add**: submit an `append_extension` op targeting a SEC without an explicit `append_touched_by_cf` op; verify engine auto-adds the `append_touched_by_cf` op into the applied plan
 
 ## Out of Scope
 

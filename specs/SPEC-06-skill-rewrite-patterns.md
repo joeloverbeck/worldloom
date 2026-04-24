@@ -2,9 +2,19 @@
 
 # SPEC-06: Skill Rewrite Patterns — Thin Orchestrators
 
-**Phase**: 1 pilot (canon-addition read-side); Phase 2 remainder (all 8 skills full migration)
-**Depends on**: SPEC-01, SPEC-02, SPEC-03 (Phase 2), SPEC-04, SPEC-05
+**Phase**: Phase 2 — all 8 skills full migration against atomic source (per SPEC-13, the originally-planned Phase 1 read-side pilot is folded into Phase 2; canon-addition's read-side rewrite lands together with its write-side against `_source/` atomic records)
+**Depends on**: SPEC-01, SPEC-02, SPEC-03 (Phase 2), SPEC-04, SPEC-05, **SPEC-13 (atomic-source contract — skills read/write atomic records directly)**
 **Blocks**: SPEC-08 acceptance criteria (token reduction depends on this spec landing)
+
+## SPEC-13 amendment summary
+
+This spec was originally written against monolithic-markdown storage. Per SPEC-13 §C, the following changes apply:
+
+- **SPEC-06 Part A / Part B distinction collapses.** Part A was the Phase 1 canon-addition read-side pilot; Part B was Phase 2 full migration. With atomic-source landing in Phase 1.5 before Phase 2, there's no value in a read-only pilot against a storage form that will be retired — canon-addition's full rewrite (read + write) lands in Phase 2 against `_source/` directly.
+- **Token reduction target lifts from ≥70% to ≥80%** for large deliveries. Atomic-record retrieval enables the higher target because skills read per-record YAML instead of full-file markdown, even beyond what SPEC-12's scoped-reference and packet-completeness machinery already delivered.
+- **Skill-body size estimates revise downward by an additional 15–25% per skill** beyond the pre-SPEC-13 Phase 2 baseline. Prose-layout lore (e.g., "read the §Ordinary Hazards section of EVERYDAY_LIFE.md", "grep for `<!-- added by CF-NNNN -->`", "Large-file method") becomes fully deletable once retrieval is record-addressed.
+- **Patch-plan construction shifts to record-id-addressed ops** (SPEC-03's `create_*` / `update_record_field` / `append_extension` / `append_touched_by_cf` vocabulary). No anchor-hash construction for atomic-record ops; `expected_content_hash` is retained for atomic records (per-record YAML hash) but no `expected_anchor_checksum` except for hybrid files (characters, diegetic artifacts).
+- **`create-base-world` updates to emit `_source/` directly.** New worlds start in atomic-source form; no legacy storage accumulates after SPEC-13 migration.
 
 ## Problem Statement
 
@@ -156,16 +166,18 @@ Post-migration, each canon-mutating skill invocation follows this agent structur
 - Output: red-flag list or clean-bill-of-health
 - Invoked via: `Agent({subagent_type: 'code-reviewer' or domain-specific, prompt: '<audit task>'})`
 
-### Expected aggregate impact
+### Expected aggregate impact (revised per SPEC-13)
 
-| Metric | Current (animalia) | Post-Phase-2 | Reduction |
-|---|---|---|---|
-| canon-addition SKILL.md | 237 lines | ~120 lines | ~49% |
-| canon-addition references/ | 8 files / ~2500 lines | 3 files / ~600 lines | ~76% |
-| canon-addition templates/ | 5 files | 2 files (schemas engine-owned) | ~60% |
-| propose-new-characters SKILL.md | 594 lines | ~200 lines | ~66% |
-| Total canon-pipeline skill surface | ~6500 lines | ~2200 lines | ~66% |
-| canon-addition run tool-input tokens | current baseline | ~30% of baseline | ≥70% |
+| Metric | Current (animalia) | Post-SPEC-06 (pre-SPEC-13) | Post-SPEC-13 | Reduction vs current |
+|---|---|---|---|---|
+| canon-addition SKILL.md | 237 lines | ~120 lines | ~95 lines | ~60% |
+| canon-addition references/ | 8 files / ~2500 lines | 3 files / ~600 lines | 2 files / ~360 lines | ~86% |
+| canon-addition templates/ | 5 files | 2 files | 2 files (schemas engine-owned) | ~60% |
+| character-generation SKILL.md | 433 lines | ~180 lines | ~155 lines | ~64% |
+| continuity-audit SKILL.md | 486 lines | ~200 lines | ~150 lines | ~69% |
+| propose-new-characters SKILL.md | 594 lines | ~200 lines | ~170 lines | ~71% |
+| Total canon-pipeline skill surface | ~6500 lines | ~2200 lines | ~1700 lines | ~74% |
+| canon-addition run tool-input tokens (large delivery) | baseline | ~30% of baseline | ~20% of baseline | ≥80% |
 
 ### Meta-skills (explicitly out of scope)
 
@@ -186,7 +198,7 @@ Post-migration, each canon-mutating skill invocation follows this agent structur
 
 - **Phase 1 pilot acceptance**: canon-addition run on animalia with a sample proposal:
   - Pre-flight tokens: <30% of current baseline (measured)
-  - Zero raw `Read CANON_LEDGER.md` calls (Hook 2 blocks any attempt)
+  - Zero raw `Read` calls on `_source/canon/` or `_source/change-log/` (Hook 2 blocks any oversize directory-read attempt post-SPEC-13; pre-SPEC-13 the equivalent guard was on `CANON_LEDGER.md`)
   - Phase 0–11 reasoning unchanged in output quality (human review)
 - **Phase 2 full-migration acceptance**: all 8 skills run end-to-end via engine:
   - Canon-addition large delivery (≥6 required_world_updates): single `submit_patch_plan` call, zero raw Edit
