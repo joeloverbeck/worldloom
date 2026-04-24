@@ -33,6 +33,14 @@ import { extractScopedReferences } from "../parse/scoped";
 import { extractStructuredRecordEdges } from "../parse/structured-edges";
 import { extractSemanticEdges } from "../parse/semantic";
 import { extractYamlNodes } from "../parse/yaml";
+import {
+  ATOMIC_LOGICAL_WORLD_FILES,
+  createAtomicLogicalFileResults,
+  hasAtomicSourceRecords,
+  listAtomicSourceFiles,
+  loadAtomicEntityRegistry,
+  parseAtomicSourceFile
+} from "../parse/atomic";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
@@ -133,8 +141,11 @@ export function parseWorldFile(
 
 export function finalizeEntityState(db: Database.Database, worldRoot: string, worldSlug: string): void {
   const proseNodes = loadPersistedProseNodes(db, worldSlug);
-  const ontologyPath = path.join(resolveWorldDirectory(worldRoot, worldSlug), "ONTOLOGY.md");
-  const registry = loadOntologyRegistry(ontologyPath);
+  const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
+  const ontologyPath = path.join(worldDirectory, "ONTOLOGY.md");
+  const registry = hasAtomicSourceRecords(worldDirectory)
+    ? loadAtomicEntityRegistry(worldDirectory)
+    : loadOntologyRegistry(ontologyPath);
   const { entityNodes, entities, aliases, mentions, edges, validationResults } = extractEntities(
     { type: "root", children: [] },
     proseNodes,
@@ -275,7 +286,11 @@ export function buildWorldIndex(worldRoot: string, worldSlug: string): BuildLike
   const db = openIndex(worldRoot, worldSlug);
 
   try {
-    const missingMandatory = findMissingMandatoryFiles(resolveWorldDirectory(worldRoot, worldSlug));
+    const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
+    const missingMandatory = findMissingMandatoryFiles(
+      worldDirectory,
+      hasAtomicSourceRecords(worldDirectory)
+    );
     if (missingMandatory.length > 0) {
       console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
       return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
@@ -304,7 +319,11 @@ export function syncWorldIndex(worldRoot: string, worldSlug: string): BuildLikeR
   }
 
   try {
-    const missingMandatory = findMissingMandatoryFiles(resolveWorldDirectory(worldRoot, worldSlug));
+    const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
+    const missingMandatory = findMissingMandatoryFiles(
+      worldDirectory,
+      hasAtomicSourceRecords(worldDirectory)
+    );
     if (missingMandatory.length > 0) {
       console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
       return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
@@ -323,6 +342,14 @@ function reindexAllFiles(
 ): BuildLikeResult {
   const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
   const { indexable, unexpected } = enumerate(worldDirectory);
+  const atomicMode = hasAtomicSourceRecords(worldDirectory);
+  const filesToIndex = atomicMode
+    ? indexable.filter(
+        (filePath) => !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
+      )
+    : indexable;
+  const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
+  const atomicFiles = atomicMode ? listAtomicSourceFiles(worldDirectory) : [];
   const indexedBefore = new Set(listIndexedFiles(db, worldSlug));
   let changedNodeCount = 0;
   let yamlBlockCount = 0;
@@ -330,8 +357,45 @@ function reindexAllFiles(
 
   clearEntityState(db);
 
-  for (const relativeFilePath of indexable) {
+  for (const relativeFilePath of filesToIndex) {
     const parsed = parseWorldFile(worldRoot, worldSlug, relativeFilePath);
+    const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
+    const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
+
+    yamlBlockCount += parsed.yamlBlockCount;
+    yamlFailureCount += parsed.yamlFailureCount;
+    indexedBefore.delete(relativeFilePath);
+
+    if (!shouldProcess) {
+      continue;
+    }
+
+    db.transaction(() => {
+      insertParsedFile(db, worldSlug, parsed);
+      upsertFileVersion(db, worldSlug, relativeFilePath, parsed.contentHash);
+    })();
+    changedNodeCount += parsed.nodes.length;
+  }
+
+  for (const parsed of atomicLogicalFiles) {
+    const previousHash = getFileVersion(db, worldSlug, parsed.relativeFilePath);
+    const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
+
+    indexedBefore.delete(parsed.relativeFilePath);
+
+    if (!shouldProcess) {
+      continue;
+    }
+
+    db.transaction(() => {
+      insertParsedFile(db, worldSlug, parsed);
+      upsertFileVersion(db, worldSlug, parsed.relativeFilePath, parsed.contentHash);
+    })();
+    changedNodeCount += parsed.nodes.length;
+  }
+
+  for (const relativeFilePath of atomicFiles) {
+    const parsed = parseAtomicSourceFile(worldRoot, worldSlug, relativeFilePath);
     const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
     const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
 
@@ -438,11 +502,14 @@ function clearEntityState(db: Database.Database): void {
       WHERE node_id IN (
         SELECT node_id
         FROM nodes
-        WHERE node_type IN ('named_entity', 'scoped_reference')
+        WHERE node_type = 'scoped_reference'
+           OR (node_type = 'named_entity' AND node_id LIKE 'entity:%')
       )
     `
   ).run();
-  db.prepare("DELETE FROM nodes WHERE node_type IN ('named_entity', 'scoped_reference')").run();
+  db.prepare(
+    "DELETE FROM nodes WHERE node_type = 'scoped_reference' OR (node_type = 'named_entity' AND node_id LIKE 'entity:%')"
+  ).run();
 }
 
 function loadPersistedProseNodes(db: Database.Database, worldSlug: string): NodeRow[] {
@@ -555,8 +622,10 @@ function deleteFile(filePath: string): void {
   unlinkSync(filePath);
 }
 
-function findMissingMandatoryFiles(worldDirectory: string): string[] {
-  return [...MANDATORY_WORLD_FILES]
+function findMissingMandatoryFiles(worldDirectory: string, atomicMode: boolean): string[] {
+  const requiredFiles = atomicMode ? ["ONTOLOGY.md", "WORLD_KERNEL.md"] : [...MANDATORY_WORLD_FILES];
+
+  return requiredFiles
     .filter((fileName) => !existsSync(path.join(worldDirectory, fileName)))
     .sort((left, right) => left.localeCompare(right, "en-US"));
 }
