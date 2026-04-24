@@ -90,6 +90,25 @@ function seedServerWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: "SEC-GEO-001",
+        world_slug: "seeded",
+        file_path: "_source/geography/SEC-GEO-001.yaml",
+        heading_path: "SEC-GEO-001",
+        node_type: "section",
+        body: [
+          "id: SEC-GEO-001",
+          "file_class: GEOGRAPHY",
+          "order: 1",
+          "heading: Brinewick",
+          "heading_level: 2",
+          "body: Brinewick is a salt-port city.",
+          "touched_by_cf:",
+          "  - CF-0001",
+          "extensions: []",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: "M-1",
         world_slug: "seeded",
         file_path: "MYSTERY_RESERVE.md",
@@ -215,6 +234,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.find_sections_touched_by,
+        args: { world_slug: "seeded", cf_id: "CF-0001" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.find_named_entities,
         args: { world_slug: "seeded", names: ["Brinewick"] },
         expectError: false
@@ -274,6 +298,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.get_neighbors, args: { world_slug: "seeded", depth: 1 } },
       { name: MCP_TOOL_NAMES.get_context_packet, args: { world_slug: "seeded", seed_nodes: ["CF-0001"] } },
       { name: MCP_TOOL_NAMES.find_impacted_fragments, args: { node_ids: ["CF-0001"] } },
+      { name: MCP_TOOL_NAMES.find_sections_touched_by, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.find_named_entities, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.find_edit_anchors, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.validate_patch_plan, args: {} },

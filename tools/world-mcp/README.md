@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 1 (read side; `submit_patch_plan` stubbed until Phase 2)
-**Status**: Phase 2 retrieval additions in progress; stdio MCP entrypoint registers 11 tools in `src/server.ts`
+**Status**: Phase 2 retrieval additions in progress; stdio MCP entrypoint registers 12 tools in `src/server.ts`
 
 ## Tools
 
@@ -14,6 +14,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__get_neighbors(node_id, edge_types, depth)`
 - `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`
 - `mcp__worldloom__find_impacted_fragments(node_ids)`
+- `mcp__worldloom__find_sections_touched_by(cf_id)`
 - `mcp__worldloom__find_named_entities(names)`
 - `mcp__worldloom__find_edit_anchors(targets)`
 - `mcp__worldloom__validate_patch_plan(patch_plan)` *(Phase 1: returns `validator_unavailable` until SPEC-04 lands)*

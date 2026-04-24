@@ -21,7 +21,7 @@ test("listTools returns exactly the registered worldloom MCP tool inventory", as
     const names = listed.tools.map((tool) => tool.name).sort((left, right) => left.localeCompare(right));
     const expected = getRegisteredToolNames().sort((left, right) => left.localeCompare(right));
 
-    assert.equal(listed.tools.length, 11);
+    assert.equal(listed.tools.length, 12);
     assert.deepEqual(names, expected);
   } finally {
     await Promise.all([client.close(), server.close()]);

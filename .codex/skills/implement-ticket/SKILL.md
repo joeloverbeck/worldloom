@@ -65,6 +65,8 @@ If one primary class also changes a real shared contract, keep the primary class
 
 If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks.
 
+When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.

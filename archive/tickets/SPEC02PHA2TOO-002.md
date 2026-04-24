@@ -1,14 +1,14 @@
 # SPEC02PHA2TOO-002: `find_sections_touched_by` MCP tool — reverse CF→SEC lookup
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — introduces `tools/world-mcp/src/tools/find-sections-touched-by.ts` (new); extends `tools/world-mcp/src/tool-names.ts` (adds `find_sections_touched_by` to `MCP_TOOL_NAMES` + `MCP_TOOL_ORDER`); extends `tools/world-mcp/src/server.ts` (registers the tool + Zod input schema). No impact on existing tools.
+**Engine Changes**: Yes — introduces `tools/world-mcp/src/tools/find-sections-touched-by.ts` (new); extends `tools/world-mcp/src/tool-names.ts` (adds `find_sections_touched_by` to `MCP_TOOL_NAMES` + `MCP_TOOL_ORDER`); extends `tools/world-mcp/src/server.ts` (registers the tool + Zod input schema); adds focused tests and updates the package README tool inventory. No impact on existing tools.
 **Deps**: None
 
 ## Problem
 
-SPEC-02-PHASE2 §Deliverable 2 commits `mcp__worldloom__find_sections_touched_by(cf_id)` — a reverse-index lookup returning every SEC record whose `touched_by_cf[]` array contains the given CF ID OR whose `extensions[].originating_cf` matches. Today the world-mcp surface has no inverse of `touched_by_cf[]`: a caller given a CF can only find the SECs it touched by either loading every SEC and filtering, or reading the CF's `required_world_updates` (which is a file-class hint, not a per-SEC mapping). Both workarounds are brittle.
+SPEC-02-PHASE2 §Deliverable 2 commits `mcp__worldloom__find_sections_touched_by(cf_id)` — a reverse-index lookup returning every SEC record whose `touched_by_cf[]` array contains the given CF ID OR whose `extensions[].originating_cf` matches. At intake, the world-mcp surface had no inverse of `touched_by_cf[]`: a caller given a CF could only find the SECs it touched by either loading every SEC and filtering, or reading the CF's `required_world_updates` (which is a file-class hint, not a per-SEC mapping). Both workarounds were brittle.
 
 Consumers named in the spec: SPEC-04 `touched_by_cf_completeness` validator (defined at `specs/SPEC-04-validator-framework.md:89`) — verifies for each CF that `required_world_updates` ↔ SEC `touched_by_cf[]` and `extensions[].originating_cf` agree in both directions. SPEC-03 ticket SPEC03PATENG-009 integration capstone also exercises this tool in its post-apply sync assertion.
 
@@ -18,6 +18,7 @@ Consumers named in the spec: SPEC-04 `touched_by_cf_completeness` validator (def
 2. `ExtensionEntry.originating_cf` is the attribution field that `touched_by_cf_completeness` uses for its "OR in an extensions[].originating_cf" clause (per `specs/SPEC-04-validator-framework.md:89`). The field is parsed at `tools/world-index/src/parse/atomic.ts:275` and is represented on the record types at `tools/world-index/src/schema/types.ts:125, 199, 257`.
 3. Shared boundary: the reverse-lookup contract. The tool must return BOTH `touched_by_cf` matches AND `extensions[].originating_cf` matches in a single response so the validator (and downstream SPEC-03 assertions) can verify completeness without making two calls. The response shape distinguishes the two sources via `match_type: 'touched_by_cf' | 'extension'`.
 4. FOUNDATIONS principle under audit: Rule 6 (No Silent Retcons). `find_sections_touched_by` exposes the CF↔SEC structural mapping that makes Rule 6 machine-queryable. A CF that was used to justify a SEC edit must leave a discoverable trail; this tool is the query surface for that trail. Weakening the tool (e.g., returning only `touched_by_cf` hits without `extensions[].originating_cf` hits) would leave extension-attributed changes invisible to the validator — a silent-retcon opening.
+5. Package-local closeout check found `tools/world-mcp/README.md` still reported 11 registered tools and omitted `find_sections_touched_by`; that README is a same-package user-facing contract and was updated with the 12-tool inventory.
 
 ## Architecture Check
 
@@ -29,9 +30,9 @@ Consumers named in the spec: SPEC-04 `touched_by_cf_completeness` validator (def
 
 1. Tool registers in MCP_TOOL_NAMES / MCP_TOOL_ORDER → codebase grep-proof (`grep -n "find_sections_touched_by" tools/world-mcp/src/tool-names.ts` returns ≥2 matches).
 2. Tool registers with MCP server → codebase grep-proof (`grep -n "find_sections_touched_by" tools/world-mcp/src/server.ts` returns ≥2 matches).
-3. `touched_by_cf[]` match returns correct SEC set → unit test: fixture world with CF-X listed in SEC-GEO-001.touched_by_cf; tool returns SEC-GEO-001 with `match_type: 'touched_by_cf'`.
-4. `extensions[].originating_cf` match returns correct SEC set → unit test: fixture world with SEC-INS-005 carrying `extensions: [{originating_cf: CF-Y, ...}]`; tool called with CF-Y returns SEC-INS-005 with `match_type: 'extension'`.
-5. Empty result for unreferenced CF → unit test: `findSectionsTouchedBy({ cf_id: "CF-9999" })` against a fixture where CF-9999 has no touches returns `{sections: [], total_count: 0}` — not an error, per SPEC-02-PHASE2 §Deliverable 2 contract.
+3. Live package proof uses the existing `tools/world-mcp/tests/tools/_shared.ts` temp-index harness, not a checked-in animalia fixture copy. `touched_by_cf[]` match returns correct SEC set → unit test: temp seeded world with CF-X listed in SEC-GEO-001.touched_by_cf; tool returns SEC-GEO-001 with `match_type: 'touched_by_cf'`.
+4. `extensions[].originating_cf` match returns correct SEC set → unit test: temp seeded world with SEC-INS-005 carrying `extensions: [{originating_cf: CF-Y, ...}]`; tool called with CF-Y returns SEC-INS-005 with `match_type: 'extension'`.
+5. Empty result for unreferenced CF → unit test: `findSectionsTouchedBy({ cf_id: "CF-9999" })` against a temp seeded world where CF-9999 has no touches returns `{sections: [], total_count: 0}` — not an error, per SPEC-02-PHASE2 §Deliverable 2 contract.
 6. Rule 6 alignment check → FOUNDATIONS alignment check: `docs/FOUNDATIONS.md` §Rule 6 + the CF↔SEC mapping described by SPEC-04 `touched_by_cf_completeness` both remain discoverable through this tool after the ticket lands.
 
 ## What to Change
@@ -96,7 +97,7 @@ Add `registerWrappedTool` call inside `createServer()` immediately after the `fi
 registerWrappedTool(
   server,
   "find_sections_touched_by",
-  "Reverse-index CF→SEC lookup: return SEC records whose touched_by_cf[] contains the CF or whose extensions[].originating_cf matches.",
+  "mcp__worldloom__find_sections_touched_by: Reverse-index CF to SEC lookup across touched_by_cf and extension attribution.",
   findSectionsTouchedByInputSchema,
   async (args) => findSectionsTouchedBy(args as unknown as Parameters<typeof findSectionsTouchedBy>[0])
 );
@@ -107,6 +108,10 @@ registerWrappedTool(
 - `tools/world-mcp/src/tools/find-sections-touched-by.ts` (new)
 - `tools/world-mcp/src/tool-names.ts` (modify — add registry entries)
 - `tools/world-mcp/src/server.ts` (modify — add import, Zod schema, registration call)
+- `tools/world-mcp/tests/tools/find-sections-touched-by.test.ts` (new — reverse lookup contract tests)
+- `tools/world-mcp/tests/server/list-tools.test.ts` (modify — registered tool count)
+- `tools/world-mcp/tests/server/dispatch.test.ts` (modify — dispatch coverage)
+- `tools/world-mcp/README.md` (modify — same-package tool inventory)
 
 ## Out of Scope
 
@@ -122,9 +127,9 @@ registerWrappedTool(
 1. `cd tools/world-mcp && npm run build` exits 0 with `dist/src/tools/find-sections-touched-by.js` present.
 2. `grep -c "find_sections_touched_by" tools/world-mcp/src/tool-names.ts` returns ≥2.
 3. `grep -c "find_sections_touched_by" tools/world-mcp/src/server.ts` returns ≥2.
-4. Unit test: fixture animalia copy with CF-0001 listed in `SEC-GEO-001.touched_by_cf[]` (confirmed via `worlds/animalia/_source/geography/SEC-GEO-001.yaml`); `findSectionsTouchedBy({ cf_id: "CF-0001", world_slug: "<fixture>" })` returns a response whose `sections[]` contains `{sec_id: "SEC-GEO-001", file_path: "...SEC-GEO-001.yaml", match_type: "touched_by_cf"}`.
-5. Unit test: fixture where SEC-INS-NNN has `extensions: [{originating_cf: "CF-XXXX", ...}]`; tool called with `cf_id: "CF-XXXX"` returns the SEC with `match_type: "extension"`.
-6. Unit test: `findSectionsTouchedBy({ cf_id: "CF-9999" })` against a fixture with no CF-9999 references returns `{sections: [], total_count: 0}` — NOT an error.
+4. Unit test: temp seeded world with CF-0001 listed in `SEC-GEO-001.touched_by_cf[]`; `findSectionsTouchedBy({ cf_id: "CF-0001", world_slug: "seeded" })` returns a response whose `sections[]` contains `{sec_id: "SEC-GEO-001", file_path: "_source/geography/SEC-GEO-001.yaml", match_type: "touched_by_cf"}`.
+5. Unit test: temp seeded world where SEC-INS-005 has `extensions: [{originating_cf: "CF-0002", ...}]`; tool called with `cf_id: "CF-0002"` returns the SEC with `match_type: "extension"`.
+6. Unit test: `findSectionsTouchedBy({ cf_id: "CF-9999" })` against a temp seeded world with no CF-9999 references returns `{sections: [], total_count: 0}` — NOT an error.
 7. Unit test: `findSectionsTouchedBy({ cf_id: "NOT-A-CF" })` returns `McpError` with code `invalid_input`.
 
 ### Invariants
@@ -138,10 +143,27 @@ registerWrappedTool(
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/find-sections-touched-by.test.ts` (new) — fixture-based suite covering `touched_by_cf` match, `extensions[].originating_cf` match, both-match double-return, empty result, and `invalid_input` error. Rationale: the tool is net-new; the suite anchors the reverse-index contract the SPEC-04 validator and SPEC-03 capstone depend on.
+1. `tools/world-mcp/tests/tools/find-sections-touched-by.test.ts` (new) — temp-index harness suite covering `touched_by_cf` match, `extensions[].originating_cf` match, both-match double-return, empty result, and `invalid_input` error. Rationale: the tool is net-new; the suite anchors the reverse-index contract the SPEC-04 validator and SPEC-03 capstone depend on without depending on live-world generated state.
 
 ### Commands
 
 1. `cd tools/world-mcp && npm run build` (targeted — tsc compile).
 2. `cd tools/world-mcp && npm run test` (full package suite — ensures existing tool tests still pass alongside the new find-sections-touched-by tests).
 3. `grep -n "find_sections_touched_by" tools/world-mcp/src/tool-names.ts tools/world-mcp/src/server.ts` — expect ≥4 total matches confirming registration.
+
+## Outcome
+
+Implemented `mcp__worldloom__find_sections_touched_by` as a read-only reverse CF→SEC lookup over indexed section YAML bodies. The tool validates `cf_id`, opens the requested world's index through the existing lifecycle checks, returns tagged `touched_by_cf` and `extension` matches, preserves double-return behavior when both signals exist, and returns an empty success payload for unreferenced CF IDs.
+
+The MCP registry, server registration, dispatch/list-tools tests, focused tool tests, and package README inventory now all include the new tool.
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm run build` — passed; `tools/world-mcp/dist/src/tools/find-sections-touched-by.js` exists.
+2. `cd tools/world-mcp && node --test dist/tests/tools/find-sections-touched-by.test.js` — passed.
+3. `cd tools/world-mcp && npm run test` — passed; 114 tests passed.
+4. `grep -n "find_sections_touched_by" tools/world-mcp/src/tool-names.ts tools/world-mcp/src/server.ts` — passed; 4 matches across registry and server.
+
+## Deviations
+
+The test proof uses the existing temp-index harness in `tools/world-mcp/tests/tools/_shared.ts` rather than a live animalia fixture copy. This keeps the proof independent of gitignored world generated state while still exercising the real indexed `nodes` table contract.

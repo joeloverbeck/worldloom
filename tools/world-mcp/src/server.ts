@@ -10,6 +10,7 @@ import { allocateNextId } from "./tools/allocate-next-id";
 import { findEditAnchors } from "./tools/find-edit-anchors";
 import { findImpactedFragments } from "./tools/find-impacted-fragments";
 import { findNamedEntities } from "./tools/find-named-entities";
+import { findSectionsTouchedBy } from "./tools/find-sections-touched-by";
 import { getContextPacket } from "./tools/get-context-packet";
 import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
@@ -100,6 +101,11 @@ const getContextPacketInputSchema = z.object({
 const findImpactedFragmentsInputSchema = z.object({
   world_slug: z.string().min(1),
   node_ids: z.array(z.string().min(1))
+});
+
+const findSectionsTouchedByInputSchema = z.object({
+  cf_id: z.string().regex(/^CF-\d{4}$/),
+  world_slug: z.string().min(1)
 });
 
 const findNamedEntitiesInputSchema = z.object({
@@ -212,6 +218,13 @@ export function createServer(): McpServer {
     "Find downstream world fragments impacted by proposed node mutations.",
     findImpactedFragmentsInputSchema,
     async (args) => findImpactedFragments(args as unknown as Parameters<typeof findImpactedFragments>[0])
+  );
+  registerWrappedTool(
+    server,
+    "find_sections_touched_by",
+    "mcp__worldloom__find_sections_touched_by: Reverse-index CF to SEC lookup across touched_by_cf and extension attribution.",
+    findSectionsTouchedByInputSchema,
+    async (args) => findSectionsTouchedBy(args as unknown as Parameters<typeof findSectionsTouchedBy>[0])
   );
   registerWrappedTool(
     server,

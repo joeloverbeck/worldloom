@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — edits `tickets/SPEC03PATENG-009.md` (single-line `Deps:` field update). No code changes; ticket-metadata-only.
-**Deps**: archive/tickets/SPEC02PHA2TOO-001.md, SPEC02PHA2TOO-002, SPEC02PHA2TOO-003
+**Deps**: archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, SPEC02PHA2TOO-003
 
 ## Problem
 
@@ -14,7 +14,7 @@ Today `tickets/SPEC03PATENG-009.md:7` reads: `**Deps**: SPEC03PATENG-007 (transi
 
 ## Assumption Reassessment (2026-04-25)
 
-1. `tickets/SPEC03PATENG-009.md:7` currently declares `**Deps**: SPEC03PATENG-007 (transitive head — ...)`. Confirmed via pre-flight grep (`grep -n "Deps" tickets/SPEC03PATENG-009.md` at Step 2 of this batch's spec-to-tickets run). The edit adds `archive/tickets/SPEC02PHA2TOO-001.md` plus SPEC02PHA2TOO-002/003 to this line without removing the existing SPEC03PATENG-007 anchor. Reassessment correction from post-ticket review: ticket 001 is now archived, so the dependency should resolve to its archived path.
+1. `tickets/SPEC03PATENG-009.md:7` currently declares `**Deps**: SPEC03PATENG-007 (transitive head — ...)`. Confirmed via pre-flight grep (`grep -n "Deps" tickets/SPEC03PATENG-009.md` at Step 2 of this batch's spec-to-tickets run). The edit adds `archive/tickets/SPEC02PHA2TOO-001.md`, `archive/tickets/SPEC02PHA2TOO-002.md`, and SPEC02PHA2TOO-003 to this line without removing the existing SPEC03PATENG-007 anchor. Reassessment correction from post-ticket review: tickets 001 and 002 are now archived, so those dependencies should resolve to their archived paths.
 2. `tickets/SPEC03PATENG-005.md:7` declares `**Deps**: SPEC03PATENG-001`. SPEC-02-PHASE2 §Out of Scope explicitly says token issuance is NOT delivered here, so 005's Deps weakens only to "shared HMAC contract definition" (already implicit in 005's existing architectural notes). 005 is left unchanged per the spec's directive; this ticket does NOT edit 005.
 3. Shared boundary: the ticket-level dependency graph. `Deps:` fields are the audit trail for cross-ticket ordering; a missing cross-ref means future implementation of 009 has no machine-readable signal that 001/002/003 must land first. Updating the line preserves graph integrity.
 4. FOUNDATIONS principle under audit: Rule 5 (No Consequence Evasion). The spec's directive cites Rule 5 by name: "the dependency chain must be visible in BOTH directions once tickets exist on both sides." This ticket is the execution of that directive — declining to land it would leave a Rule-5 gap the spec author explicitly flagged.
@@ -28,7 +28,7 @@ Today `tickets/SPEC03PATENG-009.md:7` reads: `**Deps**: SPEC03PATENG-007 (transi
 
 ## Verification Layers
 
-1. 009's Deps line includes all three new prerequisites → codebase grep-proof (`grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|SPEC02PHA2TOO-002\|SPEC02PHA2TOO-003" tickets/SPEC03PATENG-009.md` returns ≥3 matches on the `**Deps**:` line).
+1. 009's Deps line includes all three new prerequisites → codebase grep-proof (`grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|archive/tickets/SPEC02PHA2TOO-002.md\|SPEC02PHA2TOO-003" tickets/SPEC03PATENG-009.md` returns ≥3 matches on the `**Deps**:` line).
 2. 009's existing SPEC03PATENG-007 transitive-head anchor is preserved → codebase grep-proof (`grep -n "SPEC03PATENG-007" tickets/SPEC03PATENG-009.md` still returns ≥1 match on the `**Deps**:` line).
 3. 005 is NOT edited → codebase grep-proof (`git diff tickets/SPEC03PATENG-005.md` returns empty after this ticket lands).
 4. Rule 5 alignment → FOUNDATIONS alignment check: SPEC-02-PHASE2's Ticket-decomposition directive citation resolves; 009's prerequisite chain is now bidirectionally visible.
@@ -41,10 +41,9 @@ Replace (current):
 > **Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields)
 
 With (target):
-> **Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields), SPEC02PHA2TOO-001, SPEC02PHA2TOO-002, SPEC02PHA2TOO-003 (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
+> **Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields), archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, SPEC02PHA2TOO-003 (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
 
-Post-ticket-review correction: because ticket 001 is archived, use:
-> **Deps**: SPEC03PATENG-007 (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; the full DAG is reconstructible from the upstream tickets' own `Deps` fields), archive/tickets/SPEC02PHA2TOO-001.md, SPEC02PHA2TOO-002, SPEC02PHA2TOO-003 (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
+Post-ticket-review correction: because tickets 001 and 002 are archived, the target above uses their archived paths.
 
 ## Files to Touch
 
@@ -61,7 +60,7 @@ Post-ticket-review correction: because ticket 001 is archived, use:
 
 ### Tests That Must Pass
 
-1. `grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|SPEC02PHA2TOO-002\|SPEC02PHA2TOO-003" tickets/SPEC03PATENG-009.md` returns ≥3 matches on `**Deps**:` line 7.
+1. `grep -n "archive/tickets/SPEC02PHA2TOO-001.md\|archive/tickets/SPEC02PHA2TOO-002.md\|SPEC02PHA2TOO-003" tickets/SPEC03PATENG-009.md` returns ≥3 matches on `**Deps**:` line 7.
 2. `grep -n "SPEC03PATENG-007" tickets/SPEC03PATENG-009.md` still returns ≥1 match on line 7 (existing transitive-head anchor preserved).
 3. `git diff tickets/SPEC03PATENG-005.md` returns empty (005 NOT edited).
 4. `git diff tickets/SPEC03PATENG-006.md` returns empty (006 NOT edited).
@@ -83,5 +82,5 @@ Post-ticket-review correction: because ticket 001 is archived, use:
 ### Commands
 
 1. `grep -n "Deps" tickets/SPEC03PATENG-009.md` — expect the line-7 match including all three new ticket IDs.
-2. `grep -c "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md` — expect 3, with ticket 001 represented as `archive/tickets/SPEC02PHA2TOO-001.md`.
+2. `grep -c "SPEC02PHA2TOO-00[123]" tickets/SPEC03PATENG-009.md` — expect 3, with tickets 001 and 002 represented as `archive/tickets/SPEC02PHA2TOO-001.md` and `archive/tickets/SPEC02PHA2TOO-002.md`.
 3. `git diff --stat tickets/SPEC03PATENG-005.md tickets/SPEC03PATENG-006.md tickets/SPEC03PATENG-009.md` — expect modifications ONLY in 009; 005 and 006 must show zero changes.
