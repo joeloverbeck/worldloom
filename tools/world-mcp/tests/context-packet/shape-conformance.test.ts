@@ -91,14 +91,15 @@ test("context packet output matches the canonical top-level and layer keys", asy
     const contractTree = extractContractKeyTree();
     assert.deepEqual(Object.keys(packet), Object.keys(contractTree));
     assert.deepEqual(Object.keys(packet.task_header), contractTree.task_header);
-    assert.deepEqual(Object.keys(packet.nucleus), contractTree.nucleus);
-    assert.deepEqual(Object.keys(packet.envelope), contractTree.envelope);
-    assert.deepEqual(Object.keys(packet.constraints), contractTree.constraints);
+    assert.deepEqual(Object.keys(packet.local_authority), contractTree.local_authority);
+    assert.deepEqual(Object.keys(packet.exact_record_links), contractTree.exact_record_links);
+    assert.deepEqual(Object.keys(packet.scoped_local_context), contractTree.scoped_local_context);
     assert.deepEqual(
-      Object.keys(packet.suggested_impact_surfaces),
-      contractTree.suggested_impact_surfaces
+      Object.keys(packet.governing_world_context),
+      contractTree.governing_world_context
     );
-    assert.equal(packet.task_header.packet_version, 1);
+    assert.deepEqual(Object.keys(packet.impact_surfaces), contractTree.impact_surfaces);
+    assert.equal(packet.task_header.packet_version, 2);
   } finally {
     destroyTempRepoRoot(root);
   }

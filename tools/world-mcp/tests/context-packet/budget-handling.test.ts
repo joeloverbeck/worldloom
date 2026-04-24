@@ -9,15 +9,6 @@ import {
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
 
 function seedBudgetWorld(root: string): void {
-  const extraSections = Array.from({ length: 10 }, (_, index) => ({
-    node_id: `seeded:GEOGRAPHY.md:Sibling:${index}`,
-    world_slug: "seeded",
-    file_path: "GEOGRAPHY.md",
-    heading_path: `Sibling ${index}`,
-    node_type: "section" as const,
-    body: `Sibling context ${index} ${"salt ".repeat(30)}`
-  }));
-
   seedWorld(root, {
     worldSlug: "seeded",
     nodes: [
@@ -27,7 +18,7 @@ function seedBudgetWorld(root: string): void {
         file_path: "WORLD_KERNEL.md",
         heading_path: "Kernel",
         node_type: "section",
-        body: "The world is governed by harsh brine politics."
+        body: `Kernel ${"salt ".repeat(120)}`
       },
       {
         node_id: "seeded:INVARIANTS.md:Rule:0",
@@ -35,117 +26,88 @@ function seedBudgetWorld(root: string): void {
         file_path: "INVARIANTS.md",
         heading_path: "Rule",
         node_type: "invariant",
-        body: "Salt routes remain contested."
+        body: `Invariant ${"brine ".repeat(120)}`
       },
       {
-        node_id: "CF-0001",
+        node_id: "seeded:EVERYDAY_LIFE.md:Dawn:0",
         world_slug: "seeded",
-        file_path: "CANON_LEDGER.md",
-        node_type: "canon_fact_record",
-        body: `CF-0001 ${"brine ".repeat(100)}`
+        file_path: "EVERYDAY_LIFE.md",
+        heading_path: "Dawn",
+        node_type: "section",
+        body: `Everyday ${"market ".repeat(120)}`
       },
       {
-        node_id: "seeded:GEOGRAPHY.md:Brinewick:0",
+        node_id: "DA-0002",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/report.md",
+        node_type: "diegetic_artifact_record",
+        body: "---\nauthor_character_id: CHAR-0002\n---\nReport body.\n"
+      },
+      {
+        node_id: "CHAR-0002",
+        world_slug: "seeded",
+        file_path: "characters/melissa-threadscar.md",
+        node_type: "character_record",
+        body: "---\nname: Melissa Threadscar\n---\nMelissa.\n"
+      },
+      {
+        node_id: "seeded:GEOGRAPHY.md:Harrowgate:0",
         world_slug: "seeded",
         file_path: "GEOGRAPHY.md",
-        heading_path: "Brinewick",
+        heading_path: "Harrowgate",
         node_type: "section",
-        body: `Brinewick ${"harbor ".repeat(80)}`
+        body: "Harrowgate is the filing location."
       },
       {
-        node_id: "M-1",
+        node_id: "DA-0002#scoped:harrowgate:0",
         world_slug: "seeded",
-        file_path: "MYSTERY_RESERVE.md",
-        heading_path: "M-1",
-        node_type: "mystery_reserve_entry",
-        body: `Mystery ${"unknown ".repeat(60)}`
-      },
-      ...extraSections
+        file_path: "diegetic-artifacts/report.md",
+        node_type: "scoped_reference",
+        body: "Harrowgate"
+      }
     ],
     edges: [
       {
-        source_node_id: "CF-0001",
-        target_node_id: "seeded:GEOGRAPHY.md:Brinewick:0",
-        edge_type: "required_world_update"
+        source_node_id: "DA-0002",
+        target_node_id: "CHAR-0002",
+        edge_type: "references_record"
       },
       {
-        source_node_id: "M-1",
-        target_node_id: "CF-0001",
-        edge_type: "firewall_for"
+        source_node_id: "DA-0002",
+        target_node_id: "DA-0002#scoped:harrowgate:0",
+        edge_type: "references_scoped_name"
+      },
+      {
+        source_node_id: "DA-0002",
+        target_node_id: "seeded:GEOGRAPHY.md:Harrowgate:0",
+        edge_type: "required_world_update"
       }
     ],
-    validationResults: [
+    scopedReferences: [
       {
+        reference_id: "DA-0002#scoped:harrowgate:0",
         world_slug: "seeded",
-        validator_name: "continuity",
-        severity: "warning",
-        code: "risk-1",
-        message: "First risk"
-      },
-      {
-        world_slug: "seeded",
-        validator_name: "continuity",
-        severity: "warning",
-        code: "risk-2",
-        message: "Second risk"
+        display_name: "Harrowgate",
+        reference_kind: "place",
+        relation: "filing_location",
+        source_node_id: "DA-0002"
       }
     ]
   });
 }
 
-test("default budget split preserves the spec percentages", () => {
+test("default budget split preserves the v2 completeness-class percentages", () => {
   assert.deepEqual(DEFAULT_BUDGET_SPLIT, {
-    nucleus: 0.4,
-    envelope: 0.25,
-    constraints: 0.15,
-    suggested_impact_surfaces: 0.1,
+    local_authority: 0.25,
+    exact_record_links: 0.15,
+    scoped_local_context: 0.2,
+    governing_world_context: 0.2,
+    impact_surfaces: 0.1,
     overhead: 0.1
   });
 });
 
-test("budget pressure drops envelope before suggested impact and open risks", async () => {
-  const root = createTempRepoRoot();
-
-  try {
-    seedBudgetWorld(root);
-
-    const generousPacket = await withRepoRoot(root, () =>
-      assembleContextPacket({
-        task_type: "canon_addition",
-        world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
-        token_budget: 4000
-      })
-    );
-    const constrainedPacket = await withRepoRoot(root, () =>
-      assembleContextPacket({
-        task_type: "canon_addition",
-        world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
-        token_budget: 500
-      })
-    );
-
-    assert.ok(!("code" in generousPacket));
-    assert.ok(!("code" in constrainedPacket));
-    assert.ok(constrainedPacket.nucleus.nodes.length > 0);
-    assert.ok(
-      constrainedPacket.envelope.nodes.length < generousPacket.envelope.nodes.length,
-      "envelope should trim first under budget pressure"
-    );
-    assert.ok(
-      constrainedPacket.suggested_impact_surfaces.nodes.length <=
-        generousPacket.suggested_impact_surfaces.nodes.length
-    );
-    assert.ok(
-      constrainedPacket.constraints.open_risks.length <= generousPacket.constraints.open_risks.length
-    );
-  } finally {
-    destroyTempRepoRoot(root);
-  }
-});
-
-test("assembler returns budget_exhausted_nucleus when the nucleus alone exceeds budget", async () => {
+test("assembler reports packet_incomplete_required_classes when local authority alone cannot fit", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -153,15 +115,50 @@ test("assembler returns budget_exhausted_nucleus when the nucleus alone exceeds 
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "canon_addition",
+        task_type: "diegetic_artifact_generation",
         world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
-        token_budget: 50
+        seed_nodes: ["DA-0002"],
+        token_budget: 20
       })
     );
 
     assert.ok("code" in result);
-    assert.equal(result.code, "budget_exhausted_nucleus");
+    assert.equal(result.code, "packet_incomplete_required_classes");
+    assert.deepEqual(result.details?.retained_classes, []);
+    assert.deepEqual(result.details?.missing_classes, [
+      "local_authority",
+      "exact_record_links",
+      "scoped_local_context",
+      "governing_world_context"
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("budget insufficiency retains locality-first classes before dropping governing background", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedBudgetWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "diegetic_artifact_generation",
+        world_slug: "seeded",
+        seed_nodes: ["DA-0002"],
+        token_budget: 260
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "packet_incomplete_required_classes");
+    assert.deepEqual(result.details?.retained_classes, [
+      "local_authority",
+      "exact_record_links",
+      "scoped_local_context"
+    ]);
+    assert.deepEqual(result.details?.missing_classes, ["governing_world_context"]);
   } finally {
     destroyTempRepoRoot(root);
   }

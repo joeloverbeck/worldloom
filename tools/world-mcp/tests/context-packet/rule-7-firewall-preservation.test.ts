@@ -64,8 +64,8 @@ test("canon_addition packets surface Mystery Reserve firewalls for seed facts", 
 
     assert.ok(!("code" in packet));
     assert.ok(
-      packet.nucleus.nodes.some((node) => node.id === "M-1") ||
-        packet.constraints.open_risks.some(
+      packet.governing_world_context.nodes.some((node) => node.id === "M-1") ||
+        packet.governing_world_context.open_risks.some(
           (risk) => risk.code === "mystery_reserve_firewall" && risk.message.includes("M-1")
         )
     );

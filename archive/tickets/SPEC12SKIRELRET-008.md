@@ -1,9 +1,9 @@
 # SPEC12SKIRELRET-008: Context packet v2 (wholesale replacement)
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — rewrites `tools/world-mcp/src/context-packet/` module (shared types, assembler, five sub-builders), updates `tools/world-mcp/src/errors.ts` (removes `budget_exhausted_nucleus`, adds `packet_incomplete_required_classes`), refreshes `tools/world-mcp/src/tools/get-context-packet.ts` imports, and regenerates 5 affected test files. v1 packet shape removed outright; no backwards-compatibility shim.
+**Engine Changes**: Yes — rewrites `tools/world-mcp/src/context-packet/` to the v2 completeness classes (new locality-first builders, deleted v1 builders), updates `tools/world-mcp/src/errors.ts` (removes `budget_exhausted_nucleus`, adds `packet_incomplete_required_classes`), updates the authoritative packet contract doc in `docs/CONTEXT-PACKET-CONTRACT.md`, and rewrites the affected `tools/world-mcp` packet tests. v1 packet shape removed outright; no backwards-compatibility shim.
 **Deps**: SPEC12SKIRELRET-002, SPEC12SKIRELRET-003
 
 ## Problem
@@ -16,10 +16,11 @@ Per SPEC-12 D6, `get_context_packet` must bump `packet_version` from 1 to 2 and 
 
 1. `tools/world-mcp/src/context-packet/shared.ts:31-62` defines v1 `ContextPacket` with five top-level keys (`task_header, nucleus, envelope, constraints, suggested_impact_surfaces`) and `packet_version: 1`. `DEFAULT_PACKET_VERSION = 1 as const` at line 64. `DEFAULT_BUDGET_SPLIT` at lines 66-72 keyed by v1 layer names. `estimatePacketTokens` at lines 111-146 itemizes v1 layers.
 2. `tools/world-mcp/src/context-packet/assemble.ts:143-152` emits `budget_exhausted_nucleus` when the nucleus alone exceeds the requested budget. Per SPEC-12 D6 Error Subsumption, this is subsumed by `packet_incomplete_required_classes` with `missing_classes: ["local_authority"]` — one completeness-insufficiency error code in v2.
-3. Cross-package contract under audit: the packet shape is an output schema consumed by (a) in-repo tests in `tools/world-mcp/tests/` (6 files: `context-packet/shape-conformance.test.ts`, `context-packet/budget-handling.test.ts`, `tools/get-context-packet.test.ts`, `errors.test.ts`, `integration/spec02-verification.test.ts`, plus the new `context-packet/locality-first.test.ts`) and (b) future SPEC-06 Part A skills (not yet landed). No production consumer exists today — verified by grep across `.claude/skills/` returning zero matches for `packet_version`, `get_context_packet`, or the v1 layer names. The wholesale rewrite is safe because the consumer surface is contained within this ticket's own test rewrites.
+3. Cross-package contract under audit: the packet shape is an output schema consumed by (a) the authoritative packet contract doc `docs/CONTEXT-PACKET-CONTRACT.md`, (b) in-repo tests in `tools/world-mcp/tests/` (currently including `context-packet/shape-conformance.test.ts`, `context-packet/budget-handling.test.ts`, `context-packet/rule-7-firewall-preservation.test.ts`, `tools/get-context-packet.test.ts`, `errors.test.ts`, `integration/context-packet-canon-addition.test.ts`, and `integration/spec02-verification.test.ts`, plus the new `context-packet/locality-first.test.ts`), and (c) future SPEC-06 Part A skills (not yet landed). No production consumer exists today — verified by grep across `.claude/skills/` returning zero matches for `packet_version`, `get_context_packet`, or the v1 layer names. The wholesale rewrite is safe because the live consumer surface is confined to this contract doc and in-repo tests.
 4. FOUNDATIONS Rule 6 (No Silent Retcons): v1 is being REMOVED wholesale. Retcon justification: user explicitly confirmed Q1=(a) wholesale replacement during the /reassess-spec run in this session; no consumer depends on v1 today (see item 3); the spec's D6 Migration Posture section documents the removal; SPEC-12's Out of Scope explicitly excludes retaining a v1 shape alongside v2. This ticket's existence, cited with the spec's user-approved Migration Posture paragraph, is the attribution trail.
 5. FOUNDATIONS Rule 7 / §Tooling Recommendation enforcement surface under audit: the packet-assembly pipeline is the primary mechanism by which `docs/FOUNDATIONS.md` §Tooling Recommendation's "minimum complete input bundle" contract is realized. This ticket's v2 shape tightens — not weakens — that contract by making completeness classes explicit and making insufficiency a structured error rather than a silent shortfall. Mystery Reserve firewall preservation: `governing_world_context` class retains the existing `open_risks` surface and the `constraints` builder's MR-related rule emission unchanged; this ticket renames layers and tightens locality discipline without altering MR-firewall logic.
 6. Extends existing output schema — NOT additive: the packet shape is renamed wholesale. This is acceptable because (a) Q1=(a) user resolution captured the wholesale-rewrite approval, (b) the affected consumers are tests inside this same ticket, and (c) the spec's D6 Migration Posture paragraph documents every constant/literal that flips.
+7. Draft ticket mismatch corrected before implementation: the ticket's previous `Out of Scope` excluded `docs/CONTEXT-PACKET-CONTRACT.md`, but `tools/world-mcp/tests/context-packet/shape-conformance.test.ts` and `tools/world-mcp/tests/integration/spec02-verification.test.ts` both read that doc as the canonical schema authority. The doc update is required same-seam fallout for a truthful packet-v2 landing, so this ticket now owns it. Likewise, `tools/world-mcp/tests/integration/context-packet-canon-addition.test.ts` still asserts v1 packet structure and is part of the live rewrite blast radius.
 
 ## Architecture Check
 
@@ -110,18 +111,20 @@ Map the existing files to their v2 roles:
 
 Update all import sites.
 
-### 5. Update `tools/world-mcp/src/tools/get-context-packet.ts`
-
-No API signature change (args unchanged); only import updates + return-type reference.
-
-### 6. Rewrite affected tests
+### 5. Rewrite affected tests
 
 - `tools/world-mcp/tests/context-packet/shape-conformance.test.ts` — rewrite shape assertions to match v2 top-level keys.
 - `tools/world-mcp/tests/context-packet/budget-handling.test.ts` — rewrite to expect `packet_incomplete_required_classes` with varying `missing_classes` depending on which class is starved.
+- `tools/world-mcp/tests/context-packet/rule-7-firewall-preservation.test.ts` — update assertions from `nucleus` / `constraints` to the v2 `local_authority` / `governing_world_context` surfaces while preserving the Rule 7 firewall guarantee.
 - `tools/world-mcp/tests/tools/get-context-packet.test.ts` — update `packet_version` assertion from `1` to `2`.
 - `tools/world-mcp/tests/errors.test.ts` — remove `budget_exhausted_nucleus` from the expected-codes list; add `packet_incomplete_required_classes`.
+- `tools/world-mcp/tests/integration/context-packet-canon-addition.test.ts` — rewrite the bounded-packet assertions to the v2 class names.
 - `tools/world-mcp/tests/integration/spec02-verification.test.ts:322` — update `packet_version` assertion from `1` to `2`; SPEC-02 is already archived (`archive/specs/SPEC-02-retrieval-mcp-server.md`) so the assertion can stay as a regression guard with the new version.
 - `tools/world-mcp/tests/context-packet/locality-first.test.ts` (new) — assert `local_authority` populated before `governing_world_context` under tight budgets.
+
+### 6. Rewrite the authoritative packet contract doc
+
+Regenerate `docs/CONTEXT-PACKET-CONTRACT.md` for the v2 shape. The live repo treats this file as the canonical packet-schema reference and the shape-conformance tests parse it directly, so the YAML example, layer semantics, and assembly-discipline prose must move from v1 (`nucleus`, `envelope`, `constraints`, `suggested_impact_surfaces`) to the v2 completeness classes (`local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, `impact_surfaces`).
 
 ## Files to Touch
 
@@ -133,18 +136,20 @@ No API signature change (args unchanged); only import updates + return-type refe
 - `tools/world-mcp/src/context-packet/constraints.ts` → rename to `governing-world-context.ts` (rewrite)
 - `tools/world-mcp/src/context-packet/suggested-impact.ts` → rename to `impact-surfaces.ts` (rewrite)
 - `tools/world-mcp/src/errors.ts` (modify — swap one error code)
-- `tools/world-mcp/src/tools/get-context-packet.ts` (modify — import updates only)
+- `docs/CONTEXT-PACKET-CONTRACT.md` (rewrite)
 - `tools/world-mcp/tests/context-packet/shape-conformance.test.ts` (rewrite)
 - `tools/world-mcp/tests/context-packet/budget-handling.test.ts` (rewrite)
+- `tools/world-mcp/tests/context-packet/rule-7-firewall-preservation.test.ts` (modify)
 - `tools/world-mcp/tests/context-packet/locality-first.test.ts` (new)
 - `tools/world-mcp/tests/tools/get-context-packet.test.ts` (modify)
 - `tools/world-mcp/tests/errors.test.ts` (modify)
+- `tools/world-mcp/tests/integration/context-packet-canon-addition.test.ts` (modify)
 - `tools/world-mcp/tests/integration/spec02-verification.test.ts` (modify)
 
 ## Out of Scope
 
 - v1 backwards-compatibility shim (explicitly excluded per Q1=(a))
-- Docs rewrite of `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/FOUNDATIONS.md`, `CLAUDE.md` (covered by ticket 009)
+- Follow-on docs rewrite beyond the packet contract itself (`docs/MACHINE-FACING-LAYER.md`, `docs/FOUNDATIONS.md`, `CLAUDE.md`) (covered by ticket 009)
 - Live-corpus testing against animalia (covered by ticket 010)
 
 ## Acceptance Criteria
@@ -159,7 +164,8 @@ No API signature change (args unchanged); only import updates + return-type refe
 6. When `token_budget` is too small for required classes, the call returns `packet_incomplete_required_classes` with `missing_classes`, `requested_budget`, `minimum_required_budget`, `retained_classes` populated.
 7. `budget_exhausted_nucleus` is NEVER emitted (removed from error codes union).
 8. `governing_world_context` still contains the FOUNDATIONS-required surfaces (active_rules, protected_surfaces, required_output_schema, prohibited_moves, open_risks) with semantics preserved.
-9. All rewritten tests pass.
+9. `docs/CONTEXT-PACKET-CONTRACT.md` documents the same v2 top-level keys and layer semantics that the implementation emits.
+10. All rewritten tests pass.
 
 ### Invariants
 
@@ -176,15 +182,31 @@ No API signature change (args unchanged); only import updates + return-type refe
 1. `tools/world-mcp/tests/context-packet/shape-conformance.test.ts` — rewritten for v2 shape.
 2. `tools/world-mcp/tests/context-packet/budget-handling.test.ts` — rewritten for `packet_incomplete_required_classes` with multiple `missing_classes` cases.
 3. `tools/world-mcp/tests/context-packet/locality-first.test.ts` (new) — asserts `local_authority` populated before `governing_world_context` when budget is tight.
-4. `tools/world-mcp/tests/tools/get-context-packet.test.ts` — updated `packet_version` assertion.
-5. `tools/world-mcp/tests/errors.test.ts` — updated error-codes list.
-6. `tools/world-mcp/tests/integration/spec02-verification.test.ts` — updated `packet_version` assertion.
+4. `tools/world-mcp/tests/context-packet/rule-7-firewall-preservation.test.ts` — updated for the v2 class names while preserving the Rule 7 assertion.
+5. `tools/world-mcp/tests/tools/get-context-packet.test.ts` — updated `packet_version` assertion and packet-content expectations.
+6. `tools/world-mcp/tests/errors.test.ts` — updated error-codes list.
+7. `tools/world-mcp/tests/integration/context-packet-canon-addition.test.ts` — updated bounded-packet assertions to the v2 shape.
+8. `tools/world-mcp/tests/integration/spec02-verification.test.ts` — updated `packet_version` assertion and canonical-shape check.
 
 ### Commands
 
-1. `pnpm --filter @worldloom/world-mcp test tests/context-packet/`
-2. `pnpm --filter @worldloom/world-mcp test tests/tools/get-context-packet.test.ts`
-3. `pnpm --filter @worldloom/world-mcp test tests/errors.test.ts`
-4. `pnpm --filter @worldloom/world-mcp test tests/integration/`
-5. `pnpm --filter @worldloom/world-mcp test`
-6. `pnpm --filter @worldloom/world-mcp build` (build runs `tsc -p tsconfig.json`, which is the typecheck surface; the `world-mcp` package does not ship a separate `typecheck` script)
+1. `cd tools/world-mcp && npm run build`
+2. `cd tools/world-mcp && node --test dist/tests/context-packet/*.test.js dist/tests/tools/get-context-packet.test.js dist/tests/errors.test.js dist/tests/integration/context-packet-canon-addition.test.js dist/tests/integration/spec02-verification.test.js`
+3. `cd tools/world-mcp && npm test`
+
+## Outcome
+
+- Completed: 2026-04-24
+- Replaced the v1 packet shape with v2 completeness classes: `local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, and `impact_surfaces`.
+- Removed the dead v1 builder files and replaced them with locality-first builders plus the unified insufficiency error `packet_incomplete_required_classes`.
+- Rewrote `docs/CONTEXT-PACKET-CONTRACT.md` and the packet-focused `tools/world-mcp` tests to the emitted v2 schema.
+
+## Verification Result
+
+- `cd tools/world-mcp && npm run build`
+- `cd tools/world-mcp && node --test dist/tests/context-packet/*.test.js dist/tests/tools/get-context-packet.test.js dist/tests/errors.test.js dist/tests/integration/context-packet-canon-addition.test.js dist/tests/integration/spec02-verification.test.js`
+- `cd tools/world-mcp && npm test`
+
+## Deviations
+
+- `tools/world-mcp/src/tools/get-context-packet.ts` did not need an import or API edit because the `assemble.ts` export surface stayed stable while the internal packet implementation changed wholesale.

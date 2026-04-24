@@ -2,10 +2,14 @@ import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 import type { TaskType } from "../ranking/profiles";
 
-import { buildConstraints } from "./constraints";
-import { buildEnvelope } from "./envelope";
-import { buildNucleus } from "./nucleus";
-import { buildSuggestedImpact } from "./suggested-impact";
+import { buildExactRecordLinks } from "./exact-record-links";
+import { buildGoverningWorldContext } from "./governing-world-context";
+import {
+  buildLocalAuthority,
+  findLocalAuthoritySourceNodeIds
+} from "./local-authority";
+import { buildImpactSurfaces } from "./impact-surfaces";
+import { buildScopedLocalContext } from "./scoped-local-context";
 import {
   DEFAULT_BUDGET_SPLIT,
   DEFAULT_PACKET_VERSION,
@@ -20,6 +24,15 @@ import {
 
 export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
 export type { ContextPacket, ContextPacketArgs } from "./shared";
+
+const REQUIRED_PACKET_CLASSES = [
+  "local_authority",
+  "exact_record_links",
+  "scoped_local_context",
+  "governing_world_context"
+] as const;
+
+type RequiredPacketClass = (typeof REQUIRED_PACKET_CLASSES)[number];
 
 function makeEmptyPacket(args: {
   taskType: TaskType;
@@ -39,22 +52,28 @@ function makeEmptyPacket(args: {
       seed_nodes: uniqueStrings(args.seedNodes),
       packet_version: DEFAULT_PACKET_VERSION
     },
-    nucleus: {
+    local_authority: {
       nodes: [],
       why_included: []
     },
-    envelope: {
+    exact_record_links: {
       nodes: [],
       why_included: []
     },
-    constraints: {
+    scoped_local_context: {
+      nodes: [],
+      why_included: []
+    },
+    governing_world_context: {
       active_rules: [],
       protected_surfaces: [],
       required_output_schema: [],
       prohibited_moves: [],
-      open_risks: []
+      open_risks: [],
+      nodes: [],
+      why_included: []
     },
-    suggested_impact_surfaces: {
+    impact_surfaces: {
       nodes: [],
       rationale: []
     }
@@ -62,56 +81,154 @@ function makeEmptyPacket(args: {
 }
 
 function trimPacketToBudget(packet: ContextPacket, requestedBudget: number): void {
-  const envelopeBudget = Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.envelope);
-  trimPairedListToBudget(
-    packet.envelope.nodes,
-    packet.envelope.why_included,
-    envelopeBudget,
-    (node, reason) => estimateNodeTokens(node) + estimateTextTokens(reason)
+  const suggestedBudget = Math.max(
+    0,
+    Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.impact_surfaces)
   );
-
-  const suggestedBudget = Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.suggested_impact_surfaces);
   trimPairedListToBudget(
-    packet.suggested_impact_surfaces.nodes,
-    packet.suggested_impact_surfaces.rationale,
+    packet.impact_surfaces.nodes,
+    packet.impact_surfaces.rationale,
     suggestedBudget,
     (node, rationale) => estimateNodeTokens(node) + estimateTextTokens(rationale)
   );
 
   const fixedConstraintTokens =
-    packet.constraints.active_rules.reduce((sum, rule) => sum + estimateTextTokens(rule), 0) +
-    packet.constraints.protected_surfaces.reduce(
+    packet.governing_world_context.active_rules.reduce(
+      (sum, rule) => sum + estimateTextTokens(rule),
+      0
+    ) +
+    packet.governing_world_context.protected_surfaces.reduce(
       (sum, surface) => sum + estimateTextTokens(surface),
       0
     ) +
-    packet.constraints.required_output_schema.reduce(
+    packet.governing_world_context.required_output_schema.reduce(
       (sum, schema) => sum + estimateTextTokens(schema),
       0
     ) +
-    packet.constraints.prohibited_moves.reduce((sum, move) => sum + estimateTextTokens(move), 0);
+    packet.governing_world_context.prohibited_moves.reduce(
+      (sum, move) => sum + estimateTextTokens(move),
+      0
+    ) +
+    packet.governing_world_context.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0) +
+    packet.governing_world_context.why_included.reduce(
+      (sum, reason) => sum + estimateTextTokens(reason),
+      0
+    );
 
   const riskBudget = Math.max(
     0,
-    Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.constraints) - fixedConstraintTokens
+    Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.governing_world_context) - fixedConstraintTokens
   );
-  trimRisksToBudget(packet.constraints.open_risks, riskBudget);
+  trimRisksToBudget(packet.governing_world_context.open_risks, riskBudget);
 
-  while (estimatePacketTokens(packet) > requestedBudget && packet.envelope.nodes.length > 0) {
-    packet.envelope.nodes.pop();
-    packet.envelope.why_included.pop();
+  while (estimatePacketTokens(packet) > requestedBudget && packet.impact_surfaces.nodes.length > 0) {
+    packet.impact_surfaces.nodes.pop();
+    packet.impact_surfaces.rationale.pop();
   }
 
   while (
     estimatePacketTokens(packet) > requestedBudget &&
-    packet.suggested_impact_surfaces.nodes.length > 0
+    packet.governing_world_context.open_risks.length > 0
   ) {
-    packet.suggested_impact_surfaces.nodes.pop();
-    packet.suggested_impact_surfaces.rationale.pop();
+    packet.governing_world_context.open_risks.pop();
+  }
+}
+
+function classHasRequiredContent(packet: ContextPacket, className: RequiredPacketClass): boolean {
+  switch (className) {
+    case "local_authority":
+    case "exact_record_links":
+    case "scoped_local_context":
+      return packet[className].nodes.length > 0;
+    case "governing_world_context":
+      return (
+        packet.governing_world_context.nodes.length > 0 ||
+        packet.governing_world_context.active_rules.length > 0 ||
+        packet.governing_world_context.protected_surfaces.length > 0 ||
+        packet.governing_world_context.required_output_schema.length > 0 ||
+        packet.governing_world_context.prohibited_moves.length > 0 ||
+        packet.governing_world_context.open_risks.length > 0
+      );
+  }
+}
+
+function cloneClassIntoPacket(
+  packet: ContextPacket,
+  source: ContextPacket,
+  className: RequiredPacketClass
+): void {
+  switch (className) {
+    case "local_authority":
+      packet.local_authority = {
+        nodes: [...source.local_authority.nodes],
+        why_included: [...source.local_authority.why_included]
+      };
+      return;
+    case "exact_record_links":
+      packet.exact_record_links = {
+        nodes: [...source.exact_record_links.nodes],
+        why_included: [...source.exact_record_links.why_included]
+      };
+      return;
+    case "scoped_local_context":
+      packet.scoped_local_context = {
+        nodes: [...source.scoped_local_context.nodes],
+        why_included: [...source.scoped_local_context.why_included]
+      };
+      return;
+    case "governing_world_context":
+      packet.governing_world_context = {
+        active_rules: [...source.governing_world_context.active_rules],
+        protected_surfaces: [...source.governing_world_context.protected_surfaces],
+        required_output_schema: [...source.governing_world_context.required_output_schema],
+        prohibited_moves: [...source.governing_world_context.prohibited_moves],
+        open_risks: [...source.governing_world_context.open_risks],
+        nodes: [...source.governing_world_context.nodes],
+        why_included: [...source.governing_world_context.why_included]
+      };
+  }
+}
+
+function classifyBudgetInsufficiency(
+  completePacket: ContextPacket,
+  args: {
+    taskType: TaskType;
+    worldSlug: string;
+    seedNodes: string[];
+    tokenBudget: number;
+  }
+): { minimumRequiredBudget: number; missingClasses: string[]; retainedClasses: string[] } | null {
+  const requiredPacket = makeEmptyPacket(args);
+  const retainedClasses: string[] = [];
+
+  for (const className of REQUIRED_PACKET_CLASSES) {
+    if (!classHasRequiredContent(completePacket, className)) {
+      continue;
+    }
+
+    cloneClassIntoPacket(requiredPacket, completePacket, className);
+
+    const candidatePacket = makeEmptyPacket(args);
+    for (const retainedClassName of [...retainedClasses, className] as RequiredPacketClass[]) {
+      cloneClassIntoPacket(candidatePacket, completePacket, retainedClassName);
+    }
+
+    if (estimatePacketTokens(candidatePacket) > args.tokenBudget) {
+      return {
+        minimumRequiredBudget: estimatePacketTokens(requiredPacket),
+        missingClasses: REQUIRED_PACKET_CLASSES.filter(
+          (requiredClassName) =>
+            classHasRequiredContent(completePacket, requiredClassName) &&
+            !retainedClasses.includes(requiredClassName)
+        ),
+        retainedClasses
+      };
+    }
+
+    retainedClasses.push(className);
   }
 
-  while (estimatePacketTokens(packet) > requestedBudget && packet.constraints.open_risks.length > 0) {
-    packet.constraints.open_risks.pop();
-  }
+  return null;
 }
 
 export async function assembleContextPacket(args: {
@@ -133,31 +250,63 @@ export async function assembleContextPacket(args: {
       tokenBudget: args.token_budget
     });
 
-    const nucleus = await buildNucleus(opened.db, args.world_slug, args.task_type, args.seed_nodes);
-    if ("code" in nucleus) {
-      return nucleus;
+    const localAuthoritySourceIds = await findLocalAuthoritySourceNodeIds(
+      opened.db,
+      args.world_slug,
+      args.seed_nodes
+    );
+    if ("code" in localAuthoritySourceIds) {
+      return localAuthoritySourceIds;
     }
 
-    packet.nucleus = nucleus;
-    const minimumPacketTokens = estimatePacketTokens(packet);
-    if (minimumPacketTokens > args.token_budget) {
+    packet.local_authority = buildLocalAuthority(opened.db, args.world_slug, localAuthoritySourceIds);
+    packet.exact_record_links = buildExactRecordLinks(
+      opened.db,
+      args.world_slug,
+      localAuthoritySourceIds,
+      packet.local_authority.nodes.map((node) => node.id)
+    );
+    packet.scoped_local_context = buildScopedLocalContext(
+      opened.db,
+      args.world_slug,
+      localAuthoritySourceIds,
+      [...packet.local_authority.nodes, ...packet.exact_record_links.nodes]
+    );
+    packet.governing_world_context = await buildGoverningWorldContext(
+      opened.db,
+      args.world_slug,
+      args.task_type,
+      [
+        ...packet.local_authority.nodes,
+        ...packet.exact_record_links.nodes,
+        ...packet.scoped_local_context.nodes
+      ]
+    );
+
+    const insufficiency = classifyBudgetInsufficiency(packet, {
+      taskType: args.task_type,
+      worldSlug: args.world_slug,
+      seedNodes: args.seed_nodes,
+      tokenBudget: args.token_budget
+    });
+    if (insufficiency !== null) {
       return createMcpError(
-        "budget_exhausted_nucleus",
-        "The required nucleus exceeds the requested token budget. Narrow the seed nodes or raise the budget.",
+        "packet_incomplete_required_classes",
+        "The requested token budget cannot fit the required locality-first packet classes.",
         {
+          missing_classes: insufficiency.missingClasses,
           requested_budget: args.token_budget,
-          minimum_required_budget: minimumPacketTokens
+          minimum_required_budget: insufficiency.minimumRequiredBudget,
+          retained_classes: insufficiency.retainedClasses
         }
       );
     }
 
-    packet.envelope = await buildEnvelope(opened.db, args.world_slug, nucleus.nodes);
-    packet.constraints = await buildConstraints(opened.db, args.world_slug, args.task_type, nucleus.nodes);
-    packet.suggested_impact_surfaces = await buildSuggestedImpact(
-      opened.db,
-      args.world_slug,
-      nucleus.nodes
-    );
+    packet.impact_surfaces = await buildImpactSurfaces(opened.db, args.world_slug, [
+      ...packet.local_authority.nodes,
+      ...packet.exact_record_links.nodes,
+      ...packet.scoped_local_context.nodes
+    ]);
 
     trimPacketToBudget(packet, args.token_budget);
     packet.task_header.token_budget.allocated = estimatePacketTokens(packet);

@@ -5,17 +5,17 @@ import { findImpactedFragments } from "../tools/find-impacted-fragments";
 import type { ContextPacketNode } from "./shared";
 import { loadPacketNodes } from "./shared";
 
-export async function buildSuggestedImpact(
+export async function buildImpactSurfaces(
   db: Database.Database,
   worldSlug: string,
-  nucleusNodes: ContextPacketNode[]
+  localityNodes: ContextPacketNode[]
 ): Promise<{
   nodes: ContextPacketNode[];
   rationale: string[];
 }> {
   const impactResponse = await findImpactedFragments({
     world_slug: worldSlug,
-    node_ids: nucleusNodes.map((node) => node.id)
+    node_ids: localityNodes.map((node) => node.id)
   });
 
   if ("code" in impactResponse) {

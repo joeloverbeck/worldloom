@@ -3,7 +3,7 @@ import type Database from "better-sqlite3";
 import type { ContextPacketNode } from "./shared";
 import { loadPacketNodes } from "./shared";
 
-const ENVELOPE_EDGE_TYPES = [
+const LOCAL_CONTEXT_EDGE_TYPES = [
   "derived_from",
   "affected_fact",
   "originates_in",
@@ -12,7 +12,9 @@ const ENVELOPE_EDGE_TYPES = [
   "modified_by",
   "patched_by",
   "clarified_by",
-  "mentions_entity"
+  "mentions_entity",
+  "references_scoped_name",
+  "references_record"
 ] as const;
 
 function addReason(
@@ -36,9 +38,9 @@ function addReason(
 function findNeighborNodeIds(
   db: Database.Database,
   worldSlug: string,
-  nucleusNodeIds: readonly string[]
+  sourceNodeIds: readonly string[]
 ): string[] {
-  if (nucleusNodeIds.length === 0) {
+  if (sourceNodeIds.length === 0) {
     return [];
   }
 
@@ -47,19 +49,19 @@ function findNeighborNodeIds(
       `
         SELECT DISTINCT
           CASE
-            WHEN e.source_node_id IN (${nucleusNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
+            WHEN e.source_node_id IN (${sourceNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
             ELSE e.source_node_id
           END AS neighbor_node_id
         FROM edges e
         INNER JOIN nodes n
           ON n.node_id = CASE
-            WHEN e.source_node_id IN (${nucleusNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
+            WHEN e.source_node_id IN (${sourceNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
             ELSE e.source_node_id
           END
-        WHERE e.edge_type IN (${ENVELOPE_EDGE_TYPES.map(() => "?").join(", ")})
+        WHERE e.edge_type IN (${LOCAL_CONTEXT_EDGE_TYPES.map(() => "?").join(", ")})
           AND (
-            e.source_node_id IN (${nucleusNodeIds.map(() => "?").join(", ")})
-            OR e.target_node_id IN (${nucleusNodeIds.map(() => "?").join(", ")})
+            e.source_node_id IN (${sourceNodeIds.map(() => "?").join(", ")})
+            OR e.target_node_id IN (${sourceNodeIds.map(() => "?").join(", ")})
           )
           AND n.world_slug = ?
           AND neighbor_node_id IS NOT NULL
@@ -67,11 +69,11 @@ function findNeighborNodeIds(
       `
     )
     .all(
-      ...nucleusNodeIds,
-      ...nucleusNodeIds,
-      ...ENVELOPE_EDGE_TYPES,
-      ...nucleusNodeIds,
-      ...nucleusNodeIds,
+      ...sourceNodeIds,
+      ...sourceNodeIds,
+      ...LOCAL_CONTEXT_EDGE_TYPES,
+      ...sourceNodeIds,
+      ...sourceNodeIds,
       worldSlug
     ) as Array<{ neighbor_node_id: string | null }>;
 
@@ -83,11 +85,11 @@ function findNeighborNodeIds(
 function findSiblingNodeIds(
   db: Database.Database,
   worldSlug: string,
-  nucleusNodes: readonly ContextPacketNode[]
+  packetNodes: readonly ContextPacketNode[]
 ): string[] {
   const ordered: string[] = [];
 
-  for (const node of nucleusNodes) {
+  for (const node of packetNodes) {
     const rows = db
       .prepare(
         `
@@ -112,38 +114,43 @@ function findSiblingNodeIds(
   return ordered;
 }
 
-export async function buildEnvelope(
+export function buildScopedLocalContext(
   db: Database.Database,
   worldSlug: string,
-  nucleusNodes: ContextPacketNode[]
-): Promise<{
+  sourceNodeIds: readonly string[],
+  baseNodes: readonly ContextPacketNode[]
+): {
   nodes: ContextPacketNode[];
   why_included: string[];
-}> {
-  const nucleusNodeIds = nucleusNodes.map((node) => node.id);
-  const excluded = new Set(nucleusNodeIds);
+} {
+  const excluded = new Set(baseNodes.map((node) => node.id));
   const orderedNodeIds: string[] = [];
   const reasons = new Map<string, string>();
 
-  for (const nodeId of findNeighborNodeIds(db, worldSlug, nucleusNodeIds)) {
+  for (const nodeId of findNeighborNodeIds(db, worldSlug, sourceNodeIds)) {
     if (excluded.has(nodeId)) {
       continue;
     }
 
-    addReason(orderedNodeIds, reasons, nodeId, "one-hop graph context for nucleus interpretation");
+    addReason(
+      orderedNodeIds,
+      reasons,
+      nodeId,
+      "one-hop graph context for seed-local interpretation"
+    );
   }
 
-  for (const nodeId of findSiblingNodeIds(db, worldSlug, nucleusNodes)) {
+  for (const nodeId of findSiblingNodeIds(db, worldSlug, baseNodes)) {
     if (excluded.has(nodeId)) {
       continue;
     }
 
-    addReason(orderedNodeIds, reasons, nodeId, "adjacent same-file context for nucleus node");
+    addReason(orderedNodeIds, reasons, nodeId, "adjacent same-file context for the local authority");
   }
 
   const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds);
   return {
     nodes,
-    why_included: nodes.map((node) => reasons.get(node.id) ?? "bounded envelope context")
+    why_included: nodes.map((node) => reasons.get(node.id) ?? "scoped local context")
   };
 }

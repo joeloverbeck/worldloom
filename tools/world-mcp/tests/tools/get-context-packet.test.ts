@@ -26,11 +26,26 @@ function buildContextPacketWorld(root: string): void {
         body: "Salt routes remain politically contested."
       },
       {
-        node_id: "CF-0001",
+        node_id: "seeded:EVERYDAY_LIFE.md:Dawn-Market:0",
         world_slug: "seeded",
-        file_path: "CANON_LEDGER.md",
-        node_type: "canon_fact_record",
-        body: "id: CF-0001\nstatement: Brinewick anchors the western salt trade.\n"
+        file_path: "EVERYDAY_LIFE.md",
+        heading_path: "Dawn Market",
+        node_type: "section",
+        body: "Morning trade begins before first light."
+      },
+      {
+        node_id: "DA-0002",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/after-action-report.md",
+        node_type: "diegetic_artifact_record",
+        body: "---\nauthor_character_id: CHAR-0002\n---\nFiled by Melissa from Brinewick.\n"
+      },
+      {
+        node_id: "CHAR-0002",
+        world_slug: "seeded",
+        file_path: "characters/melissa-threadscar.md",
+        node_type: "character_record",
+        body: "---\nname: Melissa Threadscar\n---\nMelissa lives in Brinewick.\n"
       },
       {
         node_id: "M-1",
@@ -49,50 +64,43 @@ function buildContextPacketWorld(root: string): void {
         body: "Brinewick sits on the western brine shelf."
       },
       {
-        node_id: "seeded:INSTITUTIONS.md:Harbor Office:0",
+        node_id: "DA-0002#scoped:brinewick:0",
         world_slug: "seeded",
-        file_path: "INSTITUTIONS.md",
-        heading_path: "Harbor Office",
-        node_type: "section",
-        body: "The Harbor Office regulates brine exports."
-      },
-      {
-        node_id: "entity:brinewick",
-        world_slug: "seeded",
-        file_path: "ONTOLOGY.md",
-        node_type: "named_entity",
+        file_path: "diegetic-artifacts/after-action-report.md",
+        node_type: "scoped_reference",
         body: "Brinewick"
       }
     ],
     edges: [
       {
-        source_node_id: "CF-0001",
+        source_node_id: "DA-0002",
+        target_node_id: "CHAR-0002",
+        edge_type: "references_record"
+      },
+      {
+        source_node_id: "DA-0002",
+        target_node_id: "DA-0002#scoped:brinewick:0",
+        edge_type: "references_scoped_name"
+      },
+      {
+        source_node_id: "DA-0002",
         target_node_id: "seeded:GEOGRAPHY.md:Brinewick:0",
         edge_type: "required_world_update"
       },
       {
         source_node_id: "M-1",
-        target_node_id: "CF-0001",
+        target_node_id: "DA-0002",
         edge_type: "firewall_for"
-      },
-      {
-        source_node_id: "CF-0001",
-        target_node_id: "entity:brinewick",
-        edge_type: "mentions_entity"
-      },
-      {
-        source_node_id: "seeded:INSTITUTIONS.md:Harbor Office:0",
-        target_node_id: "entity:brinewick",
-        edge_type: "mentions_entity"
       }
     ],
-    entities: [
+    scopedReferences: [
       {
-        entity_id: "entity:brinewick",
+        reference_id: "DA-0002#scoped:brinewick:0",
         world_slug: "seeded",
-        canonical_name: "Brinewick",
-        entity_kind: "place",
-        source_node_id: "entity:brinewick"
+        display_name: "Brinewick",
+        reference_kind: "place",
+        relation: "filing_location",
+        source_node_id: "DA-0002"
       }
     ],
     validationResults: [
@@ -101,13 +109,13 @@ function buildContextPacketWorld(root: string): void {
         validator_name: "continuity",
         severity: "warning",
         code: "dangling_update",
-        message: "GEOGRAPHY.md needs a synchronized update after CF-0001."
+        message: "GEOGRAPHY.md needs a synchronized update after DA-0002."
       }
     ]
   });
 }
 
-test("getContextPacket returns a fully populated canon_addition packet", async () => {
+test("getContextPacket returns a fully populated v2 diegetic_artifact_generation packet", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -115,32 +123,36 @@ test("getContextPacket returns a fully populated canon_addition packet", async (
 
     const result = await withRepoRoot(root, () =>
       getContextPacket({
-        task_type: "canon_addition",
+        task_type: "diegetic_artifact_generation",
         world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
+        seed_nodes: ["DA-0002"],
         token_budget: 8000
       })
     );
 
     assert.ok(!("code" in result));
-    assert.equal(result.task_header.task_type, "canon_addition");
+    assert.equal(result.task_header.task_type, "diegetic_artifact_generation");
     assert.equal(result.task_header.world_slug, "seeded");
-    assert.equal(result.task_header.packet_version, 1);
+    assert.equal(result.task_header.packet_version, 2);
     assert.ok(result.task_header.token_budget.allocated <= 8000);
-    assert.ok(result.nucleus.nodes.some((node) => node.id === "CF-0001"));
-    assert.ok(result.nucleus.nodes.some((node) => node.id === "M-1"));
+    assert.ok(result.local_authority.nodes.some((node) => node.id === "DA-0002"));
+    assert.ok(result.local_authority.nodes.some((node) => node.id === "DA-0002#scoped:brinewick:0"));
+    assert.ok(result.exact_record_links.nodes.some((node) => node.id === "CHAR-0002"));
     assert.ok(
-      result.nucleus.nodes.some((node) => node.file_path === "WORLD_KERNEL.md"),
-      "world kernel must be in the nucleus"
+      result.scoped_local_context.nodes.some((node) => node.id === "seeded:GEOGRAPHY.md:Brinewick:0")
     );
     assert.ok(
-      result.constraints.open_risks.some((risk) => risk.code === "dangling_update"),
+      result.governing_world_context.nodes.some((node) => node.file_path === "WORLD_KERNEL.md"),
+      "world kernel must be in the governing world context"
+    );
+    assert.ok(
+      result.governing_world_context.open_risks.some((risk) => risk.code === "dangling_update"),
       "validation_results rows should surface as open risks"
     );
     assert.ok(
-      result.nucleus.nodes.some((node) => node.id === "seeded:GEOGRAPHY.md:Brinewick:0") ||
-        result.suggested_impact_surfaces.nodes.some(
-          (node) => node.id === "seeded:GEOGRAPHY.md:Brinewick:0"
+      result.governing_world_context.nodes.some((node) => node.id === "M-1") ||
+        result.governing_world_context.open_risks.some(
+          (risk) => risk.code === "mystery_reserve_firewall"
         )
     );
   } finally {

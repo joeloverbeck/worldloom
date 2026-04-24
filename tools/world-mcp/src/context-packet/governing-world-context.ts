@@ -1,0 +1,257 @@
+import type Database from "better-sqlite3";
+
+import type { TaskType } from "../ranking/profiles";
+
+import type { ContextPacketNode, ContextPacketRisk } from "./shared";
+import { loadPacketNodes, uniqueStrings } from "./shared";
+
+const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
+  canon_addition: ["WORLD_KERNEL.md", "INVARIANTS.md"],
+  character_generation: [
+    "WORLD_KERNEL.md",
+    "INVARIANTS.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md"
+  ],
+  diegetic_artifact_generation: ["WORLD_KERNEL.md", "INVARIANTS.md", "EVERYDAY_LIFE.md"],
+  continuity_audit: ["WORLD_KERNEL.md", "INVARIANTS.md", "CANON_LEDGER.md"],
+  other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
+};
+
+const ACTIVE_RULES: Record<TaskType, string[]> = {
+  canon_addition: [
+    "Rule 1: no floating facts",
+    "Rule 2: preserve causal integrity",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
+  character_generation: [
+    "Rule 4: distribution discipline",
+    "Rule 7: preserve Mystery Reserve deliberately",
+    "No world-level writes from generation flows"
+  ],
+  diegetic_artifact_generation: [
+    "No silent canon mutation from diegetic generation",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
+  continuity_audit: [
+    "Audit-only surface; do not mutate canon directly",
+    "Rule 1: no floating facts",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
+  other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
+};
+
+const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
+  canon_addition: ["Canon Fact Record", "Change Log Entry", "Patch plan envelope"],
+  character_generation: ["Character dossier", "Scoped support artifacts only"],
+  diegetic_artifact_generation: ["Diegetic artifact record", "Scoped support artifacts only"],
+  continuity_audit: ["Audit record", "Optional retcon proposal follow-up"],
+  other: ["Task-specific output approved by workflow"]
+};
+
+const PROHIBITED_MOVES: Record<TaskType, string[]> = {
+  canon_addition: [
+    "Do not overwrite world-level canon files without append-only canon process",
+    "Do not resolve a Mystery Reserve entry implicitly"
+  ],
+  character_generation: [
+    "Do not mutate mandatory world files",
+    "Do not launder contested or unresolved facts into hard canon"
+  ],
+  diegetic_artifact_generation: [
+    "Do not mutate mandatory world files",
+    "Do not present diegetic claims as world-level truth without canon flow"
+  ],
+  continuity_audit: [
+    "Do not mutate canon during an audit-only pass",
+    "Do not silently retcon contradictions"
+  ],
+  other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
+};
+
+const PROTECTED_SURFACES = [
+  "WORLD_KERNEL.md",
+  "INVARIANTS.md",
+  "ONTOLOGY.md",
+  "TIMELINE.md",
+  "GEOGRAPHY.md",
+  "PEOPLES_AND_SPECIES.md",
+  "INSTITUTIONS.md",
+  "ECONOMY_AND_RESOURCES.md",
+  "MAGIC_OR_TECH_SYSTEMS.md",
+  "EVERYDAY_LIFE.md",
+  "CANON_LEDGER.md",
+  "OPEN_QUESTIONS.md",
+  "MYSTERY_RESERVE.md",
+  "adjudications/",
+  "characters/",
+  "diegetic-artifacts/",
+  "proposals/",
+  "audits/"
+] as const;
+
+function addReason(
+  orderedNodeIds: string[],
+  reasons: Map<string, string>,
+  nodeId: string,
+  reason: string
+): void {
+  if (!reasons.has(nodeId)) {
+    orderedNodeIds.push(nodeId);
+    reasons.set(nodeId, reason);
+    return;
+  }
+
+  const existing = reasons.get(nodeId);
+  if (existing !== undefined && !existing.includes(reason)) {
+    reasons.set(nodeId, `${existing}; ${reason}`);
+  }
+}
+
+function findNodeIdsByFiles(
+  db: Database.Database,
+  worldSlug: string,
+  filePaths: readonly string[]
+): string[] {
+  if (filePaths.length === 0) {
+    return [];
+  }
+
+  const rows = db
+    .prepare(
+      `
+        SELECT node_id
+        FROM nodes
+        WHERE world_slug = ?
+          AND file_path IN (${filePaths.map(() => "?").join(", ")})
+        ORDER BY file_path, COALESCE(heading_path, ''), node_id
+      `
+    )
+    .all(worldSlug, ...filePaths) as Array<{ node_id: string }>;
+
+  return rows.map((row) => row.node_id);
+}
+
+function findFirewallNodeIds(
+  db: Database.Database,
+  worldSlug: string,
+  protectedNodeIds: readonly string[]
+): string[] {
+  if (protectedNodeIds.length === 0) {
+    return [];
+  }
+
+  const rows = db
+    .prepare(
+      `
+        SELECT DISTINCT
+          CASE
+            WHEN e.source_node_id IN (${protectedNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
+            ELSE e.source_node_id
+          END AS firewall_node_id
+        FROM edges e
+        INNER JOIN nodes n
+          ON n.node_id = CASE
+            WHEN e.source_node_id IN (${protectedNodeIds.map(() => "?").join(", ")}) THEN e.target_node_id
+            ELSE e.source_node_id
+          END
+        WHERE e.edge_type = 'firewall_for'
+          AND (
+            e.source_node_id IN (${protectedNodeIds.map(() => "?").join(", ")})
+            OR e.target_node_id IN (${protectedNodeIds.map(() => "?").join(", ")})
+          )
+          AND n.world_slug = ?
+          AND firewall_node_id IS NOT NULL
+        ORDER BY firewall_node_id
+      `
+    )
+    .all(
+      ...protectedNodeIds,
+      ...protectedNodeIds,
+      ...protectedNodeIds,
+      ...protectedNodeIds,
+      worldSlug
+    ) as Array<{ firewall_node_id: string | null }>;
+
+  return rows
+    .map((row) => row.firewall_node_id)
+    .filter((nodeId): nodeId is string => nodeId !== null);
+}
+
+function loadOpenRisks(db: Database.Database, worldSlug: string): ContextPacketRisk[] {
+  const rows = db
+    .prepare(
+      `
+        SELECT severity, code, message, node_id, file_path
+        FROM validation_results
+        WHERE world_slug = ?
+        ORDER BY datetime(created_at) DESC, result_id DESC
+      `
+    )
+    .all(worldSlug) as Array<{
+      severity: string;
+      code: string;
+      message: string;
+      node_id: string | null;
+      file_path: string | null;
+    }>;
+
+  return rows.map((row) => ({
+    severity: row.severity,
+    code: row.code,
+    message: row.message,
+    node_id: row.node_id,
+    file_path: row.file_path
+  }));
+}
+
+export async function buildGoverningWorldContext(
+  db: Database.Database,
+  worldSlug: string,
+  taskType: TaskType,
+  localityNodes: readonly ContextPacketNode[]
+): Promise<{
+  active_rules: string[];
+  protected_surfaces: string[];
+  required_output_schema: string[];
+  prohibited_moves: string[];
+  open_risks: ContextPacketRisk[];
+  nodes: ContextPacketNode[];
+  why_included: string[];
+}> {
+  const orderedNodeIds: string[] = [];
+  const reasons = new Map<string, string>();
+
+  for (const nodeId of findNodeIdsByFiles(db, worldSlug, GOVERNING_FILE_PATHS[taskType])) {
+    addReason(orderedNodeIds, reasons, nodeId, `${taskType} governing file required by FOUNDATIONS`);
+  }
+
+  for (const nodeId of findFirewallNodeIds(
+    db,
+    worldSlug,
+    uniqueStrings(localityNodes.map((node) => node.id))
+  )) {
+    addReason(orderedNodeIds, reasons, nodeId, "Mystery Reserve firewall for the locality-first packet");
+  }
+
+  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds);
+  const firewallRisks = nodes
+    .filter((node) => node.node_type === "mystery_reserve_entry")
+    .map((node) => ({
+      severity: "info",
+      code: "mystery_reserve_firewall",
+      message: `Mystery Reserve firewall present in governing_world_context: ${node.id}`,
+      node_id: node.id,
+      file_path: node.file_path
+    }) satisfies ContextPacketRisk);
+
+  return {
+    active_rules: ACTIVE_RULES[taskType],
+    protected_surfaces: [...PROTECTED_SURFACES],
+    required_output_schema: REQUIRED_OUTPUT_SCHEMA[taskType],
+    prohibited_moves: PROHIBITED_MOVES[taskType],
+    open_risks: [...firewallRisks, ...loadOpenRisks(db, worldSlug)],
+    nodes,
+    why_included: nodes.map((node) => reasons.get(node.id) ?? "governing world context")
+  };
+}

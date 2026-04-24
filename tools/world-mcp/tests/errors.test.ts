@@ -16,7 +16,7 @@ test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
     "token_expired",
     "token_consumed",
     "token_tampered",
-    "budget_exhausted_nucleus",
+    "packet_incomplete_required_classes",
     "anchor_drift",
     "validator_unavailable",
     "phase1_stub"

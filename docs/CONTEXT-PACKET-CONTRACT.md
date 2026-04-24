@@ -1,8 +1,8 @@
 # Context Packet Contract
 
-`mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)` is the retrieval-side contract for giving a skill the minimum complete input bundle required by `docs/FOUNDATIONS.md` without forcing the skill to load raw world files opportunistically.
+`mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)` is the retrieval-side contract for delivering the minimum complete machine-facing bundle required by `docs/FOUNDATIONS.md`.
 
-This contract is phase-defining for the machine-facing layer. Shape changes should be treated as breaking changes for retrieval consumers.
+The packet is locality-first. It must secure seed-local authority and the governing FOUNDATIONS surfaces before it spends budget on broader downstream context.
 
 ## Packet Shape
 
@@ -10,27 +10,31 @@ This contract is phase-defining for the machine-facing layer. Shape changes shou
 task_header:
   task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | other
   world_slug: animalia
-  generated_at: "2026-04-23T00:00:00Z"
+  generated_at: "2026-04-24T00:00:00Z"
   token_budget:
     requested: 12000
     allocated: 9800
   seed_nodes:
-    - CF-0012
-    - animalia:INSTITUTIONS.md:market-regulation
-  packet_version: 1
-nucleus:
+    - CHAR-0002
+  packet_version: 2
+local_authority:
   nodes: []
   why_included: []
-envelope:
+exact_record_links:
   nodes: []
   why_included: []
-constraints:
+scoped_local_context:
+  nodes: []
+  why_included: []
+governing_world_context:
   active_rules: []
   protected_surfaces: []
   required_output_schema: []
   prohibited_moves: []
   open_risks: []
-suggested_impact_surfaces:
+  nodes: []
+  why_included: []
+impact_surfaces:
   nodes: []
   rationale: []
 ```
@@ -39,106 +43,104 @@ suggested_impact_surfaces:
 
 ### 1. Task header
 
-Declares the invocation context:
+Describes the invocation context:
 
 - task type
 - world slug
 - packet version
-- budget request vs allocation
-- seed nodes or seed ids that anchored retrieval
-- generation timestamp for debugging and stale-packet diagnosis
+- requested versus allocated budget
+- seed nodes
+- generation timestamp
 
-The header is descriptive, not deliberative. It explains how the packet was assembled; it does not tell the skill what answer to produce.
+### 2. Local authority
 
-### 2. Nucleus
+The source-local authority core.
 
-The nucleus is the unquestionably relevant core.
+Typical contents:
 
-It should contain only nodes the skill would be incorrect to omit, such as:
+- the seed node itself
+- the immediate authority-bearing parent record when the seed is a sub-node
+- explicit scoped references declared by that authority-bearing source
 
-- directly requested canon facts
-- the exact domain sections the seed nodes modify or depend on
-- contradiction records or mystery-reserve entries that materially constrain the ask
-- mandatory governing files for the task class when those files are below the direct-packet threshold
+If a node appears here, the packet is asserting that the downstream consumer should treat it as the first retrieval surface, not as optional background.
 
-If a node lands in the nucleus, the retrieval layer is asserting that the downstream skill needs it, not just that it might be interesting.
+### 3. Exact record links
 
-### 3. Envelope
+Exact structured record-to-record links reachable from the local authority surface via `references_record`.
 
-The envelope is the minimal surrounding context required to interpret the nucleus safely.
+These are higher-trust than lexical adjacency. They expose deliberate foreign-key-style relationships already present in the indexed source.
 
-Typical envelope material:
+### 4. Scoped local context
 
-- prerequisite facts upstream of a nucleus canon fact
-- adjacent institution, geography, or timeline nodes needed for scope control
-- neighboring records that prevent false novelty or silent contradiction
-- nearby prose anchors that preserve local meaning for downstream edits
+Bounded one-hop local context around the seed-local authority surface.
 
-The envelope should be intentionally bounded. It exists to keep the skill from decontextualizing the nucleus, not to recreate whole-file reading.
+Typical contents:
 
-### 4. Constraints
+- nodes reached through `references_scoped_name`
+- one-hop graph neighbors required to interpret the local authority safely
+- adjacent same-file nodes that keep the seed-local bundle truthful
 
-Constraints convert FOUNDATIONS and workflow policy into machine-delivered guardrails.
+This layer is still local. It is not a license to sweep the whole world model into the packet.
 
-The layer should encode:
+### 5. Governing world context
 
-- active FOUNDATIONS rules or validator checks relevant to the task
-- protected or engine-only surfaces
-- output-shape requirements for the skill
-- prohibited mutation patterns
-- size or retrieval warnings
-- open risks already known from the index or prior validation
+The FOUNDATIONS-driven world-level guardrail surface required by the task type.
 
-This is where the packet tells the skill what must not be violated.
+This layer carries:
 
-### 5. Suggested impact surfaces
+- active rules
+- protected surfaces
+- required output schema
+- prohibited moves
+- open risks
+- governing nodes such as required kernel or invariant files
+- Mystery Reserve firewall nodes when locality intersects protected unknowns
 
-This layer is advisory. It identifies likely downstream surfaces the skill should inspect or mention before claiming completion.
+### 6. Impact surfaces
 
-Examples:
+Advisory downstream consequence surfaces.
 
-- domain files likely to require updates
-- related canon facts likely to be narrowed or contradicted
-- dossier, artifact, or audit surfaces that would be invalidated by the requested change
-
-Suggested impact surfaces should help the skill avoid consequence evasion without pretending to be a full dependency closure proof.
+This layer remains optional and trim-first under budget pressure. It exists to help a consumer avoid consequence evasion after locality and governing completeness are already secured.
 
 ## Assembly Discipline
 
-- Prefer exact ids and typed edges before lexical search.
-- Keep nucleus and envelope separate; "important" and "helpful" are not the same.
-- Budget pressure should trim the envelope before the nucleus.
-- If completeness cannot be satisfied inside budget, the packet should surface that as a constraint rather than silently omitting required context.
-- Retrieval should be deterministic for the same world state, task type, seed set, and budget.
+- Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
+- Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
+- Establish locality before governing background, and establish governing background before advisory impact surfaces.
+- If required classes cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality.
+- `packet_incomplete_required_classes` must report `missing_classes`, `requested_budget`, `minimum_required_budget`, and `retained_classes`.
+- `budget_exhausted_nucleus` is removed; completeness insufficiency is represented only through `packet_incomplete_required_classes`.
+- Retrieval should remain deterministic for the same world state, task type, seed set, and budget.
 
-## Example Shapes
+## Example Roles
 
 ### Canon addition
 
-- **Task header**: `task_type=canon_addition`, seed nodes include proposal card, cited CF records, and affected domain file nodes.
-- **Nucleus**: governing invariants, directly cited canon facts, relevant contradiction entries, target domain sections.
-- **Envelope**: immediate prerequisite and consequence neighbors.
-- **Constraints**: Rules 1 through 7, protected world-level surfaces, required adjudication outputs.
-- **Suggested impact surfaces**: likely downstream domain files, ledger records, adjudication path.
+- `local_authority`: the cited CF record or other exact seed-local authority
+- `exact_record_links`: exact linked records declared by structured ids
+- `scoped_local_context`: adjacent local update surfaces and one-hop interpretive neighbors
+- `governing_world_context`: kernel, invariants, protected surfaces, append-only canon rules
+- `impact_surfaces`: likely downstream domain files or records needing synchronized follow-up
 
 ### Character generation
 
-- **Task header**: `task_type=character_generation`, seed nodes include brief-derived entities, relevant place nodes, and institution nodes.
-- **Nucleus**: world kernel, invariants touching embodiment and society, directly relevant canon facts, mystery-reserve boundaries.
-- **Envelope**: adjacent institutions, regional details, and distribution-limiting facts.
-- **Constraints**: no world-level writes, Rule 4 distribution discipline, mystery-reserve firewall.
-- **Suggested impact surfaces**: `characters/INDEX.md`, related local dossiers, open audits involving the same place or institution.
+- `local_authority`: character-local record anchors and declared scoped references
+- `exact_record_links`: exact linked batches, artifacts, or source records
+- `scoped_local_context`: local place, institution, and relation nodes needed to avoid decontextualized generation
+- `governing_world_context`: no-world-write rules, distribution discipline, Mystery Reserve firewall
+- `impact_surfaces`: adjacent dossier or audit surfaces likely to matter before closeout
 
 ### Continuity audit
 
-- **Task header**: `task_type=continuity_audit`, seed nodes include suspected contradictions or drift clusters.
-- **Nucleus**: conflicting canon facts, impacted domain files, prior audit records, adjudications.
-- **Envelope**: prerequisite facts and timeline or geography neighbors needed to classify the contradiction.
-- **Constraints**: audit-only output surface, no canon mutation without a separate canon-addition flow.
-- **Suggested impact surfaces**: retcon-proposal slots, affected artifacts or character dossiers, unresolved contradiction clusters.
+- `local_authority`: contradiction cluster seeds and their immediate authority records
+- `exact_record_links`: exact linked records that help classify the drift precisely
+- `scoped_local_context`: the bounded local neighborhood needed to interpret the conflict truthfully
+- `governing_world_context`: audit-only guardrails, protected surfaces, unresolved-risk context
+- `impact_surfaces`: likely proposal, adjudication, or follow-up audit surfaces
 
 ## Non-Goals
 
-- This packet is not a hidden full-world snapshot.
-- It does not replace user approval or HARD-GATE discipline.
-- It does not decide truth; it delivers structured context so the skill can decide truthfully.
+- treating scoped references as world-level canonical ontology
+- promoting arbitrary prose names into authority surfaces heuristically
+- silently trading away seed-local completeness for broad background coverage
+- using impact-surface expansion as a substitute for exact or explicit locality

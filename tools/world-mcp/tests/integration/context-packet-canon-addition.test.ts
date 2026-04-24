@@ -77,7 +77,8 @@ test("canon_addition packet replaces ad hoc multi-file loading with a bounded pa
 
     assert.ok(!("code" in packet));
     assert.deepEqual(packet.task_header.seed_nodes, ["CF-0001"]);
-    assert.ok(packet.nucleus.nodes.length >= 3);
+    assert.ok(packet.local_authority.nodes.length >= 1);
+    assert.ok(packet.governing_world_context.nodes.length >= 2);
     assert.ok(packet.task_header.token_budget.allocated < 1200);
   } finally {
     destroyTempRepoRoot(root);

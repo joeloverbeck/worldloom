@@ -38,36 +38,43 @@ export interface ContextPacket {
       allocated: number;
     };
     seed_nodes: string[];
-    packet_version: 1;
+    packet_version: 2;
   };
-  nucleus: {
+  local_authority: {
     nodes: ContextPacketNode[];
     why_included: string[];
   };
-  envelope: {
+  exact_record_links: {
     nodes: ContextPacketNode[];
     why_included: string[];
   };
-  constraints: {
+  scoped_local_context: {
+    nodes: ContextPacketNode[];
+    why_included: string[];
+  };
+  governing_world_context: {
     active_rules: string[];
     protected_surfaces: string[];
     required_output_schema: string[];
     prohibited_moves: string[];
     open_risks: ContextPacketRisk[];
+    nodes: ContextPacketNode[];
+    why_included: string[];
   };
-  suggested_impact_surfaces: {
+  impact_surfaces: {
     nodes: ContextPacketNode[];
     rationale: string[];
   };
 }
 
-export const DEFAULT_PACKET_VERSION = 1 as const;
+export const DEFAULT_PACKET_VERSION = 2 as const;
 
 export const DEFAULT_BUDGET_SPLIT = {
-  nucleus: 0.4,
-  envelope: 0.25,
-  constraints: 0.15,
-  suggested_impact_surfaces: 0.1,
+  local_authority: 0.25,
+  exact_record_links: 0.15,
+  scoped_local_context: 0.2,
+  governing_world_context: 0.2,
+  impact_surfaces: 0.1,
   overhead: 0.1
 } as const;
 
@@ -112,32 +119,51 @@ export function estimatePacketTokens(packet: ContextPacket): number {
   let total = 0;
 
   total += estimateTextTokens(JSON.stringify(packet.task_header));
-  total += packet.nucleus.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
-  total += packet.nucleus.why_included.reduce((sum, reason) => sum + estimateTextTokens(reason), 0);
-  total += packet.envelope.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
-  total += packet.envelope.why_included.reduce((sum, reason) => sum + estimateTextTokens(reason), 0);
-  total += packet.constraints.active_rules.reduce((sum, rule) => sum + estimateTextTokens(rule), 0);
-  total += packet.constraints.protected_surfaces.reduce(
+  total += packet.local_authority.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
+  total += packet.local_authority.why_included.reduce(
+    (sum, reason) => sum + estimateTextTokens(reason),
+    0
+  );
+  total += packet.exact_record_links.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
+  total += packet.exact_record_links.why_included.reduce(
+    (sum, reason) => sum + estimateTextTokens(reason),
+    0
+  );
+  total += packet.scoped_local_context.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
+  total += packet.scoped_local_context.why_included.reduce(
+    (sum, reason) => sum + estimateTextTokens(reason),
+    0
+  );
+  total += packet.governing_world_context.active_rules.reduce(
+    (sum, rule) => sum + estimateTextTokens(rule),
+    0
+  );
+  total += packet.governing_world_context.protected_surfaces.reduce(
     (sum, surface) => sum + estimateTextTokens(surface),
     0
   );
-  total += packet.constraints.required_output_schema.reduce(
+  total += packet.governing_world_context.required_output_schema.reduce(
     (sum, entry) => sum + estimateTextTokens(entry),
     0
   );
-  total += packet.constraints.prohibited_moves.reduce(
+  total += packet.governing_world_context.prohibited_moves.reduce(
     (sum, move) => sum + estimateTextTokens(move),
     0
   );
-  total += packet.constraints.open_risks.reduce(
+  total += packet.governing_world_context.open_risks.reduce(
     (sum, risk) => sum + estimateTextTokens(JSON.stringify(risk)),
     0
   );
-  total += packet.suggested_impact_surfaces.nodes.reduce(
+  total += packet.governing_world_context.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0);
+  total += packet.governing_world_context.why_included.reduce(
+    (sum, reason) => sum + estimateTextTokens(reason),
+    0
+  );
+  total += packet.impact_surfaces.nodes.reduce(
     (sum, node) => sum + estimateNodeTokens(node),
     0
   );
-  total += packet.suggested_impact_surfaces.rationale.reduce(
+  total += packet.impact_surfaces.rationale.reduce(
     (sum, rationale) => sum + estimateTextTokens(rationale),
     0
   );
