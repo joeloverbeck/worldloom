@@ -14,6 +14,7 @@ import test from "node:test";
 import Database from "better-sqlite3";
 
 import { openIndex, SchemaVersionMismatchError } from "../src/index/open";
+import { CURRENT_INDEX_VERSION } from "../src/schema/version";
 
 const INITIAL_MIGRATION_SQL = readFileSync(
   path.resolve(__dirname, "..", "..", "src", "schema", "migrations", "001_initial.sql"),
@@ -66,7 +67,7 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
       );
 
       assert.equal(existsSync(dbPath), true);
-      assert.equal(readFileSync(versionPath, "utf8"), "2\n");
+      assert.equal(readFileSync(versionPath, "utf8"), `${CURRENT_INDEX_VERSION}\n`);
 
       const tables = db
         .prepare(
@@ -77,6 +78,7 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         tables.map(({ name }) => name),
         [
           "anchor_checksums",
+          "approval_tokens_consumed",
           "edges",
           "entities",
           "entity_aliases",
@@ -188,7 +190,7 @@ test("FTS triggers keep insert, delete, and update search results coherent", () 
   }
 });
 
-test("openIndex upgrades a version-1 index to version 2", () => {
+test("openIndex upgrades a version-1 index to the current schema version", () => {
   const root = createTempRoot();
 
   try {
@@ -197,7 +199,7 @@ test("openIndex upgrades a version-1 index to version 2", () => {
     const db = openFixtureIndex(root);
     try {
       const versionPath = path.join(root, "worlds", "fixture-world", "_index", "index_version.txt");
-      assert.equal(readFileSync(versionPath, "utf8"), "2\n");
+      assert.equal(readFileSync(versionPath, "utf8"), `${CURRENT_INDEX_VERSION}\n`);
 
       const tables = db
         .prepare(
@@ -205,12 +207,13 @@ test("openIndex upgrades a version-1 index to version 2", () => {
             SELECT name
             FROM sqlite_master
             WHERE type = 'table'
-              AND name IN ('scoped_references', 'scoped_reference_aliases')
+              AND name IN ('approval_tokens_consumed', 'scoped_references', 'scoped_reference_aliases')
             ORDER BY name
           `
         )
         .all() as Array<{ name: string }>;
       assert.deepEqual(tables.map(({ name }) => name), [
+        "approval_tokens_consumed",
         "scoped_reference_aliases",
         "scoped_references"
       ]);
@@ -230,14 +233,15 @@ test("version mismatches raise SchemaVersionMismatchError", () => {
     db.close();
 
     const versionPath = path.join(root, "worlds", "fixture-world", "_index", "index_version.txt");
-    writeFileSync(versionPath, "3\n", "utf8");
+    const futureVersion = CURRENT_INDEX_VERSION + 1;
+    writeFileSync(versionPath, `${futureVersion}\n`, "utf8");
 
     assert.throws(
       () => openFixtureIndex(root),
       (error: unknown) =>
         error instanceof SchemaVersionMismatchError &&
-        error.expectedVersion === 2 &&
-        error.actualVersion === "3"
+        error.expectedVersion === CURRENT_INDEX_VERSION &&
+        error.actualVersion === String(futureVersion)
     );
   } finally {
     cleanup(root);

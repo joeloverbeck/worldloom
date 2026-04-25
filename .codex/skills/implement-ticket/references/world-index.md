@@ -15,6 +15,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 ## Verification
 
 - For index-backed build/sync/verify tickets, prefer temp-copy probes over live-world `_index/` state when proving rebuild behavior or unresolved-reference cleanup.
+- For schema or migration build probes, prefer the package's existing atomic fixture builders or generated-fixture harnesses over copying legacy fixture directories, unless the ticket specifically owns legacy-mode behavior.
 - For atomic-source `world-index verify` tickets, remember that retired logical file names such as `INSTITUTIONS.md` can be synthetic in atomic worlds but real disk-backed files in legacy fixtures. Skip or special-case them only after proving the backing file is absent or the fixture mode is truly atomic.
 - When replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path. Do not scan a broader substrate ad hoc and treat that result as equivalent evidence.
 - When proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof.

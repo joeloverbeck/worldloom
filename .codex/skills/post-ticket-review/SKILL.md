@@ -45,7 +45,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 5. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 6. Record whether the ticket is tracked or untracked so archival reporting stays truthful.
 
-### 2. Check closeout and archival readiness
+### 2. Check closeout and provisional archival readiness
 
 1. Read the target ticket and confirm its current status and owned boundary.
 2. Confirm the ticket header summary is truthful for the landed state:
@@ -61,9 +61,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 4. Fix factual, unambiguous handoff drift directly in the ticket.
 5. If in-scope deliverables are still missing, stop and report archival as blocked. Do not hide unfinished owned work inside a follow-up ticket.
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
-7. Archive only when the handoff is actually complete. Follow `docs/archival-workflow.md` exactly.
-8. After archival, confirm the original active ticket path no longer exists and record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
-9. After archival, grep active tickets, specs, and docs for the old active path and same-family dependency references. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
+7. Treat this step as a provisional readiness check only. Do not move the ticket to `archive/tickets/` until after the review surface, FOUNDATIONS/contract audit, and follow-up/blocker decision are complete.
 
 ### 3. Establish the review surface
 
@@ -81,6 +79,8 @@ Broaden only when the implementation crosses an important shared boundary:
 - canon-mutating workflow boundary
 - HARD-GATE / approval / validation enforcement surface
 - archival or dependency-chain handoff
+
+For approval tokens, cryptographic handoffs, wire formats, shared schemas, or producer/consumer contracts, inspect both the live producer and live consumer before archival. Prefer a direct cross-boundary probe over isolated synthetic fixtures when the reviewed ticket claims compatibility across that boundary.
 
 ### 4. Audit against FOUNDATIONS and repo contracts
 
@@ -117,6 +117,15 @@ Decision rule:
 - if no active ticket owns it, create one bounded follow-up ticket
 - if the reviewed ticket's owned invariant is complete but a broader shared proof surface is stale because adjacent family work changed the contract, archive the reviewed ticket and create a separate bounded follow-up instead of treating the stale proof lane as unfinished owned work
 - if downstream tickets depend on a user-owned commit, release, manual approval, or other post-review gate that the reviewed ticket intentionally did not perform, update those dependency chains to name both the archived/completed ticket state and the remaining user-owned gate
+
+If the review confirms archival readiness after the review-surface audit and follow-up/blocker decision, follow `docs/archival-workflow.md` exactly:
+
+1. Move the ticket to `archive/tickets/`.
+2. Confirm the original active ticket path no longer exists.
+3. Record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
+4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
+
+If a blocker is discovered after the ticket has already been moved to the archive during the same review, recover immediately: move it back to `tickets/`, restore an active status such as `PENDING`, undo any archive-path dependency repairs that now imply completion, record the blocker in the ticket, and report archival as blocked.
 
 Before creating a new ticket:
 1. inspect adjacent active tickets in the same family
