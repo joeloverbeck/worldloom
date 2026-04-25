@@ -25,13 +25,15 @@ This gate is authoritative under Auto Mode or any other autonomous-execution con
 ## Invocation
 
 ```
-/reassess-spec <spec-path>
+/reassess-spec <spec-path> [inline user hint]
 ```
 
 **Arguments** (required, positional):
 - `<spec-path>` — path to the spec file (e.g., `specs/SPEC-03-patch-engine.md`)
 
 If the argument is missing, ask the user to provide it before proceeding.
+
+**Inline user hint (optional, audit-lens)**: If the user provides additional text alongside the path — parenthetical note, post-dash hint, or a follow-on message (e.g., `specs/SPEC-04-validator-framework.md (Note: I'm concerned some validators may be too brittle.)`) — treat it as an audit-lens constraint. A hint shapes severity assignment during Step 5 classification and may force restructuring of §Questions to surface the hint's implications; it does NOT constitute a second argument to validate for path existence, and it does NOT override FOUNDATIONS alignment or approved recommendations (per §Guardrails). When a hint materially shaped finding classification, cite it verbatim in the Step 6 presentation — typically in the Classification line or in the framing of the first Issue whose severity it affected — so the user sees how the hint was applied. A hint that would force a FOUNDATIONS violation is flagged as a CRITICAL Issue rather than applied.
 
 ## Process Flow
 
@@ -75,6 +77,9 @@ Step 8: Final summary + suggested next step
 
 **Optional:**
 - (none) — hybrid classification, plan-mode detection, and worktree-root resolution are auto-detected, not arguments.
+
+**Auxiliary (non-argument)**:
+- **Inline user hint** — parenthetical, dash-prefixed, or follow-on text accompanying the invocation that shapes audit lens (severity assignment during Step 5, question framing at Step 6). Not an input in the argument-validation sense (no path or shape to validate); see §Invocation for parsing and application rules.
 
 ## Output
 

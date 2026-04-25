@@ -2,9 +2,9 @@
 
 # SPEC-04: Validator Framework
 
-**Phase**: 2 (structural validators activate in Phase 1)
-**Depends on**: SPEC-01, **SPEC-13 (atomic-source contract — validators consume atomic YAML records directly)**
-**Blocks**: SPEC-03 (engine pre-apply gate), SPEC-05 Hook 5 (PostToolUse), SPEC-06 (skills replace Phase 14a rubric with validator calls)
+**Phase**: 2 Tier 1 (structural validators activate in Phase 1 via CLI; full enforcement path lands with engine integration in Phase 2)
+**Depends on**: [SPEC-01 World Index](../archive/specs/SPEC-01-world-index.md) (archived 2026-04-22), [SPEC-13 Atomic-Source Migration](../archive/specs/SPEC-13-atomic-source-migration.md) (archived 2026-04-24 — validators consume atomic YAML records directly)
+**Blocks**: [SPEC-03 Patch Engine](../archive/specs/SPEC-03-patch-engine.md) pre-apply gate (archived 2026-04-25; fail-closed pending this spec), SPEC-05 Hook 5 (PostToolUse; Phase 2 Tier 3), SPEC-06 (skills replace mechanized Phase 14a tests with validator calls)
 
 ## Problem Statement
 
@@ -12,16 +12,18 @@ FOUNDATIONS.md Rules 1–7 currently live as prose assertions in `canon-addition
 
 **Post-SPEC-13 context**: validators consume atomic YAML records from `worlds/<slug>/_source/` directly. No markdown parse step is needed for CF / CH / INV / M / OQ / ENT / SEC records. Hybrid files (characters, diegetic artifacts, adjudications) continue to be parsed for their YAML frontmatter. The validator inputs are simpler, typed, and schema-validatable.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions; validator = code, not prompt.
+**Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions for structural checks; semantic rules remain skill-judgment. Validators must be deterministic code, not prose heuristics.
 
 ## Approach
 
-One TypeScript module per validator, running in three contexts:
+One TypeScript module per mechanized validator, running in three contexts:
 1. **Patch engine pre-apply gate** (SPEC-03 Phase A step 5) — `mode: 'pre-apply'`, input is `(current_world_state + proposed_patch_plan)`
 2. **Standalone CLI** (`world-validate`) — `mode: 'full-world'`, input is a world slug
 3. **Hook 5 PostToolUse** (SPEC-05) — `mode: 'incremental'`, input is a list of just-mutated `_source/*.yaml` or hybrid-file paths
 
-A validator is a function `(input, context) => Verdict[]`. Verdicts have uniform shape. The framework runs validators in parallel per input, aggregates verdicts, and writes them to `validation_results` table in the index.
+A validator is a function `(input, context) => Verdict[]`. Verdicts have uniform shape. The framework runs validators in parallel per input, aggregates verdicts, and writes them to the `validation_results` table in the index.
+
+**No prose-content heuristics.** Every mechanized validator inspects structural fields, enum values, ID references, patch-plan op shapes, or JSON Schema compliance. Rules whose enforcement is inherently semantic (Rule 3 specialness inflation; the stabilizer-quality clause of Rule 4; the forbidden-answer overlap clause of Rule 7) remain `canon-addition` / `propose-new-canon-facts` skill-judgment rather than being mechanized with regex or NLP proxies. The skill-judgment catchment is named explicitly in the validator inventory and Phase 14a migration table below.
 
 ## Deliverables
 
@@ -41,7 +43,6 @@ tools/validators/
 │   ├── rules/
 │   │   ├── rule1-no-floating-facts.ts
 │   │   ├── rule2-no-pure-cosmetics.ts
-│   │   ├── rule3-no-specialness-inflation.ts
 │   │   ├── rule4-no-globalization-by-accident.ts
 │   │   ├── rule5-no-consequence-evasion.ts
 │   │   ├── rule6-no-silent-retcons.ts
@@ -54,6 +55,7 @@ tools/validators/
 │   │   ├── touched-by-cf-completeness.ts
 │   │   ├── modification-history-retrofit.ts
 │   │   └── adjudication-discovery-fields.ts
+│   ├── schemas/                    # JSON Schemas per record class (see below)
 │   └── cli/
 │       └── world-validate.ts       # standalone CLI entry
 ├── tests/
@@ -62,30 +64,56 @@ tools/validators/
 
 **Retired vs pre-SPEC-13**: `attribution-comment.ts` retired (attribution is now a structural field on records, not an HTML-comment authoring surface); `anchor-integrity.ts` retired (atomic records don't have prose-anchor drift; hybrid-file anchor drift is handled by the patch engine directly in SPEC-03's anchor-miss handling for hybrid files).
 
-**Added post-SPEC-13**: `record-schema-compliance.ts` (validates each `_source/*.yaml` file against its record type's JSON Schema — one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class); `touched-by-cf-completeness.ts` (bidirectional CF↔SEC mapping check — for each SEC with `touched_by_cf: [CF-X]`, verifies CF-X's `required_world_updates` includes this SEC's `file_class`; for each CF with `required_world_updates: [FILE_CLASS]`, verifies at least one SEC under `_source/<file-subdir>/` has this CF in `touched_by_cf` or in an `extensions[].originating_cf`).
+**Added post-SPEC-13**: `record-schema-compliance.ts` (validates each `_source/*.yaml` file against its record type's JSON Schema — one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class; see §JSON Schemas below); `touched-by-cf-completeness.ts` (bidirectional CF↔SEC mapping check — for each SEC with `touched_by_cf: [CF-X]`, verifies CF-X's `required_world_updates` includes this SEC's `file_class`; for each CF with `required_world_updates: [FILE_CLASS]`, verifies at least one SEC under `_source/<file-subdir>/` has this CF in `touched_by_cf` or in an `extensions[].originating_cf`).
 
-### Validator inventory (14)
+**Not mechanized (skill-judgment only)**: `rule3_no_specialness_inflation` remains `canon-addition` Phase 14a Test 10 prose-judgment (see `.claude/skills/canon-addition/SKILL.md:223`). Mechanical detection of "unmotivated superlative register" would require prose-content heuristics (regex over CF `statement` / `visible_consequences`; semantic evaluation of `distribution.why_not_universal` stabilizer quality); Rule 3 is inherently semantic and is kept in the skill-judgment catchment, parallel to the Phase 14a Test 9 precedent.
 
-#### Rule-derived validators (7)
+### JSON Schemas
+
+`record_schema_compliance` requires one JSON Schema per record class. Schemas live at `tools/validators/src/schemas/<record-class>.schema.json`:
+
+- `canon-fact-record.schema.json` (CF) — authoritative shape from FOUNDATIONS.md §Canon Fact Record Schema
+- `change-log-entry.schema.json` (CH)
+- `invariant.schema.json` (INV — single shape across ONT / CAU / DIS / SOC / AES; category preserved in the record's `category` field)
+- `mystery-reserve.schema.json` (M — fields per `worlds/animalia/_source/mystery-reserve/M-*.yaml` shape: `id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `future_resolution_safety`, `extensions`)
+- `open-question.schema.json` (OQ)
+- `entity.schema.json` (ENT)
+- `section.schema.json` (SEC — single shape; `file_class` enum discriminator covers all 7 subtypes ELF / INS / MTS / GEO / ECR / PAS / TML)
+- `adjudication-frontmatter.schema.json` (PA, frontmatter only; body is prose)
+- `character-frontmatter.schema.json` (CHAR, frontmatter only)
+- `diegetic-artifact-frontmatter.schema.json` (DA, frontmatter only)
+
+**Source of truth**: CF's schema is derived by hand from FOUNDATIONS.md §Canon Fact Record Schema (which is authoritative). Other classes' schemas are derived from the atomic-source record shapes introduced by SPEC-13 and verified against the current animalia corpus. Schemas enforce (a) required-field presence, (b) field-type constraints, (c) enum-value constraints, (d) `id` pattern regex.
+
+**ID pattern variance**: the MR schema's id pattern is `^M-\d+$` to match the animalia corpus (records `M-1` through `M-NN`, unpadded); all other classes require zero-padded 4-digit ids per CLAUDE.md §ID Allocation Conventions (e.g., `^CF-\d{4}$`). Re-padding animalia MR ids is a separate world-maintenance decision outside this spec's scope. New worlds produced by `create-base-world` should emit zero-padded MR ids; this is a `create-base-world` concern, not a validator concern.
+
+### Validator inventory (13 mechanized + 1 skill-judgment)
+
+#### Rule-derived mechanized validators (6)
 
 | Validator | FOUNDATIONS rule | Checks |
 |---|---|---|
 | `rule1_no_floating_facts` | Rule 1 | CF records have non-empty `domains_affected`, `scope`, `costs_and_limits`, `visible_consequences`; `prerequisites` populated for operationally-conditioned types (`capability`, `artifact`, `technology`, `institution`, `ritual`, `event`, `craft`, `resource_distribution`) |
 | `rule2_no_pure_cosmetics` | Rule 2 | `domains_affected` non-empty and drawn from canonical enum (labor, embodiment, social_norms, architecture, mobility, law, trade, war, kinship, religion, language, status_signaling, ecology, daily_routine) plus established ledger extensions (economy, settlement_life, memory_and_myth, magic, medicine, status_order, warfare, taboo_and_pollution) |
-| `rule3_no_specialness_inflation` | Rule 3 | Detects unmotivated superlative register (`#1`, `most`, `second-most`, `world-first`, `greatest`, `unparalleled`, `unprecedented`, `the only`) in CF `statement`, `visible_consequences`, `distribution`. PASS when (a) `distribution.why_not_universal` cites a concrete stabilizer mechanism explaining durability of the primacy, OR (b) language softens to pragmatic-scale register (`among the foremost`, `notably large`, `one of the most`). |
-| `rule4_no_globalization_by_accident` | Rule 4 | Any CF with non-`global` geographic OR non-`public` social scope has `distribution.why_not_universal` populated with at least one concrete stabilizer; stabilizer cites mechanism, not hand-wave |
-| `rule5_no_consequence_evasion` | Rule 5 | 2nd/3rd-order consequences named in proposal materialize either in `visible_consequences` or in at least one Phase 13a patch targeting a `required_world_updates` file. A filename in `required_world_updates` without a corresponding drafted patch fails. |
-| `rule6_no_silent_retcons` | Rule 6 | Every CF modification has (a) a CH entry with matching `affected_fact_ids`, (b) a `modification_history` entry on the modified CF, (c) an attribution comment in any modified domain prose. All three conjuncts required. |
-| `rule7_mystery_reserve_preservation` | Rule 7 | No forbidden-answer collision with any MR entry; firewall extensions properly attributed; new MR entries have `what_is_unknown` + `what_is_known_around_it` + `forbidden_answers` populated |
+| `rule4_no_globalization_by_accident` | Rule 4 | Any CF with non-`global` geographic OR non-`public` social scope has `distribution.why_not_universal` populated with at least one entry. **Structural-only**: no prose inspection of stabilizer quality. Stabilizer-quality judgment remains `canon-addition` Phase 14a Tests 3/8 skill-judgment. |
+| `rule5_no_consequence_evasion` | Rule 5 | **Pre-apply mode only** (skipped in full-world and incremental modes — no drafted patch to diff against; state-side equivalent check delivered by `touched_by_cf_completeness`). Every entry in the proposed CF's `required_world_updates` (a `file_class` list per SPEC-13) has at least one op in the submitted patch plan targeting a record whose `file_class` matches. Structural-only: no prose inspection of the proposal to identify "2nd/3rd-order consequences". |
+| `rule6_no_silent_retcons` | Rule 6 | Every CF modification has (a) a CH entry with matching `affected_fact_ids`, (b) a `modification_history` array entry appended to the modified CF referencing the CH. Both conjuncts required. Post-SPEC-13 attribution is a structural record field, not an HTML-comment authoring surface — the pre-SPEC-13 "attribution comment" conjunct is retired (see Retired validators note above). |
+| `rule7_mystery_reserve_preservation` | Rule 7 | **Structural-only.** New MR entries (added via patch plan ops or discovered at full-world audit) have non-empty `unknowns`, `knowns`, `disallowed_cheap_answers`, `domains_touched` fields, and valid enum values for `status` (`active \| passive \| forbidden`) and `future_resolution_safety`. Existing MR entries retain those fields across extensions. Field names match current animalia data (`worlds/animalia/_source/mystery-reserve/M-*.yaml`); FOUNDATIONS.md §Mystery Reserve prose describes the concerns by intent, and the record shape's field names are the structural surface. **No forbidden-answer overlap / collision check** — overlap detection is inherently prose-judgment and remains `canon-addition` Phase 12 / `propose-new-canon-facts` Phase 7 skill-judgment (see `.claude/skills/propose-new-canon-facts/references/phase-7-canon-safety-check.md`). |
+
+#### Rule-derived skill-judgment (1, not mechanized)
+
+| Rule | Catchment |
+|---|---|
+| Rule 3 No Specialness Inflation | `canon-addition` Phase 14a Test 10 prose-judgment; `propose-new-canon-facts` Phase 8 per-card check. Inherently semantic; no structural proxy is substitutable without inviting prose-heuristic brittleness. Skill prose rubric is the load-bearing enforcement surface. |
 
 #### Structural validators (7)
 
 | Validator | Checks |
 |---|---|
-| `yaml_parse_integrity` | Every `_source/*.yaml` file parses as valid YAML; required top-level keys present per record type; trimmed fields trimmed cleanly. Hybrid-file frontmatter (characters, diegetic artifacts) also parsed. |
-| `id_uniqueness` | No duplicate CF-NNNN / CH-NNNN / INV-IDs / M-NNNN / OQ-NNNN / ENT-NNNN / SEC-* / PA-NNNN / CHAR-NNNN / DA-NNNN / PR-NNNN / BATCH-NNNN / AU-NNNN / RP-NNNN within a world; cross-record-class uniqueness not required but intra-class uniqueness strict. |
+| `yaml_parse_integrity` | Every `_source/*.yaml` file parses as valid YAML; required top-level keys present per record type; trimmed fields trimmed cleanly. Hybrid-file frontmatter (characters, diegetic artifacts, adjudications) also parsed. |
+| `id_uniqueness` | No duplicate CF-NNNN / CH-NNNN / INV-IDs / M-NNNN / OQ-NNNN / ENT-NNNN / SEC-* / PA-NNNN / CHAR-NNNN / DA-NNNN / PR-NNNN / BATCH-NNNN / AU-NNNN / RP-NNNN within a world; cross-record-class uniqueness not required but intra-class uniqueness strict. Comparison is **string-literal** (no zero-padding normalization); padding-drift (e.g., `M-1` vs `M-0001` coexisting in a world) is caught by `record_schema_compliance` via each schema's `id` pattern regex, not by `id_uniqueness`. |
 | `cross_file_reference` | Every id referenced in CF `derived_from`, CF `required_world_updates` (now a `file_class` list), CH `affected_fact_ids`, `modification_history[].originating_cf`, `extensions[].originating_cf`, `extensions[].change_id`, SEC `touched_by_cf[]` resolves to an indexed record. No orphan references. |
-| `record_schema_compliance` | Every `_source/*.yaml` file validates against its record type's JSON Schema (one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class). Field types, enum values, required-field presence all enforced structurally. |
+| `record_schema_compliance` | Every `_source/*.yaml` file validates against its record type's JSON Schema (one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class; see §JSON Schemas above). Field types, enum values, required-field presence, and id-pattern regex all enforced structurally. |
 | `touched_by_cf_completeness` | For each SEC with `touched_by_cf: [CF-X, CF-Y]`, verify each listed CF's `required_world_updates` includes this SEC's `file_class`. For each CF with `required_world_updates: [FILE_CLASS]`, verify at least one SEC under `_source/<file-subdir-for-file-class>/` has this CF in `touched_by_cf[]` OR in an `extensions[].originating_cf`. Discrepancies in either direction are fails. |
 | `modification_history_retrofit` | Any CF with notes-field modification lines (`Modified YYYY-MM-DD by CH-NNNN`) has a matching populated `modification_history` array entry; partial population (array has only current modification while notes reference earlier ones) is a fail |
 | `adjudication_discovery_fields` | Every `adjudications/PA-NNNN-*.md` Discovery block uses canonical field names (`mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`); ad-hoc names (`New CF`, `Modifications`, `Critics dispatched`) fail |
@@ -101,7 +129,7 @@ interface Verdict {
   location: {
     file: string;
     line_range?: [number, number];
-    node_id?: string;
+    node_id?: string;                  // record id (CF-NNNN, CH-NNNN, etc.); named node_id for schema parity with world-index
   };
   suggested_fix?: string;
 }
@@ -122,6 +150,29 @@ interface ValidatorRun {
 }
 ```
 
+**Persistence**: `ValidatorRun` is runtime-only — it is returned to callers (CLI, MCP tool, engine pre-apply gate) but NOT persisted. Per-verdict rows persist to the `validation_results` table in `worlds/<slug>/_index/world.db` (schema at `tools/world-index/src/schema/migrations/001_initial.sql:124-136`) with each row stamped `created_at`; the SQL row shape is `(result_id, world_slug, validator_name, severity, code, message, node_id, file_path, line_range_start, line_range_end, created_at)`. Run-level metadata (started_at, finished_at, summary) is not persisted.
+
+### Per-run-mode applicability matrix
+
+| Validator | pre-apply | full-world | incremental |
+|---|---|---|---|
+| `rule1_no_floating_facts` | ✓ | ✓ | ✓ (on CF writes) |
+| `rule2_no_pure_cosmetics` | ✓ | ✓ | ✓ (on CF writes) |
+| `rule3_no_specialness_inflation` | — | — | — (N/A — skill-judgment only) |
+| `rule4_no_globalization_by_accident` | ✓ | ✓ | ✓ (on CF writes) |
+| `rule5_no_consequence_evasion` | ✓ | — | — (needs patch plan; no drafted patch in non-pre-apply modes) |
+| `rule6_no_silent_retcons` | ✓ | ✓ | ✓ (on CF or CH writes) |
+| `rule7_mystery_reserve_preservation` | ✓ | ✓ | ✓ (on M writes) |
+| `yaml_parse_integrity` | ✓ | ✓ | ✓ |
+| `id_uniqueness` | ✓ | ✓ | ✓ |
+| `cross_file_reference` | ✓ | ✓ | ✓ |
+| `record_schema_compliance` | ✓ | ✓ | ✓ |
+| `touched_by_cf_completeness` | ✓ | ✓ | ✓ (on SEC or CF writes) |
+| `modification_history_retrofit` | ✓ | ✓ | ✓ (on CF writes) |
+| `adjudication_discovery_fields` | ✓ | ✓ | ✓ (on PA writes) |
+
+The `applies_to` predicate on each validator implements the incremental-mode filtering (see Validator implementation pattern below).
+
 ### Gate semantics
 
 - **pre-apply mode** (called by patch engine): any `fail` blocks the commit; engine returns error listing all fails
@@ -130,25 +181,52 @@ interface ValidatorRun {
 
 ### Phase 14a migration (canon-addition skill)
 
-Current Phase 14a's 10-test rubric maps to validators:
+Current Phase 14a's 10-test rubric maps to validators as follows. Note the split: structural cores mechanize to validators; semantic layers remain skill-judgment.
 
 | Current Phase 14a test | Replaces with |
 |---|---|
 | Test 1: Domains populated (Rule 2) | `rule2_no_pure_cosmetics` |
 | Test 2: Fact structure complete (Rule 1) | `rule1_no_floating_facts` |
-| Test 3: Stabilizers for non-universal scope (Rule 4) | `rule4_no_globalization_by_accident` |
-| Test 4: Consequences materialized (Rule 5) | `rule5_no_consequence_evasion` |
+| Test 3: Stabilizers for non-universal scope (Rule 4) | `rule4_no_globalization_by_accident` (structural core: non-empty `why_not_universal`); **stabilizer-quality judgment kept in skill** |
+| Test 4: Consequences materialized (Rule 5) | `rule5_no_consequence_evasion` (pre-apply; `file_class` → patch-op matching) |
 | Test 5: Retcon policy observed (Rule 6) | `rule6_no_silent_retcons` |
-| Test 6: Mystery Reserve preserved (Rule 7) | `rule7_mystery_reserve_preservation` |
-| Test 7: Required updates enumerated AND patched | `cross_file_reference` + `rule5_no_consequence_evasion` |
-| Test 8: Stabilizer mechanisms named | `rule4_no_globalization_by_accident` (extended) |
+| Test 6: Mystery Reserve preserved (Rule 7) | `rule7_mystery_reserve_preservation` (structural core: required MR fields present and valid enums); **forbidden-answer overlap judgment kept in skill — `canon-addition` Phase 12 / `propose-new-canon-facts` Phase 7** |
+| Test 7: Required updates enumerated AND patched | `rule5_no_consequence_evasion` (alone — the structural check already covers both the enumeration and the patch-op matching per deliverable) |
+| Test 8: Stabilizer mechanisms named | **Kept in skill as judgment** — stabilizer-quality is semantic; structural field-presence catchment is Test 3 / Rule 4 |
 | Test 9: Verdict cites phases | **Kept in skill as judgment** — not a mechanical check |
-| Test 10: No specialness inflation (Rule 3) | `rule3_no_specialness_inflation` |
+| Test 10: No specialness inflation (Rule 3) | **Kept in skill as judgment** — Rule 3 not mechanized (see Not-mechanized note in §Package Location) |
 
 Post-migration, the skill's Phase 14a collapses to:
-1. Call `mcp__worldloom__validate_patch_plan(plan)`
-2. Inspect returned verdicts; loop back to relevant Phase if any `fail`
-3. Hand-write the Test 9 (verdict cites phases) PASS/FAIL in the adjudication record
+1. Call `mcp__worldloom__validate_patch_plan(plan)` — returns verdicts covering the structural catchments of Tests 1, 2, 3, 4, 5, 6, 7.
+2. Inspect returned verdicts; loop back to the relevant Phase if any `fail`.
+3. Hand-write PASS/FAIL with one-line rationale in the adjudication record for the surviving skill-judgment tests: **Test 3** (stabilizer-quality assessment on top of the structural pass), **Test 6** (forbidden-answer overlap check against MR entries), **Test 8** (stabilizer mechanism-quality assessment), **Test 9** (verdict cites phases), **Test 10** (specialness inflation — Rule 3 in full).
+
+### Engine integration contract
+
+The SPEC-03 patch engine's pre-apply gate imports this package. The existing MCP stub at `tools/world-mcp/src/tools/validate-patch-plan.ts` returns a `validator_unavailable` error via a sentinel branch; landing this spec swaps the sentinel for the real import:
+
+```typescript
+// tools/world-mcp/src/tools/validate-patch-plan.ts (swap target at SPEC-04 landing)
+const { validatePatchPlan } = await import("@worldloom/validators");
+return validatePatchPlan(args.patch_plan);
+```
+
+Package: `@worldloom/validators` (published from `tools/validators/package.json`).
+
+Entry function signature:
+
+```typescript
+export async function validatePatchPlan(
+  envelope: PatchPlanEnvelope
+): Promise<{ verdicts: Verdict[] }>;
+```
+
+Contract:
+- Runs the pre-apply-mode validator set (13 mechanized validators × the `pre-apply` column of the applicability matrix) against `(current_world_state + envelope)`.
+- Returns the aggregated verdict list; caller (engine) treats any `severity: 'fail'` as a block.
+- The `PatchPlanEnvelope` type is imported from `tools/world-mcp/src/tools/_shared.ts` (already shared between the stub and the real implementation path).
+
+The Verdict interface (see §Verdict schema) matches the existing stub's declaration at `tools/world-mcp/src/tools/validate-patch-plan.ts:9-17`; no MCP response-shape change at swap time.
 
 ### CLI usage
 
@@ -158,16 +236,16 @@ world-validate <world-slug> --rules=1,2,6    # subset of rule-derived validators
 world-validate <world-slug> --structural     # structural validators only
 world-validate <world-slug> --json           # machine-readable output (for CI / hooks)
 world-validate <world-slug> --file <path>    # single-file scope
-world-validate <world-slug> --since <commit> # only files changed since git commit (for diff workflows)
+world-validate <world-slug> --since <commit> # only files changed since <commit> within the git repository containing <world-slug> (cross-repo diff out of scope)
 world-validate --help
 world-validate --version
 ```
 
 Exit codes: `0` all pass, `1` any fail, `2` invalid world slug, `3` index missing.
 
-### Bootstrap audit (SPEC-08 Phase 1 acceptance criterion)
+### Bootstrap audit (SPEC-08 Phase 2 Tier 1 acceptance criterion)
 
-Before Phase 2 (patch engine + edit-guards) activates, run `world-validate animalia`. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason).
+Before SPEC-04 closes Phase 2 Tier 1 — specifically, before the SPEC-03 engine's pre-apply gate is unblocked from its current fail-closed state (per `archive/specs/SPEC-03-patch-engine.md` and the stub at `tools/world-mcp/src/tools/validate-patch-plan.ts`) — run `world-validate animalia`. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason).
 
 ### Validator implementation pattern
 
@@ -187,7 +265,7 @@ export const rule1NoFloatingFacts: Validator = {
           severity: 'fail',
           code: 'rule1.missing_domains_affected',
           message: `CF ${cf.parsed.id} has empty domains_affected`,
-          location: { file: cf.file_path, record_id: cf.parsed.id },
+          location: { file: cf.file_path, node_id: cf.parsed.id },
         });
       }
       // ... other checks ...
@@ -203,34 +281,42 @@ The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the ind
 
 | Principle | Alignment |
 |---|---|
-| Rules 1–7 | Each rule has a dedicated validator enforcing it mechanically |
-| §Change Control Policy | `rule6_no_silent_retcons` + `attribution_comment` + `modification_history_retrofit` jointly enforce downstream-updates discipline |
-| §Canon Fact Record Schema | `yaml_parse_integrity` validates every fenced-YAML block parses and has required fields |
-| §Acceptance Tests | Remain author-driven judgment; not mechanized (these are about world coherence, not schema compliance) |
-| HARD-GATE discipline | Pre-apply validators are the gate's teeth; engine cannot commit on any `fail` |
+| Rules 1, 2, 4, 6, 7 | Each rule has a dedicated structural validator enforcing it mechanically (see §Validator inventory). Rule 4's stabilizer-quality clause and Rule 7's forbidden-answer overlap clause are delegated to skill-judgment rather than mechanized with prose heuristics — the structural core alone is what this spec enforces. |
+| Rule 3 | Remains `canon-addition` Phase 14a Test 10 skill-judgment (see §Package Location Not-mechanized note); inherently semantic, no structural proxy is substitutable without inviting prose-heuristic brittleness. |
+| Rule 5 | Dedicated validator runs in pre-apply mode only (structural file_class → patch-op matching); state-side equivalent check delivered by `touched_by_cf_completeness` in all three modes. |
+| §Change Control Policy | `rule6_no_silent_retcons` + `modification_history_retrofit` jointly enforce downstream-updates discipline. |
+| §Canon Fact Record Schema | `record_schema_compliance` validates every CF record against the authoritative JSON Schema derived from FOUNDATIONS.md §Canon Fact Record Schema; `yaml_parse_integrity` validates every `_source/*.yaml` file parses and has required top-level keys per record type. |
+| §Acceptance Tests | Remain author-driven judgment; not mechanized (these are about world coherence, not schema compliance). |
+| HARD-GATE discipline | Pre-apply validators are the gate's teeth; engine cannot commit on any `fail`. |
 
 ## Verification
 
-- **Unit**: each of 14 validators tested against known-good and known-bad fixtures
+- **Unit**: each of 13 mechanized validators tested against known-good and known-bad fixtures
 - **Integration**: run full validator suite against animalia; compare verdicts against a hand-audit baseline
 - **Pre-apply mode**: submit a patch plan with a deliberate Rule 4 violation (non-global CF missing `why_not_universal`); verify engine rejects
 - **Full-world mode**: run `world-validate animalia`; verify exit code; verify JSON output parses
-- **Incremental mode**: after a test write, run Hook 5; verify only relevant validators run (by `applies_to` filter)
-- **Phase 14a migration**: replay a historical canon-addition run through the new validator-based Phase 14a; verify all 10 tests map cleanly
-- **False-positive baseline**: run rule validators on unmodified animalia; no fails (zero-false-positive baseline)
+- **Incremental mode**: after a test write, run Hook 5; verify only relevant validators run (per the §Per-run-mode applicability matrix via each validator's `applies_to` predicate)
+- **Phase 14a migration**: replay a historical canon-addition run through the new validator-based Phase 14a; verify Tests 1, 2, 3 (structural), 4, 5, 6 (structural), 7 map cleanly to validators; verify Tests 3 (stabilizer quality), 6 (MR overlap), 8, 9, 10 remain skill-judgment producing hand-written PASS/FAIL with rationale
+- **False-positive baseline**: run mechanized rule validators on unmodified animalia; no fails (zero-false-positive baseline)
+- **Engine rewire**: replace the stub at `tools/world-mcp/src/tools/validate-patch-plan.ts:50-53` with the real `@worldloom/validators` import per the §Engine integration contract; submit a plan and confirm verdicts flow through
+- **Schema conformance**: run `record_schema_compliance` against animalia's `_source/` tree; verify zero schema violations against the ten JSON Schemas (or surface any as a grandfathered `info` per Bootstrap audit)
 
 ## Out of Scope
 
-- Style validators (prose tone, register consistency)
-- Linguistic validators (readability metrics)
-- Validators requiring LLM calls (all validators are deterministic code)
+- Prose-content validators (style, tone, register consistency, readability metrics, superlative detection, hand-wave detection)
+- Validators requiring LLM calls (all mechanized validators are deterministic code)
 - Cross-world validators
-- Historical validator state (only most-recent run persisted)
+- Historical validator state (only most-recent run persisted to `validation_results`)
 - Validator conflict resolution (if two validators disagree, both verdicts are reported; human resolves)
+- Mechanized Rule 3 enforcement (inherently semantic; kept as skill-judgment)
+- Forbidden-answer overlap mechanization for Rule 7 (inherently prose-judgment; kept as skill-judgment)
+- Stabilizer-quality assessment for Rule 4 (inherently prose-judgment; kept as skill-judgment)
+- Cross-repo git diff for `--since <commit>` (scoped to the world slug's containing repository only)
 
 ## Risks & Open Questions
 
-- **False-positive rate on Rule 3 superlative detection**: regex-based detection may misfire on legitimate uses. Mitigation: start conservative (require stabilizer citation only for top-N superlatives); expand via empirical calibration.
-- **Validator drift from prose rubric**: the Phase 14a prose rubric in `canon-addition/SKILL.md` must be deleted or redirected to this spec; otherwise two sources of truth. Mitigation: SPEC-06 skill rewrite removes the prose rubric and references validators by name.
+- **Rule 3 left unmechanized**: Rule 3 (no specialness inflation) is inherently semantic and cannot be mechanized without prose-content heuristics. Mitigation: `canon-addition` Phase 14a Test 10 and `propose-new-canon-facts` Phase 8 continue as the catchments for Rule 3, matching the Test 9 precedent for verdict-rationale judgment. Drift from the prose rubric is a SPEC-06 concern, not a SPEC-04 concern.
+- **Validator drift from prose rubric**: the Phase 14a prose rubric in `canon-addition/SKILL.md` must be pruned or redirected to this spec for mechanized rules (1, 2, 4 structural core, 5, 6, 7 structural core); Rule 3's Test 10 rubric plus the skill-judgment layers of Tests 3 (stabilizer quality), 6 (MR overlap), 8, 9 remain in-skill. Mitigation: SPEC-06 skill rewrite removes the mechanized-rule prose catchment and references validators by name while preserving the skill-judgment residue.
 - **Performance on large worlds**: full-world validation of a 12,000-line world should complete in <10s. If slower, parallelize per validator.
 - **Validator additions post-Phase-2**: new validators are additive; existing patch plans continue to pass. Migration: new validator runs as `warn` for one release cycle, then `fail`.
+- **MR id-pattern grandfather**: animalia's MR ids are unpadded (`M-1` through `M-NN`) while CLAUDE.md's §ID Allocation Conventions documents `M-NNNN`. The MR JSON Schema's id pattern is deliberately permissive (`^M-\d+$`) to avoid failing the existing corpus; re-padding is a separate world-maintenance decision and is out of scope for this spec. If the decision is to re-pad, it becomes a one-off `canon-addition`-equivalent maintenance run outside the Rule-1–7 enforcement surface.
