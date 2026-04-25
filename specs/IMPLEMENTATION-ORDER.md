@@ -100,15 +100,15 @@ Parallelizable order (within each tier, items may proceed in parallel):
 - Hybrid-file artifacts (characters, diegetic artifacts, adjudications, proposals, audits) unchanged on disk
 - Exception carried forward: `.pre-migration-snapshot/animalia/` remains until the one-week stability window in `tickets/SPEC13ATOSRCMIG-006.md` elapses
 
-The original structural-validator gate is not used as the Phase 1.5 closeout proof because SPEC-04 validators remain Phase 2 work. The current truthful gate is the world-index build/verify path plus direct source-shape checks.
+The original structural-validator gate was not used as the Phase 1.5 closeout proof because SPEC-04 validators had not shipped at that point. The current Phase 1.5 historical proof remains the world-index build/verify path plus direct source-shape checks; SPEC-04 validation is now a completed Phase 2 surface.
 
 ### Phase 2 — Write Path + All-Skill Migration
 
 **Depends on**: Phase 1.5 complete (atomic-source migration landed on animalia; `_source/` is the only storage surface; legacy markdown retired).
 
 **Scope** (content revised per SPEC-13 Tier 2 amendments):
-- **SPEC-03** patch engine — completed 2026-04-25 and archived at `archive/specs/SPEC-03-patch-engine.md`: new atomic-record op vocabulary (7 retired markdown-anchor ops; 7 new `create_*` ops for CF/CH/INV/M/OQ/ENT/SEC; 3 repurposed ops `update_record_field` / `append_extension` / `append_touched_by_cf`; `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` / `append_modification_history_entry` retained). No compile step; simplified 3-tier write order (create-all → update-all → adjudication); anchor-hash machinery retained only for hybrid files (characters, diegetic artifacts). Production pre-apply validation is wired through SPEC-04's `validatePatchPlan` entry; SPEC-04's capstone still owns the bootstrap audit and full verification matrix before Phase 2 advances.
-- **SPEC-04** validator framework — 2 retired (`attribution_comment`, `anchor_integrity`); 2 added (`record_schema_compliance`, `touched_by_cf_completeness`). Input shift from parsed-markdown to per-record YAML.
+- **SPEC-03** patch engine — completed 2026-04-25 and archived at `archive/specs/SPEC-03-patch-engine.md`: new atomic-record op vocabulary (7 retired markdown-anchor ops; 7 new `create_*` ops for CF/CH/INV/M/OQ/ENT/SEC; 3 repurposed ops `update_record_field` / `append_extension` / `append_touched_by_cf`; `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` / `append_modification_history_entry` retained). No compile step; simplified 3-tier write order (create-all → update-all → adjudication); anchor-hash machinery retained only for hybrid files (characters, diegetic artifacts). Production pre-apply validation is wired through SPEC-04's `validatePatchPlan` entry; SPEC-04's bootstrap audit disposition is completed via `archive/tickets/SPEC04VALFRA-008.md`.
+- **SPEC-04** validator framework — completed 2026-04-25 and archived at `archive/specs/SPEC-04-validator-framework.md`: 2 retired (`attribution_comment`, `anchor_integrity`); 2 added (`record_schema_compliance`, `touched_by_cf_completeness`); input shifted from parsed-markdown to per-record YAML. Delivered `world-validate`, 13 mechanized validators, `validatePatchPlan`, and explicit Animalia bootstrap grandfathering via `archive/tickets/SPEC04VALFRA-008.md`.
 - **SPEC-05 Part B** Hooks 3, 5 — block list covers `_source/` subdirectories; explicitly allowed direct edits on `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, and per-file hybrid artifacts (characters, diegetic artifacts, adjudications, proposals, audits); Hook 5 runs `record_schema_compliance` on any `_source/*.yaml` write.
 - **SPEC-02-PHASE2** retrieval-MCP Phase 2 tooling update — completed 2026-04-25 and archived at `archive/specs/SPEC-02-phase2-tooling.md`: added `get_record(record_id)` and `find_sections_touched_by(cf_id)`; extended `allocate_next_id` to INV per-category / OQ / ENT / SEC per-file-class; dropped `get_compiled_view` per YAGNI reassessment. The `submit_patch_plan` rewire (removing the Phase 1 stub, importing from `@worldloom/patch-engine`) stays with SPEC-03 ticket 007 — conceptually a SPEC-02 surface touch, but mechanically owned by SPEC-03 since it consumes the engine package.
 - **SPEC-06** all-skill migration — all 8 canon-mutating / canon-reading skills (`canon-addition`, `character-generation`, `diegetic-artifact-generation`, `continuity-audit`, `propose-new-canon-facts`, `canon-facts-from-diegetic-artifacts`, `propose-new-characters`, `create-base-world`) rewritten against atomic source. SPEC-06 Part A / Part B distinction collapses since atomic-source landed in Phase 1.5. `create-base-world` updated to emit `_source/` directly for new worlds.
@@ -117,11 +117,11 @@ The original structural-validator gate is not used as the Phase 1.5 closeout pro
 **Parallelizable order**:
 
 **Tier 1 (no new dependencies beyond Phase 1.5)**:
-- `SPEC-04` validator framework — atomic-YAML inputs; shippable as CLI first, engine-integrated after
+- `SPEC-04` validator framework — completed 2026-04-25; spec archived at `archive/specs/SPEC-04-validator-framework.md`; ticket family archived under `archive/tickets/SPEC04VALFRA-*.md`; delivered atomic-YAML validators, CLI, pre-apply entrypoint, and bootstrap audit disposition.
 - `SPEC-07 Part B` docs updates
 
 **Tier 2 (depends on Tier 1)**:
-- `SPEC-03` patch engine — completed 2026-04-25; spec archived at `archive/specs/SPEC-03-patch-engine.md`; ticket family archived under `archive/tickets/SPEC03PATENG-*.md`. Production pre-apply validation is now wired through SPEC-04's `validatePatchPlan` entry; SPEC-04's remaining capstone owns bootstrap-audit disposition.
+- `SPEC-03` patch engine — completed 2026-04-25; spec archived at `archive/specs/SPEC-03-patch-engine.md`; ticket family archived under `archive/tickets/SPEC03PATENG-*.md`. Production pre-apply validation is now wired through SPEC-04's `validatePatchPlan` entry; SPEC-04's bootstrap-audit disposition is completed via `archive/tickets/SPEC04VALFRA-008.md`.
 - `SPEC-02-PHASE2` retrieval-MCP tooling update — completed 2026-04-25; spec archived at `archive/specs/SPEC-02-phase2-tooling.md`; ticket family archived under `archive/tickets/SPEC02PHA2TOO-*.md`. The `submit_patch_plan` stub removal itself remains under SPEC-03 ticket 007.
 
 **Tier 3 (depends on Tier 2)**:
@@ -139,7 +139,7 @@ The original structural-validator gate is not used as the Phase 1.5 closeout pro
 **Phase 2 completion gate** (revised per SPEC-13):
 - All 8 skills end-to-end via engine against `_source/` atomic records
 - canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on `_source/` surfaces
-- `world-validate animalia --all` reports zero Rule 1–7 fails
+- `world-validate animalia --json` reports zero `fail` verdicts for the SPEC-04 baseline; grandfathered historical bootstrap findings remain visible as `info`
 - **≥80% token reduction** vs Phase 0 baseline (lifted from SPEC-08's ≥70% target — atomic-source retrieval enables the higher target; measured across 3 representative runs per skill)
 - Atomicity injection tests pass (two-phase commit holds; no partial writes)
 - Concurrency test passes (per-world write lock serializes same-world plans)
@@ -160,7 +160,7 @@ Order (single tier; internal parallelization minimal):
 6. **docs/WORKFLOWS.md pointer** for the new tests
 
 **Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
-- `world-validate animalia --all` reports zero new failures on historical CFs (grandfather clause holds structurally)
+- `world-validate animalia --json` reports zero new failures on historical CFs (grandfather clause holds structurally)
 - Synthetic capability CF without `exception_governance` FAILS Test 12
 - Synthetic geography CF with `exception_governance: { n_a: "..." }` PASSES
 - Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
@@ -218,7 +218,7 @@ Phase 1.5 (Atomic-Source Migration, SPEC-13) ← NEW; supersedes old Phase 3 + P
                                    ▼
 Phase 2 (Write Path + All-Skill Migration) — revised per SPEC-13
   │
-  ├── SPEC-04 Validators (atomic-YAML inputs) ──────────┐
+  ├── SPEC-04 Validators (completed 2026-04-25) ───────┐
   │                                                      ▼
   ├── SPEC-07 Part B (docs) ───────────────────────────┤
   │                                                      ▼
@@ -263,7 +263,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - Stream C (SPEC-01 parser refresh): completed via archived `SPEC13ATOSRCMIG-002`, `SPEC13ATOSRCMIG-004`, and `SPEC13ATOSRCMIG-005`
   - Deferred exception: `SPEC13ATOSRCMIG-006` removes `.pre-migration-snapshot/animalia/` after the one-week stability window
 - **Phase 2**: 5–8 sessions (reduced vs. original estimate; atomic-source simplifies patch engine and validator scope)
-  - SPEC-04 (atomic-YAML validators, 15 validators net): 1.5–2 sessions
+  - SPEC-04 (atomic-YAML validators, 13 mechanized validators): completed 2026-04-25; archived at `archive/specs/SPEC-04-validator-framework.md`
   - SPEC-03 (atomic-record patch engine, simplified op vocabulary): completed 2026-04-25; archived at `archive/specs/SPEC-03-patch-engine.md`
   - SPEC-02-PHASE2 (retrieval-MCP tooling update): completed 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`
   - SPEC-05 Part B (2 hooks, `_source/` discipline): 0.5 session
@@ -300,7 +300,7 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 | SPEC-02 Retrieval MCP Server | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-02-retrieval-mcp-server.md` |
 | SPEC-02-PHASE2 Retrieval-MCP Phase 2 Tooling Update | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`; delivered `get_record`, `find_sections_touched_by`, and INV/OQ/ENT/SEC `allocate_next_id` extensions via archived `SPEC02PHA2TOO-*` tickets; `get_compiled_view` intentionally dropped |
 | SPEC-03 Patch Engine | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-03-patch-engine.md`; ticket family archived under `archive/tickets/SPEC03PATENG-*.md` |
-| SPEC-04 Validator Framework | ✓ specified |
+| SPEC-04 Validator Framework | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-04-validator-framework.md`; delivered `world-validate`, `validatePatchPlan`, 13 mechanized validators, and Animalia bootstrap grandfathering |
 | SPEC-05 Hooks Discipline | Part A implemented 2026-04-24 at `tools/hooks/` and `.claude/settings.json.example`; Part B remains specified |
 | SPEC-06 Skill Rewrite Patterns | ✓ specified |
 | SPEC-07 Docs Updates | Part A implemented 2026-04-23 at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`; Part B remains specified; Part C retired by SPEC-13 |

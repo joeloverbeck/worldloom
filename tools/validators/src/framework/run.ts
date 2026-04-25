@@ -1,4 +1,5 @@
 import { aggregateSeverity } from "./aggregate.js";
+import { applyGrandfathering } from "./grandfathering.js";
 import type { Context, Validator, ValidatorRun, Verdict } from "./types.js";
 
 export async function runValidators(
@@ -26,7 +27,7 @@ export async function runValidators(
   const verdictGroups = await Promise.all(
     runnable.map(async (validator): Promise<Verdict[]> => validator.run(input, ctx))
   );
-  const verdicts = verdictGroups.flat();
+  const verdicts = applyGrandfathering(verdictGroups.flat(), input);
   const summary = aggregateSeverity(verdicts);
 
   return {

@@ -87,6 +87,55 @@ test("world-validate exits 1 and persists verdict rows for a deliberate violatio
   assert.ok(validationRowCount(path.join(repo, "worlds", "clean", "_index", "world.db")) > 0);
 });
 
+test("world-validate downgrades exact grandfathered bootstrap findings to info", () => {
+  const repo = createIndexedWorld({
+    mysteryOverride: {
+      disallowed_cheap_answers: []
+    }
+  });
+  const world = path.join(repo, "worlds", "clean");
+  mkdirSync(path.join(world, "audits"), { recursive: true });
+  writeFileSync(
+    path.join(world, "audits", "validation-grandfathering.yaml"),
+    yaml.dump({
+      schema: "worldloom.validation_grandfathering.v1",
+      world_slug: "clean",
+      entries: [
+        {
+          id: "GF-0001",
+          rationale: "Known bootstrap fixture drift accepted for explicit audit proof.",
+          findings: [
+            {
+              validator: "rule7_mystery_reserve_preservation",
+              code: "rule7.missing_disallowed_cheap_answers",
+              message: "M-1 has empty disallowed_cheap_answers",
+              location: {
+                file: "_source/mystery-reserve/M-1.yaml",
+                node_id: "M-1"
+              }
+            }
+          ]
+        }
+      ]
+    }),
+    "utf8"
+  );
+
+  const result = spawnSync(cliPath, ["clean", "--json"], { cwd: repo, encoding: "utf8" });
+
+  assert.equal(result.status, 0, result.stderr + result.stdout);
+  const parsed = JSON.parse(result.stdout) as {
+    verdicts: Array<{ severity: string; code: string; message: string; suggested_fix?: string }>;
+    summary: { fail_count: number; info_count: number };
+  };
+  assert.equal(parsed.summary.fail_count, 0);
+  assert.equal(parsed.summary.info_count, 1);
+  assert.equal(parsed.verdicts[0]?.severity, "info");
+  assert.equal(parsed.verdicts[0]?.code, "rule7.missing_disallowed_cheap_answers");
+  assert.match(parsed.verdicts[0]?.message ?? "", /Grandfathered by GF-0001/);
+  assert.match(parsed.verdicts[0]?.suggested_fix ?? "", /Known bootstrap fixture drift/);
+});
+
 test("world-validate --since narrows selector applicability from the world's git repo", () => {
   const repo = createIndexedWorld();
   execFileSync("git", ["init"], { cwd: repo });

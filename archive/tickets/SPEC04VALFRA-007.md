@@ -20,7 +20,7 @@ At intake, this ticket also claimed the animalia Bootstrap audit could be comple
 4. FOUNDATIONS principle under audit: the Machine-Facing Layer tooling recommendation and Rule 6 No Silent Retcons. Validator failures must remain visible until a canon-addition-equivalent cleanup or explicit grandfather policy is implemented; they must not be hidden by stale DB rows.
 5. Required-consequence validator fix: the live world-index DB contains derived lexical `named_entity` and prose `section` nodes that share node types with atomic authority records. Structural validators must validate only canonical authority surfaces (`_source/.../*.yaml`, characters, diegetic artifacts, adjudications), not derived index nodes such as `entity:*` or `WORLD_KERNEL.md` prose sections.
 6. Required-consequence full-world fix: the CLI passed `files: []` in full-world mode, causing raw-file validators to skip world-root fallback. `fileInputsFrom` now treats an empty explicit file list as "no explicit scope" and falls back to `world_root`, so full-world validation includes hybrid and adjudication files.
-7. Bootstrap cleanup split: because no live grandfather allowlist exists and changing canon/source records is a separate high-trust world-content operation, the remaining grandfather-or-fix disposition is split to `tickets/SPEC04VALFRA-008.md`.
+7. Bootstrap cleanup split: because no live grandfather allowlist existed and changing canon/source records was a separate high-trust world-content operation, the remaining grandfather-or-fix disposition was split to `archive/tickets/SPEC04VALFRA-008.md`.
 
 ## Architecture Check
 
@@ -59,7 +59,7 @@ Add `tools/validators/tests/integration/spec04-verification.test.ts` and `tools/
 - `tools/validators/tests/integration/spec04-verification.test.ts` (new)
 - `tools/validators/tests/integration/README.md` (new)
 - `specs/SPEC-04-validator-framework.md` (modify)
-- `tickets/SPEC04VALFRA-008.md` (new follow-up)
+- `archive/tickets/SPEC04VALFRA-008.md` (completed follow-up)
 - `archive/tickets/SPEC04VALFRA-007.md` (modify closeout)
 
 ## Out of Scope
@@ -107,7 +107,7 @@ Implemented the SPEC-04 capstone and corrected two validator-framework issues it
 1. Structural validators now ignore derived world-index nodes that are not canonical authority records.
 2. Full-world validation now discovers raw world files when the caller passes an empty explicit file list.
 
-The capstone records the current animalia baseline as 224 fail verdicts, 0 warn, 0 info. Atomic `_source/` schema conformance is clean; the remaining findings are hybrid/adjudication schema/discovery drift, `touched_by_cf` completeness drift, modification-history drift, and rule-derived bootstrap findings. Those are routed to `tickets/SPEC04VALFRA-008.md`.
+The capstone recorded the intake animalia baseline as 224 fail verdicts, 0 warn, 0 info. Atomic `_source/` schema conformance was clean; the remaining findings were hybrid/adjudication schema/discovery drift, `touched_by_cf` completeness drift, modification-history drift, and rule-derived bootstrap findings. Those were dispositioned by `archive/tickets/SPEC04VALFRA-008.md`.
 
 ## Verification Result
 
@@ -124,4 +124,4 @@ Ignored/generated state: `tools/validators/dist/` is an expected ignored build a
 
 - The drafted "grandfather rows make CLI exit 0" acceptance was false. Persisted `validation_results` rows do not override validator verdicts.
 - The ticket was widened from test-only to include two required-consequence validator fixes inside the same package seam.
-- The remaining animalia grandfather-or-fix disposition is split to `tickets/SPEC04VALFRA-008.md`; this ticket does not claim the broader Phase 2 Tier 1 clean gate.
+- The remaining animalia grandfather-or-fix disposition was completed by `archive/tickets/SPEC04VALFRA-008.md`; this ticket does not claim that later work.

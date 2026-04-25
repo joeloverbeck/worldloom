@@ -73,7 +73,7 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 **Animalia bootstrap**:
 1. `world-index build animalia` → produces `worlds/animalia/_index/world.db`
 2. `world-validate animalia --structural` runs structural validators only (Rule 1–7 validators defer to Phase 2) — any failure is an existing latent defect
-3. Resolve structural fails via one-off canon-addition cleanup runs OR grandfather with a `validation_results` row of severity `info` and human-authored reason
+3. Resolve structural fails via one-off canon-addition cleanup runs OR grandfather through an exact-match `audits/validation-grandfathering.yaml` policy that emits matched findings as `info` verdicts with human-authored rationale
 4. No markdown file is touched; current structure preserved
 
 **Acceptance criteria**:
@@ -104,12 +104,12 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 **Animalia re-validation**:
 1. After SPEC-04 ships, `world-validate animalia` runs **full** validator suite (including Rules 1–7)
 2. Any Rule 1–7 fails on current animalia are latent defects from the prose-enforced era
-3. Resolve via canon-addition runs (each fails is a retcon proposal); grandfather residuals with `info` severity
+3. Resolve via canon-addition runs (each fail is a retcon proposal); grandfather residuals through an exact-match `audits/validation-grandfathering.yaml` policy that emits matched findings with `info` severity
 
 **Acceptance criteria**:
 - All 8 skills run end-to-end via engine (verified by end-to-end integration test per skill)
 - A canon-addition run on animalia with a large delivery (≥6 required_world_updates files) writes exclusively via engine; Hook 3 denies any raw Edit attempt on protected surfaces
-- `world-validate animalia --all` reports zero Rule 1–7 `fail` (post-cleanup)
+- `world-validate animalia --json` reports zero Rule 1–7 `fail` (post-cleanup)
 - **≥70% token reduction** vs Phase 0 baseline (measured across 3 representative runs per skill)
 - Patch engine atomicity verified: inject failure at Phase A validate, Phase B temp-write, Phase B rename — no partial write on disk in any case
 - One synthetic concurrency test: two skills operating on different worlds simultaneously both succeed; same-world concurrency serializes (second waits or errors with `world_locked`)
@@ -151,7 +151,7 @@ Phase 2:
 2. `cd tools/patch-engine && npm install && npm run build`
 3. Update `tools/world-mcp/` to enable `submit_patch_plan` (currently stubbed)
 4. Add Hooks 3, 5 to `.claude/settings.json`
-5. `world-validate animalia --all` → resolve any Rule 1–7 fails via canon-addition or grandfather
+5. `world-validate animalia --json` → resolve any Rule 1–7 fails via canon-addition or grandfather
 6. Restart Claude Code session
 7. Run a sample canon-addition on animalia with a large delivery; measure token counts and verify Hook 3 enforcement
 
@@ -191,7 +191,7 @@ Phase 3 and Phase 4 (old): superseded — not executed separately.
 | §Change Control Policy | Each phase is a change; acceptance criteria act as the "change is complete" test |
 | §Mandatory World Files | 13 concerns preserved in count and semantics through all phases; Phase 1.5 (SPEC-13) relocates storage form from monolithic markdown to atomic YAML under `_source/` for 11 of 13 concerns; WORLD_KERNEL and (stripped) ONTOLOGY remain primary-authored |
 | §Acceptance Tests | Each phase's acceptance criteria are measurable, not aspirational — honoring FOUNDATIONS' standard for "a world model is not ready until…" |
-| Rule 6 No Silent Retcons | Migration is logged; animalia structural fails that get grandfathered receive explicit `info` validation_results entries |
+| Rule 6 No Silent Retcons | Migration is logged; animalia structural fails that get grandfathered are recorded in an exact-match audit policy and emitted as explicit `info` validation results |
 
 ## Verification
 

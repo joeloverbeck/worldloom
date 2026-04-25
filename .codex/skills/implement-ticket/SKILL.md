@@ -73,6 +73,10 @@ For validator, audit, or live-corpus baseline tickets, run the smallest truthful
 
 When a validator, audit, or live-corpus baseline ticket claims grandfathering, waiver rows, allowlists, or other disposition metadata can change the command's pass/fail result, verify the live validator/CLI actually consumes that mechanism before accepting it as an acceptance path. If the mechanism is only persisted audit data and emitted verdicts are recomputed independently, keep the findings visible, rewrite the active ticket to the truthful baseline/proof seam, and route real cleanup or policy implementation to a separate owner.
 
+If a validator grandfathering, waiver, baseline, or allowlist mechanism is implemented in a shared validator runner, also prove that pre-apply and other hard-gate paths remain fail-closed unless the ticket explicitly owns weakening that gate. A full-world bootstrap disposition must not accidentally downgrade engine pre-apply failures, Hook failures, or other canon-mutation gate verdicts.
+
+For explicit validator grandfathering policies, require an auditable minimum shape before treating the policy as real: stable disposition id, human rationale, exact validator name, exact code, exact file path, optional node id, and exact original message or another equivalently collision-resistant finding key. The implementation must downgrade only exact matched findings, preserve the finding as a queryable emitted verdict such as `info`, avoid DB-only insertion as the source of truth, and leave unmatched/new findings as failures.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.
@@ -281,6 +285,7 @@ Update the active ticket before finishing:
 - if the ticket contains embedded code snippets, pseudocode, or literal algorithm sketches, compare them against the landed seam before finishing; update or remove any snippet that no longer matches the truthful final implementation boundary
 - if `What to Change`, `Architecture Check`, or another completed-ticket section contains illustrative code or scenario sketches, either update them to landed helper names and command shapes or replace them with prose; do not leave contradicted examples under a completed ticket
 - if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
+- if the ticket created or changed an ignored `worlds/<slug>/` artifact, verify the exact owned path directly, not just the ignored parent directory; use a direct read, parser probe, count check, or other path-specific assertion that proves the intended file exists and has the expected shape
 - if verification rebuilt a live-world index or other derived artifact, classify the resulting dirty state explicitly as expected derived dirt, cleaned state, or unexpected source fallout before finalizing
 - if package-manager, build, test, formatter, generator, or codegen commands created or changed ignored package/tool artifacts such as `node_modules/`, `dist/`, coverage output, caches, or compiled test output, classify that ignored state explicitly as expected generated ignored artifacts, cleaned state, or unexpected fallout before finalizing
 - if a local sibling package or `file:` dependency was refreshed for proof, record whether the consumer's installed dependency was a symlink or copied install and cite the consumer-resolved artifact check used to prove the consumer saw the changed producer surface

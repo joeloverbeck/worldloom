@@ -2,8 +2,9 @@
 
 # SPEC-04: Validator Framework
 
+**Status**: COMPLETED
 **Phase**: 2 Tier 1 (structural validators activate via CLI; pre-apply MCP/engine integration is present)
-**Depends on**: [SPEC-01 World Index](../archive/specs/SPEC-01-world-index.md) (archived 2026-04-22), [SPEC-13 Atomic-Source Migration](../archive/specs/SPEC-13-atomic-source-migration.md) (archived 2026-04-24 — validators consume atomic YAML records directly)
+**Depends on**: [SPEC-01 World Index](SPEC-01-world-index.md) (archived 2026-04-22), [SPEC-13 Atomic-Source Migration](SPEC-13-atomic-source-migration.md) (archived 2026-04-24 — validators consume atomic YAML records directly)
 **Blocks**: SPEC-05 Hook 5 (PostToolUse; Phase 2 Tier 3), SPEC-06 (skills replace mechanized Phase 14a tests with validator calls)
 
 ## Problem Statement
@@ -244,7 +245,9 @@ Exit codes: `0` all pass, `1` any fail, `2` invalid world slug, `3` index missin
 
 ### Bootstrap audit (SPEC-08 Phase 2 Tier 1 acceptance criterion)
 
-Before SPEC-04 closes Phase 2 Tier 1, run `world-validate animalia` and the integration capstone after the now-wired SPEC-03/MCP pre-apply validation path. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason).
+Before SPEC-04 closes Phase 2 Tier 1, run `world-validate animalia` and the integration capstone after the now-wired SPEC-03/MCP pre-apply validation path. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered through `worlds/<slug>/audits/validation-grandfathering.yaml`.
+
+The grandfather policy is exact-match and auditable: each accepted finding records the validator, code, file, optional node id, original message, and human rationale. The runner converts matched `fail` verdicts to `info` verdicts with a `Grandfathered by GF-NNNN` message prefix and rationale in `suggested_fix`, then persists those rows to `validation_results`. Unmatched failures remain `fail` and keep the CLI exit code non-zero.
 
 ### Validator implementation pattern
 
@@ -293,10 +296,10 @@ The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the ind
 - **Unit**: each of 13 mechanized validators tested against known-good and known-bad fixtures
 - **Integration**: run full validator suite against animalia; compare verdicts against a hand-audit baseline
 - **Pre-apply mode**: submit a patch plan with a deliberate Rule 4 violation (non-global CF missing `why_not_universal`); verify engine rejects
-- **Full-world mode**: run `world-validate animalia`; verify exit code; verify JSON output parses
+- **Full-world mode**: run `world-validate animalia`; verify exit code; verify JSON output parses; for animalia, verify the grandfathered bootstrap baseline emits 224 `info` verdicts and zero `fail` verdicts
 - **Incremental mode**: after a test write, run Hook 5; verify only relevant validators run (per the §Per-run-mode applicability matrix via each validator's `applies_to` predicate)
 - **Phase 14a migration**: replay a historical canon-addition run through the new validator-based Phase 14a; verify Tests 1, 2, 3 (structural), 4, 5, 6 (structural), 7 map cleanly to validators; verify Tests 3 (stabilizer quality), 6 (MR overlap), 8, 9, 10 remain skill-judgment producing hand-written PASS/FAIL with rationale
-- **False-positive / bootstrap baseline**: run mechanized validators on unmodified animalia and compare verdicts against the hand-audit baseline. Structural validators currently surface pre-existing corpus findings; SPEC04VALFRA-007 landed the capstone and current structured baseline, while SPEC04VALFRA-008 owns grandfather-or-fix disposition before the broader Phase 2 Tier 1 gate is treated as clean.
+- **False-positive / bootstrap baseline**: run mechanized validators on unmodified animalia and compare verdicts against the hand-audit baseline. SPEC04VALFRA-007 landed the capstone and current structured baseline; SPEC04VALFRA-008 landed the explicit grandfather disposition, so the broader Phase 2 Tier 1 gate treats those exact bootstrap findings as `info` while preserving new or changed findings as `fail`.
 - **Engine rewire**: `tools/world-mcp/src/tools/validate-patch-plan.ts` delegates to the real `@worldloom/validators` import per the §Engine integration contract; submit a plan and confirm verdicts flow through
 - **Schema conformance**: run `record_schema_compliance` against animalia's `_source/` tree and supported hybrid/PA structured surfaces; zero schema violations are expected for atomic `_source/` records after ticket 002, while hybrid/PA findings are handled through the Bootstrap audit when they reflect pre-existing corpus drift.
 
@@ -319,3 +322,23 @@ The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the ind
 - **Performance on large worlds**: full-world validation of a 12,000-line world should complete in <10s. If slower, parallelize per validator.
 - **Validator additions post-Phase-2**: new validators are additive; existing patch plans continue to pass. Migration: new validator runs as `warn` for one release cycle, then `fail`.
 - **MR id-pattern grandfather**: animalia's MR ids are unpadded (`M-1` through `M-NN`) while CLAUDE.md's §ID Allocation Conventions documents `M-NNNN`. The MR JSON Schema's id pattern is deliberately permissive (`^M-\d+$`) to avoid failing the existing corpus; re-padding is a separate world-maintenance decision and is out of scope for this spec. If the decision is to re-pad, it becomes a one-off `canon-addition`-equivalent maintenance run outside the Rule-1–7 enforcement surface.
+
+## Outcome
+
+Completed: 2026-04-25
+
+The validator framework shipped in `tools/validators/` with the 13 mechanized validators named in this spec, package-local build/test coverage, the `world-validate` CLI, and the public `validatePatchPlan` pre-apply entry consumed by the patch-engine/MCP path. The post-SPEC-13 atomic-source input model is the implemented contract: validators consume `_source/*.yaml` records and supported hybrid structured surfaces rather than retired monolithic markdown records.
+
+The Animalia bootstrap audit was dispositioned by `archive/tickets/SPEC04VALFRA-008.md`: the exact 224 pre-existing bootstrap findings are recorded in `worlds/animalia/audits/validation-grandfathering.yaml` and emitted as `info` verdicts, while unmatched or new findings remain `fail` verdicts. Pre-apply validation remains fail-closed.
+
+Deviations from the original plan:
+
+- Rule 3, stabilizer-quality judgment, and Mystery Reserve forbidden-answer overlap remain skill-judgment surfaces rather than mechanized prose heuristics.
+- Rule 5 is pre-apply-only in full implementation; full-world state-side coverage is handled by `touched_by_cf_completeness`.
+- Animalia historical Mystery Reserve id padding is grandfathered by schema pattern rather than rewritten.
+
+Verification results:
+
+- `cd tools/validators && npm test` passed with 47/47 tests.
+- `node tools/validators/dist/src/cli/world-validate.js animalia --json` exited 0 with `fail_count: 0`, `warn_count: 0`, `info_count: 224`; Rule 5 was skipped as `pre-apply-only`.
+- SPEC-04 integration coverage proves registry cardinality, full-world grandfather baseline, pre-apply Rule 4 rejection, engine rewire verdict flow, incremental applicability filtering, and Rule 3 skill ownership.

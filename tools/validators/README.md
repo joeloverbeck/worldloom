@@ -2,7 +2,7 @@
 
 Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
-**Design**: `specs/SPEC-04-validator-framework.md`
+**Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
 **Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
@@ -66,6 +66,14 @@ The CLI reads `worlds/<slug>/_index/world.db`, runs the selected validators in
 `1` when any `fail` verdict is emitted. `--file` and `--since` narrow selector
 applicability and persistence cleanup to the touched files while preserving the
 runtime `full-world` run mode.
+
+## Bootstrap Grandfathering
+
+When a world has an explicit `audits/validation-grandfathering.yaml` policy, the
+runner matches exact `fail` verdicts by validator, code, file, node id, and
+message. Matched bootstrap findings are emitted and persisted as `info` with a
+`Grandfathered by GF-NNNN` audit reference and rationale. Unmatched failures stay
+as `fail`, so the CLI still exits non-zero for new or changed defects.
 
 ## Phase 14a Migration
 

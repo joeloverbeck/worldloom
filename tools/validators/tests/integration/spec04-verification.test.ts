@@ -50,12 +50,14 @@ test("SPEC-04 verification: Unit registry exposes the 13 mechanized validators",
   assert.equal([...structuralValidators, ...ruleValidators].length, 13);
 });
 
-test("SPEC-04 verification: Full-world and bootstrap baseline is structured", async () => {
+test("SPEC-04 verification: Full-world and bootstrap grandfather baseline is structured", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 224);
+  assert.equal(run.summary.fail_count, 0);
   assert.equal(run.summary.warn_count, 0);
-  assert.equal(run.summary.info_count, 0);
+  assert.equal(run.summary.info_count, 224);
+  assert.ok(run.verdicts.every((verdict) => verdict.severity === "info"));
+  assert.ok(run.verdicts.every((verdict) => verdict.message.startsWith("Grandfathered by GF-")));
   assert.deepEqual(codesByValidator(run.verdicts), {
     modification_history_retrofit: ["modification_history_retrofit.missing_entry"],
     adjudication_discovery_fields: ["adjudication_discovery_fields.non_canonical"],
@@ -152,7 +154,8 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 224);
+  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.info_count, 224);
   console.log(`SPEC-04 full-world animalia validation took ${durationMs}ms`);
 });
 

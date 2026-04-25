@@ -172,7 +172,7 @@ No tensions identified. The spec is additive and compatible with the existing SP
 
 ### Regression
 
-9. `world-validate animalia --all` post-SPEC-09 reports zero new failures on the 47 existing CFs. Grandfather clause must hold structurally, not just by policy: historical CFs are not evaluated against Rules 11/12 or the new schema blocks by the validator.
+9. `world-validate animalia --json` post-SPEC-09 reports zero new failures on the 47 existing CFs. Grandfather clause must hold structurally, not just by policy: historical CFs are not evaluated against Rules 11/12 or the new schema blocks by the validator.
 10. A post-SPEC-09 `canon-addition` run on animalia producing a new CF (e.g., a next-in-sequence capability addition) exercises the new blocks and tests end-to-end without regression in the existing Phase 0–12 flow.
 11. `create-base-world` genesis on a synthetic new world produces `CF-0001` with both blocks populated or correctly `n_a`'d per fact-type. Synthetic test world must include at least one capability CF and one geography CF to exercise both populated and N/A paths.
 
