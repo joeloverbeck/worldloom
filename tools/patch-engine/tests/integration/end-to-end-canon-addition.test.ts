@@ -16,6 +16,7 @@ import {
   createOp,
   extension,
   nextId,
+  openQuestion,
   section,
   signedToken,
   writeSecret
@@ -232,6 +233,59 @@ test("submitPatchPlan rejects unsigned, expired, tampered, and replayed approval
   );
 });
 
+test("submitPatchPlan creates OQ records before adjudications that cite them", async (t) => {
+  const world = createIndexedTestWorld(t);
+  const secret = Buffer.from("integration-oq-secret");
+  const secretPath = writeSecret(world.worldRoot, secret);
+  const oqId = nextId(world.db, "OQ", 4);
+  const paId = nextId(world.db, "PA", 4);
+  const patches: PatchOperation[] = [
+    createOp({
+      op: "append_adjudication_record",
+      target_world: world.worldSlug,
+      target_file: `adjudications/${paId}-oq-allocation.md`,
+      payload: {
+        adjudication_frontmatter: {
+          pa_id: paId,
+          verdict: "ACCEPT",
+          date: "2026-04-25",
+          originating_skill: "canon-addition",
+          mystery_reserve_touched: [],
+          invariants_touched: [],
+          cf_records_touched: ["CF-0001"],
+          open_questions_touched: [oqId],
+          change_id: "CH-0001"
+        },
+        body_markdown: `# ${paId} -- Adjudication Record\n\nThe new open question is cited by id.`
+      }
+    } satisfies Extract<PatchOperation, { op: "append_adjudication_record" }>),
+    createOp({
+      op: "create_oq_record",
+      target_world: world.worldSlug,
+      payload: {
+        oq_record: {
+          ...openQuestion(oqId),
+          topic: "A SPEC-14 adjudication-linked open question."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "create_oq_record" }>)
+  ];
+  const envelope = envelopeForPatches(world, { oq_ids: [oqId], pa_ids: [paId] }, patches);
+
+  const result = await submitPatchPlan(envelope, signedToken({ envelope, secret, expiresAt: "2999-01-01T00:00:00.000Z" }), {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+
+  assertPatchReceipt(result);
+  assert.ok(fs.existsSync(path.join(world.worldRoot, "worlds", world.worldSlug, "_source", "open-questions", `${oqId}.yaml`)));
+  assert.match(
+    fs.readFileSync(path.join(world.worldRoot, "worlds", world.worldSlug, "adjudications", `${paId}-oq-allocation.md`), "utf8"),
+    new RegExp(`open_questions_touched:\\n\\s+- ${oqId}`)
+  );
+});
+
 interface CanonAdditionIds {
   cfId: string;
   chId: string;
@@ -262,7 +316,7 @@ function canonAdditionEnvelope(
         payload: {
           cf_record: {
             ...canonFact(ids.cfId),
-            required_world_updates: ["GEOGRAPHY.md"],
+            required_world_updates: ["GEOGRAPHY", "EVERYDAY_LIFE"],
             source_basis: { direct_user_approval: true }
           }
         }
@@ -291,7 +345,7 @@ function canonAdditionEnvelope(
           sec_record: {
             ...section(ids.secId),
             id: ids.secId,
-            file_class: "geography",
+            file_class: "GEOGRAPHY",
             order: 1,
             heading: "Integration Geography",
             touched_by_cf: [ids.cfId]

@@ -70,9 +70,10 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 |---|---|
 | `src/ops/append-adjudication-record.ts` | `AdjudicationFrontmatter` interface field `id` → `pa_id`; `verdict` typed as union of `"ACCEPT" \| "ACCEPT_WITH_REQUIRED_UPDATES" \| "ACCEPT_AS_LOCAL_EXCEPTION" \| "ACCEPT_AS_CONTESTED_BELIEF" \| "REVISE_AND_RESUBMIT" \| "REJECT"`; `originating_skill` retained. The serialized YAML frontmatter is now consumable by the validator's `record_schema_compliance` end-to-end. |
 | `src/ops/append-touched-by-cf.ts` | Adds bidirectional check: looks up target CF in the world index; if `required_world_updates` does not include the section's `file_class`, throws `PatchEngineOpError` with `code: required_world_updates_mismatch` (new error code added to the union in `src/ops/shared.ts`). Skills resolve by including an `update_record_field` op for `required_world_updates` ahead of the `append_touched_by_cf` in the plan. |
+| `src/ops/append-extension.ts` | Applies the same bidirectional check before section-target extensions auto-add their `originating_cf` to `touched_by_cf[]`, preventing a bypass around `append_touched_by_cf`. |
 | `src/ops/shared.ts` | Adds `required_world_updates_mismatch` to `PatchEngineOpErrorCode`. |
 | `src/envelope/schema.ts` | Updated `AdjudicationFrontmatter` re-export reflects the new field shape. |
-| `tests/ops/append-adjudication-record.test.ts` | Test payload updated to canonical shape (`pa_id`, UPPERCASE verdict). New test asserts engine-emitted PA passes `record_schema_compliance` end-to-end (cross-package integration test). |
+| `tests/ops/append-adjudication-record.test.ts` | Test payload updated to canonical shape (`pa_id`, UPPERCASE verdict). Runtime rejection covers non-canonical verdicts. |
 | `tests/ops/append-touched-by-cf.test.ts` | New test coverage: rejects when target CF lacks the section's file_class; accepts when CF lists it; same-plan `update_record_field` + `append_touched_by_cf` resolves the case. |
 
 ### MCP retrieval surface (`tools/world-mcp/`)
@@ -94,7 +95,7 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 | Path | Change |
 |---|---|
 | `tools/validators/tests/structural/record-schema-compliance.test.ts` | Updated test fixtures use frontmatter-form PAs; old `## Discovery`-block fixtures removed. |
-| `tools/validators/tests/integration/spec04-verification.test.ts` | Acceptance test extended to assert `record_schema_compliance` passes on engine-emitted PAs. |
+| `tools/validators/tests/integration/spec14-engine-roundtrip.test.ts` | Acceptance test asserts `record_schema_compliance` passes on engine-emitted PAs. |
 
 ### Collateral amendments (Tier 1 of triage work plan)
 
@@ -110,7 +111,7 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 | Ticket | Scope |
 |---|---|
 | `archive/tickets/SPEC14PAVOC-001.md` | Validator framework update (adjudication frontmatter parser; status-coupled mystery rule; `geography` domain; retire `adjudication_discovery_fields`) |
-| `tickets/SPEC14PAVOC-002.md` | Patch engine update (`append_adjudication_record` field rename + verdict enum; bidirectional `append_touched_by_cf`; OQ-allocation pre-flight) |
+| `archive/tickets/SPEC14PAVOC-002.md` | Patch engine update (`append_adjudication_record` field rename + verdict enum; bidirectional `append_touched_by_cf`; OQ-allocation pre-flight) |
 | `archive/tickets/SPEC14PAVOC-003.md` | Canonical-vocabulary MCP tool + shared-enum-module refactor |
 
 ### Migration tickets (Tier 3 of triage work plan)
@@ -149,8 +150,8 @@ OQ allocation mid-migration: when `SPEC14PAVOC-004` reconciles topic-strings to 
 
 ## Verification
 
-- **Engine-validator end-to-end**: a fresh canon-addition run that emits a PA via `append_adjudication_record` produces a file that passes `record_schema_compliance` with zero findings. Verified by `tools/validators/tests/integration/spec04-verification.test.ts` cross-package fixture.
-- **Bidirectional `append_touched_by_cf`**: integration test in `tools/patch-engine/tests/integration/` constructs a plan with a `append_touched_by_cf` against a CF whose `required_world_updates` lacks the section's file_class → engine rejects with `required_world_updates_mismatch`. Same plan with an `update_record_field` op preceding the `append_touched_by_cf` → succeeds.
+- **Engine-validator end-to-end**: a fresh canon-addition-shaped plan that emits a PA via `append_adjudication_record` produces a file that passes `record_schema_compliance` with zero findings. Verified by `tools/validators/tests/integration/spec14-engine-roundtrip.test.ts` cross-package fixture.
+- **Bidirectional section-to-CF writes**: tests cover `append_touched_by_cf` and section-target `append_extension` against CFs whose `required_world_updates` lack the section's file_class → engine rejects with `required_world_updates_mismatch`. Same-plan overlays with `update_record_field` or `create_cf_record` ahead of the section write succeed.
 - **Status-coupled mystery rule**: validator unit test asserts `forbidden`-status + `low` → fails; `forbidden`-status + `none` → passes; `active`-status + `none` → fails; `active`-status + `medium` → passes.
 - **`geography` / `technology` domains**: validator unit test asserts both are accepted in `domains_affected`; existing canonical domains all still pass.
 - **Canonical-vocab MCP tool**: integration test invokes `get_canonical_vocabulary({class: "domain"})` and asserts the returned list matches `CANONICAL_DOMAINS` exactly; same for verdict, mystery status, mystery resolution safety (the latter returns the coupling rule).

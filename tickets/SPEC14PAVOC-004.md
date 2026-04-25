@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: No code changes — content-only migration. Uses the engine ops landed by `SPEC14PAVOC-002` and validates against the schema landed by `SPEC14PAVOC-001`.
-**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator parses frontmatter; schema rename in place), **SPEC14PAVOC-002** (engine emits canonical PA shape; `append_touched_by_cf` bidirectional check active so OQ allocations work via patch plans), `archive/tickets/SPEC14PAVOC-003.md` (canonical-vocab MCP available for spot-checks during reconciliation)
+**Engine Changes**: No code changes — content-only migration. Uses the engine ops landed by `archive/tickets/SPEC14PAVOC-002.md` and validates against the schema landed by `archive/tickets/SPEC14PAVOC-001.md`.
+**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator parses frontmatter; schema rename in place), `archive/tickets/SPEC14PAVOC-002.md` (engine emits canonical PA shape; `append_touched_by_cf` bidirectional check active so OQ allocations work via patch plans), `archive/tickets/SPEC14PAVOC-003.md` (canonical-vocab MCP available for spot-checks during reconciliation)
 
 ## Problem
 
@@ -28,7 +28,7 @@ This produces 136 GF-0004 findings (8 missing-required-field errors per PA × 17
 
 ## Architecture Check
 
-1. Migration as one-shot historical cleanup is justified — these 17 PAs were written before the contract existed. Going forward (post `SPEC14PAVOC-002` + SPEC-06 canon-addition rewrite), new PAs flow through the engine and are born compliant.
+1. Migration as one-shot historical cleanup is justified — these 17 PAs were written before the contract existed. Going forward (post `archive/tickets/SPEC14PAVOC-002.md` + SPEC-06 canon-addition rewrite), new PAs flow through the engine and are born compliant.
 2. OQ reconciliation centralizes scattered topic-strings into structured records. This is independent value: skills can now ask "what other PAs touch OQ-0061?" via the world index, where today the answer requires grepping topic-strings across all 17 PAs.
 3. No backwards-compatibility for the legacy PA shape. After this ticket lands, all PAs are frontmatter-form; the legacy bold-prefix-lines pattern is purged from animalia.
 

@@ -6,6 +6,16 @@ import type { OperationKind } from "../envelope/schema.js";
 export interface OpContext {
   worldRoot: string;
   db: Database.Database;
+  stagedRecords?: Map<string, StagedRecord> | undefined;
+}
+
+export interface StagedRecord {
+  node_id: string;
+  node_type: string;
+  file_path: string;
+  absolute_file_path: string;
+  record: Record<string, unknown>;
+  current_hash: string;
 }
 
 export interface StagedWrite {

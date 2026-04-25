@@ -18,6 +18,7 @@ export type PatchEngineOpErrorCode =
   | "record_hash_drift"
   | "record_already_exists"
   | "record_not_found"
+  | "required_world_updates_mismatch"
   | "retcon_attestation_required"
   | "target_world_mismatch"
   | "target_file_missing"
@@ -218,6 +219,12 @@ export async function loadExistingRecord(params: {
     | { node_id: string; node_type: string; file_path: string }
     | undefined;
 
+  const stagedRecord = params.ctx.stagedRecords?.get(params.targetRecordId);
+  if (stagedRecord !== undefined) {
+    verifyExpectedContentHash(stagedRecord, params.expectedContentHash, params.opKind);
+    return stagedRecord;
+  }
+
   if (!row) {
     throw new PatchEngineOpError({
       code: "record_not_found",
@@ -244,15 +251,18 @@ export async function loadExistingRecord(params: {
   }
 
   const currentHash = contentHashForYaml(parsed);
-  if (params.expectedContentHash !== currentHash) {
-    throw new PatchEngineOpError({
-      code: "record_hash_drift",
-      message: `${params.targetRecordId} content hash drifted`,
-      target_file: absoluteFilePath,
-      record_id: params.targetRecordId,
-      op_kind: params.opKind
-    });
-  }
+  verifyExpectedContentHash(
+    {
+      node_id: row.node_id,
+      node_type: row.node_type,
+      file_path: row.file_path,
+      absolute_file_path: absoluteFilePath,
+      record: parsed,
+      current_hash: currentHash
+    },
+    params.expectedContentHash,
+    params.opKind
+  );
 
   return {
     node_id: row.node_id,
@@ -262,6 +272,26 @@ export async function loadExistingRecord(params: {
     record: parsed,
     current_hash: currentHash
   };
+}
+
+function verifyExpectedContentHash(
+  record: ExistingRecord,
+  expectedContentHash: string | undefined,
+  opKind: OperationKind
+): void {
+  if (expectedContentHash === undefined) {
+    return;
+  }
+  if (expectedContentHash === record.current_hash) {
+    return;
+  }
+  throw new PatchEngineOpError({
+    code: "record_hash_drift",
+    message: `${record.node_id} content hash drifted`,
+    target_file: record.absolute_file_path,
+    record_id: record.node_id,
+    op_kind: opKind
+  });
 }
 
 export async function stageExistingRecordFile(params: {

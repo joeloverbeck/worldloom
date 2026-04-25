@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: No code changes — verification ticket. Adds a cross-package integration test asserting the SPEC-06 amended acceptance criterion holds end-to-end.
-**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator-side contract), **SPEC14PAVOC-002** (engine-side contract), `archive/tickets/SPEC14PAVOC-003.md` (canonical-vocab MCP), **SPEC14PAVOC-004** (animalia PA migration — provides clean baseline for the test world), and the SPEC-06 canon-addition Phase 2 rewrite (lands separately as part of SPEC-06 implementation; this ticket sequences AFTER that rewrite is in-progress and BEFORE SPEC-06's Phase 2 acceptance gate)
+**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator-side contract), `archive/tickets/SPEC14PAVOC-002.md` (engine-side contract), `archive/tickets/SPEC14PAVOC-003.md` (canonical-vocab MCP), **SPEC14PAVOC-004** (animalia PA migration — provides clean baseline for the test world), and the SPEC-06 canon-addition Phase 2 rewrite (lands separately as part of SPEC-06 implementation; this ticket sequences AFTER that rewrite is in-progress and BEFORE SPEC-06's Phase 2 acceptance gate)
 
 ## Problem
 
@@ -17,7 +17,7 @@ This ticket lands the cross-package end-to-end test that closes the SPEC-14 cont
 ## Assumption Reassessment (2026-04-25)
 
 1. SPEC-06's canon-addition Phase 2 rewrite produces a skill that, when invoked on a brief, calls `mcp__worldloom__submit_patch_plan` with a patch envelope containing (among other ops) `append_adjudication_record`. Per SPEC-14 §Approach + this ticket's premise, the resulting on-disk PA file must pass `record_schema_compliance`.
-2. The cross-package roundtrip test landed in `SPEC14PAVOC-002` (`tools/patch-engine/tests/integration/end-to-end-spec14-validator-roundtrip.test.ts`) verifies the LOWER LEVEL contract: synthetic engine payload → on-disk file → validator passes. This ticket extends that to the HIGHER LEVEL contract: full canon-addition skill run → engine submission → on-disk file → validator passes.
+2. The cross-package roundtrip test landed in `archive/tickets/SPEC14PAVOC-002.md` (`tools/validators/tests/integration/spec14-engine-roundtrip.test.ts`) verifies the LOWER LEVEL contract: synthetic engine payload → on-disk file → validator passes. This ticket extends that to the HIGHER LEVEL contract: full canon-addition skill run → engine submission → on-disk file → validator passes.
 3. Test world setup: copy a snapshot of post-`SPEC14PAVOC-004` animalia (or use a smaller synthetic world) into a temp directory; run a representative canon-addition brief through the rewritten skill; assert the resulting adjudication file passes the validator.
 4. The skill itself is rewritten by SPEC-06's per-skill ticket family (not this ticket). This ticket lands the ACCEPTANCE TEST that SPEC-06's canon-addition rewrite must pass before its own ticket can be marked completed.
 5. Cross-skill scope: technically the same acceptance criterion applies to all 8 skills (per SPEC-06 amended §Verification). This ticket scopes specifically to canon-addition (the highest-risk skill, the one that emits PAs). Sibling tickets for character-generation, diegetic-artifact-generation, etc., apply the same pattern at their own per-skill rewrite tickets, scoped to their respective output records.

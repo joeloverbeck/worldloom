@@ -49,6 +49,35 @@ export async function stageAppendTouchedByCf(
     });
   }
 
+  const loadedCf = await loadExistingRecord({
+    ctx,
+    targetWorld: env.target_world,
+    targetRecordId: op.payload.cf_id,
+    expectedContentHash: undefined,
+    opKind: op.op
+  });
+  if (loadedCf.node_type !== "canon_fact_record") {
+    throw new PatchEngineOpError({
+      code: "op_target_class_mismatch",
+      message: `${op.payload.cf_id} must be a canon fact record`,
+      target_file: loadedCf.absolute_file_path,
+      record_id: op.payload.cf_id,
+      op_kind: op.op
+    });
+  }
+
+  const fileClass = normalizedFileClass(loaded.record.file_class);
+  const requiredWorldUpdates = requiredWorldUpdatesFor(loadedCf.record);
+  if (!requiredWorldUpdates.has(fileClass)) {
+    throw new PatchEngineOpError({
+      code: "required_world_updates_mismatch",
+      message: `${targetRecordId} (file_class=${fileClass}) cites ${op.payload.cf_id}, but ${op.payload.cf_id}.required_world_updates does not include ${fileClass}; include an update_record_field op extending required_world_updates ahead of this op`,
+      target_file: loaded.absolute_file_path,
+      record_id: op.payload.cf_id,
+      op_kind: op.op
+    });
+  }
+
   const touchedByCf = loaded.record.touched_by_cf;
   if (!Array.isArray(touchedByCf)) {
     throw new PatchEngineOpError({
@@ -72,4 +101,16 @@ export async function stageAppendTouchedByCf(
     record: loaded.record,
     noop
   });
+}
+
+function requiredWorldUpdatesFor(record: Record<string, unknown>): Set<string> {
+  const values = Array.isArray(record.required_world_updates) ? record.required_world_updates : [];
+  return new Set(values.map(normalizedFileClass));
+}
+
+function normalizedFileClass(value: unknown): string {
+  return String(value ?? "")
+    .replace(/\.md$/i, "")
+    .replace(/-/g, "_")
+    .toUpperCase();
 }

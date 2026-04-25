@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: No code changes — content-only migration. Uses `update_record_field` and `append_extension` ops landed in archived SPEC-03; relies on the validator changes from `SPEC14PAVOC-001`.
-**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator's status-coupled mystery rule + `geography` domain in canonical enum + retired adjudication_discovery_fields), **SPEC14PAVOC-002** (engine's bidirectional `append_touched_by_cf` — relevant for verifying the bidirectional fix on CFs being touched here)
+**Engine Changes**: No code changes — content-only migration. Uses `update_record_field` and `append_extension` ops landed in archived SPEC-03; relies on the validator changes from `archive/tickets/SPEC14PAVOC-001.md`.
+**Deps**: SPEC-14, `archive/tickets/SPEC14PAVOC-001.md` (validator's status-coupled mystery rule + `geography` domain in canonical enum + retired adjudication_discovery_fields), `archive/tickets/SPEC14PAVOC-002.md` (engine's bidirectional `append_touched_by_cf` / section-target `append_extension` guard — relevant for verifying the bidirectional fix on CFs being touched here)
 
 ## Problem
 
@@ -58,7 +58,7 @@ Total: 70 of 224 grandfathered findings closed by this ticket.
 
 ## Architecture Check
 
-1. Closing the bidirectional CF↔SEC drift at the source means subsequent canon-addition runs (post `SPEC14PAVOC-002`) won't be able to re-introduce the drift (engine fail-fast). The 45 GF-0010 findings disappear permanently.
+1. Closing the bidirectional CF↔SEC drift at the source means subsequent canon-addition runs (post `archive/tickets/SPEC14PAVOC-002.md`) won't be able to re-introduce the drift (engine fail-fast). The 45 GF-0010 findings disappear permanently.
 2. Domain re-tag to `memory_and_myth` collapses redundant vocabulary (`history` ≈ time-shape captured by `temporal scope`; `memory` is a subset of `memory_and_myth`). The single canonical token is more semantically coherent.
 3. Status-coupled mystery enum normalization aligns animalia content with SPEC-14's structural rule. M-5 in particular gains the `none` value that signals "this is a forbidden mystery, not a low-resolution-safety one" — a real semantic improvement.
 

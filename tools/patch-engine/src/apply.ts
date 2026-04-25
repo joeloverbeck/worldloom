@@ -22,6 +22,8 @@ export type {
   RetconAttestation
 } from "./envelope/schema.js";
 
+export { canonicalOpHash } from "./approval/verify-token.js";
+
 export interface SubmitPatchPlanOptions extends PerWorldLockOptions {
   worldRoot?: string;
   hmacSecretPath?: string;

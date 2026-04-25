@@ -207,7 +207,7 @@ export function canonFact(id = "CF-0099"): CanonFactRecord {
     truth_scope: { world_level: true, diegetic_status: "objective" },
     domains_affected: ["everyday_life"],
     distribution: { why_not_universal: ["Access remains limited."] },
-    required_world_updates: ["SEC-ELF-001"],
+    required_world_updates: ["EVERYDAY_LIFE"],
     source_basis: { direct_user_approval: true },
     notes: "Initial note."
   };
@@ -295,7 +295,7 @@ export function entity(id = "ENT-0099"): NamedEntityRecord {
 export function section(id = "SEC-ELF-099"): SectionRecord {
   return {
     id,
-    file_class: "everyday-life",
+    file_class: "EVERYDAY_LIFE",
     order: 99,
     heading: "Fixture Section",
     heading_level: 2,

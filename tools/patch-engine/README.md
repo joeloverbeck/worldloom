@@ -4,14 +4,15 @@ Deterministic patch applier for the SPEC-03 write path. The package entrypoint i
 
 The engine consumes post-SPEC-13 atomic-record patch plans, verifies the HARD-GATE approval token, stages writes through temp files, commits with atomic per-file rename, consumes the token, and triggers `world-index sync` after storage commit. Canonical storage remains `worlds/<slug>/_source/`; `_index/world.db` is derived and may be regenerated.
 
-Design authority: `specs/SPEC-03-patch-engine.md`.
+Design authority: `archive/specs/SPEC-03-patch-engine.md`, amended by `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md` for adjudication frontmatter and bidirectional CF/SEC checks.
 
 ## Public Surface
 
 - `submitPatchPlan(envelope, approvalToken, opts?)`
+- `canonicalOpHash(op)` for approval-token hash construction and cross-package tests
 - `PatchReceipt`
 
-The operation vocabulary is the SPEC-03 post-SPEC-13 vocabulary: `create_*` record ops, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, and the three hybrid-file append ops for adjudications, characters, and diegetic artifacts.
+The operation vocabulary is the SPEC-03 post-SPEC-13 vocabulary: `create_*` record ops, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, and the three hybrid-file append ops for adjudications, characters, and diegetic artifacts. Per SPEC-14, adjudication frontmatter uses `pa_id` and the shared canonical verdict enum. Section-to-CF writes through `append_touched_by_cf` or section-target `append_extension` reject pointers whose target CF does not list the section `file_class` in `required_world_updates`.
 
 ## Write Order
 
@@ -22,6 +23,8 @@ The orchestrator controls write order:
 3. Write hybrid-file artifacts.
 
 Callers do not rely on patch-list order for correctness. `append_extension` on a section auto-adds the originating CF to `touched_by_cf[]` when it is not already attached.
+
+Staging keeps an in-memory overlay of earlier same-plan atomic creates and updates. This lets later operations validate against post-overlay records before any source write is committed.
 
 ## Atomicity
 

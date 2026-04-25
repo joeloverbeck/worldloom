@@ -61,6 +61,7 @@ export async function stageAppendExtension(
 
   extensions.push(op.payload.extension);
   if (loaded.node_type === "section") {
+    await requireCfCoversSectionFileClass(env, op, ctx, loaded.record);
     autoAddTouchedByCf(loaded.record, op.payload.extension.originating_cf, op.op, targetRecordId);
   }
 
@@ -70,6 +71,42 @@ export async function stageAppendExtension(
     targetFilePath: loaded.absolute_file_path,
     record: loaded.record
   });
+}
+
+async function requireCfCoversSectionFileClass(
+  env: PatchPlanEnvelope,
+  op: AppendExtensionOperation,
+  ctx: OpContext,
+  sectionRecord: Record<string, unknown>
+): Promise<void> {
+  const cfId = op.payload.extension.originating_cf;
+  const loadedCf = await loadExistingRecord({
+    ctx,
+    targetWorld: env.target_world,
+    targetRecordId: cfId,
+    expectedContentHash: undefined,
+    opKind: op.op
+  });
+  if (loadedCf.node_type !== "canon_fact_record") {
+    throw new PatchEngineOpError({
+      code: "op_target_class_mismatch",
+      message: `${cfId} must be a canon fact record`,
+      target_file: loadedCf.absolute_file_path,
+      record_id: cfId,
+      op_kind: op.op
+    });
+  }
+
+  const fileClass = normalizedFileClass(sectionRecord.file_class);
+  const requiredWorldUpdates = requiredWorldUpdatesFor(loadedCf.record);
+  if (!requiredWorldUpdates.has(fileClass)) {
+    throw new PatchEngineOpError({
+      code: "required_world_updates_mismatch",
+      message: `${op.payload.target_record_id} (file_class=${fileClass}) cites ${cfId}, but ${cfId}.required_world_updates does not include ${fileClass}; include an update_record_field op extending required_world_updates ahead of this op`,
+      record_id: cfId,
+      op_kind: op.op
+    });
+  }
 }
 
 function autoAddTouchedByCf(
@@ -110,4 +147,16 @@ function validateExtension(
       record_id: targetRecordId
     });
   }
+}
+
+function requiredWorldUpdatesFor(record: Record<string, unknown>): Set<string> {
+  const values = Array.isArray(record.required_world_updates) ? record.required_world_updates : [];
+  return new Set(values.map(normalizedFileClass));
+}
+
+function normalizedFileClass(value: unknown): string {
+  return String(value ?? "")
+    .replace(/\.md$/i, "")
+    .replace(/-/g, "_")
+    .toUpperCase();
 }

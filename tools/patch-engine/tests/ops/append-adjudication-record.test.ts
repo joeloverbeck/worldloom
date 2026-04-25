@@ -10,22 +10,51 @@ import { assertOpError, baseEnvelope, createOp, createTestWorld } from "../harne
 test("append_adjudication_record writes under adjudications", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope();
-  const op = createOp({ op: "append_adjudication_record", target_world: env.target_world, target_file: "adjudications/PA-0099.md", payload: { adjudication_frontmatter: { id: "PA-0099", verdict: "accepted", date: "2026-04-25", originating_skill: "unit-test" }, body_markdown: "Body." } } satisfies Extract<PatchOperation, { op: "append_adjudication_record" }>);
+  const op = createOp({ op: "append_adjudication_record", target_world: env.target_world, target_file: "adjudications/PA-0099.md", payload: { adjudication_frontmatter: { pa_id: "PA-0099", verdict: "ACCEPT", date: "2026-04-25", originating_skill: "unit-test" }, body_markdown: "Body." } } satisfies Extract<PatchOperation, { op: "append_adjudication_record" }>);
 
   const staged = await stageAppendAdjudicationRecord(env, op, world.ctx);
 
   assert.equal(staged.target_file_path, path.join(world.worldRoot, "worlds", world.worldSlug, "adjudications/PA-0099.md"));
-  assert.match(fs.readFileSync(staged.temp_file_path, "utf8"), /verdict: accepted/);
+  assert.match(fs.readFileSync(staged.temp_file_path, "utf8"), /pa_id: PA-0099/);
+  assert.match(fs.readFileSync(staged.temp_file_path, "utf8"), /verdict: ACCEPT/);
 });
 
 test("append_adjudication_record rejects traversal and existing files", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope();
-  const basePayload = { adjudication_frontmatter: { id: "PA-0099", verdict: "accepted", date: "2026-04-25", originating_skill: "unit-test" }, body_markdown: "Body." };
+  const basePayload = { adjudication_frontmatter: { pa_id: "PA-0099", verdict: "ACCEPT" as const, date: "2026-04-25", originating_skill: "unit-test" }, body_markdown: "Body." };
   const existingPath = path.join(world.worldRoot, "worlds", world.worldSlug, "adjudications/PA-0099.md");
   fs.mkdirSync(path.dirname(existingPath), { recursive: true });
   fs.writeFileSync(existingPath, "exists", "utf8");
 
   await assertOpError(() => stageAppendAdjudicationRecord(env, createOp({ op: "append_adjudication_record", target_world: env.target_world, target_file: "../PA-0099.md", payload: basePayload } satisfies Extract<PatchOperation, { op: "append_adjudication_record" }>), world.ctx), "target_file_outside_world");
   await assertOpError(() => stageAppendAdjudicationRecord(env, createOp({ op: "append_adjudication_record", target_world: env.target_world, target_file: "adjudications/PA-0099.md", payload: basePayload } satisfies Extract<PatchOperation, { op: "append_adjudication_record" }>), world.ctx), "file_already_exists");
+});
+
+test("append_adjudication_record rejects non-canonical verdicts", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope();
+
+  await assertOpError(
+    () =>
+      stageAppendAdjudicationRecord(
+        env,
+        createOp({
+          op: "append_adjudication_record",
+          target_world: env.target_world,
+          target_file: "adjudications/PA-0099.md",
+          payload: {
+            adjudication_frontmatter: {
+              pa_id: "PA-0099",
+              verdict: "accepted",
+              date: "2026-04-25",
+              originating_skill: "unit-test"
+            },
+            body_markdown: "Body."
+          }
+        } as unknown as Extract<PatchOperation, { op: "append_adjudication_record" }>),
+        world.ctx
+      ),
+    "field_path_invalid"
+  );
 });
