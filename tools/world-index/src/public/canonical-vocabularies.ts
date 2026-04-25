@@ -13,6 +13,8 @@ export const CANONICAL_DOMAINS = [
   "status_signaling",
   "ecology",
   "daily_routine",
+  "institutions",
+  "everyday_life",
   "economy",
   "settlement_life",
   "memory_and_myth",

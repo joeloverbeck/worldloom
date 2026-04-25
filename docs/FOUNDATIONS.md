@@ -367,6 +367,8 @@ It must change at least one of:
 - daily routine
 - technology
 - geography
+- institutions
+- everyday_life
 
 > The canonical-domain enum (`tools/world-index/src/public/canonical-vocabularies.ts`) extends this list with additional domains accumulated during implementation (`economy`, `settlement_life`, `memory_and_myth`, `magic`, `medicine`, `status_order`, `warfare`, `taboo_and_pollution`). The list above is the authoritative starting set; the validator's superset is queryable at runtime via `mcp__worldloom__get_canonical_vocabulary({class: "domain"})` (per SPEC-14).
 

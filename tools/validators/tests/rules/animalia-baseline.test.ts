@@ -16,13 +16,6 @@ test("rule validators report the current animalia bootstrap baseline in full-wor
 
   assert.deepEqual(
     actual,
-    [
-      "rule2.non_canonical_domain|CF-0036",
-      "rule2.non_canonical_domain|CF-0036",
-      "rule2.non_canonical_domain|CF-0038",
-      "rule2.non_canonical_domain|CF-0038",
-      "rule2.non_canonical_domain|CF-0038",
-      "rule2.non_canonical_domain|CF-0038"
-    ].sort()
+    []
   );
 });

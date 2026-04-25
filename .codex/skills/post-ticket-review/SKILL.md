@@ -28,6 +28,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and note unrelated dirty paths before review.
+- If `git status --short` shows renames, staged entries, or mixed staged/unstaged paths, also inspect `git diff --name-status --cached` and `git diff --name-status` so review-created edits are not confused with pre-existing staged work.
 - For tool or package tickets that ran builds or installs, also inspect `git status --short --ignored` when ignored generated artifacts may affect the handoff; classify ignored artifacts separately from tracked review state.
 - Classify dirty paths into: reviewed-ticket implementation state, review-created edits, and unrelated noise. Only the reviewed-ticket implementation state should drive archival readiness unless another dirty path changes the ticket's factual closeout.
 - Treat follow-up tickets created during the review as `review-created edits`. Report them explicitly in the handoff, but do not let their presence block archival unless they prove unfinished owned work inside the reviewed ticket.
@@ -126,7 +127,7 @@ If the review confirms archival readiness after the review-surface audit and fol
 1. Move the ticket to `archive/tickets/`.
 2. Confirm the original active ticket path no longer exists.
 3. Record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
-4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
+4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. Prefer literal-safe searches such as `rg -n -F 'tickets/SPEC-EXAMPLE-001.md' tickets specs docs` or single-quoted regex patterns so ticket IDs, backticks, and path punctuation are not interpreted by the shell. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
 
 If a blocker is discovered after the ticket has already been moved to the archive during the same review, recover immediately: move it back to `tickets/`, restore an active status such as `PENDING`, undo any archive-path dependency repairs that now imply completion, record the blocker in the ticket, and report archival as blocked.
 
@@ -134,9 +135,10 @@ Before creating a new ticket:
 1. inspect adjacent active tickets in the same family
 2. inspect nearby active specs or plans only if the completed ticket changed their live assumptions unambiguously
 3. confirm the concern is not already owned elsewhere
-4. scan active and archived same-family ticket IDs before choosing the follow-up ID
-5. use the next non-colliding append-only ID, and record any gap or collision reason in the ticket or report when it affects handoff clarity
-6. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
+4. decide the ticket family from the concern's owning boundary, not only from the reviewed ticket's family. If a SPEC-14 review exposes a patch-engine bug, for example, inspect the patch-engine ticket/spec family and create the follow-up there instead of defaulting to the reviewed ticket prefix.
+5. scan active and archived ticket IDs in both the reviewed family and the concern-owning family before choosing the follow-up ID
+6. use the next non-colliding append-only ID in the concern-owning family, and record any gap, collision, or cross-family handoff reason in the ticket or report when it affects handoff clarity
+7. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
 
 ### 6. Author follow-up tickets
 

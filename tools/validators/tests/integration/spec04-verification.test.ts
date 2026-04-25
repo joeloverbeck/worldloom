@@ -40,7 +40,7 @@ after(() => {
 
 test("SPEC-04 capstone re-enumerates animalia source counts from the fixture copy", () => {
   assert.equal(countYaml("_source/canon"), 47);
-  assert.equal(countYaml("_source/change-log"), 19);
+  assert.equal(countYaml("_source/change-log"), 20);
   assert.equal(countMarkdown("adjudications"), 17);
 });
 
@@ -51,21 +51,13 @@ test("SPEC-04 verification: Unit registry exposes the active mechanized validato
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
-test("SPEC-04 verification: Full-world and bootstrap grandfather baseline is structured", async () => {
+test("SPEC-04 verification: Full-world baseline is clean after SPEC-14 grandfathering closure", async () => {
   const run = await runFullWorldValidation();
 
   assert.equal(run.summary.fail_count, 0);
   assert.equal(run.summary.warn_count, 0);
-  assert.equal(run.summary.info_count, 10);
-  assert.ok(
-    run.verdicts
-      .filter((verdict) => verdict.severity === "info")
-      .every((verdict) => verdict.message.startsWith("Grandfathered by GF-"))
-  );
-  assert.deepEqual(codesByValidator(run.verdicts), {
-    record_schema_compliance: ["record_schema_compliance.required"],
-    rule2_no_pure_cosmetics: ["rule2.non_canonical_domain"]
-  });
+  assert.equal(run.summary.info_count, 0);
+  assert.deepEqual(codesByValidator(run.verdicts), {});
 });
 
 test("SPEC-04 verification: Schema conformance has no atomic-source schema failures", async () => {
@@ -147,7 +139,7 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const durationMs = Date.now() - start;
 
   assert.equal(run.summary.fail_count, 0);
-  assert.equal(run.summary.info_count, 10);
+  assert.equal(run.summary.info_count, 0);
   console.log(`SPEC-04 full-world animalia validation took ${durationMs}ms`);
 });
 

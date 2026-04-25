@@ -118,10 +118,11 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 
 | Ticket | Scope |
 |---|---|
-| `tickets/SPEC14PAVOC-004.md` | Animalia PA migration (rewrite 17 PAs to frontmatter form; OQ reconciliation + new OQ allocations; PA-0009/PA-0014 Synthesis-block move) |
-| `tickets/SPEC14PAVOC-005.md` | Animalia CF cleanup (domain re-tags `history`/`memory`→`memory_and_myth`; mystery enum normalizations to status-coupled values; `required_world_updates` extensions for the 45 GF-0010 fixes) |
-| `tickets/SPEC14PAVOC-006.md` | Animalia one-off fixes (CHAR-0002 `major_local_pressures` type fix; DA-0002 frontmatter cleanup; M-5 `disallowed_cheap_answers`; CF-0003 modification_history retrofit; CF-0020 dangling reference resolution) |
+| `archive/tickets/SPEC14PAVOC-004.md` | Animalia PA migration (rewrite 17 PAs to frontmatter form; OQ reconciliation + new OQ allocations; PA-0009/PA-0014 Synthesis-block move) |
+| `archive/tickets/SPEC14PAVOC-005.md` | Animalia CF cleanup (domain re-tags `history`/`memory`→`memory_and_myth`; mystery enum normalizations to status-coupled values; `required_world_updates` extensions for the 45 GF-0010 fixes) |
+| `archive/tickets/SPEC14PAVOC-006.md` | Animalia one-off fixes (CHAR-0002 `major_local_pressures` type fix; DA-0002 frontmatter cleanup; M-5 `disallowed_cheap_answers`; CF-0003 modification_history retrofit; CF-0020 dangling reference resolution) |
 | `tickets/SPEC14PAVOC-007.md` | canon-addition skill rewrite acceptance — validator-pass test on engine-emitted PAs end-to-end (per SPEC-06 amended acceptance criterion) |
+| `archive/tickets/SPEC14PAVOC-008.md` | Animalia final grandfathering closure (adds `institutions` + `everyday_life` to the canonical-domain enum, re-tags CF-0038 residual domains, retrofits CHAR-0001/CHAR-0002 `continuity_checked_with`, and archives the now-empty grandfathering policy) |
 
 ## FOUNDATIONS Alignment
 
@@ -137,14 +138,15 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 
 ## Migration
 
-The animalia bulk fix is decomposed into Tier 3 tickets (`SPEC14PAVOC-004` through `-007`). Migration sequence:
+The animalia bulk fix is decomposed into completed Tier 3 tickets `SPEC14PAVOC-004` through `SPEC14PAVOC-006`, plus final closure ticket `SPEC14PAVOC-008`. `SPEC14PAVOC-007` remains the canon-addition skill acceptance ticket after the zero-finding baseline. Migration sequence:
 
 1. Land Tier 2 (validator + engine + MCP). Engine and validator now agree on the contract, but no migration of legacy data has happened. Animalia's existing grandfathering remains in effect (`info`-level findings unchanged).
 2. Land `SPEC14PAVOC-004` (PA migration). Rewrites 17 PAs to frontmatter form; OQ reconciliation (matches existing 60 OQs where possible; allocates new OQ records via patch engine for unmatched topic strings; total new OQ allocations expected ~10–30 depending on overlap). Closes ~136 findings (GF-0004 PA portion) + 7 findings (GF-0001 — PA-0009/PA-0014 Synthesis-block move).
-3. Land `SPEC14PAVOC-005` (CF cleanup). Closes 45 (GF-0010) + 17 (GF-0006) + 8 (GF-0008) findings — 70 total.
-4. Land `SPEC14PAVOC-006` (one-off fixes). Closes 6 findings (GF-0002, GF-0003, GF-0005, GF-0007, GF-0009; GF-0004 char portion).
-5. Run `world-validate animalia` — expect zero findings. Empty `worlds/animalia/audits/validation-grandfathering.yaml` to no `entries`. Optionally archive the file (kept as audit-trail evidence) or delete.
-6. Land `SPEC14PAVOC-007` (skill acceptance). Verify SPEC-06's new acceptance criterion holds end-to-end on a fresh canon-addition run.
+3. Land `SPEC14PAVOC-005` (CF cleanup). Closes 45 (GF-0010) + the history/memory/geography subset of GF-0006 + 8 (GF-0008) findings; residual CF-0036/CF-0038 vocabulary findings are deferred to `SPEC14PAVOC-008`.
+4. Land `SPEC14PAVOC-006` (one-off fixes). Closes 6 findings (GF-0002, GF-0003, GF-0005, GF-0007, GF-0009, and the non-character-frontmatter one-off subset).
+5. Land `SPEC14PAVOC-008` (final grandfathering closure). Closes the final GF-0004 character `continuity_checked_with` findings and the final GF-0006 domain-vocabulary findings, then archives `worlds/animalia/audits/validation-grandfathering.yaml` as audit-trail evidence.
+6. Run `world-validate animalia` — expect zero findings.
+7. Land `SPEC14PAVOC-007` (skill acceptance). Verify SPEC-06's new acceptance criterion holds end-to-end on a fresh canon-addition run.
 
 OQ allocation mid-migration: when `SPEC14PAVOC-004` reconciles topic-strings to IDs, each new OQ allocation goes through the patch engine (`create_oq_record` op) so the resulting OQ records are properly indexed and back-referenced from PAs.
 

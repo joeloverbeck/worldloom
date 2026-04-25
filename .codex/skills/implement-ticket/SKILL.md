@@ -24,6 +24,10 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 - For package/tool tickets, remember that common generated artifacts such as `node_modules/`, `dist/`, coverage output, caches, and compiled test output are often gitignored. After package-manager, build, test, formatter, generator, or codegen commands, run an ignored-aware targeted check for the affected package directories and classify ignored artifacts as `expected generated ignored artifacts`, `cleaned state`, or `unexpected fallout` in the ledger. Do not rely on `git status --short` alone for this class of side effect.
 - If dirty paths overlap the ticket's seam, inspect the live diffs before coding and classify them as unrelated local edits, partial implementation of the active ticket, or in-flight sibling-ticket work.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
+- For world-content writes, keep the write surface explicit:
+  - `_source/*.yaml` atomic canon records are engine-only. Use `mcp__worldloom__submit_patch_plan` when it is exposed.
+  - Hybrid world files such as `characters/*.md`, `diegetic-artifacts/*.md`, and `adjudications/*.md` may be direct-edited only when the ticket or live phase precedent proves that direct edit is currently permitted. Otherwise route through the corresponding engine op or escalate.
+  - Derived artifacts such as `_index/world.db` are regenerated, not hand-edited.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - If a drafted proof command uses a workspace filter or root package-manager command (`pnpm --filter ...`, `npm --workspace ...`, `turbo ...`, etc.), verify the root workspace manifests and lockfiles exist before trusting it. If the repo has only package-local manifests, rewrite the proof to package-local commands during reassessment.
@@ -111,6 +115,7 @@ Check:
 - every skill, tool, hook, validator, schema, or doc section named by the ticket
 - if a required gate, validator, hook, approval verifier, or other enforcement framework is specified but not implemented in the live repo, do not stub success to satisfy orchestration; either fail closed with a truthful structured unavailable/error result or escalate if multiple safe boundaries are plausible
 - for integration or capstone tickets blocked by an absent validator, gate, hook, or approval framework, a test-only injection seam is acceptable only when the production/default behavior still fails closed, the injection is explicit at the call site, and the ticket records why the seam proves integration behavior without bypassing the real hard gate
+- for engine-only canon writes where `mcp__worldloom__submit_patch_plan` is unavailable in the Codex toolset, load `references/patch-engine-codex-fallback.md` and use the local patch-engine fallback only if it preserves the same source-write boundary. Do not direct-edit `_source/*.yaml` as a convenience fallback.
 - for tickets that depend on a third-party or vendor-owned API, hook system, protocol schema, or tool contract, verify the current primary documentation before trusting the ticket/spec wording; if the live contract differs, record that drift in reassessment and truth the local config/docs to the actual API
 - every drafted algorithm, tree-shape, parser-behavior, or data-flow claim the ticket relies on; verify these against the live substrate instead of trusting spec prose
 - for tickets where filesystem presence controls dispatch, mode selection, migration state, or feature activation, inspect whether existing fixtures, generated artifacts, ignored files, placeholders, or legacy worlds already contain that sentinel path before accepting the drafted condition; prefer the narrowest truthful marker, such as recognized record files, over bare directory existence when placeholders would misroute the live seam
@@ -155,6 +160,14 @@ Low-risk factual drift should be corrected directly in the ticket during reasses
 When reassessment cleanly narrows the owned delta before coding, patch the ticket's `Problem`, stale evidence-backed statements in `Assumption Reassessment`, `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
 
 If early probing shows that a drafted broad package/workspace proof lane is already failing for reasons outside the owned seam, remove it from the active acceptance surface before implementation and rewrite the ticket to the strongest truthful narrower proof boundary. Keep the broader lane only as contextual noise or follow-up evidence, not as an active acceptance gate.
+
+When a pre-apply validator emits failures during an engine-only patch reassessment, classify each failure before proceeding:
+
+- `owned blocker`: the verdict is caused by this patch and must be fixed in this ticket.
+- `validator overbreadth for this op class`: the verdict is real validator behavior but does not match the semantic scope of the operation being submitted; record the exact verdict and rationale in `Assumption Reassessment` / `## Deviations`.
+- `separate validator bug or policy gap`: keep the current ticket honest and create or name a follow-up owner when the failure should be repaired but is not same-seam.
+
+Ignoring or injecting around pre-apply verdicts is only acceptable after this classification, and only when the production/default path remains fail-closed.
 
 Required-consequence fallout does **not** require escalation when all of the following are true:
 
