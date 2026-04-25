@@ -248,7 +248,7 @@ function collectNewNodes(patches: PatchOperation[]): NewNodeReceipt[] {
       case "create_cf_record":
         return [{ node_id: String(patch.payload.cf_record.id), node_type: "canon_fact_record", file_path: "" }];
       case "create_ch_record":
-        return [{ node_id: String(patch.payload.ch_record.id), node_type: "change_log_entry", file_path: "" }];
+        return [{ node_id: String(patch.payload.ch_record.change_id), node_type: "change_log_entry", file_path: "" }];
       case "create_inv_record":
         return [{ node_id: String(patch.payload.inv_record.id), node_type: "invariant", file_path: "" }];
       case "create_m_record":

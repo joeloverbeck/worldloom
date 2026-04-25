@@ -54,6 +54,18 @@ test("submitPatchPlan applies a canon-addition plan, syncs the index, preserves 
   assert.equal(result.id_allocations_consumed.cf_ids?.[0], ids.cfId);
   assert.equal(result.id_allocations_consumed.ch_ids?.[0], ids.chId);
   assert.equal(result.id_allocations_consumed.sec_ids?.[0], ids.secId);
+  assert.ok(
+    result.new_nodes.some((node) => node.node_id === ids.cfId && node.node_type === "canon_fact_record"),
+    `missing CF receipt node for ${ids.cfId}: ${JSON.stringify(result.new_nodes)}`
+  );
+  assert.ok(
+    result.new_nodes.some((node) => node.node_id === ids.chId && node.node_type === "change_log_entry"),
+    `missing CH receipt node for ${ids.chId}: ${JSON.stringify(result.new_nodes)}`
+  );
+  assert.ok(
+    result.new_nodes.some((node) => node.node_id === ids.secId && node.node_type === "section"),
+    `missing SEC receipt node for ${ids.secId}: ${JSON.stringify(result.new_nodes)}`
+  );
   assert.ok(result.files_written.some((write) => write.file_path.endsWith(`_source/canon/${ids.cfId}.yaml`)));
   assert.ok(result.files_written.some((write) => write.file_path.endsWith(`_source/change-log/${ids.chId}.yaml`)));
   assert.ok(result.files_written.some((write) => write.file_path.endsWith(`_source/geography/${ids.secId}.yaml`)));

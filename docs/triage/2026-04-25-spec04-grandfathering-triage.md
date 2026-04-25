@@ -9,7 +9,7 @@
 
 ## Source-of-truth pointers (do not duplicate content here — reference by path)
 
-- Umbrella spec: `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`
+- Umbrella spec: `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`
 - Collateral amendments: `specs/SPEC-06-skill-rewrite-patterns.md`, `specs/SPEC-08-migration-and-phasing.md`, `docs/FOUNDATIONS.md`, `specs/IMPLEMENTATION-ORDER.md`
 - Tickets: see SPEC-14 §Deliverables for the canonical decomposition
 
@@ -97,7 +97,7 @@ Engine test (`tools/patch-engine/tests/ops/append-adjudication-record.test.ts:13
 **Tier 1 — Contract changes** (this triage's accompanying writes)
 
 1. This triage doc.
-2. New `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`.
+2. New `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`.
 3. Collateral amendment to `specs/SPEC-06-skill-rewrite-patterns.md`.
 4. Collateral amendment to `specs/SPEC-08-migration-and-phasing.md`.
 5. Collateral amendment to `docs/FOUNDATIONS.md`.

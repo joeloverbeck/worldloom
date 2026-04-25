@@ -10,7 +10,7 @@
 
 The Phase 1 and Phase 2 animalia resolution paths originally allowed grandfathering as a permanent landing state for residual structural fails. Per SPEC-14, the resolution target tightens:
 
-- **Animalia structural-fail resolution targets the SPEC-14 contract**, not the legacy three-way drift (engine ≠ validator ≠ existing PA shape). The bulk fix is decomposed into SPEC-14's Tier 3 tickets (`SPEC14PAVOC-004` through `-007`).
+- **Animalia structural-fail resolution targets the SPEC-14 contract**, not the legacy three-way drift (engine ≠ validator ≠ existing PA shape). The bulk fix is decomposed into SPEC-14's completed Animalia cleanup tickets (`SPEC14PAVOC-004` through `SPEC14PAVOC-006`, plus final closure `SPEC14PAVOC-008`); `SPEC14PAVOC-007` is the downstream SPEC-06 skill-acceptance handoff.
 - **Grandfathering target reduced to zero**. Post-Tier-3, `worlds/animalia/audits/validation-grandfathering.yaml` should have no `entries` (the file may be archived as audit-trail evidence or removed). Permanent grandfathering is no longer an acceptable end-state for the 224 animalia findings; SPEC-14's reconciliation makes legitimate fix paths exist for every bucket.
 - **Phase 2 acceptance criterion strengthened**: `world-validate animalia --json` must report zero findings (not "zero `fail`" with `info` grandfathering accepted as residual). Per SPEC-14 Verification.
 - **SPEC-14 lands as a Phase 2 prerequisite**. Engine + validator + MCP changes (SPEC-14 Tier 2 tickets) precede the animalia bulk fix (SPEC-14 Tier 3 tickets), which precedes the SPEC-06 acceptance gate.

@@ -5,7 +5,7 @@
 **Phase**: Hooks 1, 2, 4 ship in Phase 1; Hooks 3, 5 ship in Phase 2
 **Depends on**: SPEC-01 (index for Hook 1 context), SPEC-02 (MCP server for redirects), SPEC-03 (Hook 3 policy), SPEC-04 (Hook 5 validators), **SPEC-13 (atomic-source contract — Hook 2/3 scope shifts to `_source/` subdirectories and primary-authored files)**
 **Blocks**: SPEC-06 (skills rely on hooks to make discipline structural)
-**Status (2026-04-24)**: Part A is implemented at `tools/hooks/` and wired in `.claude/settings.json.example`. Hooks 3 and 5 remain specified-only Phase 2 work.
+**Status (2026-04-26)**: All five hooks implemented. Part A landed 2026-04-24 at `tools/hooks/src/hook1-user-prompt-context.ts`, `tools/hooks/src/hook2-guard-large-read.ts`, and `tools/hooks/src/hook4-subagent-localization.ts`. Part B landed 2026-04-26 at `tools/hooks/src/hook3-guard-direct-edit.ts` and `tools/hooks/src/hook5-validate-after-patch.ts`, with paired test suites in `tools/hooks/tests/`. `.claude/settings.json.example` now wires all five hooks unconditionally.
 
 ## SPEC-13 amendment summary
 
@@ -36,7 +36,9 @@ tools/hooks/
 ├── src/
 │   ├── hook1-user-prompt-context.ts
 │   ├── hook2-guard-large-read.ts
+│   ├── hook3-guard-direct-edit.ts       # Phase 2 — landed 2026-04-26
 │   ├── hook4-subagent-localization.ts
+│   ├── hook5-validate-after-patch.ts    # Phase 2 — landed 2026-04-26
 │   └── lib/
 │       ├── detect-world.ts              # infer world_slug from prompt / path
 │       ├── hook-io.ts                   # stdin/stdout helpers for Claude hook JSON
@@ -48,11 +50,11 @@ tools/hooks/
 │   ├── _shared.ts
 │   ├── hook1-user-prompt-context.test.ts
 │   ├── hook2-guard-large-read.test.ts
-│   └── hook4-subagent-localization.test.ts
+│   ├── hook3-guard-direct-edit.test.ts  # Phase 2 — landed 2026-04-26
+│   ├── hook4-subagent-localization.test.ts
+│   └── hook5-validate-after-patch.test.ts  # Phase 2 — landed 2026-04-26
 └── dist/                                # compiled JS; gitignored
 ```
-
-Phase 2 will add `hook3-guard-direct-edit.ts` and `hook5-validate-after-patch.ts`.
 
 ### Hook inventory
 
@@ -104,37 +106,31 @@ If you genuinely need the full file, include the token ALLOW_FULL_READ in your n
 
 **Exit codes**: `0` on allow and on structured `permissionDecision: deny`; non-zero only on unexpected runtime failure.
 
-#### Hook 3 — PreToolUse on Edit/Write: Block Direct Mutation *(Phase 2)*
+#### Hook 3 — PreToolUse on Edit/Write: Block Direct Mutation *(Phase 2 — implemented 2026-04-26)*
 
 **Trigger**: `Edit` or `Write` tool call with `file_path` matching `worlds/<slug>/`.
 
-**Policy**:
-- **Allowed through** (writable via skill directly, not through patch engine):
-  - `worlds/<slug>/briefs/**`
-  - `worlds/<slug>/proposals/PR-*.md` (written by `propose-new-canon-facts`)
-  - `worlds/<slug>/proposals/batches/BATCH-*.md`
-  - `worlds/<slug>/proposals/INDEX.md`
-  - `worlds/<slug>/character-proposals/**`
-  - `worlds/<slug>/audits/AU-*.md` and its retcon-proposal sub-dirs (written by `continuity-audit`)
-  - `worlds/<slug>/audits/INDEX.md`
-- **Blocked** (patch-engine-only):
-  - All 13 mandatory world files (`CANON_LEDGER.md`, `INVARIANTS.md`, `WORLD_KERNEL.md`, `ONTOLOGY.md`, `TIMELINE.md`, `GEOGRAPHY.md`, `PEOPLES_AND_SPECIES.md`, `INSTITUTIONS.md`, `ECONOMY_AND_RESOURCES.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `EVERYDAY_LIFE.md`, `OPEN_QUESTIONS.md`, `MYSTERY_RESERVE.md`)
-  - `worlds/<slug>/characters/**` (written by `character-generation` via engine for index consistency — Phase 2 revision vs. current direct write)
-  - `worlds/<slug>/diegetic-artifacts/**` (same)
-  - `worlds/<slug>/adjudications/**` (written by `canon-addition` via engine's `append_adjudication_record` op)
+**Policy** (post-SPEC-13 amendment):
+- **Blocked** (patch-engine-only): any direct `Edit`/`Write` against `worlds/<slug>/_source/<subdir>/*.yaml` (or `*.yml`). All atomic-source records — CF, CH, INV, M, OQ, ENT, SEC across every `_source/` subdirectory — are engine-only.
+- **Allowed through**:
+  - `worlds/<slug>/WORLD_KERNEL.md` (primary-authored prose)
+  - `worlds/<slug>/ONTOLOGY.md` (primary-authored prose)
+  - `worlds/<slug>/_source/<subdir>/README.md` (per-subdirectory documentation; never an atomic record)
+  - `worlds/<slug>/characters/**`, `worlds/<slug>/diegetic-artifacts/**`, `worlds/<slug>/adjudications/**`, `worlds/<slug>/proposals/**`, `worlds/<slug>/audits/**`, `worlds/<slug>/character-proposals/**`, `worlds/<slug>/briefs/**` (engine-only discipline on hybrid per-file artifacts is enforced by the skills' HARD-GATE patterns, not via Hook 3 filename match — per SPEC-13 amendment)
+  - Any path outside `worlds/<slug>/_source/`
 
 **On block** — return `permissionDecision: deny` with message:
 
 ```
 Direct Edit/Write to <path> is blocked — this surface is patch-engine-only.
 Assemble a patch plan and submit via:
-  mcp__worldloom__submit_patch_plan(plan, approval_token)
+  mcp__worldloom__submit_patch_plan(patch_plan, approval_token)
 The approval_token is issued at HARD-GATE user approval; see docs/HARD-GATE-DISCIPLINE.md.
 ```
 
-**No override**: Hook 3 has no `ALLOW_DIRECT_EDIT` bypass. Engine writes bypass the hook naturally because they use `fs.writeFile` inside the MCP server process, not Claude's Edit/Write tools.
+**No override**: Hook 3 has no `ALLOW_DIRECT_EDIT` bypass. Engine writes bypass the hook naturally because they use `fs.writeFile` inside the MCP server process, not Claude's `Edit`/`Write` tools.
 
-**Exit codes**: `0` allow, `2` deny.
+**Exit codes**: `0` always (deny is structured via `permissionDecision: deny` in stdout, not a non-zero exit).
 
 #### Hook 4 — SubagentStart: Localization-Agent Bootstrap *(Phase 1)*
 
@@ -157,31 +153,36 @@ Avoid wholesale reads of large world files. Return node ids and structured evide
 
 **Exit codes**: `0` always (informational).
 
-#### Hook 5 — PostToolUse: Auto-Validate on Write *(Phase 2)*
+#### Hook 5 — PostToolUse: Auto-Validate on Write *(Phase 2 — implemented 2026-04-26)*
 
-**Trigger**: `PostToolUse` after any successful tool call. Filter to events matching `mcp__worldloom__submit_patch_plan`.
+**Trigger**: `PostToolUse` after a successful tool call with `tool_name === "mcp__worldloom__submit_patch_plan"`.
 
-**Behavior**:
-1. Extract `target_world` and `files_written[].file_path` from the patch receipt
-2. Run `world-validate --structural --file <paths> --json` (structural validators only; rule validators already ran as pre-apply gate)
-3. If any `fail`:
-   - Log to `tools/hooks/logs/validation-failures.jsonl`
-   - Inject system reminder describing the failure
+**Behavior** (post-SPEC-13 amendment):
+1. Decode the patch receipt from the MCP `tool_response`. The hook accepts the receipt either at `tool_response.structuredContent`, directly on `tool_response`, or parsed from `tool_response.content[0].text` JSON.
+2. Walk `files_written[].file_path`. Each absolute path is normalized and split via the `worlds/<slug>/<rest>` regex into a `(world_slug, relative_path)` pair. Entries that don't match are dropped silently (graceful degrade).
+3. For each affected world, run `node tools/validators/dist/src/cli/world-validate.js <slug> --structural --json` once. Exit codes `0` (all pass) and `1` (at least one `fail`) are accepted; `2`/`3` are treated as a graceful skip.
+4. Filter the verdicts: keep only `severity === "fail"` whose `validator` is one of `record_schema_compliance`, `id_uniqueness`, `cross_file_reference`, `touched_by_cf_completeness`, **and** whose `location.file` matches one of the relative paths from the receipt for that world. Pre-existing failures on untouched files are not surfaced (those are SPEC-04's `world-validate` surface, not a post-write incident).
+5. If any failures remain, log each to `tools/hooks/logs/hook-decisions.jsonl` at `error` level and emit a single `additionalContext` block via the `PostToolUse` hook output:
 
 ```
 <system-reminder>
-Post-write validator detected structural drift:
-  validator: anchor_integrity
-  file: worlds/animalia/CANON_LEDGER.md
-  code: anchor.drift_after_write
-  message: anchor_checksum mismatch after patch apply
-This should not normally happen — pre-apply gate should have caught it. Please investigate.
+Post-write validators detected structural drift on world '<slug>'.
+This should not normally happen — the pre-apply gate should have caught it. Please investigate before further writes.
+  validator: record_schema_compliance
+  file: _source/canon/CF-0042.yaml
+  code: record.missing_required_field
+  message: Field 'fact_type' is missing.
 </system-reminder>
 ```
 
-**Graceful degrade**: if validator CLI unavailable, log and pass through.
+**Hybrid-file scope (per SPEC-13 amendment)**: structural validators run frontmatter schema checks on hybrid-file writes (`characters/*`, `diegetic-artifacts/*`, `adjudications/*`) via the validator framework's existing `parsedBodyFor` fallback to YAML frontmatter — no separate Hook 5 codepath is needed.
 
-**Exit codes**: `0` always (write has already happened; this is post-hoc).
+**Graceful degrade**:
+- Missing validator CLI under `tools/validators/dist/src/cli/world-validate.js` → log `info` and return without output.
+- Validator subprocess crashes or times out → log `info` and return without output. Hook 5 never breaks Claude.
+- Receipt has no `files_written` (or `tool_response.isError === true`) → return silently.
+
+**Exit codes**: `0` always. Hook 5 is post-hoc; the write has already landed and surfacing is informational.
 
 ### `.claude/settings.json` additions
 
@@ -230,15 +231,17 @@ This should not normally happen — pre-apply gate should have caught it. Please
 
 ### Testing strategy
 
-The landed Part A package has compiled-script tests that:
+The landed package has compiled-script tests that:
 1. Spin up a sandboxed worldloom directory with a small fixture world
 2. Feed synthetic hook payloads over stdin to the compiled hook entrypoints
-3. Assert hook decisions or injected context for Hooks 1, 2, and 4
+3. Assert hook decisions or injected context for all five hooks
 
 Fixture worlds cover:
 - No-world-detected / no-output behavior for Hook 1
 - A large protected-file world shape for Hook 2 thresholds and overrides
+- Allow/deny matrix for Hook 3 across `_source/<subdir>/*.yaml` records, `_source/<subdir>/README.md`, primary-authored prose, and hybrid artifact directories — plus the no-override invariant
 - Subagent bootstrap output for Hook 4
+- Receipt parsing, validator-CLI dispatch, and verdict filtering for Hook 5; a stub `world-validate.js` is dropped under the temp repo's `tools/validators/dist/src/cli/` to exercise the runner without a real world index
 
 ## FOUNDATIONS Alignment
 
@@ -254,10 +257,10 @@ Fixture worlds cover:
 ## Verification
 
 - **Unit**: each hook's decision function tested in isolation
-- **Integration**: `cd tools/hooks && npm test` passes on 2026-04-24, covering Hook 1 context injection, Hook 2 deny/allow/override behavior, and Hook 4 subagent bootstrap
+- **Integration**: `cd tools/hooks && npm test` passes on 2026-04-26 with all 17 tests green, covering Hook 1 context injection, Hook 2 deny/allow/override behavior, Hook 3 allow/deny matrix and no-override invariant, Hook 4 subagent bootstrap, and Hook 5 receipt-parsing / validator-dispatch / verdict-filtering
 - **Performance**: hook execution time <100ms to avoid user-visible latency (target <20ms for Hook 1/4 since every prompt hits them)
-- **Graceful degrade**: delete `_index/world.db`; verify hooks don't break Claude (pass through silently)
-- **Override discipline**: `ALLOW_FULL_READ` in prompt bypasses Hook 2; no equivalent for Hook 3 (verify no backdoor exists)
+- **Graceful degrade**: delete `_index/world.db`; verify hooks don't break Claude (pass through silently). Hook 5 also degrades gracefully when `tools/validators/dist/src/cli/world-validate.js` is absent or the subprocess returns a non-{0,1} exit code.
+- **Override discipline**: `ALLOW_FULL_READ` in prompt bypasses Hook 2; no equivalent for Hook 3 (verify no backdoor exists; Hook 3 test suite explicitly asserts deny stdout contains neither `ALLOW_FULL_READ` nor `ALLOW_DIRECT_EDIT`)
 - **Logging**: decisions logged at info level; failures logged at error level; log files rotate
 
 ## Out of Scope
