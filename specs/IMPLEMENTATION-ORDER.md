@@ -125,7 +125,7 @@ The original structural-validator gate was not used as the Phase 1.5 closeout pr
 - `SPEC-02-PHASE2` retrieval-MCP tooling update — completed 2026-04-25; spec archived at `archive/specs/SPEC-02-phase2-tooling.md`; ticket family archived under `archive/tickets/SPEC02PHA2TOO-*.md`. The `submit_patch_plan` stub removal itself remains under SPEC-03 ticket 007.
 
 **Tier 3 (depends on Tier 2)**:
-- `SPEC-05 Part B` Hooks 3, 5 — completed 2026-04-26; spec at `specs/SPEC-05-hooks-discipline.md` (status note dated 2026-04-26); implementation at `tools/hooks/src/hook3-guard-direct-edit.ts` + `tools/hooks/src/hook5-validate-after-patch.ts`; 17 hook tests pass via `cd tools/hooks && npm test`.
+- `SPEC-05 Part B` Hooks 3, 5 — completed 2026-04-26; spec archived at `archive/specs/SPEC-05-hooks-discipline.md`; implementation at `tools/hooks/src/hook3-guard-direct-edit.ts` + `tools/hooks/src/hook5-validate-after-patch.ts`; 17 hook tests pass via `cd tools/hooks && npm test`.
 
 **Tier 3.5 (depends on Tier 2; lands before Tier 4 SPEC-06 acceptance)**:
 - `SPEC-14` PA Contract & Vocabulary Reconciliation — completed 2026-04-25 and archived at `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`. Supersedes parts of archived SPEC-03 (`append_adjudication_record` payload shape; `append_touched_by_cf` semantics) and archived SPEC-04 (`record_schema_compliance` adjudication parsing; `rule7_mystery_reserve_preservation` enum; `rule2_no_pure_cosmetics` domain enum). Tier 2 tickets landed validator + engine + MCP changes; Tier 3 tickets executed the animalia bulk fix (decomposed in `docs/triage/2026-04-25-spec04-grandfathering-triage.md`). Collateral amendments: SPEC-06, SPEC-08, FOUNDATIONS.md, this file.
@@ -277,7 +277,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-14 (PA contract & vocabulary reconciliation): 1–1.5 sessions
     - Tier 2 (validator + engine + MCP): 0.5–0.75 session
     - Tier 3 (animalia bulk fix): 0.5–0.75 session
-  - SPEC-05 Part B (2 hooks, `_source/` discipline): completed 2026-04-26
+  - SPEC-05 Part B (2 hooks, `_source/` discipline): completed 2026-04-26; archived at `archive/specs/SPEC-05-hooks-discipline.md`
   - SPEC-06 (all 8 skills against atomic source): 2.5–3 sessions
   - SPEC-07 Part B: 0.5 session
   - Animalia re-validation + cleanup: 0.5 session (lifted into SPEC-14 Tier 3)
@@ -312,7 +312,7 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 | SPEC-02-PHASE2 Retrieval-MCP Phase 2 Tooling Update | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`; delivered `get_record`, `find_sections_touched_by`, and INV/OQ/ENT/SEC `allocate_next_id` extensions via archived `SPEC02PHA2TOO-*` tickets; `get_compiled_view` intentionally dropped |
 | SPEC-03 Patch Engine | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-03-patch-engine.md`; ticket family archived under `archive/tickets/SPEC03PATENG-*.md` |
 | SPEC-04 Validator Framework | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-04-validator-framework.md`; delivered `world-validate`, `validatePatchPlan`, 13 mechanized validators, and Animalia bootstrap grandfathering |
-| SPEC-05 Hooks Discipline | Part A implemented 2026-04-24 at `tools/hooks/` and `.claude/settings.json.example`; Part B implemented 2026-04-26 at `tools/hooks/src/hook3-guard-direct-edit.ts` and `tools/hooks/src/hook5-validate-after-patch.ts` (paired tests in `tools/hooks/tests/`); all five hooks wired in `.claude/settings.json.example` |
+| SPEC-05 Hooks Discipline | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-05-hooks-discipline.md`; Part A implemented 2026-04-24 at `tools/hooks/` and `.claude/settings.json.example`; Part B implemented 2026-04-26 at `tools/hooks/src/hook3-guard-direct-edit.ts` and `tools/hooks/src/hook5-validate-after-patch.ts` (paired tests in `tools/hooks/tests/`); all five hooks wired in `.claude/settings.json.example` |
 | SPEC-06 Skill Rewrite Patterns | ✓ specified |
 | SPEC-07 Docs Updates | Part A implemented 2026-04-23 at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`; Part B remains specified; Part C retired by SPEC-13 |
 | SPEC-08 Migration & Phasing | ✓ specified |

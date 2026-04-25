@@ -1,5 +1,5 @@
 {
-  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. All five hooks are active as of SPEC-05 Part B (Phase 2). Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see specs/SPEC-05-hooks-discipline.md).",
+  "_comment": "Worldloom hook configuration example. Copy or merge into .claude/settings.json. All five hooks are active as of SPEC-05 Part B (Phase 2). Each hook's implementation lives at tools/hooks/dist/src/*.js, built from tools/hooks/src/*.ts (see archive/specs/SPEC-05-hooks-discipline.md).",
 
   "hooks": {
     "UserPromptSubmit": [

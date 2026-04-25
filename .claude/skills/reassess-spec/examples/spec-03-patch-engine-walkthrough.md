@@ -135,6 +135,6 @@ Apply I1, M1, A1. Skip M2 (retracted).
 - Post-apply confirmation: zero matches for eliminated references; 3 matches for corrected references (`--dry-run format`, `tools/patch-engine/src/rollback/`, `--verbose`).
 - Sections that changed substantially: D4 (Dry-run), D6 (Rollback), §CLI surface.
 - Classification shift: none.
-- Suggested next step: Review the updated SPEC-03, then either (a) decompose into tickets by hand, or (b) invoke a ticket-decomposition skill when one is created. reassess-spec prepares specs for decomposition but does not perform it.
+- Suggested next step: Review the updated SPEC-03, then either (a) decompose into tickets by hand, or (b) invoke `spec-to-tickets` to decompose the spec into implementation tickets aligned with FOUNDATIONS.md. reassess-spec prepares specs for decomposition but does not perform it.
 
 Do NOT commit. Leave the file for user review.

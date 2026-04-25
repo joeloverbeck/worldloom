@@ -5,7 +5,7 @@
 **Phase**: Hooks 1, 2, 4 ship in Phase 1; Hooks 3, 5 ship in Phase 2
 **Depends on**: SPEC-01 (index for Hook 1 context), SPEC-02 (MCP server for redirects), SPEC-03 (Hook 3 policy), SPEC-04 (Hook 5 validators), **SPEC-13 (atomic-source contract — Hook 2/3 scope shifts to `_source/` subdirectories and primary-authored files)**
 **Blocks**: SPEC-06 (skills rely on hooks to make discipline structural)
-**Status (2026-04-26)**: All five hooks implemented. Part A landed 2026-04-24 at `tools/hooks/src/hook1-user-prompt-context.ts`, `tools/hooks/src/hook2-guard-large-read.ts`, and `tools/hooks/src/hook4-subagent-localization.ts`. Part B landed 2026-04-26 at `tools/hooks/src/hook3-guard-direct-edit.ts` and `tools/hooks/src/hook5-validate-after-patch.ts`, with paired test suites in `tools/hooks/tests/`. `.claude/settings.json.example` now wires all five hooks unconditionally.
+**Status**: COMPLETED 2026-04-26. All five hooks implemented. Part A landed 2026-04-24 at `tools/hooks/src/hook1-user-prompt-context.ts`, `tools/hooks/src/hook2-guard-large-read.ts`, and `tools/hooks/src/hook4-subagent-localization.ts`. Part B landed 2026-04-26 at `tools/hooks/src/hook3-guard-direct-edit.ts` and `tools/hooks/src/hook5-validate-after-patch.ts`, with paired test suites in `tools/hooks/tests/`. `.claude/settings.json.example` now wires all five hooks unconditionally.
 
 ## SPEC-13 amendment summary
 
@@ -278,3 +278,15 @@ Fixture worlds cover:
 - **Hook 4 prompt injection**: injected system reminders compete with the main agent's prompt. Mitigation: short, targeted, high-signal.
 - **Hook 5 post-hoc detection**: Hook 5 runs after write. Any `fail` indicates a gap in pre-apply gate. Mitigation: treat Hook 5 fails as high-priority bugs; track in an incident log.
 - **Settings.json merge discipline**: these hook additions must merge with user-local settings. Mitigation: SPEC-07 documents the merge pattern; SPEC-08 Phase 0 adds a sample `.claude/settings.json.example`.
+
+## Outcome
+
+Completed: 2026-04-26.
+
+SPEC-05 shipped in two parts. Part A delivered the read-side and subagent enforcement hooks (`hook1-user-prompt-context`, `hook2-guard-large-read`, `hook4-subagent-localization`) on 2026-04-24. Part B delivered direct `_source/` mutation blocking and post-patch validation surfacing (`hook3-guard-direct-edit`, `hook5-validate-after-patch`) on 2026-04-26.
+
+The final implementation lives under `tools/hooks/` with paired tests in `tools/hooks/tests/`. `.claude/settings.json.example` wires all five hooks unconditionally.
+
+Deviations from the original plan: SPEC-13 shifted Hook 2 and Hook 3 from monolithic world-file discipline to atomic `_source/` discipline. Hook 3 blocks direct Claude `Edit`/`Write` operations on atomic YAML records while leaving primary-authored prose and hybrid artifact directories to the skill/HARD-GATE layer. Hook 5 filters structural validator failures to the files reported by the patch receipt.
+
+Verification: `cd tools/hooks && npm test` passed on 2026-04-26 with 17 tests green, covering Hook 1 context injection, Hook 2 deny/allow/override behavior, Hook 3 allow/deny matrix and no-override invariant, Hook 4 subagent bootstrap, and Hook 5 receipt parsing / validator dispatch / verdict filtering.

@@ -247,7 +247,7 @@ Present:
 
   Omit if classification is unchanged.
 - **Suggested next step**:
-  - **Default path** (classifications (a), (b), (c)): "Review the updated spec, then either (a) decompose into tickets by hand, or (b) invoke a ticket-decomposition skill when one is created. reassess-spec prepares specs for decomposition but does not perform it."
+  - **Default path** (classifications (a), (b), (c)): "Review the updated spec, then either (a) decompose into tickets by hand, or (b) invoke `spec-to-tickets` to decompose the spec into implementation tickets aligned with FOUNDATIONS.md. reassess-spec prepares specs for decomposition but does not perform it."
   - **Retroactive path** (classification (d)): archival flow:
     1. Move the spec: `git mv specs/<ID>.md archive/specs/<ID>.md` (if tracked) or plain `mv` fallback (if untracked). Detect via `git ls-files --error-unmatch specs/<ID>.md`; non-zero exit → untracked → use plain `mv`. Create `archive/specs/` with `mkdir -p` if it doesn't exist.
     2. **Reconcile `specs/IMPLEMENTATION-ORDER.md`**: find the spec's roadmap entry, verify it doesn't already say `✅ COMPLETED`, and rewrite it using the canonical format: `- **<ID>**: ✅ COMPLETED — archived at [archive/specs/<file>.md](...). <1–2 line summary of landed artifacts>.` Include delivering commit IDs or sibling-spec IDs and note any scope absorbed by downstream work.
