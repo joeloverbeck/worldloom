@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/character-frontmatter.schema.json",
+  "title": "CharacterFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["character_id", "slug", "name", "species", "age_band", "place_of_origin", "current_location", "date", "social_position", "profession", "kinship_situation", "religious_ideological_environment", "major_local_pressures", "intended_narrative_role", "world_consistency", "source_basis"],
+  "properties": {
+    "character_id": { "type": "string", "pattern": "^CHAR-[0-9]{4}$" },
+    "slug": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "aliases": { "type": "array", "items": { "type": "string" } },
+    "species": { "type": "string" },
+    "age_band": { "type": "string" },
+    "place_of_origin": { "type": "string" },
+    "current_location": { "type": "string" },
+    "scoped_references": { "type": "array" },
+    "date": { "type": "string" },
+    "social_position": { "type": "string" },
+    "profession": { "type": "string" },
+    "kinship_situation": { "type": "string" },
+    "religious_ideological_environment": { "type": "string" },
+    "major_local_pressures": { "type": "array", "items": { "type": "string" } },
+    "intended_narrative_role": { "type": "string" },
+    "world_consistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canon_facts_consulted", "invariants_respected", "mystery_reserve_firewall", "distribution_exceptions", "continuity_checked_with"],
+      "properties": {
+        "canon_facts_consulted": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "invariants_respected": { "type": "array", "items": { "type": "string", "pattern": "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$" } },
+        "mystery_reserve_firewall": { "type": "array", "items": { "type": "string", "pattern": "^M-[0-9]+$" } },
+        "distribution_exceptions": { "type": "array", "items": { "type": "string" } },
+        "continuity_checked_with": { "type": "array", "items": { "type": "string", "pattern": "^CHAR-[0-9]{4}$" } }
+      }
+    },
+    "source_basis": { "type": "object" },
+    "notes": { "type": "string" }
+  }
+}

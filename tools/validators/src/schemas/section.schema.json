@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/section.schema.json",
+  "title": "SectionRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "file_class", "order", "heading", "heading_level", "body", "extensions", "touched_by_cf"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SEC-(ELF|INS|MTS|GEO|ECR|PAS|TML)-[0-9]{3}$"
+    },
+    "file_class": {
+      "type": "string",
+      "enum": ["EVERYDAY_LIFE", "INSTITUTIONS", "MAGIC_OR_TECH_SYSTEMS", "GEOGRAPHY", "ECONOMY_AND_RESOURCES", "PEOPLES_AND_SPECIES", "TIMELINE"]
+    },
+    "order": { "type": "integer", "minimum": 1 },
+    "heading": { "type": "string", "minLength": 1 },
+    "heading_level": { "type": "integer", "minimum": 1 },
+    "body": { "type": "string" },
+    "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } },
+    "touched_by_cf": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" }
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "file_class": { "const": "EVERYDAY_LIFE" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-ELF-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "INSTITUTIONS" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-INS-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "MAGIC_OR_TECH_SYSTEMS" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-MTS-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "GEOGRAPHY" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-GEO-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "ECONOMY_AND_RESOURCES" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-ECR-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "PEOPLES_AND_SPECIES" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-PAS-[0-9]{3}$" } } } },
+    { "if": { "properties": { "file_class": { "const": "TIMELINE" } }, "required": ["file_class"] }, "then": { "properties": { "id": { "type": "string", "pattern": "^SEC-TML-[0-9]{3}$" } } } }
+  ]
+}

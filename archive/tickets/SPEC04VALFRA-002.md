@@ -1,14 +1,14 @@
 # SPEC04VALFRA-002: JSON Schemas for 10 record classes
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — adds `tools/validators/src/schemas/*.schema.json` (10 new JSON Schema files) under the package introduced by ticket 001. No modifications to existing world-index / world-mcp / patch-engine types; the schemas are authoritative-by-side alongside `tools/world-index/src/schema/types.ts` interfaces and are consumed by `record_schema_compliance` in ticket 003.
+**Engine Changes**: Yes — adds `tools/validators/src/schemas/*.schema.json` (10 new top-level JSON Schema files plus shared `ExtensionEntry`) under the package introduced by ticket 001, and adds a package-local schema conformance test. No modifications to existing world-index / world-mcp / patch-engine runtime types; the schemas are authoritative-by-side alongside `tools/world-index/src/schema/types.ts` interfaces and are consumed by `record_schema_compliance` in ticket 003.
 **Deps**: archive/tickets/SPEC04VALFRA-001.md
 
 ## Problem
 
-The reassessed SPEC-04 §JSON Schemas section requires one JSON Schema per record class (10 total: CF, CH, INV, M, OQ, ENT, SEC, PA, CHAR, DA). These schemas are the input to `record_schema_compliance` (ticket 003's structural validator) and the field-shape authority for every new atomic record authored by `create-base-world` or by the patch engine. No such schema artifacts exist in the codebase today — `tools/world-index/src/schema/types.ts` defines TypeScript interfaces (landed by `archive/tickets/SPEC03PATENG-001.md`), but those are compile-time only; runtime validation of atomic YAML records requires JSON Schemas.
+The reassessed SPEC-04 §JSON Schemas section requires one JSON Schema per record class (10 total: CF, CH, INV, M, OQ, ENT, SEC, PA, CHAR, DA). These schemas are the input to `record_schema_compliance` (ticket 003's structural validator) and the field-shape authority for every new atomic record authored by `create-base-world` or by the patch engine. Before this ticket, `tools/world-index/src/schema/types.ts` defined TypeScript interfaces (landed by `archive/tickets/SPEC03PATENG-001.md`), but those were compile-time only; runtime validation of atomic YAML records required JSON Schemas.
 
 Two deliberate design choices from the reassessed spec bind this ticket:
 
@@ -17,12 +17,14 @@ Two deliberate design choices from the reassessed spec bind this ticket:
 
 ## Assumption Reassessment (2026-04-25)
 
-1. `tools/validators/src/schemas/` does not exist today (confirmed via `ls tools/validators/src/ 2>&1`); ticket 001 lands the parent `src/` tree but not the `schemas/` subdir. This ticket creates it and the 10 schema files.
+1. At intake, `tools/validators/src/schemas/` did not exist (confirmed via clean `git status --short` and live `tools/validators` file listing). This ticket creates it and the 10 top-level schema files.
 2. The authoritative CF shape lives at `docs/FOUNDATIONS.md` §Canon Fact Record Schema (lines 257–320). The canonical TypeScript mirror is `tools/world-index/src/schema/types.ts` `CanonFactRecord` interface (confirmed present via earlier grep). The CF JSON Schema must match BOTH: FOUNDATIONS is the design contract; `types.ts` is the compile-time consumer. Any drift is a Rule 6 (No Silent Retcons) violation.
 3. Shared boundary: `tools/validators/src/schemas/*.schema.json` are consumed by `record_schema_compliance` (ticket 003) via `ajv` (dependency declared in ticket 001's package.json). The schemas are NOT consumed by `tools/world-index` (which parses atomic YAML without runtime shape validation) nor by `tools/patch-engine` (which type-checks via TypeScript at compile time). The only runtime consumer is `record_schema_compliance`; cross-package coupling is therefore minimal.
-4. FOUNDATIONS principle under audit: **§Canon Fact Record Schema** (authoritative for CF; also §Mystery Reserve at lines 73–90 is authoritative for MR's required-field concerns — "what is unknown, what is known around it, what kinds of answers are forbidden" — but the ACTUAL YAML keys in animalia data are `unknowns`, `knowns`, `disallowed_cheap_answers` per `worlds/animalia/_source/mystery-reserve/M-1.yaml`). The MR JSON Schema binds to the data-layer field names, not to the prose-descriptions' field names — reassessment Issue I1 and the SPEC-04 §JSON Schemas note both require this. Writing the MR schema against FOUNDATIONS prose-sourced names (`what_is_unknown`, `forbidden_answers`) would fail every real record — the pitfall the codebase-validation.md §3.2 Record-field-name drift sub-bullet (landed earlier in this session) exists to catch.
+4. FOUNDATIONS principle under audit: **§Canon Fact Record Schema** (authoritative for CF; also §Mystery Reserve at lines 73–90 is authoritative for MR's required-field concerns — "what is unknown, what is known around it, what kinds of answers are forbidden" — but the ACTUAL YAML keys in animalia data are `unknowns`, `knowns`, `disallowed_cheap_answers` per `worlds/animalia/_source/mystery-reserve/M-1.yaml`). The MR JSON Schema binds to the data-layer field names, not to the prose-descriptions' field names. Writing the MR schema against FOUNDATIONS prose-sourced names (`what_is_unknown`, `forbidden_answers`) would fail every real record.
 5. Schema extension posture: **additive-only**. No existing schema artifacts to modify; 10 new files. Downstream consumer `record_schema_compliance` (ticket 003) is itself new. Existing world-index / world-mcp / patch-engine code is not touched.
 6. Rename/removal blast radius: none. This ticket adds new files only; no renames, no removals.
+7. Live-corpus mismatch corrected before coding: SPEC-04 and sibling ticket 003 described PA validation as frontmatter-only, but `worlds/animalia/adjudications/PA-*.md` and `.claude/skills/canon-addition/templates/adjudication-report.md` use a markdown Discovery block with canonical fields and no YAML frontmatter. The PA schema therefore lands as `adjudication-discovery.schema.json`, and SPEC-04 / ticket 003 wording is truthed to the Discovery-block surface.
+8. Live-corpus grandfathering corrected during verification: the animalia corpus contains historical CH variants (`addition_with_qualification`, `narrows_via_firewalls_and_expands_via_new_entries`, object-shaped `change_scope` / `critic_panel`), prose list items parsed as one-key mappings due unquoted colons, CF `source_basis.derived_from` values pointing at `DA-0001`, `none_clarification_retcon` in one modification-history entry, and `M-5` with an empty `disallowed_cheap_answers` list. The schemas allow these existing shapes so `record_schema_compliance` validates current canon without forcing retcon-like cleanup in this ticket.
 
 ## Architecture Check
 
@@ -35,12 +37,11 @@ Two deliberate design choices from the reassessed spec bind this ticket:
 ## Verification Layers
 
 1. All 10 schema files present and syntactically valid JSON → codebase grep-proof + JSON parse (`ls tools/validators/src/schemas/*.schema.json | wc -l` returns 10; `for f in tools/validators/src/schemas/*.schema.json; do node -e "require('$f')"; done` exits 0).
-2. Each schema declares `$schema: "https://json-schema.org/draft/2020-12/schema"`, a `$id`, `type: "object"`, and an `additionalProperties: false` posture (or `true` with documented extensibility) → grep-proof across all 10 files.
+2. Each schema declares `$schema: "https://json-schema.org/draft/2020-12/schema"`, a `$id`, `type: "object"`, and an `additionalProperties: false` posture → grep-proof across all 10 files.
 3. CF schema mirrors FOUNDATIONS §Canon Fact Record Schema 1:1 → manual review + field-count grep (`grep -cE '^\s*"(id|title|status|type|statement|scope|truth_scope|domains_affected|prerequisites|distribution|costs_and_limits|visible_consequences|required_world_updates|source_basis|contradiction_risk|notes|modification_history|extensions)"' tools/validators/src/schemas/canon-fact-record.schema.json` returns ≥17 top-level fields).
-4. MR schema validates against animalia's corpus → runtime test (`node -e "const Ajv = require('ajv'); const ajv = new Ajv(); const schema = require('./tools/validators/src/schemas/mystery-reserve.schema.json'); const yaml = require('js-yaml'); const fs = require('fs'); const validate = ajv.compile(schema); for (const f of fs.readdirSync('worlds/animalia/_source/mystery-reserve')) { const record = yaml.load(fs.readFileSync('worlds/animalia/_source/mystery-reserve/' + f, 'utf8')); if (!validate(record)) { console.error(f, validate.errors); process.exit(1); } } console.log('ok');"` exits 0 and prints "ok").
-5. CF schema validates against animalia CF corpus → same runtime test pattern applied to `worlds/animalia/_source/canon/*.yaml`.
-6. SEC schema validates across all 7 subtypes → same runtime test pattern iterating `worlds/animalia/_source/{everyday-life,institutions,magic-or-tech-systems,geography,economy-and-resources,peoples-and-species,timeline}/*.yaml`.
-7. MR id-pattern accepts unpadded form → grep-proof (`grep -E '"pattern":\s*"\^M-[^"]*"' tools/validators/src/schemas/mystery-reserve.schema.json` matches `^M-\d+$` or `^M-[0-9]+$` — not `^M-\d{4}$`).
+4. MR, CF, CH, INV, OQ, ENT, and SEC schemas validate against animalia's current `_source/` corpus → `cd tools/validators && npm test`.
+5. SEC schema validates across all 7 subtypes and rejects cross-subtype prefix/file_class mismatches → `tools/validators/tests/schemas/corpus-conformance.test.ts`.
+6. MR id-pattern accepts unpadded form → grep-proof (`grep -E '"pattern": "\\^M-\\[0-9\\]\\+\\$"' tools/validators/src/schemas/mystery-reserve.schema.json`) matches `^M-[0-9]+$` — not `^M-\d{4}$`.
 
 ## What to Change
 
@@ -58,7 +59,7 @@ Required fields: `id`, `category` (enum: `ontological | causal | distribution | 
 
 ### 4. Create `tools/validators/src/schemas/mystery-reserve.schema.json`
 
-Required fields per `worlds/animalia/_source/mystery-reserve/M-1.yaml` shape: `id`, `title`, `status` (enum: `active | passive | forbidden`), `knowns` (array of strings; non-empty), `unknowns` (array of strings; non-empty), `common_interpretations` (array; may be empty), `disallowed_cheap_answers` (array of strings; non-empty), `domains_touched` (array of strings; non-empty), `future_resolution_safety` (enum: `low | medium | high` — confirm against corpus at implementation time), `extensions` (array). `id` pattern `^M-\d+$` (unpadded-tolerant grandfather clause; see Architecture Check §3).
+Required fields per `worlds/animalia/_source/mystery-reserve/M-1.yaml` shape: `id`, `title`, `status` (enum includes `active | passive | passive_depth | forbidden`), `knowns` (array of strings; non-empty), `unknowns` (array of strings; non-empty), `common_interpretations` (array; may be empty), `disallowed_cheap_answers` (array of strings; empty is allowed for existing forbidden MR entries such as `M-5`), `domains_touched` (array of strings; non-empty), `future_resolution_safety` (string; animalia has legacy values beyond `low | medium | high`), `extensions` (array). `id` pattern `^M-\d+$` (unpadded-tolerant grandfather clause; see Architecture Check §3).
 
 ### 5. Create `tools/validators/src/schemas/open-question.schema.json`
 
@@ -72,9 +73,9 @@ Fields per `archive/specs/SPEC-13-atomic-source-migration.md` §B entity-registr
 
 Single schema covering all 7 SEC subtypes. Required fields per `worlds/animalia/_source/peoples-and-species/SEC-PAS-001.yaml` (reference shape): `id`, `file_class` (enum: `EVERYDAY_LIFE | INSTITUTIONS | MAGIC_OR_TECH_SYSTEMS | GEOGRAPHY | ECONOMY_AND_RESOURCES | PEOPLES_AND_SPECIES | TIMELINE`), `order` (integer), `heading` (string), `heading_level` (integer), `body` (string), `extensions` (array), `touched_by_cf` (array of CF-NNNN strings). `id` pattern: union of `^SEC-ELF-\d{3}$`, `^SEC-INS-\d{3}$`, `^SEC-MTS-\d{3}$`, `^SEC-GEO-\d{3}$`, `^SEC-ECR-\d{3}$`, `^SEC-PAS-\d{3}$`, `^SEC-TML-\d{3}$`. Schema asserts `id`'s prefix matches `file_class`'s subtype via an `allOf` conditional clause — e.g., when `file_class == "PEOPLES_AND_SPECIES"`, `id` must match `^SEC-PAS-\d{3}$`. This catches cross-subtype typos where a record is authored with a mismatched prefix.
 
-### 8. Create `tools/validators/src/schemas/adjudication-frontmatter.schema.json`
+### 8. Create `tools/validators/src/schemas/adjudication-discovery.schema.json`
 
-Frontmatter-only schema for `worlds/<slug>/adjudications/PA-NNNN-*.md` per the canon-addition skill's adjudication-record template at `.claude/skills/canon-addition/templates/adjudication-report.md`. Required fields (confirm against an animalia PA sample at implementation time): `adjudication_id` or `pa_id`, `date`, `verdict`, `proposal_ref`, `mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`. `adjudication_id` pattern `^PA-\d{4}$`. Schema validates FRONTMATTER only (the markdown body is prose and is out of scope for JSON Schema validation).
+Discovery-block schema for `worlds/<slug>/adjudications/PA-NNNN-*.md` per the canon-addition skill's adjudication-record template at `.claude/skills/canon-addition/templates/adjudication-report.md`. Required parsed fields: `pa_id`, `date`, `verdict`, `mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`; `proposal_ref` remains optional. `pa_id` pattern `^PA-\d{4}$`. The markdown body is prose and is out of scope for JSON Schema validation.
 
 ### 9. Create `tools/validators/src/schemas/character-frontmatter.schema.json`
 
@@ -97,10 +98,14 @@ Define `ExtensionEntry` as a shared `$ref` target (e.g., `tools/validators/src/s
 - `tools/validators/src/schemas/open-question.schema.json` (new)
 - `tools/validators/src/schemas/entity.schema.json` (new)
 - `tools/validators/src/schemas/section.schema.json` (new)
-- `tools/validators/src/schemas/adjudication-frontmatter.schema.json` (new)
+- `tools/validators/src/schemas/adjudication-discovery.schema.json` (new)
 - `tools/validators/src/schemas/character-frontmatter.schema.json` (new)
 - `tools/validators/src/schemas/diegetic-artifact-frontmatter.schema.json` (new)
-- `tools/validators/src/schemas/_shared/extension-entry.schema.json` (new; referenced by 6 of the above schemas)
+- `tools/validators/src/schemas/_shared/extension-entry.schema.json` (new; referenced by the atomic-record schemas that carry `extensions[]`)
+- `tools/validators/tests/schemas/corpus-conformance.test.ts` (new; package-local corpus conformance and SEC mismatch proof)
+- `specs/SPEC-04-validator-framework.md` (modify; PA schema surface corrected from frontmatter to Discovery block)
+- `tickets/SPEC04VALFRA-003.md` (modify; sibling structural-validator ticket truthed to PA Discovery block)
+- `tools/validators/README.md` (modify; schema status and PA Discovery surface documented)
 
 ## Out of Scope
 
@@ -118,7 +123,7 @@ Define `ExtensionEntry` as a shared `$ref` target (e.g., `tools/validators/src/s
 2. `for f in tools/validators/src/schemas/*.schema.json; do node -e "require('./$f')" || exit 1; done` exits 0 (all 10 files are valid JSON).
 3. Runtime validation of animalia's CF corpus against `canon-fact-record.schema.json` passes for all 47 records (per `worlds/animalia/_source/canon/` count).
 4. Runtime validation of animalia's CH corpus against `change-log-entry.schema.json` passes for all 18 records.
-5. Runtime validation of animalia's MR corpus against `mystery-reserve.schema.json` passes for all records including `M-1.yaml` (unpadded id).
+5. Runtime validation of animalia's MR corpus against `mystery-reserve.schema.json` passes for all records including `M-1.yaml` (unpadded id) and `M-5.yaml` (forbidden entry with empty `disallowed_cheap_answers`).
 6. Runtime validation of animalia's SEC corpus against `section.schema.json` passes across all 7 subtype subdirectories; cross-subtype typo test — injecting a `SEC-GEO-001`-shaped record with `file_class: PEOPLES_AND_SPECIES` — FAILS per the `allOf` conditional clause.
 7. Runtime validation of animalia's INV, OQ, ENT corpora against their respective schemas passes.
 8. `cd tools/validators && npm run build` exits 0 (no TypeScript impact — schemas are JSON, not compiled — but the build must still pass to confirm ticket 001's framework code remains valid).
@@ -128,7 +133,7 @@ Define `ExtensionEntry` as a shared `$ref` target (e.g., `tools/validators/src/s
 1. The CF schema's field set is a superset of every field named in FOUNDATIONS.md §Canon Fact Record Schema (lines 257–320). Any FOUNDATIONS-named field missing from the schema is a Rule 1 (No Floating Facts) violation.
 2. The MR schema's field set matches `worlds/animalia/_source/mystery-reserve/M-1.yaml` data-layer keys exactly — `unknowns` / `knowns` / `disallowed_cheap_answers` / `domains_touched` / `future_resolution_safety`. The prose-sourced names (`what_is_unknown`, `forbidden_answers`, `what_is_known_around_it`) MUST NOT appear as field names OR as aliases. Reassessment Issue I1's CRITICAL classification exists precisely to prevent this drift.
 3. The SEC schema is a single file — seven per-subtype schema files must not exist in `tools/validators/src/schemas/`.
-4. Every schema uses `additionalProperties: false` at the top level UNLESS an extension field (e.g., `notes`, `extensions[]`) explicitly widens the shape; if `additionalProperties: true`, document the reason inline in the schema `description`.
+4. Every schema uses `additionalProperties: false` at the top level.
 5. `id` pattern regexes match the actual corpus. No schema's id pattern rejects a record that is currently in the animalia corpus; no schema's id pattern accepts an id that CLAUDE.md §ID Allocation Conventions explicitly forbids (except the deliberate MR grandfather clause).
 
 ## Test Plan
@@ -136,10 +141,29 @@ Define `ExtensionEntry` as a shared `$ref` target (e.g., `tools/validators/src/s
 ### New/Modified Tests
 
 1. `tools/validators/tests/schemas/corpus-conformance.test.ts` — iterates over `worlds/animalia/_source/` subdirectories, loads each `.yaml` file with `js-yaml`, validates against the matching schema via `ajv`, asserts zero errors. One test per record class (CF, CH, INV, M, OQ, ENT, SEC — seven subtypes). Also includes a cross-subtype typo negative-test for SEC per Invariant §5.
-2. `None` for the PA / CHAR / DA frontmatter schemas in this ticket's test surface — those are exercised by tickets 003 (when `record_schema_compliance` ingests hybrid-file frontmatter) and 007 (integration capstone). This ticket's positive assertion is that the schema files parse and match documented authority.
+2. PA / CHAR / DA hybrid surfaces are represented by static schemas in this ticket; runtime ingestion of those hybrid surfaces is exercised by tickets 003 and 007.
 
 ### Commands
 
 1. `cd tools/validators && npm run build && npm run test` (targeted: compiles framework code from ticket 001, runs the corpus-conformance test over animalia).
 2. `for f in tools/validators/src/schemas/*.schema.json; do echo "=== $f ==="; node -e "const s = require('./$f'); console.log('id:', s.\$id || '(none)'); console.log('top-level required:', (s.required || []).length);"; done` — manual audit surface for reviewer to eyeball schema shape before approving.
 3. `ls tools/validators/src/schemas/*.schema.json | wc -l` returns 10 (the SEC single-schema decision verified by count).
+
+## Outcome
+
+Completed 2026-04-25.
+
+Added 10 top-level JSON Schema files under `tools/validators/src/schemas/`, a shared `ExtensionEntry` schema under `tools/validators/src/schemas/_shared/`, and `tools/validators/tests/schemas/corpus-conformance.test.ts`. The atomic-record schemas validate the current animalia `_source/` corpus, and the SEC schema rejects id-prefix/file_class mismatches.
+
+## Verification Result
+
+- `cd tools/validators && npm run build` — PASS.
+- `cd tools/validators && npm test` — PASS; runs the schema corpus conformance test and the SEC mismatch negative test.
+- `ls tools/validators/src/schemas/*.schema.json | wc -l` — PASS, returned `10`.
+- `for f in tools/validators/src/schemas/*.schema.json; do node -e "require('./$f')" || exit 1; done` — PASS.
+- `grep -E '"pattern": "\\^M-\\[0-9\\]\\+\\$"' tools/validators/src/schemas/mystery-reserve.schema.json` — PASS; MR remains unpadded-tolerant.
+
+## Deviations
+
+- PA validation was corrected from a nonexistent YAML-frontmatter surface to the live Discovery-block surface.
+- Several schemas deliberately include narrow grandfathering for existing animalia corpus variants discovered by the conformance test; those variants are documented in Assumption Reassessment item 8.

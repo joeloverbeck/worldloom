@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/diegetic-artifact-frontmatter.schema.json",
+  "title": "DiegeticArtifactFrontmatter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact_id", "slug", "title", "artifact_type", "author", "author_character_id", "date", "place", "audience", "communicative_purpose", "desired_relation_to_truth", "author_profile", "epistemic_horizon", "claim_map", "world_consistency", "source_basis"],
+  "properties": {
+    "artifact_id": { "type": "string", "pattern": "^DA-[0-9]{4}$" },
+    "slug": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "artifact_type": { "type": "string", "minLength": 1 },
+    "author": { "type": "string" },
+    "author_character_id": {
+      "anyOf": [
+        { "type": "string", "pattern": "^CHAR-[0-9]{4}$" },
+        { "type": "null" }
+      ]
+    },
+    "date": { "type": "string" },
+    "place": { "type": "string" },
+    "audience": { "type": "string" },
+    "communicative_purpose": { "type": "string" },
+    "desired_relation_to_truth": { "type": "string" },
+    "canon_facts_accessible": { "anyOf": [{ "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }, { "type": "null" }] },
+    "taboo_censorship_conditions": { "anyOf": [{ "type": "array" }, { "type": "string" }, { "type": "null" }] },
+    "desired_length": { "anyOf": [{ "type": "string" }, { "type": "integer" }, { "type": "null" }] },
+    "emotional_tone": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "rhetorical_style": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "ornament_level": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "mystery_seeding_intent": { "anyOf": [{ "type": "boolean" }, { "type": "null" }] },
+    "contradiction_target": { "anyOf": [{ "type": "string", "pattern": "^DA-[0-9]{4}$" }, { "type": "null" }] },
+    "genre_conventions": { "type": "object" },
+    "author_profile": { "type": "object" },
+    "epistemic_horizon": { "type": "object" },
+    "claim_map": { "type": "array" },
+    "canon_links": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+    "cannot_know": { "type": "array", "items": { "type": "string" } },
+    "world_consistency": { "type": "object" },
+    "source_basis": { "type": "object" },
+    "notes": { "type": "string" }
+  }
+}

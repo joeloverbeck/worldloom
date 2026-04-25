@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/change-log-entry.schema.json",
+  "title": "ChangeLogEntry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["change_id", "date", "change_type"],
+  "properties": {
+    "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
+    "date": { "type": "string", "format": "date" },
+    "change_type": {
+      "type": "string",
+      "enum": ["addition", "addition_with_qualification", "scope_retcon", "cost_retcon", "perspective_retcon", "chronology_retcon", "ontology_retcon", "clarification", "de_canonization"]
+    },
+    "affected_fact_ids": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+    "affected_cf_ids": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+    "summary": { "type": "string" },
+    "change_summary": { "type": "string" },
+    "reason": { "type": "array", "items": { "type": "string" } },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "local_or_global": { "type": "string", "enum": ["local", "global"] },
+        "changes_ordinary_life": { "type": "boolean" },
+        "creates_new_story_engines": { "type": "boolean" },
+        "mystery_reserve_effect": { "type": "string", "enum": ["unchanged", "expands", "narrows", "narrows_via_firewalls_and_expands_via_new_entries"] }
+      }
+    },
+    "change_scope": { "anyOf": [{ "type": "string" }, { "type": "object" }] },
+    "affected_files": { "type": "array", "items": { "type": "string" } },
+    "downstream_updates": { "type": "array", "items": { "type": "string" } },
+    "impact_on_existing_texts": { "type": "array", "items": { "type": "string" } },
+    "severity_before_fix": { "type": "number" },
+    "severity_after_fix": { "type": "number" },
+    "retcon_policy_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "no_silent_edit": { "type": "boolean" },
+        "replacement_noted": { "type": "boolean" },
+        "no_stealth_diegetic_rewrite": { "type": "boolean" },
+        "net_contradictions_not_increased": { "type": "boolean" },
+        "world_identity_preserved": { "type": "boolean" }
+      }
+    },
+    "latent_burdens_introduced": { "type": "array", "items": { "type": "string" } },
+    "critic_panel": { "anyOf": [{ "type": "array", "items": { "type": "string" } }, { "type": "object" }] },
+    "decided_by": { "type": "string" },
+    "initiating_proposal": { "type": "string" },
+    "proposed_by": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "anyOf": [
+    { "properties": { "affected_fact_ids": true }, "required": ["affected_fact_ids"] },
+    { "properties": { "affected_cf_ids": true }, "required": ["affected_cf_ids"] }
+  ]
+}

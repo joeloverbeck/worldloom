@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/canon-fact-record.schema.json",
+  "title": "CanonFactRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "status",
+    "type",
+    "statement",
+    "scope",
+    "truth_scope",
+    "domains_affected",
+    "required_world_updates",
+    "source_basis",
+    "contradiction_risk"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^CF-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["hard_canon", "soft_canon", "contested_canon", "mystery_reserve"]
+    },
+    "type": { "type": "string", "minLength": 1 },
+    "statement": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geographic", "temporal", "social"],
+      "properties": {
+        "geographic": { "type": "string", "enum": ["local", "regional", "global", "cosmic"] },
+        "temporal": { "type": "string", "enum": ["ancient", "historical", "current", "future", "cyclical"] },
+        "social": { "type": "string", "enum": ["restricted_group", "public", "elite", "secret", "rumor"] }
+      }
+    },
+    "truth_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["world_level", "diegetic_status"],
+      "properties": {
+        "world_level": { "enum": [true, false, "uncertain"] },
+        "diegetic_status": {
+          "type": "string",
+          "enum": ["objective", "believed", "disputed", "propagandistic", "legendary"]
+        }
+      }
+    },
+    "domains_affected": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "prerequisites": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "who_can_do_it": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } },
+        "who_cannot_easily_do_it": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } },
+        "why_not_universal": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } }
+      }
+    },
+    "costs_and_limits": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } },
+    "visible_consequences": { "type": "array", "items": { "anyOf": [{ "type": "string" }, { "type": "object" }] } },
+    "required_world_updates": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "source_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direct_user_approval"],
+      "properties": {
+        "direct_user_approval": { "type": "boolean" },
+        "derived_from": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(CF|DA)-[0-9]{4}$" }
+        }
+      }
+    },
+    "contradiction_risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hard", "soft"],
+      "properties": {
+        "hard": { "type": "boolean" },
+        "soft": { "type": "boolean" }
+      }
+    },
+    "notes": { "type": "string" },
+    "modification_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change_id", "originating_cf", "date", "summary"],
+        "properties": {
+          "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
+          "originating_cf": {
+            "type": "string",
+            "pattern": "^(CF-[0-9]{4}|none_clarification_retcon)$"
+          },
+          "date": { "type": "string", "format": "date" },
+          "summary": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "pre_figured_by": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" }
+    },
+    "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } }
+  }
+}

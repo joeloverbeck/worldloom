@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds `tools/validators/src/structural/*.ts` (7 new validator modules) + a package-internal registry that tickets 005 (CLI) and 006 (engine integration) consume. No modifications to existing pipeline code; downstream consumers import `@worldloom/validators` from tickets 005 and 006.
-**Deps**: archive/tickets/SPEC04VALFRA-001.md, SPEC04VALFRA-002
+**Deps**: archive/tickets/SPEC04VALFRA-001.md, archive/tickets/SPEC04VALFRA-002.md
 
 ## Problem
 
@@ -22,7 +22,7 @@ Each validator declares its own `applies_to` predicate per the reassessed spec's
 4. FOUNDATIONS principle under audit: **Rule 6 No Silent Retcons** (enforced via `modification_history_retrofit`: any CF with notes-field modification lines like `Modified YYYY-MM-DD by CH-NNNN` must have a matching `modification_history[]` array entry; partial population fails). Also **§Canon Fact Record Schema** (enforced via `record_schema_compliance` against the 10 JSON Schemas from ticket 002). Neither Validation Rule is weakened by this ticket; the structural-only posture is strictly additive.
 5. Schema extension posture: **additive-only**. Structural validators emit new `Verdict` objects; they do NOT modify atomic records or hybrid-file frontmatter. Consumers (ticket 005, ticket 006) pick them up via the registry.
 6. Cross-subtype rename/removal blast radius: none. Structural validators are new files. The retired `attribution_comment` and `anchor_integrity` validators (per the reassessed SPEC-04 Retired note) are NOT added — ticket 001's README rewrite already removes their names from the documented inventory.
-7. Adjacent-contradiction classification: `adjudication_discovery_fields` checks hybrid-file frontmatter, not `_source/*.yaml` records. This means the validator must tolerate the frontmatter-delimited markdown format (`---` delimiters) — `js-yaml` parsing of the frontmatter block only, per the animalia PA samples at `worlds/animalia/adjudications/PA-*.md`. The `yaml_parse_integrity` validator handles both surfaces (atomic YAML + hybrid frontmatter) per the reassessed spec's inventory row.
+7. Adjacent-contradiction classification: `adjudication_discovery_fields` checks the PA markdown Discovery block, not `_source/*.yaml` records and not YAML frontmatter. Ticket 002 corrected SPEC-04's stale frontmatter wording after confirming `worlds/animalia/adjudications/PA-*.md` and `.claude/skills/canon-addition/templates/adjudication-report.md` use canonical Discovery bullet fields without `---` frontmatter. The `yaml_parse_integrity` validator still handles atomic YAML plus CHAR/DA hybrid frontmatter; PA Discovery parsing is owned by `adjudication_discovery_fields`.
 
 ## Architecture Check
 
@@ -33,8 +33,8 @@ Each validator declares its own `applies_to` predicate per the reassessed spec's
 5. `cross_file_reference` resolves every referenced id against the world-index (via `ctx.index.query`). Unresolved ids emit `fail`-severity verdicts. The check does NOT attempt to "repair" unresolved ids — that's out of scope; the repair path is `canon-addition`-owned.
 6. `touched_by_cf_completeness` is bidirectional (per spec): SEC → CF direction checks `required_world_updates` contains the SEC's `file_class`; CF → SEC direction checks at least one SEC in the matching subdirectory has the CF in `touched_by_cf[]` OR in an `extensions[].originating_cf`. Both directions emit distinct error codes.
 7. `modification_history_retrofit` parses the `notes` string field for the `Modified YYYY-MM-DD by CH-NNNN` pattern via regex (the pattern is structured even though it lives inside a prose field — this is the pre-SPEC-13 authoring convention the validator is named for). Matches must resolve to a `modification_history[]` entry with the same date + CH reference. Unmatched notes-pattern occurrences emit `fail` verdicts.
-8. `adjudication_discovery_fields` parses frontmatter YAML from `adjudications/PA-NNNN-*.md` files. It enforces the canonical field name set (`mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`); ad-hoc names (`New CF`, `Modifications`, `Critics dispatched`) — historical shapes surfaced by the `canon-addition` skill's earlier iterations — emit `fail` verdicts per the reassessed spec's inventory row.
-9. No backwards-compatibility aliasing/shims introduced. Each validator targets the post-SPEC-13 atomic-record shape and the current hybrid-file frontmatter shape.
+8. `adjudication_discovery_fields` parses the Discovery block from `adjudications/PA-NNNN-*.md` files. It enforces the canonical field name set (`mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`); ad-hoc names (`New CF`, `Modifications`, `Critics dispatched`) — historical shapes surfaced by the `canon-addition` skill's earlier iterations — emit `fail` verdicts per the reassessed spec's inventory row.
+9. No backwards-compatibility aliasing/shims introduced. Each validator targets the post-SPEC-13 atomic-record shape, the current CHAR/DA hybrid-file frontmatter shape, and the current PA Discovery-block shape.
 
 ## Verification Layers
 
@@ -45,14 +45,14 @@ Each validator declares its own `applies_to` predicate per the reassessed spec's
 5. `record_schema_compliance` catches the MR prose-sourced-vs-data-sourced drift → fixture test (an MR record with `what_is_unknown` / `forbidden_answers` fields FAILS per the schema's data-layer field names; an MR record with `unknowns` / `disallowed_cheap_answers` PASSES).
 6. `touched_by_cf_completeness` catches both directions → fixture test (SEC citing CF that doesn't list the SEC's file_class → `fail` in SEC→CF direction; CF naming a file_class with no SEC citing it → `fail` in CF→SEC direction).
 7. `modification_history_retrofit` catches retrofit gaps → fixture test (a CF whose `notes` field contains `Modified 2026-04-18 by CH-0006` without a matching `modification_history[]` entry → `fail`).
-8. `adjudication_discovery_fields` catches ad-hoc field names → fixture test (a PA frontmatter using `New CF` instead of `cf_records_touched` → `fail`).
+8. `adjudication_discovery_fields` catches ad-hoc field names → fixture test (a PA Discovery block using `New CF` instead of `cf_records_touched` → `fail`).
 9. All 7 validators pass against unmodified animalia → zero `fail` verdicts (zero-false-positive baseline per the spec's §Verification section). Any animalia-originated `fail` is either a latent defect (to be resolved via `canon-addition` cleanup or grandfathered per the Bootstrap audit in ticket 007) OR a validator bug (to be fixed in this ticket).
 
 ## What to Change
 
 ### 1. Create `tools/validators/src/structural/yaml-parse-integrity.ts`
 
-Export `yamlParseIntegrity: Validator`. `name: 'yaml_parse_integrity'`, `severity_mode: 'fail'`. `applies_to`: all modes (per matrix). `run`: iterates `_source/*.yaml` files in the world's `_source/` tree (full-world) OR the `touched_files` subset (incremental) OR the records implied by `ctx.patch_plan` create ops (pre-apply). For each file: attempt `js-yaml.load`; on parse error emit `fail` with `code: 'yaml_parse_integrity.parse_error'`, `message` containing the error detail, `location.file` set. Also validates hybrid-file frontmatter (characters, diegetic artifacts, adjudications) by splitting on `---` delimiters and parsing the frontmatter block only.
+Export `yamlParseIntegrity: Validator`. `name: 'yaml_parse_integrity'`, `severity_mode: 'fail'`. `applies_to`: all modes (per matrix). `run`: iterates `_source/*.yaml` files in the world's `_source/` tree (full-world) OR the `touched_files` subset (incremental) OR the records implied by `ctx.patch_plan` create ops (pre-apply). For each file: attempt `js-yaml.load`; on parse error emit `fail` with `code: 'yaml_parse_integrity.parse_error'`, `message` containing the error detail, `location.file` set. Also validates CHAR/DA hybrid-file frontmatter by splitting on `---` delimiters and parsing the frontmatter block only; PA Discovery parsing is owned by `adjudication_discovery_fields`.
 
 ### 2. Create `tools/validators/src/structural/id-uniqueness.ts`
 
@@ -66,7 +66,7 @@ Export `crossFileReference: Validator`. `name: 'cross_file_reference'`, `severit
 
 Export `recordSchemaCompliance: Validator`. `name: 'record_schema_compliance'`, `severity_mode: 'fail'`. `applies_to`: all modes. `run`: loads the 10 JSON Schemas from ticket 002 at module-import time, compiles each with `ajv.compile`, builds a `Map<RecordClass, AjvValidateFn>`. At run time, for each record in scope, look up the compiled validator by class and invoke it; on schema errors emit `fail` per error with `code: 'record_schema_compliance.<schema-error-keyword>'` (e.g., `record_schema_compliance.required`, `record_schema_compliance.type`, `record_schema_compliance.enum`, `record_schema_compliance.pattern`), `message` carrying `ajv`'s error description + `instancePath`, `location.file` + `location.node_id` set.
 
-For hybrid-file records (PA, CHAR, DA), parse frontmatter via `yaml_parse_integrity`'s same frontmatter-split helper, then validate the parsed frontmatter against the frontmatter schema.
+For hybrid-file records, parse CHAR and DA frontmatter via `yaml_parse_integrity`'s same frontmatter-split helper. For PA records, parse the canonical Discovery block and validate the parsed structured object against `adjudication-discovery.schema.json`.
 
 ### 5. Create `tools/validators/src/structural/touched-by-cf-completeness.ts`
 
@@ -82,7 +82,7 @@ Export `modificationHistoryRetrofit: Validator`. `name: 'modification_history_re
 
 ### 7. Create `tools/validators/src/structural/adjudication-discovery-fields.ts`
 
-Export `adjudicationDiscoveryFields: Validator`. `name: 'adjudication_discovery_fields'`, `severity_mode: 'fail'`. `applies_to`: all modes; in incremental mode, applies only on PA writes. `run`: for each `adjudications/PA-NNNN-*.md` file, parse frontmatter, locate the Discovery block. Canonical field name set: `mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`. Any ad-hoc field name (regex-matched against a denylist derived from `canon-addition`'s earlier iterations: `New CF`, `Modifications`, `Critics dispatched`, `Dispatch`) emits `fail` with `code: 'adjudication_discovery_fields.non_canonical'`, `message` naming the non-canonical field.
+Export `adjudicationDiscoveryFields: Validator`. `name: 'adjudication_discovery_fields'`, `severity_mode: 'fail'`. `applies_to`: all modes; in incremental mode, applies only on PA writes. `run`: for each `adjudications/PA-NNNN-*.md` file, locate and parse the Discovery block. Canonical field name set: `mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`. Any ad-hoc field name (regex-matched against a denylist derived from `canon-addition`'s earlier iterations: `New CF`, `Modifications`, `Critics dispatched`, `Dispatch`) emits `fail` with `code: 'adjudication_discovery_fields.non_canonical'`, `message` naming the non-canonical field.
 
 ### 8. Create `tools/validators/src/public/registry.ts`
 
@@ -126,13 +126,13 @@ Export `export const structuralValidators: readonly Validator[] = [yamlParseInte
 2. The MR schema's data-layer field names (`unknowns`, `knowns`, `disallowed_cheap_answers`, `domains_touched`, `future_resolution_safety`) are the ONLY names `record_schema_compliance` recognizes for MR records. Any code path that tries to validate against the prose-sourced FOUNDATIONS names fails fast — reassessment Issue I1's CRITICAL severity exists for exactly this.
 3. `id_uniqueness` compares string-literals; padding-drift detection is `record_schema_compliance`'s responsibility via schema id-patterns. The validators must not overlap — double-counting a padding-drift finding would distort `validation_results` aggregates.
 4. `cross_file_reference` resolves references via the index; it does NOT re-parse atomic records. The index is the authoritative resolution surface; direct file reads would violate the §Tooling Recommendation principle.
-5. `adjudication_discovery_fields` validates frontmatter only. The prose body of PA records is not parsed by this validator — that's out of scope for structural enforcement.
+5. `adjudication_discovery_fields` validates the PA Discovery block only. The prose body of PA records is not parsed by this validator — that's out of scope for structural enforcement.
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/structural/yaml-parse-integrity.test.ts` — malformed-YAML fixture + hybrid-frontmatter fixture.
+1. `tools/validators/tests/structural/yaml-parse-integrity.test.ts` — malformed-YAML fixture + CHAR/DA hybrid-frontmatter fixture.
 2. `tools/validators/tests/structural/id-uniqueness.test.ts` — within-class duplicate fixture + cross-class non-collision fixture.
 3. `tools/validators/tests/structural/cross-file-reference.test.ts` — orphan `derived_from` fixture + orphan `touched_by_cf` fixture.
 4. `tools/validators/tests/structural/record-schema-compliance.test.ts` — prose-sourced-MR-field fixture (FAIL expected), data-sourced-MR-field fixture (PASS expected), SEC cross-subtype-typo fixture (FAIL expected).

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/adjudication-discovery.schema.json",
+  "title": "AdjudicationDiscoveryFields",
+  "description": "Parsed Discovery block for worlds/<slug>/adjudications/PA-NNNN-*.md; PA records are markdown with canonical discovery fields, not YAML frontmatter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["pa_id", "date", "verdict", "mystery_reserve_touched", "invariants_touched", "cf_records_touched", "open_questions_touched", "change_id"],
+  "properties": {
+    "pa_id": { "type": "string", "pattern": "^PA-[0-9]{4}$" },
+    "date": { "type": "string", "format": "date" },
+    "verdict": {
+      "type": "string",
+      "enum": ["ACCEPT", "ACCEPT_WITH_REQUIRED_UPDATES", "ACCEPT_AS_LOCAL_EXCEPTION", "ACCEPT_AS_CONTESTED_BELIEF", "REVISE_AND_RESUBMIT", "REJECT"]
+    },
+    "proposal_ref": { "type": "string" },
+    "mystery_reserve_touched": { "type": "array", "items": { "type": "string", "pattern": "^M-[0-9]+$" } },
+    "invariants_touched": { "type": "array", "items": { "type": "string", "pattern": "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$" } },
+    "cf_records_touched": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+    "open_questions_touched": { "type": "array", "items": { "type": "string", "pattern": "^OQ-[0-9]{4}$" } },
+    "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" }
+  }
+}

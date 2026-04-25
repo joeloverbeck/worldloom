@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/invariant.schema.json",
+  "title": "InvariantRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "category", "title", "statement", "rationale", "examples", "non_examples", "break_conditions", "revision_difficulty", "extensions"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$" },
+    "category": { "type": "string", "enum": ["ontological", "causal", "distribution", "social", "aesthetic_thematic"] },
+    "title": { "type": "string", "minLength": 1 },
+    "statement": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "examples": { "type": "array", "items": { "type": "string" } },
+    "non_examples": { "type": "array", "items": { "type": "string" } },
+    "break_conditions": { "type": "string", "minLength": 1 },
+    "revision_difficulty": { "type": "string", "enum": ["low", "medium", "high"] },
+    "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } }
+  }
+}

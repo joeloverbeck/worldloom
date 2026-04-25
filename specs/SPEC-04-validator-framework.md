@@ -10,7 +10,7 @@
 
 FOUNDATIONS.md Rules 1–7 currently live as prose assertions in `canon-addition/references/foundations-and-rules-alignment.md`. Phase 14a's 10-test rubric lives as prose in `canon-addition/SKILL.md` Validation Tests. Structural invariants (YAML parse integrity, id uniqueness, record-schema compliance) have no enforcement at all — they're implicit. Every skill must re-read the rubric, and the model re-interprets it every run.
 
-**Post-SPEC-13 context**: validators consume atomic YAML records from `worlds/<slug>/_source/` directly. No markdown parse step is needed for CF / CH / INV / M / OQ / ENT / SEC records. Hybrid files (characters, diegetic artifacts, adjudications) continue to be parsed for their YAML frontmatter. The validator inputs are simpler, typed, and schema-validatable.
+**Post-SPEC-13 context**: validators consume atomic YAML records from `worlds/<slug>/_source/` directly. No markdown parse step is needed for CF / CH / INV / M / OQ / ENT / SEC records. Hybrid files keep their structured surfaces: characters and diegetic artifacts use YAML frontmatter; adjudications use a canonical Discovery block. The validator inputs are simpler, typed, and schema-validatable.
 
 **Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions for structural checks; semantic rules remain skill-judgment. Validators must be deterministic code, not prose heuristics.
 
@@ -79,7 +79,7 @@ tools/validators/
 - `open-question.schema.json` (OQ)
 - `entity.schema.json` (ENT)
 - `section.schema.json` (SEC — single shape; `file_class` enum discriminator covers all 7 subtypes ELF / INS / MTS / GEO / ECR / PAS / TML)
-- `adjudication-frontmatter.schema.json` (PA, frontmatter only; body is prose)
+- `adjudication-discovery.schema.json` (PA Discovery block only; adjudication records are markdown with canonical Discovery fields, not YAML frontmatter)
 - `character-frontmatter.schema.json` (CHAR, frontmatter only)
 - `diegetic-artifact-frontmatter.schema.json` (DA, frontmatter only)
 
@@ -110,10 +110,10 @@ tools/validators/
 
 | Validator | Checks |
 |---|---|
-| `yaml_parse_integrity` | Every `_source/*.yaml` file parses as valid YAML; required top-level keys present per record type; trimmed fields trimmed cleanly. Hybrid-file frontmatter (characters, diegetic artifacts, adjudications) also parsed. |
+| `yaml_parse_integrity` | Every `_source/*.yaml` file parses as valid YAML; required top-level keys present per record type; trimmed fields trimmed cleanly. Hybrid-file frontmatter for characters and diegetic artifacts is also parsed; PA adjudication Discovery blocks are checked by `adjudication_discovery_fields`. |
 | `id_uniqueness` | No duplicate CF-NNNN / CH-NNNN / INV-IDs / M-NNNN / OQ-NNNN / ENT-NNNN / SEC-* / PA-NNNN / CHAR-NNNN / DA-NNNN / PR-NNNN / BATCH-NNNN / AU-NNNN / RP-NNNN within a world; cross-record-class uniqueness not required but intra-class uniqueness strict. Comparison is **string-literal** (no zero-padding normalization); padding-drift (e.g., `M-1` vs `M-0001` coexisting in a world) is caught by `record_schema_compliance` via each schema's `id` pattern regex, not by `id_uniqueness`. |
 | `cross_file_reference` | Every id referenced in CF `derived_from`, CF `required_world_updates` (now a `file_class` list), CH `affected_fact_ids`, `modification_history[].originating_cf`, `extensions[].originating_cf`, `extensions[].change_id`, SEC `touched_by_cf[]` resolves to an indexed record. No orphan references. |
-| `record_schema_compliance` | Every `_source/*.yaml` file validates against its record type's JSON Schema (one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class; see §JSON Schemas above). Field types, enum values, required-field presence, and id-pattern regex all enforced structurally. |
+| `record_schema_compliance` | Every `_source/*.yaml` file and supported hybrid structured surface validates against its record type's JSON Schema (one schema per CF / CH / INV / M / OQ / ENT / SEC / PA / CHAR / DA class; see §JSON Schemas above). For PA records, the structured surface is the markdown Discovery block. Field types, enum values, required-field presence, and id-pattern regex all enforced structurally. |
 | `touched_by_cf_completeness` | For each SEC with `touched_by_cf: [CF-X, CF-Y]`, verify each listed CF's `required_world_updates` includes this SEC's `file_class`. For each CF with `required_world_updates: [FILE_CLASS]`, verify at least one SEC under `_source/<file-subdir-for-file-class>/` has this CF in `touched_by_cf[]` OR in an `extensions[].originating_cf`. Discrepancies in either direction are fails. |
 | `modification_history_retrofit` | Any CF with notes-field modification lines (`Modified YYYY-MM-DD by CH-NNNN`) has a matching populated `modification_history` array entry; partial population (array has only current modification while notes reference earlier ones) is a fail |
 | `adjudication_discovery_fields` | Every `adjudications/PA-NNNN-*.md` Discovery block uses canonical field names (`mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`, `change_id`); ad-hoc names (`New CF`, `Modifications`, `Critics dispatched`) fail |

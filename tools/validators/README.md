@@ -4,7 +4,14 @@ Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
 **Design**: `specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. Structural subset activates through the CLI in ticket 005; engine integration lands in ticket 006.
-**Status**: package scaffold and framework types present; schemas, concrete validators, CLI, and engine entry point are staged in later SPEC-04 tickets.
+**Status**: package scaffold, framework types, and record-class JSON Schemas present; concrete validators, CLI, and engine entry point are staged in later SPEC-04 tickets.
+
+## Schemas
+
+Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
+OQ, ENT, SEC, PA Discovery, CHAR frontmatter, and DA frontmatter record classes.
+The PA schema validates the canonical Discovery block parsed from
+`adjudications/PA-NNNN-*.md`; those records do not use YAML frontmatter.
 
 ## Validator Inventory
 

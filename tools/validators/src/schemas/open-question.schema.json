@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/open-question.schema.json",
+  "title": "OpenQuestionRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "topic", "body", "when_to_resolve", "extensions"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^OQ-[0-9]{4}$" },
+    "topic": { "type": "string", "minLength": 1 },
+    "body": { "type": "string", "minLength": 1 },
+    "when_to_resolve": { "type": "string" },
+    "caution": { "type": "string" },
+    "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } }
+  }
+}

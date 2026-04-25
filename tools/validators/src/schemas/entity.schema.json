@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/entity.schema.json",
+  "title": "NamedEntityRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "canonical_name", "entity_kind", "aliases", "originating_cf", "scope_notes"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^ENT-[0-9]{4}$" },
+    "canonical_name": { "type": "string", "minLength": 1 },
+    "entity_kind": { "type": "string", "minLength": 1 },
+    "aliases": { "type": "array", "items": { "type": "string" } },
+    "originating_cf": {
+      "anyOf": [
+        { "type": "string", "pattern": "^CF-[0-9]{4}$" },
+        { "type": "null" }
+      ]
+    },
+    "scope_notes": { "type": "string" },
+    "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } }
+  }
+}
