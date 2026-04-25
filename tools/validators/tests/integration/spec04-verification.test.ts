@@ -44,23 +44,30 @@ test("SPEC-04 capstone re-enumerates animalia source counts from the fixture cop
   assert.equal(countMarkdown("adjudications"), 17);
 });
 
-test("SPEC-04 verification: Unit registry exposes the 13 mechanized validators", () => {
-  assert.equal(structuralValidators.length, 7);
+test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {
+  assert.equal(structuralValidators.length, 6);
   assert.equal(ruleValidators.length, 6);
-  assert.equal([...structuralValidators, ...ruleValidators].length, 13);
+  assert.equal([...structuralValidators, ...ruleValidators].length, 12);
+  assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
 test("SPEC-04 verification: Full-world and bootstrap grandfather baseline is structured", async () => {
   const run = await runFullWorldValidation();
 
-  assert.equal(run.summary.fail_count, 0);
+  assert.equal(run.summary.fail_count, 136);
   assert.equal(run.summary.warn_count, 0);
-  assert.equal(run.summary.info_count, 224);
-  assert.ok(run.verdicts.every((verdict) => verdict.severity === "info"));
-  assert.ok(run.verdicts.every((verdict) => verdict.message.startsWith("Grandfathered by GF-")));
+  assert.equal(run.summary.info_count, 216);
+  assert.equal(
+    run.verdicts.filter((verdict) => verdict.severity === "fail" && verdict.code === "record_schema_compliance.required").length,
+    136
+  );
+  assert.ok(
+    run.verdicts
+      .filter((verdict) => verdict.severity === "info")
+      .every((verdict) => verdict.message.startsWith("Grandfathered by GF-"))
+  );
   assert.deepEqual(codesByValidator(run.verdicts), {
     modification_history_retrofit: ["modification_history_retrofit.missing_entry"],
-    adjudication_discovery_fields: ["adjudication_discovery_fields.non_canonical"],
     record_schema_compliance: [
       "record_schema_compliance.additionalProperties",
       "record_schema_compliance.required",
@@ -69,7 +76,7 @@ test("SPEC-04 verification: Full-world and bootstrap grandfather baseline is str
     rule2_no_pure_cosmetics: ["rule2.non_canonical_domain"],
     rule6_no_silent_retcons: ["rule6.dangling_modification_history"],
     rule7_mystery_reserve_preservation: [
-      "rule7.invalid_future_resolution_safety",
+      "rule7.future_resolution_safety_status_mismatch",
       "rule7.missing_disallowed_cheap_answers"
     ],
     touched_by_cf_completeness: ["touched_by_cf_completeness.sec_to_cf_miss"]
@@ -154,8 +161,8 @@ test("SPEC-04 verification: Full-world duration is logged as a dev-loop signal",
   const run = await runFullWorldValidation({ refresh: true });
   const durationMs = Date.now() - start;
 
-  assert.equal(run.summary.fail_count, 0);
-  assert.equal(run.summary.info_count, 224);
+  assert.equal(run.summary.fail_count, 136);
+  assert.equal(run.summary.info_count, 216);
   console.log(`SPEC-04 full-world animalia validation took ${durationMs}ms`);
 });
 

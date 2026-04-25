@@ -4,14 +4,14 @@ Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
 **Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 6 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
-OQ, ENT, SEC, PA Discovery, CHAR frontmatter, and DA frontmatter record classes.
-The PA schema validates the canonical Discovery block parsed from
-`adjudications/PA-NNNN-*.md`; those records do not use YAML frontmatter.
+OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, and DA frontmatter record
+classes. The PA schema validates YAML frontmatter parsed from
+`adjudications/PA-NNNN-*.md`; PA body prose is not schema-constrained.
 
 ## Validator Inventory
 
@@ -32,7 +32,6 @@ Structural validators:
 - `record_schema_compliance`
 - `touched_by_cf_completeness`
 - `modification_history_retrofit`
-- `adjudication_discovery_fields`
 
 Skill-judgment rule:
 

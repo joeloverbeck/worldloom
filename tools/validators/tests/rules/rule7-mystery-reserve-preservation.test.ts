@@ -27,3 +27,23 @@ test("rule7_mystery_reserve_preservation accepts populated structural fields", a
   const result = await rule7MysteryReservePreservation.run({}, testContext([mrRecord("M-1")]));
   assert.equal(result.length, 0);
 });
+
+test("rule7_mystery_reserve_preservation couples future_resolution_safety to status", async () => {
+  const result = await rule7MysteryReservePreservation.run(
+    {},
+    testContext([
+      mrRecord("M-1", { ...completeMr, status: "forbidden", future_resolution_safety: "none" }),
+      mrRecord("M-2", { ...completeMr, status: "forbidden", future_resolution_safety: "low" }),
+      mrRecord("M-3", { ...completeMr, status: "active", future_resolution_safety: "medium" }),
+      mrRecord("M-4", { ...completeMr, status: "active", future_resolution_safety: "none" })
+    ])
+  );
+
+  assert.deepEqual(
+    result.map((verdict) => [verdict.location.node_id, verdict.code]),
+    [
+      ["M-2", "rule7.future_resolution_safety_status_mismatch"],
+      ["M-4", "rule7.future_resolution_safety_status_mismatch"]
+    ]
+  );
+});

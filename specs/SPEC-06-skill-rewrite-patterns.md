@@ -3,8 +3,18 @@
 # SPEC-06: Skill Rewrite Patterns — Thin Orchestrators
 
 **Phase**: Phase 2 — all 8 skills full migration against atomic source (per SPEC-13, the originally-planned Phase 1 read-side pilot is folded into Phase 2; canon-addition's read-side rewrite lands together with its write-side against `_source/` atomic records)
-**Depends on**: SPEC-01, SPEC-02, SPEC-03 (Phase 2), SPEC-04, SPEC-05, **SPEC-13 (atomic-source contract — skills read/write atomic records directly)**
+**Depends on**: SPEC-01, SPEC-02, SPEC-03 (Phase 2), SPEC-04, SPEC-05, **SPEC-13 (atomic-source contract — skills read/write atomic records directly)**, **SPEC-14 (PA contract & vocabulary reconciliation — skills emit validator-conformant adjudications and consume canonical vocabularies at reasoning time)**
 **Blocks**: SPEC-08 acceptance criteria (token reduction depends on this spec landing)
+
+## SPEC-14 amendment summary
+
+This spec was originally written assuming the validator's `adjudication_discovery_fields` validator would catch Discovery-block field-name drift, and that canonical vocabularies (domain enum, mystery-resolution-safety enum) lived in code without a skill-facing API. Per SPEC-14, the following changes apply:
+
+- **Adjudication emission contract.** PA records are hybrid frontmatter+body files (consistent with characters and diegetic artifacts). canon-addition's Phase 2 rewrite emits PAs through `append_adjudication_record` with the SPEC-14 frontmatter shape (`pa_id`, canonical-enum `verdict`, `originating_skill`, `change_id`, four `*_touched` arrays). Validator parses frontmatter via `record_schema_compliance`; the legacy `adjudication_discovery_fields` validator is retired. The "Discovery-section canonical field names" row in §What moves OUT of each skill now maps to `record_schema_compliance` (frontmatter schema) rather than the retired validator.
+- **OQ allocation joins the patch plan.** When canon-addition's reasoning raises a new open question, the skill's patch plan includes a `create_oq_record` op AND cites the resulting `OQ-NNNN` ID in the PA's `open_questions_touched[]`. PA files no longer carry free-form OQ topic-strings.
+- **Bidirectional `append_touched_by_cf`.** When canon-addition cites a section in `touched_by_cf`, the patch plan includes an `update_record_field` op extending the target CF's `required_world_updates` ahead of the section update — engine fail-fast (SPEC-14) rejects plans that lack the bidirectional pointer.
+- **Canonical-vocabulary lookups at reasoning time.** Skills consume `mcp__worldloom__get_canonical_vocabulary({class})` during reasoning to validate domain values, verdict enum, and mystery-resolution-safety values BEFORE writing them into a patch plan. This eliminates a class of post-write validator fails (vocabulary drift) without coupling skill prose to validator code paths.
+- **New acceptance criterion** added to §Verification: every record emitted by a rewritten skill must pass `record_schema_compliance` end-to-end. Skill rewrites that emit an artifact failing the schema are incomplete.
 
 ## SPEC-13 amendment summary
 
@@ -85,8 +95,11 @@ Phase N+3: mcp__worldloom__submit_patch_plan(plan, approval_token)
 | Write-order discipline (Phase 15a sub-step ordering) | SPEC-03 engine-enforced |
 | Attribution stamping (`<!-- added by CF-NNNN -->`, notes-field lines) | SPEC-03 engine auto-stamp |
 | Rule 1–7 enforcement (Phase 14a tests 1–8, 10) | SPEC-04 validators |
-| Discovery-section canonical field names | SPEC-04 `adjudication_discovery_fields` validator |
+| Discovery-section canonical field names | SPEC-14 `record_schema_compliance` against the adjudication frontmatter schema (the legacy `adjudication_discovery_fields` validator is retired; PA records are now frontmatter+body hybrids) |
 | modification_history retrofit discipline | SPEC-04 `modification_history_retrofit` validator |
+| Canonical-vocabulary memorization (domain enum, verdict enum, mystery-resolution-safety enum) | SPEC-14 `mcp__worldloom__get_canonical_vocabulary({class})` MCP tool |
+| Bidirectional CF↔SEC pointer maintenance | SPEC-14 engine fail-fast on `append_touched_by_cf` |
+| OQ allocation when reasoning raises open questions | SPEC-14 patch plan includes `create_oq_record` op alongside the PA's `open_questions_touched[]` citation |
 | Phase 12a axis-(a)(b)(c) mechanical scan | SPEC-02 `find_impacted_fragments` + SPEC-04 `rule6_no_silent_retcons` |
 | Large-delivery inter-step structural-integrity grep | SPEC-03 engine atomicity (structurally impossible to fail halfway) |
 
@@ -119,6 +132,7 @@ Phase N+3: mcp__worldloom__submit_patch_plan(plan, approval_token)
 - Replace Phase 13a artifact assembly with `PatchOperation[]` construction
 - Replace Phase 14a 10-test rubric with `validate_patch_plan` call (Test 9 stays)
 - Replace Phase 15a 25+ Edit calls with single `submit_patch_plan`
+- **Per SPEC-14**: PA frontmatter assembled with canonical fields (`pa_id`, UPPERCASE `verdict`, `originating_skill: "canon-addition"`, `change_id`, four `*_touched` arrays); the analysis prose lands in `body_markdown` of `append_adjudication_record`. When reasoning raises a new open question, the patch plan includes a `create_oq_record` op AND cites the resulting `OQ-NNNN` in `open_questions_touched[]`. When the verdict cites a section in `touched_by_cf`, the patch plan includes an `update_record_field` op extending the target CF's `required_world_updates` ahead of `append_touched_by_cf`. Domain values, verdict enum, and mystery-resolution-safety values are validated at reasoning time via `get_canonical_vocabulary` lookups before the patch plan is finalized.
 - Expected size reduction: final SKILL.md ~120 lines; final references/*.md ~600 lines across 2-3 files (proposal-normalization, consequence-analysis, counterfactual-and-verdict; others deleted or folded)
 
 *create-base-world*:
@@ -205,6 +219,7 @@ Post-migration, each canon-mutating skill invocation follows this agent structur
   - Character-generation: writes via engine; `characters/INDEX.md` consistent
   - Every validator passes on post-write animalia state
   - Token reduction ≥70% vs baseline (measured across 3 representative runs per skill)
+  - **Per SPEC-14**: every record emitted by a rewritten skill (PA frontmatter, character frontmatter, DA frontmatter, atomic CF/CH/M/OQ/INV/ENT/SEC YAML) passes `record_schema_compliance` end-to-end. A skill rewrite that emits any artifact failing the schema is incomplete and must not land. Verified by extending the per-skill integration test to assert validator pass on engine-emitted output.
 - **Reasoning preservation**: before/after comparison of canon-addition adjudications for 3 historical proposals; verdicts match; phase-citation coverage equivalent
 - **Role split**: Localizer-Editor-Auditor dispatch measured; Localizer context fork keeps main agent context lean
 

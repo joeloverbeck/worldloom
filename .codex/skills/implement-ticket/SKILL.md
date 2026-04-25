@@ -67,9 +67,11 @@ If one primary class also changes a real shared contract, keep the primary class
 
 If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks.
 
+If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, or live-corpus validator baseline, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
+
 When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
 
-For validator, audit, or live-corpus baseline tickets, run the smallest truthful live-corpus probe before coding when acceptance claims zero findings or a clean baseline. Classify every finding as validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects.
+For validator, audit, or live-corpus baseline tickets, run the smallest truthful live-corpus probe before coding when acceptance claims zero findings or a clean baseline. Classify every finding as validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects. For schema/parser migration specifics, apply `references/validator-schema-migrations.md`.
 
 When a validator, audit, or live-corpus baseline ticket claims grandfathering, waiver rows, allowlists, or other disposition metadata can change the command's pass/fail result, verify the live validator/CLI actually consumes that mechanism before accepting it as an acceptance path. If the mechanism is only persisted audit data and emitted verdicts are recomputed independently, keep the findings visible, rewrite the active ticket to the truthful baseline/proof seam, and route real cleanup or policy implementation to a separate owner.
 
@@ -97,6 +99,8 @@ Validate the ticket against the live repo, not against the spec draft alone.
 
 If a prior review reopened this same ticket by blocking archival on an owned issue, treat that review finding as current reassessment evidence. Resume the same ticket rather than creating a new one, fix the owned blocker, rerun the final proof, and only then restore `COMPLETED` / archive-ready closeout text.
 
+If the user reports a same-seam omission or contradiction after a ticket has been marked `COMPLETED` but before archival, reopen the active ticket record in place. Update reassessment/outcome/deviations as needed, truth same-seam sibling/spec references, rerun the narrow proof, and keep archival out of scope unless explicitly requested.
+
 Check:
 
 - every path in `Deps`, `Files to Touch`, `Verification Layers`, `Test Plan`, and prose references
@@ -116,8 +120,9 @@ Check:
 - whether a repo-level doc under `docs/` is the real authority or a tested consumer for the seam you are changing; if tests, helpers, or examples parse that doc directly, treat it as same-seam owned fallout even when the draft ticket excluded it
 - whether a claimed schema authority is actually split across `docs/FOUNDATIONS.md`, live skill templates, and spec/docs; if so, inspect the producer templates and record the true authority boundary in `Assumption Reassessment` before coding
 - for staged tool/schema tickets, every drafted enum member, union variant, persisted row field, and emitted artifact named by the ticket; verify each against the live type/module authority before trusting storage or emission claims
+- for centralized vocabulary or enum tickets, compare the candidate list against authoritative doc taxonomies and paired concern names in `docs/FOUNDATIONS.md`, not only against the ticket's drafted enum members or current failing values; missing authoritative categories can be real same-seam fallout even when no current fixture uses them
 - for validator CLI or filter tickets, verify whether named rules/checks are actually mechanized before exposing them through command flags, help text, selectors, or tests; rules that remain skill-judgment-only must be rejected, omitted, or explicitly documented rather than silently accepted as empty selections
-- for staged tool/schema tickets that validate YAML or frontmatter records, verify the exact parser package, parser options, and schema mode that the future validator or tool will use before freezing JSON Schema field types; record parser-driven shape facts such as timestamp coercion, unquoted-colon mapping items, or grandfathered legacy values in reassessment
+- for staged tool/schema tickets that validate YAML or frontmatter records, verify the exact parser package, parser options, and schema mode that the future validator or tool will use before freezing JSON Schema field types; record parser-driven shape facts such as timestamp coercion, unquoted-colon mapping items, or grandfathered legacy values in reassessment; when a hybrid record class is in scope, decide and record how missing frontmatter behaves instead of silently skipping the file
 - for staged tool/schema tickets that translate authored record fields into parser/index rows, graph edges, synthetic nodes, or other derived artifacts, verify the producer-emitted row/edge/type names directly from the parser or persistence code; do not assume the prose field name is the persisted contract
 - for staged tool/schema tickets that compare persisted hashes, checksums, canonical serialization, or drift markers across packages, inspect the producer of the stored value and reuse its canonicalization algorithm or record the intentional difference before coding
 - for staged tool/schema tickets that emit derived rows into an existing table, inspect the live schema for foreign keys and companion-artifact requirements before coding; if the row must also emit a backing `nodes` record, alias row, cleanup path, or other dependent artifact to satisfy the current contract, treat that as same-seam owned fallout and record it in reassessment

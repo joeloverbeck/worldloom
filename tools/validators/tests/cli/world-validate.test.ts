@@ -59,9 +59,13 @@ test("world-validate emits JSON and keeps clean-run persistence stable", () => {
 
   const first = spawnSync(cliPath, ["clean", "--json"], { cwd: repo, encoding: "utf8" });
   assert.equal(first.status, 0, first.stderr + first.stdout);
-  const parsed = JSON.parse(first.stdout) as { summary: { fail_count: number }; run_mode: string };
+  const parsed = JSON.parse(first.stdout) as {
+    summary: { fail_count: number; validators_run: string[] };
+    run_mode: string;
+  };
   assert.equal(parsed.run_mode, "full-world");
   assert.equal(parsed.summary.fail_count, 0);
+  assert.ok(!parsed.summary.validators_run.includes("adjudication_discovery_fields"));
 
   const dbPath = path.join(repo, "worlds", "clean", "_index", "world.db");
   const firstCount = validationRowCount(dbPath);

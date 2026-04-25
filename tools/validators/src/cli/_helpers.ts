@@ -14,7 +14,6 @@ import type {
   WorldIndexReadSurface
 } from "../framework/types.js";
 import { frontmatterFor } from "../structural/yaml-parse-integrity.js";
-import { parseDiscoveryBlock } from "../structural/record-schema-compliance.js";
 
 export interface CliValues {
   rules?: string;
@@ -257,12 +256,9 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
 }
 
 function parsedBodyFor(row: NodeRow): Record<string, unknown> {
-  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record") {
+  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record" || row.node_type === "adjudication_record") {
     const frontmatter = frontmatterFor(row.body);
     return parseYamlRecord(frontmatter ?? "");
-  }
-  if (row.node_type === "adjudication_record") {
-    return parseDiscoveryBlock(row.body) ?? {};
   }
   return parseYamlRecord(row.body);
 }

@@ -8,6 +8,7 @@ export const MCP_TOOL_NAMES = {
   find_sections_touched_by: "mcp__worldloom__find_sections_touched_by",
   find_named_entities: "mcp__worldloom__find_named_entities",
   find_edit_anchors: "mcp__worldloom__find_edit_anchors",
+  get_canonical_vocabulary: "mcp__worldloom__get_canonical_vocabulary",
   validate_patch_plan: "mcp__worldloom__validate_patch_plan",
   submit_patch_plan: "mcp__worldloom__submit_patch_plan",
   allocate_next_id: "mcp__worldloom__allocate_next_id"
@@ -26,6 +27,7 @@ export const MCP_TOOL_ORDER: McpToolName[] = [
   MCP_TOOL_NAMES.find_sections_touched_by,
   MCP_TOOL_NAMES.find_named_entities,
   MCP_TOOL_NAMES.find_edit_anchors,
+  MCP_TOOL_NAMES.get_canonical_vocabulary,
   MCP_TOOL_NAMES.validate_patch_plan,
   MCP_TOOL_NAMES.submit_patch_plan,
   MCP_TOOL_NAMES.allocate_next_id

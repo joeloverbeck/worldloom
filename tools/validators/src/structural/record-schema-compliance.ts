@@ -125,15 +125,17 @@ function hybridRecordsFromFiles(input: unknown, ctx: Context): SchemaTarget[] {
       }
     }
     if (normalizedPath.startsWith("adjudications/")) {
-      const parsed = parseDiscoveryBlock(file.content);
-      if (parsed) {
-        records.push({
-          node_id: String(parsed.pa_id ?? normalizedPath),
-          node_type: "adjudication_record",
-          file_path: normalizedPath,
-          parsed
-        });
+      const frontmatter = frontmatterFor(file.content);
+      const parsed = frontmatter === null ? {} : parseYamlSurface(frontmatter);
+      if (!parsed) {
+        continue;
       }
+      records.push({
+        node_id: String(asPlainRecord(parsed).pa_id ?? normalizedPath),
+        node_type: "adjudication_record",
+        file_path: normalizedPath,
+        parsed
+      });
     }
   }
   return records;
@@ -145,50 +147,6 @@ function parseYamlSurface(content: string): unknown | null {
   } catch {
     return null;
   }
-}
-
-export function parseDiscoveryBlock(content: string): Record<string, unknown> | null {
-  const heading = /^## Discovery\s*$/im.exec(content);
-  if (!heading) {
-    return null;
-  }
-  const afterHeading = content.slice(heading.index + heading[0].length);
-  const nextHeading = /\n##\s+/.exec(afterHeading);
-  const block = nextHeading ? afterHeading.slice(0, nextHeading.index) : afterHeading;
-  const parsed: Record<string, unknown> = {};
-
-  for (const line of block.split(/\r?\n/)) {
-    const match = /^\s*[-*]\s*([A-Za-z0-9_ -]+):\s*(.*)\s*$/.exec(line);
-    if (!match) {
-      continue;
-    }
-    const key = canonicalDiscoveryKey(match[1] ?? "");
-    const rawValue = match[2] ?? "";
-    parsed[key] = parseDiscoveryValue(key, rawValue);
-  }
-
-  return Object.keys(parsed).length > 0 ? parsed : null;
-}
-
-function canonicalDiscoveryKey(key: string): string {
-  return key.trim().toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
-}
-
-function parseDiscoveryValue(key: string, value: string): unknown {
-  const trimmed = value.trim();
-  if (trimmed === "" || trimmed.toLowerCase() === "none") {
-    return key.endsWith("_touched") ? [] : "";
-  }
-  if (key === "verdict") {
-    return trimmed.toUpperCase();
-  }
-  if (key.endsWith("_touched")) {
-    return trimmed.split(",").map((part) => part.trim()).filter(Boolean);
-  }
-  if (trimmed.includes(",")) {
-    return trimmed.split(",").map((part) => part.trim()).filter(Boolean);
-  }
-  return trimmed;
 }
 
 function isInIncrementalScope(filePath: string, ctx: Context): boolean {

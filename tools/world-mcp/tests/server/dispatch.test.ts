@@ -249,6 +249,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.get_canonical_vocabulary,
+        args: { class: "domain" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.validate_patch_plan,
         args: { patch_plan: buildValidPatchPlan() },
         expectError: false
@@ -300,6 +305,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.find_sections_touched_by, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.find_named_entities, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.find_edit_anchors, args: { world_slug: "seeded" } },
+      { name: MCP_TOOL_NAMES.get_canonical_vocabulary, args: {} },
       { name: MCP_TOOL_NAMES.validate_patch_plan, args: {} },
       { name: MCP_TOOL_NAMES.submit_patch_plan, args: { patch_plan: buildValidPatchPlan() } },
       { name: MCP_TOOL_NAMES.allocate_next_id, args: { world_slug: "seeded" } }

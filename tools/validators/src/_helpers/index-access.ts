@@ -7,7 +7,6 @@ import yaml from "js-yaml";
 import type { PatchOperation, PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import type { IndexedRecord, WorldIndexReadSurface } from "../framework/types.js";
-import { parseDiscoveryBlock } from "../structural/record-schema-compliance.js";
 import {
   FILE_CLASS_TO_SUBDIR,
   RECORD_TYPE_BY_SOURCE_DIR,
@@ -256,11 +255,8 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
 }
 
 function parsedBodyFor(row: NodeRow): MutableRecord {
-  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record") {
+  if (row.node_type === "character_record" || row.node_type === "diegetic_artifact_record" || row.node_type === "adjudication_record") {
     return parseYamlRecord(frontmatterFor(row.body) ?? "");
-  }
-  if (row.node_type === "adjudication_record") {
-    return parseDiscoveryBlock(row.body) ?? {};
   }
   return parseYamlRecord(row.body);
 }

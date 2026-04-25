@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { structuralValidators } from "../../src/public/registry.js";
 
-test("structural registry contains exactly the 7 SPEC-04 structural validators", () => {
+test("structural registry omits the retired adjudication Discovery validator", () => {
   assert.deepEqual(
     structuralValidators.map((validator) => validator.name),
     [
@@ -12,8 +12,7 @@ test("structural registry contains exactly the 7 SPEC-04 structural validators",
       "cross_file_reference",
       "record_schema_compliance",
       "touched_by_cf_completeness",
-      "modification_history_retrofit",
-      "adjudication_discovery_fields"
+      "modification_history_retrofit"
     ]
   );
 });

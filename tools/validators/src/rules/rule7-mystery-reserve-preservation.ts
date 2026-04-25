@@ -1,10 +1,9 @@
+import { MYSTERY_STATUS_ENUM, mysteryResolutionSafetyForStatus } from "@worldloom/world-index/public/canonical-vocabularies";
 import type { Context, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord } from "../structural/utils.js";
 import { appliesToMysteryReserve, fail, nonEmptyArray, queryMysteryReserve, recordIdFrom } from "./_shared/rule-utils.js";
 
 const VALIDATOR = "rule7_mystery_reserve_preservation";
-const VALID_STATUSES = new Set(["active", "passive", "forbidden"]);
-const VALID_FUTURE_RESOLUTION_SAFETY = new Set(["low", "medium", "high"]);
 
 export const rule7MysteryReservePreservation: Validator = {
   name: VALIDATOR,
@@ -23,22 +22,22 @@ export const rule7MysteryReservePreservation: Validator = {
         }
       }
 
-      if (typeof parsed.status !== "string" || !VALID_STATUSES.has(parsed.status)) {
-        verdicts.push(fail(VALIDATOR, "rule7.invalid_status", `${mrId} has invalid status '${String(parsed.status)}'`, record));
-      }
-
-      if (
-        typeof parsed.future_resolution_safety !== "string" ||
-        !VALID_FUTURE_RESOLUTION_SAFETY.has(parsed.future_resolution_safety)
-      ) {
-        verdicts.push(
-          fail(
-            VALIDATOR,
-            "rule7.invalid_future_resolution_safety",
-            `${mrId} has invalid future_resolution_safety '${String(parsed.future_resolution_safety)}'`,
-            record
-          )
-        );
+      const status = typeof parsed.status === "string" ? parsed.status : "";
+      if (!(MYSTERY_STATUS_ENUM as readonly string[]).includes(status)) {
+        verdicts.push(fail(VALIDATOR, "rule7.invalid_status", `${mrId} has invalid status '${status}'`, record));
+      } else {
+        const allowed = mysteryResolutionSafetyForStatus(status);
+        const safety = typeof parsed.future_resolution_safety === "string" ? parsed.future_resolution_safety : "";
+        if (!(allowed as readonly string[]).includes(safety)) {
+          verdicts.push(
+            fail(
+              VALIDATOR,
+              "rule7.future_resolution_safety_status_mismatch",
+              `${mrId} has future_resolution_safety '${safety}' but status '${status}' allows only [${allowed.join(", ")}]`,
+              record
+            )
+          );
+        }
       }
     }
 

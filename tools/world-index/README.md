@@ -29,7 +29,9 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 
 ## Public contract entry
 
-`@worldloom/world-index/public/types` is a narrow public contract surface for `tools/world-mcp/`. It re-exports schema types, enum constants, the current index version, and the atomic logical-file list so retrieval tooling can typecheck SQLite rows and share lifecycle constants against the exact world-index contract. It does not expose a query library, runtime helper, or any broader programmatic read surface.
+`@worldloom/world-index/public/types` is a narrow public contract surface for `tools/world-mcp/`. It re-exports schema types, enum constants, the current index version, and the atomic logical-file list so retrieval tooling can typecheck SQLite rows and share lifecycle constants against the exact world-index contract.
+
+`@worldloom/world-index/public/canonical-vocabularies` is the shared canonical vocabulary surface for validator and MCP consumers. It exports the canonical domain list, adjudication verdict enum, mystery status enum, mystery resolution-safety enum, and small pure helpers. It does not expose a query library or broader programmatic read surface.
 
 ## Output location per world
 

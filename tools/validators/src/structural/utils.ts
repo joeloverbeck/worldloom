@@ -58,7 +58,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   open_question_entry: "open-question",
   named_entity: "entity",
   section: "section",
-  adjudication_record: "adjudication-discovery",
+  adjudication_record: "adjudication-frontmatter",
   character_record: "character-frontmatter",
   diegetic_artifact_record: "diegetic-artifact-frontmatter"
 };

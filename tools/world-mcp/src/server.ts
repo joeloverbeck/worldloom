@@ -11,6 +11,7 @@ import { findEditAnchors } from "./tools/find-edit-anchors";
 import { findImpactedFragments } from "./tools/find-impacted-fragments";
 import { findNamedEntities } from "./tools/find-named-entities";
 import { findSectionsTouchedBy } from "./tools/find-sections-touched-by";
+import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonical-vocabulary";
 import { getContextPacket } from "./tools/get-context-packet";
 import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
@@ -116,6 +117,10 @@ const findNamedEntitiesInputSchema = z.object({
 const findEditAnchorsInputSchema = z.object({
   world_slug: z.string().min(1),
   targets: z.array(z.string().min(1))
+});
+
+const getCanonicalVocabularyInputSchema = z.object({
+  class: z.enum(VOCABULARY_CLASSES)
 });
 
 const patchPlanInputSchema = z.object({}).passthrough();
@@ -253,6 +258,13 @@ export function createServer(): McpServer {
     "Return anchor checksums, content hashes, and anchor text for targets.",
     findEditAnchorsInputSchema,
     async (args) => findEditAnchors(args as unknown as Parameters<typeof findEditAnchors>[0])
+  );
+  registerWrappedTool(
+    server,
+    "get_canonical_vocabulary",
+    "Return canonical validator vocabulary values for skill reasoning before patch-plan submission.",
+    getCanonicalVocabularyInputSchema,
+    async (args) => getCanonicalVocabulary(args as unknown as Parameters<typeof getCanonicalVocabulary>[0])
   );
   registerWrappedTool(
     server,

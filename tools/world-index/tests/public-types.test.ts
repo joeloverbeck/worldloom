@@ -11,6 +11,7 @@ import {
   SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES
 } from "../src/public/types";
+import { CANONICAL_DOMAINS, VERDICT_ENUM } from "../src/public/canonical-vocabularies";
 import type {
   AttributionEdgeType,
   CanonContradictionRisk,
@@ -108,6 +109,7 @@ test("package self-import resolves without import-time IO", () => {
 
   try {
     const publicTypes = require("@worldloom/world-index/public/types");
+    const canonicalVocabularies = require("@worldloom/world-index/public/canonical-vocabularies");
     assert.equal(publicTypes.ATOMIC_LOGICAL_WORLD_FILES, ATOMIC_LOGICAL_WORLD_FILES);
     assert.equal(publicTypes.CURRENT_INDEX_VERSION, CURRENT_INDEX_VERSION);
     assert.equal(publicTypes.NODE_TYPES, NODE_TYPES);
@@ -116,6 +118,8 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.ATTRIBUTION_EDGE_TYPES, ATTRIBUTION_EDGE_TYPES);
     assert.equal(publicTypes.ENTITY_EDGE_TYPES, ENTITY_EDGE_TYPES);
     assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
+    assert.equal(canonicalVocabularies.CANONICAL_DOMAINS, CANONICAL_DOMAINS);
+    assert.equal(canonicalVocabularies.VERDICT_ENUM, VERDICT_ENUM);
   } finally {
     fs.statSync = originalStatSync;
   }

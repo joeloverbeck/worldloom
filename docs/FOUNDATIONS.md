@@ -88,6 +88,8 @@ Mystery Reserve entries must define:
 - what kinds of answers are forbidden
 - whether future canon may resolve it
 
+> **Resolution-safety semantics (per SPEC-14)**: `future_resolution_safety` is coupled to `status`. Mysteries with `status: forbidden` take `future_resolution_safety: none` (no future canon may resolve them — they define the world's metaphysics by what stays unsaid). Mysteries with `status: active` or `status: passive` take `future_resolution_safety: low | medium | high` (rare-but-allowed → readily allowed). This coupling is enforced by the `rule7_mystery_reserve_preservation` validator.
+
 ---
 
 ## Mandatory World Files
@@ -363,6 +365,10 @@ It must change at least one of:
 - status signaling
 - ecology
 - daily routine
+- technology
+- geography
+
+> The canonical-domain enum (`tools/world-index/src/public/canonical-vocabularies.ts`) extends this list with additional domains accumulated during implementation (`economy`, `settlement_life`, `memory_and_myth`, `magic`, `medicine`, `status_order`, `warfare`, `taboo_and_pollution`). The list above is the authoritative starting set; the validator's superset is queryable at runtime via `mcp__worldloom__get_canonical_vocabulary({class: "domain"})` (per SPEC-14).
 
 ### Rule 3: No Specialness Inflation
 Do not repeatedly add exceptional elements that behave as if they have no impact on the ordinary world.

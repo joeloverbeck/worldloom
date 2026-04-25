@@ -1,6 +1,6 @@
 import type { Context, Validator, Verdict } from "../framework/types.js";
 import { asPlainRecord, stringArray } from "../structural/utils.js";
-import { isCanonicalDomain } from "./_shared/domain-enum.js";
+import { isCanonicalDomain } from "@worldloom/world-index/public/canonical-vocabularies";
 import { appliesToCanonFacts, fail, queryCanonFacts, recordIdFrom } from "./_shared/rule-utils.js";
 
 export const rule2NoPureCosmetics: Validator = {

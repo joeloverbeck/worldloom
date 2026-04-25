@@ -2,7 +2,7 @@
 
 | Spec Verification bullet | Test case name |
 |---|---|
-| Unit | SPEC-04 verification: Unit registry exposes the 13 mechanized validators |
+| Unit | SPEC-04 verification: Unit registry exposes the active mechanized validators |
 | Integration | SPEC-04 verification: Full-world and bootstrap baseline is structured |
 | Pre-apply mode | SPEC-04 verification: Pre-apply mode rejects a deliberate Rule 4 violation |
 | Full-world mode | SPEC-04 verification: Full-world and bootstrap baseline is structured |

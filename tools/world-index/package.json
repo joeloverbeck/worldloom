@@ -26,6 +26,11 @@
       "import": "./dist/src/public/types.js",
       "require": "./dist/src/public/types.js",
       "types": "./dist/src/public/types.d.ts"
+    },
+    "./public/canonical-vocabularies": {
+      "import": "./dist/src/public/canonical-vocabularies.js",
+      "require": "./dist/src/public/canonical-vocabularies.js",
+      "types": "./dist/src/public/canonical-vocabularies.d.ts"
     }
   },
   "scripts": {

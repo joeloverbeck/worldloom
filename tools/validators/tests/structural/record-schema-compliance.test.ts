@@ -44,7 +44,39 @@ test("record_schema_compliance rejects SEC id/file_class mismatches", async () =
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.pattern"));
 });
 
-test("record_schema_compliance validates hybrid frontmatter and PA Discovery blocks", async () => {
+test("record_schema_compliance validates adjudication frontmatter", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "adjudications/PA-0001-test.md",
+          content: [
+            "---",
+            "pa_id: PA-0001",
+            "date: 2026-04-25",
+            "verdict: ACCEPT",
+            "mystery_reserve_touched: []",
+            "invariants_touched: []",
+            "cf_records_touched:",
+            "  - CF-0001",
+            "open_questions_touched: []",
+            "change_id: CH-0001",
+            "originating_skill: canon-addition",
+            "---",
+            "# PA-0001",
+            "",
+            "Body prose is unconstrained by the frontmatter schema."
+          ].join("\n")
+        }
+      ]
+    },
+    context([record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)])
+  );
+
+  assert.equal(result.length, 0);
+});
+
+test("record_schema_compliance rejects legacy adjudication body-only Discovery blocks", async () => {
   const result = await recordSchemaCompliance.run(
     {
       files: [
@@ -69,7 +101,8 @@ test("record_schema_compliance validates hybrid frontmatter and PA Discovery blo
     context([record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)])
   );
 
-  assert.equal(result.length, 0);
+  assert.equal(result.length, 8);
+  assert.ok(result.every((verdict) => verdict.code === "record_schema_compliance.required"));
 });
 
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {

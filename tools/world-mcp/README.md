@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
-**Status**: Stdio MCP entrypoint registers 12 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`; `submit_patch_plan` delegates to `@worldloom/patch-engine`
+**Status**: Stdio MCP entrypoint registers 13 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`; `submit_patch_plan` delegates to `@worldloom/patch-engine`
 
 ## Tools
 
@@ -17,6 +17,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__find_sections_touched_by(cf_id)`
 - `mcp__worldloom__find_named_entities(names)`
 - `mcp__worldloom__find_edit_anchors(targets)`
+- `mcp__worldloom__get_canonical_vocabulary(class)` *(returns shared canonical enum values for `domain`, `verdict`, `mystery_status`, and `mystery_resolution_safety`)*
 - `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ verdicts }`)*
 - `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(delegates to SPEC-03 `@worldloom/patch-engine`)*
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)`

@@ -1,12 +1,12 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
-This document sequences the active spec bundle (`SPEC-01` through `SPEC-13`, plus `SPEC-09`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by archived `SPEC-13`.
+This document sequences the active spec bundle (`SPEC-01` through `SPEC-14`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by archived `SPEC-13` and current `SPEC-14`.
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-13` → `SPEC-03` → `SPEC-04` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-13` → `SPEC-03` → `SPEC-04` → `SPEC-14` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then the **atomic-source migration** that moves canonical storage from monolithic markdown to per-record YAML (SPEC-13 — foundational for understanding how SPEC-03/04/05/06 now operate), then write surface (engine + validators, both reoriented to atomic records), then enforcement (hooks, reoriented to `_source/` discipline), then consumption (skill rewrites against atomic records), then contract updates (docs), then sequencing (migration plan, amended by SPEC-13). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then the **atomic-source migration** that moves canonical storage from monolithic markdown to per-record YAML (SPEC-13 — foundational for understanding how SPEC-03/04/05/06 now operate), then write surface (engine + validators, both reoriented to atomic records), then **PA contract & vocabulary reconciliation** (SPEC-14 — supersedes parts of archived SPEC-03 and SPEC-04 to align engine emission, validator parsing, and canonical vocabulary surfacing into a single contract), then enforcement (hooks, reoriented to `_source/` discipline), then consumption (skill rewrites against atomic records), then contract updates (docs), then sequencing (migration plan, amended by SPEC-13 and SPEC-14). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
 
 ## Implementation order (for builders)
 
@@ -127,7 +127,10 @@ The original structural-validator gate was not used as the Phase 1.5 closeout pr
 **Tier 3 (depends on Tier 2)**:
 - `SPEC-05 Part B` Hooks 3, 5 (edit-side `_source/` discipline + auto-validate)
 
-**Tier 4 (depends on Tier 3)**:
+**Tier 3.5 (depends on Tier 2; lands before Tier 4 SPEC-06 acceptance)**:
+- `SPEC-14` PA Contract & Vocabulary Reconciliation — new spec at `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`. Supersedes parts of archived SPEC-03 (`append_adjudication_record` payload shape; `append_touched_by_cf` semantics) and archived SPEC-04 (`record_schema_compliance` adjudication parsing; `rule7_mystery_reserve_preservation` enum; `rule2_no_pure_cosmetics` domain enum). Tier 2 tickets land validator + engine + MCP changes; Tier 3 tickets execute the animalia bulk fix (decomposed in `docs/triage/2026-04-25-spec04-grandfathering-triage.md`). Collateral amendments: SPEC-06, SPEC-08, FOUNDATIONS.md, this file.
+
+**Tier 4 (depends on Tier 3 + Tier 3.5)**:
 - `SPEC-06` all-skill migration. Suggested sub-order (may parallelize within):
   1. `canon-addition` (proven pattern; migrate first as the fullest-surface pilot)
   2. `create-base-world` (update to emit `_source/` directly for new worlds)
@@ -136,15 +139,16 @@ The original structural-validator gate was not used as the Phase 1.5 closeout pr
   5. `propose-new-characters` (biggest; last once pattern is proven)
   6. `continuity-audit` (complex reasoning; done last on the main-orchestrator side)
 
-**Phase 2 completion gate** (revised per SPEC-13):
+**Phase 2 completion gate** (revised per SPEC-13 and SPEC-14):
 - All 8 skills end-to-end via engine against `_source/` atomic records
 - canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on `_source/` surfaces
-- `world-validate animalia --json` reports zero `fail` verdicts for the SPEC-04 baseline; grandfathered historical bootstrap findings remain visible as `info`
+- **Per SPEC-14**: `world-validate animalia --json` reports **zero findings** (not "zero `fail` with `info` grandfathering as residual" — the 224-finding baseline has full fix paths via SPEC-14 Tier 3 tickets and the grandfathering file empties post-fix)
 - **≥80% token reduction** vs Phase 0 baseline (lifted from SPEC-08's ≥70% target — atomic-source retrieval enables the higher target; measured across 3 representative runs per skill)
 - Atomicity injection tests pass (two-phase commit holds; no partial writes)
 - Concurrency test passes (per-world write lock serializes same-world plans)
 - Every `create_*` / `update_record_field` / `append_extension` / `append_touched_by_cf` op fixture-tested
 - `touched_by_cf_completeness` validator passes on animalia post-Phase-2 state
+- **Per SPEC-14**: every record emitted by a rewritten skill passes `record_schema_compliance` end-to-end (cross-package integration test asserts engine output matches validator schema)
 
 ### Phase 2.5 — Canon-Safety Expansion (independent track, SPEC-09)
 
@@ -228,6 +232,10 @@ Phase 2 (Write Path + All-Skill Migration) — revised per SPEC-13
   │                                                      ▼
   ├── SPEC-05 Hooks 3,5 (_source/ discipline) ─────────┤
   │                                                      ▼
+  ├── SPEC-14 PA Contract & Vocabulary Reconciliation ──┤
+  │     ├── Tier 2: validator + engine + MCP code changes
+  │     └── Tier 3: animalia bulk fix (PA migration + CF cleanup + one-offs)
+  │                                                      ▼
   └── SPEC-06 all-skill migration (8 skills, atomic-source) ─┐
                                                               ▼
 Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 + SPEC-06
@@ -266,10 +274,13 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-04 (atomic-YAML validators, 13 mechanized validators): completed 2026-04-25; archived at `archive/specs/SPEC-04-validator-framework.md`
   - SPEC-03 (atomic-record patch engine, simplified op vocabulary): completed 2026-04-25; archived at `archive/specs/SPEC-03-patch-engine.md`
   - SPEC-02-PHASE2 (retrieval-MCP tooling update): completed 2026-04-25; archived at `archive/specs/SPEC-02-phase2-tooling.md`
+  - SPEC-14 (PA contract & vocabulary reconciliation): 1–1.5 sessions
+    - Tier 2 (validator + engine + MCP): 0.5–0.75 session
+    - Tier 3 (animalia bulk fix): 0.5–0.75 session
   - SPEC-05 Part B (2 hooks, `_source/` discipline): 0.5 session
   - SPEC-06 (all 8 skills against atomic source): 2.5–3 sessions
   - SPEC-07 Part B: 0.5 session
-  - Animalia re-validation + cleanup: 0.5 session
+  - Animalia re-validation + cleanup: 0.5 session (lifted into SPEC-14 Tier 3)
 - **Phase 2.5** (SPEC-09 canon-safety expansion): 1–2 sessions
 - **Phase 3** (old atomic-source): SUPERSEDED — not a separate phase
 - **Phase 4** (old prose fragmentization): SUPERSEDED — not a separate phase
@@ -310,6 +321,7 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 | SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
 | SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
 | SPEC-13 Atomic-Source Migration | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-13-atomic-source-migration.md`; delayed snapshot cleanup remains tracked by `tickets/SPEC13ATOSRCMIG-006.md` |
-| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13 |
+| SPEC-14 PA Contract & Vocabulary Reconciliation | ✓ specified 2026-04-25; spec at `specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`; collateral amendments to SPEC-06 / SPEC-08 / FOUNDATIONS.md / IMPLEMENTATION-ORDER.md landed in same session; tickets pending decomposition (Tier 2: validator + engine + MCP; Tier 3: animalia bulk fix) |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14 |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots. **SPEC-14 is the contract-reconciliation umbrella surfaced by the 2026-04-25 grandfathering triage** (`docs/triage/2026-04-25-spec04-grandfathering-triage.md`): the SPEC-04 baseline run on animalia exposed three-way drift between engine emission (`append_adjudication_record`), validator parsing (`record_schema_compliance`), and existing PA file shape; SPEC-14 supersedes the relevant parts of archived SPEC-03 and SPEC-04, adds canonical-vocabulary surfacing via MCP, and decomposes the animalia bulk fix into Tier 3 tickets that empty `audits/validation-grandfathering.yaml` to zero entries.

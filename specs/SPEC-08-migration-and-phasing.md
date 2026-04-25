@@ -3,8 +3,17 @@
 # SPEC-08: Migration & Phasing Plan
 
 **Phase**: meta (orchestrates Phases 0 through 2.5)
-**Depends on**: SPEC-01 through SPEC-07, **SPEC-13 (atomic-source migration — inserts Phase 1.5 and supersedes old Phase 3 + Phase 4)**
+**Depends on**: SPEC-01 through SPEC-07, **SPEC-13 (atomic-source migration — inserts Phase 1.5 and supersedes old Phase 3 + Phase 4)**, **SPEC-14 (PA contract & vocabulary reconciliation — animalia structural-fail resolution path now targets the SPEC-14 contract)**
 **Blocks**: nothing (this spec is the overview)
+
+## SPEC-14 amendment summary
+
+The Phase 1 and Phase 2 animalia resolution paths originally allowed grandfathering as a permanent landing state for residual structural fails. Per SPEC-14, the resolution target tightens:
+
+- **Animalia structural-fail resolution targets the SPEC-14 contract**, not the legacy three-way drift (engine ≠ validator ≠ existing PA shape). The bulk fix is decomposed into SPEC-14's Tier 3 tickets (`SPEC14PAVOC-004` through `-007`).
+- **Grandfathering target reduced to zero**. Post-Tier-3, `worlds/animalia/audits/validation-grandfathering.yaml` should have no `entries` (the file may be archived as audit-trail evidence or removed). Permanent grandfathering is no longer an acceptable end-state for the 224 animalia findings; SPEC-14's reconciliation makes legitimate fix paths exist for every bucket.
+- **Phase 2 acceptance criterion strengthened**: `world-validate animalia --json` must report zero findings (not "zero `fail`" with `info` grandfathering accepted as residual). Per SPEC-14 Verification.
+- **SPEC-14 lands as a Phase 2 prerequisite**. Engine + validator + MCP changes (SPEC-14 Tier 2 tickets) precede the animalia bulk fix (SPEC-14 Tier 3 tickets), which precedes the SPEC-06 acceptance gate.
 
 ## SPEC-13 amendment summary
 
@@ -104,12 +113,12 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 **Animalia re-validation**:
 1. After SPEC-04 ships, `world-validate animalia` runs **full** validator suite (including Rules 1–7)
 2. Any Rule 1–7 fails on current animalia are latent defects from the prose-enforced era
-3. Resolve via canon-addition runs (each fail is a retcon proposal); grandfather residuals through an exact-match `audits/validation-grandfathering.yaml` policy that emits matched findings with `info` severity
+3. **Per SPEC-14**: residuals are NOT grandfathered as a permanent end-state. The 224-finding baseline (captured by `audits/validation-grandfathering.yaml` as of 2026-04-25) is decomposed into SPEC-14's Tier 3 tickets (`SPEC14PAVOC-004` through `-006`) for full resolution: PA migration to frontmatter form, CF cleanup (domain re-tags + mystery enum normalizations + `required_world_updates` extensions), one-off integrity fixes. Post-Tier-3, the grandfathering file empties to zero entries.
 
 **Acceptance criteria**:
 - All 8 skills run end-to-end via engine (verified by end-to-end integration test per skill)
 - A canon-addition run on animalia with a large delivery (≥6 required_world_updates files) writes exclusively via engine; Hook 3 denies any raw Edit attempt on protected surfaces
-- `world-validate animalia --json` reports zero Rule 1–7 `fail` (post-cleanup)
+- `world-validate animalia --json` reports **zero findings** (not "zero `fail` with `info` grandfathering as residual" — per SPEC-14, all 224 baseline findings have legitimate fix paths and the grandfathering file empties post-Tier-3)
 - **≥70% token reduction** vs Phase 0 baseline (measured across 3 representative runs per skill)
 - Patch engine atomicity verified: inject failure at Phase A validate, Phase B temp-write, Phase B rename — no partial write on disk in any case
 - One synthetic concurrency test: two skills operating on different worlds simultaneously both succeed; same-world concurrency serializes (second waits or errors with `world_locked`)
@@ -154,6 +163,8 @@ Phase 2:
 5. `world-validate animalia --json` → resolve any Rule 1–7 fails via canon-addition or grandfather
 6. Restart Claude Code session
 7. Run a sample canon-addition on animalia with a large delivery; measure token counts and verify Hook 3 enforcement
+8. **Per SPEC-14**: animalia bulk fix tickets (`SPEC14PAVOC-004` through `-006`) close the 224-finding baseline — PA migration to frontmatter form, CF cleanup (domain/mystery/required_world_updates), one-off integrity fixes — leaving `audits/validation-grandfathering.yaml` with no `entries`
+9. **Per SPEC-14**: skill acceptance ticket (`SPEC14PAVOC-007`) verifies SPEC-06's amended acceptance criterion (every emitted record passes `record_schema_compliance`) holds end-to-end on a fresh canon-addition run
 
 Phase 1.5 (SPEC-13 animalia migration) — **authoritative procedure at SPEC-13 §E**. Summary:
 1. Pre-migration snapshot (`.pre-migration-snapshot/` gitignored)
@@ -191,7 +202,7 @@ Phase 3 and Phase 4 (old): superseded — not executed separately.
 | §Change Control Policy | Each phase is a change; acceptance criteria act as the "change is complete" test |
 | §Mandatory World Files | 13 concerns preserved in count and semantics through all phases; Phase 1.5 (SPEC-13) relocates storage form from monolithic markdown to atomic YAML under `_source/` for 11 of 13 concerns; WORLD_KERNEL and (stripped) ONTOLOGY remain primary-authored |
 | §Acceptance Tests | Each phase's acceptance criteria are measurable, not aspirational — honoring FOUNDATIONS' standard for "a world model is not ready until…" |
-| Rule 6 No Silent Retcons | Migration is logged; animalia structural fails that get grandfathered are recorded in an exact-match audit policy and emitted as explicit `info` validation results |
+| Rule 6 No Silent Retcons | Migration is logged; per SPEC-14, the 224-finding baseline now has full fix paths (Tier 3 tickets) and grandfathering is no longer a permanent end-state — every legitimate Rule 6 violation becomes either a fix or an explicit retcon proposal, not an `info`-level grandfathering entry |
 
 ## Verification
 
