@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan";
+import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
 
 function buildValidPatchPlan() {
   return {
@@ -13,25 +14,90 @@ function buildValidPatchPlan() {
     expected_id_allocations: {},
     patches: [
       {
-        op: "insert_before_node",
+        op: "create_cf_record",
         target_world: "seeded",
-        target_file: "GEOGRAPHY.md",
-        payload: { body: "Brinewick expands." }
+        target_file: "_source/canon/CF-0001.yaml",
+        payload: {
+          cf_record: {
+            id: "CF-0001",
+            title: "Brinewick Harbor Office",
+            status: "hard_canon",
+            type: "institution",
+            statement: "Brinewick maintains a harbor office.",
+            scope: { geographic: "local", temporal: "current", social: "public" },
+            truth_scope: { world_level: true, diegetic_status: "objective" },
+            domains_affected: ["law"],
+            prerequisites: ["appointed clerks"],
+            distribution: {
+              who_can_do_it: ["clerks"],
+              who_cannot_easily_do_it: ["outsiders"],
+              why_not_universal: ["requires harbor appointment"]
+            },
+            costs_and_limits: ["bounded staff time"],
+            visible_consequences: ["posted ledgers"],
+            required_world_updates: ["INSTITUTIONS"],
+            source_basis: { direct_user_approval: true, derived_from: [] },
+            contradiction_risk: { hard: false, soft: false },
+            notes: "None",
+            extensions: []
+          }
+        }
+      },
+      {
+        op: "create_sec_record",
+        target_world: "seeded",
+        target_file: "_source/institutions/SEC-INS-001.yaml",
+        payload: {
+          sec_record: {
+            id: "SEC-INS-001",
+            file_class: "INSTITUTIONS",
+            order: 1,
+            heading: "Harbor Office",
+            heading_level: 2,
+            body: "Brinewick maintains a harbor office.",
+            extensions: [],
+            touched_by_cf: ["CF-0001"]
+          }
+        }
       }
     ]
   };
 }
 
-test("validatePatchPlan returns validator_unavailable for a well-formed Phase 1 plan", async () => {
-  const result = await validatePatchPlan({ patch_plan: buildValidPatchPlan() });
+function seedEmptyWorld(root: string): void {
+  seedWorld(root, { worldSlug: "seeded", nodes: [] });
+}
 
-  assert.deepEqual(result, {
-    code: "validator_unavailable",
-    message: "SPEC-04 validator framework not yet built; activates in Phase 2 per SPEC-08."
-  });
+test("validatePatchPlan returns verdicts from the validators package", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: buildValidPatchPlan() }));
+
+    assert.deepEqual(result, { verdicts: [] });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
 });
 
-test("validatePatchPlan rejects a malformed plan before the Phase 1 stub", async () => {
+test("validatePatchPlan surfaces rule verdicts from the validators package", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = buildValidPatchPlan();
+    (plan.patches[0]!.payload as any).cf_record.distribution.why_not_universal = [];
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("verdicts" in result);
+    assert.ok(result.verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("validatePatchPlan rejects a malformed plan before validator delegation", async () => {
   const result = await validatePatchPlan({
     patch_plan: {
       ...buildValidPatchPlan(),
@@ -44,7 +110,7 @@ test("validatePatchPlan rejects a malformed plan before the Phase 1 stub", async
   assert.equal(result.details?.field, "patch_plan.plan_id");
 });
 
-test("validatePatchPlan rejects an empty patch list before the Phase 1 stub", async () => {
+test("validatePatchPlan rejects an empty patch list before validator delegation", async () => {
   const result = await validatePatchPlan({
     patch_plan: {
       ...buildValidPatchPlan(),

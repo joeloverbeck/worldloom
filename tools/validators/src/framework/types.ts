@@ -10,6 +10,8 @@ import type {
   OpenQuestionRecord,
   SectionRecord
 } from "@worldloom/world-index/public/types";
+import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
+export type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 export type RunMode = "pre-apply" | "full-world" | "incremental";
 
@@ -69,8 +71,6 @@ export interface WorldIndexReadSurface {
     world_slug: string;
   }): Promise<IndexedRecord[]>;
 }
-
-export type PatchPlanEnvelope = Record<string, unknown>;
 
 export interface Context {
   run_mode: RunMode;

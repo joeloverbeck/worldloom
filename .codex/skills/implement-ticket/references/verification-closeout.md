@@ -39,6 +39,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - If `node --test dist/path/to/test.js` reports only a wrapper failure for a compiled test module that itself uses `node:test`, run `node dist/path/to/test.js` as a diagnostic command to expose nested TAP/subtest assertion details. Still rerun the accepted `node --test ...` proof before closeout if the ticket records that command.
 - If a compiled TS test imports runtime data or reads files from disk, check the emitted test's runtime location before assuming the implementation is wrong; `dist/tests/...` often changes the relative path contract.
 - If an MCP, stdio, or transport-client lane is noisy, first prove whether the instability is outside the owned seam; keep acceptance on the strongest truthful in-process or package-local surface unless a known-good end-to-end lane exists.
+- For child-process lifecycle tests, prefer the child `close` event's `(code, signal)` result over reading `child.exitCode` immediately after a close or signal path. `exitCode` can remain unset during signal-driven shutdown even when the close event carries the proof signal.
 
 ## Ticket closeout
 

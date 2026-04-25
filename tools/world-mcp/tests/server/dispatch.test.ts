@@ -251,8 +251,7 @@ test("registered tools dispatch with either a success payload or the documented 
       {
         name: MCP_TOOL_NAMES.validate_patch_plan,
         args: { patch_plan: buildValidPatchPlan() },
-        expectError: true,
-        expectedCode: "validator_unavailable"
+        expectError: false
       },
       {
         name: MCP_TOOL_NAMES.submit_patch_plan,

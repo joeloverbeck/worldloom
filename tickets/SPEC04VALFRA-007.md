@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/validators/tests/integration/spec04-verification.test.ts` (the spec's §Verification bullets as a test matrix against a fixture-copied animalia); no new production code. Bootstrap audit disposition documents any latent defects surfaced in animalia (grandfather as `info` with authored reason, or route to `canon-addition` cleanup). Completes SPEC-04 Phase 2 Tier 1 acceptance.
-**Deps**: SPEC04VALFRA-006
+**Deps**: archive/tickets/SPEC04VALFRA-006.md
 
 ## Problem
 
@@ -17,25 +17,25 @@ Per the Spec-Integration Ticket Shape guidance from `.claude/skills/spec-to-tick
 - Re-enumerates expected counts (47 CFs, 18 CHs, 17 PAs) from the fixture at test start rather than hardcoding.
 - Has one assertion per spec §Verification bullet.
 - Lists a wall-clock perf check if the spec names a threshold (spec §Risks mentions "<10s" for full-world validation of a 12,000-line world — this is aspirational, so the assertion is logged as a dev-loop expectation, not a CI gate).
-- Uses transitive-head `Deps: SPEC04VALFRA-006` (006 depends on 003/004; 003/004 depend on 001/002; the DAG is reconcilable).
+- Uses transitive-head `Deps: archive/tickets/SPEC04VALFRA-006.md` (006 depends on 003/004; 003/004 depend on 001/002; the DAG is reconcilable).
 
 ## Assumption Reassessment (2026-04-25)
 
 1. The animalia corpus at Step 1 has 47 CFs, 18 CHs, 17 adjudications (confirmed via reassessment Step 3 grep). The fixture-copy strategy preserves these counts; the test re-enumerates from the fixture at start to catch corpus growth between ticket authoring and execution.
-2. The `validation_results` SQL table is populated by the CLI (ticket 005) and by `validatePatchPlan` (ticket 006). This capstone's tests invoke both surfaces and assert row-count / row-shape expectations against the fixture's `_index/world.db`.
+2. The `validation_results` SQL table is populated by the CLI path from ticket 005. Ticket 006's `validatePatchPlan` entry returns verdicts to MCP/engine callers but does not persist rows itself; this capstone's row-count / row-shape assertions must therefore target the CLI/bootstrap-audit path, while MCP/engine assertions inspect returned verdicts directly.
 3. Shared boundary: this ticket reads the spec's §Verification section to build the test matrix; it reads tickets 003–006 to understand what assertions each surface must satisfy; it reads `worlds/animalia/_source/` to copy the fixture. Nothing outside `tools/validators/` and the fixture is written.
 4. FOUNDATIONS principle under audit: **§Tooling Recommendation** — this capstone is the integration proof that the validator framework fulfills the "LLM agents should never operate on prose alone" commitment's validator-framework deliverable from the §Machine-Facing Layer section. Also **Rule 6 No Silent Retcons**: Bootstrap-audit grandfather decisions must surface in `validation_results` with an authored reason so the retcon decision is auditable.
 5. Schema extension posture: **additive-only**. New test file; no production code; no schema changes.
 6. Grandfathering posture: the Bootstrap audit's grandfathered findings land as `info`-severity rows in `validation_results` with a `message` field whose content is the human-authored reason (e.g., `"[BOOTSTRAP-GRANDFATHER] CF-0012's missing prerequisites field is a pre-SPEC-13 authoring gap; fix deferred to canon-addition cleanup run scheduled for 2026-05-01"`). The `info` severity means the CLI's exit code is still 0 — these findings do not block Phase 2 Tier 2.
 7. Rename/removal blast radius: zero. This ticket adds a test file; no production source modifications, no renames.
-8. Cross-spec dependency: this capstone completes SPEC-04 Phase 2 Tier 1 and unblocks Phase 2 Tier 2 per `specs/IMPLEMENTATION-ORDER.md` Phase 2 Tier 1 (SPEC-04) → Tier 2 (SPEC-03 fail-closed gate activated; SPEC-02-PHASE2 MCP tooling) → Tier 3 (SPEC-05 Part B hooks). Ticket 006 wires the SPEC-04 → engine integration; this ticket attests the full chain.
+8. Cross-spec dependency: this capstone completes SPEC-04 Phase 2 Tier 1 and unblocks the next Phase 2 work per `specs/IMPLEMENTATION-ORDER.md`: ticket 006 already wires the SPEC-04 → MCP/engine validation path, while this ticket attests the bootstrap audit and full verification matrix before Hook 5 / skill migration proceeds.
 
 ## Architecture Check
 
 1. Fixture-copy via `fs.cpSync` is the correct isolation strategy for a capstone test that exercises CLI + MCP + engine paths — all three paths assume a writable world directory (the CLI writes to `_index/world.db`; the MCP path may trigger world-index rebuilds; the engine's pre-apply check reads atomic records). Mutating the real `worlds/animalia/` tree would cross the test/canon boundary.
 2. Re-enumerated counts (computed at test start via `fs.readdirSync`) are robust to corpus growth. Hardcoded counts would drift as new CFs / CHs land via ongoing `canon-addition` runs; re-enumeration stays valid.
 3. One assertion per §Verification bullet (rather than bundled assertions) keeps the test output legible: a failure surfaces the specific bullet that failed, not a generic "integration failed" message. Matches the SPEC-Integration-Ticket-Shape discipline from `.claude/skills/spec-to-tickets/SKILL.md`.
-4. Bootstrap-audit disposition is performed manually by the ticket's implementer, not automated in the test: the test asserts the row count in `validation_results` matches (clean runs + grandfathered info rows = 0 fails); the implementer authors the grandfather rows before committing. This follows the spec's §Bootstrap audit wording precisely: "latent defects surfaced … documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason)."
+4. Bootstrap-audit disposition is performed manually by the ticket's implementer, not automated in the test: the CLI/bootstrap-audit path is the persistence surface for `validation_results` row assertions, while `validatePatchPlan` / MCP assertions inspect returned verdicts directly. This follows the spec's §Bootstrap audit wording precisely: "latent defects surfaced … documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason)."
 5. No backwards-compatibility aliasing/shims introduced. The capstone tests the post-reassessment validator surface end-to-end; no legacy paths exercised.
 
 ## Verification Layers

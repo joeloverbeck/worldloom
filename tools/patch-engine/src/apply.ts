@@ -14,7 +14,13 @@ import { validateEnvelopeShape } from "./envelope/validate.js";
 import { PatchEngineOpError } from "./ops/shared.js";
 import type { OpContext } from "./ops/types.js";
 
-export type { PatchReceipt } from "./envelope/schema.js";
+export type {
+  OperationKind,
+  PatchOperation,
+  PatchPlanEnvelope,
+  PatchReceipt,
+  RetconAttestation
+} from "./envelope/schema.js";
 
 export interface SubmitPatchPlanOptions extends PerWorldLockOptions {
   worldRoot?: string;

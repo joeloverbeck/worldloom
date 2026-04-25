@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
+
 import { rule6NoSilentRetcons } from "../../src/rules/rule6-no-silent-retcons.js";
 import { cfRecord, chRecord, completeCf, testContext } from "./helpers.js";
 
@@ -29,7 +31,7 @@ test("rule6_no_silent_retcons requires CH and modification_history entry in pre-
             payload: { ch_record: { change_id: "CH-0001", affected_fact_ids: ["CF-0001"] } }
           }
         ]
-      }
+      } as unknown as PatchPlanEnvelope
     }
   );
 
@@ -60,7 +62,7 @@ test("rule6_no_silent_retcons requires CH and modification_history entry in pre-
             payload: { target_cf_id: "CF-0001", change_id: "CH-0001", originating_cf: "CF-0001", date: "2026-04-25", summary: "Changed." }
           }
         ]
-      }
+      } as unknown as PatchPlanEnvelope
     }
   );
 

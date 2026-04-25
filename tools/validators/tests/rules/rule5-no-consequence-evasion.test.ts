@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
+
 import { rule5NoConsequenceEvasion } from "../../src/rules/rule5-no-consequence-evasion.js";
 import { completeCf, testContext } from "./helpers.js";
 
@@ -19,7 +21,7 @@ test("rule5_no_consequence_evasion matches CF required_world_updates to SEC ops 
             payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INSTITUTIONS"] } }
           }
         ]
-      }
+      } as unknown as PatchPlanEnvelope
     }
   );
 
@@ -45,7 +47,7 @@ test("rule5_no_consequence_evasion matches CF required_world_updates to SEC ops 
             payload: { sec_record: { id: "SEC-INS-001", file_class: "INSTITUTIONS" } }
           }
         ]
-      }
+      } as unknown as PatchPlanEnvelope
     }
   );
 

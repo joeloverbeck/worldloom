@@ -27,6 +27,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@worldloom/patch-engine": "file:../patch-engine",
     "@worldloom/world-index": "file:../world-index",
     "ajv": "8.17.1",
     "better-sqlite3": "12.2.0",

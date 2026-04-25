@@ -2,9 +2,9 @@
 
 # SPEC-04: Validator Framework
 
-**Phase**: 2 Tier 1 (structural validators activate in Phase 1 via CLI; full enforcement path lands with engine integration in Phase 2)
+**Phase**: 2 Tier 1 (structural validators activate via CLI; pre-apply MCP/engine integration is present)
 **Depends on**: [SPEC-01 World Index](../archive/specs/SPEC-01-world-index.md) (archived 2026-04-22), [SPEC-13 Atomic-Source Migration](../archive/specs/SPEC-13-atomic-source-migration.md) (archived 2026-04-24 — validators consume atomic YAML records directly)
-**Blocks**: [SPEC-03 Patch Engine](../archive/specs/SPEC-03-patch-engine.md) pre-apply gate (archived 2026-04-25; fail-closed pending this spec), SPEC-05 Hook 5 (PostToolUse; Phase 2 Tier 3), SPEC-06 (skills replace mechanized Phase 14a tests with validator calls)
+**Blocks**: SPEC-05 Hook 5 (PostToolUse; Phase 2 Tier 3), SPEC-06 (skills replace mechanized Phase 14a tests with validator calls)
 
 ## Problem Statement
 
@@ -203,10 +203,9 @@ Post-migration, the skill's Phase 14a collapses to:
 
 ### Engine integration contract
 
-The SPEC-03 patch engine's pre-apply gate imports this package. The existing MCP stub at `tools/world-mcp/src/tools/validate-patch-plan.ts` returns a `validator_unavailable` error via a sentinel branch; landing this spec swaps the sentinel for the real import:
+The MCP pre-apply validation tool imports this package. `tools/world-mcp/src/tools/validate-patch-plan.ts` validates the permissive MCP envelope shape, then delegates to `@worldloom/validators`:
 
 ```typescript
-// tools/world-mcp/src/tools/validate-patch-plan.ts (swap target at SPEC-04 landing)
 const { validatePatchPlan } = await import("@worldloom/validators");
 return validatePatchPlan(args.patch_plan);
 ```
@@ -245,7 +244,7 @@ Exit codes: `0` all pass, `1` any fail, `2` invalid world slug, `3` index missin
 
 ### Bootstrap audit (SPEC-08 Phase 2 Tier 1 acceptance criterion)
 
-Before SPEC-04 closes Phase 2 Tier 1 — specifically, before the SPEC-03 engine's pre-apply gate is unblocked from its current fail-closed state (per `archive/specs/SPEC-03-patch-engine.md` and the stub at `tools/world-mcp/src/tools/validate-patch-plan.ts`) — run `world-validate animalia`. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason).
+Before SPEC-04 closes Phase 2 Tier 1, run `world-validate animalia` and the integration capstone after the now-wired SPEC-03/MCP pre-apply validation path. Any latent defects surfaced (pre-existing inconsistencies in the 47 CFs, 18 CHs, 17 PAs) are documented, and either resolved via a one-off cleanup canon-addition run OR accepted as grandfathered (recorded in a `validation_results` row with severity `info` and a human-authored reason).
 
 ### Validator implementation pattern
 
@@ -298,7 +297,7 @@ The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the ind
 - **Incremental mode**: after a test write, run Hook 5; verify only relevant validators run (per the §Per-run-mode applicability matrix via each validator's `applies_to` predicate)
 - **Phase 14a migration**: replay a historical canon-addition run through the new validator-based Phase 14a; verify Tests 1, 2, 3 (structural), 4, 5, 6 (structural), 7 map cleanly to validators; verify Tests 3 (stabilizer quality), 6 (MR overlap), 8, 9, 10 remain skill-judgment producing hand-written PASS/FAIL with rationale
 - **False-positive / bootstrap baseline**: run mechanized validators on unmodified animalia and compare verdicts against the hand-audit baseline. Structural validators currently surface pre-existing corpus findings; SPEC04VALFRA-007 owns grandfather-or-fix disposition before the broader Phase 2 Tier 1 gate is treated as clean.
-- **Engine rewire**: replace the stub at `tools/world-mcp/src/tools/validate-patch-plan.ts:50-53` with the real `@worldloom/validators` import per the §Engine integration contract; submit a plan and confirm verdicts flow through
+- **Engine rewire**: `tools/world-mcp/src/tools/validate-patch-plan.ts` delegates to the real `@worldloom/validators` import per the §Engine integration contract; submit a plan and confirm verdicts flow through
 - **Schema conformance**: run `record_schema_compliance` against animalia's `_source/` tree and supported hybrid/PA structured surfaces; zero schema violations are expected for atomic `_source/` records after ticket 002, while hybrid/PA findings are handled through the Bootstrap audit when they reflect pre-existing corpus drift.
 
 ## Out of Scope

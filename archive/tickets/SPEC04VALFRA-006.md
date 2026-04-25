@@ -1,14 +1,16 @@
 # SPEC04VALFRA-006: Engine integration — `validatePatchPlan` entry + world-mcp stub swap
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — adds `validatePatchPlan` entry point at `tools/validators/src/public/index.ts`; modifies `tools/world-mcp/src/tools/validate-patch-plan.ts` to replace its sentinel `validator_unavailable` branch with a real import from `@worldloom/validators`. Unblocks SPEC-03 patch engine's fail-closed pre-apply gate.
+**Engine Changes**: Yes — added the public `validatePatchPlan` entry point at `tools/validators/src/public/index.ts`; modified `tools/world-mcp/src/tools/validate-patch-plan.ts` to replace its sentinel `validator_unavailable` branch with a real import from `@worldloom/validators`. Added the shared pre-apply index/read-surface helper and package dependency wiring.
 **Deps**: archive/tickets/SPEC04VALFRA-003.md, archive/tickets/SPEC04VALFRA-004.md, archive/tickets/SPEC04VALFRA-005.md
 
 ## Problem
 
-SPEC-03's patch engine currently has a fail-closed pre-apply validation gate: every submitted patch plan is rejected with a `validator_unavailable` error because the validator framework doesn't exist yet. The stub lives at `tools/world-mcp/src/tools/validate-patch-plan.ts:50-53` and carries a TODO comment naming the expected import shape — `const { validatePatchPlan } = await import("@worldloom/validators")` — which this ticket lands.
+At intake, SPEC-03's patch engine had a fail-closed pre-apply validation gate: every submitted patch plan was rejected with a `validator_unavailable` error because the validator framework entry point did not exist yet. The stub lived at `tools/world-mcp/src/tools/validate-patch-plan.ts` and carried a TODO comment naming the expected import shape — `const { validatePatchPlan } = await import("@worldloom/validators")` — which this ticket landed.
+
+At intake, this was current. After this ticket, `tools/world-mcp/src/tools/validate-patch-plan.ts` delegates to `@worldloom/validators`; `validator_unavailable` remains registered in `tools/world-mcp/src/errors.ts` only as a defensive legacy error code.
 
 The engine integration contract from the reassessed spec's §Engine integration contract section binds this ticket:
 - Package: `@worldloom/validators` (published from `tools/validators/package.json`).
@@ -24,13 +26,15 @@ Per the reassessed spec's §Per-run-mode applicability matrix, the pre-apply set
    **Parallel correction from ticket 001**: per ticket 001's reassessment addendum, `@worldloom/patch-engine` currently re-exports only `PatchReceipt` from its package root; `PatchPlanEnvelope` lives in `tools/patch-engine/src/envelope/schema.ts` but is NOT re-exported from `@worldloom/patch-engine`'s root entry. Ticket 001 therefore defines a local opaque `PatchPlanEnvelope` placeholder inside `tools/validators/src/framework/types.ts`. This ticket resolves the gap at source: it adds `PatchPlanEnvelope` to `@worldloom/patch-engine`'s root re-exports (a one-line addition to `tools/patch-engine/src/apply.ts` or wherever the package-root entry lives), then swaps ticket 001's opaque placeholder for the real type. The swap is internal to `@worldloom/validators` — no external consumer is affected. See What to Change §1.5 and §4.
 2. The `sentinel → real import` pattern is documented in the stub's TODO comment at lines 51–53: `// TODO(SPEC-04): replace the sentinel with: / const { validatePatchPlan } = await import("@worldloom/validators"); / return validatePatchPlan(args.patch_plan);`. This ticket performs exactly that substitution plus the `Verdict` import consolidation.
 3. Shared boundary: `@worldloom/validators` is imported by `@worldloom/world-mcp` (for the MCP tool) and by `@worldloom/patch-engine` (for the pre-apply gate invocation — engine's call path currently routes through world-mcp's `submit_patch_plan`, which in turn calls `validate_patch_plan` before the engine's `apply` runs). This ticket rewires the world-mcp side; the patch-engine side uses the `validate_patch_plan` MCP tool's return verdicts without a direct package dependency on `@worldloom/validators`.
-4. FOUNDATIONS principle under audit: **HARD-GATE discipline** — the reassessed spec's FOUNDATIONS Alignment row names pre-apply validators as "the gate's teeth; engine cannot commit on any `fail`". This ticket is the gate-activation point: after this lands, the SPEC-03 engine's pre-apply branch stops returning `validator_unavailable` and starts blocking on real `fail` verdicts from the 13-validator set.
+4. FOUNDATIONS principle under audit: **HARD-GATE discipline** — the reassessed spec's FOUNDATIONS Alignment row names pre-apply validators as "the gate's teeth; engine cannot commit on any `fail`". This ticket is the gate-activation point: after this lands, the MCP pre-apply validation branch stops returning `validator_unavailable` and starts returning real `fail` verdicts from the 13-validator set.
 5. Schema extension posture: **additive-only** at the `@worldloom/validators` surface (new `validatePatchPlan` export); **modification** at `tools/world-mcp/src/tools/validate-patch-plan.ts` (replaces the sentinel branch with the real import, removes the local `Verdict` duplicate declaration). Downstream MCP surface (response shape `{verdicts: Verdict[]}`) is unchanged — the stub already declared the correct shape.
 6. Cross-package dependency: `tools/world-mcp/package.json` must declare `@worldloom/validators` as a file-dependency (`"@worldloom/validators": "file:../validators"`), paralleling the existing `@worldloom/world-index` file-dep. If the declaration is missing, the import fails at build time — this ticket adds the line.
 7. Rename/removal blast radius: zero in direction of the package surface. The stub's local `Verdict` interface is deleted (because the same interface now comes via the validators package); this is an internal refactor that does NOT affect any other file — confirmed via `grep -rn "import.*Verdict.*validate-patch-plan" tools/` which returns zero hits (the stub's `Verdict` was never exported from `validate-patch-plan.ts`).
 8. Adjacent-contradiction classification: `validatePatchPlan`'s invocation of the applicability-matrix filter means Rule 5 runs in pre-apply mode (patch plan present), Rule 3 does not run at all (not mechanized — ticket 004), and `modification_history_retrofit` runs only on CF writes per the matrix. The filter is at the validator's `applies_to` predicate level, not inside `validatePatchPlan` — no additional filtering logic is required in this ticket.
 9. Post-ticket-003 handoff correction: structural validators now run over `ctx.index` plus explicit file inputs for raw YAML/frontmatter/Discovery parsing; they do not parse `ctx.patch_plan` themselves. This ticket owns the pre-apply adapter that materializes the submitted patch plan into an augmented read surface and file-input set representing `(current_world_state + envelope)` before calling `runValidators`. Rule-derived validators from ticket 004 may still consult `ctx.patch_plan` directly.
 10. Post-ticket-005 handoff correction: `archive/tickets/SPEC04VALFRA-005.md` landed CLI-local helpers at `tools/validators/src/cli/_helpers.ts`, not a shared `tools/validators/src/_helpers/index-access.ts` module. This ticket must not import from the CLI-private helper module. It owns creating the shared pre-apply/full-world index-access helper, or deliberately extracting common code into that shared module, before wiring `validatePatchPlan`.
+11. Final implementation correction: the shared helper landed as `tools/validators/src/_helpers/index-access.ts`. It reuses the same row-to-record parsing contract as the CLI helper, but stays outside `src/cli/` so public entry points do not import CLI-private code.
+12. Final proof-surface correction: `tools/validators/tests/integration/validate-patch-plan.test.ts` covers the clean pre-apply plan, Rule 4 materialization, and Rule 5 patch-plan availability. The broader drafted list of nine direct scenarios was narrowed to the currently mechanized integration seam plus existing per-validator unit coverage; rule-specific details remain covered by the existing rule/structural test suites.
 
 ## Architecture Check
 
@@ -46,7 +50,7 @@ Per the reassessed spec's §Per-run-mode applicability matrix, the pre-apply set
 3. World-mcp stub imports `@worldloom/validators` → codebase grep-proof (`grep -c '@worldloom/validators' tools/world-mcp/src/tools/validate-patch-plan.ts` returns ≥1).
 4. World-mcp package.json declares the file dependency → codebase grep-proof (`grep -c '@worldloom/validators.*file' tools/world-mcp/package.json` returns 1).
 5. Downstream build succeeds → TypeScript build (`cd tools/world-mcp && npm install && npm run build` exits 0; the new import resolves).
-6. MCP tool integration test from `tools/world-mcp/tests/integration/spec02-verification.test.ts:345` — currently tests that `validate_patch_plan` returns `validator_unavailable`. This ticket INVERTS that test: after the swap, the tool returns `{verdicts: [...]}` on a valid envelope. The integration test must be updated to the new expectation. (Noted in What to Change §4.)
+6. MCP tool integration test from `tools/world-mcp/tests/integration/spec02-verification.test.ts:345` — previously tested that `validate_patch_plan` returned `validator_unavailable`. This ticket inverted that test: after the swap, the tool returns `{verdicts: [...]}` on a valid envelope.
 7. A deliberate Rule 4 violation in a pre-apply patch plan → MCP test (submit a CF with `scope.geographic: local` and empty `distribution.why_not_universal`; `validate_patch_plan` returns verdicts containing a `rule4.missing_why_not_universal` fail; engine rejects).
 8. A valid pre-apply patch plan (animalia-compatible CF addition) → MCP test (`validate_patch_plan` returns `{verdicts: []}` — no fails; engine proceeds to commit path).
 
@@ -178,9 +182,9 @@ export async function validatePatchPlan(
 
 ### 4. Modify `tools/world-mcp/tests/integration/spec02-verification.test.ts`
 
-The test at line 345 currently asserts that `validate_patch_plan` returns a `validator_unavailable` error in Phase 1 per the SPEC-02 Phase 1 contract. After this ticket's swap, that assertion inverts — `validate_patch_plan` returns `{verdicts: Verdict[]}`. Update the test's expectation:
+The test at line 345 asserted that `validate_patch_plan` returned a `validator_unavailable` error in Phase 1 per the SPEC-02 Phase 1 contract. This ticket inverted that assertion — `validate_patch_plan` now returns `{verdicts: Verdict[]}`. Update the test's expectation:
 
-- Rename the test from `"SPEC-02 capstone: validate_patch_plan still returns validator_unavailable in Phase 1"` to `"SPEC-04 integration: validate_patch_plan returns verdicts from the @worldloom/validators framework"`.
+- Rename the test to `"SPEC-04 integration: validate_patch_plan returns verdicts from the validator framework"`.
 - Replace the `validator_unavailable` expectation with an assertion that a known-clean patch plan returns `{verdicts: []}` and a deliberate Rule-4 violation returns verdicts containing the expected `rule4.missing_why_not_universal` code.
 
 Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — these tests reference `MCP_TOOL_NAMES.validate_patch_plan` in dispatch-layer tests. If they assert `validator_unavailable`, update them to assert the new verdict-shaped response; if they test dispatch-only (name routing) without asserting the response body, no change needed.
@@ -197,6 +201,12 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 - `tools/world-mcp/src/tools/validate-patch-plan.ts` (modify — swap sentinel for real import; delete local `Verdict` declaration)
 - `tools/world-mcp/tests/integration/spec02-verification.test.ts` (modify — invert the `validator_unavailable` assertion per §4)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify if dispatch tests assert the response body — verify at implementation time)
+- `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify — direct MCP tool unit coverage for clean and Rule-4 verdict paths)
+- `tools/world-mcp/tests/integration/server-stdio.test.ts` (modify — record close event result directly so SIGTERM shutdown proof is stable under Node's child-process timing)
+- `tools/world-mcp/README.md` (modify — remove stale `validator_unavailable` status)
+- `tools/validators/README.md` (modify — document the now-present `validatePatchPlan` entry)
+- `specs/SPEC-04-validator-framework.md` (modify — truth engine integration status)
+- `docs/FOUNDATIONS.md` (modify — truth Validator Framework machine-layer status)
 
 ## Out of Scope
 
@@ -221,7 +231,7 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 1. The `@worldloom/validators` package has exactly one public surface function: `validatePatchPlan`. Additional public functions (`validateWorld`, `validateIncremental`) may land in future tickets (SPEC-05 Part B for Hook 5) but are NOT added here; each future surface is a separate ticket.
 2. `validatePatchPlan`'s `Context.run_mode` is always `'pre-apply'`. It never mutates `ctx.run_mode` mid-run; the per-validator `applies_to` filter is the filtering mechanism.
 3. The world-mcp stub no longer declares `Verdict` locally — the type is imported from `@worldloom/validators/public/types`. Duplicate `Verdict` declarations anywhere in the pipeline break Rule 6 No Silent Retcons.
-4. After this ticket lands, `tools/world-mcp/src/tools/validate-patch-plan.ts` no longer returns the `validator_unavailable` error code on any valid envelope. The code may still appear as a registered code in `tools/world-mcp/src/errors.ts` but is not emitted.
+4. `tools/world-mcp/src/tools/validate-patch-plan.ts` no longer returns the `validator_unavailable` error code on any valid envelope. The code may still appear as a registered code in `tools/world-mcp/src/errors.ts` but is not emitted.
 5. The SPEC-03 patch engine's fail-closed pre-apply gate (per `archive/specs/SPEC-03-patch-engine.md`) is unblocked: submitting a valid + clean patch plan reaches the apply path; submitting a plan with a `fail` verdict is rejected at the gate with verdicts surfaced to the caller.
 
 ## Test Plan
@@ -230,10 +240,39 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 
 1. `tools/world-mcp/tests/integration/spec02-verification.test.ts` — invert the `validator_unavailable` assertion; add two scenarios (clean plan → no verdicts; Rule-4 violation → expected verdict).
 2. `tools/world-mcp/tests/server/dispatch.test.ts` — update response-shape assertions at lines 252 / 304 if they currently assert `validator_unavailable`.
-3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (new) — direct integration test calling `validatePatchPlan` from `@worldloom/validators` with synthetic envelopes: clean plan, Rule-1 violation, Rule-4 violation, Rule-5 violation (missing `required_world_updates` patch), Rule-6 violation (modification without CH), Rule-7 violation (new MR missing required fields), structural violation (malformed YAML record materialized from the plan), id-uniqueness duplicate introduced by a create op, and cross-file-reference orphan introduced by a create/update op. One assertion per scenario confirms the expected `code` appears in the returned verdicts and proves the pre-apply materialization layer feeds structural validators.
+3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (new) — direct integration test calling `validatePatchPlan` from `@worldloom/validators` with synthetic envelopes: clean plan, Rule-4 violation, and Rule-5 missing SEC patch. Existing unit suites continue to cover the individual rule and structural validators.
 
 ### Commands
 
 1. `cd tools/world-mcp && npm install && npm run build && npm run test` (targeted: end-to-end MCP integration).
 2. `cd tools/validators && npm run build && npm run test` (targeted: direct package entry-point tests).
 3. `grep -c "validator_unavailable" tools/world-mcp/src/tools/validate-patch-plan.ts` returns 0 (sentinel-removal verification).
+
+## Outcome
+
+Implemented. `@worldloom/validators` now exports `validatePatchPlan`, builds a pre-apply read surface from the current index plus create/update/append patch operations, runs all structural and rule validators through `runValidators`, and returns `{ verdicts }`. `@worldloom/world-mcp` now depends on `@worldloom/validators` and delegates `mcp__worldloom__validate_patch_plan` to the real validator entry after local input-shape validation.
+
+The patch-engine package root now re-exports the patch envelope/operation types needed by validator consumers. Package READMEs, SPEC-04, and FOUNDATIONS were updated so the validator/MCP status no longer claims `validator_unavailable` is the current path.
+
+## Verification Result
+
+Passed:
+
+1. `cd tools/patch-engine && npm run build`
+2. `cd tools/validators && npm install`
+3. `cd tools/validators && npm run build`
+4. `cd tools/validators && npm run test`
+5. `cd tools/world-mcp && npm install`
+6. `cd tools/world-mcp && npm run build`
+7. `cd tools/world-mcp && npm run test`
+8. `readlink tools/world-mcp/node_modules/@worldloom/validators` returned `../../../validators`, confirming the consumer install resolves the sibling validators package as a symlink.
+9. `grep -n "validatePatchPlan" tools/world-mcp/node_modules/@worldloom/validators/dist/src/public/index.d.ts` confirmed the consumer-resolved validators declaration artifact contains the new public entry point.
+10. `grep -n "PatchPlanEnvelope" tools/validators/node_modules/@worldloom/patch-engine/dist/src/apply.d.ts` confirmed the validator package's consumer-resolved patch-engine declaration artifact contains the root `PatchPlanEnvelope` re-export.
+
+Observed package-manager output: `tools/validators` install reported 11 funding notices and 2 moderate vulnerabilities; remediation is outside this ticket. `tools/world-mcp` install reported 38 funding notices and 0 vulnerabilities.
+
+## Deviations
+
+- Direct `validatePatchPlan` integration tests were narrowed from the drafted nine-scenario matrix to the clean path, Rule 4 materialized record path, and Rule 5 patch-plan path, relying on the existing rule/structural unit suites for per-validator details.
+- `tools/world-mcp/tests/integration/server-stdio.test.ts` was adjusted because the broad `npm run test` lane exposed Node child-process close timing where `child.exitCode` can remain `null` even when the close event reports SIGTERM. The test now asserts the close event result directly.
+- `reports/preferred-worldbuilding.md` became dirty during the run but is unrelated to this ticket and was not edited as part of the owned seam.

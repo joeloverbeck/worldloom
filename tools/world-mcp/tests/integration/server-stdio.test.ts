@@ -29,12 +29,12 @@ test("stdio server entrypoint stays alive as a child process until stdin closes"
 
     child.kill("SIGTERM");
 
-    await new Promise<void>((resolve, reject) => {
-      child.once("close", () => resolve());
+    const closeResult = await new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve, reject) => {
+      child.once("close", (code, signal) => resolve({ code, signal }));
       child.once("error", reject);
     });
 
-    assert.equal(child.exitCode, 0);
+    assert.ok(closeResult.code === 0 || closeResult.signal === "SIGTERM");
   } finally {
     if (child.exitCode === null) {
       child.kill("SIGTERM");

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@worldloom/patch-engine": "file:../patch-engine",
+    "@worldloom/validators": "file:../validators",
     "@worldloom/world-index": "file:../world-index",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "better-sqlite3": "12.2.0",

@@ -19,7 +19,7 @@ import {
   buildVersionMismatchFixture,
   createSpec02FixtureRoot
 } from "../fixtures/build-fixture";
-import { destroyTempRepoRoot } from "../tools/_shared";
+import { destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
 function extractContractKeyTree(): Record<string, string[]> {
   const contractPath = path.join(
@@ -75,6 +75,70 @@ function buildValidPatchPlan() {
       }
     ]
   };
+}
+
+function buildValidatorCleanPatchPlan() {
+  return {
+    plan_id: "plan-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "canon-addition",
+    expected_id_allocations: {},
+    patches: [
+      {
+        op: "create_cf_record",
+        target_world: "seeded",
+        target_file: "_source/canon/CF-0001.yaml",
+        payload: {
+          cf_record: {
+            id: "CF-0001",
+            title: "Brinewick Harbor Office",
+            status: "hard_canon",
+            type: "institution",
+            statement: "Brinewick maintains a harbor office.",
+            scope: { geographic: "local", temporal: "current", social: "public" },
+            truth_scope: { world_level: true, diegetic_status: "objective" },
+            domains_affected: ["law"],
+            prerequisites: ["appointed clerks"],
+            distribution: {
+              who_can_do_it: ["clerks"],
+              who_cannot_easily_do_it: ["outsiders"],
+              why_not_universal: ["requires harbor appointment"]
+            },
+            costs_and_limits: ["bounded staff time"],
+            visible_consequences: ["posted ledgers"],
+            required_world_updates: ["INSTITUTIONS"],
+            source_basis: { direct_user_approval: true, derived_from: [] },
+            contradiction_risk: { hard: false, soft: false },
+            notes: "None",
+            extensions: []
+          }
+        }
+      },
+      {
+        op: "create_sec_record",
+        target_world: "seeded",
+        target_file: "_source/institutions/SEC-INS-001.yaml",
+        payload: {
+          sec_record: {
+            id: "SEC-INS-001",
+            file_class: "INSTITUTIONS",
+            order: 1,
+            heading: "Harbor Office",
+            heading_level: 2,
+            body: "Brinewick maintains a harbor office.",
+            extensions: [],
+            touched_by_cf: ["CF-0001"]
+          }
+        }
+      }
+    ]
+  };
+}
+
+function buildValidatorFixture(root: string): void {
+  seedWorld(root, { worldSlug: "seeded", nodes: [] });
 }
 
 async function withServerClient<T>(root: string, run: (client: Client) => Promise<T>): Promise<T> {
@@ -342,19 +406,30 @@ test("SPEC-02 capstone: world-index public contract export imports cleanly", () 
   assert.equal(typeof exported.CURRENT_INDEX_VERSION, "number");
 });
 
-test("SPEC-02 capstone: validate_patch_plan still returns validator_unavailable in Phase 1", async () => {
+test("SPEC-04 integration: validate_patch_plan returns verdicts from the validator framework", async () => {
   const root = createSpec02FixtureRoot();
-  buildSpec02Fixture(root);
+  buildValidatorFixture(root);
 
   try {
     await withServerClient(root, async (client) => {
       const result = await client.callTool({
         name: MCP_TOOL_NAMES.validate_patch_plan,
-        arguments: { patch_plan: buildValidPatchPlan() }
+        arguments: { patch_plan: buildValidatorCleanPatchPlan() }
       });
 
-      assert.equal(result.isError, true);
-      assert.equal((result.structuredContent as { code: string }).code, "validator_unavailable");
+      assert.notEqual(result.isError, true);
+      assert.deepEqual(result.structuredContent, { verdicts: [] });
+
+      const rule4Plan = buildValidatorCleanPatchPlan();
+      (rule4Plan.patches[0]!.payload as any).cf_record.distribution.why_not_universal = [];
+      const rule4Result = await client.callTool({
+        name: MCP_TOOL_NAMES.validate_patch_plan,
+        arguments: { patch_plan: rule4Plan }
+      });
+
+      assert.notEqual(rule4Result.isError, true);
+      const verdicts = (rule4Result.structuredContent as { verdicts: Array<{ code: string }> }).verdicts;
+      assert.ok(verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
     });
   } finally {
     destroyTempRepoRoot(root);

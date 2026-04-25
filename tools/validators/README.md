@@ -3,8 +3,8 @@
 Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
 **Design**: `specs/SPEC-04-validator-framework.md`
-**Phase**: 2 Tier 1. CLI activation is present; engine integration lands in ticket 006.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, and the `world-validate` CLI are present. The engine entry point is staged in ticket 006.
+**Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -40,7 +40,7 @@ Skill-judgment rule:
 
 ## Verdict Schema
 
-`Verdict` matches `tools/world-mcp/src/tools/validate-patch-plan.ts`: `{ validator, severity: 'fail' | 'warn' | 'info', code, message, location: { file, line_range?, node_id? }, suggested_fix? }`.
+`Verdict` is exported from `@worldloom/validators/public/types`: `{ validator, severity: 'fail' | 'warn' | 'info', code, message, location: { file, line_range?, node_id? }, suggested_fix? }`.
 
 ## Gate Semantics
 

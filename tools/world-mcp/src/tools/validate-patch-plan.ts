@@ -1,22 +1,11 @@
 import { createMcpError, type McpError } from "../errors";
+import { validatePatchPlan as runValidatePatchPlan } from "@worldloom/validators";
+import type { Verdict } from "@worldloom/validators/public/types";
 
 import {
   type PatchPlanEnvelope,
   validatePatchPlanEnvelopeShape
 } from "./_shared";
-
-export interface Verdict {
-  validator: string;
-  severity: "fail" | "warn" | "info";
-  code: string;
-  message: string;
-  location: {
-    file: string;
-    line_range?: [number, number];
-    node_id?: string;
-  };
-  suggested_fix?: string;
-}
 
 export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
@@ -28,11 +17,6 @@ export interface ValidatePatchPlanResponse {
 
 function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
-}
-
-function validatorsPackageLooksBuilt(): boolean {
-  // Phase 2 will replace this sentinel branch with a real runtime import.
-  return false;
 }
 
 export async function validatePatchPlan(
@@ -47,14 +31,5 @@ export async function validatePatchPlan(
     return shapeError;
   }
 
-  if (validatorsPackageLooksBuilt()) {
-    // TODO(SPEC-04): replace the sentinel with:
-    // const { validatePatchPlan } = await import("@worldloom/validators");
-    // return validatePatchPlan(args.patch_plan);
-  }
-
-  return createMcpError(
-    "validator_unavailable",
-    "SPEC-04 validator framework not yet built; activates in Phase 2 per SPEC-08."
-  );
+  return runValidatePatchPlan(args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0]);
 }
