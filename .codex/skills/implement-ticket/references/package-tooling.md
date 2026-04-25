@@ -17,6 +17,8 @@ Before final response for a package/tool ticket, inspect adjacent same-package u
 - package-local usage snippets or command examples
 - scripts that document or wrap the changed command/API
 
+If the ticket adds or changes a user-facing CLI, workflow command, or machine-layer command surface, also inspect repo-level quick-reference docs that users rely on for invocation, especially `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention the command. Treat stale same-seam command status, flags, examples, or planned/present wording as closeout fallout unless a later ticket explicitly owns that docs update.
+
 For each stale same-seam surface, either truth it in the active ticket or record why it belongs to a separate follow-up. When the stale package doc, entrypoint, script, or example is real but outside the active ticket, name the existing owner or create/recommend a bounded follow-up ticket unless the user requested implementation-only with no follow-up drafting; in that case, record the excluded drift in `Assumption Reassessment` or `## Deviations`. Do not leave known stale package docs/examples unmentioned after changing package-local behavior.
 
 ## Verification

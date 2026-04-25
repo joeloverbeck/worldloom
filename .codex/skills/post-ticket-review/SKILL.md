@@ -28,6 +28,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and note unrelated dirty paths before review.
+- For tool or package tickets that ran builds or installs, also inspect `git status --short --ignored` when ignored generated artifacts may affect the handoff; classify ignored artifacts separately from tracked review state.
 - Classify dirty paths into: reviewed-ticket implementation state, review-created edits, and unrelated noise. Only the reviewed-ticket implementation state should drive archival readiness unless another dirty path changes the ticket's factual closeout.
 - Treat follow-up tickets created during the review as `review-created edits`. Report them explicitly in the handoff, but do not let their presence block archival unless they prove unfinished owned work inside the reviewed ticket.
 - Review the local implementation state as it exists now, committed or not.
@@ -117,6 +118,8 @@ Decision rule:
 - if no active ticket owns it, create one bounded follow-up ticket
 - if the reviewed ticket's owned invariant is complete but a broader shared proof surface is stale because adjacent family work changed the contract, archive the reviewed ticket and create a separate bounded follow-up instead of treating the stale proof lane as unfinished owned work
 - if downstream tickets depend on a user-owned commit, release, manual approval, or other post-review gate that the reviewed ticket intentionally did not perform, update those dependency chains to name both the archived/completed ticket state and the remaining user-owned gate
+
+When a new follow-up depends on the reviewed ticket's completed state, decide that the follow-up is warranted before archival, then draft or finalize it after the archive move so `Deps` and evidence can truthfully point at `archive/tickets/...`.
 
 If the review confirms archival readiness after the review-surface audit and follow-up/blocker decision, follow `docs/archival-workflow.md` exactly:
 

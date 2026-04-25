@@ -3,8 +3,8 @@
 Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
 **Design**: `specs/SPEC-04-validator-framework.md`
-**Phase**: 2 Tier 1. Structural subset activates through the CLI in ticket 005; engine integration lands in ticket 006.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, and the package-internal structural/rule registries are present. CLI and engine entry point are staged in later SPEC-04 tickets.
+**Phase**: 2 Tier 1. CLI activation is present; engine integration lands in ticket 006.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, package-internal structural/rule registries, and the `world-validate` CLI are present. The engine entry point is staged in ticket 006.
 
 ## Schemas
 
@@ -50,8 +50,6 @@ Skill-judgment rule:
 
 ## CLI
 
-Planned in ticket 005:
-
 ```text
 world-validate <world-slug>
 world-validate <world-slug> --rules=1,2,6
@@ -62,6 +60,12 @@ world-validate <world-slug> --since <commit>
 world-validate --help
 world-validate --version
 ```
+
+The CLI reads `worlds/<slug>/_index/world.db`, runs the selected validators in
+`full-world` mode, writes per-verdict rows to `validation_results`, and exits
+`1` when any `fail` verdict is emitted. `--file` and `--since` narrow selector
+applicability and persistence cleanup to the touched files while preserving the
+runtime `full-world` run mode.
 
 ## Phase 14a Migration
 

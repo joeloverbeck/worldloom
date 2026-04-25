@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `validatePatchPlan` entry point at `tools/validators/src/public/index.ts`; modifies `tools/world-mcp/src/tools/validate-patch-plan.ts` to replace its sentinel `validator_unavailable` branch with a real import from `@worldloom/validators`. Unblocks SPEC-03 patch engine's fail-closed pre-apply gate.
-**Deps**: archive/tickets/SPEC04VALFRA-003.md, archive/tickets/SPEC04VALFRA-004.md
+**Deps**: archive/tickets/SPEC04VALFRA-003.md, archive/tickets/SPEC04VALFRA-004.md, archive/tickets/SPEC04VALFRA-005.md
 
 ## Problem
 
@@ -30,6 +30,7 @@ Per the reassessed spec's §Per-run-mode applicability matrix, the pre-apply set
 7. Rename/removal blast radius: zero in direction of the package surface. The stub's local `Verdict` interface is deleted (because the same interface now comes via the validators package); this is an internal refactor that does NOT affect any other file — confirmed via `grep -rn "import.*Verdict.*validate-patch-plan" tools/` which returns zero hits (the stub's `Verdict` was never exported from `validate-patch-plan.ts`).
 8. Adjacent-contradiction classification: `validatePatchPlan`'s invocation of the applicability-matrix filter means Rule 5 runs in pre-apply mode (patch plan present), Rule 3 does not run at all (not mechanized — ticket 004), and `modification_history_retrofit` runs only on CF writes per the matrix. The filter is at the validator's `applies_to` predicate level, not inside `validatePatchPlan` — no additional filtering logic is required in this ticket.
 9. Post-ticket-003 handoff correction: structural validators now run over `ctx.index` plus explicit file inputs for raw YAML/frontmatter/Discovery parsing; they do not parse `ctx.patch_plan` themselves. This ticket owns the pre-apply adapter that materializes the submitted patch plan into an augmented read surface and file-input set representing `(current_world_state + envelope)` before calling `runValidators`. Rule-derived validators from ticket 004 may still consult `ctx.patch_plan` directly.
+10. Post-ticket-005 handoff correction: `archive/tickets/SPEC04VALFRA-005.md` landed CLI-local helpers at `tools/validators/src/cli/_helpers.ts`, not a shared `tools/validators/src/_helpers/index-access.ts` module. This ticket must not import from the CLI-private helper module. It owns creating the shared pre-apply/full-world index-access helper, or deliberately extracting common code into that shared module, before wiring `validatePatchPlan`.
 
 ## Architecture Check
 
@@ -92,7 +93,7 @@ export async function validatePatchPlan(
 ```
 
 Notes:
-- `openWorldIndex(world_slug)` plus full-world and pre-apply read-surface helpers live at `tools/validators/src/_helpers/index-access.ts` (created by ticket 005 for the CLI if 005 lands first, or created here if 006 lands first).
+- `openWorldIndex(world_slug)` plus full-world and pre-apply read-surface helpers live at `tools/validators/src/_helpers/index-access.ts`, created by this ticket as a shared helper module or by deliberate extraction from the CLI-local helper implementation.
 - `buildPreApplyReadSurface(db, envelope)` overlays create/update operations from the patch plan onto the current indexed records so index-backed structural validators can resolve proposed ids and fields.
 - `buildPreApplyFileInputs(db, envelope)` emits the atomic YAML / hybrid frontmatter / adjudication Discovery file inputs implied by the patch plan so raw-file structural validators can validate the proposed state before disk writes.
 - The `applies_to` filter inside `runValidators` auto-skips validators whose matrix cell is empty for pre-apply mode (Rule 5 enters, Rule 3 doesn't exist — tickets 003/004 encode this).
@@ -190,7 +191,7 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 - `tools/validators/src/framework/types.ts` (modify — swap ticket 001's opaque `PatchPlanEnvelope` placeholder for the real `@worldloom/patch-engine` re-export per §1.6)
 - `tools/validators/package.json` (modify — add `@worldloom/patch-engine` file-dependency per §1.6)
 - `tools/patch-engine/src/apply.ts` (modify — add `PatchPlanEnvelope` + `PatchOperation` + `OperationKind` + `RetconAttestation` re-exports per §1.5; or whichever file is the package-root entry per `tools/patch-engine/package.json` `main`)
-- `tools/validators/src/_helpers/index-access.ts` (new OR shared with ticket 005 — if ticket 005 lands first, extend it here; if this ticket lands first, create it here with full-world read-surface helpers plus `buildPreApplyReadSurface` / `buildPreApplyFileInputs`)
+- `tools/validators/src/_helpers/index-access.ts` (new shared helper owned by this ticket — may reuse logic from CLI-local `_helpers.ts` by extraction, but public entry points must not import CLI-private helpers)
 - `tools/world-mcp/package.json` (modify — add `@worldloom/validators` file-dependency)
 - `tools/world-mcp/package-lock.json` (modify — regenerated by `npm install`)
 - `tools/world-mcp/src/tools/validate-patch-plan.ts` (modify — swap sentinel for real import; delete local `Verdict` declaration)
