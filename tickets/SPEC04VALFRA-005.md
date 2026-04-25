@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/validators/src/cli/world-validate.ts` (new CLI entry point declared in ticket 001's `package.json` `bin` mapping). Consumes `structuralValidators` + `ruleValidators` from `tools/validators/src/public/registry.ts` (tickets 003–004). Persists per-verdict rows to the `validation_results` table in `worlds/<slug>/_index/world.db`. No modifications to existing world-index / world-mcp / patch-engine code.
-**Deps**: archive/tickets/SPEC04VALFRA-003.md, SPEC04VALFRA-004
+**Deps**: archive/tickets/SPEC04VALFRA-003.md, archive/tickets/SPEC04VALFRA-004.md
 
 ## Problem
 

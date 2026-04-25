@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `validatePatchPlan` entry point at `tools/validators/src/public/index.ts`; modifies `tools/world-mcp/src/tools/validate-patch-plan.ts` to replace its sentinel `validator_unavailable` branch with a real import from `@worldloom/validators`. Unblocks SPEC-03 patch engine's fail-closed pre-apply gate.
-**Deps**: archive/tickets/SPEC04VALFRA-003.md, SPEC04VALFRA-004
+**Deps**: archive/tickets/SPEC04VALFRA-003.md, archive/tickets/SPEC04VALFRA-004.md
 
 ## Problem
 

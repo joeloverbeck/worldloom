@@ -68,6 +68,8 @@ If the primary class is `tool or script implementation`, or the ticket changes a
 
 When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
 
+For validator, audit, or live-corpus baseline tickets, run the smallest truthful live-corpus probe before coding when acceptance claims zero findings or a clean baseline. Classify every finding as validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.
@@ -129,7 +131,7 @@ Check:
 - whether the ticket's owned boundary is still real, already landed, narrower than drafted, or blocked by another ticket
 - when reassessment narrows or rewrites a shared contract, whether existing same-seam proof scripts, fixtures, or verification docs still encode the old contract; if they do, treat truthful proof-surface upkeep inside that seam as required consequence fallout rather than optional cleanup
 - for end-to-end validation / composition tickets whose premise is that an existing live command or pipeline already works at scale, run that command or a minimal direct probe during reassessment before assuming the ticket is test-only or proof-only
-- for validator, audit, or live-corpus baseline tickets, classify every finding from the live corpus as one of: validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects
+- for validator, audit, or live-corpus baseline tickets, keep any early live-corpus baseline classification current as implementation changes the validator/tool behavior; recompute the final baseline from the post-fix artifact before closeout
 - for fixture-backed command or integration tests, verify whether the assertion shape is still truthful before editing the test harness; if the live contract still matches the assertion, check whether the copied fixture source is stale and narrow the ticket to fixture-proof alignment instead of rewriting a still-correct test
 Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
 

@@ -4,7 +4,7 @@ Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement.
 
 **Design**: `specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. Structural subset activates through the CLI in ticket 005; engine integration lands in ticket 006.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, and the package-internal structural registry are present. Rule-derived validators, CLI, and engine entry point are staged in later SPEC-04 tickets.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 7 structural validators, the 6 rule-derived validators, and the package-internal structural/rule registries are present. CLI and engine entry point are staged in later SPEC-04 tickets.
 
 ## Schemas
 
