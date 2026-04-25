@@ -109,6 +109,9 @@ export async function queryStructuralRecords(ctx: Context): Promise<IndexedRecor
 
   for (const recordType of STRUCTURAL_NODE_TYPES) {
     for (const record of await ctx.index.query({ record_type: recordType, world_slug: ctx.world_slug })) {
+      if (!isStructuralAuthorityRecord(record)) {
+        continue;
+      }
       byKey.set(`${record.node_type}:${record.node_id}:${record.file_path}`, record);
     }
   }
@@ -123,7 +126,7 @@ export async function queryRecordsByType(ctx: Context, recordType: string): Prom
 export function fileInputsFrom(input: unknown, ctx: Context): FileInput[] {
   const record = asPlainRecord(input);
   const explicitFiles = record.files;
-  if (Array.isArray(explicitFiles)) {
+  if (Array.isArray(explicitFiles) && explicitFiles.length > 0) {
     return explicitFiles
       .filter(isPlainRecord)
       .map((file) => ({
@@ -169,6 +172,44 @@ export function worldRootFrom(input: unknown, ctx: Context): string | undefined 
 
 export function toPosixPath(filePath: string): string {
   return filePath.split(path.sep).join("/");
+}
+
+function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
+  const filePath = toPosixPath(record.file_path);
+  const nodeId = record.node_id;
+
+  if (record.node_type === "canon_fact_record") {
+    return /^_source\/canon\/CF-\d+\.yaml$/.test(filePath) && /^CF-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "change_log_entry") {
+    return /^_source\/change-log\/CH-\d+\.yaml$/.test(filePath) && /^CH-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "invariant") {
+    return /^_source\/invariants\/[^/]+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "mystery_reserve_entry") {
+    return /^_source\/mystery-reserve\/M-\d+\.yaml$/.test(filePath) && /^M-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "open_question_entry") {
+    return /^_source\/open-questions\/OQ-\d+\.yaml$/.test(filePath) && /^OQ-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "named_entity") {
+    return /^_source\/entities\/ENT-\d+\.yaml$/.test(filePath) && /^ENT-\d+$/.test(nodeId);
+  }
+  if (record.node_type === "section") {
+    return /^_source\/(?:everyday-life|institutions|magic-or-tech-systems|geography|economy-and-resources|peoples-and-species|timeline)\/SEC-[A-Z]{3}-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "character_record") {
+    return /^characters\/[^/]+\.md$/.test(filePath);
+  }
+  if (record.node_type === "diegetic_artifact_record") {
+    return /^diegetic-artifacts\/[^/]+\.md$/.test(filePath);
+  }
+  if (record.node_type === "adjudication_record") {
+    return /^adjudications\/PA-\d+[^/]*\.md$/.test(filePath);
+  }
+
+  return false;
 }
 
 function listSupportedWorldFiles(worldRoot: string): string[] {

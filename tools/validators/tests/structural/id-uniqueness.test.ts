@@ -9,7 +9,7 @@ test("id_uniqueness catches within-class duplicates and ignores cross-class coll
     ...validCf,
     id: "CF-0099"
   });
-  const duplicateB = record("canon_fact_record", "CF-0099", "_source/canon/CF-0099-copy.yaml", {
+  const duplicateB = record("canon_fact_record", "CF-0099", "_source/canon/CF-0100.yaml", {
     ...validCf,
     id: "CF-0099"
   });

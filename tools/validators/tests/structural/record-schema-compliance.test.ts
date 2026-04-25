@@ -71,3 +71,20 @@ test("record_schema_compliance validates hybrid frontmatter and PA Discovery blo
 
   assert.equal(result.length, 0);
 });
+
+test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("named_entity", "entity:canal-heartland", "_source/entities", {
+        body: "Canonical name: Canal Heartland"
+      }),
+      record("section", "animalia:WORLD_KERNEL.md:Genre Contract:0", "WORLD_KERNEL.md", {
+        body: "## Genre Contract"
+      }),
+      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)
+    ])
+  );
+
+  assert.deepEqual(result, []);
+});

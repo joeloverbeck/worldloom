@@ -71,6 +71,8 @@ When the ticket changes a user-facing tool inventory, command surface, package e
 
 For validator, audit, or live-corpus baseline tickets, run the smallest truthful live-corpus probe before coding when acceptance claims zero findings or a clean baseline. Classify every finding as validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects.
 
+When a validator, audit, or live-corpus baseline ticket claims grandfathering, waiver rows, allowlists, or other disposition metadata can change the command's pass/fail result, verify the live validator/CLI actually consumes that mechanism before accepting it as an acceptance path. If the mechanism is only persisted audit data and emitted verdicts are recomputed independently, keep the findings visible, rewrite the active ticket to the truthful baseline/proof seam, and route real cleanup or policy implementation to a separate owner.
+
 ### 1. Load the ticket context
 
 1. Read the target ticket file.
@@ -164,6 +166,8 @@ Examples:
 - same-seam / no escalation: a CLI ticket also needs the missing parser/helper module that the CLI path cannot function without
 - boundary growth / escalate: a CLI ticket appears to require MCP wiring, hook orchestration, or a sibling validator/spec family that the active ticket did not already own
 
+If the discovered fallout crosses into high-trust world canon or other canon-mutating cleanup, do not widen a package/tool/docs ticket into direct source cleanup just to make a broad gate green. When the current ticket can close truthfully by preserving visible failures, documenting the baseline, and creating a bounded follow-up for canon-addition-equivalent cleanup or an explicit grandfather policy, keep the active implementation on its original non-canon seam and create/update that follow-up instead.
+
 ### 3. Extract the real implementation slice
 
 Before editing code or docs, name the actual owned delta:
@@ -234,6 +238,8 @@ If a fixture-backed command or integration test fails after a contract shift, fi
 If the drafted proof uses a CLI, confirm the command's working-directory contract before recording it in the ticket. If the CLI resolves paths from `process.cwd()` or another ambient root, either run it from the truthful root or switch to a narrower direct probe that exercises the same owned seam.
 
 If the ticket adds a runnable shell script or npm-script proof surface, apply the same package-root discipline inside the script itself: embedded `node`, `node -e`, or similar package-local probes must launch from the root where local dependencies actually resolve, even when the artifact under inspection lives elsewhere in the repo.
+
+In Codex, if a package or CLI proof fails with sandbox-looking child-process errors such as `EPERM` from spawning the built CLI, `git`, `node`, or another subprocess, treat the first failure as a possible environment restriction rather than immediate code evidence. Rerun the same command with the required escalation, then record both the sandbox failure and the successful/failed escalated result in closeout so verification history is truthful.
 
 For precondition failure, unsupported-mode, or rejection-path tickets, prove not only the exit code/message but also that the command fails before creating or mutating derived artifacts, indexes, caches, or other side-effect surfaces unless the ticket explicitly owns that mutation.
 
