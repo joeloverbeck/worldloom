@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/validators/src/cli/world-validate.ts` (new CLI entry point declared in ticket 001's `package.json` `bin` mapping). Consumes `structuralValidators` + `ruleValidators` from `tools/validators/src/public/registry.ts` (tickets 003–004). Persists per-verdict rows to the `validation_results` table in `worlds/<slug>/_index/world.db`. No modifications to existing world-index / world-mcp / patch-engine code.
-**Deps**: SPEC04VALFRA-003, SPEC04VALFRA-004
+**Deps**: archive/tickets/SPEC04VALFRA-003.md, SPEC04VALFRA-004
 
 ## Problem
 
@@ -24,6 +24,7 @@ The CLI operates in `full-world` run mode (per the reassessed spec's §Per-run-m
 6. Exit-code convention matches the codebase validation sub-check §3.3A: `0` success, `1` generic failure, `2` invalid input, `3` missing mandatory file, (`4` reserved for parse failure above threshold per SPEC-01 but not used here — this CLI's `0/1/2/3` mapping matches the spec's explicit mapping). No collisions.
 7. Schema extension posture: **additive-only**. The CLI reads from `validation_results` (for the `--since` commit-diff workflow's cache path) and writes to it (per-run verdict persistence). No column additions; no row-shape changes.
 8. Adjacent-contradiction classification: `--since <commit>` implementation needs git history. The simplest approach is `git log --since=<commit> --name-only -- worlds/<slug>/_source/ worlds/<slug>/adjudications/` to derive the touched-file set, then run only validators whose `applies_to` matches the touched set. Cross-repo diff (when worlds/ lives in a separate repo) is explicitly out of scope.
+9. Post-ticket-003 handoff correction: structural validators from `archive/tickets/SPEC04VALFRA-003.md` run over `ctx.index` plus explicit file/world-root inputs for raw YAML/frontmatter/Discovery parsing. The CLI must pass a real `world_root` or explicit `files` input to `runValidators`; invoking the runner with only `{ world_slug }` leaves raw-file structural validators without a truthful file surface when the CLI is launched from arbitrary directories.
 
 ## Architecture Check
 
@@ -120,7 +121,7 @@ async function main(): Promise<number> {
   };
 
   // run validators, persist verdicts, emit output
-  const run = await runValidators(selected, { world_slug: worldSlug }, ctx);
+  const run = await runValidators(selected, { world_slug: worldSlug, world_root: worldRoot }, ctx);
   persistVerdicts(db, worldSlug, run.verdicts, touchedFiles);
   db.close();
 
@@ -133,7 +134,7 @@ async function main(): Promise<number> {
 main().then((code) => process.exit(code)).catch((err) => { console.error(err); process.exit(1); });
 ```
 
-Helper functions (`printHelp`, `deriveTouchedFiles`, `selectValidators`, `buildReadSurface`, `persistVerdicts`, `printHuman`) defined inline or in sibling helper files under `src/cli/`.
+Helper functions (`printHelp`, `deriveTouchedFiles`, `selectValidators`, `buildReadSurface`, `persistVerdicts`, `printHuman`) defined inline or in sibling helper files under `src/cli/`. `worldRoot` is the resolved `worlds/<slug>` directory for the selected world and is passed into validators so structural raw-file checks can read the same world tree the index represents.
 
 ### 2. `deriveTouchedFiles` helper
 

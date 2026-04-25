@@ -297,9 +297,9 @@ The key simplification post-SPEC-13: `cf.parsed` is pre-parsed YAML from the ind
 - **Full-world mode**: run `world-validate animalia`; verify exit code; verify JSON output parses
 - **Incremental mode**: after a test write, run Hook 5; verify only relevant validators run (per the §Per-run-mode applicability matrix via each validator's `applies_to` predicate)
 - **Phase 14a migration**: replay a historical canon-addition run through the new validator-based Phase 14a; verify Tests 1, 2, 3 (structural), 4, 5, 6 (structural), 7 map cleanly to validators; verify Tests 3 (stabilizer quality), 6 (MR overlap), 8, 9, 10 remain skill-judgment producing hand-written PASS/FAIL with rationale
-- **False-positive baseline**: run mechanized rule validators on unmodified animalia; no fails (zero-false-positive baseline)
+- **False-positive / bootstrap baseline**: run mechanized validators on unmodified animalia and compare verdicts against the hand-audit baseline. Structural validators currently surface pre-existing corpus findings; SPEC04VALFRA-007 owns grandfather-or-fix disposition before the broader Phase 2 Tier 1 gate is treated as clean.
 - **Engine rewire**: replace the stub at `tools/world-mcp/src/tools/validate-patch-plan.ts:50-53` with the real `@worldloom/validators` import per the §Engine integration contract; submit a plan and confirm verdicts flow through
-- **Schema conformance**: run `record_schema_compliance` against animalia's `_source/` tree; verify zero schema violations against the ten JSON Schemas (or surface any as a grandfathered `info` per Bootstrap audit)
+- **Schema conformance**: run `record_schema_compliance` against animalia's `_source/` tree and supported hybrid/PA structured surfaces; zero schema violations are expected for atomic `_source/` records after ticket 002, while hybrid/PA findings are handled through the Bootstrap audit when they reflect pre-existing corpus drift.
 
 ## Out of Scope
 

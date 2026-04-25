@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `validatePatchPlan` entry point at `tools/validators/src/public/index.ts`; modifies `tools/world-mcp/src/tools/validate-patch-plan.ts` to replace its sentinel `validator_unavailable` branch with a real import from `@worldloom/validators`. Unblocks SPEC-03 patch engine's fail-closed pre-apply gate.
-**Deps**: SPEC04VALFRA-003, SPEC04VALFRA-004
+**Deps**: archive/tickets/SPEC04VALFRA-003.md, SPEC04VALFRA-004
 
 ## Problem
 
@@ -29,11 +29,12 @@ Per the reassessed spec's §Per-run-mode applicability matrix, the pre-apply set
 6. Cross-package dependency: `tools/world-mcp/package.json` must declare `@worldloom/validators` as a file-dependency (`"@worldloom/validators": "file:../validators"`), paralleling the existing `@worldloom/world-index` file-dep. If the declaration is missing, the import fails at build time — this ticket adds the line.
 7. Rename/removal blast radius: zero in direction of the package surface. The stub's local `Verdict` interface is deleted (because the same interface now comes via the validators package); this is an internal refactor that does NOT affect any other file — confirmed via `grep -rn "import.*Verdict.*validate-patch-plan" tools/` which returns zero hits (the stub's `Verdict` was never exported from `validate-patch-plan.ts`).
 8. Adjacent-contradiction classification: `validatePatchPlan`'s invocation of the applicability-matrix filter means Rule 5 runs in pre-apply mode (patch plan present), Rule 3 does not run at all (not mechanized — ticket 004), and `modification_history_retrofit` runs only on CF writes per the matrix. The filter is at the validator's `applies_to` predicate level, not inside `validatePatchPlan` — no additional filtering logic is required in this ticket.
+9. Post-ticket-003 handoff correction: structural validators now run over `ctx.index` plus explicit file inputs for raw YAML/frontmatter/Discovery parsing; they do not parse `ctx.patch_plan` themselves. This ticket owns the pre-apply adapter that materializes the submitted patch plan into an augmented read surface and file-input set representing `(current_world_state + envelope)` before calling `runValidators`. Rule-derived validators from ticket 004 may still consult `ctx.patch_plan` directly.
 
 ## Architecture Check
 
 1. Housing `validatePatchPlan` at `tools/validators/src/public/index.ts` (rather than a dedicated `src/entry-points/validate-patch-plan.ts`) keeps the engine-facing entry point at the package's default export location, so consumers import via `import { validatePatchPlan } from "@worldloom/validators"` without needing to remember a subpath. The package `main` in ticket 001's package.json already points here.
-2. The `validatePatchPlan` function delegates to the same `runValidators` runner that the CLI (ticket 005) uses — single code path for the parallel-validator-invocation logic, with `run_mode: 'pre-apply'` and `ctx.patch_plan` populated differentiating pre-apply from CLI full-world. This preserves the DRY discipline and makes per-run-mode behavior a pure function of `Context`.
+2. The `validatePatchPlan` function delegates to the same `runValidators` runner that the CLI (ticket 005) uses — single code path for the parallel-validator-invocation logic. Pre-apply mode differs by using an adapter-built input surface: `ctx.patch_plan` remains available for rule-derived validators, while structural validators see an augmented index/file view of the proposed world state. This preserves the DRY discipline and keeps per-run-mode behavior a pure function of `Context` plus the materialized input surface.
 3. Removing the duplicate `Verdict` interface from the world-mcp stub (rather than keeping it as a local re-declaration) eliminates a Rule 6 silent-retcon risk: if the `@worldloom/validators` package evolves its `Verdict` shape in a future ticket, the duplicate in world-mcp would go stale without any import failure flagging the drift. Single source of truth at the validators package is the correct end state.
 4. No backwards-compatibility aliasing/shims introduced. The sentinel branch is deleted outright, not preserved behind a feature flag or env-gated opt-in. Once this ticket lands, every `mcp__worldloom__validate_patch_plan` invocation runs the real validator set.
 
@@ -59,7 +60,11 @@ import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 import type { Verdict } from "./types";
 import { runValidators } from "../framework/run";
 import { structuralValidators, ruleValidators } from "./registry";
-import { buildReadSurface, openWorldIndex } from "../_helpers/index-access";
+import {
+  buildPreApplyFileInputs,
+  buildPreApplyReadSurface,
+  openWorldIndex,
+} from "../_helpers/index-access";
 
 export type { Verdict, ValidatorRun, Validator, Context, RunMode } from "./types";
 
@@ -68,15 +73,17 @@ export async function validatePatchPlan(
 ): Promise<{ verdicts: Verdict[] }> {
   const db = openWorldIndex(envelope.target_world);
   const allValidators = [...structuralValidators, ...ruleValidators];
+  const index = buildPreApplyReadSurface(db, envelope);
+  const files = buildPreApplyFileInputs(db, envelope);
   const ctx = {
     run_mode: "pre-apply" as const,
     world_slug: envelope.target_world,
-    index: buildReadSurface(db),
+    index,
     touched_files: [],
     patch_plan: envelope,
   };
   try {
-    const run = await runValidators(allValidators, { world_slug: envelope.target_world }, ctx);
+    const run = await runValidators(allValidators, { world_slug: envelope.target_world, files }, ctx);
     return { verdicts: run.verdicts };
   } finally {
     db.close();
@@ -85,7 +92,9 @@ export async function validatePatchPlan(
 ```
 
 Notes:
-- `openWorldIndex(world_slug)` / `buildReadSurface(db)` helpers live at `tools/validators/src/_helpers/index-access.ts` (created by ticket 005 for the CLI — this ticket reuses them).
+- `openWorldIndex(world_slug)` plus full-world and pre-apply read-surface helpers live at `tools/validators/src/_helpers/index-access.ts` (created by ticket 005 for the CLI if 005 lands first, or created here if 006 lands first).
+- `buildPreApplyReadSurface(db, envelope)` overlays create/update operations from the patch plan onto the current indexed records so index-backed structural validators can resolve proposed ids and fields.
+- `buildPreApplyFileInputs(db, envelope)` emits the atomic YAML / hybrid frontmatter / adjudication Discovery file inputs implied by the patch plan so raw-file structural validators can validate the proposed state before disk writes.
 - The `applies_to` filter inside `runValidators` auto-skips validators whose matrix cell is empty for pre-apply mode (Rule 5 enters, Rule 3 doesn't exist — tickets 003/004 encode this).
 - `ctx.touched_files: []` is correct for pre-apply — pre-apply has no "touched" concept; the patch plan IS the mutation, not yet applied. Incremental mode's `touched_files` is used only by Hook 5.
 
@@ -181,7 +190,7 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 - `tools/validators/src/framework/types.ts` (modify — swap ticket 001's opaque `PatchPlanEnvelope` placeholder for the real `@worldloom/patch-engine` re-export per §1.6)
 - `tools/validators/package.json` (modify — add `@worldloom/patch-engine` file-dependency per §1.6)
 - `tools/patch-engine/src/apply.ts` (modify — add `PatchPlanEnvelope` + `PatchOperation` + `OperationKind` + `RetconAttestation` re-exports per §1.5; or whichever file is the package-root entry per `tools/patch-engine/package.json` `main`)
-- `tools/validators/src/_helpers/index-access.ts` (new OR shared with ticket 005 — if ticket 005 lands first, this file exists; if this ticket lands first, create it here with the same shape)
+- `tools/validators/src/_helpers/index-access.ts` (new OR shared with ticket 005 — if ticket 005 lands first, extend it here; if this ticket lands first, create it here with full-world read-surface helpers plus `buildPreApplyReadSurface` / `buildPreApplyFileInputs`)
 - `tools/world-mcp/package.json` (modify — add `@worldloom/validators` file-dependency)
 - `tools/world-mcp/package-lock.json` (modify — regenerated by `npm install`)
 - `tools/world-mcp/src/tools/validate-patch-plan.ts` (modify — swap sentinel for real import; delete local `Verdict` declaration)
@@ -220,7 +229,7 @@ Also inspect `tools/world-mcp/tests/server/dispatch.test.ts:252` and `:304` — 
 
 1. `tools/world-mcp/tests/integration/spec02-verification.test.ts` — invert the `validator_unavailable` assertion; add two scenarios (clean plan → no verdicts; Rule-4 violation → expected verdict).
 2. `tools/world-mcp/tests/server/dispatch.test.ts` — update response-shape assertions at lines 252 / 304 if they currently assert `validator_unavailable`.
-3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (new) — direct integration test calling `validatePatchPlan` from `@worldloom/validators` with synthetic envelopes: clean plan, Rule-1 violation, Rule-4 violation, Rule-5 violation (missing `required_world_updates` patch), Rule-6 violation (modification without CH), Rule-7 violation (new MR missing required fields), structural violation (malformed YAML record referenced in the plan). One assertion per scenario confirming the expected `code` appears in the returned verdicts.
+3. `tools/validators/tests/integration/validate-patch-plan.test.ts` (new) — direct integration test calling `validatePatchPlan` from `@worldloom/validators` with synthetic envelopes: clean plan, Rule-1 violation, Rule-4 violation, Rule-5 violation (missing `required_world_updates` patch), Rule-6 violation (modification without CH), Rule-7 violation (new MR missing required fields), structural violation (malformed YAML record materialized from the plan), id-uniqueness duplicate introduced by a create op, and cross-file-reference orphan introduced by a create/update op. One assertion per scenario confirms the expected `code` appears in the returned verdicts and proves the pre-apply materialization layer feeds structural validators.
 
 ### Commands
 

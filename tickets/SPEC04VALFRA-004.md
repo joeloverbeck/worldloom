@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds `tools/validators/src/rules/*.ts` (6 new validator modules: Rules 1, 2, 4, 5, 6, 7); appends 6 entries to the package-internal registry introduced by ticket 003. No modifications to existing pipeline code. Rule 3 is explicitly NOT mechanized per the reassessed spec's §Package Location Not-mechanized note.
-**Deps**: archive/tickets/SPEC04VALFRA-001.md, archive/tickets/SPEC04VALFRA-002.md, SPEC04VALFRA-003
+**Deps**: archive/tickets/SPEC04VALFRA-001.md, archive/tickets/SPEC04VALFRA-002.md, archive/tickets/SPEC04VALFRA-003.md
 
 ## Problem
 
