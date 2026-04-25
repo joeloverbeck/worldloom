@@ -18,6 +18,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 ## Verification discipline
 
 - Verify exact command shapes before recording them in the ticket.
+- For inverted expected-failure proof commands, inspect stderr/stdout and confirm the failure is the intended diagnostic. Do not accept no-input, parse, missing-file, unsupported-extension, shell-shape, or excluded-file failures as proof of the intended rejection.
 - When a proof command counts matches across a file glob, dry-run the exact command and confirm it emits the scalar value the ticket claims. Some tools, such as `grep -c file-*`, emit one count per file unless forced through `grep -h`, `wc -l`, `awk`, or another explicit aggregation.
 - For negative grep proofs, preserve the failure signal instead of hiding it behind `|| true`. Prefer an explicit command such as `if grep -R "needle" paths; then exit 1; fi` or `! grep -R "needle" paths`, then record that exact command and result in the ticket.
 - If a grep-count proof is brittle or counts incidental spelling rather than behavior, rewrite the ticket to a stronger truthful proof surface instead of adding marker text solely to satisfy the count. Prefer exported registries, list/dispatch tests, direct tool calls, or focused runtime probes when they better prove the invariant.
@@ -48,6 +49,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
+- illustrative code snippets, helper names, and scenario sketches still match the landed seam or have been replaced with prose
 - preserved original failure evidence is clearly historical, not phrased as a current-state claim after the ticket is complete
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed

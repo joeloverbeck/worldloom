@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — adds `tools/patch-engine/tests/integration/end-to-end-canon-addition.test.ts` plus supporting fixtures. No production code changes; exercises the pipeline composed by tickets 001–007 end-to-end via the world-mcp `submit_patch_plan` path.
-**Deps**: archive/tickets/SPEC03PATENG-007.md (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; ticket 006 is archived at `archive/tickets/SPEC03PATENG-006.md`), specs/SPEC-04-validator-framework.md (implemented pre-apply validator framework required before successful apply assertions can pass; archived ticket 006 fails closed with `validator_unavailable` until this exists), archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, archive/tickets/SPEC02PHA2TOO-003.md (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
+**Deps**: archive/tickets/SPEC03PATENG-007.md (transitive head — ticket 007 composes tickets 001–006 via the world-mcp rewire; ticket 006 is archived at `archive/tickets/SPEC03PATENG-006.md`), archive/tickets/SPEC03PATENG-008.md (per-op unit suite prerequisite; the capstone does not duplicate that suite), specs/SPEC-04-validator-framework.md (implemented pre-apply validator framework required before successful apply assertions can pass; archived ticket 006 fails closed with `validator_unavailable` until this exists), archive/tickets/SPEC02PHA2TOO-001.md, archive/tickets/SPEC02PHA2TOO-002.md, archive/tickets/SPEC02PHA2TOO-003.md (MCP retrieval-tool prerequisites: `get_record` / `find_sections_touched_by` power the post-apply sync integration assertion; extended `allocate_next_id` powers the plan-creation test matrix for INV/OQ/ENT/SEC creates)
 
 ## Problem
 
-SPEC-03 §Verification enumerates 10 acceptance bullets beyond the per-op unit tests in ticket 008 (integration replay, atomicity injection, record-hash drift, hybrid anchor drift, approval-token cases, write-order pathological ordering, append-only runtime rejection, retcon attestation, attribution, `append_touched_by_cf` auto-add). Reassessment added an 11th bullet (post-apply sync integration). SPEC-03 §Risks line 311 names a performance target (<2s for a ~13-op plan). This ticket is the Spec-Integration capstone that exercises every one of those bullets against a fixture-world copy of animalia, via the real `mcp__worldloom__submit_patch_plan` → `@worldloom/patch-engine` path that ticket 007 wired up.
+SPEC-03 §Verification enumerates 10 acceptance bullets beyond the per-op unit tests in archived `SPEC03PATENG-008` (integration replay, atomicity injection, record-hash drift, hybrid anchor drift, approval-token cases, write-order pathological ordering, append-only runtime rejection, retcon attestation, attribution, `append_touched_by_cf` auto-add). Reassessment added an 11th bullet (post-apply sync integration). SPEC-03 §Risks line 311 names a performance target (<2s for a ~13-op plan). This ticket is the Spec-Integration capstone that exercises every one of those bullets against a fixture-world copy of animalia, via the real `mcp__worldloom__submit_patch_plan` → `@worldloom/patch-engine` path that ticket 007 wired up.
 
 ## Assumption Reassessment (2026-04-24; amended 2026-04-25)
 
@@ -33,7 +33,7 @@ SPEC-03 §Verification enumerates 10 acceptance bullets beyond the per-op unit t
 
 Each SPEC-03 §Verification bullet maps to its own proof surface. One assertion per bullet so failures pinpoint the offending invariant:
 
-1. **Unit** → ticket 008 (not this ticket; noted for completeness so the capstone's sub-cases don't duplicate the unit suite).
+1. **Unit** → `archive/tickets/SPEC03PATENG-008.md` (not this ticket; noted for completeness so the capstone's sub-cases don't duplicate the unit suite).
 2. **Integration** → test case: replay a historical `canon-addition` delivery (CH-0013 or a current substitute) as a patch plan against the fixture copy of animalia; verify `_source/` tree state matches the expected post-delivery state record-by-record (diff `after/_source/` against expected).
 3. **Atomicity** → three sub-test cases:
    - inject failure at Phase A step 5 (mock SPEC-04 validator to return `fail`); verify no temp files exist and no files changed on disk.
@@ -43,7 +43,7 @@ Each SPEC-03 §Verification bullet maps to its own proof surface. One assertion 
 5. **Hybrid anchor drift** → same pattern for a hybrid character or diegetic-artifact file; verify `anchor_drift` rejection.
 6. **Approval token** → 4 sub-test cases: unsigned token, expired token, tampered HMAC, replayed token. Each rejected with its specific error code (`approval_invalid_hmac`, `approval_expired`, `approval_replayed`, etc.).
 7. **Write-order** → submit a plan with patches in pathological order (all Tier 3 ops first, then Tier 2, then Tier 1); verify `_source/` on-disk state after apply matches the canonical Tier 1 → Tier 2 → Tier 3 order (e.g., the Tier 3 `append_adjudication_record` references a CF that Tier 1 `create_cf_record` produced — applying out of order would reference a non-existent CF).
-8. **Append-only runtime** → attempt to construct a hypothetical `replace_cf_record` op via a JSON payload that bypasses TypeScript; submit to the engine; verify runtime schema validator rejects with `op_unknown` or `envelope_shape_invalid`. (Compile-time rejection is ticket 008's probe; this is the runtime complement.)
+8. **Append-only runtime** → attempt to construct a hypothetical `replace_cf_record` op via a JSON payload that bypasses TypeScript; submit to the engine; verify runtime schema validator rejects with `op_unknown` or `envelope_shape_invalid`. (Compile-time rejection is archived `SPEC03PATENG-008`'s probe; this is the runtime complement.)
 9. **Retcon attestation** → submit a plan with `update_record_field` on `CF-0001.statement` without `retcon_attestation`; verify engine rejects with `retcon_attestation_required`.
 10. **Attribution** → submit a plan creating a CF and appending extensions to three SEC records; verify (a) all three SEC records' `extensions[]` carry the correct `originating_cf` / `change_id` / `date` / `label` / `body`, and (b) each SEC's `touched_by_cf[]` includes the new CF-ID (via the auto-add).
 11. **`append_touched_by_cf` auto-add** → submit an `append_extension` op targeting a SEC without an explicit `append_touched_by_cf` op in the patch list; verify engine's reordered plan includes the auto-added op (assert via `PatchReceipt.files_written` or via direct on-disk SEC record inspection post-apply).
@@ -69,7 +69,7 @@ Helpers: `copyAnimaliaToTmp()`, `buildIndexAt(tmp, slug)`, `startMcpServer(tmp)`
 
 ### 4. Update `tools/patch-engine/package.json` scripts
 
-Add `"test:integration": "npm run build && node --test dist/tests/integration/*.test.js"` so the heavy integration suite can be run separately from the unit suite (ticket 008). The default `npm test` runs both.
+Add `"test:integration": "npm run build && node --test dist/tests/integration/*.test.js"` so the heavy integration suite can be run separately from the unit suite archived in `SPEC03PATENG-008`. The default `npm test` runs both.
 
 ## Files to Touch
 
@@ -83,7 +83,7 @@ Add `"test:integration": "npm run build && node --test dist/tests/integration/*.
 
 ## Out of Scope
 
-- Per-op unit tests — ticket 008.
+- Per-op unit tests — archived `SPEC03PATENG-008`.
 - SPEC-04 validator unit tests — SPEC-04's suite.
 - SPEC-02 Phase 2 tooling implementation (`get_record`, `find_sections_touched_by`, extended `allocate_next_id`) — completed separately via archived SPEC02PHA2TOO tickets. This ticket EXERCISES that tooling but does not implement it.
 - CI-infrastructure wiring (adding the integration suite to the GitHub Actions matrix, wall-clock variance tuning) — separate ops ticket.

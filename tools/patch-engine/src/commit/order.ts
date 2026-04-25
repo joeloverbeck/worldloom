@@ -96,8 +96,8 @@ function hasTouchedByCf(ctx: OpContext, worldSlug: string, targetRecordId: strin
         SELECT 1
         FROM edges
         WHERE world_slug = ?
-          AND from_node_id = ?
-          AND to_node_id = ?
+          AND source_node_id = ?
+          AND target_node_id = ?
           AND edge_type = 'patched_by'
         LIMIT 1
       `
