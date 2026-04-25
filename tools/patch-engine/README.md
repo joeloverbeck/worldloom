@@ -1,38 +1,28 @@
 # patch-engine
 
-Deterministic patch applier. Consumes a JSON patch plan via `mcp__worldloom__submit_patch_plan` (SPEC-02) and writes files atomically (two-phase commit with temp-file rename). Writes via `fs.writeFile` — bypasses Claude's Edit/Write tools so SPEC-05 Hook 3 does not fire on engine writes.
+Deterministic patch applier for the SPEC-03 write path. The package entrypoint is `submitPatchPlan(envelope, approvalToken, opts?)`, exported from `src/apply.ts` and emitted at `dist/src/apply.js`.
 
-**Design**: `specs/SPEC-03-patch-engine.md`
-**Phase**: 2
-**Status**: not yet implemented
+The engine consumes post-SPEC-13 atomic-record patch plans, verifies the HARD-GATE approval token, stages writes through temp files, commits with atomic per-file rename, consumes the token, and triggers `world-index sync` after storage commit. Canonical storage remains `worlds/<slug>/_source/`; `_index/world.db` is derived and may be regenerated.
 
-## Op vocabulary (13)
+Design authority: `specs/SPEC-03-patch-engine.md`.
 
-Generic structural: `insert_before_node`, `insert_after_node`, `replace_node`, `insert_under_heading`
+## Public Surface
 
-YAML-record: `replace_yaml_field`, `append_list_item`, `append_modification_history_entry`, `append_cf_record`
+- `submitPatchPlan(envelope, approvalToken, opts?)`
+- `PatchReceipt`
 
-Markdown prose: `append_bullet_cluster`, `append_heading_section`, `insert_attribution_comment`
+The operation vocabulary is the SPEC-03 post-SPEC-13 vocabulary: `create_*` record ops, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, and the three hybrid-file append ops for adjudications, characters, and diegetic artifacts.
 
-Cross-file: `append_change_log_entry`, `append_adjudication_record`
+## Write Order
 
-**Append-only vocabulary**: no `replace_cf_record`, no `delete_*`, no `move_*`.
+The orchestrator controls write order:
 
-## Write-order discipline (engine-enforced)
+1. Create atomic records.
+2. Update or append to existing atomic records.
+3. Write hybrid-file artifacts.
 
-1. All domain-file ops
-2. `append_adjudication_record`
-3. `CANON_LEDGER.md` in sub-order:
-   a. In-place CF qualifications (`replace_yaml_field` + `append_modification_history_entry`)
-   b. `append_cf_record`
-   c. `append_change_log_entry`
-
-Skill patch-list order is ignored; engine reorders internally.
+Callers do not rely on patch-list order for correctness. `append_extension` on a section auto-adds `append_touched_by_cf` when the originating CF is not already attached.
 
 ## Atomicity
 
-Phase A — validate (no writes); Phase B — temp-write + fsync + rename. Any op failure aborts the plan; disk unchanged.
-
-## Attribution auto-stamping
-
-`<!-- added by CF-NNNN -->`, `<!-- clarified by CH-NNNN -->`, notes-field `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ...` lines are all engine-generated from the `attribution` field of each op. Skills never hand-format.
+Phase A validates without source writes. Phase B writes temp files, fsyncs them, and renames each temp file over its target. Per-file rename is atomic; a mid-commit failure is forward-only and leaves the successfully renamed subset in place, with recovery via git rather than engine rollback.

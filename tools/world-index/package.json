@@ -7,6 +7,21 @@
     "world-index": "dist/src/cli.js"
   },
   "exports": {
+    "./commands/sync": {
+      "import": "./dist/src/commands/sync.js",
+      "require": "./dist/src/commands/sync.js",
+      "types": "./dist/src/commands/sync.d.ts"
+    },
+    "./hash/content": {
+      "import": "./dist/src/hash/content.js",
+      "require": "./dist/src/hash/content.js",
+      "types": "./dist/src/hash/content.d.ts"
+    },
+    "./index/open": {
+      "import": "./dist/src/index/open.js",
+      "require": "./dist/src/index/open.js",
+      "types": "./dist/src/index/open.d.ts"
+    },
     "./public/types": {
       "import": "./dist/src/public/types.js",
       "require": "./dist/src/public/types.js",

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds `tools/patch-engine/tests/ops/` suite with one test file per op (14 ops total) plus an approval-verification test file and a commit-order test file. No production code changes.
-**Deps**: SPEC03PATENG-006
+**Deps**: archive/tickets/SPEC03PATENG-006.md
 
 ## Problem
 

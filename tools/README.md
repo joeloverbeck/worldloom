@@ -18,4 +18,4 @@ TypeScript on Node.js. Each sub-package has its own `package.json`, `tsconfig.js
 
 ## Current status
 
-`world-index/`, `world-mcp/`, and the read/subagent portions of `hooks/` are now implemented Phase 1 packages. `patch-engine/`, `validators/`, and the edit/post-write portions of `hooks/` remain Phase 2 work per `specs/SPEC-08-migration-and-phasing.md`.
+`world-index/`, `world-mcp/`, and the read/subagent portions of `hooks/` are now implemented Phase 1 packages. `patch-engine/` is in active Phase 2 implementation: typed op modules and the `submitPatchPlan` package entrypoint exist, while the world-mcp rewire, acceptance suites, validators, and edit/post-write hooks remain Phase 2 work per `specs/SPEC-08-migration-and-phasing.md`.

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `tools/world-mcp/package.json` (adds `@worldloom/patch-engine` dep) and `tools/world-mcp/src/tools/submit-patch-plan.ts` (replaces stub delegation with real import). Removes world-mcp's local `PatchReceipt` declaration.
-**Deps**: SPEC03PATENG-006
+**Deps**: archive/tickets/SPEC03PATENG-006.md
 
 ## Problem
 
