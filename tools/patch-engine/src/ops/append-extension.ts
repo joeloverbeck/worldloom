@@ -60,6 +60,9 @@ export async function stageAppendExtension(
   }
 
   extensions.push(op.payload.extension);
+  if (loaded.node_type === "section") {
+    autoAddTouchedByCf(loaded.record, op.payload.extension.originating_cf, op.op, targetRecordId);
+  }
 
   return stageExistingRecordFile({
     planId: env.plan_id,
@@ -67,6 +70,27 @@ export async function stageAppendExtension(
     targetFilePath: loaded.absolute_file_path,
     record: loaded.record
   });
+}
+
+function autoAddTouchedByCf(
+  record: Record<string, unknown>,
+  cfId: string,
+  opKind: "append_extension",
+  targetRecordId: string
+): void {
+  const touchedByCf = record.touched_by_cf;
+  if (!Array.isArray(touchedByCf)) {
+    throw new PatchEngineOpError({
+      code: "field_path_invalid",
+      message: `${targetRecordId}.touched_by_cf must be an array`,
+      op_kind: opKind,
+      record_id: targetRecordId
+    });
+  }
+
+  if (!touchedByCf.includes(cfId)) {
+    touchedByCf.push(cfId);
+  }
 }
 
 function validateExtension(

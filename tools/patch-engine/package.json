@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/tests/**/*.test.js",
+    "test:integration": "npm run build && node --test dist/tests/integration/*.test.js",
     "test:compile-reject": "! tsc -p tsconfig.compile-reject.json",
     "clean": "rm -rf dist"
   },

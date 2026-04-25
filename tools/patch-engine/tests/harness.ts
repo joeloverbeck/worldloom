@@ -8,6 +8,7 @@ import type { TestContext } from "node:test";
 import Database from "better-sqlite3";
 import YAML from "yaml";
 
+import { openIndex } from "@worldloom/world-index/index/open";
 import type {
   CanonFactRecord,
   ChangeLogEntry,
@@ -32,6 +33,26 @@ export interface TestWorld {
   worldSlug: string;
   db: Database.Database;
   ctx: OpContext;
+}
+
+export function createIndexedTestWorld(t: TestContext): TestWorld {
+  const worldRoot = fs.mkdtempSync(path.join(os.tmpdir(), "patch-engine-integration-"));
+  const worldPath = path.join(worldRoot, "worlds", WORLD_SLUG);
+  fs.mkdirSync(path.join(worldPath, "_source"), { recursive: true });
+  fs.writeFileSync(path.join(worldPath, "WORLD_KERNEL.md"), "# Kernel\n\nA minimal indexed fixture world.\n", "utf8");
+  fs.writeFileSync(path.join(worldPath, "ONTOLOGY.md"), "# Ontology\n\n## Categories in Use\n\n- entity\n", "utf8");
+
+  const db = openIndex(worldRoot, WORLD_SLUG);
+  const ctx = { worldRoot, db };
+  const world = { worldRoot, worldSlug: WORLD_SLUG, db, ctx };
+  seedStandardRecords(world);
+
+  t.after(() => {
+    db.close();
+    fs.rmSync(worldRoot, { recursive: true, force: true });
+  });
+
+  return world;
 }
 
 export function createTestWorld(t: TestContext): TestWorld {
@@ -61,6 +82,28 @@ export function baseEnvelope(allocations: IdAllocations = {}): PatchPlanEnvelope
     expected_id_allocations: allocations,
     patches: []
   };
+}
+
+export function writeSecret(worldRoot: string, secret = Buffer.from("integration-test-secret")): string {
+  const secretPath = path.join(worldRoot, "tools", "world-mcp", ".secret");
+  fs.mkdirSync(path.dirname(secretPath), { recursive: true });
+  fs.writeFileSync(secretPath, secret, { mode: 0o600 });
+  return secretPath;
+}
+
+export function nextId(db: Database.Database, prefix: string, width: number, zeroPad = true): string {
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`^${escapedPrefix}-(\\d+)$`);
+  const rows = db.prepare("SELECT node_id FROM nodes ORDER BY node_id").all() as Array<{ node_id: string }>;
+  let maxValue = 0;
+  for (const row of rows) {
+    const match = regex.exec(row.node_id);
+    if (match !== null) {
+      maxValue = Math.max(maxValue, Number.parseInt(match[1] ?? "0", 10));
+    }
+  }
+  const nextValue = maxValue + 1;
+  return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
 }
 
 export function seedRecord(

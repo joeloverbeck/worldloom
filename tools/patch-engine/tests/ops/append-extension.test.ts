@@ -13,7 +13,7 @@ test("append_extension appends to section records", async (t) => {
 
   const staged = await stageAppendExtension(env, op, world.ctx);
 
-  assertYamlEquals(staged, { ...section("SEC-ELF-001"), extensions: [ext] });
+  assertYamlEquals(staged, { ...section("SEC-ELF-001"), touched_by_cf: ["CF-0002"], extensions: [ext] });
 });
 
 test("append_extension rejects CF target and malformed extension", async (t) => {

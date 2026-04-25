@@ -2,6 +2,7 @@
 
 # SPEC-03: Patch Engine & Edit Contract
 
+**Status**: COMPLETED
 **Phase**: 2
 **Depends on**:
 - SPEC-01 (record-level index data)
@@ -108,7 +109,7 @@ Atomization under SPEC-13 simplifies the op surface substantially. Retired ops w
 |---|---|---|
 | `update_record_field` | Set or append a field on an existing record by ID + field path | `{target_record_id, field_path: string[], operation: 'set' \| 'append_list' \| 'append_text', new_value: any, retcon_attestation?: RetconAttestation}` |
 | `append_extension` | Append an entry to any record's `extensions[]` array (uniform Rule 6 attribution surface across INV / M / OQ / SEC) | `{target_record_id, extension: {originating_cf, change_id, date, label, body}}` |
-| `append_touched_by_cf` | Append a CF-ID to a SEC record's `touched_by_cf[]` array | `{target_sec_id, cf_id}`. **Engine auto-adds** this op whenever `append_extension` targets a SEC with a new `originating_cf`; the op is also callable directly during migration or retrofit. |
+| `append_touched_by_cf` | Append a CF-ID to a SEC record's `touched_by_cf[]` array | `{target_sec_id, cf_id}`. **Engine auto-adds the touched-by-CF effect** whenever `append_extension` targets a SEC with a new `originating_cf`; the implementation may apply that effect inside the same staged SEC write rather than materializing a second synthetic op. The op is also callable directly during migration or retrofit. |
 | `append_modification_history_entry` | Append a typed entry to a CF's `modification_history` array | `{target_cf_id, change_id, originating_cf, date, summary}` |
 
 **Retcon discipline on `update_record_field`**: the `notes` field and `modification_history` array are freely appendable on accepted CFs without retcon attestation. The `extensions` array on any record is freely appendable. Any other structural-field mutation (e.g., changing `statement`, `scope`, `domains_affected`, `distribution`, `visible_consequences`) requires `retcon_attestation` with `{retcon_type: <A-F per continuity-audit taxonomy>, originating_ch: CH-NNNN, rationale: string}`. Validator `rule6_no_silent_retcons` enforces.
@@ -174,7 +175,7 @@ Atomization collapses the pre-SPEC-13 write-order from the 3-sub-step ledger-seq
 The engine preserves tier order **by reordering patches internally** before apply, regardless of the plan's patch-list order:
 
 1. **Tier 1 — All `create_*` ops** (in parallel; independent per-file writes). Includes `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`.
-2. **Tier 2 — All `update_record_field` / `append_extension` / `append_touched_by_cf` / `append_modification_history_entry` ops** (in parallel; targets created in Tier 1 or pre-existing records). The engine auto-adds `append_touched_by_cf` for any `append_extension` targeting a SEC where the extension's `originating_cf` isn't already in `touched_by_cf[]`.
+2. **Tier 2 — All `update_record_field` / `append_extension` / `append_touched_by_cf` / `append_modification_history_entry` ops** (in parallel; targets created in Tier 1 or pre-existing records). The engine auto-adds the touched-by-CF effect for any `append_extension` targeting a SEC where the extension's `originating_cf` isn't already in `touched_by_cf[]`; this may be folded into the same staged SEC write as the extension to avoid duplicate temp writes for one file.
 3. **Tier 3 — `append_adjudication_record` / `append_character_record` / `append_diegetic_artifact_record` ops** (per-file hybrid artifacts). Written last because their content references Tier 1/2 record IDs; writing them after the referenced records exist keeps the on-disk graph consistent.
 
 If the engine crashes between Tier 2 and Tier 3, the atomic records reflect post-operation state but the adjudication / character / artifact references to them have not yet been written; future runs recover cleanly (reference-free ids are acceptable pre-state). Inverse ordering (adjudication-first) would leave orphaned references and is structurally forbidden.
@@ -282,7 +283,7 @@ interface PatchReceipt {
 - **Append-only**: attempt to construct a hypothetical `replace_cf_record` or `delete_cf_record` op; verify compile-time rejection (op not in union) and runtime rejection (schema validator)
 - **Retcon attestation**: attempt `update_record_field` against a CF's `statement` field without `retcon_attestation`; verify engine rejects
 - **Attribution**: submit a plan creating a CF and appending extensions to three SEC records; verify all `extensions[]` entries are structurally present with correct `originating_cf` / `change_id` / `date` / `label` / `body`; verify `touched_by_cf[]` auto-updated on each SEC
-- **`append_touched_by_cf` auto-add**: submit an `append_extension` op targeting a SEC without an explicit `append_touched_by_cf` op; verify engine auto-adds the `append_touched_by_cf` op into the applied plan
+- **`append_touched_by_cf` auto-add**: submit an `append_extension` op targeting a SEC without an explicit `append_touched_by_cf` op; verify the applied SEC record includes the originating CF in `touched_by_cf[]`
 
 ## Out of Scope
 
@@ -300,3 +301,26 @@ interface PatchReceipt {
 - **Attribution canonicalization**: date format across skills must match. Mitigation: engine owns the date format (`YYYY-MM-DD`, UTC); skills never supply dates.
 - **Large-plan performance**: a canon-addition delivery with 6 domain files + 4 modification_history + 3 MR firewalls = ~13 ops. Target apply time <2s. If slower, profile hot paths.
 - **Hook 3 coordination (SPEC-05 Phase 2 Part B)**: the engine writes atomic records to `_source/` via `fs.writeFile` (bypassing Claude's Edit/Write tools, per §Approach). SPEC-05 Hook 3 is absent today (Phase 1 landed Hooks 1, 2, 4 only) and must be designed to exclude engine `fs.writeFile` calls from interception. If Hook 3's eventual implementation intercepts by file-path-pattern without a caller-process carve-out, engine writes break. Mitigation: SPEC-05 Part B design reviews this spec's `fs.writeFile` target list (`_source/<subdir>/*.yaml`, `characters/*.md`, `diegetic-artifacts/*.md`, `adjudications/*.md`) before finalizing Hook 3 block rules; the carve-out discriminator can be either process-identity (Hook 3 runs in Claude's tool-use lifecycle, engine runs out-of-process) or a per-write marker file, whichever SPEC-05 Part B selects.
+
+## Outcome
+
+Completed 2026-04-25.
+
+SPEC-03 delivered the `tools/patch-engine/` package, the typed patch-plan envelope, the append-only atomic-record and hybrid-file operation vocabulary, approval-token verification, deterministic write ordering, temp-write/rename commit behavior, post-apply world-index sync, and the `tools/world-mcp` `submit_patch_plan` delegation through the archived `SPEC03PATENG-*` ticket family. The core implementation landed through `SPEC03PATENG-001` through `SPEC03PATENG-009`; `SPEC03PATENG-010` and `SPEC03PATENG-011` closed follow-up truthing seams before spec archival.
+
+Deviations from the original design:
+
+- The engine targets the post-SPEC-13 atomic `_source/` storage form directly; no compiled markdown views are generated or maintained.
+- SPEC-04 validators are still absent, so production pre-apply validation remains fail-closed with `validator_unavailable`; the integration capstone added only an explicit test seam for validator success/failure.
+- `append_extension` on a SEC applies the `touched_by_cf[]` auto-add inside the same staged SEC write instead of materializing a second synthetic `append_touched_by_cf` op.
+- The capstone proves patch-engine public entrypoint plus post-apply index sync; the `world-mcp` delegation seam remains owned by existing world-mcp tests to avoid a reverse package dependency.
+- Dedicated `anchor_drift` for existing hybrid-file updates was narrowed because the live hybrid op surface appends new hybrid files rather than updating existing ones.
+
+Verification recorded by the final ticket:
+
+- `cd tools/patch-engine && npm run build` — PASS.
+- `cd tools/patch-engine && npm run test:integration` — PASS.
+- `cd tools/patch-engine && npm test` — PASS, 35 tests.
+- `cd tools/patch-engine && npm run test:compile-reject` — PASS by expected TypeScript rejection of forbidden mutation ops.
+- `find tools/patch-engine/tests/integration -name "*.test.ts" | xargs grep -l "^test(" | wc -l` — PASS, returned `1`.
+- `git diff -- worlds/animalia/_source` — PASS, empty.

@@ -6,7 +6,7 @@ import { openExistingIndex } from "@worldloom/world-index/index/open";
 
 import { markTokenConsumed as consumeApprovalToken, verifyApprovalToken as verifyToken } from "./approval/verify-token.js";
 import { acquirePerWorldLock, type PerWorldLockOptions } from "./commit/lock.js";
-import { autoAddTouchedByCfOps, reorderPatches } from "./commit/order.js";
+import { reorderPatches } from "./commit/order.js";
 import { commitStaged, unlinkAllTempFiles } from "./commit/rename.js";
 import { stageAllOps } from "./commit/temp-file.js";
 import type { IdAllocations, NewNodeReceipt, PatchOperation, PatchPlanEnvelope, PatchReceipt } from "./envelope/schema.js";
@@ -19,6 +19,7 @@ export type { PatchReceipt } from "./envelope/schema.js";
 export interface SubmitPatchPlanOptions extends PerWorldLockOptions {
   worldRoot?: string;
   hmacSecretPath?: string;
+  preApplyValidator?: () => Promise<{ ok: true } | EngineError> | { ok: true } | EngineError;
 }
 
 export type EngineError = {
@@ -72,13 +73,12 @@ async function submitPatchPlanImpl(
       return allocationError;
     }
 
-    const validator = await runPreApplyValidators();
+    const validator = await runPreApplyValidators(opts);
     if (!validator.ok) {
       return validator;
     }
 
-    const expandedPatches = autoAddTouchedByCfOps(envelope.patches, ctx);
-    const reorderedPatches = reorderPatches(expandedPatches);
+    const reorderedPatches = reorderPatches(envelope.patches);
     const stageResult = await stageAllOps({ ...envelope, patches: reorderedPatches }, reorderedPatches, ctx);
     if (!stageResult.ok) {
       return normalizeThrownError(stageResult.error);
@@ -223,7 +223,11 @@ function nextIdFor(
   return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
 }
 
-async function runPreApplyValidators(): Promise<{ ok: true } | EngineError> {
+async function runPreApplyValidators(opts: SubmitPatchPlanOptions): Promise<{ ok: true } | EngineError> {
+  if (opts.preApplyValidator !== undefined) {
+    return opts.preApplyValidator();
+  }
+
   return error(
     "validator_unavailable",
     "SPEC-04 validator framework is not yet implemented; patch-engine apply fails closed before source writes."

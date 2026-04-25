@@ -21,7 +21,7 @@ The orchestrator controls write order:
 2. Update or append to existing atomic records.
 3. Write hybrid-file artifacts.
 
-Callers do not rely on patch-list order for correctness. `append_extension` on a section auto-adds `append_touched_by_cf` when the originating CF is not already attached.
+Callers do not rely on patch-list order for correctness. `append_extension` on a section auto-adds the originating CF to `touched_by_cf[]` when it is not already attached.
 
 ## Atomicity
 
