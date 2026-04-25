@@ -16,7 +16,7 @@ import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { searchNodes } from "./tools/search-nodes";
-import { submitPatchPlan } from "./tools/submit-patch-plan";
+import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan";
 import { validatePatchPlan } from "./tools/validate-patch-plan";
 import {
   MCP_TOOL_NAMES,
@@ -264,9 +264,9 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "submit_patch_plan",
-    "Submit a patch plan using an approval token; Phase 1 returns a stub.",
+    "Submit a patch plan using an approval token through the patch engine.",
     submitPatchPlanInputSchema,
-    async (args) => submitPatchPlan(args as unknown as Parameters<typeof submitPatchPlan>[0])
+    async (args) => handleSubmitPatchPlanTool(args as unknown as Parameters<typeof handleSubmitPatchPlanTool>[0])
   );
   registerWrappedTool(
     server,

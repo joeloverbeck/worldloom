@@ -19,7 +19,6 @@ test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
     "token_tampered",
     "packet_incomplete_required_classes",
     "anchor_drift",
-    "validator_unavailable",
-    "phase1_stub"
+    "validator_unavailable"
   ]);
 });

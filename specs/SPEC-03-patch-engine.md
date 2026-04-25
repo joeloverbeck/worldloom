@@ -5,8 +5,8 @@
 **Phase**: 2
 **Depends on**:
 - SPEC-01 (record-level index data)
-- archived SPEC-02 retrieval MCP server (the `submit_patch_plan` tool is stubbed at `tools/world-mcp/src/tools/submit-patch-plan.ts`; see `archive/specs/SPEC-02-retrieval-mcp-server.md`)
-- **SPEC-02 Phase 2 tooling update per archived `archive/specs/SPEC-02-phase2-tooling.md`: delivered `mcp__worldloom__get_record`, `find_sections_touched_by`, and the INV/OQ/ENT/SEC `allocate_next_id` extensions. The `get_compiled_view` commitment from SPEC-13 was intentionally dropped during SPEC-02-PHASE2 reassessment. The `submit_patch_plan` delegation to the engine remains owned by this SPEC-03 package, specifically ticket SPEC03PATENG-007.**
+- archived SPEC-02 retrieval MCP server (the `submit_patch_plan` tool was originally stubbed at `tools/world-mcp/src/tools/submit-patch-plan.ts`; see `archive/specs/SPEC-02-retrieval-mcp-server.md`)
+- **SPEC-02 Phase 2 tooling update per archived `archive/specs/SPEC-02-phase2-tooling.md`: delivered `mcp__worldloom__get_record`, `find_sections_touched_by`, and the INV/OQ/ENT/SEC `allocate_next_id` extensions. The `get_compiled_view` commitment from SPEC-13 was intentionally dropped during SPEC-02-PHASE2 reassessment. The `submit_patch_plan` delegation to the engine is delivered by SPEC03PATENG-007.**
 - SPEC-04 (validator gate)
 - **SPEC-13 (atomic-source storage contract — patch engine writes atomic records, not monolithic files)**
 
@@ -255,7 +255,7 @@ interface PatchReceipt {
 }
 ```
 
-**Supersession note**: `PatchReceipt` is owned by `tools/patch-engine` and re-exported by `tools/world-mcp` as part of SPEC-03 delivery. The shape declared above supersedes the Phase 1 stub at `tools/world-mcp/src/tools/submit-patch-plan.ts:8–28`, which declares only the narrow `{cf_ids?, ch_ids?, pa_ids?}` variant under `id_allocations_consumed`. On SPEC-03 landing, the stub's local type declaration is replaced by an import from `@worldloom/patch-engine` (matching the existing TODO at `submit-patch-plan.ts:61–63`), and `id_allocations_consumed` mirrors the ten-class surface of `expected_id_allocations` in the envelope.
+**Supersession note**: `PatchReceipt` is owned by `tools/patch-engine` and consumed by `tools/world-mcp` as part of SPEC-03 delivery. The shape declared above superseded the Phase 1 stub at `tools/world-mcp/src/tools/submit-patch-plan.ts`, which declared only the narrow `{cf_ids?, ch_ids?, pa_ids?}` variant under `id_allocations_consumed`. SPEC03PATENG-007 replaced the stub's local type declaration with an import from `@worldloom/patch-engine`, and `id_allocations_consumed` mirrors the ten-class surface of `expected_id_allocations` in the envelope.
 
 ## FOUNDATIONS Alignment
 

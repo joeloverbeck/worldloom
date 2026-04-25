@@ -361,7 +361,7 @@ test("SPEC-02 capstone: validate_patch_plan still returns validator_unavailable 
   }
 });
 
-test("SPEC-02 capstone: submit_patch_plan still returns phase1_stub in Phase 1", async () => {
+test("SPEC-02 capstone: submit_patch_plan delegates to the SPEC-03 patch engine", async () => {
   const root = createSpec02FixtureRoot();
   buildSpec02Fixture(root);
 
@@ -371,12 +371,12 @@ test("SPEC-02 capstone: submit_patch_plan still returns phase1_stub in Phase 1",
         name: MCP_TOOL_NAMES.submit_patch_plan,
         arguments: {
           patch_plan: buildValidPatchPlan(),
-          approval_token: "unused-in-phase-1"
+          approval_token: "unused-for-delegation-proof"
         }
       });
 
       assert.equal(result.isError, true);
-      assert.equal((result.structuredContent as { code: string }).code, "phase1_stub");
+      assert.equal((result.structuredContent as { code: string }).code, "envelope_shape_invalid");
     });
   } finally {
     destroyTempRepoRoot(root);

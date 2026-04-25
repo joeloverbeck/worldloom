@@ -200,7 +200,7 @@ async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise
   }
 }
 
-test("registered tools dispatch with either a success payload or the documented stub payload", async () => {
+test("registered tools dispatch with either a success payload or the documented error payload", async () => {
   await withServerClient(async (client) => {
     const calls = [
       {
@@ -258,7 +258,7 @@ test("registered tools dispatch with either a success payload or the documented 
         name: MCP_TOOL_NAMES.submit_patch_plan,
         args: { patch_plan: buildValidPatchPlan(), approval_token: "unused-in-phase-1" },
         expectError: true,
-        expectedCode: "phase1_stub"
+        expectedCode: "envelope_shape_invalid"
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { submitPatchPlan } from "../../src/tools/submit-patch-plan";
+import { handleSubmitPatchPlanTool } from "../../src/tools/submit-patch-plan";
 
 function buildValidPatchPlan() {
   return {
@@ -22,41 +22,42 @@ function buildValidPatchPlan() {
   };
 }
 
-test("submitPatchPlan returns phase1_stub for a well-formed Phase 1 plan", async () => {
-  const result = await submitPatchPlan({
+function assertInvalidInput(result: Awaited<ReturnType<typeof handleSubmitPatchPlanTool>>, field: string): void {
+  assert.ok("code" in result);
+  assert.equal(result.code, "invalid_input");
+  assert.ok("details" in result);
+  assert.equal(result.details?.field, field);
+}
+
+test("handleSubmitPatchPlanTool delegates operation validation to the patch engine", async () => {
+  const result = await handleSubmitPatchPlanTool({
     patch_plan: buildValidPatchPlan(),
-    approval_token: "unused-in-phase-1"
+    approval_token: "unused-for-delegation-proof"
   });
 
-  assert.deepEqual(result, {
-    code: "phase1_stub",
-    message: "Engine integration activates in Phase 2 per SPEC-08."
-  });
+  assert.ok("code" in result);
+  assert.equal(result.code, "envelope_shape_invalid");
 });
 
-test("submitPatchPlan rejects a malformed plan before the Phase 1 stub", async () => {
-  const result = await submitPatchPlan({
+test("handleSubmitPatchPlanTool rejects a malformed plan before engine delegation", async () => {
+  const result = await handleSubmitPatchPlanTool({
     patch_plan: {
       ...buildValidPatchPlan(),
       patches: [{ payload: {}, target_world: "seeded", target_file: "GEOGRAPHY.md" }] as unknown as ReturnType<
         typeof buildValidPatchPlan
       >["patches"]
     },
-    approval_token: "unused-in-phase-1"
+    approval_token: "unused-for-validation-proof"
   });
 
-  assert.ok("code" in result);
-  assert.equal(result.code, "invalid_input");
-  assert.equal(result.details?.field, "patch_plan.patches[0].op");
+  assertInvalidInput(result, "patch_plan.patches[0].op");
 });
 
-test("submitPatchPlan rejects a missing approval token before the Phase 1 stub", async () => {
-  const result = await submitPatchPlan({
+test("handleSubmitPatchPlanTool rejects a missing approval token before engine delegation", async () => {
+  const result = await handleSubmitPatchPlanTool({
     patch_plan: buildValidPatchPlan(),
     approval_token: ""
   });
 
-  assert.ok("code" in result);
-  assert.equal(result.code, "invalid_input");
-  assert.equal(result.details?.field, "approval_token");
+  assertInvalidInput(result, "approval_token");
 });

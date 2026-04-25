@@ -1,3 +1,9 @@
+import {
+  submitPatchPlan,
+  type EngineError,
+  type PatchReceipt
+} from "@worldloom/patch-engine";
+
 import { createMcpError, type McpError } from "../errors";
 
 import {
@@ -5,27 +11,7 @@ import {
   validatePatchPlanEnvelopeShape
 } from "./_shared";
 
-export interface PatchReceipt {
-  plan_id: string;
-  applied_at: string;
-  files_written: {
-    file_path: string;
-    prior_hash: string;
-    new_hash: string;
-    ops_applied: number;
-  }[];
-  new_nodes: {
-    node_id: string;
-    node_type: string;
-    file_path: string;
-  }[];
-  id_allocations_consumed: {
-    cf_ids?: string[];
-    ch_ids?: string[];
-    pa_ids?: string[];
-  };
-  index_sync_duration_ms: number;
-}
+type EnginePatchPlanEnvelope = Parameters<typeof submitPatchPlan>[0];
 
 export interface SubmitPatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
@@ -36,14 +22,9 @@ function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
 }
 
-function patchEngineLooksBuilt(): boolean {
-  // Phase 2 will replace this sentinel branch with a real runtime import.
-  return false;
-}
-
-export async function submitPatchPlan(
+export async function handleSubmitPatchPlanTool(
   args: SubmitPatchPlanArgs
-): Promise<PatchReceipt | McpError> {
+): Promise<PatchReceipt | EngineError | McpError> {
   if (typeof args !== "object" || args === null || !("patch_plan" in args)) {
     return invalidInput("patch_plan is required.", "patch_plan");
   }
@@ -57,14 +38,5 @@ export async function submitPatchPlan(
     return invalidInput("approval_token must be a non-empty string.", "approval_token");
   }
 
-  if (patchEngineLooksBuilt()) {
-    // TODO(SPEC-03): replace the sentinel with:
-    // const { submitPatchPlan } = await import("@worldloom/patch-engine");
-    // return submitPatchPlan(args.patch_plan, args.approval_token);
-  }
-
-  return createMcpError(
-    "phase1_stub",
-    "Engine integration activates in Phase 2 per SPEC-08."
-  );
+  return submitPatchPlan(args.patch_plan as unknown as EnginePatchPlanEnvelope, args.approval_token);
 }

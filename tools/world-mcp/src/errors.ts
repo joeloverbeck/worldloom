@@ -13,8 +13,7 @@ export const MCP_ERROR_CODES = [
   "token_tampered",
   "packet_incomplete_required_classes",
   "anchor_drift",
-  "validator_unavailable",
-  "phase1_stub"
+  "validator_unavailable"
 ] as const;
 
 export type McpErrorCode = (typeof MCP_ERROR_CODES)[number];
