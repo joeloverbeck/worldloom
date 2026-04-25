@@ -17,32 +17,12 @@ test("rule validators report the current animalia bootstrap baseline in full-wor
   assert.deepEqual(
     actual,
     [
-      "rule2.non_canonical_domain|CF-0004",
-      "rule2.non_canonical_domain|CF-0021",
-      "rule2.non_canonical_domain|CF-0023",
-      "rule2.non_canonical_domain|CF-0024",
-      "rule2.non_canonical_domain|CF-0027",
-      "rule2.non_canonical_domain|CF-0027",
-      "rule2.non_canonical_domain|CF-0028",
-      "rule2.non_canonical_domain|CF-0029",
-      "rule2.non_canonical_domain|CF-0031",
-      "rule2.non_canonical_domain|CF-0033",
       "rule2.non_canonical_domain|CF-0036",
       "rule2.non_canonical_domain|CF-0036",
       "rule2.non_canonical_domain|CF-0038",
       "rule2.non_canonical_domain|CF-0038",
       "rule2.non_canonical_domain|CF-0038",
-      "rule2.non_canonical_domain|CF-0038",
-      "rule6.dangling_modification_history|CF-0020",
-      "rule7.future_resolution_safety_status_mismatch|M-15",
-      "rule7.future_resolution_safety_status_mismatch|M-16",
-      "rule7.future_resolution_safety_status_mismatch|M-17",
-      "rule7.future_resolution_safety_status_mismatch|M-2",
-      "rule7.future_resolution_safety_status_mismatch|M-20",
-      "rule7.future_resolution_safety_status_mismatch|M-4",
-      "rule7.future_resolution_safety_status_mismatch|M-5",
-      "rule7.future_resolution_safety_status_mismatch|M-7",
-      "rule7.missing_disallowed_cheap_answers|M-5"
+      "rule2.non_canonical_domain|CF-0038"
     ].sort()
   );
 });

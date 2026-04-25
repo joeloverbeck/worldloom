@@ -105,6 +105,93 @@ test("record_schema_compliance rejects legacy adjudication body-only Discovery b
   assert.ok(result.every((verdict) => verdict.code === "record_schema_compliance.required"));
 });
 
+test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped_references", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "diegetic-artifacts/DA-0001-test.md",
+          content: [
+            "---",
+            "artifact_id: DA-0001",
+            "slug: test-artifact",
+            "title: Test Artifact",
+            "artifact_type: report",
+            "author: Test Author",
+            "author_character_id: null",
+            "date: 2026-04-25",
+            "place: Mudbrook",
+            "audience: internal",
+            "scoped_references:",
+            "  - name: Mudbrook",
+            "    kind: place",
+            "    relation: event_location",
+            "  - name: Long Board",
+            "    kind: institution",
+            "    relation: crew_vouch_site",
+            "    aliases:",
+            "      - Long Board tavern",
+            "communicative_purpose: narrate",
+            "desired_relation_to_truth: accurate",
+            "author_profile: {}",
+            "epistemic_horizon: {}",
+            "claim_map: []",
+            "world_consistency: {}",
+            "source_basis: {}",
+            "---",
+            "# DA-0001",
+            "",
+            "Body prose."
+          ].join("\n")
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.equal(result.length, 0);
+});
+
+test("record_schema_compliance rejects diegetic-artifact scoped_references entries missing required fields", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "diegetic-artifacts/DA-0002-test.md",
+          content: [
+            "---",
+            "artifact_id: DA-0002",
+            "slug: bad-artifact",
+            "title: Bad Artifact",
+            "artifact_type: report",
+            "author: Test Author",
+            "author_character_id: null",
+            "date: 2026-04-25",
+            "place: Mudbrook",
+            "audience: internal",
+            "scoped_references:",
+            "  - name: Mudbrook",
+            "communicative_purpose: narrate",
+            "desired_relation_to_truth: accurate",
+            "author_profile: {}",
+            "epistemic_horizon: {}",
+            "claim_map: []",
+            "world_consistency: {}",
+            "source_basis: {}",
+            "---",
+            "# DA-0002",
+            "",
+            "Body prose."
+          ].join("\n")
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.required"));
+});
+
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {
   const result = await recordSchemaCompliance.run(
     {},

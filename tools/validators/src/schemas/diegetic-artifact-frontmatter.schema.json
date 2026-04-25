@@ -20,6 +20,20 @@
     "date": { "type": "string" },
     "place": { "type": "string" },
     "audience": { "type": "string" },
+    "scoped_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "relation"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "relation": { "type": "string", "minLength": 1 },
+          "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
     "communicative_purpose": { "type": "string" },
     "desired_relation_to_truth": { "type": "string" },
     "canon_facts_accessible": { "anyOf": [{ "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }, { "type": "null" }] },

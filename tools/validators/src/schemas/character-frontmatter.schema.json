@@ -14,7 +14,20 @@
     "age_band": { "type": "string" },
     "place_of_origin": { "type": "string" },
     "current_location": { "type": "string" },
-    "scoped_references": { "type": "array" },
+    "scoped_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "relation"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "minLength": 1 },
+          "relation": { "type": "string", "minLength": 1 },
+          "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
     "date": { "type": "string" },
     "social_position": { "type": "string" },
     "profession": { "type": "string" },
