@@ -1,49 +1,73 @@
 # Pre-flight and World-State Prerequisites
 
-Before this skill acts, it MUST load (per FOUNDATIONS §Tooling Recommendation — non-negotiable):
+Post-SPEC-13, world canon lives as atomic YAML records under `worlds/<slug>/_source/`. Skills do NOT bulk-read those subdirectories — Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. The retrieval contract for this skill:
 
-## Reading mature world files
+## Primary load: context packet
 
-As worlds mature, any world file can cross the Read tool's token limit — `CANON_LEDGER.md` is the first to do so (it accumulates one entry per accepted CF), but `INSTITUTIONS.md`, `MYSTERY_RESERVE.md`, `EVERYDAY_LIFE.md`, and later `TIMELINE.md` and `GEOGRAPHY.md` follow the same trajectory as modification-history annotations accumulate.
+Pre-flight calls:
 
-When a prescribed Read returns a token-limit error, use this pattern:
-1. **Grep for structural anchors** to enumerate the file's section layout — `^##[^#]` for top-level sections; `^### ` for subsections; `^id:` for CF entries in `CANON_LEDGER.md`; `^## M-` for Mystery Reserve entries; filename-appropriate patterns otherwise.
-2. **Read targeted ranges** with `offset`/`limit` for the sections most relevant to the current batch's thinness scan and redundancy filter — the CFs in the domains the batch targets; the INSTITUTIONS / EVERYDAY_LIFE / MYSTERY_RESERVE sections whose material bears on the specific proposal families being generated.
-3. **Do not attempt a single full Read** when the size warning triggers — selective reading is the expected mode once enough canon accumulates, and the audit trail (what sections were read, why) is as load-bearing as any other record.
+```
+mcp__worldloom__get_context_packet(
+  task_type='other',
+  seed_nodes=[<diagnosis-anchor seeds>],
+  token_budget=15000
+)
+```
 
-This pattern applies uniformly across every file in this section. The CANON_LEDGER.md entry below cross-references it but does not repeat the mechanism.
+`'other'` is the registered fallback in the TASK_TYPES enum (`canon_addition` | `character_generation` | `diegetic_artifact_generation` | `continuity_audit` | `other`); a `propose_new_canon_facts` task type is NOT registered, and adding it is out of scope for this skill rewrite. The `'other'` profile applies the default ranking weights — sufficient because this skill's reasoning is intentionally broad-domain (thinness scans target every world concern, not a single locality).
 
-## Mandatory — always loaded at Pre-flight
-- `docs/FOUNDATIONS.md` — cited throughout (Canon Layers; Rules 2/3/4/5/7; Canon Fact Record Schema; Proposal Families alignment).
-- `worlds/<world-slug>/WORLD_KERNEL.md` — Phase 1 diagnosis (tonal/genre contract for coherence filter); Phase 6 diversification (Core Pressures guide slot priorities).
-- `worlds/<world-slug>/INVARIANTS.md` — Phase 7a invariant conformance for every card.
-- `worlds/<world-slug>/ONTOLOGY.md` — Phase 2 enrichment targeting (each category maps to ontology categories).
-- `worlds/<world-slug>/PEOPLES_AND_SPECIES.md` — Phase 1 thinness scan (species-without-material-consequence); Phase 3 species-adaptation seeds.
-- `worlds/<world-slug>/GEOGRAPHY.md` — Phase 1 thinness scan (geography-without-trade-implications); Phase 3 travel-texture and region-differentiation seeds.
-- `worlds/<world-slug>/INSTITUTIONS.md` — Phase 1 thinness scan (frictionless institutions, undermodeled classes); Phase 3 institutional-response and law-coupling seeds; structural anchor for Proposal Families 2, 5, 9.
-- `worlds/<world-slug>/ECONOMY_AND_RESOURCES.md` — Phase 1 thinness scan (scarcity without black market, war without logistics); Phase 3 Scarcity and Hidden-Cost family seeds.
-- `worlds/<world-slug>/MAGIC_OR_TECH_SYSTEMS.md` — Phase 1 thinness scan (magic-without-institutional-response); Phase 3 Cost-Deepening and Boundary family seeds. **Loaded unconditionally here** (unlike `character-generation`'s conditional load) because the diagnosis phase must detect magical/technological thinness across any world.
-- `worlds/<world-slug>/EVERYDAY_LIFE.md` — Phase 1 thinness scan (missing daily-life texture); Phase 3 Local Practice and Material Culture seeds (Families 4, 10).
-- `worlds/<world-slug>/TIMELINE.md` — Phase 1 thinness scan (catastrophe with weak residue); Phase 3 Residue Facts seeds (Family 3).
-- `worlds/<world-slug>/CANON_LEDGER.md` — Phase 5 redundancy filter; Phase 7c distribution discipline. Large mature ledgers exceed the Read tool's token limit; use the selective-reading pattern in §Reading mature world files above, grepping `^id:` to enumerate CF IDs and then reading by line-range for CFs in the domains targeted by the current batch.
-- `worlds/<world-slug>/OPEN_QUESTIONS.md` — Phase 1 thinness scan (what is already listed as open, so proposals do not duplicate); Phase 3 Mystery Seeding (new questions complement existing).
-- `worlds/<world-slug>/MYSTERY_RESERVE.md` — Phase 7b firewall (non-negotiable — each entry's `disallowed cheap answers` and `what is unknown` blocks are the literal test material); Phase 3 Mystery Seeding (open new bounded unknowns without closing these).
+Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phases 1-7 expand on demand via record-addressed retrieval.
+
+### Choosing seed_nodes
+
+- If `parameters_path` declares an `upstream_audit_path`, derive seeds from records the audit cites (`AU-NNNN`'s findings list specific CF-NNNN / SEC-* / M-NNNN ids).
+- If `parameters_path` declares `enrichment_types` or `taboo_areas` that name specific named entities (places, institutions, species), resolve them via `mcp__worldloom__find_named_entities(names)` and pass the resulting `ENT-NNNN` ids.
+- If neither is specified (interview-driven), seed with a small set (3-5) of representative anchor nodes drawn from WORLD_KERNEL §Core Pressures — typically the institution / region / pressure-domain `ENT-NNNN` or `SEC-*` records named there.
+
+## Targeted record retrieval (during diagnosis and reasoning)
+
+When a phase needs a record beyond what the packet returned:
+
+- `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC).
+- `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans:
+  - `node_type='section', filters={file_class: 'institutions'}` — Phase 1 thinness scan over institutional sections; analogously for `everyday-life`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline`.
+  - `node_type='canon_fact', filters={domain: ...}` — Phase 5 redundancy filter; Phase 7c distribution discipline lookups.
+  - `node_type='mystery_record'` — Phase 7b firewall expansion when a seed implicates an M entry not in the packet.
+- `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species).
+- `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-NNNN` ids.
+- `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 1 needs to ground a CF against the section context where it was applied.
+
+## Primary-authored files (direct Read permitted)
+
+These remain primary-authored at the world root and are read directly:
+
+- `docs/FOUNDATIONS.md` — Rules 2 / 3 / 4 / 5 / 7 cited throughout Phases 5 / 7 / 8; Canon Layers at Phase 6; Canon Fact Record Schema as the structural target the proposal card shadows.
+- `worlds/<world-slug>/WORLD_KERNEL.md` — Phase 1 diagnosis (tonal/genre contract for coherence filter); Phase 6 diversification (Core Pressures guide slot priorities); seed_nodes anchoring at Pre-flight.
+- `worlds/<world-slug>/ONTOLOGY.md` — Categories + Relation Types + Notes; Phase 2 enrichment targeting (each enrichment category maps to ontology categories); Phase 7c capability classification.
+
+## Hybrid files (direct Read permitted)
+
+For Pre-flight allocation discipline:
+
+- `worlds/<world-slug>/proposals/INDEX.md` — quick scan for prior batch coverage when interpreting `enrichment_types`. Optional read; not load-bearing for allocation (the engine's `allocate_next_id` is authoritative).
+
+## ID allocation
+
+- Pre-flight: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-NNNN`. Single call.
+- Phase 6 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'PR')` per slot-filling card, called in card order. `PR-NNNN` IDs are bound to surviving cards before Phase 7 begins so the audit trail (Phase 7 sub-phases, Phase 7e repairs, Phase 8 tests) can reference them.
+
+The allocator scans the indexed world state for the highest existing id of the requested class and returns the next. Drops at Phase 7e or Phase 9 leave permanent gaps — the next batch's allocator picks up at `highest_existing + 1`, never reusing a dropped id.
 
 ## Pre-flight inputs
-- `worlds/<world-slug>/proposals/` directory listing — for `BATCH-NNNN` and `PR-NNNN` allocation and slug-collision checks. Read existing `INDEX.md` if present. Directory created at Phase 9 commit time if absent.
-- `parameters_path` contents (if provided) — read once at Phase 0.
-- `upstream_audit_path` contents (if provided via `parameters_path`) — read once at Phase 1 to short-circuit the thinness scan for domains it covers.
+
+- `parameters_path` contents (if provided) — direct `Read` once at Phase 0.
+- `upstream_audit_path` contents (if provided via `parameters_path`) — direct `Read` once at Phase 1; cited records retrieved via `get_record` for diagnosis grounding.
 
 ## Abort conditions
-- `worlds/<world-slug>/` missing → abort: "World directory not found. Run `create-base-world` first, or supply a valid `world_slug`."
-- Any of the 13 mandatory files missing or unreadable → abort naming the specific file.
+
+Enforced by Pre-flight (canonical abort messages live in the thin SKILL.md):
+
+- `worlds/<world-slug>/` missing → "World directory not found. Run `create-base-world` first, or supply a valid `world_slug`."
 - `parameters_path` or `upstream_audit_path` provided but unreadable → abort naming the file.
-
-## Pre-flight Check (6 steps)
-
-1. Verify `worlds/<world-slug>/` exists. If absent, abort: "World directory not found. Run `create-base-world` first, or supply a valid `world_slug`."
-2. Verify all 13 mandatory files (docs/FOUNDATIONS.md + 12 world files) are readable. If any is missing or unreadable, abort naming the specific file.
-3. Load `docs/FOUNDATIONS.md` into working context.
-4. Load the 12 mandatory world files (with the `CANON_LEDGER.md` selective-read pattern if size warning triggers).
-5. Scan `worlds/<world-slug>/proposals/` for highest existing `BATCH-NNNN` by grepping `^batch_id:` across `batches/*.md` frontmatters, and highest existing `PR-NNNN` by grepping `^proposal_id:` across card frontmatters. Allocate `next_batch_id = highest_batch + 1`; `next_pr_id = highest_pr + 1`. If the directory does not exist or contains no cards, `next_batch_id = BATCH-0001` and `next_pr_id = PR-0001`.
-6. Read existing `worlds/<world-slug>/proposals/INDEX.md` if present.
+- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; rebuild via `world-index build` before proceeding).
+- Card-slug collision detected at Phase 9 (would-be `proposals/PR-NNNN-<slug>.md` already exists) → abort; never overwrite.

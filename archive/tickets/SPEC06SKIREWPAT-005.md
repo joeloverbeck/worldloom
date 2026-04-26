@@ -1,6 +1,6 @@
 # SPEC06SKIREWPAT-005: propose-new-canon-facts — pre-flight migration
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/propose-new-canon-facts/SKILL.md` rewritten; pre-flight world-state load via `get_context_packet`; proposal cards and `proposals/INDEX.md` remain direct-Edit on hybrid files (Hook 3 hybrid-file allowlist)
@@ -104,3 +104,26 @@ Present batch summary to user; user approves; skill writes all card files + batc
 1. `cd tools/world-mcp && npm test` — confirm MCP retrieval surface unchanged
 2. `cd tools/hooks && npm test` — confirm Hook 3 hybrid-file allowlist behavior unchanged
 3. Manual skill dry-run producing a test proposal batch on animalia; review 5-angle coverage. Manual review is the correct boundary for thinness-gap reasoning.
+
+## Outcome
+
+**Completion date**: 2026-04-26
+
+**What actually changed**:
+- `.claude/skills/propose-new-canon-facts/SKILL.md` rewritten 167 → 132 lines (target ~130). Pre-flight uses `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` + direct Read of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY + `mcp__worldloom__get_context_packet(...)`. PR-NNNN allocation moved to Phase 6 (after diversification settles), one allocation per slot-filling card. HARD-GATE preserved; Phase 9 writes go direct-Edit on the proposals/ hybrid-file allowlist (Hook 3 permits). 5-angle judgment phases (Phase 1 thinness/overstability/overcomplexity → Phase 2 enrichment-category mapping → Phases 3-6 generate/score/filter/diversify → Phase 7 Canon Safety Check → Phase 8 validation) preserved in-skill.
+- `references/preflight-and-prerequisites.md` rewritten end-to-end against atomic-record retrieval; documents seed_nodes choice, on-demand `get_record` / `search_nodes`, and the `task_type='other'` decision.
+- `references/phases-1-2-diagnose-and-target.md` Phase 1 thinness scans rewritten as a per-concern record-class pattern (12-row table mapping each thinness indicator to its primary `SEC-*` / `CF-*` / `M-*` / `OQ-*` record class).
+- `references/phase-7-canon-safety-check.md` 7a/7b/7c retrieval references updated to atomic INV / M / CF records via packet + `search_nodes` / `get_record`.
+- `references/phases-3-6-generate-score-filter-diversify.md` `redundancy_risk` cross-check rewired from CANON_LEDGER to `search_nodes(node_type='canon_fact')`.
+- `references/canon-rules-and-foundations.md` Tooling Recommendation row updated to atomic-source loading.
+- `templates/proposal-card.md` `likely_required_downstream_updates` example values changed from retired filenames (INSTITUTIONS.md, etc.) to `SEC-*` ids.
+- `templates/batch-manifest.md` Diagnosis Dossier preface updated to atomic-record cite-by-id discipline.
+
+**Deviations from original plan**:
+- **`task_type` value**: SPEC-06 line 167 prescribes `task_type='propose-new-canon-facts'`, but that value is not in the registered `TASK_TYPES` enum (`tools/world-mcp/src/ranking/profiles/index.ts:7` registers only `canon_addition` | `character_generation` | `diegetic_artifact_generation` | `continuity_audit` | `other`). Per the ticket's "Files to Touch" scope (skill directory only), used `task_type='other'` (the registered fallback that uses `defaultRankingProfile`). Documented inline in the SKILL.md §World-State Prerequisites and the preflight reference. Token budget set explicitly to 15000. Adding a tailored `propose_new_canon_facts` task type with its own ranking profile is a separate MCP-side ticket if desired later.
+- **Examples not modified**: `examples/PR-0001-*.md` and `PR-0002-*.md` still reference retired monolithic filenames in their illustrative content. These are vintage artifacts not loaded by the runtime; the ticket's "Files to Touch" did not list `examples/`.
+
+**Verification results**:
+- `cd tools/world-mcp && npm test` → 137/137 pass (MCP retrieval surface unchanged).
+- `cd tools/hooks && npm test` → 17/17 pass (Hook 3 hybrid-file allowlist behavior unchanged).
+- Skill dry-run against animalia (Test plan #3) reserved for an authoring session per the ticket's note that manual review is the correct boundary for thinness-gap reasoning.

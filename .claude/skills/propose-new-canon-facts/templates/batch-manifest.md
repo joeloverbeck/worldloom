@@ -47,7 +47,7 @@ notes: >
 
 ## Diagnosis Dossier
 
-<Prose: the output of Phase 1's three scans across all 12 world files.>
+<Prose: the output of Phase 1's three scans across the world's atomic records — section records (SEC-*) per concern, canon facts (CF-*), invariants (INV-*), mystery reserve (M-*), open questions (OQ-*). Each finding cites specific record ids.>
 
 ### Thinness Findings
 

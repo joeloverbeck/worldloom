@@ -4,7 +4,7 @@ Four sub-phases (three per-card, one batch-level) are independent checks with in
 
 ## Phase 7a: Per-card Invariant Conformance
 
-For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every invariant in `INVARIANTS.md`. Record each invariant tested into the card's `canon_safety_check.invariants_respected`.
+For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every `INV` record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) returned in the context packet. The `'other'` packet profile loads invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id tested into the card's `canon_safety_check.invariants_respected`.
 
 Fail triggers (→ Phase 7e):
 - violates an ontological invariant (card introduces an ontology the world disallows)
@@ -21,7 +21,7 @@ Fail triggers (→ Phase 7e):
 
 ## Phase 7b: Per-card Mystery Reserve Firewall
 
-For every entry in `MYSTERY_RESERVE.md`, check whether its `what_is_unknown` or `disallowed_cheap_answers` blocks overlap the card's `canon_fact_statement`, `immediate_consequences`, or `longer_term_consequences`. Record every checked MR entry's id into the card's `canon_safety_check.mystery_reserve_firewall` **regardless of overlap** — the firewall list is a proof-of-check audit trail. Document overlap status per entry in the card's Canon Safety Check Trace prose.
+For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `mcp__worldloom__search_nodes(node_type='mystery_record')` then `get_record`), check whether its `what_is_unknown` or `disallowed_cheap_answers` blocks overlap the card's `canon_fact_statement`, `immediate_consequences`, or `longer_term_consequences`. Record every checked M-NNNN id into the card's `canon_safety_check.mystery_reserve_firewall` **regardless of overlap** — the firewall list is a proof-of-check audit trail. Document overlap status per entry in the card's Canon Safety Check Trace prose.
 
 For cards of Proposal Family J (Mystery Seeding), the check is **inverted**: they MUST open a new bounded unknown. A Family J card that closes an existing MR entry, or merely re-frames one without adding a new bounded unknown, fails.
 
@@ -30,7 +30,7 @@ Fail triggers (→ 7e):
 - card's consequences entail an answer to `disallowed_cheap_answers`
 - Family J card does not open a new bounded unknown
 
-**Rule**: Empty firewall list when `MYSTERY_RESERVE.md` has entries = Phase 8 fail. Silent firewall means no firewall.
+**Rule**: Empty firewall list when the world has any `M-NNNN` records = Phase 8 fail. Silent firewall means no firewall.
 
 **FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — this IS the Rule 7 audit point for proposal generation.
 
@@ -41,7 +41,7 @@ For each card introducing a capability / artifact / technology / magic practice:
 - MUST specify `why_not_universal` UNLESS `social: rumor` (rumors are inherently un-localized by design)
 - if the card's capability overlaps an existing CF's `who_cannot_easily_do_it`, the card's `why_not_universal` MUST NOT contradict the CF's stabilizers
 
-Record each consulted CF id into `canon_safety_check.distribution_discipline.canon_facts_consulted`.
+Consult capability CFs via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: ...})` then `get_record` for each candidate. Record each consulted CF id into `canon_safety_check.distribution_discipline.canon_facts_consulted`.
 
 Fail triggers (→ 7e):
 - capability card missing `recommended_scope`

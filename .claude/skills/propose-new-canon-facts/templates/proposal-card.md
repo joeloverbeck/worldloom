@@ -69,11 +69,12 @@ longer_term_consequences: []                 # second-order and beyond — enfor
   # - "inheritance law adapts to the new grave-cost burden"
   # - "anti-graverobber violence becomes normalized"
 
-likely_required_downstream_updates: []       # world files that would need updating if this card is accepted by canon-addition
-  # - INSTITUTIONS.md
-  # - ECONOMY_AND_RESOURCES.md
-  # - EVERYDAY_LIFE.md
-  # - TIMELINE.md
+likely_required_downstream_updates: []       # atomic SEC-* records that would need updating if this card is accepted by canon-addition
+  # - SEC-INS-007         # institutions
+  # - SEC-ECR-003         # economy-and-resources
+  # - SEC-ELF-012         # everyday-life
+  # - SEC-TML-002         # timeline
+  # canon-addition's verdict.touched_by_cf binds the accepted CF to these SEC ids
 
 risks: []                                    # per Phase 4 + proposal card template
   # - "may require rethinking prior burial customs"

@@ -22,7 +22,7 @@ For every seed, score on 8 dimensions (1–5 each):
 - `ordinary_life_relevance`: affects more than elite adventure scenes (Rule 2)
 - `mystery_preservation`: deepens without flattening unknowns (Rule 7)
 - `integration_burden`: lower is better; 5 = massive retcon, 1 = minimal
-- `redundancy_risk`: lower is better (CANON_LEDGER cross-check)
+- `redundancy_risk`: lower is better (cross-check via `mcp__worldloom__search_nodes(node_type='canon_fact')` against existing CFs)
 
 **Aggregate**: `(coherence + propagation + story_yield + distinctiveness + ordinary_life_relevance + mystery_preservation) − (integration_burden + redundancy_risk)`. Range is [−10, +28]. Seeds with aggregate < +6 are flagged for Phase 5 removal unless the diagnosis finding they address is `high`-value.
 

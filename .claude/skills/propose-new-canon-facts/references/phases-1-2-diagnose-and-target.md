@@ -1,22 +1,45 @@
 # Phases 1-2: Diagnose the Current World + Identify Enrichment Targets
 
-Phase 1 scans all 12 loaded world files for thinness / overstability / overcomplexity and produces a cited diagnosis dossier. Phase 2 maps each `high`-value diagnosis finding to enrichment categories (A–J) and Proposal Families (1–10), applying user parameters.
+Phase 1 scans the world's atomic-record state for thinness / overstability / overcomplexity and produces a cited diagnosis dossier. Phase 2 maps each `high`-value diagnosis finding to enrichment categories (A–J) and Proposal Families (1–10), applying user parameters.
 
 ## Phase 1: Diagnose the Current World
 
-Execute three scans across all 12 loaded world files. Each finding must cite the specific file (and ideally section) demonstrating it.
+Execute three scans across the world's atomic records via record-addressed retrieval (`mcp__worldloom__search_nodes`, `mcp__worldloom__get_record`). Each finding cites the specific record id (e.g., `SEC-INS-007`, `CF-0042`, `M-0003`) and the concern (file class) it sits under.
 
-**Thinness scan** — per the reference proposal's 12 indicators: species-without-material-consequence; magic-without-institutional-response; geography-without-trade-implication; religion-without-law-or-daily-life impact; catastrophe-with-weak-residue; well-modeled-class-with-blank-others; taboo-without-ritual; corruption-without-containment; war-without-logistics; cities-without-food-systems; relics-without-salvage-economies; multilingual-coexistence-without-language-politics.
+**Per-concern scan pattern**:
 
-**Overstability scan** — 6 indicators: no pressure systems; no unresolved tensions; too few local anomalies; frictionless institutions; mystery reserve too thin; everything important already known.
+```
+mcp__worldloom__search_nodes(node_type='section', filters={file_class: '<concern>'})
+```
 
-**Overcomplexity scan** — 4 indicators: too many disconnected facts; lore branches with low story yield; exotic detail without structural relevance; mysteries that are actually clutter.
+For each of the seven prose concerns — `everyday-life`, `institutions`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline` — enumerate the `SEC-*` ids, then `get_record` selectively for the indicators below. Pair with `search_nodes(node_type='canon_fact')` for cross-CF redundancy / pressure-system coverage, and with `get_record` on cited `M-NNNN` / `OQ-NNNN` / `INV-*` ids when an indicator implicates them.
 
-Output: **diagnosis dossier** — each finding ranked `high` / `medium` / `low` remediation-value based on how many downstream gaps it creates. If `upstream_audit_path` was loaded, merge its findings — but do not skip this phase entirely, only skip scan-types the upstream report already covers.
+**Thinness scan** — 12 indicators:
 
-**Rule**: Every finding must cite at least one loaded world file by name. A finding that cannot be cited is not a finding — it is a hunch, and hunches are disallowed here.
+| # | Indicator | Primary record class to inspect |
+|---|---|---|
+| 1 | species-without-material-consequence | `SEC-PAS-*` + `SEC-ELF-*` (does species inventory show up in daily-life records?) |
+| 2 | magic-without-institutional-response | `SEC-MTS-*` + `SEC-INS-*` |
+| 3 | geography-without-trade-implication | `SEC-GEO-*` + `SEC-ECR-*` |
+| 4 | religion-without-law-or-daily-life impact | `SEC-INS-*` + `SEC-ELF-*` |
+| 5 | catastrophe-with-weak-residue | `SEC-TML-*` + `SEC-GEO-*` + `SEC-ELF-*` |
+| 6 | well-modeled-class-with-blank-others | `SEC-INS-*` + `SEC-ELF-*` |
+| 7 | taboo-without-ritual | `SEC-INS-*` + `SEC-ELF-*` |
+| 8 | corruption-without-containment | `SEC-INS-*` |
+| 9 | war-without-logistics | `SEC-TML-*` + `SEC-ECR-*` + `SEC-INS-*` |
+| 10 | cities-without-food-systems | `SEC-GEO-*` + `SEC-ECR-*` + `SEC-ELF-*` |
+| 11 | relics-without-salvage-economies | `SEC-TML-*` + `SEC-ECR-*` |
+| 12 | multilingual-coexistence-without-language-politics | `SEC-PAS-*` + `SEC-INS-*` |
 
-**FOUNDATIONS cross-ref**: Tooling Recommendation (diagnosis operates on loaded structured state, not prose intuition).
+**Overstability scan** — 6 indicators: no pressure systems (cross-CF coverage of `SEC-INS-*` tensions); no unresolved tensions (`OQ-*` density relative to CF count); too few local anomalies (CF distribution skew); frictionless institutions (`SEC-INS-*` failure-mode coverage); mystery reserve too thin (`M-*` count + breadth); everything important already known (low `OQ-*` + `M-*` ratio).
+
+**Overcomplexity scan** — 4 indicators: too many disconnected facts (CFs without `derived_from_cfs` or `prerequisites`); lore branches with low story yield (`SEC-*` records with no `touched_by_cf` entries); exotic detail without structural relevance (CFs whose `domains_affected` covers <2 domains); mysteries that are actually clutter (`M-*` entries with no `disallowed_cheap_answers` discipline).
+
+Output: **diagnosis dossier** — each finding ranked `high` / `medium` / `low` remediation-value based on how many downstream gaps it creates, citing record ids. If `upstream_audit_path` was loaded, merge its findings — skip scan types it already covers but do not skip the phase wholesale.
+
+**Rule**: Every finding cites at least one record id. A finding that cannot be record-cited is not a finding — it is a hunch, and hunches are disallowed.
+
+**FOUNDATIONS cross-ref**: Tooling Recommendation + §Mandatory World Files §atomic-source classification — diagnosis operates on indexed atomic records, not on retired monolithic prose.
 
 ## Phase 2: Identify Enrichment Targets
 
