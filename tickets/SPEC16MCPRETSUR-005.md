@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — updates `tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and `.claude/skills/canon-addition/references/retrieval-tool-tree.md` to document the four new MCP retrieval surfaces. No code change.
-**Deps**: archive/tickets/SPEC16MCPRETSUR-001.md, SPEC16MCPRETSUR-002, SPEC16MCPRETSUR-003, SPEC16MCPRETSUR-004
+**Deps**: archive/tickets/SPEC16MCPRETSUR-001.md, archive/tickets/SPEC16MCPRETSUR-002.md, SPEC16MCPRETSUR-003, SPEC16MCPRETSUR-004
 
 ## Problem
 
@@ -38,7 +38,7 @@ The four post-pilot MCP refinements (`get_record_field`, `get_record_schema`, pe
 - Status line at line 7: change "registers 13 tools" → "registers 15 tools".
 - §Tools list (lines 11-23): add four new bullets in order matching `MCP_TOOL_ORDER`:
   - `mcp__worldloom__get_record_field(record_id, field_path, world_slug?)` — returns a single field of a parsed record without the full body. Example invocations: `get_record_field("SEC-ELF-001", ["touched_by_cf"])` for the CF list; `get_record_field("CF-0042", ["extensions", 0, "body"])` for the first extension's body. Numeric path segments are array indices when the parent is an array; string segments are object keys.
-  - `mcp__worldloom__get_record_schema(node_type)` — returns the JSON Schema for a record class (`canon_fact_record`, `change_log_entry`, `invariant`, `mystery_reserve_entry`, `open_question_entry`, `named_entity`, `section`, `character_record`, `diegetic_artifact_record`, `adjudication_record`). Response includes `schema`, `source_path`, and `referenced_schemas` (a map of transitively-referenced schemas keyed by `$id` URL — currently `extension-entry` for `canon_fact_record` and `section`).
+  - `mcp__worldloom__get_record_schema(node_type)` — returns the JSON Schema for a record class (`canon_fact_record`, `change_log_entry`, `invariant`, `mystery_reserve_entry`, `open_question_entry`, `named_entity`, `section`, `character_record`, `diegetic_artifact_record`, `adjudication_record`). Response includes `schema`, `source_path`, and `referenced_schemas` (a map of transitively-referenced schemas keyed by `$id` URL — currently `extension-entry` for several record schemas that expose `extensions[]`).
   - Update the existing `mcp__worldloom__get_context_packet` bullet to note the per-`task_type` default table (`canon_addition: 16000`; all others 8000) and the `retry_with: { token_budget }` field on `packet_incomplete_required_classes` errors (single round-trip retry).
   - Update the existing `mcp__worldloom__search_nodes` bullet to note the `exhaustive?: boolean` parameter (default `false` preserves capped+ranked behavior; `true` skips cap, sorts by `node_id`, populates `match_locations: ('body' | 'heading_path' | 'summary')[]` per row).
 

@@ -17,6 +17,7 @@ import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
+import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
 import { searchNodes } from "./tools/search-nodes";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan";
 import { validatePatchPlan } from "./tools/validate-patch-plan";
@@ -90,6 +91,10 @@ const getRecordFieldInputSchema = z.object({
   record_id: z.string().min(1),
   field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
   world_slug: z.string().min(1).optional()
+});
+
+const getRecordSchemaInputSchema = z.object({
+  node_type: z.enum(SUPPORTED_RECORD_SCHEMA_NODE_TYPES)
 });
 
 const getNeighborsInputSchema = z.object({
@@ -230,6 +235,13 @@ export function createServer(): McpServer {
     "get_record_field: Fetch one field from an atomic record without returning the full parsed record.",
     getRecordFieldInputSchema,
     async (args) => getRecordField(args as unknown as Parameters<typeof getRecordField>[0])
+  );
+  registerWrappedTool(
+    server,
+    "get_record_schema",
+    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type.",
+    getRecordSchemaInputSchema,
+    async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0])
   );
   registerWrappedTool(
     server,

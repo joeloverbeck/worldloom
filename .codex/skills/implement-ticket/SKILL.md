@@ -16,6 +16,18 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, `tickets/_TEMPLATE.m
 
 Reassess first, then implement. Do not treat the ticket as mechanically executable until its assumptions match the current repo.
 
+## Execution Map
+
+Use this as the default path, then apply the detailed rules below when the ticket's shape needs them:
+
+1. Resolve the live ticket/spec paths and snapshot the worktree.
+2. Read the required repo contracts (`AGENTS.md`, `docs/FOUNDATIONS.md`, ticket template/readme, ticket, and explicit references).
+3. Classify the ticket and load only the focused reference docs needed for that class.
+4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
+5. State the owned implementation slice to the user, then make minimal edits.
+6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
+7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed.
+
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.
@@ -304,6 +316,7 @@ Update the active ticket before finishing:
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
 - when a ticket belongs to an active spec family, check implementation-order or roadmap/status tables such as `specs/IMPLEMENTATION-ORDER.md` for same-seam pending/completed wording even when archival is not in scope
 - refresh the dirty-worktree ledger and explicitly distinguish `pre-existing unrelated`, `pre-existing same-seam`, `owned edits`, `new/untracked owned files`, and `expected ignored artifacts` in the final response or ticket closeout; do not omit same-family untracked sibling tickets just because they were not owned by the current ticket
+- run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, or skill files
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
