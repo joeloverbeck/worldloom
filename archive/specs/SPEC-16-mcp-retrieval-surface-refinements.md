@@ -128,7 +128,7 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 ### Cross-track: skill-side documentation
 
 **`tools/world-mcp/README.md`** — document each new surface and update the Status line:
-- Status line at README.md:7 currently reads "registers 13 tools"; update to "registers 15 tools" after C3 + C4 land.
+- At intake, the status line at README.md:7 still read "registers 13 tools"; update to "registers 15 tools" after C3 + C4 land.
 - §Tools — add bullets for each new surface:
   - `get_record_field`: parameters, return shape, example invocations (one for `touched_by_cf` slice, one for `extensions[N].body` slice).
   - `get_record_schema`: parameters, the supported `node_type` set (matches `NodeType`), the `referenced_schemas` map, example invocation.
@@ -220,12 +220,12 @@ SPEC-16 should land before SPEC-17's C2 deliverable (FOUNDATIONS prose softening
 
 ## Outcome
 
-To be recorded after the four tickets complete. Expected post-completion state:
+Completed and archived on 2026-04-26.
 
-- Four new MCP tools / tool extensions land in `tools/world-mcp/src/tools/`.
-- `tools/world-mcp/README.md` documents each new surface.
-- `.claude/skills/canon-addition/references/retrieval-tool-tree.md` references the new surfaces at the appropriate phases.
-- A subsequent canon-addition pilot exercises at least C3 + C5 successfully (informal evidence).
-- SPEC-17's C2 deliverable becomes unblocked.
+- `SPEC16MCPRETSUR-001` landed `get_record_field`.
+- `SPEC16MCPRETSUR-002` landed `get_record_schema`.
+- `SPEC16MCPRETSUR-003` landed per-task-type `get_context_packet` defaults plus `retry_with`.
+- `SPEC16MCPRETSUR-004` landed `search_nodes(exhaustive: true)` plus `match_locations`.
+- `SPEC16MCPRETSUR-005` synchronized `tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and `.claude/skills/canon-addition/references/retrieval-tool-tree.md` with the landed retrieval surface.
 
-`specs/IMPLEMENTATION-ORDER.md` is amended to reference the archived spec and tickets at completion.
+SPEC-17's C2 deliverable is unblocked on the SPEC-16 side. A subsequent canon-addition pilot using one of the new surfaces remains useful informal evidence, but it is not a gating criterion for this spec's implementation closeout.

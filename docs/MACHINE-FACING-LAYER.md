@@ -49,7 +49,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Rebuild or refresh machine-readable world state | `world-index build <world>` / `world-index sync <world>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
-| Localize a specific node, entity, or neighborhood | `search_nodes`, `get_node`, `get_neighbors`, `find_named_entities` |
+| Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `get_record_field`, `get_neighbors`, `find_named_entities` |
 | Localize source-local names that are not world-level canonical entities | `find_named_entities.scoped_matches`, `get_node.scoped_references`, and `search_nodes` with `reference_name` or `include_scoped_references` |
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
@@ -59,14 +59,16 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 | Tool | Reads |
 |---|---|
-| `search_nodes` | FTS5 lexical node content plus structured filters such as node type, file path, canonical entity name, and scoped-reference name. Use for body-prose discovery. |
+| `search_nodes` | FTS5 lexical node content plus structured filters such as node type, file path, canonical entity name, and scoped-reference name. Default mode is capped and ranked. Use `exhaustive: true` for Rule 6 audit scans that need presence/absence confirmation across prose bodies; exhaustive results are sorted by `node_id` and include `match_locations[]`. |
 | `get_node` | One indexed node plus its structured links, mentions, scoped references, and file metadata. |
 | `get_record` | The full parsed record for a structured id such as CF / CH / M / OQ / SEC / PA / DA / CHAR. Use this after context-packet previews before citing record content. |
+| `get_record_field` | A single field of a parsed atomic record. Use when the field is small and the record body is large, such as `touched_by_cf` on a large SEC record. Reuses `get_record`'s record-resolution path. |
+| `get_record_schema` | JSON Schema for a record class plus transitively referenced schemas. Use to discover field constraints, regex patterns, enum values, and required/optional fields before authoring a record draft. |
 | `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |
-| `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are truncated; full text requires `get_record`. |
+| `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are truncated; full text requires `get_record`. Omitted budgets use per-task defaults (`canon_addition` currently 16000, others 8000), and incomplete-packet errors include `retry_with.token_budget`. |
 | `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
 | `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
-| `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. It does not scan prose bodies; pair with `search_nodes` for lexical-only evidence. |
+| `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. It does not scan prose bodies; pair with `search_nodes(exhaustive: true)` for lexical-only Rule 6 evidence. |
 
 ## Trust tiers
 
