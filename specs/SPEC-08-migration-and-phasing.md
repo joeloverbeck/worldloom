@@ -20,7 +20,7 @@ The Phase 1 and Phase 2 animalia resolution paths originally allowed grandfather
 - **Phase 1.5** (Atomic-Source Migration) inserted between Phase 1 and Phase 2. Scope: storage-form change from monolithic markdown to atomic YAML under `worlds/<slug>/_source/` for 11 of 13 mandatory concerns (CF, CH, invariants, mystery reserve, open questions, named entities, and the seven prose-file concerns: everyday life, institutions, magic or tech systems, geography, economy and resources, peoples and species, timeline). WORLD_KERNEL.md and (reduced) ONTOLOGY.md remain primary-authored at the world root. No compiled views. See SPEC-13 for the full migration contract and the `worlds/animalia/` migration procedure.
 - **Phase 3** ("Atomic Source for CF/CH Records"): **SUPERSEDED**. SPEC-13's Phase 1.5 scope is broader (all 11 atomized concerns, not just CF/CH) and lands earlier (before Phase 2 write path, not after Phase 2 stability). Phase 3 as a separate phase slot is retired.
 - **Phase 4** ("High-Churn Prose Fragmentization"): **SUPERSEDED**. Prose fragmentization is incorporated into SPEC-13's Phase 1.5 scope via per-H2-section SEC records. Phase 4 as a separate phase slot is retired.
-- **Phase 2 completion gate lifts from ≥70% to ≥80% token reduction** (per SPEC-13 §C amendment to SPEC-06).
+- **Phase 2 completion gate token-reduction target retired** (per 2026-04-26 scope narrowing on SPEC-06; previously the gate had lifted from ≥70% to ≥80% per SPEC-13 §C amendment to SPEC-06).
 - **`.gitignore` Phase 0 entry for `worlds/*/_source/` is reversed during Phase 1.5** — `_source/` is now source-of-truth and must be tracked in git.
 - **Animalia bootstrap detailed steps Phase 3 block** (below) is also superseded; see SPEC-13 §E Migration Procedure for the authoritative animalia migration steps.
 
@@ -32,7 +32,7 @@ Landing the full machine-facing layer (SPEC-01 through SPEC-07) in a single chan
 
 ## Approach
 
-Four phases plus a prep phase. Each phase is independently valuable (token reduction, correctness wins, scalability wins) and independently rollback-able (later phases don't invalidate earlier phase benefits). Acceptance criteria are **measurable** (token counts, validator pass counts, elapsed time) — not aspirational.
+Four phases plus a prep phase. Each phase is independently valuable (correctness wins, scalability wins, structural simplification) and independently rollback-able (later phases don't invalidate earlier phase benefits). Acceptance criteria are **measurable** (validator pass counts, structural checks) — not aspirational. Per the 2026-04-26 scope narrowing on SPEC-06, runtime token-count measurement is no longer a verification gate.
 
 ## Deliverables
 
@@ -89,7 +89,7 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 - `world-index build animalia` completes in <30 seconds on commodity hardware
 - Node count sanity check matches manual enumeration (47 CF + 18 CH + 17 PA + 15+ MR entries + 3 characters + 3 diegetic artifacts + 14 proposal cards + sections/subsections per file)
 - `world-validate animalia --structural` reports **zero `fail`** (all structural validators pass)
-- A sample canon-addition run on animalia completes with **≥50% token reduction** vs current baseline (measured by tool-input token count across pre-flight + Phase 0–11 loads)
+- ~~A sample canon-addition run on animalia completes with **≥50% token reduction** vs current baseline (measured by tool-input token count across pre-flight + Phase 0–11 loads)~~ — **retired** per 2026-04-26 scope narrowing on SPEC-06; Phase 1 is substantially met via landed read-side tickets (SPEC-01 / SPEC-02 / SPEC-05 Part A / SPEC-07 Part A / SPEC-10 / SPEC-11 / SPEC-12) without runtime token measurement
 - Hook 2 blocks ≥1 raw `Read CANON_LEDGER.md` attempt during the test run; canon-addition completes without any such raw read
 - Sibling skills (`character-generation`, `diegetic-artifact-generation`, `continuity-audit`, `propose-new-canon-facts`, `canon-facts-from-diegetic-artifacts`, `propose-new-characters`) continue to work unchanged (they operate primarily on sub-directory artifacts that Hook 2 doesn't block, and they don't yet depend on MCP)
 - FOUNDATIONS.md references SPEC-01 through SPEC-05 by name in §Machine-Facing Layer; skill can cite FOUNDATIONS without contradiction
@@ -119,7 +119,7 @@ Four phases plus a prep phase. Each phase is independently valuable (token reduc
 - All 8 skills run end-to-end via engine (verified by end-to-end integration test per skill)
 - A canon-addition run on animalia with a large delivery (≥6 required_world_updates files) writes exclusively via engine; Hook 3 denies any raw Edit attempt on protected surfaces
 - `world-validate animalia --json` reports **zero findings** (not "zero `fail` with `info` grandfathering as residual" — per SPEC-14, all 224 baseline findings have legitimate fix paths and the grandfathering file empties post-Tier-3)
-- **≥70% token reduction** vs Phase 0 baseline (measured across 3 representative runs per skill)
+- ~~**≥70% token reduction** vs Phase 0 baseline (measured across 3 representative runs per skill)~~ — **retired** per 2026-04-26 scope narrowing on SPEC-06
 - Patch engine atomicity verified: inject failure at Phase A validate, Phase B temp-write, Phase B rename — no partial write on disk in any case
 - One synthetic concurrency test: two skills operating on different worlds simultaneously both succeed; same-world concurrency serializes (second waits or errors with `world_locked`)
 - Every sub-directory artifact creation (characters, diegetic artifacts, adjudications) goes through engine; direct Edit blocked by Hook 3
@@ -207,8 +207,8 @@ Phase 3 and Phase 4 (old): superseded — not executed separately.
 ## Verification
 
 - **Phase 0 acceptance**: structural repo-state check passes for the required `specs/`, `tools/`, `.claude/settings.json.example`, and `.gitignore` Phase 0 entries; Phase 0 completion is then recorded in `specs/IMPLEMENTATION-ORDER.md`
-- **Phase 1 acceptance**: measured token reduction ≥50%; zero structural fails; sibling skills regression-tested
-- **Phase 2 acceptance**: measured token reduction ≥70%; zero Rule 1–7 fails; atomicity injection tests pass
+- **Phase 1 acceptance**: zero structural fails; sibling skills regression-tested. (The previously-listed ≥50% measured token reduction is retired per 2026-04-26 scope narrowing on SPEC-06.)
+- **Phase 2 acceptance**: zero Rule 1–7 fails; atomicity injection tests pass. (The previously-listed ≥70% / ≥80% measured token reduction is retired per 2026-04-26 scope narrowing on SPEC-06.)
 - **Phase 1.5 acceptance** (SPEC-13): `world-index build animalia` succeeds against `_source/`; `world-validate animalia --structural` reports zero fails; no dangling references to retired monolithic filenames in skills / specs / docs (see SPEC-13 §Verification)
 - **Cross-phase stability**: each phase's acceptance test is re-run at every subsequent phase to catch regressions (e.g., Phase 1's token count should not regress in Phase 2)
 
@@ -223,7 +223,6 @@ Phase 3 and Phase 4 (old): superseded — not executed separately.
 
 ## Risks & Open Questions
 
-- **Phase 1 token-reduction target**: ≥50% may be aggressive if canon-addition's current baseline is already efficient for small proposals. Mitigation: measure baseline first; if ≥50% unachievable, revise target to "best effort" with a concrete percentage documented.
 - **Animalia structural fails**: unknown quantity until `world-validate animalia` runs. Mitigation: Phase 1 bootstrap step 3 explicitly allocates time for this; if fails are numerous, surface in a pre-Phase-2 cleanup plan.
 - **Phase 2 skill migration order**: rewriting 7 skills in one phase is ambitious. Mitigation: canon-addition pilot proves the pattern; remaining 7 can land in sub-batches within Phase 2 (e.g., content-generation skills first, then continuity-audit, then proposal-generation).
 - **Concurrent canon-addition runs**: engine per-world write lock is fine for single-user. Mitigation: documented limitation.

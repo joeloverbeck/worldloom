@@ -4,7 +4,7 @@
 
 **Phase**: Phase 2 — all 8 skills full migration against atomic source (per SPEC-13, the originally-planned Phase 1 read-side pilot is folded into Phase 2; canon-addition's read-side rewrite lands together with its write-side against `_source/` atomic records)
 **Depends on**: SPEC-01, SPEC-02, SPEC-03 (Phase 2), SPEC-04, SPEC-05, **SPEC-13 (atomic-source contract — skills read/write atomic records directly)**, **SPEC-14 (PA contract & vocabulary reconciliation — skills emit validator-conformant adjudications and consume canonical vocabularies at reasoning time)**
-**Blocks**: SPEC-08 acceptance criteria (token reduction depends on this spec landing); SPEC-09 Phase 2.5 (Tests 11 & 12 attach to canon-addition's post-rewrite Phase 14a — see `specs/SPEC-09-canon-safety-expansion.md` line 6)
+**Blocks**: SPEC-09 Phase 2.5 (Tests 11 & 12 attach to canon-addition's post-rewrite Phase 14a — see `specs/SPEC-09-canon-safety-expansion.md` line 6)
 
 ## SPEC-14 amendment summary
 
@@ -20,8 +20,8 @@ This spec was originally written assuming the validator's `adjudication_discover
 
 This spec was originally written against monolithic-markdown storage. Per SPEC-13 §C, the following changes apply:
 
-- **SPEC-06 Part A / Part B distinction collapses.** Part A was the Phase 1 canon-addition read-side pilot; Part B was Phase 2 full migration. With atomic-source landing in Phase 1.5 before Phase 2, there's no value in a read-only pilot against a storage form that will be retired — canon-addition's full rewrite (read + write) lands in Phase 2 against `_source/` directly. `specs/IMPLEMENTATION-ORDER.md` Phase 1 Tier 3 records the SKIP explicitly; the Phase 1 pilot acceptance gate is retired and its token-reduction measurement rolls into Phase 2's ≥80% target.
-- **Token reduction target lifts from ≥70% to ≥80%** for large deliveries. Atomic-record retrieval enables the higher target because skills read per-record YAML instead of full-file markdown, even beyond what SPEC-12's scoped-reference and packet-completeness machinery already delivered.
+- **SPEC-06 Part A / Part B distinction collapses.** Part A was the Phase 1 canon-addition read-side pilot; Part B was Phase 2 full migration. With atomic-source landing in Phase 1.5 before Phase 2, there's no value in a read-only pilot against a storage form that will be retired — canon-addition's full rewrite (read + write) lands in Phase 2 against `_source/` directly. `specs/IMPLEMENTATION-ORDER.md` Phase 1 Tier 3 records the SKIP explicitly; the Phase 1 pilot acceptance gate is retired.
+- **Token-reduction target retired.** Earlier drafts of this spec promised ≥80% measured token reduction (lifted from ≥70% per SPEC-13's atomic-source amendment, on the rationale that atomic-record retrieval enables the higher target). Per the 2026-04-26 scope narrowing, runtime token-reduction measurement is no longer a verification gate. Architectural gains from atomic-record retrieval still motivate the rewrites; they are not quantified. Per-skill static size-reduction estimates (file lines) remain as static-shape evidence in §Estimated Skill Size Reduction.
 - **Skill-body size estimates revise downward by an additional 15–25% per skill** beyond the pre-SPEC-13 Phase 2 baseline. Prose-layout lore (e.g., "read the §Ordinary Hazards section of EVERYDAY_LIFE.md", "grep for `<!-- added by CF-NNNN -->`", "Large-file method") becomes fully deletable once retrieval is record-addressed.
 - **Patch-plan construction shifts to record-id-addressed ops** (SPEC-03's `create_*` / `update_record_field` / `append_extension` / `append_touched_by_cf` vocabulary). No anchor-hash construction for atomic-record ops; `expected_content_hash` is retained for atomic records (per-record YAML hash) but no `expected_anchor_checksum` except for hybrid files (characters, diegetic artifacts).
 - **`create-base-world` updates to emit `_source/` directly.** New worlds start in atomic-source form; no legacy storage accumulates after SPEC-13 migration.
@@ -202,9 +202,8 @@ Two-column structure: pre-reassessment baseline (current skill state) vs post-SP
 | continuity-audit SKILL.md | 486 lines | ~150 lines | ~69% |
 | propose-new-characters SKILL.md | 594 lines | ~170 lines | ~71% |
 | Total canon-pipeline skill surface | ~3130 lines (8 SKILL.md files) | ~1110 lines | ~65% |
-| canon-addition run tool-input tokens (large delivery) | baseline | ~20% of baseline | ≥80% |
 
-Notes: `Total canon-pipeline skill surface` row sums the 8 SKILL.md files only (canon-addition 237 + create-base-world 304 + continuity-audit 486 + character-generation 165 + diegetic-artifact-generation 174 + propose-new-canon-facts 167 + canon-facts-from-diegetic-artifacts 156 + propose-new-characters 594 = 2283 lines; references/ and templates/ for canon-addition add the rest of the ~3130-line aggregate). character-generation's modest reduction reflects that its references were already extracted in commit `438d194` (2026-04-19); it starts the migration thinner than the other content-generation skills.
+Notes: `Total canon-pipeline skill surface` row sums the 8 SKILL.md files only (canon-addition 237 + create-base-world 304 + continuity-audit 486 + character-generation 165 + diegetic-artifact-generation 174 + propose-new-canon-facts 167 + canon-facts-from-diegetic-artifacts 156 + propose-new-characters 594 = 2283 lines; references/ and templates/ for canon-addition add the rest of the ~3130-line aggregate). character-generation's modest reduction reflects that its references were already extracted in commit `438d194` (2026-04-19); it starts the migration thinner than the other content-generation skills. The runtime tool-input-tokens row that used to terminate this table was retired per the 2026-04-26 scope narrowing (see §Retired verification gates); only static line counts remain.
 
 ### Meta-skills (explicitly out of scope)
 
@@ -225,28 +224,34 @@ Notes: `Total canon-pipeline skill surface` row sums the 8 SKILL.md files only (
 
 ## Verification
 
-- **Phase 2 full-migration acceptance**: all 8 skills run end-to-end via engine against `_source/` atomic records:
-  - Canon-addition large delivery (≥6 required_world_updates): single `submit_patch_plan` call, zero raw Edit on `_source/` paths
-  - Hook 3 denies any raw Edit attempt on `_source/<subdir>/*.yaml`; explicitly allows direct-Edit on hybrid artifacts (characters, diegetic artifacts, adjudications, proposals, audits) per SPEC-05 Part B
-  - Character-generation: writes via engine `append_character_record`; `characters/INDEX.md` consistent
-  - Every validator (`record_schema_compliance`, `id_uniqueness`, `cross_file_reference`, `touched_by_cf_completeness`, `modification_history_retrofit`, `yaml_parse_integrity`, plus Rules 1, 2, 4, 5, 6, 7) passes on post-write animalia state
-  - Token reduction ≥80% vs baseline (measured across 3 representative runs per skill — aligned with SPEC-08 Phase 2 completion gate at `specs/IMPLEMENTATION-ORDER.md` line 146)
-  - **Per SPEC-14**: every record emitted by a rewritten skill (PA frontmatter, character frontmatter, DA frontmatter, atomic CF/CH/M/OQ/INV/ENT/SEC YAML) passes `record_schema_compliance` end-to-end. A skill rewrite that emits any artifact failing the schema is incomplete and must not land. Verified by extending the per-skill integration test to assert validator pass on engine-emitted output.
-- **Reasoning preservation**: before/after comparison of canon-addition adjudications for 3 historical proposals; verdicts match; phase-citation coverage equivalent
-- **Role split**: Localizer-Editor-Auditor dispatch measured; the Localizer subagent's fresh-context window keeps the main agent context lean (Hook 4 SubagentStart preface confirms the discipline preface lands)
+Verification scope was narrowed on 2026-04-26 to the static-and-CLI-verifiable subset. The retired runtime-only bullets (token-reduction measurement, before/after reasoning-preservation comparison on historical adjudications, instrumented Localizer-Editor-Auditor dispatch trace) are recorded in §Retired verification gates so the change is auditable.
+
+- **Phase 2 full-migration acceptance** (static + CLI):
+  - Each rewritten skill's `SKILL.md` prescribes engine-routed writes for `_source/` paths (and engine ops or the spec's documented direct-Edit-on-hybrid pattern for hybrid artifacts); no rewritten skill prescribes raw `Edit`/`Write` on `_source/<subdir>/*.yaml`. Verified by static structural audit per `tickets/SPEC06SKIREWPAT-009.md`.
+  - Hook 3 denies raw `Edit` attempts on `_source/<subdir>/*.yaml` and explicitly allows direct-Edit on hybrid artifacts (characters, diegetic artifacts, adjudications, proposals, audits) per SPEC-05 Part B. Verified by the `tools/hooks/` test suite, not by per-skill runtime trace.
+  - Character-generation prescribes writes via engine `append_character_record` and maintains `characters/INDEX.md` in skill prose. Verified by static structural audit.
+  - `cd tools/validators && node dist/src/cli/world-validate.js animalia --json` reports zero findings on post-rewrite animalia state. Covers `record_schema_compliance`, `id_uniqueness`, `cross_file_reference`, `touched_by_cf_completeness`, `modification_history_retrofit`, `yaml_parse_integrity`, and Rules 1, 2, 4, 5, 6, 7.
+  - **Per SPEC-14**: every record emitted by a rewritten skill (PA frontmatter, character frontmatter, DA frontmatter, atomic CF/CH/M/OQ/INV/ENT/SEC YAML) passes `record_schema_compliance` end-to-end. A skill rewrite that emits any artifact failing the schema is incomplete and must not land. Verified by `world-validate animalia --json` zero findings on the post-rewrite animalia state and by the per-package integration tests under `tools/`; no per-skill instrumented runtime assertion is required.
+
+### Retired verification gates
+
+The following gates were specified in earlier drafts of this spec and are retired per the 2026-04-26 scope narrowing. They are recorded here so the change is auditable; they are not active criteria.
+
+- **Token reduction ≥80%**: was a runtime measurement of canon-addition large-delivery tool-input tokens against a Phase 0 baseline, measured across 3 representative runs per skill. Retired because the project no longer treats runtime token measurement as a verification gate. Architectural gains from atomic-record retrieval still motivate the rewrites; they are not quantified.
+- **Reasoning preservation**: was a before/after comparison of canon-addition adjudications on 3 historical proposals (verdicts match; phase-citation coverage equivalent). Retired because re-running canon-addition end-to-end is a runtime verification. The reasoning-preservation *risk* (judgment lost in thinning) is real and survives in §Risks; it is mitigated structurally (preserve judgment reference files; only delete mechanism prose) rather than by historical re-runs.
+- **Role split**: was an instrumented dispatch measurement confirming the Localizer-Editor-Auditor pattern fires and the Hook 4 SubagentStart preface lands. Retired. The role-split *pattern* is still part of the rewritten skills (see §Agent role split) — it is implementation guidance, not a measured gate.
 
 ## Out of Scope
 
 - Meta-skill migration (brainstorm, skill-creator, etc. — not needed)
 - New skill creation (this spec is migration, not feature addition)
-- Performance optimization beyond the ≥80% token-reduction target
+- Performance optimization (token-reduction target retired per §Retired verification gates)
 - Backwards compatibility with pre-migration skill invocations (cleanup during migration)
 - New patch-engine ops beyond the SPEC-03 / SPEC-14 vocabulary already shipped (audit records and proposal cards stay direct-Edit on hybrid files)
 
 ## Risks & Open Questions
 
-- **Reasoning preservation**: thinning a skill risks losing judgment subtleties encoded in prose (e.g., Phase 6b critic-recommendation-vs-decision-test reconciliation in canon-addition). Mitigation: preserve judgment reference files (`proposal-normalization.md`, `consequence-analysis.md`, `counterfactual-and-verdict.md`); only delete mechanism prose; code-review each rewrite against pre-migration behavior using historical adjudications.
-- **Agent role split latency**: three-agent dispatch may add overhead. Mitigation: measure during migration; if overhead >5% of total run time, collapse Auditor into main agent for small deliveries.
+- **Reasoning preservation**: thinning a skill risks losing judgment subtleties encoded in prose (e.g., Phase 6b critic-recommendation-vs-decision-test reconciliation in canon-addition). Mitigation: preserve judgment reference files (`proposal-normalization.md`, `consequence-analysis.md`, `counterfactual-and-verdict.md`); only delete mechanism prose. The historical-adjudication code-review check named in earlier drafts is retired (see §Retired verification gates); structural preservation of judgment files is the surviving mitigation.
 - **Hybrid-file engine-routing migration**: per SPEC-05 Part B Hook 3 hybrid-file allowlist (`specs/IMPLEMENTATION-ORDER.md` line 112), characters, diegetic artifacts, adjudications, proposals, and audits remain writable via direct-Edit even with Hook 3 active. Per-skill migration to engine ops (`append_character_record`, `append_diegetic_artifact_record`, `append_adjudication_record`) is therefore an internal-only refactor — pre-migration writes that pass and post-migration writes that pass against the same `record_schema_compliance` schema (per SPEC-14) are observationally indistinguishable. Risk shifts from "skill-direct vs engine-direct cliff" to "engine-emitted record must satisfy validator schema end-to-end" (covered by §Verification's `record_schema_compliance` acceptance criterion).
 - **Proposal cards stay direct-Edit**: `proposals/PR-NNNN-*.md` and `character-proposals/` remain writable directly post-migration (Hook 3 allows). This is a deliberate escape hatch for proposal-generating skills — proposals are not canon. Risk: accidentally treated as canon. Mitigation: validator framework's `cross_file_reference` flags any proposal referenced as canon source.
 - **Validator false-positives during migration**: a rewritten skill may trigger new validator fails on previously-passing world state. Mitigation: SPEC-08 Phase 2 bootstrap re-runs `world-validate`; fails are either fixed (one-off canon-addition) or surfaced as retcon proposals through `continuity-audit`.

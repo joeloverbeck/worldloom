@@ -53,7 +53,7 @@ Parallelizable order (within each tier, items may proceed in parallel):
 **Tier 3 (depends on Tier 2.25)**:
 - ~~`SPEC-06 Part A` canon-addition read-side rewrite~~ — **SKIPPED**, folded into Phase 2. Rationale per SPEC-13: rewriting canon-addition's read-side against the monolithic ledger and then re-rewriting it against atomic records two phases later is wasteful. The Phase 1 pilot's token-reduction evidence has already landed via SPEC-12's live-corpus verification.
 
-**Phase 1 completion gate**: substantially met via the landed tickets for SPEC-01 / SPEC-02 / SPEC-05 Part A / SPEC-07 Part A / SPEC-10 / SPEC-11 / SPEC-12. The SPEC-06 Part A pilot gate is retired per SPEC-13; its token-reduction measurement rolls into Phase 2's ≥80% target against atomic-source state.
+**Phase 1 completion gate**: substantially met via the landed tickets for SPEC-01 / SPEC-02 / SPEC-05 Part A / SPEC-07 Part A / SPEC-10 / SPEC-11 / SPEC-12. The SPEC-06 Part A pilot gate is retired per SPEC-13. Token-reduction measurement is retired entirely per 2026-04-26 scope narrowing on SPEC-06 — the project no longer treats runtime token measurement as a verification gate.
 
 ### Phase 1.5 — Atomic-Source Migration (SPEC-13)
 
@@ -143,7 +143,7 @@ The original structural-validator gate was not used as the Phase 1.5 closeout pr
 - All 8 skills end-to-end via engine against `_source/` atomic records
 - canon-addition large delivery: zero raw Edit; Hook 3 denies 100% of raw attempts on `_source/` surfaces
 - **Per SPEC-14**: `world-validate animalia --json` reports **zero findings** (not "zero `fail` with `info` grandfathering as residual" — the 224-finding baseline has full fix paths via SPEC-14 Tier 3 tickets and the grandfathering file empties post-fix)
-- **≥80% token reduction** vs Phase 0 baseline (lifted from SPEC-08's ≥70% target — atomic-source retrieval enables the higher target; measured across 3 representative runs per skill)
+- ~~**≥80% token reduction** vs Phase 0 baseline (lifted from SPEC-08's ≥70% target — atomic-source retrieval enables the higher target; measured across 3 representative runs per skill)~~ — **retired** per 2026-04-26 scope narrowing on SPEC-06
 - Atomicity injection tests pass (two-phase commit holds; no partial writes)
 - Concurrency test passes (per-world write lock serializes same-world plans)
 - Every `create_*` / `update_record_field` / `append_extension` / `append_touched_by_cf` op fixture-tested
@@ -353,15 +353,13 @@ Before Phase 1 begins, capture baseline measurements on animalia:
 - Number of Edit tool calls per delivery
 - Maximum context-window usage in a large delivery
 
-These baseline numbers anchor the ≥50% (Phase 1) and ≥80% (Phase 2) reduction targets.
+These baseline numbers were originally captured to anchor the ≥50% (Phase 1) and ≥80% (Phase 2) reduction targets. Both targets are retired per 2026-04-26 scope narrowing on SPEC-06; the baseline notes here are preserved as historical reference only.
 
 ## Risk-adjusted re-sequencing options
 
 If Phase 1 reveals that Hook 2 is too aggressive (false-positives on legitimate reads), SPEC-05 Part A may tighten thresholds before proceeding to Phase 2.
 
 If SPEC-06 Phase 2 skill rewrites reveal systematic reasoning gaps (judgment being lost), pause Phase 2 and revisit SPEC-06's "what stays in each skill" table.
-
-If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further token-reduction wins live in the context-packet budget tuning (SPEC-02) rather than in deeper mechanism moves.
 
 ## Deliverable status
 
