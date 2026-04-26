@@ -1,43 +1,77 @@
 # World-State Prerequisites
 
-Before this skill acts, it MUST load (per FOUNDATIONS §Tooling Recommendation — non-negotiable):
+Post-SPEC-13, world canon lives as atomic YAML records under `worlds/<slug>/_source/`. Skills do NOT bulk-read those subdirectories — Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. The retrieval contract for this skill:
 
-## Reading mature world files
+## Primary load: context packet
 
-As worlds mature, any world file can cross the Read tool's token limit — `CANON_LEDGER.md` is the first to do so (it accumulates one entry per accepted CF), but `INSTITUTIONS.md`, `MYSTERY_RESERVE.md`, `EVERYDAY_LIFE.md`, and later `TIMELINE.md` and `GEOGRAPHY.md` follow the same trajectory as modification-history annotations accumulate from each accepted CF.
+Pre-flight calls:
 
-When a prescribed Read returns a token-limit error, use this pattern:
-1. **Grep for structural anchors** to enumerate the file's section layout — `^##[^#]` for top-level sections; `^### ` for subsections; `^id:` for CF entries in `CANON_LEDGER.md`; `^## M-` for Mystery Reserve entries; filename-appropriate patterns otherwise.
-2. **Read targeted ranges** with `offset`/`limit` for the sections most relevant to the character's brief — the CFs whose `who_can_do_it` distributions bear on the character's capabilities; the INSTITUTIONS axes that embed the character's profession, law-exposure, and religion; the Mystery Reserve entries whose `what is unknown` blocks plausibly touch the character's epistemic surface.
-3. **Do not attempt a single full Read** when the size warning triggers — selective reading is the expected mode once enough canon accumulates, and the audit trail (what sections were read, why) is as load-bearing as any other Phase 7 record.
+```
+mcp__worldloom__get_context_packet(
+  task_type='character_generation',
+  seed_nodes=[<brief-derived seed nodes>],
+  token_budget=10000
+)
+```
 
-This pattern applies uniformly across every file in §World-State Prerequisites. The CANON_LEDGER.md entry below cross-references it but does not repeat the mechanism.
+Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories) + relevant CFs + Mystery Reserve entries touching the character's domain + named-entity neighbors + section context, with completeness guarantees against silent truncation.
 
-## Mandatory — always loaded at Pre-flight
-- `docs/FOUNDATIONS.md` — cited throughout (Rule 2 at Phases 1/2/5; Rule 3 at Phase 5; Rule 4 at Phase 7c; Rule 7 at Phase 7b; Canon Layers at Phase 7; Ontology Categories at Phase 5).
-- `worlds/<world-slug>/WORLD_KERNEL.md` — genre/tonal/chronotope contract (Phase 0 input validation against world identity; Phase 6 voice register calibration).
-- `worlds/<world-slug>/INVARIANTS.md` — Phase 7a invariant conformance (every capability, belief, and knowledge claim tested).
-- `worlds/<world-slug>/ONTOLOGY.md` — Phase 5 capability classification (each skill attaches to declared ontology categories).
-- `worlds/<world-slug>/PEOPLES_AND_SPECIES.md` — Phase 1 embodiment (body plan, diet, senses, vulnerability, lifespan, social density) + Phase 6 species/body perception effects.
-- `worlds/<world-slug>/GEOGRAPHY.md` — Phase 1 material reality (terrain, climate, choke points, disease ecologies, food baselines → body, food, mobility, injury profile).
-- `worlds/<world-slug>/INSTITUTIONS.md` — Phase 2 institutional embedding (family, law, religion, employer, military, guild, landholding, education, recordkeeping — the proposal's structural anchor).
-- `worlds/<world-slug>/ECONOMY_AND_RESOURCES.md` — Phase 1 (food, possessions, access restrictions, debts) + Phase 2 (employer/guild/lord relations).
-- `worlds/<world-slug>/EVERYDAY_LIFE.md` — Phase 1 + Phase 3 (the ordinary-life backdrop this character inhabits or departs from; vocabulary/categories available to ordinary people in this region/class/species cluster).
-- `worlds/<world-slug>/TIMELINE.md` — Phase 3 (what history the character lived through or learned about; what residues remain in their region).
-- `worlds/<world-slug>/CANON_LEDGER.md` — Phase 5 (capability facts and their `distribution` blocks) + Phase 7c (distribution/scope conformance check). Large mature ledgers exceed the Read tool's token limit; use the selective-reading pattern in §Reading mature world files above, grepping `^id:` to enumerate CF IDs and then reading by line-range for the CFs relevant to the character's capabilities and brief.
-- `worlds/<world-slug>/MYSTERY_RESERVE.md` — Phase 7b firewall (non-negotiable — each entry's `disallowed cheap answers` and `what is unknown` blocks are the literal test material).
-- `worlds/<world-slug>/OPEN_QUESTIONS.md` — Phase 3 (so the character does not "know" things the world has deliberately not yet decided).
+Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, species, or capability domain. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
+
+## Targeted record retrieval (during reasoning)
+
+When a phase needs a specific record beyond what the packet returned:
+
+- `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC).
+- `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans, e.g., capability CFs whose distribution touches the character's social position.
+- `mcp__worldloom__get_neighbors(node_id)` — pull the relation graph around a resolved entity (regions / institutions / species).
+- `mcp__worldloom__find_named_entities(names)` — resolve current_location / place_of_origin / institution names from the brief to `ENT-NNNN` ids.
+- `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 5 needs to ground a capability against the section context where its CF lives.
+
+## Primary-authored files (direct Read permitted)
+
+These remain primary-authored at the world root and are read directly:
+
+- `docs/FOUNDATIONS.md` — Rule 2 at Phases 1/2/5; Rule 3 at Phase 5; Rule 4 at Phase 7c; Rule 7 at Phase 7b; Canon Layers at Phase 7; Ontology Categories at Phase 5.
+- `worlds/<world-slug>/WORLD_KERNEL.md` — genre / tonal / chronotope contract (Phase 0 input validation against world identity; Phase 6 voice register calibration).
+- `worlds/<world-slug>/ONTOLOGY.md` — Categories + Relation Types + Notes; Phase 5 capability classification.
+
+## Hybrid files (direct Read permitted)
+
+For continuity-preservation reads at Pre-flight:
+
+- `worlds/<world-slug>/characters/<existing-slug>.md` — read frontmatter + `notes` block of any existing dossier whose contents constrain the new character (per the Pre-flight continuity-preservation step).
+- `worlds/<world-slug>/characters/INDEX.md` — quick scan for slug references when resolving "are any existing characters mentioned in this brief?"
+
+## Phase-to-record mapping
+
+| Phase | Records consulted | Retrieval surface |
+|-------|-------------------|-------------------|
+| Pre-flight | CHAR-NNNN allocation | `allocate_next_id(world_slug, 'CHAR')` |
+| Phase 0 | ENT (current_location, place_of_origin); SEC-GEO; SEC-PAS (species cluster); SEC-INS (profession institution) | `find_named_entities` + `get_neighbors` |
+| Phase 1 | SEC-GEO (terrain / climate / hazards); SEC-PAS (embodiment); SEC-ELF (class diet / housing / injuries / vocabulary); SEC-ECR (possessions / scarcity); SEC-INS (legal / material access) | packet + `get_record` |
+| Phase 2 | SEC-INS (every institutional axis: family / law / religion / employer / military / debt / taboo / literacy / inheritance) | packet + `search_nodes(node_type='section', filters={file_class: 'institutions'})` |
+| Phase 3 | M-NNNN (Mystery Reserve `what is unknown` overlap); OQ-NNNN (deliberately undecided questions); SEC-INS (ideological environment); SEC-ELF (common beliefs, vocabulary) | packet + `search_nodes` |
+| Phase 4 | WORLD_KERNEL §Core Pressures; SEC-* identifying `major_local_pressures` | direct Read + packet |
+| Phase 5 | capability CFs (each capability's `who_can_do_it` distribution); SEC-PAS (embodiment); SEC-GEO (regional effects); SEC-MTS (loaded selectively if magic/tech capabilities present) | `search_nodes(node_type='canon_fact', filters={domain: ...})` + `get_record` |
+| Phase 6 | SEC-ELF (language patterns by class/region/religion); SEC-PAS (senses); SEC-INS (taboo system) | packet + `get_record` |
+| Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants are always loaded by the `character_generation` profile) |
+| Phase 7b | every M-NNNN record (firewall) | packet + `search_nodes(node_type='mystery_record')` if any are missing |
+| Phase 7c | matching capability CFs from Phase 5 | (already retrieved at Phase 5) |
 
 ## Selectively loaded
-- `worlds/<world-slug>/MAGIC_OR_TECH_SYSTEMS.md` — Phase 5, loaded only if Phase 0 detects the character's inputs or generated capabilities touch magical or technological systems. Skipped otherwise to avoid context bloat on ordinary-laborer characters.
 
-## Pre-flight
-- `worlds/<world-slug>/characters/` directory listing — for `CHAR-NNNN` allocation and slug-collision check. Read `INDEX.md` if present. Directory created at Phase 9 commit time if absent.
-- `character_brief_path` contents (if provided) — read once at Phase 0.
+`worlds/<world-slug>/_source/magic-or-tech-systems/SEC-MTS-NNN.yaml` records load via `search_nodes(node_type='section', filters={file_class: 'magic-or-tech-systems'})` only if Phase 0 detects the brief's inputs or generated capabilities touch a magical or technological system named in `ONTOLOGY.md` magic-practice / technology categories or a capability CF. Skipped otherwise to avoid context bloat on ordinary-laborer characters.
+
+## Pre-flight reads
+
+- `worlds/<world-slug>/characters/` directory listing — for slug-collision check against the derived `<char-slug>`. The CHAR-NNNN allocation runs through `allocate_next_id`, NOT a directory grep.
+- `character_brief_path` contents (if provided) — direct Read once at Phase 0.
 
 ## Abort conditions
 
-Enforced by Pre-flight Check (canonical abort messages live in the thin SKILL.md):
+Enforced by Pre-flight (canonical abort messages live in the thin SKILL.md):
+
 - `worlds/<world-slug>/` missing
-- Any of the 13 mandatory files missing or unreadable — the abort names the specific file
-- `worlds/<world-slug>/characters/<char-slug>.md` already exists (slug collision; this skill never overwrites a dossier)
+- `worlds/<world-slug>/characters/<char-slug>.md` already exists (slug collision; this skill never overwrites a dossier — the engine's `file_already_exists` check is the second backstop)
+- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; rebuild via `world-index build` before proceeding)

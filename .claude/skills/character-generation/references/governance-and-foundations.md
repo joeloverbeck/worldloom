@@ -19,7 +19,7 @@ No Canon Fact Record or Change Log Entry is emitted — see the thin SKILL.md's 
 
 | Principle | Phase | Mechanism |
 |-----------|-------|-----------|
-| Tooling Recommendation (non-negotiable) | Pre-flight | docs/FOUNDATIONS.md + 12 mandatory world files (13 files total) loaded before any phase; MAGIC_OR_TECH_SYSTEMS.md selectively loaded at Phase 0 based on input detection |
+| Tooling Recommendation (non-negotiable) | Pre-flight | docs/FOUNDATIONS.md (direct Read) + WORLD_KERNEL.md + ONTOLOGY.md (direct Read) + atomic-record context packet via `mcp__worldloom__get_context_packet(task_type='character_generation', ...)`; SEC-MTS records selectively retrieved at Phase 0 via `search_nodes` if magical/tech capability is implicated |
 | Canon Layers §Hard / Soft / Contested | Phase 7 | Character beliefs classified against their source: hard canon in `known_firsthand` only if observably true; folk beliefs and propaganda routed to `known_by_rumor` or `wrongly_believes`; no character silently promotes contested canon to objective truth |
 | Canon Layers §Mystery Reserve | Phase 7b | Explicit firewall with audit list in `world_consistency.mystery_reserve_firewall` |
 | Invariants §full schema | Phase 7a | Every invariant tested; `break conditions` and `revision difficulty` fields guide Phase 7d repair paths |
@@ -35,7 +35,7 @@ No Canon Fact Record or Change Log Entry is emitted — see the thin SKILL.md's 
 ## Full Guardrails
 
 - This skill operates on **exactly one existing world** per invocation. It never creates a new world (that is `create-base-world`'s job), never modifies `docs/FOUNDATIONS.md`, never touches other worlds, never touches `archive/` or `brainstorming/`.
-- This skill **never writes to world-level canon files** — not `WORLD_KERNEL.md`, `INVARIANTS.md`, `ONTOLOGY.md`, `TIMELINE.md`, `GEOGRAPHY.md`, `PEOPLES_AND_SPECIES.md`, `INSTITUTIONS.md`, `ECONOMY_AND_RESOURCES.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `EVERYDAY_LIFE.md`, `CANON_LEDGER.md`, `OPEN_QUESTIONS.md`, or `MYSTERY_RESERVE.md`. All writes are confined to `worlds/<world-slug>/characters/`.
+- This skill **never writes to world-level canon records** — not `WORLD_KERNEL.md`, `ONTOLOGY.md`, nor any `_source/<subdir>/*.yaml` record (CF / CH / INV / M / OQ / ENT / SEC). Hook 3 enforces. All writes are confined to `worlds/<world-slug>/characters/`: the dossier file lands via the engine's `append_character_record` op through `submit_patch_plan`; `INDEX.md` is maintained via direct `Edit` (Hook 3's hybrid-file allowlist permits it).
 - All reads and writes are rooted at `worlds/<world-slug>/` or at the user-provided `character_brief_path`. Repo-root writes are forbidden.
 - If a pre-flight `next_char_id` or `<char-slug>.md` would collide with an existing file, the skill aborts. Never overwrite an existing dossier. Character dossiers, once committed, are treated as existing state.
 - This skill **proposes characters; it does not canonize them**. If the user later wants a specific NPC to become world-level hard canon (a named faction leader, a ruler whose existence is a fact the world tracks), that is a separate `canon-addition` run whose proposal cites the existing dossier. The character's existence is *not* hard canon merely by virtue of a dossier existing.
