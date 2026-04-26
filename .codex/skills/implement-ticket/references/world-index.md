@@ -19,6 +19,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 - For atomic-source `world-index verify` tickets, remember that retired logical file names such as `INSTITUTIONS.md` can be synthetic in atomic worlds but real disk-backed files in legacy fixtures. Skip or special-case them only after proving the backing file is absent or the fixture mode is truly atomic.
 - When replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path. Do not scan a broader substrate ad hoc and treat that result as equivalent evidence.
 - When proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof.
+- For sync or `file_versions` tests, confirm the mutation changes the exact tracked content hash. Avoid whitespace-only touches when parser or hash normalization may erase them; for semantic-neutral atomic YAML edits, a YAML comment touch can prove the reparse without changing record data.
 - When a command is expected to reject a world before build/sync, assert the rejection does not create or mutate `_index/world.db`, WAL/SHM files, or other derived artifacts unless the ticket explicitly owns that side effect.
 
 ## Closeout

@@ -427,7 +427,7 @@ test("build resolves animalia DA-0001 references through the canonical whole-fil
       });
 
       const derivedFromRows = loadDerivedFromRefsTo(db, "DA-0001");
-      assert.equal(derivedFromRows.length, 4);
+      assert.equal(derivedFromRows.length, 5);
       assert.equal(derivedFromRows.every((row) => row.target_node_id === "DA-0001"), true);
       assert.equal(derivedFromRows.every((row) => row.target_unresolved_ref === null), true);
     } finally {
@@ -796,10 +796,10 @@ test("build preserves recovery-parsed animalia semantic edge totals", () => {
     const db = openBuiltDb(root);
     try {
       assert.deepEqual(loadSemanticEdgeCounts(db), {
-        affected_fact: 127,
-        derived_from: 87,
-        modified_by: 80,
-        required_world_update: 283
+        affected_fact: 149,
+        derived_from: 89,
+        modified_by: 82,
+        required_world_update: 313
       });
     } finally {
       db.close();
@@ -821,9 +821,9 @@ test("sync reparses only the touched file", async () => {
 
     await delay(25);
 
-    const relativePath = "ECONOMY_AND_RESOURCES.md";
+    const relativePath = "_source/economy-and-resources/SEC-ECR-001.yaml";
     const absolutePath = path.join(root, "worlds", WORLD_SLUG, relativePath);
-    writeFileSync(absolutePath, `${readFileSync(absolutePath, "utf8")}\n `, "utf8");
+    writeFileSync(absolutePath, `${readFileSync(absolutePath, "utf8")}\n# sync touch\n`, "utf8");
 
     assert.equal(sync(root, WORLD_SLUG), 0);
 
