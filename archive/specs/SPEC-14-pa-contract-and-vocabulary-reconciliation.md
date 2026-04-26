@@ -102,7 +102,7 @@ Reconcile the three-layer drift into a single PA contract; close the structural 
 | Path | Change |
 |---|---|
 | `specs/SPEC-06-skill-rewrite-patterns.md` | Skills consume canonical-vocab MCP at reasoning time (replaces "canonical domain known to skill prose" assumption). canon-addition emits validator-conformant PAs via engine; OQ allocation joins the patch plan. New acceptance criterion: every record emitted by a rewritten skill passes `record_schema_compliance` end-to-end. |
-| `specs/SPEC-08-migration-and-phasing.md` | Animalia structural-fail resolution path uses SPEC-14 contract; bulk migration target is zero grandfathering entries post-Tier 3 (was: residual structural fails grandfathered indefinitely). |
+| `archive/specs/SPEC-08-migration-and-phasing.md` | Animalia structural-fail resolution path uses SPEC-14 contract; bulk migration target is zero grandfathering entries post-Tier 3 (was: residual structural fails grandfathered indefinitely). |
 | `docs/FOUNDATIONS.md` | Rule 2 list adds `geography`. Mystery Reserve definition (§5) adds note: *"`future_resolution_safety` is coupled to `status`: `forbidden`-status mysteries take `none`; `active`/`passive` take `low`/`medium`/`high`."* |
 | `specs/IMPLEMENTATION-ORDER.md` | SPEC-14 inserted in dependency chain after SPEC-13, before SPEC-06 Phase 2; collateral amendments to SPEC-06/08 noted. |
 

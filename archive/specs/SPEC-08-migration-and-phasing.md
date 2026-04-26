@@ -3,6 +3,7 @@
 # SPEC-08: Migration & Phasing Plan
 
 **Phase**: meta (orchestrates Phases 0 through 2.5)
+**Status**: ✅ COMPLETED — see §Outcome
 **Depends on**: SPEC-01 through SPEC-07, **SPEC-13 (atomic-source migration — inserts Phase 1.5 and supersedes old Phase 3 + Phase 4)**, **SPEC-14 (PA contract & vocabulary reconciliation — animalia structural-fail resolution path now targets the SPEC-14 contract)**
 **Blocks**: nothing (this spec is the overview)
 
@@ -26,7 +27,7 @@ The Phase 1 and Phase 2 animalia resolution paths originally allowed grandfather
 
 ## Problem Statement
 
-Landing the full machine-facing layer (SPEC-01 through SPEC-07) in a single change would be high-risk: all eight canon/content-generation skills break simultaneously if any one component regresses. The existing `animalia` world (47 CF + 18 CH + 17 PA + 3 characters + 3 diegetic artifacts + 14 proposals) is real user data — migration must be non-destructive and rollback-able. The greenfield framing permits clean architectural choices, but does not license data-loss-risking transitions.
+Landing the full machine-facing layer (SPEC-01 through SPEC-07) in a single change would be high-risk: all eight canon/content-generation skills break simultaneously if any one component regresses. The existing `animalia` world (47 CF + 18 CH + 17 PA + 3 characters + 3 diegetic artifacts + 14 proposals) is real user data — migration must be non-destructive and rollback-able. The greenfield framing permits clean architectural choices, but does not license data-loss-risking transitions. (Historical framing preserved as written at Phase 0 authoring time. The phased approach landed end-to-end without rollback being needed; the animalia world inventory has since grown via subsequent canon-addition runs — see §Outcome.)
 
 **Source context**: `brainstorming/structure-aware-retrieval.md` §10 (migrate the ledger first, not the whole repo), §17 (phased implementation plan). Brainstorm decision: each phase ships standalone value; rollback preserves prior-phase wins.
 
@@ -211,6 +212,43 @@ Phase 3 and Phase 4 (old): superseded — not executed separately.
 - **Phase 2 acceptance**: zero Rule 1–7 fails; atomicity injection tests pass. (The previously-listed ≥70% / ≥80% measured token reduction is retired per 2026-04-26 scope narrowing on SPEC-06.)
 - **Phase 1.5 acceptance** (SPEC-13): `world-index build animalia` succeeds against `_source/`; `world-validate animalia --structural` reports zero fails; no dangling references to retired monolithic filenames in skills / specs / docs (see SPEC-13 §Verification)
 - **Cross-phase stability**: each phase's acceptance test is re-run at every subsequent phase to catch regressions (e.g., Phase 1's token count should not regress in Phase 2)
+
+## Outcome
+
+**Completion date**: 2026-04-26 (Phase 2 closeout via `SPEC06SKIREWPAT-009` static-audit capstone). Reassessed 2026-04-26.
+
+**Landed deliverables**:
+
+- **Phase 0 — Prep** (closed 2026-04-22): `tools/` scaffold present (`tools/world-index/`, `tools/world-mcp/`, `tools/patch-engine/`, `tools/validators/`, `tools/hooks/`); `.claude/settings.json.example` present; `.gitignore` carried the six Phase 0 entries (the `worlds/*/_source/` entry was reversed during Phase 1.5 per the SPEC-13 amendment summary above — current `.gitignore` shows the five remaining entries).
+- **Phase 1 — Read Path** (closed substantially 2026-04-24; SPEC-06 Part A pilot folded into Phase 2 per SPEC-13): SPEC-01 (`tools/world-index/`), SPEC-02 (`tools/world-mcp/`), SPEC-05 Part A Hooks 1/2/4 (`tools/hooks/src/hook{1,2,4}-*.ts`), SPEC-07 Part A docs (`docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`), plus SPEC-10 / SPEC-11 / SPEC-12 retrieval-reliability remediations. All archived at `archive/specs/SPEC-{01,02,07,10,11,12}*.md` and `archive/specs/SPEC-05-hooks-discipline.md`.
+- **Phase 1.5 — Atomic-Source Migration** (closed 2026-04-24, SPEC-13): `worlds/animalia/_source/` populated across all 11 atomized concerns (CF=48, CH=21, INV=16, M=20, OQ=60, ENT=6, plus seven SEC-class subdirectories); 11 monolithic files retired; SPEC-13 archived at `archive/specs/SPEC-13-atomic-source-migration.md`. Open exception: `tickets/SPEC13ATOSRCMIG-006.md` covers the one-week-soak deletion of `.pre-migration-snapshot/animalia/`, BLOCKED until 2026-05-01 — not a Phase 2 blocker.
+- **Phase 2 — Write Path + All-Skill Migration** (closed 2026-04-26 via `SPEC06SKIREWPAT-009`): SPEC-03 patch engine (`tools/patch-engine/`), SPEC-04 validators (`tools/validators/`, 13 mechanized validators), SPEC-02-PHASE2 retrieval-MCP tooling update, SPEC-05 Part B Hooks 3 + 5 (`tools/hooks/src/hook{3,5}-*.ts`, all five hooks wired in `.claude/settings.json.example`), SPEC-14 PA-contract reconciliation (Tier 2 code + Tier 3 animalia bulk fix), SPEC-06 all-eight-skill migration against atomic source, SPEC-07 Part B HARD-GATE/CLAUDE.md refinements. All archived at `archive/specs/SPEC-{03,04,05,06,07,14}*.md` and `archive/specs/SPEC-02-phase2-tooling.md`. Animalia validation-grandfathering policy archived as `worlds/animalia/audits/validation-grandfathering-pre-spec14.yaml` (audit-trail evidence; current canonical filename retired).
+- **Phase 3 (old) and Phase 4 (old)**: superseded by Phase 1.5 (SPEC-13) — no separate execution.
+
+**Deviations from original plan**:
+
+- The Phase 1 SPEC-06 Part A pilot was skipped per SPEC-13 to avoid double-rewriting against the soon-to-be-retired monolithic ledger. Token-reduction evidence landed via SPEC-12's live-corpus verification instead.
+- Token-reduction acceptance gates (≥50% Phase 1, ≥70% / ≥80% Phase 2) were retired per the 2026-04-26 scope narrowing on SPEC-06 — the project no longer treats runtime token measurement as a verification gate. The Phase 2 zero-findings validator gate (per SPEC-14) became the load-bearing acceptance criterion.
+- The animalia residual-fail bulk fix targeted the SPEC-14 contract, not the legacy three-way drift; grandfathering target reduced to zero (eliminated permanent grandfathering as an end-state).
+- Three downstream post-pilot tracks (SPEC-15 / SPEC-16 / SPEC-17) extended Phase 2 closeout with validator + MCP refinements + audit-trail/retrieval-contract clarifications. These are not within SPEC-08's original scope but are recorded in `specs/IMPLEMENTATION-ORDER.md` as Phase 2.6 / 2.7.
+
+**Re-run verification (2026-04-26 reassessment)**:
+
+| Command | Result |
+|---|---|
+| `node tools/validators/dist/src/cli/world-validate.js animalia --json` | exit 0; `summary.fail_count = 0`, `warn_count = 0`, `info_count = 0`; zero verdicts. **Phase 2 / SPEC-14 zero-findings gate = MET.** |
+| `ls archive/specs/SPEC-{01,02,02-phase2,03,04,05,06,07,13,14}*.md` | All 10 sibling specs archived. |
+| `ls tools/{world-index,world-mcp,patch-engine,validators,hooks}/` | All 5 tooling packages present. |
+| `grep -E "hook[1-5]" .claude/settings.json.example` | All 5 hooks wired (Hook 1 SessionStart; Hooks 2/3/4 PreToolUse; Hook 5 PostToolUse on `mcp__worldloom__submit_patch_plan`). |
+| `ls worlds/animalia/_source/canon/*.yaml \| wc -l` and analogous | 48 CF + 21 CH + 16 INV + 20 M + 60 OQ + 6 ENT + 7 SEC-class subdirectories all populated. |
+| `ls worlds/animalia/audits/validation-grandfathering*.yaml` | Archived as `validation-grandfathering-pre-spec14.yaml` (audit-trail form per spec line 14). |
+| Read `tickets/SPEC13ATOSRCMIG-006.md` Status | BLOCKED on the post-migration soak; not a Phase 2 blocker per IMPLEMENTATION-ORDER.md. |
+
+**Cross-references to downstream specs that absorbed scope**:
+
+- `archive/specs/SPEC-13-atomic-source-migration.md` — absorbed Phase 3 (CF/CH atomization) and Phase 4 (high-churn prose fragmentization); inserted Phase 1.5.
+- `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md` — superseded the legacy three-way drift resolution path; emptied the animalia grandfathering file via Tier 3 tickets.
+- `archive/specs/SPEC-15-pilot-feedback-fixes.md`, `archive/specs/SPEC-16-mcp-retrieval-surface-refinements.md`, `archive/specs/SPEC-17-audit-trail-and-retrieval-contract-clarifications.md` — post-pilot refinement track surfaced after Phase 2 closeout (Phase 2.6 / 2.7 per IMPLEMENTATION-ORDER.md).
 
 ## Out of Scope
 
