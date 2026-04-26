@@ -1,6 +1,6 @@
 # Example: ACCEPT_WITH_REQUIRED_UPDATES
 
-Walks through a proposal that yields ACCEPT_WITH_REQUIRED_UPDATES — the most common "this is good but multiple files must update" outcome. Adapted from the canonical example in the source proposal (PA-0012: buried magical artifacts).
+Walks through a proposal that yields ACCEPT_WITH_REQUIRED_UPDATES — the most common "this is good but multiple records must update" outcome. Adapted from the canonical example in the source proposal (PA-0012: buried magical artifacts). Atomic-source op vocabulary.
 
 ## Scenario
 
@@ -12,13 +12,22 @@ Target world: a low-fantasy agrarian setting with ancient ruins in its mountaino
 
 ## Walkthrough
 
+### Pre-flight
+
+- `mcp__worldloom__allocate_next_id(world_slug, 'PA') → 'PA-0012'`
+- `mcp__worldloom__allocate_next_id(world_slug, 'CF') → 'CF-0047'`
+- `mcp__worldloom__allocate_next_id(world_slug, 'CH') → 'CH-0012'`
+- `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed>], token_budget=10000)` returns Kernel + relevant invariants (rarity-of-magic, institutional-thinness) + adjacent CF records + currently-loaded mystery-reserve entries + section neighbors under `_source/magic-or-tech-systems/`, `_source/geography/`, `_source/institutions/`, `_source/everyday-life/`, `_source/timeline/`.
+- `mcp__worldloom__get_canonical_vocabulary({class: 'domain'})` and `({class: 'verdict'})` cached for reasoning-time validation.
+- `mcp__worldloom__find_named_entities(['Bitter Range', 'ruin-warden'])` runs the pre-figuring scan: no character or diegetic-artifact records reference these names yet, so no `derived_from` citation is required.
+
 ### Phase 0: Normalize
 
 - **Statement**: buried magical artifacts exist and can corrupt on contact.
 - **Underlying world-change**: recurring relic emergence exists; relics remain active across time; contact risks corruption; effects are variable and difficult to predict; relic discovery is a repeating phenomenon producing treasure economies, ritual quarantines, black markets, cults, contamination zones, salvage specialists, and political struggles over containment.
-- **Canon fact types**: artifact + hazard + metaphysical effect.
+- **Canon fact types**: artifact + hazard + metaphysical effect → primary `type: artifact` with hazard/metaphysical_rule sub-aspects in `notes`.
 - **User-stated constraints**: no explicit scope preference; implicit "regional at most."
-- **Additional files loaded**: `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `INSTITUTIONS.md`, `EVERYDAY_LIFE.md`, `TIMELINE.md`.
+- **Selectively expanded packet** via `get_neighbors`: SEC-MTS-* (magic systems), SEC-GEO-* (mountain regions), SEC-INS-* (relevant institutional surfaces — religion + landholding), SEC-ELF-* (mountain-adjacent settlement clusters), SEC-TML-* (Bitter Range historical layer).
 
 ### Phase 1: Scope Detection
 
@@ -60,15 +69,15 @@ Ancient burial sites (rare), survivable relic persistence (rare material propert
 
 ### Escalation Gate
 
-Domains touched in Phase 6: economy, law, religion, architecture (ruin management), everyday-life, status order, kinship (funerary), mobility (border controls). **Eight domains — exceeds the 3-domain trigger.** Dispatch six critic sub-agents.
+Domains touched in Phase 6: economy, law, religion, architecture (ruin management), everyday-life, status order, kinship (funerary), mobility (border controls). **Eight domains — exceeds the 3-domain trigger.** Dispatch six critic sub-agents in parallel (one Agent invocation per critic, each receiving a per-role-substituted `templates/critic-prompt.md` plus a role-scoped `get_context_packet`).
 
 **Critic synthesis (abbreviated)**:
-- **Continuity Archivist**: no existing CF records conflict. Latent burden — existing TIMELINE.md "fall of the Ancient Kingdoms" now inherits a plausibility test: did the ancients know about relic activation?
+- **Continuity Archivist**: no existing CF records conflict. Latent burden — existing SEC-TML "fall of the Ancient Kingdoms" record now inherits a plausibility test: did the ancients know about relic activation?
 - **Systems/Economy Critic**: relic black market creates inflationary pressure on containment materials. Watch for second-order scarcity in cleansing incense, blessed salt, or whatever the containment economy settles on.
 - **Politics/Institution Critic**: state ruin-wardens imply a state capable of regional enforcement — tension with "civilization is institutionally thin." Resolve: wardens are contract-based, not state-salaried; accountable to landowners, not crowns.
 - **Everyday-Life Critic**: good coverage; relic-sickness penetrates daily life. No "only affects heroes" drift.
 - **Theme/Tone Critic**: matches grim low-fantasy register. Enhances rather than violates the Kernel's "frontier is hazardous" frame.
-- **Mystery Curator**: relics' origin is a natural Mystery Reserve expansion vector — "who made them, and why did it end" is a forbidden-answer candidate. Flag for future OPEN_QUESTIONS.md entry.
+- **Mystery Curator**: relics' origin is a natural Mystery Reserve expansion vector — "who made them, and why did it end" is a forbidden-answer candidate. Recommend a new `M-NNNN` record committed alongside this CF.
 
 ### Phase 7: Counterfactual Pressure Test
 
@@ -76,8 +85,8 @@ Why hasn't this already reshaped the world? Stabilizers: (1) active relics are r
 
 ### Phase 8: Contradiction Classification
 
-- **Soft**: prior GEOGRAPHY.md mentioned "the Bitter Range ruins" without hazard notation. Requires retroactive annotation.
-- **Latent**: ruin-containment economy begs questions about who the ancients were (routes to MYSTERY_RESERVE.md).
+- **Soft**: prior SEC-GEO record mentioned "the Bitter Range ruins" without hazard notation. Requires retroactive `append_extension` on the SEC-GEO record.
+- **Latent**: ruin-containment economy begs questions about who the ancients were → seed via `create_oq_record` op.
 
 ### Phase 9: Repair Pass
 
@@ -90,40 +99,58 @@ Applied: (a) active artifacts rare and clustered in specific geologies (Phase 7 
 - Universalizes specialness: no (rare, clustered, costly).
 - Undermines mystery: no — in fact, expands Mystery Reserve.
 - Enriches ordinary life: yes — rural folklore, funerary change, prejudice.
+- OQ scan: 4 unchanged, 1 PRESSURED (`OQ-0003` — ancient civilization fall — receives an `append_extension` cross-referencing CF-0047), 1 NEW (`OQ-0007` — origin and persistence of relics).
 
 ### Phase 11: Adjudication
 
 **Verdict**: `ACCEPT_WITH_REQUIRED_UPDATES`
 
-**Phase-cited justification**: Phase 2 (compatible with repairs); Phase 7 (stabilizers hold without hand-waving); Phase 10 (identity deepened, tensions generated); Phase 6 (eight domains touched — updates required across multiple files).
+**Phase-cited justification**: Phase 2 (compatible with repairs); Phase 7 (stabilizers hold without hand-waving); Phase 10 (identity deepened, tensions generated); Phase 6 (eight domains touched — section updates required across multiple file classes).
 
-### Phase 12a: Required Update List
+### Phase 12a: modification_history axis-(c) judgment
 
-- `MAGIC_OR_TECH_SYSTEMS.md` — add relic-effect system (source, access path, training, cost, reliability, failure states, social perception, regulation).
-- `INSTITUTIONS.md` — add relic-warden contract institution; extend religious pollution doctrine.
-- `EVERYDAY_LIFE.md` — add relic-sickness to ordinary-life fears in ruin-adjacent regions; add funerary reform to death-disposal section.
-- `TIMELINE.md` — annotate Bitter Range ruin events with relic-hazard notation.
-- `OPEN_QUESTIONS.md` — add "who were the ancients and why did relics persist?"
-- (`MYSTERY_RESERVE.md` is not modified here — Mystery Curator's flag is noted for a future dedicated mystery-installation run.)
+CF-0023 (existing "active wards on the Bitter Range" CF) — the new CF-0047 ADDS a metaphysical hazard surface that constrains how a future reader interprets CF-0023's ward-presence claims (a future reader of CF-0023 alone needs to know about the relic-hazard frame to read it correctly). → Substantive extension; emit `append_modification_history_entry` on CF-0023.
 
-### Phase 13a: Deliverable Assembly
+No axis-(a) entries (proposal carries empty `derived_from_cfs`); no axis-(b) entries (Phase 8 soft contradiction is at the SEC-GEO record, not a CF).
 
-- `CF-0047` — "Buried magical artifacts corrupt on disturbed contact" (status: hard_canon; scope: regional; domains: 8).
-- `CH-0012` — `change_type: addition`; `affected_fact_ids: [CF-0047]`; `downstream_updates`: 5 files.
-- Domain-file patches drafted for each of the 5 files, each carrying `<!-- added by CF-0047 -->` attribution.
-- Adjudication record: `worlds/<slug>/adjudications/PA-0012-accept-with-required-updates.md`.
+### Phase 13a: Patch Plan Assembly
+
+```
+patch_plan = [
+  create_cf_record(CF-0047, full YAML — primary type: artifact, hazard sub-aspect, status: hard_canon, scope.geographic: regional, distribution.why_not_universal: 4-stabilizer chain, domains_affected: [magic, religion, law, daily_routine, kinship, status_signaling, mobility, economy], required_world_updates: [SEC-MTS-..., SEC-INS-..., SEC-ELF-..., SEC-TML-..., SEC-GEO-..., OQ-0007], source_basis.derived_from: []),
+  create_ch_record(CH-0012, change_type: addition, affected_fact_ids: [CF-0047, CF-0023]),
+  // bidirectional pointer for each touched section: extend CF's required_world_updates BEFORE touched_by_cf
+  update_record_field(CF-0047, 'required_world_updates' → +SEC-MTS-XXX),
+  append_touched_by_cf(SEC-MTS-XXX, CF-0047),
+  append_extension(SEC-MTS-XXX, "Relic-effect system: source, access, training, cost, reliability, failure states..."),
+  // ... repeated for SEC-INS, SEC-ELF, SEC-TML, SEC-GEO, OQ-0003 (PRESSURED extension), OQ-0007 (NEW)
+  create_oq_record(OQ-0007, "Who were the ancients and why did relics persist?"),
+  append_extension(OQ-0003, "Cross-referenced by CF-0047 — ancestral knowledge of relic activation now an open question"),
+  append_modification_history_entry(CF-0023, change_id: CH-0012, originating_cf: CF-0047, summary: "Bitter Range ward-presence reading constrained by new relic-hazard frame"),
+  append_adjudication_record(adjudications/PA-0012-accept_with_required_updates.md, frontmatter={pa_id: PA-0012, verdict: ACCEPT_WITH_REQUIRED_UPDATES, originating_skill: canon-addition, change_id: CH-0012, mystery_reserve_touched: [], invariants_touched: [<invariant-IDs touched>], cf_records_touched: [CF-0047, CF-0023], open_questions_touched: [OQ-0003, OQ-0007]}, body_markdown=<full Phase 0–11 + Phase 14a checklist>)
+]
+```
 
 ### Phase 14a: Validation
 
-All rejection tests pass.
+`mcp__worldloom__validate_patch_plan(patch_plan)` returns clean (mechanical layers — record_schema_compliance, id_uniqueness, cross_file_reference, touched_by_cf_completeness, modification_history_retrofit, yaml_parse_integrity, Rules 1/2/4/5/6/7).
+
+Skill-side judgment Tests recorded in PA body_markdown:
+- Test 3 (judgment layer — stabilizer quality): PASS — geological clustering + activation cost + handler mortality + specialist knowledge are all concrete mechanisms.
+- Test 6 (judgment layer — forbidden-answer overlap): PASS — proposal does not commit on relic origin; new M-NNNN entry preserves the boundary.
+- Test 8 (judgment layer — hand-wave detection): PASS — every stabilizer names a mechanism.
+- Test 9: PASS — verdict cites Phases 2, 7, 10, 6.
+- Test 10 (Rule 3): PASS — no superlative claims; "rare" and "clustered" are pragmatic-quantity language.
 
 ### Phase 15a: Commit
 
-User approves summary. Atomic write of CF record + change log entry + 5 domain-file patches + adjudication record. World committed.
+User reviews chunked deliverable summary (verdict + new CF YAML + modification_history op + per-section append summary + new OQ + PA file path). User approves; `approval_token` issued.
+
+`mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` → engine applies atomically. Receipt returned. Hook 5 runs `record_schema_compliance` + `id_uniqueness` + `cross_file_reference` + `touched_by_cf_completeness` against every patched path; clean.
 
 ## Takeaway
 
 This is the typical "good addition with scope" verdict. The skill did three things that matter:
 1. Caught the high diffusion risk at Phase 1 and narrowed it at Phase 4 and Phase 9.
 2. Required six critic sub-agents at the escalation gate because 8 domains exceeded the 3-domain trigger.
-3. Refused to accept until every affected file had a concrete patch — not a "TODO" placeholder.
+3. Refused to call `submit_patch_plan` until every affected section had a concrete `append_extension` op paired with the bidirectional `update_record_field` + `append_touched_by_cf` ops — engine fail-fast rejects plans lacking the pair.

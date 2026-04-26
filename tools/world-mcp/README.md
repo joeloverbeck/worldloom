@@ -28,7 +28,17 @@ Exact id > exact canonical entity > exact structured record edge > exact scoped 
 
 ## Approval token
 
-HMAC-signed; single-use; 5-minute expiry. Secret at `tools/world-mcp/.secret` (gitignored).
+HMAC-signed; single-use; default 20-minute expiry (configurable). Secret at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
+
+Skills issue tokens via the canonical CLI:
+
+```bash
+node dist/src/cli/sign-approval-token.js <plan-path> [--expiry-minutes <n>]
+```
+
+The CLI reads a JSON patch-plan envelope, computes `canonicalOpHash` for every `patches[]` entry, and emits the base64 token to stdout. The token binds `plan_id + world_slug + patch_hashes + issued_at + expires_at`. See `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token for the full skill-side flow.
+
+`--expiry-minutes` defaults to 20, accommodating the 50KB+ envelopes typical of full canon-addition submissions; the engine's verifier only checks `expires_at <= now` and accepts longer windows. Override via flag or `WORLD_MCP_TOKEN_EXPIRY_MIN` env var.
 
 ## Configuration
 

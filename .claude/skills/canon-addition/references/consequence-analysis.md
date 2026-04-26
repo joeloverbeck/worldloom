@@ -12,9 +12,9 @@ Determine actual scope, not stated scope: geographic, temporal, social, visibili
 
 ## Phase 2: Invariant Check
 
-Test the proposal against every invariant in `INVARIANTS.md` plus the tonal/genre contract in `WORLD_KERNEL.md`. Classify: compatible / compatible-only-if-scoped-locally / compatible-only-if-reclassified-as-belief / compatible-only-if-invariant-revised / incompatible.
+Test the proposal against every invariant record under `_source/invariants/` (retrieved via the context packet or `mcp__worldloom__get_record(<INV-ID>)`) plus the tonal/genre contract in `WORLD_KERNEL.md`. Classify: compatible / compatible-only-if-scoped-locally / compatible-only-if-reclassified-as-belief / compatible-only-if-invariant-revised / incompatible.
 
-**Mystery Reserve coverage check**: If the proposal declares a `mystery_reserve_firewall` list (e.g., "M-1 through M-10") in its self-trace, verify that the list covers every CURRENT entry in `MYSTERY_RESERVE.md`. Proposals are often authored before later MR entries were committed (e.g., a proposal naming M-1 through M-10 may predate M-11). Flag any omission as an audit-hygiene concern in the adjudication record even when the omitted entry is untouched by the proposal — a self-trace that silently omits a newer MR entry is a signal the proposal may not have considered it. Phase 2's own invariant check must test the proposal against the full current MR set regardless of what the self-trace covers.
+**Mystery Reserve coverage check**: If the proposal declares a `mystery_reserve_firewall` list (e.g., "M-1 through M-10") in its self-trace, verify that the list covers every CURRENT `M-NNNN` record under `_source/mystery-reserve/`. Proposals are often authored before later MR entries were committed (e.g., a proposal naming M-1 through M-10 may predate M-11). Flag any omission as an audit-hygiene concern in the PA `body_markdown` even when the omitted entry is untouched by the proposal — a self-trace that silently omits a newer MR entry is a signal the proposal may not have considered it. Phase 2's own invariant check must test the proposal against the full current MR set regardless of what the self-trace covers.
 
 **Hard rejection triggers** (force REJECT at Phase 11 unless user wants a world rewrite): direct violation of non-negotiable ontology; collapse of primary genre contract; contradiction of world-defining scarcity/distribution logic; world-scale destabilization without plausible stabilizers; retroactive invalidation of too much established canon.
 
@@ -44,7 +44,7 @@ Run three layers across the 13 required **exposition** domains (everyday life, e
 - **Second-order** — institutional and social responses.
 - **Third-order** — world equilibrium shifts.
 
-**Domain label convention** (for CF `domains_affected`): Phase 6's 13 exposition domains are the investigation guide — they name where to LOOK. The CF `domains_affected` field uses a separate canonical enum from FOUNDATIONS §Rule 2 normalized to snake_case: `labor | embodiment | social_norms | architecture | mobility | law | trade | war | kinship | religion | language | status_signaling | ecology | daily_routine`. Ledger precedent extends this with domain labels in active use (notably `economy` as alias for `trade`, `settlement_life` for lived-in texture, `memory_and_myth` for bardic/memorial surface, `magic` for artifact-economy adjacency, `medicine` for clinical practice). New CFs SHOULD prefer canonical Rule 2 labels and may use established extensions when canonical labels do not cover the attachment surface. Do NOT retrofit existing CF labels (ledger is append-only). See `templates/canon-fact-record.yaml` for the canonical list comment.
+**Domain label convention** (for CF `domains_affected`): Phase 6's 13 exposition domains are the investigation guide — they name where to LOOK. The CF `domains_affected` field uses a separate canonical enum returned by `mcp__worldloom__get_canonical_vocabulary({class: 'domain'})` (sourced from FOUNDATIONS §Rule 2): `labor | embodiment | social_norms | architecture | mobility | law | trade | war | kinship | religion | language | status_signaling | ecology | daily_routine`. Ledger precedent extends this with domain labels in active use (notably `economy` as alias for `trade`, `settlement_life` for lived-in texture, `memory_and_myth` for bardic/memorial surface, `magic` for artifact-economy adjacency, `medicine` for clinical practice). New CFs SHOULD prefer canonical Rule 2 labels and may use established extensions when canonical labels do not cover the attachment surface. Do NOT retrofit existing CF labels (records under `_source/canon/` are append-only in structural fields). The validator `rule2_no_pure_cosmetics` enforces non-empty `domains_affected`; vocabulary drift (labels outside canonical + extensions) degrades grep-discoverability across CFs.
 
 **FOUNDATIONS cross-ref**: Rule 5 (No Consequence Evasion) — this phase IS the Consequence Propagation step.
 
@@ -52,19 +52,21 @@ Run three layers across the 13 required **exposition** domains (everyday life, e
 
 Evaluate triggers from Phase 2 and Phase 6:
 - Invariant revision required?
-- More than 3 of 13 domains touched in Phase 6?
+- More than 3 substantive commitments in the proposal's `domains_affected` field? (Phase 6 inspects all 13 domains by definition; only domains receiving a `domains_affected` entry count toward the threshold. Secondary surfaces and tangential consequences flowing from existing CFs do NOT count.)
 - New invariant-level rule introduced (ontological / causal / distribution / social / aesthetic)?
 
-**If any trigger fires**: dispatch six parallel sub-agents via the Agent tool, one per critic role:
-- **Continuity Archivist** — `CANON_LEDGER.md` + `TIMELINE.md` contradictions and latent burdens.
-- **Systems/Economy Critic** — Phase 6 economic/trade/labor consequences against `ECONOMY_AND_RESOURCES.md`.
-- **Politics/Institution Critic** — Phase 6 institutional consequences against `INSTITUTIONS.md`.
-- **Everyday-Life Critic** — Phase 6 ordinary-life consequences against `EVERYDAY_LIFE.md`; flags "only affects heroes" drift.
-- **Theme/Tone Critic** — `WORLD_KERNEL.md` genre/tonal contract.
-- **Mystery Curator** — `MYSTERY_RESERVE.md` and `OPEN_QUESTIONS.md`; flags forbidden-answer collisions and mystery-trivialization risks.
+**If any trigger fires AND no de-escalation criterion applies**: dispatch six parallel sub-agents via the Agent tool, one per critic role:
+- **Continuity Archivist** — `_source/canon/` CF records + `_source/timeline/` SEC-TML records: contradictions and latent burdens.
+- **Systems/Economy Critic** — Phase 6 economic/trade/labor consequences against `_source/economy-and-resources/` SEC-ECR records.
+- **Politics/Institution Critic** — Phase 6 institutional consequences against `_source/institutions/` SEC-INS records.
+- **Everyday-Life Critic** — Phase 6 ordinary-life consequences against `_source/everyday-life/` SEC-ELF records; flags "only affects heroes" drift.
+- **Theme/Tone Critic** — `WORLD_KERNEL.md` genre/tonal contract plus aesthetic invariants under `_source/invariants/`.
+- **Mystery Curator** — `_source/mystery-reserve/` M-NNNN records + `_source/open-questions/` OQ-NNNN records; flags forbidden-answer collisions and mystery-trivialization risks.
 
-Each sub-agent receives: the full proposal, the Phase 0–6 outputs, `docs/FOUNDATIONS.md`, and the specific world-state slice its role needs. Each returns a concise critique report. Sub-agents never write files. Use `templates/critic-prompt.md` to construct each per-role prompt and `templates/critic-report-format.md` to specify the required report structure — this keeps critic outputs uniform across runs and across roles.
+Each sub-agent receives: the full proposal, the Phase 0–6 outputs, `docs/FOUNDATIONS.md`, and the specific world-state slice its role needs (typically a role-scoped `mcp__worldloom__get_context_packet` call rather than the full world). Each returns a concise critique report. Sub-agents never write files. Use `templates/critic-prompt.md` to construct each per-role prompt (per-role substitution; do NOT pass the template literally to all six) and `templates/critic-report-format.md` to specify the required report structure — this keeps critic outputs uniform across runs and across roles.
 
 **Phase 6b: Multi-Critic Synthesis** — the main agent reads all six reports, resolves conflicts (noting productive tensions), and produces an integrated critique that feeds Phases 7–10. Sub-agent reports are appended to the adjudication record at commit time.
 
-**If no trigger fires**: the main agent runs the remaining phases alone, adopting each critic lens inline at the appropriate phase.
+**De-escalation criterion**: Inline four-lens analysis (Continuity Archivist + Systems-Economy + Theme-Tone + Mystery Curator, adopted by the main agent) is acceptable in lieu of parallel dispatch when the proposal scores LOW on novelty (`distinctiveness ≤ 3` AND `propagation_value ≤ 2` AND `integration_burden ≤ 2`) AND fits a documented absorption pattern: sub-occasion-within-parent-CF (CF-0045 lock-night precedent), sub-specialty-within-parent-subtype (CF-0034 / CF-0035 / CF-0042 / CF-0043 precedents), retcon-clarification (`retcon_type: A`), or pre-figured-by-existing-DA (CF-0038 / CF-0045 precedent). The choice MUST be justified in the PA's notes section by naming the precedent CF and the absorption pattern. Default behavior remains parallel dispatch when in doubt.
+
+**If no trigger fires OR de-escalation criterion applies**: the main agent runs the remaining phases alone, adopting each critic lens inline at the appropriate phase.

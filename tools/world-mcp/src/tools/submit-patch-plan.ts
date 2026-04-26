@@ -3,6 +3,7 @@ import {
   type EngineError,
   type PatchReceipt
 } from "@worldloom/patch-engine";
+import { validatePatchPlan as runPreApplyValidators } from "@worldloom/validators";
 
 import { createMcpError, type McpError } from "../errors";
 
@@ -38,5 +39,29 @@ export async function handleSubmitPatchPlanTool(
     return invalidInput("approval_token must be a non-empty string.", "approval_token");
   }
 
-  return submitPatchPlan(args.patch_plan as unknown as EnginePatchPlanEnvelope, args.approval_token);
+  const envelope = args.patch_plan as unknown as EnginePatchPlanEnvelope;
+
+  return submitPatchPlan(envelope, args.approval_token, {
+    preApplyValidator: async () => {
+      try {
+        const { verdicts } = await runPreApplyValidators(envelope);
+        const failures = verdicts.filter((verdict) => verdict.severity === "fail");
+        if (failures.length > 0) {
+          return {
+            ok: false,
+            code: "validator_failed",
+            message: `Pre-apply validators reported ${failures.length} failure(s).`,
+            detail: { verdicts: failures }
+          };
+        }
+        return { ok: true };
+      } catch (err) {
+        return {
+          ok: false,
+          code: "validator_error",
+          message: err instanceof Error ? err.message : String(err)
+        };
+      }
+    }
+  });
 }

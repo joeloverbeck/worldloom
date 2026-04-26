@@ -62,6 +62,8 @@ If one primary class also changes a real shared contract, keep the primary class
 
 If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks.
 
+For package/tool tickets, do a compact package checkpoint before coding: inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
+
 If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, or live-corpus validator baseline, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
 
 When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
@@ -310,6 +312,7 @@ Update the active ticket before finishing:
 - for `tool or script implementation` tickets whose landed behavior changes a package-local contract, perform the package/tool closeout hard stop in `references/package-tooling.md`: inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly, then either truth them or record why they are outside the active seam
 - for tickets that add or change a user-facing CLI, workflow command, or machine-layer command surface, inspect repo-level quick-reference docs such as `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention that command surface; truth stale same-seam references or record why another ticket owns them
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
+- when a ticket belongs to an active spec family, check implementation-order or roadmap/status tables such as `specs/IMPLEMENTATION-ORDER.md` for same-seam pending/completed wording even when archival is not in scope
 - refresh the dirty-worktree ledger and explicitly distinguish pre-existing unrelated dirt from owned edits and new/untracked owned files in the final response or ticket closeout
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 

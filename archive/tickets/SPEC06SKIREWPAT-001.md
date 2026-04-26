@@ -1,6 +1,6 @@
 # SPEC06SKIREWPAT-001: canon-addition — full migration to atomic-source
 
-**Status**: PENDING
+**Status**: COMPLETED 2026-04-26
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `.claude/skills/canon-addition/SKILL.md` rewritten; `.claude/skills/canon-addition/references/` collapses 8→3 files (5 deleted/folded); `.claude/skills/canon-addition/templates/` collapses 5→2 files (engine owns CF/CH schemas); `.claude/skills/canon-addition/examples/` refreshed to atomic-source op vocabulary

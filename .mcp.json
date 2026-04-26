@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "worldloom": {
+            "command": "node",
+            "args": [
+                "tools/world-mcp/dist/src/server.js"
+            ],
+            "env": {}
+        }
+    }
+}

@@ -170,6 +170,23 @@ Order (single tier; internal parallelization minimal):
 - Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
 - `create-base-world` genesis test world emits CF-0001 with both blocks correctly populated or N/A'd per fact-type
 
+### Phase 2.6 — Pilot Feedback Fixes (SPEC-15)
+
+Independent post-pilot fix track, surfaced by the 2026-04-26 first-live canon-addition run (animalia PR-0015). Lands during or after Phase 2.5; not a blocker for any other phase.
+
+**Scope** (full decomposition — two tickets cover the entire spec):
+- **Track A**: validator coverage gap — `rule5_no_consequence_evasion` recognizes `append_extension` (implemented and archived at `archive/tickets/SPEC15PILFIX-001.md`).
+- **Track B**: documentation + skill content — `pre_figured_by` semantics, `find_named_entities` scope, canon-addition retrieval-tool decision tree. Ticket: `SPEC15PILFIX-002`.
+
+**Out of SPEC-15**: engine-convention synchronization decisions (mod-history ↔ notes) and MCP retrieval-surface refinements (packet richness, slice tool, schema discovery, auto-budget UX, prose-body scan) are scoped to `brainstorming/post-pilot-retrieval-refinements.md`. Each requires a design call before ticketing; promotion to a separate spec (likely SPEC-16) when prioritized.
+
+**Phase 2.6 completion gate** (both tickets land; SPEC-15 archives):
+- `cd tools/validators && npm test` passes after rule5 expansion
+- `node tools/validators/dist/src/cli/world-validate.js animalia --json` reports unchanged fail count from repo root
+- `docs/FOUNDATIONS.md`, `tools/world-mcp/README.md`, and `.claude/skills/canon-addition/references/` carry the new clarifications and decision tree
+- A subsequent canon-addition run uses `append_extension` ops successfully (validator returns clean) and references the retrieval-tool decision tree at the appropriate phases
+- SPEC-15 archives to `archive/specs/SPEC-15-pilot-feedback-fixes.md` after SPEC15PILFIX-002 lands; SPEC15PILFIX-001 is already archived, and SPEC15PILFIX-002 archives when completed
+
 ### Phase 3 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
 Previously: "Atomic Source for CF/CH Records" — deferred, optional, conditional on Phase 2 stability. **Superseded** by SPEC-13 Atomic-Source Migration, which pulls CF/CH atomization plus the full 11-file atomization forward into Phase 1.5 ahead of Phase 2. Phase 3 slot is retired.
@@ -322,6 +339,7 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 | SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
 | SPEC-13 Atomic-Source Migration | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-13-atomic-source-migration.md`; delayed snapshot cleanup remains tracked by `tickets/SPEC13ATOSRCMIG-006.md` |
 | SPEC-14 PA Contract & Vocabulary Reconciliation | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`; delivered PA contract reconciliation, canonical vocabulary surfacing, status-coupled Mystery Reserve validation, bidirectional CF/SEC engine checks, and Animalia zero-grandfathering closure via archived `SPEC14PAVOC-*` tickets |
-| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14 |
+| SPEC-15 Pilot Feedback Fixes | ✓ specified 2026-04-26; `SPEC15PILFIX-001` (rule5 + append_extension) completed and archived at `archive/tickets/SPEC15PILFIX-001.md`; `SPEC15PILFIX-002` (documentation + skill content) remains pending. These two tickets are the full decomposition; SPEC-15 archives once both land. Engine-convention sync + MCP retrieval-surface refinements are scoped separately to `brainstorming/post-pilot-retrieval-refinements.md`, awaiting design calls before promotion to a follow-on spec. |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14; amended 2026-04-26 per SPEC-15 |
 
 SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots. **SPEC-14 is the contract-reconciliation umbrella surfaced by the 2026-04-25 grandfathering triage** (`docs/triage/2026-04-25-spec04-grandfathering-triage.md`): the SPEC-04 baseline run on animalia exposed three-way drift between engine emission (`append_adjudication_record`), validator parsing (`record_schema_compliance`), and existing PA file shape; archived SPEC-14 supersedes the relevant parts of archived SPEC-03 and SPEC-04, adds canonical-vocabulary surfacing via MCP, and decomposes the animalia bulk fix into Tier 3 tickets that empty `audits/validation-grandfathering.yaml` to zero entries.

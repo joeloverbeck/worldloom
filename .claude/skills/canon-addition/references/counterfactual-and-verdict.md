@@ -17,7 +17,7 @@ Typical stabilizers: rarity, secrecy, high mortality, unreliability, expensive p
 Using Phase 2 + Phase 6 output, classify every detected conflict:
 - **Hard** — cannot coexist without changing established truths.
 - **Soft** — can coexist, but existing canon owes explanation or visible consequences (seeds `required_updates`).
-- **Latent Burden** — mandatory future lore work (tracked in CF `notes`; may seed `OPEN_QUESTIONS.md`).
+- **Latent Burden** — mandatory future lore work (tracked in CF `notes`; may seed a new `OQ-NNNN` record under `_source/open-questions/` via a `create_oq_record` op in the patch plan).
 - **Scope Drift Risk** — acceptable only if kept local/temporary/secret (routes toward `ACCEPT_AS_LOCAL_EXCEPTION`).
 - **Tone/Thematic Mismatch** — logic intact but world feels unlike itself (routes to REVISE/REJECT or `ACCEPT_AS_CONTESTED_BELIEF`).
 
@@ -63,16 +63,16 @@ Evaluate: deepens identity? creates tensions? trivializes struggle? universalize
 
 **Rule**: Reject technically consistent but dramatically flattening facts.
 
-**FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — collision with `MYSTERY_RESERVE.md` `disallowed cheap answers` → REJECT or repair toward Mystery Reserve placement.
+**FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — collision with a `disallowed_answers[]` list on any `M-NNNN.yaml` record under `_source/mystery-reserve/` → REJECT or repair toward Mystery Reserve placement.
 
-**OPEN_QUESTIONS pressure scan (required)**: on `OPEN_QUESTIONS.md`, grep `^## ` to enumerate every section heading. For each heading, classify under this proposal as one of:
+**Open Questions pressure scan (required)**: enumerate the `OQ-NNNN` records the context packet returned (or `mcp__worldloom__search_nodes` against `node_type: open_question_record` if the packet under-covered). For each, classify under this proposal as one of:
 
 - **UNCHANGED** — no pressure from the proposal; the deferral scope is unaffected.
-- **PRESSURED** — the proposal narrows the deferral scope, adds a cross-reference annotation, extends the caution clause, or otherwise touches the item without resolving the question. Pressured items receive an annotation in the domain-file patch set at Phase 13a and appear in the adjudication record's `open_questions_touched` Discovery field.
-- **NEW** — the proposal creates a deferred item that this adjudication appends to `OPEN_QUESTIONS.md` as a new section. The new section lists alongside pressured items in `open_questions_touched`.
-- **RESOLVED** — the proposal commits on a previously-deferred question (rare). Treat with Phase 10 narrative-fit scrutiny — a resolved OQ is a deliberate commitment, not a silent one, and its resolution must be justified in the adjudication record's Justification section. Silent OQ resolution violates Rule 6 (No Silent Retcons).
+- **PRESSURED** — the proposal narrows the deferral scope, adds a cross-reference annotation, extends the caution clause, or otherwise touches the item without resolving the question. Pressured items receive an `append_extension` op on the target `OQ-NNNN.yaml` at Phase 13a and appear in the PA frontmatter's `open_questions_touched[]` array.
+- **NEW** — the proposal creates a deferred item; emit a `create_oq_record` op for the new `OQ-NNNN` and cite the resulting id in `open_questions_touched[]`. PA frontmatter no longer carries free-form OQ topic-strings — it carries `OQ-NNNN` ids only (per SPEC-14).
+- **RESOLVED** — the proposal commits on a previously-deferred question (rare). Treat with Phase 10 narrative-fit scrutiny — a resolved OQ is a deliberate commitment, not a silent one, and its resolution must be justified in the PA's Justification section. Silent OQ resolution violates Rule 6 (No Silent Retcons).
 
-Record the full list (every OQ section named, with classification) in the adjudication record's Discovery section `open_questions_touched` field — PRESSURED and NEW items populate the field; UNCHANGED items are the unstated complement (do not enumerate them in the Discovery field, but the scan itself MUST cover them to produce the PRESSURED / NEW list correctly). Missing this scan produces silent OQ drift: a pressured item that receives no annotation carries a reader of OPEN_QUESTIONS into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
+Record the full list (every OQ examined, with classification) in the PA `body_markdown` Discovery section, but populate the frontmatter `open_questions_touched[]` array with PRESSURED + NEW + RESOLVED ids only — UNCHANGED items are the unstated complement (do not enumerate them in the frontmatter array, but the scan itself MUST cover them to produce the PRESSURED / NEW / RESOLVED list correctly). Missing this scan produces silent OQ drift: a pressured item that receives no extension carries a reader into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
 
 ## Phase 11: Adjudication
 
@@ -86,3 +86,18 @@ Synthesize Phases 0–10 into one verdict:
 - **REJECT** — breaks invariants / destroys genre contract / creates implausible omissions / weakens identity / imposes excessive retcon burden.
 
 The verdict must cite the specific phase findings that drove it. Vague verdicts are themselves a failure.
+
+## PA body-markdown structural template
+
+The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`, `verdict`, `date`, `originating_skill: "canon-addition"`, `change_id` for accept branches, and four `*_touched` arrays — `mystery_reserve_touched`, `invariants_touched`, `cf_records_touched`, `open_questions_touched`) plus a free-prose `body_markdown` payload. Use these named sections in this order — the headings are conventional (free prose under each), not engine-validated, but consistent ordering keeps adjudications grep-discoverable across the worlds:
+
+- `# Discovery` — top-of-file index mirroring the four `*_touched` frontmatter arrays for in-body grep. Match the frontmatter exactly: do not re-include UNCHANGED items here either.
+- `# Proposal` — verbatim copy of the proposal text + user-stated constraints (preferred scope, desired rarity, dramatic purpose, revision appetite, other).
+- `# Phase 0–11 Analysis` — full per-phase outputs (Phase 0 normalize / Phase 1 scope / Phase 2 invariants / Phase 3 capability / Phase 4 prerequisites / Phase 5 diffusion / Phase 6 consequence propagation, with first/second/third-order subsections / Phase 7 counterfactual + stated stabilizers / Phase 8 contradiction classification / Phase 9 repair pass — options considered / declined / adopted / Phase 10 narrative-and-thematic fit + OQ pressure scan results).
+- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 10 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. SPEC-09 will append Tests 11/12 here.
+- `# Verdict` — one of `ACCEPT` / `ACCEPT_WITH_REQUIRED_UPDATES` / `ACCEPT_AS_LOCAL_EXCEPTION` / `ACCEPT_AS_CONTESTED_BELIEF` / `REVISE_AND_RESUBMIT` / `REJECT` (matches the canonical verdict enum).
+- `# Justification` — phase-cited reasoning. Every claim cites a specific phase finding.
+- `# Critic Reports` — verbatim, only if the Escalation Gate fired. One subsection per critic (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator) plus a Synthesis (Phase 6b) subsection covering convergent concerns, productive tensions resolved, and required CF-language commitments arising from synthesis.
+- `# Required World Updates Applied` — accept-only. One paragraph per affected section record summarising what the corresponding `append_extension` / `update_record_field` op added.
+- `# Resubmission Menu` (REVISE only) OR `# Why This Cannot Be Repaired` (REJECT only) — concrete; the user can act on it without further clarification.
+- `# User Override` — only if a Phase 14b user override fired (original verdict, override verdict, user reasoning, converted accept-branch outputs). Rule 6 compliance: overrides are logged.

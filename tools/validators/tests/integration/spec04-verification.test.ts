@@ -39,9 +39,9 @@ after(() => {
 });
 
 test("SPEC-04 capstone re-enumerates animalia source counts from the fixture copy", () => {
-  assert.equal(countYaml("_source/canon"), 47);
-  assert.equal(countYaml("_source/change-log"), 20);
-  assert.equal(countMarkdown("adjudications"), 17);
+  assert.equal(countYaml("_source/canon"), 48);
+  assert.equal(countYaml("_source/change-log"), 21);
+  assert.equal(countMarkdown("adjudications"), 18);
 });
 
 test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {

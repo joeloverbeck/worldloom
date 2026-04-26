@@ -1,6 +1,6 @@
 # Example: REJECT
 
-Walks through a proposal that yields REJECT. Shows when the skill refuses to accept even with repairs, and how REJECT still produces actionable output (a resubmission menu of narrower alternatives).
+Walks through a proposal that yields REJECT. Shows when the skill refuses to accept even with repairs, and how REJECT still produces actionable output (a resubmission menu of narrower alternatives) — emitted as a single `append_adjudication_record` op with no `_source/` mutations.
 
 ## Scenario
 
@@ -12,11 +12,18 @@ Target world: the same low-fantasy agrarian setting from the accept example. Its
 
 ## Walkthrough
 
+### Pre-flight
+
+- `allocate_next_id(world_slug, 'PA') → 'PA-0013'`
+- `allocate_next_id(world_slug, 'CF') / 'CH'` — allocated speculatively but never consumed (non-accept branch).
+- `get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed>], token_budget=10000)` returns Kernel + the rarity-of-magic invariant + the institutional-thinness invariant + the distribution invariant covering large-scale magical schooling + every CF whose subject touches magic distribution + relevant SEC-INS / SEC-MTS / SEC-ELF section neighbors.
+- `get_canonical_vocabulary({class: 'verdict'})` cached — `REJECT` is one of the canonical values.
+
 ### Phase 0: Normalize
 
 - **Statement**: state-sponsored mass magical education exists in the western realms.
 - **Underlying world-change**: magical capability is available to the literate classes at population scale; states have institutional capacity to run standardized curricula; "licensed instructor" implies a certifying body and a legal framework; magic ceases to be scarce by training alone.
-- **Canon fact types**: institution + resource distribution + social practice.
+- **Canon fact types**: institution + resource distribution + social practice → primary `type: institution` if classified, but Phase 2 immediately flags hard rejection triggers.
 
 ### Phase 1: Scope Detection
 
@@ -27,10 +34,10 @@ Target world: the same low-fantasy agrarian setting from the accept example. Its
 
 ### Phase 2: Invariant Check
 
-Tested against:
+Tested against the loaded invariant records:
 - Kernel invariant *magic is rare and dangerous* → **direct violation** at the distribution level. Wide institutional teaching by definition makes magic not rare.
 - Kernel invariant *civilization is institutionally thin* → **direct violation** at the institutional level. State-funded standardized schooling at population scale is institutionally thick.
-- Distribution invariant *large-scale magical schooling does not exist* (if present in `INVARIANTS.md`) → **direct violation**.
+- Distribution invariant *large-scale magical schooling does not exist* (loaded record) → **direct violation**.
 
 **Result**: incompatible. Two Kernel-level invariants violated.
 
@@ -43,11 +50,11 @@ Because Phase 2 hit two hard-rejection triggers, Phases 3–6 are run for record
 - **Phase 3**: grants mass spellcasting capability to the literate classes.
 - **Phase 4**: prerequisites listed (trained teachers, standardized texts, state funding) are all "uncommon" at best and do not exist at scale in the current world.
 - **Phase 5**: diffusion is already universalized within the stated scope.
-- **Phase 6**: consequence propagation spans all 13 domains at first-order alone — the world would be unrecognizable.
+- **Phase 6**: consequence propagation spans all 13 exposition domains at first-order alone — the world would be unrecognizable.
 
 ### Escalation Gate
 
-13 / 13 domains touched → dispatch six critic sub-agents.
+13 / 13 domains touched → dispatch six critic sub-agents in parallel.
 
 **Critic synthesis (abbreviated)**:
 - All six critics independently flag the proposal as a world-rewrite, not a world-extension.
@@ -71,7 +78,7 @@ Cannot produce credible stabilizers.
 ### Phase 9: Repair Pass
 
 Repair options considered:
-- **Reduce scope**: "one western realm teaches magic privately, not state-funded." This is a different proposal — salvageable as a future `ACCEPT_AS_LOCAL_EXCEPTION` submission. Routed to the Resubmission Menu.
+- **Reduce scope**: "one western realm teaches magic privately, not state-funded." Different proposal — salvageable as a future `ACCEPT_AS_LOCAL_EXCEPTION` submission. Routed to the Resubmission Menu.
 - **Reduce reproducibility**: "only hereditary magical families." Different proposal — routes to resubmission.
 - **Reclassify as contested belief**: "some western realms *claim* to have magical academies, but the claim is propagandistic." Salvageable as `ACCEPT_AS_CONTESTED_BELIEF` — routes to resubmission.
 - **Move to Mystery Reserve**: not applicable; the proposal is not a mystery shape.
@@ -91,22 +98,31 @@ No repair preserves the user's stated dramatic intent ("widely taught, state-fun
 
 **Phase-cited justification**: Phase 2 (two Kernel invariants violated at the distribution and institutional level; hard rejection triggers hit); Phase 7 (no plausible stabilizer can rescue the proposal within the current world); Phase 9 (no repair preserves the user's dramatic intent without effectively rewriting the proposal); Phase 10 (world identity would be erased).
 
-### Phase 12b: Draft Adjudication Report
+### Phase 13b: PA-only patch plan
 
-Includes:
-- Original proposal (copied).
-- Phase 0–11 analysis above.
-- Verdict + justification.
-- Critic reports verbatim (because the escalation gate fired).
-- **Why This Cannot Be Repaired**: names the two Kernel invariants violated, names the genre-contract element (low-magic frame) that would be erased, names the distribution invariant (if present in `INVARIANTS.md`) that would be inverted. Recommends three narrower proposals the user could submit instead (per Phase 9).
+```
+patch_plan = [
+  append_adjudication_record(
+    adjudications/PA-0013-reject.md,
+    frontmatter={
+      pa_id: PA-0013,
+      verdict: REJECT,
+      date: 2026-04-26,
+      originating_skill: "canon-addition",
+      // change_id absent — no canon mutated
+      mystery_reserve_touched: [],     // proposal would have collided but not adjudicated
+      invariants_touched: [<the two violated invariants>, <distribution invariant>],
+      cf_records_touched: [],          // no CFs created or modified
+      open_questions_touched: []
+    },
+    body_markdown=<full Discovery + Proposal + Phase 0–11 Analysis + Phase 14a Validation Checklist (subset that applies to REJECT) + Verdict + Justification + Critic Reports verbatim + Why This Cannot Be Repaired (names the two Kernel invariants + the genre-contract element + recommends three narrower proposals per Phase 9)>
+  )
+]
+```
 
-### Phase 13b: Validation
+### HARD-GATE → submit
 
-All tests pass.
-
-### Phase 14b: Commit
-
-User approves report summary. Atomic write of `worlds/<slug>/adjudications/PA-0013-reject.md`. No canon mutated. Report written; the user has a menu of three narrower proposals to try instead.
+User approves the PA summary and the resubmission menu. `approval_token` issued. `submit_patch_plan(patch_plan, approval_token)` writes the single PA file. No `_source/` mutations. Receipt returned. Hook 5 runs `record_schema_compliance` against the new PA frontmatter; clean.
 
 ## Takeaway
 

@@ -123,6 +123,14 @@ function hasMatchingPatchForFileClass(patches: PatchInfo[], fileClass: string): 
       return asPlainRecord(patch.payload.sec_record).file_class === fileClass;
     }
 
+    if (patch.op === "append_extension") {
+      const targetId =
+        typeof patch.payload.target_record_id === "string"
+          ? patch.payload.target_record_id
+          : patch.target_record_id ?? patch.target_node_id;
+      return typeof targetId === "string" && sectionIdMatchesFileClass(targetId, fileClass);
+    }
+
     if (patch.op !== "update_record_field") {
       return false;
     }

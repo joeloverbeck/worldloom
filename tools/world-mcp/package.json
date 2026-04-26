@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "description": "MCP retrieval server scaffold for worldloom machine-facing reads",
   "private": true,
+  "bin": {
+    "sign-approval-token": "dist/src/cli/sign-approval-token.js"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && chmod +x dist/src/cli/sign-approval-token.js",
     "test": "npm run build && node --test",
     "clean": "rm -rf dist"
   },
