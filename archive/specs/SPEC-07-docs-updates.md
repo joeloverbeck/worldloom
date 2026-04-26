@@ -2,9 +2,18 @@
 
 # SPEC-07: FOUNDATIONS.md, CLAUDE.md, and Pipeline Docs Updates
 
-**Phase**: Part A in Phase 1 (foundational additions, **complete 2026-04-23**); Part B in Phase 2 (edit-side updates); ~~Part C in Phase 3~~ **— Part C retired per SPEC-13**
+**Phase**: Part A in Phase 1 (foundational additions, **complete 2026-04-23**); Part B in Phase 2 (edit-side updates, **complete 2026-04-26**); ~~Part C in Phase 3~~ **— Part C retired per SPEC-13**
 **Depends on**: SPEC-01 through SPEC-06, **SPEC-13 (atomic-source contract — SPEC-13 handles its own FOUNDATIONS revision directly)**
 **Blocks**: SPEC-08 Phase 1 acceptance (contract must be updated before skills reference new mechanisms)
+
+## Status (2026-04-26)
+
+All landable parts implemented:
+- **Part A** — shipped 2026-04-23 against `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, plus the two new docs `docs/MACHINE-FACING-LAYER.md` and `docs/CONTEXT-PACKET-CONTRACT.md`.
+- **Part B** — shipped 2026-04-26: `docs/HARD-GATE-DISCIPLINE.md` §Why write order matters rewritten for the post-SPEC-13 3-tier engine ordering (create-all → update-all → adjudication; two-phase commit; per-world write lock) and §Execution pattern step 6 de-hedged for the now-Phase-2-complete engine path; `CLAUDE.md` §Non-Negotiables refined to acknowledge structural enforcement of HARD-GATE via Hook 3 + approval-token discipline (with the prose non-negotiable retained for cases where mechanism is absent), and the `_source/` engine-only surface bullet refined to distinguish Hook-3-blocked `.yaml` records from prescriptively-engine-routed hybrid artifacts.
+- **Part C** — retired per SPEC-13 §D; FOUNDATIONS.md atomic-source revision was authored directly by SPEC-13 Stream A.
+
+The "Why write order matters" example block in §Part B below preserves the pre-SPEC-13-amendment draft prose (with the monolithic-ledger sub-sequence `(a)/(b)/(c)`) for traceability of what changed; the as-shipped text in `docs/HARD-GATE-DISCIPLINE.md` reflects the SPEC-13 amendment summary's 3-tier ordering. Read the as-shipped doc for current truth, not this spec's literal example.
 
 ## SPEC-13 amendment summary
 
@@ -200,11 +209,11 @@ Target length: ≤200 lines.
 
 ### Docs update summary table
 
-| Doc | Part A (Phase 1, COMPLETE) | Part B (Phase 2) | Part C (RETIRED per SPEC-13) |
+| Doc | Part A (Phase 1, COMPLETE 2026-04-23) | Part B (Phase 2, COMPLETE 2026-04-26) | Part C (RETIRED per SPEC-13) |
 |---|---|---|---|
 | `docs/FOUNDATIONS.md` | New §Machine-Facing Layer; §Mandatory World Files initial note; §Tooling Recommendation upgrade | — | Retired — superseded by SPEC-13 §D (§Mandatory World Files reclassification, new §Canonical Storage Layer, §Canon Fact Record Schema storage note) |
-| `CLAUDE.md` | §Repository Layout tools/ tree; §Skill Architecture machine-layer subsection; §Non-Negotiables two new items; §ID Allocation update | §Non-Negotiables phrasing refinement (atomic-source discipline; Hook 3 on `_source/`) | Retired |
-| `docs/HARD-GATE-DISCIPLINE.md` | §Execution pattern step 6/7 revision; new §Approval token discipline | §Why write order matters rewrite for 3-tier engine ordering | Retired |
+| `CLAUDE.md` | §Repository Layout tools/ tree; §Skill Architecture machine-layer subsection; §Non-Negotiables two new items; §ID Allocation update | §Non-Negotiables HARD-GATE bullet refined (Hook 3 + approval-token structural enforcement; prose retained for absent-mechanism cases); `_source/` engine-only-surfaces bullet refined (distinguish Hook-3-blocked `_source/<subdir>/*.yaml` from prescriptively-engine-routed hybrid artifacts) | Retired |
+| `docs/HARD-GATE-DISCIPLINE.md` | §Execution pattern step 6/7 revision; new §Approval token discipline | §Execution pattern step 6 de-hedged (engine path is now the active mutation path post-Phase-2); §Why write order matters rewrite for post-SPEC-13 3-tier engine ordering (create-all → update-all → adjudication), two-phase commit semantics, per-world write lock, and explicit deletion of phase-15a inter-step grep checkpoints | Retired |
 | `docs/WORKFLOWS.md` | New §Machine-facing layer CLI section | — | Retired |
 | `docs/MACHINE-FACING-LAYER.md` | **New doc** (shipped 2026-04-23) | — | Retired |
 | `docs/CONTEXT-PACKET-CONTRACT.md` | **New doc** (shipped 2026-04-23) | — | Retired |
@@ -219,11 +228,11 @@ This spec *is* the FOUNDATIONS update. Alignment table applies reflexively: ever
 
 ## Verification
 
-- **Part A acceptance**: post-edit, CLAUDE.md's non-negotiables list describes machine-facing enforcement; FOUNDATIONS's §Machine-Facing Layer cross-references SPEC-01 through SPEC-05
-- **Part B acceptance**: HARD-GATE-DISCIPLINE.md no longer instructs skills to sequence Phase 15a writes by hand
-- **Part C acceptance** (deferred): FOUNDATIONS explicitly acknowledges atomic source vs. compiled ledger distinction
-- **Doc consistency check**: run a manual `grep` for references to deprecated patterns (phase-15a-checkpoint grep; Large-file method prose; "always Read WORLD_KERNEL.md") — any hit must have an updated replacement or an explicit deprecation note
-- **New doc review**: MACHINE-FACING-LAYER.md and CONTEXT-PACKET-CONTRACT.md reviewed against SPEC-01 through SPEC-05 for technical accuracy
+- **Part A acceptance** — **MET 2026-04-23**. CLAUDE.md's non-negotiables describe machine-facing enforcement; FOUNDATIONS's §Machine-Facing Layer cross-references SPEC-01 through SPEC-05.
+- **Part B acceptance** — **MET 2026-04-26**. `docs/HARD-GATE-DISCIPLINE.md` no longer instructs skills to sequence Phase 15a writes by hand: §Execution pattern step 6 routes through `mcp__worldloom__submit_patch_plan(plan, approval_token)`; §Why write order matters describes the engine's 3-tier ordering, two-phase commit, per-world write lock, and explicitly notes that the phase-15a inter-step structural-integrity grep checkpoints are deleted because engine atomicity makes partial-apply structurally impossible. `CLAUDE.md` §Non-Negotiables HARD-GATE bullet acknowledges Hook 3 + approval-token structural enforcement while retaining the prose non-negotiable for absent-mechanism cases; the `_source/` engine-only-surfaces bullet truthfully distinguishes Hook-3-blocked `_source/<subdir>/*.yaml` from prescriptively-engine-routed hybrid artifacts.
+- **Part C acceptance** — **RETIRED per SPEC-13**. FOUNDATIONS.md atomic-source revision (§Mandatory World Files reclassification, new §Canonical Storage Layer, §Canon Fact Record Schema storage note) was authored directly by SPEC-13 Stream A.
+- **Doc consistency check** — run a manual `grep` for references to deprecated patterns (phase-15a-checkpoint grep; Large-file method prose; "always Read WORLD_KERNEL.md") — any hit must have an updated replacement or an explicit deprecation note. Closed via SPEC-06 static-audit capstone (`docs/triage/2026-04-26-spec06-phase2-static-acceptance.md`) which verified zero retired-monolith references in the eight rewritten skills' prose.
+- **New doc review** — MACHINE-FACING-LAYER.md and CONTEXT-PACKET-CONTRACT.md reviewed against SPEC-01 through SPEC-05 for technical accuracy as part of Part A landing.
 
 ## Out of Scope
 

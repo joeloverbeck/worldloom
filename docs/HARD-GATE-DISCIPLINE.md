@@ -9,7 +9,7 @@ Every canon-mutating or content-generating skill in `.claude/skills/` begins wit
 3. **Validation / Rejection tests** — numbered; each must record PASS with a one-line rationale. A bare "PASS" is treated as FAIL per the skill's own contract.
 4. **Present deliverable summary** — to the user, in the conversation, before any write.
 5. **Wait for explicit user approval** — before any `Write` or `Edit` to `worlds/<slug>/`.
-6. **Write via the active mutation path** — today, most skills still write in their prescribed order. On machine-layer-enabled worlds, HARD-GATE approval produces an `approval_token`, the skill submits a patch plan, and the engine enforces write order internally.
+6. **Write via the patch engine** — HARD-GATE user approval produces an `approval_token` (signed via `tools/world-mcp/dist/src/cli/sign-approval-token.js`); the skill assembles a patch plan and submits via `mcp__worldloom__submit_patch_plan(plan, approval_token)`. The engine enforces write order internally (see §Why write order matters). Skills no longer sequence `Edit`/`Write` calls by hand for `_source/` records or hybrid artifacts (characters, diegetic artifacts, adjudications). `WORLD_KERNEL.md` and `ONTOLOGY.md` remain primary-authored at the world root and may be written directly (Hook 3 carve-out per SPEC-05 Part B); `proposals/`, `audits/`, and the per-INDEX.md files of hybrid sub-directories likewise stay direct-`Edit` (Hook 3 hybrid-file allowlist).
 7. **Never `git commit` from inside a skill** — writes land in the working tree; the user reviews the diff and commits.
 
 ## Approval token discipline
@@ -67,11 +67,19 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 
 The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
 
-## Why write order matters
+## Why write order matters (engine-enforced)
 
-Skills that write multiple files should sequence them so the final file written is the one that "announces" the successful operation to future queries. Example: `canon-addition` writes affected domain files first, then the adjudication record, and appends to `CANON_LEDGER.md` last. If the skill crashes mid-way, the ledger (which future runs consult to detect already-done work) still reflects the pre-operation state, so a re-run can recover cleanly rather than corrupting the ledger with a claim whose downstream patches never landed.
+Post-SPEC-13, canonical storage is atomic YAML under `_source/`; there is no monolithic `CANON_LEDGER.md` to "announce" success last. Write order is now an engine concern, not a skill concern. The patch engine reorders every submitted plan into three tiers before staging (`tools/patch-engine/src/commit/order.ts`):
 
-When a skill's phase prescribes an order, follow it exactly. Deviating breaks the recovery model.
+1. **Tier 1 — create-all**: `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`. New atomic records land first so subsequent ops can reference their IDs.
+2. **Tier 2 — update-all**: `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`. In-place mutations on existing records (including the freshly-created ones from Tier 1) and bidirectional `touched_by_cf[]` pointers settle next.
+3. **Tier 3 — adjudication / hybrid-file appends**: `append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`. The PA / character / diegetic-artifact hybrid files commit last, after every record they cite is on disk.
+
+The engine applies the reordered plan via two-phase commit: every op stages to a temp file (`tools/patch-engine/src/commit/temp-file.ts`), and only after every stage succeeds does the engine atomically rename them into place (`tools/patch-engine/src/commit/rename.ts`). If any stage fails the temp files are unlinked; if any rename fails staged temps are unlinked. **Intermediate states never hit disk**, so partial-apply is structurally impossible — there is nothing for skills to "checkpoint" mid-write. The phase-15a inter-step structural-integrity grep checkpoints that lived in earlier `canon-addition` reference material are deleted; the engine's atomicity is their replacement.
+
+A per-world write lock (`tools/patch-engine/src/commit/lock.ts`) serializes concurrent plans against the same world, so the 3-tier ordering applies cleanly within each plan and plans never interleave on the same world.
+
+When a skill submits a plan, it does **not** order ops by hand. Ordering inside the submitted `patches[]` array is irrelevant — the engine reorders deterministically. Skills are free to assemble ops in whatever order their reasoning produces.
 
 ## Auto Mode does not relax gates
 
