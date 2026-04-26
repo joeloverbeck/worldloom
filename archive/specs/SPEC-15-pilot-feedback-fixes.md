@@ -1,5 +1,6 @@
 # SPEC-15: Pilot Feedback — Validator Coverage and Documentation
 
+**Status**: COMPLETED
 **Phase**: Independent post-pilot; lands during or after Phase 2.5
 **Depends on**: SPEC-04 (validator framework, archived), SPEC-03 (patch engine, archived), SPEC-06 (skill rewrite — `canon-addition` migrated)
 **Blocks**: none; pre-existing skills continue to function with documented workarounds
@@ -97,7 +98,7 @@ Two tracks, both immediately actionable:
 - **Re-running the 2026-04-26 PR-0015 patch plan with `append_extension` ops post-fix.** The current submitted form (using `update_record_field`) is byte-identical on disk to what `append_extension` would have produced. Re-issuing would add a no-op CH entry. Skipped.
 - **Engine-convention sync (mod_history ↔ notes) and MCP retrieval-surface refinements.** Scoped to `brainstorming/post-pilot-retrieval-refinements.md`. Promotion to a separate spec (likely SPEC-16) when prioritized; not part of SPEC-15.
 - **Backfilling the `notes` paragraph on CF-0024 for the CH-0021 modification.** That's part of the brainstorming doc's C1 design call; do not pre-empt the decision by retroactively appending.
-- **Adding `pre_figured_by` to FOUNDATIONS §Canon Fact Record Schema as a canonical field.** The field is implementation-only today (zero CFs use it in animalia); FOUNDATIONS canonicalization is a separate decision worth its own discussion if/when usage emerges.
+- **Promoting `pre_figured_by` into a new required authoring field.** The field is implementation-only today (zero CFs use it in animalia); this spec only documents its existing optional semantics so authors know not to route DA/CHAR pre-figurement through it.
 - **Migrating `tools/world-mcp/.secret` away from filesystem to a more secure store.** Out of scope; current discipline (gitignored, generated on first invocation) is sufficient for single-user local development.
 
 ## Risks & Open Questions
@@ -111,8 +112,22 @@ Two tracks, both immediately actionable:
 Within SPEC-15 (full decomposition — both tickets ship the spec):
 
 1. **SPEC15PILFIX-001** — Track A (rule5 + append_extension). Completed and archived at `archive/tickets/SPEC15PILFIX-001.md`.
-2. **SPEC15PILFIX-002** — Track B (documentation + skill content). Independent of -001; can land in parallel.
+2. **SPEC15PILFIX-002** — Track B (documentation + skill content). Completed and archived at `archive/tickets/SPEC15PILFIX-002.md`.
 
-After SPEC15PILFIX-002 lands and its acceptance criteria pass, SPEC-15 archives to `archive/specs/SPEC-15-pilot-feedback-fixes.md`; SPEC15PILFIX-001 is already archived, and SPEC15PILFIX-002 should archive when completed. No deferred follow-on tickets under SPEC-15 — items in `brainstorming/post-pilot-retrieval-refinements.md` are explicitly out-of-scope and would land under their own subsequent spec when prioritized.
+Both SPEC-15 tickets are archived, and this spec is archived at `archive/specs/SPEC-15-pilot-feedback-fixes.md`. No deferred follow-on tickets under SPEC-15 — items in `brainstorming/post-pilot-retrieval-refinements.md` are explicitly out-of-scope and would land under their own subsequent spec when prioritized.
 
 `SPEC15PILFIX-001` and `SPEC15PILFIX-002` should land before any further canon-mutating skill rewrite (`character-generation`, `diegetic-artifact-generation`, etc.) so those rewrites benefit from the corrected validator coverage and the documented retrieval-tool tree.
+
+## Outcome
+
+Completed on 2026-04-26.
+
+- Track A landed via `archive/tickets/SPEC15PILFIX-001.md`: `rule5_no_consequence_evasion` recognizes `append_extension` as a SEC mutation, with validator coverage.
+- Track B landed via `archive/tickets/SPEC15PILFIX-002.md`: `pre_figured_by[]` semantics, `find_named_entities` search scope, machine-facing retrieval-tool scope, and the canon-addition retrieval-tool decision tree are documented.
+- Both SPEC-15 tickets are archived; no deferred follow-on tickets remain inside SPEC-15. Engine-convention synchronization and MCP retrieval-surface refinements remain intentionally parked in `brainstorming/post-pilot-retrieval-refinements.md` for a future spec.
+
+Verification:
+
+- Track A verification is recorded in `archive/tickets/SPEC15PILFIX-001.md`.
+- Track B verification is recorded in `archive/tickets/SPEC15PILFIX-002.md`.
+- Post-archive handoff updated `specs/IMPLEMENTATION-ORDER.md` to point at the archived spec and archived tickets.

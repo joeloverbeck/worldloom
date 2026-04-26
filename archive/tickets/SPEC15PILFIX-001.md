@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — validator-only change in `@worldloom/validators`. No engine, MCP, or skill changes.
-**Deps**: SPEC-15 (`specs/SPEC-15-pilot-feedback-fixes.md`)
+**Deps**: SPEC-15 (`archive/specs/SPEC-15-pilot-feedback-fixes.md`)
 
 ## Problem
 

@@ -1,10 +1,10 @@
 # SPEC15PILFIX-002: Documentation and skill-content fixes — `pre_figured_by` semantics, `find_named_entities` scope, canon-addition retrieval-tool decision tree
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — documentation and skill-content only.
-**Deps**: SPEC-15 (`specs/SPEC-15-pilot-feedback-fixes.md`)
+**Deps**: SPEC-15 (`archive/specs/SPEC-15-pilot-feedback-fixes.md`)
 
 ## Problem
 
@@ -26,6 +26,9 @@ The 2026-04-26 first-live canon-addition run surfaced three discoverability gaps
 6. No schema extension. No CF / CH / SEC / PA field added or modified. Pure additive documentation across three artifacts.
 7. No skill, tool, hook, or schema field renamed or removed. Blast radius is limited to the documentation files and the canon-addition references directory.
 8. Adjacent contradiction surfaced during reassessment: `tools/world-mcp/README.md` was updated under SPEC-15 ticket creation context to document the `sign-approval-token` CLI; this ticket extends the same README with retrieval-tool scope clauses. No conflict; both extensions are additive in adjacent sections.
+9. Final implementation chose a new `.claude/skills/canon-addition/references/retrieval-tool-tree.md` rather than appending to `proposal-normalization.md`; the tree is long enough to keep the main reference readable, and SKILL.md now links to it from §World-State Prerequisites.
+10. `docs/MACHINE-FACING-LAYER.md` exists and already carries the machine-facing overview, so this ticket adds a compact retrieval-tool scope table there instead of leaving the README as the only tool-scope surface.
+11. Same-seam spec/status references in `specs/SPEC-15-pilot-feedback-fixes.md` and `specs/IMPLEMENTATION-ORDER.md` were initially updated to say this ticket was complete but intentionally still active pending explicit archival; post-ticket review later updated those handoff lines to the archived ticket path, and SPEC-15 archival moved the spec to `archive/specs/SPEC-15-pilot-feedback-fixes.md`.
 
 ## Architecture Check
 
@@ -40,14 +43,14 @@ The 2026-04-26 first-live canon-addition run surfaced three discoverability gaps
 
 1. `pre_figured_by` semantics documented -> codebase grep-proof (`grep -A3 "pre_figured_by" docs/FOUNDATIONS.md tools/world-mcp/README.md` returns the new clarification on at least one of the two surfaces) + manual review (the prose actually distinguishes CF-to-CF foreshadowing from DA-to-CF pre-figurement)
 2. `find_named_entities` search scope documented -> codebase grep-proof (`grep -B1 -A4 "find_named_entities" tools/world-mcp/README.md` returns the new scope clause naming canonical_name / alias / scoped_reference fields and stating prose body is NOT scanned)
-3. canon-addition retrieval-tool decision tree exists -> codebase grep-proof (file `.claude/skills/canon-addition/references/retrieval-tool-tree.md` exists OR a §Retrieval-tool tree section exists in `.claude/skills/canon-addition/references/proposal-normalization.md`) + skill dry-run (a skill author reading SKILL.md + references can identify the right MCP retrieval tool for each phase without reading TypeScript)
+3. canon-addition retrieval-tool decision tree exists -> codebase grep-proof (file `.claude/skills/canon-addition/references/retrieval-tool-tree.md` exists and SKILL.md links to it) + skill dry-run (a skill author reading SKILL.md + references can identify the right MCP retrieval tool for each phase without reading TypeScript)
 4. FOUNDATIONS Rule 6 audit-trail principle alignment -> FOUNDATIONS alignment check (`docs/FOUNDATIONS.md` §Validation Rules §Rule 6 — `pre_figured_by` clarification supports clean audit-trail routing for CF-to-CF foreshadowing; doesn't introduce a new mechanism, only documents the existing one)
 
 ## What to Change
 
 ### 1. Document `pre_figured_by` semantics
 
-`docs/FOUNDATIONS.md` §Canon Fact Record Schema — append a short prose paragraph after the YAML example block, OR add an inline comment within the schema block. Suggested form:
+`docs/FOUNDATIONS.md` §Canon Fact Record Schema — append a short prose paragraph after the YAML example block:
 
 > The optional `pre_figured_by[]` field accepts CF id references only and records CF-to-CF foreshadowing — i.e., a previously-accepted CF that hinted at the new CF before the new CF was committed. DA-to-CF pre-figurement (a diegetic artifact whose narrator-content foreshadowed a later canon commitment, per Rule 6 audit-trail discipline) is recorded in `source_basis.derived_from` instead, alongside any contributing CF parents. Precedent: CF-0038 and CF-0045 both record DA-0001 pre-figurement via `derived_from`, leaving `pre_figured_by` empty.
 
@@ -63,60 +66,28 @@ The 2026-04-26 first-live canon-addition run surfaced three discoverability gaps
 
 ### 3. Add canon-addition retrieval-tool decision tree
 
-Choose ONE of:
-- (a) Append a `## Retrieval Tool Decision Tree` section to `.claude/skills/canon-addition/references/proposal-normalization.md`, or
-- (b) Create `.claude/skills/canon-addition/references/retrieval-tool-tree.md` and link from SKILL.md §World-State Prerequisites.
+Create `.claude/skills/canon-addition/references/retrieval-tool-tree.md` and link it from SKILL.md §World-State Prerequisites. The reference maps retrieval calls by phase:
 
-Author chooses (a) or (b) based on length once written. If the section runs >100 lines, prefer (b) for legibility.
-
-Content (phase-by-phase mapping):
-
-> ## Retrieval Tool Decision Tree
->
-> Per-phase mapping of which MCP retrieval tool to invoke when. The skill's existing process flow names retrieval tools at specific points; this tree provides the per-phase rationale.
->
-> **Pre-flight**:
-> - `mcp__worldloom__allocate_next_id(world_slug, id_class)` for each ID class needed (PA always; CF/CH on accept branches; M / OQ if Phase 9 repair manufactures bounded unknowns or new open questions).
-> - `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`. Validates enum values at reasoning time, eliminating post-write vocabulary-drift fails.
-> - `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed_nodes>], token_budget=<>=15000)`. Returns Kernel + Invariants + relevant CF/CH/M/OQ records + named-entity neighbors + section context as an INDEX (body_previews truncated). Skills follow up with `get_record` for full content per cited node.
->
-> **Phase 0–2 (Normalize, Scope, Invariants)**:
-> - `mcp__worldloom__get_record(record_id)` for each cited CF / M / OQ the proposal references — full content needed to verify the proposal's claims about existing canon. Use this aggressively; do not reason from packet body_previews alone.
-> - For pre-figuring scans of named entities the proposal commits: `mcp__worldloom__find_named_entities(names)` filtered to `node_type ∈ {character_record, diegetic_artifact_record}`. Note: scans the entity registry, NOT prose body content (per `tools/world-mcp/README.md` §Tools). For prose-body string discovery, pair with `mcp__worldloom__search_nodes(query)` against the FTS5 lexical layer.
->
-> **Phase 3–6 (Capability, Prerequisites, Diffusion, Consequence Propagation)**:
-> - `mcp__worldloom__get_neighbors(node_id, edge_types, depth)` for one-hop ontology neighbors when scope detection is unclear or when CFs other than the seed_nodes need disambiguation.
-> - `mcp__worldloom__get_record(record_id)` for any SEC the proposal's `likely_required_downstream_updates` cites — needed to verify the SEC's current `touched_by_cf[]` and `extensions[]` arrays before Phase 13a patch assembly.
-> - For very large SEC records (>50KB; e.g., SEC-ELF-001 in animalia ≈ 76KB) where `get_record` exceeds context budget: dispatch a subagent with explicit field-extraction instructions (jq queries on the raw JSON for `body`, `touched_by_cf`, `extensions[]`).
->
-> **Escalation Gate / Phase 6b (if escalation fires)**: `mcp__worldloom__get_context_packet` is invoked per critic role with role-scoped seed_nodes and a smaller token_budget; do not pass the full pre-flight packet to each critic.
->
-> **Phase 12a (modification_history axis-(c) judgment)**:
-> - `mcp__worldloom__find_sections_touched_by(cf_id)` for each candidate parent CF identified via axis (a) `derived_from_cfs` — returns the set of SEC records that currently cite the candidate. Used to confirm whether the new CF's content extends each candidate's substantive footprint (axis-(c) YES) vs is mere cross-reference (axis-(c) NO).
-> - `mcp__worldloom__find_impacted_fragments(node_ids)` to identify additional records (CFs, SECs, hybrid artifacts) that may need updating if the new CF is accepted. Useful when the proposal's `likely_required_downstream_updates` is incomplete or when the skill is uncertain whether ancillary records are affected.
->
-> **Phase 13a (Patch plan assembly)**:
-> - No new retrieval calls; assemble the `PatchOperation[]` from the analysis above.
->
-> **Phase 14a (Validation)**:
-> - `mcp__worldloom__validate_patch_plan(plan)` — exercises the full validator stack (mechanical layers + Rules 1, 2, 4, 5, 6, 7) against the assembled envelope. Loop back to the originating Phase on any fail.
->
-> **Phase 15a (Submit, post-HARD-GATE)**:
-> - Persist the envelope to `/tmp/<plan-id>.json`, sign the approval token via `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` (per `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token.
-
-If chosen as (a), update `.claude/skills/canon-addition/references/proposal-normalization.md` to include the section. If chosen as (b), the new file is referenced from `.claude/skills/canon-addition/SKILL.md` §World-State Prerequisites or §Procedure step 1 (Pre-flight).
+- Pre-flight: `allocate_next_id`, `get_canonical_vocabulary`, and `get_context_packet`.
+- Phase 0-2: `get_record` for cited records, `find_named_entities` for registry/scoped-reference pre-figuring scans, and `search_nodes` for prose-body discovery.
+- Phase 3-6: `get_neighbors`, `get_record` for cited SEC records, and read-only subagent extraction for oversized records.
+- Phase 6b: role-scoped `get_context_packet` calls for critic roles when escalation fires.
+- Phase 12a: `find_sections_touched_by` for axis-(c) judgment and `find_impacted_fragments` for incomplete downstream-update discovery.
+- Phase 13a-15a: patch assembly, `validate_patch_plan`, approval-token signing, and `submit_patch_plan`.
 
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify — append clarification paragraph after CF schema YAML example)
 - `tools/world-mcp/README.md` (modify — extend `find_named_entities` description; optionally clarify `get_context_packet` body_preview semantics)
-- `docs/MACHINE-FACING-LAYER.md` (modify — IF the file exists; add per-tool scope subsection)
-- `.claude/skills/canon-addition/references/proposal-normalization.md` (modify, OR new sibling file `retrieval-tool-tree.md` — author chooses based on resulting section length)
-- `.claude/skills/canon-addition/SKILL.md` (modify — link to the new section / file from §World-State Prerequisites or §Procedure step 1, IF (b) chosen)
+- `docs/MACHINE-FACING-LAYER.md` (modify — add per-tool scope subsection)
+- `.claude/skills/canon-addition/references/retrieval-tool-tree.md` (new)
+- `.claude/skills/canon-addition/SKILL.md` (modify — link to the new reference from §World-State Prerequisites)
+- `archive/specs/SPEC-15-pilot-feedback-fixes.md` (modify — completion/status truthing)
+- `specs/IMPLEMENTATION-ORDER.md` (modify — completion/status truthing)
 
 ## Out of Scope
 
-- Adding `pre_figured_by` to FOUNDATIONS §Canon Fact Record Schema as a canonical field with prose definition. Out-of-scope per SPEC-15 §Out of Scope; this ticket only documents the existing field's intent inline.
+- Promoting `pre_figured_by` beyond an implementation-backed optional machine field into a new canonical authoring requirement. This ticket documents the existing field's intent inline but does not require authors to populate it.
 - Adding a `prose_body_scan: boolean` parameter to `find_named_entities`. Out of scope; deferred to `brainstorming/post-pilot-retrieval-refinements.md` §C6.
 - Documenting every MCP retrieval tool's scope (only `find_named_entities` is in scope; `get_neighbors`, `find_impacted_fragments`, etc. are well-documented enough today). If subsequent canon-addition runs reveal additional opacity, follow-up tickets.
 - Re-running the 2026-04-26 PR-0015 envelope to test the new retrieval-tool tree. The tree is documentation; verification is by manual review of the prose, not by a synthetic skill run.
@@ -127,7 +98,7 @@ If chosen as (a), update `.claude/skills/canon-addition/references/proposal-norm
 
 1. `grep -A3 "pre_figured_by" docs/FOUNDATIONS.md` returns the new clarification paragraph (or comment block) distinguishing CF-to-CF foreshadowing from DA-to-CF pre-figurement.
 2. `grep -B1 -A6 "find_named_entities" tools/world-mcp/README.md` returns the new scope clause naming canonical_name / alias / scoped_reference fields and stating prose body is NOT scanned.
-3. `ls .claude/skills/canon-addition/references/retrieval-tool-tree.md` returns the file (option b), OR `grep -A2 "Retrieval Tool Decision Tree" .claude/skills/canon-addition/references/proposal-normalization.md` returns the new section header (option a).
+3. `ls .claude/skills/canon-addition/references/retrieval-tool-tree.md` returns the file, and `grep -n "retrieval-tool-tree.md" .claude/skills/canon-addition/SKILL.md` returns the SKILL.md link.
 4. Manual review: a skill author reading the canon-addition SKILL.md + references can identify the correct MCP retrieval tool to call at each phase without reading TypeScript source.
 
 ### Invariants
@@ -146,5 +117,35 @@ If chosen as (a), update `.claude/skills/canon-addition/references/proposal-norm
 
 1. `grep -A3 "pre_figured_by" docs/FOUNDATIONS.md`
 2. `grep -B1 -A6 "find_named_entities" tools/world-mcp/README.md`
-3. `find .claude/skills/canon-addition/references/ -name "retrieval-tool-tree.md" -o -name "proposal-normalization.md"` then `grep -l "Retrieval Tool Decision Tree" .claude/skills/canon-addition/references/*.md`
+3. `find .claude/skills/canon-addition/references/ -name "retrieval-tool-tree.md"` then `grep -l "Retrieval Tool Decision Tree" .claude/skills/canon-addition/references/*.md`
 4. `cat docs/FOUNDATIONS.md | grep -c "pre_figured_by"` — confirms reference exists at least once after the change.
+
+## Outcome
+
+Completed on 2026-04-26.
+
+Outcome amended: 2026-04-26 — post-ticket review archived this completed ticket at `archive/tickets/SPEC15PILFIX-002.md`.
+
+- Added the `pre_figured_by[]` clarification to `docs/FOUNDATIONS.md`, preserving CF-only semantics and routing diegetic/character pre-figurement through `source_basis.derived_from`.
+- Expanded `tools/world-mcp/README.md` and `docs/MACHINE-FACING-LAYER.md` with the `find_named_entities` scope boundary and retrieval tool-scope guidance.
+- Added `.claude/skills/canon-addition/references/retrieval-tool-tree.md` and linked it from `.claude/skills/canon-addition/SKILL.md`.
+- Updated SPEC-15 and implementation-order status prose during implementation, then post-ticket review repaired those handoff lines to the archived ticket path.
+
+## Verification Result
+
+Passed on 2026-04-26:
+
+1. `grep -A3 "pre_figured_by" docs/FOUNDATIONS.md`
+2. `grep -B1 -A6 "find_named_entities" tools/world-mcp/README.md`
+3. `find .claude/skills/canon-addition/references/ -name "retrieval-tool-tree.md"` plus `grep -l "Retrieval Tool Decision Tree" .claude/skills/canon-addition/references/*.md`
+4. `cat docs/FOUNDATIONS.md | grep -c "pre_figured_by"`
+5. `ls .claude/skills/canon-addition/references/retrieval-tool-tree.md`
+6. `grep -n "retrieval-tool-tree.md" .claude/skills/canon-addition/SKILL.md`
+7. `git diff --check`
+8. Manual review: SKILL.md §World-State Prerequisites links to the new tree; the tree identifies the correct retrieval tool for each canon-addition phase without changing HARD-GATE semantics.
+
+## Deviations
+
+- Chose the new-file option for the decision tree because the phase map is substantial enough that appending it to `proposal-normalization.md` would make that reference less focused.
+- Updated `docs/MACHINE-FACING-LAYER.md` because it exists and already owns the machine-facing overview.
+- Initial implementation did not archive the ticket or SPEC-15 because the user requested implementation and reference-spec reliance, not archival. Post-ticket review archived this ticket; SPEC-15 spec archival remains a separate handoff.

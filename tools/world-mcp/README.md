@@ -15,7 +15,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`
 - `mcp__worldloom__find_impacted_fragments(node_ids)`
 - `mcp__worldloom__find_sections_touched_by(cf_id)`
-- `mcp__worldloom__find_named_entities(names)`
+- `mcp__worldloom__find_named_entities(names)` — searches the entity registry's `canonical_name`, `entity_aliases.alias_text`, `scoped_references.display_name`, and `scoped_reference_aliases.alias_text` surfaces against the world index. It does not perform a lexical scan over prose body content such as section bodies, diegetic-artifact bodies, character dossiers, or adjudication prose. For Rule 6 pre-figuring scans where a string may exist only in prose, pair this with `mcp__worldloom__search_nodes(query)` to cover the FTS5 lexical layer. Returns `canonical_matches[]`, `scoped_matches[]`, and `surface_matches[]`.
 - `mcp__worldloom__find_edit_anchors(targets)`
 - `mcp__worldloom__get_canonical_vocabulary(class)` *(returns shared canonical enum values for `domain`, `verdict`, `mystery_status`, and `mystery_resolution_safety`)*
 - `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ verdicts }`)*

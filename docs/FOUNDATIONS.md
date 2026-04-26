@@ -317,6 +317,8 @@ notes: >
   Accepted only with limiting conditions and downstream updates.
 ```
 
+The optional `pre_figured_by[]` field, when present in machine-readable Canon Fact Records, accepts CF ids only and records CF-to-CF foreshadowing: an earlier accepted CF that hinted at the later commitment before it was canonized. Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references.
+
 > **Canonical storage (machine-layer-enabled worlds, per SPEC-13)**: Canon Fact Records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-NNNN.yaml` — one record per file. The `notes` field and `modification_history[]` array are the authorized in-place mutation surfaces for an accepted CF; structural fields (`statement`, `scope`, `domains_affected`, `distribution`, etc.) are append-only in practice (changing them requires an explicit retcon attestation through the patch engine).
 
 ---

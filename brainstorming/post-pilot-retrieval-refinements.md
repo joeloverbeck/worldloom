@@ -5,7 +5,7 @@
 **Status**: brainstorming. Awaits design call before promotion to a spec.
 
 **Related shipped work**:
-- `specs/SPEC-15-pilot-feedback-fixes.md` — covers the immediately-actionable findings (Track A: rule5 + append_extension; Track B: documentation + skill content). SPEC-15 deliberately does NOT cover the items in this brainstorming doc; those are scoped here for separate prioritization.
+- `archive/specs/SPEC-15-pilot-feedback-fixes.md` — covers the immediately-actionable findings (Track A: rule5 + append_extension; Track B: documentation + skill content). SPEC-15 deliberately does NOT cover the items in this brainstorming doc; those are scoped here for separate prioritization.
 
 ---
 

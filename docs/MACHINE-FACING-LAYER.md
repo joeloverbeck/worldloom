@@ -55,6 +55,19 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
 | Prove structural integrity | `world-validate <world> --structural` |
 
+## Retrieval Tool Scope
+
+| Tool | Reads |
+|---|---|
+| `search_nodes` | FTS5 lexical node content plus structured filters such as node type, file path, canonical entity name, and scoped-reference name. Use for body-prose discovery. |
+| `get_node` | One indexed node plus its structured links, mentions, scoped references, and file metadata. |
+| `get_record` | The full parsed record for a structured id such as CF / CH / M / OQ / SEC / PA / DA / CHAR. Use this after context-packet previews before citing record content. |
+| `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |
+| `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are truncated; full text requires `get_record`. |
+| `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
+| `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
+| `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. It does not scan prose bodies; pair with `search_nodes` for lexical-only evidence. |
+
 ## Trust tiers
 
 Retrieval now distinguishes four trust tiers instead of flattening everything into either canonical entities or lexical hits:
