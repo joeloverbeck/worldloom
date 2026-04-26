@@ -131,6 +131,10 @@ test("assembler reports packet_incomplete_required_classes when local authority 
       "scoped_local_context",
       "governing_world_context"
     ]);
+    assert.equal(
+      (result.details?.retry_with as { token_budget?: unknown } | undefined)?.token_budget,
+      result.details?.minimum_required_budget
+    );
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -159,6 +163,25 @@ test("budget insufficiency retains locality-first classes before dropping govern
       "scoped_local_context"
     ]);
     assert.deepEqual(result.details?.missing_classes, ["governing_world_context"]);
+    const retryBudget = (result.details?.retry_with as { token_budget?: unknown } | undefined)
+      ?.token_budget;
+    assert.equal(retryBudget, result.details?.minimum_required_budget);
+    assert.equal(typeof retryBudget, "number");
+    if (typeof retryBudget !== "number") {
+      throw new Error("retry_with.token_budget must be numeric.");
+    }
+
+    const retryResult = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "diegetic_artifact_generation",
+        world_slug: "seeded",
+        seed_nodes: ["DA-0002"],
+        token_budget: retryBudget
+      })
+    );
+
+    assert.ok(!("code" in retryResult));
+    assert.ok(retryResult.task_header.token_budget.allocated <= retryBudget);
   } finally {
     destroyTempRepoRoot(root);
   }

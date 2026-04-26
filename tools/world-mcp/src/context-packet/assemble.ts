@@ -297,6 +297,7 @@ export async function assembleContextPacket(args: {
           missing_classes: insufficiency.missingClasses,
           requested_budget: args.token_budget,
           minimum_required_budget: insufficiency.minimumRequiredBudget,
+          retry_with: { token_budget: insufficiency.minimumRequiredBudget },
           retained_classes: insufficiency.retainedClasses
         }
       );

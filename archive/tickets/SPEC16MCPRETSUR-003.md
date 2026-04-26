@@ -1,6 +1,6 @@
 # SPEC16MCPRETSUR-003: Per-task-type packet defaults + `retry_with` error surface
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — modifies `get_context_packet` default behavior and `packet_incomplete_required_classes` error payload in `@worldloom/world-mcp`. No public-API tool addition; existing signatures preserved.
@@ -12,10 +12,12 @@
 
 ## Assumption Reassessment (2026-04-26)
 
-1. The hardcoded `token_budget ?? 8000` fallback is at `tools/world-mcp/src/tools/get-context-packet.ts:39`. Confirmed — the file is short (42 lines); the fallback is the only one. The `TaskType` import is already in scope at line 3 (`import { TASK_TYPES, type TaskType } from "../ranking/profiles"`).
-2. The `packet_incomplete_required_classes` error is emitted at `tools/world-mcp/src/context-packet/assemble.ts:286-302`. Confirmed — `insufficiency.minimumRequiredBudget` is already computed and surfaced in the error's `data` payload (line 299); adding `retry_with` is purely a payload extension.
-3. Cross-skill boundary: this ticket modifies the `get_context_packet` tool's default-budget behavior and the `assemble.ts` error payload. Consumers of `get_context_packet` are skills that call it as a context-loading step (`canon-addition`, `character-generation`, `diegetic-artifact-generation`, `continuity-audit`, future skills). The change is backwards-compatible: omitting `token_budget` continues to work; existing `minimum_required_budget` field stays in the error payload; `retry_with` is additive. Same-package contract tests under `tools/world-mcp/tests/context-packet/` and `tools/world-mcp/tests/errors.test.ts` may already assert on the `packet_incomplete_required_classes` error payload shape — extend (do not replace) any such assertion to cover the new `retry_with` field; existing assertions on `minimum_required_budget` must continue to pass.
+1. The hardcoded `token_budget ?? 8000` fallback was at `tools/world-mcp/src/tools/get-context-packet.ts`. Confirmed — the file was the only defaulting surface and already imported `TaskType`, so a `Record<TaskType, number>` default table is the narrow owned change.
+2. The `packet_incomplete_required_classes` error is emitted in `tools/world-mcp/src/context-packet/assemble.ts`. Confirmed — `insufficiency.minimumRequiredBudget` was already computed and surfaced as `minimum_required_budget`; adding `retry_with` is a payload extension, not a new budget algorithm.
+3. Cross-skill boundary: this ticket modifies the `get_context_packet` tool's default-budget behavior and the `assemble.ts` error payload. Consumers of `get_context_packet` are skills that call it as a context-loading step (`canon-addition`, `character-generation`, `diegetic-artifact-generation`, `continuity-audit`, future skills). The change is backwards-compatible: omitting `token_budget` continues to work; existing `minimum_required_budget` field stays in the error payload; `retry_with` is additive. Same-package contract tests under `tools/world-mcp/tests/context-packet/` and `tools/world-mcp/tests/tools/` now cover the new `retry_with` and default-budget behavior.
 4. Schema extension: extends the `packet_incomplete_required_classes` McpError `data` shape (additive only — new optional field `retry_with: { token_budget: number }`). Existing consumers parsing `minimum_required_budget` continue to work; consumers that learn `retry_with` get single-round-trip retry. Additive-only.
+5. This ticket does not own user-facing MCP inventory docs; `tickets/SPEC16MCPRETSUR-005.md` explicitly owns cross-track documentation for `tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and skill-side retrieval references after the code tracks land.
+6. The explicit `SPEC-16` reference contained one same-seam stale risk sentence implying a non-8000 default for a non-canon task type. Corrected it in `specs/SPEC-16-mcp-retrieval-surface-refinements.md` so the spec matches the landed C5 default table.
 
 ## Architecture Check
 
@@ -47,16 +49,16 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 };
 ```
 
-Replace the `args.token_budget ?? 8000` fallback at line 39 with `args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type]`.
+Replace the `args.token_budget ?? 8000` fallback with `args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type]`.
 
 ### 2. `retry_with` field in error payload
 
-`tools/world-mcp/src/context-packet/assemble.ts` — augment the `createMcpError(...)` call at lines 293-302 to include `retry_with: { token_budget: insufficiency.minimumRequiredBudget }` in the `data` payload. The existing `minimum_required_budget` field stays as-is for backward compatibility.
+`tools/world-mcp/src/context-packet/assemble.ts` — augment the `createMcpError(...)` call for `packet_incomplete_required_classes` to include `retry_with: { token_budget: insufficiency.minimumRequiredBudget }` in the `data` payload. The existing `minimum_required_budget` field stays as-is for backward compatibility.
 
 ### 3. Tests
 
-`tools/world-mcp/tests/tools/get-context-packet.test.ts` (or wherever the tool's tests live) — add cases:
-- `task_type='canon_addition'` with `token_budget` omitted → uses 16000 default (verify by inspecting the assembled packet's `task_header.token_budget.allocated` upper bound or by stubbing `assembleContextPacket` and asserting the forwarded `token_budget`).
+`tools/world-mcp/tests/tools/get-context-packet.test.ts` — add default-wrapper cases, and `tools/world-mcp/tests/context-packet/budget-handling.test.ts` — extend assembler insufficiency cases:
+- `task_type='canon_addition'` with `token_budget` omitted → uses 16000 default by inspecting `task_header.token_budget.requested`.
 - `task_type='character_generation'` with `token_budget` omitted → uses 8000 default.
 - Insufficient explicit budget → error includes `retry_with.token_budget` matching `minimum_required_budget`.
 - Successful retry using `retry_with.token_budget` → returns a complete packet.
@@ -65,7 +67,9 @@ Replace the `args.token_budget ?? 8000` fallback at line 39 with `args.token_bud
 
 - `tools/world-mcp/src/tools/get-context-packet.ts` (modify)
 - `tools/world-mcp/src/context-packet/assemble.ts` (modify)
-- `tools/world-mcp/tests/tools/get-context-packet.test.ts` (modify or create — implementer verifies whether tests for this tool already live elsewhere)
+- `tools/world-mcp/tests/tools/get-context-packet.test.ts` (modify)
+- `tools/world-mcp/tests/context-packet/budget-handling.test.ts` (modify)
+- `specs/SPEC-16-mcp-retrieval-surface-refinements.md` (modify — same-seam risk wording truthing)
 
 ## Out of Scope
 
@@ -78,8 +82,8 @@ Replace the `args.token_budget ?? 8000` fallback at line 39 with `args.token_bud
 ### Tests That Must Pass
 
 1. `cd tools/world-mcp && npm test` passes after the new test cases land.
-2. Manual smoke: invoke `mcp__worldloom__get_context_packet(task_type='canon_addition', world_slug='animalia', seed_nodes=[<known-good-seed>])` with no `token_budget`; response succeeds first call.
-3. Insufficient-budget retry path: invoke with `token_budget=10000`; error includes `retry_with.token_budget` field; second invocation using that value succeeds.
+2. Unit coverage proves `task_type='canon_addition'` with omitted `token_budget` forwards a 16000 requested budget.
+3. Unit coverage proves an insufficient budget error includes `retry_with.token_budget`, preserves `minimum_required_budget`, and a retry using that value succeeds.
 
 ### Invariants
 
@@ -91,9 +95,29 @@ Replace the `args.token_budget ?? 8000` fallback at line 39 with `args.token_bud
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/get-context-packet.test.ts` — covers all four test cases above (location TBD by implementer; existing tests for this tool may already live in `tests/context-packet/` — implementer follows the existing pattern).
+1. `tools/world-mcp/tests/tools/get-context-packet.test.ts` — covers omitted-budget defaults for `canon_addition` and `character_generation`.
+2. `tools/world-mcp/tests/context-packet/budget-handling.test.ts` — extends the existing assembler insufficiency tests for `retry_with` and retry success.
 
 ### Commands
 
 1. `cd tools/world-mcp && npm test` — full package test suite.
-2. Smoke invocation through MCP after `cd tools/world-mcp && npm run build`.
+2. Direct external MCP smoke was not run in this Codex toolset; the full package test includes build, direct handler tests, assembler tests, and in-memory MCP server dispatch coverage for the same package surface.
+
+## Outcome
+
+Implemented C5 in `@worldloom/world-mcp`:
+
+1. `getContextPacket` now uses an exhaustive per-`TaskType` default table: `canon_addition` defaults to `16000`; all other current task types retain `8000`.
+2. `packet_incomplete_required_classes` errors now include `retry_with: { token_budget: minimum_required_budget }` while preserving the existing `minimum_required_budget` field.
+3. Focused tests cover the default budget lookup, retry hint equality, and a successful retry using the structured hint.
+4. The explicit `SPEC-16` reference was corrected to match the landed default table.
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm test` — PASS. The command ran `npm run build` and the full Node test suite (`135` passing tests).
+2. Grep/manual review confirmed `minimum_required_budget` remains emitted in `tools/world-mcp/src/context-packet/assemble.ts` and `retry_with.token_budget` is set to the same computed value.
+
+## Deviations
+
+1. The drafted manual `animalia` MCP smoke was replaced with package-local direct and in-memory coverage because no direct `mcp__worldloom__get_context_packet` tool invocation is exposed in this Codex session. This matches the skill guidance for `tools/world-mcp` tickets: use package-local direct handler/assembler proof when external MCP invocation is unavailable.
+2. Cross-track user-facing docs remain out of scope for this ticket and are still owned by `tickets/SPEC16MCPRETSUR-005.md`.

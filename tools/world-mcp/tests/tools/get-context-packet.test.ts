@@ -159,3 +159,47 @@ test("getContextPacket returns a fully populated v2 diegetic_artifact_generation
     destroyTempRepoRoot(root);
   }
 });
+
+test("getContextPacket defaults canon_addition requests to a 16000 token budget", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildContextPacketWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "canon_addition",
+        world_slug: "seeded",
+        seed_nodes: ["DA-0002"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.task_header.token_budget.requested, 16000);
+    assert.ok(result.task_header.token_budget.allocated <= 16000);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket keeps the existing 8000 default for character_generation", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildContextPacketWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "character_generation",
+        world_slug: "seeded",
+        seed_nodes: ["CHAR-0002"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.task_header.token_budget.requested, 8000);
+    assert.ok(result.task_header.token_budget.allocated <= 8000);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

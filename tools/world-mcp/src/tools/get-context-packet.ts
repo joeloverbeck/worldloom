@@ -9,6 +9,14 @@ export interface GetContextPacketArgs {
   token_budget?: number;
 }
 
+const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
+  canon_addition: 16000,
+  character_generation: 8000,
+  diegetic_artifact_generation: 8000,
+  continuity_audit: 8000,
+  other: 8000
+};
+
 function assertValidArgs(args: GetContextPacketArgs): void {
   if (args.world_slug.trim().length === 0) {
     throw new Error("world_slug must be non-empty.");
@@ -36,6 +44,6 @@ export async function getContextPacket(
     task_type: args.task_type,
     world_slug: args.world_slug,
     seed_nodes: args.seed_nodes,
-    token_budget: args.token_budget ?? 8000
+    token_budget: args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type]
   });
 }

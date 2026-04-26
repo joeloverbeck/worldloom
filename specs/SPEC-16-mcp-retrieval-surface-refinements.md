@@ -103,7 +103,7 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 
 **`tools/world-mcp/src/context-packet/assemble.ts`** — augment the `packet_incomplete_required_classes` error payload (lines 296-301) to include `retry_with: { token_budget: insufficiency.minimumRequiredBudget }`. The existing `minimum_required_budget` field stays for backward compatibility; `retry_with` is the structured retry-hint surface.
 
-**`tools/world-mcp/tests/tools/get-context-packet.test.ts`** (or wherever the tool tests live) — test cases:
+**`tools/world-mcp/tests/tools/get-context-packet.test.ts`** and **`tools/world-mcp/tests/context-packet/budget-handling.test.ts`** — test cases:
 - `task_type='canon_addition'` with `token_budget` omitted → uses 16000 default
 - `task_type='character_generation'` with `token_budget` omitted → uses 8000 default
 - Insufficient explicit budget → error includes `retry_with.token_budget` matching `minimum_required_budget`
@@ -173,8 +173,8 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 ### Track C5
 
 - `cd tools/world-mcp && npm test` passes after the new test cases are added.
-- Manual smoke: invoke `mcp__worldloom__get_context_packet(task_type='canon_addition', world_slug='animalia', seed_nodes=[<known-good-seed>])` with no `token_budget`; response succeeds first call.
-- Insufficient-budget retry path: invoke with `token_budget=10000`; error includes `retry_with.token_budget` field; second invocation using that value succeeds.
+- Package-local handler proof: `task_type='canon_addition'` with no `token_budget` requests a 16000 budget, while `task_type='character_generation'` retains the 8000 default.
+- Assembler retry proof: an insufficient budget returns `retry_with.token_budget` equal to `minimum_required_budget`, and a second assembler call using that value succeeds. A direct external MCP smoke can be added when the `mcp__worldloom__get_context_packet` tool is available in the active session.
 
 ### Track C6
 
@@ -198,7 +198,7 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 
 ## Risks & Open Questions
 
-- **Risk: per-task-type defaults drift from empirical reality.** The initial 16000 / 8000 / 12000 / 8000 defaults are grounded in 2026-04-26 pilot data for one world (animalia) at one point in its growth. As worlds grow, the canon-addition minimum will rise. Mitigation: the `retry_with` error surface auto-corrects; defaults are a first-call optimization, not a contract. Re-tune defaults via a follow-up if pilot evidence on a second world (or post-SPEC-09 animalia) shows systematic mismatch.
+- **Risk: per-task-type defaults drift from empirical reality.** The initial `canon_addition: 16000` default and retained `8000` defaults for the other task types are grounded in 2026-04-26 pilot data for one world (animalia) at one point in its growth. As worlds grow, the canon-addition minimum will rise. Mitigation: the `retry_with` error surface auto-corrects; defaults are a first-call optimization, not a contract. Re-tune defaults via a follow-up if pilot evidence on a second world (or post-SPEC-09 animalia) shows systematic mismatch.
 - **Risk: `exhaustive: true` performance on large worlds.** FTS5 queries are fast but uncapped result sets may surprise callers. Mitigation: tests assert determinism (node-id sort), not bounded size; if a future world produces multi-thousand-match results, callers can filter via existing `filters` parameter or the spec can add an explicit `max_results` cap.
 - **Risk: `get_record_field` field-path ambiguity for arrays.** Numeric path segments (`["extensions", 0, "body"]`) need clear semantics — array index vs object key. Resolution: the Zod input schema for C3 declares `field_path: z.array(z.union([z.string(), z.number().int()]))` — numeric segments are array indices when the parent is an array; string segments are object keys. Document in the README.
 - **Open question: should `get_record_schema` cache schema files in memory?** The schemas change rarely (only via SPEC-04 ticket-driven updates). Initial implementation may load on-demand; if profiling shows hot-path cost, add a startup-time cache. Not a release blocker.
