@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install + build world-index (file: dependency)
+      - name: Install and build world-index (file dependency)
         working-directory: tools/world-index
         run: npm install && npm run build
       - name: Install
