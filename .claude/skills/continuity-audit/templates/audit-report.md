@@ -71,11 +71,12 @@ One subsection per CH-NNNN in the Phase 2 delta window. For each CH, record:
 - **affected_fact_ids**: [CF-NNNN, CF-NNNN, ...]
 - **invariants_touched**: [ONT-N, CAU-N, ...] (or "none")
 - **mystery_reserve_interactions**: narrows | expands | none
-- **required_world_updates** (from the CH entry): [FILE.md, FILE.md, ...]
-- **patch_attribution_status**: per file in required_world_updates, does the file
-  carry an `<!-- added by CF-NNNN -->` or equivalent attribution? Record each file
-  as `FILE.md: attributed` or `FILE.md: MISSING`. Missing attribution feeds Phase 4
-  category 9 or 10 candidate findings.
+- **required_world_updates** (from the CH entry): [SEC-XXX-NNN, ...]
+- **patch_attribution_status**: per SEC record in required_world_updates, does
+  it carry the originating CF in its `touched_by_cf[]` array (verified via
+  `find_sections_touched_by(cf_id)`)? Record each as `SEC-XXX-NNN: attributed`
+  or `SEC-XXX-NNN: MISSING`. Missing bidirectional pointers feed Phase 4
+  category 4j (Local/Global Drift) and Hidden Retcons candidate findings.
 
 If the delta window is empty (no CHs since cutoff), record "Empty delta — no change
 log entries newer than <cutoff>." Empty delta is legitimate, not a bug.
@@ -98,8 +99,9 @@ each question produces zero or more candidate anchors:
 - **Q9** (diegetic texts should be re-read as biased): [anchors]
 - **Q10** (mysteries to protect from overexposure): [anchors]
 
-Each anchor is a CF id or file-plus-paragraph reference (e.g., `GEOGRAPHY.md §Eastern
-Reach ¶3`). Un-anchored candidates are discarded — Phase 3 rule.
+Each anchor is a record id (CF-NNNN, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-XXX-NNN,
+DA-NNNN, CHAR-NNNN) or a record-plus-section reference (e.g., `SEC-GEO-007 ¶3`).
+Un-anchored candidates are discarded — Phase 3 rule.
 
 ---
 
@@ -115,7 +117,7 @@ For each finding:
 #### F-NN — <one-line title>
 
 - **Category**: 4a
-- **Cited CFs / anchors**: CF-NNNN, GEOGRAPHY.md §Section ¶N
+- **Cited CFs / anchors**: CF-NNNN, SEC-XXX-NNN ¶N, M-NNNN, etc.
 - **Description**: one-paragraph description of the contradiction, naming the specific
   invariant or CF statements in conflict.
 - **Severity**: N (1-5)
@@ -141,7 +143,7 @@ Phase 6 findings, separated because they cross-cut Phase 4 categories.
 - **Accepted stabilizers** (from CF's costs_and_limits and distribution.why_not_universal):
   [list]
 - **Subsequent CFs treating target as consequence-free**: [CF-NNNN, CF-NNNN, ...]
-- **Domain-file prose drifting from stabilizers**: [FILE.md §Section ¶N, ...]
+- **SEC-record prose drifting from stabilizers**: [SEC-XXX-NNN ¶N, ...]
 - **Severity**: N
 - **Severity rationale**: one-line
 
@@ -202,7 +204,7 @@ Each test records PASS with one-line rationale OR FAIL with the responsible loop
 phase. Bare PASS is FAIL.
 
 1. **Every finding cites anchor**: PASS — all F-NN entries carry either a CF id or a
-   file-plus-paragraph reference.
+   record-plus-section reference (e.g., SEC-XXX-NNN ¶N).
 2. **Every severity has rationale**: PASS — every severity claim in the Per-Category
    Findings section has a rationale line.
 3. **Retcon type matches repair**: PASS — spot-check of RP-NNNN cards against the

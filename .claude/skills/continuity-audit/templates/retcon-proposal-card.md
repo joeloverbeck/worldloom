@@ -5,7 +5,9 @@ This file is a candidate canon change produced by a continuity-audit run. Writte
   worlds/<world-slug>/audits/AU-NNNN/retcon-proposals/RP-NNNN-<slug>.md
 
 CF-SCHEMA PARITY (load-bearing design constraint — preserve across schema evolution):
-The frontmatter below is structurally parallel to templates/canon-fact-record.yaml.
+The frontmatter below is structurally parallel to the engine-owned canon_fact_record
+schema (canonical surface: tools/world-mcp's `get_record_schema('canon_fact_record')`;
+authoritative source: docs/FOUNDATIONS.md §Canon Fact Record Schema).
 Matching fields use matching names (type, scope, truth_scope, domains_affected,
 distribution, costs_and_limits, visible_consequences, required_world_updates,
 source_basis, contradiction_risk, notes) so that when canon-addition accepts an
@@ -20,14 +22,15 @@ the candidacy explicit at file-read time. A reader of this file should never
 mistake it for an accepted CF — the `proposed_` prefix is the mnemonic. When
 canon-addition accepts, it drops the prefix and writes `status` to the new CF.
 For Type A Clarificatory retcons that do not change the target CF's status
-(e.g., domain-file-patch clarifications, modification_history-only retcons),
-use `proposed_status: unchanged` — canon-addition's Phase 0 Normalization treats
+(e.g., SEC-record extension or modification_history-only retcons), use
+`proposed_status: unchanged` — canon-addition's Phase 0 Normalization treats
 this as a signal to preserve the target CF's current `status` field unchanged.
 
 SUB-DIRECTORY CONTEXT: RP-NNNN cards live under audits/AU-NNNN/retcon-proposals/
 rather than in a flat cards/ directory, so each audit run's recommendations stay
 grouped. Deleting a stale audit run's subdirectory is safe; deleting the audit
-report without the subdirectory is not.
+report without the subdirectory is not. Direct-`Edit` is allowed for these files
+— Hook 3 only blocks `_source/*.yaml` writes.
 -->
 
 ---
@@ -37,7 +40,7 @@ proposed_status: hard_canon                 # hard_canon | soft_canon | conteste
                                             # (if different from target CF's current status, this retcon is a
                                             # re-classification — typically retcon_type: B or C)
                                             # `unchanged` means "same status as target CF" — use for Type A
-                                            # Clarificatory retcons that modify domain-file patches or add
+                                            # Clarificatory retcons that modify SEC-record extensions or add
                                             # modification_history entries without changing the CF's status field.
 type: ""                                    # matches CF types enum: capability | artifact | law | belief |
                                             # event | institution | species | ritual | taboo | technology |
@@ -54,8 +57,8 @@ retcon_type: B                              # A: Clarificatory | B: Scope | C: P
                                             # D: Cost | E: Chronology | F: Ontology
                                             # Must match the Phase 7 repair-menu-to-type mapping.
 
-target_cf_ids:                              # CFs being modified by this retcon. Every id must exist in
-  - CF-NNNN                                 # CANON_LEDGER.md (Phase 12 test 6 verifies this).
+target_cf_ids:                              # CFs being modified by this retcon. Every id must resolve via
+  - CF-NNNN                                 # `mcp__worldloom__get_record(CF-NNNN)` (Phase 12 test 6 verifies this).
 
 severity_before_fix: 0                      # 0-5 (see SKILL.md Phase 5 Severity Classification)
 severity_after_fix: 0                       # projected severity if this retcon is accepted and downstream
@@ -64,7 +67,7 @@ severity_after_fix: 0                       # projected severity if this retcon 
 audit_origin: AU-NNNN                       # the audit run that produced this card
 finding_id: F-NN                            # the finding within that audit run this card addresses
 
-# CF-schema-parallel fields (match canon-fact-record.yaml for canon-addition field-copy)
+# CF-schema-parallel fields (match the engine-owned canon_fact_record schema for canon-addition field-copy)
 scope:
   geographic: local                         # local | regional | global | cosmic
   temporal: current                         # ancient | historical | current | future | cyclical
@@ -90,11 +93,12 @@ costs_and_limits: []                        # stabilizers — Rule 3 (No Special
 
 visible_consequences: []                    # ordinary-life signals — Rule 5 (No Consequence Evasion)
 
-required_world_updates: []                  # files that must be updated if canon-addition accepts this retcon.
-                                            # canon-addition's Phase 12a will re-check this list against actual
-                                            # patches it generates.
-  # - INSTITUTIONS.md
-  # - EVERYDAY_LIFE.md
+required_world_updates: []                  # SEC record IDs that must be updated if canon-addition accepts this
+                                            # retcon. canon-addition's patch plan extends both the originating
+                                            # CF's required_world_updates AND each target SEC's touched_by_cf[]
+                                            # bidirectionally per SPEC-14.
+  # - SEC-INS-007
+  # - SEC-ELF-012
 
 source_basis:
   direct_user_approval: false               # set true at Phase 13 after HARD-GATE approval (means "user kept
@@ -156,8 +160,8 @@ carry a one-line justification. Bare `true` / `false` fails Phase 9 test 4.
   narrows from 'global' to 'regional' via explicit retcon_type: B, not via
   a diegetic text claiming the narrowing.">
 - [x] **no_net_contradiction_increase**: <one-line — e.g., "Scanning proposed
-  statement against all 47 CFs shows zero new contradictions introduced; the
-  revision resolves 1 existing soft contradiction (F-NN).">
+  statement against all currently-indexed CFs shows zero new contradictions
+  introduced; the revision resolves 1 existing soft contradiction (F-NN).">
 - [x] **world_identity_preserved**: <one-line — e.g., "The kernel's tonal
   contract and primary difference remain intact; this retcon narrows a detail
   rather than shifting the world's identity surface.">
@@ -168,16 +172,16 @@ audit report, and no RP-NNNN id is consumed.
 
 ## Downstream Updates
 
-Files requiring patches if canon-addition accepts this retcon. Matches the
-frontmatter `required_world_updates` list — reproduced here with one-line
-descriptions for the canon-addition adjudicator.
+SEC records (and other atomic records) requiring patches if canon-addition
+accepts this retcon. Matches the frontmatter `required_world_updates` list —
+reproduced here with one-line descriptions for the canon-addition adjudicator.
 
-- **FILE.md**: <one-line describing what patch this file will receive — e.g.,
-  "narrow Section 3 ¶2 from 'practiced across the continent' to 'practiced in
-  the Eastern Reach'">
+- **SEC-XXX-NNN**: <one-line describing what patch this SEC record will
+  receive — e.g., "narrow §Eastern Reach paragraph from 'practiced across the
+  continent' to 'practiced in the Eastern Reach'">
 
-If no downstream updates are needed (pure clarificatory retcon with no
-domain-file prose to adjust), record "None — the target CF's statement
+If no downstream updates are needed (pure clarificatory retcon affecting only
+the target CF's statement), record "None — the target CF's statement
 revision is self-contained."
 
 ## Operator Notes for Canon-Addition
