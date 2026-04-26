@@ -6,16 +6,16 @@ Parse `brief_path`. Extract the 7 HARD inputs and 8 SOFT inputs. For each HARD i
 
 For each SOFT input unresolved after parsing:
 - `canon_facts_accessible` → default to derivation from the author's Phase 0b epistemic horizon. Note in `notes`: "canon_facts_accessible derived from author epistemic horizon."
-- `taboo_censorship_conditions` → default to author's ideological environment + `INSTITUTIONS.md` taboo system. Note in `notes`: "taboo_censorship_conditions derived from author ideological environment + INSTITUTIONS.md."
+- `taboo_censorship_conditions` → default to author's ideological environment + SEC-INS taboo records. Note in `notes`: "taboo_censorship_conditions derived from author ideological environment + SEC-INS taboo records."
 - Remaining SOFT inputs → unspecified is acceptable; recorded as `null` in frontmatter.
 
-Bind each HARD input to specific world entities: `date` → a point/era in `TIMELINE.md`; `place` → a `GEOGRAPHY.md` region/settlement; `audience` → an `INSTITUTIONS.md` stratum, `EVERYDAY_LIFE.md` demographic, or `PEOPLES_AND_SPECIES.md` cluster; `communicative_purpose` → a function legible within the world's genre contract (legitimize / warn / memorialize / instruct / accuse / propitiate / narrate / contest). An input bound to "the public" is not bound; a `charter-era temple laity` is bound.
+Bind each HARD input to specific world entities resolved through `find_named_entities` + `get_neighbors` against the context packet: `date` → a point / era / TIMELINE Layer in SEC-TML records; `place` → an ENT region or settlement bound to SEC-GEO; `audience` → a SEC-INS stratum, SEC-ELF demographic, or SEC-PAS cluster; `communicative_purpose` → a function legible within the world's genre contract (legitimize / warn / memorialize / instruct / accuse / propitiate / narrate / contest). An input bound to "the public" is not bound; a `charter-era temple laity` is bound.
 
-**Local-scope settlement naming**: If the brief specifies a settlement (city, town, village) absent from `GEOGRAPHY.md`, check `OPEN_QUESTIONS.md` §Place and Polity Naming. If settlement naming is deferred there for local resolution (standard for most worldloom worlds at genesis), bind the new settlement-name to the nearest-matching `GEOGRAPHY.md` climate/culture band — for example, "Brinewick, a sprawling canal-fed city in the Temperate Canal Heartland band" — record the local-scope resolution in frontmatter `notes`, and treat it as Phase 7d.1-permitted local-scope naming. No larger-scope canon is created by the artifact. If `OPEN_QUESTIONS.md` does NOT defer settlement naming (a rare case in mature worlds with committed place rosters), abort to user interview.
+**Local-scope settlement naming**: If the brief specifies a settlement (city, town, village) absent from the resolved ENT/SEC-GEO context, check the OQ records (`search_nodes(node_type='open_question_record', filters={topic: 'place_and_polity_naming'})` or scan packet OQs) for any "place and polity naming" deferrals. If settlement naming is deferred there for local resolution (standard for most worldloom worlds at genesis), bind the new settlement-name to the nearest-matching SEC-GEO climate/culture band — for example, "Brinewick, a sprawling canal-fed city in the Temperate Canal Heartland band" — record the local-scope resolution in frontmatter `notes`, and treat it as Phase 7d.1-permitted local-scope naming. No larger-scope canon is created by the artifact. If no OQ defers settlement naming (a rare case in mature worlds with committed place rosters), abort to user interview.
 
-**Title generation when absent**: If the brief omits a title, generate one consistent with Phase 2's genre conventions (journal-byline form for travelogues; liturgical incipit for sermons; issuing-body formula for decrees; inscription-formula for funerary objects; entry-head practical-register for herbals and manuals; etc.) AND Phase 0b's author voice register. Record `title` in frontmatter. Operator-invented titles are permitted at Phase 0 close; the slug derives from the invented title via Pre-flight step 8's kebab-case rule. Prefer a short-form slug (5–8 words max) drawn from the title's headline portion; do not include subtitles in the slug.
+**Title generation when absent**: If the brief omits a title, generate one consistent with Phase 2's genre conventions (journal-byline form for travelogues; liturgical incipit for sermons; issuing-body formula for decrees; inscription-formula for funerary objects; entry-head practical-register for herbals and manuals; etc.) AND Phase 0b's author voice register. Record `title` in frontmatter. Operator-invented titles are permitted at Phase 0 close; the slug derives from the invented title per the kebab-case rule (lowercase, punctuation-stripped). Prefer a short-form slug (5–8 words max) drawn from the title's headline portion; do not include subtitles in the slug.
 
-**Conditional world-file load**: load `MAGIC_OR_TECH_SYSTEMS.md` per the trigger conditions in `references/preflight-and-prerequisites.md` § Selectively loaded.
+**Conditional packet expansion**: when the brief's `artifact_type` is magic-or-tech-adjacent, the author's profession/institution touches a magical or technological system, the audience does, or generated claims at Phase 3 produce claims in those domains, expand retrieval via `mcp__worldloom__search_nodes(node_type='section', filters={file_class: 'magic-or-tech-systems'})` and `get_record(sec_id)` for each relevant SEC-MTS record. Skipped otherwise to avoid context bloat on ordinary-register artifacts.
 
 ## Phase 0b: Author Reality Construction
 
@@ -51,11 +51,11 @@ Record `author_character_id` in frontmatter.
 4. **Identify the network-and-events absences**: dossier-later events (operations, apprenticeships, relationship formations) that have not yet occurred at artifact-date; dossier-network members (mentors, apprentices, patrons, adversaries) not yet encountered at artifact-date; dossier-later adjustments (risk aversions, specialty retirements, contract refusals) not yet set in. Record these absences in frontmatter `notes` under "Chronology coherence" so the HARD-GATE deliverable exposes the back-projection reasoning.
 5. **Cross-reference against the artifact's network footprint**: any named figure referenced in the artifact body that belongs to a dossier-network-member must pass the delta-gate (the figure's relationship-to-author must be consistent with the stage-at-artifact-date, not with the dossier-present stage).
 
-If `character_path` NOT provided: generate each author field from brief + world state. Every generated field must cite the world file it sources from. "A temple-charter scholar" is not an author; "a third-generation cultist-turned-scribe in the Port Serekh temple charter, age 47, literate in trade-tongue and ritual script, dependent on the charter for patronage" is. Set `author_character_id: null`.
+If `character_path` NOT provided: generate each author field from brief + retrieved world state. Every generated field must cite the record-id it sources from (SEC-id, CF-id, ENT-id, M-id). "A temple-charter scholar" is not an author; "a third-generation cultist-turned-scribe in the Port Serekh temple charter, age 47, literate in trade-tongue and ritual script, dependent on the charter for patronage" is. Set `author_character_id: null`.
 
-**Rule (from proposal Phase 0)**: No omniscient artifact authors unless the artifact itself is a divine or impossible object and the world permits that. If the brief specifies an impossible-object artifact, verify permission against `INVARIANTS.md` and `WORLD_KERNEL.md` — if the world's genre contract forbids divine voice, abort with "world does not permit impossible-object authorship; revise the artifact_type or the author."
+**Rule (from proposal Phase 0)**: No omniscient artifact authors unless the artifact itself is a divine or impossible object and the world permits that. If the brief specifies an impossible-object artifact, verify permission against the relevant INV records and `WORLD_KERNEL.md` — if the world's genre contract forbids divine voice, abort with "world does not permit impossible-object authorship; revise the artifact_type or the author."
 
-**Slug derivation** (if not yet done at Pre-flight step 8): kebab-case the artifact title. Re-run the collision check.
+**Slug derivation** (if not yet done at Pre-flight): kebab-case the artifact title. Re-run the collision check.
 
 **FOUNDATIONS cross-ref**: Tooling Recommendation (Phase 0 is the binding step — every subsequent phase depends on author + artifact being bound to world state).
 
@@ -74,8 +74,8 @@ Phase 0c commits these figures BEFORE draft composition so the HARD-GATE deliver
 
 ### Naming rule — author-personal-scope only
 
-- Species assignments per `PEOPLES_AND_SPECIES.md` clusters (Cluster A / B / C / D proportions should match the artifact's place-and-era per `GEOGRAPHY.md` regional-asymmetry clauses and `DIS-3` mythical-species-rare invariant).
-- Institutional roles bound to `INSTITUTIONS.md` terminology (magistrate's second, posting-clerk senior, senior hunter-officer, charter-defense clergy-witness) rather than inventing new titles. Titled roles are institutional-positions; the person filling them is author-personal-scope.
+- Species assignments per SEC-PAS clusters (Cluster A / B / C / D proportions should match the artifact's place-and-era per SEC-GEO regional-asymmetry clauses and any DIS-N mythical-species-rare invariant).
+- Institutional roles bound to SEC-INS terminology (magistrate's second, posting-clerk senior, senior hunter-officer, charter-defense clergy-witness) rather than inventing new titles. Titled roles are institutional-positions; the person filling them is author-personal-scope.
 - Avoid proper-noun faction names, capitalized doctrinal titles, or any naming convention that would convert a bounded-scope figure into a larger-scope recurring entity.
 - For dead figures named for kin-of-record or memorial purposes (ARRs, letters, funerary inscriptions), include species + kin-of-record-location (village, waterstation, household) at the minimum level needed for the artifact's procedural function — not biography.
 
@@ -84,7 +84,7 @@ Phase 0c commits these figures BEFORE draft composition so the HARD-GATE deliver
 Record each constructed figure in frontmatter `notes` under a "Cast construction" block naming:
 - count (with derivation if inferred from brief-anchor),
 - names (all author-personal-scope — no proper-noun larger-scope entities),
-- species assignments (cluster + specific species per `PEOPLES_AND_SPECIES.md`) and role/armament/profession bindings (per relevant CF and INSTITUTIONS terminology),
+- species assignments (cluster + specific species per SEC-PAS records) and role/armament/profession bindings (per relevant CF and SEC-INS terminology),
 - any notable narrative weight (who dies, who speaks, who witnesses, whose kin receives payout).
 
 The HARD-GATE deliverable summary (Phase 9) exposes the full cast block so the user can review and course-correct before writes commit.

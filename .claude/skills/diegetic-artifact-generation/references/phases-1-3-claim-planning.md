@@ -5,12 +5,12 @@ Build the Author's epistemic horizon (Phase 1), apply the in-world genre convent
 ## Phase 1: Epistemic Horizon
 
 For the bound Author at the bound date/place, determine what they can:
-- **know directly** (witnessed, experienced, handled — cross-reference `TIMELINE.md` events within lifetime; `GEOGRAPHY.md` places within mobility; `EVERYDAY_LIFE.md` practices within class/region/profession)
+- **know directly** (witnessed, experienced, handled — cross-reference SEC-TML events within lifetime; SEC-GEO places within mobility; SEC-ELF practices within class/region/profession)
 - **infer plausibly** (from training, literacy, access)
 - **repeat secondhand** (rumor, sermon, merchant gossip, bardic transmission)
-- **get wrong** (folk theories; inherited propaganda; professional blind spots — cross-reference `INSTITUTIONS.md` religious/ideological material, `EVERYDAY_LIFE.md` common beliefs)
+- **get wrong** (folk theories; inherited propaganda; professional blind spots — cross-reference SEC-INS religious/ideological material, SEC-ELF common beliefs)
 - **intentionally conceal** (given `political_dependency`, `desired_relation_to_truth`, `taboo_censorship_conditions`)
-- **never know** (cross-reference `MYSTERY_RESERVE.md` `what is unknown` blocks; `OPEN_QUESTIONS.md` items; CAU-3-style restricted vocabulary)
+- **never know** (cross-reference M-NNNN `what is unknown` blocks; OQ-NNNN items; CAU-N-style restricted vocabulary CFs)
 
 ### Dossier-transfer (when `character_path` is provided)
 
@@ -63,8 +63,8 @@ The six Phase 1 epistemic-horizon categories (how the author comes to know) do N
 ## Phase 2: Genre Convention Pass
 
 Apply the in-world conventions of the bound `artifact_type`. The proposal enumerates conventions for chronicle, sermon, travelogue, herbal, myth. For any artifact_type not in the proposal's enumeration, derive conventions from the world's own tradition:
-- Which `INSTITUTIONS.md` bodies produce this artifact type (temple, guild, court, school, itinerant performer, prison, private correspondence)?
-- What `EVERYDAY_LIFE.md` practices establish its conventional form (length, register, rhetorical moves, permitted topics, material support)?
+- Which SEC-INS bodies produce this artifact type (temple, guild, court, school, itinerant performer, prison, private correspondence)?
+- What SEC-ELF practices establish its conventional form (length, register, rhetorical moves, permitted topics, material support)?
 - What tonal register does `WORLD_KERNEL.md` permit for this institutional producer (grim / comic / tragic / lyrical / pulp / mythic)?
 
 Record conventions in frontmatter `genre_conventions` as a list of the specific moves this artifact will honor or deliberately break. A deliberate break must be justified in `notes` by the author's motive.
@@ -85,11 +85,11 @@ Build the artifact's claim list. For each claim, record:
 | `source` | one of the six Phase 1 tags |
 | `contradiction_risk` | `none` \| `soft` \| `hard` |
 | `mode` | `direct` \| `implied` \| `symbolic` |
-| `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve in `CANON_LEDGER.md`; null otherwise |
-| `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve in `MYSTERY_RESERVE.md`; null otherwise |
+| `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve to a `_source/canon/CF-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
+| `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve to a `_source/mystery-reserve/M-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
 | `repair_trace` | null by default; populated by Phase 7f with `{repair_type, reason}` when the claim is retagged, rescoped, moved, or removed |
 
-Every claim with `canon_status: canonically_true` must populate `cf_id` with a CF-id from `CANON_LEDGER.md`. Every claim with `canon_status: mystery_adjacent` must populate `mr_id` with an MR-id from `MYSTERY_RESERVE.md`. Every claim repaired at Phase 7f must record the repair under `repair_trace`. Every claim tagged `prohibited_for_this_artifact` is **removed from the artifact body** — it stays in the record as an audit trail of what was considered and rejected.
+Every claim with `canon_status: canonically_true` must populate `cf_id` with a CF-id resolvable via `mcp__worldloom__get_record`. Every claim with `canon_status: mystery_adjacent` must populate `mr_id` with an MR-id resolvable via `mcp__worldloom__get_record`. Every claim repaired at Phase 7f must record the repair under `repair_trace`. Every claim tagged `prohibited_for_this_artifact` is **removed from the artifact body** — it stays in the record as an audit trail of what was considered and rejected.
 
 **Rule (from proposal Phase 3)**: The `truth_status` taxonomy is the firewall against Rule 7 failures by commission. A claim that would resolve a mystery must be tagged `prohibited_for_this_artifact` here, not caught at Phase 7b.
 

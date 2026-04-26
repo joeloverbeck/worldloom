@@ -4,7 +4,7 @@ Five independent sub-checks. All must run; failure on any triggers Phase 7f Repa
 
 ## Phase 7a: Invariant Conformance
 
-For every claim in the artifact body and `claim_map`, and every asserted capability or knowledge of the Author, test against every invariant in `INVARIANTS.md`. Record each tested invariant's id into `world_consistency.invariants_respected`.
+For every claim in the artifact body and `claim_map`, and every asserted capability or knowledge of the Author, test against every INV record retrieved by the context packet (the `diegetic_artifact_generation` ranking profile loads all five invariant categories — ONT-N / CAU-N / DIS-N / SOC-N / AES-N — by default; if any are missing, fetch via `mcp__worldloom__search_nodes(node_type='invariant_record')`). Record each tested invariant's id into `world_consistency.invariants_respected`.
 
 Fail triggers (send to Phase 7f):
 - an objective claim (i.e., `canon_status: canonically_true` or `partially_true` with a direct-assertion mode) that breaks an ontological / causal / distribution / social / aesthetic invariant.
@@ -16,7 +16,7 @@ Fail triggers (send to Phase 7f):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every entry in `MYSTERY_RESERVE.md`, check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
+For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__search_nodes(node_type='mystery_record')` if any are missing), check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
 
 For each entry where overlap IS found:
 - the artifact MAY reference the mystery's `common in-world interpretations` (contested-canon folk theories the world itself tracks).
@@ -29,10 +29,10 @@ Fail triggers (send to Phase 7f):
 
 ## Phase 7c: Distribution/Scope Conformance
 
-For every capability the artifact attributes to its Author, look up matching CFs in `CANON_LEDGER.md`. Apply the three-case rule:
+For every capability the artifact attributes to its Author, look up matching CFs via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: <capability domain>})` and `get_record(cf_id)` for each candidate. Apply the three-case rule:
 - Author fits `distribution.who_can_do_it` → pass.
 - Author fits `distribution.who_cannot_easily_do_it` → fail unless Phase 0b institutional embedding justifies the exception (recorded in `world_consistency.distribution_exceptions`).
-- No matching CF → pass at ordinary-person scope, UNLESS `EVERYDAY_LIFE.md` places the capability outside the Author's class/region/species baseline without Phase 0b training path.
+- No matching CF → pass at ordinary-person scope, UNLESS the relevant SEC-ELF section places the capability outside the Author's class/region/species baseline without Phase 0b training path.
 
 For every **world-fact claim** in the artifact body that carries a distribution block in the matching CF:
 - the Author must have plausible access to that fact per Phase 1 `archive_access` / `rumor_access` — a claim's `source` tag must be consistent with the CF's distribution.
@@ -55,7 +55,7 @@ Fail triggers → Phase 7f. Each trigger names which of the four rules failed.
 
 Two tests from proposal Phase 6:
 
-1. **World-Truth Check**: does any claim with `mode: direct` and `canon_status: canonically_true` correspond to a CF in `CANON_LEDGER.md`? If a direct-assertion claim is tagged `canonically_true` but cites no CF, it is either untagged canon-creation (routes to 7d.1) or a miscategorization (routes to re-tagging).
+1. **World-Truth Check**: does every claim with `mode: direct` and `canon_status: canonically_true` cite a `cf_id` resolvable via `mcp__worldloom__get_record`? If a direct-assertion claim is tagged `canonically_true` but cites no resolvable CF, it is either untagged canon-creation (routes to 7d.1) or a miscategorization (routes to re-tagging).
 2. **Narrator-Truth Check**: given Author + date + place + audience, would this person plausibly *say* each claim the way it appears? A sentence's register, vocabulary, and rhetorical move must be reachable from the Author's Phase 0b profile.
 
 Fail triggers → Phase 7f.

@@ -24,9 +24,9 @@ artifact_type: ""                            # chronicle | sermon | travelogue |
 
 author: ""                                   # attributed author's name in-world (may be anonymous, pseudonymous, pen name, or institutional — "the charter-house of Port Serekh")
 author_character_id: null                    # CHAR-NNNN if character_path was used to lift author; else null
-date: ""                                     # world-calendar date per TIMELINE.md (e.g., "Year 412 After Flood")
-place: ""                                    # GEOGRAPHY.md-bound place of production (settlement, region, or institutional site)
-audience: ""                                 # INSTITUTIONS.md stratum / EVERYDAY_LIFE.md demographic / PEOPLES_AND_SPECIES.md cluster (not "the public")
+date: ""                                     # world-calendar date per SEC-TML records (e.g., "Year 412 After Flood")
+place: ""                                    # ENT/SEC-GEO-bound place of production (settlement, region, or institutional site)
+audience: ""                                 # SEC-INS stratum / SEC-ELF demographic / SEC-PAS cluster (not "the public")
 communicative_purpose: ""                    # legitimize | warn | memorialize | instruct | accuse | propitiate | narrate | contest
 desired_relation_to_truth: ""                # accurate | biased_but_mostly_true | propaganda | mythicized | fragmentary | deliberately_false_in_places
 
@@ -45,16 +45,16 @@ genre_conventions:                           # Phase 2 output — conventions th
   breaks: []                                 # each break must have a Phase 5 author-motive justification in `notes`
 
 author_profile:                              # Phase 0b output — the 15 author fields (trauma_history_if_relevant and sex/gender may be null when not narratively relevant)
-  species: ""                                # PEOPLES_AND_SPECIES.md cluster binding
+  species: ""                                # SEC-PAS cluster binding
   age_band: ""
   sex_or_gender: null                        # nullable when not relevant
-  class: ""                                  # INSTITUTIONS.md stratum
+  class: ""                                  # SEC-INS stratum
   literacy: ""                               # level + scripts (e.g., "trade-tongue + ritual script")
-  profession: ""                             # INSTITUTIONS.md / ECONOMY_AND_RESOURCES.md binding
+  profession: ""                             # SEC-INS / SEC-ECR binding
   religious_ideological_environment: ""
   political_dependency: ""                   # patronage, charter, guild, crown, clandestine
   bodily_limits: ""
-  mobility: ""                               # GEOGRAPHY.md range
+  mobility: ""                               # SEC-GEO range
   archive_access: ""                         # what institutional records / libraries / scriptoria they can read
   rumor_access: ""                           # what informal channels they hear from
   speech_register: ""                        # formal | vernacular | terse | florid | devotional | legal | colloquial
@@ -76,8 +76,8 @@ claim_map:                                   # Phase 3 output — every claim co
     source: ""                               # witnessed | learned_from_authority | inherited_tradition | common_rumor | contested_scholarship | impossible_for_narrator_to_verify
     contradiction_risk: ""                   # none | soft | hard
     mode: ""                                 # direct | implied | symbolic
-    cf_id: null                              # required if canon_status == canonically_true; must resolve in CANON_LEDGER.md
-    mr_id: null                              # required if canon_status == mystery_adjacent; must resolve in MYSTERY_RESERVE.md
+    cf_id: null                              # required if canon_status == canonically_true; must resolve via mcp__worldloom__get_record
+    mr_id: null                              # required if canon_status == mystery_adjacent; must resolve via mcp__worldloom__get_record
     repair_trace: null                       # if this claim was repaired at Phase 7f, record the repair type + reason here
 
 canon_links: []                              # flat list of CF-ids the artifact touches (for ledger-side indexing)

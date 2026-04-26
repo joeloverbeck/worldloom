@@ -1,47 +1,44 @@
 ---
 name: diegetic-artifact-generation
-description: "Use when generating an in-world text or artifact situated inside an existing worldloom world — chronicle, sermon, travelogue, herbal, cult tract, legal decree, funerary inscription, manual, letter, folk tale, fragmentary myth, prison confession, scholarly dispute, battle song, or any other diegetic text whose author, date, place, audience, and relation to truth are world-embedded. Produces: a diegetic artifact file at worlds/<world-slug>/diegetic-artifacts/<da-slug>.md (hybrid YAML frontmatter + markdown body) plus an auto-updated diegetic-artifacts/INDEX.md. Mutates: only worlds/<world-slug>/diegetic-artifacts/ (never WORLD_KERNEL.md, INVARIANTS.md, CANON_LEDGER.md, or any other world-level canon file)."
+description: "Use when generating an in-world text or artifact situated inside an existing worldloom world — chronicle, sermon, travelogue, herbal, cult tract, legal decree, funerary inscription, manual, letter, folk tale, fragmentary myth, prison confession, scholarly dispute, battle song, or any other diegetic text whose author, date, place, audience, and relation to truth are world-embedded. Produces: a diegetic artifact file at worlds/<world-slug>/diegetic-artifacts/<da-slug>.md (hybrid YAML frontmatter + markdown body) plus an auto-updated diegetic-artifacts/INDEX.md. Mutates: only worlds/<world-slug>/diegetic-artifacts/ (never WORLD_KERNEL.md, ONTOLOGY.md, or any _source/ atomic record)."
 user-invocable: true
 arguments:
   - name: world_slug
-    description: "Directory slug of an existing world under worlds/<world-slug>/. The skill aborts if the directory is missing or any mandatory world file (WORLD_KERNEL.md, INVARIANTS.md, ONTOLOGY.md, PEOPLES_AND_SPECIES.md, GEOGRAPHY.md, INSTITUTIONS.md, ECONOMY_AND_RESOURCES.md, EVERYDAY_LIFE.md, TIMELINE.md, CANON_LEDGER.md, MYSTERY_RESERVE.md, OPEN_QUESTIONS.md) is unreadable."
+    description: "Directory slug of an existing world under worlds/<world-slug>/. Pre-flight aborts if the directory is missing."
     required: true
   - name: brief_path
-    description: "Path to a markdown brief (typically under briefs/, but any path is accepted) containing the artifact's required inputs: artifact_type, date, place, author identity, audience, communicative_purpose, desired_relation_to_truth. Optional inputs: canon_facts_accessible (defaults to author's derived epistemic horizon), taboo_censorship_conditions (defaults to author's ideological environment + INSTITUTIONS taboos), desired_length, emotional_tone, rhetorical_style, ornament_level, mystery_seeding_intent, contradiction_target. Phase 0 runs a targeted gap-filler if any HARD input is unresolved; SOFT inputs are defaulted-and-noted."
+    description: "Path to a markdown brief containing the artifact's HARD inputs (artifact_type, date, place, author identity, audience, communicative_purpose, desired_relation_to_truth) and optional SOFT inputs (canon_facts_accessible, taboo_censorship_conditions, desired_length, emotional_tone, rhetorical_style, ornament_level, mystery_seeding_intent, contradiction_target). Phase 0 runs a targeted gap-filler if any HARD input is unresolved; SOFT inputs are defaulted-and-noted."
     required: true
   - name: character_path
-    description: "Optional path to an existing character dossier (e.g., worlds/animalia/characters/vespera-nightwhisper.md). If provided, Phase 0 lifts Author Reality Construction fields from the dossier's frontmatter and prose body, filling any gaps via world-state-consistent generation. If absent, Phase 0 generates a world-embedded author from scratch using the brief + loaded world files. Pre-flight verifies the path resolves inside worlds/<world-slug>/characters/ — cross-world or out-of-tree author references are rejected."
+    description: "Optional path to an existing character dossier (e.g., worlds/animalia/characters/vespera-nightwhisper.md). If provided, Phase 0 lifts Author Reality Construction fields from the dossier's frontmatter and prose body, filling any gaps via world-state-consistent generation. If absent, Phase 0 generates a world-embedded author from scratch using the brief + retrieved world state. Pre-flight verifies the path resolves inside worlds/<world-slug>/characters/ — cross-world or out-of-tree author references are rejected."
     required: false
 ---
 
 # Diegetic Artifact Generation
 
-Generates an in-world text or artifact situated inside an existing worldloom world: reads the world's kernel, invariants, institutions, everyday life, canon ledger, and mystery reserve; constructs a world-embedded author (lifted from an optional character dossier or generated from brief + world state); produces a persistent artifact file whose claims, voice, texture, and knowledge are provably consistent with the loaded canon, with an explicit Mystery Reserve firewall preventing accidental resolution of protected mysteries.
+Generates an in-world text or artifact situated inside an existing worldloom world. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='diegetic_artifact_generation', ...)`; the artifact write routes through `submit_patch_plan` carrying a single `append_diegetic_artifact_record` op; an explicit Mystery Reserve firewall and a diegetic-to-world firewall prevent silent canon creation and forbidden-answer leakage.
 
 <HARD-GATE>
-Do NOT write any file — artifact file or INDEX.md update — until: (a) pre-flight check confirms worlds/<world-slug>/ exists, all 13 mandatory files (docs/FOUNDATIONS.md + 12 world files) are readable, and no artifact file already exists at worlds/<world-slug>/diegetic-artifacts/<da-slug>.md; (b) Phase 7 Canon Safety Check passes with zero unrepaired violations across invariant conformance, mystery-reserve firewall, distribution/scope conformance, and the diegetic-specific checks (no silent canon creation, no restricted-knowledge leakage to the wrong narrator, no local-as-global overgeneralization unless the author would plausibly make that mistake, no untagged intentional contradiction); (c) Phase 8 Validation and Rejection Tests pass with zero failures; (d) the user has explicitly approved the Phase 9 deliverable summary (full artifact frontmatter + artifact body text + Canon Safety Check trace + repair sub-passes that fired + target write paths). This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
+Do NOT call `mcp__worldloom__submit_patch_plan` and do NOT `Edit` `diegetic-artifacts/INDEX.md` until: (a) pre-flight resolves `worlds/<world-slug>/`, allocates the next `DA-NNNN` via `mcp__worldloom__allocate_next_id`, and confirms no artifact already exists at the target slug; (b) Phase 7 Canon Safety Check passes with zero unrepaired violations across invariant conformance, Mystery Reserve firewall, distribution/scope conformance, the four diegetic-safety rules, and the World-Truth + Narrator-Truth discipline checks; (c) Phase 8 Validation and Rejection Tests record PASS with a one-line rationale for every test; (d) the user has explicitly approved the Phase 9 deliverable summary (full frontmatter + artifact body + Canon Safety Check Trace + Phase 7f repairs that fired + target write paths) and the skill has issued an `approval_token` per `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token. The gate is absolute under Auto Mode — invoking the skill is not approval.
 </HARD-GATE>
 
 ## Process Flow
 
 ```
-Pre-flight Check (resolve worlds/<world-slug>/; verify all 13 mandatory
-                  files readable — docs/FOUNDATIONS.md + 12 world files;
-                  allocate next DA-NNNN; check <da-slug>.md absent;
-                  load all 13 mandatory files + the skill's frontmatter
-                  template; read brief_path; read character_path if provided)
+Pre-flight (allocate_next_id DA; get_context_packet for world state;
+            slug-collision check on worlds/<slug>/diegetic-artifacts/<da-slug>.md;
+            optional character_path read for Author lift)
       |
       v
 Phase 0: Normalize Brief + Author Reality Construction
           (parse brief; classify HARD/SOFT input resolution;
            interview on unresolved HARD inputs; default-and-note SOFT;
            lift Author from character_path if provided, glean gaps from
-           dossier + world state; else generate world-embedded Author
-           from brief + world state;
-           detect whether MAGIC_OR_TECH_SYSTEMS.md must be selectively loaded;
-           bind author to INSTITUTIONS / PEOPLES / GEOGRAPHY entities;
-           construct cast-at-artifact-scope for figures the brief under-
-           specifies — author-personal-scope per Phase 7d.1)
+           dossier + retrieved world state; else generate world-embedded
+           Author from brief + world state;
+           selectively expand the packet with SEC-MTS records if magic-
+           or-tech-adjacent; bind author to ENT / SEC-INS / SEC-PAS /
+           SEC-GEO entries; construct cast-at-artifact-scope per Phase 0c)
       |
       v
 Phase 1: Epistemic Horizon          (author's known firsthand / inferable /
@@ -74,10 +71,10 @@ Phase 6: Draft Artifact Text        (compose the artifact body honoring Phases
       |
       v
 Phase 7: Canon Safety Check
-         7a: Invariant conformance          (vs INVARIANTS.md)
-         7b: Mystery Reserve firewall       (vs MYSTERY_RESERVE.md; explicit list)
-         7c: Distribution/scope conformance (vs CANON_LEDGER.md; author access +
-                                             claim scope)
+         7a: Invariant conformance          (vs INV records)
+         7b: Mystery Reserve firewall       (vs M records; explicit list)
+         7c: Distribution/scope conformance (vs CF distribution blocks; author
+                                             access + claim scope)
          7d: Diegetic Safety Sub-Check      (no silent canon creation, no
                                              restricted-knowledge leakage, no
                                              local-as-global, no untagged
@@ -94,81 +91,94 @@ Phase 8: Validation and Rejection Tests (11 tests)
     pass
       |
       v
-Phase 9: Commit (HARD-GATE approval --> atomic write of
-          worlds/<slug>/diegetic-artifacts/<da-slug>.md
-          + worlds/<slug>/diegetic-artifacts/INDEX.md update)
+Phase 9: Commit (HARD-GATE approval -->
+          submit_patch_plan(plan, approval_token) carrying
+          append_diegetic_artifact_record op for <da-slug>.md;
+          then skill-managed Edit of diegetic-artifacts/INDEX.md)
 ```
-
-## Inputs
-
-### Required
-- `world_slug` — string — directory slug of an existing world under `worlds/<world-slug>/`. Pre-flight verifies the directory exists, all 13 mandatory files (docs/FOUNDATIONS.md + 12 world files) are readable, and no artifact exists at the derived target slug.
-- `brief_path` — filesystem path — markdown brief specifying the artifact's **HARD inputs** (`artifact_type`, `date`, `place`, `author`, `audience`, `communicative_purpose`, `desired_relation_to_truth`) and optionally its **SOFT inputs** (`canon_facts_accessible`, `taboo_censorship_conditions`, `desired_length`, `emotional_tone`, `rhetorical_style`, `ornament_level`, `mystery_seeding_intent`, `contradiction_target`). Phase 0 aborts if any HARD input remains unresolved after targeted gap-filler. SOFT inputs are defaulted-and-noted: `canon_facts_accessible` derives from the author's epistemic horizon (profession + institution + place + date); `taboo_censorship_conditions` derives from the author's ideological environment + `INSTITUTIONS.md` taboo system.
-
-### Optional
-- `character_path` — filesystem path — existing character dossier. If provided, Phase 0 lifts Author Reality Construction fields from the dossier's frontmatter (`species`, `age_band`, `social_position`, `profession`, `kinship_situation`, `religious_ideological_environment`) and prose body (literacy level, political dependency, bodily limits, mobility, archive access, rumor access, speech register, blind spots — mined from Institutional Embedding, Epistemic Position, Voice and Perception sections). Gaps are filled by gleaning from the loaded world state, not invented freely. If absent, Phase 0 generates a world-embedded author from scratch. Pre-flight verifies the path resolves inside `worlds/<world-slug>/characters/` — cross-world or out-of-tree author references are rejected.
 
 ## Output
 
-- **Diegetic artifact file** at `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` — hybrid YAML frontmatter + markdown body.
-  - **Frontmatter fields** (the authoritative schema is `.claude/skills/diegetic-artifact-generation/templates/diegetic-artifact.md` — the field names and shapes in the Phase 9 write MUST match the template exactly): `artifact_id` (DA-NNNN), `slug`, `title`, `artifact_type`, `author`, `author_character_id` (CHAR-NNNN if `character_path` was used; else null), `date`, `place`, `audience`, `communicative_purpose`, `desired_relation_to_truth`, the 8 SOFT-input frontmatter fields (`canon_facts_accessible`, `taboo_censorship_conditions`, `desired_length`, `emotional_tone`, `rhetorical_style`, `ornament_level`, `mystery_seeding_intent`, `contradiction_target` — null is acceptable when unspecified; derivation source recorded in `notes` when defaulted), `genre_conventions` (`honors`, `breaks`), `author_profile` (the 15 Phase 0b fields: `species`, `age_band`, `sex_or_gender`, `class`, `literacy`, `profession`, `religious_ideological_environment`, `political_dependency`, `bodily_limits`, `mobility`, `archive_access`, `rumor_access`, `speech_register`, `likely_blind_spots`, `trauma_history_if_relevant` — the last two nullable when not narratively relevant, nullity must be deliberate), `epistemic_horizon` (`direct_knowledge`, `inferred_knowledge`, `secondhand_knowledge`, `wrongly_believed`, `concealable`, `impossible_knowledge`), `claim_map` (list of `{claim, canon_status, narrator_belief, source, contradiction_risk, mode, cf_id, mr_id, repair_trace}`), `canon_links` (list of CF-ids the artifact touches), `cannot_know` (explicit list of MR entries and CAU-3-style restricted items this narrator cannot know), `world_consistency` (`canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`), `source_basis` (`world_slug`, `brief_path`, `character_path` or null, `generated_date`, `user_approved`), `notes`.
-  - **Markdown body sections**: the **artifact text itself** (the in-world content, in the author's voice, with Phase 5 distortions baked in — NOT annotated), followed by a Canon Safety Check Trace section (Phase 7a-7e results + Phase 8 test results). Clearly demarcated — trace is for the maintainer, not the in-world reader. Matches `templates/diegetic-artifact.md`.
+- **Diegetic artifact file** at `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` — hybrid YAML frontmatter + markdown body. Frontmatter fields enumerated in `templates/diegetic-artifact.md` (the authoritative schema; the field names and shapes in the Phase 9 write MUST match the template exactly): `artifact_id` (DA-NNNN), `slug`, `title`, `artifact_type`, `author`, `author_character_id` (CHAR-NNNN if `character_path` was used; else null), `date`, `place`, `audience`, `communicative_purpose`, `desired_relation_to_truth`, the 8 SOFT-input fields, `genre_conventions`, `author_profile` (15 Phase 0b fields), `epistemic_horizon`, `claim_map`, `canon_links`, `cannot_know`, `world_consistency`, `source_basis`, `notes`. Body sections: the **artifact text itself** (the in-world content, in the author's voice, with Phase 5 distortions baked in — NOT annotated), followed by a clearly demarcated **Canon Safety Check Trace** section (Phase 7a-7e results + Phase 8 11-test results). Engine validates the frontmatter against `record_schema_compliance` post-write.
+- **INDEX.md update** at `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — one line per artifact in the form `- [<title>](<slug>.md) — <artifact_type>, <date>, <author>, <place>`, re-sorted alphabetically by slug on every write. Created with header `# Diegetic Artifacts — <World-Slug-TitleCased>` + blank line if absent.
 
-- **INDEX.md update** at `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — one line per artifact: `- [<title>](<slug>.md) — <artifact_type>, <date>, <author>, <place>`, re-sorted alphabetically by slug on every write. Created if absent with header `# Diegetic Artifacts — <World-Slug-TitleCased>` + blank line.
+**No canon-file mutations.** This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/<subdir>/*.yaml` record. Hook 3 enforces. **No CF / CH / INV / M / OQ / ENT / SEC record is emitted.** The artifact's claims are *contested canon* (FOUNDATIONS §Canon Layers) at their strongest — an in-world voice, not a world-level truth. If the user later wants a claim from the artifact canonized at the world level, that runs through `canon-addition` (or `canon-facts-from-diegetic-artifacts` to mine the artifact for proposal cards first), whose proposal may cite the artifact by DA-id.
 
-**No canon-file mutations.** This skill never writes to `WORLD_KERNEL.md`, `INVARIANTS.md`, `ONTOLOGY.md`, `TIMELINE.md`, `GEOGRAPHY.md`, `PEOPLES_AND_SPECIES.md`, `INSTITUTIONS.md`, `ECONOMY_AND_RESOURCES.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `EVERYDAY_LIFE.md`, `CANON_LEDGER.md`, `OPEN_QUESTIONS.md`, or `MYSTERY_RESERVE.md`. **No Canon Fact Record emitted. No Change Log Entry emitted.** The artifact's claims are *contested canon* (FOUNDATIONS §Canon Layers) at their strongest — an in-world voice, not a world-level truth. If the user later wants a claim from the artifact canonized at the world level, that is a separate `canon-addition` run whose proposal may cite the artifact by DA-id.
+## World-State Prerequisites
+
+`docs/FOUNDATIONS.md` plus the world-state slice the brief touches load via `mcp__worldloom__get_context_packet(task_type='diegetic_artifact_generation', seed_nodes=[<brief-derived seed nodes>], token_budget=10000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. The packet delivers Kernel + invariants + relevant CFs + Mystery Reserve entries touching the artifact's claim domain + named-entity neighbors + section context with completeness guarantees. Direct `Read` of `_source/<subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read. For specific records, use `mcp__worldloom__get_record(record_id)`. For domain-filtered CF lookups during Phase 3 / 7c, use `mcp__worldloom__search_nodes(node_type='canon_fact', filters=...)`. For named-entity binding during Phase 0 (resolve place / institution / audience names), use `mcp__worldloom__find_named_entities(names)` followed by `get_neighbors`. ONTOLOGY categories load via `Read worlds/<slug>/ONTOLOGY.md`; the world's tonal contract via `Read worlds/<slug>/WORLD_KERNEL.md` — both remain primary-authored at the world root.
+
+If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first.
 
 ## Procedure
 
-1. **Pre-flight Check.** Verify `worlds/<world-slug>/` exists, all 13 mandatory files are readable, `brief_path` (and `character_path` if provided) resolve correctly, allocate next `DA-NNNN`, derive `<da-slug>`, check slug-collision, load FOUNDATIONS + template + 12 mandatory world files. Load `references/preflight-and-prerequisites.md` for the file-load manifest (mandatory + selectively-loaded), abort conditions, and the 9 numbered pre-flight steps.
+### 1. Pre-flight
 
-2. **Phase 0: Normalize Brief + Author Reality Construction.** Parse the brief's 7 HARD + 8 SOFT inputs; interview on unresolved HARD inputs; default-and-note SOFT inputs; bind HARD inputs to specific world entities; lift the Author's 15-field profile from `character_path` if provided (else generate from brief + world state with every field citing its world file); selectively load `MAGIC_OR_TECH_SYSTEMS.md` if triggered; construct cast-at-artifact-scope (Phase 0c) for crew, dead comrades, named officials, or other figures the brief under-specifies, at author-personal-scope per Phase 7d.1. Load `references/phase-0-normalize-and-author.md`.
+Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`). Allocate the next artifact id: `mcp__worldloom__allocate_next_id(world_slug, 'DA')` → `DA-NNNN`. Load the context packet (per §World-State Prerequisites). Read `worlds/<slug>/ONTOLOGY.md` and `worlds/<slug>/WORLD_KERNEL.md` directly. Read the template `.claude/skills/diegetic-artifact-generation/templates/diegetic-artifact.md` to anchor the frontmatter schema for the Phase 9 write.
 
-3. **Phases 1-3: Claim Planning.** Build the Author's epistemic horizon (Phase 1: six source tags — `witnessed`, `learned_from_authority`, `inherited_tradition`, `common_rumor`, `contested_scholarship`, `impossible_for_narrator_to_verify`), apply in-world genre conventions (Phase 2), build the tagged claim list (Phase 3: `canon_status`, `narrator_belief`, `source`, `contradiction_risk`, `mode`, `cf_id`, `mr_id`, `repair_trace`). Load `references/phases-1-3-claim-planning.md`.
+Read `brief_path` once. If `character_path` is provided, verify it resolves inside `worlds/<world-slug>/characters/` (cross-world paths are rejected to prevent canon leakage) AND the target dossier exists; abort naming the path if either condition fails. Read the dossier; if it exceeds the Read tool's token limit, apply selective-read by structural anchors (`^## `, `^character_id:`, frontmatter section heads).
 
-4. **Phases 4-6: Text Composition.** Embed material and social texture citing source files (Phase 4), apply bias and distortion baked into the composition (Phase 5), draft the artifact body as continuous in-world prose with prohibited claims absent (Phase 6). Load `references/phases-4-6-text-composition.md`.
+Derive `<da-slug>` from the artifact title per Phase 0a's slug rule (kebab-case, lowercase, punctuation-stripped, headline-portion 5–8 words). If the title is not yet known from the brief, defer slug derivation to the end of Phase 0.
 
-5. **Phase 7: Canon Safety Check.** Run five independent sub-checks — 7a Invariant Conformance, 7b Mystery Reserve Firewall, 7c Distribution/Scope Conformance, 7d Diegetic Safety (four rules), 7e Truth Discipline (World-Truth + Narrator-Truth). Any fail triggers Phase 7f Repair Sub-Pass (retag / rescope / move / remove / add embedding / loop-to-Phase-0). Load `references/phase-7-canon-safety-check.md`.
+If `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` already exists, abort: "Artifact slug collision — supply a different title. This skill never overwrites an existing artifact."
 
-6. **Phase 8: Validation and Rejection Tests.** Run all 11 tests, each recorded as PASS / FAIL with a one-line rationale. A PASS without rationale is treated as FAIL. Any FAIL halts and loops back to the originating phase. Load `references/phase-8-validation-tests.md`.
+### 2. Phase 0: Normalize Brief + Author Reality Construction
 
-7. **Phase 9: Commit.** Present the deliverable summary to the user:
-   1. Full frontmatter.
-   2. Artifact body text (the in-world text).
-   3. Canon Safety Check Trace (Phase 7a-7e results + Phase 8 11-test results with rationales).
-   4. Phase 7f repair sub-passes that fired (if any), each framed as "preserved: <brief intent> / sacrificed: <what was retagged, rescoped, moved, or removed>".
-   5. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`.
-   6. Target write paths.
+Load `references/phase-0-normalize-and-author.md`. Parse the brief's 7 HARD + 8 SOFT inputs; interview on unresolved HARD inputs; default-and-note SOFT inputs; bind HARD inputs to ENT / SEC-GEO / SEC-INS / SEC-PAS / SEC-TML records resolved through `find_named_entities` + `get_neighbors`. Lift the Author's 15-field profile from `character_path` if provided (run the chronology and back-projection audits when artifact-date differs from dossier-present); else generate from brief + retrieved world state with every field citing the record-id it sources from. Selectively expand the packet via `search_nodes(node_type='section', filters={file_class: 'magic-or-tech-systems'})` if the brief or generated claims touch magic / technology. Construct cast-at-artifact-scope (Phase 0c) for crew, dead comrades, named officials, or other figures the brief under-specifies, at author-personal-scope per Phase 7d.1.
 
-   **HARD-GATE fires here**: no file is written until user explicitly approves. User may (a) approve, (b) request revisions (loop to named phase), (c) reject and abort.
+### 3. Phases 1-3: Claim Planning
 
-   On approval, write in order:
-   1. **Artifact file first**: `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md`. Set `source_basis.user_approved: true` immediately before this write.
-   2. **INDEX.md second**: Read existing `worlds/<world-slug>/diegetic-artifacts/INDEX.md` (create with header `# Diegetic Artifacts — <World-Slug-TitleCased>` + blank line if absent), append or replace this artifact's line in the form `- [<title>](<slug>.md) — <artifact_type>, <date>, <author>, <place>`, re-sort by slug, write back.
+Load `references/phases-1-3-claim-planning.md`. Build the Author's epistemic horizon (Phase 1: six source tags — `witnessed`, `learned_from_authority`, `inherited_tradition`, `common_rumor`, `contested_scholarship`, `impossible_for_narrator_to_verify` — including dossier-transfer when `character_path` is provided), apply in-world genre conventions (Phase 2), build the tagged claim list (Phase 3: `canon_status`, `narrator_belief`, `source`, `contradiction_risk`, `mode`, `cf_id`, `mr_id`, `repair_trace`).
 
-   Partial-failure state (artifact written without index update) is detectable by grepping INDEX.md for the slug. Recovery is manual: operator either appends the INDEX line by hand, or deletes the orphaned artifact and re-runs the skill from Phase 0. Pre-flight step 9 aborts on an existing artifact file, so re-running with the same slug will NOT regenerate the index.
+### 4. Phases 4-6: Text Composition
 
-   Report written paths.
+Load `references/phases-4-6-text-composition.md`. Embed material and social texture citing the SEC records it draws from (Phase 4), apply bias and distortion baked into the composition (Phase 5), draft the artifact body as continuous in-world prose with prohibited claims absent (Phase 6).
 
-## Canon Alignment
+### 5. Phase 7: Canon Safety Check
 
-For Validation Rules this skill upholds (Rules 2, 3, 4, 7), Record Schemas, and the full FOUNDATIONS Alignment table, load `references/canon-rules-and-foundations.md`.
+Load `references/phase-7-canon-safety-check.md`. Run all five sub-phases — 7a invariant conformance (against every INV record retrieved into the packet), 7b Mystery Reserve firewall (recording every checked M-id into `world_consistency.mystery_reserve_firewall`, overlap or not), 7c distribution/scope conformance against capability and world-fact CFs, 7d four diegetic-safety rules, 7e World-Truth + Narrator-Truth discipline. Any failure routes to Phase 7f Repair Sub-Pass; unrepairable failures loop back to Phase 0.
 
-## Guardrails
+### 6. Phase 8: Validation and Rejection Tests
 
-### Scope of operation
-- This skill operates on **exactly one existing world** per invocation. It never creates a new world (that is `create-base-world`'s job), never modifies `docs/FOUNDATIONS.md`, never touches other worlds, never touches `archive/` or `brainstorming/`.
-- All reads and writes are rooted at `worlds/<world-slug>/` or at the user-provided `brief_path` / `character_path`. Repo-root writes are forbidden. Writes are confined to `worlds/<world-slug>/diegetic-artifacts/`; the canon-file list this skill never writes to is in Output § Diegetic artifact file.
-- This skill **never writes to the `characters/` sibling directory**. An artifact may reference an existing character (via `character_path`) but does not create, modify, or annotate character dossiers. If Phase 0b's author-generation reveals a character worth committing as a reusable dossier, that is a separate `character-generation` run whose input brief may cite the artifact.
-- **Cross-world `character_path` is rejected at pre-flight.** A character from `worlds/foo/characters/` cannot author an artifact in `worlds/bar/`. Canon leakage across worlds is a pre-flight abort, not a runtime check.
+Load `references/phase-8-validation-tests.md`. Run all 11 tests and record each as PASS / FAIL with a one-line rationale into the Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
 
-### Artifact identity
-- Never overwrites an existing artifact. Pre-flight collision aborts. Once committed, diegetic artifacts are treated as existing diegetic state.
+### 7. Phase 9: Commit
 
-### Process discipline
-- Worktree discipline: if invoked inside a worktree, all paths resolve from the worktree root.
-- Do NOT commit to git. Writes land in the working tree only; the user reviews and commits.
+Present the deliverable summary to the user:
+1. Full frontmatter
+2. Artifact body text (the in-world text)
+3. Canon Safety Check Trace (Phase 7a-7e results + Phase 8 11-test results with rationales)
+4. Phase 7f repair sub-passes that fired (if any), each framed as "preserved: <brief intent> / sacrificed: <what was retagged, rescoped, moved, or removed>"
+5. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`
+6. Target write paths: `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` and `worlds/<world-slug>/diegetic-artifacts/INDEX.md`
+
+**HARD-GATE fires here**: no patch plan submits and no INDEX.md edit happens until the user explicitly approves. User may (a) approve, (b) request specific revisions (loop back to named phase), (c) reject and abort (no file written).
+
+On approval, set `source_basis.user_approved: true`, then commit in two engine-aware steps:
+
+1. **Engine-routed artifact write.** Assemble a single-op patch plan: `append_diegetic_artifact_record` with `payload.da_record` carrying the full frontmatter, `payload.body_markdown` carrying the prose body + Canon Safety Check Trace, `target_file: "diegetic-artifacts/<da-slug>.md"`, `payload.filename: "<da-slug>.md"`. Persist the plan envelope (e.g., `/tmp/<plan-id>.json`); invoke the canonical signer (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` per `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token); call `mcp__worldloom__submit_patch_plan(plan, approval_token)`. The engine atomically writes the hybrid file at the resolved path and validates the frontmatter against `record_schema_compliance`. On `approval_expired`, re-sign and resubmit; on `approval_replayed`, do NOT resubmit (the prior submit already applied).
+2. **INDEX.md update.** `Read` existing `worlds/<world-slug>/diegetic-artifacts/INDEX.md` (create with header `# Diegetic Artifacts — <World-Slug-TitleCased>` followed by one blank line if absent), append or replace the artifact's line in the form `- [<title>](<slug>.md) — <artifact_type>, <date>, <author>, <place>`, re-sort alphabetically by slug, write back via direct `Edit` (Hook 3's hybrid-file allowlist permits `diegetic-artifacts/INDEX.md`).
+
+The artifact-first ordering means a partial-failure state has an artifact without an index entry — easy to detect (grep INDEX.md for the slug). **Recovery is manual**: because the Pre-flight slug-collision abort stops any re-run, re-running the skill with the same slug will NOT update the index. To recover, the operator must either (a) manually append the INDEX.md line in the format above, or (b) delete the orphaned artifact and re-run from Phase 0. The inverse partial-failure state (index entry pointing to a non-existent artifact) requires the same manual approach.
+
+Report all written paths. Do NOT commit to git.
+
+## Governance
+
+Load `references/canon-rules-and-foundations.md` for the Validation Rules This Skill Upholds (Rule 2 / 3 / 4 / 7 phase citations), the complete FOUNDATIONS Alignment table, the Record Schemas, and the rationale for the contested-canon posture.
+
+## Hard Rules
+
+- **HARD-GATE is absolute** (see top of file). No `submit_patch_plan` and no `Edit` of `diegetic-artifacts/INDEX.md` until Phase 7 + Phase 8 pass clean and the user approves the Phase 9 deliverable. Auto Mode does not override — skill invocation is not deliverable approval.
+- **Engine-only writes for the artifact file.** The new `<da-slug>.md` lands via `append_diegetic_artifact_record` through `submit_patch_plan`. Direct `Write` to `worlds/<slug>/diegetic-artifacts/<da-slug>.md` is forbidden; the engine performs the atomic write and the schema check.
+- **Never write world-level canon records.** This skill never emits CF / CH / INV / M / OQ / ENT / SEC records. Direct `Edit` / `Write` on `_source/<subdir>/*.yaml` is blocked by Hook 3. The artifact is contested canon — an in-world voice, not world-level truth.
+- **Never write to the `characters/` sibling directory.** An artifact may reference an existing character via `character_path` but does not create, modify, or annotate dossiers. If Phase 0b's author-generation reveals a character worth committing as a reusable dossier, that is a separate `character-generation` run.
+- **Cross-world `character_path` is rejected at pre-flight.** Canon leakage across worlds is a pre-flight abort, not a runtime check.
+- **Never overwrite an existing artifact.** Pre-flight slug-collision aborts; the engine's `file_already_exists` check is the second backstop. The diegetic-artifact ledger is append-only by construction.
+- **Phases 1 / 3 / 7b are the three Rule 7 enforcement points.** A future phase that exposes the artifact to Mystery Reserve content must either extend the firewall audit or be explicitly classified out-of-scope (documented in `notes`).
+- **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.
+- **Do NOT commit to git.** Writes land in the working tree only; the user reviews and commits.
 
 ## Final Rule
 
-A diegetic artifact is not committed until the Author is bound to the world, every claim has a truth-status tag and a source provenance, every forbidden answer has been firewalled, every asserted capability or world-fact claim respects its Canon Fact Record's distribution, the text reads as a voice from within the world rather than an encyclopedia entry in disguise, and the user has approved the complete deliverable — and once committed, the artifact is treated as existing diegetic state that this skill will refuse to overwrite.
+A diegetic artifact is not committed until the Author is bound to the world, every claim has a truth-status tag and a source provenance, every forbidden answer has been firewalled, every asserted capability or world-fact claim respects its CF distribution, the text reads as a voice from within the world rather than an encyclopedia entry in disguise, and the user has approved the complete deliverable — and once committed (the engine atomically writes the hybrid file under its `file_already_exists` backstop), the artifact is treated as existing diegetic state that this skill will refuse to overwrite.

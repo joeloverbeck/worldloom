@@ -4,18 +4,18 @@ Embed material and social texture (Phase 4), apply the author's bias and distort
 
 ## Phase 4: Material and Social Texture
 
-Embed the artifact in world texture. For the author's place + class + profession + era, select texture details from `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, and `PEOPLES_AND_SPECIES.md`:
+Embed the artifact in world texture. For the author's place + class + profession + era, select texture details from SEC-GEO, SEC-ECR, SEC-ELF, SEC-INS, and SEC-PAS records (retrieve via the context packet or `search_nodes(node_type='section', filters={file_class: ...})`):
 
 - local measurements (currency, weight, distance, time — per the world's own units, not generic)
-- proper names (places, persons, institutions, rituals — drawn from world files, not invented freely)
+- proper names (places, persons, institutions, rituals — drawn from ENT / SEC records, not invented freely)
 - food, weather, tools, animals
 - ritual gestures, insults, honorifics, legal phrases
-- body metaphors (inflected by author's species per `PEOPLES_AND_SPECIES.md`)
+- body metaphors (inflected by author's species per SEC-PAS)
 - architecture, writing surfaces, smells, stains, fabrics
 - local calendrical markers
 - class markers in diction
 
-**Rule (from proposal)**: Do not add texture randomly. Texture should imply the world. Each texture element must cite its source file and the world-embedded reason it belongs.
+**Rule (from proposal)**: Do not add texture randomly. Texture should imply the world. Each texture element must cite its source record-id (SEC-id, CF-id, ENT-id) and the world-embedded reason it belongs.
 
 **FOUNDATIONS cross-ref**: Rule 2 (No Pure Cosmetics) — this phase IS the Rule 2 enforcement point for the artifact body.
 
@@ -27,7 +27,7 @@ Apply the author's worldview pressure. For the bound Author, populate:
 - **moralizations**: what they frame as good/bad
 - **unthinkables**: what they cannot imagine otherwise
 - **audience pressures**: what their audience expects, fears, rewards, punishes
-- **institutional pressures**: which `INSTITUTIONS.md` body they must flatter or fear
+- **institutional pressures**: which SEC-INS body they must flatter or fear
 
 These do not appear as editor's notes — they are **baked into the composition**. An omission is text-that-isn't-there; an overstatement is a phrase calibrated to the bias, not annotated; a moralization is a sentence the author writes believing it is true.
 
