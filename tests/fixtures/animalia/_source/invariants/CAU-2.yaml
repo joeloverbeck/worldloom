@@ -1,0 +1,12 @@
+id: CAU-2
+category: causal
+title: Corruption produces diagnostic environmental and behavioral signals
+statement: Bleed-through gloom, dimming light, objects feeling "wrong," compulsions in animals or people are diagnostic of nearby uncontained artifact activity. Practitioners (and seasoned canal-folk) read these signals.
+rationale: Brief specifies bleed-through symptoms used as diagnostic by practitioners.
+examples:
+  - a canal-side beaver-folk noticing fish behaving strangely and calling for an inspector; a ward-wright walking the perimeter and feeling the air thin
+non_examples:
+  - invisible, undetectable magical contamination
+break_conditions: forbidden.
+revision_difficulty: high
+extensions: []

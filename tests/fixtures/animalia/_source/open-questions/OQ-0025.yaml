@@ -1,0 +1,13 @@
+id: OQ-0025
+topic: Resealing Authority Jurisdiction
+body: |-
+  - CF-0028 commits that catastrophic ruin sites are "officially resealed" after squad-wipe events. Which institution holds sealing authority — the sponsor-polity's civic watch, the chartered extraction-guild whose territory the ruin falls in, the crown or city-council in centralizing polities, or some hybrid committee — is unresolved. "At least officially" in civic-archive formulations signals enforcement porosity: a sealed ruin-mouth in polity A may be quietly re-entered from an adjacent polity B's jurisdiction.
+
+when_to_resolve: when a story features a specific resealing event, a reseal-and-re-enter scenario, or a jurisdictional dispute between guild and civic authority over sealing.
+caution: interacts with CF-0008 civic-seizure clause, CF-0030 polity-asymmetric funder-primacy, and TIMELINE Layer 4 expedition-competition convergent pressure. Clean resolution would change the Charter-Era stress-fracture into a proper rupture or proper accommodation; both are destabilizing.
+extensions:
+  - originating_cf: CF-0041
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Civic-administrative resealing vs Maker-original-sealing distinction
+    body: CF-0041 commits Maker-Age deliberate-original-sealing as a categorically distinct phenomenon from civic-administrative resealing of CF-0027 enterable ruins. Civic-administrative resealing walls off a site AROUND a hazard post-discovery; Maker-original-sealing locked individual artifacts or entire buildings from the inside using now-lost Maker engineering. Where a sealed Maker-buried building is newly struck and the multi-guild unsealing-triage protocol considers re-burial as disposition option, the resulting re-burial is CIVIC-ADMINISTRATIVE resealing, NOT restoration of the original Maker seal — the distinction is load-bearing because civic re-burial is porous (per existing CF-0028 "at least officially" register) in ways the original Maker seal was not. The two-tier distinction extends the existing deferral without resolving it.

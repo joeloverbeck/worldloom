@@ -1,0 +1,8 @@
+id: OQ-0052
+topic: Brinewick Trunk-Canal-Count Specifics
+body: |-
+  - CF-0038 commits Brinewick as canal-confluence hub at "a convergence of canal trunks feeding a river-mouth system" — specific trunk-count (three, five, seven? different sources may cite differently), named trunks (names of specific canal trunks converging at Brinewick's trunk-locks), and specific river-mouth connection geometry (whether the river exits to coastal trade directly or via an intervening port city, and if the latter, the intervening port's identity) remain deferred.
+
+when_to_resolve: when a specific story or simulation requires geographic precision on Brinewick's trunk-canal convergence.
+caution: resolution interacts with CF-0015 canal-network geometry and with the §Identity of the Most-Populated Heartland City deferral (an intervening coastal port city might be a candidate for most-populated). Narrow per-story commitments are acceptable — a specific story can commit to a specific trunk-count and specific intervening port without foreclosing wider canal-network detail.
+extensions: []

@@ -1,0 +1,8 @@
+id: OQ-0033
+topic: Dragoon Funding-Stream Specificity (per polity)
+body: |-
+  - CF-0033 names "dedicated canal-transit levy or special ward-economy draw" as the dragoon funding-stream adoption-gate (Stabilizer-3). Specific per-polity mechanism — whether dragoon funding is additive (new tariff tier layered on existing canal-transit revenue) or displacing (reallocation from existing containment-upkeep budget, generating the dragoon-containment funding squeeze flagged in ECONOMY §Breakage Points) — remains deferred. The pattern parallels the CF-0031 funding-stream specificity deferral precedent: the mechanism is load-bearing but unspecified; each adopting polity resolves its own mechanism; resolution-drift toward displacing mechanism creates structural breach-frequency exposure.
+
+when_to_resolve: when a story foregrounds a specific adopting polity's dragoon-funding economics, or when a magistrate case involves dragoon pay delivery failure due to containment-levy reallocation dispute.
+caution: interacts with TIMELINE Layer 3 existing commitment ("special transit fees on canal traffic" for containment-financing) and with ECONOMY §Breakage Points new dragoon-containment funding squeeze. A formal canonization of additive vs displacing mechanism in any specific adopting polity commits to a funding-flow structure that has cascade implications for ward-breach severity trends in that polity; narrow per-polity commitment is acceptable, but generalization to adopting-polity pattern risks collapsing the structural ambiguity that preserves the asymmetric-adoption narrative texture.
+extensions: []

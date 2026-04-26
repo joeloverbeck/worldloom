@@ -1,0 +1,38 @@
+id: SEC-GEO-005
+file_class: GEOGRAPHY
+order: 5
+heading: Migration Routes
+heading_level: 2
+body: |-
+  - **Seasonal labor migration**: harvest-followers and canal-work crews move north-to-south or coast-to-interior with the season.
+  - **Species-typical migration**: some bird-folk communities migrate seasonally between summer and winter ranges, complicating their civic-registry enrollment in any single polity. Multi-polity reciprocity arrangements exist for some communities; for others, civic-registry status is contested annually.
+  - **Refugee migration**: displaced populations from sealed quarter-towns or contaminated zones, periodically resettling along canal corridors.
+  - **Caravan circuits**: drylands caravan rotations follow seasonal water and market rhythms.
+  - <!-- added by CF-0037 --> **Stationkeeper-self-exile migration**: a recognized minor-volume migration pattern in heartland, highland, and mountain-east regions where the family-handled waystation tradition (CF-0037) operates. Inheritor-children unwilling to accept the stationkeeper life-path walk away — most into adjacent settlements (artisan-quarter casual labor; CF-0024 contractor entry-tier postings at tavern-boards), some into the bardic circuit's traveling-life as itinerant followers, a minority into CF-0034 endemic-banditry recruitment-feeders. The migration is permanent rather than seasonal; placement-right is forfeited at exile (per CF-0037 distribution); kin-distance is voluntary rather than civic-suppression-imposed. Distinct from refugee-migration (no contamination/raid push); distinct from seasonal-labor (no return); distinct from species-typical bird-folk migration (not embodiment-driven).
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

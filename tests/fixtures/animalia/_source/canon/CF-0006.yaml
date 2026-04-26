@@ -1,0 +1,69 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - host suffers brutal physical trauma during the procedure
+  - vessel becomes contaminated and must be disposed of by guild protocol
+  - procedure is expensive; rural communities may lack access
+distribution:
+  who_can_do_it:
+    - guild-trained containment-wrights operating under charter
+  who_cannot_easily_do_it:
+    - laypersons, unlicensed practitioners
+  why_not_universal:
+    - procedure requires training, materials, and license; failure is severe
+domains_affected:
+  - magic
+  - settlement_life
+  - economy
+  - law
+id: CF-0006
+modification_history:
+  - change_id: CH-0009
+    date: 2026-04-19
+    originating_cf: CF-0035
+    summary: cross-reference only — MAGIC_OR_TECH_SYSTEMS §Visible Signs table extended to include mutated-beast encounter as upstream-contamination diagnostic signal; CF-0006's containment technology itself unchanged
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0039
+    summary: cross-reference only — disposal operationally re-framed as containment-not-destruction per CF-0039 destruction-resistance commitment; CF-0006's containment technology itself unchanged
+  - change_id: CH-0015
+    date: 2026-04-20
+    originating_cf: CF-0043
+    summary: qualification — Brinewick-specific commercial containment-wright role fulfillment by Ash-Seal under non-transferable civic-charter anomaly; CF-0006 containment technology categorically unchanged; ward-inscription / ward-inspection remain SOC-4 chartered-guild elsewhere and in Brinewick
+notes: |
+  Direct from brief. The most concrete artifact-handling technique committed at genesis.
+  Modified 2026-04-19 by CH-0009 (CF-0035): cross-reference annotation only (no CF-field change) — the empirical-diagnosis tradition CF-0006 instantiates (containment-wright procedural knowledge of contamination; visible vessel-under-guild-stamp register) is extended in parallel register by the MAGIC_OR_TECH_SYSTEMS §Visible Signs CH-0009 addition — a mutated beast of wrong proportion encountered in deep wilderness is now a recognized diagnostic signal of upstream uncontained contamination. CF-0006's containment technology is categorically unaffected; the registration here is audit-trail hygiene documenting the parallel empirical-diagnosis extension.
+  Modified 2026-04-20 by CH-0014 (CF-0039): cross-reference annotation only (no CF-field change) — "disposal by guild protocol" referenced in costs_and_limits is now operationally understood as CONTAINMENT-NOT-DESTRUCTION per CF-0039 destruction-resistance commitment. Containment-wright disposal of contaminated vessels follows sealed-storage protocol rather than destruction protocol; this reframing is documented in INSTITUTIONS §Artifact-Extraction Guilds neutralizer re-scoping (CH-0014). CF-0006's containment technology is categorically unaffected; the registration here is audit-trail hygiene documenting the operational disposal-register shift.
+  Modified 2026-04-20 by CH-0015 (CF-0043): qualification (commercial containment-wright role fulfillment) — in Brinewick specifically (CF-0038), the containment-wright role attached to CF-0006 ceramic-containment technology is fulfilled COMMERCIALLY by the Ash-Seal company (CF-0043) under Brinewick civic-charter non-guild anomaly concorded with chartered-extraction-guild. CF-0006's containment technology is categorically UNCHANGED — Ash-Seal uses the same CF-0006 ceramic-containment technology under empirical-craft register (ONT-2 family); ward-inscription and ward-inspection remain SOC-4 chartered-extraction-guild-licensed; other heartland polities retain guild-or-civic containment-wright arrangements. Brinewick is the unique local-variant; the non-transferable civic-charter anomaly (per CF-0038 four-stabilizer primacy compound + SOC-4 enforcement elsewhere + century-plus precedent-lock) prevents Rule 4 globalization. The qualification is Brinewick-operational-fulfillment audit-trail hygiene; the underlying technology is unchanged.
+prerequisites:
+  - containment-grade ceramic clay (geographically restricted)
+  - guild-trained containment-wright
+  - inscribed and prepared vessel
+  - controlled procedural environment
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - PEOPLES_AND_SPECIES
+  - TIMELINE
+scope:
+  geographic: regional
+  social: restricted_group
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0005
+  direct_user_approval: true
+statement: |
+  A ceramic vessel of specific clay-grade can receive extracted "wrongness" or corruption from a host (animal or person), leaving the host behaviorally normal again. The procedure is physically brutal to the host during engagement.
+status: hard_canon
+title: Ceramic containment vessels can extract corruption from a host
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: technology
+visible_consequences:
+  - containment-wright is a recognized social role
+  - sealed ceramic vessels under guild stamp are visible in workshops and transit
+  - tales of the procedure circulate; the brutality is widely understood

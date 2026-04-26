@@ -1,0 +1,26 @@
+affected_fact_ids:
+  - CF-0038
+change_id: CH-0020
+change_type: clarification
+date: 2026-04-25
+downstream_updates: []
+impact_on_existing_texts: []
+latent_burdens_introduced: []
+notes: Tooling-driven Tier 3 migration. No adjudication record produced; the active implementation ticket and SPEC-14 own the vocabulary-normalization rationale.
+reason:
+  - Bootstrap SPEC-14 grandfathering closure for the final Animalia GF-0006 findings.
+  - Preserves CF-0038's statement, scope, distribution, and visible consequences while normalizing only validator-facing domain vocabulary.
+retcon_policy_checks:
+  net_contradictions_not_increased: true
+  no_silent_edit: true
+  no_stealth_diegetic_rewrite: true
+  replacement_noted: true
+  world_identity_preserved: true
+scope:
+  changes_ordinary_life: false
+  creates_new_story_engines: false
+  local_or_global: local
+  mystery_reserve_effect: unchanged
+severity_after_fix: 0
+severity_before_fix: 1
+summary: "SPEC14PAVOC-008 vocabulary cleanup: re-tags CF-0038 domains_affected from four non-canonical sub-concept tokens to canonical domains after adding institutions/everyday_life to the shared enum."

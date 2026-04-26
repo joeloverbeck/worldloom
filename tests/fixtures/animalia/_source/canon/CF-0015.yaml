@@ -1,0 +1,54 @@
+id: CF-0015
+title: Canal network is the primary commercial spine
+status: hard_canon
+type: technology
+statement: |
+  A network of natural and constructed canals through the temperate heartland serves as the primary commercial transportation spine. Locks, weirs, and ferry crossings are choke points. Canal-side rural towns are a common settlement pattern; sprawling cities concentrate at confluences and ports.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - economy
+  - settlement_life
+  - warfare
+  - architecture
+prerequisites:
+  - chartered polity capable of canal construction and maintenance
+  - lock-and-weir engineering tradition
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - terrain (highlands, drylands, fens) limits canal extent
+costs_and_limits:
+  - lock and weir maintenance is significant ongoing cost
+  - canal contamination from artifact incidents can isolate towns
+  - canal-rights and toll disputes are recurring inter-polity friction
+visible_consequences:
+  - canal-side row-cottages, lock-master offices, towpath traffic
+  - canal-borne supply gives wealthy polities military logistics advantage
+  - beaver-folk concentration in canal engineering
+  - special canal-transit fees fund containment infrastructure in some polities
+required_world_updates:
+  - GEOGRAPHY
+  - ECONOMY_AND_RESOURCES
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Brief specifies compact canal-side rural towns and sprawling cities with outskirts estates; this fact anchors that geography.
+  Modified 2026-04-19 by CH-0013 (CF-0038): Brinewick committed as named canal-confluence-hub city — specific instance anchoring the canal-network commercial-spine commitment at heartland exemplar density. Trunk-canal- confluence geometry is CF-0038 Phase 4 prerequisite-binding; pre-Charter canal-network origin is civic-mainstream ancestral-engineering per M-19 bounded unknown + CH-0013 M-1 extension firewall (pre-Charter ancestral- engineering is the civic-mainstream attribution, NOT Maker-Age). CF-0015 statement, scope, distribution, and stabilizer structure unchanged.
+modification_history:
+  - change_id: CH-0013
+    originating_cf: CF-0038
+    date: 2026-04-19
+    summary: "extension: Brinewick (CF-0038) committed as named canal-confluence-hub city — specific instance anchoring canal-network commercial-spine commitment at heartland exemplar density; trunk-canal-confluence geometry per CF-0038 Phase 4 prerequisite binding; M-19 bounded unknown created for canal-origin attribution with CH-0013 M-1 extension firewall (pre-Charter ancestral-engineering civic-mainstream, NOT Maker-Age)"

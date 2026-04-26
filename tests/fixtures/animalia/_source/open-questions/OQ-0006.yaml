@@ -1,0 +1,16 @@
+id: OQ-0006
+topic: Specific Maker-Age Details
+body: "- Whether the Maker civilization had cities visible from the surface (versus only substructures), what visual style their inscriptions take, whether they had multiple language-scripts, the geographic extent of their territory — all unresolved."
+when_to_resolve: when a specific dig-site or excavated artifact appears in story.
+caution: any resolution here interacts with Mystery Reserve M-1 and M-2; care required to avoid foreclosing those mysteries.
+extensions:
+  - originating_cf: CF-0027
+    change_id: CH-0004
+    date: 2026-04-18
+    label: Expedition-era pressure
+    body: CF-0027 commits enterable Maker-Age ruin sites as a recognized category and CF-0028 commits patron-funded ruin-expeditions. Expeditions WILL force visual and structural detail (chamber layout, inscription patterns, architectural scale). Narrow regional commitments are acceptable — specific sites can have specific detail — but territorial-extent and civilization-identity resolutions remain forbidden per M-1 and CF-0027's anti-accumulation clause. Accumulated per-site detail across multiple expeditions does NOT amount to civilization-level resolution; the M-1 firewall is load-bearing.
+  - originating_cf: CF-0041
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Deliberate-burial-site pressure
+    body: "CF-0041 commits Maker-Age deliberate-burial practice — entire buildings sealed via complex engineering. Buried-building strikes at foundation-digs, canal cuts, estate-cellar excavations, and qanat-cleaning rites WILL force structural / engineering / burial-method detail at specific sites. Narrow per-site speculation is acceptable; territorial-extent, civilization-identity, and burial-intent resolution are FORBIDDEN per M-1 anti-evidence firewall (CH-0014 extension). A specific Brinewick orchard strike may reveal the method of a single burial; it does NOT reveal what the Makers feared, whether burial preceded / accompanied / postdated the fall, or whether the burial effort succeeded. The CH-0013 CF-0038 narrowing (pre-Charter-engineering firewall) and the CH-0014 CF-0041 narrowing (deliberate-burial firewall) converge: narrow per-site detail OK, civilization-level resolutions FORBIDDEN."

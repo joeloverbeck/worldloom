@@ -1,0 +1,54 @@
+id: CF-0003
+title: Magic exists only as artifact-bound, not as learned or innate
+status: hard_canon
+type: metaphysical_rule
+statement: |
+  Living people cannot cast spells from will alone. Magical effects are produced exclusively by physical artifacts — the vast majority inherited from a vanished prior civilization, and a marginal modern stream produced by leaked-grimoire crafter attempts (CF-0021). There are no hereditary mage bloodlines, no learned spellcraft, no innate magical talent. The crafter-attempt practice is a learned CRAFT of producing vessels; the artifact remains the magical agent, not the practitioner.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - religion
+  - law
+  - economy
+  - warfare
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it:
+    - all living people (no one can cast)
+  why_not_universal:
+    - magical capacity is not a property of living beings in this world
+costs_and_limits:
+  - artifact possession requires extraction, containment, and license
+  - artifact use carries cost (CF-0005)
+visible_consequences:
+  - mundane substitutes exist for nearly all "magical" services (aqueducts, walls, herb-medicine)
+  - artifact-extraction guilds, not magical academies, structure the magic-adjacent profession
+  - heroic-mage figures are absent from world-true narrative; they appear only in folk tale
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Invariant ONT-2. Foundational to genre identity. Modified 2026-04-18 by CH-0002 (CF-0021): "artifact" now explicitly includes both Maker-Age artifacts (CF-0004) and modern crafted artifacts (CF-0021). The learned-spellcraft prohibition still holds — what is learned is the craft of producing vessels, not the channeling of magic through the practitioner; the artifact remains the magical agent. Modified 2026-04-20 by CH-0014 (CF-0039): destruction-physics clarification added — the binding of magical effect to the vessel in Maker-Age artifacts confers destruction-resistance on the vessel itself, a property OF the artifact-as-locus (not a new channel through the crafter); SCOPED to Maker-Age artifacts, modern crafter outputs remain destructible by ordinary means; ONT-2 holds without exception.
+modification_history:
+  - change_id: CH-0002
+    originating_cf: CF-0021
+    date: 2026-04-18
+    summary: "ONT-2 scope qualification: 'artifact' now explicitly includes both Maker-Age artifacts (CF-0004) and modern crafted artifacts (CF-0021). The learned-spellcraft prohibition still holds — what is learned is the craft of producing vessels, not the channeling of magic through the practitioner; the artifact remains the magical agent."
+  - change_id: CH-0014
+    originating_cf: CF-0039
+    date: 2026-04-20
+    summary: "ONT-2 destruction-physics clarification: Maker-Age artifact destruction-resistance is a property of the artifact-as-locus; modern crafter outputs do NOT inherit; preserves CF-0021 inferior register."

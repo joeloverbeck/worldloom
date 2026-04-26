@@ -1,0 +1,45 @@
+id: CF-0014
+title: Winter fevers are recurring lethal seasonal disease
+status: hard_canon
+type: hazard
+statement: |
+  "Winter fevers" are recognized respiratory disease that recurs in cold seasons and kills heavily, particularly in the heartland and cold north. They are part of lived memory, demographically significant, and shape household planning.
+scope:
+  geographic: regional
+  temporal: cyclical
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - settlement_life
+  - economy
+  - kinship
+  - religion
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - disease itself is the agent; affected populations cannot avoid susceptibility
+costs_and_limits:
+  - no germ theory in-world; treatment is empirical and partial
+  - species-typed susceptibility variation exists but is poorly characterized
+  - bad fever years can produce demographic shocks
+visible_consequences:
+  - widows, orphans, household labor gaps after bad years
+  - winter food preservation and shelter customs shaped by fever risk
+  - herb-wives and barber-surgeons stretched thin in bad years
+  - mourning traditions include winter-fever memorials
+required_world_updates:
+  - EVERYDAY_LIFE
+  - GEOGRAPHY
+  - TIMELINE
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Direct from brief. Two bad recent years noted in TIMELINE.md current present.

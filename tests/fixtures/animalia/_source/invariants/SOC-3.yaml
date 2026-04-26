@@ -1,0 +1,17 @@
+id: SOC-3
+category: social
+title: Coin contract is sacred by custom
+statement: A payment contracted in coin or in-kind must be honored, or restitution made. Breach is a recognized civil and customary wrong; reputation damage compounds the legal cost. Trade across species depends on this norm.
+rationale: Derived from the brief's coin-and-livestock framing; necessary for stable trade across species and regions.
+examples:
+  - a tavernkeeper hounding a defaulted patron through three towns; a guild withholding work from a known oath-breaker
+non_examples:
+  - payments routinely renegotiated after delivery without consequence
+break_conditions: low — story tension often arises from breach.
+revision_difficulty: low
+extensions:
+  - originating_cf: CF-0046
+    change_id: CH-0018
+    date: 2026-04-20
+    label: Drylands Reciprocity-Primary Preservation Clarification
+    body: "The drylands caravan corridor (CF-0046) operates a reciprocity-primary regional economy with coin-at-the-edges for practical transactions (supply runs, heartland-border trade, caravan provisioning). SOC-3 coin-contract sacredness is PRESERVED WITHOUT EXCEPTION at the coin-at-edges contact surface — coin-contracted lodging, supply, and escort-hire at well-stops / caravanserai / gate-stops are honored with standard SOC-3 discipline and reputation-damage on breach. Reciprocity obligations (hospitality-due, supply-returned, water-share-balanced in the well-keeper's book) are customary-reputation-enforced within the drylands corridor, NOT a separate sacred tier parallel to SOC-3; they are ordinary customary obligation, breach of which costs corridor-reputation (paralleling CF-0034 caravan-master cargo-refusal reputation register). The drylands economy is NOT pure barter uncorrupted by coin — drylanders honor coin when coin is on the table. Fewer coin-contracts are entered than in heartland; those that are are enforced under SOC-3 as elsewhere. Forbidden register: \"pure reciprocity economy untainted by coin,\" \"drylands that coin had not yet corrupted\" (romanticization)."

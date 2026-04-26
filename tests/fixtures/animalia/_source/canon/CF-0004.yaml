@@ -1,0 +1,66 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - Maker-Age artifact supply is finite; modern creation adds a marginal trickle that does not meaningfully replenish the artifact pool
+  - knowledge of artifacts is fragmentary and empirical
+  - modern crafted artifacts cannot reach catastrophic-class effect (M-2 boundary)
+distribution:
+  who_can_do_it:
+    - the vanished Maker civilization (historical, terminated)
+    - modern crafters at marginal volume per CF-0021
+  who_cannot_easily_do_it:
+    - all living people for catastrophic-class artifacts (no one can make these; M-2 boundary)
+    - all living people for Maker-equivalent quality (technique unrecovered at full fidelity)
+  why_not_universal:
+    - the full Maker technique is lost; whether it could ever be fully relearned remains mystery M-2
+    - modern attempts are constrained by the stabilizers in CF-0021
+domains_affected:
+  - magic
+  - religion
+  - memory_and_myth
+  - settlement_life
+id: CF-0004
+modification_history:
+  - change_id: CH-0002
+    date: 2026-04-18
+    originating_cf: CF-0021
+    summary: "qualification: marginal modern crafter stream acknowledged as parallel origin; Maker Age remains dominant"
+  - change_id: CH-0004
+    date: 2026-04-18
+    originating_cf: CF-0027
+    summary: "qualification: non-guild-primary expedition recovery pathway acknowledged; Maker-Age origin remains dominant; M-1/M-2 firewalls reaffirmed"
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0039
+    summary: "extension: Maker-Age artifact destruction-resistance + mundane-tier inverse strength-rarity distribution + Maker-Age deliberate-burial practice; four firewalls on M-1/M-8/M-9/M-10 (CF-0041); Maker-sealing technique LOST (not in CF-0023 corpus); cause-of-fall M-1 preserved."
+notes: |
+  Anchors mystery reserve M-1, M-2, M-5. The "vanished prior civilization" framing is implied by the brief's reference to ancient artifacts of unknown origin. Modified 2026-04-18 by CH-0002 (CF-0021): qualified to acknowledge the marginal modern crafter stream. Maker Age remains dominant origin by orders of magnitude. The qualification is logged here per Rule 6 (No Silent Retcons). The modern parallel is interpretively suggestive only with respect to Mystery Reserve M-1 — it does NOT constitute evidence at world level for any M-1 hypothesis (in particular, the "they consumed themselves with their own magic" cautionary reading gains diegetic traction without world-level confirmation). Modified 2026-04-18 by CH-0004 (CF-0027): qualified to acknowledge non-guild-primary expedition recovery pathway. Chartered extraction-guild recovery remains the dominant modality for piecemeal Maker-Age finds (DIS-1); patron-funded ruin-expedition ventures (CF-0028) recover from enterable ruin sites (CF-0027) as a parallel channel, operating in polity-asymmetric tension with CF-0008 and disposing via CF-0030 funder-primacy convention through chartered-broker channel in tolerant polities. Maker-Age origin remains dominant by orders of magnitude; expedition-era recovery is episodic and wealth-gated. No expedition yields civilization-identity answers at world level (M-1 anti-accumulation firewall in CF-0027); no catastrophic-class finds are within the recoverable domain (M-2 preserved by CF-0027 / CF-0029 scope boundaries). Modified 2026-04-20 by CH-0014 (CF-0039, CF-0040, CF-0041): Maker-Age attribution extended via three CH-0014 CF commitments — (a) CF-0039 destruction-resistance is a property of Maker-Age artifacts that does NOT transfer to modern crafter outputs (CF-0021 scope boundary preserved); (b) CF-0040 commits the mundane-tier as EXPLICIT NAMING of the DIS-1 "most inert junk" band (most of the Maker corpus is low-tier active, inverse strength-rarity relationship); (c) CF-0041 commits Maker-Age deliberate-burial practice with four firewalls (M-1 anti-evidence, M-8 distinct-origin, M-9 anti-custody-channel, M-10 FOURTH anti-predictor); Maker-sealing technique is LOST (not in CF-0023 leaked corpus; not reproducible by CF-0021 crafters). All three extensions preserve M-1 cause-of-fall as bounded unknown.
+prerequisites: []
+required_world_updates:
+  - TIMELINE
+  - MAGIC_OR_TECH_SYSTEMS
+  - GEOGRAPHY
+  - INSTITUTIONS
+scope:
+  geographic: global
+  social: public
+  temporal: ancient
+source_basis:
+  derived_from:
+    - CF-0003
+  direct_user_approval: true
+statement: |
+  The vast majority of magical artifacts in Animalia were made by a vanished prior civilization (the "Maker Age") in centuries-to-millennia past. The civilization's identity, geographic extent, and cause of fall are unrecovered. Modern crafters can attempt to make new artifacts (CF-0021), but their outputs are marginal in volume, inferior in stability and power, and never reach catastrophic-class effect; the Maker Age remains the dominant artifact source by orders of magnitude.
+status: hard_canon
+title: Magical artifacts predominantly originate in the Maker Age
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: historical_process
+visible_consequences:
+  - Maker substructures are encountered when digging foundations or canal beds
+  - artifact-extraction guilds specialize in recovery from Maker sites
+  - Maker-skeptical and Maker-mystic sectarian movements both exist
+  - cosmologies vary in how they position the Makers (ancestors, demons, failed gods)
+  - authentication specialists distinguish Maker-Age artifacts from modern crafted work by craft signature

@@ -1,0 +1,27 @@
+id: M-13
+title: Institutional Contingency of the Dragoon Form
+status: passive
+knowns:
+  - Canal-corridor quarantine dragoons (CF-0033) exist as chartered civic perimeter force in some larger heartland polities, instituted in the past decade
+unknowns:
+  - Whether the dragoon-form was invented in one heartland polity and diffused through Charter-Era institutional mimesis, or whether it arose convergently in several polities responding to similar Incident Wave pressure
+common_interpretations: []
+disallowed_cheap_answers:
+  - Any "Polity X invented the dragoon-form and all others copy" reveal — closes the convergent/diffusion dispute with single-polity-founder narrative; forecloses the Charter-Era regional-variation pattern's institutional diversity
+domains_touched:
+  - INSTITUTIONS (civic registry
+  - chartered extraction-guild counter-pressure
+  - civic-watch and magistrate chain-of-command)
+  - LAW (charter-court jurisprudence
+  - extradition docket
+  - mission-scope case law)
+  - RELIGION (CF-0026 principled-refuser clergy standing role)
+  - POLITICS (centralization-vs-charter-concession debates in adopting and non-adopting polities)
+  - M-11 firewall surface (three-generation pensioner-health longitudinal records analog).
+future_resolution_safety: low
+extensions:
+  - originating_cf: CF-0034
+    change_id: CH-0008
+    date: 2026-04-19
+    label: Extension — Bandit-pursuit mission-scope cross-reference
+    body: "Endemic banditry (CF-0034) creates standing pressure on CF-0033 dragoon mission scope: bandit corridors exist within adopting polities' charter territory; bandit-trafficking of artifacts overlaps with dragoon artifact-trafficking predicate; the CF-0033 charter-court challenge precedent against mission-creep (brought by CF-0026 principled-refuser clergy) faces a new potential creep-vector in the form of bandit-pursuit-by-dragoon framing. CF-0034 commits explicitly that settlement-hired hunter-contractors, NOT dragoons, are the civic bandit-response institution; dragoon engagement with bandits occurs only via the narrow ward-breach perimeter or black-market artifact-traffic predicate, and magistrate predicate-declaration is required at cross-predicate pursuit (M-13 boundary defense). No text change to M-13 body is required; the CF-0034 commitment is the load-bearing countergate against bandit-pursuit becoming a creep-vector for dragoon scope expansion. Added as cross-reference, not as disallowed cheap answer (M-13's existing disallowed answers already cover the structural risk). The M-13 firewall holds with this cross-application clause acknowledged in CF-0034 costs_and_limits."

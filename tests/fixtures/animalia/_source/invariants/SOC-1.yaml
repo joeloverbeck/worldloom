@@ -1,0 +1,22 @@
+id: SOC-1
+category: social
+title: Animal-folk can occupy any class
+statement: Class mobility is not species-coded. Animal-folk can hold landed nobility, civic authority, guild mastery, and craft livelihoods. A beaver-folk magistrate and a human laborer are both ordinary.
+rationale: Brief explicit.
+examples:
+  - an aurochs-folk landowning estate that employs human and otter-folk laborers; a hyena-folk magistrate presiding over a mixed-species court
+non_examples:
+  - caste systems where humans rule and animal-folk serve; species-coded slavery
+break_conditions: forbidden.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0036
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Clarification
+    body: individual and sectarian species-prejudice exist as ordinary sociological phenomena (tavern slurs, labor-prejudice distancing, crew-composition sorting preferences, marriage-broker catechism extensions). Isolated single-species exclusionary settlements exist in weak-charter / demographically-fragile regions. Supremacist sectarian doctrine asserting species entitlement to violence against other sentient peoples exists as CONTESTED-CANON sectarian belief held by a fringe. An interspecies-cannibal sub-subset exists within CF-0034 outlaw bands. **None of these constitute world-level class-coded species hierarchy.** Civic charters continue to suppress hierarchy-speech at world level; no chartered polity adopts supremacist doctrine as civic policy; no guild charter gates intake by species; no magistrate-court recognizes a "lesser sentient" legal category. SOC-1 holds without exception. Individual-and-sectarian friction ≠ civic hierarchy; the former is ordinary social phenomenon, the latter is the forbidden break-condition.
+  - originating_cf: CF-0047
+    change_id: CH-0018
+    date: 2026-04-20
+    label: Drylands Well-Keeper No-Species-Gate Reaffirmation
+    body: The drylands well-keeper customary-authority role (CF-0047) holds at any species without civic-registry gate — humans, Cluster A/B/C/D drylanders, and cross-species travelers pass through the well-stop hospitality protocol under the same charter-custom frame. Cross-species hospitality etiquette is charter-custom obligation under load, NOT unearned harmony; CF-0036 friction-register (scent-aversion, mix-sound, one-fur-talk-now returning migrants, tavern joke-threshold register) operates at well-stops as it does at caravanserai-rotation hire. Lineage-inheritance of the well-stop office is no-species-gated; a mixed-species household may hold the well-stop and pass it lineally. Species-concentration by corridor-resident embodiment-fit (heat-tolerant Cluster A/B/C resident-drylanders over-represented at well-keeper posts in practice) does NOT constitute species-gating at intake. SOC-1 holds without exception.

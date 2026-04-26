@@ -1,0 +1,82 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - bards travel at their own risk through bandit corridors
+  - performance content is sometimes politically sensitive (Maker-skeptical, guild-skeptical material)
+  - some bards politicized in current period
+distribution:
+  who_can_do_it:
+    - traveling performers, often itinerant
+  who_cannot_easily_do_it:
+    - those without travel means or instrument access
+  why_not_universal:
+    - itinerant labor is a specialty
+domains_affected:
+  - economy
+  - settlement_life
+  - religion
+  - status_signaling
+id: CF-0017
+modification_history:
+  - change_id: CH-0003
+    date: 2026-04-18
+    originating_cf: CF-0024
+    summary: "extension: bards also take patron commissions as contracted agents"
+  - change_id: CH-0008
+    date: 2026-04-19
+    originating_cf: CF-0034
+    summary: "extension: bandit-related bardic subgenre register (raid-lament, hunter-return, named-captain cycles, bounty-ethics broadsides); performer-martyr class; moral-witness-refusal threshold committed; M-14 cross-reference"
+  - change_id: CH-0009
+    date: 2026-04-19
+    originating_cf: CF-0035
+    summary: "extension: fifth bardic subgenre register added (beast-hunter return account in AES-1 tavern-veteran cadence — dry-numerical, corridor-named-not-hunter-named); M-7 sub-specialty holding clause (NOT a sixth M-7 cohort); AES-1 hero-drift taboo list; bardic mainstream withholds heroic ballad-status from beast-hunt material; M-14 cross-reference for mutated-beast-legend mythography parallel-but-distinct register"
+  - change_id: CH-0010
+    date: 2026-04-19
+    originating_cf: CF-0036
+    summary: "extension: sixth bardic subgenre register added (silenced-contractor ballad subgenre in AES-1 scarred-veteran cadence — witness-refusal songs; itinerant-carried, patron-refused, sectarian-inflation marked-breach); moral-witness-refusal threshold extended to supremacist-doctrine preacher and interspecies-cannibal-band captain material; M-14 sub-register cross-reference for cannibal-captain mythography (sub-register WITHIN M-14, NOT new M-entry); hero-drift firewall"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "extension: Brinewick (CF-0038) commits canal-circuit bardic subgenre at heartland exemplar density with named anchor taverns The Copper Weir and The Lock-Keeper's Cat (four other rotation venues unnamed, deferred per OPEN_QUESTIONS); circuit-walker bard as named regional-bardic-status distinct from CF-0017 regional-hub pattern; fell-at-the-Weir failure-idiom; Brinewick-specific contested-canon discipline on specific-estate-scandal bardic material (defamation-docket risk for bards naming specific estate-rival scandal content); M-7 sub-specialty holding clause at canal-circuit-bard scope"
+  - change_id: CH-0016
+    date: 2026-04-20
+    originating_cf: CF-0044
+    summary: "extension: bardic-absorption directional firewall — circuit-bards absorb drylands short-poetry stranger-hospitality verse-fragments (CF-0044) and transport them into canal-heartland tavern-performance in bardic-tavern register only; the stranger-exchange PROTOCOL (turn-exchange, hospitality-register, host-initiated cadence) does NOT travel; return-circuit bards cannot elicit register from drylands hosts; one-way cultural-borrowing pathway preserved; narrative-custody channel scope unchanged (verse-fragments join existing bardic-repertoire transmission, NOT a new drylands-stranger-exchange custody channel)"
+  - change_id: CH-0017
+    date: 2026-04-20
+    originating_cf: CF-0045
+    summary: "extension: lock-night as named bardic-performance occasion at canal-corridor lockside taverns — sub-occasion within CF-0017 bardic-tavern frame (Rule 3 specialness-inflation firewall; NOT a new institution with its own licensure); distinct from CF-0038 canal-circuit quarter-year rotation (orthogonal scheduling dimensions: rotation = which-taverns-across-a-year; lock-night = which-night-type-within-a-week); canal-labor audience composition (lockmaster-crew, barge-layover travelers, wharf-traders) + silver-differential pay register above middling tavern-night rate; lock-night sub-genre accretes within CF-0017 bardic repertoire (lockside-labor ballads, canal-route work-songs, barge-traveler goodbyes); regional canal-heartland scope gated by canal-lock infrastructure (CF-0015); partial-support soft_canon pathway with DA-0001 pre-figuring audit-trail preservation"
+notes: |
+  Direct from brief. Modified 2026-04-18 by CH-0003 (CF-0024): bards extended as contracted agents taking patron commissions for material/intelligence gathering and narrative-custody production. The tavern-performance and bardic-circuit economics of CF-0017 are preserved; the modification adds a second economic stream and names the consequent narrative-custody channel. See Mystery Reserve M-7 (reputation-genealogy of occult-fallout specialists) for the bounded unknown this creates. Modified 2026-04-19 by CH-0008 (CF-0034): bardic-circuit narrative- custody extended with bandit-related subgenres (raid-lament songs, hunter-contractor return accounts, named-bandit-captain bardic cycles, bounty-ethics reform broadsides); performer-martyr class named (bards killed while traveling corridors); bardic moral-witness-refusal threshold committed ("no ballad for a captain whose camp held slaves beyond threshold" in mainstream traditions; sectarian-commissioned bards violate this threshold for pro-supremacist recruitment and listeners mark the breach). Named-bandit-captain historicity is contested per new Mystery Reserve M-14 (bandit-captain mythography reliability). Modified 2026-04-19 by CH-0010 (CF-0036): sixth bardic subgenre register added — silenced-contractor ballad subgenre (witness-refusal songs in AES-1 scarred-veteran cadence; itinerant-bard-carried; patron-commissioned bards refuse; sectarian-commissioned bards inflate supremacist recruitment register and are marked-breach by listeners). Mainstream bardic moral-witness-refusal threshold extended — no ballad for a supremacist-doctrine preacher; no ballad for an interspecies- cannibal-band captain in mainstream traditions; interspecies-cannibal captains accrue mythography AS SUB-REGISTER within M-14 existing antagonist-mythography register (NOT a new M-entry). Hero-drift firewall: silenced contractor is the dredger who keeps singing at the tavern, NOT the protagonist who exposes the watch.
+  Modified 2026-04-20 by CH-0016 (CF-0044): bardic-absorption directional firewall — circuit-bards traversing drylands corridors absorb drylands short-poetry stranger-hospitality verse-fragments (CF-0044) and transport them into canal-heartland tavern-performance in the bardic-tavern register only; the stranger-exchange PROTOCOL itself (turn-exchange, hospitality- register, host-initiated cadence) does NOT travel. Return-circuit bards cannot elicit the stranger-exchange register from drylands hosts because the register is host-initiated hospitality, not guest-performance. One-way cultural-borrowing pathway preserved; canal-heartland audiences recognize "drylands cadence" in absorbed verse-fragments without access to the source protocol. This is documentation of an existing-but-implicit bardic-absorption constraint on CF-0017's narrative-custody channel (the fifth economically- incentivized narrative-custody channel named at CH-0003 does NOT become a drylands-stranger-exchange custody channel via absorption; verse-fragments join existing bardic-repertoire transmission register, the protocol stays drylands-scoped).
+  Modified 2026-04-20 by CH-0017 (CF-0045): extension — lock-night is a named bardic-performance occasion at canal-corridor lockside taverns, distinct from ordinary tavern-night by audience composition (canal-labor heavy: lockmaster-crew, barge-layover travelers, wharf-traders) and customary silver-differential pay register above a middling tavern-night rate. Performance is keyed to lock-closure hour at the nearest tavern to the lock; informal lockmaster / tavern-keeper coordination on scheduling is routine, no civic-charter licensure or guild-body attaches. Lock-night is a sub-occasion WITHIN CF-0017's bardic-tavern institutional frame (Rule 3 specialness-inflation firewall — NOT a new institution with its own licensure, oversight, guild body, or cohort), and is distinct from CF-0038's Brinewick canal-circuit quarter-year rotation (orthogonal dimensions: rotation = which-taverns-across-a-year; lock-night = which- night-type-within-a-week at a given canal-corridor tavern). Lock-night- specific material accretes as a named sub-genre within CF-0017 bardic repertoire — lockside-labor ballads, canal-route work-songs, barge- traveler goodbyes — and canal-labor oral idiom enters the broader circuit-bard catalog via lock-night audience composition. Regional scope (canal-heartland band plus selected canal-adjacent heartland nodes with working locks); stabilizers anchored to canal-lock infrastructure (CF-0015), CF-0017 parent-institution containment, and Rule 3 sub-occasion framing. Lock-night performer competence is absorbed within existing CF-0017 circuit-bard reputation register; no new M-7 cohort-class or sub-specialty holding clause introduced. M-7 and M-19 firewalls preserved without modification. DA-0001 (Vespera Nightwhisper, "a-season-on-the-circuit") pre-figures the lock-night occasion at diegetic level (claim_map canonically_true at cf_refs [CF-0017, CF-0009]); CF-0045 formalizes the diegetic precedent to world-level canon per Rule 6 audit-trail preservation.
+prerequisites:
+  - tavern infrastructure
+  - performer training (apprenticeship or self-taught)
+required_world_updates:
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - ECONOMY_AND_RESOURCES
+  - GEOGRAPHY
+  - TIMELINE
+scope:
+  geographic: regional
+  social: public
+  temporal: current
+source_basis:
+  derived_from: []
+  direct_user_approval: true
+statement: |
+  Traveling performers (bards, minstrels, story-tellers) work a customary bardic circuit through tavern venues across the heartland and into selected drylands and highland nodes. Tavern income is a known economic stream for these performers; their performance shapes the oral-narrative landscape of the world.
+status: hard_canon
+title: Bardic-circuit performers earn coin in taverns
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - tavern bard nights as ordinary event
+  - bardic cycles transmit Charter-Era myth, recent-incident songs, work-songs
+  - bards compete with scribes for authoritative narrative
+  - contracted bards (per CF-0024) take patron commissions for material/intelligence gathering, hire-notice relay between towns, and narrative-custody production; this creates a fifth, economically-incentivized narrative-custody channel competing with scribes, civic archive, artifact-guild, and theological authority

@@ -1,0 +1,43 @@
+id: SEC-PAS-005
+file_class: PEOPLES_AND_SPECIES
+order: 5
+heading: Cluster D — Mythical-Species Folk ("Rare Bloods")
+heading_level: 2
+body: |-
+  Population-rare per DIS-3, locally clustered, conspicuous. Examples: chimera-folk (composite features), basilisk-folk, manticore-folk, gryphon-folk, naga-folk, kelpie-folk (regional), kitsune-folk (multi-tail variant of fox lineage), wyvern-folk.
+
+  - **Body plan**: distinctive composite or otherwise extraordinary. Basilisk-folk are reptilian with a faint paralyzing-fluster gaze at close range (fluster only — not lethal, not magical, a species-typical autonomic-nervous-system effect on small animals). Naga-folk lower-body serpentine. Gryphon-folk avian-feline composite. Etc.
+  - **Embodiment with minor extra-natural features**: each mythic species has one or two species-typical embodiment traits that read as "uncanny" — e.g., basilisk-folk fluster-gaze; chimera-folk minor heat-emission from one head; gryphon-folk slightly-raised-than-baseline eyesight. **These are species traits, not magic.** They have biological mechanisms (autonomic, glandular, sensory). They obey ONT-2.
+  - **Diet**: species-typical.
+  - **Movement**: species-typical; some are constrained (naga-folk on stairs; gryphon-folk wing-vanes are short-glide, not full flight, like raptor-folk).
+  - **Senses**: species-typical, sometimes pronounced.
+  - **Vulnerability**: small population pools mean genetic concentration; visibility means social vulnerability (curiosity, prejudice, recruitment).
+  - **Reproduction**: species-typical, breeds true within species. **(Mystery Reserve M-3 entertains the unresolved question of why mythic-species sentients are sometimes born to non-mythic lineages; world-level stays uncommitted.)**
+  - **Lifespan**: variable; some species long-lived (naga-folk often 100+; basilisk-folk 70–90; gryphon-folk 50–70).
+  - **Social density**: very rare per region; conspicuous; legally scrutinized in some polities.
+  - **Embodiment effects on**:
+    - **labor** — niche specialties (basilisk-folk physicians often used for animal-handling; naga-folk often barge-masters in waterway corridors);
+    - **clothing** — fully bespoke, often expensive, sometimes exoticized;
+    - **architecture** — accommodation rare and ad-hoc;
+    - **warfare** — niche battlefield presence; sometimes used as morale weapons;
+    - **taboo** — strong social censure against treating mythic-species folk as objects of curiosity in their own communities; weaker censure in cosmopolitan settings;
+    - **religion** — some sectarians treat them as omens (good or bad); civic charters generally suppress this;
+    - **law** — scrutinized; conspicuous travelers find anonymity hard, per the brief.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0032
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0046
+  - CF-0047

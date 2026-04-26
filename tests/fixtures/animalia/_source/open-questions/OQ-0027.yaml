@@ -1,0 +1,8 @@
+id: OQ-0027
+topic: Expedition-Widow Pension Framework
+body: |-
+  - CF-0028 commits widow-of-the-expedition as a recognized household category; CF-0024 widow-of-the-job covers ordinary contractor deaths but does NOT cover full-expedition squad-wipes where dozens die on a single patron-funded venture. Funder liability for squad-wipe is a distinct legal category with no charter framework. Some patrons negotiate one-off settlements; some syndicates include mutual-aid clauses; most widows are left to contract-custom enforcement via SOC-3 coin-contract sacredness, which is slow and inconsistent. A formal framework — chartered expedition-widow pension, funder-liability insurance pool, syndicate-mandated reserve — is under discussion in some reform-current magistrate circles but is not committed at world level.
+
+when_to_resolve: when a story features a specific expedition-widow dispute, a syndicate-reserve establishment, or a reform-magistrate push for charter protection.
+caution: interacts with CF-0024 widow-of-the-job (parallel but distinct), CF-0026 principled-refusers (reform-current clergy campaign for better arrangements), and ECONOMY_AND_RESOURCES.md Inequality Patterns (expedition-widow precarity is a recognized stratum).
+extensions: []

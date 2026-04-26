@@ -1,0 +1,64 @@
+id: SEC-INS-008
+file_class: INSTITUTIONS
+order: 8
+heading: Burial / Death Management
+heading_level: 2
+body: |-
+  - **Function**: dispose of dead per custom and law; comfort survivors; settle estate handover with the civic registry.
+  - **Legitimacy source**: religious tradition (common pantheon and progenitor cult both have burial rites); civic confirmation for property transfer.
+  - **Material base**: cemeteries (multispecies in most cities, sectioned by tradition), charnel houses, pyre fields, river-burial wharves, sky-burial platforms (raptor-folk regions), cairn fields (highlands), dry-tomb complexes (drylands).
+  - **Violence capacity**: zero.
+  - **Recruitment**: hereditary in some traditions, sworn officiant in others, ordained in monastic burial orders.
+  - **Succession**: lineage and ordination.
+  - **Internal contradictions**:
+    - multispecies cemeteries must coordinate species-typical preferences (sky-burial for some bird-folk, river-release for some otter-folk, earth-burial for humans, fire for some hyena-folk traditions, dry-tomb for drylands traditions);
+    - sectarian progenitor cults sometimes refuse common-pantheon burial rites;
+    - charnel-house and pyre-field neighbors periodically petition relocation, especially during plague years.
+    - <!-- added by CF-0036 --> mixed-cemetery sectional tensions (CF-0036): contested burial-plot cases emerge where a noble dowager's family demands species-separation from adjacent laborer sections (ermine-folk dowager contesting plot-proximity to beaver-folk canal-labor section; cat-folk estate-family demanding separation from rat-folk artisan quarter sections); civic cemetery-master adjudicates under existing multispecies-coordination framework, generally refusing species-separation requests as charter-adjacent hierarchy-speech; dowager-gossip circuit tracks refusals as charter-sound-vs-charter-adjacent reputation signals; cemetery-master "sectioning-pressure" emerges as minor bribe-exposure pattern paralleling other sectioning decisions. Victim-remains from sealed-cannibal-case prosecutions receive SEALED-DOCKET burial with magistrate-warrant-gated record; burial-officiants operate under civic-oath to preserve silence-protocol; public ceremony absent, family-only rites permitted; cemetery-master notes euphemistic classification ("grave-violation-of-person victim") on the plot-ledger. Restoration-rite for survivors of cannibal-camp liberation parallels CF-0034 liberated-slave restoration-rite register: common-pantheon hearth-god and judgment-god pairings, reform-current clergy pastoral specialty, regional ritual variation; specific restoration-rite canonical form deferred per polity (OPEN_QUESTIONS LB-3).
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0009
+  - CF-0010
+  - CF-0011
+  - CF-0013
+  - CF-0015
+  - CF-0016
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

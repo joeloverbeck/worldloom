@@ -1,0 +1,11 @@
+id: OQ-0014
+topic: Specific Disease Etiologies
+body: "- Winter fever and marsh ague are committed as recurring lethal disease. Specific causative agents, transmission mechanisms (no germ theory in-world), and species-typed susceptibilities are sketched empirically but not specified at the etiological level."
+when_to_resolve: when a plague-year story needs concrete mechanics.
+caution: ""
+extensions:
+  - originating_cf: CF-0031
+    change_id: CH-0005
+    date: 2026-04-18
+    label: Caution under ledger-mark pressure
+    body: Contamination-injury is now a civic-registry category via CF-0031 in adopting polities. Etiology resolution MUST NOT bleed into or from registry convention. The three-generation administrative interval is NOT a medical-etiological commitment (see Mystery Reserve M-11 — Empirical Basis of the Three-Generation Contamination-Lineage Marker). Future canon work on contamination disease etiology that touches registry prose must explicitly firewall the folk-medical-reified reading from any world-level medical claim; conversely, medical-etiological advances in herb-wife or barber-surgeon practice must not collapse into civic-registry validation.

@@ -1,0 +1,39 @@
+id: SEC-GEO-006
+file_class: GEOGRAPHY
+order: 6
+heading: Predator Zones
+heading_level: 2
+body: |-
+  - **Highland feral megafauna corridors**: non-sentient large beasts (bear, aurochs-relatives, wolves) range freely in the high country; herder-folk maintain ward-of-the-flock vigilance.
+  - **Deep fen**: large amphibian and reptilian fauna, some dangerous to a careless boatman.
+  - **Bandit corridors**: under-policed sections of caravan road, particularly in the drylands and on certain bog causeways. <!-- added by CF-0046 --> Drylands bandit-corridor response is runner-reached village militia (CF-0046 informal emergency-response convention) coordinated with caravan-master waiting-wolves vigilance (CF-0034 existing) — village runner dispatched on sighting to the nearest neighbor-village or gate-stop; militia is emergency-only and informal (not chartered, not CF-0020 standing-militia subtype, not CF-0033 dragoon-precursor); response capacity is proportional to village population, wildland-road exposure, and drought-year traffic compression; corridor stretches with sparse village siting retain the gap-stretch typology paralleling heartland overland connector-route bandit corridors (CF-0037 existing). <!-- added by CF-0034 --> Formalized per CF-0034 as the geographic signature of endemic banditry — the seams Charter-Era civic jurisdiction does not reach, stabilized across layers. Regional typology: drylands *"waiting-wolves"* ambush at water-stops; bog causeway chokepoints in the fen margins; mountain cold-pass holds open in summer pass-season; heartland wildland-road stretches between canal towns where canal traffic does not run; highland cold-pass approaches where winter hospitality laws thin. <!-- added by CF-0037 --> Heartland wildland-road bandit corridors are typologically GAP-STRETCHES BETWEEN WAYSTATIONS rather than uniform unbroken hazard — family-handled waystations (CF-0037) along the overland connector-route web sit at intervals; the bandit corridor lives in the gap between two stops where neither stop's road-knowledge or vouch-network reaches. The same gap-stretch typology applies to highland cold-pass approaches and mountain-east valley-pass approaches where waystations cluster at approach-towns and lower-pass rest-spurs. Where a stationkeeper-family or inheritor self-exiles into banditry and the station turns to corridor-betrayal (provisioning a raid-band, signaling traveler arrival for kickback), the gap-typology fails locally and the corridor swallows the stop itself — a sub-exposure tracked under ECONOMY §Breakage Points. Some corridors carry named bandit-captain bardic memory whose historicity is contested per Mystery Reserve M-14. Bandit occupation of Maker-Age ruin sites (per CF-0027 enterable-ruin subtype) is shelter-scope and preferentially occurs in previously-accessed, non-guardian-active, non-catastrophic-class subset — CF-0029 guardian-wipe enforcement and CF-0027 anti-accumulation clause keep catastrophic-class ruin occupation a selection-biased non-outcome. Bandit-survivor folklore about "safe" versus "unsafe" ruins is selection-bias folklore, NOT a guardian-predictor (Mystery Reserve M-10 firewall). <!-- added by CF-0036 --> Cannibal-edge sub-subset (CF-0036) of CF-0034 raid-and-enslave subset: rare, corridor-bounded (same geographic signature as raid-and-enslave — drylands, bog causeway, mountain chokepoint, highland cold-pass, heartland wildland-road), internally and adjacent-bandit-outrage suppressed, triple bounty-premium in settlement/merchant/estate/guild coalition-hire, universal cleansing-rite refusal for returnees. Hunter-survivor / bandit-survivor corridor-folklore about "safe" versus "cannibal-camp" corridors is SELECTION-BIAS FOLKLORE, NOT a world-level cannibal-band-presence empirical predictor — THIRD M-10 cross-application (after CF-0034 ruin-folklore and CF-0035 zone-folklore); the M-10 firewall now holds across three domains. NOT a new corridor typology — same geography as CF-0034.
+  - **Corrupted-artifact zones**: rare but feared. Local fauna may behave abnormally near uncontained or recently contained sites; sealed quarter-towns sometimes become functional predator zones for displaced or affected animals. <!-- added by CF-0035 --> Wilderness-distal variant: uncontained Maker-Age artifacts unearthed by earthquake, flood, burrowing animal, or slow soil-creep in locations beyond civic / guild / chartered-watch reach produce, over centuries, rare surviving artifact-mutated non-sentient beasts (CF-0035) exhibiting morphological and capability alteration — increased size, supernumerary limbs, chimeric-seeming morphology, altered predation. Most beasts die of exposure; rare survivors persist in local wildland niches. Location knowledge is hunter-corridor reputation informal rather than cartographer-recorded; ward-inspector dispatch to suspected upstream zones is DISCRETIONARY (gated by patron-funder or estate-commission or declared civic-watch predicate), not mandatory. Hazard is MOBILE: the mutated beast's range extends the effective contamination-exclusion radius of its origin zone outward from the static substructure. Scale firewall per M-2 — ALL effects LOCAL (squad-wipe maximum at worst); NO cascade, NO mass-mind-control, NO urban-scale, NO civilization-killing capability. Non-sentience preserved without exception (ONT-1 / M-5 firewall, fourth cross-application).
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0020
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

@@ -1,0 +1,84 @@
+id: SEC-TML-001
+file_class: TIMELINE
+order: 1
+heading: "Layer 1 — Deep Past: The Maker Age"
+heading_level: 2
+body: |-
+  A civilization of unknown identity flourished here in centuries-to-millennia past, then ended. Its scale, geographic extent, and political form are unrecovered. Modern peoples encounter it only through what it left behind.
+
+  **Material residue**:
+  - Stone substructures beneath modern foundations, occasionally exposed by canal cuts and quarry collapses. <!-- added by CF-0027 --> A subset of these substructures survive as enterable ruin sites (CF-0027) with interior volumes, chambers, and recoverable contents; most Maker-Age material is still encountered piecemeal (DIS-1), but enterable ruins are a distinct, less-common subtype that admits organized multi-professional entry via CF-0028 expeditions.
+  - Fragmentary inscriptions in unknown scripts, never fully translated. <!-- added by CF-0023 --> Partial translations exist, are restricted, and have leaked from chartered custody (CF-0023); no complete translation of any major text exists.
+  - The artifacts themselves — ceramic, wood, metal — most inert, some dangerous, a tiny fraction catastrophic. <!-- added by CF-0021 --> The Maker Age remains the dominant artifact source; a marginal modern crafter stream (CF-0021) produces inferior, distinguishable, never-catastrophic-class new work.
+  - Buried lattices in some regions that disturb compass-needle behavior of certain craftsmen's instruments.
+  - <!-- added by CF-0029 --> Magically-animated guardian constructions (CF-0029) are present in a rare subset of enterable ruin sites; their activation has caused squad-wipe catastrophes on CF-0028 expeditions. Officially-resealed ruin records in civic archives mark such sites; enforcement of seals is variable. Guardian constructions are world-level non-sentient (ONT-1 preserved per CH-0004); their mechanism is tracked under Mystery Reserve M-8, their presence-heterogeneity under M-10.
+  - <!-- added by CF-0035 --> Artifact contamination of non-sentient fauna in wilderness-distal sites (CF-0035) is a centuries-accumulated Maker residue parallel to buried lattices and guardian constructions. Most contaminated beasts died; a rare survivor population persists in isolated wildland zones exhibiting morphological and capability alteration; the scale-tail of the distribution is rumor-only gargantuan-underground forms deep in caves and Maker-substructure-adjacent strata (Mystery Reserve M-15). The mechanism is DISTINCT in origin from CF-0029 guardian constructions (incidental biological effect on untargeted fauna, NOT intentional craft with activation logic) — bounded-unknown tracked under M-15; scale firewall per M-2 (LOCAL only; squad-wipe maximum; NO cascade / mass / urban / civilization-killing). Non-sentience preserved without exception (ONT-1 fourth clarification, M-5 firewall).
+  - <!-- added by CF-0041 --> Deliberately-buried / flooded / entombed Maker-Age buildings (CF-0041) survive as a distinct substructure sub-category under the general Layer-1 material-residue register. Entire structures containing hazardous artifacts were deliberately sealed by the Makers themselves, using complex engineering and coordinated labor — burial by deep earth-fill, flooding via engineered hydrology, or entombment behind reinforced masonry. Modern foundation-digs, canal cuts, estate-cellar excavations, and qanat-cleaning rites occasionally strike the top of such a buried building and stop work on the spot. The sealing-technique itself is LOST (not present in the leaked grimoire corpus per CF-0023; not reproducible by modern crafter attempts per CF-0021). Sealed-artifact containers within these buildings are observed to remain mechanically INERT until the container is opened or the seal is breached; the "unsealing" idiom ("the hair goes up when the seal breaks") circulates across all regions as a dread-register cultural convention. Maker-Age deliberate-burial is committed as hazard-awareness and response-practice ONLY; it does NOT resolve what the Makers feared, whether burial preceded, accompanied, or postdated the fall, or the nature of the Maker fall itself (M-1 firewall preserved per CH-0014 extension). Maker-buried-building archaeology is categorically NOT a seventh Maker-knowledge custody channel (M-9 firewall per CH-0014 extension); archaeology yields structural / engineering / artifact-disposition data, not Maker-cognitive content.
+  - <!-- added by CF-0039 --> Maker-Age artifact destruction-resistance (CF-0039) is a Layer-1 material-residue property of the artifact-as-locus itself: attempts to unmake Maker-Age artifacts BIND the effect more deeply into the vessel, elevating material resistance (wood hardens to behave like strong metal; ceramic sets harder; metal refuses the hammer). Many Maker-Age artifacts are consequently indestructible by any current-age technique. The destruction-resistance mechanism is unknown (Mystery Reserve M-20, new). Modern crafter outputs (CF-0021) do NOT inherit destruction-resistance and remain destructible by ordinary means, preserving the CF-0021 "inferior" stabilizer register.
+
+  **Institutional residue**:
+  - The artifact-extraction guilds exist *because* the Maker Age leaks into the present. Their charter-language often refers obliquely to "the elder labor" without claiming to know what was made.
+  - Containment-wright apprenticeship lineages trace pedigree back to founding extractors who, by tradition, learned by trial and casualty.
+
+  **Symbolic residue**:
+  - Cosmologies position the Makers variably: some cults treat them as ancestors, some as cautionary demons, some as failed gods. **No world-level truth is committed.** The contestation is itself a Charter-Era diplomatic compromise (see Layer 2).
+  - Folk sayings: *"a Maker's gift is a buried debt."* *"Dig deep, dig once."* *"The dirt remembers what the bones forgot."*
+
+  **Who tells the story**: priests, bards, scholars, extraction-guild masters, and frightened parents — each with their own version. (Mystery Reserve entries M-1, M-2, M-5 govern what may and may not be resolved later.)
+
+  <!-- added by CF-0037 --> **Pre-Charter folk-tradition residue (Layer-1 annotation)**: The family-handled waystation tradition (CF-0037) along overland connector roads in heartland, highland, and mountain east predates Charter-Era institutional consolidation as informal kin-handed roadside hospitality. Pre-Charter origin is deliberately under-resolved (parallel-but-distinct from M-12 oversize-saddlery antiquity contestation — waystation antiquity lacks progenitor-cult sectarian entanglement and belongs in OPEN_QUESTIONS as ordinary author-side deferral, NOT in Mystery Reserve). The institution carries no Maker-Age cosmological residue; it is ordinary commerce-and-kinship infrastructure that Charter-Era civic frame later organized.
+
+  <!-- added by CF-0038 --> **Pre-Charter ancestral-engineering residue (Layer-1 annotation, CH-0013)**: The canal networks feeding Brinewick (CF-0038) and, more generally, the trunk-canal geometry of the Temperate Canal Heartland band's commercial spine pre-date Charter-Era written civic records. Civic-mainstream attribution: pre-Charter ancestral human-and-animal-folk engineering consortia whose administrative documents and charter-fragments did not survive the Charter-Era institutional convergence (the Charter Era's own chronicle-consolidation discarded or lost the older civic material it was replacing). Maker-mystic sectarian speculation that the deepest canal-beds rest on Maker-Age substructure is local-rumor-only in-world contested register per Mystery Reserve M-19 — never world-truth, firewalled against Maker-Age-resolution drift (M-1 extension CH-0013). Brinewick's pre-Charter engineering residue is NOT a Mystery Reserve foothold for Maker-Age surface-infrastructure resolution; §Specific Maker-Age Details (OPEN_QUESTIONS) deferral is preserved with narrowed scope. Underground tunnel networks under Brinewick outskirts estates (CF-0038) carry parallel uncertainty — civic-mainstream reading: pre-Charter smuggling infrastructure constructed by ancestral merchant-consortia; landowner "suspect smuggling-origin" language is in-world contested register, preserved per M-19.
+
+  <!-- added by CF-0044 --> **Pre-Charter folk-tradition residue (Layer-1 annotation, CH-0016)**: The drylands short-poetry stranger-hospitality convention (CF-0044) along drylands caravan corridors and at fixed-site caravanserai, wayhouse, and well-side stranger encounters plausibly predates Charter-Era institutional consolidation as informal oral-hospitality register — parallel-but-distinct from M-12 oversize-saddlery antiquity contestation (the verse-convention antiquity lacks progenitor-cult sectarian entanglement and belongs in OPEN_QUESTIONS §Drylands Short-Poetry Convention Antiquity and Scope as ordinary author-side deferral, NOT in Mystery Reserve). The institution carries no Maker-Age cosmological residue; it is ordinary oral-cultural-hospitality infrastructure that Charter-Era civic frame later neither chartered nor displaced. Parallel to the CF-0037 waystation-antiquity pattern in heartland connector-route context, with drylands caravan-corridor geographic substrate rather than heartland overland-connector substrate.
+
+  <!-- added by CF-0046 --> **Pre-Charter folk-tradition residue (Layer-1 annotation, CH-0018)**: The drylands caravan-corridor institutional-cultural complex (CF-0046) and the drylands well-keeper customary-authority role (CF-0047) — corridor-as-node-network of wells, gate-stops, villages, and caravanserai; caravan-master corridor-internal customary-adjudication of minor disputes; runner-reached village militia emergency-response; reciprocity-primary regional economy with coin-at-edges; oral-primary DIS-2-partial-literacy with household-held trade-tongue station-log; lineage-inheritable well-stop property/office with apprenticeship chore-from-young; drought-cycle life-rhythm — plausibly trace to pre-Charter folk-tradition residue paralleling the CF-0037 waystation-antiquity and CF-0044 verse-convention-antiquity patterns. The institutional complex carries no Maker-Age cosmological residue; drylands qanat, well, and corridor-infrastructure antiquity is categorically distinct from Brinewick canal-network and underground-tunnel bounded-unknown (M-19) — per CH-0018 MYSTERY_RESERVE M-19 scoped-distinct firewall, drylands corridor-infrastructure antiquity is ordinary author-side deferral (OPEN_QUESTIONS §Drylands Caravan-Corridor Infrastructure Antiquity), NOT a parallel M-19-like bounded-unknown. Water-scarcity geography predates Charter-Era by geological scale; the institutional patterns that settled over that geographic substrate plausibly evolved through pre-Charter folk-tradition into the Charter-Era-era consolidation form. Parallel to the CF-0037 heartland-connector-route and CF-0044 drylands-verse-convention Layer-1 patterns, with drylands corridor-institutional-complex as the composite surface. DIS-2 trade-tongue corridor-application is mundane commercial convergence (per CH-0018 INVARIANTS DIS-2 clarification and OPEN_QUESTIONS §Maker-Age Linguistic Recovery DIS-2-convergence discharge), NOT Maker-Age linguistic survival evidence.
+
+  ---
+
+  ---
+extensions:
+  - originating_cf: CF-0038
+    change_id: CH-0013
+    date: 2026-04-19
+    label: Pre-Charter ancestral-engineering residue (Layer-1 annotation,
+    body: "The canal networks feeding Brinewick (CF-0038) and, more generally, the trunk-canal geometry of the Temperate Canal Heartland band's commercial spine pre-date Charter-Era written civic records. Civic-mainstream attribution: pre-Charter ancestral human-and-animal-folk engineering consortia whose administrative documents and charter-fragments did not survive the Charter-Era institutional convergence (the Charter Era's own chronicle-consolidation discarded or lost the older civic material it was replacing). Maker-mystic sectarian speculation that the deepest canal-beds rest on Maker-Age substructure is local-rumor-only in-world contested register per Mystery Reserve M-19 — never world-truth, firewalled against Maker-Age-resolution drift (M-1 extension CH-0013). Brinewick's pre-Charter engineering residue is NOT a Mystery Reserve foothold for Maker-Age surface-infrastructure resolution; §Specific Maker-Age Details (OPEN_QUESTIONS) deferral is preserved with narrowed scope. Underground tunnel networks under Brinewick outskirts estates (CF-0038) carry parallel uncertainty — civic-mainstream reading: pre-Charter smuggling infrastructure constructed by ancestral merchant-consortia; landowner \"suspect smuggling-origin\" language is in-world contested register, preserved per M-19."
+  - originating_cf: CF-0044
+    change_id: CH-0016
+    date: 2026-04-20
+    label: Pre-Charter folk-tradition residue (Layer-1 annotation,
+    body: The drylands short-poetry stranger-hospitality convention (CF-0044) along drylands caravan corridors and at fixed-site caravanserai, wayhouse, and well-side stranger encounters plausibly predates Charter-Era institutional consolidation as informal oral-hospitality register — parallel-but-distinct from M-12 oversize-saddlery antiquity contestation (the verse-convention antiquity lacks progenitor-cult sectarian entanglement and belongs in OPEN_QUESTIONS §Drylands Short-Poetry Convention Antiquity and Scope as ordinary author-side deferral, NOT in Mystery Reserve). The institution carries no Maker-Age cosmological residue; it is ordinary oral-cultural-hospitality infrastructure that Charter-Era civic frame later neither chartered nor displaced. Parallel to the CF-0037 waystation-antiquity pattern in heartland connector-route context, with drylands caravan-corridor geographic substrate rather than heartland overland-connector substrate.
+  - originating_cf: CF-0046
+    change_id: CH-0018
+    date: 2026-04-20
+    label: Pre-Charter folk-tradition residue (Layer-1 annotation,
+    body: The drylands caravan-corridor institutional-cultural complex (CF-0046) and the drylands well-keeper customary-authority role (CF-0047) — corridor-as-node-network of wells, gate-stops, villages, and caravanserai; caravan-master corridor-internal customary-adjudication of minor disputes; runner-reached village militia emergency-response; reciprocity-primary regional economy with coin-at-edges; oral-primary DIS-2-partial-literacy with household-held trade-tongue station-log; lineage-inheritable well-stop property/office with apprenticeship chore-from-young; drought-cycle life-rhythm — plausibly trace to pre-Charter folk-tradition residue paralleling the CF-0037 waystation-antiquity and CF-0044 verse-convention-antiquity patterns. The institutional complex carries no Maker-Age cosmological residue; drylands qanat, well, and corridor-infrastructure antiquity is categorically distinct from Brinewick canal-network and underground-tunnel bounded-unknown (M-19) — per CH-0018 MYSTERY_RESERVE M-19 scoped-distinct firewall, drylands corridor-infrastructure antiquity is ordinary author-side deferral (OPEN_QUESTIONS §Drylands Caravan-Corridor Infrastructure Antiquity), NOT a parallel M-19-like bounded-unknown. Water-scarcity geography predates Charter-Era by geological scale; the institutional patterns that settled over that geographic substrate plausibly evolved through pre-Charter folk-tradition into the Charter-Era-era consolidation form. Parallel to the CF-0037 heartland-connector-route and CF-0044 drylands-verse-convention Layer-1 patterns, with drylands corridor-institutional-complex as the composite surface. DIS-2 trade-tongue corridor-application is mundane commercial convergence (per CH-0018 INVARIANTS DIS-2 clarification and OPEN_QUESTIONS §Maker-Age Linguistic Recovery DIS-2-convergence discharge), NOT Maker-Age linguistic survival evidence.
+touched_by_cf:
+  - CF-0004
+  - CF-0008
+  - CF-0011
+  - CF-0014
+  - CF-0016
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

@@ -1,0 +1,54 @@
+id: CF-0010
+title: Sentient animal-folk include modern, extinct, and mythical species
+status: hard_canon
+type: species
+statement: |
+  Animalia's sentient animal-folk are not limited to modern animal types but include extinct species (aurochs-folk, mammoth-folk, sabertooth-folk, etc.) and mythical species (chimera-folk, basilisk-folk, naga-folk, etc.). All are species in the same biological sense as humans and obey the same rules of embodiment, reproduction, and lifespan.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - kinship
+  - settlement_life
+  - religion
+  - architecture
+  - law
+  - status_signaling
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - extinct-species folk cluster in ancestral home regions; rarer than modern
+    - mythical-species folk are population-rare per region (CF-0012)
+costs_and_limits:
+  - large-bodied species (mammoth-folk) require architectural accommodation
+  - small populations of extinct and mythical species concentrate genetic vulnerabilities
+  - mythic-species traits read as "uncanny" but are biological, not magical (ONT-2)
+visible_consequences:
+  - bespoke tailoring and architecture in regions with extinct-species clusters
+  - mythical species draw public commentary as "exotic" travelers
+  - progenitor cults exist for many species, including extinct and mythical
+required_world_updates:
+  - PEOPLES_AND_SPECIES
+  - GEOGRAPHY
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0001
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Direct from brief. Mythical-species traits are committed as biological per ONT-2; mystery reserve M-3 and M-5 govern unresolved related questions. Modified 2026-04-18 by CH-0006 (CF-0032): Cluster C architectural accommodation for large-body-plan species (mammoth-folk, ground-sloth-folk, etc.) is now partially institutionalized in ancestral polities via the oversize-saddlery guild-subsection (CF-0032); species distinctness now includes a trans-regional professional vector (reciprocal cross-polity journeyman circuit) beyond the in-region rootedness already committed here. CF-0010 scope unchanged; the modification extends the institutional surface, not the ontological claim.
+modification_history:
+  - change_id: CH-0006
+    originating_cf: CF-0032
+    date: 2026-04-18
+    summary: "qualification: Cluster C architectural accommodation partially institutionalized via oversize-saddlery guild-subsection; species distinctness now includes trans-regional professional vector"

@@ -1,0 +1,27 @@
+id: CAU-1
+category: causal
+title: Artifact effects always cost
+statement: Every effect drawn from a magical artifact costs the user, the host, the environment, or all three. Costs include fatigue, host trauma, ward attrition, environmental "bleed-through" (dimming light, gloom, animal compulsion), and slow contamination of place.
+rationale: Brief specifies the ceramic containment procedure is brutal to the host and that artifacts can corrupt water and mind-control beasts.
+examples:
+  - extraction leaving the host bedridden; ward attrition near a contained artifact; canal water gone "wrong" downriver of a buried device
+non_examples:
+  - a free, clean magical effect; a costless ward
+break_conditions: forbidden — would invalidate the artifact-as-hazard frame.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Cost-Taxonomy Extension
+    body: The cost taxonomy includes a **rare survival-as-mutation outcome** observed in non-sentient fauna (CF-0035) exposed to uncontained artifacts over time in wilderness-distal sites. Most beasts die of artifact exposure (ordinary CAU-1 lethality); a rare subset survive and exhibit morphological and capability alteration. Survival does NOT exempt the environment, the local ecology, or subsequent secondary hosts from cost; the rare "beneficial for the beast in its niche" outcome (dangerous predator status) is an individual-level windfall embedded in a population-level cost catastrophe (most died). Cost universality holds without exception.
+  - originating_cf: CF-0039
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Cost-Taxonomy Extension — destruction-attempt cost-transfer
+    body: "The cost taxonomy includes **destruction-attempt cost-transfer** as a variant form observed on Maker-Age artifacts (CF-0039). Attempts to destroy a Maker-Age artifact — by smithing, fire, crushing, dissolution, or other means available to current-age capability — do NOT annihilate the magical effect; the attempt instead BINDS the effect more deeply into the vessel, elevating the material resistance of the substrate (wood hardens to behave like strong metal; ceramic sets harder; metal refuses the hammer). The cost manifests partially as a material-elevation cost on the vessel (transformation into higher-order resistance) and partially as an attempt-cost on the attempting party (injury, exhaustion, equipment loss, ward-attrition radius). The cost-universality principle holds without exception — destruction-attempts do not escape cost; they redirect it. Cost universality holds without exception. Also see CF-0041 sealed-inert extension: opening a sealed Maker container ACTIVATES the artifact within with CAU-1 cost, making unknown-container unsealing a feared cultural moment."
+  - originating_cf: CF-0040
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Cost-Taxonomy Reaffirmation — mundane-tier per-artifact contamination
+    body: CF-0040 commits that mundane-tier Maker-Age artifacts (breeze-dolls, tick-mirrors, weak coin-sorters, scar-rubbers) are commonly found in ordinary-life contexts; the CAU-1 principle still holds without exception for this tier. Every mundane-tier artifact carries a cost surface — slow-bleed on user, room-misfeel, animal unease, household water off-flavor, vessel fatigue across months of proximity. No "harmless charm" reading is world-truth; the low-tier artifact is low-tier COST not no-cost. AES-3 contamination-clause compliance is mandatory for every mundane-tier CF-record annotation.

@@ -1,0 +1,11 @@
+id: OQ-0015
+topic: Species Population Ratios
+body: "- Genesis commits that humans are common everywhere and Cluster A modern-mammalian animal-folk are the largest animal-folk population, with Cluster B (avian/reptile/amphibian) regionally clustered, Cluster C (extinct) ancestrally clustered and rarer, Cluster D (mythical) population-rare per region. Specific ratios per region are deferred."
+when_to_resolve: when demographic plausibility tests are run for a specific region.
+caution: ""
+extensions:
+  - originating_cf: CF-0032
+    change_id: CH-0006
+    date: 2026-04-18
+    label: Ancestral-region floor narrowing
+    body: 'CF-0032 commits the oversize-saddlery guild-subsection as a functioning institutional form in ancestral Cluster C polities, with sustained ancestral community presence as a stabilizer. Subsection viability implies Cluster C large-body-plan species (mammoth-folk, ground-sloth-folk, woolly-rhinoceros-folk) maintain non-trivial population density in ancestral regions — enough to sustain a master-craft commission stream and reciprocal journeyman apprenticeship pipeline. The "population-rare" upper bound for these subspecies in ancestral regions is narrowed: they are NOT so rare that a multi-generation guild-subsection cannot sustain itself. Specific ratios remain deferred.'

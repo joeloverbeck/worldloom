@@ -1,0 +1,39 @@
+id: SEC-GEO-001
+file_class: GEOGRAPHY
+order: 1
+heading: Continental Shape
+heading_level: 2
+body: |-
+  A temperate-to-cold continent oriented roughly north-south, with:
+  - a long coastline broken by river-mouth ports;
+  - a major interior river system feeding a network of natural and constructed canals;
+  - a mountain range to the east that arrests warm winds and shapes the rain shadow;
+  - a fenland-and-bog complex along parts of the western lowlands;
+  - a warm-dry south transitioning toward semi-arid drylands at its margins.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

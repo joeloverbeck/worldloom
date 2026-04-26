@@ -1,0 +1,93 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - authentication-cartel formation pressure increases (eighth pressure vector on existing seven illegitimate-service product-lines — status-display-provenance verification), ABSORBED into cartel formation rather than new product-line per Rule 3 firewall (ECONOMY §Breakage Points CH-0014 extension)
+  - bodyguard commission is an ELEVENTH concurrent claim on CF-0024 veteran pool cannibalization (extraction-escort sub-specialty, NOT new sixth CF-0024 subtype per Rule 3 firewall)
+  - stolen-status-artifact fencing is ABSORBED into CF-0034 bandit-stolen-goods rail as higher-margin authenticated-provenance niche (NOT new eighth illegitimate-service rail product-line per Rule 3 firewall)
+  - sealed-quarter permanence from destruction-resistance (CF-0039) compounds the civic ward-reserve budget line into monotonic-accretion liability across Brinewick (CF-0038) and other canal-heartland commerce hubs, affecting status-display insurance/retainer pricing
+  - state-security concealment rumor has information-good value (bardic material, speculation-market, dissident publishing, blackmail-kit) — economically generative but must stay DIFFUSE (no named-incident; preserves M-2 firewall per CH-0014 extension)
+  - civic-magistrate sealed-catastrophic-rumor docket (INSTITUTIONS §Recordkeeping CH-0014 tenth archival category) prosecutes publication-breach of specific-named-incident content, NOT the underlying (non-confirmed at world-level) incident
+distribution:
+  who_can_do_it:
+    - nobility, clan-leaders, chartered guild-masters, wealthy merchants, ancestral-estate dowagers (display of declared safe-class artifacts)
+    - organized theft-rings and opportunistic burglars (theft)
+    - assassination contractors and contract-retaliators targeting notable artifact-handlers (brokers, guild-stampers, extraction-contractors)
+    - bardic-circuit transmission, tavern rumor-register, civic-dissident broadside network (state-security concealment rumor circulation)
+    - CF-0024 contractor-veterans as bodyguard sub-specialty for famous-owner households (eleventh concurrent veteran-pool claim)
+  who_cannot_easily_do_it:
+    - commoners rarely hold declared-inventory status-display artifacts; mundane-tier finds (CF-0040) are NOT status-display items
+    - polities with weak charter do not maintain effective declared-inventory regimes (highland clans, fen-villages, some drylands caravan-polities) — status-display there operates under convention-register only
+    - mundane-tier artifacts do NOT attract assassination (assassination-risk is value-calibrated to chartered safe-class)
+  why_not_universal:
+    - declared-inventory regime is polity-asymmetric; fifth parallel sixth-axis latent-burden watch-item for Charter-Era stress register (adopt-stringency-of-display-registration axis) per CH-0014
+    - state-security concealment rumor is diffuse-register; never specific-incident-confirmed at world-level
+    - assassination-risk is calibrated to item value; bodyguard-retinue scale reflects the calibration
+domains_affected:
+  - economy
+  - status_signaling
+  - law
+  - labor
+  - social_norms
+  - memory_and_myth
+id: CF-0042
+modification_history:
+  - change_id: CH-0015
+    date: 2026-04-20
+    originating_cf: CF-0043
+    summary: "extension: Ash-Seal civic-backchannel-purchase channel as FOURTH concurrent purchase channel (alongside chartered-broker, black-market, civic-seizure) for safe-class / moderate-tier declared-inventory artifacts; catastrophic-tier NEVER flows through backchannel (M-2 firewall preserved; commercial-corruption distinct from state-security-concealment register); Ash-Seal senior technicians and officers FOURTH concurrent CF-0042 assassination-exposure category; Ash-Seal-backchannel-cascade named compound-Breakage vector; CF-0042 status-display / theft-economy / assassination-risk categorically unchanged"
+notes: |
+  Proposed as part of CH-0014 four-CF bundle. Three absorptions per Phase 6b convergent findings (Rule 3 firewalls): (1) Status-artifact fencing ABSORBED into CF-0034 stolen-goods (higher-
+      margin authenticated-provenance niche; NOT new 8th product-line)
+  (2) Bodyguard commission ABSORBED into CF-0024 extraction-escort (NOT new
+      6th subtype; counts as 11th veteran-pool cannibalization claim)
+  (3) Display-registration asymmetry tracked as FIFTH parallel sixth-axis
+      latent-burden watch-item (NOT new 6th Charter-Era structural axis;
+      Charter-Era settlement STRAINS not BREAKS)
+  M-2 anti-evidence firewall on state-security concealment rumor: rumor remains DIFFUSE, never named-incident-confirmed; no named catastrophic incident is confirmed to have occurred-and-been-covered-up; no state- security archive is confirmed to hold a named catastrophic-class attribution. AES-1 laborer-register preservation: assassination-on-famous- owner framings reframed per Theme/Tone critic recommendation (the artifact is the protagonist of the anecdote; the owner is scenery). Adjudication record: adjudications/PA-0013-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): extension — Ash-Seal (CF-0043) Brinewick-local civic-backchannel-purchase channel is a FOURTH concurrent purchase channel (alongside chartered-broker purchase channel, black-market, civic-seizure) for safe-class and moderate-tier declared-inventory artifacts; wealthy Brinewick parties (estate-dowagers, civic-council members acting in private capacity) buy discreetly from Ash-Seal in contravention of official hold-for-study / disposal mandate. Catastrophic-tier NEVER flows through Ash-Seal backchannel — Ash-Seal concordat routes catastrophic-tier to civic sealed-quarter per CF-0038 ward-reserve allocation; M-2 state-security-concealment specific-named-incident firewall preserved (commercial-corruption at moderate-tier is categorically distinct from M-2 diffuse-rumor state-security-concealment register). Ash-Seal senior technicians and company officers carry FOURTH concurrent CF-0042 assassination-exposure category alongside broker, guild-stamper, and extraction-contractor — artifact-handling figure with public visibility in the Brinewick chartered-broker-bench environment. Ash-Seal civic-backchannel-cascade is a named compound-Breakage vector per ECONOMY §Breakage Points CH-0015 extension (exposed leak can trigger charter-audit crisis + civic-advisory restructuring + authentication-cartel rupture simultaneously, couple-able with Brinewick (c) estate-scandal cascade). CF-0042 status-display regime, theft-economy, and assassination-risk register are CATEGORICALLY UNCHANGED; the Ash-Seal backchannel is a newly-named specific channel within the existing theft-economy structural pattern.
+prerequisites:
+  - existing class hierarchy (CF-0001)
+  - chartered extraction-guild licensing and declared-inventory regimes (CF-0008, SOC-4)
+  - existing criminal law for theft and homicide
+  - existing CF-0024 extraction-escort bodyguard-labor infrastructure
+  - CF-0034 stolen-goods fencing rail (absorption target for status-artifact fencing)
+required_world_updates:
+  - WORLD_KERNEL
+  - ONTOLOGY
+  - TIMELINE
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+  - MAGIC_OR_TECH_SYSTEMS
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0001
+    - CF-0008
+    - CF-0024
+    - CF-0034
+  direct_user_approval: true
+statement: |
+  Owning chartered / declared-inventory artifacts is a sign of elite status across Animalia polities; safe-class artifacts are displayed in noble-clan houses, estate halls, guildhall galleries, and civic-registry bureau-ornamental contexts, registered under polity-asymmetric declared-inventory regimes (fifth parallel sixth-axis latent-burden watch-item for the Charter-Era stress register). Persistent artifact-theft economy targets declared-inventory items; assassination attempts on notable owners of high-value artifacts are a recognized pattern rendered in AES-1 laborer-register cadence — the broker, guild-stamper, or extraction-contractor who handled a famous piece is more often the target than a "famous adventurer" chosen-one figure. State-security concealment of specific catastrophic-class discoveries circulates as DIFFUSE RUMOR only — no named-incident is confirmed at world-level; the rumor is diegetic civic-paranoid-dread atmosphere, never world-truth (M-2 anti-evidence firewall per CH-0014 extension).
+status: hard_canon
+title: Artifact-as-status-object economy — elite display of safe-class artifacts, persistent theft and assassination-risk, state-security concealment of catastrophic circulates as diffuse rumor
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - elite houses display declared-inventory safe-class artifacts at guest-receptions; Brinewick estate-outskirts dowager-gossip 7th axis specifically tracks display inventory vs concealment (alongside CF-0031 charter-sound-vs-parvenu, CF-0033 dragoon-funding-council, CF-0034 exposed-district, CF-0036 mix-sound, CF-0037 kept-stop, CF-0038 Fourth-Bend-backchannel)
+  - authentication-specialist (CF-0021 niche) cheap-end expansion to include status-display provenance verification; eighth authentication-cartel vector on shared canal-corridor infrastructure per Economy critic Phase 6b synthesis
+  - organized artifact-theft rings operate under polity-asymmetric regimes; magistrate docket class for artifact-adjacent homicide (assassination tier) is recognized; civic-magistrate dockets include declared-inventory display-registration compliance prosecutions
+  - bodyguard-contractor commissions attach to famous-owner households; CF-0024 veteran pool cannibalization tracks eleventh concurrent claim (ECONOMY §Breakage Points + §Wage Spreads CH-0014 extensions)
+  - civic-paranoid-dread rumor-register on state-security concealment of catastrophic finds circulates in tavern-transmission, CF-0036 silenced-contractor subgenre, and contracted-bard narrative-custody (CF-0024 extension) with coded-performance workaround paralleling CF-0023 grimoire / CF-0028 ruin-cartography patterns — NEVER named-incident
+  - stolen-status-artifact recovery operations pull from CF-0024 contractor stratum; victim-house direct hire precedent; chartered-broker referral; rare CF-0033 dragoon involvement only under cross-border black-market artifact-traffic predicate (mission-scope firewall holds)
+  - bardic-circuit: assassination-on-artifact-owner ballad IS AES-1 laborer-register ("the broker drank at the Weir and did not see dawn; the coroner logged theft, not duel"), NOT chosen-one adventurer register; bardic mainstream withholds hero-cycle from artifact-owner-survived-assassination material per WORLD_KERNEL What Is Taboo CH-0014 extension
+  - Brinewick (CF-0038) chartered-broker bench carries the sharpest assassination-exposure geometry (bench concentration + dowager-gossip density + migrant-churn texture + authentication-cartel compounding); broker-assassination-cascade is a named Breakage-Point exposure per ECONOMY §Breakage Points CH-0014 extension
+  - declared-inventory display-registration stringency is FIFTH parallel sixth-axis latent-burden watch-item alongside CF-0034 bandit-extradition, CF-0035 trophy-legality, CF-0036 silence-protocol-unsealing, CF-0037 child-conscription-protection; if polities develop structurally divergent conventions, this watch-item could harden into a sixth Charter-Era structural axis (NOT current structural reality)

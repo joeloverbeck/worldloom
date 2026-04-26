@@ -1,0 +1,8 @@
+id: OQ-0026
+topic: Entrance-Knowledge Restricted-Speech Status
+body: |-
+  - CF-0028 commits entrance-knowledge of enterable ruins as lethal contraband; CF-0019 qualification (CH-0004) logs this as a new lethal-contraband subcategory distinct from grimoire fragments. Whether entrance-knowledge warrants formal restricted-speech protection parallel to CAU-3 (ward-specifics are restricted speech regulated by guild charter) is unresolved. Current enforcement is primarily killing-by-rival; civic prosecution exists in charter polities but is reactive. A formal restricted-speech frame would integrate entrance-knowledge into chartered-custody structures — with its own speaker-licensing, archival conventions, and magistrate protections — but this would dilute the wildcat-secrecy pressure that makes ruin-entrance intelligence so valuable.
+
+when_to_resolve: when a story features a specific entrance-knowledge-killing trial, a guild attempt to charter ruin-cartography, or a charter-polity debate over speech restrictions.
+caution: interacts with CAU-3 (ward-specifics precedent) and CF-0019 (grimoire-fragment enforcement pattern). Making entrance-knowledge formally restricted speech tends to normalize it; keeping it killing-enforced preserves its wildcat register but leaves civic authority reactive.
+extensions: []

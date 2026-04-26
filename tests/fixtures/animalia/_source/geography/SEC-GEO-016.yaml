@@ -1,0 +1,40 @@
+id: SEC-GEO-016
+file_class: GEOGRAPHY
+order: 16
+heading: Extractive Zones
+heading_level: 2
+body: |-
+  - **Stone quarries** — heartland and mountain.
+  - **Iron, copper, and silver mines** — primarily mountain east; some fen-edge bog-iron.
+  - **Salt evaporation flats** — coastal south.
+  - **Peat bogs** — fenlands west; primary fuel source there.
+  - **Forest lots** — managed coppice and timber stands across the heartland.
+  - **Kelp shores** — coastal; food and fertilizer.
+  - **Ruin-rich zones** — geographically scattered; identified by Maker substructures or surface-finds; here the artifact-extraction guilds operate. Local towns vary from prosperous-because-of-the-guild to wary-because-of-the-guild.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

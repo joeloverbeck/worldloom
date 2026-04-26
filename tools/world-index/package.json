@@ -7,6 +7,11 @@
     "world-index": "dist/src/cli.js"
   },
   "exports": {
+    "./commands/build": {
+      "import": "./dist/src/commands/build.js",
+      "require": "./dist/src/commands/build.js",
+      "types": "./dist/src/commands/build.d.ts"
+    },
     "./commands/sync": {
       "import": "./dist/src/commands/sync.js",
       "require": "./dist/src/commands/sync.js",

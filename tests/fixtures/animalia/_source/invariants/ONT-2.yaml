@@ -1,0 +1,22 @@
+id: ONT-2
+category: ontological
+title: Magic exists only as artifact, not as learnable art
+statement: Living people cannot cast spells from will alone. Magical effects are produced by physical artifacts — ceramic, wood, metal vessels and devices — predominantly made by lost makers, with a marginal modern stream produced by leaked-grimoire crafter attempts (CF-0021). Some can be used; some can only be contained; many do nothing recognizable until they fail.
+rationale: Premise. Forces the magic-as-hazard texture and prevents the world drifting into hereditary-mage high fantasy.
+examples:
+  - ceramic containment vessel for extracting corruption; an artifact that mind-controls animals into wading water; a modern crafter's wood-vessel that hums and once destroyed three village hens before going inert
+non_examples:
+  - a wizard throwing fire from his hands; a hereditary mage bloodline; a learned spell
+break_conditions: only by explicit user revision.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0021
+    change_id: CH-0002
+    date: 2026-04-18
+    label: Annotation
+    body: The "made by lost makers" clause now includes a marginal modern reverse-engineering. The artifact-as-mediator constraint holds — what is learned by crafters is the craft of producing vessels, not the channeling of magic through the practitioner. The magic still lives in the artifact, not in the maker.
+  - originating_cf: CF-0039
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Destruction-Physics Clarification
+    body: "The artifact-as-locus clause carries material-physical consequence: the binding of magical effect to the vessel in Maker-Age artifacts (CF-0039) confers destruction-resistance on the vessel itself — destruction-attempts BIND the effect more deeply rather than unmaking it, and the vessel's material resistance is elevated accordingly. This is a property OF the artifact-as-locus, NOT a new channel through the crafter. The destruction-physics is SCOPED to Maker-Age artifacts; modern crafter outputs (CF-0021) remain destructible by ordinary means, which preserves CF-0021's \"inferior\" stabilizer register. ONT-2 holds without exception."

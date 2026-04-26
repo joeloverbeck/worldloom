@@ -1,0 +1,114 @@
+id: CF-0043
+title: Ash-Seal, Brinewick commercial containment company — civic-chartered non-guild anomaly with monopoly on containment / research / disposal in the city and carriage-distance heartland
+status: hard_canon
+type: institution
+statement: |
+  Ash-Seal is a civic-chartered non-guild commercial company in Brinewick (CF-0038) holding effective monopoly over magical-artifact containment, research, and sealed-inert disposal within the city and its carriage-distance heartland radius. The company operates under a Brinewick-specific civic charter granted in the Charter-Era / Incident-Wave-era consolidation period (specific grant-year and charter terms deferred to OPEN_QUESTIONS) in response to an early-Charter-Era local competence precedent, concordat- arranged with the chartered-extraction-guild: Ash-Seal absorbs the containment / research / disposal functions while extraction, ward- inscription, ward-inspection, and chartered-brokerage remain SOC-4 chartered-guild-licensed. "Retrieval is client responsibility" — extraction and transport-in are performed by chartered extractors, CF-0024 contractor- auxiliaries, CF-0033 dragoons (ward-breach perimeter only; CF-0033 firewall), dredger crews, canal-wardens, or estate-retained muscle; Ash-Seal receives incoming artifacts at the civic-quarter intake bench. Technicians self- identify as such (idiom "Here's the Ash-Seal technician"); the company cultivates corporate mystique and trade-jargon ("Standard Class-C containment with moderate environmental spread") as commercial information-asymmetry rent-extraction strategy — fed-up-technician admission ("It's a procedure. There's a checklist. Quality control, not a seance") is the in-world revealer of the marketing-as-performance register. Facility locations are civic-legally protected trade secrets; theft attempts are repelled by commercial property-protection guards bounded to facility perimeter (beyond- perimeter deployment triggers CF-0024 civic-watch friction; NOT a new private-army subtype per Rule 3). Disillusioned technicians defect and become INDIVIDUAL leading containment specialists worldwide (absorbed into existing M-7 containment-wright / occult-fallout sub-specialty holding clause per Rule 3), carrying Brinewick-trained portable reputation fee-for- service into chartered-extraction-guild labor markets outside Brinewick; the company itself does NOT expand outside Brinewick (civic-charter is Brinewick-specific and non-transferable; SOC-4 chartered-guild-monopoly prohibits unchartered company operations in other polities). "Ash-Seal deliberately maintains an air of ritual and mystique" — including the unevidenced company-existence-for-hundreds-of-years claim — which is CORPORATE MYTHMAKING in-world-contested-register (paralleling M-19 canal- age contested register); world-level institutional age is post-Charter-Era- consolidation (Incident-Wave-era most likely; specific grant-year deferred). Ash-Seal's "patented method to destroy wooden artifacts 100% of the time" is CORPORATE MARKETING CLAIM (diegetic, contested, NOT world-truth); actual practice is CF-0039-compliant specialized render-inert / seal-and-contain warded containment for wooden-substrate artifacts, functionally inert-in- storage but not destroyed (contributes to Brinewick's monotonic-accretion ward-reserve liability per CF-0038 × CF-0039 CH-0014 extension). The company handles moderate-tier and mundane-tier intake at company facility; catastrophic-tier finds flow through Ash-Seal to civic sealed-quarter (Ash-Seal-billed per-artifact to civic-treasury), NOT into Ash-Seal's own permanent inventory at scale.
+scope:
+  geographic: local
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - economy
+  - labor
+  - law
+  - settlement_life
+  - magic
+  - status_signaling
+  - daily_routine
+  - language
+  - memory_and_myth
+  - kinship
+  - architecture
+  - religion
+prerequisites:
+  - Brinewick civic authority (CF-0038) with charter-grant capacity and civic-advisory council
+  - chartered-extraction-guild concurrence for concordat (Brinewick-specific; guild retains extraction / ward-inscription / ward-inspection / chartered-brokerage per SOC-4)
+  - historical competence-precedent (specific grant-event deferred to OPEN_QUESTIONS §Ash-Seal Civic-Charter Terms)
+  - Brinewick's artifact-throughput volume exceeding chartered-guild capacity at grant-time (CF-0038 exemplar Layer-4 stress-register density; Incident-Wave-era consolidation period)
+  - SOC-3 coin-contract sacredness governing civic-commercial payment
+  - civic-legal infrastructure supporting trade-secret facility-location protection
+  - CF-0006 ceramic containment technology + CF-0007 ward system + CF-0041 sealed-inert protocol as operational craft-base
+distribution:
+  who_can_do_it:
+    - Ash-Seal commercial employees in Brinewick under civic-charter (technicians, ward-apprentices, in-house scriveners, company guards)
+    - concordat handoffs — chartered extractors deliver to Ash-Seal intake bench; canal-wardens route dredge-finds; dragoons route post-perimeter material; CF-0024 contractor-auxiliaries handle transport-in; estate-retained muscle delivers private cellar-finds
+    - Brinewick civic-advisory council approves biannual charter-audit cycle review (CF-0038 convention); magistrate courts hear Ash-Seal-guild jurisdictional disputes and trade-secret-facility-location litigation
+    - wealthy backchannel purchasers in Brinewick (estate-dowagers, civic-council members acting in private capacity) buy safe-class / moderate-tier artifacts discreetly (economic backchannel only; catastrophic-tier NEVER flows through this channel)
+  who_cannot_easily_do_it:
+    - chartered-extraction-guild elsewhere (other polities maintain full-power SOC-4 chartered-guild-monopoly over containment / neutralization; Ash-Seal's non-guild civic-chartered form is Brinewick-specific and non-replicable in single-generation timescales)
+    - defectors attempting to establish competing companies outside Brinewick (civic-charter is non-transferable; unchartered company operations criminalized under CF-0008 SOC-4 enforcement elsewhere; defectors operate as INDIVIDUAL fee-for-service consultants absorbed into existing chartered-extraction-guild labor pool)
+    - unchartered Brinewick parties attempting containment/research/disposal without Ash-Seal commission (civic-magistrate prosecution under Brinewick statute; chartered-guild opposition)
+    - highland clans, fen-villages, drylands-caravan contexts, mountain-east (institutional absence structurally preserved — Ash-Seal is Brinewick-local)
+  why_not_universal:
+    - Brinewick civic-charter is NON-TRANSFERABLE; civic-charter-grant requires century-plus precedent-lock with chartered-extraction-guild concurrence (political cost prohibitive for other polities)
+    - four-stabilizer CF-0038 compound (canal-geometry singularity + path-dependence of Charter-Era commercial capital + migration-gravity flywheel + chartered-broker bench density) underwrites Brinewick's artifact-throughput volume exceeding chartered-guild capacity; other polities do not reach that threshold — chartered-guild capacity is sufficient
+    - SOC-4 chartered-guild-monopoly holds EVERYWHERE ELSE; Ash-Seal's non-guild civic-charter form is Brinewick-specific structural anomaly, NOT replicable template
+    - defector-diffusion is INDIVIDUAL-consultant-only (fee-for-service absorbed into M-7 sub-specialty holding clause); no institutional replication
+costs_and_limits:
+  - Ash-Seal monopoly pricing (upper-silver tier for technician-engagement; sealed-inert containment billed per-artifact to civic-treasury for chartered-party intake and to private-client rate for estate backchannel) extracts information-asymmetry rent via Class-C-containment trade-jargon classification vocabulary the civic cannot independently evaluate
+  - Ash-Seal-trained defector-specialists compress chartered-containment-wright wages heartland-wide (Brinewick-trained upper-silver fee-for-service rate as ceiling on non-Brinewick chartered wages)
+  - civic-treasury payment to Ash-Seal entrenches regulatory-capture; biannual charter-audit cycle (CF-0038) nominally covers Ash-Seal but company-resistance is reliable and reform-current clergy (CF-0026) charter-audit pressure is standing (eleventh charter-audit target)
+  - backchannel-purchase leakage of moderate-tier and safe-class artifacts to wealthy Brinewick parties is COMMERCIAL CORRUPTION (magistrate-docket corruption-prosecution category); does NOT constitute civic-watch corruption (CF-0038 C6 firewall preserved — ward-inspector integrity under SOC-4/CAU-3 is UNAFFECTED; backchannel targets Ash-Seal commercial personnel and canal-wardens per CF-0038 existing pattern, NOT ward-inspectors); named slow-rolling exposure pattern in ECONOMY §Breakage Points — "Ash-Seal-backchannel-cascade" as compound-Breakage vector
+  - monopoly-rupture cascade exposure (ECONOMY §Breakage Points) — massed defector-exit or charter-revocation creates multi-year containment-capacity gap in Brinewick; chartered-extraction-guild capacity recovery requires generational relearning of containment-wright roster
+  - technicians carry AES-3 contamination signature over long careers (scrapers' shake, wasting, long cough, ward-rot); CF-0031 ledger-mark eligibility in Brinewick-adopting polity applies to Ash-Seal long-career technicians under containment-wright-specialist clause
+  - trade-secret research archive is civic-legally protected against civic-registry subpoena except under charter-audit predicate; ELEVENTH civic-archive category (commercial-trade-secret custody) categorically distinct from civic-registry's ten existing streams; M-1/M-9 firewall holds (research is empirical-containment-craft only, NOT Maker-cognitive content, NOT civilization-identity findings, NOT cause-of-fall evidence)
+  - assassination-risk on Ash-Seal senior technicians and company officers at CF-0042 broker-bench-adjacent tier (artifact-handling figure with public visibility; FOURTH concurrent CF-0042 assassination-exposure category alongside broker, guild-stamper, extraction-contractor)
+  - ward-reserve allocation bifurcation — Ash-Seal handles moderate-tier containment at company facility; catastrophic-tier flows to civic sealed-quarter (Ash-Seal billed per-artifact for routing); Brinewick civic-treasury pays Ash-Seal AND funds sealed-quarter (compound exposure per CF-0038 (b) Breakage Points worsened)
+  - civic-magistrate jurisdiction over Ash-Seal-guild concordat disputes evolves incrementally; trade-secret facility-location litigation (theft-attempt prosecution under sedition-libel-adjacent or specific Brinewick statute) generates distinct case-law
+  - chartered-extraction-guild containment-wright faction at Brinewick is BIFURCATED — master-level defection into Ash-Seal is historical pattern; in-guild remainder is resentful and reform-current-aligned; containment-wright faction elsewhere (other heartland polities) is full-power and holds standard CH-0002/0004/0014 schism positions
+  - reform-current clergy (CF-0026 CH-0010 charter-defense wing) standing charter-audit pressure on Ash-Seal corporate-mystique as opaque-to-civic-custody; eleventh charter-audit target alongside CF-0031 welfare-access, CF-0033 mission-creep, CF-0038 biannual-cycle
+visible_consequences:
+  - Ash-Seal technicians are visible weekly-to-monthly in Brinewick canal-quarter during dredger silt-bar handoffs, canal-warden routing, estate cellar-find dispatch, CF-0041 unsealing-triage protocol (chartered containment-wright role fulfilled COMMERCIALLY by Ash-Seal in Brinewick specifically; other heartland polities retain guild-or-civic containment-wright arrangements)
+  - "\"Here's the Ash-Seal technician\" tavern-recognition idiom in Brinewick (paralleling \"Here's the canal-warden\" register); fed-up-technician-drinking-alone at The Copper Weir / Lock-Keeper's Cat absorbed into CF-0036 silenced-contractor subgenre (NOT new bardic register per Rule 3)"
+  - Ash-Seal building-existence known in Brinewick civic-core but facility-locations are trade-secret; 10th skip-rope rhyme slot (*"one-box, two-box, don't lift the lid / three-box, four-box, Ash-Seal knows what the old world hid"*) per CF-0040 CH-0014 10-entry annotation; trade-secret-facility-breach as civic taboo (WORLD_KERNEL What Is Taboo CH-0015 extension)
+  - Brinewick-specific dowager-gossip idioms extend existing seven axes with EIGHTH — *"the Mellivers called Ash-Seal at dusk — quiet disposition or late-log scandal?"* (display-inventory-routing register; interacts with CF-0042 display-registration seventh axis per CF-0038 × CF-0042 CH-0014 convergence)
+  - biannual charter-audit cycle (CF-0038) covers Ash-Seal as ELEVENTH reform-current-clergy audit-pressure target; charter-audit scandal as Brinewick magistrate-docket slow-rolling genre
+  - technicians' contamination signature enters CF-0031 ledger-mark register at Brinewick (long-career technician households register-eligible under containment-wright clause); ledger-mark FOURTH lineage-source category (extractor / containment-wright / occult-fallout specialist / Ash-Seal technician)
+  - defector-specialist emigration — Brinewick-trained containment-specialist individuals posted at tavern-board notice and chartered-extraction-guild roster commissions in other heartland polities; "took the seal-work" or "came out of Brinewick" as in-register idiom for Ash-Seal-trained origin
+  - trade-jargon ("Class-C containment," "moderate environmental spread") is ORIGIN of cross-guild empirical containment vocabulary; vocabulary travels with defectors; neighboring canal-city chartered-containment-wrights use the terminology without adopting the company
+  - private-client estate backchannel — wealthy Brinewick parties (estate-dowagers, civic-council members privately) buy safe-class and moderate-tier artifacts via backchannel; recorded in dowager-gossip register; magistrate-docket corruption-prosecution category when exposed; does NOT cross into CAU-3/SOC-4 ward-inspector integrity (CF-0038 C6 firewall); catastrophic-tier NEVER flows through backchannel
+  - ward-reserve allocation — Ash-Seal company-facility holds moderate-tier permanent inventory; catastrophic-tier routes to civic sealed-quarter; Brinewick ward-reserve budget pays both streams (compound exposure per CF-0038 × CF-0039 CH-0014 monotonic-accretion)
+  - Ash-Seal commercial-employee professional-register distinct from chartered-extraction-guild containment-wright register — technician identity, corporate-mystique jargon, fed-up-technician admission, trade-secret discipline, commercial employment (no guild pension; civic-registry ledger-mark supplement possible in Brinewick-adopting polity)
+  - ELEVENTH archival category in INSTITUTIONS §Recordkeeping (commercial trade-secret research custody; categorically distinct from civic-registry's ten existing streams); M-1/M-9 firewall explicit
+  - tenth-latent sixth-axis watch-item candidate — Ash-Seal trade-secret-extradition framework (what happens when a defector carries Ash-Seal trade-secrets to a competing polity) deferred to OPEN_QUESTIONS; NOT a new Charter-Era structural axis
+  - Ash-Seal-guild concordat — chartered-extraction-guild retains extraction / ward-inscription / ward-inspection / chartered-brokerage; Ash-Seal absorbs containment / research / disposal; broker-faction OPPORTUNISTIC-ACCOMMODATIONIST (Ash-Seal provides efficient disposal-channel clearing declared-inventory); inspector-faction handles concordat-interface; containment-wright-faction BIFURCATED (master-level defection inside Ash-Seal + in-guild remainder resentful); guild containment-wright faction elsewhere holds standard positions
+  - ELEVENTH CF-0024 concurrent veteran-pool-claim — Ash-Seal commercial property-protection guards (perimeter-bounded); absorbed as sub-specialty within extraction-escort subtype (NOT new twelfth subtype per Rule 3; parallel to CF-0042 status-artifact bodyguard-commission eleventh-claim)
+  - reform-current clergy (CF-0026 CH-0010 charter-defense wing) standing campaign for Ash-Seal charter-audit access; Maker-mystic sectarian fringe reads Ash-Seal trade-secret research as modern Maker-research-echo (M-1 firewall holds; sectarian reading is contested-canon not world-truth); common-pantheon mainstream mildly disapproves of corporate-mystique encroachment on ritual register
+  - Ash-Seal-trained specialist portable reputation as TWELFTH value-store (non-polity-bounded fee-for-service signaling; overlaps CF-0024 contractor-reputation but with higher authentication-specialist cachet)
+  - wage-compression pattern heartland-wide — Brinewick-trained defectors' upper-silver fee-for-service rates anchor ceiling on chartered-containment-wright wages elsewhere; named in ECONOMY §Breakage Points as slow-rolling pressure
+  - highland defector-returnee saga-fragment (thin) — clan-son who went south, took Ash-Seal work, defected, returned as independent containment-specialist — named inside existing CF-0031/CF-0033 southern-emigrant saga-fragment register (NOT new saga cadence per Rule 3)
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - ONTOLOGY
+  - TIMELINE
+  - GEOGRAPHY
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - MAGIC_OR_TECH_SYSTEMS
+  - EVERYDAY_LIFE
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0006
+    - CF-0008
+    - CF-0038
+    - CF-0039
+    - CF-0041
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Proposed from briefs/animalia-ash-seal.md. Eleven firewalls committed per Phase 6b multi-critic synthesis (all six critics engaged): F1 CF-0039/M-20 corporate-marketing-reframe; F2 SOC-4 non-guild civic-chartered anomaly; F3 CF-0038 C6 commercial-vs-civic corruption; F4 CF-0006/CF-0041 containment-wright role fulfillment; F5 M-1/M-9 trade-secret-research anti- custody-channel; F6 M-2 backchannel economic-only; F7 M-7 defector sub- specialty holding; F8 M-19 antiquity-as-corporate-mythmaking; F9 M-6 procedural-language discipline; F10 Rule 3 absorptions (defector-specialists, private guards, fed-up-technician bardic register, civic-backchannel channel, ledger-mark lineage-source, trade-secret archive); F11 AES-1 laborer-register dominance + AES-3 contamination signature canonical.
+  Composite CF per Phase 9 split rubric — sub-facts (company institutional form, technician role, trade-jargon, corporate mystique, defector-diffusion) share single stabilizer chain, single invariant-firewall set, shared required_world_updates footprint, user treats as one phenomenon in brief. Primary `type: institution`; sub-types social_role (technicians) + craft (containment expertise) + text_tradition (trade jargon + mystique) + historical_process (lifespan + defector diffusion) + faction (us-vs-them culture).
+  Six critic sub-agents dispatched at escalation gate (12/13 FOUNDATIONS domains touched). Critical Continuity Archivist finding: brief's "100% wooden destruction" claim is CF-0039/M-20 HARD-CONTRADICTION unless reframed via Phase 9 corporate-marketing-reframe repair. All six critics converged on ACCEPT_WITH_REQUIRED_UPDATES after synthesis.
+  Nine existing CFs receive modification_history entries per Phase 12a three-axis scan (CF-0006, CF-0008, CF-0024, CF-0031, CF-0038, CF-0039, CF-0040, CF-0041, CF-0042). Seven Mystery Reserve extensions (M-1, M-2, M-6, M-7, M-9, M-19, M-20); no new M-NN entry. Two new OPEN_QUESTIONS sections; seven pressured OPEN_QUESTIONS annotations.
+  Adjudication record: adjudications/PA-0014-accept_with_required_updates.md.
+modification_history: []

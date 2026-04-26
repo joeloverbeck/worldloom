@@ -1,0 +1,85 @@
+id: CF-0008
+title: Artifact extraction, traffic, and creation are guild-licensed; unlicensed possession or creation is criminal or civil
+status: hard_canon
+type: law
+statement: |
+  In most polities, artifact extraction, containment, neutralization, and brokerage are conducted under chartered guild license. Private possession beyond declared inventory is prohibited; unlicensed possession of catastrophic -class artifacts can carry capital penalty. Black markets exist but operate at risk. Modern artifact CREATION (CF-0021) extends the legal frame unevenly: some polities license it under chartered crafter-guilds, some tolerate it untaxed, some impose fines, and some criminalize possession of creation knowledge outright. Inter-polity divergence is sharp and generates novel extradition case law.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - law
+  - economy
+  - magic
+  - warfare
+prerequisites:
+  - polity with chartered legal framework
+  - guild charter recognized by polity
+distribution:
+  who_can_do_it:
+    - chartered guild members under license (extraction, containment, neutralization, brokerage; creation in polities that license it)
+    - declared collectors and scholars purchasing under broker license
+  who_cannot_easily_do_it:
+    - laypersons, unlicensed parties, foreign agents
+  why_not_universal:
+    - civic prohibition with criminal/civil enforcement
+costs_and_limits:
+  - guild licensing creates concentrated power in artifact-guilds
+  - smugglers and unlicensed brokers operate persistently
+  - jurisdiction friction between guild and civic watch is common
+  - regional legal divergence on artifact creation generates jurisdictional friction
+  - crafter-mobility raises novel extradition questions civic registry has no schema for
+  - battlefield-artifact taboo under new strain: mercenary captains tempted by crafter commissions; some commanders quietly experiment
+visible_consequences:
+  - guild stamps on legal artifacts and containment vessels
+  - prosecution of smugglers is a recurring civic event
+  - centralization fights between polities and guilds shape current politics
+  - special canal-transit fees in some polities fund containment infrastructure
+  - new criminal-statute categories for unlicensed creation in punitive polities
+  - extradition disputes when crafters trained in tolerant polities travel to punitive ones
+  - contractor-auxiliary rosters (per CF-0024) under guild commission engage adventurer-contractors for security/muscle work on extraction sites, dredger crews, and escort duty for broker-moved artifacts; contractors do NOT perform extraction, ward inscription, ceramic-vessel containment, or neutralization (those remain chartered functions); the containment-wright vs broker schism maps cleanly onto contractor-auxiliary policy
+required_world_updates:
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - TIMELINE
+  - MAGIC_OR_TECH_SYSTEMS
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0003
+    - CF-0007
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Invariant SOC-4. Derived from brief's "professions and guilds exist to extract … research … sell … to bidders." Modified 2026-04-18 by CH-0002 (CF-0021): scope extended to artifact CREATION. Regional legal divergence (accept/tolerate/fine/jail) explicitly recognized. Mercenary-commission threat to battlefield-artifact taboo flagged. Modified 2026-04-18 by CH-0003 (CF-0024): contractor-auxiliary rosters under guild commission formally recognized. Adventurer-contractors engaged for security/muscle on extraction sites, dredger crews, and broker-moved artifacts; contractors do NOT perform chartered functions (extraction, ward inscription, ceramic-vessel containment, neutralization). SOC-4 chartered monopoly on artifact-handling functions preserved; the modification adds the ordinary-labor adjacency that the brief "crews that extract artifacts from dig or construction sites, or dredger crews that extract them from canals" directly implies. Modified 2026-04-18 by CH-0004 (CF-0030): scope extended to acknowledge funder-primacy convention for ruin-expedition artifact recovery (CF-0028, CF-0030) as a polity-asymmetric Charter-Era stress-fracture. Chartered- guild monopoly remains load-bearing; funder primacy operates via declared-broker purchase channel under CF-0008's existing "declared collectors and scholars" clause in tolerant polities, while punitive polities maintain full civic-seizure enforcement. Inter-polity friction parallels CF-0021 crafter-tolerance and CF-0024 mercenary-licensure asymmetries — three parallel regional-variation patterns now constitute a recognizable Charter-Era stress register. Expedition-skirmish escalation into regional armed conflict (per TIMELINE Layer 4 new convergent-pressure bullet) flagged as acute Charter-Era anti-monopoly-of-force stress, exceeding the CF-0024 "strains rarely breaks" framing. Extradition case law for expedition-sponsors across incompatible funder-primacy statutes accumulates. Funder-primacy is ECONOMIC and LEGAL only, NOT EPISTEMIC — CF-0027 anti-accumulation and CF-0028 partisan-canon clauses prevent patron epistemic claim over Maker-Age knowledge. Modified 2026-04-18 by CH-0007 (CF-0033): scope narrowed in dragoon- adopting polities. Perimeter enforcement during ward-breach declaration is split from chartered extraction monopoly; canal-corridor quarantine dragoons (CF-0033) are civic-chartered personnel authorized to cordon and evacuate under ward-breach predicate but are categorically prohibited from extraction, containment, neutralization, inscription, and brokerage — those chartered functions remain SOC-4 protected. The load-bearing perimeter/extraction jurisdictional boundary is normative and structurally binding; the first dragoon unit performing an extraction-adjacent act under perimeter cover triggers chartered-guild opposition and magistrate-court jurisdictional dispute (see INSTITUTIONS §Trade/Guilds internal-contradictions bullet and ECONOMY §Breakage Points dragoon-guild jurisdictional-conflict cascade). SOC-4 chartered monopoly on artifact-handling preserved; dragoon adoption does NOT extend to extraction functions even under ward-breach emergency declaration. Adoption is polity-asymmetric (adopt / refuse / lack- infrastructure) per CF-0033 four adoption-gates, joining CF-0021 crafter-tolerance, CF-0024 mercenary-licensure, CF-0028/CF-0030 funder- primacy, and CF-0031 contamination-registry as fifth polity-asymmetric disagreement axis. Adjudication record: adjudications/PA-0006-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): qualification — SOC-4 "in most polities" scope permits a Brinewick-specific NON-GUILD CIVIC-CHARTERED COMMERCIAL-COMPANY anomaly (Ash-Seal, CF-0043) holding monopoly on CONTAINMENT / RESEARCH / SEALED-INERT DISPOSAL under concordat with chartered-extraction-guild. Chartered-extraction-guild retains EXTRACTION, WARD-INSCRIPTION, WARD-INSPECTION (CAU-3 preserved), and CHARTERED-BROKERAGE everywhere including Brinewick. Ash-Seal's civic charter is NON-TRANSFERABLE — Brinewick's four-stabilizer primacy compound (CF-0038 canal-geometry singularity + path-dependence + migration-gravity flywheel + chartered-broker bench density) + century-plus precedent-lock + chartered-extraction-guild concurrence gate make single-generation replication in other polities prohibitive. SOC-4 chartered-guild-monopoly holds EVERYWHERE ELSE without exception; unchartered company operations outside Brinewick remain criminal under standard CF-0008 enforcement. Defector-specialists carry Brinewick-trained portable INDIVIDUAL reputation (fee-for-service) absorbed into existing chartered-extraction-guild labor pool elsewhere; no institutional replication. This is a SCOPE-QUALIFICATION extension to the existing "in most polities" hedge, not a new exception class. Adjudication record: adjudications/PA-0014-accept_with_required_updates.md.
+modification_history:
+  - change_id: CH-0002
+    originating_cf: CF-0021
+    date: 2026-04-18
+    summary: "scope extension: artifact creation added to guild-licensed frame"
+  - change_id: CH-0003
+    originating_cf: CF-0024
+    date: 2026-04-18
+    summary: "clarification: contractor-auxiliary rosters under guild commission; SOC-4 chartered monopoly on artifact-handling preserved"
+  - change_id: CH-0004
+    originating_cf: CF-0030
+    date: 2026-04-18
+    summary: "scope extension: funder-primacy convention for ruin-expedition recovery as polity-asymmetric Charter-Era stress-fracture; third parallel regional-variation pattern; expedition-skirmish regional armed conflict as acute anti-monopoly-of-force stress"
+  - change_id: CH-0007
+    originating_cf: CF-0033
+    date: 2026-04-18
+    summary: "scope narrowing: perimeter enforcement during ward-breach declaration split from chartered extraction monopoly in dragoon-adopting polities; extraction-guild monopoly on extraction / containment / neutralization / inscription / brokerage preserved; load-bearing perimeter/extraction boundary inscribed normatively"
+  - change_id: CH-0014
+    originating_cf: CF-0039
+    date: 2026-04-20
+    summary: "extension: neutralizer subtype operationally re-scoped to render-inert/seal-and-contain (destruction OFF-TABLE per CF-0039 destruction-resistance); CF-0042 declared-inventory display-registration regime added as fifth parallel sixth-axis latent-burden watch-item; CF-0040 mundane-find intake-tier institutional addition; disposal reframing documented; SOC-4 chartered monopoly preserved."
+  - change_id: CH-0015
+    originating_cf: CF-0043
+    date: 2026-04-20
+    summary: "scope-qualification: Brinewick-specific non-guild civic-chartered commercial-company anomaly (Ash-Seal) granted monopoly on containment / research / sealed-inert disposal under concordat with chartered-extraction-guild; guild retains extraction / ward-inscription / ward-inspection / chartered-brokerage; non-transferable Brinewick civic charter; SOC-4 chartered-guild-monopoly holds everywhere else; individual-consultant defector-diffusion absorbed into existing chartered-extraction-guild labor pool without institutional replication"

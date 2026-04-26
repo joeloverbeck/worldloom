@@ -1,0 +1,40 @@
+id: SEC-GEO-017
+file_class: GEOGRAPHY
+order: 17
+heading: Food Baselines
+heading_level: 2
+body: |-
+  - **Heartland**: oats, rye, wheat (in better land), root vegetables, freshwater fish (extensive fishery), poultry, mutton, cattle, dairy, ale, mead.
+  - **Cold north**: oats, rye, dried fish, mutton, hard cheese, dried berries, mead.
+  - **Drylands south**: barley, lentils, dates (regional), lamb, goat, fermented dairy, fermented date wine.
+  - **Fenlands west**: eel, waterfowl, root vegetables, peat-smoked everything, ale.
+  - **Mountain east**: oats, root vegetables, mutton, hard cheese, traded grain, distilled spirits where wood and wherewithal exist.
+
+  Carnivore-folk have organized butchery and hunting access in all regions. Herbivore-folk dominate certain agrarian sectors (notably bovine-folk in heartland dairy and beaver-folk in canal engineering, neither of which is purely diet-driven but both of which are species-clustered).
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

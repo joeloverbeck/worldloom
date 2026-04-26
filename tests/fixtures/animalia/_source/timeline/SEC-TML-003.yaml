@@ -1,0 +1,123 @@
+id: SEC-TML-003
+file_class: TIMELINE
+order: 3
+heading: "Layer 3 — Recent Past: The Incident Wave (~last 50 years)"
+heading_level: 2
+body: |-
+  A measurable rise in artifact incidents — discoveries, ward breaches, contamination events — over the past two generations. Causes are debated: population growth, canal-network expansion, intensification of agriculture and quarrying, deeper foundations in growing cities. Some sectarians read it cosmologically; the extraction-guilds read it logistically.
+
+  **Material residue**:
+  - New ward enclosures around incident sites.
+  - Sealed quarter-towns abandoned after irrecoverable contamination.
+  - A generation of guild-issued ward markers visible in cities and along canal corridors.
+
+  **Institutional residue**:
+  - Artifact-guilds have professionalized and consolidated their charters significantly. New ward-inspection cycles instituted in most polities.
+  - A new social role — the **ward-breach drill** — practiced in cities and canal towns since childhood.
+  - Increased civic spending on containment, often funded by special transit fees on canal traffic.
+
+  **Symbolic residue**:
+  - A generation of children raised on ward-breach drills carries a different relationship to artifact-dread than their grandparents — more procedural, less mystical.
+  - New tavern songs about specific recent breaches, often naming the dead.
+  - Folk anxiety about deep digging: rumors that no one will quote.
+
+  <!-- added by CF-0021 -->
+  **Crafter-Attempt Sub-Stream (Incident Wave attribution)**:
+  - A subset of recent ward-breach and contamination incidents — initially attributed to leaked Maker artifacts — were subsequently identified as failed crafter attempts (CF-0021). Contemporary research has begun reattributing some sealed-quarter cases. The reattribution is politically contested: artifact-extraction guilds resist reclassification (it implies internal-research leakage); civic centralizers welcome it (it strengthens the case for nationalizing creation custody); Maker-mystic sectarians read both readings as cosmologically meaningful.
+  - Named kiln-explosion incidents: scattered through heartland artisan quarters across the past two generations; bardic cycles preserve the lineage of the dead (the Tenth-Loom potter's family; the Long Quay forge-master; the Fen-Edge scholar who killed three apprentices before finishing a single humming bowl).
+  - The originating research that produced creation knowledge was conducted on contained Maker-Age artifacts within the artifact-extraction guilds during this layer's professionalization period; partial knowledge subsequently leaked, was sold, or was carried out by defecting researchers (CF-0023).
+
+  <!-- added by CF-0024 -->
+  **Contractor-Stratum Intensification (Incident Wave attribution)**:
+  - The adventurer/contractor stratum (CF-0024) existed before the Incident Wave but intensified during this layer as fallout-response demand outpaced chartered guild capacity. Tavern notice-boards proliferated in mid-to-large towns; broker matchmakers emerged as an unchartered adjunct to artifact-brokerage; hazard-pay precedent compounded across generations in magistrate courts.
+  - The specialized occult-fallout subtype (CF-0025) consolidated during this layer from precedent fragments: veterans previously hired ad-hoc for extraction-security found steady work in mundane fallout containment under civic and guild commission. The subtype's characteristic career arc — years of commissioned fallout work yielding visible contamination-injury analogous to extractor-veteran patterns — became recognizable within two generations.
+  - The principled-refuser tradition (CF-0026) also consolidated during this layer: reform currents within common-pantheon clergy articulated refusal as moral witness; highland clan-elder sanction tightened around outland contract-taking; some progenitor-cult lineage-keepers forbade members from accepting occult-adjacent commissions.
+
+  <!-- added by CF-0028 -->
+  **Ruin-Expedition Discovery Vector (Incident Wave contribution)**:
+  - Patron-funded ruin-expedition activity (CF-0028) is a contributing vector to the Incident Wave alongside canal expansion and deeper foundation digging. Enterable Maker-Age ruin sites (CF-0027) have been opened across the heartland and into drylands/mountain corridors over the past two generations; recovered material has fed the artifact pipeline at scale previously unknown. Catastrophic squad-wipe events triggered by guardian constructions (CF-0029) have produced a sub-category of sealed sites distinct from quarter-town contamination seals: "officially resealed" ruin-mouths, enforcement variable, accumulate as a new Incident Wave residue.
+  - Bardic cycles preserve named expedition disasters and their funders; magistrate archives of that period hold the earliest recognizable funder-primacy disputes (CF-0030) that would later harden into polity-asymmetric conventions.
+
+  <!-- added by CF-0033 -->
+  **Canal-Corridor Quarantine Dragoon Institutional Founding (late-Incident-Wave residue)**:
+  - Canal-corridor quarantine dragoons (CF-0033) were instituted in the past decade — late Layer 3, early Layer 4 — in some larger heartland polities as a chartered civic perimeter force for rapid ward-breach perimeter enforcement and sealed-quarter evacuation support. The founding is a direct institutional response to the Incident Wave's compounding ward-breach frequency: prior watch-plus-guild ad hoc coordination had become insufficient where breach volume outpaced chartered-watch coordination speed.
+  - Dragoons are a contested Charter-Era anti-monopoly-of-force concession. Four adoption-gates (political cost, guild consent/override, funding stream, sectarian/clergy refusal) kept adoption polity-asymmetric from the start — most heartland polities did NOT adopt, and the non-adoption pattern is as canonical as the adoption pattern. Institutional residue in adopting polities includes dragoon barracks and drill yards in civic quarters, muster rolls in civic-registry archive, pensionable-service records carrying a retired-dragoon subtype, and the impersonation-of-dragoon offense in charter-school offense-tier lists.
+  - The load-bearing perimeter/extraction jurisdictional boundary — dragoons enforce perimeter only; chartered extraction guilds retain extraction — emerged through the earliest adopting polities' charter-negotiation and has held across subsequent adopters. The boundary is the primary stabilizer preventing SOC-4 chartered monopoly collapse; its maintenance requires continuous guild cooperation and magistrate vigilance.
+  - Named small-polity transition-cost incidents: dragoon corps buildout in several smaller adopting polities produced 3-7 year ward-breach severity spikes as veteran recruitment cannibalized militia and contractor pools before institutions matured; bardic cycles preserve the lineage of the dead from the transition-cost years (the Long Quay tenement evacuation that came late; the Three Arches cordon that broke under understaffed first-deployment response; the Fen-Edge dragoon captain who walked off in the second year and was never replaced).
+
+  <!-- added by CF-0035 -->
+  **Wilderness-Encounter Uptick (Incident Wave annotation)**:
+  - Hunter-contractor return accounts from wildland corridors in recent cohorts include rising incidence of anomalous-trophy deliveries — carcasses with supernumerary limbs, fused features, unusual predation marks on livestock that veteran trackers cannot match to known fauna. Bardic-circuit legendary-beast subgenre consolidated during this layer as a fifth recognizable register alongside CF-0024 contracted-veteran, CF-0025 occult-fallout-specialist, CF-0028 ruin-cycle, and CF-0034 four bandit-related subgenres. Settlement-bounty wall (CF-0034 innovation) extends in wildland-adjacent heartland towns and highland clan-ground with verified-beast bounty postings under bounty-clerk certification. Uptick is not yet institutionally consolidated into civic-registry category; it sits in hunter-corridor reputation and bardic transmission. Reattribution of specific sealed-quarter or wildland-predation incidents as mutated-beast events is contested in magistrate courts where hunter-contractor bounties produce evidentiary burden.
+  - The underlying exposure (uncontained artifacts turned up by wilderness geology — earthquake, flood, burrowing, slow soil-creep — and never reached by chartered response) is ancient; what is recent is the frequency of hunter-corridor traffic through such zones, driven by CF-0034 corridor patrol demand, CF-0028 expedition-scout advance work, and CF-0024 wildlife-control contract volume.
+
+  <!-- added by CF-0040 -->
+  **Mundane-tier Ordinary-Routine Consolidation (Incident Wave annotation, CH-0014)**:
+  - CF-0040 commits the mundane-tier (near-imperceptible-effect artifacts — breeze-dolls, tick-mirrors, weak coin-sorters, scar-rubbers) as explicit naming of DIS-1's "most inert junk" band; the tier is not new to the world, but its ordinary-routine register consolidated during the Incident Wave as dredger-crew volume and canal-expansion caseload intensified surface-intake rates. Canal-heartland dredger protocols for silt-bar finds (hand to lock-master's office; never pocket; ward-inspector quarterly triage at canal-quarter office) stabilized during this layer. Children's skip-rope rhymes and hearth warnings about pocketing (*"one-seal, two-seal, don't lift the lid / three-seal, four-seal, the old world hid"*) entered the canal-heartland household register as generation-stable transmission. Mundane-find finder-fee wage-schedule is per-polity variable and deferred (OPEN_QUESTIONS §Mundane-Tier Finder-Fee Wage Schedule, new). Brinewick dredge-find registry caseload line for mundane-tier has grown monotonically across recent cohorts.
+
+  <!-- added by CF-0042 -->
+  **Status-Theft Economy Intensification (Incident Wave annotation, CH-0014)**:
+  - Artifact-as-status-object economy (CF-0042) predates the Incident Wave as an elite custom but intensified during this layer as chartered-broker capacity, authentication-specialist niche (CF-0021 extension), and declared-inventory ward-inspection regimes matured. Elite-house display of safe-class chartered artifacts stabilized during the Charter-Era institutional consolidation (Layer 2); organized theft-ring specialization and bodyguard-contractor sub-specialty consolidation (CF-0024 extraction-escort extension, absorbed as 11th veteran-pool concurrent-claim per Rule 3 firewall) are Layer-3/4 developments. Assassination-on-owner register operates under AES-1 laborer-register cadence (the broker or guild-stamper or extraction-contractor who handled the famous piece is the common target; bardic treatment withholds chosen-one framing — the artifact is the protagonist of the anecdote, the owner is scenery). State-security concealment of specific catastrophic-class discoveries circulates as DIFFUSE rumor across tavern-transmission, CF-0036 silenced-contractor subgenre, and contracted-bard coded-performance register — NEVER named-incident (M-2 anti-evidence firewall per CH-0014 extension).
+
+  <!-- added by CF-0036 -->
+  **Silenced-Witness Stratum Consolidation (Incident Wave annotation)**:
+  - Civic-authority scandal-containment of interspecies-predation evidence (CF-0036) is Charter-Era-deep as general procedural posture, but the Incident Wave period saw the silenced-witness sub-stratum consolidate alongside CF-0024 / CF-0033 / CF-0034 stratum work. Adventurer-contractors (CF-0024) pursuing routine work in bandit-adjacent corridors increasingly encountered cannibal-camp evidence at the Layer-3 recruitment-feeder intensification confluence; magistrate-court sealed-docket procedure under euphemistic "grave-violation-of-person" classification matured as the civic institutional response. The silenced-contractor is ABSORBED into the CF-0024 failed-reputation-contractor feeder — NOT a new welfare stratum — and carries the bitterness-register in AES-1 scarred-veteran cadence (kept the coin and kept his mouth, drinks alone in the winter-rota). Reform-current principled-refuser clergy (CF-0026) bifurcation along charter-defense-anti-supremacism vs civic-restraint-pragmatic lines consolidated during this layer under the accumulating silenced-witness evidentiary load.
+
+  <!-- added by CF-0043 -->
+  **Ash-Seal Incident-Wave Professionalization and Defector-Diffusion Consolidation (Incident Wave annotation, CH-0015)**:
+  - Ash-Seal (CF-0043) is Charter-Era-granted (per Layer 2 annotation above), but its Incident-Wave-era professionalization consolidated the company's contemporary commercial form alongside chartered-extraction-guild professionalization (Layer 3 opening annotation). Incident Wave containment-demand volume — driven by canal expansion, deep-foundation work, and CF-0028 ruin-expedition intake — produced the caseload base on which Ash-Seal's concordat-downstream containment / research / disposal operation matured: company facility capacity expanded; trade-jargon ("Class-C containment, moderate environmental spread") stabilized as empirical-craft-register (ONT-2 / CF-0006 family) vocabulary; the fed-up-technician plain-speaking admission ("checklist, not a seance") emerged as in-world tonal counter to corporate-mystique marketing; the disillusioned-defector return-route — master-level containment expertise emigrating from Ash-Seal into chartered-extraction-guild labor pool heartland-wide as INDIVIDUAL fee-for-service consultants — consolidated during this layer as a recognizable career pattern. Brinewick-trained portable reputation began anchoring upper-silver fee-for-service rates elsewhere, compressing chartered-containment-wright wages heartland-wide (ECONOMY §Breakage Points CH-0015). Contamination-lineage ledger-mark registry (CF-0031) opened to Ash-Seal long-career technicians under containment-wright-specialist clause as Brinewick adopted the registry per CF-0038 commitment (Layer-3/4 late). The Ash-Seal internal research archive, civic-legally protected against civic-registry subpoena except under charter-audit predicate, matured during this layer into the ELEVENTH archival category (commercial-trade-secret custody) categorically distinct from civic-registry's ten existing streams; M-1/M-9 firewall holds (archive contents are empirical-containment-craft only, NOT Maker-cognitive content custody channel).
+
+  <!-- added by CF-0034 -->
+  **Bandit-Recruitment Feeder Intensification (Incident Wave annotation)**:
+  - Endemic banditry (CF-0034) existed long before the Incident Wave, but the Layer-3 / Layer-4 convergent pressures materially intensified recruitment feeders. Two bad winter-fever years in the heartland produced a demographic cohort of widows, orphans, and debt-distressed households pushed out of tenant rolls. Sealed-quarter abandonment from contamination events produced dispossessed refugees whose precarious stratum placement (ECONOMY §Inequality Patterns) left some walking to outland bands rather than monastic-clinic relief. CF-0021 crafter-attempt failed-apprentice stratum, CF-0024 failed-reputation contractors, and clan-sanctioned exiles (highland custom; CF-0021 highland clan-burning precedent) joined the feeders — compounding what had been a tolerable background flow into a recognizable recent recruitment uptick.
+  - Tavern bounty-contract volume measurably rose on notice-boards across heartland canal towns during the bad-winter-fever cohort years; a generation of contractor-veterans (CF-0024) now carry bandit-hunting as a named sub-specialty alongside extraction-escort and occult-fallout.
+  - Hunter-contractor ≠ dragoon boundary emerged as a civic-doctrinal register during the earliest adopting-polity charter debates, a direct consequence of CF-0033 mission-scope firewall work: bandit-pursuit is contractor-stratum civic function, NOT dragoon chartered function; magistrate predicate-declaration is required at cross-predicate pursuit when a bandit group also traffics artifacts.
+
+  ---
+extensions:
+  - originating_cf: CF-0040
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Mundane-tier Ordinary-Routine Consolidation (Incident Wave annotation,
+    body: "- CF-0040 commits the mundane-tier (near-imperceptible-effect artifacts — breeze-dolls, tick-mirrors, weak coin-sorters, scar-rubbers) as explicit naming of DIS-1's \"most inert junk\" band; the tier is not new to the world, but its ordinary-routine register consolidated during the Incident Wave as dredger-crew volume and canal-expansion caseload intensified surface-intake rates. Canal-heartland dredger protocols for silt-bar finds (hand to lock-master's office; never pocket; ward-inspector quarterly triage at canal-quarter office) stabilized during this layer. Children's skip-rope rhymes and hearth warnings about pocketing (*\"one-seal, two-seal, don't lift the lid / three-seal, four-seal, the old world hid\"*) entered the canal-heartland household register as generation-stable transmission. Mundane-find finder-fee wage-schedule is per-polity variable and deferred (OPEN_QUESTIONS §Mundane-Tier Finder-Fee Wage Schedule, new). Brinewick dredge-find registry caseload line for mundane-tier has grown monotonically across recent cohorts."
+  - originating_cf: CF-0042
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Status-Theft Economy Intensification (Incident Wave annotation,
+    body: "- Artifact-as-status-object economy (CF-0042) predates the Incident Wave as an elite custom but intensified during this layer as chartered-broker capacity, authentication-specialist niche (CF-0021 extension), and declared-inventory ward-inspection regimes matured. Elite-house display of safe-class chartered artifacts stabilized during the Charter-Era institutional consolidation (Layer 2); organized theft-ring specialization and bodyguard-contractor sub-specialty consolidation (CF-0024 extraction-escort extension, absorbed as 11th veteran-pool concurrent-claim per Rule 3 firewall) are Layer-3/4 developments. Assassination-on-owner register operates under AES-1 laborer-register cadence (the broker or guild-stamper or extraction-contractor who handled the famous piece is the common target; bardic treatment withholds chosen-one framing — the artifact is the protagonist of the anecdote, the owner is scenery). State-security concealment of specific catastrophic-class discoveries circulates as DIFFUSE rumor across tavern-transmission, CF-0036 silenced-contractor subgenre, and contracted-bard coded-performance register — NEVER named-incident (M-2 anti-evidence firewall per CH-0014 extension)."
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Ash-Seal Incident-Wave Professionalization and Defector-Diffusion Consolidation (Incident Wave annotation,
+    body: "- Ash-Seal (CF-0043) is Charter-Era-granted (per Layer 2 annotation above), but its Incident-Wave-era professionalization consolidated the company's contemporary commercial form alongside chartered-extraction-guild professionalization (Layer 3 opening annotation). Incident Wave containment-demand volume — driven by canal expansion, deep-foundation work, and CF-0028 ruin-expedition intake — produced the caseload base on which Ash-Seal's concordat-downstream containment / research / disposal operation matured: company facility capacity expanded; trade-jargon (\"Class-C containment, moderate environmental spread\") stabilized as empirical-craft-register (ONT-2 / CF-0006 family) vocabulary; the fed-up-technician plain-speaking admission (\"checklist, not a seance\") emerged as in-world tonal counter to corporate-mystique marketing; the disillusioned-defector return-route — master-level containment expertise emigrating from Ash-Seal into chartered-extraction-guild labor pool heartland-wide as INDIVIDUAL fee-for-service consultants — consolidated during this layer as a recognizable career pattern. Brinewick-trained portable reputation began anchoring upper-silver fee-for-service rates elsewhere, compressing chartered-containment-wright wages heartland-wide (ECONOMY §Breakage Points CH-0015). Contamination-lineage ledger-mark registry (CF-0031) opened to Ash-Seal long-career technicians under containment-wright-specialist clause as Brinewick adopted the registry per CF-0038 commitment (Layer-3/4 late). The Ash-Seal internal research archive, civic-legally protected against civic-registry subpoena except under charter-audit predicate, matured during this layer into the ELEVENTH archival category (commercial-trade-secret custody) categorically distinct from civic-registry's ten existing streams; M-1/M-9 firewall holds (archive contents are empirical-containment-craft only, NOT Maker-cognitive content custody channel)."
+touched_by_cf:
+  - CF-0004
+  - CF-0006
+  - CF-0008
+  - CF-0011
+  - CF-0014
+  - CF-0016
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

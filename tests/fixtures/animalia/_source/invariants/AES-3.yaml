@@ -1,0 +1,12 @@
+id: AES-3
+category: aesthetic_thematic
+title: The magical and the contaminated are aesthetically allied
+statement: Wonder and dread are inseparable in this world. Magic is never simply pretty. Every magical experience carries contamination — physical, social, or moral.
+rationale: Brief.
+examples:
+  - an artifact that is beautiful and lethal in the same breath; a containment-wright respected and quietly avoided. <!-- added by CF-0035 --> A six-limbed boar carcass hauled to a ward-inspector's door — the hunters dryly proud, the villagers quietly moving the children indoors; the trophy hung in a guildhall smoke-room, not paraded. <!-- added by CF-0043 --> An Ash-Seal technician in her fifteenth year with the long cough and the scrapers' shake, drinking alone at The Lock-Keeper's Cat in Brinewick in the CF-0036 silenced-contractor register; the corporate-clean trade-jargon on the morning intake-slip and the contamination-lineage ledger-mark the grandmother-scrivener will enter on the civic-registry side. AES-3 contamination-signature on Ash-Seal personnel is canonical, not optional; the company's cultivated corporate-mystique surface does not exempt its workforce from the hazard they broker
+non_examples:
+  - charming, harmless magical decor
+break_conditions: forbidden.
+revision_difficulty: high
+extensions: []

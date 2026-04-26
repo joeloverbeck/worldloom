@@ -1,0 +1,46 @@
+change_id: CH-0001
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0001
+  - CF-0002
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0009
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0013
+  - CF-0014
+  - CF-0015
+  - CF-0016
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+summary: |
+  Genesis creation of the Animalia world by the create-base-world skill. Establishes world kernel, invariants, ontology, timeline (four pressure layers), geography, peoples and species (four clusters plus humans), institutions (ten domains), economy and resources, magic and tech systems (artifact-magic operational model), everyday life (five region/class clusters), open questions, mystery reserve (five entries: M-1 active, M-2 active, M-3 passive, M-4 passive, M-5 forbidden), and twenty Canon Fact Records anchoring the baseline hard canon.
+reason:
+  - initial world creation
+  - premise provided in briefs/animalia.md
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates: []
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+notes: |
+  Premise provided via briefs/animalia.md; no Phase 0 interview was needed. Phase 15 validation passed clean against all ten rejection tests. CF-0016 (Common Pantheon plus Species-Progenitor Cults) is the only derived canon in the genesis ledger; all other CF records are direct from brief or direct-from-invariant. Future canon work that touches Mystery Reserve M-1, M-2, M-3, M-4 must respect their disallowed-cheap-answer constraints; M-5 must not be canonically resolved.

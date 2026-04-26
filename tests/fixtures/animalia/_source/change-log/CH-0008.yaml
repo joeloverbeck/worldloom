@@ -1,0 +1,50 @@
+change_id: CH-0008
+date: 2026-04-19
+change_type: addition
+affected_fact_ids:
+  - CF-0034
+  - CF-0017
+  - CF-0024
+  - CF-0026
+  - CF-0028
+  - CF-0033
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict per adjudication PA-0007 (2026-04-19). CF-0034 formalizes endemic banditry as a historical_process already implicit in GEOGRAPHY.md §Predator Zones "Bandit corridors," in CF-0017 and CF-0024 costs_and_limits references to bandit losses, and in INSTITUTIONS.md §Military/Defense "suppress banditry" function. The formalization-of-implicit framing is load-bearing per Rule 6 anti-silent-retcon and is explicit in the CF statement. Five dependent qualifications extend: CF-0017 bardic-circuit narrative-custody subgenres (raid-lament, hunter-return, named-captain cycles, bounty-ethics broadsides) plus performer-martyr class plus bardic moral- witness-refusal threshold; CF-0024 bandit-hunter as named fifth contractor subtype alongside caravan-escort/wildlife/extraction-escort/dredger-escort/ mercenary-band/occult-fallout, plus three-tier skirmish-season taxonomy (sanctioned mercenary / endemic bandit / patron-backed expedition-war), plus widow-of-the-raid absorbed as idiom-extension of widow-of-the-job per Rule 3 specialness-inflation firewall; CF-0026 bounty-execution morality bifurcation (bounty-commission-accepting vs execution-abolitionist) within the principled-refuser tradition following the CF-0031 / CF-0033 reform- with-protection-vs-abolition template, plus highland cleansing-rite REFUSAL for returned band-members who committed kill-witnesses or raid-and-enslave acts (heavier than standard CF-0024 rite); CF-0028 two-threat expedition security model (guardian-wipe plus bandit-resistance in non-guardian occupied subsets) plus M-10 selection-bias deepening; CF-0033 mission-scope NEGATIVE-CLAUSE committing that dragoons do NOT pursue bandits qua-banditry (cross-predicate pursuit requires magistrate predicate-declaration; M-13 boundary defense preserved). Mystery Reserve firewall extensions applied under CH-0008: M-1 shelter- scope; M-2 anti-bandit-catastrophic-custody; M-6 partisan-reportage; M-7 fifth reputation-genealogy cohort; M-8 procedural-tactical observation (parallel to CF-0033 CH-0007 dragoon perimeter-lore); M-9 bandit-custody- is-a-route-not-channel; M-10 LOAD-BEARING selection-bias firewall with added disallowed cheap answer (this is M-10's FIRST cross-application extension — no prior precedent); M-13 cross-reference acknowledging hunter-contractor ≠ dragoon commitment. NEW Mystery Reserve entry M-14 (Bandit-Captain Mythography Reliability) manufactured per Phase 9 Rule 7 obligation to bound the bardic-named-captain historicity unknown the CF creates. New OPEN_QUESTIONS.md items: Hunter-Contractor Licensing and Bounty Framework (per polity); Inter-Polity Bandit-Extradition Convention (latent sixth-axis watch-item); Liberated-Slave Reintegration Civic Procedure; Ransom-Prisoner Civic-Registry Status. Eight downstream files patched: WORLD_KERNEL, TIMELINE, GEOGRAPHY, INSTITUTIONS, ECONOMY_AND_RESOURCES, EVERYDAY_LIFE, OPEN_QUESTIONS, MYSTERY_RESERVE. INVARIANTS, ONTOLOGY, PEOPLES_AND_SPECIES, and MAGIC_OR_TECH_SYSTEMS unchanged. Escalation Gate fired (13/13 domains); six critic sub-agents dispatched and synthesis integrated. Adjudication record: adjudications/PA-0007-accept_with_required_updates.md.
+reason:
+  - user intention is to add danger and darker texture to the world while showing that some groups don't operate by settlement rules and adding meaningful work for adventurers / warriors / contractors
+  - prior implicit canon mentions in GEOGRAPHY §Predator Zones, CF-0017 / CF-0024 cost clauses, and INSTITUTIONS §Military/Defense required Rule 6 explicit formalization rather than silent retcon
+  - Escalation Gate fired (13/13 domains); six-critic synthesis produced convergent commitments on scope stabilizer, firewall discipline, register discipline, and mod_history entries
+  - Rule 7 obligation satisfied via new M-14 Mystery Reserve entry bounding the bardic-named-captain historicity unknown the CF manufactures
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - WORLD_KERNEL.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "Inter-polity bandit-extradition convention: potential sixth Charter-Era structural asymmetry axis if safe-harbor-for-reformed vs automatic-execution conventions diverge; currently tracked as MINOR docket line + OPEN_QUESTIONS watch-item."
+  - "Liberated-slave reintegration civic procedure: civic-registry schema for recovered captives, restoration-rite canonical form, marriage-market standing for returned-raped women and returned-enslaved men, children-born-in-captivity civic standing — all per-polity-asymmetric and deferred."
+  - "Ransom-prisoner civic-registry status: ambiguous pre-ransom standing, kin-proxy agency, estate-steward-as-agent, coin-contract non-governance of coerced negotiation — deferred."
+  - "Clergy bounty-ethics magistrate case law: specific precedent on bounty-execution-vs-trial charter-court challenges by principled-refuser clergy (CF-0026 extension)."
+  - "Hunter-Contractor Licensing and Bounty Framework (per polity): chartered-mercenary-company parallel; no-body-no-pay precedent; kill-vs-capture bounty differential; per-polity-deferred."
+  - "Ransom-broker charter status (per polity): unchartered matchmaking role; SOC-3 non-application; per-polity licensing pressure deferred."
+  - "Bounty-hunter liability case law: killed-wrong-person prosecutions; collateral damage to tenant land and rival estate tenants; evolving magistrate precedent."
+notes: |
+  Phase 9 repair options considered and DECLINED: (a) split into multiple CFs (banditry-as-historical-process + bandit-hunting-as-institution + raid-and- enslave-hazard) — kept single per Phase 0 tie-break rubric; sub-facts share the same underlying world-change and splitting fragments integrity plus produces redundant derived_from chains; (b) move into Mystery Reserve — banditry is open-known phenomenon, not bounded-unknown material, wrong category; (c) contested_canon — banditry is world-level objective (civic orders treat it as real, not belief-only); (d) reduce to rumor — inconsistent with bounty-contract practice and civic-watch pursuit. Phase 9 repair options ADOPTED: single CF with distribution-clause scope stabilizer localizing the worst-bandit subset (Rule 4); modification_history entries on CF-0017 / CF-0024 / CF-0026 / CF-0028 / CF-0033 (Rule 6); NEW M-14 MR entry (Rule 7); ten Phase 7 stabilizers (Rule 3); Theme/Tone register discipline committed to CF notes (forbidden/required vocabulary lists) and governing EVERYDAY_LIFE patch drafting; widow-of-the-raid ABSORBED into CF-0024 widow-of-the-job as idiom-extension (Rule 3 specialness-inflation firewall — Systems/Economy and Everyday-Life critics both independently rejected elevation to a seventh stratum); bandit- extradition committed as MINOR operational docket line NOT sixth structural asymmetry axis (Politics/Institution reading prevailed over Systems/ Economy's potential-sixth-axis flag, with the potential axis tracked as latent burden and OPEN_QUESTIONS watch-item). Register-discipline exemplar CF-language cadence: *"Raiders took the Haldfen steading in the third week of Blackfrost; four dead on the threshold, nine carried off, the byre burned for warmth. The hunter- company from Ostrey charged forty silver and retrieved six. Two never spoke of it. The widow kept the farm."* Forbidden cadence: lyrical dwelling on atrocity; any sentence whose grammar invites the reader to admire a bandit; heroic-outlaw romanticization; exploitation-register rendering of rape or enslavement; chosen-one bandit-hunter framing; species-coded victimhood. M-10 selection-bias firewall is the novel-and-load-bearing commitment in this CH — first cross-application M-10 has ever carried; the disallowed cheap answer *"Bandit settlement-lore treated as empirical guardian- absence predictor — forbidden reveal"* is the primary Mystery Reserve commitment of CH-0008 and the commitment future canon work must preserve when extending bandit-corridor geography, ruin-expedition contingency, or any lore-registry artifact. Critic convergences summary: Rule 6 silent-retcon exposure via prior implicit mentions (Continuity Archivist, Politics/Institution); CF-0033 dragoon mission-scope firewall load-bearing (Continuity Archivist, Politics/Institution, Mystery Curator, Theme/Tone); hero-drift HIGH per user intent (Everyday-Life, Theme/Tone); Rule 4 globalization-by- accident on raid+slavery subset (Continuity Archivist, Politics/ Institution, Everyday-Life); Rule 3 widow-of-the-raid absorption (Systems/Economy, Everyday-Life converged independently); bandit-hunter CF-0024 subtype not new wage row (Systems/Economy); mod_history entries on five CFs (Continuity Archivist, Politics/Institution, Everyday-Life); Mystery Reserve firewalls including novel M-10 (Mystery Curator). Critic productive tension resolved: Systems/Economy MEDIUM-risk potential sixth-axis bandit-tolerance vs Politics/Institution MINOR docket line — resolved in favor of MINOR, with sixth-axis watch tracked as latent burden.

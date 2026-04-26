@@ -1,0 +1,67 @@
+id: SEC-INS-007
+file_class: INSTITUTIONS
+order: 7
+heading: Healing / Medicine
+heading_level: 2
+body: |-
+  - **Function**: care of sick, injured, parturient; advise on contagion; manage death.
+  - **Legitimacy source**: training plus reputation; not centrally licensed in most polities, though civic statutes sometimes regulate practice in cities.
+  - **Material base**: barber-surgeons, herb-wives, apothecaries, monastic infirmaries, traveling physicians, species-specialist consultants.
+  - **Violence capacity**: zero formal.
+  - **Recruitment**: apprenticeship, vocation, monastic orders.
+  - **Succession**: training lineage.
+  - **Internal contradictions**:
+    - species-specific physiology requires species-specific knowledge; specialists are rare; rural clinics may lack a practitioner who understands a given species' anatomy;
+    - artifact-related contamination injury is recognized but poorly characterized; treatment is often palliative;
+    - barber-surgeon and herb-wife traditions sometimes friction with monastic medicine over authority and method.
+    - <!-- added by CF-0021 --> kiln-explosion injury (CF-0021) is now a distinct treated category — burns, blast-trauma, embedded ceramic shrapnel, occasionally entity-possession contamination from a botched vessel; herb-wives in artisan quarters keep extra burn-salve stocked; barber-surgeons in heartland canal towns develop empirical kiln-explosion triage protocols that monastic medicine has not yet incorporated.
+    - <!-- added by CF-0024 --> contractor-specific empirical medicine (CF-0024): herb-wives and barber-surgeons develop contractor-triage lineages — deep-cut suturing, animal-bite and claw-puncture care, fallout-exposure assessment, post-battle sepsis control. Post-career occult-fallout specialists (CF-0025) present contamination injuries indistinguishable from extractor-veteran patterns and are treated in the same empirical registers; monastic medicine has not yet incorporated contractor-specific triage as a doctrinal category.
+    - <!-- added by CF-0028 --> expedition-specific triage (CF-0028): squad-wipe survivors and returning expedition-veterans present a distinct injury profile — guardian-construction trauma patterns (often previously un-encountered by local barber-surgeons), contamination exposure from ruin-interior environments, crush injuries from collapsed ruin architecture, field-sepsis from delayed evacuation. Herb-wives and barber-surgeons in heartland canal towns that host patron-syndicate activity develop expedition-triage protocols empirically. Widow-of-the-expedition grief care has become a recognized informal specialty in artisan-quarter herb-wife practice. Monastic medicine has not incorporated expedition-triage doctrinally; the gap between chartered-medical doctrine and contractor-medicine field practice widens.
+    - <!-- added by CF-0031 --> contamination-lineage ledger-mark intake (CF-0031): in adopting chartered polities, monastic clinics maintain a priority line at intake for households bearing the ledger-mark, with the intake-scribe's question ("have you or your people taken the mark?") delivered in flatly procedural cadence — the absence of pity is itself a tonal signature. Barber-surgeons and herb-wives in artisan quarters develop a referral pathway from empirical contamination-diagnosis into registry-eligibility adjudication; the barber-surgeon's note on the ledger is not medical doctrine but a field-empirical notation that civic scriveners later reconcile into the registry record. Priority intake produces a capacity-reallocation effect — non-registered contamination-injured patients, especially fen-village emigrants and highland emigrants seeking monastic-clinic care at adopting-polity houses, fall to the common bench. The asymmetry is a quiet new frustration audible in herb-wife complaint and rural-guest testimony, though neither complaint rises to formal doctrinal pressure on monastic medicine.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0009
+  - CF-0010
+  - CF-0011
+  - CF-0013
+  - CF-0015
+  - CF-0016
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

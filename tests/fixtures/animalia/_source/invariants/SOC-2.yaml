@@ -1,0 +1,12 @@
+id: SOC-2
+category: social
+title: Public adult barter is legal and visible in many regions
+statement: Sexual services can be publicly posted, framed as pragmatic exchange, and treated by many locals as mundane. Scandal attaches to the character of those involved, not to the act itself. Regional and class variation exists.
+rationale: Brief explicit.
+examples:
+  - a posted price-list at a tavern; a respectable courtesan whose patrons include guild-masters; quiet disapproval from a stricter sectarian household
+non_examples:
+  - blanket criminalization; blanket destigmatization
+break_conditions: would shift the texture significantly; medium revision difficulty.
+revision_difficulty: medium
+extensions: []

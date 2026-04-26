@@ -27,7 +27,8 @@ const ANIMALIA_SOURCE = path.resolve(
   "..",
   "..",
   "..",
-  "worlds",
+  "tests",
+  "fixtures",
   WORLD_SLUG
 );
 function createTempRepoRoot(): string {

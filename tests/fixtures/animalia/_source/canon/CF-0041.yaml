@@ -1,0 +1,98 @@
+id: CF-0041
+title: Maker-Age peoples deliberately buried hazardous artifacts; sealed-artifact containers are mechanically inert until opened; the "unsealing" idiom is a lived cultural convention carrying dread across all regions
+status: hard_canon
+type: historical_process
+statement: |
+  The Maker-Age peoples had hazard-awareness and response-capability regarding at least some of their own magical artifacts, and deliberately sealed, entombed, or flooded both individual artifacts and entire buildings containing artifacts, using complex engineering and coordinated labor, to prevent those items from acting on the world. A Maker-Age-sealed container holding an artifact remains mechanically INERT until the container is opened or the seal is broken; opening an unknown sealed container ACTIVATES the artifact within with full CAU-1 cost at the site. "Unsealing" is a feared and dread-laden cultural moment in present Animalia ("the hair goes up when the seal breaks"), with multi-guild civic-response protocols in chartered polities and convention-register response in non-chartered regions. This commitment is Maker-Age hazard-awareness and response-PRACTICE ONLY; it does NOT resolve what the Makers feared, whether burial preceded / accompanied / postdated the fall, or the nature of the Maker fall itself (M-1 firewall preserved per CH-0014 extension). Maker-Age sealing technique is categorically LOST — it is not present in the leaked grimoire corpus (CF-0023) and is not reproducible by modern crafters (CF-0021).
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - memory_and_myth
+  - architecture
+  - religion
+  - law
+  - daily_routine
+  - taboo_and_pollution
+prerequisites:
+  - Maker-Age peoples had hazard-awareness and response-capability (now lost to present institutions)
+  - Maker-Age sealing technique (LOST; not in CF-0023 leaked corpus; not reproducible by CF-0021 crafters)
+  - ordinary-life encounter with sealed containers or Maker-buried buildings (foundation excavations, canal dredging, estate-cellar archaeology, peat-cuttings, qanat-cleaning rites, flood-erosion exposures)
+distribution:
+  who_can_do_it:
+    - (Maker-Age peoples; terminated civilization; practice not transmitted) — for original sealing
+    - anyone who encounters a sealed container or Maker-buried building — for unsealing (but chartered unsealing-triage protocol governs the response in chartered polities)
+  who_cannot_easily_do_it:
+    - current-age crafters cannot reproduce Maker-sealing technique (CF-0023 boundary; CF-0021 scope; M-20 firewall parallel against sealing-technique-recovery as world-achievable goal)
+    - chartered extraction-guild containment-wrights can CONTAIN (sealed-storage-of-extracted-material) but cannot replicate ORIGINAL Maker-sealing (civic-administrative resealing of CF-0027 ruins is categorically distinct from Maker-deliberate-original-burial per CH-0014 OPEN_QUESTIONS §Resealing Authority Jurisdiction extension)
+  why_not_universal:
+    - Maker-sealing technique is LOST; no current-age practice reproduces it
+    - unsealing dread-response is region-sensitive (canal-heartland formal multi-guild protocol highest; estate-outskirts steward-coordinated; highland clan-elder sanction; drylands caravan-master sealed-cargo-refusal + qanat-cleaning-rite; fenland marker-reed red-bound relay-summons with amphibian-folk canary-diagnosis — institutional-absence preserved)
+    - buried-building strike rates vary by geographic exposure to foundation-dig / canal-cut / estate-cellar / qanat-cleaning activity
+costs_and_limits:
+  - opening a sealed Maker container or breaching a Maker-buried building ACTIVATES whatever artifact lies within with CAU-1 cost at the site; multi-fatality outcomes are historically frequent when protocol is bypassed (the silt-dredge crew who opened the Fourth-Bend case without triage; the tenant-cottage harvest-eve cellar unsealing; the qanat-cleaning crew who breached an entombed building-top; the reed-fisher who lifted a seal in the bog-bottom)
+  - Maker-buried-building archaeology adds a new site-type under CF-0027 enterable-ruin category but is NOT a seventh Maker-knowledge custody channel (M-9 CH-0014 anti-custody-channel firewall); archaeology yields STRUCTURAL / ENGINEERING / ARTIFACT-DISPOSITION data only, NOT Maker-cognitive content
+  - buried-building site-presence does NOT empirically predict catastrophic-class or guardian-construction presence (M-10 FOURTH cross-application anti-predictor firewall per CH-0014); the Makers buried many things; what they chose to bury is not empirically reconstructible as typology
+  - the sealed-inert mechanism is CATEGORICALLY DISTINCT in origin from CF-0029 guardian-construction activation (M-8 CH-0014 distinct-origin firewall): sealed-inert is container-suppression of an artifact's effect (breached by opening); guardian-construction is pre-baked Maker-craft responsive to intrusion (activated by approach; distinct authentication signature)
+  - Maker-deliberate-burial practice commits hazard-awareness and response-practice ONLY; it does NOT resolve Maker cause-of-fall (M-1 CH-0014 anti-evidence firewall)
+  - jurisdiction on Maker-deliberately-buried-building excavation is contested (chartered extraction-guild vs CF-0028 patron-funded expedition vs civic-archaeological-license); OPEN_QUESTIONS §Ruin Ownership and Jurisdiction pressured (CH-0014)
+visible_consequences:
+  - canal-heartland dredger crews follow a sealed-find protocol (hand to ward-inspector; never break the seal; report container shape to lock-master's office); eldest-awake adult in tenant-cottage households carries sealed cellar-finds wrapped in three cloths to the lock-master's office before breakfast
+  - "estate-outskirts (Brinewick) dowager-axis on unsealing: *\"the Corlyhaughs' cellar-find cleared ward-inspection — sealed-inert or already opened before they logged it?\"*"
+  - highland clan-elder sanction parallels CF-0021 ritual-burning register: idiom *"the seal is the old world's word; we do not answer"*; saga-fragment for the clansman who unsealed and returned changed (withheld from hero-cycle; third-person mourning register)
+  - 'drylands caravan-master sealed-cargo-refusal alongside existing grimoire / ruin-cartography / dragoon-jurisdiction / stolen-goods / beast-trophy refusals; tea-house scribe refuses-to-witness unsealed-provenance trophy-cargo; cargo-riddle: *"what sleeps in the coin-box until the lid is lifted? — the thing the old world buried; and the one who carries it pays seal-breach if the wax parts in the heat"*'
+  - fenland marker-reed RED-BOUND summons for suspected sealed-artifact findings (third marker-reed sequence alongside CF-0024 green-bound fallout and CF-0035 black-bound beast); fenland-discipline (institutional-absence-acknowledged-in-silence) preserved — NO drill; amphibian-folk canary-neighbor bog-diagnosis primary early-detection system
+  - Maker-deliberately-buried-buildings recognized to civic archaeology as a distinct substructure sub-category (GEOGRAPHY §Sacred and Cursed Terrain CH-0014 extension); excavation strike closes work on the spot; multi-guild unsealing-triage protocol convenes (chartered extraction-guild ward-inspector + civic-watch + containment-wright + excavation-or-dredger foreman)
+  - bardic-circuit unsealing-dread register lives WITHIN CF-0036 silenced-contractor subgenre, NOT a new fifth bardic register; bardic mainstream withholds hero-cycle from unsealer-protagonist material (parallel to CF-0034 lean-winter-walker, CF-0035 beast-hunter, CF-0037 walked-stop, CF-0036 silenced-contractor withhold-discipline)
+  - common-pantheon clergy on Maker-deliberate-burial: aspectualization available (civic-ritual-of-witness at unsealing); progenitor-cult split between penitent-Makers reading (reform-current-adjacent framing) and calculating-Makers reading (heritage-partisan framing) — neither world-truth
+  - sealed-inert mechanism observation by containment-wrights is an empirical pattern, NOT a recoverable technique; CF-0023 leaked corpus explicitly does not contain sealing instructions
+  - fenland 6th ghost-story category gains *"the seal the peat gave up"* cadence (alongside sunken-ruin / drowned-runner / fen-widow / the-raid-that-sank-Low-Reed / fen-beast-seen-once-at-dusk / the-village-that-turned-one-fur-and-sank)
+required_world_updates:
+  - WORLD_KERNEL
+  - ONTOLOGY
+  - MAGIC_OR_TECH_SYSTEMS
+  - TIMELINE
+  - GEOGRAPHY
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0004
+    - CF-0023
+    - CF-0027
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Proposed as part of CH-0014 four-CF bundle. FOUR firewalls committed per Mystery Curator critic Phase 6b synthesis: (1) M-1 anti-evidence firewall — Maker-burial-practice is hazard-awareness
+      and response-practice ONLY; never cause-of-fall evidence; the Makers'
+      deliberate burial neither confirms nor refutes any M-1 hypothesis.
+  (2) M-8 distinct-origin firewall — sealed-inert mechanism is CATEGORICALLY
+      DISTINCT from guardian-construction activation; the two Maker-origin
+      autonomy-adjacent phenomena are NOT identified (parallels CF-0022 ↔
+      CF-0029 ↔ CF-0035 three-way firewall extended to four-way with CF-0041).
+  (3) M-9 anti-custody-channel firewall — Maker-buried-building archaeology
+      yields STRUCTURAL / ENGINEERING / ARTIFACT-DISPOSITION data only; does
+      NOT yield Maker-cognitive content, translated texts, civilization-
+      identity findings, or cause-of-fall evidence; NOT a seventh Maker-
+      knowledge custody channel.
+  (4) M-10 anti-predictor firewall (FOURTH cross-application) — buried-
+      building presence does NOT empirically predict catastrophic-class or
+      guardian-construction presence.
+  Maker-sealing technique is committed as LOST (not in CF-0023 leaked corpus; not reproducible by CF-0021 crafters). Maker-deliberate-original-burial is distinguished from civic-administrative resealing of CF-0027 ruins per Continuity Archivist Phase 6b finding. Unsealing bardic register ABSORBED into CF-0036 silenced-contractor subgenre (Rule 3 firewall). Excavation jurisdiction deferred to OPEN_QUESTIONS §Ruin Ownership extended. Adjudication record: adjudications/PA-0013-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): qualification — CF-0041 Brinewick-specific multi-guild unsealing-triage protocol containment-wright role fulfillment: in Brinewick specifically (CF-0038), the chartered containment-wright role in the unsealing-triage sequence (ward-inspector + civic-watch + containment-wright + excavation-foreman) is fulfilled COMMERCIALLY by Ash-Seal technicians (CF-0043) under the Brinewick non-guild civic-charter anomaly with chartered-extraction-guild concordat. Other heartland polities retain guild-or-civic containment-wright arrangements for the same protocol sequence. CF-0041 unsealing-triage protocol structure, scope, and Maker-sealing-LOST firewall are CATEGORICALLY UNCHANGED; the qualification is Brinewick-operational-fulfillment audit-trail hygiene. The Maker-sealing-technique-LOST firewall parallel for Ash-Seal: Ash-Seal's trade-jargon ('impedance field, embedded geometry, Class-C containment') stays in empirical-craft register (ONT-2 / CF-0006 family); does NOT drift toward Maker-sealing-technique-recovery register; Ash-Seal does NOT reproduce Maker-sealing technique (any more than chartered-containment-wrights elsewhere).
+modification_history:
+  - change_id: CH-0015
+    originating_cf: CF-0043
+    date: 2026-04-20
+    summary: "qualification: Brinewick-specific multi-guild unsealing-triage protocol containment-wright role fulfilled commercially by Ash-Seal (CF-0043) under non-guild civic-charter anomaly concorded with chartered-extraction-guild; CF-0041 protocol structure and Maker-sealing-LOST firewall categorically unchanged; Ash-Seal trade-jargon stays in ONT-2/CF-0006 empirical-craft register; Ash-Seal does not reproduce Maker-sealing technique"

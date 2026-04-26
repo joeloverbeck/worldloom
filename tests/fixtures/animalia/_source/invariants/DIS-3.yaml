@@ -1,0 +1,17 @@
+id: DIS-3
+category: causal
+title: Mythical-species sentients are population-rare and locally clustered
+statement: Mythic-species sentients (basilisk-folk, chimera-folk, manticore-folk, gryphon-folk, naga-folk, etc.) exist among animal-folk but are population-rare per region. You do not see a chimera in every market.
+rationale: Prevents specialness inflation. Preserves wonder. Matches the brief's note that exotic-species bodies attract attention and commentary in public.
+examples:
+  - a single naga-folk bargemaster known by reputation across a canal corridor; a basilisk-folk physician practicing in only one city
+non_examples:
+  - mythic species as common as cat-folk
+break_conditions: would inflate mythic-species into background-noise.
+revision_difficulty: medium
+extensions:
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Firewall
+    body: "Artifact-contaminated mutated non-sentient beasts (CF-0035) are CATEGORICALLY DISTINCT from Cluster D mythic-species sentient folk. The surface similarity (unusual morphology; chimeric features; wonder-adjacent register) must NOT be conflated: mutated beasts are non-sentient fauna with artifact-shaped bodies; mythic-species sentient folk are civic-participant peoples with species-typical embodiment (ONT-1/SOC-1). The firewall holds across all encounter contexts — no in-world institution may process a mutated beast as a mythic-species individual, and no mythic-species individual may be treated as a mutated-beast specimen."

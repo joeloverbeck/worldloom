@@ -1,0 +1,52 @@
+id: CF-0018
+title: Skilled trades are stable livelihoods; craft authority operates without guild exposition
+status: hard_canon
+type: institution
+statement: |
+  Skilled trades (tannery, smithing, ceramic ware, carpentry, etc.) are stable livelihoods. Craft identity is socially legible without explicit guild branding. Craft networks can carry authority — a master tanner is recognized as such by peers and customers without a guildhall placard.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - economy
+  - settlement_life
+  - status_signaling
+  - law
+prerequisites:
+  - apprenticeship system
+  - tools and workshop
+distribution:
+  who_can_do_it:
+    - those completing apprenticeship and entering practice
+  who_cannot_easily_do_it:
+    - those without family placement or guild access
+  why_not_universal:
+    - apprenticeship is gated by family connection, fee, or vocation
+costs_and_limits:
+  - mastery takes years and capital
+  - guild gatekeeping in some trades is real even when not explicit
+visible_consequences:
+  - master craftsmen recognized in their towns without need for placard
+  - tanner, smith, ceramic-wright, ward-wright are stable career paths
+  - small-artisan coalitions periodically challenge entrenched charters
+required_world_updates:
+  - ECONOMY_AND_RESOURCES
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Direct from brief. The "without guild exposition" clause matters for prose rendering: characters do not need to recite guild credentials to be recognized as masters. Modified 2026-04-18 by CH-0006 (CF-0032): the oversize-saddlery guild-subsection (CF-0032) is a narrow named exception to the "socially legible without explicit guild branding" default — the subsection's guild-seal is visibly stamped on commissioned work as a body-plan-variant competence marker and regional authenticity signal. CF-0018's default remains intact for other skilled trades; the subsection seal is a specific institutional exception, not a general shift toward explicit guild-branding. Guild-seal is located in charter-and- apprenticeship system, not in bloodline or ancestry.
+modification_history:
+  - change_id: CH-0006
+    originating_cf: CF-0032
+    date: 2026-04-18
+    summary: "qualification: CF-0032 subsection guild-seal is narrow named exception to 'without placard' default; default intact elsewhere; seal in charter-apprenticeship register, not bloodline"

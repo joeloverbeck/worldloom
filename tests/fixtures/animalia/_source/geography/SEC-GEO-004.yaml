@@ -1,0 +1,42 @@
+id: SEC-GEO-004
+file_class: GEOGRAPHY
+order: 4
+heading: Trade Corridors
+heading_level: 2
+body: |-
+  - **Primary spine**: the canal-and-river network through the temperate heartland. Carries grain, fish, peat, ceramic clay, wool, metalwork, ware-goods, and (under license) artifact-related materials. <!-- added by CF-0038 --> Brinewick (CF-0038) sits at a trunk-confluence convergence of this spine — trunk-lock arithmetic, throughput ledger, and ward-reserve budget line at this node anchor the heartland commercial clearinghouse function; specific trunk-count and river-mouth connection details deferred to OPEN_QUESTIONS §Brinewick Trunk-Canal-Count Specifics. The city's primacy is stabilized by four compounding mechanisms (canal-geometry singularity — the confluence geography is geographic-specific and not replicable in adjacent polities at this scale; path-dependence of accumulated commercial capital across Charter-Era-depth generations; migration-gravity flywheel — labor pool self-reinforces by attracting further migrants; chartered-broker bench density — authentication-specialist concentration compounds across the seven-product-line canal-corridor illegitimate-service rail) and vulnerable to four named Breakage Points (trunk-lock failure, commercial-core ward-breach, estate-scandal charter-audit cascade, migrant-cohort overflow exceeding urban-poor infrastructure) — per ECONOMY §Breakage Points.
+  - **Secondary spine**: coastal shipping along the long coastline, connecting river-mouth ports.
+  - **Tertiary**: caravan roads through the drylands and across the mountain passes. <!-- added by CF-0046 --> The drylands tertiary network operates as a named caravan-corridor institutional-cultural complex (CF-0046): a node-network of wells, gate-stops, villages, and caravanserais under caravan-rotation social form (CF-0024 substrate) organizing traffic along thirst-geography. Corridor nodes are water-gated — caravans rotate between wells at distances calibrated to draft-beast range and water-discipline; gate-stops mark transitions between corridor-segments and settlement-jurisdiction; caravanserai are multi-family merchant-association-managed overnight-hosting institutions (per CF-0037 drylands structural-absence annotation); villages are settlement-adjacent supply-run origins providing runner-reached emergency-response capacity. Drought cycles pulse corridor traffic — drought-thin years compress rotation, drought-break years swell caravan traffic and water-pressure at corridor nodes. Drylands corridor institutional thinness (thin civic registry, no civic-court reach, caravan-master corridor-internal customary adjudication) is geographic-substrate-stabilized: heartland civic-registry infrastructure physically cannot propagate along drylands corridors because canal-based institutional-export vectors have no water-substrate to float on. Drylands polities' institutional posture is a regional-consensus uncontested pattern, not a Charter-Era structural-asymmetry axis.
+  - **Bardic circuit**: a customary route, distinct from commercial trade, that traveling performers follow tavern-by-tavern through the heartland and into selected drylands and highland nodes. <!-- added by CF-0024 --> The circuit also serves as informal contract-relay: reputable adventurer-contractors (CF-0024) often learn of work through bardic transmission, and contracted bards (extension of CF-0017) carry hire-notices between towns that lack permanent posting infrastructure, compete with scribes for narrative-custody authority, and compose the named-veteran reputations that travel inter-polity. <!-- added by CF-0044 --> A named cross-regional cultural-borrowing pathway operates on the drylands segment of the bardic circuit: drylands short-poetry stranger-hospitality verse (CF-0044) is absorbed by circuit-bards traversing drylands corridors and transported one-way into canal-heartland taverns as bardic-performance material (canal-heartland audiences recognize "drylands cadence" without the source stranger-exchange protocol). This parallels existing one-way cultural flows (highland clan-song into canal-heartland via highland migrants; fen-marker-reed semantic register via monastic communication). The stranger-exchange PROTOCOL itself stays drylands-scoped — venue-and-host binding (caravanserai / wayhouse / well-side + resident-drylander host) prevents return-transplantation; verse FRAGMENTS travel, the register does not.
+  - <!-- added by CF-0044 --> **Drylands regional cultural-identity axis (caravan-corridor hospitality-verse extension)**: the drylands trade corridor carries not only commercial flows but a regional cultural-identity register — drylands short-poetry stranger-hospitality (CF-0044) operates at caravanserai, wayhouse, and well-side stranger encounters along the tertiary caravan roads, as a hospitality-protocol distinct from canal-heartland tavern-vouch (CF-0024) and from bardic-circuit performance (CF-0017). Non-chartered folk-practice; no civic-procedural infrastructure attaches; the convention is regional-cultural texture on the geographic substrate of drylands caravan corridors, not a trade-infrastructure institution.
+  - <!-- added by CF-0037 --> **Heartland overland connector-route web**: in addition to the canal spine (which carries commercial bulk), an overland road network connects canal towns to settlements canal traffic does not reach — market-feeder branches off the trunk canal, overland routes between adjacent canal-corridor towns, approaches to mountain-east passes, drylands-border road segments. This network was implicit in CF-0034's wildland-road register (see §Predator Zones below) but is here made explicit as the GEOGRAPHIC HOST for the family-handled waystation tradition (CF-0037). Connector-route traffic is carriers, contractors, hunters, traders, bardic-circuit performers, and charter-day pilgrims; cargo is small-goods and passenger, NOT canal-bound bulk. Highland clan-border roads and mountain-east valley-pass approaches similarly host the connector-route function in their respective regions.
+  - <!-- added by CF-0037 --> **Highland clan-border roads**: between clan territories and between highland and heartland, customary roads carry seasonal trade, kin-visiting, and outland-band passage where clan-elder sanction permits. Family-handled waystations (CF-0037) sit at clan-border approach points where clan custom permits non-kin hospitality.
+  - <!-- added by CF-0037 --> **Mountain-east valley-pass approaches**: roads ascending to the high passes carry seasonal trade (open in summer, closed in winter per Climate Bands above) — silver, copper, iron downward; grain and traded goods upward. Family-handled waystations (CF-0037) cluster at the approach-towns and at lower-pass rest-spurs where the road is open long enough to sustain the household enterprise; high-pass stations close half the year.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0017
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

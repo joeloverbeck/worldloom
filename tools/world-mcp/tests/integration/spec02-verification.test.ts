@@ -21,9 +21,11 @@ import {
 } from "../fixtures/build-fixture";
 import { destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
+const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+
 function extractContractKeyTree(): Record<string, string[]> {
   const contractPath = path.join(
-    "/home/joeloverbeck/projects/worldloom",
+    REPO_ROOT,
     "docs",
     "CONTEXT-PACKET-CONTRACT.md"
   );

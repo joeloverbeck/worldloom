@@ -1,0 +1,70 @@
+change_id: CH-0010
+date: 2026-04-19
+initiating_proposal: briefs/animalia-interspecies-conflicts.md
+change_type: addition_with_qualification
+affected_cf_ids:
+  - CF-0036
+affected_fact_ids:
+  - CF-0017
+  - CF-0024
+  - CF-0026
+  - CF-0033
+  - CF-0034
+  - CF-0035
+affected_files:
+  - worlds/animalia/WORLD_KERNEL.md
+  - worlds/animalia/INVARIANTS.md
+  - worlds/animalia/PEOPLES_AND_SPECIES.md
+  - worlds/animalia/TIMELINE.md
+  - worlds/animalia/GEOGRAPHY.md
+  - worlds/animalia/INSTITUTIONS.md
+  - worlds/animalia/ECONOMY_AND_RESOURCES.md
+  - worlds/animalia/EVERYDAY_LIFE.md
+  - worlds/animalia/OPEN_QUESTIONS.md
+  - worlds/animalia/MYSTERY_RESERVE.md
+  - worlds/animalia/CANON_LEDGER.md
+change_scope:
+  geographic: global
+  temporal: cyclical
+  social: public
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: narrows_via_firewalls_and_expands_via_new_entries
+latent_burdens_introduced:
+  - LB-1 interspecies-prejudice civic suppression-vs-unsealing convention (latent sixth-axis candidate; joins CF-0034 bandit-extradition and CF-0035 trophy-legality latent-burdens as three parallel sixth-axis watch-items)
+  - LB-2 single-species exclusionary settlement civic-registry polity-status and extradition-dispute precedent
+  - LB-3 interspecies-cannibal survivor-witness civic-registry status and restoration-rite convention per polity (parallel CF-0034 LB-2 liberated-slave reintegration)
+  - LB-4 silenced-witness stratum compensation / pension / retaliation-complaint convention in polities where civic-suppression is systematic
+  - LB-5 cross-species predation vs ordinary homicide magistrate charging-tier asymmetry (sealed-docket cannibal-case evidentiary standards)
+  - LB-6 CF-0026 clergy bifurcation case law for aspectualizing-vs-abolitionist positions on silencing-protocol cooperation per polity
+  - LB-7 sectarian supremacist movement licensure / proscription status per polity
+  - LB-8 species-specific progenitor-cult internal-refutation discipline durability across regions
+summary: |
+  Formalizes interspecies-friction spectrum already implicit in WORLD_KERNEL §What Is Ordinary (species instinct-jokes) and §What Is Taboo (bodily- mocking in mixed company), extending the pattern into labor-prejudice, exclusionary settlements, supremacist doctrine (contested-canon sectarian belief, NEVER world-truth), cannibal-fringe (CF-0034 raid-and-enslave cannibal-edge sub-subset with distinct stabilizer set), and civic-silencing strata. Rule 6 anti-silent-retcon framing: formalization not retcon, parallel to CF-0034's formalization of implicit banditry mentions. SOC-1 preserved without exception (friction is individual/sectarian, NOT world-truth hierarchy); INVARIANTS SOC-1 CH-0010 clarification added. Six modification_history entries on CF-0017 / CF-0024 / CF-0026 / CF-0033 / CF-0034 / CF-0035. M-5 FIFTH firewall cross-application (sectarian "mere beasts" is PATHOLOGICAL CATEGORY ERROR, NOT sentience-boundary blur); M-4 supremacist-reading firewall extension; M-7 sub-specialty holding clause (silenced-contractor absorbed into CF-0024 failed- reputation feeder per Rule 3); M-14 sub-register cross-reference (cannibal-captain mythography WITHIN M-14); M-2 anti-supremacist- catastrophic-custody extension; M-10 THIRD cross-application (hunter/ bandit-survivor corridor-folklore as selection-bias). Three NEW MR entries per Rule 7 obligation: M-16 (supremacist-cannibal doctrine antiquity — ancient vs recent vs perennial contested register); M-17 (demographic scope and prevalence of interspecies-cannibal cases — civic-suppression-generated bounded unknown); M-18 (antiquity of civic-suppression protocol — Charter-Era founding vs Layer-3 Incident Wave response vs Layer-4 politicization consolidation, paralleling M-13 structure). Six-critic synthesis; Systems/Economy divergence on sixth-axis candidacy resolved via Politics/Institution CF-0034 precedent to latent-burden-watched status. Charter-Era settlement STRAINS, does not break; five-axis polity-asymmetric stress register preserved; three parallel sixth-axis latent-burden watch-items now tracked (CF-0034 bandit-extradition / CF-0035 trophy-legality / CF-0036 suppression- unsealing-convention). Adjudication record: adjudications/PA-0009- accept_with_required_updates.md. Key critic convergences: Rule 6 formalization framing (Continuity Archivist); Rule 3 silenced-contractor absorption into CF-0024 feeder (Systems/Economy + Mystery Curator); euphemistic "grave-violation-of-person" sealed-magistrate-docket specification (Politics/Institution); per-cluster EVERYDAY_LIFE patches with structural-absence annotations for drylands and fenlands clusters (Everyday-Life); species-embodiment-biological allegory-collapse firewall and aftermath-household-vocabulary cannibal-material template (Theme/ Tone); M-5 fifth cross-application + M-4 extension + three new MR entries (Mystery Curator).
+reason:
+  - Formalizes interspecies-friction patterns already implicit in WORLD_KERNEL and related domain files without changing SOC-1 or turning sectarian belief into world-truth hierarchy.
+  - Extends the canon into labor prejudice, exclusionary settlements, civic silencing, and cannibal-fringe texture while preserving the existing five-axis Charter-Era stress register.
+  - Discharges Rule 7 obligations by recording the required Mystery Reserve firewall extensions and the three new bounded unknowns M-16, M-17, and M-18.
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - PEOPLES_AND_SPECIES.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+  - CANON_LEDGER.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true

@@ -1,0 +1,65 @@
+id: CF-0019
+title: Occult text fragments can be purchased
+status: hard_canon
+type: text_tradition
+statement: |
+  Fragmentary occult texts — partial translations, copied excerpts, recovered inscriptions — can be purchased through chartered brokers and through black- market channels. They are studied empirically by guild apprentices and by private scholars. No complete authoritative text exists. The most operationally dangerous subset — artifact-creation grimoires (CF-0021, CF-0023) — circulates predominantly on black markets.
+scope:
+  geographic: regional
+  temporal: current
+  social: restricted_group
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - economy
+  - law
+  - religion
+prerequisites:
+  - literacy (partial-not-elite per CF-0009 economy and per Invariant DIS-2)
+  - coin or barter for purchase
+distribution:
+  who_can_do_it:
+    - literate buyers with means
+  who_cannot_easily_do_it:
+    - illiterate, poor, or remote populations
+  why_not_universal:
+    - literacy partial; fragments expensive; legal scrutiny in some polities
+costs_and_limits:
+  - fragments are partial and contradictory
+  - possession can attract guild and civic attention
+  - sectarian movements use fragments for doctrinal claims that scholars dispute
+  - artifact-creation grimoire subset is the most dangerous and most sought
+  - mere possession of creation grimoires can carry capital penalty in punitive polities
+visible_consequences:
+  - private libraries holding fragments
+  - black-market fragment trade
+  - sectarian use of fragments to legitimate doctrine
+  - apprentice extractors study fragments as part of training
+  - operational artifact-creation grimoires (CF-0021) circulate on black markets
+  - possessed wares occasionally surface in scholar households and broker inventories
+  - kiln explosions in artisan quarters trace back to grimoire-fragment use
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0003
+    - CF-0004
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Direct from brief. Supports Invariant DIS-2. Modified 2026-04-18 by CH-0002 (CF-0021): visible consequences and costs extended to include grimoire use in modern artifact creation. Modified 2026-04-18 by CH-0004 (CF-0028): entrance-knowledge cartography and related ruin-location intelligence added as a new lethal-contraband subcategory distinct from grimoire-fragments. Enforcement mechanism is primarily killing-by-rival (inter-expedition hostility over site intelligence), though civic prosecution exists in charter polities as a secondary layer. Distinct enforcement dynamic from grimoire-fragment capital penalty: grimoires circulate on black markets under civic prosecution risk; ruin-cartography circulates under killing-enforcement with civic prosecution reactive. Bardic-oral deniability operates as a workaround parallel to the CF-0023 grimoire workaround — a song about an expedition route is not a ledger entry. The broader occult-fragment corpus (CF-0019) now encompasses two distinct lethal-contraband streams: artifact-creation grimoires (CF-0023) and ruin-cartography (CF-0028), sharing custody mechanics but distinct in content, enforcement, and custodial intent.
+modification_history:
+  - change_id: CH-0002
+    originating_cf: CF-0021
+    date: 2026-04-18
+    summary: "extension: visible consequences and costs extended to include grimoire use in modern artifact creation"
+  - change_id: CH-0004
+    originating_cf: CF-0028
+    date: 2026-04-18
+    summary: "qualification: entrance-knowledge cartography added as new lethal-contraband subcategory distinct from grimoire-fragments, with killing-by-rival primary enforcement"

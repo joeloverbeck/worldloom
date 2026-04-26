@@ -1,0 +1,50 @@
+id: SEC-ECR-001
+file_class: ECONOMY_AND_RESOURCES
+order: 1
+heading: Currency
+heading_level: 2
+body: |-
+  - **Copper** — petty transactions, day-labor wages, market purchases, tavern bills, tolls.
+  - **Silver** — substantial transactions, monthly wages of skilled tradesfolk, contracts, taxes, larger guild dues.
+  - **Higher denominations** — gold and special-issue coinage exist in major polities and for cross-polity trade and noble accounts; they are rare in ordinary life.
+  - **In-kind contractual payment** — livestock (cattle, sheep, goats by region), grain, salt, peat, timber, ceramic ware, woven cloth. Large rural contracts often stipulate in-kind delivery; this can impose logistical burdens on the recipient (transport, housing, resale).
+  - **Bills and ledger-credit** — chartered guilds and large estates use ledger-credit and written bills for inter-city accounts; the civic registry archives standard contract forms.
+
+  The brief specifies that compensation can be coin or in-kind and that payment can impose logistical burdens. This is honored in ordinary practice: a wagon-driver paid in two yearling calves must arrange transport and pasture; a tavern-musician paid in casks of ale must arrange resale.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0005
+  - CF-0008
+  - CF-0009
+  - CF-0013
+  - CF-0015
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

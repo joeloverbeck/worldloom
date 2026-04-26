@@ -1,0 +1,46 @@
+body: |-
+  Adventurer-contractors (CF-0024) provide auxiliary labor to the chartered artifact system under civic and guild commission. They do NOT perform extraction, ward inscription, ceramic-vessel containment, or neutralization — those functions remain guild-chartered under CF-0006, CF-0007, CF-0008. What contractor-auxiliaries provide:
+
+  - **Extraction-escort labor** — security for dig-site crews and dredger crews recovering artifacts from canal beds, quarries, foundation sites, and ruin-zones. Extraction itself remains guild work; contractors stand perimeter, handle bystander suppression, and move material under guild supervision.
+  - <!-- added by CF-0028 --> **Ruin-expedition security and scholarly auxiliary labor** (CF-0028) — an expedition-scale extension of extraction-escort. Expedition contractors stand perimeter at enterable ruin sites (CF-0027), handle bystander suppression against rival expeditions, manage porters and ordinary-trades (cooks, teamsters, scribes, pack-handlers, boat-guides), and move material under chartered-guild supervision where jurisdiction holds. Scholar-contractors (CF-0023-literate researchers, authentication specialists, Maker-archaeology scholars) provide the non-martial professional layer. Expedition security does NOT perform extraction, ward inscription, ceramic-vessel containment, or neutralization — those remain chartered (CF-0006, CF-0007, CF-0008). Occult-fallout specialists (CF-0025) are the post-incident containment stratum when guardian-construction activation or expedition-contamination follows. ONT-2 firewall holds: expedition-contractor craft is empirical reconnaissance, field-extraction prioritization, squad-wipe survival — not magic-use.
+  - **Occult-fallout specialists (CF-0025)** — mundane containment of the consequences of artifact activation or breach: suppression of rage-induced animals (trap, kill, pen), forced isolation of victims producing toxic breath or other bodily manifestations (forced masking, zone quarantine), perimeter control during guild response. These specialists are reputational/occupational, not practitioner-magical. They are not grimoire-readers, not ward-inscribers, not crafters. ONT-2 firewall holds: what a specialist knows is how to manage fallout empirically, not how to manipulate artifacts.
+  - **Commission gate** — occult-fallout work is normally engaged by civic magistrate, ward-inspector, or chartered extraction-guild under commission. Unlicensed fallout-response carries legal risk in most polities; in tolerant polities, a tavern-vouched veteran responding to a clear public hazard may be retroactively blessed rather than prosecuted. Opportunistic brokers occasionally commission contractors directly, creating friction with the containment-wright tradition that prefers chartered-only response.
+  - **Empirical-knowledge limits** — specialists accumulate empirical pattern-knowledge across careers. This knowledge is contested canon, not world-level authority on Maker-Age origin (M-1), catastrophic-class origin (M-2), or vessel-hosted agency (M-6). Specialist field-lore does NOT constitute evidence at world level for any mystery-reserve position; bardic songs about famous specialists are narrative-custody material, not knowledge claims. The bounded unknown this creates is Mystery Reserve M-7.
+  - **Principled refusers (CF-0026)** — a visible moral/religious minority of veterans refuse artifact-fallout work on principle. Reasons include theological (common-pantheon reform current; progenitor-cult doctrine; Maker-skeptical conviction), biographical (witnessed a bad job), or personal oath. The refusal is ethical, not metaphysical; it does not imply any world-level claim about artifacts or vessel-agencies.
+
+  ---
+extensions:
+  - body: "**Canal-heartland corner-share / serious-share pay-split register (CF-0048)**: In canal-heartland CF-0024 contractor-auxiliary compensation practice on chartered-plus-auxiliary INFORMAL cellar-job configurations — a chartered professional (containment-wright per CF-0006 ceramic-handler / ward-wright per CF-0007 / extraction-specialist per CF-0008) accompanied by a contractor-auxiliary performing lantern-hold / door-keep / one-fetch role-scope — the pay-split between the two parties uses a named bifurcation: the chartered professional takes the \"serious share\" and the auxiliary takes the \"corner-share\" (a customary copper-to-lower-silver tier calibrated to the auxiliary's role-scope). The register is canal-heartland oral-register vocabulary (transmitted via CF-0024 tavern-board posting + CF-0017 circuit-bard narrative-custody), distinct from sole-contractor flat-silver pay (CF-0024 sole-contractor configuration) and from fully-rostered chartered-extraction-team pay per guild charter (CF-0008). The register names a previously-implicit pay-tier WITHIN the existing CF-0024 contractor-auxiliary frame; it is NOT a new compensation institution, NOT a new pay-class, NOT a new contractor subtype (Rule 3 specialness-inflation firewall — parallel to CF-0034 / CF-0035 / CF-0042 / CF-0043 sub-specialty absorption precedents within CF-0024). Sibling regional registers exist with different vocabulary (highland clan-share under clan-elder-sanction; drylands caravan-share per CF-0046; fenland relay-summoning compensation); the corner-share register is canal-heartland-specific. Tavern-keeper vouch register (CF-0024 social asset) extends with \"corner-share-reliable\" as a competence register, separable from generic-job-completion vouch. Charter-audit-strict polities (Brinewick exemplar per CF-0038 + CF-0043) maintain a formal-vs-informal vocabulary divide: the register does NOT appear in civic-registry contract-template vocabulary; magistrate-docket exposure of informal corner-share retainer arrangements is a Brinewick-specific story-engine (CF-0038 biannual charter-audit cycle). SOC-4 chartered-guild monopoly preserved — the corner-share register is auxiliary pay-split, not chartered-work authority transfer; chartered professionals retain all chartered-work authority. AES-1 dry-professional pay-vocabulary cadence preserved (\"took the corner-share\" enters self-deprecating self-description register; the auxiliary names herself auxiliary, not chartered)."
+    change_id: CH-0021
+    date: 2026-04-26
+    label: Corner-share / serious-share named pay-split register for canal-heartland chartered-plus-auxiliary cellar-jobs
+    originating_cf: CF-0048
+file_class: MAGIC_OR_TECH_SYSTEMS
+heading: Auxiliary Contractor Labor (CF-0024, CF-0025)
+heading_level: 2
+id: SEC-MTS-002
+order: 2
+touched_by_cf:
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0019
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0035
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0043
+  - CF-0048

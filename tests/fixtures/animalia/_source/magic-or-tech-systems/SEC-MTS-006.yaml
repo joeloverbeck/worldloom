@@ -1,0 +1,41 @@
+id: SEC-MTS-006
+file_class: MAGIC_OR_TECH_SYSTEMS
+order: 6
+heading: Mundane Technology Notes
+heading_level: 2
+body: |-
+  Animalia is medieval-to-early-modern in technological character. Specific calls:
+
+  - **Metallurgy**: iron, steel, bronze for specialized work; copper and silver in coin and craft; gold rare; ceramic ware highly developed (containment-grade ceramic is a specialist subset).
+  - **Engineering**: canal locks, weirs, aqueducts (qanat in drylands), stone bridges in established polities, wood-and-stone construction common.
+  - **Power**: animal traction, water mills, wind mills (in some regions), human labor.
+  - **Recordkeeping**: parchment, wax tablet, civic-registry codices; movable type does not exist; broadsheets in big cities are hand-copied.
+  - **Weapons**: longsword, polearm, bow (raptor-folk archery noted), crossbow in some polities, light cavalry; gunpowder does not exist.
+  - **Medicine**: empirical herbalism, barber-surgery, basic anatomy, no germ theory.
+  - **Agriculture**: three-field-rotation in heartland, irrigated terrace in drylands, peat-bog husbandry in fens.
+  - **Communication**: courier, river-relay, signal-tower in some polities, broadsheet in cities.
+
+  The world is not steampunk. It is not cyberpunk. It is a working medieval-to-early-modern texture with one magical layer that everyone is afraid of.
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0019
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0035
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0043

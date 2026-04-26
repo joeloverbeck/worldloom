@@ -1,0 +1,113 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - squad-wipe mortality from guardian constructions (CF-0029); whole expeditions lost
+  - inter-group ruin-competition escalating to skirmishes and regional armed conflict; levy and mercenary-band mobilization
+  - knowledge-killings around ruin-entrance information (distinct enforcement from civic prosecution; parallels CF-0019 grimoire dynamics but with killing-by-rival as primary mechanism)
+  - Charter-Era anti-monopoly-of-force norms under acute stress (exceeds CF-0024 "strains rarely breaks" in some regions)
+  - widow-of-the-expedition category without charter pension (distinct from CF-0024 widow-of-the-job)
+  - contamination drift from failed expeditions extending sealed-quarter perimeters
+  - patron-funded expedition reports are partisan-canon; narrative-custody contest extends CF-0024 dynamic (fifth custody channel)
+  - expedition-syndicate shares are volatile value-store without civic-registry recognition (shadow-equity market)
+  - labor-market cannibalization — expedition demand pulls top-silver veterans from ward-breach response
+  - authentication-specialist market susceptible to cartel formation (regulatory capture risk)
+distribution:
+  who_can_do_it:
+    - estate-owners and nobility of any species (SOC-1) with sufficient capital
+    - chartered polity-community syndicates
+    - chartered artifact-extraction guilds within jurisdictional zones
+    - sectarian Maker-mystic movements with capital (rarely)
+    - speculator-collectives pooling capital
+  who_cannot_easily_do_it:
+    - ordinary households (wealth-gate)
+    - highland clan communities (clan-elder sanction usually refused; Maker-site desecration taboo)
+    - fen stilt-villages (no wealth-gate satisfied; participate only as specialist-responders to other expeditions' fallout)
+    - principled-refuser lineages (CF-0026 extended)
+    - poor polities (may sell civic permissions to outside funders, generating friction)
+  why_not_universal:
+    - high capital requirement for dozens of professionals, provisioning, transport, security, legal processing
+    - squad-wipe lethality attrits the veteran pool
+    - chartered-guild legal-disposition bottleneck raises the break-even threshold
+    - entrance-knowledge killings and jurisdictional contests add friction costs
+    - most hauls yield moderate returns (pottery, precious metals), not catastrophic-class wealth
+    - institutional / cultural / religious opposition (containment-wrights, progenitor-cult, CF-0026 refusers)
+    - contamination drift from failed expeditions punishes aggressive polities
+domains_affected:
+  - labor
+  - economy
+  - warfare
+  - law
+  - settlement_life
+  - religion
+  - status_signaling
+  - architecture
+  - language
+  - memory_and_myth
+  - kinship
+id: CF-0028
+modification_history:
+  - change_id: CH-0007
+    date: 2026-04-18
+    originating_cf: CF-0033
+    summary: "clarification: dragoon perimeter response (CF-0033) and ruin-levy mobilization (CF-0028) are structurally distinct forces; may co-deploy at ruin-mouths without merger; categorical distinction preserved in civic registry, chain-of-command, and compensation structure"
+  - change_id: CH-0008
+    date: 2026-04-19
+    originating_cf: CF-0034
+    summary: "extension: two-threat expedition security model (guardian-wipe plus bandit-resistance in non-guardian occupied subsets); M-10 selection-bias deepening via bandit-occupation sample; security-roster rebalancing in corridors with bandit-occupation intelligence; M-1/M-2/M-9/M-10 firewall extensions acknowledged"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "named-polity-instance commitment: Brinewick (CF-0038) adopts SYNDICATE-LICENSING-WITH-CIVIC-AUDIT posture on funder-primacy; commerce-hub scale favors syndicate-participation over estate-patronage-monopoly; estate-patron funder-primacy claims contested in Brinewick magistrate docket; civic-audit of outskirts-estate artifact vaults recurring flashpoint; chartered-broker disposition fees from expedition recoveries constitute material civic-revenue stream. CF-0028 scope, distribution, and stabilizer structure unchanged"
+notes: |
+  Direct from briefs/animalia-ruin-expeditions.md. AES-1 guard clause: the expedition venture is HAZARD LABOR, not vocation-romance; bards narrate real-and-fictional exploits but veterans are dryly mocking of glory-talk per AES-1 precedent (CF-0020, CF-0024). Most retirements are "a middling purse and a scar," not jackpot fortune. In-register language: "expedition, contractor, extraction crew, funder, haul, resealed (officially), pension-bond, survivor's scrip, squad-wipe (dry), hazard-pay, bond-surety, broker, ruin-charter, inquest, widow's claim, Maker-era shard, inert fragment, crew-captain, veteran-for-hire, took the ruin job." Out-of-register language to AVOID: "adventurer's guild, quest, party, loot, dungeon, raid (heroic sense), chosen, destiny, legendary hero, epic, glory, magnificent treasure, ancient evil, defeating the dungeon, heroic last stand, legendary artifact (as self-description only — bardic inflation is in-register), chosen one, the call, glorious exploits (except in bardic irony)." Expedition-reports are partisan-canon; patron-commissioned bards write favorable accounts; civic-archive keeps prosaic records; guild records track disposition; black-market narratives sometimes closer to reality. Four-way narrative-custody contest (per CF-0024) is now five-way with expedition-reports as a distinct genre. Mystery Reserve M-7 extends to cover expedition-veteran reputation-genealogy. New M-9 governs the epistemic content of recovered Maker-knowledge. Adjudication record: adjudications/PA-0003-accept_with_required_updates.md. Modified 2026-04-18 by CH-0007 (CF-0033): clarification that dragoon perimeter response (CF-0033) and ruin-levy mobilization (CF-0028) are STRUCTURALLY DISTINCT forces in ruin-adjacent polities; the two forces do NOT merge. In adopting heartland polities with ruin-adjacent territory, dragoon perimeter response, CF-0028 ruin-levy mobilization, and expedition-band skirmish may co-deploy at the same ruin-mouth where a chartered-polity ward-breach declaration overlaps a ruin-expedition- conflict escalation zone. Magistrates adjudicate jurisdictional primacy on a per-incident basis with visible anxiety; the three forces remain categorically distinct in civic registry, chain-of-command, and compensation structure. Dragoon perimeter authority is civic-chartered with magistrate chain-of-command; ruin-levy mobilization is polity- duty-based with variable chain-of-command depending on the polity's adoption of CF-0028 levy framework; expedition-band skirmish is private-contract / patron-syndicate labor. This is the load-bearing structural distinction that prevents ruin-adjacent dragoon-adopting polities from collapsing the three forces into a single ruin-authority category (which would violate both CF-0028 expedition-venture scope boundary and CF-0033 dragoon mission-scope commitment). Expedition- competition regional armed conflict patterns (CF-0028 Layer 4 pressure) are NOT resolved by dragoon adoption; dragoons do not deploy into expedition-conflict contexts outside ward-breach declaration predicate within home polity. Adjudication record: adjudications/PA-0006-accept_with_required_updates.md. Modified 2026-04-19 by CH-0008 (CF-0034): expedition security faces a TWO-THREAT model in some corridors — guardian-wipe hazard (CF-0029) at the catastrophic-class end PLUS bandit-resistance hazard where endemic bandit groups (CF-0034) occupy non-guardian enterable ruin subsets as shelter. Bandit-occupied ruins are preferentially non-guardian-active (guardian-wipe eliminates occupying bandits per CF-0029); this is a survivor-bias selection pattern that DEEPENS rather than resolves M-10 guardian-presence heterogeneity. Expedition teams entering suspected- bandit-occupied ruin subsets face a categorically different threat profile from empty-ruin entry: armed bandit resistance is human-scale and negotiable-under-duress in ways guardian activation is not. Expedition-ventures accordingly rebalance security rosters in corridors where bandit-occupation intelligence is available (more CF-0024 contractor-stratum martial veterans, fewer scholar-contractors). Bandit-custody of incidentally-encountered Maker-material routes through existing CF-0023/CF-0028 illegitimate-custody channels per M-9 firewall — bandit-occupation does NOT create a seventh Maker- knowledge custody channel. The M-10 selection-bias deepening is LOAD-BEARING: any institution treating bandit-corridor-lore as guardian-predictor violates M-10's disallowed cheap answer. Mystery Reserve firewalls extended (M-1 shelter-scope, M-2 anti-catastrophic custody, M-10 selection-bias). Adjudication record: adjudications/PA-0007-accept_with_required_updates.md.
+prerequisites:
+  - discovered enterable ruin site (CF-0027)
+  - patron capital (wealth-gate; syndication partially erodes)
+  - adventurer-contractor pool (CF-0024 stratum)
+  - chartered-guild cooperation for containment / ward roles in most polities
+  - polity jurisdiction or permission (contested often)
+  - SOC-3 coin-contract enforcement for expedition contracts
+required_world_updates:
+  - TIMELINE
+  - GEOGRAPHY
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - MAGIC_OR_TECH_SYSTEMS
+  - EVERYDAY_LIFE
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0027
+    - CF-0024
+    - CF-0008
+    - CF-0020
+  direct_user_approval: true
+statement: |
+  Wealthy patrons (estate-owners, nobility, prosperous communities, capital-pooling syndicates) arrange multi-professional expeditions into enterable Maker-Age ruin sites (CF-0027). Typical staffing includes adventurer-contractors (CF-0024) for martial security, scholars and researchers for artifact and inscription work, containment-wrights and ward-wrights on guild commission for procedural roles, authentication specialists, and ordinary labor (cooks, teamsters, porters, scribes, pack-handlers, boat-guides). Expedition outcomes range from inert-yield (pottery and precious metals, no magical finds) to catastrophic squad-wipe (guardian-construction encounters per CF-0029). Successful expeditions yield career-ending retirement payouts for surviving contractors; unsuccessful expeditions yield widows. Inter-group competition for contested sites has escalated in documented cases to skirmishes and regional armed conflicts involving levies and mercenary bands. Catastrophic sites are officially resealed (civic authority; enforcement variable). Bardic-circuit performers carry expedition tales real and fictional, often as contracted narrative-custody (CF-0017 extension per CF-0024). Expedition-reports are partisan-canon, not objective archival record (anti-propaganda clause).
+status: hard_canon
+title: Patron-funded ruin-expedition venture is a recognized institution
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - named expedition ventures under patron sponsorship; public at venture level, secret at entrance-detail level
+  - tavern-board and lockmaster-wall postings for expedition hires; patron-agent scouts recruit at bard-nights
+  - contract-posting variants in all five EVERYDAY_LIFE clusters with cluster-specific signatures
+  - bardic subgenre of expedition cycles (real and fictional) circulating tavern circuit
+  - civic-archive expedition-roster and disposition-inventory records
+  - magistrate docket for funder-primacy vs guild disputes, knowledge-killing prosecutions, inter-group skirmish prosecutions, resealing-authority disputes
+  - sectarian pilgrimage to ruin sites (per GEOGRAPHY §Sacred and Cursed Terrain)
+  - estate-level artifact-vault architecture and dowager-gossip ledger of funded expeditions
+  - ruin-levy as new polity-duty category in contested regions
+  - inter-polity extradition cases for expedition-contractors crossing licensing lines
+  - '"took the ruin job" cultural register; "dirt bit back" expedition-loss euphemism'
+  - place-names and street-names commemorating regional armed conflicts over ruin disputes
+  - ordinary-trade participation (cooks, teamsters, porters, scribes, pack-handlers, boat-guides) — expedition consumes ordinary labor, not only heroic
+  - most hauls mundane (pottery, precious metals, inscribed shards); magical-find is the exception, not the rule

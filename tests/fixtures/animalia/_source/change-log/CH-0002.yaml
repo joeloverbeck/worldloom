@@ -1,0 +1,45 @@
+change_id: CH-0002
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0003
+  - CF-0004
+  - CF-0008
+  - CF-0019
+summary: |
+  Adds three new Canon Fact Records (CF-0021 modern artifact creation; CF-0022 vessel-hosted-agency non-sentience; CF-0023 partial Maker-Age translations) and qualifies four existing ones (CF-0003, CF-0004, CF-0008, CF-0019). Adds Mystery Reserve entry M-6 (The Nature of Vessel-Hosted Agencies). Updates 11 of 13 mandatory world files. Source:  briefs/animalia-artifact-creation.md, processed via canon-addition skill with full multi-critic synthesis (Phase 6b) using six parallel sub-agents (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator).
+reason:
+  - user-approved canon addition from briefs/animalia-artifact-creation.md
+  - "Phase 11 verdict: ACCEPT_WITH_REQUIRED_UPDATES"
+  - multi-critic synthesis confirmed scope, retcon framing, and required guards
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+  - CANON_LEDGER.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+notes: |
+  CF-0004 receives a QUALIFICATION rather than ontology_retcon (per Continuity Archivist synthesis: change is distributional, not ontological; CF-0019 already permitted the upstream of grimoire purchase). The Maker-Age origin remains hard canon; CF-0021 establishes the marginal modern stream as a logged exception. The qualification is recorded here per Rule 6 (No Silent Retcons). Mystery Reserve M-1 (what ended Makers), M-2 (catastrophic-class origin), M-3 (mythical-species spontaneous births), M-4 (progenitor figures), and M-5 (sentience as artifact effect) are all preserved with explicit guards: M-1 cannot be cited as evidence by the modern parallel; M-2 is protected by the no-catastrophic-class scope ceiling on CF-0021; M-5 is protected by the firewall clause in CF-0022. New M-6 is added for the bounded unknown CF-0021 creates (vessel-hosted-agency mechanism). Adjudication record: adjudications/PA-0001-accept_with_required_updates.md.

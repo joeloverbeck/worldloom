@@ -1,0 +1,19 @@
+common_interpretations: []
+disallowed_cheap_answers:
+  - Any named individual gargantuan monster settled as historical at world level ("The True Thing in the Deep Selk was a seven-meter artifact-contaminated aurochs-form, encountered in year X, killed in year Y" — forbidden as canonical resolution)
+domains_touched:
+  - GEOGRAPHY (deep strata
+  - deep cave systems
+  - hill-country interior)
+  - EVERYDAY_LIFE (hunter / prospector / highland wilderness-fringe dread register; drylands corridor wilderness lore)
+  - MAGIC (firewalled via M-1 / M-2 / M-5 / M-8 adjacency — gargantuan-underground sits at the intersection of four mystery-reserve surfaces and is disciplined against touching any of them)
+  - MEMORY_AND_MYTH (bardic cycle material; M-14-parallel hazard-mythography register per CH-0009 M-14 cross-reference).
+extensions: []
+future_resolution_safety: low
+id: M-15
+knowns:
+  - Tales circulate among prospectors, hunters, deep-cave expedition survivors, and bardic cycles of gargantuan, unimaginably capable beasts dwelling in deep cave / deep underground strata of Animalia
+status: passive
+title: What Lives Deep Underground? Gargantuan-Underground-Monster Rumor Reliability
+unknowns:
+  - Whether any such creature exists as the rumors describe, whether they exist at smaller scale than legend inflates, whether they are artifact-mutated beasts (CF-0035 lineage) scaled beyond surface counterparts, whether they are geologically-isolated megafauna survivors of pre-historic eras, whether they are purely bardic composites serving cautionary-register function, or whether they are some mixture

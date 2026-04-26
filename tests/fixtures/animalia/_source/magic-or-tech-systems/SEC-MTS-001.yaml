@@ -1,0 +1,171 @@
+id: SEC-MTS-001
+file_class: MAGIC_OR_TECH_SYSTEMS
+order: 1
+heading: The Artifact System
+heading_level: 2
+body: |-
+  ### Source
+
+  The vast majority of magical artifacts originate in the **Maker Age** (see TIMELINE.md, Layer 1). The Maker Age remains the dominant source by orders of magnitude. <!-- added by CF-0021 --> A marginal modern stream of crafter-attempted artifacts (CF-0021) exists, produced from leaked partial-translation grimoires (CF-0023); these outputs are inferior in stability and power to Maker-Age work, never reach catastrophic-class effect, and are recognizably distinguishable by craft signature. <!-- added by CF-0040 --> The Maker-Age artifact corpus follows an inverse strength-rarity distribution (CF-0040): mundane-tier artifacts with near-imperceptible effects (breeze-dolls, tick-mirrors, weak coin-sorting plates, scar-rubbers) are the LARGEST share of the corpus and are commonly unearthed in ordinary-life contexts (canal silt, beach sand, peat cuttings, furrow turnovers, child-play, animal burrowing, canal dredging, flood erosion); moderate-effect artifacts are rarer; catastrophic-class artifacts are the rarest. The mundane tier is an EXPLICIT NAMING of DIS-1's "most inert junk" band reframed — most of what DIS-1 described as "inert" is in fact LOW-TIER ACTIVE, carrying per-artifact CAU-1 contamination clauses, NOT a new distribution tier. <!-- added by CF-0041 --> A distinct subset of Maker-Age artifacts and buildings were DELIBERATELY sealed by the Makers themselves (CF-0041) using complex engineering — deep earth-fill burial, engineered hydrological flooding, or reinforced masonry entombment. Sealed-artifact containers remain mechanically INERT until the container is opened or the seal is breached; opening an unknown sealed container is a feared and dread-laden cultural moment ("the hair goes up when the seal breaks"). The Maker-sealing technique itself is LOST — not present in the leaked grimoire corpus (CF-0023) and not reproducible by modern crafters (CF-0021). Deliberate Maker-original-burial commits hazard-awareness and response-practice ONLY; it does NOT resolve what the Makers feared, whether burial preceded / accompanied / postdated the fall, or the nature of the Maker fall itself (M-1 anti-evidence firewall, CH-0014). Maker-buried-building archaeology yields structural / engineering / artifact-disposition data only — NOT Maker-cognitive content, NOT a seventh Maker-knowledge custody channel (M-9 anti-custody-channel firewall, CH-0014). Sealed-inert mechanism is CATEGORICALLY DISTINCT from CF-0029 guardian-construction activation (M-8 distinct-origin firewall, CH-0014). Buried-building presence does NOT predict catastrophic-class or guardian-construction presence (M-10 FOURTH anti-predictor firewall, CH-0014). <!-- added by CF-0039 --> Maker-Age artifacts exhibit destruction-resistance (CF-0039) as a property of the artifact-as-locus itself: attempts to destroy a Maker-Age artifact BIND the effect more deeply into the vessel, elevating the material resistance of the substrate (wood hardens to behave like strong metal; ceramic sets harder; metal refuses the hammer). Many Maker-Age artifacts are consequently indestructible by any current-age technique. The destruction-resistance mechanism is unknown (new Mystery Reserve M-20). Modern crafter outputs (CF-0021) do NOT inherit destruction-resistance and remain destructible by ordinary means, preserving the CF-0021 "inferior" stabilizer register and keeping the learned-craft-of-vessels clearly bounded. What people can do with Maker-Age artifacts is **find, identify, contain, neutralize, and (rarely, partially, and at risk) use** them; what people can additionally do, with grimoire fragments and great risk, is **attempt to make new artifacts** (see "Modern Creation" below). Whether the full Maker technique could ever be relearned remains Mystery Reserve M-2; the operationally usable leaked corpus does not contain catastrophic-class instructions. <!-- added by CF-0027 --> A distinct subset of Maker-Age material originates in enterable ruin sites (CF-0027) — recovered via organized patron-funded expeditions (CF-0028) rather than piecemeal foundation or canal digging. Enterable-ruin recoveries include magical artifacts subject to funder-primacy convention (CF-0030) but never catastrophic-class finds; a rare subset of enterable sites contain magically-animated guardian constructions (CF-0029) that cause squad-wipe lethality during expedition attempts. Guardian constructions are world-level non-sentient (ONT-1 preserved; see "Maker-Age Guardian Constructions" below). <!-- added by CF-0035 --> A parallel long-timescale effect of uncontained Maker-Age artifacts in wilderness-distal sites — uncontained by earthquake / flood / burrow / slow soil-creep exposure over centuries — is the incidental biological effect on untargeted non-sentient fauna, producing rare surviving artifact-mutated beasts (CF-0035) exhibiting morphological and capability alteration. This is an incidental environmental effect, NOT intentional craft: mutated beasts are not a weapon category or a recovery target; they are the faunal signature of the Maker debt. Mechanism is DISTINCT in origin from CF-0029 guardian constructions (incidental biological effect on fauna vs intentional craft with activation logic) — bounded-unknown tracked under new Mystery Reserve M-15 for the gargantuan-underground scale-tail. Scale firewall per M-2: ALL mutated-beast effects are LOCAL at squad-wipe maximum; NO cascade / mass / urban / civilization-killing capability. Non-sentience preserved without exception (ONT-1 / M-5 firewall, fourth cross-application). See "Long-Term Consequences" below.
+
+  ### Access Path
+
+  Access to an artifact's effect requires:
+  1. **Physical possession** of the artifact;
+  2. **Activation knowledge**, which is artifact-specific and often partial;
+  3. **Material conditions** the artifact requires to function (some need water, some need direct sunlight, some need contact with a living host);
+  4. **Survival of the consequences**.
+
+  Many artifacts activate accidentally — the brief's example of an unearthed device corrupting canal waters is paradigmatic. Many never activate at all and are classified inert.
+
+  <!-- added by CF-0041 --> **Sealed-inert activation (CH-0014)**: A subset of Maker-Age artifacts were deliberately sealed within containers, buildings, or substructures by the Makers themselves using now-lost engineering technique (CF-0041). Such artifacts are observably INERT while the container or seal remains intact — no effect propagates, no bleed-through register, no ward-attrition. The moment the container is opened or the seal is breached, the artifact within activates with full CAU-1 cost: whatever effect the artifact bears begins to propagate from that moment. "Unsealing" is therefore a feared act across all regions of Animalia and has consolidated its own multi-guild civic-response protocol (chartered extraction-guild ward-inspector + civic-watch + containment-wright + dredger-or-excavation foreman). The sealing-technique itself CANNOT be reproduced by current-age capability — the leaked CF-0023 grimoire corpus does not contain sealing instructions, and CF-0021 crafters produce ordinary (non-sealing) vessels. Containment-wrights can OBSERVE the sealed-inert phenomenon as empirical pattern, but they cannot replicate original Maker sealing; chartered containment procedure operates at a tier below Maker-original-sealing (CF-0027 civic-administrative resealing of enterable ruins is categorically distinct — it walls off a hazard AROUND a site; Maker-original-sealing locked individual artifacts or entire buildings from the inside). Sealed-inert mechanism is CATEGORICALLY DISTINCT from CF-0029 guardian-construction activation (M-8 distinct-origin firewall, CH-0014): sealed-inert is container-suppression breached by opening; guardian-construction is pre-baked Maker-craft responsive to intrusion.
+
+  ### Training
+
+  There is no spellcasting curriculum. Training in artifact-related work is **diagnostic and procedural**, not performative:
+
+  - **Identification**: learning to tell live from inert, dangerous from catastrophic, by visual signs, environmental signs, behavioral signs.
+  - **Containment**: learning to build and maintain ceramic vessels, ward inscriptions, isolation chambers.
+  - **Neutralization**: learning the partial techniques (fewer than the public believes) for rendering an artifact inert.
+  - **Brokerage**: learning the legal, social, and security craft of moving artifacts between licensed parties.
+
+  Apprenticeship is dangerous. Old extractors and containment-wrights often carry visible contamination injuries (darkened skin patches, tremors, chronic respiratory issues). Lineages within the guild are common because few outsiders take the work. Fragmentary occult texts are studied; full texts do not exist; the body of knowledge is empirical and uncertain.
+
+  ### Cost
+
+  Per CAU-1, every effect costs. The forms of cost are catalogued empirically by the guilds:
+
+  | Cost type | Manifestation |
+  |---|---|
+  | **Host trauma** | brutal physical effect during procedures (e.g., ceramic containment extraction is brutal to the host during engagement) |
+  | **Practitioner fatigue** | extractors and containment-wrights are exhausted after live work |
+  | **Ward attrition** | wards near active or recently active artifacts degrade and require renewal |
+  | **Bleed-through** | environmental gloom, dimming light, objects feeling "wrong," compulsion in nearby animals or people |
+  | **Slow contamination** | cumulative effect on water, soil, food in proximity to active or improperly contained artifacts |
+  | **Generational health impact** | observed in artifact-laboring families; not officially studied; tacit |
+  | **Cultural dread** | reputation of any quarter or canal section near an incident persists for generations |
+  | <!-- added by CF-0039 --> **Destruction-attempt cost-transfer** | attempts to destroy a Maker-Age artifact bind the effect more deeply into the vessel, elevating material resistance; cost manifests partly as material-elevation on the vessel (wood hardens, ceramic sets harder, metal refuses the hammer) and partly as attempt-cost on the attempting party (injury, exhaustion, equipment loss, ward-attrition radius); attempts do not escape cost, they redirect it |
+  | <!-- added by CF-0041 --> **Unsealing-activation** | opening a Maker-sealed container or breaching a Maker-deliberately-buried building activates the artifact(s) within with full CAU-1 cost; unknown-container unsealing is the feared moment the multi-guild protocol is designed to contain |
+  | <!-- added by CF-0040 --> **Mundane-tier contamination** | every mundane-tier artifact (breeze-doll, tick-mirror, weak coin-sorter, scar-rubber) carries a low-grade cost surface: slow-bleed on user, room-misfeel, animal unease, household water off-flavor across months, vessel fatigue across seasons of proximity; no "harmless charm" reading is world-truth (AES-3 preservation) |
+
+  ### Reliability
+
+  Low. Many artifacts misfire, decay, or behave inconsistently. Documentation is fragmentary; precedent is contested; the same model of device may behave differently in different conditions. Predictable artifacts are rare and disproportionately valuable.
+
+  ### Failure States
+
+  | Failure | Description |
+  |---|---|
+  | **Inert reveal** | suspected-live artifact turns out inert; embarrassing but harmless |
+  | **Misfire** | artifact produces unexpected effect, often costly |
+  | **Containment breach (small)** | bleed-through escapes a ward; renewable, rarely disastrous |
+  | **Containment breach (large)** | "ward breach" — public event-class; can require quarter sealing and evacuation |
+  | **Cascade** | one breach destabilizes adjacent containments; rare, catastrophic, the worst-feared scenario |
+  | **Decay** | active artifact slowly decays during use, leaving residual contamination |
+  | <!-- added by CF-0021 --> **Kiln explosion (creation attempt)** | crafter and assistants killed; adjacent row-cottages damaged; civic fire-watch evacuates; ward-inspector confirms whether contamination escaped |
+  | <!-- added by CF-0021 --> **Possessed output (creation attempt)** | created vessel exhibits apparent agency; behavior is empirically observable; nature of the agency is in-world contested (M-6) but world-level NOT sentient (CF-0022) |
+  | <!-- added by CF-0021 --> **Inert success (creation attempt)** | created vessel survives firing but produces no recognizable effect; most "successful" crafts are useless |
+  | <!-- added by CF-0029 --> **Guardian-construction activation (expedition)** | a CF-0029 guardian construction activates during a CF-0028 ruin-expedition entry; squad-wipe lethality at local scale; environmental bleed-through per CAU-2 signals activation; post-activation contamination extends sealed-quarter patterns; NOT catastrophic-class (remains squad-wipe-local per Mystery Reserve M-2 scale boundary) |
+  | <!-- added by CF-0035 --> **Wildland-fauna mutation (long-term, centuries-accumulated)** | over centuries, an uncontained artifact in wilderness-distal isolation (beyond civic / guild / chartered-watch reach) exposes passing non-sentient fauna; most beasts die outright per CAU-1; rare survivors exhibit morphological and capability alteration and persist in local niches as mutated non-sentient beasts (CF-0035); some later stray near settlements under hunger or habitat pressure, where settlement-hire hunter-contractors respond under CF-0024 wildlife sub-specialty; mechanism is incidental biological effect on untargeted fauna, DISTINCT in origin from CF-0029 guardian constructions; mutated beasts remain categorically non-sentient (ONT-1 / M-5 firewall); scale cap LOCAL per M-2 (squad-wipe maximum; NO cascade / mass / urban / civilization-killing). The phenomenon is world-level canonical; gargantuan-underground scale-tail is rumor-only register per Mystery Reserve M-15. |
+  | <!-- added by CF-0039 --> **Destruction-attempt backlash** | an unlicensed smith, householder, or actor attempts to destroy a Maker-Age artifact (smash, burn, dissolve); the effect binds more deeply, the vessel hardens or refuses the work, the attempter suffers (hand crushed, workshop damaged, ward-attrition radius extended, local-bleed-through for days); stories circulate in civic-watch record and tavern-register as cautionary material; the artifact survives the attempt and is now harder to contain; guild disposal protocols (CF-0006, CF-0007, CF-0008) operationally hold destruction OFF-TABLE as a disposal route, with neutralizer-subtype work re-scoped to render-inert / seal-and-contain only |
+  | <!-- added by CF-0041 --> **Unsealing misfire (foundation strike, excavation strike, cellar-find opening)** | a construction crew, estate-steward, or opportunistic householder breaks seal on a Maker-deliberately-sealed container or building without chartered unsealing-triage protocol; the artifact within activates with full CAU-1 cost at the site; multi-fatality outcomes are historically frequent (the silt-dredge crew who opened the Fourth-Bend case; the tenant-cottage harvest-eve cellar unsealing; the qanat-cleaning rite that breached an entombed building-top); civic-response arrives after activation; sealed-quarter declaration sometimes follows |
+
+  ### Material Requirements
+
+  - **Containment vessels** — primarily ceramic, of specific clay-grade. The brief specifies that a ceramic containment vessel can receive extracted "wrongness/corruption" from a host, leaving the animal behaviorally normal again. This is an example of established containment technique, not the only one. <!-- added by CF-0021 --> Containment-grade clay remains guild-monopolized; modern crafter creation (CF-0021) does NOT use containment-grade material — crafter vessels use ordinary ceramic, metal, or wood. The bottleneck for crafter success is the preparation technique (guild-internal, not in leaked grimoires), not the material grade.
+  - **Insulating mats and panels** — specific weaves, layered.
+  - **Ward inscriptions** — specific pigments and substrates; the inscription patterns themselves are restricted speech (CAU-3).
+  - **Water isolation** — for many artifacts, contact with water exacerbates effect; isolation is standard procedure where feasible.
+  - **Distance and shielding** — last-resort protocol for the catastrophic class.
+
+  ### Social Perception
+
+  - **Dread**: the dominant register. Artifacts are treated like radium — interesting at distance, lethal at close range, never to be carried casually.
+  - **Commercial interest**: collectors, scholars, and certain noble patrons pay well for licensed pieces; the broker tier of the extraction guilds serves them.
+  - **Mistrust of practitioners**: artifact-wrights and extractors are respected and quietly avoided. Old containment-wrights find children flinch when they pass.
+  - **Suspicion of patrons**: collectors are watched, especially by civic authority and by sectarian movements.
+
+  ### Regulation
+
+  - **Guild licensing** in most polities (SOC-4): extractors, containment-wrights, neutralizers, brokers, inspectors all operate under chartered guilds. <!-- added by CF-0039 --> **CH-0014 re-scoping**: The neutralizer subtype is re-scoped to *render-inert / seal-and-contain*, never *destroy*. CF-0039 commits that Maker-Age artifacts resist destruction (destruction-attempts bind the effect more deeply); guild disposal protocols (CF-0006, CF-0007, CF-0008) operationally hold destruction OFF-TABLE as a disposal route. Neutralizer-wrights render artifact effects inert through sealed-vessel transfer, containment-neutralization compound application, and isolation-procedure — they do not attempt the unmaking of Maker-Age vessels. The subtype-name is retained for continuity with charter-language; the operational scope is the re-scoping documented here.
+  - **Civic prohibition** on private possession beyond declared inventory; capital penalty in some polities for unlicensed possession of catastrophic-class items, lesser penalties for lesser classes.
+  - **Ward inspection cycles**: chartered inspectors walk known containment perimeters on schedules set by polity.
+  - **Black market**: persistent; punished when caught; politically tolerated to varying degrees.
+
+  ### Mundane Substitutes
+
+  Most "magic" tasks have non-magical alternatives that are slower, more expensive, but safer. The world has chosen them at the institutional level:
+
+  | Magical service one might imagine | Mundane substitute that exists |
+  |---|---|
+  | clean drinking water | cisterns, aqueducts, qanats, boiling, well-maintenance |
+  | protection from violence | walls, watchmen, militia, hired veterans |
+  | healing | barber-surgeons, herb-wives, monastic infirmaries |
+  | communication at distance | couriers, river-relays, signal towers in some polities |
+  | illumination | lamp oil, candles, hearth-fire |
+  | heat in winter | peat, wood, coal, fur, stone construction |
+
+  **This is why the world has not transformed**: people would rather build an aqueduct than risk an artifact.
+
+  ### Visible Signs
+
+  | Sign | Meaning to those who know |
+  |---|---|
+  | Ward markers (guild-stamped) | a containment perimeter is in force here |
+  | Sealed quarter | a quarter or town has been declared uninhabitable |
+  | Ceramic vessel under guild seal | active or recent containment material |
+  | Gloom, dimming light, "wrong" objects | bleed-through; report to inspector |
+  | Animals behaving abnormally near water | possible water-contact artifact; report immediately |
+  | Darkened skin patches, tremors on an old worker | contamination injury; sign of a long career |
+  | <!-- added by CF-0035 --> A beast of wrong proportion or anomalous capability encountered in deep wilderness — a bear too large, a wolf with extra-limb fusion, a boar whose tracks match no known species, a predator attacking in patterns not in any trapper's lore | upstream uncontained Maker-Age artifact contamination in wilderness-distal isolation (CF-0035); hunter-contractor response via CF-0024 wildlife sub-specialty; settlement reports to bounty-clerk; ward-inspector dispatch to suspected upstream zone is DISCRETIONARY (patron-funder or estate-commission or declared civic-watch predicate required), not mandatory; mutated beast remains categorically non-sentient regardless of capability alteration (M-5 firewall); DO NOT conflate with CF-0029 guardian constructions (distinct-origin) or Cluster D mythic-species sentient folk (DIS-3 firewall) |
+  | <!-- added by CF-0040 --> A mundane-tier artifact on a household windowsill, coin-drawer, or dresser top — a doll that emits a faint breeze in no wind, a mirror that emits a soft tick at random, a stone plate that groups coins into denominations when placed over them, a smooth stone that rubs shallow scars away | mundane-tier Maker-Age artifact (CF-0040); CAU-1 contamination is LOW but ongoing (slow-bleed on user, room-misfeel, animal unease, household water off-flavor over months, vessel fatigue over seasons); ward-inspector registry obligation varies polity-asymmetrically; never to be displayed as status-inventory (CF-0042 applies to chartered safe-class only); never to be traded as curiosity without household-ward disclosure (WORLD_KERNEL taboo extension per CH-0014) |
+  | <!-- added by CF-0041 --> A container — ceramic case, metal box, wood-and-lead chest, sealed masonry cavity — uncovered at an excavation site, cellar dig, canal-silt haul, peat-bog cutting, or qanat-cleaning rite, showing Maker-Age construction signature and an intact seal | a deliberately-sealed Maker-Age artifact container (CF-0041); DO NOT OPEN; multi-guild unsealing-triage protocol applies (chartered extraction-guild ward-inspector + civic-watch + containment-wright + excavation-foreman); the hair-on-arms dread-register ("the hair goes up when the seal breaks") is the ordinary signal; eldest-awake adult carries the container wrapped in three cloths to the lock-master's office or ward-inspector's office; the guild-stamped disposition record is the legal close |
+  | <!-- added by CF-0041 --> An excavation strike at the top of Maker-Age stonework in a foundation dig, canal-bed dredging, or estate-cellar archaeology — revealing architecture that continues downward beneath the strike zone | a Maker-deliberately-buried building (CF-0041); stop work on the spot; chartered extraction-guild foreman + ward-inspector dispatch; jurisdiction may be contested (chartered extraction-guild, CF-0028 patron-funded expedition, civic-archaeological-license); M-1 anti-evidence firewall applies (Maker-burial is hazard-awareness, not cause-of-fall); pilgrimage-pressure from sectarian Maker-mystic movements may arrive |
+
+  ### Long-Term Consequences
+
+  - **Contaminated zones** persist for generations. Some are walled off and ritualized; some are quietly forgotten and dangerous to rediscover.
+  - **Generational health impact** in extractor families is empirical reality, only partially studied.
+  - **Cultural dread** is durable; a town that lost a quarter remembers it for centuries.
+  - **Political weight** of the extraction guilds is substantial because their work is the only thing standing between a polity and the next breach.
+  - <!-- added by CF-0039 --> **Artifact-permanence civic-liability monotonic accretion** (CH-0014): CF-0039 destruction-resistance makes catastrophic-class-containment a permanent civic liability rather than an amortizable hazard. Every uncontained catastrophic find surfaced by canal expansion, deep foundation work, CF-0028 ruin-expedition, or accidental unsealing adds to a growing sealed-quarter footprint that cannot be reduced by destruction. Ward-reserve budget lines in civic-council accounts shift from cyclic to monotonic; Brinewick exemplar (CF-0038) carries the sharpest visible pressure. Centralization-fight advocates cite artifact-permanence as argument for crown-or-city-council custody nationalization; guild faction resists. Containment-wright faction pressure strengthens for larger sealed-quarter allocation. Principled-refuser clergy (CF-0026) reform-current bifurcates between "Maker-debt permanence acceptance" (resignation-register) and "burial-technique recovery advocacy" (the latter is categorically forbidden under M-20 firewall — the technique is lost and not recoverable; advocacy is diegetic position only, never world-achievable goal).
+
+  - <!-- added by CF-0041 --> **Maker-buried-building strike-rate intensification** (CH-0014): CF-0041 commits deliberately-buried Maker-Age buildings as a distinct substructure sub-category. Strike-rates at foundation-digs, canal cuts, estate-cellar excavations, and qanat-cleaning rites rise with Layer-4 canal expansion and deep-foundation work; each strike triggers multi-guild unsealing-triage convergence at a scale that strains chartered extraction-guild inspector capacity. Excavation jurisdiction is contested (OPEN_QUESTIONS §Ruin Ownership and Jurisdiction pressured). Sectarian Maker-mystic pilgrimage-pressure at discovered sites strains civic containment. Common-pantheon clergy offer civic-ritual-of-witness aspectualization as pressure-release valve.
+
+  - <!-- added by CF-0042 --> **Status-display monoculture at elite houses + bodyguard-retinue expansion** (CH-0014): CF-0042 commits artifact-as-status-object economy. Elite houses concentrate chartered safe-class artifacts under declared-inventory ward-inspection; bodyguard-contractor commissions attach to famous-owner households as eleventh veteran-pool concurrent-claim (absorbed into CF-0024 extraction-escort per Rule 3 firewall, NOT new subtype). Stolen-status-artifact fencing is a higher-margin niche within CF-0034 bandit-stolen-goods rail (authenticated-provenance requirement). State-security concealment rumor-register generates dissident-publishing and blackmail-kit economies.
+
+  - <!-- added by CF-0038 --> **Concentrated dredging-uptick in canal-heartland commerce hubs** (CF-0038 Brinewick exemplar): per DIS-1 (artifacts routinely turned up underground) and Layer-3 Incident Wave attribution (canal expansion as one causal vector), named commerce-hub cities whose working week includes continuous canal-bed dredging, lock-bed maintenance, weir-reconstruction, and deep-foundation excavation show the highest artifact-surfacing volume per working-week in the heartland. Brinewick's dredge-find registry, maintained by the chartered extraction-guild inspector's office under SOC-4 chartered authority, is kept separately from ordinary guild inventory because volume demands a dedicated ledger; dredger-crews, working on contractor-auxiliary roster per CF-0024, hand finds to the inspector before guild-handoff under pre-dredge certification protocol. The pre-Charter origin of Brinewick's canal network (CF-0038; compatible with M-1 firewall per CH-0013 extension — ancestral ordinary-engineering attribution is civic-mainstream, NOT Maker-Age) means the deepest canal-bed strata sit on ancestral substructure rather than on Maker foundation; dredge-find volume nonetheless remains high because DIS-1 artifact distribution is diffuse across heartland soils regardless of deeper substructure identity, and ancestral-period substructures themselves accumulated artifact-surfacing caches that later eras did not fully recover. Commercial-core ward-breach anxiety is consequently Brinewick's defining civic dread per AES-3 — the next warehouse foundation excavation, the next lock-rebuild, the next deep-channel dredge could surface a live find and quarantine a district, and the civic-advisory council's ward-reserve budget line is a standing charter-audit focus.
+
+  ---
+extensions:
+  - originating_cf: CF-0041
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Sealed-inert activation
+    body: 'A subset of Maker-Age artifacts were deliberately sealed within containers, buildings, or substructures by the Makers themselves using now-lost engineering technique (CF-0041). Such artifacts are observably INERT while the container or seal remains intact — no effect propagates, no bleed-through register, no ward-attrition. The moment the container is opened or the seal is breached, the artifact within activates with full CAU-1 cost: whatever effect the artifact bears begins to propagate from that moment. "Unsealing" is therefore a feared act across all regions of Animalia and has consolidated its own multi-guild civic-response protocol (chartered extraction-guild ward-inspector + civic-watch + containment-wright + dredger-or-excavation foreman). The sealing-technique itself CANNOT be reproduced by current-age capability — the leaked CF-0023 grimoire corpus does not contain sealing instructions, and CF-0021 crafters produce ordinary (non-sealing) vessels. Containment-wrights can OBSERVE the sealed-inert phenomenon as empirical pattern, but they cannot replicate original Maker sealing; chartered containment procedure operates at a tier below Maker-original-sealing (CF-0027 civic-administrative resealing of enterable ruins is categorically distinct — it walls off a hazard AROUND a site; Maker-original-sealing locked individual artifacts or entire buildings from the inside). Sealed-inert mechanism is CATEGORICALLY DISTINCT from CF-0029 guardian-construction activation (M-8 distinct-origin firewall, CH-0014): sealed-inert is container-suppression breached by opening; guardian-construction is pre-baked Maker-craft responsive to intrusion.'
+touched_by_cf:
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0019
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0034
+  - CF-0035
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043

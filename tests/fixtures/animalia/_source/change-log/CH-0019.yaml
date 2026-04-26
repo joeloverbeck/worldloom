@@ -1,0 +1,45 @@
+affected_fact_ids:
+  - CF-0004
+  - CF-0006
+  - CF-0009
+  - CF-0017
+  - CF-0020
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0031
+  - CF-0033
+  - CF-0034
+  - CF-0042
+  - CF-0044
+change_id: CH-0019
+change_type: clarification
+date: 2026-04-25
+downstream_updates: []
+impact_on_existing_texts: []
+notes: One-shot vocabulary + bidirectional-integrity migration. Each affected record carries retcon_attestation pointing to this CH. Adjudication record not produced (this is a tooling-driven Tier 3 migration, not a canon-addition run).
+reason:
+  - Bootstrap drift cleanup per SPEC-14 Tier 3 migration plan
+  - Bidirectional CF<->SEC integrity (engine fail-fast post SPEC14PAVOC-002)
+  - Canonical-domain enum alignment post SPEC14PAVOC-001/003
+  - Status-coupled Mystery future_resolution_safety per SPEC14PAVOC-001
+retcon_policy_checks:
+  net_contradictions_not_increased: true
+  no_silent_edit: true
+  no_stealth_diegetic_rewrite: true
+  replacement_noted: true
+  world_identity_preserved: true
+scope:
+  changes_ordinary_life: false
+  creates_new_story_engines: false
+  local_or_global: global
+  mystery_reserve_effect: unchanged
+severity_after_fix: 0
+severity_before_fix: 1
+summary: "SPEC14PAVOC-005 Tier 3 migration: extends required_world_updates on 14 CFs to match the file_classes already cited by sections via touched_by_cf (closes 45 GF-0010 findings); re-tags 9 CFs' domains_affected to use 'memory_and_myth' in place of the pre-SPEC14PAVOC-001 'history' / 'memory' tokens (closes 11 GF-0006 findings — the history/memory/geography subset of Decision F); and normalizes 8 Mystery records' future_resolution_safety to the SPEC-14 status-coupled values (closes 8 GF-0008 findings). No new CFs, sections, or invariants. No CF statement, scope, or distribution field is changed."

@@ -1,0 +1,22 @@
+id: AES-1
+category: aesthetic_thematic
+title: Heroism is paid in coin and scars, not glory
+statement: Risk-taking is treated as labor. Veterans are quietly proud and dryly mocking of glory-talk. Songs that romanticize battle exist but are sung mostly by those who never fought.
+rationale: Tonal contract. The "scarred veteran with longsword" framing of the brief.
+examples:
+  - a pension-list at a guildhall; a tavern song that ends with an unpaid widow
+non_examples:
+  - chosen-one narratives treated as world-truth
+break_conditions: would betray tone.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0044
+    change_id: CH-0016
+    date: 2026-04-20
+    label: Clarification
+    body: "Drylands verse-competence as named social-asset (CF-0044) is WORKING-TEXTURE reputation register — trade-useful, reputation-thickening, parallel to bardic-circuit tavern-vouch (CF-0017) and portable-contractor reputation (CF-0024). NOT a glory-register, chosen-verse register, destined-bard register, or prestige-caste. Drylander verse-adepts (bards, caravan-masters, well-keepers with deep hospitality-verse repertoires) are respected in the same dryly-proud mode as a scarred veteran or a CF-0017 tavern-recognized circuit-bard — respected for the work, not elevated above ordinary drylanders who cannot turn a verse. The \"verse-inept migrant\" is slower-hosted, not denied-hospitality; the caravan-master covers with a vouching-cadence — ordinary social-friction register, NOT status-caste exclusion. Forbidden registers: \"destined verse,\" \"the drylander's verse that became legend,\" \"the great verse-turn of X,\" \"verse-elite / verse-caste,\" \"binding verse / verse that wards / verse of power,\" \"chosen / quest / legendary\" in any adjacency to the convention. AES-1 holds without exception."
+  - originating_cf: CF-0047
+    change_id: CH-0018
+    date: 2026-04-20
+    label: Drylands Well-Keeper and Corridor-Institution Working-Texture Clarification
+    body: "The drylands caravan-corridor institutional-cultural complex (CF-0046) and the well-keeper customary-authority role (CF-0047) operate in WORKING-TEXTURE reputation register paralleling CF-0037 stationkeeper and CF-0044 verse-competence precedents — trade-useful, reputation-thickening, dryly-proud. Well-keepers are respected for the work (keeping the well through drought, holding the keeping-book honestly, hosting strangers under charter-custom under load), not elevated into glory-register; caravan-masters who adjudicate corridor-internal disputes are paid carriers of liability performing unglamorous docket-keeping, NOT chieftains or corridor-princes; runner-reached village militia is informal emergency-response folk-practice, NOT heroic defense. In-register language: \"the well-keeper's word,\" \"kept the well\" / \"walked the well\" (paralleling CF-0037 \"kept the stop\" / \"walked the stop\"), \"trade-useful,\" \"working-texture,\" \"station-log register,\" \"runner-reached,\" \"paid carrier of liability,\" \"the corridor knows her name in two seasons,\" \"the keeper sent the runner; the magistrate will come in four days.\" Forbidden registers: \"wise well-keeper,\" \"ancient keeper-lineage,\" \"the venerable gate-custom,\" \"refined / sophisticated / cultured drylands,\" \"hereditary verse-lord,\" \"the great keeper of the Third Well,\" \"keeper-elite / verse-caste,\" \"pristine pre-civic tradition,\" \"pure reciprocity economy untainted by coin,\" \"destined caravan-master,\" \"the legendary corridor,\" \"chosen well-line,\" \"noble caravan-master adjudicating in timeless wisdom,\" \"desert warriors / corridor princes / well-lords,\" \"the simple honest drylanders.\" AES-1 holds without exception across drylands corridor-institution and well-keeper register."

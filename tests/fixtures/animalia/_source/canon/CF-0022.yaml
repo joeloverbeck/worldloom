@@ -1,0 +1,51 @@
+id: CF-0022
+title: Vessel-hosted "agencies" in modern artifacts are world-level non-sentient
+status: hard_canon
+type: metaphysical_rule
+statement: |
+  When a modern crafted artifact (CF-0021) behaves as if "possessed" by an entity with apparent agency, that entity is NOT sentient at the world level. Invariant ONT-1 (sentience requires biological embodiment) is preserved without exception. In-world, the nature of the apparent agency is contested by practitioners and theologians (magical instruction-set / beastly intelligence / sentient intelligence), and the dispute is observationally unresolvable in the present. The contested-canon dispute does NOT cross-apply to animal-folk sentience — animal-folk sentience is biological per CF-0001 and CF-0010 and cannot be reframed by analogy to vessel-hosted agencies. (M-5 firewall.)
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - religion
+  - law
+  - settlement_life
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - this is a metaphysical rule, not a capability
+costs_and_limits:
+  - sectarian movements that attempt to legally adopt or marry possessed artifacts are refused by civic registry
+  - exorcism rites performed on possessed artifacts are performative; the ritual outcome is interpretively contested
+  - common-pantheon clergy and progenitor-cult lineage-keepers split on theological framing
+  - language conventions among careful practitioners restrict vocabulary ("behaves as if," "appears to") and avoid "spirits/souls/demons"
+visible_consequences:
+  - civic registry refusals when sectarians attempt artifact "personhood" claims
+  - magistrate rulings on possession-related cases cite this principle
+  - common bardic framing: the pot that hums is not the friend who hums
+  - careful-practitioner vocabulary discipline visible in guild apprentice training
+  - Mystery Reserve M-6 governs the bounded in-world unknown
+required_world_updates:
+  - INVARIANTS
+  - INSTITUTIONS
+  - MAGIC_OR_TECH_SYSTEMS
+  - MYSTERY_RESERVE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0021
+    - CF-0001
+    - CF-0010
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Required by Phase 2 invariant check and Phase 9 repair: the "possessed with agency" framing of the proposal would otherwise violate ONT-1 or silently foreclose Mystery Reserve M-5. The world-level commitment here preserves both. The in-world contestation is real and politically loaded; it is the new Mystery Reserve entry M-6.

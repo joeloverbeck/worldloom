@@ -1,0 +1,50 @@
+id: SEC-ECR-009
+file_class: ECONOMY_AND_RESOURCES
+order: 9
+heading: Specialist Resources Worth Naming
+heading_level: 2
+body: |-
+  - **Containment-grade ceramic clay** — geographically restricted; specific clay pits are guild-controlled.
+  - <!-- added by CF-0043 --> **Brinewick-trained containment-specialist labor pool** (CF-0043) — a distinct specialist-labor resource created by Ash-Seal's Charter-Era-to-present training pipeline: current Ash-Seal technicians + Ash-Seal-trained defector-specialists now operating as INDIVIDUAL fee-for-service consultants on chartered-extraction-guild rosters across the heartland. The pool's distinctive knowledge-signature is Ash-Seal's empirical-containment-craft empirical accumulation (handling protocols, vessel-design technique, disposal-site selection empirical patterns, trade-jargon classification vocabulary — "Class-C containment, moderate environmental spread" — that has spread across heartland chartered containment-wright benches via defector carriers). The pool is distinct from the standard chartered-extraction-guild containment-wright master labor pool (Mossdown, Havenreach, other heartland polities) in carrying Brinewick-trained portable reputation that anchors upper-silver fee-for-service ceiling wages. Supply-side: 5-15 year Ash-Seal apprenticeship produces the base labor pool; ~30% defector-emigration rate historically (estimate; actual rate deferred) spreads the pool into wider heartland labor market. Demand-side: chartered-extraction-guild roster commissions in non-Brinewick heartland polities, patron-syndicate expedition (CF-0028) authentication-specialist fees on defector-consultant contractor arrangements. The labor pool is distinctly Brinewick-origin and has been materially spreading across the heartland for the past 2-4 generations (Incident-Wave-era professionalization consolidation per TIMELINE Layer 3 extension).
+  - **Ward inscription pigments** — restricted both by source and by guild.
+  - **Neutralizer compounds** — alchemy-adjacent specialty materials; regional sources.
+  - **Maker-substructure stone** — not legally extractable in most polities; a black market exists.
+  - **Charter timber** — some old-growth stands are charter-protected for civic-construction and shipbuilding.
+  - <!-- added by CF-0023 --> **Artifact-creation grimoire fragments (CF-0023)** — scarce by both restricted content and possession risk; the most operationally dangerous and most sought subset of the broader occult-fragment corpus (CF-0019); circulate predominantly on black markets; carry capital penalty in punitive polities; price thinness makes valuation contested.
+  - <!-- added by CF-0028 --> **Maker-Age ruin recoveries** (CF-0027, CF-0028) — a new specialist-resource category comprising: Maker-Age pottery (non-magical, inscribed or plain; high collector value), precious-metal fittings and hardware (legal bullion after civic-registry processing), inscribed shards (fragmentary text-recovery material entering CF-0023 register via expedition-research pathway), and — rarely — magical artifacts disposed through CF-0030 funder-primacy convention via chartered-broker channel. Magical ruin-finds are NEVER catastrophic-class (CF-0027 scope boundary); guardian-construction remains are distinguishable by craft signature and typically retained under civic or guild custody after resealing.
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0005
+  - CF-0008
+  - CF-0009
+  - CF-0013
+  - CF-0015
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

@@ -1,0 +1,43 @@
+id: SEC-GEO-018
+file_class: GEOGRAPHY
+order: 18
+heading: Settlement Limits
+heading_level: 2
+body: |-
+  - **Canal-bound rural towns** — small, often linear along a canal, work-emptied during the day, crowded at evening. Common throughout the heartland.
+  - **Sprawling cities** — at confluences and ports. Multi-tiered: dense civic core, ringed by guild quarters, surrounded by walled estates and tenant lands. <!-- added by CF-0038 --> **Brinewick** (CF-0038) is Animalia's first committed named sprawling city — a canal-fed charter-polity in the Temperate Canal Heartland band sited at a confluence of canal trunks feeding a river-mouth system. World-renowned as among the foremost centers of commerce (clearing more canal-clearing volume in an ordinary week than three heartland market-towns in a fair-season combined) and among the most populated heartland cities. The downtown civic core is a three-storey row-cottage working-household quarter addressed by canal-bend and lock-number rather than street-name (Fourth Bend at Lock Four is prestige; Seventh is journeyman-affordable), ringed by artisan-guild quarters, surrounded by the outskirts ancestral-estate cluster. Canal-side lamps, the characteristic "briny line" where saltwater-marsh-fed locks meet freshwater canal (local Fourth-Bend geography), and frequent dawn fog are Brinewick's sensory signature.
+  - **Mountain hamlets** — sparse, self-sufficient, open to the world only seasonally.
+  - **Fen-villages** — built on stilts and platforms, small, close-bonded, demographically fragile.
+  - **Caravan towns** — drylands; population swells and shrinks with the rotation. <!-- added by CF-0046 --> Drylands caravan-corridor node-network (CF-0046) is a four-node-type pattern: **wells** (single-household well-stops and larger multi-household well-compounds operated by well-keeper lineages per CF-0047 — water-node-anchored, drought-volatile, the corridor's load-bearing nodes); **gate-stops** (corridor-boundary transition points between settled-jurisdiction and open-corridor; may be light-staffed or ceremonial depending on drought-year traffic); **villages** (settlement-adjacent supply-run origins providing runner-reached militia capacity and apprentice-labor onboarding; paralleling drylands oasis hamlets already committed); **caravanserai** (merchant-association-managed overnight-hosting institutions per CF-0037 drylands structural-absence — NOT family-handled waystations; multi-family operation under caravan-rotation custom). Settlement-limit driver for drylands per CF-0046: corridor water-capacity (well-node concentration risk — a well-lineage failure or drought-break overload at a key corridor-node cascades along the corridor at higher severity than CF-0037 waystation-insolvency because water is non-substitutable); caravan-master adjudication capacity at multi-master network scale is the only stabilizer.
+  - **Sealed quarter-towns** — abandoned; ringed; not livable.
+
+  **Population ceiling driver**: in the heartland, the limiting factor is increasingly artifact-zone exclusion (every contaminated site removes habitable area) and the cost of ward maintenance. In the fens, it is disease and unstable ground. In the drylands, water. In the mountains and north, food and winter. <!-- added by CF-0028 --> Ruin-rich regions face a compounding driver: failed expeditions extend sealed-ruin perimeters onto surrounding land, and contested sites draw armed conflict that displaces tenants from ruin-adjacent estates. <!-- added by CF-0035 --> A further compounding driver in wildland-adjacent settlements: mutated-beast predation on livestock and occasional approach by displaced mutated individuals (CF-0035) joins bandit-raid abandonment as a population-ceiling pressure at lower acuity — the beast does not raze settlements, but it bleeds livestock, forces defensive watch-rotation, raises caravan-escort premiums, and occasionally kills a tenant at the pasture edge. Raid-abandoned settlements (below) remain the sharper driver; mutated-beast pressure is standing exposure paralleling bandit-corridor disruption per CF-0034 rather than cascade-trigger. <!-- added by CF-0034 --> A further compounding driver in isolated, weak-charter, or demographically-fragile regions: bandit-raid-abandoned settlements. Where raid-and-enslave bands (CF-0034 distribution) reach a small or poorly-defended settlement, the subsequent abandonment can be permanent; the survivors join the existing refugees-from-sealed-quarters precarious stratum (ECONOMY §Inequality Patterns) or, rarely, walk into the same outland band that raided them. Fen stilt-villages are categorically hard to reach (the raid-that-sank-Low-Reed register preserves the rarity-but-catastrophe pattern); highland hamlets, drylands oasis-stops, and mountain valley hamlets absorb the bulk of this loss across the continent. The pattern is a standing exposure, not a cascade-trigger; sealed quarter-towns and raid-abandoned settlements are distinct categories — the first is contamination-perimeter-walled, the second is merely empty.
+
+  <!-- added by CF-0036 --> **Single-species exclusionary settlements** (CF-0036): a rare, self-limiting settlement subtype found in isolated, weak-charter, or demographically-fragile regions — specifically in highland clan-ground pockets where clan-custom exclusivity has hardened, in remote mountain valleys where pass-isolation has preserved pre-Charter single-species custom, in dry-edge fen margins where demographic fragility resists mixed-species settlement, and in drylands oasis-stops where caravan-rotation rarely reaches. These settlements refuse other-species immigration — the inn-keeper does not meet the naga-folk bargemaster's eye; the saddler will not sell to the cat-folk traveler; the village-council declines the beaver-folk stonemason's charter-work. Economic self-limit: single-species enclaves cannot sustain Charter-Era multispecies economy at scale; trade with outside compromises exclusivity; generational labor-starvation decline. No civic-registry polity-status recognition — exclusionary settlements do not hold formal charter standing, though they participate in chartered-polity trade under individual-household contracts. Charter-Era settlement treats these as marginal holdouts, not recognized polities; magistrate-court extradition precedent is emerging but thin. Returning-traveler dread-register idiom: *"he came back with the one-fur talk now"* (heartland cadence) — paralleling the *"coin-for-shame"* / *"coin-for-service"* cadences. Standing exposure, not cascade-trigger; categorically distinct from raid-abandoned settlements (which are empty) and sealed quarter-towns (which are walled) — exclusionary settlements are peopled, working, and closed.
+
+  <!-- added by CF-0037 --> **Family-handled waystation as settlement-adjacent enterprise type** (CF-0037): not a settlement category in its own right, but a recognized settlement-ADJACENT enterprise type sited *somewhat-close* to feeder settlements for supply-runs. Distinct from canal-bound rural towns (which the waystation supplies traveler-rest function for); distinct from caravan towns (drylands; caravan-rotation handles equivalent function via caravanserai); distinct from fen-villages (stilt-village topology incompatible with fixed roadside infrastructure). Highland clan-territory waystations operate under clan-elder sanction; mountain-east valley-pass waystations cluster at lower-pass approach-towns. The waystation's settlement-adjacency is itself a stabilizer per CF-0037 distribution — no waystation is more than a half-day's wagon-haul from its supplying settlement, which keeps the household economy viable, the supply-run logistics tractable, and the civic-registry tenancy recordation accessible.
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

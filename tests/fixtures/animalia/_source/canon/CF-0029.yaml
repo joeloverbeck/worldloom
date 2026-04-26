@@ -1,0 +1,81 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - squad-wipe lethality during activation; entire expeditions lost
+  - environmental bleed-through per CAU-2 signals activation
+  - post-activation contamination extends sealed-quarter patterns
+  - apparent autonomy is observational, not a sentience claim (ONT-1 firewall)
+  - scale cap: squad-wipe local only; cascade / mass-mind-control / urban-scale effects are EXCLUDED and remain catastrophic-class (M-2)
+  - NO conflation with modern-crafted vessel-hosted agencies (CF-0022); the phenomena are distinct-origin parallel, not identical
+  - mechanism unknown in-world (Mystery Reserve M-8); apparent targeting and activation conditions are disputed
+  - guardian-activation does NOT confirm Maker intentionality at world level; M-1 (cause of fall) does not gain evidence from guardian presence
+  - 'careful-practitioner vocabulary discipline parallels CF-0022: "behaves as if," "appears to," avoid "thinks," "knows," "decides"'
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it:
+    - all living people (guardian constructions are Maker-Age autonomous artifacts; no one can make them)
+    - modern crafters per CF-0021 (catastrophic-class boundary permanently unrecoverable; guardian-construction class is beyond leaked-corpus scope)
+  why_not_universal:
+    - guardian constructions are rare even within enterable ruins; most ruin sites yield mundane hauls
+    - Maker-Age production is terminated (historical); guardians are finite surviving inventory
+    - catastrophic encounters trigger resealing, reducing future encounter risk
+    - guardian-activation conditions and targeting logic are empirically poorly-understood (see M-8)
+domains_affected:
+  - magic
+  - warfare
+  - settlement_life
+  - memory_and_myth
+id: CF-0029
+modification_history:
+  - change_id: CH-0009
+    date: 2026-04-19
+    originating_cf: CF-0035
+    summary: distinct-origin firewall extended bidirectionally against CF-0035 mutated non-sentient beasts; guardian-construction mechanism (intentional Maker craft with activation logic) categorically distinct from mutated-beast mechanism (incidental biological effect on untargeted fauna); authentication-specialist craft signatures do not cross-validate; three surface-similar Maker-origin apparent-autonomy phenomena (CF-0022 / CF-0029 / CF-0035) each held at distinct-origin status; new Mystery Reserve M-15 for gargantuan-underground scale-tail bounded unknown
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0041
+    summary: distinct-origin firewall extended FOUR-WAY against CF-0041 sealed-inert mechanism; guardian-construction activation (pre-baked Maker-craft with activation logic) categorically distinct from sealed-inert (container-suppression breached by opening); authentication-specialist craft signatures do not cross-validate between sealed containers and guardian constructions; four surface-similar Maker-origin autonomy-adjacent phenomena (CF-0022 / CF-0029 / CF-0035 / CF-0041) each held at distinct-origin status per M-8 CH-0014 extension; minority Maker-mystic position treating all four as continuous cosmological phenomena is contested canon, NOT world-truth
+notes: |
+  Direct from briefs/animalia-ruin-expeditions.md. Carries SEVEN explicit firewall commitments analogous to CF-0025's six: (1) world-level non-sentience (ONT-1 preservation); (2) M-2 scale cap (squad-wipe local only; catastrophic-class excluded); (3) M-5 firewall against animal-folk sentience cross-application; (4) M-6 non-conflation with modern-crafted vessel-hosted agencies (distinct origin class); (5) M-1 anti-evidence clause (guardian presence does NOT constitute evidence for Maker cause-of-fall); (6) M-8 bounded-unknown referral for mechanism; (7) careful-practitioner vocabulary discipline parallel to CF-0022. The "magically-animated" framing in the user proposal is preserved as in-world observation, not as ontological commitment to agency. Mystery Reserve M-10 governs the bounded-unknown of guardian-presence heterogeneity. Adjudication record: adjudications/PA-0003-accept_with_required_updates.md.
+  Modified 2026-04-19 by CH-0009 (CF-0035): distinct-origin firewall extended bidirectionally — artifact-contaminated mutated non-sentient beasts (CF-0035) are SURFACE-SIMILAR to guardian constructions (both Maker-origin wilderness hazards with apparent-autonomy patterns) but CATEGORICALLY DISTINCT IN ORIGIN (guardian = intentional Maker craft with activation logic; mutated beast = incidental biological effect on untargeted fauna; authentication-specialist craft signatures do not cross-validate between the two categories). Three surface-similar Maker-origin apparent-autonomy phenomena (CF-0022 modern-crafted vessel-hosted agencies, CF-0029 guardian constructions, CF-0035 mutated non-sentient beasts) must each be held at distinct-origin status; M-6 / M-8 / new M-15 firewalls apply independently. Minority Maker-mystic position treating the three as continuous cosmological phenomena is contested canon, NOT world-truth. Parallels the CF-0022 ↔ CF-0029 reciprocity established in CH-0004.
+prerequisites:
+  - pre-existing Maker-Age guardian construction surviving from the Maker Age (historical; not reproducible by modern crafters)
+  - intrusion into a guardian-bearing enterable ruin site (CF-0027)
+  - activation conditions (empirically poorly-understood; see Mystery Reserve M-8)
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INVARIANTS
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - ECONOMY_AND_RESOURCES
+  - GEOGRAPHY
+  - TIMELINE
+scope:
+  geographic: global
+  social: restricted_group
+  temporal: ancient
+source_basis:
+  derived_from:
+    - CF-0027
+    - CF-0004
+    - CF-0022
+  direct_user_approval: true
+statement: |
+  A rare subset of enterable Maker-Age ruin sites (CF-0027) contain magically-animated constructions — self-operating artifact-bearing defenses that respond to intrusion. Encountered at squad-wipe local scale, guardian constructions kill expeditions outright when activated and have caused catastrophic outcomes that trigger ruin resealing. They are WORLD-LEVEL NON-SENTIENT: Invariant ONT-1 is preserved without exception (CH-0004 clarification extends the CH-0002 ONT-1 clarification). Their apparent autonomy is behaviorally observed, empirically described, and in-world contested as to mechanism (Mystery Reserve M-8); the world does not commit a cognitive or intentional framing. Guardian constructions are LOCAL in lethality (squad-wipe scale, not cascade / mass-mind-control / urban-scale ward-collapse — those remain catastrophic-class per Mystery Reserve M-2 and are NOT within expedition recovery). Guardian constructions are DISTINCT in origin from modern-crafted vessel-hosted agencies (CF-0022); the phenomena are parallel but not conflated — no forced identification between Maker-Age guardian and modern crafted-artifact apparent-agency (M-6 firewall). The M-5 firewall against animal-folk sentience cross-application holds: nothing about guardian-construction apparent-autonomy transfers to claims about animal-folk sentience. Guardian presence at a ruin site does NOT constitute evidence for any Maker cause-of-fall hypothesis (M-1 anti-evidence firewall).
+status: hard_canon
+title: Magically-animated Maker-Age guardian constructions exist as a rare ruin-defense category
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: artifact
+visible_consequences:
+  - bardic cycles name specific guardian-encountered sites and the dead they produced
+  - expedition-veteran vocabulary distinguishes "the quiet ruin" from "the watching one"
+  - ward-wright post-activation inspection becomes standard for catastrophic expedition aftermath
+  - resealed quarter-towns attributed to guardian encounters form a distinct subcategory of sealed perimeter
+  - authentication-specialist work includes distinguishing guardian-construction remains from other Maker-Age artifact types
+  - sectarian interpretations proliferate (Maker-mystic sacred; progenitor-skeptic warnings; common-pantheon cautionary proof of Maker hubris); NONE is world-true
+  - civic-registry refuses sectarian "personhood" claims about guardian constructions, parallel to CF-0022 refusals
+  - guardian-construction encounter is a recognizable bardic catastrophe subgenre
+  - expedition pre-entry protocols include guardian-indicator scouting (inscription patterns, residual bleed-through, animal-behavior at entrance)

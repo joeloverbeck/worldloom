@@ -1,0 +1,100 @@
+change_id: CH-0007
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0033
+  - CF-0008
+  - CF-0020
+  - CF-0024
+  - CF-0026
+  - CF-0028
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict on proposal PR-0003-canal-corridor- quarantine-dragoons.md. CF-0033 committed as soft_canon institution at regional / current / public scope, documenting canal-corridor quarantine dragoons as chartered civic perimeter force in some larger heartland polities, instituted in the past decade as contested Charter-Era anti- monopoly-of-force concession. Load-bearing perimeter/extraction jurisdictional boundary inscribed normatively in CF statement: dragoons enforce perimeter only; chartered extraction guilds retain extraction, containment, neutralization, inscription, and brokerage. Mission-scope commitment enumerated: dragoons do NOT extract, inscribe, contain, neutralize, police routinely, or deploy in external conflict. Adoption contested asymmetric: some polities adopt, some refuse on principle, some lack infrastructure. Dragoon-adoption becomes a fifth polity- asymmetric disagreement axis joining CF-0021 (crafter-tolerance), CF-0024 (mercenary-licensure), CF-0028/CF-0030 (funder-primacy/ expedition-tolerance), and CF-0031 (contamination-registry adoption). Five existing CFs qualified by CH-0007 modification_history entries: CF-0008 (scope narrowing), CF-0020 (qualification), CF-0024 (qualification), CF-0026 (extension), CF-0028 (clarification). Mystery Reserve firewall extensions added to M-6 (confiscation-custody), M-7 (retired-dragoon reputation-genealogy), M-8 (perimeter-lore tactical not mechanistic), M-9 (civic-evidence archive disposition discipline), M-11 (pensioner-health occupational-epidemiological); new M-13 entry (institutional contingency of dragoon form) added per Rule 7 obligation. Downstream updates applied to INSTITUTIONS.md (Military new §Subtype subsection; Law, Landholding, Trade/Guilds, Religion, Recordkeeping internal-contradictions annotations), TIMELINE.md (Layer 3 institutional-residue late-Incident-Wave founding; Layer 4 fifth-axis convergent-pressure bullet), GEOGRAPHY.md (new Regional Asymmetry on Dragoon-Adoption section; Sealed-Quarter-Towns annotation), ECONOMY_AND_RESOURCES.md (Wage Spreads dragoon tier; Value Stores dragoon charter-pension; Wealth Creation civic-payroll; Inequality Patterns dragoon-widow stratum; three new Breakage Points — dragoon-containment funding squeeze, dragoon-guild jurisdictional- conflict cascade, mission-creep adoption rollback; Trade Flows kit- counterfeit as fourth illegitimate-service product-line; Hazard-pay paragraph extension), EVERYDAY_LIFE.md (all five clusters: adopting heartland household texture with lintel-marker, child-drill skip-rope rhyme, ward-inspector walkthrough change, retired-dragoon neighborhood role, funerary treatment, three-layer bardic stratification; big-city estate dowager-gossip layer, patron- liability ledger, tenant-cottage pattern; highland silent-absence + "walks the southern cordon" enlistment idiom + "does not walk the southern cordon" refusal idiom; drylands silent-absence + caravan- master route-refusal + "coin-for-service" emigration idiom + cargo- riddle; fens silent-absence + not-spoken-of posture + dry-edge dragoon-casualty queue asymmetry), OPEN_QUESTIONS.md (four new deferred items: dragoon charter terms per polity, mission-scope case law, funding-stream specificity, cross-polity pursuit extradition framework), MYSTERY_RESERVE.md (M-6 / M-7 / M-8 / M-9 / M-11 extensions + new M-13). Six critic sub-agents dispatched at escalation gate (approximately 10 of 13 FOUNDATIONS domains touched): Continuity Archivist, Systems/Economy, Politics/ Institution, Everyday-Life, Theme/Tone, Mystery Curator. All six accept-with-repair; no dissent from acceptance. Four explicit latent burdens logged plus four additional monitored exposures. Adjudication record: adjudications/PA-0006-accept_with_required_updates.md.
+reason:
+  - Commits institutional form for a convergent response to the Incident Wave (TIMELINE Layer 3) that the canon names but does not institutionally resolve — INSTITUTIONS.md §Law already flags ward-breach response as blurred between religious and artifact-guild jurisdiction; CF-0024 adds contractor auxiliary labor; CF-0025 adds post-breach containment specialists. There was no dedicated rapid-response perimeter force; dragoons fill that gap with polity-asymmetric adoption preserving canonical Charter-Era regional variation.
+  - Activates the dormant Charter-Era anti-monopoly-of-force tension that INSTITUTIONS.md names across Landholding, Military, and Trade without until now having had a clean test case. The existing CF-0024 noble-retinue friction strains the norm from ABOVE (private-force accreting); dragoons invert the direction, stressing from BELOW (civic-chartered force accreting). Bidirectional anti-monopoly pressure is productive Charter-Era tension rather than Charter-Era rupture.
+  - Extends the polity-asymmetric disagreement register from four axes (CF-0021, CF-0024, CF-0028/CF-0030, CF-0031) to five, maintaining the Charter-Era regional-variation pattern characteristic of the current Incident Wave.
+  - "Generates story engines in Animalia's natural registers: jurisdictional refusal during ward-breach, cross-border pursuit, retired-dragoon civic-advisory roles, charter-court mission-creep challenges, ruin-mouth three-force convergence, impersonation trials, dragoon-widow charter-pension navigation, mission-creep-scandal rollback."
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - INSTITUTIONS.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "LB-1: future dragoon-confiscation-procedure CFs must specify custody-disposition of modern crafted artifacts without triggering M-6 (vessel-hosted agency firewall)"
+  - "LB-2: future dragoon-welfare CFs must not produce three-generation longitudinal health datasets paralleling CF-0031 scrivener's convention (preserves M-11 biological-heritability firewall)"
+  - "LB-3: future famous-dragoon-commander CFs must constrain reputation to civic-tactical domain, not ward-breach ontology (preserves M-7 reputation-genealogy firewall extended to dragoon subtype)"
+  - "LB-4: future extradition-resolution CFs must not retroactively adjudicate whether the four adoption-stabilizers are causally necessary (M-13 institutional-contingency preservation)"
+  - "funding-stream specificity deferred: whether dragoon funding is additive (new levy tier) or displacing (reallocation from existing canal-transit containment levy) is unresolved per adopting polity; CF-0031-style deferral pattern acknowledged; resolution deferred to OPEN_QUESTIONS Dragoon Funding-Stream Specificity"
+  - "transition-cost ward-breach severity spike: small adopting polities experience 3-7 year ward-breach severity spike during dragoon corps buildout as veteran recruitment cannibalizes militia and contractor pools; monitored economic exposure"
+  - "reactive adoption under smuggler escalation pressure: black-market re-routing toward non-adopting polities may trigger defensive adoption that partially defeats Stabilizer-1 (anti-monopoly political cost); monitored Charter-Era stress surface"
+  - "mission-creep countergate fragility: charter-court challenge via CF-0026 principled-refuser clergy is the primary procedural check against dragoon scope expansion; countergate effectiveness depends on charter-court precedent robustness and refuser-clergy influence per polity — M-13 tracks this as bounded-unknown"
+notes: |
+  Six critic sub-agents dispatched at escalation gate: Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator. All six recommended accept with repair; no dissent from accept. Thirteen categories of Phase 9 repair applied: - Continuity Archivist recommended 5 modification_history entries on
+    existing CFs (CF-0008 narrowing, CF-0020 qualification, CF-0024
+    qualification, CF-0026 extension, CF-0028 clarification) — all
+    adopted. Flagged pre-existing ledger counting-drift ("three axes"
+    prose vs four actual in CH-0006) as latent; PR-0003 counts honestly
+    as fifth axis without retroactive ledger cleanup (separate workflow
+    if needed).
+  - Systems/Economy flagged four stabilizer weaknesses (S1 gates adoption
+    not drift; S2 fragile at extraction-adjacent trip-wire; S3 decorative
+    as written; S4 adoption-diversity-only) and five missed consequences
+    (containment-fund displacement; inter-polity contractor cannibalization;
+    dowry/widow-asset bifurcation; smuggler counter-force escalation;
+    authentication-cartel integration). Repair response: scope-creep
+    countergate added to costs_and_limits; funding-stream mechanism
+    deferred to OPEN_QUESTIONS; labor-market cannibalization extended
+    via CF-0024 modification; three Breakage Points added to ECONOMY;
+    transition-cost note added to Wage Spreads; reactive-adoption
+    pressure flagged in costs_and_limits + OPEN_QUESTIONS.
+  - Politics/Institution recommended Charter-Era tether clauses (ward-
+    breach-declaration predicate; civic-treasury pay; ward-resident
+    recruitment; no hire-out; magistrate chain-of-command) — all adopted
+    in CF statement. Axis classification resolved by synthesis as fifth
+    independent axis sharing substrate with CF-0024 but with distinctive
+    shape. Religious response template specified as CF-0031 bifurcation
+    (adopted in visible_consequences and INSTITUTIONS §Religion).
+    Landholding bidirectional-stress amended bullet adopted.
+  - Everyday-Life flagged AES-2 hero-drift risk MODERATE-HIGH and
+    recommended per-cluster texture patches across all five clusters
+    with silent-absence commitments in (c)(d)(e) — all adopted. Named
+    lintel-marker, skip-rope rhyme ("one-post, two-post, three-post
+    hold"), child-drill command, retired-dragoon neighborhood role,
+    funerary treatment added to EVERYDAY_LIFE cluster (a). Estate
+    dowager-gossip layer + patron-liability ledger + tenant-cottage
+    pattern added to cluster (b). Silent-absence idioms added to (c)
+    "walks the southern cordon" and "does not walk the southern cordon";
+    to (d) "coin-for-service" and caravan cargo-refusal; to (e) not-
+    spoken-of posture and queue-asymmetry.
+  - Theme/Tone flagged tonal discipline as decorative not load-bearing
+    and recommended extensive in-register / out-of-register language
+    clauses — all adopted in CF-0033 notes field. Bardic stratification
+    (patron-inflated / tavern-veteran AES-1 / charter-court opposition)
+    adopted. Mission-creep register bureaucratic-drift discipline
+    adopted. Counter-register heroic-by-inversion (jackboot/stormtrooper
+    pulp) flagged as out-of-register.
+  - Mystery Curator identified M-6, M-7, M-8, M-9, M-11 as requiring
+    cross-application clauses and recommended new M-13 entry — all
+    adopted in MYSTERY_RESERVE.md extensions and new M-13. Four latent
+    burdens logged in latent_burdens_introduced (plus funding-stream,
+    transition-cost, reactive-adoption, mission-creep-countergate
+    additional monitored exposures).
+  Phase 14a validation: all 9 tests PASS with rationale recorded in adjudication record's Phase 14a Validation Checklist section. The split-option was considered and declined per Phase 9 split rubric: sub-facts share type (institution), Mystery Reserve exposure profile (M-6, M-7, M-8, M-9, M-11, new M-13), distribution shape (polity- asymmetric heartland-adoption-gated), and domains_affected set. Splitting would fragment integrity. The kit-counterfeit black-market commitment is structurally bound to the dragoon institution itself rather than splitting into its own CF.

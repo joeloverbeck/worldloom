@@ -1,0 +1,45 @@
+id: SEC-PAS-002
+file_class: PEOPLES_AND_SPECIES
+order: 2
+heading: Cluster A — Modern Mammalian Animal-Folk (most common)
+heading_level: 2
+body: |-
+  The largest population of animal-folk. Examples: cat-folk, beaver-folk, hyena-folk, wolf-folk, bear-folk, badger-folk, otter-folk, fox-folk, hare-folk, mouse-folk, mole-folk, deer-folk, boar-folk, raccoon-folk, dog-folk (multiple breeds), squirrel-folk, opossum-folk.
+
+  - **Body plan**: bipedal humanoid with species-typical sensory apparatus (ears, snout, eyes, whiskers), fur, claws or paws or pads, often a tail. Hand dexterity adapted per species — otters and beavers excellent fine-motor; some carnivores adapted for grip-and-tear; hooved species rare and use prosthetic-fitted handles.
+  - **Diet**: species-typical and respected. Obligate carnivores must eat meat (legal frameworks for butchery access). Herbivores require bulk plant matter. Omnivores flexible.
+  - **Movement**: bipedal; species-modulated. Hare-folk fast over short distances; badger-folk strong-but-slow; beaver-folk strong swimmers; squirrel-folk excellent climbers.
+  - **Senses**: species-typical. Cat-folk excellent low-light vision; canid-folk excellent scent; hare-folk excellent hearing; mole-folk poor sight, excellent vibration sense.
+  - **Vulnerability**: species-typical to certain animal-typed diseases; no species is immune to winter fever, but susceptibility varies.
+  - **Reproduction**: species-typical, breeds true within species.
+  - **Lifespan**: roughly 40–60 for smaller species; 50–80 for medium; 60–90 for larger. Bears and bovids longer than mice.
+  - **Social density**: integrated everywhere; clusters exist where embodiment favors a region (otter-folk on waterways; beaver-folk in canal-engineering centers; hare-folk in drylands plain). <!-- added by CF-0047 --> The drylands well-keeper customary-authority role (CF-0047) operates under SOC-1 no-species-gate (per CH-0018 INVARIANTS SOC-1 reaffirmation); practical species-concentration by corridor-resident embodiment-fit (heat-tolerant Cluster A fur-clipped / short-fur variants, desert-adapted Cluster A hare-folk, Cluster B scaled warm-south variants, rare Cluster C heat-tolerant ancestral lines, and occasional Cluster D mythic travelers) shows at well-keeper household pattern in practice without species-gating at intake — a mixed-species drylander household may hold the well-stop and pass the office lineally. Cross-species hospitality etiquette at the well-approach is charter-custom obligation under load (CF-0036 friction-register preserved — scent-aversion, mix-sound, one-fur-talk-now returning migrants, tavern joke-threshold register); NOT unearned harmony. Returning-drylander register "he came in dumb at the gate" (CF-0044 existing idiom) applies to well-approach and caravanserai-gate equally.
+  - **Embodiment effects on**:
+    - **labor** — strongly differentiated; canal engineering favors beaver-folk, scent-tracking favors canid-folk, low-light night-shift favors cat-folk and mole-folk;
+    - **clothing** — tailored around tails, ears, body plan; fur-bearers wear less in summer; oilcloth specially fitted for waterway species;
+    - **tools** — handle shapes vary by species, multi-handled implements common in mixed shops;
+    - **architecture** — doorways sized for the largest local species; some neighborhoods (mole-folk, low-fox-folk) feature lower ceilings; multi-storey workshops common;
+    - **warfare** — claws and bite are recognized natural arms in some legal codes; longsword still dominates infantry; raptor-folk archery (Cluster B) also notable;
+    - **taboo** — public mockery of species drives is poor form; eating obviously-recognizable meat in front of strict herbivores is rude;
+    - **religion** — many species honor a progenitor figure alongside common gods; hyena-folk laughter is sometimes incorporated into ritual;
+    - **law** — bite-marks, scent, claw-prints recognized forensic evidence;
+    - **environment** — heat-stress for heavy-fur species in drylands; waterway towns favor amphibious species; cold north easier on heavy-fur species.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0032
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

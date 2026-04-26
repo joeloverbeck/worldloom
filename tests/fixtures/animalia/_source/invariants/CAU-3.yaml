@@ -1,0 +1,17 @@
+id: CAU-3
+category: causal
+title: Wards are a public-but-restricted social-technical system
+statement: Wards are publicly understood as a containment system. Their existence, locations, and the concept of "ward breach" are common knowledge. Their specifics — the inscriptions, the materials, the maintenance schedules — are restricted speech, regulated by guild charter.
+rationale: Brief specifies ward-breach as known, and that public discussion of wards carries social risk.
+examples:
+  - a child knows what a ward marker looks like; an apprentice cannot legally describe the inscription pattern aloud in a tavern
+non_examples:
+  - wards as secret unknowable magic; wards as fully open public technology
+break_conditions: forbidden.
+revision_difficulty: medium
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Brinewick-local commercial containment fulfillment
+    body: "In Brinewick specifically (CF-0038), the containment-wright role attached to the ward-system frame is fulfilled COMMERCIALLY by the Ash-Seal company (CF-0043) under Brinewick civic-charter — a non-guild civic-chartered anomaly concorded with the chartered-extraction-guild. CAU-3 ward-system status is CATEGORICALLY UNCHANGED: wards remain publicly understood, their specifics restricted speech regulated by guild and civic charter, and ward-inscription / ward-inspection functions remain SOC-4 chartered-extraction-guild-licensed everywhere including Brinewick. The commercial containment-wright fulfillment affects WHO performs containment/disposal downstream of extraction in Brinewick; it does NOT extend Ash-Seal into ward-inscription, ward-inspection, or any CAU-3-gated function. Corporate trade-jargon vocabulary attaches to containment empirical-craft register (CF-0006 family), not to ward-specifics restricted speech. Defector-specialist portable containment knowledge is empirical craft transmission (parallels guild journeyman-migration); does NOT constitute publication of ward-inscription specifics. CAU-3 holds without exception."

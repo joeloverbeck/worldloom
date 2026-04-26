@@ -1,0 +1,44 @@
+common_interpretations:
+  - description: They were the Makers' weapons against each other
+    holders: war-collapse hypothesis
+disallowed_cheap_answers:
+  - '"An evil cult made them" tidy reveal'
+domains_touched:
+  - MAGIC
+  - INSTITUTIONS (extraction guilds)
+  - POLITICS (centralization fights)
+  - TIMELINE.
+extensions:
+  - body: 'Endemic bandit groups (CF-0034) categorically do NOT hold catastrophic-class artifacts. Catastrophic-class Maker-Age artifacts are held under the strictest guild and civic control where known, are guardian-active in their original contexts per CF-0029, and cannot be accessed by bandit groups because (a) CF-0027 anti-accumulation discipline prevents catastrophic ruin subset from accumulating bandit-accessible findings; (b) CF-0029 guardian-wipe eliminates bandit groups that intrude on guardian-active ruin sites; (c) CAU-1 and SOC-4 structural invariants preclude bandit operation of artifact extraction, containment, or activation. Bandit-trafficked artifact material on black markets is categorically non-catastrophic — dead-weight loot from incidental ruin-occupation or intercepted chartered-extraction cargo, disposed through CF-0023/CF-0028 channels. Added to disallowed cheap answers: *"A bandit-captain wielding a functional catastrophic-class Maker-Age artifact — forbidden reveal."* The M-2 firewall holds with this cross-application clause.'
+    change_id: CH-0008
+    date: 2026-04-19
+    label: Extension — Anti-bandit-catastrophic-custody firewall
+    originating_cf: CF-0034
+  - body: 'Artifact-contaminated mutated non-sentient beasts (CF-0035) — including the rumor-only gargantuan-underground scale-tail tracked under Mystery Reserve M-15 — exhibit effects LOCAL at squad-wipe maximum, paralleling the CF-0029 guardian-construction scale cap. NO cascade-capable effects. NO mass-mind-control. NO urban-scale ward-collapse. NO civilization-killing capability. The gargantuan-underground subcategory is rumor-register only: no sentient eyewitness survives a close encounter, the phenomenon IS its legend, and any encountered effect at scales beyond squad-wipe-local is out-of-canon and requires a new canon-addition run with explicit user approval. Added to disallowed cheap answers: *"A mutated beast exhibiting cascade, mass-mind-control, urban-scale, or civilization-killing capability — forbidden reveal."* *"A gargantuan-underground monster wielding cascade-capable or urban-scale effects at world level — forbidden reveal."* The M-2 firewall holds with this cross-application clause.'
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Extension — Mutated-beast scale-cap firewall
+    originating_cf: CF-0035
+  - body: 'Interspecies-cannibal-band sub-subset of CF-0034 outlaw bands categorically do NOT hold catastrophic-class artifacts. The CF-0034 CH-0008 anti-bandit-catastrophic-custody firewall extends without modification to the cannibal-edge sub-subset: (a) CAU-1 and SOC-4 structural invariants apply identically; (b) cannibal-band-trafficked artifact material on black markets is categorically non-catastrophic, dead-weight loot disposed through CF-0023/CF-0028 channels; (c) supremacist sectarian doctrine does NOT grant operational custody of catastrophic-class material (no "ancient weapon awakened for the chosen species" reveal; no "supremacist cult holds the Maker-war artifact" reveal). Added to disallowed cheap answers: *"An interspecies-cannibal-band captain wielding a functional catastrophic-class Maker-Age artifact — forbidden reveal."* *"A supremacist sectarian movement holding or operating a catastrophic-class artifact as instrument of species-war — forbidden reveal."* The M-2 firewall holds with this cross-application clause.'
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Extension — Interspecies-cannibal-band catastrophic-custody firewall
+    originating_cf: CF-0036
+  - body: "CF-0042 commits that state-security concealment of specific catastrophic-class discoveries circulates as DIFFUSE RUMOR ONLY within Animalia — never world-truth, never named-incident-confirmed. The rumor-register is preserved as diegetic civic-paranoid-dread atmosphere, generating bardic material and dissident publishing broadsides without ever resolving into specific attribution. World-level commitment: NO specific named catastrophic incident is confirmed to have occurred-and-been-covered-up by any polity's state-security apparatus; NO state-security archive is confirmed to hold a named catastrophic-class attribution at any scale that would implicate M-2's bounded unknowns. Civic magistrate dockets for dissident-publishing prosecutions (CF-0042 subsidiary docket) presuppose the world-level non-confirmation and target the PUBLICATION-BREACH, not the underlying incident. Added to disallowed cheap answers: *\"A state-security cover-up rumor cited as evidence of specific catastrophic-class origin — forbidden reveal.\"* *\"A state-security archive exposed by whistleblower containing a named catastrophic incident and its attribution — forbidden reveal at world level.\"* *\"A dissident-publishing broadside confirmed at world-level to have revealed a true state-security-concealed catastrophic incident — forbidden reveal.\"* *\"A reform-current clergy campaign succeeding in unsealing state-security records to reveal catastrophic-class attribution — forbidden reveal.\"* The M-2 firewall holds with this cross-application clause; the rumor-register is LOAD-BEARING as diegetic atmosphere that must never resolve to world-confirmed content."
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Extension — State-security-concealment rumor-register firewall
+    originating_cf: CF-0042
+  - body: "CF-0043 commits Ash-Seal's Brinewick-local backchannel economy (safe-class / moderate-tier declared-inventory artifacts sold discreetly to wealthy Brinewick parties in contravention of hold-for-study / disposal mandate). This channel is ECONOMIC COMMERCIAL CORRUPTION at moderate-tier and below; does NOT instantiate M-2 state-security-concealment specific-named-incident rumor register. Catastrophic-class finds NEVER flow through Ash-Seal backchannel — Ash-Seal concordat routes catastrophic-tier to civic sealed-quarter (Ash-Seal-billed per-artifact); the company's moderate-tier backchannel is magistrate-docket commercial-corruption prosecutable under Brinewick statute, categorically distinct from M-2's diffuse-rumor state-security-concealment register. Any in-world claim that Ash-Seal backchannel is the mechanism by which specific catastrophic-class incidents are concealed from civic record is CONTESTED-RUMOR PROJECTION, NOT world-truth — the two registers (commercial-corruption at moderate-tier / state-security-concealment at catastrophic-tier) must NOT be conflated in any canon-level commitment. Added to disallowed cheap answers: *\"An Ash-Seal backchannel sale revealed to have routed a catastrophic-class artifact to a private buyer — forbidden reveal at world level.\"* *\"Ash-Seal civic-backchannel channel cited as evidence of named state-security-concealment incident — forbidden reveal.\"* *\"A specific named catastrophic-class find routed through Ash-Seal backchannel rather than civic sealed-quarter — forbidden reveal at world level.\"* The M-2 firewall holds with this cross-application clause."
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Extension — Ash-Seal backchannel economic-only firewall
+    originating_cf: CF-0043
+future_resolution_safety: low
+id: M-2
+knowns:
+  - A small fraction of artifacts are catastrophic in effect (cascade-capable, mass-mind-control, water-corruption at scale, ward-collapse-inducing)
+status: active
+title: Who or What Made the Catastrophic-Class Artifacts?
+unknowns:
+  - Whether the catastrophic class was made by the same Makers who made ordinary artifacts

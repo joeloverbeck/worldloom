@@ -1,0 +1,73 @@
+id: CF-0039
+title: Maker-Age magical artifacts exhibit destruction-resistance; attempts to destroy bind the effect more deeply into the vessel
+status: hard_canon
+type: metaphysical_rule
+statement: |
+  Maker-Age magical artifacts resist destruction by means available to current-age capability. Attempts to break, burn, dissolve, or otherwise unmake a Maker-Age artifact do not destroy the effect; they bind it more deeply into the vessel and elevate the material resistance of the substrate. Wooden Maker-Age artifacts resist as if they were strong metal; stone and metal artifacts are frequently indestructible by any current-age technique. This destruction-resistance is a property OF the Maker-Age artifact-as-locus; modern crafter-produced vessels (CF-0021) do NOT inherit destruction-resistance and can be destroyed by ordinary means, preserving the CF-0021 "inferior" stabilizer register. The underlying mechanism is an unknown bounded by Mystery Reserve M-20.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - economy
+  - settlement_life
+  - law
+  - warfare
+  - memory_and_myth
+prerequisites:
+  - artifact is of Maker-Age origin per CF-0004; modern crafter outputs (CF-0021) do NOT inherit
+distribution:
+  who_can_do_it:
+    - (property is inherent to Maker-Age artifacts themselves; no current-age technique or practitioner can reliably destroy one)
+  who_cannot_easily_do_it:
+    - all current-age smiths, metallurgists, alchemists, civic-watch disposal units
+    - chartered extraction-guild neutralizers (operationally scoped to render-inert / seal-and-contain; destruction off-table per CH-0014 re-scoping)
+    - containment-wrights, ward-inspectors, civic-magistrates, crown authorities
+    - all modern crafters (CF-0021) working on their own outputs remain able to destroy crafter-vessels, but cannot destroy Maker-Age artifacts
+  why_not_universal:
+    - the property is scoped to Maker-Age origin by craft provenance; modern crafter vessels (CF-0021) remain destructible by ordinary means, preserving the CF-0021 "inferior" register and the M-20 firewall against technique-recovery-as-world-achievable-goal
+    - the underlying binding mechanism is unknown (Mystery Reserve M-20); no current-age agent, sect, polity, or coalition can overcome it
+costs_and_limits:
+  - destruction-attempts BIND the effect more strongly into the vessel (material-elevation on the substrate) AND extract attempt-cost from the attempter (injury, exhaustion, equipment loss, ward-attrition radius, local-bleed-through register for days to weeks); cost-universality (CAU-1) is preserved — attempts do not escape cost, they redirect it
+  - civic authority and chartered extraction guilds cannot destroy seized catastrophic-class material; only seal and contain; sealed-quarter maintenance becomes MONOTONIC-ACCRETION LIABILITY across generations (permanent civic obligation rather than amortizable hazard; ECONOMY §Breakage Points CH-0014 extension)
+  - the destruction-resistance mechanism is bounded-unknown per Mystery Reserve M-20; no current-age or recoverable Maker-Age technique enables reliable destruction
+  - battlefield-artifact deployment taboo (CF-0021 extension) is further reinforced: an artifact that falls to enemy hands cannot be destroyed to deny the enemy; it must be recovered or permanently lost
+visible_consequences:
+  - guild disposal protocols (CF-0006, CF-0007, CF-0008) operationally hold destruction OFF-TABLE; neutralizer-subtype work is re-scoped to render-inert / seal-and-contain only (INSTITUTIONS §Artifact-Extraction Guilds CH-0014 re-scoping)
+  - sealed-quarter footprints grow monotonically across generations (every uncontained catastrophic find adds to permanent liability; Brinewick exemplar per CF-0038 ward-reserve monotonic-accretion line)
+  - the silver-plate-over-heart register: a nobleman wore a Maker-Age silver kitchen-plate strapped over his heart as improvised breastplate in a short war because the plate would outlast his body; the plate is the protagonist of the anecdote, the nobleman is scenery (AES-1 laborer-register preservation; WORLD_KERNEL What Is Ordinary CH-0014 extension)
+  - blacksmiths, farriers, civic-watch, and householders know the destruction-prohibition rule; stories circulate in tavern-register and at guildhall notice-walls of attempts that went worse than the original hazard (the smith who lost his hand trying to split the humming disc; the foundation-crew whose bonfire the stone-plate took as polish; the widow whose contamination-injured tool came home the next morning after she threw it into the canal)
+  - highland clan-saga-fragment cadence for the clansman who tried to unmake a Maker-Age coin-find and found it stronger afterward (*"the coin kept the edge, the axe broke, his arm with it; the coin is under the cairn now"*); drylands caravan-corridor attempted-destruction rumor register; fenland discipline of "what the bog keeps, let the bog keep"
+  - centralization-fight advocates cite artifact-permanence as argument for crown-or-city-council custody nationalization; containment-wright faction pressure strengthens; reform-current clergy (CF-0026) bifurcates on Maker-debt-permanence acceptance vs burial-technique-recovery advocacy (latter categorically forbidden as world-achievable goal per M-20 firewall)
+  - assassination-and-theft economy for catastrophic-class items is sharper because seizure-and-destroy is unavailable as remedy; the hazard of ownership travels with the object permanently (CF-0042 status-economy texture)
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - ONTOLOGY
+  - TIMELINE
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0003
+    - CF-0004
+    - CF-0005
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Proposed as part of CH-0014 four-CF bundle extending the artifact system per brief briefs/animalia-magical-artifacts.md. Scoped to Maker-Age artifacts only per Continuity Archivist critic's Phase 6b recommendation; modern crafter outputs (CF-0021) remain destructible by ordinary means, preserving the CF-0021 "inferior" stabilizer register. CAU-1 cost taxonomy extended in-place via modification_history entries on CF-0005 (destruction-attempt cost-transfer is a variant cost form); no new invariant introduced per Phase 6b convergent recommendation. Underlying mechanism is bounded-unknown per new Mystery Reserve M-20 (Rule 7 obligation). Recommend permanent atmospheric retention of M-20 mechanism; the unknowability IS the stabilizer. Adjudication record: adjudications/PA-0013-accept_with_required_updates.md.
+modification_history:
+  - change_id: CH-0015
+    originating_cf: CF-0043
+    date: 2026-04-20
+    summary: "qualification: Ash-Seal (CF-0043) corporate-marketing 'patented destruction of wooden artifacts 100% of the time' claim committed as CONTESTED DIEGETIC CORPORATE CLAIM (in-world mystique-marketing; paralleling M-19 canal-age contested register and Ash-Seal 'hundreds of years' antiquity claim per M-19 CH-0015 extension), NOT world-truth; actual Ash-Seal practice is CF-0039-compliant specialized render-inert / seal-and-contain warded containment per CF-0008 CH-0014 neutralizer re-scoping; wooden Maker-Age artifacts processed by Ash-Seal remain in company-facility permanent inventory contributing to Brinewick's monotonic-accretion ward-reserve liability; fed-up-technician plain-speaking admission ('checklist, not a seance') is in-world revealer of mystique-as-performance; M-20 firewall extended with new disallowed cheap answers (Ash-Seal patented destruction proven at world level; Ash-Seal technique instantiating recovered Maker-sealing; Ash-Seal material-specific destruction marketing as material-typology-differential capability; Ash-Seal chosen-technician / defector mastering world-capable Maker-Age destruction); CF-0039 destruction-resistance scope categorically unchanged"

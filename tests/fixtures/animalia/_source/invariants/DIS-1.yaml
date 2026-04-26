@@ -1,0 +1,28 @@
+id: DIS-1
+category: causal
+title: Artifacts are routinely turned up underground
+statement: Foundations, canal-digging, mining, and ruin-clearance regularly turn up artifacts. Most are inert junk. A small fraction are dangerous. A tiny fraction are catastrophic.
+rationale: Brief specifies routine construction can unearth them.
+examples:
+  - a beaver-folk canal-crew finding a ceramic shard that registers as inert; a foundation dig that uncovers a humming metal disc and triggers a quarter-town evacuation
+non_examples:
+  - artifacts as so rare no one has ever seen one; artifacts as so common they fill marketplaces
+break_conditions: would change the entire artifact economy.
+revision_difficulty: medium
+extensions:
+  - originating_cf: CF-0040
+    change_id: CH-0014
+    date: 2026-04-22
+    label: Mundane-tier is explicit subset of "most inert junk" band, not a new distribution tier
+    body: |
+      CF-0040 commits the mundane-tier (near-imperceptible-effect artifacts: breeze-dolls, tick-mirrors, weak coin-sorters, scar-rubbers) as an EXPLICIT naming of the LARGEST share of the DIS-1 "most inert junk" band, reframed: most of what DIS-1 described as "inert" is in fact LOW-TIER ACTIVE, carrying per-artifact CAU-1 contamination clauses. Inverse strength-rarity relationship holds across the artifact corpus: mundane-tier is the most common; catastrophic-class is the rarest. The mundane-tier IS a subset within DIS-1, NOT a new distribution tier at the distribution-invariant level.
+  - originating_cf: CF-0027
+    change_id: CH-0004
+    date: 2026-04-18
+    label: Cross-reference
+    body: Enterable Maker-Age ruin sites (CF-0027) are a recognized subset of Maker substructures that admits organized multi-professional entry; piecemeal unearthing per DIS-1 remains the dominant modality, but enterable-ruin expeditions (CF-0028) are the less-common, high-risk, high-yield variant. The DIS-1 distribution pattern (most inert, small fraction dangerous, tiny fraction catastrophic) applies equally to enterable-ruin recoveries; catastrophic-class finds trigger resealing rather than recovery (preserves Mystery Reserve M-2).
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Wilderness-Distal Subset
+    body: A subset of DIS-1 unearthings occurs in wilderness beyond civic / guild / chartered-watch reach (earthquake-exposed, flood-exposed, burrowing-animal-exposed, slow-soil-creep-exposed). These exposures are not detected by inspectors and not contained by chartered response; the artifacts remain active in place. Over time this subset produces the CF-0035 contaminated-fauna phenomenon. Inspector-dispatch to wilderness-distal sites is DISCRETIONARY (gated by patron-funder or estate-commission or declared civic-watch predicate), not mandatory — cost, escort requirement, and wilderness reach preclude routine extension. DIS-1 distribution pattern holds within the wilderness-distal subset as everywhere else.

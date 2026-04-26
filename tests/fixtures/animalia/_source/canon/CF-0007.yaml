@@ -1,0 +1,58 @@
+id: CF-0007
+title: Wards are a recognized social-technical containment system; "ward breach" is a known event-class
+status: hard_canon
+type: technology
+statement: |
+  Wards mark artifact containment perimeters and registration. Their existence and the concept of "ward breach" are publicly known across the world. The specific inscriptions and maintenance procedures are restricted speech, regulated by guild and civic charter.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - law
+  - settlement_life
+  - economy
+prerequisites:
+  - ward-grade pigments and substrates (specialist materials)
+  - guild-licensed ward-wright
+  - civic registration
+distribution:
+  who_can_do_it:
+    - guild-trained ward-wrights and inspectors
+  who_cannot_easily_do_it:
+    - laypersons (illegal in most polities)
+  why_not_universal:
+    - inscription patterns are restricted speech; materials are guild-controlled
+costs_and_limits:
+  - wards attrit near active artifacts and require renewal
+  - public discussion of ward specifics carries social and sometimes legal risk
+  - ward-breach response requires coordinated guild and civic action
+visible_consequences:
+  - ward markers are visible in cities and along canal corridors
+  - ward-breach drills are part of childhood in cities and canal towns
+  - sealed quarter-towns are walled and warded
+  - inspector is a recognized chartered role
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - GEOGRAPHY
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0005
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Invariant CAU-3. Direct from brief.
+  Modified 2026-04-20 by CH-0014 (CF-0039): cross-reference annotation only (no CF-field change) — ward-breach disposal protocols are operationally CONTAINMENT-NOT-DESTRUCTION per CF-0039 destruction-resistance commitment; ward response at a breach site seals the hazard rather than destroying the artifact. CF-0007's ward system is categorically unaffected; the registration here is audit-trail hygiene documenting the operational disposal-register shift.
+modification_history:
+  - change_id: CH-0014
+    originating_cf: CF-0039
+    date: 2026-04-20
+    summary: cross-reference only — ward-breach disposal operationally re-framed as containment-not-destruction per CF-0039 destruction-resistance commitment; CF-0007 ward system itself unchanged

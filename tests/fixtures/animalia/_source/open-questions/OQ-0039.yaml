@@ -1,0 +1,8 @@
+id: OQ-0039
+topic: Ransom-Prisoner Civic-Registry Status
+body: |-
+  - CF-0034 commits that bandit-held captives exist in a pre-ransom ambiguous standing — their civic-registry status (household-of-record? estate-tenant roll? canal-barge crew roster?) is not formally suspended, transactional proxy is informal (kin acting as negotiating agent; estate-steward-as-agent in noble cases; coin-contract does not naturally govern coerced negotiation). Specific civic-registry suspension-or-retention convention, estate-steward-agency standard practice, and recovered-captive re-entry procedure remain deferred.
+
+when_to_resolve: when a story features a specific ransom-negotiation; when an estate-steward acts as captive-proxy in magistrate court; when a ransom-delivery-failure produces a civic-registry suspension or re-entry dispute.
+caution: interacts with SOC-3 (coin-contract governs ransom-payment but not the captive's civic standing directly); with CF-0024 contract-matchmaker role (extending into ransom-broker territory per Value Stores). Hardening prisoner-civic-standing toward full formal agency-suspension tilts toward prisoner-as-legal-non-person; softening tilts toward prisoner-as-incapacitated-person with kin-proxy rights — the balance carries implications for estate-steward authority and for recovered-captive re-entry procedure.
+extensions: []

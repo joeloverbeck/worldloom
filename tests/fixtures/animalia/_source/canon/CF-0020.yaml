@@ -1,0 +1,59 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - hazard pay is contested but real
+  - veterans-for-hire compete with militia traditions
+  - tone: heroism is paid in coin and scars, not glory (Invariant AES-1)
+distribution:
+  who_can_do_it:
+    - trained veterans, militia members, mercenary contractors
+  who_cannot_easily_do_it:
+    - untrained laypersons (though anyone may carry weapons in most polities)
+  why_not_universal:
+    - training and experience required for hire-grade work
+domains_affected:
+  - warfare
+  - economy
+  - law
+  - settlement_life
+id: CF-0020
+modification_history:
+  - change_id: CH-0003
+    date: 2026-04-18
+    originating_cf: CF-0024
+    summary: "qualification: hireable-veteran capability named within broader public contractor stratum with public posting infrastructure"
+  - change_id: CH-0007
+    date: 2026-04-18
+    originating_cf: CF-0033
+    summary: "qualification: dragoon subtype is chartered-civic institutional form, categorically DISTINCT from hireable-veteran capability; CF-0020 scope preserved; dragoon recruitment cannibalizes CF-0020 militia and veteran pool during buildout in adopting polities"
+notes: |
+  Direct from brief. Anchors Invariant AES-1. Modified 2026-04-18 by CH-0003 (CF-0024): the "veteran-for-hire" capability is now named within a broader public contractor stratum ("adventurers") with contract-posting infrastructure, subtypes including occult-fallout specialists (CF-0025) and principled refusers (CF-0026), and formalized mercenary-band pathway during inter-community skirmishes. CF-0020's capability-existence is preserved; CF-0024 commits the stratum and its public-facing institutional frame. Modified 2026-04-18 by CH-0007 (CF-0033): in dragoon-adopting polities, canal-corridor quarantine dragoons (CF-0033) are a chartered-civic personnel category categorically DISTINCT from the hireable-veteran capability that CF-0020 commits. Dragoons are civic-treasury-paid (not contract retainer), ward-resident-recruited (not open labor market), magistrate-chain-of-command-gated (not hired per-job), and cannot be hired out — these operational features distinguish dragoons from all CF-0024 contractor-stratum subtypes (hireable veterans, mercenary-company members, extraction/dredger-escort, caravan/wildlife escort, occult-fallout specialists, ruin-expedition contractors). CF-0020's hireable-veteran capability scope is PRESERVED; the dragoon subtype is not a new instance of CF-0020 capability but a categorically distinct chartered-civic institutional form. The retired-dragoon subtype is distinct from the retired-veteran CF-0020 category and carries charter-backed pension that no CF-0020 retiree receives. In adopting polities, dragoon recruitment cannibalizes the CF-0020 militia and veteran pool during buildout (3-7 year transition-cost spike in small polities) and exports cannibalization pressure to non-adopting polities as veterans emigrate to enlist. Adjudication record: adjudications/PA-0006-accept_with_required_updates.md.
+prerequisites:
+  - prior military service or trained fighting experience
+  - weapons (longsword, polearm, bow per region and species)
+required_world_updates:
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - GEOGRAPHY
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from: []
+  direct_user_approval: true
+statement: |
+  Most settled communities can field combatants. Veteran fighters — often with visible scars, longswords, and reputations — exist as a hireable resource for risky jobs (caravan escort, artifact-extraction security, debt enforcement). Danger is treated credibly; veterans are paid as labor, not glorified as heroes.
+status: hard_canon
+title: Local violent capability exists and is hireable
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: capability
+visible_consequences:
+  - scarred veteran in tavern is an ordinary, hireable figure
+  - militias muster for civic emergencies (ward breach, raid, plague-year enforcement)
+  - bardic cycles distinguish romantic war-songs from veteran reality
+  - veterans form the core of the CF-0024 adventurer-contractor stratum; named veterans accrue portable inter-polity reputation via the bardic circuit, and the occult-fallout specialty (CF-0025) is the mortality-limited sub-niche at the top of the hazard-pay ladder

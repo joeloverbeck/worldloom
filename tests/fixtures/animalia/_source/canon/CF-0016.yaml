@@ -1,0 +1,45 @@
+id: CF-0016
+title: Common Pantheon coexists with Species-Progenitor Cults
+status: hard_canon
+type: belief
+statement: |
+  Animalia's religious life is structured by a Common Pantheon of named gods worshipped across species, intersecting with Species-Progenitor Cults that honor mythic species-progenitor figures. The Charter-Era settlement folded most progenitor cults into civic religious life by treating progenitors as aspects of pantheon gods, but this compromise is contested by sectarian progenitor-supremacy movements.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - religion
+  - kinship
+  - law
+  - status_signaling
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal: []
+costs_and_limits:
+  - charter-era settlement is under strain in mixed cities
+  - sectarian movements draw active membership
+  - cross-species marriages must navigate two-tradition households
+visible_consequences:
+  - hearth prayer, weekly temple visit, progenitor feast days are ordinary
+  - sectarian movements visible in current politics
+  - common-pantheon clergy and progenitor-cult lineage-keepers compete for influence
+required_world_updates:
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - TIMELINE
+source_basis:
+  direct_user_approval: false
+  derived_from:
+    - CF-0001
+    - CF-0010
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Derived canon: required by Rule 5 (multispecies civic integration without a religious accommodation would be unstable). Specific pantheon roster deferred (OPEN_QUESTIONS). The aspectual compromise interacts with mystery M-4.

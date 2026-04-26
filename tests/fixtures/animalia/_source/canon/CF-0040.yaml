@@ -1,0 +1,73 @@
+id: CF-0040
+title: Mundane-tier Maker-Age artifacts are commonly unearthed in ordinary-life contexts
+status: hard_canon
+type: resource_distribution
+statement: |
+  Mundane-tier Maker-Age artifacts — artifacts with near-imperceptible or barely-useful effects such as dolls that generate a weak breeze in no wind, mirrors that emit a soft tick at random intervals, stone plates that group coins by denomination when placed on them, smooth palm-stones that rub shallow scars — are regularly found in canal silt, beach sand, peat cuttings, furrow turnovers, and are turned up by ordinary farming, children's play, animal burrowing, canal dredging, and flood erosion. The mundane tier is the LARGEST share of the DIS-1 "most inert junk" band given explicit naming; an inverse strength-rarity relationship holds across the artifact corpus, with mundane tier the most common and catastrophic-class the rarest. Every mundane-tier artifact carries a CAU-1 cost surface (slow-bleed on user, room-misfeel, animal unease, household water off-flavor across months, vessel fatigue across seasons of proximity) — no "harmless charm" reading is world-truth. The mundane tier is a subset within the DIS-1 distribution invariant's "most inert junk" band, NOT a new distribution tier at the invariant level.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - economy
+  - settlement_life
+  - daily_routine
+  - status_signaling
+  - law
+prerequisites:
+  - existing Maker-Age artifact corpus (CF-0004) in soils, canal beds, peat cuttings, tidal sand
+  - ordinary-life exposure contexts (farming, dredging, child-play, animal burrowing, flood erosion, qanat-cleaning)
+distribution:
+  who_can_do_it:
+    - anyone present in ordinary-life contexts where Maker-Age artifacts surface (farmers, dredgers, children, peat-cutters, canal-crews, beach-walkers, herd-children, reed-fishers, qanat-maintenance crews)
+  who_cannot_easily_do_it:
+    - urban inhabitants without access to unearthing activity rarely encounter mundane finds directly (they buy or inherit them after a rural or dredger finder)
+    - polities with weak charter do not operate a coherent intake regime, leaving find-disposition informal (highland clans, fen-villages, drylands-caravan contexts)
+  why_not_universal:
+    - dependent on soil disturbance, tidal action, burrowing behavior, canal dredging frequency, and peat-cutting rotations; region-sensitive even within global commitment (canal heartland and estate-outskirts exposure is higher; fenlands finds are peat-bog-mediated; drylands finds are sand and wadi-bed; highlands finds are lower but not absent; mountain-east finds are valley-pass-mediated)
+    - polity-asymmetric treatment creates variable disposition outcomes (license-low-floor / register-and-ignore / de-minimis-exemption / punitive-confiscation); this asymmetry is part of the broader fifth-parallel-sixth-axis latent-burden watch-register per CH-0014
+costs_and_limits:
+  - CAU-1 holds for every mundane-tier artifact: every useful or amusing effect carries a cost surface; a scar-rubbing stone that smooths shallow scars for a season contaminates the household water by harvest and the herb-wife notes the off-flavor; a coin-sorting plate draws moths to the coin-drawer until the coin-drawer smells wrong by autumn; a breeze-doll gives the room an off-feel that accumulates over months
+  - mundane finds are guild-intake-eligible but per-polity variable: some polities license-low-floor registration with flat finder-fee; some register-and-ignore; some allow de-minimis exemption below charter-threshold; some criminalize with carve-outs; highland / fenland / drylands-caravan contexts handle under convention-register only (clan-elder sanction, marker-reed relay, caravan-master refusal)
+  - mundane-tier value-per-item is low; chartered-broker commerce centers on higher tiers; bottom-copper authentication-specialist cheap-end classification layer earns fees on high intake-volume rather than per-item depth
+  - mundane-tier artifacts are categorically NOT suitable for elite display (CF-0042 status-display register is for chartered safe-class only); attempts to inflate mundane-tier into status-display would mark the owner as parvenu in dowager-gossip circuits
+  - per-polity finder-fee wage-schedule and child-finder coin-split discipline are DEFERRED (OPEN_QUESTIONS §Mundane-Tier Finder-Fee Wage Schedule CH-0014)
+visible_consequences:
+  - canal-heartland dredger crews follow a routine for silt-bar finds (hand to lock-master's office before midshift-end; never pocket; quarterly ward-inspector triage at canal-quarter office); Brinewick (CF-0038) dredge-find-registry caseload exemplar volume per CH-0014
+  - "children in canal-heartland households are taught a skip-rope rhyme warning against pocketing: *\"one-seal, two-seal, don't lift the lid / three-seal, four-seal, the old world hid\"* (10th rhyme in rotation per EVERYDAY_LIFE §(a) CH-0014 extension)"
+  - 'estate-outskirts (Brinewick) 7th dowager-gossip axis on display-inventory distinguishes charter-sound provenance from casual-hoarding: *"the Mellivers have a declared-inventory mirror in the salon — is the provenance-stamp current?"*'
+  - "highland clan-elder sanction applies to found artifacts paralleling CF-0021 grimoire ritual-burning and CF-0035 beast-trophy protocol; idiom: *\"the seal is the old world's word; we do not answer\"*; disposition is buried-back-under-cairn or rare-sent-south via escort"
+  - "drylands caravan-master sealed-cargo-refusal extends to mundane-find cargo; qanat-cleaning-rite unsealing discovery convention handles cistern-bottom finds; cargo-riddle extension: *\"what ticks in the cistern that holds no bell? — the old world's mirror; leave it where the water cleans it\"*"
+  - fenland marker-reed red-bound summons for sealed-find discoveries (institutional-absence-acknowledged-in-silence preserved; NO drill); amphibian-folk canary-neighbor bog-diagnosis precedes visible symptoms by hours or days
+  - mundane-find curiosity-market operates under polity-asymmetric legality — bottom-copper tier, absorbed into existing authentication cartel-formation pressure (eighth authentication product-line material per CF-0042 compounding) WITHOUT constituting a new illegitimate-service product-line
+  - bardic-circuit unsealing-dread register lives WITHIN CF-0036 silenced-contractor subgenre (itinerant bards sing; patron-commissioned bards refuse; reform-current bards refute in litigious register), NOT a new fifth bardic register
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - ONTOLOGY
+  - MAGIC_OR_TECH_SYSTEMS
+  - TIMELINE
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0004
+    - CF-0005
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Proposed as part of CH-0014 four-CF bundle. Per Phase 6b synthesis, the mundane tier is explicitly committed as a subset within DIS-1's "most inert junk" band, NOT a new distribution tier (Rule 3 firewall per Theme/Tone critic). Per-artifact CAU-1 cost annotation is mandatory (AES-3 preservation) — no useful mundane artifact escapes contamination clause. Per-region ordinary-life signatures committed per Everyday-Life critic (fenlands institutional-absence preserved — marker-reed relay, not drill; highland clan-elder sanction, not drill; drylands caravan-refusal + qanat-cleaning-rite, not drill; canal-heartland dredger protocol and ward-inspector triage IS a drill-register). Authentication-cartel eighth-stream pressure ABSORBED into existing cartel formation (Rule 3 firewall per Economy + Politics critics). Per-polity finder-fee wage-schedule is DEFERRED to OPEN_QUESTIONS (new §Mundane-Tier Finder-Fee Wage Schedule entry). Adjudication record: adjudications/PA-0013-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): extension — Ash-Seal (CF-0043) Brinewick-specific intake-tier handoff-boundary commits that mundane-tier finds in Brinewick stay with the chartered-extraction-guild inspector's office mundane-find intake-tier (license-low-floor regime) and are NOT routed to Ash-Seal — Ash-Seal handoff threshold is at ABOVE-MUNDANE tier. The boundary between mundane-tier (civic-handled per CF-0040) and above-mundane (Ash-Seal-handled per CF-0043) is mostly empirical at the inspector-office classification layer; civic-quarter authentication-specialist classifies findings per CF-0021 cheap-end classification layer. Boundary is Brinewick-local; non-Brinewick polities maintain standard chartered-extraction-guild handling for all tiers. CF-0040 mundane-tier scope categorically unchanged; the handoff-boundary is operational Brinewick-institutional-variant documentation, not a scope revision.
+modification_history:
+  - change_id: CH-0015
+    originating_cf: CF-0043
+    date: 2026-04-20
+    summary: "extension: Brinewick-specific mundane-tier / Ash-Seal handoff-boundary — mundane-tier finds stay with chartered-extraction-guild inspector's office mundane-find intake-tier (license-low-floor regime); Ash-Seal threshold at ABOVE-MUNDANE tier; boundary empirical at civic-quarter classification layer; Brinewick-local operational variant; CF-0040 mundane-tier scope categorically unchanged"

@@ -1,0 +1,13 @@
+id: OQ-0021
+topic: Contractor Liability Case Law
+body: |-
+  - CF-0024 establishes that hazard-pay, collateral-damage liability, and breach-of-contract precedent is evolving in magistrate courts across chartered polities, but specific precedent cases, liability schemas, and standard contract forms are deferred.
+
+when_to_resolve: when a story features a specific contractor dispute reaching magistrate decision.
+caution: interacts with SOC-3 (coin-contract sacredness). Precedent that softens contractor liability would erode SOC-3; precedent that hardens it without adjustment for hazard-work would strangle the contractor economy. The balance is load-bearing.
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Ash-Seal retrieval-as-client-responsibility precedent annotation
+    body: "CF-0043 commits Ash-Seal's \"retrieval is client responsibility\" commercial policy — the retrieving party (chartered extractor, CF-0024 contractor-auxiliary, CF-0033 dragoon ward-breach perimeter team, dredger crew, canal-warden, estate-retained muscle) bears the contract-liability for the retrieval act itself; Ash-Seal receives the artifact at the civic-quarter intake bench and absorbs containment / research / sealed-inert disposal liability from there. This shifts contract-liability precedent dimension in Brinewick specifically (and in the carriage-distance heartland radius Ash-Seal dispatches into): the HIRING party (civic-treasury, canal-warden, estate-owner) pays the contractor-auxiliary retrieval-cost; the containment liability is a separate fee paid to Ash-Seal on intake. Magistrate precedent on collateral-damage during retrieval vs during containment is evolving and distinguishes the liability boundary at physical-handoff. Non-Brinewick polities with ordinary chartered-extraction-guild containment-wright function retain unified liability (same guild performs retrieval and containment under one charter). The parent deferral above is narrowed for Brinewick-local liability-boundary precedent; structural commitment (separate retrieval vs containment liability) is named, specific magistrate-precedent forms remain deferred per parent."

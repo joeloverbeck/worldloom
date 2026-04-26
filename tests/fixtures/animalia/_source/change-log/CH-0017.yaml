@@ -1,0 +1,43 @@
+change_id: CH-0017
+date: 2026-04-20
+change_type: addition
+affected_fact_ids:
+  - CF-0045
+  - CF-0017
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES of PR-0014: commits CF-0045 lock-night as named bardic-performance occasion at canal-corridor lockside taverns at soft_canon (partial-support evidence-breadth pathway; CF-0015 / CF-0017 / CF-0024 / CF-0038 commit surrounding mechanics, NAMING sole-source DA-0001). Performance keyed to lock-closure hour; audience composition canal-labor heavy (lockmaster-crew, barge-layover travelers, wharf- traders); customary silver-differential pay above middling tavern-night rate; informal lockmaster / tavern-keeper coordination on scheduling. Regional canal-heartland scope structurally gated by canal-lock infrastructure (CF-0015). Lock-night is a named sub-occasion within CF-0017's bardic-tavern frame (Rule 3 specialness-inflation firewall — NOT a new institution with its own licensure) and is distinct from CF-0038's Brinewick canal-circuit quarter-year rotation (orthogonal scheduling dimensions). CF-0017 extended with lock-night named sub- occasion + canal-labor audience register + silver-differential pay register per axis-(c) substantive extension. DA-0001 (Vespera Nightwhisper travelogue) pre-figuring formalized to world-level canon per Rule 6 audit-trail preservation. Escalation gate not fired (3 of 13 FOUNDATIONS domains touched — INSTITUTIONS / EVERYDAY_LIFE / ECONOMY; no invariant revision; no new invariant-level rule); single-agent path. Adjudication record: adjudications/PA-0016-accept_with_required_updates.md.
+reason:
+  - formalize diegetic pre-figuring from DA-0001 (Vespera Nightwhisper, 'a-season-on-the-circuit' body text line 362 + claim_map canonically_true entry at cf_refs [CF-0017, CF-0009]) to world-level canon per Rule 6 audit-trail preservation
+  - commit a named bardic-performance sub-occasion within CF-0017's institutional frame specific to canal-corridor lockside taverns — distinct from CF-0038's Brinewick canal-circuit quarter-year rotation, distinct from ordinary tavern-night
+  - enrich canal-heartland everyday-life texture with a recognized silver-differential performance register tied to lockmaster-crew shift rhythm and barge-traffic / wharf-trader audience composition
+  - name a feedback channel by which canal-labor oral register enters circuit-bard repertoire via lock-night audience composition (lockside-labor ballads, canal-route work-songs, barge-traveler goodbyes accreting as named sub-genre within CF-0017)
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: false
+  mystery_reserve_effect: unchanged
+downstream_updates:
+  - INSTITUTIONS.md
+  - EVERYDAY_LIFE.md
+  - ECONOMY_AND_RESOURCES.md
+impact_on_existing_texts:
+  - "DA-0001 (a-season-on-the-circuit): body-text line 362 lock-night claim and claim_map entry at canon_status: canonically_true are retroactively recontextualized as narrator-witness of the now-committed CF-0045 convention; narrator Vespera's firsthand circuit-bard exposure supports the claim's canonical-truth status; no diegetic artifact edits required (Rule 6 audit-trail preserved via CF-0045 source_basis.derived_from citation)"
+  - "CF-0017 modification_history: seventh entry appended (CH-0017) documenting axis-(c) substantive extension — lock-night as named sub-occasion + canal-labor audience register + silver-differential pay register within bardic-tavern institutional frame"
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - Lock-night-specific bardic sub-genre content (named lockside-labor ballads, canal-route work-songs, barge-traveler goodbyes) may pressure future canon work if specific named lock-night songs or bardic cycles are drawn into story material; not currently committed — general sub-genre register only
+  - Silver-differential pay register specific tier (how much above middling tavern-night rate) is committed qualitatively not quantitatively; future ECONOMY work may pressure a wage-spread commitment paralleling existing §Wage Spreads structure
+  - "Lock-night scope outside Brinewick: non-Brinewick canal-heartland polity-specific lock-night idiom variation (per-polity cadence differences, per-polity tavern-keeper convention differences) underdetermined; future per-polity story-demand may pressure commitments — soft_canon status accommodates narrow per-polity commitments without escalation"
+notes: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict at soft_canon. Escalation gate did NOT fire — 3 of 13 FOUNDATIONS domain files substantively changed (INSTITUTIONS / EVERYDAY_LIFE / ECONOMY; plus CANON_LEDGER.md always); no invariant revision required; no new invariant-level rule introduced. Single-agent path; no critic sub-agents dispatched.
+  Pre-figuring scan (mandatory per SKILL.md when proposal names specific entities) confirmed DA-0001 (a-season-on-the-circuit.md) claim_map entry at line 124 (canon_status: canonically_true, cf_refs [CF-0017, CF-0009]) and body-text line 362 pre-figure the lock-night occasion at diegetic level. DA-0001 citation in CF-0045 source_basis.derived_from satisfies Rule 6 audit-trail preservation.
+  Pre-scan verification per SKILL.md axis-(a) rule pared proposal-self- asserted derived_from list [CF-0015, CF-0017, CF-0024, CF-0038] to [CF-0017, DA-0001]. CF-0015 (canal network commercial spine) is prerequisite-substrate only — lock-night does not commit specific canal- lock instances or extend CF-0015's territory; captured in prerequisites list. CF-0024 (lockmaster posting-wall / contractor stratum) is mechanism-reference only — lock-night uses CF-0024's posting-wall for advertising but does not extend CF-0024's contractor-stratum content. CF-0038 (Brinewick canal-circuit quarter-year rotation) is orthogonal- coexistence — lock-night and canal-circuit rotation are two independent scheduling dimensions (rotation = which-taverns-across-a-year; lock- night = which-night-type-within-a-week) that coexist without either extending the other's territory. Per SKILL.md worked example (CF-0036 cross-referencing CF-0032 without modification_history), firewall language in the new CF's statement / notes suffices; no axis-(c) modification_history entry required on CF-0015 / CF-0024 / CF-0038. Only CF-0017 receives modification_history (axis-(c) substantive extension — lock-night ADDS content to CF-0017's bardic-tavern frame).
+  All 10 Phase 14a Validation Tests PASS — see adjudication record for per-test rationale. M-7 firewall preserved (lock-night performer competence absorbed within existing CF-0017 circuit-bard reputation register; NOT a new M-7 cohort-class or sub-specialty holding clause). M-19 firewall preserved (lock-night operates on current canal infrastructure; no antiquity/origin claim about canal construction). No MR extension required.
+  Rule 3 specialness-inflation firewall load-bearing: lock-night is a named sub-occasion within CF-0017, NOT a new institution with its own licensure, oversight, guild-body, or cohort. Parallel to CH-0009 / CH-0010 / CH-0012 / CH-0015 / CH-0016 sub-specialty holding clause precedents.

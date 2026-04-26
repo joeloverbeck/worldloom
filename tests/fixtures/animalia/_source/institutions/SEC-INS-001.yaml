@@ -1,0 +1,67 @@
+id: SEC-INS-001
+file_class: INSTITUTIONS
+order: 1
+heading: Family / Clan / Household
+heading_level: 2
+body: |-
+  - **Function**: reproduction, child-rearing, primary economic unit, inheritance, daily labor coordination.
+  - **Legitimacy source**: kinship plus custom plus species tradition; cross-species marriages legitimate via civic registry.
+  - **Material base**: household land, tools, workshop, livestock, contract obligations, savings in coin or kind.
+  - **Violence capacity**: low; weapons in homes for self-defense; militia call-up in emergencies.
+  - **Recruitment**: birth, marriage, adoption, fostering. Adoption and fostering are the only paths to cross-species kinship (ONT-3).
+  - **Succession**: typically eldest child or designated heir; species traditions vary widely (some matrilineal, some primogeniture, some elective among siblings); civic registry mediates when species traditions conflict.
+  - **Internal contradictions**:
+    - cross-species households face inheritance disputes when species-tradition conflicts with civic law;
+    - obligate-carnivore households in vegetarian-clan-dominant regions face quiet pressure;
+    - urban estate households have a different succession logic than rural tenant households, and intermarriage between them complicates both.
+    - <!-- added by CF-0031 --> registered-vs-unregistered contamination-lineage household stratum (CF-0031): in adopting polities, extractor, containment-wright, and post-career fallout-specialist (CF-0025) households face an inter-generational deliberation — register the aging patriarch for widow-supplement and monastic-clinic priority, or decline the mark to preserve marriage prospects for grandchildren. Marriage-broker catechism in adopting-polity heartland households now includes "did your grandfather take the mark? show the ledger-leaf." The decision-point interacts with existing mixed-species-estate succession complications (CF-0002 / CF-0011), with inheritance disputes picking up registry-marked-estate as an asset-class-adjacent category. The mark's three-generation administrative interval means households deliberate across grandparents, parents, and children in a single conversation — the scrivener's interval is also the household's planning horizon.
+    - <!-- added by CF-0034 --> household-dissolution push-out feeding endemic banditry (CF-0034): debt-spiral foreclosures, brutal-winter survival-failure, abandoned-settlement dispossession, clan-sanctioned exile, and guild-blacklist expulsion are recognized household-dissolution vectors that feed the CF-0034 bandit-recruitment stratum. The pathway is particularly acute in Layer-4 Incident-Wave-era pressure cohorts (bad-winter-fever demographic shock, sealed-quarter refugee stratum, CF-0021 failed-apprentice survivors, CF-0024 failed-reputation contractors). Kinship consequence: households whose members have "walked south" or "gone to the hollow" carry the idiom-specific grief register — distinct from winter-death or sealed-quarter loss, because the departed kin is still alive and potentially criminal; saga-fragment and skip-rope rhyme preserve the ambiguity rather than resolve it. Marriage-broker catechism in exposed-district households extends: *"did your kin come back from the raid?"* as a ledger-leaf-adjacent question paralleling the CF-0031 mark-inquiry. Recovered-slave reintegration (from CF-0034 raid-and-enslave distribution subset) is a fraught kinship procedure; common-pantheon restoration rite is available in some polities but communities vary in acceptance — this is a standing latent burden per CH-0008 rather than a committed institutional form.
+    - <!-- added by CF-0037 --> family-handled waystation inheritance pattern (CF-0037): waystation-family households in heartland (most prevalent), cold north highland, and mountain east operate a multi-generational kin-to-kin household-enterprise succession pattern distinct from registered-vs-unregistered contamination-lineage household stratum (CF-0031), from oversize-saddlery placement-right inheritance (CF-0032), and from ordinary household-trade succession. The waystation inheritance is FIXED-PHYSICAL-INFRASTRUCTURE — the building, well, supply-storage, and route-knowledge attach to the place rather than to the lineage's craft skill (CF-0032) or to the lineage's body-state record (CF-0031). Inheritor-children begin chore-work from young (often earlier than the canal-town age-ten apprenticeship norm per EVERYDAY_LIFE §(a)), are encouraged to marry locally and reproduce in turn, and most often remain stationkeeper for life. Marriage-broker catechism extends: *"is the stop kept in the family?"* (heartland connector-route cadence) joins the CF-0031 mark-inquiry, CF-0032 placement-right-inquiry, and CF-0034 raid-widow-inquiry as a fourth named inheritance-context catechism question. Inheritor-children unwilling to accept the burden walk away (recognized self-exile pathway feeding existing CF-0024 contractor entry-tier / urban-poor / CF-0034 banditry recruitment-feeder cohorts per Rule 3 firewall — ABSORBED into existing precarious strata, NOT named distinctly); the inheritor-who-stays is settled-resigned-respectable middle-stratum carrying resignation-resentment register in AES-1 cadence applied to ordinary commerce. Mixed-species waystations are ordinary in heartland per SOC-1; clan-affiliated in highland; valley-pass in mountain east. NON-STRATUM: the staying inheritor is ordinary-commerce household, NOT a precarious or specialized welfare category.
+    - <!-- added by CF-0047 --> drylands well-keeper lineage-inheritable household-enterprise pattern (CF-0047): well-keeper households operate a multi-generational kin-to-kin household-enterprise succession pattern in the drylands caravan corridor (CF-0046 substrate), categorically DISTINCT from CF-0037 family-handled waystation (water-node vs road-rest-node; drylands-present vs drylands-structurally-absent per CF-0037 Stabilizer (i) preserved) and distinct from CF-0031 contamination-lineage ledger-mark, CF-0032 subsection placement-right, and ordinary household-trade succession. The well-keeper inheritance is WATER-NODE-ANCHORED-PHYSICAL-INFRASTRUCTURE — the well-stop (single-household well and its adobe compound, or a multi-household well-complex shared among allied lineages), the keeping-book (running record of hospitality-due and water-share-balanced, customary-property-locked), the station-log (in DIS-2 trade-tongue; load-bearing keeper-competence per CF-0046), and the verse-counter (wooden tally of performed-and-owed hospitality-verse per CF-0044) attach to the well-stop. Inheritor-children begin chore-work from young at age 6-7 (paralleling CF-0037 stationkeeper chore-from-young; drylands-specific at well-stop rather than road-rest station). Marriage-broker catechism extends: *"whose well does your family keep?"* joins the CF-0031 mark-inquiry, CF-0032 placement-right-inquiry, CF-0034 raid-widow-inquiry, and CF-0037 "is the stop kept in the family?" as a fifth named inheritance-context catechism question. Inheritor-children unwilling to accept the burden walk away (*"walked the well"* — absorbed into existing CF-0024 contractor entry-tier / urban-poor / CF-0034 banditry recruitment-feeder cohorts per Rule 3 firewall; the inheritor-who-stays *"kept the well"* is settled-resigned-respectable middle-stratum carrying resignation-resentment register in AES-1 cadence paralleling CF-0037). Cross-species well-keeper households are ordinary per SOC-1 (no-species-gate at lineage-inheritance; species-concentration by embodiment-fit at practice-level not intake-level per CH-0018 INVARIANTS SOC-1 reaffirmation). Well-stop tenancy on estate-tenant land is rare in drylands (drylands does not host heartland-style noble-estate tenant pattern at corridor scale) but arises where a drylands polity has a nominal landholder claim; customary well-keeper family-property claim prevails absent formal civic-magistrate contest. NON-STRATUM: the staying well-keeper is ordinary-commerce household, NOT a precarious or specialized welfare category (paralleling CF-0037). NO CHARTERED well-keepers' guild; NO master-rank progression; NO seal (paralleling CF-0037 NON-CHARTERED clause).
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0009
+  - CF-0010
+  - CF-0011
+  - CF-0013
+  - CF-0015
+  - CF-0016
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

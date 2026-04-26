@@ -7,9 +7,11 @@ import { getContextPacket } from "../../src/tools/get-context-packet";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
 
+const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+
 function extractContractKeyTree(): Record<string, string[]> {
   const contractPath = path.join(
-    "/home/joeloverbeck/projects/worldloom",
+    REPO_ROOT,
     "docs",
     "CONTEXT-PACKET-CONTRACT.md"
   );

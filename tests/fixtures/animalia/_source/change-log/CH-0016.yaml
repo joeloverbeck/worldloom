@@ -1,0 +1,45 @@
+change_id: CH-0016
+date: 2026-04-20
+change_type: addition
+affected_fact_ids:
+  - CF-0044
+  - CF-0017
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES of PR-0017: commits CF-0044 drylands short- poetry stranger-hospitality protocol at soft_canon regional (drylands). A named oral-hospitality register distinct from bardic performance (CF-0017) and canal-heartland tavern-vouch (CF-0024), operating at caravanserai, wayhouse, and well-side stranger encounters. Proposal's stated stabilizers (regional-cultural gate, bardic one-way flow, non-portable prestige) repaired and expanded per Phase 6b multi-critic synthesis to include venue-and-host binding, per-cluster accommodation, M-4 progenitor-verse- matter firewall block, M-7 sub-specialty holding clause, Rule 3 absorption clauses. CF-0017 extended with bardic-absorption directional firewall annotation (verse-fragments travel in bardic-tavern register; the stranger- exchange protocol does NOT). Adjudication record: adjudications/ PA-0015-accept_with_required_updates.md.
+reason:
+  - enrich drylands regional cultural texture with a specific hospitality-protocol naming drawn from diegetic-artifact evidence (DA-0001 paragraph 3 aside)
+  - commit a fourth named drylands oral-tradition register (short-form hospitality-verse) alongside long-memorized-poem, riddle, and caravan-tale traditions existing in EVERYDAY_LIFE §(d)
+  - name a low-register-religious layer where hospitality-verse may invoke progenitor/household-gods as GENRE-REGISTER verse-matter without doctrinal implication
+  - name a cross-regional cultural-borrowing pathway (drylands short-poetry → canal-heartland bardic-fragment via circuit-bards) paralleling existing one-way flows (highland clan-song, fen-marker-reed)
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: false
+  mystery_reserve_effect: unchanged
+downstream_updates:
+  - EVERYDAY_LIFE.md
+  - GEOGRAPHY.md
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - INSTITUTIONS.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+  - TIMELINE.md
+  - ECONOMY_AND_RESOURCES.md
+impact_on_existing_texts:
+  - "DA-0001 (a-season-on-the-circuit): paragraph 3 aside ('the short kind of poetry the drylanders trade with strangers') is re-contextualized as narrator-witness of the now-committed CF-0044 convention; narrator Vespera's firsthand exposure is peripheral to her travelogue's self-promotional spine, reducing inflation risk"
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - drylands short-poetry convention antiquity (Charter-Era-consolidated vs older folk practice) and scope refinement (pan-drylands vs caravan-route-specific) — Vespera's three-week caravan exposure underdetermines the range; tracked at OPEN_QUESTIONS §Drylands Short-Poetry Convention Antiquity and Scope
+  - named verse-form meter / line-count / turn-count register — future canon work involving bardic-performance scenes drawing on drylands-absorbed fragments may pressure this naming; not currently committed
+  - progenitor-cult sectarian-doctrine propagation through protected hospitality-register — moderate watch-item; CF-0036 supremacist-doctrine register could attempt co-option via hospitality-verse protected speech convention, requiring M-4 cross-application firewall vigilance
+notes: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict. Escalation gate fired (>3 of 13 domains touched: language, settlement-life, status-order, religion, daily- routine, memory/myth). Six parallel critic sub-agents dispatched at Phase 6a (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday- Life, Theme/Tone, Mystery Curator); Phase 6b synthesis converged on six required CF-language commitments (M-4 firewall, M-7 holding clause, Rule 3 absorption trio, venue-and-host binding stabilizer, per-cluster accommodation, in-register/out-of-register language lists), all committed in CF-0044 costs_and_limits and notes fields.
+  No sixth Charter-Era polity-asymmetric axis added — CF-0044 is uncontested convention; polity-disagreement not applicable. No new wage-table row, no new value-store, no new labor-role sub-stratum (Rule 3 absorption firewalls preserved in costs_and_limits). No new archival category. Mystery Reserve effect: unchanged — M-4 and M-7 receive cross-application firewalls preserving existing bounded-unknowns (M-4 parallel to CF-0032 / CF-0036 precedents; M-7 sub-specialty holding clause parallel to CF-0035 / CF-0036 / CF-0037 / CF-0043 precedents). One new OPEN_QUESTIONS section (Drylands Short-Poetry Convention Antiquity and Scope) paralleling CF-0037 Waystation Tradition Antiquity precedent — ordinary author-side deferral, not Mystery Reserve entry. All 10 Phase 14a Validation Tests PASS (see adjudication record).

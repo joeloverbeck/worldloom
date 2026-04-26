@@ -51,7 +51,7 @@ export function mrRecord(id: string, parsed: Record<string, unknown> = completeM
 }
 
 export function loadAnimaliaRuleRecords(): IndexedRecord[] {
-  const worldRoot = path.resolve(process.cwd(), "../../worlds/animalia/_source");
+  const worldRoot = path.resolve(process.cwd(), "../../tests/fixtures/animalia/_source");
   const records: IndexedRecord[] = [];
 
   for (const [subdir, nodeType] of [

@@ -13,7 +13,7 @@ import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "../tools/
 
 const REPO_ROOT = path.resolve(process.cwd(), "..", "..");
 const WORLD_SLUG = "animalia";
-const SOURCE_WORLD_ROOT = path.join(REPO_ROOT, "worlds", WORLD_SLUG);
+const SOURCE_WORLD_ROOT = path.join(REPO_ROOT, "tests", "fixtures", WORLD_SLUG);
 const WORLD_INDEX_BUILD_MODULE = path.join(
   process.cwd(),
   "node_modules",

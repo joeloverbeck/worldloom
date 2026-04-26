@@ -292,7 +292,7 @@ export function buildEmptyWorldFixture(root: string, worldSlug: string): void {
   writeFileSync(path.join(worldRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
 
   const migrationPath = path.join(
-    "/home/joeloverbeck/projects/worldloom",
+    path.resolve(__dirname, "..", "..", "..", "..", ".."),
     "tools",
     "world-index",
     "src",
