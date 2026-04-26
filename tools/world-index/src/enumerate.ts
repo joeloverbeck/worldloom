@@ -23,7 +23,27 @@ export const MANDATORY_WORLD_FILES = new Set([
 ]);
 
 const PRIMARY_AUTHORED_ROOT_FILES = new Set(["WORLD_KERNEL.md", "ONTOLOGY.md"]);
+const ATOMIC_SOURCE_DIRECTORIES = new Set([
+  "canon",
+  "change-log",
+  "invariants",
+  "mystery-reserve",
+  "open-questions",
+  "entities",
+  "everyday-life",
+  "institutions",
+  "magic-or-tech-systems",
+  "geography",
+  "economy-and-resources",
+  "peoples-and-species",
+  "timeline"
+]);
 
+/**
+ * Enumerates disk-backed world files that the indexer may process directly.
+ * Generated logical rows such as atomized domain-file sentinels are not files
+ * and remain outside this filesystem inventory.
+ */
 export function enumerate(worldRoot: string): FileEnumeration {
   const indexable: string[] = [];
   const unexpected: string[] = [];
@@ -78,7 +98,7 @@ function isExcludedPath(relativePath: string): boolean {
   const segments = relativePath.split("/");
   const basename = segments[segments.length - 1] ?? "";
 
-  if (segments[0] === "_index" || segments[0] === "_source") {
+  if (segments[0] === "_index") {
     return true;
   }
 
@@ -90,12 +110,26 @@ function isExcludedPath(relativePath: string): boolean {
     return true;
   }
 
+  if (segments.length === 2 && segments[0] === "audits" && basename.endsWith(".yaml")) {
+    // Audit-sidecar YAML files are policy/baseline artifacts, not indexed source records.
+    return true;
+  }
+
   return false;
 }
 
 function isIndexablePath(relativePath: string): boolean {
   const segments = relativePath.split("/");
   const basename = segments[segments.length - 1] ?? "";
+
+  if (
+    segments.length === 3 &&
+    segments[0] === "_source" &&
+    basename.endsWith(".yaml")
+  ) {
+    const sourceDirectory = segments[1];
+    return sourceDirectory ? ATOMIC_SOURCE_DIRECTORIES.has(sourceDirectory) : false;
+  }
 
   if (!basename.endsWith(".md")) {
     return false;

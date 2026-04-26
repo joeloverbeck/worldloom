@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None at the source level — single-line change to `tools/world-index/package.json` plus the existing `.github/workflows/ci-world-index.yml` continues to invoke the package-level `npm test`
-**Deps**: `archive/tickets/CIINT-001.md`, `tickets/CIINT-002.md` (both changes must be merged first; otherwise CI immediately goes red)
+**Deps**: `archive/tickets/CIINT-001.md`, `archive/tickets/CIINT-002.md` (both completed changes must be merged first; otherwise CI immediately goes red)
 
 ## Problem
 
@@ -26,7 +26,7 @@ This ticket switches the glob to make `npm test` recursive, bringing world-index
 2. After the change, the recursive glob `dist/tests/**/*.test.js` will pick up `dist/tests/integration/build-animalia.test.js`. The existing `tests/integration/spec10-verification.sh` is a shell script (not a `.test.js` file) and is invoked separately via `npm run test:spec10-verification`; it remains unaffected.
 3. `.github/workflows/ci-world-index.yml` currently runs `npm test` in `tools/world-index/`. No workflow file changes are required — the recursive glob automatically extends CI coverage to the integration test once `npm test` invokes it.
 4. Cross-artifact boundary: this ticket only changes the `npm test` invocation surface. It does not touch `enumerate.ts`, `build.ts`, the test files themselves, or the workflow YAML. The other four packages' globs are unchanged (they already include `**`).
-5. Hard prerequisite: `archive/tickets/CIINT-001.md` and `tickets/CIINT-002.md` must both be merged first. If this ticket lands before either, CI for world-index goes red immediately on the next push that triggers it (which is every PR touching `tools/world-index/**` or `tests/fixtures/animalia/**`). Confirm both prereq tickets have STATUS: COMPLETED before merging this one.
+5. Hard prerequisite: `archive/tickets/CIINT-001.md` and `archive/tickets/CIINT-002.md` must both be merged first. If this ticket lands before either completed change, CI for world-index goes red immediately on the next push that triggers it (which is every PR touching `tools/world-index/**` or `tests/fixtures/animalia/**`). Confirm both prereq tickets have STATUS: COMPLETED before merging this one.
 6. The package's other test script `test:spec10-verification` is untouched. If the integration test for SPEC-10 should also run in CI, that's a separate concern (likely worth its own ticket if the shell script is intended as a CI gate).
 
 ## Architecture Check
@@ -57,7 +57,7 @@ This matches `patch-engine`, `validators`, and `hooks`'s pattern (`dist/tests/**
 - Workflow file changes. `.github/workflows/ci-world-index.yml` already runs `npm test`; the glob change in `package.json` automatically expands its scope.
 - The `test:spec10-verification` shell script. If that should also gate CI, it's a separate ticket.
 - Adding integration tests to other packages. They already run their integration tests via recursive globs.
-- Changes to the test fixture or to the integration test's content (covered by `archive/tickets/CIINT-001.md` and `tickets/CIINT-002.md`).
+- Changes to the test fixture or to the integration test's content (covered by `archive/tickets/CIINT-001.md` and `archive/tickets/CIINT-002.md`).
 
 ## Acceptance Criteria
 

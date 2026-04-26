@@ -48,7 +48,8 @@ test("enumerate returns every expected indexable path and no unexpected paths fo
       "MYSTERY_RESERVE.md",
       "OPEN_QUESTIONS.md",
       "PEOPLES_AND_SPECIES.md",
-      "TIMELINE.md"
+      "TIMELINE.md",
+      "_source/raw.md"
     ]);
     assert.deepEqual(
       result.indexable.filter((filePath) => result.unexpected.includes(filePath)),

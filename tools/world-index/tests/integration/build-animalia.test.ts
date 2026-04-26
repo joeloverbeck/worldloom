@@ -13,7 +13,13 @@ import { stats } from "../../src/commands/stats";
 import { sync } from "../../src/commands/sync";
 import { verify } from "../../src/commands/verify";
 import { enumerate } from "../../src/enumerate";
-import { extractEntities, loadOntologyRegistry } from "../../src/parse/entities";
+import {
+  ATOMIC_LOGICAL_WORLD_FILES,
+  createAtomicLogicalFileResults,
+  loadAtomicEntityRegistry,
+  parseAtomicSourceFile
+} from "../../src/parse/atomic";
+import { extractEntities } from "../../src/parse/entities";
 import { extractScopedReferences } from "../../src/parse/scoped";
 import { extractStructuredRecordEdges } from "../../src/parse/structured-edges";
 import { parseWorldFile } from "../../src/commands/shared";
@@ -46,17 +52,6 @@ function cleanup(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
-function replaceNamedEntityRegistry(root: string, registryBlock: string): void {
-  const ontologyPath = path.join(root, "worlds", WORLD_SLUG, "ONTOLOGY.md");
-  const existing = readFileSync(ontologyPath, "utf8");
-  const updated = existing.replace(
-    /## Named Entity Registry\s+```yaml[\s\S]*?```/,
-    registryBlock
-  );
-  assert.notEqual(updated, existing, "expected copied animalia ONTOLOGY.md to contain a named-entity registry");
-  writeFileSync(ontologyPath, updated, "utf8");
-}
-
 function openBuiltDb(root: string): Database.Database {
   return new Database(path.join(root, "worlds", WORLD_SLUG, "_index", "world.db"), {
     readonly: true
@@ -76,22 +71,38 @@ function loadExpectedNodeCounts(root: string): Map<NodeType, number> {
   );
 
   for (const relativePath of enumeration.indexable) {
-    const parsed = parseWorldFile(root, WORLD_SLUG, relativePath);
+    const parsed = relativePath.startsWith("_source/")
+      ? parseAtomicSourceFile(root, WORLD_SLUG, relativePath)
+      : parseWorldFile(root, WORLD_SLUG, relativePath);
     for (const node of parsed.nodes) {
       counts.set(node.node_type, (counts.get(node.node_type) ?? 0) + 1);
       proseNodes.push(node);
     }
   }
 
-  const ontologyPath = path.join(worldRoot, "ONTOLOGY.md");
-  const registry = loadOntologyRegistry(ontologyPath);
+  for (const parsed of createAtomicLogicalFileResults(WORLD_SLUG)) {
+    for (const node of parsed.nodes) {
+      counts.set(node.node_type, (counts.get(node.node_type) ?? 0) + 1);
+    }
+  }
+
+  const registry = loadAtomicEntityRegistry(worldRoot);
   const { entityNodes } = extractEntities({ type: "root", children: [] }, proseNodes, registry);
   const scoped = extractScopedReferences(proseNodes);
   const structured = extractStructuredRecordEdges(proseNodes);
-  counts.set("named_entity", entityNodes.length);
-  counts.set("scoped_reference", scoped.scopedNodes.length + structured.scopedNodes.length);
+  counts.set("named_entity", (counts.get("named_entity") ?? 0) + entityNodes.length);
+  counts.set(
+    "scoped_reference",
+    (counts.get("scoped_reference") ?? 0) + scoped.scopedNodes.length + structured.scopedNodes.length
+  );
 
   return counts;
+}
+
+function writeAtomicEntity(root: string, fileName: string, lines: string[]): void {
+  const entityRoot = path.join(root, "worlds", WORLD_SLUG, "_source", "entities");
+  mkdirSync(entityRoot, { recursive: true });
+  writeFileSync(path.join(entityRoot, fileName), `${lines.join("\n")}\n`, "utf8");
 }
 
 function loadActualNodeCounts(db: Database.Database): Map<NodeType, number> {
@@ -558,25 +569,27 @@ test("build removes audited workflow-label entities and legacy ontology bullets 
   }
 });
 
-test("build promotes explicit ontology registry declarations from the copied world fixture", () => {
+test("build promotes explicit atomic entity declarations from the copied world fixture", () => {
   const root = createTempRepoRoot();
 
   try {
-    replaceNamedEntityRegistry(
-      root,
-      [
-        "## Named Entity Registry",
-        "```yaml",
-        "named_entities:",
-        "  - canonical_name: Brinewick",
-        "    entity_kind: place",
-        "    aliases:",
-        "      - Brinewick Charter City",
-        "  - canonical_name: Ash-Seal",
-        "    entity_kind: institution",
-        "```"
-      ].join("\n")
-    );
+    writeAtomicEntity(root, "ENT-9998.yaml", [
+      "id: ENT-9998",
+      "canonical_name: Saltbridge Test Entity",
+      "entity_kind: place",
+      "aliases:",
+      "  - Saltbridge Charter City",
+      "originating_cf: null",
+      "scope_notes: Integration-test entity."
+    ]);
+    writeAtomicEntity(root, "ENT-9999.yaml", [
+      "id: ENT-9999",
+      "canonical_name: Ash-Seal Test Guild",
+      "entity_kind: institution",
+      "aliases: []",
+      "originating_cf: null",
+      "scope_notes: Integration-test entity."
+    ]);
 
     assert.equal(build(root, WORLD_SLUG), 0);
 
@@ -587,7 +600,7 @@ test("build promotes explicit ontology registry declarations from the copied wor
           `
             SELECT canonical_name, entity_kind, provenance_scope
             FROM entities
-            WHERE canonical_name IN ('Ash-Seal', 'Brinewick')
+            WHERE canonical_name IN ('Ash-Seal Test Guild', 'Saltbridge Test Entity')
             ORDER BY canonical_name
           `
         )
@@ -602,19 +615,19 @@ test("build promotes explicit ontology registry declarations from the copied wor
             SELECT alias_text, alias_kind
             FROM entity_aliases ea
             INNER JOIN entities e ON e.entity_id = ea.entity_id
-            WHERE e.canonical_name = 'Brinewick'
+            WHERE e.canonical_name = 'Saltbridge Test Entity'
             ORDER BY alias_text
           `
         )
         .all() as Array<{ alias_text: string; alias_kind: string }>;
 
       assert.deepEqual(registryRows, [
-        { canonical_name: "Ash-Seal", entity_kind: "institution", provenance_scope: "world" },
-        { canonical_name: "Brinewick", entity_kind: "place", provenance_scope: "world" }
+        { canonical_name: "Ash-Seal Test Guild", entity_kind: "institution", provenance_scope: "world" },
+        { canonical_name: "Saltbridge Test Entity", entity_kind: "place", provenance_scope: "world" }
       ]);
       assert.equal(
         aliasRows.some(
-          (row) => row.alias_text === "Brinewick Charter City" && row.alias_kind === "exact_structured"
+          (row) => row.alias_text === "Saltbridge Charter City" && row.alias_kind === "exact_structured"
         ),
         true
       );
@@ -931,10 +944,23 @@ test("all indexable files appear in file_versions", () => {
         )
         .all(WORLD_SLUG) as Array<{ file_path: string }>;
 
-      assert.deepEqual(
-        indexedFiles.map((row) => row.file_path),
-        expectedIndexableFiles(root)
+      const indexedFilePaths = indexedFiles.map((row) => row.file_path);
+      const sortedIndexedFilePaths = [...indexedFilePaths].sort((left, right) =>
+        left.localeCompare(right, "en-US")
       );
+      const expectedFilePaths = [
+        ...expectedIndexableFiles(root),
+        ...(ATOMIC_LOGICAL_WORLD_FILES as readonly string[])
+      ].sort((left, right) => left.localeCompare(right, "en-US"));
+      const syntheticLogicalFiles = new Set<string>(ATOMIC_LOGICAL_WORLD_FILES);
+      const nonSyntheticMissing = indexedFilePaths.filter(
+        (filePath) =>
+          !syntheticLogicalFiles.has(filePath) &&
+          !existsSync(path.join(root, "worlds", WORLD_SLUG, filePath))
+      );
+
+      assert.deepEqual(sortedIndexedFilePaths, expectedFilePaths);
+      assert.deepEqual(nonSyntheticMissing, []);
     } finally {
       db.close();
     }

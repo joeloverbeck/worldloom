@@ -50,6 +50,7 @@ For each stale same-seam surface, either truth it in the active ticket or record
 
 - Run producer commands before consumer proofs.
 - Run package-local builds/tests from the package root when module resolution depends on package-local dependencies.
+- Before an optional broad package sweep, snapshot ignored state for each package the sweep may touch when feasible. If you skip a pre-sweep ignored-state snapshot for non-owned packages, say so in closeout before classifying later `dist/`, `node_modules/`, cache, coverage, or secret-file dirt.
 - When tests consume compiled output such as `dist/tests/**/*.js` and a source or test file was renamed or removed, prevent stale compiled files from remaining in the proof lane. Prefer the package clean script if present; otherwise explicitly check and remove the stale generated file before rerunning the accepted proof, then classify the ignored generated state in closeout.
 - When a consumer package depends on a local sibling package via a workspace or `file:` dependency, refresh the consumer's installed dependency view after producer-side package/export changes and before consumer proof; do not assume the consumer is exercising the newly built public surface until that refresh has happened.
 - If the consumer dependency is a symlink to the producer package, a producer build plus grepping the consumer-resolved runtime and declaration artifacts is the refresh check. If the dependency is a copied install, run the package install/update step before consumer proof.

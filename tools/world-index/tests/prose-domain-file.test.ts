@@ -44,6 +44,7 @@ test("required_world_update resolves mandatory filenames to domain-file nodes an
     "  - institutions",
     "required_world_updates:",
     "  - INSTITUTIONS.md",
+    "  - ONTOLOGY",
     "  - NOT_REAL.md",
     "source_basis:",
     "  direct_user_approval: true",
@@ -58,7 +59,7 @@ test("required_world_update resolves mandatory filenames to domain-file nodes an
   const { edges } = extractSemanticEdges(tree, lines, "CANON_LEDGER.md", "animalia", yamlNodes, proseNodes);
   const requiredEdges = edges.filter((edge) => edge.edge_type === "required_world_update");
 
-  assert.equal(requiredEdges.length, 2);
+  assert.equal(requiredEdges.length, 3);
   assert.deepEqual(requiredEdges[0], {
     edge_id: 1,
     source_node_id: "CF-0001",
@@ -68,6 +69,13 @@ test("required_world_update resolves mandatory filenames to domain-file nodes an
   });
   assert.deepEqual(requiredEdges[1], {
     edge_id: 2,
+    source_node_id: "CF-0001",
+    target_node_id: domainFileNodeId("animalia", "ONTOLOGY.md"),
+    target_unresolved_ref: null,
+    edge_type: "required_world_update"
+  });
+  assert.deepEqual(requiredEdges[2], {
+    edge_id: 3,
     source_node_id: "CF-0001",
     target_node_id: null,
     target_unresolved_ref: "NOT_REAL.md",
