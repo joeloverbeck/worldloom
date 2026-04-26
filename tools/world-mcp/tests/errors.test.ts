@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { MCP_ERROR_CODES } from "../src/errors";
 
-test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
+test("MCP_ERROR_CODES matches the registered MCP error taxonomy exactly", () => {
   assert.deepEqual(MCP_ERROR_CODES, [
     "invalid_input",
     "index_missing",
@@ -13,6 +13,7 @@ test("MCP_ERROR_CODES matches the SPEC-02 error taxonomy exactly", () => {
     "world_not_found",
     "node_not_found",
     "record_not_found",
+    "record_field_not_found",
     "token_invalid",
     "token_expired",
     "token_consumed",

@@ -35,7 +35,7 @@ export interface GetRecordResponse {
   file_path: string;
 }
 
-interface RecordRow {
+export interface RecordRow {
   node_id: string;
   node_type: NodeType;
   file_path: string;
@@ -64,7 +64,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isMcpError(value: unknown): value is McpError {
+export function isMcpError(value: unknown): value is McpError {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -73,7 +73,7 @@ function isMcpError(value: unknown): value is McpError {
   );
 }
 
-function validateRecordId(recordId: string): McpError | null {
+export function validateRecordId(recordId: string): McpError | null {
   if (!RECORD_ID_PATTERN.test(recordId)) {
     return createMcpError("invalid_input", `record_id '${recordId}' is not a supported atomic record id.`, {
       field: "record_id",
@@ -107,7 +107,7 @@ function findRecordRow(worldSlug: string, recordId: string): RecordRow | McpErro
   }
 }
 
-function resolveRecordRow(args: GetRecordArgs): { worldSlug: string; row: RecordRow } | McpError {
+export function resolveRecordRow(args: GetRecordArgs): { worldSlug: string; row: RecordRow } | McpError {
   if (args.world_slug !== undefined && args.world_slug.length > 0) {
     const row = findRecordRow(args.world_slug, args.record_id);
     if (row === undefined) {
@@ -148,7 +148,7 @@ function resolveRecordRow(args: GetRecordArgs): { worldSlug: string; row: Record
   });
 }
 
-function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
+export function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
   const recordKind = getRecordKind(row.node_type);
   if (recordKind === null) {
     return createMcpError("invalid_input", `Node '${row.node_id}' is not an atomic record node.`, {

@@ -219,6 +219,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.get_record_field,
+        args: { record_id: "SEC-GEO-001", field_path: ["touched_by_cf"], world_slug: "seeded" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.get_neighbors,
         args: { node_id: "CF-0001", world_slug: "seeded", depth: 1 },
         expectError: false
@@ -299,6 +304,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.search_nodes, args: {} },
       { name: MCP_TOOL_NAMES.get_node, args: {} },
       { name: MCP_TOOL_NAMES.get_record, args: {} },
+      { name: MCP_TOOL_NAMES.get_record_field, args: { record_id: "SEC-GEO-001", world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_neighbors, args: { world_slug: "seeded", depth: 1 } },
       { name: MCP_TOOL_NAMES.get_context_packet, args: { world_slug: "seeded", seed_nodes: ["CF-0001"] } },
       { name: MCP_TOOL_NAMES.find_impacted_fragments, args: { node_ids: ["CF-0001"] } },

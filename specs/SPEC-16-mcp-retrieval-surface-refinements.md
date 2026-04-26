@@ -26,19 +26,19 @@ These are the kinds of finding that emerge only from running the live pipeline a
 
 Four additive MCP tooling changes, all independent of each other, none changing FOUNDATIONS or storage contracts. Each ships under its own ticket; they parallelize freely.
 
-**Track C3 — `get_record_field` slice tool.** New MCP tool `mcp__worldloom__get_record_field(record_id, field_path)` returning a single field's value without the rest of the record. `field_path` is a string array (e.g., `["touched_by_cf"]`, `["extensions"]`, `["modification_history"]`). Reuses the existing `get-record.ts` resolution path (record-id pattern, world-resolution, YAML parsing); diverges only in projecting to the requested field after parse. Reduces the cost of structural inspection on large records from "load 76KB body" to "load the field of interest."
+**Track C3 — `get_record_field` slice tool.** New MCP tool `mcp__worldloom__get_record_field(record_id, field_path)` returning a single field's value without the rest of the record. `field_path` is a `(string | number)[]` array (e.g., `["touched_by_cf"]`, `["extensions"]`, `["modification_history"]`, `["extensions", 0, "body"]`). Reuses the existing `get-record.ts` resolution path (record-id pattern, world-resolution, YAML parsing); diverges only in projecting to the requested field after parse. Reduces the cost of structural inspection on large records from "load 76KB body" to "load the field of interest."
 
-**Track C4 — `get_record_schema` discovery tool.** New MCP tool `mcp__worldloom__get_record_schema(node_type)` returning the JSON Schema for the requested record class, sourced from `tools/validators/src/schemas/*.json`. Supported `node_type` values: `canon_fact_record`, `change_log_entry`, `invariant`, `mystery_reserve_entry`, `open_question_entry`, `named_entity`, `section`, `character_frontmatter`, `diegetic_artifact_frontmatter`, `adjudication_frontmatter`. Returns the static schema as-is — no merging with rule-level constraints (deferred per YAGNI; SPEC-09's conditionally-mandatory Rule 11/12 fields can be exposed in a follow-on if a skill needs them).
+**Track C4 — `get_record_schema` discovery tool.** New MCP tool `mcp__worldloom__get_record_schema(node_type)` returning the JSON Schema for the requested record class, sourced from `tools/validators/src/schemas/*.json`. Supported `node_type` values mirror the existing `NodeType` enum in `tools/world-index/src/schema/types.ts` (so a skill author who already knows the NodeType discriminator passes that value verbatim): `canon_fact_record`, `change_log_entry`, `invariant`, `mystery_reserve_entry`, `open_question_entry`, `named_entity`, `section`, `character_record`, `diegetic_artifact_record`, `adjudication_record`. The tool maps these `node_type` values internally to schema filenames (three of the ten — character / diegetic-artifact / adjudication — resolve to `*-frontmatter.schema.json` because their schema validates the record's frontmatter; see the mapping table under Deliverables). Returns the static structural schema plus a `referenced_schemas` map (see Deliverables for the exact response shape) — no merging with rule-level constraints (deferred per YAGNI; SPEC-09's conditionally-mandatory Rule 11/12 fields can be exposed in a follow-on if a skill needs them).
 
 **Track C5 — Context-packet auto-budget UX.** Two coordinated changes to `get_context_packet`:
-- **Per-task-type defaults.** Replace the hardcoded `token_budget ?? 8000` fallback in `tools/world-mcp/src/tools/get-context-packet.ts:39` with a per-`task_type` default lookup table. Initial defaults: `canon_addition: 16000`, `character_generation: 8000`, `diegetic_artifact_generation: 8000`, `continuity_audit: 12000`, `other: 8000`. Empirically grounded by the 2026-04-26 pilot (`canon_addition` minimum was ~14.3K against animalia at current state); other task types retain the existing default until live evidence demands otherwise.
+- **Per-task-type defaults.** Replace the hardcoded `token_budget ?? 8000` fallback in `tools/world-mcp/src/tools/get-context-packet.ts:39` with a per-`task_type` default lookup table. Initial defaults: `canon_addition: 16000`, `character_generation: 8000`, `diegetic_artifact_generation: 8000`, `continuity_audit: 8000`, `other: 8000`. Empirically grounded by the 2026-04-26 pilot (`canon_addition` minimum was ~14.3K against animalia at current state); other task types retain the existing default until live evidence demands otherwise — the `retry_with` error surface auto-corrects upward when actual minimums exceed the default.
 - **Improved error response.** Augment the existing `packet_incomplete_required_classes` error (`tools/world-mcp/src/context-packet/assemble.ts:286-302`) with a structured `retry_with: { token_budget: <minimum_required_budget> }` field. The agent retries with the suggested budget on a single round-trip rather than parsing the error message and re-invoking. Preserves explicit-retry semantics (no implicit override of the requested budget cap).
 
 **Track C6 — Exhaustive lexical scan via `search_nodes`.** Extend `mcp__worldloom__search_nodes` with an `exhaustive: true` mode (default `false` preserves current behavior). When `exhaustive: true`, the tool:
 - Uses the same FTS5 lexical query path
 - Returns ALL matches (not capped at 20)
 - Skips relevance ranking (returns matches in node-id order for deterministic output)
-- Includes a `match_locations[]` array per result indicating which fields contained the match (`body`, `heading_path`, etc.)
+- Includes a `match_locations[]` array per result indicating which FTS5-indexed columns contained the match. The enum is `'body' | 'heading_path' | 'summary'` — these are the three indexed columns of the `fts_nodes` virtual table (`tools/world-index/src/schema/migrations/001_initial.sql:88-95`). Omitting `summary` would silently lose attribution for the case where a query matches only the `summary` column.
 
 The `exhaustive` mode is the right surface for Rule 6 audit-trail / pre-figuring scans — "does this string appear ANYWHERE in the world?" Distinct from `find_named_entities`, which is the canonical-registry surface; mixing concerns by parameterizing `find_named_entities` with `include_prose_body: true` would conflate "registered entity lookup" with "lexical presence check" — they are different audit questions and should remain different tools.
 
@@ -50,7 +50,7 @@ The `exhaustive` mode is the right surface for Rule 6 audit-trail / pre-figuring
 
 **`tools/world-mcp/src/tool-names.ts`** — add `get_record_field: "mcp__worldloom__get_record_field"` to `MCP_TOOL_NAMES` and to `MCP_TOOL_ORDER`.
 
-**`tools/world-mcp/src/server.ts`** — register the new tool in the MCP server's tool registry (follow the pattern of `get_record`).
+**`tools/world-mcp/src/server.ts`** — declare a Zod input schema near `getRecordInputSchema` (server.ts:83): `getRecordFieldInputSchema = z.object({ record_id: z.string().min(1), field_path: z.array(z.union([z.string(), z.number().int()])).min(1), world_slug: z.string().min(1).optional() })`. The `(string | number)` element type pins the array-index-vs-object-key resolution at the schema layer (numeric segments index arrays; string segments index object keys). Then register the new tool via `registerWrappedTool` (follow the pattern of `get_record` at server.ts:213-219).
 
 **`tools/world-mcp/tests/tools/get-record-field.test.ts`** — test cases:
 - Valid record + valid scalar field path → returns the value
@@ -61,9 +61,12 @@ The `exhaustive` mode is the right surface for Rule 6 audit-trail / pre-figuring
 
 ### Track C4: `get_record_schema` discovery tool
 
-**`tools/world-mcp/src/tools/get-record-schema.ts`** — new tool. Signature: `getRecordSchema({ node_type }) → { schema: JSONSchema, source_path: string }` or `McpError`. Loads the schema file from `tools/validators/src/schemas/<node_type>.schema.json` at startup or on-demand; returns the parsed JSON object plus the relative source path so callers can verify provenance.
+**`tools/world-mcp/src/tools/get-record-schema.ts`** — new tool. Signature: `getRecordSchema({ node_type }) → { schema: JSONSchema, source_path: string, referenced_schemas: Record<string, JSONSchema> }` or `McpError`. Loads the schema file from `tools/validators/src/schemas/<mapped-stem>.schema.json` at startup or on-demand; returns:
+- `schema` — the parsed JSON Schema as-is, including any `$ref` URLs (provenance preserved).
+- `source_path` — relative path to the schema file so callers can verify provenance.
+- `referenced_schemas` — map keyed by `$id` URL (e.g., `"https://worldloom.local/schemas/extension-entry.schema.json"`) containing every transitively-referenced schema reachable via `$ref` from the requested schema (currently only `extension-entry.schema.json`, referenced by `canon-fact-record` and `section`). Empty map when the requested schema has no `$ref` sites. The implementer walks `$ref` URLs from the loaded schema, resolves each against `tools/validators/src/schemas/_shared/` (and any other co-located schema directories), and includes the parsed JSON in the map. This lets a skill author dereference field constraints (e.g., `extensions[]` shape) without an additional MCP call.
 
-**Schema-name mapping** — `node_type` is the public name; the schema file may use a different stem. Mapping table:
+**Schema-name mapping** — `node_type` mirrors the existing `NodeType` enum (`tools/world-index/src/schema/types.ts:6`). The tool maps `node_type` to schema filenames; three values resolve to a `-frontmatter.schema.json` stem because the schema validates the record's YAML frontmatter (the prose body has no structural schema). Mapping table:
 | `node_type` | schema file |
 |---|---|
 | `canon_fact_record` | `canon-fact-record.schema.json` |
@@ -73,17 +76,17 @@ The `exhaustive` mode is the right surface for Rule 6 audit-trail / pre-figuring
 | `open_question_entry` | `open-question.schema.json` |
 | `named_entity` | `entity.schema.json` |
 | `section` | `section.schema.json` |
-| `character_frontmatter` | `character-frontmatter.schema.json` |
-| `diegetic_artifact_frontmatter` | `diegetic-artifact-frontmatter.schema.json` |
-| `adjudication_frontmatter` | `adjudication-frontmatter.schema.json` |
+| `character_record` | `character-frontmatter.schema.json` |
+| `diegetic_artifact_record` | `diegetic-artifact-frontmatter.schema.json` |
+| `adjudication_record` | `adjudication-frontmatter.schema.json` |
 
 Unknown `node_type` → `invalid_input` McpError listing the supported set.
 
 **`tools/world-mcp/src/tool-names.ts`** — add `get_record_schema: "mcp__worldloom__get_record_schema"` to `MCP_TOOL_NAMES` and to `MCP_TOOL_ORDER`.
 
-**`tools/world-mcp/src/server.ts`** — register the new tool.
+**`tools/world-mcp/src/server.ts`** — declare a Zod input schema near `getRecordInputSchema` (server.ts:83): `getRecordSchemaInputSchema = z.object({ node_type: z.enum([...]) })` enumerating the ten supported `node_type` values verbatim from the mapping table above. Then register the new tool via `registerWrappedTool` (follow the pattern of `get_record` at server.ts:213-219).
 
-**`tools/world-mcp/tests/tools/get-record-schema.test.ts`** — test cases for each `node_type` (asserts the returned schema's `$id` matches the expected file); unknown `node_type` returns `invalid_input` with the supported list.
+**`tools/world-mcp/tests/tools/get-record-schema.test.ts`** — test cases for each `node_type` (asserts the returned schema's `$id` matches the expected file); CF-record and section requests return a `referenced_schemas` map containing the extension-entry schema keyed by its `$id` URL; unknown `node_type` returns `invalid_input` with the supported list.
 
 ### Track C5: Context-packet auto-budget UX
 
@@ -93,7 +96,7 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
   canon_addition: 16000,
   character_generation: 8000,
   diegetic_artifact_generation: 8000,
-  continuity_audit: 12000,
+  continuity_audit: 8000,
   other: 8000
 };
 ```
@@ -113,21 +116,24 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 **`tools/world-mcp/src/tools/search-nodes.ts`** — when `exhaustive === true`:
 - Skip the `.slice(0, 20)` cap at line 370
 - Replace the ranking-profile sort with a deterministic node-id sort
-- For each returned `SearchNodeResult`, populate a new `match_locations: ('body' | 'heading_path')[]` field by checking which source columns satisfied the lexical match (the FTS5 query already covers `body` + `heading_path` via the `fts_nodes` virtual table — the per-row attribution can be computed by re-checking the `query` against each column post-fetch).
+- For each returned `SearchNodeResult`, populate a new `match_locations: ('body' | 'heading_path' | 'summary')[]` field by checking which source columns satisfied the lexical match. The `fts_nodes` virtual table indexes all three of `body`, `heading_path`, and `summary` (`tools/world-index/src/schema/migrations/001_initial.sql:88-95`); the per-row attribution can be computed by re-checking the `query` against each column post-fetch.
 
 **`tools/world-mcp/tests/tools/search-nodes.test.ts`** — test cases:
 - `exhaustive: false` (default) → existing behavior preserved (capped at 20, ranked)
 - `exhaustive: true` against a corpus where the query matches >20 nodes → returns all matches, sorted by `node_id`
 - `exhaustive: true` → each result includes `match_locations[]` populated per-row
+- `exhaustive: true` against a node whose match falls only in the `summary` column → result's `match_locations` is `['summary']` (covers the third FTS-indexed column the previous draft omitted)
 - `exhaustive: true` with no matches → empty `nodes[]` array (not an error)
 
 ### Cross-track: skill-side documentation
 
-**`tools/world-mcp/README.md` §Tools** — document each new surface:
-- `get_record_field`: parameters, return shape, example invocations (one for `touched_by_cf` slice, one for `extensions[N].body` slice)
-- `get_record_schema`: parameters, the supported `node_type` set, example invocation
-- `get_context_packet`: note the per-task-type default table; document the `retry_with` error surface
-- `search_nodes`: document the `exhaustive` parameter and `match_locations` response field
+**`tools/world-mcp/README.md`** — document each new surface and update the Status line:
+- Status line at README.md:7 currently reads "registers 13 tools"; update to "registers 15 tools" after C3 + C4 land.
+- §Tools — add bullets for each new surface:
+  - `get_record_field`: parameters, return shape, example invocations (one for `touched_by_cf` slice, one for `extensions[N].body` slice).
+  - `get_record_schema`: parameters, the supported `node_type` set (matches `NodeType`), the `referenced_schemas` map, example invocation.
+  - `get_context_packet`: note the per-task-type default table; document the `retry_with` error surface.
+  - `search_nodes`: document the `exhaustive` parameter and the `match_locations` response field (`'body' | 'heading_path' | 'summary'`).
 
 **`docs/MACHINE-FACING-LAYER.md`** — extend the "scope of each retrieval tool" subsection (added by SPEC-15 Track B3) to include the four new surfaces and clarify when to reach for each (e.g., "use `get_record_field` when the field of interest is small and the record body is large; use `get_record_schema` to discover field constraints before authoring; use `search_nodes` with `exhaustive: true` for Rule-6 audit scans").
 
@@ -160,8 +166,9 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 ### Track C4
 
 - `cd tools/world-mcp && npm test` passes after `get-record-schema.test.ts` is added.
-- Manual smoke: invoke `mcp__worldloom__get_record_schema("canon_fact_record")` and confirm the response contains a `properties.pre_figured_by.items.pattern` matching `^CF-[0-9]{4}$`.
+- Manual smoke: invoke `mcp__worldloom__get_record_schema("canon_fact_record")` and confirm the response contains a `properties.pre_figured_by.items.pattern` matching `^CF-[0-9]{4}$`, AND that `referenced_schemas` includes the `extension-entry` schema keyed by `https://worldloom.local/schemas/extension-entry.schema.json`.
 - Each of the 10 supported `node_type` values returns a schema whose `$id` matches the expected file.
+- `grep -nE "character_record|diegetic_artifact_record|adjudication_record" tools/world-mcp/src/tools/get-record-schema.ts` confirms the C4 tool accepts the canonical `NodeType` values for the three frontmatter-schema cases (catches future drift if `NodeType` is renamed without updating C4's mapping table).
 
 ### Track C5
 
@@ -193,20 +200,21 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 
 - **Risk: per-task-type defaults drift from empirical reality.** The initial 16000 / 8000 / 12000 / 8000 defaults are grounded in 2026-04-26 pilot data for one world (animalia) at one point in its growth. As worlds grow, the canon-addition minimum will rise. Mitigation: the `retry_with` error surface auto-corrects; defaults are a first-call optimization, not a contract. Re-tune defaults via a follow-up if pilot evidence on a second world (or post-SPEC-09 animalia) shows systematic mismatch.
 - **Risk: `exhaustive: true` performance on large worlds.** FTS5 queries are fast but uncapped result sets may surprise callers. Mitigation: tests assert determinism (node-id sort), not bounded size; if a future world produces multi-thousand-match results, callers can filter via existing `filters` parameter or the spec can add an explicit `max_results` cap.
-- **Risk: `get_record_field` field-path ambiguity for arrays.** Numeric path segments (`["extensions", 0, "body"]`) need clear semantics — array index vs object key. Resolution: numeric-string segments are array indices when the parent is an array; otherwise treated as object keys. Document in the README.
+- **Risk: `get_record_field` field-path ambiguity for arrays.** Numeric path segments (`["extensions", 0, "body"]`) need clear semantics — array index vs object key. Resolution: the Zod input schema for C3 declares `field_path: z.array(z.union([z.string(), z.number().int()]))` — numeric segments are array indices when the parent is an array; string segments are object keys. Document in the README.
 - **Open question: should `get_record_schema` cache schema files in memory?** The schemas change rarely (only via SPEC-04 ticket-driven updates). Initial implementation may load on-demand; if profiling shows hot-path cost, add a startup-time cache. Not a release blocker.
-- **Open question: ticket prefix.** Tickets under this spec take prefix `SPEC16MCPRET-NNN` (MCP RETrieval). Confirmed naming-convention-consistent with SPEC13ATOSRCMIG / SPEC14PAVOC / SPEC15PILFIX.
+- **Ticket prefix.** Tickets under this spec use prefix `SPEC16MCPRETSUR-NNN` (MCP RETRieval SURface), matching the active ticket family in `tickets/`.
 
 ## Implementation order
 
-Within SPEC-16 (full decomposition — four sub-tracks, parallelizable):
+Within SPEC-16 (four code sub-tracks plus one cross-track documentation ticket):
 
-1. **SPEC16MCPRET-001** — Track C3 (`get_record_field` tool + tests + README).
-2. **SPEC16MCPRET-002** — Track C4 (`get_record_schema` tool + tests + README).
-3. **SPEC16MCPRET-003** — Track C5 (per-task-type defaults + `retry_with` error surface + tests + README).
-4. **SPEC16MCPRET-004** — Track C6 (`search_nodes` exhaustive mode + tests + README + retrieval-tool-tree.md update).
+1. **SPEC16MCPRETSUR-001** — Track C3 (`get_record_field` tool + tests).
+2. **SPEC16MCPRETSUR-002** — Track C4 (`get_record_schema` tool + tests).
+3. **SPEC16MCPRETSUR-003** — Track C5 (per-task-type defaults + `retry_with` error surface + tests).
+4. **SPEC16MCPRETSUR-004** — Track C6 (`search_nodes` exhaustive mode + tests).
+5. **SPEC16MCPRETSUR-005** — cross-track docs (`tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and the canon-addition retrieval-tool-tree reference) after the four code surfaces exist.
 
-All four tickets may proceed in parallel; no inter-ticket dependencies. Suggested sub-order if serialized: C5 (smallest, smoothes pilot UX immediately) → C3 + C4 (additive tools, similar test scaffolding) → C6 (largest test surface).
+All four code tickets may proceed in parallel; no inter-ticket dependencies. Suggested sub-order if serialized: C5 (smallest, smoothes pilot UX immediately) → C3 + C4 (additive tools, similar test scaffolding) → C6 (largest test surface), followed by the cross-track documentation ticket.
 
 SPEC-16 should land before SPEC-17's C2 deliverable (FOUNDATIONS prose softening) because the FOUNDATIONS amendment relies on C3 + C5 being available for the index + follow-up-call pattern to be ergonomic.
 

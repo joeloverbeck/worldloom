@@ -14,7 +14,7 @@ Reassess a worldloom spec against the codebase and FOUNDATIONS.md. Validates ass
 
 <HARD-GATE>
 Do NOT Write or Edit the spec file until:
-(a) Step 6 findings have been presented to the user and explicit approval (or per-finding disposition: fix / defer / reject) has been received for every Issue, Improvement, and Addition;
+(a) Step 6 findings have been presented to the user, the user has responded, and either (i) explicit approval / per-finding disposition (fix / defer / reject) has been received for every Issue, Improvement, and Addition, OR (ii) no explicit objection to a finding was raised in the user's response (per `references/findings-and-questions.md` §Question Handling — silence on a finding while answering Questions counts as approval; an explicit objection re-opens that finding's disposition and requires re-presenting the corrected recommendation before Step 7);
 (b) Step 7's pre-apply verification table has been emitted in chat, with a check + result row per finding, and any detected mismatch has been reclassified (evidence-refining / recommendation-changing / scope-extending) and — for recommendation-changing mismatches — re-presented to the user for fresh approval;
 (c) any open Questions surfaced in Step 6 have been answered by the user;
 (d) bundled-answer consistency has been verified when a single user reply resolved multiple interdependent questions.

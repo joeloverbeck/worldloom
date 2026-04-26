@@ -7,6 +7,7 @@ export const MCP_ERROR_CODES = [
   "world_not_found",
   "node_not_found",
   "record_not_found",
+  "record_field_not_found",
   "token_invalid",
   "token_expired",
   "token_consumed",
