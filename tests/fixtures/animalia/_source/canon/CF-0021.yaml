@@ -1,0 +1,113 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - kiln explosions, forge accidents, and wood-vessel ignitions kill crafters and assistants
+  - successful crafted artifacts are unstable, inferior to Maker-Age work, and produce unpredictable effects
+  - modern artifacts cannot reach catastrophic-class effect (hard scope boundary; preserves Mystery Reserve M-2)
+  - effects of successful artifacts may be random upon creation OR process-dependent (in-world researcher dispute, observationally unresolved)
+  - vessels use ordinary ceramic, metal, or wood — NOT containment-grade clay (which remains guild-monopolized; the bottleneck is preparation technique, not material grade)
+  - knowledge transfer is empirical and dangerous; apprenticeship turnover is brutal
+  - guild seizure and civic prosecution in punitive polities; capital penalty in some for catastrophic-adjacent attempts
+  - vessel-hosted apparent-agency outputs (CF-0022) are world-level non-sentient but in-world contested
+distribution:
+  who_can_do_it:
+    - independent occult scholars willing to risk death
+    - rogue current or former guild researchers
+    - sectarian movements (Maker-mystic fringe; certain progenitor-cult radicals)
+    - greedy or desperate crafters in trades adjacent to ceramics, metalwork, woodwork
+    - chartered crafter-guilds in the few polities that license the practice
+  who_cannot_easily_do_it:
+    - illiterate, poor, or remote populations
+    - communities without grimoire-fragment trade access
+    - chartered guild members operating openly in punitive polities (license-revocation risk)
+  why_not_universal:
+    - extreme lethality of attempts (kiln explosions, forge accidents, wood-vessel ignitions)
+    - knowledge fragmentariness (no complete recipe; vessel-preparation step is guild-internal and not in leaked grimoires)
+    - capital cost of repeated failed attempts
+    - civic and guild penalties in most polities
+    - folk taboo in communities scarred by kiln explosions
+    - unpredictable outputs even in successful attempts
+    - cannot produce catastrophic-class artifacts (M-2 boundary; permanently unrecoverable from leaked corpus)
+    - mundane substitutes preferred at institutional and household level (CF-0003 logic)
+domains_affected:
+  - magic
+  - economy
+  - law
+  - settlement_life
+  - religion
+  - warfare
+  - status_signaling
+  - architecture
+  - memory_and_myth
+id: CF-0021
+modification_history:
+  - change_id: CH-0003
+    date: 2026-04-18
+    originating_cf: CF-0024
+    summary: "concretization: crafter-hunting niche and mercenary-commission pathway formalized as visible consequences with named contractor-stratum actors"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "named-polity-instance commitment: Brinewick (CF-0038) adopts PUNITIVE-WITH-LICENSING-EXPERIMENT posture on crafter-tolerance axis — downtown civic-core prosecution coordination, estate-outskirts tenant-cottage effective cover, limited crafter-guild licensing experiment under civic-advisory review; CF-0021 scope, distribution, and stabilizer structure unchanged, Brinewick adoption instantiates the abstract polity-category distribution"
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0039
+    summary: "qualification: modern crafter outputs (CF-0021) do NOT inherit destruction-resistance — remain destructible by ordinary means, preserving the 'inferior' stabilizer register; Maker-sealing technique is explicitly NOT in the CF-0023 leaked corpus and CF-0021 crafters cannot reproduce it; CF-0021 scope boundary preserved against CF-0039 / CF-0041 Maker-Age-only commitments."
+notes: |
+  Direct from briefs/animalia-artifact-creation.md. The proposal as written drifts toward "lone artificer protagonist" — early canon should keep crafters offstage or in supporting roles to protect AES-1 (heroism in coin and scars) and AES-2 (the ordinary keeps the world honest). Modern crafted artifacts must remain interpretively suggestive only with respect to Mystery Reserve M-1 — the modern parallel does NOT constitute evidence at world level for any M-1 hypothesis. Linked CF-0022 establishes the world-level non-sentience of vessel-hosted "agencies" (preserves ONT-1; maintains M-5 firewall). Linked CF-0023 commits the partial-translation existence forced by this proposal. Linked Mystery Reserve M-6 governs the bounded unknown of vessel-hosted-agency mechanism. Adjudication record: adjudications/PA-0001-accept_with_required_updates.md. Modified 2026-04-18 by CH-0003 (CF-0024): crafter-hunting niche in punitive polities formalized; mercenary-band commission pathway for tactical crafted-artifact use formalized. Both were flagged in CF-0021's original costs_and_limits but are now concretized as visible consequences with named contractor-stratum actors. See adjudication record adjudications/PA-0002-accept_with_required_updates.md.
+prerequisites:
+  - partial-translation grimoire fragments (CF-0023)
+  - kiln, forge, or fitted woodworking shop
+  - capital sufficient for repeated-failure attempts
+  - literacy (per DIS-2)
+  - empirical patience and willingness to risk death
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - TIMELINE
+  - GEOGRAPHY
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - MAGIC_OR_TECH_SYSTEMS
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+scope:
+  geographic: global
+  social: restricted_group
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0003
+    - CF-0004
+    - CF-0008
+    - CF-0019
+  direct_user_approval: true
+statement: |
+  A small population of crafters across the Charter polities can attempt to create new magical artifacts using vessels of ordinary ceramic, metal, or wood and partial-translation grimoires (CF-0023) leaked from chartered artifact-research. Most attempts fail catastrophically — kiln explosions, forge accidents, or wood-vessel ignitions kill crafters and assistants. A small fraction succeed; their outputs are inferior in stability and power to Maker-Age artifacts, never reach catastrophic-class effect, and are recognizably distinguishable from Maker-Age artifacts by craft signature. Different polities respond differently — some accept, some tolerate, some fine, some jail. The originating research was conducted on contained Maker-Age artifacts within the artifact-extraction guilds during the Incident Wave era; partial knowledge subsequently leaked, was sold, or was carried out by defecting researchers.
+status: hard_canon
+title: Modern artifact creation exists as a marginal, lethal, unstable craft
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: craft
+visible_consequences:
+  - occasional kiln explosions in artisan quarters across heartland canal towns
+  - workshops with private kilns or unusual hours attract civic and guild suspicion
+  - new criminal-statute categories in most polities; regional legal divergence (accept/tolerate/fine/jail)
+  - inter-polity friction over crafters fleeing strict polities for permissive ones
+  - new occupational niche — authentication specialists distinguishing modern from Maker-Age work
+  - parallel small-scale shadow market alongside Maker-Age artifact trade
+  - sectarian movements form around successful crafters; common-pantheon clergy mostly condemn; Maker-mystics celebrate
+  - new bardic cycles about the crafter who made too much, the kiln that took the family, the possessed pot
+  - childhood warnings about unstamped workshops in artisan quarters
+  - herb-wives keep extra burn-salve stocked in artisan quarters
+  - estate dowager-gossip tracks which families had kiln-yard scandals on tenant land
+  - drylands water-rights tribunals add "occult firing" to well-misuse statutes
+  - fenland villages quarantine suspect dry-edge potters when contamination drifts
+  - highland clans burn grimoire-leaves found in trade goods and exile readers
+  - civic ward-inspectors add walk-throughs of suspect workshops to their schedules
+  - battlefield-artifact taboo under new strain — mercenary captains tempted by crafter commissions
+  - crafter-hunting niche (per CF-0024) in punitive polities: civic watch contracts adventurer-investigators to locate unlicensed workshops and to surveil authentication-specialist competitors; the niche creates a new enforcement-contractor subeconomy and feeds CF-0023 custody-contest pressure
+  - mercenary-band commission pathway (per CF-0024) formalized: the abstract battlefield-artifact-taboo strain becomes a concrete commission route — a mercenary captain commissioned to use crafted artifacts tactically is now a named risk, not merely a rumor

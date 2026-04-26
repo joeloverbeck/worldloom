@@ -1,0 +1,67 @@
+change_id: CH-0018
+date: 2026-04-20
+change_type: addition
+affected_fact_ids:
+  - CF-0046
+  - CF-0047
+  - CF-0024
+  - CF-0031
+  - CF-0033
+  - CF-0034
+  - CF-0037
+  - CF-0044
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict (PA-0017-accept_with_required_ updates.md). Two new CFs added: CF-0046 (drylands caravan-corridor institutional-cultural complex; hard_canon, institution) and CF-0047 (drylands well-keeper as named customary-authority social role; hard_canon, social_role), formalizing a composite drylands regional deepening per user brief (briefs/animalia-drylands-deepening.md). CF-0046 commits corridor-as-node-network (wells, gate-stops, villages, caravanserai), institutional thinness (thin civic registry, no civic-court reach, caravan-master corridor-internal customary adjudication), runner-reached village militia informal emergency- response, reciprocity-primary regional economy with SOC-3 coin-at- edges preservation, drought-cycle traffic pulse, oral-primary DIS-2- partial-literacy with household-held trade-tongue station-logs. CF-0047 commits well-keeper as lineage-inheritable mid-stratum customary-authority role with apprenticeship chore-from-young at 6-7 paralleling CF-0037 stationkeeper, cross-species hospitality etiquette authority at well-approach, CF-0044 verse-repertoire custodianship formalized as retiring-keeper-verse-book heirloom convention, and station-log keeping in DIS-2 trade-tongue as load-bearing keeper competence. Six existing CFs qualified via modification_history at CH-0018: CF-0024 (axis-a caravan-rotation substrate extension), CF-0031 (axis-c drylands-non-adoption alternative-institutional- substrate reason), CF-0033 (axis-c runner-militia not dragoon- precursor firewall), CF-0034 (axis-c caravan-master corridor- adjudication extends waiting-wolves judgment register), CF-0037 (axis-b/c water-node/road-rest-node firewall preserving drylands- exclusion stabilizer through categorical distinction), CF-0044 (axis-a via CF-0047 derived_from; well-keeper formalized as verse- book-custodian). CF-0017 cross-referenced via CF-0047 derived_from chain per DA-0001 pre-figuring (Rule 6 audit-trail) but does NOT receive modification_history per axis-(c) decision test (station- log convention is parallel cross-regional commitment, not substantive extension of CF-0017 bardic-tavern institutional frame).
+  11 domain files updated per CF required_world_updates: WORLD_KERNEL.md (What Is Ordinary drylands block extended; Core Pressures extended; What Is Taboo extended), INVARIANTS.md (four clarification annotations: DIS-2 drylands-regional partial-literacy signature; SOC-1 well-keeper no-species-gate reaffirmation; SOC-3 drylands reciprocity-primary coin-at-edges preservation; AES-1 working-texture register with enumerated forbidden-register list paralleling CH-0016 CF-0044 precedent), ONTOLOGY.md (CF-0046 composite institution attachment; CF-0047 social_role attachment; station-log + trade-tongue corridor- application text/tradition attachments), GEOGRAPHY.md (Tertiary trade- corridor CF-0046 annotation; NEW §Regional Asymmetry on Drylands Institutional Thinness section; Settlement Limits four-node-type extension; Predator Zones CF-0046 runner-militia annotation), PEOPLES_AND_SPECIES.md (Cluster A §Social density CF-0047 SOC-1 no-species-gate annotation), INSTITUTIONS.md (§Family/Clan/Household CF-0047 well-keeper lineage pattern; §Law/Custom/Judgment CF-0046 caravan-master corridor-adjudication firewall; §Religion/Ritual common-pantheon water-rite aspectualization; §Trade/Guilds corridor NON-CHARTERED reaffirmation; §Military/Defense runner-militia firewall; §Education/Apprenticeship well-keeper chore-from-young as FIFTH household-trade labor-onboarding pattern; §Recordkeeping station-log NOT new archival category firewall), ECONOMY_AND_RESOURCES.md (§Wage Spreads well-keeper household NON-ANOMALOUS row; §Value Stores NEW well-stop tenancy/placement-right as FOURTH multi-generational tenancy asset-class; §Scarcity Map drylands well-node concentration risk annotation; §Trade Flows drylands reciprocity-primary corridor annotation + coin-at-edges monetary anchor; §Wealth Creation NEW reciprocity-primary regional wealth-creation entry; §Inequality Patterns NEW drylands obligation-denominated stratification register entry; §Breakage Points NEW well-lineage failure / drought-corridor collapse entry), EVERYDAY_LIFE.md (§(a) heartland inbound drylands-cadence tavern-fragment annotation; §(b) outskirts-estate NINTH dowager-gossip axis on drylands-trade-factor reciprocity-standing; §(c) highland clansman-learned-the-gate-turn saga-fragment; §(d) drylands EXTENSIVE extensions covering corridor-node typology housing, well-keeper apprenticeship childrearing, caravan-master + runner-militia labor rhythm, drought-cycle-specific common fears and aspirations, well- keeper catechism courtship, station-log as fifth drylands literacy register, drought-cycle calendar-markers; §(e) fenland non-participation via silence-discipline), OPEN_QUESTIONS.md (NEW §Drylands Caravan- Corridor Infrastructure Antiquity; NEW §Well-Stop Succession Case Law; pressured annotation on §Drylands Short-Poetry Convention Antiquity and Scope; DIS-2-convergence discharge on §Maker-Age Linguistic Recovery), MYSTERY_RESERVE.md (THREE extensions: M-7 well-keeper sub-specialty holding clause; M-9 drylands corridor station-log not-a-custody-channel firewall; M-19 drylands corridor-infrastructure scoped-distinct firewall), TIMELINE.md (Layer 1 Pre-Charter annotation; Layer 2 Charter-Era annotation — neither chartered nor displaced).
+  Escalation gate fired (13/13 exposition domains touched); six critic sub-agents dispatched (Continuity Archivist, Systems/Economy, Politics/ Institution, Everyday-Life, Theme/Tone, Mystery Curator); all six lean accept-with-revisions; Phase 6b synthesis integrated 13 consolidated commitments into final CF records, invariant clarifications, Mystery Reserve firewalls, and domain-file patches. Systems/Economy critic contributed the load-bearing geographic non-transportability of canal-infrastructure stabilizer. Mystery Curator confirmed no new Mystery Reserve entries warranted (Rule 7 obligation discharged with documented negative finding; three extensions sufficient).
+  Reading 1 committed on trade-tongue interpretation: existing DIS-2 Animalia cross-community commercial lingua-franca applied in drylands corridor, NOT a new distinct drylands-specific language. User confirmed at Phase 0 interpretive question.
+reason:
+  - deepen drylands regional texture and realism to match heartland detail (user intention)
+  - generate drylands stories with distinct 'feel' from heartland stories (user dramatic purpose)
+  - drought cycles + verse-tradition peculiar-exchanges as dramatic engines (user intention)
+  - formalize implicit drylands institutional patterns already partially attested across CF-0021, CF-0024, CF-0028, CF-0031, CF-0033, CF-0034, CF-0035, CF-0036, CF-0037, CF-0040, CF-0041, CF-0044 drylands annotations
+  - establish named customary-authority role (well-keeper) paralleling CF-0037 stationkeeper structural precedent
+  - commit water-node/road-rest-node firewall resolving Phase 8 soft-conflict with CF-0037 through categorical distinction rather than scope-retcon
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: narrows
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - ONTOLOGY.md
+  - GEOGRAPHY.md
+  - PEOPLES_AND_SPECIES.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+  - TIMELINE.md
+impact_on_existing_texts:
+  - "DA-0001 (Vespera Nightwhisper, 'a-season-on-the-circuit'): diegetic trade-tongue, caravanserai, and drylands-corridor references are now formalized at world-level institutional register; the travelogue's drylands-adjacent content retains narrator-reliability discipline but gains canon-anchored context for circuit-bardic fragments absorbed from drylands verse-convention (CF-0044 existing + CF-0046 corridor-complex substrate)"
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "Well-stop succession case law (multi-heir inheritance adjudication procedure; walked-the-well return-and-reclaim; lineage-extinction protocol; cross-corridor inheritance; estate-tenant well-stop): new OPEN_QUESTIONS section committed as latent burden for future story-demand resolution"
+  - "Drylands caravan-corridor infrastructure antiquity (well-keeper lineage antiquity; caravan-master adjudication antiquity; runner-militia antiquity; station-log convention antiquity; reciprocity-primary economy antiquity): new OPEN_QUESTIONS section committed as ordinary author-side deferral (NOT Mystery Reserve) paralleling CF-0037 waystation-antiquity and CF-0044 verse-convention-antiquity precedents"
+  - "Verse-book heirloom ownership disputes at retiring-keeper transition (lineage-book as customary property vs. sale/loss to bardic-circuit absorption): documented in Phase 8 latent burden register"
+  - "Drought-cycle hospitality obligation case law: drought-year reciprocity-default and caravan-master reputation-boycott enforcement patterns as corridor-internal customary practice without formal magistrate mechanism"
+  - "Inter-corridor caravan-master reputation-boycott case law: cross-corridor coordination mechanisms and failure modes (regional cartel collusion, sectarian-supremacy patronage penetration) as operational watch-items per CF-0046 Breakage Points"
+notes: |
+  Repair options considered and declined documented in PA-0017 Phase 9 section. Single CF monolith rejected (too monolithic; well-keeper deserves named social-role treatment); three-plus atomic CFs rejected (excessive fragmentation); Reading 2 on trade-tongue (distinct drylands-specific caravan tongue) rejected (introduces Rule 3 pressure; Reading 1 is canon-consistent).
+  Mystery Curator flagged four mandatory firewalls; all four applied (M-7 well-keeper sub-specialty, M-9 station-log custody-channel, M-19 drylands-infrastructure scoped-distinct, DIS-2-convergence on trade-tongue). No new Mystery Reserve entries manufactured — Rule 7 obligation discharged with documented negative finding.
+  Theme/Tone critic flagged Orientalism + noble-primitive pastoral + desert-warrior drift as HIGH risk; mitigation applied via AES-1 register-discipline clarification paralleling CH-0016 CF-0044 precedent with enumerated forbidden and in-register language lists in both CF-0046 and CF-0047 costs_and_limits fields, in WORLD_KERNEL What Is Ordinary extension, in INVARIANTS AES-1 clarification annotation, and in EVERYDAY_LIFE §(d) Drylands extensions.
+  Everyday-Life critic flagged hero-drift MODERATE risk on well-keeper; mitigation applied via 'ordinary well-keeper' register commitment in CF-0047 costs_and_limits ('my cousin the keeper' visibility alongside dramatic-actor register). Per-cluster signature gaps addressed: §(a) heartland inbound drylands-fragment annotation; §(b) outskirts-estate NINTH dowager-gossip axis; §(c) highland saga-fragment; §(e) fenland non-participation via silence-discipline.
+  Systems/Economy critic surfaced geographic non-transportability of canal-infrastructure as load-bearing stabilizer; Systems/Economy critic also identified water-node wealth-concentration HIGH risk mitigated via drought-cycle customary hospitality obligations + inter-corridor caravan-master reputation-boycott structural brake. Well-stop placement-right named as FOURTH multi-generational tenancy asset-class per Systems/Economy recommendation (categorical distinctness from CF-0037 waystation placement-right load-bearing).
+  Politics/Institution critic flagged caravan-master adjudication scope risk; mitigation applied via CORRIDOR-INTERNAL CUSTOMARY DISPUTE RESOLUTION scope commitment (NOT magistrate-reachable; NOT extradition- carrying; NOT sixth Charter-Era structural axis — uncontested regional- consensus pattern formalized in new GEOGRAPHY §Regional Asymmetry on Drylands Institutional Thinness section).
+  Continuity Archivist flagged CF-0037 structural-absence silent erosion as HIGH risk; mitigation applied via water-node/road-rest-node firewall preserving CF-0037 drylands-exclusion stabilizer through categorical distinction; CF-0037 receives modification_history entry documenting the firewall.
+  Phase 14a all 10 validation tests PASS (per PA-0017 Phase 14a Validation Checklist).
+  Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.

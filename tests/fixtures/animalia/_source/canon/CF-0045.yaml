@@ -1,0 +1,69 @@
+id: CF-0045
+title: Lock-night — named bardic-performance occasion at canal-corridor lockside taverns
+status: soft_canon
+type: institution
+statement: |
+  In the canal-heartland (and selected canal-adjacent heartland) towns, "lock-night" is a named bardic-performance occasion distinct from ordinary tavern-night — performance around lock-closure hour, when lockmaster-crew, barge-layover travelers, and wharf-traders gather at the nearest tavern to the lock. The occasion extends CF-0017's bardic-tavern institutional frame with a canal-infrastructure-keyed performance subtype carrying characteristic audience composition (canal-labor heavy, not wholly tavern-regular) and customary silver compensation above a middling tavern-night rate. Lock-night is distinct from CF-0038's Brinewick canal- circuit quarter-year rotation — the rotation specifies which taverns a bard works across a year; lock-night specifies a named night-type within canal-corridor tavern performance. The two occasions coexist; in Brinewick the week's lock-nights sit inside the canal-circuit rotation's weekly cadence, not in competition with it.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - economy
+  - settlement_life
+  - language
+  - status_signaling
+prerequisites:
+  - canal-lock infrastructure per CF-0015 providing lockmaster-crew end-of-shift rhythm
+  - CF-0017 tavern and bardic-circuit institutional frame
+  - canal-labor density (barge-traffic + wharf-traders + lockmaster-crew) sufficient to populate the audience
+  - canal-circuit bard mobility through the corridor
+  - CF-0024 posting-wall or tavern-keeper-vouch advertising infrastructure
+distribution:
+  who_can_do_it:
+    - canal-heartland lockside taverns (primary)
+    - selected canal-adjacent heartland taverns near working locks
+    - Brinewick canal-circuit taverns as exemplar density (lock-night sits inside the CF-0038 quarter-year rotation's weekly cadence)
+  who_cannot_easily_do_it:
+    - non-canal heartland market-towns (no lock infrastructure)
+    - highland clan-holds, drylands caravan-stops, fenland stilt-villages (canal-infrastructure-sparse or canal-infrastructure-absent regions)
+  why_not_universal:
+    - structurally gated by canal-lock infrastructure (CF-0015) and lockmaster-crew shift rhythm; regions without working canal corridors lack the occasion entirely
+    - named as a sub-occasion within CF-0017's institutional frame (NOT as a separate performance institution with its own licensure, oversight, or guild body) — Rule 3 specialness-inflation firewall
+    - ordinary tavern-night (CF-0017) remains the dominant bardic venue heartland-wide; lock-night is a circuit-subtype, not a replacement
+costs_and_limits:
+  - performer-income volatility tracks canal-season opening/closing, lock-repair windows, and seasonal barge-traffic density (a frozen or under-maintenance canal closes lock-night in that stretch for the duration)
+  - audience composition skews canal-labor heavy, selecting for short-form and work-song repertoire; a bard trained primarily on long-form narrative cycles may underperform at lock-night relative to tavern-night
+  - silver-differential pay register is customary, not charter-enforced; lockside tavern-keepers may short-pay newcomer bards without tavern-keeper-vouch (SOC-3 coin-contract custom applies but negotiating position favors the tavern-keeper with the regular audience-supply)
+visible_consequences:
+  - lockside canal-town taverns distinguish lock-night from ordinary tavern-night in their performance-calendar, advertised via CF-0024 posting-wall or tavern-keeper word-of-mouth
+  - canal-circuit bards distinguish lock-night bookings from ordinary tavern-night bookings in their circuit scheduling, with characteristic silver-differential pay
+  - audience composition at lock-night differs from ordinary tavern-night (canal-labor heavy, wharf-traders, barge-layovers, fewer tavern-regulars), shaping song-selection toward work-songs, canal-route ballads, and short-form material
+  - canal-labor oral-register feeds back into circuit-bard repertoire via lock-night audience composition; canal-labor idioms and song-requests enter the circuit-bard catalog and travel inter-town via bardic-circuit circulation
+  - a lock-night sub-genre accretes within CF-0017's bardic material — lockside-labor ballads, canal-route work-songs, barge-traveler goodbyes — recognizable as "lock-night material" in circuit-bard repertoire
+  - minor inter-institutional texture between lockmaster end-of-shift rhythm and tavern performance-calendar (lock-closure hour times the performance)
+  - in Brinewick, lock-nights sit inside the CF-0038 canal-circuit weekly cadence at the rotation taverns in proportion to each tavern's canal-labor audience draw; the quarter-year rotation and the night-type are orthogonal scheduling dimensions
+required_world_updates:
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - ECONOMY_AND_RESOURCES
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0017
+    - DA-0001
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  CF-0045 commits lock-night as a named bardic-performance occasion within CF-0017's institutional frame, formalizing the diegetic precedent established by DA-0001 (Vespera Nightwhisper, "a-season-on-the-circuit" body text line 362 + claim_map entry at canon_status: canonically_true). Soft_canon reflects partial-support evidence-breadth: CF-0015, CF-0017, CF-0024, and CF-0038 commit surrounding infrastructure and institutional mechanics; the NAMING of "lock-night" as a distinct occasion-class with canal-labor audience composition and silver-differential pay register is DA-0001-sole-source. Partial-support soft_canon is defensible against Rule 4 globalization via three structurally-anchored stabilizers (canal- lock infrastructure gating, CF-0017 parent-institution containment, Rule 3 sub-occasion framing).
+  Cross-reference (not derived): CF-0015 canal-network commercial-spine provides the infrastructural substrate but is not extended by this CF (lock-night does not commit specific canal-lock instances); CF-0024 lockmaster posting-wall contract-posting register is the advertising mechanism but is not extended by this CF (lock-night does not extend posting-wall's contractor-stratum territory); CF-0038 Brinewick canal- circuit quarter-year rotation coexists with lock-night as an orthogonal dimension (rotation: which-taverns-across-a-year; lock-night: which- night-type-within-a-week at a given canal-corridor tavern). The two commitments must not be collapsed in downstream prose. Pre-scan verification per SKILL.md axis-(a) rule pared proposal-self-asserted derived_from list [CF-0015, CF-0017, CF-0024, CF-0038] to [CF-0017, DA-0001] — CF-0015 is prerequisite-substrate, CF-0024 is mechanism- reference, CF-0038 is orthogonal-coexistence; none of the three are genuine axis-(a) parents.
+  M-7 firewall preserved: lock-night performer competence is bardic craft, not M-7 oracle-register specialist reputation; a circuit-bard's lock- night skill does NOT accrue as a new M-7 cohort-class or sub-specialty holding clause (no new oracle reading of canal-labor-cadence bards who "knew what the lock keeps"). Per Rule 3 specialness-inflation firewall.
+  M-19 firewall preserved: lock-night operates on CURRENT canal infrastructure; no antiquity/origin claim about canal construction is made by this commitment. Pre-Charter canal attribution remains the bounded unknown per M-19.
+  Rule 3 firewall: lock-night is a named sub-occasion within CF-0017, NOT a new institution with its own licensure, oversight, guild body, or cohort. Parallel to existing sub-specialty holding clauses — CF-0035 legendary-beast-hunt (CH-0009), CF-0036 silenced-contractor (CH-0010), CF-0037 stationkeeper (CH-0012), CF-0043 Ash-Seal defector-specialist (CH-0015), CF-0044 drylands verse-competence (CH-0016). Lock-night performer competence is ABSORBED WITHIN the existing circuit-bard reputation register per CF-0017.
+  In-register language (for CF record and domain-file patches): "lock- night," "played the lock-night," "lock-night booking," "lock-night audience," "lock-night cadence," "canal-labor audience," "lockmaster- crew," "lock-closure hour," "silver-differential," "took silver enough to drink for a week" (DA-0001 cadence). Out-of-register language (forbid): "lock-night guild," "chartered lock-night," "lock-night master" (no chartered institution); "the great lock-night of X," "legendary lock-night" (chosen-bard pathology; AES-1 violation); "lock-night as the heart of canal culture" (Rule 3 specialness inflation).
+  Adjudication record: adjudications/PA-0016-accept_with_required_updates.md.
+modification_history: []

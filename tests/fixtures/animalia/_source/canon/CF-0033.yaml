@@ -1,0 +1,161 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - dragoon corps buildout in small adopting polities produces 3-7 year ward-breach severity spike as veteran recruitment cannibalizes militia and contractor pools before institution matures (transition-cost)
+  - funding-stream competition with ward-maintenance containment upkeep creates zero-sum pressure in polities drawing on the same canal-transit levy; a polity choosing dragoons may REDUCE containment upkeep and thereby RAISE breach frequency (feedback loop; see ECONOMY §Breakage Points dragoon-containment funding squeeze)
+  - chartered extraction guild boundary defense is continuous; any extraction-adjacent dragoon act under perimeter cover risks converting guild consent into guild opposition (see ECONOMY §Breakage Points dragoon-guild jurisdictional-conflict cascade)
+  - mission-creep countergate; adopting polities that permit dragoon mission expansion beyond ward-breach perimeter and sealed-quarter evacuation forfeit the anti-monopoly-of-force concession; charter-court challenge by principled-refuser clergy (CF-0026) is the primary procedural check (see ECONOMY §Breakage Points mission-creep adoption rollback)
+  - black-market artifact brokers re-route away from dragoon-active canal corridors toward non-adopting polities, sharpening adoption-asymmetric concentration; reactive-adoption pressure on non-adopting polities is real and may trigger defensive adoption that partially defeats Stabilizer-1 (logged as OPEN_QUESTIONS)
+  - charter-backed dragoon pension creates preferred-marriage tier among hazard-labor families, drawing marriageable veterans from contractor, fallout-specialist, and mercenary pools; parallel assortative-sorting pattern to CF-0032 placement-right and CF-0031 registered-lineage intermarriage dynamics
+  - inter-polity extradition docket grows around cross-border dragoon pursuit of artifact traffickers; dragoons have NO chartered authority outside their home polity, and pursuing beyond charter line is legally fraught
+  - impersonation-of-dragoon is a named civic offense; black market in retired-dragoon kit (uniform, crest, escutcheon) operates as a fourth product-line on the CF-0023 grimoire / CF-0028 ruin-cartography / CF-0031 registry-scrubber illegitimate-service canal-corridor infrastructure, sharpening authentication-cartel formation pressure already flagged under CF-0028 and CF-0031
+  - dragoon civic-evidence archives of confiscated broker-material DO NOT constitute a Maker-knowledge custody channel (M-9 firewall per this CF); disposition of confiscated material follows chartered-guild handoff protocols, not civic retention
+  - battlefield-artifact taboo (CF-0008) preserved — dragoons do NOT deploy artifacts; the taboo is structurally reinforced by mission-scope commitment
+  - inter-polity labor-market effect; adopting polities export cannibalization pressure to non-adopting polities as veterans emigrate to enlist in dragoon service, thinning non-adopting polities' contractor pools and raising non-adopting ward-breach severity indirectly
+distribution:
+  who_can_do_it:
+    - larger heartland canal-choke-point polities with all four adoption-gates satisfied
+    - adopting polities can stand up dragoon corps under ward-breach-declaration predicate
+  who_cannot_easily_do_it:
+    - smaller heartland polities without funding-stream access (Stabilizer-3 gated)
+    - polities with strong progenitor-cult sectarian presence blocking adoption on principle (Stabilizer-4)
+    - polities with principled-refuser clergy (CF-0026) influence sufficient to block or rescind charter (Stabilizer-4)
+    - polities without chartered extraction guild consent or override (Stabilizer-2)
+    - highland clans — no civic-registry infrastructure; clan-custom welfare handles ward-breach response
+    - fenland stilt-villages — no civic infrastructure; demographic fragility precludes standing force
+    - drylands caravan polities — too decentralized for standing civic force; caravan-rotation social form incompatible
+    - mountain-east valley polities — seasonal isolation; sparse civic infrastructure; pass-closure renders standing force unsustainable
+  why_not_universal:
+    - Charter-Era anti-monopoly-of-force political cost gates founding to polities with acute Incident Wave exposure AND strong central-council authority; the political cost is load-bearing for adoption but NOT for mission-creep drift (scope-creep countergate required)
+    - chartered-guild consent/override is fragile stabilizer — the first dragoon unit performing an extraction-adjacent act under perimeter cover converts guild consent into guild opposition; the perimeter/extraction boundary is load-bearing
+    - dedicated funding stream (canal-transit levy or ward-economy draw) is a Stabilizer-3 adoption-gate but funding-stream specificity (additive vs displacing from containment upkeep) is deferred to OPEN_QUESTIONS
+    - principled-refuser clergy (CF-0026) and progenitor-cult sectarian refusal-on-principle caps adoption-diversity; refusers lead charter-court challenges against mission creep in adopting polities
+domains_affected:
+  - labor
+  - law
+  - warfare
+  - settlement_life
+  - status_signaling
+  - economy
+  - religion
+  - kinship
+  - architecture
+  - memory_and_myth
+id: CF-0033
+modification_history:
+  - change_id: CH-0008
+    date: 2026-04-19
+    originating_cf: CF-0034
+    summary: "qualification: negative-scope clause added — dragoons do NOT pursue bandits qua-banditry; bandit-pursuit is CF-0024 contractor-stratum civic function; cross-predicate pursuit (ward-breach or artifact-trafficking) requires magistrate predicate-declaration; M-13 boundary defense preserved"
+  - change_id: CH-0010
+    date: 2026-04-19
+    originating_cf: CF-0036
+    summary: "qualification: second negative-scope clause added — dragoons do NOT perform cannibal-case investigation, evidentiary custody, silence-protocol enforcement, or criminal adjudication. CF-0036 civic silence-protocol (euphemistic 'grave-violation-of-person' sealed-magistrate-docket) is civic-magistrate and civic-watch procedure; any dragoon acquisition of cannibal-case role triggers CF-0033 mission-creep charter-court challenge per CF-0026 CH-0010 charter-defense-anti-supremacism wing. The load-bearing perimeter/extraction boundary (SOC-4/CF-0008 preserved) extends to a load-bearing perimeter/criminal-adjudication boundary: civic-magistrate and civic-watch reserve criminal-investigative function; dragoons remain within ward-breach perimeter and sealed-quarter evacuation only. Mission-scope commitment thus now carries TWO negative-scope clauses (CH-0008 anti-bandit-pursuit, CH-0010 anti-cannibal-case-investigation) alongside the original mission-scope negative enumeration (no extraction, no ward-specifics inscription/speech, no containment, no neutralization, no routine policing, no external-conflict deployment). M-13 boundary defense preserved"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "named-polity-instance commitment: Brinewick (CF-0038) ADOPTING on dragoon-corps; canal-choke-point revenue funds canal-transit levy dedicated to dragoon payroll (additive per OPEN_QUESTIONS §Dragoon Funding-Stream Specificity); dragoon barracks + drill yards visible in civic quarter; chartered extraction-guild consent secured via perimeter/extraction boundary; CF-0026 principled-refuser charter-court challenges against mission creep standing docket line. CF-0033 scope, distribution, and stabilizer structure unchanged. Brinewick's canal-warden corps (CF-0038 INSTITUTIONS §Military/Defense extension) is categorically DISTINCT from dragoons — tariff-and-traffic chartered-watch-subtype, not ward-breach-perimeter chartered civic force"
+  - change_id: CH-0018
+    date: 2026-04-20
+    originating_cf: CF-0046
+    summary: "qualification: CF-0033 drylands-non-adoption posture now coexists alongside CF-0046 drylands runner-reached village militia informal emergency-response folk-practice; runner-militia is CATEGORICALLY DISTINCT from dragoon-corps and dragoon-precursor (informal civilian self-defense convention, village-designated runner with good-leg reputation, NOT chartered militiaman, NOT civic-chartered perimeter force, NOT treasury-paid, NOT ward-resident-recruited, NOT magistrate-appointed, NOT operating under ward-breach-declaration predicate); mobilizes village-consensus volunteers under village-council direction per incident and disbands; pursuit beyond village jurisdiction defaults to CF-0034 hunter-contractor commission; runner-militia does NOT create CF-0033 drylands-adopting posture; CF-0033 five-axis polity-asymmetric structural-disagreement pattern unchanged; drylands remain NOT ADOPTING on dragoon-corps axis"
+notes: |
+  Direct from worlds/animalia/proposals/PR-0003-canal-corridor-quarantine- dragoons.md (BATCH-0001). Load-bearing mission-scope normative commitment (dragoons do NOT extract, inscribe, contain, neutralize, police routinely, or deploy in external conflict) is the primary stabilizer; the perimeter/extraction jurisdictional boundary is inscribed in the statement itself as normative. Thirteen categories of Phase 9 repair applied at adjudication: (1) perimeter/extraction boundary promoted to normative CF clause; (2) Charter-Era tether clauses added (ward-breach declaration predicate; civic-treasury pay; ward-resident recruitment; no hire-out; magistrate chain-of-command per Politics/Institution critic); (3) mission- scope negative enumeration; (4) Mystery Reserve firewall extensions on M-6, M-7, M-8, M-9, M-11 plus new M-13 (institutional contingency of dragoon form) added to MYSTERY_RESERVE.md; (5) tonal discipline clauses (see below); (6) scope-creep countergate; (7) funding-stream deferral acknowledgement; (8) labor-market cannibalization modeling; (9) per- cluster EVERYDAY_LIFE patches for all five clusters with silent-absence in (c)(d)(e); (10) boundary reaffirmations via modification_history entries on CF-0008, CF-0020, CF-0024, CF-0026, CF-0028; (11) religious response CF-0031 bifurcation template; (12) three new ECONOMY Breakage Points; (13) kit-counterfeit black market fourth product-line commitment.
+  AES-1 / AES-3 register-binding: Dragoons are paid laborers with a hazardous civic commission; they are "feared, respected, and quietly avoided in the same register that extractors are." Dragoon-veteran accounts follow CF-0024 / CF-0028 extractor-veteran register — dry, scarred, numerical, pensionable-service cadence. Ward-holding and seal- failure are narrated with the INSTITUTION as grammatical subject. Named-officer heroism is out-of-register. Rank is job-title, not honorific. Turnout is work-kit, not ceremonial uniform.
+  In-register language (for writing in this setting): "ward-breach, perimeter, seal-line, sealed-quarter, evacuation-order, cordon, muster, turnout, drill-day, rota, shift-pay, hazard-stipend, pensionable-service, dragoon (lowercase, job-title register), quarter-roster, canal-post, posting, inspection, warrant, charter-concession, containment, decontamination detail, body-detail, salvage-escort, press-back, hold the line (procedural not heroic), the seal held / the seal failed, broke ward, drill-worn, turnout-boots, canal-mud, winter-rota, fever- month, plainclothes inspector, civic-watch auxiliary, pulled a family, walked the perimeter, took the posting, retired on the pension, took a breach and came home wrong."
+  Out-of-register language to AVOID: - Military-romance: "regiment, the regiment, regimental pride, colors,
+    standard, proud tradition, elite unit, finest, sharp end, tip of the
+    spear, crack troops, the few, brothers/sisters-in-arms (heroic sense),
+    band of, esprit de corps, gallant, dashing, the lieutenant rode,
+    cavalry charge (even metaphorically), sabres out."
+  - Heroic-sacrifice: "last stand, held to the last, fell defending,
+    noble sacrifice, brave defense, to the man, valor, bravery (as
+    epithet), heroism, fallen (as honorific), gave their lives."
+  - Chosen-force: "the chosen, the called, sworn, oath-bound (mystical
+    sense), standard-bearer, torch-bearer, vanguard, guardian (of anything
+    abstract), shield of the city, bulwark."
+  - Paramilitary-glamour: "steel-eyed, grim-faced, hardened, battle-scarred
+    (as decoration), the uniform (with definite article reverence), wore
+    it well, honor of, disciplined ranks (admiringly), the line
+    (mythologized)."
+  - Counter-register heroic-by-inversion (pulp-revolutionary): "jackbooted,
+    thuggish, brutes in uniform, the boot, the fascist boot, state
+    violence (sloganized), stormtroopers, the dragoons came for us
+    (pulp register)." This register still myth-sizes dragoons and is
+    out-of-register even when used against them.
+
+  Bardic stratification (three layers): (a) patron-commissioned ward- saved-the-quarter ballads (institution-competence inflated, NOT individual gallantry; never a named lieutenant's charge, always "the perimeter held"); (b) tavern-veteran dragoon accounts (dry, numerical, pensionable-service cadence, mocking of ballad-register — "we pulled sixty out of that tenement; the registry says forty-three"); (c) anti-dragoon charter-court opposition broadsides (procedural grievance, cited precedent, named concessions breached — litigious register, NOT revolutionary pulp).
+  Mission-creep register is BUREAUCRATIC DRIFT, not fascist slide: rota extended, warrant reinterpreted, charter-concession footnote cited then stretched, council subcommittee quietly widening remit between minutes. Dragoons are "posted, rotated, reassigned" — they never "march on" anything. Charter-court is the load-bearing counterweight; every creep clause cites the concession it tests.
+  Five CFs qualified by modification_history entry under CH-0007: - CF-0008 (scope narrowing: perimeter enforcement split from chartered
+    extraction monopoly in dragoon-adopting polities; extraction-guild
+    monopoly on extraction preserved);
+  - CF-0020 (qualification: dragoon subtype is chartered-civic, NOT
+    hireable-veteran capability; CF-0020 scope preserved);
+  - CF-0024 (qualification: perimeter enforcement exits the contractor-
+    auxiliary niche in dragoon-adopting polities; stratum scope otherwise
+    preserved; inter-polity labor-market cannibalization pattern extended);
+  - CF-0026 (extension: named standing role in charter-court challenges
+    against dragoon mission creep);
+  - CF-0028 (clarification: dragoon perimeter response and ruin-levy
+    mobilization are structurally distinct; both may co-deploy at ruin-
+    mouths without merger).
+
+  Religious response follows CF-0031 bifurcation template: reform-current common-pantheon clergy split between charter-court-challenge-with- protection (accept dragoons with sunset and strict perimeter scope) and abolitionist-civic-militarization-refusal. Progenitor-cult sectarians denounce adoption on species-lineage-occlusion grounds; aspectualizing clergy in common pantheon treat dragoons as civic- hazard-commission labor without doctrinal implication.
+  Mystery Reserve firewall extensions added to M-6 (confiscation custody protocol), M-7 (retired-dragoon reputation-genealogy), M-8 (dragoon perimeter-lore is tactical not mechanistic), M-9 (dragoon civic- evidence archives do not constitute Maker-knowledge custody channel), M-11 (dragoon pensioner-health records are occupational-epidemiological not heritability-evidentiary). New M-13 entry (institutional contingency of dragoon form) added per Rule 7 obligation.
+  Latent burdens logged: (LB-1) future dragoon-confiscation-procedure CFs must specify custody-disposition without triggering M-6; (LB-2) future dragoon-welfare CFs must not produce three-generation health datasets paralleling CF-0031 scrivener's convention; (LB-3) future famous-dragoon-commander CFs must constrain reputation to civic- tactical domain not ward-breach ontology; (LB-4) future extradition- resolution CFs must not retroactively adjudicate whether the four adoption-stabilizers are causally necessary (M-13 preservation). Plus four additional monitored exposures: funding-stream specificity deferral; transition-cost 3-7 year ward-breach severity spike; reactive- adoption pressure under smuggler escalation; mission-creep countergate fragility dependent on charter-court precedent robustness.
+  Six critic sub-agents dispatched at escalation gate (approximately 10 of 13 FOUNDATIONS domains touched): Continuity Archivist, Systems/ Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator. No critic dissented from accept recommendation; five of six required repair before accept, all repairs applied in Phase 9.
+  Adjudication record: adjudications/PA-0006-accept_with_required_updates.md. Modified 2026-04-19 by CH-0008 (CF-0034): negative-scope clause added to mission-scope commitment — dragoons do NOT pursue bandits qua-banditry (CF-0034 suppression is CF-0024 contractor-stratum civic function, NOT a dragoon chartered function). Dragoon engagement with bandit groups is permitted ONLY via the narrow ward-breach perimeter predicate (when a bandit group triggers or occupies a ward-breach zone) or via the black-market artifact-traffic predicate (when a bandit group is also trafficking artifacts), and magistrate predicate- declaration is REQUIRED at cross-predicate pursuit — a dragoon unit pursuing a bandit-group-qua-artifact-traffickers must file magistrate notice that the pursuit operates under the artifact-trafficking predicate, not the banditry predicate. This commitment is the load- bearing countergate against bandit-pursuit becoming a creep-vector for dragoon scope expansion; M-13 institutional-contingency firewall depends on its disposition. CF-0034 explicitly names settlement-hired hunter-contractors as the civic bandit-response institution. The negative-scope clause joins the existing mission-scope commitments (no extraction, no ward-specifics inscription/speech, no containment, no neutralization, no routine policing, no external-conflict deployment); it is categorically distinct because bandit-pursuit is a creep-vector RECOGNIZED AT THIS CANON STEP rather than originally- committed. Adjudication record: adjudications/PA-0007-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0018 (CF-0046): qualification — CF-0033 drylands-non-adoption posture (GEOGRAPHY §Regional Asymmetry on Dragoon-Adoption drylands-south caravan towns do NOT adopt; caravan-rotation social form structurally incompatible with ward-resident dragoon recruitment; "took the coin-for-service" idiom) now sits alongside CF-0046 drylands runner-reached village militia informal emergency-response folk-practice. The runner-militia is CATEGORICALLY DISTINCT from dragoon-corps and from dragoon-precursor — it is informal civilian self-defense convention (village-designated runner with good-leg reputation rotating across able villagers; NOT chartered militiaman; NOT civic-chartered perimeter force; NOT recruited from ward-resident rolls; NOT treasury-paid; NOT magistrate-appointed; NOT operating under ward-breach-declaration predicate; NOT coordinated with chartered extraction-guild consent). Runner-militia emergency-response mobilizes village-consensus volunteers under village-council direction for the duration of a specific bandit-sighting incident and then disbands; pursuit beyond village jurisdiction defaults to CF-0034 hunter-contractor commission. No dragoon-adoption under CF-0046 drylands corridor institutional-thinness — the runner-militia does NOT create a CF-0033 drylands-adopting posture; CF-0033 five-axis polity-asymmetric structural-disagreement pattern is unchanged; drylands remain NOT ADOPTING on dragoon-corps axis. CF-0033 scope, distribution, and stabilizer structure unchanged. Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+prerequisites:
+  - chartered polity with civic registry and magistrate chain-of-command
+  - central-council authority sufficient to override chartered-guild veto where guild consent is withheld
+  - canal-choke-point revenue or comparable dedicated funding stream (adoption-gate; Stabilizer-3)
+  - ward-breach incident density at acute Incident Wave threshold (adoption-gate; Stabilizer-1 substrate)
+  - veteran pool from which to recruit ward-resident dragoon personnel
+  - chartered extraction guild concurrent consent or override; dragoons cannot be stood up over guild objection (adoption-gate; Stabilizer-2)
+  - ward-breach-declaration charter predicate and magistrate chain-of-command structure
+required_world_updates:
+  - INSTITUTIONS
+  - TIMELINE
+  - GEOGRAPHY
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+  - CANON_LEDGER
+scope:
+  geographic: regional
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0007
+    - CF-0008
+    - CF-0020
+    - CF-0024
+    - CF-0026
+    - CF-0028
+  direct_user_approval: true
+statement: |
+  Some larger heartland polities have, in the past decade, chartered a civic perimeter force — colloquially called "quarantine dragoons" or "canal- corridor dragoons" — for rapid ward-breach perimeter enforcement and sealed-quarter evacuation support. Dragoons are drilled, armed, uniformed, pensioned chartered-civic personnel drawn from ward-resident rolls and paid from civic treasury; they are NOT contractors (CF-0024), NOT mercenary-company members (CF-0024), NOT chartered extraction guild personnel (CF-0008), and NOT noble private retinue (CF-0024). Dragoon operations are predicated on ward-breach declaration and magistrate chain-of-command; they enforce perimeter and evacuate families, and they do NOT extract artifacts, inscribe or speak ward specifics (CAU-3/CF-0007 preserved), contain or neutralize artifacts (SOC-4/CF-0008 preserved), perform routine civic policing, or deploy in external inter-polity conflict. Adoption is contested Charter-Era anti-monopoly-of-force concession: some polities adopt, some refuse on principle (civic-charter, sectarian, or clergy grounds), some lack infrastructure. Inter-polity adoption asymmetry produces novel extradition disputes when a dragoon unit pursues black-market artifact traffic across a charter line, joining CF-0021 crafter-tolerance, CF-0024 mercenary-licensure, CF-0028 /CF-0030 funder-primacy, and CF-0031 contamination-registry as a fifth polity-asymmetric disagreement axis in the Charter-Era stress register.
+status: soft_canon
+title: Canal-corridor quarantine dragoons — chartered civic-perimeter force, polity-asymmetric
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - named dragoon units uniformed and quartered in adopting polities; muster rolls visible at civic-registry archives
+  - drill-day rota posted at civic barrack gates; three-note turnout-call whistle recognizable by children in adopting canal-towns
+  - ward-breach response time drops sharply in adopting polities; sealed-quarter evacuation becomes faster and more coercive than the prior watch-plus-guild ad hoc arrangement
+  - chartered extraction guilds renegotiate jurisdictional boundary with civic authority on a per-polity basis; perimeter/extraction boundary answer differs per polity
+  - bardic circuit picks up dragoon subject matter within a season of adoption; three-layer stratification emerges (patron-commissioned ward-saved-the-quarter ballads inflated at institution-level NOT individual-level; tavern-veteran dragoon accounts in AES-1 scarred register; charter-court opposition broadsides in litigious-procedural register)
+  - principled-refuser clergy (CF-0026) mount visible charter-court challenges against dragoon mission creep; some progenitor-cult lineages denounce adoption; common-pantheon clergy bifurcate between charter-court-challenge-with-protection reformers and civic-militarization-abolitionists per CF-0031 bifurcation template
+  - retired dragoons form a new veteran-subtype distinct from mercenary veteran (CF-0024), occult-fallout specialist (CF-0025), ruin-expedition veteran (CF-0028), and extractor veteran; carries charter-backed pension and civic-advisory role eligibility
+  - inter-polity extradition docket grows around cross-border dragoon pursuit; magistrate courts build precedent slowly alongside CF-0021, CF-0024, CF-0028/CF-0030, and CF-0031 precedent (five-axis stress register now recognized)
+  - impersonation-of-dragoon civic offense appears in charter-school offense-tier lists in adopting polities; black market in retired-dragoon kit joins canal-corridor illegitimate-service infrastructure as fourth product-line
+  - ruin-adjacent polity three-force convergence vector; dragoon perimeter response, CF-0028 ruin-levy mobilization, and expedition-band skirmish can co-deploy at the same ruin-mouth; three forces remain structurally distinct and magistrates build jurisdictional-primacy precedent with visible anxiety
+  - in non-adopting polities, residents experience comparative insecurity and develop named idioms (*"we still run the old-walk"* in heartland; *"took the coin-for-service"* in drylands; *"walks the southern cordon"* / *"does not walk the southern cordon"* in highland); political pressure to adopt rises but anti-monopoly-of-force holdouts continue to refuse
+  - dragoon widow with charter-backed pension stratum contrasts visibly with contractor-widow (CF-0024), fallout-specialist widow (CF-0025), and expedition-widow (CF-0028) strata without charter pension; pension-differential feeds reform-current clergy (CF-0026) campaigns paralleling CF-0031 reform dynamics
+  - estate-steward ledger in adopting polities gains dragoon-charter magistrate liaison burden; dowager-gossip distinguishes "estates seated on dragoon-funding council" from "estates that have never had a dragoon posting cross their tenant line"

@@ -1,0 +1,52 @@
+id: SEC-ECR-003
+file_class: ECONOMY_AND_RESOURCES
+order: 3
+heading: Scarcity Map
+heading_level: 2
+body: |-
+  | Region | Acute scarcities | Why |
+  |---|---|---|
+  | Cold North Highland | grain (imported), warm cloth, medicine | short summer, isolation |
+  | Temperate Canal Heartland | habitable area near contaminated zones; ward-grade pigment; <!-- added by CF-0021 --> artifact-creation grimoire fragments (CF-0023) — the most operationally dangerous and most sought subset; <!-- added by CF-0028 --> authentication-capacity (specialists are few and over-booked on expedition-disposition work); ruin-expedition-capable veterans (pulled by expedition demand from ward-breach response, raising systemic risk); ruin-cartography (black-market-scarce and killing-enforced); <!-- added by CF-0035 --> wildland-adjacent habitable area compounded by mobile-contamination-vector fauna — mutated-beast range (CF-0035) extends effective contamination-exclusion radius outward from static Maker-substructure sites, narrowing habitable frontier at the wildland edge; trophy-authentication-capacity (thin, contamination-risk-gated, polity-asymmetric in legality); <!-- added by CF-0042 --> status-display-provenance-authentication capacity (the eighth authentication-cartel vector; elite-house demand for verified provenance on declared-inventory items; thin specialist pool shared with expedition-disposition, crafter-distinction, ruin-authentication, trophy-authentication tiers) | artifact-incident wave; specialist material; black-market scarcity; expedition-era labor cannibalization; mobile-vector contamination at wildland edge; CH-0014 compounds authentication thinning via status-display demand |
+  | Drylands South | water; <!-- added by CF-0047 --> well-node concentration risk (CF-0047) — lineage-inheritable well-stop office concentrates water-access authority across generations, a natural monopoly stabilized by drought-cycle customary hospitality obligations and inter-corridor caravan-master reputation-boycott per CF-0046 (reputation-not-civic brake) | climate; dependence on aqueducts and cisterns; <!-- added by CF-0046 --> drylands institutional thinness (no civic-registry backing for well-stop tenancy; customary-authority only) leaves water-access monopoly stabilization to reputation-network rather than civic-regulatory-capture |
+  | Fenlands West | dry ground, healthy children | water-table; disease |
+  | Mountain East | grain, traded goods (winter); skilled medicine | passes close half the year |
+
+  Across all regions: artifact-related materials (containment-grade ceramic, ward inscription pigments, neutralizer compounds) are scarce by guild design and by genuine geological constraint. <!-- added by CF-0021 --> Note: containment-grade ceramic clay remains guild-monopolized; modern artifact crafters (CF-0021) use ORDINARY ceramic, metal, or wood vessels, not containment-grade — the bottleneck for crafter success is the preparation technique (guild-internal, not in leaked grimoires), not the material grade. This preserves the containment-clay monopoly while explaining why crafter outputs are inferior in stability and power to Maker-Age work.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0005
+  - CF-0008
+  - CF-0009
+  - CF-0013
+  - CF-0015
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

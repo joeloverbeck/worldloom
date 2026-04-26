@@ -1,0 +1,8 @@
+id: OQ-0028
+topic: Ledger-Mark Funding Stream Specificity
+body: |-
+  - CF-0031 commits that the contamination-lineage ledger-mark pension supplement is funded via chartered extraction-guild taxation in adopting polities. The specific civic-taxation line — whether it is a dedicated surcharge on artifact-transit fees, a pension-specific extraction-guild levy, a civic-general tax allocated by magistrate discretion, or some combination — is not canonized at ECONOMY level and varies polity-to-polity.
+
+when_to_resolve: when a story foregrounds a specific adopting polity's registry economics, or when a magistrate case involves pension-supplement delivery failure due to taxation-line dispute.
+caution: "interacts with ECONOMY_AND_RESOURCES.md §Breakage Points (ward-economy financing; a new registry-capture breakage has been added) and §Wage Spreads (CF-0025 line annotation). A formal canonization of the taxation mechanism would commit to a funding-flow structure currently deferred; narrow per-polity commitment is acceptable. The funding-stream specificity is a Systems-critic-flagged weakness in CF-0031's stabilizer set: \"requires extraction-guild taxation\" gates adoption but does not explain mechanism; the gap is deferred here deliberately rather than hand-waved."
+extensions: []

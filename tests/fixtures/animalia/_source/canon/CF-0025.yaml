@@ -1,0 +1,85 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - contamination-injury accumulates across career (darkened skin patches, tremors, respiratory issues — indistinguishable from extractor-veteran patterns)
+  - high mortality from direct fallout exposure and secondary consequences
+  - commission-gated work limits volume; opportunistic brokers occasionally bypass the gate, creating friction with containment-wrights
+  - specialist empirical knowledge is contested canon, not world-level authority — specialists are NOT oracles on Maker-Age, catastrophic-class, or vessel-agency questions
+  - specialists encountering possessed artifacts (CF-0022) do NOT "commune with," "communicate with," or "decipher" vessel-hosted agencies; they contain and hand off to chartered guilds
+  - specialists are NOT crafters, grimoire-readers, ward-inscribers, or ceramic-vessel makers — ONT-2 firewall holds
+  - post-career widows and contamination-injured retirees have no charter pension in non-adopting polities — arrangements negotiated by contract custom; in adopting chartered polities, voluntary self-enrollment on the CF-0031 ledger-mark registry confers pension supplement and monastic-clinic priority across three administrative generations
+  - reputation mythologization via bardic-circuit loop (CF-0017 extension per CF-0024) creates the M-7 bounded unknown
+distribution:
+  who_can_do_it:
+    - seasoned adventurer-veterans willing to take the specialty under commission
+    - former extraction-guild apprentices who left before charter completion
+    - rare non-human-folk specialists (amphibian-folk canaries sometimes become specialists themselves in fen regions)
+  who_cannot_easily_do_it:
+    - untrained laypersons
+    - principled refusers (CF-0026) by oath or doctrine
+    - specialists blacklisted by guild or civic watch for unlicensed response
+    - those without commissioning patron (magistrate, ward-inspector, extraction-guild, or opportunistic broker)
+  why_not_universal:
+    - high mortality through contamination-injury and career-attrition
+    - commission-gated access in most polities
+    - empirical pattern-knowledge takes years and survival to acquire
+    - guild-charter ceiling keeps specialists out of extraction/wards/neutralization (limiting career scope to fallout containment)
+    - principled-refuser tradition siphons legitimacy-seekers away from the subtype
+domains_affected:
+  - magic
+  - economy
+  - warfare
+  - law
+  - settlement_life
+id: CF-0025
+modification_history:
+  - change_id: CH-0005
+    date: 2026-04-18
+    originating_cf: CF-0031
+    summary: "scope_retcon: post-career pension-absence claim narrowed to non-adopting-polity scope; adopting polities provide pension supplement via CF-0031 registry; M-7 body-injury-vs-knowledge-genealogy firewall strengthened"
+notes: |
+  Direct from briefs/animalia-adventurers.md. The specialty subtype is the highest-mystery-exposure element of the proposal and carries six explicit firewall commitments to preserve M-1, M-2, M-6, and ONT-2: (1) mundane containment only, not chartered artifact work; (2) empirical pattern- knowledge is contested canon, not world-level evidence; (3) specialists are reputational/occupational, not practitioner-magical; (4) bards contracted as agents produce narrative material subordinate to CF-0023's contested-partial-translation frame; (5) specialists encountering possessed artifacts do not "commune with," "communicate with," or "decipher" vessel-hosted agencies; (6) no specialist is framed as uniquely knowing what a Maker artifact is or who made it. The bounded unknown the specialty manufactures (reputation-genealogy of famous specialists) is logged as Mystery Reserve M-7. Adjudication record: adjudications/PA-0002-accept_with_required_updates.md. Modified 2026-04-18 by CH-0005 (CF-0031): post-career pension-absence claim in costs_and_limits narrowed to non-adopting-polity scope. Adopting chartered polities have established the CF-0031 civic-registry contamination-lineage ledger-mark as a voluntary-enrollment welfare instrument providing pension supplement and monastic-clinic priority for CF-0025-eligible lineages across three administrative generations. Firewall preserved and strengthened: the registry records body-injury (contamination-injury empirical signature), NOT knowledge-genealogy; specialist EMPIRICAL pattern-knowledge remains contested canon per M-7, unchanged by registry institutionalization. No civic authority treats registry status as evidence of oracle-reading validity. Post-career widow pension arrangements partially close in the adopting-polity branch; non-adopting polities maintain contract-custom arrangements as before. Adjudication record: adjudications/PA-0004-accept_with_required _updates.md.
+prerequisites:
+  - veteran experience with artifact-incident response (usually accumulated through ward-breach response or extraction-security gigs)
+  - willingness to work contaminated sites
+  - civic or guild commission for lawful engagement
+  - empirical fallout-containment pattern-knowledge (acquired through apprenticeship and survival)
+  - equipment for mundane containment (nets, pens, forced-mask rigs, isolation-zone barriers, suppression weapons)
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - ECONOMY_AND_RESOURCES
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - GEOGRAPHY
+  - TIMELINE
+scope:
+  geographic: global
+  social: restricted_group
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0024
+    - CF-0020
+    - CF-0005
+  direct_user_approval: true
+statement: |
+  A scarce subtype of adventurer-contractor (CF-0024) specializes in mundane containment of artifact-induced fallout consequences: suppression of rage-induced animals (trap, kill, pen), forced isolation of victims producing toxic breath or other bodily manifestations (forced masking, zone quarantine), and perimeter control during chartered guild response. These specialists are reputational and occupational, not practitioner- magical. They do NOT perform artifact extraction, ward inscription, ceramic-vessel containment, or neutralization — those remain chartered under CF-0006, CF-0007, CF-0008. ONT-2 firewall is explicit: what a specialist knows is how to manage fallout empirically, not how to manipulate artifacts. Specialists are engaged under civic magistrate, ward-inspector, or chartered extraction-guild commission in most polities; unlicensed fallout-response carries legal risk. Empirical pattern- knowledge accumulated across careers is contested canon, not world-level authority on Maker-Age origin (M-1), catastrophic-class origin (M-2), or vessel-hosted agency (M-6). Specialist field-lore does NOT constitute evidence at world level for any mystery-reserve position. The subtype's reputational signature — the scarred, quiet specialist whose silences bardic-circuit mythologizes — creates the bounded unknown logged as Mystery Reserve M-7.
+status: hard_canon
+title: Occult-fallout specialists perform mundane containment under commission
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: capability
+visible_consequences:
+  - named occult-fallout specialists accrue quiet-avoid prestige in artisan quarters and canal towns
+  - scarred veteran figures with the specialty's characteristic gaze are a recognizable bardic subgenre
+  - magistrate commission records of named specialists survive in civic archives (though specialist knowledge itself does not)
+  - post-career specialists present to herb-wives and barber-surgeons with contamination injuries in the extractor-veteran empirical register
+  - bardic-circuit songs about the specialist who said less and knew more circulate; the reputation-accretion is the M-7 concern
+  - civic-registry refuses sectarian attempts to classify dead specialists as "progenitor-touched" or similar supernatural status claims
+  - civic prosecution of unlicensed fallout-response in most polities; tavern-vouched public-emergency exceptions in some
+  - engineering-guild and extraction-guild contractor-auxiliary rosters name repeat specialists with commission history
+  - bardic cycles distinguish "the specialist who said less" (high reputation; M-7 subject) from "the one who wrote pamphlets" (treated as unreliable)

@@ -1,0 +1,65 @@
+change_id: CH-0009
+date: 2026-04-19
+change_type: addition
+affected_fact_ids:
+  - CF-0035
+  - CF-0005
+  - CF-0006
+  - CF-0017
+  - CF-0024
+  - CF-0029
+  - CF-0034
+summary: |
+  Canon-addition of CF-0035: artifact-contaminated mutated non-sentient beasts as wilderness hazard, with scale-tail rumor-only gargantuan- underground subcategory (new Mystery Reserve M-15). Composite fact (primary type hazard; sub-types species / local_anomaly / historical_process) committed with six primary firewalls (M-2 scale cap; M-5 non-sentience fourth cross-application after CF-0022 / CF-0029 / CF-0031; M-8 distinct-origin from CF-0029 bidirectional; AES-1 hero-drift taboo list with full forbidden-framings inventory; Rule 3 wildlife-sub-specialty-not-cohort; not-a-sixth-Charter-Era-axis with MINOR operational docket parallel to CF-0034) and three additional cross-application firewalls (M-1 no-Maker-cause-of-fall from mutated- beast evidence or gargantuan-underground rumor; M-9 not-a-Maker- knowledge-custody-channel for mutated-beast remains; M-10 second cross-application of selection-bias folklore firewall for hunter- survivor wilderness-zone-folklore paralleling CF-0034 bandit-survivor ruin-folklore firewall). Six qualifications to existing CFs (CF-0005 / CF-0006 / CF-0017 / CF-0024 / CF-0029 / CF-0034) extend taxonomies without falsifying any existing commitment. Twelve domain files receive patches covering ordinary-life signatures across all five EVERYDAY_LIFE clusters, new Mystery Reserve entry M-15, four new OPEN_QUESTIONS items, and consequence-propagation across the 13-domain surface. Verdict: ACCEPT_WITH_REQUIRED_UPDATES. Adjudication record: worlds/animalia/adjudications/PA-0008-accept_with_required_updates.md.
+reason:
+  - "User intention: make world more dangerous, strange, and wondrous; broaden diversity of animal life"
+  - "Dramatic effect: dread of venturing into the wilds; 'what may be out there'; legends via rumors and bards"
+  - "Deepens Primary Difference #2 (artifact-magic-as-vanished-hazard texture) by extending CAU-1 cost taxonomy into the faunal ecology — Maker debt is now paid by the biosphere, not only by sentient civic orders"
+  - Strengthens AES-3 (magical and contaminated are aesthetically allied) — the mutated-beast carcass is wonder and contamination in one body
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - ONTOLOGY.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - PEOPLES_AND_SPECIES.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "Trophy-legality polity-asymmetric risk: if polities develop structurally divergent beast-parts legality (trophy-legal vs contamination-prosecuted, with incompatible extradition postures), the current MINOR docket could harden into a sixth Charter-Era asymmetry axis. Compounds CF-0034 latent-burden watch and the existing five-axis register (CF-0021 / CF-0024 / CF-0028+CF-0030 / CF-0031 / CF-0033). Track across future canon work."
+  - "Trophy contamination-category ambiguity: whether mutated-beast remains are contaminated-artifact-category under SOC-4 custody or ordinary-trophy trade will pressure a future CF on hunter-contractor fence infrastructure and authentication-niche extension. Currently held as 'uncertified = civic-refusal in many polities,' but not world-level codified."
+  - "Wildland contamination hazard-mapping convention: whether any polity attempts systematic wildland-contamination mapping parallel to civic ward-inspection is deferred to OPEN_QUESTIONS; pressures extraction-guild scope and hunter-corridor reputation informality."
+  - "Captured-alive mutated-beast collection scenarios: a chartered containment-wright, a broker, or a sectarian collector acquiring a captured-alive mutated beast would pressure SOC-4 boundary and CF-0029 'no modern replication' posture; currently held as 'destroyed by civic-response contamination protocol,' but no specific magistrate precedent canonical."
+  - "Legendary-beast-hunter sixth-cohort risk: if future canon work names specialist beast-hunter institutions distinct from CF-0024 wildlife sub-specialty, M-7 firewall extension to a sixth cohort would be warranted. Current holding clause: sub-specialty, not cohort. Track."
+  - "Gargantuan-underground rumor-tier upward pressure: whether future adventurer-contractor or expedition-venture proposals attempt to render the gargantuan-underground subcategory as encounterable canon. M-2 stabilizer audit burden; any such proposal requires explicit new canon-addition run per CF-0035 scale-cap commitment."
+  - "Bardic mutated-beast-figure mythography reliability register: paralleling M-14 named-bandit-captain mythography, whether named legendary-beast figures accrue historical / composite / invention / mixed reliability contestation is deferred to OPEN_QUESTIONS. Register-distinction from bandit-captain cycle is load-bearing for both CF-0034 M-14 discipline and CF-0035 AES-1 hero-drift discipline."
+notes: |
+  Verdict: ACCEPT_WITH_REQUIRED_UPDATES. Six critic sub-agents (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator) dispatched at Phase 6a escalation gate (>3 of 13 domains touched — all 13 domains affected in some form; invariant-clarification extensions to CAU-1 / ONT-1 / ONT-3). Strong convergence on six primary firewalls (M-2 scale cap; M-5 fourth cross-application; M-8 distinct-origin bidirectional; AES-1 hero-drift; Rule 3 sub-specialty; MINOR docket not sixth axis) and on sub-classifications (wildlife sub-specialty within CF-0024 wildlife subtype; NOT a sixth CF-0024 subtype; widow-of-the-hunt absorbed into CF-0024 widow-of-the-job).
+  Three additional cross-application firewalls identified by Mystery Curator and adopted: M-1 firewall (no Maker-cause-of-fall resolution from mutated-beast evidence); M-9 firewall (mutated-beast remains NOT a seventh Maker-knowledge custody channel; hunter-trophy / natural- history register stays separate); M-10 firewall second cross-application (hunter-survivor wilderness-zone-folklore is selection-bias parallel to CF-0034 bandit-survivor ruin-folklore firewall, compounding the M-10 discipline that CF-0034 established).
+  Five operational firewalls from Politics/Institution critic adopted: inspector discretionary dispatch; habitat-cultivation charter-scandal; Maker-mystic veneration diffuse-only; contaminated-trophy guild-handoff; dragoon-perimeter predicate-declaration.
+  Systems/Economy critic flagged authentication-cartel sixth-product-line compounding pressure (now six overlapping revenue streams on the canal- corridor illegitimate-service infrastructure rail alongside CF-0023 / CF-0028 / CF-0031 / CF-0033 / CF-0034 — the strongest regulatory-capture pressure in the current Layer-4 stress register) and distributional- regression concern (wealth flows from rural-tenant tax base to urban curiosity-collector via hunter-contractor; mild regression paralleling but distinct from CF-0028 ruin-rich-region concentration). Mild regression confirmed acceptable; cartel pressure named explicitly in Breakage Points.
+  Politics/Institution critic convergences with other critics: MINOR operational docket (uncontested-suppression-consensus holds parallel to CF-0034 bandit-extradition); no religious aspectualization crisis (fauna, not cosmological site); no new archival category for zone- knowledge (hunter-corridor reputation is the mechanism; systematic zone-ledger explicitly forbidden).
+  Everyday-Life critic specified per-cluster signatures across all five clusters: strong signature in Cold North Highland (cleansing-rite extension, clan-sanction, saga-fragment register, ward-of-the-flock heightening, named up-ridge idiom); moderate in Canal-Town Heartland (bounty-wall fourth column, tavern-return cadence, pasture-edge- carcass fear, skip-rope rhyme); moderate in Big-City Outskirts Estate (dowager trophy-discrimination, cousin-scandal charter-risk, habitat- cultivation charter-scandal firewall, verified-trophy aspiration); moderate-weak in Drylands South (caravan trophy-cargo refusal, night-watch beast-sign sentry, cargo-riddle extension); moderate in Wet Fenlands West (relay-summoning for beast-specialist distinct from CF-0025 fallout-specialist summon, fourth ghost-story category, canary- discrimination mechanism).
+  Theme/Tone critic produced the forbidden-trope list incorporated in CF costs_and_limits: forbidden honorifics (legendary, ancient evil, apex predator, mythic quarry, epic hunt, greatest prey); forbidden vocational frames (monster hunter, beast-slayer, witcher, school of, brotherhood of, order of, initiated, chosen, destined, called, calling); forbidden cosmic-horror frames (awakening, primordial horror, end-of- days, destroyer of worlds); forbidden kaiju frames (civilization-ending, kingdom-destroying, world-ender); forbidden quest frames (quest-giver, hunt of a lifetime, beast-king); forbidden heroic cadence. In-register language required: dry-numerical hunter-return; corridor-named-not- hunter-named proper-noun particularity; pensionable-cadence; widow-of- the-hunt absorbed register.
+  Mystery Curator critic specified M-2 scale-cap LITERAL commitment (NO cascade / mass-mind-control / urban-scale / civilization-killing; NOT gestural) as the single largest risk surface — addressed in CF scale- cap costs_and_limits item. Gargantuan-underground scale-tail held at rumor-register-only in new M-15 entry; any encountered effect beyond squad-wipe-local requires new canon-addition run with explicit user approval.
+  Register-discipline commitments load-bearing per Theme/Tone critic. The CF-language cadence exemplar — *"We walked the deep wood three days; we brought back the head; the bounty-clerk paid; one of the four stayed in the wood. The ward-inspector came out the next morning."* — captures the AES-1 hunter-return register. Stories generated by this CF should hold this cadence across all five EVERYDAY_LIFE clusters and avoid the forbidden-framings inventory.
+  Critic productive tensions resolved: (1) Theme/Tone forbids "legendary" as honorific vs. user's own vocabulary — resolved: keep "legendary-beast" as bardic idiom in-world, flank with AES-1 register discipline, mandate proper-noun particularity over honorifics in concrete prose. (2) Systems/Economy sees sectarian buyers as exploit path vs. stabilizers hold structurally — resolved: diffusion-stabilizers cover commercial-scale; ideological-buyer segment thin but durable; caravan- refusal register and polity-asymmetric legality absorb; flagged as the single market-segment weakness. (3) Everyday-Life wants strong cluster signatures vs. Theme/Tone warns against over-proliferation / kaiju drift — resolved: per-cluster signatures specified with strong highland, moderate elsewhere; all signatures remain in scarred-veteran / bounty-wall / cleansing-rite register, never glory.
+  Critic convergences summary: M-2 scale-cap firewall (Continuity Archivist, Theme/Tone, Mystery Curator); M-5 fourth cross-application (Continuity Archivist, Theme/Tone, Mystery Curator, Everyday-Life implicit); M-8 distinct-origin bidirectional (Continuity Archivist, Mystery Curator, Politics/Institution implicit); AES-1 hero-drift taboo (Theme/Tone, Everyday-Life, Mystery Curator); Rule 3 wildlife- sub-specialty-not-cohort (all six critics agree); MINOR docket not sixth axis (Continuity Archivist, Politics/Institution, Systems/Economy); authentication-cartel sixth-stream (Systems/Economy primary, others implicit); habitat-cultivation scandal firewall (Politics/Institution, Everyday-Life); ward-inspector discretionary dispatch (Politics/ Institution, Systems/Economy); trophy-contamination handling (Everyday- Life, Politics/Institution); Maker-mystic diffuse-only firewall (Politics/Institution, Mystery Curator); selection-bias folklore second cross-application (Mystery Curator, Continuity Archivist); M-9 not-custody-channel (Mystery Curator); mobile-vs-static contamination (Systems/Economy); M-14 bardic-reliability parallel register distinction (Mystery Curator).

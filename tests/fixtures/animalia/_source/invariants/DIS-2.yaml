@@ -1,0 +1,17 @@
+id: DIS-2
+category: causal
+title: Literacy and occult-fragment access is partial, not aristocratic monopoly
+statement: Literacy is not universal but is not gated to nobility. Occult text fragments can be purchased by anyone with coin and a willing seller. Specialist knowledge is gated by guild and apprenticeship more than by class.
+rationale: Brief specifies fragment purchase is possible.
+examples:
+  - a tavern bard who can read trade-tongue; a journeyman extractor who owns three fragments; a literate canal-master
+non_examples:
+  - only nobles can read; only priests own books
+break_conditions: would change the structure of knowledge access.
+revision_difficulty: medium
+extensions:
+  - originating_cf: CF-0046
+    change_id: CH-0018
+    date: 2026-04-20
+    label: Drylands-Regional Signature Clarification
+    body: The drylands caravan corridor (CF-0046) is a concrete regional signature of DIS-2's partial-literacy rule — oral-primary by dominant transmission mode (long memorized poems, riddles, caravan-tale traditions, CF-0044 verse-turn hospitality register, verse-counter pedagogy), only partially literate (sparse household-held station-logs kept in trade-tongue; tea-house-scribe witnessing for contract custody). The existing trade-tongue (a cross-community commercial lingua franca, per DIS-2 examples) serves as the drylands corridor-language substrate; station-log literacy in trade-tongue is a load-bearing well-keeper (CF-0047) competence. Trade-tongue corridor-application is DIS-2-convergence mundane commercial convergence — NOT evidence for or against Maker-Age linguistic survival, reconstruction, or descent (§Maker-Age Linguistic Recovery OPEN_QUESTIONS firewall). DIS-2 partial-literacy rule holds without exception; the drylands corridor is its clearest regional expression.

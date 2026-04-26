@@ -1,0 +1,24 @@
+id: M-3
+title: Spontaneous Mythical-Species Births in Non-Mythic Lineages
+status: passive
+knowns:
+  - Occasional births of mythic-species sentients (basilisk-folk, chimera-folk, naga-folk) occur in modern-species lineages with no recorded mythic ancestry
+unknowns:
+  - Mechanism — purely genetic recessive, environmental, place-related, ancestral memory, none of these
+common_interpretations:
+  - description: Ancestral throwback
+    holders: a Mendelian-style folk theory
+disallowed_cheap_answers:
+  - A purely Mendelian-recessive reveal that resolves the mystery without cost
+domains_touched:
+  - PEOPLES_AND_SPECIES
+  - RELIGION
+  - KINSHIP
+  - occasionally LAW.
+future_resolution_safety: low
+extensions:
+  - originating_cf: CF-0031
+    change_id: CH-0005
+    date: 2026-04-18
+    label: Cross-reference
+    body: The civic-registry subsidiary record for observed mythic-species births under M-3 and the civic-registry contamination-lineage ledger-mark under CF-0031 both register "heritable" phenomena at civic-administrative level in adopting polities. This is civic-registry-scope coincidence, NOT mechanistic parallel; no in-world authority treats the two heritable-phenomenon categories as mechanistically related, and no civic charter cites one to justify framing of the other. The M-3 firewall against mechanism-reveal remains load-bearing and independent of registry institutionalization.

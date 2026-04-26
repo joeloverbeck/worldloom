@@ -1,0 +1,8 @@
+id: OQ-0022
+topic: Mercenary-Company Licensing Framework
+body: |-
+  - CF-0024 commits that mercenary-band formation during inter-community skirmishes is real, and that polities respond with uneven licensure (license / tolerate / restrict / ban). Specific polity names, charter terms for licensed mercenary companies, and extradition procedures for cross-polity mercenary operations are deferred.
+
+when_to_resolve: when a story foregrounds a mercenary company as a named institution or when a specific extradition dispute needs resolution.
+caution: parallels the CF-0021 crafter-tolerance asymmetry and maps onto the same canal-corridor arbitrage dynamic. Licensing in permissive polities creates safe-harbor markets for companies banned elsewhere; noble retinues under adventurer-contract language complicate the licensing picture further.
+extensions: []

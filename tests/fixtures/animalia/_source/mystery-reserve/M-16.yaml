@@ -1,0 +1,20 @@
+common_interpretations: []
+disallowed_cheap_answers:
+  - A canonical founder-sect or founder-figure whose name and doctrinal text settles the doctrine's origin at world level
+domains_touched:
+  - RELIGION (progenitor-cult sectarian / mainstream tension
+  - common-pantheon reform-current clergy bifurcation)
+  - LAW (supremacist-movement proscription / toleration debate per polity)
+  - MEMORY_AND_MYTH (bardic cannibal-captain sub-register M-14 parallel; civic-mobilization rhetoric)
+  - TIMELINE (Charter-Era founding-compromise interpretation; Layer-3 / Layer-4 politicization pressure)
+  - M-4 firewall surface (cross-applies to disallow progenitor-position validation)
+  - M-5 firewall surface (cross-applies to disallow sentience-boundary implication).
+extensions: []
+future_resolution_safety: low
+id: M-16
+knowns:
+  - Supremacist sectarian doctrine asserting species entitlement to violence against other sentient peoples (CF-0036) exists as CONTESTED-CANON fringe belief held by a minority within progenitor-cult sectarian supremacy wing and by some unaffiliated sectarian currents
+status: passive
+title: Historical Origin of Supremacist-Cannibal Sectarian Doctrine
+unknowns:
+  - Whether the doctrine is ANCIENT (pre-Charter-Era sectarian current preserved underground through the Charter-Era compromise; resurfaced under Layer-3 Incident Wave / Layer-4 politicization pressure)

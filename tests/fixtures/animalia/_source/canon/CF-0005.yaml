@@ -1,0 +1,58 @@
+id: CF-0005
+title: Magical artifact effects always cost
+status: hard_canon
+type: metaphysical_rule
+statement: |
+  Every effect drawn from a magical artifact costs the user, the host, the environment, or all three. Costs include host trauma, practitioner fatigue, ward attrition, environmental "bleed-through," and slow contamination.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+  - economy
+  - settlement_life
+  - religion
+  - law
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - cost is a property of artifacts themselves; no one can avoid it
+costs_and_limits:
+  - cost may be borne by users, hosts, environment, or any combination
+  - cost can be deferred but not removed (deferred cost concentrates as contamination)
+visible_consequences:
+  - extractor and containment-wright families show contamination injuries (skin, tremor, respiratory)
+  - quarter-towns are sealed when contamination becomes irrecoverable
+  - artifact use is treated like radiation exposure
+  - hazard pay is contested but recognized
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - EVERYDAY_LIFE
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0003
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Invariant CAU-1. Cited by CF-0006, CF-0007.
+  Modified 2026-04-19 by CH-0009 (CF-0035): cost taxonomy extended — rare survival-as-mutation outcome in non-sentient fauna is a variant cost form (trauma that reshapes host rather than killing outright); individual-level windfall (a dangerous predator in its niche) embedded in a population-level cost catastrophe (most beasts died); does NOT dilute cost universality.
+  Modified 2026-04-20 by CH-0014 (CF-0039, CF-0040, CF-0041): cost taxonomy extended twice more — (a) CF-0039 destruction-attempt cost-transfer — attempts to destroy a Maker-Age artifact do NOT annihilate the effect; the attempt BINDS the effect more deeply into the vessel, elevating material resistance and extracting cost as material-elevation on the vessel AND attempt-cost on the attempting party (injury, exhaustion, equipment loss, ward-attrition radius); cost-universality preserved — attempts do not escape cost, they redirect it; (b) CF-0041 unsealing-activation cost — opening a Maker-deliberately-sealed container or breaching a Maker-buried building ACTIVATES the artifact within with full CAU-1 cost at the site (unknown-container unsealing is the feared moment that multi-guild protocol exists to contain); (c) CF-0040 mundane-tier contamination reaffirmation — every mundane-tier artifact (breeze-doll, tick-mirror, weak coin-sorter, scar-rubber) carries a per-artifact cost surface (slow-bleed on user, room-misfeel, animal unease, household water off-flavor, vessel fatigue); no "harmless charm" reading is world-truth; CAU-1 holds without exception for the tier.
+modification_history:
+  - change_id: CH-0009
+    originating_cf: CF-0035
+    date: 2026-04-19
+    summary: cost taxonomy extended to include rare survival-as-mutation outcome in non-sentient fauna exposed over centuries to uncontained wilderness-distal artifacts; cost universality preserved without exception
+  - change_id: CH-0014
+    originating_cf: CF-0039
+    date: 2026-04-20
+    summary: "cost taxonomy extended: destruction-attempt cost-transfer (CF-0039), unsealing-activation cost (CF-0041), mundane-tier per-artifact contamination reaffirmation (CF-0040); CAU-1 holds without exception across all three extensions."

@@ -1,0 +1,43 @@
+id: SEC-PAS-003
+file_class: PEOPLES_AND_SPECIES
+order: 3
+heading: Cluster B — Avian, Reptile, Amphibian Folk
+heading_level: 2
+body: |-
+  Less common than Cluster A but well-established regionally. Examples: corvid-folk (raven, crow, magpie), raptor-folk (hawk, owl), songbird-folk (regional), waterfowl-folk (duck, goose, swan), lizard-folk, gecko-folk, frog-folk, salamander-folk, tortoise-folk.
+
+  - **Body plan**: feathered or scaled or moist-skinned bipedal humanoid; beaks (corvids, raptors, waterfowl) constrain phonetics; reptile-folk thermoregulate behaviorally; amphibian-folk require regular moisture access.
+  - **Diet**: species-typical. Raptor-folk obligate carnivore; corvid-folk omnivorous; frog-folk insectivore-leaning; tortoise-folk herbivore.
+  - **Movement**: bipedal with species variations — raptor-folk gliding at short range with arm-vanes (not flight), tortoise-folk slow-and-steady, frog-folk excellent jumpers and swimmers.
+  - **Senses**: raptor-folk superior distance vision; corvid-folk excellent pattern recognition; frog-folk excellent low-frequency hearing.
+  - **Vulnerability**: reptile-folk vulnerable to cold (rare in highlands); amphibian-folk vulnerable to water contamination (acutely sensitive to artifact bleed-through, sometimes used as canaries in canal-towns; <!-- added by CF-0041 --> the canary-sensitivity extends to early detection of sealed-artifact containers in canal-silt, peat-bog, and cistern-bottom contexts before seal-breach — fenland amphibian-folk marker-reed relay protocol per CH-0014 EVERYDAY_LIFE §(e) extension relies on amphibian-folk bog-diagnosis at the first sign of wrongness, and canal-heartland dredger crews with aquatic-folk members have an informal "the frog-folk called it" sealed-find escalation register that predates the Charter-Era multi-guild unsealing-triage consolidation); avian-folk vulnerable to certain respiratory diseases.
+  - **Reproduction**: species-typical. Egg-laying for reptile, amphibian, avian-folk; communal nurseries common in some bird-folk communities.
+  - **Lifespan**: highly variable. Tortoise-folk among the longest-lived (90–120). Raptor-folk shorter (40–60). Amphibian-folk short (30–50).
+  - **Social density**: regionally clustered. Amphibians dominate canal towns and fens; reptiles cluster in the warm south; corvids ubiquitous in cities; raptors in highland and coastal regions.
+  - **Embodiment effects on**:
+    - **labor** — amphibian-folk in fishery and canal contamination diagnosis; raptor-folk in archery and surveying; corvid-folk in scribal and recordkeeping work; tortoise-folk in archival continuity;
+    - **clothing** — beaks constrain face-cover design; scales constrain tight tailoring; feathers require special hygiene;
+    - **architecture** — perch-rails common in corvid neighborhoods; sun-warm verandas in reptile-folk quarters; misting basins in amphibian quarters;
+    - **warfare** — raptor-folk archers; corvid-folk scouts; tortoise-folk anchor with shield-discipline (rare specialty);
+    - **taboo** — cold-handling of reptile-folk is socially serious harm; teasing a beak's accent is offensive;
+    - **religion** — sky-burial common among raptor-folk; water-rites in amphibian communities;
+    - **language** — accent variation pronounced; trade-tongue developed in part to bridge phonetic gaps;
+    - **environment** — climate sharply constrains where this cluster settles.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0032
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0046
+  - CF-0047

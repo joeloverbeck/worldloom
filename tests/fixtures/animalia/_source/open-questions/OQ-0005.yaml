@@ -1,0 +1,11 @@
+id: OQ-0005
+topic: Wage Scales
+body: "- Illustrative wage tiers are sketched in `ECONOMY_AND_RESOURCES.md` but specific numbers are deferred."
+when_to_resolve: when a story needs concrete pay figures or when economic plausibility tests demand calibration.
+caution: ""
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Ash-Seal wage-tier pressure
+    body: CF-0043 commits Ash-Seal Brinewick-local commercial-company employment tiers (upper-copper apprentice / mid-silver technician / upper-silver master-technician monopoly-rent-supported tier; in-house scrivener at mid-silver; commercial property-protection guard at upper-copper-to-mid-silver). Defector-specialist fee-for-service rates anchor ceiling at upper-silver in non-Brinewick chartered-extraction-guild labor markets, compressing chartered-containment-wright wages heartland-wide (see ECONOMY §Breakage Points CH-0015 slow-rolling vector). Exact wage figures remain deferred consistent with the existing Wage Scales deferral; the structural commitment is named. When a story needs concrete Brinewick-tier Ash-Seal compensation figures or heartland-wide chartered-containment-wright wage-compression figures, this item resolves with the parent deferral.

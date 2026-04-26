@@ -1,0 +1,44 @@
+id: SEC-GEO-011
+file_class: GEOGRAPHY
+order: 11
+heading: Regional Asymmetry on Expedition-Tolerance
+heading_level: 2
+body: |-
+  Patron-funded ruin-expedition activity (CF-0028) is geographically uniform in its existence — wherever enterable Maker-Age ruins (CF-0027) are found and capital is available, expeditions organize — but sharply uneven in institutional response, especially for funder-primacy convention (CF-0030) and for inter-group competition escalation. This is the third recognizable Charter-Era regional-variation pattern, paralleling crafter-tolerance (CF-0021) and contractor-licensing (CF-0024):
+
+  - **Canal heartland charter towns**: centralization-vs-funder-autonomy debate is active. Larger polities increasingly license expedition-venture syndicates under tight charter (declared-inventory discipline, civic-observer requirement, prosecution of knowledge-killings); smaller towns tolerate patron-primacy with broker-channel processing. Chartered-broker revenue from expedition disposition fees has become a material civic revenue stream in ruin-rich heartland polities. Magistrate precedent on funder-primacy disputes is densest here.
+  - **Big-city outskirts estates**: officially aligned with parent polity, but estate-as-patron is the dominant mode in practice. Large estates fund expeditions directly or via syndicate participation; civic-audit of artifact vaults is a recurring flashpoint. Dowager-gossip tracks which estates funded the last three expeditions and which squad-wiped. Charter risk attaches to any expedition-contract signed under family seal without steward-ledger approval.
+  - **Cold north highland clans**: expedition activity is clan-mediated and largely refused. Clan-elder sanction governs any outland expedition seeking clan-territorial passage or personnel. Maker-site desecration taboo is stronger than in the heartland; clan-burning of ruin-cartography leaves parallels the CF-0021 grimoire-burning ritual. Armed conflict straddling clan territory is a recognized seasonal hazard; cleansing-rite refusal for ruin-returned fighters ("owing ruin-silence") is a clan-specific response.
+  - **Drylands south caravan towns**: caravan-rotation provides natural cover for expedition-material transit; caravan-masters can refuse ruin-cargo by reputation, and a known refusal travels ahead. Tea-house scribes in some traditions refuse to witness ruin-contracts (treating the entrance-knowledge contraband as a SOC-3 carve-out that cannot be legitimated by witness). Water-rights tribunals occasionally rule on expedition-caused damages.
+  - **Wet fenlands west**: no wealth-gate for local patronage. Fen-villages participate only as specialist-responders to other people's expedition fallout, typically via monastic-clinic relay-summoning of occult-fallout specialists (CF-0025). "Sunken ruins" — partially submerged enterable sites under fen silt — are a distinct subcategory of concern; attempted entry is near-suicidal, and amphibian-folk upstream-warning is the primary contamination-drift signal.
+  - **Mountain east**: seasonal pass-opening gates expedition transit. Valley mining estates sometimes fund expeditions into mountain-ruin sites accessible only during summer; the hazard-pay tier is especially high here because a squad-wipe before pass-closure leaves survivors with no extraction route. Isolated valley smiths participate in authentication work.
+
+  Patron-funder mobility across polity lines generates recurring legal friction; an estate-owner whose expedition is lawful in the sponsor-polity may face prosecution in the ruin-site polity, and civic registry has no schema for "lawful expedition-sponsor standing" recognized across polities. This is the same no-schema gap that CF-0021 exposed for crafters and CF-0024 for mercenary-companies — three parallel asymmetries now constitute the recognizable Charter-Era regional-variation pattern.
+
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0030
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

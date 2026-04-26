@@ -1,0 +1,69 @@
+id: SEC-INS-009
+file_class: INSTITUTIONS
+order: 9
+heading: Education / Apprenticeship
+heading_level: 2
+body: |-
+  - **Function**: pass craft, literacy, doctrine, civic knowledge.
+  - **Legitimacy source**: master's mark, guild seal, monastic ordination.
+  - **Material base**: workshops, monasteries, scribal halls, charter-school endowments in some cities.
+  - **Violence capacity**: corporal discipline historically; restrained by custom and by some chartered protections now.
+  - **Recruitment**: family placement, indenture, vocation.
+  - **Succession**: master-rank, ordination.
+  - **Internal contradictions**:
+    - species-typical learning curves can become discriminatory excuses (species said to "learn slow" often disadvantaged in apprenticeship choice);
+    - urban literacy expansion creates pressure on traditional craft-guild gatekeeping;
+    - charter-schools in some cities offer multispecies civic education that older guilds resent.
+    - <!-- added by CF-0021 --> clandestine occult apprenticeship (CF-0021): a shadow track outside guild-seal and monastic-ordination legitimacy, dangerous for both master and apprentice; few apprentices survive long enough to take a journeymaster's role; folk wisdom warns against unstamped workshop placements; surviving maimed apprentices form a precarious stratum (often blacklisted from chartered guild apprenticeship after exposure).
+    - <!-- added by CF-0028 --> expedition-craft apprenticeship (CF-0028): a third clandestine track distinct from the CF-0021 occult-apprenticeship and the chartered guild-seal / monastic-ordination tracks. Expedition-craft is taught informally under patron-syndicate or chartered-expedition-venture auspices (where such charters exist); it includes the empirical crafts of ruin-site reconnaissance, entrance-detection, pre-entry scouting for guardian-indicators, field-extraction prioritization, and squad-wipe survival. Training is lethal — apprentices die on their first or second expedition at disproportionate rates. Civic watch in charter polities treats expedition-apprenticeship as a monitored category; in tolerant polities it operates openly under expedition-venture syndicate charter. The ONT-2 firewall holds for expedition-craft as it does for occult-fallout specialists: expedition-apprentices learn empirical craft (reconnaissance, containment-handoff, survival), NOT magic-use.
+    - <!-- added by CF-0032 --> oversize-saddlery subsection apprenticeship (CF-0032): a sub-tradition WITHIN the chartered guild-seal track, NOT a separate legitimate track and NOT a clandestine one. Body-plan-variant instructional lineage is a hereditary-mastership subtype (per Trade/Guilds succession). Master-rank progression requires multi-year reciprocal journeyman circuit across Cluster C ancestral polities to acquire body-plan-variant competence; absent the circuit, seal is not awarded. Apprenticeship is species-concentrated by ancestral-region presence (pipeline flows from Cluster C families), NOT species-gated at intake — a human, Cluster A, or Cluster B apprentice who completes the reciprocal circuit receives the same seal. Failed apprentices return to general wainwright/saddlery work or haulage with subsection-partial skills; the failed-apprentice stratum is a recognizable if minor category in ancestral-polity artisan quarters.
+    - <!-- added by CF-0037 --> household-trade chore-from-young as parallel-but-distinct labor-onboarding pattern (CF-0037): family-handled waystation (CF-0037) inheritor-children begin chore-work from young (often earlier than the canal-town age-ten apprenticeship norm per EVERYDAY_LIFE §(a) line 18 — chore-bound by age 6-7 in many waystation families) as a RECOGNIZED HOUSEHOLD-TRADE LABOR-ONBOARDING PATTERN that is parallel-but-DISTINCT from chartered-guild apprenticeship (which the chore-from-young pattern does NOT displace in chartered polities) and NOT a clandestine track (unlike CF-0021 occult-apprenticeship and CF-0028 expedition-craft). The pattern is FOURTH NAMED household-trade labor-onboarding category alongside (i) chartered guild-seal apprenticeship, (ii) monastic-ordination, (iii) clandestine occult-apprenticeship (CF-0021) / expedition-craft (CF-0028) / oversize-saddlery subsection-apprenticeship (CF-0032 sub-tradition WITHIN chartered guild-seal track). In chartered polities, charter-school enrollment is expected for waystation-children alongside chore-from-young household-trade labor; the tension is informally tolerated where enrollment is maintained but is unevenly adjudicated where enrollment lapses (Law §(g) child-labor-vs-charter-school friction docket). Failed inheritors who walk away forfeit placement-right (per CF-0037 distribution) and carry household-trade route-knowledge and stationkeeping-skills but no portable charter-credential — the unhandling sub-cohort is absorbed into CF-0024 contractor entry-tier / urban-poor / CF-0034 banditry per Rule 3 firewall.
+    - <!-- added by CF-0047 --> drylands well-keeper chore-from-young as FIFTH household-trade labor-onboarding pattern (CF-0047): well-keeper lineage inheritor-children begin chore-work from young (age 6-7) paralleling CF-0037 stationkeeper chore-from-young, operating the drylands caravan-corridor equivalent of the heartland/highland/mountain-east family-handled waystation onboarding pattern. The onboarding is parallel-but-DISTINCT from chartered-guild apprenticeship (drylands institutional thinness per CF-0046 substrate precludes chartered-guild infrastructure for well-keeping in any case), NOT clandestine, and NOT monastic. The pattern is FIFTH NAMED household-trade labor-onboarding category joining (i) chartered guild-seal apprenticeship, (ii) monastic-ordination, (iii) clandestine occult-apprenticeship (CF-0021) / expedition-craft (CF-0028) / oversize-saddlery subsection-apprenticeship (CF-0032 sub-tradition WITHIN chartered guild-seal track), (iv) CF-0037 family-handled waystation chore-from-young. Drylands charter-school infrastructure is thin per CF-0046 institutional-thinness — where drylands polities have chartered-school-adjacent instruction (tea-house scribal-tutoring; traveling schoolmasters in larger oasis-towns), attendance is modest and the chore-from-young household-trade onboarding is the dominant childhood labor-education pattern. Instruction includes keeping-book literacy, station-log literacy in DIS-2 trade-tongue, verse-counter use for CF-0044 hospitality-verse apprenticeship, water-share-balanced arithmetic, cross-species hospitality etiquette pedagogy, and corridor-reputation-network basic orientation. Failed inheritors who walk away forfeit well-stop placement-right (per CF-0047 distribution) and carry household-trade route-knowledge, station-log-keeping skill, and partial verse-repertoire but no portable charter-credential — the walked-the-well sub-cohort absorbed into CF-0024 contractor entry-tier / urban-poor / CF-0034 banditry per Rule 3 firewall (paralleling CF-0037 unhandling-sub-cohort routing).
+    - <!-- added by CF-0036 --> species-typical-learning-curve SOC-1 firewall re-flag (CF-0036): the "species said to 'learn slow' often disadvantaged in apprenticeship choice" internal-contradiction bullet above is reaffirmed under CF-0036 pressure as a MASTER-APPRENTICE MATCHING FRICTION, NOT a guild-charter-level species-gating mechanism. Crew-composition sorting pressure (CF-0036 workplace texture) touches apprentice-master matching at the edges (a beaver-folk canal-engineering guild master may in practice prefer beaver-folk apprentices; a tortoise-folk master may be patient with tortoise-folk apprentices other masters find "slow"), but SOC-1 firewall holds at charter-seal intake level: no guild may species-gate apprenticeship at charter. Charter-school offense-tier lists in adopting chartered polities name "progenitor-supremacist solicitation of minor students" and "canal-mud-refusal harassment among apprentices" as new offense categories alongside existing ward-related and ruin-knowledge-possession offense tiers; charter-school intake retains strict SOC-1 firewall. Apprentices who encounter supremacist-doctrine recruitment from journeyman or master face civic-watch intake under hate-speech docket; master or journeyman who pursues supremacist-doctrine recruitment faces seal-review. Good-joke/bad-joke pedagogy enters charter-school curricular discussion informally (never as formal syllabus) — masters teach apprentices the tavern joke-threshold implicitly through workshop-floor correction.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0009
+  - CF-0010
+  - CF-0011
+  - CF-0013
+  - CF-0015
+  - CF-0016
+  - CF-0017
+  - CF-0018
+  - CF-0019
+  - CF-0020
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0026
+  - CF-0028
+  - CF-0030
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+  - CF-0044
+  - CF-0045
+  - CF-0046
+  - CF-0047

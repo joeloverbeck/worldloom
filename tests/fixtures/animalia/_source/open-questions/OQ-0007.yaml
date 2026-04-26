@@ -1,0 +1,11 @@
+id: OQ-0007
+topic: Sentient–Non-Sentient Boundary Details
+body: "- A sentient hyena-folk magistrate and a non-sentient hyena both exist in this world (PEOPLES_AND_SPECIES.md). The genesis world commits to this duality but does not specify the social mechanics, legal protections, or the cultural processing of the encounter (one's kin in animal form, etc.)."
+when_to_resolve: when a story foregrounds the encounter; consider sectarian variation.
+caution: ""
+extensions:
+  - originating_cf: CF-0036
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Firewall obligation under sectarian-pathology pressure
+    body: CF-0036 commits that interspecies-cannibal bandits apply a sectarian "mere beasts" register to sentient victims as a PATHOLOGICAL CATEGORY ERROR (the crime IS the category error; world-level sentience boundary is preserved). The M-5 firewall FIFTH cross-application (CH-0010 extension) forbids reading the sectarian category error as pressure on the sentient-non-sentient boundary itself. Future canon work touching this deferred item MUST firewall against collapsing sectarian-pathology into a world-level boundary-blur — sectarian category error does NOT destabilize the boundary; it demonstrates a specific sectarian current's moral pathology. Resolution of the boundary-detail question remains deferred, but the firewall is now load-bearing.

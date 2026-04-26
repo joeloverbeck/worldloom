@@ -1,0 +1,46 @@
+id: CF-0013
+title: Public adult barter is legal and visible in many regions; scandal is character-dependent
+status: hard_canon
+type: law
+statement: |
+  Sexual services may be publicly posted, framed as pragmatic exchange, and treated by many locals as mundane. Scandal attaches to the character of those involved (deception, coercion, breach of contract) rather than to the act itself. Regional and class variation in attitude exists.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - law
+  - economy
+  - settlement_life
+  - kinship
+prerequisites:
+  - permissive civic charter or local custom
+distribution:
+  who_can_do_it:
+    - adult sentients in regions where legal
+  who_cannot_easily_do_it:
+    - those in stricter sectarian regions or households
+  why_not_universal:
+    - regional and sectarian variation
+costs_and_limits:
+  - sectarian disapproval persists in some communities
+  - travelers from stricter regions may misread local norms
+visible_consequences:
+  - posted price-lists at taverns and inns in some regions
+  - respected courtesans with regular clientele
+  - conversion of intimate service into ordinary contractual labor
+required_world_updates:
+  - EVERYDAY_LIFE
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Direct from brief. Invariant SOC-2.

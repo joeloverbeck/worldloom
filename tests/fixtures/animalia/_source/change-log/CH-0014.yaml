@@ -1,0 +1,68 @@
+change_id: CH-0014
+date: 2026-04-20
+change_type: addition
+affected_fact_ids:
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0027
+  - CF-0029
+  - CF-0034
+  - CF-0038
+summary: |
+  Four-CF canon addition extending the Animalia artifact system per user proposal briefs/animalia-magical-artifacts.md (ACCEPT_WITH_REQUIRED_UPDATES verdict; adjudication PA-0013-accept_with_required_updates.md).
+  CF-0039 commits Maker-Age artifact destruction-resistance (attempts to destroy BIND the effect more deeply into the vessel; scope restricted to Maker-Age origin, crafter outputs CF-0021 remain destructible by ordinary means). CF-0040 commits the mundane-tier as explicit NAMING of DIS-1 "most inert junk" band with inverse strength-rarity and per-artifact CAU-1 contamination clauses. CF-0041 commits Maker-Age deliberate-burial practice, sealed-inert mechanism, and the "unsealing" dread-idiom as lived cultural convention, with four firewalls (M-1 anti-evidence / M-8 distinct-origin / M-9 anti-custody-channel / M-10 FOURTH anti-predictor). CF-0042 commits artifact-as-status-object economy with M-2 anti-evidence firewall on state-security concealment rumor, three absorptions (theft into CF-0034, bodyguard into CF-0024, display-asymmetry as 5th parallel sixth-axis watch-item), and AES-1 laborer-register reframing of assassination-on-owner narratives.
+  Thirteen existing CFs receive modification_history entries for qualifications / extensions. NEW Mystery Reserve M-20 (artifact destruction-resistance mechanism) added per Rule 7 obligation. M-1, M-2, M-8, M-9, M-10 receive cross-application firewall extensions. Domain files patched: WORLD_KERNEL, INVARIANTS, ONTOLOGY, TIMELINE, GEOGRAPHY, PEOPLES_AND_SPECIES, INSTITUTIONS, ECONOMY_AND_RESOURCES, MAGIC_OR_TECH_SYSTEMS, EVERYDAY_LIFE (five regions), OPEN_QUESTIONS (four annotations + new entry), MYSTERY_RESERVE (five extensions + new M-20).
+  Six critic sub-agents dispatched at escalation gate (triggers: new invariant-level rule [destruction-resistance]; >3 domains touched; M-1 / M-2 / M-8 / M-9 / M-10 firewall pressure). All six converged on ACCEPT_WITH_REQUIRED_UPDATES with no fatal contradictions; Phase 6b synthesis produced four firewalls on CF-0041 (M-1/M-8/M-9/M-10), one on CF-0042 (M-2), three Rule-3 absorptions, per-cluster EVERYDAY_LIFE signatures, new M-20 entry, and hero-drift reframing to AES-1 laborer-register. All 10 Phase 14a Validation Tests PASS.
+reason:
+  - Deepen magical artifacts as a load-bearing story-engine system per user intention, treating artifacts as objectives, hazards, and sources of conflict among characters.
+  - Make explicit the mundane-tier ordinary-life distribution that was already implicit in DIS-1 and commit the lived cultural register of unsealing dread across regions.
+  - Formalize destruction-resistance and artifact-as-status economy as bounded extensions that preserve the non-chosen-one tonal contract and keep the Mystery Reserve firewalls intact.
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - ONTOLOGY.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - PEOPLES_AND_SPECIES.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - EVERYDAY_LIFE.md
+  - OPEN_QUESTIONS.md
+  - MYSTERY_RESERVE.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - destruction-resistance mechanism bounded unknown (new Mystery Reserve M-20; permanent atmospheric retention; recommended unresolvable by design — the unknowability IS the stabilizer against current-age technique achievement)
+  - "Maker-sealing technique lost but sealed-inert mechanism observable — firewall load-bearing against drift: no future canon work may recover the sealing-technique as world-achievable goal (burial-technique-recovery advocacy is diegetic doctrinal position only, per M-20 firewall)"
+  - polity-asymmetric mundane-tier finder-fee wage-schedule DEFERRED to OPEN_QUESTIONS §Mundane-Tier Finder-Fee Wage Schedule; per-polity regime variation spans license-low-floor / register-and-ignore / de-minimis-exemption / punitive-confiscation; child-finder coin-split discipline unresolved
+  - Maker-deliberately-buried-building excavation jurisdiction contested between chartered extraction-guild (CF-0008 / SOC-4), CF-0028 patron-funded expedition syndicates, and civic-archaeological-license frameworks (pressed by civic-reformists); OPEN_QUESTIONS §Ruin Ownership and Jurisdiction pressured with narrowed scope per CH-0014 extension
+  - display-registration regime as FIFTH parallel sixth-axis latent-burden watch-item (alongside CF-0034 bandit-extradition, CF-0035 trophy-legality, CF-0036 silence-protocol-unsealing, CF-0037 child-conscription-protection) — if polities develop structurally divergent declared-inventory stringency conventions, the watch-item could harden into a sixth Charter-Era structural axis; tracked per CH-0014, NOT current structural reality
+  - state-security-concealment rumor register must stay DIFFUSE (never specific-named-incident-confirmed); any future canon work confirming a named catastrophic incident cracks the M-2 anti-evidence firewall per CH-0014 extension
+  - eleventh CF-0024 veteran-pool cannibalization claim (status-artifact bodyguard sub-specialty) compounds existing seven-to-ten concurrent-claim pressure — a named Breakage Points §Veteran-pool watch-item extension
+  - authentication-cartel formation pressure intensified to EIGHTH revenue vector on shared canal-corridor illegitimate-service infrastructure (contamination-lineage / magical-find / ruin-cartography / dragoon-kit / stolen-goods-provenance / trophy-provenance / cannibal-bounty-certification / status-display-provenance); regulatory-capture incentive reaches strongest Layer-4 stress-register posture to date — ABSORBED into existing cartel formation per Rule 3 firewall, but cartel formation risk intensifies monotonically
+notes: |
+  Six critics dispatched at escalation gate (new invariant-level rule; >3 domains touched; multiple M-N firewalls pressured). Phase 6b synthesis produced four firewalls on CF-0041 (M-1/M-8/M-9/M-10), one firewall on CF-0042 (M-2), three Rule-3 absorptions (stolen-goods into CF-0034; bodyguard into CF-0024; display-asymmetry as 5th parallel sixth-axis watch-item), and per-cluster EVERYDAY_LIFE signatures (canal-heartland dredger protocol + skip-rope rhyme + unsealing-triage; Brinewick estate- outskirts seventh dowager-axis; highland clan-sanction; drylands caravan- refusal + qanat-cleaning-rite; fenland marker-reed red-bound summons). New invariant NOT introduced per Continuity Archivist recommendation — CAU-1 / ONT-2 / DIS-1 extension-annotations handle the weight. Mundane- tier NOT new distribution tier — subset of DIS-1 per Theme/Tone recommen- dation. Famous-adventurer framings reframed to AES-1 laborer-register per Theme/Tone critic model. Hero-drift firewall load-bearing across WORLD_KERNEL / EVERYDAY_LIFE / INSTITUTIONS / ECONOMY_AND_RESOURCES / MAGIC_OR_TECH_SYSTEMS patches. All 10 Phase 14a Validation Tests PASS (see adjudication record).

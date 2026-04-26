@@ -1,0 +1,54 @@
+affected_fact_ids:
+  - CF-0048
+  - CF-0024
+change_id: CH-0021
+change_type: addition
+date: 2026-04-26
+downstream_updates:
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - ECONOMY_AND_RESOURCES.md
+  - INSTITUTIONS.md
+  - EVERYDAY_LIFE.md
+impact_on_existing_texts:
+  - "DA-0001 (a-season-on-the-circuit): paragraph 7 'serious share' / 'corner-share' deployment is retroactively recontextualized as narrator-witness of the now-committed CF-0048 register; narrator Vespera's firsthand contractor-auxiliary professional position supports the register's canonical-truth status; no diegetic artifact edits required (Rule 6 audit-trail preserved via CF-0048 source_basis.derived_from citation)"
+  - "CF-0024 modification_history: appended entry CH-0021 documenting axis-(c) substantive extension — corner-share / serious-share register names a previously-implicit canal-heartland pay-tier within the existing contractor-auxiliary compensation frame; CF-0024 scope, distribution, stabilizer structure unchanged (the named register is a sub-tier within the existing wage row, not a new wage-row position per Rule 3 firewall)"
+  - "SEC-MTS-002 (Auxiliary Contractor Labor): extension naming the canal-heartland corner-share / serious-share register within CF-0024 contractor-auxiliary frame (chartered-plus-auxiliary cellar-job configuration-specific)"
+  - "SEC-ECR-002 (Wage Spreads): paragraph annotation on CF-0024 wage row clarifying corner-share as a named regional sub-tier WITHIN the existing 'upper copper to upper silver, risk-loaded' row — NOT a new wage-row position per Rule 3"
+  - "SEC-INS-006 (Trade/Guilds/Caravans/Shipping): annotation on the existing CF-0024 contractor-auxiliary roster mention noting the canal-heartland corner-share / serious-share register vocabulary"
+  - "SEC-ELF-001 (Canal-Town Heartland — Working Households): extension on tavern-vouch register noting 'corner-share-reliable' as a named competence register within tavern-keeper-vouch social asset"
+latent_burdens_introduced:
+  - Sibling regional contractor-compensation registers (highland clan-share, drylands caravan-share, fenland relay-summoning compensation) are stipulated to exist with different vocabulary as Rule 4 firewall mechanism but are not committed to specific names; future canon work could name them as additional regional CFs without violating CF-0048's stabilizer chain — held as non-commitment, not deferral, no OQ created
+  - Vocabulary-drift into broader chartered-adjacent informal-labor lexicon (e.g., herb-wife's runner-apprentice paid 'corner-share' on household cellar-visit) is acknowledged as drift potential within informal-register expansion; if broader idiom-extension hardens into a wage-row position parallel-but-distinct from CF-0024 contractor-auxiliary frame, future canon work may need to absorb it under Rule 3 firewall — held as informal-register-only at this CF
+  - Specific corner-share-rank wage-quantitative tier (how copper-to-lower-silver maps to specific copper / silver quantities at chartered-plus-auxiliary cellar-jobs) is committed qualitatively not quantitatively; future ECONOMY work may pressure a wage-spread quantification paralleling existing §Wage Spreads structure — soft_canon status accommodates qualitative commitment without escalation
+notes: |
+  Verdict: ACCEPT_WITH_REQUIRED_UPDATES at soft_canon. Escalation gate's domain-count trigger fired by 1 (4 named in proposal + 2 secondary surfaces in Phase 6) but inline four-lens analysis applied in lieu of parallel six-critic dispatch, parallel to CF-0045 lock-night precedent (similar regional + sub-occasion-within-parent-CF + DA-0001 pre-figured + low novelty profile + integration_burden score 1).
+
+  Pre-figuring scan (mandatory per SKILL.md when proposal names specific entities) confirmed DA-0001 (a-season-on-the-circuit.md) paragraph 7 deploys 'serious share' / 'corner-share' with definite articles ('the serious share', 'the corner-share') to a literate Brinewick reader, signaling reader-familiar canal-heartland register. find_named_entities scan (animalia world) returned zero canonical_matches for 'corner-share' / 'serious-share' / 'serious share' / 'corner share' — DA-0001 is sole pre-figuring source. DA-0001 citation in CF-0048 source_basis.derived_from satisfies Rule 6 audit-trail preservation.
+
+  Pre-scan verification per SKILL.md axis-(a) rule pared proposal-self-asserted derived_from list [CF-0009, CF-0024] to [CF-0024]. CF-0009 (copper-silver denomination with meaningful spreads) is mechanism-reference only — corner-share applies CF-0009's spread WITHIN a regional named register without extending CF-0009's universal-coverage claim; per CF-0045 precedent (mechanism-references move to prerequisites), CF-0009 cited in CF-0048 prerequisites. CF-0017 / CF-0006 / CF-0007 / CF-0008 / CF-0038 / CF-0043 are cross-reference-only (transmission channel, configuration exemplar, charter-audit context); none are genuine axis-(a) parents. Only CF-0024 receives modification_history entry (axis-(c) substantive extension — corner-share register ADDS named-register content to CF-0024's compensation-practice frame).
+
+  All 10 Phase 14a Validation Tests PASS — see adjudication record for per-test rationale. M-7 firewall preserved (corner-share is auxiliary pay-tier vocabulary, NOT occult-fallout reputation-genealogy or oracle-register specialist authority). M-1 through M-20 all overlap=false confirmed. No MR extension required.
+
+  Rule 3 specialness-inflation firewall load-bearing: corner-share is a named sub-tier WITHIN the existing CF-0024 wage-table row, NOT a new wage-row position. Parallel to existing sub-specialty / sub-tier absorption precedents — CH-0008 widow-of-the-raid → widow-of-the-job; CH-0009 widow-of-the-hunt → widow-of-the-job; CH-0010 silenced-contractor → failed-reputation-feeder; CH-0014 status-artifact bodyguard → extraction-escort sub-specialty; CH-0015 Ash-Seal property-protection → extraction-escort sub-specialty.
+
+  Phase 0 minor imprecision: PR-0015 longer_term_consequences cites 'CH-0008 / CH-0010' Rule 3 widow-precedent. CH-0010 is silenced-contractor absorption (parallel Rule 3 firewall but not widow-specific). Correct widow-absorption precedents are CH-0008 (widow-of-the-raid) + CH-0009 (widow-of-the-hunt). PR-0015 Risks section gets this right ('paralleling CH-0008 widow-of-the-raid and CH-0009 widow-of-the-hunt Rule 3 absorptions'). This CH uses CH-0008 / CH-0009 as the correct widow pair throughout impact_on_existing_texts and CF-0048 fields; CH-0010 retained as parallel Rule 3 firewall (sub-band absorption pattern) but not as widow-specific precedent.
+reason:
+  - "formalize diegetic pre-figuring from DA-0001 (Vespera Nightwhisper, 'a-season-on-the-circuit', paragraph 7: 'Aldous got the serious share; I took the corner-share a contracted auxiliary gets when she holds the lantern and keeps the door and runs once...') to world-level canon per Rule 6 audit-trail preservation"
+  - name a previously-implicit pay-tier within CF-0024 contractor-auxiliary compensation practice — chartered-plus-auxiliary cellar-job configurations carry a customary bifurcation register that the existing CF-0024 frame does not yet name
+  - enrich canal-heartland working-laborer texture with a recognized informal-register vocabulary tied to tavern-board posting, tavern-keeper vouch competence register, and circuit-bard contractor-ballad subgenre absorption
+  - make explicit the CF-0024 income-ceiling for the chartered-adjacent auxiliary tier; named tier-stratification supports widow-of-the-job tier-granularity (per CH-0008 + CH-0009 absorption precedents) and Brinewick formal-vs-informal vocabulary divide story-engines
+retcon_policy_checks:
+  net_contradictions_not_increased: true
+  no_silent_edit: true
+  no_stealth_diegetic_rewrite: true
+  replacement_noted: true
+  world_identity_preserved: true
+scope:
+  changes_ordinary_life: true
+  creates_new_story_engines: false
+  local_or_global: local
+  mystery_reserve_effect: unchanged
+severity_after_fix: 0
+severity_before_fix: 0
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES of PR-0015: commits CF-0048 corner-share / serious-share named informal compensation register for canal-heartland contractor-auxiliary on chartered-plus-auxiliary cellar-jobs at soft_canon (partial-support evidence-breadth pathway; CF-0024 + CF-0009 commit underlying mechanics; NAMING sole-source DA-0001). Pay-split bifurcation between chartered professional ("serious share") and contractor-auxiliary ("corner-share", copper-to-lower-silver tier calibrated to lantern-hold / door-keep / one-fetch role-scope) is canal-heartland oral-register vocabulary, transmitted via CF-0024 tavern-board posting + CF-0017 circuit-bard narrative-custody. Register names a previously-implicit pay-tier WITHIN the existing CF-0024 contractor-auxiliary frame; Rule 3 specialness-inflation firewall — NOT a new compensation institution, NOT a new pay-class, NOT a new wage-row position. Parallel to CF-0045 lock-night sub-occasion absorption precedent. Three structurally-anchored stabilizers (configuration-gate; regional-sibling-register-gate per CF-0046 + CF-0024 highland/fen variants; vocabulary-travel-limit per CF-0038 + CF-0043 charter-audit-strict formal-vs-informal divide). CF-0024 receives modification_history entry per Phase 12a axis-(c) substantive-extension judgment (corner-share register names previously-implicit pay-tier WITHIN CF-0024). DA-0001 (Vespera Nightwhisper, paragraph 7) pre-figuring formalized to world-level canon per Rule 6 audit-trail preservation. Escalation gate not fired in parallel-six-critic mode; inline four-lens analysis (Continuity Archivist + Systems-Economy + Theme-Tone + Mystery Curator) applied parallel to CF-0045 lock-night precedent. All 10 Phase 14a Validation Tests PASS. Adjudication record: adjudications/PA-0018-accept_with_required_updates.md.

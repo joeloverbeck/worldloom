@@ -1,0 +1,41 @@
+id: SEC-PAS-001
+file_class: PEOPLES_AND_SPECIES
+order: 1
+heading: Humans
+heading_level: 2
+body: |-
+  - **Body plan**: bipedal hominid, baseline.
+  - **Diet**: omnivorous; dietary variation by region and class.
+  - **Movement**: walking, riding, driving; no species-specific advantage.
+  - **Senses**: baseline.
+  - **Vulnerability**: respiratory disease (winter fever); broad disease susceptibility.
+  - **Reproduction**: species-typical.
+  - **Lifespan**: typically 50–70 in good conditions; longer in privileged life, shorter in fenlands and highlands.
+  - **Social density**: present everywhere; tend to be the architectural-default body that civic infrastructure assumes.
+  - **Embodiment effects on**:
+    - clothing — baseline reference for tailoring;
+    - tools — most common handle/grip patterns assume human hand;
+    - architecture — doorways, stair pitches, table heights default-sized;
+    - warfare — full range of arms, no natural weapons;
+    - taboo — none species-specific;
+    - religion — full participation in common pantheon and most progenitor-adjacent contexts;
+    - law — baseline citizen reference;
+    - environment — comfortable across all bands, none preferred or excluded.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0032
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0046
+  - CF-0047

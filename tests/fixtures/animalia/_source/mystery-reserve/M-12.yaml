@@ -1,0 +1,19 @@
+id: M-12
+title: Historical Origin and Antiquity of the Oversize-Saddlery Craft and its Reciprocal Tradition
+status: passive
+knowns:
+  - The oversize-saddlery guild-subsection (CF-0032) exists in ancestral Cluster C polities as a named, functioning sub-tradition within wainwright and saddlery guilds
+unknowns:
+  - Whether the subsection as an institutional form is Charter-Era-consolidated rationalization of pre-existing regional practice (the reformist reading), pre-Charter-inherited ancient Cluster C regional tradition that predates Charter-Era institutional convergence (the heritage reading), or recent-innovation responding to Charter-Era canal-integration and multispecies estate economics (the skeptical reading)
+common_interpretations: []
+disallowed_cheap_answers:
+  - Any world-level resolution of the craft's antiquity (reformist, heritage, or skeptical position as world-truth)
+domains_touched:
+  - PEOPLES_AND_SPECIES (Cluster C self-conception firewall surface)
+  - INSTITUTIONS (guild history
+  - Charter-Era institutional convergence narrative)
+  - RELIGION (progenitor-cult heritage claims)
+  - ECONOMY (subsection placement-right legitimacy)
+  - M-4 firewall surface.
+future_resolution_safety: low
+extensions: []

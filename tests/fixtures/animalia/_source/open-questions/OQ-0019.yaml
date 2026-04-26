@@ -1,0 +1,8 @@
+id: OQ-0019
+topic: Possessed-Entity Adjudication Mechanism
+body: |-
+  - CF-0022 commits that civic registry refuses sectarian "personhood" claims about possessed artifacts (vessel-hosted agencies are world-level non-sentient). The procedural mechanism for these refusals — what forms are filed, who hears the case, what the magistrate's standard recital is, what appeals exist — is sketched but not detailed.
+
+when_to_resolve: when a story features a sectarian "personhood" attempt or a magistrate ruling on a possessed-artifact case.
+caution: must not produce a procedure that implies the artifact has personhood for any purpose; the firewall against M-5 cross-application must hold.
+extensions: []

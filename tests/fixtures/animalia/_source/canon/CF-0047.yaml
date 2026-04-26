@@ -1,0 +1,98 @@
+id: CF-0047
+title: Drylands well-keeper — named customary-authority social role
+status: hard_canon
+type: social_role
+statement: |
+  In the drylands caravan corridor (CF-0046 substrate), the well-keeper is a named customary-authority role: mid-stratum household-enterprise operator of a well-stop at a corridor water-node, lineage-inheritable as customary family property, with apprenticeship pedagogy from age 6-7 paralleling CF-0037 stationkeeper chore-from-young. The well-keeper holds cross-species hospitality etiquette authority at well-approach (CF-0036 friction-register preserved), serves as CF-0044 verse- repertoire custodian (retiring-keeper-verse-book heirloom formalized), keeps the household station-log in DIS-2 trade-tongue as load-bearing keeper competence, and performs water-share-balanced arithmetic in the keeping-book. Authority is regionally respected working-texture reputation register — trade-useful, reputation-thickening, dryly- proud — NOT civic-registry-backed (drylands institutional thinness per CF-0046), NOT glory-register, NOT oracle-register.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - labor
+  - kinship
+  - settlement_life
+  - status_signaling
+  - language
+  - law
+  - daily_routine
+prerequisites:
+  - CF-0046 drylands corridor-complex substrate
+  - drylands water-scarce geography
+  - CF-0044 verse-repertoire tradition
+  - DIS-2 partial-literacy with trade-tongue fluency as corridor lingua-franca
+  - SOC-3 coin-contract sacredness (at coin-at-edges contact surface)
+  - household-enterprise labor-onboarding precedent (CF-0037 chore-from-young template)
+distribution:
+  who_can_do_it:
+    - drylands resident lineages holding customary well-stop family-property rights (any species per SOC-1 no-species-gate)
+    - incoming adoptees or spouses marrying into well-keeper lineages and accepting apprenticeship-observation induction
+  who_cannot_easily_do_it:
+    - non-drylanders without multi-year drylands corridor-exposure (cannot absorb the verse-repertoire, station-log literacy, keeping-book discipline, and corridor-reputation network through short exposure)
+    - chartered-polity residents seeking to establish well-keeper lineages in drylands through civic-charter grant (drylands institutional thinness precludes civic-charter mechanism; lineage is customary-only)
+    - non-drylands regional residents (heartland canal-lock has chartered lock-keeper per CF-0038 beaver-folk-concentrated; civic-chartered form replaces customary authority where wealth/institution exist; well-keeper customary-authority form does NOT transplant)
+  why_not_universal:
+    - wells-as-critical-water-nodes exist only in drylands; heartland canal-lock has chartered lock-keeper guild per CF-0038 (beaver-folk-concentrated; civic-chartered form); civic-chartered form replaces customary authority where wealth/institution exist
+    - "CF-0037 water-node / road-rest-node firewall (load-bearing): well-stop is WATER-NODE-ANCHORED (well IS the asset; non-relocatable, drought-volatile); CF-0037 waystation is ROAD-REST-ANCHORED (road IS the asset; trade-flow-volatile); categorical distinction preserves CF-0037 drylands-exclusion stabilizer ('drylands water-cistern logistics make rotating caravan-train cistern-management economically superior to fixed-station resupply; caravan-rotation IS the cistern-management mechanism' — CF-0037 Stabilizer (i) preserved)"
+    - customary authority stabilized by drylands institutional-thinness (CF-0046) — a chartered polity would formalize into a chartered water-warden role; drylands institutional-thinness cannot; NO well-keepers' guild, NO master-rank progression, NO seal, NO chartered SOC-4 monopoly (per CH-0018 INSTITUTIONS §Trade/Guilds corridor NON-CHARTERED reaffirmation)
+    - "NON-PORTABILITY of customary-authority reputation: well-keeper corridor-reputation evaporates at the drylands-heartland border paralleling CF-0044 verse-competence non-portability; CF-0024 portable-contractor-reputation mechanism does NOT pick up well-keeper competence"
+costs_and_limits:
+  - NOT a sixth M-7 reputation-genealogy cohort (CH-0018 MYSTERY_RESERVE M-7 extension); absorbed within existing tradesperson / caravan-master / CF-0017 circuit-bard / CF-0044 verse-competent-drylander register paralleling CF-0035, CF-0036, CF-0037, CF-0043, CF-0044 sub-specialty holding clause precedents
+  - NOT a new anomalous wage-class; absorbed within ECONOMY §Wage Spreads well-keeper household-enterprise non-anomalous row paralleling CF-0037 stationkeeper-master (bottom-copper to upper-copper reciprocity-dominant with occasional coin-at-edges from caravan resupply); NON-ANOMALOUS per Rule 3 absorption firewall (does NOT join the four anomalous wage-positions register CF-0021 / CF-0024 / CF-0028 / CF-0033)
+  - well-stop placement-right is FOURTH multi-generational tenancy asset-class per ECONOMY §Value Stores CH-0018 addition, categorically distinct from CF-0031 ledger-mark (negative-signaling civic-registry), CF-0032 subsection placement-right (skill-credential, mobile across reciprocal polities), and CF-0037 waystation placement-right (route-anchored, civic-backed heartland/highland/mountain-east); water-node-anchored, drought-volatile, customary-NOT-civic-registry-backed
+  - "'ORDINARY WELL-KEEPER' REGISTER COMMITMENT (hero-drift mitigation per Theme/Tone critic finding): most keeping-books sparse, most station-logs six-seasons-behind, most well-keepers middle-aged-to-old not charismatic-young, most well-stops not on named corridors; 'my cousin the keeper' register of ordinary trade-texture alongside dramatic-actor register; both register-registers coexist, the former stabilizing the latter"
+  - lineage-inheritance is INSTITUTIONAL-ROLE CONTINUITY per CH-0018 ONTOLOGY annotation, NOT knowledge-genealogy continuity (paralleling CH-0005 M-7 body-injury-vs-knowledge-genealogy discipline); a well-keeper whose great-grandmother kept the well in a named corridor does NOT thereby uniquely know Maker-Age, progenitor-cult, or civic-suppression bounded unknowns through inheritance channel
+  - partible at multi-heir succession (generates inheritance-docket pressure paralleling CF-0032 and CF-0037 precedents; handled under caravan-master corridor-internal customary-adjudication per CF-0046, NOT civic-magistrate reach unless dispute migrates to chartered-polity court at heartland border)
+  - forfeited at inheritor self-exile ('walked the well' — the walking-away child carries route-knowledge, station-log-keeping skill, and partial verse-repertoire but NO retained placement-right and NO portable-reputation asset; parallel to CF-0037 walking-inheritor gap; sub-cohort absorbed into CF-0024 contractor entry-tier / urban-poor / CF-0034 banditry per Rule 3 firewall)
+  - cross-species hospitality etiquette is CHARTER-CUSTOM OBLIGATION UNDER LOAD, NOT unearned harmony; CF-0036 friction-register preserved at well-approach (scent-aversion, mix-sound crew-composition, one-fur-talk-now returning migrants, tavern joke-threshold register); SOC-1 no-species-gate at lineage-inheritance (CH-0018 INVARIANTS SOC-1 reaffirmation)
+  - "WORKING-TEXTURE REGISTER (AES-1 per CH-0018 INVARIANTS AES-1 extension) — in-register: 'the well-keeper's word,' 'kept the well' / 'walked the well' (paralleling CF-0037 'kept the stop' / 'walked the stop'), 'trade-useful,' 'working-texture,' 'station-log register,' 'runner-reached,' 'paid carrier of liability,' 'the corridor knows her name in two seasons,' 'the keeper sent the runner; the magistrate will come in four days'; forbidden: 'wise well-keeper,' 'ancient keeper-lineage,' 'venerable gate-custom,' 'hereditary verse-lord,' 'the great keeper of the Third Well,' 'keeper-elite,' 'verse-caste,' 'destined / chosen / legendary well-line,' 'well-lords / corridor princes'"
+  - station-log keeping in DIS-2 trade-tongue is household-held commercial-mundane corridor record, NOT Maker-knowledge custody channel (M-9 firewall per CH-0018); NOT eleventh/twelfth archival category per Rule 3; station-log as well-stop household-office-heirloom alongside keeping-book and verse-counter (three heirlooms pass together at keeping-book-transfer moment); NOT marketable-as-curiosities across household ward-disclosure boundaries (WORLD_KERNEL What Is Taboo extension CH-0018)
+  - verse-repertoire custodianship operates WITHIN CF-0044 existing register (retiring-keeper-verse-book heirloom convention formalized; passes via apprenticeship-observation cadence from 6-7 chore-onboarding; NO 'verse-repertoire-as-dowry-asset' or 'verse-keeper-lineage-placement-right' separate convention per CF-0044 Rule 3 firewall); CF-0044 scope, distribution, and stabilizer structure unchanged
+  - drought-cycle customary hospitality obligations + inter-corridor caravan-master reputation-boycott are structural brake against water-node wealth-concentration extraction-rent (a well-keeper who prices drought-year water as pure coin-commerce outside customary hospitality loses the well-stop at caravan-master-network level — rotation stops routing through, keeping-book closes on the lineage across the corridor, asset-value collapses to near-zero)
+visible_consequences:
+  - well-stop as fourth drylands corridor-node type (alongside caravanserai, gate-stop, village) per GEOGRAPHY §Settlement Limits CH-0018
+  - well-keeper chore-from-young at 6-7 paralleling CF-0037 (drought-cycle water-discipline, trade-tongue fluency pedagogy, cross-species etiquette drilled early, station-log alphabet, keeping-book arithmetic, caravan-master corridor-reputation literacy)
+  - well-keeper match-maker catechism — *'whose well does your family keep?'* — as FIFTH named inheritance-context catechism question per INSTITUTIONS §Family/Clan/Household CH-0018
+  - "retiring-keeper-verse-book heirloom convention formalized (one of three well-stop household-office heirlooms passing at keeping-book-transfer moment: keeping-book, station-log bundle, verse-counter)"
+  - "'kept the well' (settled-resigned-respectable) / 'walked the well' (third-person mourning register for exile) idiom pair paralleling CF-0037 'kept the stop' / 'walked the stop'"
+  - "'the well-keeper's word' as corridor-reputation register equivalent to 'the caravan-master's word' — trade-useful judgments, not magistrate rulings"
+  - well-lineage failure common-fear register (the apprentice who walked before the keeping-book passed; the keeper with no surviving inheritor)
+  - lineage-failure + drought-corridor-collapse Breakage Point per ECONOMY CH-0018
+  - drylands obligation-denominated stratification register per ECONOMY §Inequality Patterns CH-0018 (well-keeper lineages accumulate obligation-capital rather than coin-capital across generations; mid-stratum at visible-coin-wealth register, wealthier at obligation-capital register)
+  - well-keeper Brinewick outskirts-estate dowager-gossip axis (NINTH axis per EVERYDAY_LIFE §(b) CH-0018) tracking drylands-trade-factor reciprocity-standing; estate's factor household charter-sound-vs-parvenu reputation flows from factor's well-stop keeping-book history
+  - well-keeper role attaches to ONTOLOGY §Categories in Use §social_role (CH-0018) as named lineage-inheritable household-enterprise role distinct from CF-0037 stationkeeper, CF-0043 Ash-Seal technician, CF-0025 occult-fallout specialist
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - ONTOLOGY
+  - GEOGRAPHY
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+  - TIMELINE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0046
+    - CF-0044
+    - DA-0001
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Co-proposed with CF-0046 (drylands caravan-corridor institutional- cultural complex); the two CFs cross-reference tightly — CF-0047 operates within CF-0046's corridor-complex substrate as a named social-role within the institutional-complex institution. Primary type `social_role` with secondary attachments enumerated per CH-0018 ONTOLOGY composite annotation (social_role + institution + craft).
+  CF-0037 soft-conflict resolution: water-node / road-rest-node firewall in costs_and_limits preserves CF-0037 drylands-exclusion stabilizer through categorical distinction (CF-0047 well-keeper is water-node- anchored customary-authority role drylands-present-only; CF-0037 family-handled stationkeeper is road-rest-anchored civic-backed role heartland/highland/mountain-east-present and drylands-structurally- absent). CF-0037 receives modification_history entry at CH-0018 documenting the firewall.
+  Systems/Economy critic recommendation: well-stop placement-right named as FOURTH multi-generational tenancy asset-class rather than absorbed into CF-0037 waystation placement-right (categorically distinct along ANCHOR-TYPE, CIVIC BACKING, and REGIONAL PRESENCE axes; absorption would erase load-bearing differences). Named as fourth in ECONOMY §Value Stores CH-0018 addition.
+  Hero-drift mitigation per Everyday-Life critic: 'ordinary well-keeper' register commitment alongside dramatic register — both coexist, the former stabilizing the latter; most well-keepers are middle-aged-to-old, most keeping-books sparse, most station-logs behind, most well-stops not on named corridors.
+  Rule 3 absorption applies across multiple surfaces: well-keeper NOT sixth M-7 cohort (M-7 sub-specialty holding clause per CH-0018), runner-reached village militia NOT new CF-0020 subtype (per CH-0018 INSTITUTIONS §Military/Defense firewall), station-log NOT new archival category (per CH-0018 INSTITUTIONS §Recordkeeping firewall), well-keeper NOT new wage-row (absorbed into ECONOMY household-enterprise middle-stratum register per CH-0018 §Wage Spreads), walking-well inheritor sub-cohort ABSORBED into existing CF-0024 / CF-0034 / urban- poor precarious strata per Rule 3 firewall.
+  Phase 12a modification_history scan axis-(a) pre-scan verification per SKILL.md discipline: derived_from pared to [CF-0046, CF-0044, DA-0001] — CF-0037 is a distinguish-firewall contrast reference (the categorical distinction lives in CF-0047 costs_and_limits rather than in derived_from parent-chain; CF-0037 gets mod_history under axis (b) Phase 8 soft-contradiction / axis (c) substantive extension via water-node/road-rest firewall addition); CF-0017 is parallel circuit-bard cross-reference (not substantively extended by CF-0047); only CF-0046 and CF-0044 qualify as genuine axis-(a) parents per the decision test.
+  In-register language: 'the well-keeper,' 'the well-stop,' 'the keeping- book,' 'the verse-counter,' 'the station-log,' 'kept the well,' 'walked the well,' 'the well-keeper's word,' 'the keeper's apprentice,' 'apprentice-keeper,' 'retiring keeper,' 'keeping-book-transfer,' 'trade-useful,' 'working-texture,' 'paid carrier of liability,' 'the corridor knows her name in two seasons.'
+  Out-of-register language (forbidden paralleling CH-0016 CF-0044 cadence): 'wise well-keeper,' 'ancient keeper-lineage,' 'the venerable gate- custom,' 'refined / sophisticated / cultured drylands,' 'hereditary verse-lord,' 'the great keeper of the Third Well,' 'keeper-elite,' 'verse-caste,' 'pristine pre-civic tradition,' 'pure reciprocity economy untainted by coin,' 'destined caravan-master,' 'the legendary corridor,' 'chosen well-line,' 'noble caravan-master adjudicating in timeless wisdom,' 'desert warriors / corridor princes / well-lords,' 'the simple honest drylanders.'
+  Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+modification_history: []

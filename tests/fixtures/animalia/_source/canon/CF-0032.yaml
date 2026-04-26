@@ -1,0 +1,99 @@
+id: CF-0032
+title: Oversize Saddlery Guild-Subsection for Cluster C Body Plans (Ancestral-Polity)
+status: soft_canon
+type: institution
+statement: |
+  Within the wainwright and saddlery guilds of polities with ancestral Cluster C population bases, a named subsection specializes in oversize harness, reinforced wagon-bed, barge-deck modification, and chair-for-estate work for mammoth-folk, ground-sloth-folk, and other large-body-plan Cluster C species. Journeymen travel a reciprocal cross-polity circuit between ancestral polities to acquire body-plan-variant instructional competence; master-rank progression requires completed reciprocity, and a visible subsection guild-seal marks commissioned work as body-plan-verified. The subsection is priced at the estate-class tier because the customer base is narrow and the work is hard; it functions as a recognized occupational upward-mobility route for Cluster C community members in ancestral polities who would otherwise concentrate in haulage labor, while most Cluster C members continue to work haulage — the subsection is a minority path, not a class-wide uplift. Apprenticeship is species-concentrated by ancestral-region presence, NOT species-gated at intake: a human, Cluster A, or Cluster B apprentice who completes the reciprocal circuit receives the same seal.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - labor
+  - economy
+  - law
+  - religion
+  - status_signaling
+  - kinship
+  - architecture
+  - mobility
+  - language
+  - memory_and_myth
+  - settlement_life
+prerequisites:
+  - sustained ancestral Cluster C large-body-plan community presence
+  - wainwright and saddlery guild continuity across multiple ancestral polities
+  - body-plan-variant instructional lineage (multi-year apprenticeship)
+  - reciprocal cross-polity journeyman circuit with inter-polity master-rank recognition
+  - oversize materials supply (heavy leather, reinforced timber, larger metal fittings, bespoke cordage)
+  - charter-clerk or guild-internal reciprocal-journey verification archive
+distribution:
+  who_can_do_it:
+    - wainwright and saddlery guilds in ancestral Cluster C polities hosting the subsection
+    - individual apprentices who complete the reciprocal circuit and receive the seal
+  who_cannot_easily_do_it:
+    - guilds in non-ancestral polities (no customer base, no reciprocal training lineage, no guild continuity)
+    - individual apprentices without ancestral-polity guild access
+    - extra-regional customers without long-lead-time export-contract patience
+  why_not_universal:
+    - requires sustained ancestral Cluster C community presence (mammoth-folk, ground-sloth-folk, etc.); rare outside Cluster C ancestral regions
+    - bespoke pricing gates customer accessibility to estate-class households and wealthier Cluster C communities
+    - reciprocal journeyman tradition requires institutional continuity within wainwright and saddlery guilds across Cluster C ancestral polities, sustained only by established polities
+    - apprenticeship lineages with body-plan-variant instruction demand multi-year master-training that cannot easily be replicated outside ancestral regions
+    - Rule-4 partial concession: consumption-locality does NOT fully track production-locality — estate-sizing norm migration to non-ancestral polities via mobile Cluster C residents is a named intended generational drift, but the CRAFT (production) remains ancestral-region-gated by guild continuity
+costs_and_limits:
+  - master-rank progression is multi-year and reciprocal-travel-dependent; a master cannot shortcut the circuit
+  - bespoke pricing narrows the customer base; subsection masters are scarce per polity
+  - Cluster C large-body-plan demographic ceiling limits both supply (apprenticeship pipeline) and demand
+  - reciprocal tradition operates as craft-discipline coordination, NOT as rent-extraction cartel — authentication-specialist cartel-formation pressure (parallel to CF-0028) is a structural risk requiring ongoing discipline
+  - subsection-seal authentication is a minor sub-specialty with cartel-adjacent pressure
+  - barge-deck modification on live canals carries falls and crush-injury exposure (ordinary structural-labor hazard, not contamination register; non-hazard classification for CF-0031 eligibility purposes)
+  - most Cluster C community members remain in haulage; subsection is minority upward-mobility path, not default
+visible_consequences:
+  - recognizable oversize-saddlery subsection shops in ancestral-polity artisan quarters (taller than ordinary workshops, wide double-door for reinforced wagon-beds, oversize-hide-curing smell)
+  - barge-refit yards at canal-lock towns in canal-corridor ancestral polities
+  - subsection-apprentice tenant-cottage as recognizable household category in ancestral-polity artisan quarters
+  - guild-seal subsection fitments at Cluster C estates (oversize chairs, reinforced-floor wings, stair-ramps, barge-deck upper quarters)
+  - dowager-gossip circuit tracks subsection commissions and cross-polity journeyman residencies in ancestral polities
+  - ancestral-polity estate architecture migrates toward subsection-informed default sizing over generations
+  - subsection-apprenticeship placement-right as inheritance/dowry-negotiable asset
+  - reciprocal cross-polity journey tradition creates informal mobility network alongside bardic circuit
+  - subsection-master reputation-bardic subgenre emerges (in AES-1 register of work-song, not heroic cycle; subject to M-7 firewall cross-application)
+  - extra-regional long-lead-time export contracts flow from ancestral-polity masters to estate-class customers elsewhere
+  - magistrate docket picks up subsection-seal fraud, placement-breach, reciprocal-travel-abandonment cases (fourth docket class distinct from three polity-asymmetric patterns)
+  - progenitor-cult lineage-keeper doctrinal response bifurcates (aspectualizing vs supremacist); common-pantheon clergy aspectualize cleanly
+  - '"chair-guild pricing" as cultural idiom for outrageously high but correctly specified quotes'
+  - children's skip-rope rhyme in ancestral polities ("north for the horn, south for the hide, east for the fit")
+  - subsection-seal recognition as charter-school civic literacy in ancestral-polity towns
+  - failed-apprentice stratum (returned to haulage with partial skills) as minor recognizable category
+  - intra-Cluster-C stratification (subsection-lineage vs haulage-lineage) as Rule 3 compounding pressure in ancestral polities, mitigated by firewall language; diaspora Cluster C remain outside both strata
+  - new archival category (reciprocal-journey verification, guild-internal with civic-copy deposit at charter polities)
+required_world_updates:
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - GEOGRAPHY
+  - TIMELINE
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - CANON_LEDGER
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0010
+    - CF-0011
+    - CF-0018
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Load-bearing firewalls carried here (per Phase 9 repair synthesis of six critic sub-agents dispatched at escalation gate): (1) Rule 3 "older bloods" disowning clause: the subsection is a body-plan accommodation craft; it does NOT constitute world-level validation of the Cluster C "older bloods" self-conception (PEOPLES_AND_SPECIES.md), which remains soft-canon at most. Progenitor-cult lineage-keeper integration of subsection journeymen-lineages into cultural-continuity claims is sectarian activity, not chartered endorsement. (2) M-4 firewall: the subsection does NOT adjudicate whether species- progenitor figures are historical, mythical, or pantheon-aspects. Subsection mastery is craft-competence, not progenitor-position evidence. (3) M-7 reputation-genealogy firewall cross-application: subsection-master reputations are subject to the four contested readings (procedural- competence / oracle / bard-accretion / mixed). No subsection-master holds world-level authority on Cluster C ancestry, Maker-Age adjacency, or progenitor-figure nature. Bardic accretion may outrun case-knowledge; the "master who said less and completed more circuits" is a bardic trope, not a world-level epistemic position. (4) SOC-1 non-species-gated apprenticeship clause: apprenticeship is species-concentrated by ancestral-region presence (pipeline flows from Cluster C families), NOT species-gated at intake — a human or non-Cluster-C apprentice who completes the reciprocal circuit receives the same seal. (5) Rule 4 partial concession: consumption-locality does NOT fully track production-locality; estate-sizing norm migration to non-ancestral polities via mobile Cluster C residents is a named intended generational drift, not accidental universalization. The CRAFT (production) remains ancestral- region-gated by guild continuity. (6) M-12 antiquity reservation: the historical origin of the craft and the reciprocal tradition is a bounded unknown (new Mystery Reserve entry added by CH-0006). Charter-Era-consolidated / pre-Charter-inherited / recent-innovation readings are all productive; no world-level resolution. Latent burdens introduced (tracked in CH-0006 latent_burdens_introduced): M-12 resolution; reciprocal-travel case law (OPEN_QUESTIONS); subsection- seal fraud precedent (OPEN_QUESTIONS); intra-Cluster-C stratification compounding; architectural sizing-norm drift to non-ancestral estates (Rule 4 partial concession); authentication-specialist cartel-formation pressure parallel to CF-0028. Specific guild names, charter terms, reciprocal-journey verification archive custody specifics deferred to OPEN_QUESTIONS Specific Guild Naming. Six critic sub-agents dispatched at escalation gate (11 of 13 domains touched); all flagged risks repaired in Phase 9 or logged as latent burdens. Adjudication record: adjudications/PA-0005-accept_with_required_updates.md.
+modification_history:
+  - change_id: CH-0011
+    originating_cf: none_clarification_retcon
+    date: 2026-04-19
+    summary: "clarification: INSTITUTIONS.md line 169 CF-0032 subsection bullet corrected — 'mirror image of the three disagreement-asymmetries CF-0021 / CF-0024 / CF-0028 / CF-0031' → 'mirror image of the four disagreement-asymmetries CF-0021 / CF-0024 / CF-0028+CF-0030 / CF-0031'; consequential ordinal update 'fourth instance' → 'fifth instance' under same attribution for count-ordinal consistency; inherited CH-0006 counting-drift acknowledged in PA-0006 and corrected per RP-0001 (AU-0001 Finding F-02); no CF-0032 statement/scope/status/distribution change. Adjudication: adjudications/PA-0010-accept_with_required_updates.md"

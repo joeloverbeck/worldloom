@@ -1,0 +1,38 @@
+id: SEC-GEO-003
+file_class: GEOGRAPHY
+order: 3
+heading: Choke Points
+heading_level: 2
+body: |-
+  - **River-mouth ports** — funnel coastal trade into interior canals; politically valuable, often disputed.
+  - **Canal locks and weirs** — single points of control on commercial flow; small towns grow around them.
+  - **Mountain passes** (eastern range) — open in summer, closed in winter; toll-rich.
+  - **Ferry crossings** where bridges have not been built; some predate the Charter Era.
+  - **Bog causeways** in the fens — narrow, slow, easily blocked by accident or design.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

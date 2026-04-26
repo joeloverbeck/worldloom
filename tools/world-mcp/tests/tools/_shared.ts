@@ -6,6 +6,8 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { CURRENT_INDEX_VERSION, type EdgeType, type NodeType } from "@worldloom/world-index/public/types";
 
+const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+
 interface SeedNodeInput {
   node_id: string;
   world_slug: string;
@@ -135,7 +137,7 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   writeFileSync(path.join(indexRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
 
   const schemaRoot = path.join(
-    "/home/joeloverbeck/projects/worldloom",
+    REPO_ROOT,
     "tools",
     "world-index",
     "src",

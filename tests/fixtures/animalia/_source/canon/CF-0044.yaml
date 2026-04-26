@@ -1,0 +1,83 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - verse-inept migrants at caravanserai-gate are SLOWER-HOSTED, not denied-hospitality — caravan-master covers with a vouching-cadence, guest is seated at back of the receiving-hall, introduction-phase takes longer and feels awkward; SOC-3 coin-contract for lodging is honored (hospitality-protocol is co-register with SOC-3, not substitute). Parallels CF-0038 provincial-migrant-with-letter-of-vouch cadence.
+  - returning-emigrant with register-fade (too long in canal-heartland) accrues mild pity-rebuke reputation — idiom *'he came in dumb at the gate'* in drylands cadence; parallels CF-0031 *'coin-for-shame'*, CF-0033 *'coin-for-service'*, CF-0036 *'one-fur talk now'* idiom register.
+  - "non-chartered folk-practice: no civic-procedural gate, no chartered verse-keeper register, no magistrate-adjudicated verse-competence. If raised in canal-heartland migrant-dispute, functions as ordinary character evidence only, not as chartered-standard gate — parallels CF-0037 non-chartered commitment."
+  - "Rule 3 absorption clauses (no specialness inflation): no new wage-table row, no new labor-role sub-stratum (no 'drylands hospitality-bard' stratum parallel to CF-0017 circuit-bards), no new value-store entry (verse-competence is cultural-prestige register, non-portable at border — distinct from CF-0024 portable contractor-reputation which travels inter-polity), no new archival register (oral-only, performance-ephemeral, no tea-house-scribe transcription convention)."
+  - "M-4 firewall: verse-matter taking progenitor figures or common-pantheon household-gods as subject is GENRE-REGISTER CONVENTION, NOT doctrinal assertion; no hospitality-verse tradition resolves M-4 progenitor-historicity at world level. Sectarian-supremacy co-option of hospitality-verse for species-lineage-witness recruitment is a minor recruitment-margin pressure watched by mixed-polity magistrates, NOT a sanctioned register."
+  - "M-7 sub-specialty holding clause: drylander verse-competence reputation (bards, caravan-masters, well-keepers with deep hospitality-verse repertoires) is ABSORBED WITHIN existing tradesperson / caravan-master / CF-0017 circuit-bard reputation register — NOT a sixth M-7 reputation-genealogy cohort (Rule 3 firewall; parallel to CF-0035, CF-0036, CF-0037, CF-0043 sub-specialty holding clause precedents). Same four contested readings (procedural-competence / oracle / bard-accretion / mixed) apply; same disallowed cheap answers hold."
+  - "per-cluster accommodation preserves SOC-1: beak-folk phonetic-constrained species participate via mammalian-partner vouching-cadence OR short-line prose-turn under host-waiver convention; movement-constrained Cluster D species (naga-folk serpentine) receive host-side waiver paralleling stairs-adjacent register OR present short committal gesture-plus-verse. No species is silently excluded; multispecies AES-2 baseline held."
+distribution:
+  who_can_do_it:
+    - resident drylanders of all clusters (humans, Cluster A heat-stress-fur-bearers, Cluster B scaled/warm-south, Cluster C heat-tolerant rare, Cluster D mythic travelers rare per DIS-3)
+    - long-circuit caravan-apprenticed outland-born caravan-masters whose tenure has absorbed the register
+  who_cannot_easily_do_it:
+    - canal-heartland residents without drylands exposure
+    - highland / fen / mountain-east residents (regional-practice unreachable)
+    - short-exposure travelers (three-week-caravan-stint level produces observation, not full participation)
+    - phonetic-constrained species (beak-folk corvid/raptor) participate through a mammalian caravan-partner vouching-cadence OR present short-line prose-turn under host-waiver convention; movement-constrained species (naga-folk serpentine lower-body) receive host-side waiver paralleling stairs-adjacent register OR present a short committal gesture-plus-verse
+  why_not_universal:
+    - "regional-cultural gate: drylands caravanserai sociality, DIS-2 partial-literacy drylands conditions, and oral-tradition density do NOT hold in canal-heartland (CF-0024 tavern-vouch + CF-0009 coin handles equivalent social work), fens (summon-not-post per CF-0024), highland (clan-hospitality register per CF-0037 clan-elder-sanction), or mountain east. A canal-heartland migrant in a drylands caravanserai must learn the convention; a drylander in canal-heartland finds no reciprocal protocol."
+    - "venue-and-host binding: stranger-exchange register requires drylands caravanserai / wayhouse / well-side venue AND resident-drylander host; canal-heartland tavern + canal-heartland host does NOT produce the register. A drylander hosting in canal-heartland may recite verse in private or at family gathering, but no stranger-exchange register emerges because venue and guest's cultural-exposure are absent. Return-circuit bards cannot elicit the register from drylands hosts because the register is host-initiated hospitality, not guest-performance."
+    - "one-way bardic-flow register-discipline: circuit-bards (CF-0017) transport verse-fragments in bardic-tavern performance register — canal-heartland audiences recognize 'drylands cadence' without knowing the source protocol. Verse-fragments travel, the stranger-exchange protocol stays."
+    - "non-portable cultural-prestige: verse-competence is drylands-local cultural-prestige register ONLY; evaporates at the drylands-heartland border; CF-0024 portable-contractor-reputation mechanism does not pick it up."
+domains_affected:
+  - language
+  - settlement_life
+  - status_signaling
+  - religion
+id: CF-0044
+modification_history:
+  - change_id: CH-0018
+    date: 2026-04-20
+    originating_cf: CF-0047
+    summary: "extension: CF-0044 drylands hospitality-verse-repertoire custody formalized as named WELL-KEEPER competence — retiring-well-keeper-verse-book is one of three well-stop household-office heirlooms (keeping-book, station-log bundle, verse-counter) passing at keeping-book-transfer moment; verse-repertoire pedagogy extends into well-keeper chore-from-young at 6-7 paralleling CF-0037; verse-competence working-texture reputation operates at well-keeper scale with reputation-softening for verse-inept, not role-blocking; M-7 sub-specialty holding clause extended to well-keeper cohort (NOT a sixth M-7 cohort); circuit-bard one-way absorption directional firewall unchanged; AES-1 forbidden-register discipline extended; CF-0044 scope, distribution, stabilizer structure unchanged; well-keeper formalization anchors one institutional locus of the verse-convention without closing scope-refinement questions"
+notes: |
+  Partial-support evidence-breadth pathway per Phase 6d; narrator-source DA-0001 paragraph 3 aside (firsthand but peripheral to Vespera's self- promotional travelogue spine); convention NAMING is artifact-sole-source capped at soft_canon by Phase 3 narrator-reliability mapping. Pan-drylands scope with caravanserai / wayhouse / well-side as exemplar encounter contexts (non-exhaustive); antiquity + scope-refinement (pan-drylands vs caravan-route-specific) deferred to OPEN_QUESTIONS §Drylands Short-Poetry Convention Antiquity and Scope. Not a sixth Charter-Era polity-asymmetric axis — uncontested-convention status; polity disagreement not applicable. Not a new Charter-Era stress-register exemplar. No guild charter sought or implied. DA-0001 pre-figuring is the source artifact itself (cited on proposal card's source_basis.derived_from_artifact_path; no independent DA or character pre-figuring exists, so no additional DA-NNNN / CHAR-NNNN attribution required in derived_from).
+  In-register language (use for CF record and domain-file patches): "short- form verse-turn exchanged as stranger-hospitality register," "brief verse- turns," "verse-exchange," "verse-turn at the gate," "hospitality-protocol," "stranger-introduction register," "trade-useful verse-competence," "verse- competent drylander," "verse-adept caravan-master," "verse-inept migrant," "slower-hosted migrant," "covered-by-caravan-master," "verse-matter invoking progenitor figures or household-gods" (for religion adjacency), "drylands-register hospitality-poetry distinct from bardic performance."
+  Out-of-register language (forbid): "ritual" / "rite" / "sacred exchange" / "sacralized verse" (religion-inflation); "refined" / "cultured" / "sophisticated drylands" / "lyrical drylanders" (Orientalism drift); "destined verse" / "the drylander's verse that became legend" / "the great verse-turn of X" (chosen-bard pathology); "verse-elite" / "true drylander" / "verse-caste" (caste-adjacent hierarchy); "binding verse" / "verse that wards" / "verse of power" (verse-mysticism drift); "quest" / "chosen" / "destined" / "legendary" in any adjacency to the convention (AES-1 violation).
+  Adjudication record: adjudications/PA-0015-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0018 (CF-0047): extension — CF-0044 drylands hospitality-verse-repertoire custody is formalized as a named WELL-KEEPER (CF-0047) competence, consolidating the existing CF-0044 visible_consequences annotation (*"well-keepers accumulate informal verse-repertoire over a keeping-career; a retiring well-keeper's verse-book passed to an apprentice is a minor ordinary-life inheritance"*) into explicit well-keeper lineage-inheritance convention. The retiring-well-keeper-verse-book is one of three well-stop household-office heirloom items (keeping-book, station-log bundle, verse-counter) that pass together at the keeping-book-transfer moment per CF-0047. Verse-repertoire pedagogy continues per CF-0044 §Childrearing register (drylander children pick up verse-turn register by observation at household caravanserai-guesting before apprenticeship; formal drilling at caravan-apprenticeship stage); CF-0047 extends pedagogy into well-keeper chore-from-young at age 6-7 paralleling CF-0037 stationkeeper onboarding (apprentice-keeper running the verse-counter through daily household practice until verse-turn cadence is muscle memory before formal apprenticeship age). Verse-competence as trade-useful working-texture reputation register (CF-0044) operates at well-keeper scale — a well-keeper with deep verse-repertoire gains tacit corridor-reputation preference parallel to CF-0044 caravan-master verse-competence tacit foreman-judgment preference; reputation-softening for verse-inept well-keeper, not role-blocking. M-7 sub-specialty holding clause extended to well-keeper cohort per CH-0018 MYSTERY_RESERVE M-7 extension (well-keeper is NOT a sixth M-7 cohort; absorbed within existing tradesperson / caravan-master / CF-0017 circuit-bard / CF-0044 verse-competent-drylander register). Circuit-bard (CF-0017) one-way absorption of drylands verse-fragments into canal-heartland bardic-tavern material per CF-0044 existing stabilizer unchanged — well-keeper custody of verse-repertoire does NOT alter the absorption-directional firewall (verse-fragments travel via circuit-bard; well-keeper repertoire is corridor-local heirloom). AES-1 forbidden-register discipline per CF-0044 CH-0016 extended to well-keeper context per CH-0018 INVARIANTS AES-1 extension (no "hereditary verse-lord"; no "legendary verse-turn of X"; no "chosen well-line"). CF-0044 scope, distribution, and stabilizer structure unchanged; well-keeper formalization anchors one institutional locus of the verse-convention without closing scope-refinement questions per CH-0018 OPEN_QUESTIONS §Drylands Short-Poetry Convention Antiquity and Scope pressure-annotation. Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+prerequisites:
+  - drylands cultural exposure (drylander-raised OR extended caravan-rotation apprenticeship)
+  - register-recognition (what counts as a verse-turn; what counts as response)
+  - drylands caravanserai / wayhouse / well-side sociality (regional institutional density)
+  - oral-tradition density (existing drylands long-memorized-poem, riddle, caravan-tale heritage per EVERYDAY_LIFE §(d))
+required_world_updates:
+  - EVERYDAY_LIFE
+  - GEOGRAPHY
+  - WORLD_KERNEL
+  - INVARIANTS
+  - INSTITUTIONS
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - TIMELINE
+  - ECONOMY_AND_RESOURCES
+  - PEOPLES_AND_SPECIES
+scope:
+  geographic: regional
+  social: public
+  temporal: current
+source_basis:
+  derived_from: []
+  direct_user_approval: true
+statement: |
+  A drylands-regional cultural convention: travelers and residents in drylands caravanserai sociality engage in a customary short-form oral-poetry exchange at stranger-encounters — brief verse-turns traded between host and guest as a hospitality-protocol register. Distinct from bardic performance (CF-0017) and canal-heartland tavern-vouch (CF-0024). Canonical encounter configurations include caravan-master-and-guest introductions, host-household-and-overnight- traveler threshold exchanges, and well-side or waystation stranger-pair encounters; these are exemplar contexts, not the only contexts. Verse-matter may take progenitor figures or common-pantheon household-gods as subject AS GENRE-REGISTER CONVENTION (not doctrinal assertion; M-4 firewall preserved). The convention stays drylands-scoped — circuit-bards (CF-0017) absorb verse- fragments and transport them to canal-heartland taverns as bardic-performance material; the stranger-exchange protocol itself does not travel.
+status: soft_canon
+title: Drylands short-poetry stranger-hospitality protocol
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: ritual
+visible_consequences:
+  - drylands caravanserai / wayhouse / well-side stranger encounters carry a named hospitality-protocol distinct from tavern-vouch
+  - drylander children learn the verse-turn register by observation at household caravanserai-guesting before apprenticeship; formal drilling at caravan-apprenticeship age paralleling existing cargo-riddle pedagogy
+  - match-maker notebooks record verse-turns heard at courtship-visits as modest match-evaluation register (parallel to caravan-master mix-sound judgment per CF-0036; not determinative)
+  - well-keepers accumulate informal verse-repertoire over a keeping-career; retiring well-keeper's verse-book is a minor ordinary-life inheritance
+  - caravan-masters with verse-competence gain tacit foreman-judgment preference in caravanserai rotation-hire (parallel to CF-0036 mix-sound judgment; explicitly NOT a charter-level or roster-level hiring criterion; outland caravan-masters without verse accrue reputation-softening not hire-blocking)
+  - circuit-bards (CF-0017) traveling drylands corridors absorb verse-fragments for canal-heartland tavern performance in bardic cadence — canal-heartland audiences recognize 'drylands cadence' without knowing the source stranger-exchange protocol
+  - returning-migrant idiom *'he came in dumb at the gate'* (pity-rebuke register) for drylands-emigrants whose register has faded from too-long canal-heartland residence
+  - canal-heartland migrant arriving at drylands caravanserai without the register — caravan-master covers with vouching-cadence; six-week adaptation period paralleling CF-0038 provincial-migrant-at-Brinewick cadence
+  - cross-regional cultural-borrowing pathway named (drylands short-poetry → canal-heartland bardic-fragment via circuit-bards), paralleling highland clan-song into canal-heartland via highland migrants and fen-marker-reed semantic register via monastic communication

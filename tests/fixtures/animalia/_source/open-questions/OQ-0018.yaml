@@ -1,0 +1,8 @@
+id: OQ-0018
+topic: Vessel Effect Predictability — Random vs Process-Dependent
+body: |-
+  - CF-0021 records the in-world researcher dispute about whether the effects of successful crafted artifacts are random upon creation or process-dependent. Both readings have organized partisans; neither is world-truth.
+
+when_to_resolve: only if a story requires the answer; consider preserving the dispute as recurring contested-canon depth.
+caution: any author-side resolution either way affects how reproducible crafter outputs are and tilts the diffusion-stabilizer balance in CF-0021. A "process-dependent" answer makes the practice more learnable and more dangerous; a "random" answer keeps it gamble-heavy.
+extensions: []

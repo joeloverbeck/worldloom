@@ -1,0 +1,55 @@
+change_id: CH-0004
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0004
+  - CF-0008
+  - CF-0019
+  - CF-0024
+summary: |
+  Adds four new Canon Fact Records (CF-0027 enterable Maker-Age ruin sites as recognized category; CF-0028 patron-funded ruin-expedition venture as institution; CF-0029 magically-animated Maker-Age guardian constructions with seven explicit firewall commitments; CF-0030 funder-primacy convention operating polity-asymmetric as Charter-Era stress-fracture repair to SOC-4) and qualifies four existing CFs (CF-0004 non-guild-primary recovery pathway; CF-0008 funder-primacy via chartered-broker channel with polity asymmetry; CF-0019 entrance-knowledge as new lethal-contraband subcategory distinct from grimoire-fragments; CF-0024 expedition-contractor scale-up subtype with scholar-contractor extension and ordinary-trades naming). Adds three new Mystery Reserve entries (M-8 Guardian-Construction Mechanism; M-9 Epistemic Content of Recovered Maker-Knowledge; M-10 Guardian-Presence Heterogeneity) and extends M-7 to cover expedition-veteran reputation-genealogy as parallel class to occult-fallout specialists. Updates 10 world files (INVARIANTS, TIMELINE, GEOGRAPHY, INSTITUTIONS, ECONOMY_AND_RESOURCES, MAGIC_OR_TECH_SYSTEMS, EVERYDAY_LIFE, MYSTERY_RESERVE, OPEN_QUESTIONS, CANON_LEDGER). Source: briefs/animalia-ruin-expeditions.md, processed via canon-addition skill with full multi-critic synthesis (Phase 6b) using six parallel sub-agents (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator). Phase 11 verdict: ACCEPT_WITH_REQUIRED_UPDATES.
+reason:
+  - user-approved canon addition from briefs/animalia-ruin-expeditions.md
+  - "Phase 11 verdict: ACCEPT_WITH_REQUIRED_UPDATES"
+  - multi-critic synthesis confirmed four-CF split, firewall adequacy, and polity-asymmetric scoping
+  - concretizes world kernel chronotope 'the dirt still bites' and story engine 'artifact-extraction job that goes wrong'
+scope:
+  local_or_global: global
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - CANON_LEDGER.md
+  - INVARIANTS.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - EVERYDAY_LIFE.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "Ruin ownership: does surface-landholder, polity, guild, or finder hold discovery rights? Unresolved; OPEN_QUESTIONS new entry."
+  - "Resealing authority jurisdiction: which institution orders a catastrophic ruin resealed — guild, civic watch, crown, extraction-guild charter? Unresolved; OPEN_QUESTIONS new entry."
+  - "Entrance-knowledge speech-restriction status: does ruin-cartography deserve CAU-3-parallel formal restricted-speech protection, or remain enforced only by killing-by-rival? Unresolved; OPEN_QUESTIONS new entry."
+  - "Expedition-widow pension framework: CF-0024 widow-of-the-job covers ordinary contractor deaths; funder liability for full-expedition squad-wipe is a distinct category with no charter framework. Unresolved; OPEN_QUESTIONS new entry."
+  - "Mercenary-band escalation legality under CF-0008 battlefield-artifact taboo: does polity-levy mobilization for ruin-competition violate the taboo, or do the expedition's chartered-artifact recoveries remain clean while the armed conflict is separately adjudicated? Unresolved."
+  - "Expedition-venture charter conditions per polity: specific per-polity licensing frameworks for expedition-venture syndicates are deferred; OPEN_QUESTIONS extension to existing Specific Guild Naming item."
+  - "Guardian-presence heterogeneity (M-10): why some ruins have guardians and some don't remains bounded unknown; typology that maps cleanly onto catastrophic-class would collapse M-2. Mystery Reserve new entry."
+  - "Patron asset-capture after squad-wipe: inheritance docket for magical-artifacts-in-patron-name when the patron dies before expedition returns and expedition then squad-wipes — unresolved legal territory."
+notes: |
+  Four qualified CFs follow CH-0002 / CH-0003 qualification-and-notes-field precedent. CF-0004 receives a qualification (recovery-pathway expansion, not scope_retcon — pathway was previously silent, now explicit). CF-0008 receives a qualification (funder-primacy as polity-asymmetric stress-fracture, paralleling existing CF-0021 and CF-0024 asymmetries — three asymmetries now form a recognizable Charter-Era regional-variation pattern). CF-0019 receives a qualification (entrance-knowledge as lethal-contraband subcategory distinct from grimoire-fragments in enforcement mechanism). CF-0024 receives a qualification (expedition scale-up as a named subtype of the contractor stratum). No ontology retcon; no invariant revision. ONT-1 preserved via CF-0029 explicit non-sentience (CH-0004 extends the CH-0002 clarification pattern). SOC-4 preserved via CF-0030 polity-asymmetric broker-channel repair. Six critic sub-agents reported; Mystery Curator identified four missing firewalls now incorporated: anti-accumulation (CF-0027); anti-conflation-with-CF-0022 (CF-0029); anti-propaganda (CF-0028 partisan-canon clause); M-2 scale boundary articulation (CF-0029 squad-wipe-local cap). Per-cluster EVERYDAY_LIFE signatures prescribed by Everyday-Life critic; all five clusters addressed with concrete signatures and ordinary-trades-named clause. In-register / out-of-register language lists from Theme/Tone critic committed to CF-0028 notes. M-1 / M-2 / M-5 / M-6 firewalls load-bearing and reinforced. Adjudication record: adjudications/PA-0003-accept_with_required_updates.md.

@@ -1,0 +1,12 @@
+id: AES-2
+category: aesthetic_thematic
+title: The ordinary keeps the world honest
+statement: Daily life — canal traffic, livestock, tavern songs, winter dread, child-rearing — is always present in the texture. The world cannot be experienced solely from the perspective of heroes, nobles, or cosmologists.
+rationale: Skill discipline; brief emphasis on lived realism.
+examples:
+  - a story whose stakes are framed in terms of who eats this winter; a battle scene whose aftermath shows the field being looted by tenants
+non_examples:
+  - a world rendered only as cosmology and ruling families
+break_conditions: would betray world identity.
+revision_difficulty: high
+extensions: []

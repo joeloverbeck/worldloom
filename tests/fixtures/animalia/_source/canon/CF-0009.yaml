@@ -1,0 +1,47 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - in-kind payment imposes transport, housing, resale costs
+  - poor have only copper; this constrains contract types available to them
+distribution:
+  who_can_do_it:
+    - everyone participates in the coin economy at some level
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - higher denominations rare in ordinary life
+domains_affected:
+  - economy
+  - settlement_life
+  - law
+id: CF-0009
+notes: |
+  Direct from brief. Specific exchange rates deferred (OPEN_QUESTIONS).
+prerequisites:
+  - mints in chartered polities
+  - civic and customary contract enforcement
+required_world_updates:
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - INSTITUTIONS
+  - TIMELINE
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from: []
+  direct_user_approval: true
+statement: |
+  Animalia's coin economy is denominated primarily in copper and silver, with meaningful spreads between petty tasks (copper) and higher-risk work (silver and above). Compensation may also be contracted as in-kind transfer of livestock, grain, or other valuable goods, which can impose logistical burdens on the recipient.
+status: hard_canon
+title: Currency is copper-and-silver with in-kind livestock as contractual option
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: resource_distribution
+visible_consequences:
+  - posted prices in copper at taverns, markets, ferries
+  - silver wages for skilled craft and risky work
+  - livestock-as-payment contracts common in rural areas
+  - reputation ("oath-breaker") is durable economic harm (CF interacts with SOC-3)

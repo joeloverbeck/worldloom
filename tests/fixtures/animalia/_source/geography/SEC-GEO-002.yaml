@@ -1,0 +1,40 @@
+id: SEC-GEO-002
+file_class: GEOGRAPHY
+order: 2
+heading: Climate Bands
+heading_level: 2
+body: |-
+  | Band | Character | Tempo |
+  |---|---|---|
+  | **Cold North Highland** | Snowbound 4–5 months, short summer, cold rain, wind off the heights | Long winters, compressed work-season, raid-risk |
+  | **Temperate Canal Heartland** | Mild winters, warm summers, abundant freshwater, the agricultural and commercial core | Year-round canal traffic outside hard freeze; market rhythm dominant |
+  | **Warm-Dry South / Drylands** | Hot summers, mild winters, drought cycles, water-scarcity culture | Dawn-and-dusk labor, midday rest, caravan rhythm |
+  | **Wet Fenlands West** | Cool, wet, marshy, ague-prone, peat-rich | Tide and season; hard living, sparse population |
+  | **Mountain East** | Hard winters, sparse arable, mining and pastoralism, isolated valleys | Pass-season opens trade for half the year |
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

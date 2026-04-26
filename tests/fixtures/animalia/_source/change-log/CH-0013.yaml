@@ -1,0 +1,67 @@
+change_id: CH-0013
+date: 2026-04-19
+change_type: addition
+affected_fact_ids:
+  - CF-0038
+  - CF-0015
+  - CF-0017
+  - CF-0021
+  - CF-0024
+  - CF-0028
+  - CF-0031
+  - CF-0033
+  - CF-0034
+  - CF-0036
+summary: |
+  Commits Animalia's first named city-state landmark — Brinewick, a canal-fed charter-polity in the Temperate Canal Heartland band, world-renowned as among the foremost centers of commerce and among the most populated heartland cities. Partial-resolves OPEN_QUESTIONS §Place and Polity Naming per regional-not-continent-wide discipline. Commits Brinewick as ADOPTING-POLITY on all five Charter-Era polity-asymmetric disagreement axes (CF-0021 / CF-0024 / CF-0028 / CF-0031 / CF-0033). Commits institutional decomposition of canal-inspection authority into civic canal-wardens (chartered-watch subtype, tariff-and-traffic) vs ward- inspectors (extraction-guild, artifact-hazard under SOC-4/CAU-3; integrity preserved). Commits named anchor taverns The Copper Weir and The Lock- Keeper's Cat of the six-tavern canal-circuit bardic subgenre (four other rotation venues deferred). Commits aquatic-folk MAJORITY in legitimate canal labor + MINORITY overrepresentation in canal-underwater smuggling underworld (socioeconomic occupational-geography, NOT species-coding; M-5 sixth cross-application firewall). Commits migrant-attractor regional-collector integration with refugees-from-sealed-quarters precarious-stratum pattern (coin-for-shame return-idiom). Commits canal-warden backchannel mechanism as continuous-but-incomplete audit + shadow-wage + inspector-turnover stabilizer (ward-inspector integrity firewalled). Adds M-1 extension firewall (pre-Charter-infrastructure- attribution) and creates new M-19 bounded unknown (Brinewick canal and underground network origin, merged). Expands WORLD_KERNEL.md Natural Story Engines with 6 Brinewick-specific engines; commits EVERYDAY_LIFE.md §(a) 7-clause + §(b) 4-clause Brinewick extensions (9th skip-rope rhyme slot + named Brinewick dowager idioms). Adds three new OPEN_QUESTIONS deferrals (§Identity of the Most-Populated Heartland City; §Brinewick Trunk-Canal-Count Specifics; §Brinewick Supremacist-Movement Licensure / Proscription Status). Applies 17 firewall clauses from Phase 6b multi- critic synthesis (C1-C17). Critical Continuity Archivist discovery: DA-0001 (`a-season-on-the-circuit.md`) already named Brinewick at diegetic level; CF-0038 cites DA-0001 in source_basis.derived_from per Rule 6 audit-trail preservation.
+reason:
+  - Commits Animalia's first named city-state landmark and partial-resolves OPEN_QUESTIONS §Place and Polity Naming without globalizing the commitment beyond a single canal-heartland polity.
+  - Instantiates Brinewick across the five Charter-Era polity-asymmetric axes and formalizes the canal-warden versus ward-inspector split while preserving the existing institutional firewalls.
+  - Records the required Mystery Reserve work by extending M-1 and adding bounded unknown M-19 for the canal and underground network origin.
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - GEOGRAPHY.md
+  - TIMELINE.md
+  - ECONOMY_AND_RESOURCES.md
+  - INSTITUTIONS.md
+  - PEOPLES_AND_SPECIES.md
+  - EVERYDAY_LIFE.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+  - ONTOLOGY.md
+  - WORLD_KERNEL.md
+  - CANON_LEDGER.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+change_summary: |
+  ADDITION change_type: adds CF-0038 Brinewick as Animalia's first named city-state commitment. Preserves all 17 existing world-level invariants (ONT-1/2/3, CAU-1/2/3, DIS-1/2/3, SOC-1/2/3/4, AES-1/2/3) via 17 firewall clauses (C1-C17) applied in CF-0038 notes. Commits Brinewick as ADOPTING-POLITY on all five Charter-Era asymmetric axes (CF-0021 punitive-with-licensing-experiment, CF-0024 licensing-under-tight- charter + estate-retinue-friction, CF-0028 syndicate-licensing-with- civic-audit, CF-0031 adopting, CF-0033 adopting). Commits institutional decomposition of canal-inspection authority into civic canal-wardens vs ward-inspectors (CAU-3/SOC-4 ward-inspector integrity firewalled). Commits aquatic-folk SOC-1 firewall with M-5 sixth cross-application (MAJORITY in legitimate canal labor; MINORITY underworld overrepresen- tation; socioeconomic-NOT-species-coded). Commits M-1 extension (pre- Charter ancestral-engineering attribution) + new M-19 (canal and underground network origin bounded unknown). Eleven domain files patched. Nine existing CFs receive modification_history entries. Adjudication record: adjudications/PA-0012-accept_with_required_updates.md.
+critic_panel:
+  dispatched_at: escalation_gate
+  critics:
+    - continuity_archivist
+    - systems_economy
+    - politics_institution
+    - everyday_life
+    - theme_tone
+    - mystery_curator
+  convergent_concerns_resolved: 10
+  productive_tensions_resolved: 3
+notes: |
+  CH-0013 is the thirteenth change in the Animalia ledger — the ADDITION commits Animalia's first named city-state landmark at commerce-hub scale while preserving all five Charter-Era asymmetric axes' abstract-polity- category distributions (Brinewick instantiates as named specific-polity instance, NOT as a new axis). Canal-underwater aquatic-folk-guided smuggling is firewalled as TRANSPORT-LAYER capability serving the existing seven-product-line canal-corridor illegitimate-service rail (CF-0023 grimoire, CF-0028 ruin-cartography, CF-0031 registry-scrubber, CF-0033 dragoon-kit, CF-0034 stolen-goods, CF-0035 trophy-forgery, CF-0036 cannibal-bounty-certification) — NOT an eighth product-line.
+  DA-0001 (Vespera Nightwhisper's travelogue, `a-season-on-the-circuit.md`) pre-figured Brinewick at diegetic level with local-scope OPEN_QUESTIONS §Place and Polity Naming deferral-resolution framing; Continuity Archivist Phase 6b critic flagged this as critical Rule 6 audit-trail obligation; CF-0038 cites DA-0001 in source_basis.derived_from to formalize the diegetic-to-world-canon audit trail.
+  Six critic sub-agents dispatched at escalation gate; all six converged on ACCEPT_WITH_REQUIRED_UPDATES with 17 firewall clauses; no dissent from accept recommendation after synthesis. Phase 14a Validation Checklist: 9 of 9 tests PASS with rationale.
+  modification_history scan (Phase 12a) results: axis (a) derived_from_cfs identified CF-0015 (canal network) + CF-0017 (bardic circuit) as genuine parents — both qualify as substantive extension under the three-axis scan threshold; axis (b) Phase 8 soft contradictions — none on existing CFs (DA-0001 precedent is diegetic-level, not CF-level); axis (c) Phase 9 substantive extensions — CF-0015 confluence-hub named instance, CF-0017 canal-circuit subgenre, CF-0021/24/28/31/33 named- polity-instance adoption commitments, CF-0034 regional-collector migrant-attractor integration, CF-0036 exemplar-density-mixed-species + M-5 sixth cross-application. Nine CFs receive modification_history entries under CH-0013.
+  Phase 6 consequence propagation touched 7-9 of 13 FOUNDATIONS domains (settlement_life, trade, labor, migration, institution_form, bardic_ transmission, status_signaling, architecture, daily_routine, status); escalation gate fired; six critic sub-agents dispatched in parallel (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday- Life, Theme/Tone, Mystery Curator). All six converged on ACCEPT_WITH_REQUIRED_UPDATES with required repairs.
+  Adjudication record: adjudications/PA-0012-accept_with_required_updates.md.

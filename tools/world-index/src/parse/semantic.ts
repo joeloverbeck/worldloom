@@ -203,7 +203,8 @@ function extractFirewallTargets(body: string): string[] {
 }
 
 function resolveWorldUpdateTarget(worldSlug: string, targetPath: string): string | null {
-  const normalizedTarget = targetPath.replace(/^.*[\\/]/, "");
+  const basename = targetPath.replace(/^.*[\\/]/, "");
+  const normalizedTarget = basename.endsWith(".md") ? basename : `${basename}.md`;
   if (!MANDATORY_WORLD_FILES.has(normalizedTarget)) {
     return null;
   }

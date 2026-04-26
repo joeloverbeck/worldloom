@@ -1,0 +1,14 @@
+id: OQ-0029
+topic: Ledger-Mark Purge-Convention and Migration Gap
+body: |-
+  - CF-0031 commits that the ledger-mark runs three administrative generations by convention, but the specific purge-convention at generation-three expiry — automatic expiration, petition-required, conditional-on-last-generation-status, or persistent-by-default with revocation petition — varies across adopting polities and is not committed at world level.
+  - Inter-polity registry-transfer protocol for households migrating between adopting polities with different conventions is undeveloped; transfer-gap extradition cases appear on magistrate dockets but precedent is thin. Migration between adopting and non-adopting polities is a third axis of the CF-0021 / CF-0024 / CF-0028 polity-asymmetric friction pattern.
+
+when_to_resolve: when a story features a specific purge-dispute magistrate case, an inter-polity migration-gap extradition, or a reform-current campaign targeting a polity's particular convention.
+caution: purge-convention resolution interacts with Rule 3 specialness-inflation risk flagged in the CF-0031 adjudication (three-generation marker as caste-adjacent status drift). Persistent-by-default convention tilts toward caste-status; automatic-expiry tilts toward pure welfare-record. Both readings exist in-world. Future canon work must firewall against collapsing the administrative-mimesis register (M-11) into a biological-inheritance reveal (M-5).
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Ash-Seal-commercial funding-stream annotation
+    body: "CF-0043 commits Ash-Seal as a FOURTH lineage-source category (per §Post-Career Contractor Pension and Stigma CH-0015 extension), adding Brinewick-specific commercial-pension-plus-civic-supplement-coordination complexity to the funding-stream question: Ash-Seal's company-internal pension scheme provides commercial-equivalent-of-guild-pension funded from company monopoly-rent revenue; civic-registry CF-0031 ledger-mark supplement in Brinewick-adopting polity provides welfare-supplement funded from chartered-extraction-guild-taxation stream (unchanged parent mechanism); the two streams coordinate on formula but preserve separate custody paralleling chartered-extraction-guild pension coordination. Ash-Seal's biannual charter-audit cycle exposure (CF-0038 standing convention) applies to the commercial-pension-scheme review as part of audit-access contested register. The parent funding-stream deferral is narrowed for Brinewick commercial-pension coordination specifically; residual funding-stream questions across adopting polities remain deferred as before."

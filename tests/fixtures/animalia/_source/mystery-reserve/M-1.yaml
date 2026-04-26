@@ -1,0 +1,44 @@
+id: M-1
+title: What Ended the Maker Civilization?
+status: active
+knowns:
+  - A civilization of unknown identity flourished here in centuries-to-millennia past and ended
+unknowns:
+  - Identity of the Makers — were they a single people, a federation, a species or assemblage of species?
+common_interpretations: []
+disallowed_cheap_answers:
+  - '"They were us all along" tidy reveal'
+domains_touched:
+  - TIMELINE
+  - MAGIC
+  - RELIGION
+  - INSTITUTIONS (extraction guilds)
+  - GEOGRAPHY (substructures
+  - sealed quarters).
+future_resolution_safety: medium
+extensions:
+  - originating_cf: CF-0034
+    change_id: CH-0008
+    date: 2026-04-19
+    label: Extension — Bandit-occupation shelter-scope firewall
+    body: 'Endemic bandit occupation of previously-accessed Maker-Age ruin sites (CF-0034) is SHELTER-SCOPE only. Bandit-custody of any Maker-Age fragments, inscribed shards, or incidental ruin-material encountered during occupation does NOT constitute active Maker-research, does NOT constitute a new Maker-knowledge custody channel (see M-9 extension), and cannot yield civilization-identity findings. Recovered ruin-material diverted through bandit-custody routes into the existing black-market grimoire-corridor (CF-0023) or ruin-cartography (CF-0028) channels per established illegitimate-custody mechanics; the disposition discipline is load-bearing — no new "bandit-captured Maker-archive" category forms. Added to disallowed cheap answers: *"Bandit occupation of a ruin yielded decisive Maker-civilization-identity evidence — forbidden reveal."* The M-1 firewall holds with this cross-application clause.'
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Extension — Mutated-beast evidence anti-cause-of-fall firewall
+    body: 'Artifact-contaminated mutated non-sentient beasts (CF-0035) exist in wilderness-distal sites as centuries-accumulated Maker residue; their prevalence in deep strata and the rumor-only gargantuan-underground scale-tail (new Mystery Reserve M-15) may invite Maker-mystic sectarian readings that "Maker-Age contamination persists and was itself the cause of the fall" — this reading is contested canon, NOT world-truth. Mutated-beast evidence, including underground-legend rumor material, yields NO Maker-civilization-identity or cause-of-fall resolution. The phenomenon is incidental biological effect of uncontained-artifact exposure on untargeted fauna, NOT evidence of Maker intent, Maker catastrophe, or Maker continuity. Added to disallowed cheap answers: *"Mutated-beast prevalence cited as evidence that the Maker-Age fall was a contamination-cascade persisting to present — forbidden reveal."* *"Gargantuan-underground-monster rumor cited as Maker-Age cause-of-fall evidence — forbidden reveal."* The M-1 firewall holds with this cross-application clause.'
+  - originating_cf: CF-0038
+    change_id: CH-0013
+    date: 2026-04-19
+    label: Extension — Pre-Charter-engineered-infrastructure attribution firewall
+    body: "Site-specific commitments to pre-Charter ordinary-engineering origin for ancestral infrastructure (CF-0038 Brinewick canal networks and estate-outskirts underground tunnel networks) do NOT constitute Maker-Age resolution, do NOT extend territorial-extent claims, and do NOT accumulate toward civilization-identity findings. Civic-mainstream attribution is pre-Charter ancestral human-and-animal-folk engineering consortia whose administrative records did not survive Charter-Era consolidation — this is a POSITIVE commitment that records were lost in Charter-Era chronicle-consolidation, NOT a POSITIVE commitment that Makers built the infrastructure. In-world Maker-mystic sectarian speculation that the deepest canal-beds rest on Maker-Age substructure is local-rumor-only contested-canon per Mystery Reserve M-19 — never world-truth. Added to disallowed cheap answers: *\"Brinewick canal substructure proved to be Maker-Age infrastructure — forbidden reveal at world level.\"* *\"Brinewick estate-outskirts underground tunnels proved to be Maker-Age substructure — forbidden reveal at world level.\"* *\"A specific surviving pre-Charter chronicle-fragment definitively settling the Maker-vs-ancestral attribution question — forbidden reveal at world level.\"* The M-1 firewall holds with this cross-application clause. §Specific Maker-Age Details (OPEN_QUESTIONS) deferral is preserved with narrowed scope — narrow per-site speculation at Brinewick-specific sites is acceptable (e.g., a specific story's canal-bed dredge-find might surface a Maker-substructure fragment at a specific Brinewick location), but territorial-extent and civilization-identity resolutions remain forbidden."
+  - originating_cf: CF-0041
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Extension — Maker-deliberate-burial anti-evidence firewall
+    body: 'CF-0041 commits that the Maker-Age peoples had hazard-awareness and response-capability, deliberately sealing, entombing, or flooding some of their own artifacts and buildings using complex engineering and coordinated labor. This commitment is bounded hazard-awareness-and-response-practice ONLY; it does NOT resolve what the Makers feared, whether burial preceded / accompanied / postdated the fall, whether the burial effort succeeded or failed, or the nature of the Maker fall itself. Sectarian readings divide: Maker-mystic "penitent-Makers" reading (Makers regretted what they made and buried what they could reach) and Maker-skeptic "calculating-Makers" reading (Makers made hazards deliberately and buried only what they could not otherwise control); progenitor-cult lineage-keepers split similarly. NEITHER reading is world-truth. The M-1 firewall holds without resolution; accumulated site-specific detail from Maker-deliberately-buried-building strikes does NOT amount to civilization-level cause-of-fall resolution. Added to disallowed cheap answers: *"Maker-Age burial architecture reveals the nature or cause of the Maker fall — forbidden reveal."* *"A buried-building inscription directly explaining why the Makers buried their artifacts — forbidden reveal at world level."* *"Maker-deliberate-burial proven to be an eve-of-fall response — forbidden reveal."* *"Maker-deliberate-burial proven to be a pre-fall centuries-long institutional hazard-management practice — forbidden reveal at world level."* The M-1 firewall holds with this cross-application clause.'
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Extension — Ash-Seal trade-secret-research anti-evidence firewall
+    body: "CF-0043 commits Ash-Seal's Brinewick-local trade-secret internal research archive. The archive is EMPIRICAL CONTAINMENT/CRAFT knowledge ONLY (handling protocols, vessel-design empirical notes, disposal-site selection, incident-response patterns accumulated since Charter-Era company founding); NOT Maker-cognitive content, NOT civilization-identity findings, NOT cause-of-fall evidence. Sectarian Maker-mystic readings that Ash-Seal's trade-secret archive is \"recovered Maker research\" or \"modern Maker-knowledge recovery via commercial channel\" are contested-canon sectarian projection paralleling CF-0023 grimoire-as-Maker-research sectarian register, NOT world-truth. Ash-Seal's defector-specialists carry empirical-craft knowledge under standard journeyman-migration register; specific procedural-protocol text and archive content remain covenant-constrained. Added to disallowed cheap answers: *\"Ash-Seal trade-secret archive revealed to contain recovered Maker-Age cognitive content — forbidden reveal at world level.\"* *\"Ash-Seal internal research yielded decisive Maker-civilization-identity findings — forbidden reveal at world level.\"* *\"Ash-Seal archive contents cited as evidence of modern Maker-knowledge recovery — forbidden reveal.\"* The M-1 firewall holds with this cross-application clause."

@@ -1,0 +1,18 @@
+id: OQ-0024
+topic: Ruin Ownership and Jurisdiction
+body: |-
+  - CF-0027 commits enterable Maker-Age ruin sites as a recognized category and CF-0028 commits patron-funded expeditions. Who holds discovery-rights and ongoing custody over a newly-found enterable ruin — surface-landholder, sponsor-polity, chartered extraction-guild, finder, or a combination — is polity-dependent and legally unsettled. Some polities vest ruin-discovery in the civic registry; some recognize finder's-claim under charter constraints; some treat ruin-rich land as automatic crown-hold; some leave it to case-by-case magistrate adjudication.
+
+when_to_resolve: when a specific ruin-discovery dispute appears in story, or when a named polity's expedition-licensing frame requires concrete detail.
+caution: interacts with CF-0008 chartered-guild monopoly, CF-0030 funder-primacy convention, and Landholding §title-confirmation. Any world-level resolution would collapse the regional-asymmetry pattern that CF-0021 / CF-0024 / CF-0028 have established as characteristic of the current Charter Era.
+extensions:
+  - originating_cf: CF-0041
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Maker-deliberately-buried-building jurisdictional extension
+    body: "CF-0041 commits Maker-Age deliberate-burial of entire buildings as a distinct substructure sub-category. Excavation jurisdiction over a newly-struck Maker-deliberately-buried building is MORE contested than ordinary enterable-ruin jurisdiction because (a) the surface-landholder rarely commissioned the strike (most strikes happen during ordinary foundation-dig or qanat-cleaning), (b) chartered extraction-guild claims extraction-primacy under SOC-4 / CF-0008, (c) CF-0028 patron-funded expedition syndicates claim patron-funder-primacy if the strike's surface-land is within a syndicate's prospected footprint, (d) civic-archaeological-license frameworks (pressed by civic-reformists) argue for civic custody particularly for buildings-as-distinct-from-individual-ruins. Added to the existing CF-0028 ruin-ownership deferral: per-polity jurisdictional-stringency for Maker-deliberately-buried-building excavation is deferred. Narrow per-site resolution is acceptable when a story requires; structural resolution remains deferred."
+  - originating_cf: CF-0042
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Status-display-artifact jurisdiction extension
+    body: CF-0042 commits elite-house display of declared-inventory safe-class artifacts. Jurisdiction over stolen-from-display recovery (civic-watch vs chartered-extraction-guild broker-reclaim vs CF-0033 dragoon under black-market artifact-traffic predicate vs CF-0024 contractor hired by victim-house) is polity-asymmetric and unsettled in most jurisdictions. Per-polity theft-recovery jurisdiction stringency is deferred; it interacts with the FIFTH parallel sixth-axis watch-item (declared-inventory display-registration stringency).

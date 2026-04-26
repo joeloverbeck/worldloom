@@ -1,0 +1,34 @@
+change_id: CH-0011
+date: 2026-04-19
+change_type: clarification
+affected_fact_ids:
+  - CF-0031
+  - CF-0032
+summary: |
+  Type-A Clarificatory retcon correcting inherited counting-drift in CF-0031- and CF-0032-era domain-file annotations (TIMELINE.md line 137; INSTITUTIONS.md lines 40 and 169). The drift: "three parallel polity-asymmetries" phrasing in CH-0005 and CH-0006 domain patches omitted CF-0028/CF-0030 funder-primacy (established CH-0004 as the third axis); at CF-0031 adoption FOUR axes were actually present, not three. CH-0007 onward correctly counted (TIMELINE line 138: "formerly counted as three or four, now five"); drift persisted in the CF-0031/CF-0032-era annotations until now. PA-0006 §Adjudication (line 296) explicitly acknowledged the inherited drift and deferred correction to a separate workflow; AU-0001 Finding F-02 produced retcon proposal RP-0001; this CH-0011 executes the deferred correction. Scope is narrow: three attribution-bearing prose patches + two modification_history appends on CF-0031 and CF-0032. NO CF statement/scope/status/distribution change; no invariant touched; no Mystery Reserve entry extended; no Open Questions section added. Line 169 "fourth instance" consequentially updated to "fifth instance" under the same attribution for ordinal-math consistency (four asymmetries named + "not a fourth instance" would be inconsistent). Verdict ACCEPT_WITH_REQUIRED_UPDATES. Adjudication record: adjudications/PA-0010-accept_with_required_updates.md.
+reason:
+  - executes deferred-correction obligation from PA-0006 (CH-0007 adjudication) per explicit acknowledgement at PA-0006 line 296
+  - "resolves three soft contradictions: TIMELINE line 137 ('three') vs line 138 ('formerly counted as three or four, now five'); INSTITUTIONS line 40 ('third axis alongside CF-0021 and CF-0024') vs line 42 ('fifth polity-asymmetric disagreement-axis joining CF-0021, CF-0024, CF-0028/CF-0030, CF-0031'); INSTITUTIONS line 169 internal enumeration-vs-count inconsistency (four items called 'three')"
+  - strengthens Charter-Era stress-register thematic reading — miscounting downward UNDER-states stress load; correcting upward restores designed pressure
+  - closes AU-0001 Finding F-02
+scope:
+  local_or_global: global
+  changes_ordinary_life: false
+  creates_new_story_engines: false
+  mystery_reserve_effect: unchanged
+downstream_updates:
+  - TIMELINE.md
+  - INSTITUTIONS.md
+  - CANON_LEDGER.md
+impact_on_existing_texts: []
+severity_before_fix: 3
+severity_after_fix: 1
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced: []
+notes: |
+  CH-0011 uses the CANONICAL 5-field retcon_policy_checks schema matching templates/change-log-entry.yaml and CH-0001 through CH-0009; does NOT mirror CH-0010's drifted 4-field schema (AU-0001 Finding F-01, addressed by a separate retcon proposal). RP-0001's Operator Notes reference to "9-field retcon_policy_checks" was a drafting imprecision — no 9-field schema exists; the canonical standard is 5 fields. Attribution-preserving patch pattern extends existing `<!-- added by CF-NNNN -->` convention to `<!-- clarified by CH-NNNN (inherited ... drift) -->` for post-hoc corrections; grep-verified no prior collision in world domain files. Phase 12a modification_history scan yielded CF-0031 and CF-0032 across all three axes (a-derived_from, b-soft-contradiction, c-substantive-extension); both receive mod_history entries. Phase 6 consequence propagation touched zero of 13 FOUNDATIONS domains; escalation gate did NOT fire; six critic sub- agents NOT dispatched (appropriate for pure clarificatory retcon). Phase 14a validation: 9 of 9 tests PASS with rationale (several N/A-adapted for clarificatory retcon without new CF). Line 169 "fourth instance" → "fifth instance" consequential edit covered by same attribution as the count correction (both driven by the same inherited CH-0006 drift); user explicitly approved the consequential edit at Phase 15a HARD-GATE. Pre-existing ledger latent NOT addressed here: CH-0010's 4-field retcon_policy_checks schema drift (AU-0001 Finding F-01) remains open; requires a separate retcon proposal.

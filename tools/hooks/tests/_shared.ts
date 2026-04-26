@@ -5,6 +5,8 @@ import { spawnSync } from "node:child_process";
 
 import Database from "better-sqlite3";
 
+const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..");
+
 export function createTempRepoRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "worldloom-hooks-"));
   mkdirSync(path.join(root, "tools", "hooks"), { recursive: true });
@@ -45,7 +47,7 @@ export function seedHookFixtureWorld(root: string, worldSlug = "animalia"): void
 
   const migrationSql = readFileSync(
     path.join(
-      "/home/joeloverbeck/projects/worldloom",
+      REPO_ROOT,
       "tools",
       "world-index",
       "src",
@@ -262,7 +264,7 @@ export function runCompiledHook(
 ): { status: number | null; stdout: string; stderr: string } {
   const result = spawnSync(
     process.execPath,
-    [path.join("/home/joeloverbeck/projects/worldloom", "tools", "hooks", "dist", "src", hookScript)],
+    [path.join(REPO_ROOT, "tools", "hooks", "dist", "src", hookScript)],
     {
       cwd: options.cwd,
       env: {

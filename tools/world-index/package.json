@@ -7,6 +7,11 @@
     "world-index": "dist/src/cli.js"
   },
   "exports": {
+    "./commands/build": {
+      "import": "./dist/src/commands/build.js",
+      "require": "./dist/src/commands/build.js",
+      "types": "./dist/src/commands/build.d.ts"
+    },
     "./commands/sync": {
       "import": "./dist/src/commands/sync.js",
       "require": "./dist/src/commands/sync.js",
@@ -36,7 +41,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test:spec10-verification": "bash tests/integration/spec10-verification.sh",
-    "test": "node --test dist/tests/*.test.js",
+    "test": "node --test \"dist/tests/**/*.test.js\"",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -52,6 +57,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

@@ -1,0 +1,16 @@
+id: OQ-0001
+topic: Place and Polity Naming
+body: "- Specific names of polities, cities, rivers, canals, mountain ranges, and key sites are not yet committed. The world commits only to **shape**: temperate canal heartland, cold north highland, wet fenlands west, drylands south, mountain east, with city-state and duchy political forms."
+when_to_resolve: when the first concrete story or region module is built; resolve regionally rather than continent-wide to keep narrative anchor without over-specifying.
+caution: ""
+extensions:
+  - originating_cf: CF-0037
+    change_id: CH-0012
+    date: 2026-04-19
+    label: Waystation-name informality preserved
+    body: CF-0037 commits family-handled waystations as named-by-local-tradition rather than civic-registered with formal designations. Specific named waystations (the Halver Family stop, the Bent-Birch Stop) emerge in story through informal local idiom; no place-naming is forced by CF-0037 commitment, and the deferral above is preserved.
+  - originating_cf: CF-0038
+    change_id: CH-0013
+    date: 2026-04-19
+    label: Brinewick partial-resolution
+    body: "CF-0038 commits **Brinewick** as Animalia's first named chartered sprawling city — a canal-fed charter-polity in the Temperate Canal Heartland band sited at a trunk-canal confluence feeding a river-mouth system. Named anchor venues committed: The Copper Weir and The Lock-Keeper's Cat (canal-circuit bardic anchor taverns; four other canal-circuit venues deferred to story-demand). The deferral above NARROWS accordingly: per-region resolution ongoing rather than continent-wide; other heartland polities, non-heartland polities (cold north highland clans, drylands caravan towns, fenlands west, mountain east), rivers, named mountain ranges, and the identity of the most-populated heartland city remain deferred. The commitment DOES NOT foreclose other regional centers of wonder; Brinewick's world-scale fame is narrow (commerce-hub and commercial-clearinghouse primacy per CF-0038 pragmatic-scale language, NOT ordinal \"#1 in the world\" supremacy — the commitment is world-renowned status, not world-sole-commerce-center status)."

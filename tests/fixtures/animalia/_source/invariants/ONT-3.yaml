@@ -1,0 +1,17 @@
+id: ONT-3
+category: ontological
+title: Species do not interbreed
+statement: A hyena-folk and a human cannot produce a child. Cross-species sexual relationships exist socially but are reproductively sterile. Family across species is built through marriage, fostering, and adoption — not blood.
+rationale: Without this rule, speciation collapses, embodiment loses meaning, and "halfbreed" plot conveniences erode the social texture. (Logged for OPEN_QUESTIONS as user-revisable.)
+examples:
+  - cross-species marriage with adopted heirs; a human noble and a fox-folk consort raising a fostered hare-folk child
+non_examples:
+  - hybrid offspring, "half-cat half-human" characters
+break_conditions: requires user approval; would force redesign of kinship, succession law, and species cohesion.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Clarification
+    body: '"Chimeric" morphology observed in artifact-contaminated mutated non-sentient beasts (CF-0035) — fused features, parallel limbs, merged apparent anatomy — is ARTIFACT-EFFECT on an already-contaminated individual organism, NOT cross-species reproductive hybridization. Species reproductive boundaries are preserved: no mutated-beast lineage arises from sexual interbreeding across species. The chimeric register applies to the shaped-by-artifact body, not to the reproductive act. ONT-3 holds without exception.'

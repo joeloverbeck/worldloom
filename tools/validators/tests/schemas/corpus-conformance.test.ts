@@ -10,7 +10,7 @@ import yaml from "js-yaml";
 const packageRoot = process.cwd();
 const repoRoot = resolve(packageRoot, "../..");
 const schemaRoot = resolve(packageRoot, "src/schemas");
-const sourceRoot = resolve(repoRoot, "worlds/animalia/_source");
+const sourceRoot = resolve(repoRoot, "tests/fixtures/animalia/_source");
 
 const schemaNames = [
   "canon-fact-record",

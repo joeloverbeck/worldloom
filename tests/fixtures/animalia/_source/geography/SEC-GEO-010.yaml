@@ -1,0 +1,43 @@
+id: SEC-GEO-010
+file_class: GEOGRAPHY
+order: 10
+heading: Regional Asymmetry on Contractor Licensing
+heading_level: 2
+body: |-
+  Adventurer-contractor activity (CF-0024) is geographically uniform in its existence — veterans, bards, and escort-labor exist everywhere people are hired — but sharply uneven in its institutional response, especially for mercenary-band formation and for occult-fallout specialists (CF-0025):
+
+  - **Canal heartland charter towns**: predominantly license mercenary companies under tight charter in larger polities; in smaller towns, mercenary bands form ad-hoc at skirmish-season and disband when done. Tavern notice-boards and lockmaster posting walls are standard. Contractor-auxiliary rosters (CF-0024) in extraction-guild chapter-houses are widespread.
+  - **Big-city outskirts estates**: officially aligned with parent polity, but named adventurer retinues on noble payroll re-create pre-Charter martial clientage under modern contract language. Charter-Era anti-monopoly-of-force norms friction here; civic watch periodically challenges large estate retinues; dowager-gossip tracks which estates quietly maintain named adventurer-bands on standing retainer.
+  - **Cold north highland clans**: skirmish-season brings outland mercenary bands to clan borders; clan hospitality laws govern quartering and the permission required to take contracts within clan territory. Clan-member warriors who serve outland bands undergo cleansing rites before hearth re-entry. Fallout-scarred outlanders asking after cairns are watched closely; clan-elder sanction gates all outland contract-taking.
+  - **Drylands south caravan towns**: caravan-masters contract escort-warriors at rotation turn; posting-boards at caravanserai and tea-house are ordinary. Caravan-master cargo refusals travel by reputation and can end an escort-warrior's rotation career. Water-rights tribunals occasionally rule on escort-caused damages.
+  - **Wet fenlands west**: fen-villages do not post; they summon. When amphibian-folk vigilance detects fallout drift (typically from a botched dry-edge crafter attempt per CF-0021), the village council sends dry-edge word to an occult-fallout specialist via monastic clinic relay. Marker-reeds raised at the stilt-landing guide the inbound contractor; the drowned contract-runner is a recurring ghost-story.
+  - **Mountain east**: seasonal pass-opening brings posting-boards to valley market-towns; mining estates contract escort-warriors for silver and copper shipments; isolated valley smiths are less integrated into the contractor economy but participate seasonally.
+
+  Contractor-mobility along canal corridors and caravan routes generates recurring legal friction; a contractor licensed as a mercenary-company member in a licensing polity may face arrest in a banning one, and civic registry has no schema for "lawful mercenary-company standing" recognized across polities. This is the same no-schema gap that CF-0021 exposed for crafters.
+
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

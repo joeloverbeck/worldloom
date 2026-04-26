@@ -1,0 +1,42 @@
+id: SEC-GEO-009
+file_class: GEOGRAPHY
+order: 9
+heading: Regional Asymmetry on Crafter-Tolerance
+heading_level: 2
+body: |-
+  Modern artifact creation (CF-0021) is geographically uniform in its existence (small persistent practitioner population everywhere grimoire fragments reach) but sharply uneven in its institutional and folk response:
+
+  - **Canal heartland charter towns**: predominantly punitive. Civic watch and artifact-extraction guild coordinate prosecution; ward-inspectors walk artisan quarters with creation-attempt awareness. A few large heartland polities have begun licensing crafter-guilds under tight charter to capture the practice rather than drive it underground; this is contested.
+  - **Big-city outskirts estates**: officially aligned with their parent polity, but tenant cottages on outlying estates provide effective cover; estate-master discretion is real and politically consequential.
+  - **Cold north highland clans**: handle by clan custom. Outsider tinkers peddling "useful charms" are watched; clan members caught with grimoire-leaves are exiled; suspect texts are burned ritually rather than archived.
+  - **Drylands south caravan towns**: caravan rotation provides natural cover for grimoire transit and itinerant crafters; water-rights tribunals add "occult firing" to well-misuse statutes when a kiln drains a shared cistern; caravan-masters quietly refuse certain cargo.
+  - **Wet fenlands west**: no kilns at scale on stilt-villages; the suspicion displaces to dry-edge potter villages on the fen margin, who bear scapegoating when amphibian-folk canaries detect contamination drifting from a botched firing miles away.
+  - **Mountain east**: passes carry grimoire-fragments seasonally; isolated valley smiths are the local profile of suspicion.
+
+  Crafter-mobility along canal corridors and caravan routes is a recurring legal friction; a crafter trained legally in a tolerant polity may face arrest in a punitive one, and civic registry has no schema for "lawful crafter status" recognized across polities.
+
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

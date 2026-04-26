@@ -1,0 +1,31 @@
+id: OQ-0010
+topic: Specific Guild Naming and Charter Conditions
+body: "- Artifact-extraction guilds are central to the world but have no canonical names. Their charter conditions vary by polity; the genesis world commits only to typical features (declared inventory, scheduled inspection, civic right of seizure, capital penalty for unlicensed catastrophic-class)."
+when_to_resolve: when a guild appears as a named institution in story.
+caution: ""
+extensions:
+  - originating_cf: CF-0028
+    change_id: CH-0004
+    date: 2026-04-18
+    label: Extension under expedition-venture pressure
+    body: CF-0028 commits patron-funded ruin-expedition ventures as an institutional form, and CF-0030 commits polity-asymmetric funder-primacy convention. Per-polity licensing frameworks for expedition-venture syndicates — which polities charter them, charter terms, declared-inventory discipline, civic-observer requirements, prosecution standards for knowledge-killings — remain deferred. Structural commitment holds (expedition-venture syndicates exist and operate polity-asymmetrically); specific per-polity naming and charter detail deferred until story requires.
+  - originating_cf: CF-0032
+    change_id: CH-0006
+    date: 2026-04-18
+    label: Extension under oversize-saddlery subsection pressure
+    body: CF-0032 commits the oversize-saddlery guild-subsection as a structural institutional form within wainwright and saddlery guilds in ancestral Cluster C polities. Specific wainwright-guild names, specific saddlery-guild names, charter terms for the subsection within each parent guild, master-rank progression requirements across ancestral polities, and reciprocal-journey verification archive custody arrangements (guild-internal / charter-clerk hybrid) remain deferred. Structural commitment holds (subsection exists; reciprocal circuit operates; master-rank progression requires completed reciprocity); specific per-polity naming and charter detail deferred until story requires.
+  - originating_cf: CF-0036
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Extension under exclusionary-settlement-adjacent guild-relations pressure
+    body: CF-0036 commits that single-species exclusionary settlements exist in isolated / weak-charter / demographically-fragile regions and that guild-adjacent artisan communities face sectarian supremacist-doctrine recruitment pressure at the margin. Specific per-polity guild-charter language regarding (a) charter-sound-conduct review for masters or journeymen publicly adopting supremacist doctrine, (b) guild-intake SOC-1 firewall documentation practices, (c) guild-disciplinary procedure for canal-mud-refusal or mother-species-mockery incidents reaching guild attention, (d) guild-relations protocol with exclusionary-settlement-sourced commissioning (accepting, refusing, or charter-neutral treatment) remains deferred and polity-asymmetric. Structural commitment holds (SOC-1 firewall at charter-seal intake; informal sorting pressure exists without gating); specific per-polity charter detail deferred until story requires.
+  - originating_cf: CF-0037
+    change_id: CH-0012
+    date: 2026-04-19
+    label: Family-handled waystation NON-CHARTERED commitment narrows the deferral
+    body: "CF-0037 commits that the family-handled waystation tradition is EXPLICITLY NON-CHARTERED — there is no waystation-keepers' guild, no master-rank progression, no chartered association, no SOC-4-class chartered monopoly. The deferral above narrows accordingly: per-polity charter language for waystation-keeping itself is N/A (no charter exists to draft); per-polity inn-guild charter friction with non-chartered family-waystation revenue on connector-routes (where chartered-inn proprietors occasionally invoke charter-monopoly framing) IS deferred per the existing pattern. Resolution of inn-guild-vs-waystation friction in any specific polity would commit to a charter-monopoly stance the structural geometry currently keeps cooperative."
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Ash-Seal Brinewick-specific non-guild civic-charter anomaly narrows the deferral
+    body: "CF-0043 commits Ash-Seal as a Brinewick-local civic-chartered (non-guild) commercial-company anomaly holding concordat-arranged monopoly on containment / research / sealed-inert disposal downstream of chartered-extraction. The structural commitment is named — Ash-Seal operates OUTSIDE chartered-guild structure under Brinewick civic charter with chartered-extraction-guild concurrence — but specific civic-charter TERMS are explicitly deferred to the new §Ash-Seal Civic-Charter Terms (Brinewick) section below. Specific chartered-extraction-guild NAMES (in Brinewick and elsewhere) remain deferred at the parent-scope above. The Ash-Seal specification is categorically distinct from both the chartered-extraction-guild naming deferral (which governs chartered-guild bodies everywhere including non-Brinewick heartland polities) and the CF-0037 family-handled waystation NON-CHARTERED deferral (which governs non-chartered household-enterprise institutional form): Ash-Seal is NEITHER chartered-guild NOR family-enterprise — it is civic-chartered commercial corporate form, a categorically new institutional shape on the Animalia register, Brinewick-local by commitment, non-transferable to other polities."

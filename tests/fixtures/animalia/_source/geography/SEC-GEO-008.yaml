@@ -1,0 +1,41 @@
+id: SEC-GEO-008
+file_class: GEOGRAPHY
+order: 8
+heading: Sacred and Cursed Terrain
+heading_level: 2
+body: |-
+  - **Progenitor-cult sites**: hilltops, springs, ancient trees associated with species-progenitor figures. Protected by custom; sometimes by civic law.
+  - **Maker substructures**: where exposed, often made into pilgrim sites by some sectarians and quarantined by civic authority. Tense overlap.
+  - **Sealed quarter-towns**: abandoned after irrecoverable contamination. Their boundaries are walled or warded; entry is restricted; folk-tales accumulate. <!-- added by CF-0021 --> A subset of sealed quarter-towns are now understood (or contested as understood) to have been crafter-attempt detonations rather than Maker-leakage breaches; reattribution is politically charged and incomplete. <!-- added by CF-0033 --> In adopting polities (per Regional Asymmetry on Dragoon-Adoption below), sealed-quarter perimeter maintenance and evacuation-support response are now dragoon-chartered functions rather than ad hoc chartered-watch-plus-guild coordination; the boundary enforcement is visibly faster and more coercive, and residents of adopting-polity quarters under active seal know the dragoon turnout-call and the cordon-marker gear the way their grandparents knew the ward-inspector's walk.
+  - **Battle-fields and plague-trenches**: from prior centuries, often marked by stone or cairn; sometimes bypassed by superstition even when the path would be shorter.
+  - <!-- added by CF-0027 --> **Enterable Maker-Age ruin sites** (CF-0027): a recognized subset of Maker substructures with interior volumes, entrances, and recoverable contents. Some are under active civic seal; some under chartered-guild jurisdiction; some in polity-jurisdictional dispute. Catastrophic sites (those where guardian-construction activation per CF-0029 has produced squad-wipe) are "officially resealed" — enforcement variable; "at least officially" is a standard civic-archive formulation. Pilgrim-site tension intensifies where sectarian Maker-mystic movements treat an enterable ruin as sacred ground while civic authority treats it as contained hazard. Place-name and street-name residue of regional armed conflicts over ruin disputes (per TIMELINE Layer 4) accumulates near contested sites.
+  - <!-- added by CF-0035 --> **Contaminated-fauna zones** (CF-0035): wilderness-distal pockets where centuries of uncontained artifact exposure have produced surviving mutated non-sentient beasts. Distinct from sealed quarter-towns (not population-evacuated; not walled) and distinct from static Maker-substructure sites (the hazard walks). Location knowledge travels as hunter-corridor reputation informal rather than in civic-archive record; no polity maintains a systematic zone-ledger. Selection-bias firewall (M-10 second cross-application, parallel to CF-0034 bandit-survivor folklore): hunter-survivor folklore about "safe" versus "unsafe" wilderness zones is selection-bias folklore, NOT a mutated-beast-presence empirical predictor. The zone is not a pilgrimage site under any chartered sectarian program; organized Maker-mystic beast-veneration pilgrimage to such zones is sectarian innovation not established tradition and would face Cross-Cluster firewall scrutiny. Gargantuan-underground scale-tail (M-15) associated with deep-cave strata remains rumor-only — no zone is canonically committed as gargantuan-beast-bearing at world level.
+  - <!-- added by CF-0041 --> **Maker-deliberately-buried building sites** (CF-0041): a distinct substructure sub-category within the Maker-substructure class. Entire buildings containing hazardous artifacts were deliberately sealed by the Makers themselves using complex engineering — deep earth-fill burial, engineered hydrological flooding, or reinforced masonry entombment. Occasionally struck by foundation-digs, canal cuts, qanat-cleaning rites, peat-cuttings, or estate-cellar excavations; strike-rate rises with Layer-4 canal expansion. The sealing-technique itself is LOST (not in CF-0023 leaked grimoire corpus; not reproducible by CF-0021 crafter attempts). Sealed containers within these buildings remain mechanically INERT until opened or breached; opening triggers CAU-1 activation of whatever artifact lies within. Civic response on discovery: multi-guild unsealing-triage protocol (chartered extraction-guild ward-inspector + civic-watch + containment-wright + dredger-foreman or excavation-foreman) paralleling CF-0027 enterable-ruin response but DISTINCT in jurisdiction — buried-building excavation jurisdiction is contested among chartered extraction-guild, CF-0028 patron-funded expedition syndicates, and civic-archaeological-license frameworks (OPEN_QUESTIONS §Ruin Ownership and Jurisdiction pressured, not resolved). Four Mystery Reserve firewalls (CH-0014) preserve the bounded-unknowns: M-1 anti-evidence (Maker-burial commits hazard-awareness / response-practice ONLY; never cause-of-fall); M-8 distinct-origin (sealed-inert mechanism ≠ CF-0029 guardian-construction activation); M-9 anti-custody-channel (buried-building archaeology NOT a seventh Maker-knowledge custody channel; yields structural / engineering / artifact-disposition data only); M-10 FOURTH anti-predictor (buried-building-presence does NOT predict catastrophic-class or guardian-construction presence). Sectarian register bifurcates: Maker-mystic pilgrimage pressure at discovered sites; progenitor-cult penitent-vs-calculating doctrinal split — neither world-truth. Common-pantheon clergy offer aspectualization (civic-ritual-of-witness at unsealing).
+
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0023
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

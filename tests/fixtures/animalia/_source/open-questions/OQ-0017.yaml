@@ -1,0 +1,13 @@
+id: OQ-0017
+topic: Crafter Charter Conditions (per polity)
+body: |-
+  - CF-0021 commits that polities respond differently to modern artifact creation (accept / tolerate / fine / jail) and CF-0008 commits the legal frame extension. Specific polity names, charter terms for the few that license crafter-guilds, taxation rates, and registration procedures are deferred.
+
+when_to_resolve: when a story foregrounds crafter mobility or a specific licensed crafter-guild appears as a named institution.
+caution: interacts with the canal-corridor arbitrage dynamic (ECONOMY_AND_RESOURCES.md). Polity asymmetry maps onto existing inter-polity friction.
+extensions:
+  - originating_cf: CF-0039
+    change_id: CH-0014
+    date: 2026-04-20
+    label: Crafter-disposal protocol annotation
+    body: CF-0039 commits destruction-resistance SCOPED to Maker-Age artifacts only; modern crafter outputs (CF-0021) remain destructible by ordinary means. Per-polity crafter-charter terms regarding disposal of failed / unstable / inert crafter-output vessels (smashing, burning, dissolving, burial under guild-witness) are deferred; the CF-0039 scope boundary provides the structural commitment that destruction IS available for crafter outputs, which was not the case before CH-0014. Specific disposal-protocol language for chartered crafter-guilds in tolerant polities is deferred to story-demand.

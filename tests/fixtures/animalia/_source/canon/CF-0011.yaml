@@ -1,0 +1,55 @@
+id: CF-0011
+title: Animal-folk can hold civic authority and noble title
+status: hard_canon
+type: institution
+statement: |
+  Class mobility in Animalia is not species-coded. Animal-folk can occupy any class up to and including landed nobility and chartered civic authority. A beaver-folk magistrate, an aurochs-folk landowner, and a hyena-folk guild-master are ordinary, not exceptional.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - law
+  - economy
+  - settlement_life
+  - religion
+  - status_signaling
+prerequisites:
+  - civic registry recognizing the individual
+  - applicable charter or grant
+distribution:
+  who_can_do_it:
+    - any sentient person regardless of species
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - general class barriers (wealth, birth, connection) apply to all species
+    - sectarian progenitor-supremacy movements oppose this in some regions
+costs_and_limits:
+  - mixed-species estates face succession complications (CF-0002 interaction)
+  - civic registry as arbiter is sometimes ignored in highland and fenland communities
+visible_consequences:
+  - mixed-species nobility, civic offices, guilds are ordinary
+  - Charter-Era institutional integration is durable
+  - sectarian progenitor-supremacy movements treated as fringe in most polities
+required_world_updates:
+  - INSTITUTIONS
+  - PEOPLES_AND_SPECIES
+  - EVERYDAY_LIFE
+  - TIMELINE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0001
+contradiction_risk:
+  hard: false
+  soft: false
+notes: |
+  Invariant SOC-1. Foundational social fact. Modified 2026-04-18 by CH-0006 (CF-0032): CF-0011's global class-mobility claim is now supplemented by a concrete Cluster C upward-mobility mechanism — oversize-saddlery guild-subsection apprenticeship in ancestral polities, with reciprocal cross-polity journeyman circuit (CF-0032). CF-0011 scope remains global (any sentient person regardless of species, any class); the concrete mechanism is regional-specific (ancestral Cluster C polities). Apprenticeship is species-concentrated by ancestral-region presence, NOT species-gated at intake — a human, Cluster A, or Cluster B apprentice who completes the reciprocal circuit receives the same seal (SOC-1 preserved).
+modification_history:
+  - change_id: CH-0006
+    originating_cf: CF-0032
+    date: 2026-04-18
+    summary: "qualification: concrete Cluster C upward-mobility mechanism committed via oversize-saddlery subsection; global scope preserved, mechanism regional, apprenticeship not species-gated"

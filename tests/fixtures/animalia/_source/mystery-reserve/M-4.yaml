@@ -1,0 +1,31 @@
+common_interpretations: []
+disallowed_cheap_answers:
+  - An official world-level confirmation of any single position
+domains_touched:
+  - RELIGION
+  - INSTITUTIONS
+  - POLITICS.
+extensions:
+  - body: 'The oversize-saddlery guild-subsection (CF-0032) is a concrete body-plan-accommodation craft in ancestral Cluster C polities. Progenitor-cult lineage-keepers in ancestral polities may integrate subsection journeymen-lineages into cultural-continuity claims, but this is sectarian activity, not civic-chartered endorsement. The subsection does NOT adjudicate whether species-progenitor figures are historical, mythical, or pantheon-aspects; subsection mastery is craft-competence, not progenitor-position evidence. Added to disallowed cheap answers: *"Subsection-master lineage antiquity reinterpreted as material progenitor-position evidence — forbidden reveal."* The M-4 firewall holds with this cross-application clause. Aspectualizing progenitor-cult lineage-keepers treat the subsection as civic-craft-adjacent; supremacist lineage-keepers attempt the opposite reading — neither position is world-truth.'
+    change_id: CH-0006
+    date: 2026-04-18
+    label: Extension — Subsection-craft firewall
+    originating_cf: CF-0032
+  - body: "CF-0036 commits that supremacist sectarian doctrine asserting species entitlement to violence against other sentient peoples is CONTESTED-CANON sectarian belief held by a fringe, NEVER world-truth. The doctrine frequently cites sectarian readings of species-progenitor figures as \"warrant\" for species-supremacy; this does NOT partial-validate any progenitor-position (historical / mythical / pantheon-aspect). The sectarian supremacist-reading is a MINORITY CONTESTED position within progenitor-cult sectarian supremacy wing; aspectualizing common-pantheon clergy refute under judgment-god and charter-covenant framing, aspectualizing progenitor-cult mainstream refute under civic-covenant-witness framing, and no chartered polity adopts the doctrine as civic policy. Added to disallowed cheap answers: *\"Supremacist-doctrine sectarian reading of species-progenitor figures reinterpreted as material progenitor-position evidence — forbidden reveal.\"* *\"A 'true reading' of species-progenitor cycles validating supremacist species-hierarchy at world level — forbidden reveal.\"* The M-4 firewall holds with this cross-application clause; the \"older bloods\" (CF-0032) and \"species-supremacy\" (CF-0036) sectarian readings are both contested-canon and do NOT cross-validate."
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Extension — Supremacist-doctrine progenitor-reading firewall
+    originating_cf: CF-0036
+  - body: "CF-0044 commits drylands stranger-hospitality short-poetry exchange as an ordinary-register oral-hospitality genre that MAY take progenitor figures and common-pantheon household-gods as verse-subject matter. Verse-matter about progenitor figures in this register is a GENRE-REGISTER CONVENTION — a hospitality-verse genre that draws freely on religious vocabulary and figure-naming — NOT a doctrinal assertion, NOT an aspectualization-compromise commitment, NOT evidence bearing on progenitor-historicity positions (historical / mythical / pantheon-aspect). A drylander caravan-master turning a verse that names the First Hyena or the First Aurochs is performing hospitality-protocol with available cultural-linguistic material, not declaring a progenitor-ontology position. Aspectualizing common-pantheon clergy read the register as civic-adjacent cultural-linguistic practice aligned with the CF-0016 aspectualization compromise; aspectualizing progenitor-cult lineage-keepers read it as civic-covenant-witness register without doctrinal crisis. Sectarian supremacist-reading that hospitality-verse with progenitor figures as subject \"proves\" progenitor-historicity or validates species-lineage-supremacy is CONTESTED-SECTARIAN PROJECTION, NOT world-truth — minor recruitment-margin pressure watched by mixed-polity magistrates via tea-house-scribe and caravan-master reports. Added to disallowed cheap answers: *\"A specific drylands hospitality-verse tradition's verse-matter cited at world level as resolving M-4 progenitor-historicity — forbidden reveal.\"* *\"A named drylander verse-keeper whose hospitality-repertoire is treated as progenitor-historicity evidence at world-level — forbidden reveal.\"* *\"Sectarian-supremacist reading of drylands hospitality-verse figure-naming as material progenitor-position evidence — forbidden reveal.\"* The M-4 firewall holds with this cross-application clause; the \"older bloods\" (CF-0032), \"species-supremacy\" (CF-0036), and \"hospitality-verse-as-doctrinal-assertion\" (CF-0044) sectarian readings are all contested-canon and do NOT cross-validate."
+    change_id: CH-0016
+    date: 2026-04-20
+    label: Extension — Drylands hospitality-poetry verse-matter firewall
+    originating_cf: CF-0044
+future_resolution_safety: low
+id: M-4
+knowns:
+  - Every major species honors a progenitor figure (the First Beaver, First Hyena, etc.)
+status: passive
+title: Are Species-Progenitor Figures Historical, Mythical, or Aspects of the Common Pantheon?
+unknowns:
+  - Whether the progenitors were historical individuals, mythical archetypes, divine aspects, or three-way ambiguous

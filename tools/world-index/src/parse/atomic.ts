@@ -26,6 +26,7 @@ export const ATOMIC_LOGICAL_WORLD_FILES = [
 ] as const;
 
 type AtomicLogicalWorldFile = (typeof ATOMIC_LOGICAL_WORLD_FILES)[number];
+const PRIMARY_AUTHORED_LOGICAL_WORLD_FILES = new Set(["ONTOLOGY.md", "WORLD_KERNEL.md"]);
 
 const FILE_CLASS_TO_LOGICAL_FILE = new Map<string, AtomicLogicalWorldFile>([
   ["CANON_LEDGER", "CANON_LEDGER.md"],
@@ -300,9 +301,16 @@ function resolveWorldUpdateTarget(worldSlug: string, target: string): string | n
     return domainFileNodeId(worldSlug, logicalFile);
   }
 
-  const basename = target.replace(/^.*[\\/]/, "") as AtomicLogicalWorldFile;
-  if ((ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(basename)) {
+  const basenameWithoutSuffix = target.replace(/^.*[\\/]/, "");
+  const basename = basenameWithoutSuffix.endsWith(".md")
+    ? basenameWithoutSuffix
+    : `${basenameWithoutSuffix}.md`;
+  if (PRIMARY_AUTHORED_LOGICAL_WORLD_FILES.has(basename)) {
     return domainFileNodeId(worldSlug, basename);
+  }
+
+  if ((ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(basename)) {
+    return domainFileNodeId(worldSlug, basename as AtomicLogicalWorldFile);
   }
 
   return null;

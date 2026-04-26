@@ -1,0 +1,31 @@
+id: M-11
+title: Empirical Basis of the Three-Generation Contamination-Lineage Marker
+status: passive
+knowns:
+  - The civic-registry contamination-lineage ledger-mark (CF-0031) runs three administrative generations in family ledgers in adopting chartered polities
+unknowns:
+  - Whether the three-generation interval reflects observed generational health pattern, folk-medical belief reified as policy, administrative mimesis of extractor-veteran pension precedent, or all three in varying mixture
+common_interpretations: []
+disallowed_cheap_answers:
+  - Any reveal that confirms biological heritability of contamination-injury (opens the M-5 door)
+domains_touched:
+  - MAGIC (firewalled via M-5 adjacency)
+  - INSTITUTIONS (civic registry
+  - chartered guild pension coordination)
+  - MEDICINE (folk-medical belief
+  - barber-surgeon and herb-wife empirical ledgers)
+  - LAW (registry-case magistrate precedent
+  - inheritance sub-category)
+  - KINSHIP (marriage-market stigma reckoning across three administrative generations).
+future_resolution_safety: low
+extensions:
+  - originating_cf: CF-0033
+    change_id: CH-0007
+    date: 2026-04-18
+    label: Extension — Dragoon pensioner-health longitudinal records firewall
+    body: "Canal-corridor quarantine dragoons (CF-0033) in adopting polities accrue pensionable-service records including post-service health observations across retirement years. These records are OCCUPATIONAL-EPIDEMIOLOGICAL, NOT CONTAMINATION-HERITABILITY-EVIDENTIARY. Three-generation longitudinal patterns in dragoon-family health (if any emerge as institutions mature over generations) do NOT constitute a parallel dataset to the CF-0031 scrivener's-convention three-generation ledger-mark interval. The CF-0031 three-generation marker is administrative-mimesis of extractor-veteran pension precedent, not biological-inheritance evidence; dragoon pensioner-health records follow similar administrative patterning but with DIFFERENT occupational exposure profile (ward-breach response proximity rather than artifact-extraction / containment-wrighting / occult-fallout-specialist exposure). Future canon work that touches dragoon pensioner-family health records must explicitly firewall against (a) reifying those records into biological-heritability claims, (b) cross-applying CF-0031 registry-scope interpretation to dragoon health observations, and (c) producing dragoon-family health data in forms that parallel the scrivener's-convention dataset and invite reader-inference of shared mechanism. Added to disallowed cheap answers: *\"Dragoon pensioner-family three-generation health patterns confirm CF-0031 heritability — forbidden reveal; the two datasets are administratively parallel, mechanistically independent.\"* The M-11 firewall holds with this cross-application clause."
+  - originating_cf: CF-0037
+    change_id: CH-0012
+    date: 2026-04-19
+    label: Extension — Family-handled waystation multi-generation continuity firewall
+    body: "The family-handled waystation tradition (CF-0037) operates a multi-generational kin-to-kin household-enterprise succession pattern in heartland, highland, and mountain east. Named waystation-family lineages span multiple administrative generations (waystation tenancy renewed across grandfather, father, son in chartered-polity civic-registry where adopted; parallel patterns in clan-elder-sanctioned highland and estate-tenant mountain-east contexts). This longitudinal multi-generation pattern is structurally PARALLEL to the CF-0031 three-generation contamination-lineage administrative interval as a surface phenomenon — both involve civic-administrative or estate-administrative records spanning multiple generations of a single family-line — but is MECHANISTICALLY DISTINCT in every load-bearing respect. The waystation continuity is FAMILY-ECONOMIC PHYSICAL-INFRASTRUCTURE inheritance: the building, well, supply-storage, route-knowledge, and traveler-vouch network attach to the place, transferred through ordinary household succession. The CF-0031 ledger-mark continuity is ADMINISTRATIVE-WELFARE BODY-INJURY-RECORD inheritance: the civic-registry subsidiary record tracks contamination-injury body-state across three administrative generations as scrivener's-convention mirroring extractor-veteran pension precedent. The two have NO mechanistic overlap — different inheritance object (place vs body-state), different custody (estate-steward / civic-tenancy vs civic-registry contamination-record), different welfare-eligibility consequence (placement-right value vs pension supplement and monastic-clinic priority), different stigma-economy (settled-resigned-respectable vs three-generation marriage-market stigma). Longitudinal stationkeeper-family data MUST NOT be reified, in-world or out-of-world, as parallel data substrate to CF-0031 contamination-heritability evidence; civic-registry tenancy records of waystation-family multi-generation continuity carry no biological-heritability interpretation under any chartered or sectarian reading. Future canon work that touches stationkeeper-family longitudinal records must explicitly firewall against (a) reifying those records into biological-heritability claims, (b) cross-applying CF-0031 registry-scope interpretation to waystation tenancy observations, (c) producing waystation-family records in forms that parallel the scrivener's-convention dataset and invite reader-inference of shared mechanism. Added to disallowed cheap answers: *\"Stationkeeper-family multi-generation continuity reinterpreted as parallel data substrate to CF-0031 three-generation contamination-heritability administrative interval — forbidden reveal.\"* *\"Waystation tenancy records cited as evidence of biological-heritability of stationkeeper-aptitude — forbidden reveal.\"* The M-11 firewall holds with this cross-application clause."

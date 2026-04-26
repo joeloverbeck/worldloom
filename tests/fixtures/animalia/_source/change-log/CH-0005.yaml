@@ -1,0 +1,50 @@
+change_id: CH-0005
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0031
+  - CF-0024
+  - CF-0025
+summary: |
+  Addition of CF-0031 (Chartered-polity contamination-lineage ledger-mark), a soft_canon institutional form: voluntary civic-registry subsidiary record that inscribes extractor, containment-wright, and post-career occult-fallout specialist (CF-0025) lineages for pension supplement and monastic-clinic alms-priority across three administrative generations in adopting chartered polities. Dominant action is addition. Embedded scope-narrowing of CF-0024 and CF-0025 pension-absence claims ("widow-of-the-job without charter pension protection"; "no charter pension") documented in their respective notes-field and modification_history entries: both pension-absence claims narrowed to non-adopting-polity scope for CF-0025-eligible lineages; other contractor-widow categories (mundane CF-0024 subtypes, CF-0028 expedition-widows) remain without charter hook. The global negative claim is preserved as default and narrowed explicitly, not silently replaced. Six critic sub-agents dispatched at escalation gate (>3 of 13 domains touched) and converged on accept with specific repair requirements. Phase 9 repairs adopted: title rename from "Heritable Contamination Registry" to "Chartered-polity contamination-lineage ledger-mark" (Theme/Tone critic); charter-clause civic-watch subpoena restriction stabilizer added (Politics critic); M-5 / M-7 / M-3 firewall language committed to CF statement (Mystery Curator); new Mystery Reserve entry M-11 created (Empirical Basis of the Three-Generation Contamination-Lineage Marker); per-cluster EVERYDAY_LIFE texture for all 5 clusters including explicit non-adoption textures for (c) highland and (e) fenlands (Everyday-Life critic); historical-motivation commitment in CF notes + INSTITUTIONS (Politics critic). Verdict: ACCEPT_WITH_REQUIRED_UPDATES. Adjudication record: adjudications/PA-0004-accept_with_required_updates.md.
+reason:
+  - closes Phase-0/Phase-6 institutional gap in widow-and-contamination-injured welfare for CF-0025-eligible households in adopting polities, filling the OPEN_QUESTIONS Post-Career Contractor Pension and Stigma open question with an explicitly Charter-Era-native instrument
+  - deepens the polity-asymmetric Charter-Era stress register by adding a third axis alongside CF-0021 crafter-tolerance and CF-0024 mercenary-licensure
+  - makes the CAU-1 artifact-cost invariant bureaucratically visible, strengthening AES-2 ordinary-life discipline by giving contamination-injury an administrative ordinary-life signature
+  - activates rich story engines (registered/unregistered succession disputes, registry-scrubber underground, reform-current clergy registry-reform campaigns, civic-watch misuse confrontations, inter-polity migration gap disputes) that map cleanly to kernel-native engines per Theme/Tone critic
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+  - TIMELINE.md
+  - CANON_LEDGER.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "registry-purge/expiry convention at generation-three: does the mark expire automatically, require petition, or persist by default? Open across adopting polities"
+  - "inter-polity registry-transfer protocol when a registered household migrates to an adopting polity with different conventions: does the mark carry? unresolved"
+  - "surveillance-repurposing precedent: the first documented case of civic-watch using the register for contractor-vetting or political suppression, and how magistrates responded — unresolved"
+  - "registry-scrubber trade's guild relationship: whether scrubbers operate adjacent to authentication-specialists (CF-0021 visible_consequences) or as a distinct underground — unresolved"
+  - "charter-mandated access restrictions: which offices can read the register, which must petition, whether principled-refuser clergy (CF-0026) secure witness-access for reform-current oversight — unresolved"
+  - "CF-0002 mixed-species-estate interaction: registry-mark status in mixed-species-estate succession — estate liability, personal attribute, or neither? unresolved"
+  - "non-adopting polity response to transferred marks: do declining polities prohibit registration, ignore it, or recognize transferred marks? unresolved"
+  - "funding-stream specificity: extraction-guild taxation line supporting the pension supplement is not canonized at ECONOMY level; deferred to OPEN_QUESTIONS Ledger-Mark Funding Stream Specificity section"
+  - "labor-market bifurcation dynamics: unregistered households as preferentially-cheaper hires for unchartered patrons; long-run equilibrium implications unresolved"
+  - "sectarian progenitor-supremacy organized opposition intensity: framing-as-Charter-Era-occlusion-of-species-lineage-witness ideological wedge — unresolved"
+  - non-CF-0025 contractor injury (e.g., CF-0028 expedition-triage, mundane CF-0024 subtypes) has no registry hook; gap remains
+notes: |
+  Six critic sub-agents dispatched at escalation gate. Reports consolidated under Phase 6b synthesis and appended verbatim to adjudication record. Continuity Archivist identified CF-0024 / CF-0025 negative-pension-claim silent-retcon risk and recommended addition + scope_retcon framing; adopted. Systems/Economy flagged labor-market bifurcation, monastic- clinic substitution, three-generation wealth-concentration, and registry-scrubber/CF-0023/CF-0028 authentication-cartel trifecta; all incorporated as costs_and_limits and latent burdens. Politics/Institution flagged civic-watch subpoena stabilizer absence (added), sectarian- progenitor-supremacy opposition (added to visible consequences), nobility tenant-cottage exposure (added to EVERYDAY_LIFE cluster-b and INSTITUTIONS Landholding updates), civic-vs-guild custodianship historical motivation (added to CF notes). Everyday-Life delivered per-cluster textures for all 5 clusters including non-adoption textures for (c) highland ("the one who took the southern mark" saga-fragment) and (e) fenlands (monastic-clinic queue asymmetry + fen-widow ghost-story). Theme/Tone flagged the load-bearing linguistic risk in "heritable contamination" — title and prose restructured to "contamination-lineage ledger-mark" with scribal-earthy register committed to CF notes; in-register / out-of-register language lists committed to CF notes. Mystery Curator identified M-5 / M-7 / M-3 firewall requirements (all committed to CF statement and Mystery Reserve annotations) and recommended new Mystery Reserve entry M-11 (Empirical Basis of the Three-Generation Contamination-Lineage Marker); M-11 committed with four contested readings (empirical-generational / folk-medical-reified / administrative-mimesis / mixed) and disallowed cheap answers preserving M-5 firewall. No critic dissented from the accept recommendation. No repair options were declined in ways that sacrificed dramatic intent; all proposal-requested outcomes preserved with repaired language and stabilizer additions. Phase 14a validation: all 9 tests PASS with rationale recorded in adjudication record's Phase 14a Validation Checklist section.

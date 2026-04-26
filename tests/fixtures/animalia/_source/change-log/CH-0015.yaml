@@ -1,0 +1,59 @@
+change_id: CH-0015
+date: 2026-04-20
+change_type: addition
+proposed_by: user (briefs/animalia-ash-seal.md)
+decided_by: canon-addition skill (PA-0014)
+summary: |
+  Ash-Seal — Brinewick commercial containment company — committed as civic- chartered non-guild anomaly with monopoly on artifact containment, research, and disposal in Brinewick and carriage-distance heartland radius, under chartered-extraction-guild concordat. CF-0039 "patented destruction" claim reframed via Phase 9 corporate-marketing firewall; SOC-4 stabilized via Brinewick-unique non-transferable civic charter. Eleven firewall clauses committed across seven Mystery Reserve entries plus Rule 3 / Rule 4 absorptions. Nine existing CFs receive modification_history entries (CF-0006, CF-0008, CF-0024, CF-0031, CF-0038, CF-0039, CF-0040, CF-0041, CF-0042).
+affected_fact_ids:
+  - CF-0006
+  - CF-0008
+  - CF-0024
+  - CF-0031
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0042
+  - CF-0043
+reason:
+  - Commits Ash-Seal as a Brinewick-specific civic-chartered containment company while preserving SOC-4 through a non-transferable local anomaly rather than a broader guild rewrite.
+  - Reframes CF-0039's patented-destruction claim through the corporate-marketing firewall and records the related Brinewick everyday-life, private-guard, and civic-backchannel consequences.
+  - Narrows the Mystery Reserve by adding seven firewall extensions without creating a new bounded unknown, keeping the Ash-Seal seam local to Brinewick and its carriage-distance heartland radius.
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: narrows
+downstream_updates:
+  - WORLD_KERNEL.md
+  - INVARIANTS.md
+  - ONTOLOGY.md
+  - TIMELINE.md
+  - GEOGRAPHY.md
+  - PEOPLES_AND_SPECIES.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - MAGIC_OR_TECH_SYSTEMS.md
+  - EVERYDAY_LIFE.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - Ash-Seal civic-charter terms deferred to OPEN_QUESTIONS §Ash-Seal Civic-Charter Terms (Brinewick)
+  - Ash-Seal institutional antiquity deferred to OPEN_QUESTIONS §Ash-Seal Institutional Antiquity
+  - Ash-Seal trade-secret-extradition framework latent sixth-axis watch-item (future-burden if defector-migration-to-competing-polity cases accumulate; currently not a Charter-Era structural axis)
+  - ward-reserve allocation compound-exposure in Brinewick (Ash-Seal + civic sealed-quarter dual-funding per CF-0038 (b) Breakage Points worsened)
+  - reform-current clergy standing charter-audit campaign (eleventh audit-pressure target)
+  - civic-magistrate jurisdictional case-law on Ash-Seal-guild concordat disputes and trade-secret facility-location litigation (slow-rolling genre)
+  - wage-compression pattern heartland-wide from Brinewick-trained defector-specialist upper-silver fee-for-service anchor
+notes: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict. Escalation gate fired (12/13 domains); six parallel critics converged on acceptance with 11 firewalls. Phase 9 corporate-marketing-reframe on CF-0039 destruction-claim is mission-critical repair. Composite CF selected per Phase 9 split rubric (sub-facts tightly coupled; single stabilizer chain; single invariant-firewall set; shared required_world_updates footprint; user-stated dramatic purpose treats as one phenomenon). Twelve domain-file patches; nine CF modification_history entries; seven Mystery Reserve extensions; two new OPEN_QUESTIONS deferrals; seven pressured OPEN_QUESTIONS annotations. All 10 Phase 14a Validation Tests PASS (see adjudication record). Adjudication record: adjudications/PA-0014-accept_with_required_updates.md.

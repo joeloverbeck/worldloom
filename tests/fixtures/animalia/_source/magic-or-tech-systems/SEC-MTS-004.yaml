@@ -1,0 +1,64 @@
+id: SEC-MTS-004
+file_class: MAGIC_OR_TECH_SYSTEMS
+order: 4
+heading: Modern Creation (CF-0021)
+heading_level: 2
+body: |-
+  A small population of crafters can attempt to create new magical artifacts using ordinary ceramic, metal, or wood vessels and partial-translation grimoires (CF-0023) leaked from chartered artifact-research. The originating research was conducted on contained Maker-Age artifacts within the artifact-extraction guilds during the Incident Wave era; partial knowledge subsequently leaked through containment-wright defectors, opportunistic brokers, and inter-state espionage.
+
+  ### The Practice
+
+  Most attempts fail catastrophically. Kiln explosions, forge accidents, and wood-vessel ignitions kill crafters and assistants. A small fraction of attempts produce a vessel that survives firing; of those, most are inert (no observable effect), some produce unpredictable minor effects, and a small subset exhibit "possession" behavior — apparent agency without world-level sentience (CF-0022). Catastrophic-class effect is permanently outside reach of the leaked corpus.
+
+  ### Why Most Attempts Fail
+
+  The leaked grimoires are partial. The vessel-preparation technique — known to chartered containment-wrights and never recorded in transmissible form — is missing from the leaked corpus. Crafters guess empirically, and most guess wrong. Capital cost of repeated failures, time cost of months-to-years per serious attempt, and lethality combine to keep the practitioner population small and turnover brutal.
+
+  ### Distinguishing Signature
+
+  Modern crafted artifacts can be distinguished from Maker-Age artifacts by craft signature: vessel material (ordinary ceramic / metal / wood, not containment-grade), inscription style (modern script and tooling marks), and contamination pattern (less consistent, often more concentrated). Authentication specialists have emerged as a small occupational niche to perform these distinctions; collectors, brokers, and civic prosecutors all pay for authentication.
+
+  ### Vessel-Hosted Agencies
+
+  When a modern crafted artifact behaves as if "possessed" by an entity with apparent agency (CF-0022), the entity is NOT sentient at the world level — Invariant ONT-1 is preserved without exception. In-world, the nature of the apparent agency is contested by practitioners and theologians (magical instruction-set / beastly intelligence / sentient intelligence) and is observationally unresolvable in the present (Mystery Reserve M-6). Careful practitioners restrict their vocabulary ("behaves as if," "appears to") and avoid words that imply confirmed sentience ("spirits," "souls," "demons"). Civic registry refuses sectarian "personhood" claims about possessed artifacts. The dispute does NOT cross-apply to animal-folk sentience (M-5 firewall).
+
+  ### Effect Predictability
+
+  Researchers debate whether the effects of successful crafted artifacts are random upon creation or process-dependent. The dispute is unresolved in-world (deferred to OPEN_QUESTIONS); both readings are diegetically respectable.
+
+  ### Legal and Social Status
+
+  Polities respond differently (CF-0008 extension): some accept and license under chartered crafter-guilds, some tolerate untaxed, some impose fines, some criminalize possession of creation knowledge outright. Inter-polity divergence is sharp and generates novel extradition case law. Crafter-mobility along canal corridors and caravan routes is a recurring legal friction. Sectarian movements take positions; common-pantheon clergy mostly condemn; Maker-mystic sectarians celebrate; progenitor-cult lineage-keepers split.
+
+  ### Folk Reception
+
+  Communities that have lost neighbors to kiln explosions develop folk-taboos. Childhood warnings about unstamped workshops circulate in artisan quarters. Workshops with private kilns, unusual hours, or shuttered windows on firing-day attract civic and guild suspicion. Herb-wives in artisan quarters keep extra burn-salve stocked. The cultural register of dread that surrounds Maker-Age artifacts (treated like radium, feared like plague) extends to modern crafted work, modulated by the crafter's social standing and the polity's legal stance.
+
+  ### Battlefield-Artifact Taboo
+
+  The standing taboo against deploying artifacts on the battlefield is under new strain: mercenary captains are tempted by crafter commissions for bespoke work, and some commanders quietly experiment. The taboo holds, but the pressure is real and growing.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0019
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0035
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0043

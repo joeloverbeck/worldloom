@@ -1,0 +1,38 @@
+common_interpretations: []
+disallowed_cheap_answers:
+  - "Registry-family patterns reinterpreted as Maker-lineage markers — forbidden reveal."
+  - "A mutated beast encountered by a surviving prospector that communicates meaningfully with the hunter — forbidden reveal."
+  - "Mutated-beast lineage reinterpreted as proto-animal-folk evolutionary precursor — forbidden reveal."
+  - "Artifact-exposure produced sentience in a non-sentient beast — forbidden reveal."
+  - "Supremacist doctrine reinterpreted as sentience-boundary validation — forbidden reveal."
+  - "Sectarian 'lesser/true sentient' distinction at world level — forbidden reveal."
+  - "A polity-level recognition of species-hierarchy civic-law category — forbidden reveal."
+  - "A magistrate-court ruling that an interspecies-cannibal victim was 'lesser sentient' for charging-tier purposes — forbidden reveal."
+domains_touched:
+  - PEOPLES_AND_SPECIES
+  - RELIGION
+  - the entire identity-frame of the setting.
+extensions:
+  - body: "The civic-registry ledger-mark (CF-0031) records empirical body-injury suffered in artifact-adjacent labor across three administrative generations in adopting polities. The registry is explicitly a body-ledger, NOT an ontological claim about the body, the lineage, or the mechanism of harm. Registry-family patterns MUST NOT be reinterpreted in-world or out-of-world as Maker-lineage markers, evidence of heritable Maker-touching, or proof of sentience-as-artifact-effect transmission. Added to disallowed cheap answers: *\"Registry-family patterns reinterpreted as Maker-lineage markers — forbidden reveal.\"* The three-generation administrative interval is scrivener's convention mirroring extractor-veteran pension precedent; it is NOT a civic commitment to biological heritability. The M-5 firewall holds with this additional cross-application clause."
+    change_id: CH-0005
+    date: 2026-04-18
+    label: Extension — Contamination-lineage ledger-mark firewall
+    originating_cf: CF-0031
+  - body: 'Artifact-contaminated mutated non-sentient beasts (CF-0035) exposed to uncontained Maker-Age artifacts over centuries in wilderness-distal sites exhibit morphological and capability alteration (increased size, supernumerary limbs, chimeric-seeming morphology, altered predation) — BUT DO NOT acquire sentience, speech, tool-use, proto-folk status, or any cognitive capability that would cross the ONT-1 / M-5 line. Morphological or predatory alteration is not a step toward sentience; no mutated beast, regardless of scale or capability, is on a developmental arc toward animal-folk status. Sectarian readings that mutated beasts are "proto-animal-folk" or evidence of Maker-seeded sentience transmission cross-apply to M-5 and are forbidden as world-truth (heretical sectarian belief remains contested canon, as always). Added to disallowed cheap answers: *"A mutated beast encountered by a surviving prospector that communicates meaningfully with the hunter — forbidden reveal."* *"Mutated-beast lineage reinterpreted as proto-animal-folk evolutionary precursor — forbidden reveal."* *"Artifact-exposure produced sentience in a non-sentient beast — forbidden reveal."* This is the FOURTH M-5 cross-application firewall (after CF-0022 modern-crafted vessel-hosted agencies, CF-0029 Maker-Age guardian constructions, CF-0031 contamination-lineage ledger-mark). The accumulation of cross-applications tightens the M-5 pattern without creating new approach-vectors. The M-5 firewall holds categorically.'
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Extension — Mutated-beast non-sentience firewall
+    originating_cf: CF-0035
+  - body: "CF-0036 commits that interspecies-cannibal-band supremacist sectarian doctrine applies a \"mere beasts\" register to sentient victims (\"carnivore species entitled to hunt lesser sentient species, treating and eating their meat as if they were mere beasts\"). This sectarian \"mere beasts\" register is a PATHOLOGICAL CATEGORY ERROR applied by the sectarian actor — the CRIME is the category-application of \"mere beasts\" to sentient victims; the WORLD-LEVEL sentience-status of all sentient peoples is preserved. The supremacist doctrine's sectarian reading is NOT a revision of the sentience boundary, NOT partial-validation of the forbidden M-5 question, and NOT a sectarian reveal that \"lesser sentients\" are artifact-seeded while \"true sentients\" are natural (or vice-versa). All sentient peoples — humans, Cluster A modern-mammalian animal-folk, Cluster B avian/reptile/amphibian folk, Cluster C extinct-species folk, Cluster D mythic-species folk — are world-level sentient without species-hierarchy. Added to disallowed cheap answers: *\"Supremacist doctrine reinterpreted as sentience-boundary validation — forbidden reveal.\"* *\"Sectarian 'lesser/true sentient' distinction at world level — forbidden reveal.\"* *\"A polity-level recognition of species-hierarchy civic-law category — forbidden reveal.\"* *\"A magistrate-court ruling that an interspecies-cannibal victim was 'lesser sentient' for charging-tier purposes — forbidden reveal.\"* This is the FIFTH M-5 cross-application firewall (after CF-0022 modern-crafted vessel-hosted agencies, CF-0029 Maker-Age guardian constructions, CF-0031 contamination-lineage ledger-mark, CF-0035 mutated-beast non-sentience). The accumulation of cross-applications tightens the M-5 pattern without creating new approach-vectors. The M-5 firewall holds categorically."
+    change_id: CH-0010
+    date: 2026-04-19
+    label: Extension — Supremacist-doctrine sentience-category-error firewall
+    originating_cf: CF-0036
+future_resolution_safety: none
+id: M-5
+knowns:
+  - Nothing canonical. No mainstream tradition holds this view
+status: forbidden
+title: Is Sentience Itself an Artifact Effect?
+unknowns:
+  - Everything

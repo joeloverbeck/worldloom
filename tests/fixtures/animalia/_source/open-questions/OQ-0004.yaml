@@ -1,0 +1,6 @@
+id: OQ-0004
+topic: Currency Specifics
+body: "- Exchange rates between copper, silver, and any higher denominations are not committed. Issuing polities are not committed."
+when_to_resolve: when a story or simulation requires concrete prices.
+caution: ""
+extensions: []

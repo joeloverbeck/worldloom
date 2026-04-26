@@ -1,0 +1,68 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - broker disposition fees reduce funder net yield
+  - punitive-polity expeditions carry prosecution risk; extradition cases arise when expeditions cross polity lines
+  - funder-primacy does not grant interpretive authority over Maker-Age knowledge (epistemic limit per CF-0027 / CF-0028)
+  - Charter-Era anti-monopoly-of-force norms strain when patron-funder armed retinues enforce claims
+  - centralization fights parallel CF-0008 existing friction — polities push to nationalize artifact custody; guilds and funders resist variously
+  - sealed-inventory requirements create civic-registry tracking burden
+  - novel extradition case law (funder-primacy statute mismatch across polities) accumulates in magistrate courts
+distribution:
+  who_can_do_it:
+    - patron-funders of ruin expeditions in tolerant polities under broker channel
+    - patron-funders risking civic prosecution in punitive polities
+  who_cannot_easily_do_it:
+    - unfunded contractors attempting private retention (no chartered-broker cover; subject to civic seizure)
+    - foreign patrons in punitive polities without local broker partnership
+  why_not_universal:
+    - polity asymmetry (tolerant / punitive / intermediate gradations; parallels CF-0021 and CF-0024)
+    - chartered-broker processing requires declared inventory and disposition fees
+    - catastrophic-class finds (if any were recoverable, which they are not per CF-0027 scope boundary) would be seized in all polities
+    - unchartered recovery bypassing broker channel subject to civic prosecution
+domains_affected:
+  - law
+  - economy
+  - magic
+  - warfare
+id: CF-0030
+notes: |
+  Direct from briefs/animalia-ruin-expeditions.md. Operates as SOC-4 stress-fracture repair — preserves the invariant's charter-monopoly claim while explicitly acknowledging the funder-primacy convention that would otherwise silently override it. Polity-asymmetric framing matches the precedent set by CF-0021 (crafter-tolerance) and CF-0024 (mercenary-licensure); three parallel asymmetries now constitute a recognizable Charter-Era regional-variation pattern. Funder-primacy is economic-legal only, NOT epistemic — CF-0027 anti-accumulation and CF-0028 partisan-canon clauses prevent patron-funder epistemic claim over Maker-Age knowledge. Adjudication record: adjudications/PA-0003-accept_with_required_updates.md.
+prerequisites:
+  - patron-funded ruin expedition (CF-0028)
+  - chartered-broker infrastructure (CF-0008) in most polities
+  - polity-level tolerance OR funder willingness to risk punitive prosecution
+required_world_updates:
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - TIMELINE
+  - OPEN_QUESTIONS
+  - GEOGRAPHY
+  - MAGIC_OR_TECH_SYSTEMS
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0028
+    - CF-0008
+  direct_user_approval: true
+statement: |
+  Magical artifacts recovered from patron-funded ruin expeditions (CF-0028) almost invariably end up in the hands of the funder, as a matter of convention operating in productive tension with CF-0008 chartered-guild monopoly. The convention is POLITY-ASYMMETRIC (parallel to CF-0021 crafter-tolerance asymmetry and CF-0024 mercenary-company licensure asymmetry — three parallel asymmetries now constitute a recognizable Charter-Era regional-variation pattern): in tolerant polities, funder-primacy operates through chartered-broker purchase channel under CF-0008's existing "declared collectors and scholars" clause, with the broker acting as legal custodian between extraction and funder-possession; in punitive polities, civic seizure under CF-0008 is enforced and funder-primacy is contested or prosecuted. Sealed-inventory declaration is required in most polities even where funder-primacy is tolerated. Funder-primacy is ECONOMIC and LEGAL, NOT EPISTEMIC: the funder retains the artifact but does NOT acquire interpretive authority over Maker-Age knowledge recovered alongside it; CF-0027's anti-accumulation clause and CF-0028's partisan-canon clause both limit epistemic claims. The convention is a Charter-Era stress-fracture — preserves paper charter while generating ongoing enforcement friction — and contributes to TIMELINE Layer 4 convergent pressures.
+status: hard_canon
+title: Funder primacy convention over magical-artifact recovery from ruin expeditions (polity-asymmetric)
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: law
+visible_consequences:
+  - chartered-broker purchase-channel records showing patron artifact-acquisition
+  - estate-level artifact collections visible at dowager-gossip level and civic-audit level
+  - magistrate precedent on funder-primacy vs civic-seizure cases
+  - inter-polity extradition docket for expedition-contractors moving across licensing lines
+  - Charter-Era stress-fracture language in TIMELINE Layer 4 convergent-pressures list
+  - chartered-broker revenue spike from expedition disposition fees
+  - centralization-vs-decentralization political alignment in polities (parallel to CF-0021 and CF-0024 licensing debates)
+  - sectarian movements take positions: Maker-mystic celebrate funder-primacy as recovery-legitimacy; progenitor-cult condemn as desecration-for-profit; common-pantheon clergy split

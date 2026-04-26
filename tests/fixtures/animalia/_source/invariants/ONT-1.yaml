@@ -1,0 +1,27 @@
+id: ONT-1
+category: ontological
+title: Sentience requires biological embodiment
+statement: All sentient peoples are biological, embodied beings with species-typical bodies, drives, lifespans, and senses. Sentience does not exist disembodied in this world. There are no ghosts who think, no walking gods, no machine minds.
+rationale: Premise asks for low-magic, lived-in texture. Disembodied minds shatter the gritty frame and the species-as-civic-fact rule.
+examples:
+  - a beaver-folk canal-master, an aurochs-folk wagon-driver, a human magistrate
+non_examples:
+  - ghosts who give orders, an AI ruling a city, a god walking the streets
+break_conditions: only by explicit user-approved cosmological revision.
+revision_difficulty: high
+extensions:
+  - originating_cf: CF-0022
+    change_id: CH-0002
+    date: 2026-04-18
+    label: Clarification
+    body: Modern crafted artifacts (CF-0021) sometimes behave as if "possessed" by entities with apparent agency. At the world level, these vessel-hosted agencies are NOT sentient; ONT-1 is preserved without exception. The in-world dispute about their nature (instructions / beastly / sentient) is observationally unresolvable and is tracked under Mystery Reserve M-6. The dispute does NOT cross-apply to animal-folk sentience (M-5 firewall).
+  - originating_cf: CF-0029
+    change_id: CH-0004
+    date: 2026-04-18
+    label: Extended Clarification
+    body: Magically-animated Maker-Age guardian constructions encountered in enterable ruins (CF-0029) similarly exhibit apparent autonomy without world-level sentience. ONT-1 is preserved without exception. The phenomenon is distinct in origin from modern-crafted vessel-hosted agencies (CF-0022) — Maker-Age guardian ≠ modern crafted apparent-agency — and the two are NOT to be conflated. Guardian-construction mechanism is tracked under Mystery Reserve M-8; presence-heterogeneity (why some ruins have guardians and some don't) under M-10. The M-5 firewall against animal-folk sentience cross-application applies equally here.
+  - originating_cf: CF-0035
+    change_id: CH-0009
+    date: 2026-04-19
+    label: Fourth Clarification
+    body: Artifact-contaminated mutated non-sentient beasts (CF-0035) in wilderness-distal sites remain categorically NON-SENTIENT. Artifact exposure does NOT produce sentience, speech, tool-use, or proto-folk status in a non-sentient host — morphological and capability alteration is not a step toward sentience. ONT-1 is preserved without exception; the M-5 firewall against cross-application to animal-folk sentience holds for the fourth time (after CF-0022, CF-0029, CF-0031). Mutated-beast phenomenon is DISTINCT in origin from both modern-crafted vessel-hosted agencies (CF-0022) and Maker-Age guardian constructions (CF-0029) — three surface-similar Maker-origin phenomena must NOT be conflated; each has its own bounded-unknown mechanism surface (M-6 / M-8 / new M-15 for the gargantuan-underground scale-tail).

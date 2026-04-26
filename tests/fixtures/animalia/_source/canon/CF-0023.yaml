@@ -1,0 +1,69 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - translations are partial; meaning of any single fragment is contested
+  - leaked grimoires (artifact-creation subset) may be incomplete or corrupted versions
+  - no translation of any major Maker-Age text is complete; the linguistic system as a whole is unrecovered
+  - Mystery Reserve M-1 / M-2 / M-5 are not resolved by what has been translated; the operationally usable subset (creation grimoires) does NOT contain catastrophic-class instructions
+distribution:
+  who_can_do_it:
+    - chartered artifact-guild senior researchers
+    - civic-archive translation scholars in larger polities
+    - a small number of monastic translators
+    - private scholars with means and access
+  who_cannot_easily_do_it:
+    - laypersons, illiterate populations, remote communities
+  why_not_universal:
+    - access to fragments is restricted; the work is slow and contested
+    - no institutional tradition holds full custody
+domains_affected:
+  - magic
+  - economy
+  - religion
+  - law
+  - memory_and_myth
+id: CF-0023
+modification_history:
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0041
+    summary: "scope boundary clarification: leaked corpus does NOT contain Maker-Age sealing instructions; sealing-technique recovery is NOT world-achievable; corpus boundary preserved against CF-0041 Maker-deliberate-burial commitment."
+notes: |
+  Forced by CF-0021 — modern crafter activity is impossible without partial translations existing. This commits what was previously deferred under OPEN_QUESTIONS ("Maker-Age Linguistic Recovery") in scoped form. No translation answers Mystery Reserve M-1, M-2, or M-5; the operational artifact-creation subset is the only meaningfully usable corpus, and even it is fragmentary and unreliable.
+  Modified 2026-04-20 by CH-0014 (CF-0041): scope boundary clarification — the leaked partial-translation corpus does NOT contain Maker-Age sealing instructions. CF-0041 commits Maker-Age deliberate-burial and sealed-inert-container technique as categorically LOST; the corpus boundary is load-bearing — sealing-technique recovery is NOT a world-achievable goal (M-20 firewall on destruction-resistance mechanism parallels: neither sealing nor destruction techniques are reachable by current-age capability). Operational artifact-creation subset remains the only meaningfully usable content; no sealing instructions admitted.
+prerequisites:
+  - literate scholar with extended access to recovered fragments
+  - cross-fragment comparative work
+  - empirical correlation with observed artifact behavior
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - OPEN_QUESTIONS
+  - GEOGRAPHY
+  - TIMELINE
+scope:
+  geographic: regional
+  social: restricted_group
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0019
+    - CF-0021
+  direct_user_approval: true
+statement: |
+  Partial translations of Maker-Age inscription fragments exist in the present world. They were produced over generations by chartered artifact-extraction guild researchers, civic-archive scholars, and a small number of monastic and private translators. No complete translation of any major text exists. The corpus of translated material is fragmentary, inconsistent, and contested; the most operationally useful subset (artifact-creation grimoires per CF-0021) has leaked from chartered custody and circulates on black markets. The full Maker-Age linguistic system remains unrecovered.
+status: hard_canon
+title: Partial translations of Maker-Age fragments exist, are restricted, and have leaked
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: text_tradition
+visible_consequences:
+  - private libraries of partial-translation manuscripts in scholar households
+  - black-market trade in leaked grimoire copies
+  - sectarian use of fragmentary translations to support doctrinal claims
+  - apprentice extractors and ward-wrights study (filtered) translations as part of training
+  - civic prosecution of unauthorized translation copying in some polities
+  - three-way custody contest (civic archive / artifact-guild / theological authority) intensified by the black-market fourth custodian

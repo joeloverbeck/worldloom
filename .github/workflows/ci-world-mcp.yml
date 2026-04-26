@@ -1,0 +1,50 @@
+name: CI - world-mcp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/world-mcp/**'
+      - 'tools/validators/**'
+      - 'tools/patch-engine/**'
+      - 'tools/world-index/**'
+      - 'tests/fixtures/animalia/**'
+      - 'docs/CONTEXT-PACKET-CONTRACT.md'
+      - '.github/workflows/ci-world-mcp.yml'
+  pull_request:
+    paths:
+      - 'tools/world-mcp/**'
+      - 'tools/validators/**'
+      - 'tools/patch-engine/**'
+      - 'tools/world-index/**'
+      - 'tests/fixtures/animalia/**'
+      - 'docs/CONTEXT-PACKET-CONTRACT.md'
+      - '.github/workflows/ci-world-mcp.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and build world-index (file dependency)
+        working-directory: tools/world-index
+        run: npm install && npm run build
+      - name: Install and build patch-engine (file dependency)
+        working-directory: tools/patch-engine
+        run: npm install && npm run build
+      - name: Install and build validators (file dependency)
+        working-directory: tools/validators
+        run: npm install && npm run build
+      - name: Install
+        working-directory: tools/world-mcp
+        run: npm install
+      - name: Test
+        working-directory: tools/world-mcp
+        run: npm test

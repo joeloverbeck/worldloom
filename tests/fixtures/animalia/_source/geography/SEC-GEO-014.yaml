@@ -1,0 +1,43 @@
+id: SEC-GEO-014
+file_class: GEOGRAPHY
+order: 14
+heading: Regional Asymmetry on Drylands Institutional Thinness (CH-0018)
+heading_level: 2
+body: |-
+  The drylands caravan-corridor institutional-cultural complex (CF-0046) formalizes the drylands' regional institutional-thinness pattern as an **uncontested regional-consensus pattern**, NOT as a sixth Charter-Era polity-asymmetric structural disagreement axis (which would join CF-0021 crafter-tolerance, CF-0024 mercenary-licensure, CF-0028/0030 funder-primacy, CF-0031 contamination-registry, and CF-0033 dragoon-adoption as the fifth/sixth parallel axis). The distinction is load-bearing: the five structural axes describe polities DIVERGING in institutional response to a shared pressure; the drylands pattern describes polities AGREEING (across the regional cluster) to maintain a thin-institution equilibrium stabilized by geography, economy, and demographic form. Regional distribution:
+
+  - **Drylands south caravan towns**: the full CF-0046 pattern. Civic registry is thin (CF-0031 non-adoption register per oasis-hamlet solidarity posture extends here at CF-0046 scale); civic-court reach is four-days-ride-to-the-nearest-magistrate typical, functionally absent for corridor-internal minor disputes; caravan-master corridor-internal customary-adjudication handles the minor-dispute docket; tea-house-scribe witnessing (CF-0024/0028/0033/0034/0036/0044) handles contract-custody; runner-reached village militia responds to bandit corridor pressure (CF-0034 waiting-wolves response at village scale). Reciprocity-primary regional economy with SOC-3 coin-at-edges preservation (CH-0018 INVARIANTS clarification). Drought-cycle pulse drives life-rhythm and traffic compression/expansion. Well-keeper customary-authority (CF-0047) operates as lineage-inheritable mid-stratum without civic-registry backing. Trade-tongue station-log convention at well-stops and caravanserai.
+  - **Temperate canal heartland charter towns**: full civic infrastructure; not part of the drylands pattern. CF-0046 sees the heartland as the coin-at-edges contact surface where drylands caravans complete their northward flow at market-caravan borders and return with silver, ceramic ware, and chartered-manufactured goods.
+  - **Big-city outskirts estates**: canal-heartland default; drylands-trade-factor estates (those whose factor dispatches trade caravans through drylands corridors) carry "reciprocity-standing" as a dowager-gossip axis — *"the Corlyhaughs' factor kept the well-keeper's book through drought-one; charter-sound or parvenu?"*. No structural participation in CF-0046 institutional thinness.
+  - **Cold north highland clans**: clan-custom hospitality handles equivalent social work (per CF-0037 framing); highland institutional-thinness is clan-custom-rich, not drylands-corridor-rich. Saga-fragment register for the clansman who walked south and learned the gate-turn adds a minor cross-regional cultural-borrowing pathway paralleling CF-0044 verse-fragment one-way flow.
+  - **Wet fenlands west**: institutional-absence-acknowledged-in-silence (fen discipline); amphibian-folk canary vigilance handles equivalent hazard-detection work. Silence-discipline absorbs drylands commitments through non-participation — the verse-fragments do not travel through fen because fen register is silence-discipline, not stranger-exchange. No structural participation.
+  - **Mountain east**: seasonal institutional compression (pass closure); mountain-valley inn-and-waystation infrastructure handles equivalent social work where present. Drylands corridor-complex does NOT translate to mountain east (seasonal vs continuous traffic; no drought-cycle equivalent).
+
+  Cross-polity institutional-posture recognition: drylands caravan-master rulings carry NO extradition weight across polity lines; a drylander whose dispute originated in drylands corridor and reaches canal-heartland magistrate court is handled under canal-heartland civic-court default, with caravan-master prior ruling as ordinary character-evidence only (paralleling CF-0044 hospitality-vouch character-evidence register). This is the same no-schema gap the five structural-axis patterns produce at inter-polity borders, but operates DIFFERENTLY — the drylands gap is not that polities disagree on institutional response, but that drylands polities institutionally DO LESS than chartered polities, and cross-jurisdiction routing defaults to the chartered side.
+
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0004
+  - CF-0007
+  - CF-0010
+  - CF-0012
+  - CF-0014
+  - CF-0015
+  - CF-0021
+  - CF-0024
+  - CF-0027
+  - CF-0028
+  - CF-0031
+  - CF-0032
+  - CF-0033
+  - CF-0034
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0044
+  - CF-0046
+  - CF-0047

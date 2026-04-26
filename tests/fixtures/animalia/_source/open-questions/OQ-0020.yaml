@@ -1,0 +1,13 @@
+id: OQ-0020
+topic: Broker Charter Status (per polity)
+body: |-
+  - CF-0024 commits that unchartered contract-matchmaking brokers exist in mid-to-large towns, facilitating adventurer-contractor hires alongside the ordinary tavern-board posting channel. Whether any polity has moved toward chartering these brokers (aligning them with artifact-brokerage charters) or to banning them is deferred.
+
+when_to_resolve: when a specific polity's contractor economy needs concrete regulatory texture, or when a named broker appears as an institution in story.
+caution: interacts with SOC-4 (guild licensing of artifact trade). Chartering contract-brokers would create a new guild-adjacent institution; banning them would drive matchmaking underground and compound the contract-breach cascade exposure.
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Brinewick chartered-broker concordat annotation
+    body: "CF-0043 commits Ash-Seal's Brinewick concordat with chartered-extraction-guild: CHARTERED-BROKERAGE remains SOC-4 chartered-guild function in Brinewick (broker-bench intact at near-continental density per CF-0038) — Ash-Seal does NOT compete for the chartered-broker disposition-fee revenue stream; it SUPPLIES contained / sealed-inert inventory that chartered-brokers then dispose of through the standard chartered-broker purchase channel. Brinewick's broker bench therefore structurally DECOUPLES from the containment-wright monopoly (chartered-extraction-guild containment-wright function is partly absorbed by Ash-Seal; chartered-brokerage function remains fully chartered). This narrows the existing deferral: in Brinewick the chartered-broker bench is structurally dominant, but the contract-matchmaking broker question (non-artifact brokerage) remains deferred as before. Ash-Seal's own commercial-company sales activity is NOT a new broker product-line — it is the CONTAINMENT-WRIGHT side's disposition handoff to the chartered-broker side under concordat, not independent brokerage."

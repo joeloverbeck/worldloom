@@ -37,7 +37,6 @@ import {
   ATOMIC_LOGICAL_WORLD_FILES,
   createAtomicLogicalFileResults,
   hasAtomicSourceRecords,
-  listAtomicSourceFiles,
   loadAtomicEntityRegistry,
   parseAtomicSourceFile
 } from "../parse/atomic";
@@ -345,11 +344,13 @@ function reindexAllFiles(
   const atomicMode = hasAtomicSourceRecords(worldDirectory);
   const filesToIndex = atomicMode
     ? indexable.filter(
-        (filePath) => !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
+        (filePath) =>
+          !filePath.startsWith("_source/") &&
+          !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
       )
     : indexable;
   const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
-  const atomicFiles = atomicMode ? listAtomicSourceFiles(worldDirectory) : [];
+  const atomicFiles = atomicMode ? indexable.filter((filePath) => filePath.startsWith("_source/")) : [];
   const indexedBefore = new Set(listIndexedFiles(db, worldSlug));
   let changedNodeCount = 0;
   let yamlBlockCount = 0;

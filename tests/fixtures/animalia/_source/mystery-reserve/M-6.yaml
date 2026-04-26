@@ -1,0 +1,34 @@
+id: M-6
+title: The Nature of Vessel-Hosted Agencies in Modern Crafted Artifacts
+status: passive
+knowns:
+  - 'Some modern crafted artifacts (CF-0021) exhibit "possession" behavior: apparent agency without obvious mechanism'
+unknowns:
+  - Mechanism — magical instruction-set baked into the vessel by craft? Beastly intelligence somehow concentrated by the firing process? Sentient intelligence (forbidden at world level but not in-world)? Resonance with something deeper that the crafter accidentally tuned to? An emergent property of unstable craft?
+common_interpretations: []
+disallowed_cheap_answers:
+  - "\"They're just programs\" — too tidy; closes the in-world dispute and trivializes the phenomenon"
+domains_touched:
+  - MAGIC
+  - RELIGION
+  - LAW
+  - INSTITUTIONS (artifact-guilds
+  - civic registry)
+  - and the M-5 firewall surface.
+future_resolution_safety: low
+extensions:
+  - originating_cf: CF-0033
+    change_id: CH-0007
+    date: 2026-04-18
+    label: Extension — Dragoon confiscation-custody firewall
+    body: 'Canal-corridor quarantine dragoons (CF-0033) pursue black-market artifact traffic within home-polity jurisdiction, which places them in evidentiary proximity to modern crafted artifacts during confiscation. Dragoon confiscation-custody of modern crafted artifacts MUST be described in civic-procedural language (seizure, manifest, transfer) without characterizing artifact behavior in agency-attributive terms. Dragoon incident reports, civic-evidence archives (INSTITUTIONS §Recordkeeping CH-0007 addition), and magistrate-court testimony about confiscated crafted artifacts are NOT M-6 evidence. The disposition of confiscated modern crafted artifacts follows chartered-guild handoff protocols per CF-0008 CH-0004 funder-primacy framework (chartered-broker channel for legal disposition; civic seizure under SOC-4 for unlicensed catastrophic-class); civic retention of artifact-material beyond evidentiary-hold is forbidden. Added to disallowed cheap answers: *"Dragoon civic-evidence archive resolves the nature of vessel-hosted agencies — forbidden reveal."* The M-6 firewall holds with this cross-application clause.'
+  - originating_cf: CF-0034
+    change_id: CH-0008
+    date: 2026-04-19
+    label: Extension — Bandit-custody partisan-reportage firewall
+    body: "Endemic bandit groups (CF-0034) occasionally traffic modern crafted artifacts (CF-0021) on black markets as incidental loot. Bandit-custody observation of vessel-hosted agency behavior — a bandit-captain's report that a captured artifact \"spoke a name\" or \"refused to hum for three nights\" — is partisan-unreliable reportage, NOT civic-archived evidence and NOT M-6 mechanism evidence. Bandit-reports do not enter magistrate-court evidentiary record except in captured-bandit prosecution where the report's evidentiary weight is categorically low. Added to disallowed cheap answers: *\"Bandit-custody observations of vessel-hosted agencies resolve the nature of the agency — forbidden reveal.\"* The M-6 firewall holds with this cross-application clause."
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Extension — Ash-Seal containment-research procedural-language discipline firewall
+    body: "CF-0043 commits Ash-Seal's Brinewick-local commercial containment operations including research on contained artifacts — some of which are modern crafted (CF-0021) and therefore exhibit vessel-hosted agency behavior within the M-6 bounded unknown. Ash-Seal internal research documentation, trade-jargon classification vocabulary (\"Class-C containment with moderate environmental spread,\" impedance-field, embedded-geometry, safe-class / moderate-tier / catastrophic-tier, render-inert, seal-and-contain), and technician testimony MUST stay in EMPIRICAL-CRAFT PROCEDURAL LANGUAGE (paralleling CF-0033 dragoon confiscation-custody civic-procedural discipline); DO NOT characterize vessel-agency behavior in agency-attributive terms at world level. The fed-up-technician plain-speaking admission register (\"checklist, not a seance\") is the in-world laborer-register that preserves the discipline; the corporate-mystique trade-jargon surface likewise uses classification-empirical vocabulary rather than agency-attribution vocabulary. Ash-Seal research archive contents are NOT M-6 mechanism evidence. Sectarian Maker-mystic readings that Ash-Seal's trade-secret archive contains recovered agency-communication protocols or \"modern crafted vessel-hosted agency communion records\" are contested-sectarian projection, NOT world-truth. Added to disallowed cheap answers: *\"Ash-Seal research archive revealed to resolve the nature of vessel-hosted agencies — forbidden reveal.\"* *\"An Ash-Seal technician's testimony describing vessel-agency communication, cited at world level as M-6 resolution — forbidden reveal.\"* *\"Ash-Seal's trade-secret empirical containment protocols revealed to contain agency-communion technique — forbidden reveal.\"* The M-6 firewall holds with this cross-application clause."

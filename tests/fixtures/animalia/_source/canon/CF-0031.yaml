@@ -1,0 +1,120 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - registered status carries marriage-market stigma across three administrative generations that compounds rather than dissolves existing contamination-injury stigma
+  - a visible artisan-quarter stratum ("registered stock" / "ledger-named") forms in adopting polities; cluster-adjacent drift over generations is a Rule 3 specialness-inflation pressure logged as Mystery Reserve M-11 bounded unknown
+  - civic-watch subpoena-access pressure is continuous — the welfare-purpose stabilizer is institutionally contested, not static; registry-capture breakage is a slow-rolling risk
+  - monastic-clinic priority intake crowds out non-registered contamination-injured patients (especially fen-village emigrants and highland emigrants seeking dry-edge monastic-clinic care) in capacity-scarce regions
+  - unregistered-but-eligible extractor families become preferentially cheaper hires for unchartered patrons and brokers (perverse labor-market incentive the voluntary stabilizer does not contain)
+  - registry-scrubber underground in punitive polities shares canal-corridor transit and broker matchmakers with CF-0023 grimoire-corridor and CF-0028 ruin-cartography streams — three illegitimate service product-lines on one infrastructure rail, lowering marginal cost of all three and sharpening authentication-cartel formation pressure
+  - inter-polity migration gap — a registered household emigrating to a non-adopting polity loses supplement access; the mark may or may not travel with the household record depending on purge-conventions (deferred to OPEN_QUESTIONS)
+  - funding-stream specificity under-defended — the extraction-guild taxation line supporting pension supplement is not canonized at ECONOMY level; deferred to OPEN_QUESTIONS (Systems critic)
+  - registry resolves the CF-0024 widow-of-the-job and CF-0025 post-career pension gap ONLY in adopting polities and ONLY for CF-0025-eligible lineages; expedition-widow (CF-0028) and non-specialist contractor-widow gaps remain outside registry scope
+  - three-generation administrative interval is scrivener's convention; whether it reflects observed generational health pattern, folk-medical belief, or mimesis of extractor-veteran pension precedent is diegetically contested and unresolved at world level (Mystery Reserve M-11)
+distribution:
+  who_can_do_it:
+    - households in adopting chartered polities with at least one CF-0025-eligible or extractor / containment-wright lineage member
+    - monastic-clinic administrators in adopting polities receiving registry-priority intake lists
+    - chartered extraction-guild pension committees coordinating supplement formula with civic registry
+    - civic-registry scriveners administering enrollment, purge, dispute-adjudication, and welfare-purpose subpoena restriction enforcement
+  who_cannot_easily_do_it:
+    - households in non-adopting polities (highland clans, fen-villages, polities rejecting civic centralization over guild-adjacent welfare)
+    - non-chartered or outlawed-in-polity lineages (rogue-crafter assistants per CF-0021; black-market operatives)
+    - contractor-auxiliaries outside the CF-0025 specialist subtype (most CF-0024 adventurer-contractors fall outside registry scope)
+    - expedition-contractors suffering ruin-triage injury (CF-0028 per Healing/Medicine extension) — NO registry hook; the gap is a known institutional lacuna deferred to OPEN_QUESTIONS
+  why_not_universal:
+    - civic-registry infrastructure absent in highland clans and fen-villages (structural prerequisite failure)
+    - voluntary-enrollment stigma-gating — many eligible households decline to register to preserve marriage prospects for grandchildren (household-level stabilizer)
+    - chartered-polity-only institutional form — polities rejecting civic centralization over guild-adjacent welfare decline adoption
+    - extraction-guild taxation funding requirement — polities without robust chartered-extraction economy cannot sustain the supplement (Systems critic flagged weakness; funding-mechanism specificity deferred to OPEN_QUESTIONS rather than hand-waved)
+    - political gate — containment-wright guild faction resists civic custody of contamination data on surveillance-wedge grounds
+    - narrow occupational band — registry directly reaches extractor / containment-wright / fallout-specialist families only (indirect ordinary-life reach is broader but direct enrollment is gated)
+domains_affected:
+  - law
+  - labor
+  - economy
+  - status_signaling
+  - settlement_life
+  - kinship
+  - religion
+  - memory_and_myth
+id: CF-0031
+modification_history:
+  - change_id: CH-0011
+    date: 2026-04-19
+    originating_cf: none_clarification_retcon
+    summary: "clarification: TIMELINE.md line 137 and INSTITUTIONS.md line 40 CF-0031-era domain annotations corrected — 'three parallel polity-asymmetries' / 'third axis alongside CF-0021 crafter-tolerance and CF-0024 mercenary-licensure' → 'four parallel polity-asymmetries' / 'fourth axis alongside CF-0021 crafter-tolerance, CF-0024 mercenary-licensure, and CF-0028/CF-0030 funder-primacy'; inherited CH-0005 counting-drift acknowledged in PA-0006 and corrected per RP-0001 (AU-0001 Finding F-02); no CF-0031 statement/scope/status/distribution change. Adjudication: adjudications/PA-0010-accept_with_required_updates.md"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "named-polity-instance commitment: Brinewick (CF-0038) ADOPTING on contamination-registry; commerce-hub immigration + canal-network artifact-turnup volume demands it; civic-registry subsidiary-record capability at near-continental density; registered/unregistered household distinction visible in artisan-quarter marriage-broker register; three-generation mark interval fully institutionalized. CF-0031 scope, distribution, and stabilizer structure unchanged"
+  - change_id: CH-0015
+    date: 2026-04-20
+    originating_cf: CF-0043
+    summary: "extension: FOURTH lineage-source category for CF-0031 ledger-mark eligibility (Ash-Seal technicians) under containment-wright-specialist clause in Brinewick-adopting polity; Ash-Seal commercial-pension-formula coordination Brinewick-specific variant (voluntary-enrollment / three-generation / welfare-purpose stabilizers unchanged); marriage-broker catechism kin-of-Ash-Seal idiom extension; moderate family-lineage density; non-Brinewick defector-households fall under ordinary containment-wright eligibility upon chartered-guild enrollment"
+  - change_id: CH-0018
+    date: 2026-04-20
+    originating_cf: CF-0046
+    summary: "qualification: CF-0031 drylands-non-adoption posture now has NAMED ALTERNATIVE-INSTITUTIONAL-SUBSTRATE REASON per CF-0046 drylands caravan-corridor institutional-cultural complex — the drylands institutional-thinness pattern (thin civic registry, caravan-master corridor-internal customary-adjudication, reciprocity-primary regional economy, geographic non-transportability of canal-infrastructure) is the structural reason drylands polities cannot adopt CF-0031 registry; reciprocity-primary economy would be DESTROYED rather than merely competed-with by civic-registry introduction (CF-0046 Phase 4 stabilizer); non-adoption is equilibrium-preserving rather than capacity-limited. CF-0031 scope, distribution, stabilizer structure unchanged"
+notes: |
+  Direct from proposals/PR-0002-heritable-contamination-registry.md. Scope soft_canon (per proposal) because regional adoption is load-bearing to the world's polity-asymmetric Charter-Era character; hard_canon would over-universalize, contested_canon would under-institutionalize. The proposal's original "Heritable Contamination Registry" title was struck at Phase 9 adjudication per Theme/Tone critic: "heritable" smuggles a 19th/20th-century eugenics-inflected register out-of-register for Animalia; "contamination registry" imports clinical-modern vocabulary. Replacement title "contamination-lineage ledger-mark" preserves administrative gravity while keeping the register scribal and earthy. In-register language committed to prose: "the mark," "ledger-named family," "marked stock," "the scrivener's hand across three generations," "ward-rot pension," "alms-priority at the Houses," "chartered ledger-subsidiary." Out-of-register language forbidden: "heritable contamination," "contamination injury," "generational health impact," "subsidiary record," "eligibility," "intake," "registry-case," "benefit," "subsidy." Historical motivation per Politics/Institution critic: registry arose from civic-centralization advocates winning over containment-wright guild faction resistance in larger heartland polities during recent Layer-4 current-layer debates — pension-welfare framing was the wedge civic-centralizers used to lever into guild-adjacent autonomy. Mystery Reserve firewalls per Mystery Curator critic: M-5 (body-ledger, not ontological claim; disallow registry-family patterns reinterpreted as Maker-lineage markers); M-7 (body-injury record, not knowledge-genealogy record; registry status is NOT evidence of oracle-reading validity); M-3 (civic-registry heritable-category coincidence, not mechanistic parallel with mythic-species observed-at-birth records). New Mystery Reserve entry M-11 committed — Empirical Basis of the Three-Generation Contamination-Lineage Marker — a bounded unknown about whether the interval reflects observed generational health pattern, folk-medical belief, or administrative mimesis of extractor-veteran pension precedent. Partial retcon of CF-0024 and CF-0025 pension-absence claims handled via notes-field modification trace plus modification_history array; dominant action is ADDITION (CH-0005 change_type: addition). OPEN_QUESTIONS Post-Career Contractor Pension and Stigma partially closes in adopting-polity branch; residual items (non-adopting polities, non-CF-0025 contractor widows, expedition-widows, purge-conventions, transfer protocol, surveillance precedent) remain deferred. Two new OPEN_QUESTIONS sections added (Ledger-Mark Funding Stream Specificity; Ledger-Mark Purge-Convention and Migration Gap). Six critic sub-agents dispatched at escalation gate (>3 of 13 domains touched); no dissent from accept recommendation; all flagged risks either repaired in Phase 9 or logged as latent burdens in CH-0005. Adjudication record: adjudications/PA-0004-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): extension — FOURTH lineage-source category for CF-0031 ledger-mark eligibility in Brinewick-adopting polity added: Ash-Seal technicians (CF-0043) with long-career contamination signature (scrapers' shake, long cough, ward-rot, wasting) qualify under the containment-wright-specialist clause alongside the three prior lineage-source categories (extractor, chartered containment-wright, CF-0025 occult-fallout specialist). Ash-Seal-technician ledger-mark enrollment operates under standard CF-0031 mechanism (voluntary self-enrollment; three-generation administrative interval; charter-clause welfare-purpose protection; civic-registry subsidiary-record coordination with commercial-pension-formula instead of chartered-extraction-guild pension-formula). Ash-Seal commercial-pension-formula coordination is Brinewick-specific institutional variant; the voluntary-enrollment / three-generation / welfare-purpose stabilizers are unchanged. Ash-Seal family-lineage density is moderate rather than the dense multi-generational chartered-guild pattern (company is Charter-Era-consolidated, not pre-Charter; defector-migration churn historically continuous). Marriage-broker catechism extends with kin-of-Ash-Seal question *"does your kin take the work at the company?"* (Brinewick canal-heartland exposed artisan-quarter households). Non-Brinewick polities handle Ash-Seal-defector households under ordinary chartered-containment-wright CF-0031 eligibility if defector enlists on chartered-extraction-guild roster in post-defection career. Adjudication record: adjudications/PA-0014-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0018 (CF-0046): qualification — CF-0031 drylands-non-adoption posture (oasis-hamlet solidarity arrangements for contamination-injured caravan-kin without civic-registry coordination; *"coin-for-shame"* idiom for emigrant to adopting polity) now has a NAMED ALTERNATIVE-INSTITUTIONAL-SUBSTRATE REASON per CF-0046 drylands caravan-corridor institutional-cultural complex: the drylands institutional-thinness pattern (thin civic registry, no civic-court reach, caravan-master corridor-internal customary-adjudication, reciprocity-primary regional economy, geographic non-transportability of canal-infrastructure preventing heartland institutional-export) is the structural reason drylands polities cannot adopt CF-0031 registry — the reciprocity-primary regional economy would be destroyed rather than merely competed-with by civic-registry introduction, per CF-0046 Phase 4 stabilizer. This qualifies the CF-0031 drylands-non-adoption posture from "civic-registry infrastructure is absent" (procedural framing) to "civic-registry infrastructure would destroy the economic substrate" (structural framing) — the non-adoption is not capacity-limited but equilibrium-preserving. CF-0031 scope, distribution, and stabilizer structure unchanged; the commerce-hub immigration + canal-network artifact-turnup volume conditions that make Brinewick ADOPTING remain unchanged; the drylands-non-adoption posture is now grounded in CF-0046 structural rationale. Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+prerequisites:
+  - chartered polity with civic-registry infrastructure (absent in highland clans and fen-villages)
+  - extraction-guild taxation stream capable of funding pension supplement
+  - political consensus between civic-centralization advocates and containment-wright guild faction favoring adoption
+  - reform-current clergy (CF-0026) or secular-reform magistrate advocacy providing welfare-frame motivation
+  - charter-clause restricting civic-watch subpoena to welfare purpose (added stabilizer per Politics/Institution critic)
+  - preserved distinction between civic-registry subsidiary supplement and guild-internal pension (no displacement)
+required_world_updates:
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - TIMELINE
+  - CANON_LEDGER
+  - GEOGRAPHY
+scope:
+  geographic: regional
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0005
+    - CF-0008
+    - CF-0011
+    - CF-0021
+    - CF-0024
+    - CF-0025
+    - CF-0026
+  direct_user_approval: true
+statement: |
+  In adopting chartered polities, the civic registry maintains a subsidiary ledger that inscribes — upon voluntary self-enrollment by the household — extractor, containment-wright, and post-career occult-fallout specialist (CF-0025) lineages whose members carry the empirical bodily signature of artifact-fallout (the wasting, the long cough, ward-rot, the scrapers' shake). The ledger-mark confers eligibility for a guild-pension supplement coordinated through the chartered extraction-guilds, and alms-priority placement at monastic-clinic houses. The mark runs three generations in the family ledger by scrivener's convention — an administrative interval, not a biological claim. Polities vary sharply: larger chartered heartland polities with robust civic-registry infrastructure and extraction-guild taxation streams have adopted; fen-villages and highland clans lack the civic infrastructure to adopt; polities that refuse civic centralization over guild-adjacent welfare decline. The institution is a welfare instrument; its stabilizers are load-bearing: voluntary enrollment, civic-registry subsidiary custody (not guild-internal), three-generation interval cap, charter-clause restricting civic-watch subpoena to welfare purpose, guild-internal pension preserved as distinct. The ledger-mark is a civic record of bodily injury suffered in artifact-adjacent labor; it makes no ontological claim about the body, the lineage, or the mechanism of harm. Registry status is NOT evidence of specialist oracle-reading validity (M-7 firewall), NOT evidence of heritable Maker-touching or sentience-as-artifact-effect (M-5 firewall), and NOT mechanistically related to civic-registry records of observed mythic-species births (M-3 firewall) — their shared "heritable" vocabulary is civic-registry-scope coincidence, not ontological parallel.
+status: soft_canon
+title: Chartered-polity contamination-lineage ledger-mark
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - registered and unregistered contamination-lineage households form a visible stratum in adopting-polity artisan quarters
+  - artisan-quarter skip-rope rhymes ("one-mark, two-mark, three-mark gone / grandfather's ledger, don't read on") and charter-school offense-tier recitations name the ledger-mark among civic categories children learn
+  - marriage-broker catechism in adopting-polity heartland households now includes "did your grandfather take the mark? show the ledger-leaf"
+  - monastic-clinic intake-scribes ask the registry question at admission with deliberately procedural (not compassionate) cadence — priority line to the left, common bench to the right; absence of pity is itself a tonal signature
+  - magistrate-court docket gains registry-evasion prosecutions, fraudulent-registration cases, and purge-dispute cases at generation-three expiry; inheritance docket picks up registry-marked-estate as an asset-class-adjacent subcategory
+  - dowager-estate gossip tracks which tenant-cottage lineages registered; estate-steward ledger-checks tenant-registration status before renewals; older noble houses prize tenant-discretion, newer merchant-adjacent houses see vetting value
+  - containment-wright faction and broker faction inside the extraction guilds acquire a new fault-line (civic-surveillance-wedge suspicion vs market-legibility opportunism) sharpening the schism already established under CH-0002 (crafter-tolerance) and CH-0004 (expedition-funder-primacy)
+  - principled-refuser clergy (CF-0026) bifurcate into mandatory-enrollment-with-protection reformers and three-generation-mark abolitionists
+  - registry-scrubber underground appears in punitive polities, sharing canal-corridor infrastructure with CF-0023 grimoire and CF-0028 ruin-cartography black-market streams
+  - polity-asymmetry sharpens into a third axis — registry-adopting / registry-declining sits alongside CF-0021 crafter-tolerance and CF-0024 mercenary-licensure as a recognizable Charter-Era regional-variation pattern
+  - highland clan-emigrant who registered in a heartland adopting polity becomes a saga-fragment of muted grief at cairn-day ("the one who took the southern mark")
+  - fen-widow who walks to dry-edge for the mark becomes a ghost-story fragment in fen oral tradition ("the fen-widow who walked to dry-edge for the mark and came back with nothing")
+  - drylands idiom "coin-for-shame" enters caravan-town vocabulary for a cousin who registered in a larger adopting polity
+  - bardic tavern-veteran subgenre now sorts by "registered widow" vs "unregistered widow" succession-dispute material; magistrate-court docket-clerk gossip carries registry-fraud tales as a recurring supper subgenre
+  - sectarian progenitor-supremacy movements organize opposition on grounds that occupational-lineage civic inscription occludes species-lineage progenitor-witness (Charter-Era-instrument-diluting-progenitor-authority framing)
+  - common-pantheon reform-current clergy articulate the registry as civic-ritual-of-witness (aspectualizing path) or condemn as stigmatizing (reform path); celebrate path implausible since the mark records injury
+  - aspectualizing progenitor-cult lineage-keepers accept the registry as civic-adjacent welfare without doctrinal implication
+  - civic-registry subsidiary archive stream joins the welfare-administrative category as a sixth archival category alongside contract, deed, chronicle, occult-fragment (CF-0019 / CF-0023), ruin-cartography (CF-0028); does not strain the three legitimate + two illegitimate occult-custody streams

@@ -1,0 +1,44 @@
+id: CF-0002
+title: Species do not interbreed; offspring are species-typical
+status: hard_canon
+type: metaphysical_rule
+statement: |
+  Cross-species sexual relationships exist socially but are reproductively sterile. A hyena-folk and a human cannot produce a child. Family across species is built through marriage, fostering, and adoption — not blood.
+scope:
+  geographic: global
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - kinship
+  - law
+  - religion
+  - settlement_life
+prerequisites: []
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it:
+    - all sentient peoples (no one can interbreed across species)
+  why_not_universal:
+    - biological reality of distinct species
+costs_and_limits:
+  - cross-species marriages must plan for adoption to produce named heirs
+  - inheritance disputes more common in mixed-species estates
+visible_consequences:
+  - adoption and fostering are common, ordinary practices
+  - civic registry has well-developed procedures for cross-species adoption
+  - '"halfbreed" plot conveniences do not exist in this world'
+required_world_updates:
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Logged in OPEN_QUESTIONS as user-revisable but treated as invariant ONT-3 at genesis. Revision would require restructuring kinship.

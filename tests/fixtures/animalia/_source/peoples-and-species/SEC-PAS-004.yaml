@@ -1,0 +1,45 @@
+id: SEC-PAS-004
+file_class: PEOPLES_AND_SPECIES
+order: 4
+heading: Cluster C — Extinct-Species Folk ("Ancient Bloods")
+heading_level: 2
+body: |-
+  Population-rarer than Cluster A; tend to cluster in ancestral home regions. Examples: aurochs-folk, mammoth-folk (very large), sabertooth-folk, terror-bird-folk, ground-sloth-folk, dire-wolf-folk, woolly-rhinoceros-folk.
+
+  - **Body plan**: humanoid expression of extinct megafauna. Often larger or stronger than modern equivalents. Mammoth-folk in particular are architecturally significant (require oversized doorways, taller ceilings, reinforced floors).
+  - **Diet**: species-typical. Mammoth-folk and ground-sloth-folk huge plant-bulk requirements; sabertooth-folk obligate carnivore; aurochs-folk grass-grazer.
+  - **Movement**: bipedal; large body plans constrain canal-barge use (custom barges or upper-deck quarters).
+  - **Senses**: species-typical.
+  - **Vulnerability**: large body plans face heat-stress in drylands and sometimes joint stress in old age; small populations make some genetic vulnerabilities concentrated.
+  - **Reproduction**: species-typical, breeds true; small population pools complicate marriage choice.
+  - **Lifespan**: tends longer than modern equivalents (mammoth-folk and ground-sloth-folk 80–120; sabertooth-folk 60–80).
+  - **Social density**: small population per region, ancestrally clustered. Tend to maintain deep traditions and visible cultural distinctness.
+  - **Self-conception**: some Cluster C communities consider themselves "older bloods" and carry corresponding pride; this is **soft canon** at most, not world-truth, and resented in some other communities.
+    <!-- added by CF-0032 --> **Firewall (CH-0006)**: the oversize-saddlery guild-subsection (CF-0032) is a concrete body-plan-accommodation craft in ancestral polities; it does NOT constitute world-level validation of the "older bloods" self-conception, and progenitor-cult lineage-keeper integration of the subsection into cultural-continuity claims is sectarian activity, not chartered endorsement. Subsection prestige is craft-seal prestige, not lineage-supremacy prestige.
+  - **Embodiment effects on**:
+    - **labor** — heavy haulage, anchor-roles in mixed work-crews, longstanding tradition-keeping roles;
+      <!-- added by CF-0032 --> in ancestral polities, a third named specialty exists as a guild-subsection within wainwright and saddlery guilds: oversize harness, reinforced wagon-bed, barge-deck modification, and chair-for-estate work for mammoth-folk, ground-sloth-folk, and other large-body-plan Cluster C species (CF-0032). Journeymen travel a reciprocal cross-polity circuit to learn body-plan-variant instruction. The subsection is a recognized occupational upward-mobility route for Cluster C members otherwise concentrated in haulage, but most Cluster C community members remain in haulage — the subsection is a way out, not a default, and apprenticeship pipeline is species-concentrated by ancestral-region presence, not species-gated at intake;
+    - **clothing** — bespoke-only; off-the-rack does not exist for mammoth-folk or ground-sloth-folk;
+    - **architecture** — entire neighborhoods or estate wings sized for them; civic infrastructure in their ancestral regions accommodates them by default;
+    - **warfare** — anchor heavy infantry, breaking-the-line roles; mammoth-folk levy is famous and feared in their home polities;
+    - **taboo** — disrespecting elder-tradition status is sharp social wrong;
+    - **religion** — progenitor cults strong here; some incorporate Maker-skeptical doctrines;
+    - **environment** — heat-vulnerable; ancestral homes tend to be temperate-to-cold.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0001
+  - CF-0002
+  - CF-0010
+  - CF-0011
+  - CF-0012
+  - CF-0032
+  - CF-0035
+  - CF-0036
+  - CF-0037
+  - CF-0038
+  - CF-0041
+  - CF-0043
+  - CF-0046
+  - CF-0047

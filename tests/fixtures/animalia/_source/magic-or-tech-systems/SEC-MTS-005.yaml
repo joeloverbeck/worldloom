@@ -1,0 +1,61 @@
+id: SEC-MTS-005
+file_class: MAGIC_OR_TECH_SYSTEMS
+order: 5
+heading: Maker-Age Guardian Constructions (CF-0029)
+heading_level: 2
+body: |-
+  A rare subset of enterable Maker-Age ruin sites (CF-0027) contain magically-animated constructions — self-operating artifact-bearing defenses that respond to intrusion with lethal force. Guardian constructions are the signature catastrophic hazard of ruin expeditions (CF-0028): they kill expeditions outright when activated, produce environmental bleed-through at activation per CAU-2, and trigger the "officially resealed" response when survival fails.
+
+  ### Seven Firewall Commitments
+
+  Because guardian constructions sit at the intersection of several Mystery Reserve surfaces, the world commits seven explicit positions:
+
+  1. **World-level non-sentience (ONT-1)**. Guardian constructions are NOT sentient at the world level. Their apparent autonomy is behaviorally observed, empirically described, and in-world contested; no world-level cognitive or intentional framing is committed. ONT-1 clarification CH-0004 extends the ONT-1 clarification established in CH-0002 for modern-crafted vessel-hosted agencies (CF-0022).
+  2. **Scale cap (M-2)**. Guardian constructions are LOCAL in lethality — squad-wipe scale only. Cascade, mass-mind-control, and urban-scale ward-collapse remain catastrophic-class per Mystery Reserve M-2 and are NOT within expedition recovery. Catastrophic-class artifact origin remains M-2; no ruin expedition brings catastrophic-class material into the recoverable domain.
+  3. **M-5 firewall**. Nothing about guardian-construction apparent autonomy transfers to claims about animal-folk sentience. The M-5 firewall against cross-application holds as it did for CF-0022 crafter-vessel agencies.
+  4. **M-6 non-conflation**. Guardian constructions are DISTINCT in origin from modern-crafted vessel-hosted agencies (CF-0022). The phenomena are surface-similar but must NOT be identified — Maker-Age guardian ≠ modern crafted apparent-agency. M-6 (vessel-hosted agency mechanism) and M-8 (guardian-construction mechanism) are separate bounded unknowns.
+  5. **M-1 anti-evidence**. Guardian presence at a ruin site does NOT constitute evidence for any Maker cause-of-fall hypothesis (M-1). Maker-mystic, progenitor-skeptic, war-collapse, cult-collapse, and accident-collapse readings all remain contested; guardian-construction existence is compatible with any of them.
+  6. **M-8 mechanism referral**. Guardian-construction mechanism, targeting logic, activation conditions, and classification are bounded unknowns. Mystery Reserve M-8 governs the bounded-unknown; it must not be resolved at world level.
+  7. **Careful-practitioner vocabulary discipline**. Language around guardian constructions parallels CF-0022 careful-practitioner discipline: "behaves as if," "appears to," "activates upon." Avoid "thinks," "knows," "decides," "wants."
+
+  ### Presence Heterogeneity
+
+  Not every enterable ruin contains guardians; not every guardian-bearing ruin is recognizable in advance. Pre-entry scouting (inscription patterns, residual bleed-through, animal-behavior at entrance) is unreliable. Mystery Reserve M-10 governs the bounded-unknown of why presence is heterogeneous; typology that maps cleanly onto catastrophic-class is explicitly disallowed (would collapse M-2).
+
+  ### Guardian-Construction vs. Modern Crafted Vessel-Hosted Agency
+
+  A near-consensus across in-world readings treats Maker-Age guardian constructions and modern crafted vessel-hosted agencies (CF-0022) as DIFFERENT phenomena sharing surface traits. The distinct-origin commitment is load-bearing for both M-6 and M-8 firewalls. A minority Maker-mystic position treats the two as continuous; this is contested canon, not world-truth.
+
+  ### Authentication and Disposition
+
+  Authentication specialists (CF-0021 niche expanded by expedition activity) distinguish guardian-construction remains by craft signature: construction material, inscription style, articulation pattern, and contamination profile. Guardian-construction remains are typically retained under civic or chartered-guild custody after a catastrophic expedition produces them, rather than flowing through the funder-primacy disposition channel (CF-0030). Civic registry refuses sectarian "personhood" claims about guardian constructions, parallel to CF-0022 refusals for modern crafted vessel-agencies.
+
+  ### Exorcism Rites
+
+  Sectarian exorcism rites performed on guardian-construction remnants are performative under world-level non-sentience (firewall 1 above); the rite outcome is interpretively contested between sects. Common-pantheon clergy mostly decline such rites; Maker-mystic and progenitor-cult lineages sometimes perform them for theological coherence.
+
+  ---
+extensions: []
+touched_by_cf:
+  - CF-0003
+  - CF-0004
+  - CF-0005
+  - CF-0006
+  - CF-0007
+  - CF-0008
+  - CF-0019
+  - CF-0021
+  - CF-0022
+  - CF-0023
+  - CF-0024
+  - CF-0025
+  - CF-0027
+  - CF-0028
+  - CF-0029
+  - CF-0030
+  - CF-0035
+  - CF-0038
+  - CF-0039
+  - CF-0040
+  - CF-0041
+  - CF-0043

@@ -1,0 +1,80 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - refusers earn less than comparable non-refuser veterans (opportunity cost is real)
+  - refusers are sometimes treated as moral-superior and sometimes as self-righteous — reputation effect is bimodal
+  - the tradition creates theological friction with clergy who accept hazard-commission payment
+  - sectarian progenitor-supremacy movements sometimes brand refusers as disloyal to progenitor authority
+  - refusal is ethical only — it does NOT imply world-level claims about artifacts, vessel-agencies, or Maker-Age (ONT-2 / M-1 / M-6 firewalls)
+distribution:
+  who_can_do_it:
+    - any adventurer-contractor across species and class
+    - clergy in both religious systems (though with different doctrinal framings)
+    - clan-elders in highland communities
+    - civilians in household decisions about hiring and marriage
+  who_cannot_easily_do_it:
+    - adventurer-contractors who cannot afford to refuse well-paying work (market-position gate)
+    - those in dire economic circumstances
+  why_not_universal:
+    - economic pressure drives many toward fallout work despite doctrinal preference
+    - the tradition is genuinely a minority position, not mainstream
+    - sectarian progenitor-supremacy movements actively recruit veterans (countervailing pressure)
+domains_affected:
+  - religion
+  - law
+  - status_signaling
+  - labor
+id: CF-0026
+modification_history:
+  - change_id: CH-0007
+    date: 2026-04-18
+    originating_cf: CF-0033
+    summary: "extension: named standing role in charter-court challenges against dragoon mission creep; CF-0031 bifurcation template applied (charter-court-with-protection vs abolitionist); CF-0026 ethical-not-metaphysical commitment preserved"
+  - change_id: CH-0008
+    date: 2026-04-19
+    originating_cf: CF-0034
+    summary: "extension: bounty-execution morality bifurcation (bounty-commission-accepting vs execution-abolitionist) within principled-refuser tradition; CF-0031/CF-0033 template applied; aspectualizing-clergy fallout-ministry to raid-victims and liberated slaves; highland cleansing-rite refusal for enslave-band returnees committed; ethical-not-metaphysical commitment preserved"
+  - change_id: CH-0010
+    date: 2026-04-19
+    originating_cf: CF-0036
+    summary: "extension: interspecies-friction bifurcation added as THIRD bifurcation axis (charter-defense-anti-supremacism vs civic-restraint-pragmatic) following CF-0031/CF-0033 template; aspectualizing common-pantheon clergy mainstream refute supremacist doctrine under judgment-god / charter-covenant framing (primary stabilizer); aspectualizing progenitor-cult lineage-keepers refute under civic-covenant-witness framing; progenitor-cult sectarian supremacy wing is minority contested position; cleansing-rite refusal CATEGORICALLY WORLD-WIDE for cannibal-band returnees (heavier than CF-0034 raid-and-enslave refusal, which was previously the heaviest); M-4 / M-5 fifth cross-application firewalls preserved; ethical-not-metaphysical commitment preserved"
+notes: |
+  Direct from briefs/animalia-adventurers.md. The refusal is committed as ETHICAL, not metaphysical. Per Mystery Curator firewall: refusers do NOT take theological positions that resolve M-1, M-2, M-5, M-6, or other Mystery Reserve entries. Their moral stance is about hazard- exploitation traffic and contamination-cost externalization, not about artifact ontology. The tradition is a productive pressure system between common-pantheon reform currents and guild hazard-commission economics; it is NOT a wedge into Mystery Reserve. Adjudication record: adjudications/PA-0002-accept_with_required_updates.md. Modified 2026-04-18 by CH-0007 (CF-0033): principled-refuser tradition acquires a named standing role in charter-court challenges against canal-corridor quarantine dragoon (CF-0033) mission creep in adopting polities. Reform-current common-pantheon clergy bifurcate between charter-court-challenge-with-protection (accept dragoons with strict sunset clauses and perimeter-scope discipline; challenges target mission creep not institution) and civic-militarization-abolitionist (oppose dragoon adoption as Charter-Era rupture regardless of scope) — following the CF-0031 bifurcation template. Progenitor-cult lineage- keeper doctrinal-strand refusers in adopting polities sometimes denounce adoption on species-lineage-occlusion grounds alongside the reform-current clergy challenges. The extension PRESERVES the CF-0026 ethical-not-metaphysical commitment: dragoon-mission-creep challenges are grounded in Charter-Era anti-monopoly-of-force jurisprudence and contamination-cost externalization, NOT in theological claims about artifact ontology or Maker-Age cosmology. Charter-court challenge effectiveness depends on charter-court precedent robustness and CF-0026 refuser-clergy influence per polity — M-13 tracks the underlying institutional-contingency question as bounded-unknown. Mystery Reserve firewalls preserved. Adjudication record: adjudications/PA-0006-accept_with_required_updates.md. Modified 2026-04-19 by CH-0008 (CF-0034): bounty-execution morality bifurcation added as a new axis within the principled-refuser tradition. Reform-current common-pantheon clergy bifurcate between bounty- commission-accepting wing (treat bounty-hunting as civic-hazard commission in the same register as chartered-extraction hazard work — moral though hazardous) and bounty-execution-abolitionist wing (campaign against summary killing of captured bandits, demand trial and appeal procedure; pressure is concentrated in highest-charter polities where magistrate-courts have capacity) — following the CF-0031 / CF-0033 reform-with-protection-vs-abolition template rather than CF-0021 aspectualization because the moral load attaches to the killing-act, not the institutional form. Aspectualizing common- pantheon clergy treat bandit-hunting as civic-hazard-commission labor without doctrinal implication. Fallout-ministry to raid-victim survivors and liberated slaves is a recognized aspectualizing-clergy pastoral specialty paralleling CF-0025 fallout-specialist hazard- ministry. The extension PRESERVES the CF-0026 ethical-not-metaphysical commitment: bounty-execution challenges are grounded in due-process and trial-vs-summary jurisprudence, NOT in theological claims about bandit moral status or redemption cosmology. Highland cleansing-rite REFUSAL for enslave-band returnees (CF-0034) is the sharpest doctrinal commitment around the CF-0034 raid-and-enslave subset; it is heavier than the standard CF-0024 cleansing-rite and categorically distinct from the CF-0028 ruin-silence-oath. Mystery Reserve firewalls preserved. Adjudication record: adjudications/PA-0007-accept_with_required_updates.md. Modified 2026-04-19 by CH-0010 (CF-0036): interspecies-friction bifurcation added as THIRD bifurcation axis within the principled- refuser tradition (after CH-0005 contamination-registry and CH-0007 dragoon-scope). Reform-current common-pantheon clergy bifurcate between **charter-defense-anti-supremacism wing** (invokes civic- charter anti-hierarchy clauses; campaigns for prosecution of cannibal- bands WITHOUT silence-protocol; mounts charter-court challenges against magistrate toleration of exclusionary-settlement extradition refusal; organizes cross-species moral witness against supremacist- doctrine recruitment) and **civic-restraint-pragmatic wing** (accepts silence-protocol on rebellion-prevention grounds; focuses moral witness on hate-speech reform and survivor ministry; ministers to silenced-contractor-bitterness households and cannibal-camp survivor households under fallout-ministry pastoral register paralleling CF-0025/CF-0034) — following the CF-0031/CF-0033 reform-with-protection- vs-abolition template rather than CF-0021 aspectualization path because supremacist doctrine is NOT aspectualizable, it is REFUTABLE. Aspectualizing common-pantheon clergy (the MAINSTREAM position) refute supremacist doctrine under judgment-god and charter-covenant framing — this is the primary stabilizer against supremacist-doctrine normalization. Aspectualizing progenitor-cult lineage-keepers extend refutation via "progenitor-as-civic-covenant-witness" framing — progenitor read as witness to mixed-species civic compact, NOT as lineage-supremacy warrant. Progenitor-cult sectarian supremacy wing is the MINORITY CONTESTED position; its recruitment window is the exclusionary-settlement + bitter-silenced-witness + failed-reputation- contractor feeder stratum. Cleansing-rite refusal CATEGORICALLY WORLD-WIDE for clan-member returned from a cannibal-band (heavier than CF-0034 raid-and-enslave refusal, which was previously the heaviest precedent); no atonement path in any highland clan. The extension PRESERVES the CF-0026 ethical-not-metaphysical commitment: charter-defense-anti-supremacism challenges are grounded in civic- charter hierarchy-firewall jurisprudence and survivor-welfare moral witness, NOT in theological claims about progenitor-position (M-4 firewall) or sentience-boundary (M-5 firewall FIFTH cross-application). Mystery Reserve firewalls preserved. Adjudication record: adjudications/PA-0009-accept_with_required_updates.md.
+prerequisites:
+  - cultural, religious, or biographical ground for refusal (reform-current clergy, progenitor-cult lineage doctrine, Maker-skepticism, personal oath, witness to a bad job)
+  - public willingness to be known as a refuser (character-dependent; affects contract flow)
+required_world_updates:
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - ECONOMY_AND_RESOURCES
+  - GEOGRAPHY
+  - MAGIC_OR_TECH_SYSTEMS
+  - TIMELINE
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0024
+    - CF-0016
+  direct_user_approval: true
+statement: |
+  A visible moral/religious minority of veterans, clergy, clan-elders, and civilians refuse artifact-related contract work on principle. The refusal is ethical rather than metaphysical — it does not imply any world-level claim about artifacts, vessel-agencies, or Maker-Age cosmology. Refusers come from several doctrinal strands: a reform current within common- pantheon clergy that treats refusal as moral witness against hazard- commission traffic; a doctrinal strand in some progenitor-cult lineages (distinct from progenitor-supremacy sectarianism) that treats artifact work as desecration; a Maker-skeptical conviction in certain scholarly and sectarian circles; biographical refusal after witnessing a bad job; personal oath. The tradition carries weight in inheritance disputes, civic advisory roles, and bardic-circuit reputation. It creates theological friction with common-pantheon clergy who accept hazard- commission payment from chartered guilds, and it provides an organized moral stance distinct from sectarian progenitor-supremacy. Refusal is genuine labor-market action — principled refusers often take non- artifact-adjacent contracts (caravan escort, wildlife, mundane skirmish mercenary work) to demonstrate that the refusal is specific and moral, not generic work-avoidance.
+status: hard_canon
+title: Principled-refuser tradition — ethical refusal of artifact-fallout work
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: belief
+visible_consequences:
+  - reform-current common-pantheon clergy publicly witness against fallout-traffic exploitation
+  - progenitor-cult lineage-keepers in certain traditions teach refusal as clan or lineage virtue
+  - clan-burning of contract-tokens (marked stick or posted leaf) when a contract is refused on principle in highland clans
+  - refuser-lineages in highland communities accrue distinct prestige from warrior-lineages; sometimes marry exclusively within refuser-strand families
+  - bardic subgenre of the refusal-tale travels as moral witness
+  - estate hiring filters track which candidates refuse artifact-adjacent work
+  - civic advisory roles disproportionately filled by refuser-reputation figures in some polities
+  - common-pantheon clergy who accept hazard-commission payment come under theological pressure from reform currents
+  - marriage and inheritance disputes sometimes name refuser status as relevant character evidence

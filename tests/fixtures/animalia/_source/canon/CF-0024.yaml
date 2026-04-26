@@ -1,0 +1,135 @@
+contradiction_risk:
+  hard: false
+  soft: true
+costs_and_limits:
+  - reputation-slow-build gates the upper end; tavern-board new-hires accept underpriced hazard work
+  - contract-breach cascade in thin-contractor regions compounds losses (rabid livestock uncontained; escort-gap bandit losses; fallout escalating toward ward-breach)
+  - off-the-books tavern-board contracts erode civic-registry tax base in polities that levy on ledger-credit trade
+  - widows and orphans common after bad jobs; widow-of-the-job is a recognized household category without charter pension protection in non-adopting polities; in adopting chartered polities, CF-0025-eligible lineages may self-register on the CF-0031 ledger-mark registry for voluntary-enrolled pension supplement; non-CF-0025 contractor-widow categories (mundane CF-0024 subtypes, CF-0028 expedition-widows) remain without charter hook
+  - hazard-pay asymmetry widens the gap between veteran-negotiators and ordinary wage laborers
+  - noble retinues under adventurer-contract language create Charter-Era anti-monopoly-of-force friction
+  - mercenary-band licensure varies sharply by polity (license/tolerate/restrict/ban); inter-polity mismatch generates novel extradition cases
+  - contracted-bards bypass civic-archive narrative-custody; scribal guilds (corvid-folk disproportionate) resent the competition
+  - levy cannibalization pressure in polities with weak chartered-military monopoly
+distribution:
+  who_can_do_it:
+    - veterans of any sentient species seeking hazard-labor income
+    - traveling bards extending CF-0017 into contracted agency
+    - reformed criminals, refugees from sealed quarters, and other displaced labor seeking legitimate hazard work
+    - mercenary-band organizers during skirmish-season
+  who_cannot_easily_do_it:
+    - children, elders, and injured (physically unfit)
+    - those without reputation or tavern-vouch (market access gate)
+    - those bound by principled-refuser oath or clan exile (CF-0026 and clan-custom exclusions)
+    - residents of tiny fen stilt-villages and tight-knit clan communities that summon rather than post
+  why_not_universal:
+    - skill and reputation take years to build; SOC-3 coin-contract custom makes oath-breakers economically unhireable
+    - high mortality in the specialist subset (CF-0025); moderate in mercenary-band and caravan-escort work
+    - levy/militia traditions retain primary defense standing in most polities
+    - principled-refuser tradition (CF-0026) siphons legitimacy-seekers from artifact-fallout subsets
+    - guild-charter ceiling; contractors cannot perform artifact extraction, ward inscription, ceramic-vessel containment, or neutralization — those remain chartered (CF-0006, CF-0007, CF-0008)
+    - regional variation; highland clans require clan-elder sanction; fens summon rather than post; strict sectarian communities reject the stratum on principle
+domains_affected:
+  - labor
+  - economy
+  - warfare
+  - law
+  - settlement_life
+  - religion
+  - status_signaling
+  - kinship
+  - architecture
+  - language
+  - memory_and_myth
+id: CF-0024
+modification_history:
+  - change_id: CH-0005
+    date: 2026-04-18
+    originating_cf: CF-0031
+    summary: "scope_retcon: widow-pension-absence claim narrowed to non-adopting-polity scope for CF-0025-eligible lineages; other contractor-widow categories remain without charter hook"
+  - change_id: CH-0007
+    date: 2026-04-18
+    originating_cf: CF-0033
+    summary: "qualification: perimeter enforcement exits contractor-auxiliary niche in dragoon-adopting polities; contractor stratum scope otherwise preserved; inter-polity labor-market cannibalization reversal pattern extended; assortative-sorting preferred-marriage tier bifurcation"
+  - change_id: CH-0008
+    date: 2026-04-19
+    originating_cf: CF-0034
+    summary: "extension: bandit-hunter as named fifth contractor subtype (alongside caravan-escort, wildlife, extraction-escort, dredger-escort, mercenary-band warfare, occult-fallout); three-tier skirmish-season taxonomy clarified (sanctioned mercenary with clan-elder-sanction / endemic bandit outside sanction / patron-backed expedition-war per CF-0028); widow-of-the-raid absorbed as idiom-extension of widow-of-the-job (NOT elevated to new stratum per Rule 3); narrative-custody bandit-related subgenres extend via CF-0017 modification; bandit-hunter reputation-genealogy subject to M-7 firewall at fifth-cohort parity"
+  - change_id: CH-0009
+    date: 2026-04-19
+    originating_cf: CF-0035
+    summary: "extension: legendary-beast hunt is a NAMED SUB-SPECIALTY WITHIN the existing wildlife contractor subtype (NOT a sixth CF-0024 subtype; NOT a new stratum per Rule 3); commissioned via settlement-hire bounty-contract under bounty-clerk certification; pay tier stays within wildlife sub-bucket with routine-wildlife vs legendary-beast-hunt discriminator; widow-of-the-hunt absorbed into widow-of-the-job per Rule 3 firewall; hunter-contractor ≠ dragoon boundary extended (magistrate predicate-declaration required at cross-predicate pursuit into adopting-polity dragoon-active ward perimeter, paralleling CF-0034 bandit-who-also-traffics-artifacts handling per M-13 boundary defense); veteran-pool multi-claim cannibalization reaches seven-to-ten concurrent claims depending on polity; legendary-beast-hunter sub-specialty reputation-genealogy tracked AS PART OF existing CF-0024 contractor-veteran cohort pattern under M-7 sub-specialty holding clause (NOT a sixth M-7 cohort until and unless future canon work names specialist beast-hunter institutions distinct from wildlife sub-specialty)"
+  - change_id: CH-0010
+    date: 2026-04-19
+    originating_cf: CF-0036
+    summary: "absorption: silenced-adventurer-contractor sub-band absorbed into failed-reputation-contractor feeder (Rule 3 specialness-inflation firewall; NOT a new stratum; paralleling CH-0008 widow-of-the-raid and CH-0009 widow-of-the-hunt absorptions); silenced contractor is ALIVE, retains job-pension under SOC-3; bitterness-register is qualitative reputation-damage; drift toward supremacist-doctrine-recruitment or CF-0034 bandit-recruitment pathway at sectarian-patronage margin; CF-0026 CH-0010 charter-defense wing fallout-ministry pastoral extension; M-7 sub-specialty holding clause (NOT sixth M-7 cohort); marriage-broker catechism kin-of-the-silenced idiom-extension (NOT new stratum)"
+  - change_id: CH-0013
+    date: 2026-04-19
+    originating_cf: CF-0038
+    summary: "named-polity-instance + canal-corridor hub commitment: Brinewick (CF-0038) adopts LICENSING-UNDER-TIGHT-CHARTER posture on mercenary-company licensure; ad-hoc band-formation restricted within civic core; outskirts-estate noble-retinue tolerated-with-friction; contractor-auxiliary rosters among heartland's largest. Canal-corridor illegitimate-service rail (seven product-lines) converges on Brinewick canal infrastructure at exemplar density; unchartered-broker matchmaker concentration + authentication-cartel formation pressure maximally intensified; canal-underwater aquatic-folk-guided smuggling is TRANSPORT-LAYER capability serving the existing seven product-lines per CF-0038 firewall — NOT a new eighth product-line. CF-0024 scope, distribution, and stabilizer structure unchanged; Brinewick instantiates abstract commerce-hub pattern"
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0042
+    summary: "extension: status-artifact bodyguard-commission as NAMED SUB-SPECIALTY within extraction-escort subtype (NOT a new sixth CF-0024 subtype; NOT a new stratum per Rule 3 specialness-inflation firewall); pay tier within extraction-escort-sub-bucket (dig-site mid-copper to lower-silver; display-protection mid-silver to upper-silver); ELEVENTH concurrent claim on CF-0024 veteran pool alongside CF-0034 / CF-0035 / CF-0033 / CF-0028 / CF-0025 / existing subtypes; widow-of-the-detail absorbed into widow-of-the-job per Rule 3 firewall; magistrate-docket-recognized assassination-risk predicate; chartered functions preserved (no ward-inspection, extraction, containment, authentication)."
+  - change_id: CH-0015
+    date: 2026-04-20
+    originating_cf: CF-0043
+    summary: "extension: Ash-Seal commercial property-protection guards (Brinewick-specific perimeter-bounded) as ELEVENTH concurrent veteran-pool claim absorbed into extraction-escort subtype sub-specialty per Rule 3 firewall (not a new twelfth subtype, not a new stratum); perimeter-bounded sub-specialty pay within extraction-escort-sub-bucket (upper-copper to mid-silver by guard-experience tier); beyond-perimeter deployment triggers CF-0024 civic-watch friction; veteran-pool multi-claim cannibalization pressure compounds at Brinewick exemplar density; SOC-3 commercial property-protection coin-contract preserved"
+  - change_id: CH-0018
+    date: 2026-04-20
+    originating_cf: CF-0046
+    summary: "extension: CF-0024 caravan-rotation social form and caravanserai posting-board infrastructure constitute the substrate CF-0046 extends at drylands-corridor-complex scale; caravan-master cargo-refusal judgment register extends with CORRIDOR-INTERNAL CUSTOMARY-ADJUDICATION scope (intra-caravan labor, supply-share, verse-turn etiquette breach, well-share friction) under reputation-enforced convention; multi-caravan-master reputation-boycott at corridor-network scale is structural brake against graft/coercion; runner-reached village militia emergency-response absorbed alongside CF-0024 framework (village runner NOT a posted contractor; pursuit beyond village jurisdiction defaults to CF-0034 hunter-contractor commission); drylands station-log convention in DIS-2 trade-tongue coexists with tea-house-scribe contract-custody tradition without displacement; CF-0024 scope and stabilizer structure unchanged"
+  - change_id: CH-0021
+    date: 2026-04-26
+    originating_cf: CF-0048
+    summary: "extension: canal-heartland \"corner-share\" / \"serious-share\" pay-split bifurcation register named (CF-0048) for chartered-plus-auxiliary cellar-job configurations. The register names a previously-implicit pay-tier WITHIN existing CF-0024 contractor-auxiliary compensation practice — chartered professional (per CF-0006 / CF-0007 / CF-0008) takes the \"serious share\"; auxiliary takes the \"corner-share\" (customary copper-to-lower-silver tier calibrated to lantern-hold / door-keep / one-fetch role-scope). Canal-heartland scope (sibling regional registers exist with different vocabulary — highland clan-share, drylands caravan-share per CF-0046, fenland relay-summoning compensation). Rule 3 specialness-inflation firewall: the corner-share register is a NAMED SUB-TIER WITHIN the existing CF-0024 wage-table row at SEC-ECR-002 (\"upper copper to upper silver, risk-loaded\"), NOT a new wage-row position; parallel to CF-0034 / CF-0035 / CF-0042 / CF-0043 sub-specialty absorption precedents. Tavern-keeper vouch (CF-0024 social asset) extends with \"corner-share-reliable\" competence register; circuit-bard contractor-ballad subgenres absorb the idiom (CF-0017 / CF-0024 contracted-bard narrative-custody). Widow-of-the-job framework gains tier-granularity: corner-share-rank widow's household income-recovery base lower than serious-share-rank chartered-professional's widow's, absorbed per CH-0008 widow-of-the-raid + CH-0009 widow-of-the-hunt absorption precedents. Brinewick CF-0038 + CF-0043 charter-audit-strict polity formal-vs-informal vocabulary divide preserves the register as informal-register-only (not in civic-registry contract-template vocabulary). CF-0024 scope, distribution, and stabilizer structure unchanged. Status: soft_canon (partial-support evidence-breadth pathway; DA-0001 sole pre-figuring source for the naming). Adjudication record: adjudications/PA-0018-accept_with_required_updates.md."
+notes: |
+  Direct from briefs/animalia-adventurers.md. Consolidates and structurally commits the adventurer stratum that kernel line 9 already anticipates ("Adventurers exist but are treated as dangerous laborers, not chosen ones"). Linked CF-0025 bounds the occult-fallout specialty to mundane containment under commission with explicit M-1/M-2/M-6 and ONT-2 firewalls. Linked CF-0026 commits the principled-refuser tradition as an ethical (not metaphysical) moral category. Linked Mystery Reserve M-7 governs the reputation-genealogy of famous occult-fallout specialists. AES-1 guard clause: the adventurer stratum is labor, not vocation- romance; characters must not be framed as chosen, destined, or called. In-register language for writing in this setting: "hired," "contracted," "taken on," "posted at the tavern board," "local warrior," "veteran," "takes the work," "refused the work," "paid on delivery," "hazard pay," "scarred," "handler of fallout," "licensed escort." Out-of-register language to avoid: "adventurer party/band of heroes," "quest," "quest-giver," "monster hunter," "legendary," "chosen," "destined," "calling," "school of," "initiated," "brotherhood of witchers/hunters," "dungeon," "loot," "leveled up," "epic." Four existing CFs qualified by this addition: CF-0017 (bards extended as contracted agents), CF-0020 (veteran capability now named within broader stratum), CF-0008 (contractor-auxiliary boundary), CF-0021 (crafter-hunting niche and mercenary-commission pathway formalized). Adjudication record: adjudications/PA-0002-accept_with_required_updates.md. Modified 2026-04-18 by CH-0005 (CF-0031): widow-of-the-job pension-absence claim in costs_and_limits narrowed to non-adopting-polity scope for CF-0025-eligible lineages. Adopting chartered polities with the CF-0031 ledger-mark registry provide voluntary-enrolled pension supplement for CF-0025 specialists' households; the global negative pension claim is preserved as default for all other CF-0024 contractor-widow subtypes (mundane caravan-escort, wildlife, dredger-escort, mercenary-band contractor widows) and for all contractors in non-adopting polities. SOC-3 coin-contract enforcement unchanged. M-7 firewall holds (registry tracks body-injury, not knowledge-genealogy). Adjudication record: adjudications/PA-0004-accept_with_required_updates.md. Modified 2026-04-18 by CH-0007 (CF-0033): contractor stratum scope is qualified in dragoon-adopting polities. Perimeter enforcement during ward-breach declaration EXITS the contractor-auxiliary niche in adopting polities — the work that would in a non-adopting polity flow to CF-0024 contractor-auxiliary rosters under CF-0008 guild commission now flows to CF-0033 dragoons under civic-charter. Contractor stratum is otherwise PRESERVED: extraction/dredger-escort, caravan and wildlife escort, occult-fallout containment, mercenary-band skirmish work, and CF-0028 ruin-expedition contracting all remain contractor-stratum activities in adopting and non-adopting polities alike. The inter- polity labor-market cannibalization pattern that CF-0028 CH-0004 flagged (expedition demand pulling top-silver veterans from ward- breach response) is extended in dragoon-adopting polities: during 3-7 year dragoon corps buildout, dragoon recruitment cannibalizes the CF-0024 upper-stratum veterans alongside CF-0020 militia reserves; once institution matures, dragoon pension differential creates preferred-marriage tier drawing marriageable veterans from the contractor, fallout-specialist, and mercenary pools (assortative- sorting pattern parallel to CF-0032 placement-right and CF-0031 registered-lineage dynamics). Inter-polity cannibalization reversal: dragoon-adopting polities EXPORT cannibalization pressure to non- adopting polities as veterans emigrate to enlist, thinning the non- adopting polity's contractor pool and raising its ward-breach severity indirectly. Widow-of-the-job pension-absence claim holds for CF-0024 contractor-widow categories in non-adopting polities per CH-0005 narrowing; in adopting polities, retired-dragoon widow receives full civic-treasury pension coverage (categorically distinct from CF-0031 welfare-registry supplement). Adjudication record: adjudications/PA-0006-accept_with_required_updates.md. Modified 2026-04-19 by CH-0008 (CF-0034): bandit-hunter is named fifth contractor subtype alongside caravan-escort, wildlife, extraction-escort, dredger-escort, mercenary-band warfare, and occult-fallout — a CF-0024-stratum activity (NOT a CF-0033 dragoon civic function; NOT a chartered-guild function). Three-tier skirmish- season taxonomy clarified: (i) sanctioned mercenary with clan-elder- sanction per highland tradition; (ii) endemic bandit outside sanction per CF-0034; (iii) patron-backed expedition-war per CF-0028. Widow- of-the-raid absorbed into widow-of-the-job as idiom-extension ("did your kin come back from the raid?" extends the marriage-broker catechism in corridor-exposed districts) — NOT elevated to a new stratum per Rule 3 specialness-inflation firewall. Bandit-hunter reputation-genealogy is subject to the M-7 firewall at fifth-cohort parity with extractor-veteran, expedition-veteran (CF-0028), subsection- master (CF-0032), and retired-dragoon (CF-0033) cohorts. Veteran-pool multi-claim cannibalization now reaches six to nine concurrent claims depending on polity (hunter-contract competes with all prior subtypes plus dragoon-recruitment in adopting polities). Adjudication record: adjudications/PA-0007-accept_with_required_updates.md. Modified 2026-04-19 by CH-0010 (CF-0036): silenced-adventurer- contractor sub-band is ABSORBED INTO the failed-reputation-contractor feeder (Rule 3 specialness-inflation firewall; NOT a new stratum; paralleling widow-of-the-raid → widow-of-the-job per CH-0008 and widow-of-the-hunt → widow-of-the-job per CH-0009). Silenced contractor is ALIVE (not a widow); the bitterness-register qualitatively damages reputation without creating income-stream gap requiring new welfare category. Silenced contractor retains the contract-pension from the job-that-became-sealed (SOC-3 coin-contract sacredness preserved; the job was performed). Silenced-contractor drifts into failed-reputation feeder via civic-watch intake-interview enforcement, charter-restriction on sealed-case public-speech, and penal-consequence for breach; may be recruited by supremacist-doctrine sectarian movements at the margin under sectarian-patronage pressure OR drift toward CF-0034 bandit- recruitment pathway. Reform-current principled-refuser clergy (CF-0026 CH-0010 charter-defense wing) minister to silenced-contractor households under fallout-ministry register paralleling CF-0025/CF-0034 pastoral specialties. Silenced-contractor reputation-genealogy is subject to the M-7 firewall at sub-specialty holding status (NOT a sixth M-7 cohort; absorbed as qualitative-reputation-damage pattern within existing five- cohort register). Marriage-broker catechism extends with kin-of-the- silenced question *"does your kin come back and speak?"* paralleling CF-0031 *"did your grandfather take the mark?"* and CF-0034 *"did your kin come back from the raid?"* — minor idiom-extension, NOT new stratum. Adjudication record: adjudications/PA-0009-accept_with_required_ updates.md.
+  Modified 2026-04-20 by CH-0015 (CF-0043): extension — Ash-Seal commercial property-protection guards (perimeter-bounded; Brinewick-specific) are an ELEVENTH CONCURRENT CLAIM on the CF-0024 veteran pool, ABSORBED INTO the extraction-escort subtype as a sub-specialty (NOT a new twelfth CF-0024 subtype; Rule 3 specialness-inflation firewall; parallel to CF-0042 status-artifact bodyguard-commission eleventh-claim absorption into extraction-escort subtype at CH-0014). Ash-Seal-guard sub-specialty pay sits within extraction-escort-sub-bucket (perimeter-bounded commercial property-protection at upper-copper-to-mid-silver depending on guard-experience tier); deployment beyond facility-perimeter triggers CF-0024 civic-watch friction per existing noble-retinue-under-contract pattern. The eleventh-claim counts CF-0043 Ash-Seal-guard alongside the ten-to-eleven existing concurrent claims (caravan-escort, wildlife, extraction-escort, dredger-escort, mercenary-band warfare, occult-fallout per CF-0025, ruin-expedition per CF-0028, dragoon-recruitment per CF-0033 in adopting polities, bandit-hunter per CF-0034, legendary-beast-hunt per CF-0035, status-artifact bodyguard per CF-0042). Veteran-pool multi-claim cannibalization pressure compounds in Brinewick-specific labor market where all prior claims are already at exemplar density per CF-0038 cumulative commitment. Adjudication record: adjudications/PA-0014-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0018 (CF-0046): extension — CF-0024 caravan-rotation social form and caravanserai posting-board infrastructure constitute the substrate CF-0046 extends at drylands-corridor-complex scale. Caravan-master cargo-refusal judgment register (CF-0034 waiting-wolves; CF-0036 mix-sound; CF-0041 sealed-cargo) extends with CORRIDOR-INTERNAL CUSTOMARY-ADJUDICATION scope per CF-0046 — caravan-masters on drylands rotation adjudicate minor rest-stop disputes (intra-caravan labor, supply-share, verse-turn etiquette breach, well-share friction) under reputation-enforced convention; multi-caravan-master reputation-boycott at corridor-network scale is the structural brake against graft/coercion. Runner-reached village militia emergency-response (CF-0046 drylands-specific informal folk-practice) is absorbed alongside CF-0024 caravanserai-posting contractor-auxiliary framework — the village runner is NOT a CF-0024 posted contractor (no posting-wall, no tavern-board hire; village-consensus selection rotating across able villagers); pursuit beyond village jurisdiction defaults to CF-0034 hunter-contractor commission if the corridor justifies bounty-contract. Drylands station-log convention kept in DIS-2 trade-tongue (CF-0046) operates in household register alongside the tea-house-scribe contract-custody tradition (CF-0024/0028/0033/0034/0036/0044) without displacing it; the two literacy conventions coexist. CF-0024 scope, distribution, and stabilizer structure unchanged; CF-0046 extends caravan-rotation institutional-complex superstructure and names the drylands-corridor-specific adjudication scope-firewall. Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+prerequisites:
+  - chartered polity or trade town with posting venue (tavern, lockmaster, civic wall) for the posting channel
+  - veteran experience, bardic training, or other recognizable skill for the contractor side
+  - SOC-3 coin-contract custom for enforcement
+  - mobility (foot, horse, barge, caravan) for circuit work
+required_world_updates:
+  - INSTITUTIONS
+  - EVERYDAY_LIFE
+  - ECONOMY_AND_RESOURCES
+  - MAGIC_OR_TECH_SYSTEMS
+  - TIMELINE
+  - GEOGRAPHY
+  - OPEN_QUESTIONS
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0017
+    - CF-0020
+    - CF-0008
+  direct_user_approval: true
+statement: |
+  Animalia has an organized, publicly visible economy of independent contractors (colloquially "adventurers") drawn from all sentient species, making their living by fulfilling contracts posted publicly in town and city venues or commissioned privately. Internal subtypes include local hardened warriors, traveling bard-agents (extending CF-0017), extraction/ dredger-escort labor, caravan and wildlife-control escort, and mercenary bands formed during inter-community skirmishes. The specialized occult- fallout subtype (CF-0025) and the principled-refuser tradition (CF-0026) are committed as linked CFs. Contract-posting infrastructure (tavern notice-boards, lockmaster posting walls, civic posting walls, and in mid-to-large towns unchartered matchmaking brokers) is ordinary in chartered polities; regional variants exist (highland clan-sanction for outland contracts; fenland relay-summoning via monastic clinic; drylands caravanserai posting). The stratum is treated as ordinary hazard labor, not heroic vocation — the kernel's "dangerous laborers, not chosen ones" framing applies directly.
+status: hard_canon
+title: Public contractor stratum ("adventurers") with contract-posting infrastructure
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: institution
+visible_consequences:
+  - tavern notice-boards and lockmaster posting walls are ordinary sights in mid-to-large towns of chartered polities
+  - '"adventurer" is vernacular for an ordinary hazard-labor occupation with visible subtypes'
+  - rotating contractors drink in tavern mixed rooms; tavern-keeper vouch is a real social asset
+  - magistrate courts build hazard-pay, liability, and extradition precedent across Charter polities
+  - artifact-extraction guilds maintain contractor-auxiliary rosters (vetted repeat contractors under commission)
+  - mercenary bands form and disband at skirmish-season in inter-community flares; some polities license mercenary companies under tight charter
+  - contracted bards (extension of CF-0017) carry hire-notices, gather material, and compose named-veteran reputations that travel inter-polity via the bardic circuit
+  - portable contractor reputation accrues as a new value-store object qualitatively different from polity-bounded guild-seal credentialing
+  - landholding estates retain named adventurer-retinues on quiet retainer under caravan/wildlife-contract framing; civic watch periodically tests the boundary
+  - civic-registry adventurer-contract form templates develop; widows' pension arrangements negotiated through tavern custom rather than chartered-guild protection
+  - clergy-contractor hiring for pilgrimage safety and contaminated-site intercession is ordinary; sectarian progenitor-cult lineages recruit veterans for armed lineage-guards
+  - herb-wives and barber-surgeons develop contractor-specific empirical triage (deep cuts, bite/claw punctures, fallout exposure, post-battle sepsis)
+  - bardic cycles carry named-veteran reputations, widow-pension songs, escort-refusal tales, and contractor-failure ballads as a minor subgenre
+  - regional asymmetry in contractor licensing parallels the crafter-tolerance pattern (CF-0021)

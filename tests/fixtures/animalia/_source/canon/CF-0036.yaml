@@ -1,0 +1,250 @@
+id: CF-0036
+title: Endemic interspecies friction as historical-process
+status: hard_canon
+type: historical_process
+statement: |
+  Interspecies friction is an endemic, ongoing social pattern in Animalia, as old as multispecies civic coexistence. It ranges across a spectrum from ordinary slur-and-stereotype tavern banter, through labor-prejudice distancing (some households and cohorts treat other species as "meant for" lower-reputation labor), through isolated single-species enclave settlements that drive away other-species immigration, through supremacist sectarian doctrine holding one species' entitlement to violence against another (CONTESTED-CANON sectarian belief, NEVER world-truth), through an interspecies-cannibal fringe among CF-0034 outlaw bands (carnivore-folk bandits killing and treating other sentient peoples' remains as meat), to civic-authority scandal-containment of cannibal-evidence under sealed- magistrate-docket procedure and the silenced-adventurer-contractor stratum that scandal-containment produces. Across all points on this spectrum, NO species-hierarchy is world-truth (SOC-1 preserved without exception); civic charters continue to suppress hierarchy-speech per PEOPLES Cross- Cluster existing firewall. This CF formalizes the spectrum already implicit in WORLD_KERNEL §What Is Ordinary ("oral instinct-jokes about other species") and §What Is Taboo ("mocking another species' bodily needs in mixed company"), extending the pattern into labor-prejudice, exclusionary settlements, supremacist doctrine (contested-canon), cannibal-fringe, and civic-silencing strata — Rule 6 anti-silent-retcon framing, parallel to CF-0034's formalization of implicit banditry mentions.
+scope:
+  geographic: global
+  temporal: cyclical
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - social_norms
+  - labor
+  - taboo_and_pollution
+  - institutions
+  - law
+  - religion
+  - economy
+  - everyday_life
+  - kinship
+  - language
+  - memory_and_myth
+  - status_signaling
+  - mobility
+  - settlement_life
+prerequisites: []
+distribution:
+  who_can_do_it:
+    - any sentient household, cohort, or individual can express ordinary-register friction
+    - sectarian movements of any species can recruit for supremacist doctrine (CONTESTED BELIEF, NEVER world-truth)
+    - demographically isolated single-species settlements can maintain exclusionary immigration refusal
+    - CF-0034 outlaw bands can contain a cannibal-fringe sub-subset (rare, corridor-local)
+    - civic magistrate-court and civic-watch institutions can apply sealed-docket scandal-containment procedure for cannibal-case prosecution
+  who_cannot_easily_do_it:
+    - chartered polities cannot adopt supremacist doctrine as civic policy (Charter-Era anti-hierarchy firewall load-bearing)
+    - cannibal-fringe subset cannot scale beyond CF-0034 band-size-and-duration limits (logistical, adjacent-outrage, bounty-premium, internal-collapse)
+    - exclusionary single-species settlements cannot sustain Charter-Era economy (labor-starvation decline)
+    - dragoons cannot perform cannibal-case investigation or civic-suppression enforcement (CF-0033 CH-0010 mission-scope firewall; magistrate/civic-watch reserved)
+  why_not_universal:
+    - SOC-1 Charter-Era firewall (civic charters explicitly suppress species-hierarchy-speech)
+    - mainstream common-pantheon clergy aspectualizing position refutes supremacist doctrine under judgment-god framing
+    - mainstream progenitor-cult aspectualizing wing refutes supremacist doctrine under civic-covenant-witness framing
+    - adjacent-outrage across non-cannibal bandit bands (shelter/water/supply refusal to cannibal-fringe bands plus bounty-wall differential pricing) — WEAK within same-sect enclaves; mainstream-wide otherwise
+    - triple bounty-premium for cannibal-fringe band neutralization (settlement, merchant-coalition, chartered-estate, and chartered-guild treasury coalition-funded) plus chartered bounty-clerk authentication discipline (parallel to CF-0035 trophy-provenance) prevents false-cannibal scam market capture
+    - universal cleansing-rite refusal for cannibal-band returnees across clan custom AND common-pantheon clergy AND progenitor-cult mainstream (categorically heavier than CF-0034 raid-and-enslave refusal, which was previously the heaviest precedent)
+    - mainstream bardic moral-witness-refusal threshold extends CF-0017/CF-0034 template to cannibal-band material and supremacist-recruitment speech; sectarian-commissioned bards who breach are marked by listeners
+    - civic silence-protocol specification: euphemistic classification under existing "grave-violation-of-person" magistrate-docket category, SEALED sub-register with magistrate-warrant-gated access; PROSECUTION continues (silence is scandal-containment, NOT prosecutorial refusal — otherwise implicit recognition of "not-quite-persons" reading breaches Charter-Era settlement)
+    - exclusionary single-species settlement economic self-limit: single-species enclaves cannot sustain Charter-Era multispecies economy at scale; trade with outside compromises exclusivity; generational labor-starvation decline
+    - estate-steward ledger scrutiny and dowager-gossip reputation register mark households whose tavern-talk or tenant-sorting crosses the joke-threshold or civic-charter lines
+costs_and_limits:
+  - SOC-1 preservation is LOAD-BEARING AND CONTINUOUS — individual/sectarian friction and exclusionary settlements MUST NOT harden into civic hierarchy; charter-court challenge by principled-refuser clergy (CF-0026 CH-0010 charter-defense wing) is the primary procedural check against drift
+  - silenced-adventurer-contractor stratum is ABSORBED INTO the existing CF-0024 failed-reputation-contractor feeder category (Rule 3 specialness-inflation firewall) — NOT a new stratum; the bitterness-register is a qualitative reputation-damage mechanism, not a new welfare/precarity stratum; bardic-circuit silenced-contractor ballad subgenre is moral-witness register, NOT protagonist-investigator register
+  - interspecies-cannibal fringe sub-subset is geographically LOCAL to CF-0034 corridor-bounded subset (wildland drylands, bog causeway, mountain chokepoint, highland cold-pass, heartland wildland-road) — NOT continent-wide and NOT a civic presence in chartered cities (Rule 4 scope stabilizer, parallel to CF-0034 raid-and-enslave subset)
+  - exclusionary single-species settlement subset is geographically LOCAL to isolated / weak-charter / demographically-fragile regions and to specific clan custom-enclaves — NOT a Charter-Era polity category; exclusionary settlements have no civic-registry polity-status recognition (OPEN_QUESTIONS watch-item)
+  - supremacist sectarian doctrine is CONTESTED-CANON sectarian belief held by a fringe, NEVER world-truth; in-world supremacist "mere beasts" register applied to sentient victims is a PATHOLOGICAL CATEGORY ERROR, NOT a revision of the sentience boundary — the category error IS the crime; M-5 firewall FIFTH cross-application load-bearing (after CF-0022, CF-0029, CF-0031, CF-0035)
+  - civic silence-protocol for cannibal-case scandal-containment MUST be held categorically distinct from PEOPLES Cross-Cluster hierarchy-speech civic suppression — the first is criminal-scandal containment, the second is charter-firewall speech discipline; the two suppressions coexist; neither subsumes the other
+  - dragoons (CF-0033) have NO chartered role in cannibal-case investigation, evidence custody, silence-protocol enforcement, or criminal adjudication — civic-magistrate and civic-watch handle per existing charter; any dragoon acquisition of cannibal-case role is mission-creep breach and triggers charter-court challenge per CF-0033 load-bearing perimeter/extraction firewall (extended in CH-0010 to perimeter/criminal-adjudication firewall)
+  - false-cannibal-bounty certification scam market appears as a SEVENTH product-line on the canal-corridor illegitimate-service rail (joining CF-0023 grimoire-corridor, CF-0028 ruin-cartography, CF-0031 registry-scrubber, CF-0033 dragoon-kit counterfeit, CF-0034 stolen-goods-fencing, CF-0035 trophy-forgery); authentication-cartel formation pressure compounds to its strongest posture in the Layer-4 stress register
+  - crew-composition everyday-register friction generates ORDINARY workplace texture (hire-catechism, tavern joke-threshold, mix-sound crew judgment on par with waiting-wolves judgment) but MUST NOT become species-gated guild apprenticeship intake (SOC-1 firewall); charter-seal continues to forbid species-exclusion at guild charter level
+  - hunter-contractor bandit-hunting sub-specialty (CF-0034 fifth CF-0024 subtype) and hunter-contractor cannibal-band neutralization sub-sub-specialty are NOT supremacist-vigilante formations; no polity licenses supremacist-mobilization hunter-contractor companies — the hunter-contractor-vs-supremacist-vigilante boundary parallels the hunter-contractor-vs-dragoon boundary per M-13 template
+  - supremacist sectarian movements' recruitment window is the exclusionary-settlement + bitter-silenced-witness + failed-reputation-contractor feeder stratum; mainstream refutation is AMBIENT (household, tavern, magistrate, clergy all passively refute without speech-making — silent civic action, not spoken refutation)
+  - CF-0035 carnivore-folk progenitor-cult cousin-lineage trophy taboo (CH-0009) and CF-0036 supremacist-cannibal doctrine are INVERSE-VALENCE sectarian registers within the same carnivore-folk progenitor-cult surface territory; they MUST NOT be read as ends of a single carnivore-progenitor-cult spectrum — the taboo is a respect-discipline within mainstream progenitor-cult current; the doctrine is a pathological cult-deviation; conflation produces category error
+  - CF-0032 "older bloods" firewall (cultural-continuity claims are sectarian-not-civic) cross-applies: supremacist doctrine's cross-cluster rhetorical exploitation of Cluster C "older bloods" sectarian framing is sectarian-activity-not-world-truth — neither reading cross-validates the other; both remain contested-canon
+  - 'Rule 4 globalization-by-accident firewall: "endemic interspecies friction" is GLOBAL; "supremacist cannibal fringe" is LOCAL (CF-0034 corridor-bounded); "exclusionary single-species settlements" is LOCAL (isolated/weak-charter); "civic silence-protocol" is POLITY-LOCAL (larger mixed-species chartered cities primarily); cohort-conflation across subsets is forbidden in CF-statement-adjacent prose'
+  - register discipline LOAD-BEARING: FORBIDDEN framings include allegorical race-conflict-tract, grimdark-cannibal-feast-prose, chosen-truth-teller silenced-witness, conspiracy-thriller civic-suppression, pulp-cannibal-village, capitalized-proper-noun faction names ("the Eaters"), omniscient-supremacist-doctrine exposition; REQUIRED framings hold species-embodied-biological specificity (scent-aversion predator/prey BIOLOGICAL; moisture-habitat "slimy matters" about WATER WORK not skin-as-metaphor; tortoise-folk slowness is LITERAL metabolic) and render cannibal-material exclusively in AFTERMATH-HOUSEHOLD-VOCABULARY cadence (cleansing-rite refusal, magistrate-docket, village-buried-without-speaking, hunter-contractor-delivered-heads-did-not-say-from-whose-camp) — NEVER event-in-prose (CF-0034 precedent extended)
+visible_consequences:
+  - tavern joke-threshold codified across heartland/estate/drylands clusters ("never about the mother species; never about bodily needs in mixed company; never the mother's-mother rhyme after the third drink"), enforced by tavern-keeper vouch-withdrawal and civic-watch hate-speech docket
+  - crew-master hire-catechism ("mix-sound crew?") at posting-wall or caravanserai before coin-exchange in canal-town heartland, big-city outskirts estate, and drylands caravan clusters; foreman mix-sound judgment is on par with waiting-wolves judgment and cargo-refusal judgment
+  - children's skip-rope rhymes extend ("don't stop at the one-fur town / all the rows look the same") in exposed-district pedagogy; charter-school offense-tier lists add "progenitor-supremacist solicitation" and "canal-mud-refusal harassment" alongside existing offense categories; NO cannibal-material in child-register (aftermath-register only)
+  - marriage-broker catechism extends in exposed-district households ("does your mother sit at a mixed hearth?"), paralleling CF-0031 ledger-mark and CF-0034 raid-widow questions; charter-sound mixed-species households answer quietly and at length
+  - caravan-hiring practice integrates species-compatibility judgment as rotation-crew reputation asset; "one-fur caravan" is a caravan-master reputation-damage category paralleling cargo-refusal patterns
+  - mixed-cemetery sectional tensions produce contested burial-plot adjudications by civic cemetery-master; named dowager-family separation requests paralleling CF-0032 estate-class gossip register
+  - barber-surgeon cross-species practice disputes enter herb-wife registry and civic-watch malpractice-adjacent category ("he won't treat a toad-folk cut proper"); guild-seal charter preserves no-species-exclusion norm at intake level
+  - hearth-prayer adjustments in mixed-species households: progenitor-cult enthusiast's supremacist-cadence rhyme is discouraged in mixed-marriage homes under hearth-elder arbitration; lineage-supremacist hearth cadence is contested-sectarian, not world-truth
+  - returning-from-enclave idiom register: heartland worker back from single-species enclave speaks in new cadence his mother marks ("he's got the one-fur talk now") — paralleling "took the coin-for-shame" / "took the coin-for-service" cadence; dread-register, NOT adventure-hook
+  - silenced-adventurer-contractor ballad subgenre on the bardic circuit as SIXTH named subgenre within CF-0017 / CF-0024 / CF-0033 / CF-0034 / CF-0035 narrative-custody register — itinerant bards sing; patron-commissioned bards refuse; sectarian-commissioned bards who inflate supremacist recruitment register are marked-breach by listeners; silenced contractor is the dredger who keeps singing at the tavern, NOT the detective who exposes the cover-up
+  - mainstream bardic moral-witness-refusal threshold extends CF-0017/CF-0034 precedent: no ballad for a supremacist-doctrine preacher; no ballad for a cannibal-band captain in mainstream traditions; sectarian-commissioned bards who violate are marked by listeners
+  - clan-elder sanction against outland sectarian preachers in highland clans (extending CF-0021 grimoire-burning cadence and CF-0026/CF-0034 clan-sanction precedent); clan-son who walked south to a supremacist-doctrine camp is named in saga-fragment with the particular cadence reserved for supremacist-doctrine-returnees
+  - cleansing-rite refusal CATEGORICALLY WORLD-WIDE for clansmen returned from cannibal-bands (heavier than CF-0034 raid-and-enslave refusal, which was already the heaviest precedent) — no atonement path in most clans; common-pantheon clergy mainstream parallel refusal; progenitor-cult mainstream parallel refusal
+  - magistrate-court docket class: (i) hate-speech/public-mockery magistrate cases (extending PEOPLES "public mockery is poor form" into formal docket); (ii) exclusionary-settlement extradition disputes (spurned-migrant docket line); (iii) interspecies-cannibalism SEALED prosecutions under closed-court procedure with magistrate-warrant-gated access; (iv) silenced-witness retaliation/reprisal cases; (v) cross-species predation charging-tier questions
+  - civic-registry archival category: euphemistic "grave-violation-of-person" subsidiary-ledger with sealed-access sub-register (Charter-Era subsidiary-record capability per CF-0031 precedent); magistrate-warrant access only, NO clergy-witness access (distinguishing from CF-0031 welfare-access); corvid-folk clerical overrepresentation produces SIXTH political-sensitivity compounding (after CF-0024/CF-0031/CF-0032/CF-0033/CF-0034)
+  - CF-0026 principled-refuser clergy bifurcation under CH-0010 (THIRD CF-0026 bifurcation, after CH-0005 contamination-lineage and CH-0007 dragoon-scope): reform-with-charter-defense-anti-supremacism wing (invokes civic-charter anti-supremacy, campaigns against exclusionary-settlement magistrate toleration, demands prosecution of cannibal-bands WITHOUT silence-protocol) vs civic-restraint-pragmatic wing (accepts silence-protocol on rebellion-prevention grounds, focuses moral witness on hate-speech reform and survivor ministry); both hold within the reform current without schism
+  - progenitor-cult mainstream aspectualizing position refutes supremacist doctrine explicitly; progenitor-cult sectarian supremacy wing is the MINORITY contested position recruiting from exclusionary-settlement + bitter-silenced-witness + failed-reputation-contractor feeders
+  - estate-steward ledger scrutiny extends to tenant-cottage species-composition sorting preference signals; charter-risk attaches to estates whose tenant-sorting crosses civic-charter-relevant lines; dowager-gossip tracks "mix-sound house" vs "quietly single-species house" distinction paralleling CF-0031 charter-sound-vs-parvenu and CF-0033 dragoon-funding-council axes
+  - bounty-wall settlement postings extend to include cannibal-band verified-bounty column at triple standard bounty-premium with bounty-clerk authentication discipline parallel to CF-0035 trophy-provenance; settlement-bounty wall in exposed-corridor canal-town/highland/drylands/fen-dry-edge polities extends this posting-column
+  - inter-polity magistrate docket absorbs interspecies-prejudice cases as OPERATIONAL (NOT a sixth Charter-Era structural polity-asymmetric axis — uncontested-suppression-consensus holds at PROSECUTION level per CF-0034 precedent); latent-burden-watched per CH-0010
+  - silenced-adventurer-contractor bitterness as failed-reputation CF-0024 sub-feeder: contractor who saw cannibal-case proof and was silenced drinks alone in winter-rota, retains pension, may drift to CF-0034 bandit-recruitment feeder under sectarian-patronage pressure; kin-of-the-silenced register in marriage-broker catechism
+  - drylands tea-house scribe witnessing-refusal extends to supremacist-doctrine contracts and to cannibal-band bounty-contracts (paralleling CF-0028 ruin-witness-refusal and CF-0034 ransom-witness-refusal); caravan-rotation scribes treat interspecies-predation-adjacent contracts as incompatible with rotation-witness practice
+  - fen-village institutional-absence-acknowledged-in-silence discipline extends (parallel to CF-0028 sunken-ruin, CF-0031 ledger-mark, CF-0033 dragoon): supremacist-doctrine presence at dry-edge is not-spoken-of; fen emigrant who joined a supremacist-doctrine camp in dry-edge polity is spoken of only in the third person, in the past tense; ghost-story register gains "the village that turned one-fur and sank" (the fen-village that accepted supremacist doctrine from a dry-edge preacher, lost its canary-neighbors, and was ended by contamination-drift it could no longer detect)
+  - TIMELINE Layer 4 "Rising progenitor-cult tension in mixed cities" intensifies with specific magistrate-docket evidence without structural rupture; Charter-Era settlement STRAINS, does not break; hate-speech case-law, exclusionary-settlement extradition precedent, and sealed-cannibal-case procedure accumulate on magistrate-archive dockets across adopting polities
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - PEOPLES_AND_SPECIES
+  - TIMELINE
+  - GEOGRAPHY
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+  - CANON_LEDGER
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Direct from briefs/animalia-interspecies-conflicts.md. Escalation Gate fired (~13/13 FOUNDATIONS domains touched); six critics dispatched (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday- Life, Theme/Tone, Mystery Curator). All six converged on ACCEPT_WITH_ REQUIRED_UPDATES; one divergence resolved — Systems/Economy flagged civic-suppression as potential sixth polity-asymmetric axis; Politics/ Institution resolved by adopting CF-0034 precedent (uncontested- suppression-consensus holds at PROSECUTION level; disagreement operational; latent-burden-watched NOT current axis).
+  Thirty-two categories of Phase 9 repair applied: (1) Rule 6 formalization language in statement + CH-0010 summary; (2) SOC-1 reaffirmation in statement, notes, and INVARIANTS CH-0010 clarification; (3) Cluster D firewall re-cite via PEOPLES CH-0010 extension; (4) Rule 3 silenced- contractor absorption into CF-0024 feeder; (5) Rule 4 scope stabilizers on cannibal-fringe + exclusionary-settlement subsets; (6) adjacent- outrage stabilizer + sectarian-patronage-weakness acknowledgment; (7) triple bounty-premium + authentication discipline parallel CF-0035; (8) cleansing-rite refusal CATEGORICAL world-wide; (9) mainstream bardic refusal with CF-0017 modification_history; (10) civic silence-protocol specification (euphemistic-classification + sealed-magistrate-docket per Politics/Institution + CF-0031 subsidiary-record precedent); (11) progenitor-cult mainstream refutation + aspectualizing vs sectarian discipline preserved; (12) CF-0026 bifurcation pattern (charter-defense vs civic-restraint); (13) exclusionary-settlement stabilizer set; (14) M-5 fifth cross-application firewall; (15) M-4 firewall extension; (16) M-7 sub-specialty holding clause; (17) M-14 cross-reference; (18) M-2 CH-0008 extension; (19) M-10 THIRD cross- application (settlement/corridor cannibal-band folklore as selection- bias); (20) PEOPLES Cross-Cluster CH-0010 extension; (21) CF-0032 "older bloods" firewall cross-reference in notes; (22) CF-0033 mission-scope negative clause (civic-suppression NOT dragoon function); (23) false-cannibal bounty-certification seventh-product-line acknowledgment; (24) tonal discipline clauses (see below); (25) species- embodiment-biological firewall against allegory-collapse; (26) crew- composition everyday-life commitment; (27) five-axis stress register preservation (NOT sixth; latent-burden-watched); (28) Rule 3 widow-of- the-silenced explicitly NOT created; (29) three new MR entries M-16 / M-17 / M-18 per Rule 7 obligation; (30) Charter-Era settlement strains- does-not-break framing; (31) CF-0035 progenitor-cult trophy taboo inverse-valence firewall cross-reference; (32) hunter-contractor ≠ supremacist-vigilante boundary per M-13 template.
+  AES-1 / AES-2 / AES-3 register-binding: interspecies-friction ordinary- register leads with tavern-joke-threshold and crew-composition-catechism texture; cannibal and silenced-witness material appears ONLY in aftermath-household-vocabulary cadence per CF-0034 precedent; bardic- mainstream refuses heroic-investigator register on silenced-witness material (the witness is the dredger who keeps singing at the tavern, not the protagonist who exposes the watch). The silenced contractor keeps the coin and kept his mouth, and drinks alone in the winter-rota.
+  In-register language (for writing in this setting): "species-composition (of a crew), crew-balance, mix-sound, scent-aversion (predator/prey biological), slimy matters (moisture-habitat joke about water work), slow-on-the-road (tortoise-folk literal metabolic), ermine's ledger / beaver's canal (labor-distancing register), single-stock village, single-stock hold, one-fur town, one-fur caravan, one-fur talk, won't seat (a recruiter), the recruiter was run off the porch, the case was re-classified, the roster was redacted, the inspector was reassigned, the magistrate docketed and filed, the clergy refused the blessing, cleansing-rite refusal, the remains were buried and not spoken of, the hunter-contractor delivered the heads and did not say from whose camp, silenced contractor, kept the coin and kept his mouth, took the pension and drank alone, bitterness in the veteran cadence, doctrinal pamphlet (contested speech carried by specific speakers, never ambient), the sectarian preacher at the tavern edge, ran out by closing time, eater-band (flat named fringe of CF-0034), the grave-violation-of- person docket, sealed-docket procedure, magistrate-warrant-gated, the camp ledger had kin-lists, his name came back in a bounty-posting."
+  Out-of-register language to AVOID: - Allegorical race-conflict: "racial hatred, racism, ethnic conflict,
+    apartheid, segregation, bigots, bigotry-as-such, hate group, the
+    hate, supremacist ideology (abstracted from speakers), the doctrine
+    teaches (omniscient voice), species-as-metaphor-for-race, the
+    carnivore question (reified), the predator-folk problem."
+  - Grimdark cannibal-prose: "feast of, ritual consumption, the blood-
+    ritual, they butchered and ate, meat-racks, cannibal-feast, cannibal
+    hold, the Eaters (capitalized proper-noun), the cult of the hunt,
+    the great hunt, supremacist awakening, a reckoning, any sensory
+    description of the consumption act, pulp-cannibal-village, backwoods
+    cannibals."
+  - Chosen-truth-teller silenced-witness: "the truth must be told,
+    silenced voices crying out, bear witness (as mission), speak truth
+    to, the chosen witness, the survivor who would not stay silent,
+    expose the cover-up, the conspiracy of silence, the establishment
+    buried, investigative-protagonist, exposé-hero."
+  - Conspiracy-thriller civic-suppression: "the cover-up reached the
+    highest levels, the conspiracy of silence, the establishment buried,
+    jackbooted civic (per CF-0033 counter-register firewall), state
+    violence (sloganized), the watch came for us."
+
+  Bardic stratification (following CF-0033/CF-0034 template): (a) patron-commissioned charter-defense ballads naming civic-watch competence without individual-heroism (institution-level not individual-level inflation; "the docket was opened and filed," not "a named clerk-of-records stood against the supremacist"); (b) tavern- silenced-contractor accounts in AES-1 scarred register (dry, numerical, pensionable-service cadence, mocking of conspiracy- thriller register — "he kept the coin and kept his mouth, drank alone in the winter-rota"); (c) reform-current clergy-commissioned refutation broadsides in litigious-procedural register (cited precedent, named concessions breached, NOT revolutionary pulp).
+  Civic-suppression register is BUREAUCRATIC DRIFT per CF-0033 precedent, not conspiracy-thriller cadence: "the case was re-classified, the roster was redacted, the inspector was reassigned." Charter-court is the load-bearing counterweight; every suppression clause cites the scandal-containment predicate.
+  CF-0032 "older bloods" firewall cross-application: supremacist doctrine's cross-cluster rhetorical exploitation of Cluster C "older bloods" sectarian framing as rhetorical cover is SECTARIAN ACTIVITY, NOT world-truth; CF-0032 lineage-keeper integration of subsection journeymen-lineages into cultural-continuity claims and CF-0036 supremacist doctrine's appropriation of that framing are BOTH contested-canon sectarian readings that DO NOT cross-validate; the M-4 firewall holds with this cross-application clause.
+  CF-0035 carnivore-folk progenitor-cult cousin-lineage trophy taboo (CH-0009) and CF-0036 supremacist-cannibal doctrine are INVERSE- VALENCE sectarian registers within the same carnivore-folk progenitor- cult surface territory; the taboo is a mainstream respect-discipline (progenitor-cult mainstream current), the doctrine is a pathological cult-deviation (progenitor-cult sectarian supremacy wing); they MUST NOT be read as ends of a single carnivore-progenitor-cult spectrum. Conflation produces category error.
+  Hunter-contractor ≠ supremacist-vigilante boundary per M-13 template: no polity licenses supremacist-mobilization hunter-contractor companies; cannibal-band bounty-work is CF-0034 hunter-contractor sub-specialty and follows AES-1 pensionable-dangerous-labor register, NOT supremacist-vigilante heroic-cleansing register. Any hunter- contractor company that publicly endorses supremacist doctrine forfeits bounty-commission eligibility in charter-polity settlement, merchant-coalition, and chartered-estate treasuries; civic-watch and magistrate-court flag such formations for licensing denial.
+  Six existing CFs qualified by this addition via modification_history entries under CH-0010: - CF-0017 (bardic subgenres extension + interspecies-friction moral-
+    witness-threshold + silenced-contractor ballad subgenre as SIXTH
+    named sub-register joining raid-lament / hunter-return / named-
+    captain cycles / bounty-ethics broadsides / beast-hunter-return);
+  - CF-0024 (silenced-witness sub-stratum absorption into failed-
+    reputation-contractor feeder per Rule 3 specialness-inflation
+    firewall; silenced-contractor is NOT a new stratum);
+  - CF-0026 (bifurcation pattern THIRD instance: charter-defense-anti-
+    supremacism wing vs civic-restraint-pragmatic wing; extension of
+    clergy moral-witness role; mainstream refutation of supremacist
+    doctrine under judgment-god aspectualizing framing);
+  - CF-0033 (mission-scope SECOND negative clause added: dragoons do
+    NOT perform cannibal-case investigation, evidentiary custody,
+    silence-protocol enforcement, or criminal adjudication; magistrate/
+    civic-watch reserved; M-13 boundary defense preserved);
+  - CF-0034 (raid-and-enslave subset gains cannibal-edge sub-subset
+    with its own distinct stabilizer set — adjacent-outrage, triple
+    bounty-premium, universal cleansing-rite refusal, mainstream bardic
+    refusal, civic silence-protocol, progenitor-cult mainstream
+    refutation, exclusionary-settlement economic self-limit;
+    M-10 THIRD cross-application; bandit-extradition latent-burden
+    joins supremacist-doctrine latent-burden and trophy-legality latent-
+    burden as three parallel sixth-axis watch-items);
+  - CF-0035 (carnivore-folk progenitor-cult cousin-lineage trophy
+    taboo inverse-valence firewall cross-reference: CF-0035 taboo and
+    CF-0036 doctrine MUST NOT be read as ends of single spectrum).
+
+  Mystery Reserve firewall extensions added under CH-0010: - M-2 (anti-supremacist-catastrophic-custody clause: interspecies-
+    cannibal bands likewise subsumed under existing bandit-catastrophic-
+    custody firewall);
+  - M-4 (supremacist-progenitor-reading firewall extension —
+    supremacist doctrine does NOT partial-validate any progenitor-
+    position; aspectualizing common-pantheon clergy refute, aspectualizing
+    progenitor-cult mainstream refute, sectarian supremacy wing is
+    MINORITY CONTESTED position; added to disallowed cheap answers:
+    "Supremacist doctrine reinterpreted as material progenitor-position
+    validation — forbidden reveal.");
+  - M-5 (FIFTH cross-application firewall after CF-0022 / CF-0029 /
+    CF-0031 / CF-0035: sectarian "mere beasts" register applied to
+    sentient victims is a PATHOLOGICAL CATEGORY ERROR, NOT a revision
+    of the sentience boundary; the category error IS the crime; world-
+    level sentience-status of all peoples is preserved; added to
+    disallowed cheap answers);
+  - M-7 (sub-specialty holding clause for silenced-contractor stratum,
+    parallel to CF-0035 legendary-beast-hunter holding clause:
+    silenced-contractor is a within-CF-0024 sub-specialty absorbed
+    into failed-reputation-contractor feeder, NOT a sixth reputation-
+    genealogy cohort);
+  - M-10 (THIRD cross-application firewall, after CF-0034 bandit-
+    survivor ruin-folklore and CF-0035 hunter-survivor zone-folklore:
+    hunter-survivor / bandit-survivor corridor-folklore about cannibal-
+    band locations is SELECTION-BIAS FOLKLORE, NOT a world-level
+    cannibal-band-presence empirical predictor);
+  - M-14 (cross-reference clause: interspecies-cannibal captains
+    accrue mythography AS SUB-REGISTER within M-14's existing
+    antagonist-mythography register; CF-0036 does NOT establish a new
+    antagonist-mythography M-entry).
+
+  Three NEW Mystery Reserve entries added under CH-0010 per Rule 7 obligation to bound the new bounded-unknowns this CF manufactures: - M-16 (Historical Origin of Supremacist-Cannibal Sectarian Doctrine:
+    ancient vs recent vs perennial — the doctrine's origin is contested
+    between civic-reformist "recent pathology" framing, sectarian-
+    revisionist "ancient suppressed truth" framing, and skeptical-
+    scholarly "perennial pathology" framing; productive contestation
+    preserved);
+  - M-17 (Demographic Scope and Prevalence of Interspecies-Cannibal
+    Cases: the evidence-suppression commitment means no civic archive
+    maintains honest prevalence data; the unknown IS what the
+    suppression produces; committing scope would undermine the silence-
+    stabilizer);
+  - M-18 (Antiquity of Civic-Suppression Protocol for Interspecies-
+    Predation Cases: Charter-Era founding compromise vs Layer-3
+    Incident Wave response vs Layer-4 politicization consolidation —
+    paralleling M-13 dragoon-institutional-contingency structure).
+
+  Latent burdens logged in CH-0010: - LB-1: Interspecies-prejudice civic suppression-vs-unsealing
+    convention — latent sixth Charter-Era structural-asymmetry axis
+    candidate if polities develop structurally divergent silencing-
+    protocol conventions (joins CF-0034 bandit-extradition and CF-0035
+    trophy-legality latent burdens as three parallel sixth-axis
+    watch-items; tracked, not committed).
+  - LB-2: Single-species exclusionary settlement civic-registry polity-
+    status — do they hold civic standing? extradition-dispute precedent?
+  - LB-3: Interspecies-cannibal survivor-witness civic-registry status
+    and restoration-rite convention per polity (parallel to CF-0034 LB-2
+    liberated-slave reintegration).
+  - LB-4: Silenced-witness stratum compensation/pension/retaliation-
+    complaint convention in polities where civic-suppression is
+    systematic.
+  - LB-5: Magistrate case law for cross-species predation vs ordinary
+    homicide charging-tier asymmetry (sealed-docket cannibal-case
+    evidentiary standards).
+  - LB-6: CF-0026 clergy bifurcation case law for aspectualizing-vs-
+    abolitionist positions on silencing-protocol cooperation per polity.
+  - LB-7: Sectarian supremacist movement licensure / proscription
+    status per polity (most polities ad hoc ban; some tolerate speech
+    per Charter-Era hierarchy-firewall).
+  - LB-8: Species-specific progenitor-cult internal-refutation discipline
+    durability — can mainstream progenitor-cults reliably denounce
+    supremacist offshoots across regions?
+
+  Three monitored exposures (acknowledged but not currently breaking): stabilizer-weakness under sectarian-patronage (adjacent-outrage); silence-protocol generating own latent burden (silenced-witness resentment reservoir); false-cannibal bounty-certification cartel formation pressure (seventh illegitimate-service product-line).
+  Six critic sub-agents dispatched at escalation gate (~13/13 FOUNDATIONS domains touched): Continuity Archivist, Systems/ Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator. All six converged on ACCEPT_WITH_REQUIRED_UPDATES with required repairs. Systems/Economy divergence (sixth polity- asymmetric axis candidacy) resolved via Politics/Institution analysis adopting CF-0034 uncontested-suppression-consensus precedent.
+  Adjudication record: adjudications/PA-0009-accept_with_required_ updates.md.
+modification_history:
+  - change_id: CH-0013
+    originating_cf: CF-0038
+    date: 2026-04-19
+    summary: "named-polity-instance + SOC-1 firewall reaffirmation: Brinewick (CF-0038) commerce-hub mixed-species density exemplifies Charter-Era SOC-1 mixed-species civic integration; mix-sound-house dowager-axis operates at heartland exemplar density; supremacist-movement licensure / proscription status deferred per OPEN_QUESTIONS pending civic-advisory council ruling. Aquatic-folk underworld-concentration SOC-1 firewall extended with SIXTH M-5 cross-application (after CH-0002 / CH-0004 / CH-0009 CF-0035 / CH-0010 CF-0036 fifth) — Brinewick aquatic-folk are MAJORITY in legitimate canal labor (port, sluice, barge, fishery, lock-keeper) with substantial MINORITY overrepresentation (among multiple overrepresentations) in canal-underwater smuggling niche; socioeconomic occupational-geography, NOT species-coding; no world-level species-labor pattern. CF-0036 scope, distribution, and stabilizer structure unchanged"

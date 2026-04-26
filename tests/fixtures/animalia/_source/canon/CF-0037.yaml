@@ -1,0 +1,123 @@
+id: CF-0037
+title: Family-handled waystations tradition (heartland, highland, mountain east)
+status: hard_canon
+type: institution
+statement: |
+  Across the temperate canal heartland, cold north highland, and mountain east, a multi-generational tradition of family-handled waystations operates along the overland connector roads between settlements. Each waystation is a small household enterprise — roadside building with stable, supply-storage, and traveler-rest space — sited somewhat-close to a feeder settlement for supply-runs. Stations are typically passed kin-to-kin rather than chartered or sold; an inheriting child works at the station from young (often earlier than the canal-town age-ten apprenticeship norm), is encouraged to marry locally and reproduce in turn, and most often remains stationkeeper for life. The tradition is open across species per SOC-1; mixed-species waystations are ordinary in the heartland; clan-affiliated waystations are common in the highland; valley-pass waystations carry the institution into the mountain east. The institution is non-chartered: there is no waystation-keepers' guild, no master-rank progression, no civic-charter beyond ordinary civic-registry recordation of tenancy in chartered polities (clan-elder sanction in highland; estate-steward ledger when the station sits on noble-estate tenant land). A minority of inheritors, unable or unwilling to accept the inheritance burden, walk away — most into settlement artisan-quarter casual labor, some into the CF-0024 contractor entry-tier, a few into CF-0034 endemic-banditry recruitment-feeders. The walking-away pathway is a recognized cultural register, not an exceptional event. Composite institution with historical_process and social_role sub-aspects: the tradition itself is a multi-generational pattern across regions; the stationkeeper-as-inherited-life-path is the named social role.
+scope:
+  geographic: regional
+  temporal: historical
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - economy
+  - kinship
+  - mobility
+  - status_signaling
+  - settlement_life
+  - architecture
+  - language
+  - memory_and_myth
+prerequisites:
+  - existing overland road infrastructure between settlements (heartland connector-routes between canal towns; highland clan-border roads; mountain-east valley-pass approaches)
+  - travel volume sufficient to sustain steady commerce (caravans, contractors, bardic-circuit performers, hunters, traders, charter-day pilgrims)
+  - land tenure permitting family ownership or stable estate-tenancy of roadside property (freehold or chartered-polity civic-registered or estate-tenant or clan-elder-sanctioned per region)
+  - civic-registry recordation capability for chartered-polity tenancy (already covered by existing civic-registry framework per INSTITUTIONS §Family/Clan/Household)
+  - regional geographic conduciveness — NOT drylands south (caravan-rotation cistern-management mechanism is the alternative) and NOT wet fenlands west (stilt-village topology and barge-network alternative)
+distribution:
+  who_can_do_it:
+    - heartland connector-route stationkeeper families
+    - highland clan-territory stationkeeper families
+    - mountain-east valley-pass stationkeeper families
+  who_cannot_easily_do_it:
+    - drylands caravan-town households (caravan-rotation social form structurally incompatible)
+    - fen stilt-village households (no buildable foundation along bog-causeway routes; barge-network handles equivalent function)
+  why_not_universal:
+    - drylands water-cistern logistics make rotating caravan-train cistern-management economically superior to fixed-station resupply; caravan-rotation IS the cistern-management mechanism (per Systems/Economy critic refinement at Phase 6b synthesis)
+    - fen stilt-village topology has no buildable foundation along bog-causeway routes; trade flows are barge-dominant per ECONOMY §Trade Flows; road-network density structurally absent
+    - within heartland, canal-corridor parallel infrastructure handles canal-bound trade; waystations populate OVERLAND CONNECTOR ROUTES BETWEEN canal towns where canal traffic does not run, NOT canal-bank parallel infrastructure (charter-inn proprietors in canal towns capture canal-stop hostelry; family waystations operate where they are needed)
+    - investment scale per waystation is too small for chartering economics (single household, modest infrastructure, one route-segment); guild formation would impose overhead the family-fragmented sites cannot support — non-chartered status is structurally stable
+    - inheritance-burden-versus-walking-away tension is itself a stabilizer; family pressure plus the placement-right value retains most inheritors, while the recognized self-exile pathway prevents suppressed-inheritor pressure from accumulating into broader institutional crisis
+costs_and_limits:
+  - waystation enterprise income is small but durable; bottom-copper to upper-copper traveler-service revenue per ordinary day, occasional silver from caravan-master long-haul resupply or estate-steward bulk supply contract
+  - stationkeeper-child labor begins from young (chore-bound by age 6-7 in many families, earlier than the canal-town age-ten apprentice norm per EVERYDAY_LIFE §(a) line 18); in-kind compensated (room, board, eventual placement-right) rather than wage-paid; this is parallel-but-distinct from chartered apprenticeship and does NOT displace charter-school enrollment in adopting chartered polities, though informal tension is recognized
+  - placement-right is HERITABLE and PARTIBLE (multi-heir succession generates inheritance-docket pressure paralleling CF-0032 subsection-apprenticeship placement-right) but FIXED-PHYSICAL-INFRASTRUCTURE-LOCKED — the right cannot be moved like a CF-0032 skill-credential or a CF-0031 ledger-mark; abandoning the station forfeits the right
+  - SOC-3 coin-contract sacredness applies to traveler-service contracts but NOT to placement-right transfers themselves
+  - bandit-fronting waystation (knowingly provisioning a raid-band or signaling corridor location for kickback) is recognized as a sharper-than-ordinary-fraud scandal and prosecutable under CF-0034 §(f) harboring-and-fencing standards; the failure mode is real where stationkeeper-family or inheritor self-exiles into banditry (Breakage Point sub-exposure)
+  - waystation insolvency (corridor-season closure, trade-route reroute, multi-heir inheritance-dispute litigation) is a slow-rolling economic-failure mode parallel to CF-0034 abandoned-settlement feeder cascade at lower acuity
+  - bandit-defense-of-waystation deployment by CF-0024 noble-retinue on estate-tenant waystations is CHARTER-SOUND retinue activity per CF-0034 §bandit-defense-of-tenant-land precedent (charter-sound where retinue defends estate-tenant land; magistrate liaison required for pursuit beyond estate-jurisdiction)
+visible_consequences:
+  - stationkeeper-family as recognizable household type in heartland artisan-quarter and connector-route villages, in highland clan-border settlements, and in mountain-east valley-pass communities
+  - stationkeeper-child as recognizable life-stage with chore-from-young cadence; resignation-resentment register is ordinary kinship-friction texture in adopting-region households; "the boy chose his father's road" / "the daughter the road kept" / "kept the stop" / "walked the stop" enter regional idiom rotation paralleling existing CF-0021 kiln-smoke / CF-0024 unvouched-bard / CF-0028 ruin-door / CF-0031 ledger-mark / CF-0033 cordon-post / CF-0034 hollow-road / CF-0035 deep-wood / CF-0036 one-fur catechism extensions
+  - 'marriage-broker catechism extensions in adopting-region households: "is the stop kept in the family?" (heartland connector-route cadence) and parallel highland and mountain-east cadences'
+  - 'skip-rope rhyme in canal-town heartland charter-school child-register rotation: "one-stop, two-stop, the road runs long / three-stop, four-stop, the boy who walked is gone"'
+  - 'tavern-bardic stop-keeper subgenre: oral-storytelling cadence in AES-1 register naming kept-stops and walked-stops without heroic framing; saga-fragment in highland register paralleling but distinct from CF-0034 lean-winter-walker third-person mourning ("his road was given; he gave it back")'
+  - "waystation-supply-run bidirectional micro-trade-flow with adjacent settlements (settlement → waystation: grain, ale, fodder, candles, tack-repair; waystation → settlement: modest cash flow, traveler gossip, posted-contract intake, occasional bardic-circuit hosting); augments rather than displaces existing market-feeder networks"
+  - "waystation as ordinary architectural type: roadside building, stable-and-supply-storage, traveler-rest space, sited somewhat-close to feeder settlement; fortified register adopted on wildland stretches where bandit-corridor exposure warrants it (paralleling CF-0034 chartered coaching-inn fortification register but at smaller scale — family waystations are NOT the chartered coaching-inn typology CF-0034 names)"
+  - estate-steward ledger inclusion of waystation-tenancy entries on noble-estate land; dowager-gossip distinguishes "stations that have kept three generations" from "stations that turned over twice this decade"
+  - CF-0034 wildland-road bandit-corridor texture is reframed as GAP-STRETCHES BETWEEN WAYSTATIONS rather than uniform unbroken stretches (clarification-of-meaning in the existing CF-0034 §Predator Zones bullet, NOT a content change to CF-0034's bandit-corridor commitment)
+  - self-exiled stationkeeper-child pathway feeds existing precarious- stratum cohorts (urban poor / CF-0024 contractor entry-tier / CF-0034 bandit-recruitment) per Rule 3 absorption-not-elevation; the inheritor-who-stays sub-stratum is settled-resigned-respectable middle-rank, NOT precarious — the dramatic register is frustration/resentment, not destitution
+  - "clan-territory waystation under clan-elder sanction: clan-burning of bad-actor stationkeeper paralleling CF-0021 grimoire-burning cadence; cleansing-rite-equivalent for self-exiled child where custom permits return; saga-fragment for the walked-stop child in distinct cadence from CF-0034 lean-winter-walker mourning"
+required_world_updates:
+  - WORLD_KERNEL
+  - ONTOLOGY
+  - TIMELINE
+  - GEOGRAPHY
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Composite institution with historical_process and social_role sub-aspects per proposal-normalization.md §Composite facts. Primary type: institution per the rubric — the family-handled waystation as enterprise form is the primary entity that EXISTS; the multi-generational tradition (heritability) and the stationkeeper-as-inherited-life-path are operational expressions. Sub-types documented in statement and notes per template precedent (CF-0021 / CF-0029 / CF-0034 / CF-0035 composite patterns).
+  Phase 11 verdict: ACCEPT_WITH_REQUIRED_UPDATES. Phase 6b multi-critic synthesis surfaced no blocking findings; convergent ACCEPT-with-required- annotations across all six critics (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator). See adjudications/PA-0011-accept_with_required_updates.md for full Phase 0–11 analysis, the six critic sub-agent reports, and the Phase 14a Validation Checklist.
+  Three Mystery Reserve firewall extensions land via this CF and are committed in MR file under CH-0012 attribution:
+  - M-7 sub-specialty holding clause: named stationkeeper reputations are
+    absorbed within the existing CF-0024-adjacent contractor-veteran
+    patterning OR within ordinary tradesperson-reputation register; NOT a
+    sixth M-7 reputation-genealogy cohort. Disallowed cheap answer added:
+    "Named legendary stationkeeper whose memory resolves road-corridor /
+    Maker-Age / progenitor-figure questions — forbidden reveal."
+
+  - M-11 cross-application firewall: waystation multi-generation continuity
+    is FAMILY-ECONOMIC PHYSICAL-INFRASTRUCTURE inheritance, mechanistically
+    DISTINCT from CF-0031 contamination-lineage three-generation
+    administrative interval. Longitudinal stationkeeper-family data MUST
+    NOT be reified as parallel contamination-heritability evidence. The
+    waystation pattern uses different inheritance vocabulary, different
+    custody (no civic-registry contamination-record), and different
+    mechanism (physical-infrastructure succession). Disallowed cheap
+    answer added: "Stationkeeper-family multi-generation continuity
+    reinterpreted as parallel data substrate to CF-0031 three-generation
+    contamination-heritability administrative interval — forbidden reveal."
+
+  - M-14 cross-reference clause: named stationkeeper-children-turned-bandit-
+    captains accrue mythography WITHIN the existing M-14 antagonist-
+    mythography register; NOT a new M-N entry. Self-exile-to-banditry
+    biography is corridor-mobility texture, not ontological mystery. The
+    "stationkeeper-bandit-captain" register is an enrichment of M-14, not
+    a parallel surface; the four contested readings (historical-individuals
+    / composite-figures / pure-invention / mixed) apply identically.
+
+  Per Continuity Archivist: the proposal does NOT touch M-1 / M-2 / M-3 / M-4 / M-5 / M-6 / M-8 / M-9 / M-10 / M-12 / M-13 / M-15 / M-16 / M-17 / M-18. Per Mystery Curator: NO new Mystery Reserve entry is recommended. The waystation tradition antiquity question (Charter-Era-consolidated vs older folk practice) lacks the progenitor-cult sectarian entanglement that gives M-12 oversize-saddlery antiquity its productive contestation; it belongs in OPEN_QUESTIONS.md as ordinary author-side deferral, NOT in MYSTERY_RESERVE.md. Rule 7 obligation discharged with documented negative finding.
+  MINOR operational docket commitment (paralleling CF-0034 bandit-extradition / CF-0035 trophy-legality / CF-0036 silence-protocol-unsealing minor docket patterns): waystation-succession disputes, estate-vs-family tenancy disputes, bandit-fronting prosecutions, civic-registry tenancy-recordation disputes are MINOR operational magistrate docket items, NOT a sixth Charter-Era polity-asymmetric structural disagreement axis. Uncontested-tradition-consensus and uncontested-suppression-consensus on bandit-fronting hold; polity disagreement is operational-regime variation only. Latent-burden watch: if polities develop structurally divergent CHILD-CONSCRIPTION-PROTECTION conventions (mandatory charter-school-vs-station-labor adjudication), the MINOR docket could harden into a sixth polity-asymmetric axis — tracked per CH-0012, NOT current structural reality. THREE other latent sixth-axis watch-items already tracked (CF-0034 / CF-0035 / CF-0036); this is now the FOURTH watch-item — the cumulative latent-watch register signals approaching saturation but does not yet constitute a Charter-Era rupture.
+  Stabilizer set per Phase 7 counterfactual (5 concrete mechanisms): (i) drylands caravan-rotation cistern-management mechanism prevents drylands universalization; (ii) fen stilt-village topology + barge-network alternative prevents fenland universalization; (iii) heartland canal-corridor parallel infrastructure scopes waystation footprint to overland connector-routes between canal towns; (iv) investment-scale + family-fragmented site distribution prevents guild-cartel formation; (v) inheritance-burden-versus-self-exile tension is itself a stabilizer (placement-right value retains most inheritors; self-exile pathway prevents suppressed-pressure accumulation).
+  Per Theme/Tone critic: in-register cadence committed — "kept the stop"; "walked the stop"; "took the keys"; "the boy chose his father's road"; "the daughter the road kept". Out-of-register cadence FORBIDDEN — heroic-escape / chosen-one-orphan / child-labor-exploitation / cozy-tavern-sanitization / Hardy-rural-tragedy melodrama. The bardic-circuit tradition withholds heroic-cycle status from stationkeeper material (per WORLD_KERNEL.md What Is Taboo extension); the runaway-stationkeeper bardic figure is named in third-person mourning paralleling CF-0034 lean-winter-walker register, NOT chosen-protagonist register.
+  Three new natural story engines added to WORLD_KERNEL.md per Theme/Tone critic recommendation, in established additive cadence.
+  Phase 12a modification_history scan results: axis (a) derived_from_cfs empty per pre-scan verification (CF-0024 / CF-0034 / CF-0032 / CF-0031 are cross-references, not derivation parents); axis (b) Phase 8 soft contradictions identified CF-0034 wildland-road bullet annotation as substantive extension; axis (c) Phase 9 substantive extensions: CF-0034 bandit-corridor texture is reframed by waystation presence. CF-0034 receives the only modification_history entry under CH-0012. CF-0024 / CF-0032 / CF-0031 are cross-references with no content extension; no mod_history entries for those CFs.
+  Rule 3 dual-disposition for stationkeeper-child stratum (resolved productive Systems/Economy-vs-Politics/Institution Phase 6b critic tension via TWO-POPULATION distinction): inheritor-who-stays NAMED DISTINCTLY in ECONOMY §Inequality Patterns as settled-resigned- respectable middle-stratum (where the dramatic register lives — kinship-frustration register is ordinary household texture, NOT precarity or welfare-record); inheritor-who-walks ABSORBED INTO existing precarious strata (urban poor / CF-0024 contractor entry-tier / CF-0034 banditry recruitment-feeder cohorts; sixth named source-vector for CF-0034 recruitment-feeder pattern, ABSORBED per Rule 3 firewall, NOT elevated to a distinct welfare/precarity category). The two-population distinction is load-bearing — absorbing the staying-inheritor would erase the dramatic register that motivates the institution; naming the walking-inheritor distinctly would specialness-inflate a cohort that structurally feeds existing precarious strata.
+  Modified 2026-04-20 by CH-0018 (CF-0047): firewall clause added — CF-0047 drylands well-keeper lineage-inheritable customary-authority role is CATEGORICALLY DISTINCT from CF-0037 family-handled waystation tradition and MUST NOT be conflated. The distinction operates along three load-bearing axes per CF-0047 costs_and_limits: (i) ANCHOR-TYPE — well-stop is WATER-NODE-ANCHORED (the well IS the asset; non-relocatable, drought-volatile in asset-value across cycles); waystation is ROAD-REST-ANCHORED (the road IS the asset; trade-flow-volatile across canal-extension and seasonal-pass cycles); water-node vs road-rest-node is the primary categorical firewall. (ii) CIVIC BACKING — well-stop placement-right is CUSTOMARY-NOT-CIVIC-REGISTRY-BACKED (drylands institutional thinness per CF-0046 substrate precludes civic-registry subsidiary-record capability for well-stop tenancy); waystation placement-right is CIVIC-REGISTRY-BACKED in chartered heartland polities (with clan-elder / estate-steward alternatives). (iii) REGIONAL PRESENCE — well-stop is DRYLANDS-PRESENT-ONLY (CF-0046 geographic substrate); waystation is HEARTLAND / HIGHLAND / MOUNTAIN-EAST-PRESENT and DRYLANDS-STRUCTURALLY-ABSENT per CF-0037 Stabilizer (i) preserved ("drylands water-cistern logistics make rotating caravan-train cistern-management economically superior to fixed-station resupply; caravan-rotation IS the cistern-management mechanism"). CF-0037 drylands-exclusion stabilizer is **PRESERVED** through this categorical distinction, NOT scope-retconned — the well-stop is a categorically different institutional object occupying a categorically different geographic-substrate position; CF-0037 does NOT expand to include well-stops. The idiom pair *"kept the stop"* / *"walked the stop"* (CF-0037, heartland / highland / mountain-east) and *"kept the well"* / *"walked the well"* (CF-0047, drylands) coexist as parallel cadence registers — drylander caravaner's dryly-amused note *"the southern road keeps no stop"* remains intact and now coexists with the CF-0046 complement *"the southern road keeps the corridor"*. CF-0037 scope, distribution, and stabilizer structure unchanged; the well-keeper tradition is a parallel-but-distinct institutional form at drylands scale, not a drylands-extension of family-handled waystation tradition. Per Rule 6 audit-trail preservation: this modification_history entry documents the Phase 8 soft-conflict resolution that preserves CF-0037 drylands-exclusion; a future reader of CF-0037 alone needs to know about CF-0046/CF-0047 to avoid conflating the two institutional objects. Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+modification_history:
+  - change_id: CH-0018
+    originating_cf: CF-0047
+    date: 2026-04-20
+    summary: "firewall: CF-0047 drylands well-keeper lineage-inheritable customary-authority role is CATEGORICALLY DISTINCT from CF-0037 family-handled waystation tradition along three load-bearing axes (ANCHOR-TYPE water-node vs road-rest-node; CIVIC BACKING customary-NOT-civic-registry-backed vs civic-registry-backed; REGIONAL PRESENCE drylands-present-only vs heartland/highland/mountain-east-present and drylands-structurally-absent per Stabilizer (i) preserved); CF-0037 drylands-exclusion stabilizer PRESERVED through categorical distinction (not scope-retcon); idiom pair 'kept the stop' / 'walked the stop' coexists with 'kept the well' / 'walked the well'; 'the southern road keeps no stop' intact, now coexists with 'the southern road keeps the corridor' CF-0046 complement; CF-0037 scope, distribution, stabilizer structure unchanged"

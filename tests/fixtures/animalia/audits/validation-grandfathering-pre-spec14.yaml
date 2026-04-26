@@ -1,0 +1,74 @@
+schema: worldloom.validation_grandfathering.v1
+world_slug: animalia
+generated_from: SPEC04VALFRA-008 baseline run on 2026-04-25
+entries:
+- id: GF-0004
+  rationale: Pre-existing bootstrap hybrid/adjudication schema drift accepted as grandfathered; direct repair requires canon-addition-equivalent
+    world-content cleanup.
+  findings:
+  - validator: record_schema_compliance
+    code: record_schema_compliance.required
+    message: 'CHAR-0002 schema violation at /world_consistency: must have required property ''continuity_checked_with'''
+    location:
+      file: characters/melissa-threadscar.md
+      node_id: CHAR-0002
+  - validator: record_schema_compliance
+    code: record_schema_compliance.required
+    message: 'CHAR-0002 schema violation at /world_consistency: must have required property ''continuity_checked_with'''
+    location:
+      file: characters/melissa-threadscar.md
+      node_id: CHAR-0002
+  - validator: record_schema_compliance
+    code: record_schema_compliance.required
+    message: 'CHAR-0001 schema violation at /world_consistency: must have required property ''continuity_checked_with'''
+    location:
+      file: characters/vespera-nightwhisper.md
+      node_id: CHAR-0001
+  - validator: record_schema_compliance
+    code: record_schema_compliance.required
+    message: 'CHAR-0001 schema violation at /world_consistency: must have required property ''continuity_checked_with'''
+    location:
+      file: characters/vespera-nightwhisper.md
+      node_id: CHAR-0001
+- id: GF-0006
+  rationale: Pre-existing bootstrap domain vocabulary drift accepted as grandfathered; normalizing domains requires canon-addition-equivalent
+    CF cleanup. Trimmed by SPEC14PAVOC-005 (CH-0019) — the history/memory/geography subset (Decision F) was closed via
+    update_record_field domain re-tags. The remaining CF-0036/CF-0038 entries (everyday_life, institutions, bardic_transmission,
+    institution_form, migration, status) await their own decision and are deferred to a follow-up ticket.
+  findings:
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0036 uses non-canonical domain 'everyday_life'
+    location:
+      file: _source/canon/CF-0036.yaml
+      node_id: CF-0036
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0036 uses non-canonical domain 'institutions'
+    location:
+      file: _source/canon/CF-0036.yaml
+      node_id: CF-0036
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0038 uses non-canonical domain 'bardic_transmission'
+    location:
+      file: _source/canon/CF-0038.yaml
+      node_id: CF-0038
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0038 uses non-canonical domain 'institution_form'
+    location:
+      file: _source/canon/CF-0038.yaml
+      node_id: CF-0038
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0038 uses non-canonical domain 'migration'
+    location:
+      file: _source/canon/CF-0038.yaml
+      node_id: CF-0038
+  - validator: rule2_no_pure_cosmetics
+    code: rule2.non_canonical_domain
+    message: CF-0038 uses non-canonical domain 'status'
+    location:
+      file: _source/canon/CF-0038.yaml
+      node_id: CF-0038

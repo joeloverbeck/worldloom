@@ -1,0 +1,63 @@
+contradiction_risk:
+  hard: false
+  soft: false
+costs_and_limits:
+  - ruin interiors may contain guardian constructions (CF-0029) that cause squad-wipes
+  - recovered contamination, bleed-through, and ward attrition parallel DIS-1 / CAU-1 costs
+  - knowledge yield is fragmentary and partisan — expedition reports are not archival-canonical (CF-0028 anti-propaganda clause)
+  - cumulative knowledge-yield does not resolve M-1; no expedition yields civilization-identity answers at world level
+  - no complete Maker-Age text is recovered from any ruin; the CF-0023 linguistic-recovery boundary holds
+  - catastrophic-class artifact origin (M-2) is NOT within the expedition-recoverable domain; the enterable-ruin scope boundary excludes it
+distribution:
+  who_can_do_it: []
+  who_cannot_easily_do_it: []
+  why_not_universal:
+    - enterable ruins are a subset of Maker substructures; most Maker material is exposed piecemeal rather than via enterable interiors
+    - geographic scatter across ruin-rich zones (per GEOGRAPHY §Extractive Zones)
+    - many enterable sites have been resealed after catastrophic expeditions
+domains_affected:
+  - memory_and_myth
+  - geography
+  - magic
+id: CF-0027
+modification_history:
+  - change_id: CH-0014
+    date: 2026-04-20
+    originating_cf: CF-0041
+    summary: cross-reference only — CF-0041 Maker-deliberately-buried-building sub-category noted as structurally distinct from CF-0027 civic-administrative resealing; four M-N firewalls extended (M-1/M-8/M-9/M-10); excavation jurisdiction pressured to OPEN_QUESTIONS; CF-0027 scope unchanged.
+notes: |
+  Direct from briefs/animalia-ruin-expeditions.md. Anchors the proposal's three related facts (CF-0028 expedition institution, CF-0029 guardian constructions, CF-0030 funder-primacy). M-1 anti-accumulation clause and M-2 catastrophic-class-exclusion clause are load-bearing and stated in the statement text. DIS-1 cross-reference annotation added to INVARIANTS.md (CH-0004). Mystery Reserve M-9 governs the epistemic content of recovered Maker-knowledge; M-10 governs guardian-presence heterogeneity. Adjudication record: adjudications/PA-0003-accept_with_required_updates.md.
+  Modified 2026-04-20 by CH-0014 (CF-0041): cross-reference annotation only (no CF-field change) — CF-0041 Maker-Age deliberate-burial practice commits a distinct sub-category within CF-0027 enterable-ruin category: Maker-deliberately-buried BUILDINGS (as distinct from ordinary enterable-ruins). The sub-category is struck periodically by foundation-digs / canal cuts / estate-cellar excavations / qanat-cleaning rites. Categorical distinction: CF-0027 enterable-ruin "officially resealed" semantics is CIVIC-ADMINISTRATIVE resealing (walling off a hazard post-discovery); CF-0041 Maker-deliberate-original-burial is Maker-Age engineering from the inside, using LOST technique. The two are NOT the same mechanism — civic re-burial after a CF-0041 strike does NOT restore the original Maker seal, and the resulting sealed state is porous in ways the original Maker seal was not. Excavation jurisdiction on buried buildings is contested (chartered extraction-guild vs CF-0028 patron-syndicate vs civic-archaeological-license); OPEN_QUESTIONS §Ruin Ownership and Jurisdiction pressured (CH-0014). M-1 anti-accumulation clause holds; M-9 anti-custody-channel firewall extended (buried-building archaeology is NOT a seventh Maker-knowledge custody channel); M-10 anti-predictor firewall FOURTH cross-application (buried-building presence does NOT predict catastrophic-class or guardian-construction).
+prerequisites: []
+required_world_updates:
+  - GEOGRAPHY
+  - TIMELINE
+  - MAGIC_OR_TECH_SYSTEMS
+  - INVARIANTS
+  - MYSTERY_RESERVE
+  - OPEN_QUESTIONS
+  - ECONOMY_AND_RESOURCES
+  - INSTITUTIONS
+scope:
+  geographic: global
+  social: public
+  temporal: current
+source_basis:
+  derived_from:
+    - CF-0004
+  direct_user_approval: true
+statement: |
+  A subset of Maker-Age substructures survive as enterable ruin sites — interior volumes with entrances, chambers, and recoverable contents, geographically scattered across ruin-rich zones. Most Maker-Age material residue is encountered piecemeal via foundation digs, canal cuts, and quarry collapses (per DIS-1); enterable ruins are the less common subtype that admits organized multi-professional entry (CF-0028 expeditions). Knowledge recovered from ruin interiors is fragmentary, contested, and contributes only to the CF-0023 empirical/partial/contested register — no accumulated yield resolves Mystery Reserve M-1 (civilization identity / cause of fall) at world level (anti-accumulation firewall). Catastrophic -class artifact origin (M-2) is not within the leaked-corpus or expedition-recoverable domain; catastrophic-class encounters trigger resealing rather than recovery. Enterable ≠ catastrophic.
+status: hard_canon
+title: Enterable Maker-Age ruin sites exist as a recognized category of Maker substructure
+truth_scope:
+  diegetic_status: objective
+  world_level: true
+type: historical_process
+visible_consequences:
+  - geographically scattered enterable-ruin sites, some under civic seal, some under guild seal, some in jurisdictional dispute
+  - bardic cycles narrate specific named expeditions and their outcomes
+  - civic-archive records of ruin-discovery events, expedition rosters, and resealing orders
+  - ruin-site reputation accretes over generations (a "bad" ruin avoided; a "profitable" ruin contested)
+  - pilgrim-site tension between sectarian Maker-mystic movements and civic containment (per GEOGRAPHY §Sacred and Cursed Terrain)
+  - '"officially resealed" formulations in civic records signaling enforcement porosity'

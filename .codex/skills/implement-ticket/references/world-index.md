@@ -5,6 +5,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 ## Reassessment
 
 - For `world-index` content tickets that mention adjudication YAML placement or `unexpected_yaml_section`, inspect `tools/world-index/src/parse/yaml.ts` before trusting any ticket claim about a canonical adjudication YAML section; the live parser may treat all adjudication fenced YAML as out-of-section.
+- For `world-index` tickets that claim `file_versions` contains ghost rows, classify each row shape before deciding the producer is wrong: disk-backed file row, synthetic atomic logical row such as a retired root markdown concern name, or truly invalid row. Synthetic logical rows are expected for atomic-source worlds and should usually be preserved while disk-backed rows must resolve to real files.
 - For `world-mcp` stale-index or live-corpus tickets, inspect both the retrieval-side stale-index check and the index producer that writes the rows under review. In particular, distinguish disk-backed file rows from synthetic atomic logical rows such as retired root markdown concern names.
 - For end-to-end tests that copy a live world tree or fixture, inspect copied generated-state directories such as `_index/` before trusting a "fresh build" proof path. Strip or account for inherited generated state so setup drift is not misdiagnosed as current-ticket fallout.
 - For cleanup/removal tickets, separate parser utility deletion from dispatch/mode removal. A ticket can remove legacy world-build activation while retaining markdown/YAML parser utilities, fixtures, or tests that still exercise hybrid documents or direct parser contracts.
@@ -19,6 +20,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 - For atomic-source `world-index verify` tickets, remember that retired logical file names such as `INSTITUTIONS.md` can be synthetic in atomic worlds but real disk-backed files in legacy fixtures. Skip or special-case them only after proving the backing file is absent or the fixture mode is truly atomic.
 - When replacing a drafted tool/index command with a manual probe, confirm the probe uses the same artifact root, package/module-resolution root, and source-node/filter boundary as the live producer path. Do not scan a broader substrate ad hoc and treat that result as equivalent evidence.
 - When proof moves to a temp copy or alternate root, retarget all dependent readonly queries and follow-on commands to that same rebuilt artifact root instead of mixing live generated state with temp-copy proof.
+- For sync or `file_versions` tests, confirm the mutation changes the exact tracked content hash. Avoid whitespace-only touches when parser or hash normalization may erase them; for semantic-neutral atomic YAML edits, a YAML comment touch can prove the reparse without changing record data.
 - When a command is expected to reject a world before build/sync, assert the rejection does not create or mutate `_index/world.db`, WAL/SHM files, or other derived artifacts unless the ticket explicitly owns that side effect.
 
 ## Closeout

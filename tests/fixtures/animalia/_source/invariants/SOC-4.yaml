@@ -1,0 +1,17 @@
+id: SOC-4
+category: social
+title: Artifact extraction and traffic is guild-licensed
+statement: Extractors, containment-wrights, and artifact-brokers operate under chartered guilds in most polities. Unlicensed possession of magical artifacts carries criminal or civil penalties. Black markets exist but operate at risk.
+rationale: Derived from brief's "professions and guilds exist to extract … research … sell … to bidders" plus the social risk around ward discussion.
+examples:
+  - a guild-stamped artifact in a noble's collection; a smuggler executed for trafficking an unregistered device
+non_examples:
+  - anyone can dig and sell freely
+break_conditions: medium.
+revision_difficulty: medium
+extensions:
+  - originating_cf: CF-0043
+    change_id: CH-0015
+    date: 2026-04-20
+    label: Brinewick non-guild civic-charter anomaly clarification
+    body: SOC-4's "in most polities" scope permits a Brinewick-specific civic-chartered non-guild anomaly — the Ash-Seal company (CF-0043) — holding effective monopoly over CONTAINMENT, RESEARCH, and SEALED-INERT DISPOSAL in Brinewick and its carriage-distance heartland radius, under concordat with the chartered-extraction-guild. Chartered-guild retains EXTRACTION, WARD-INSCRIPTION, WARD-INSPECTION (CAU-3), and CHARTERED-BROKERAGE everywhere including Brinewick. Ash-Seal's civic charter is NON-TRANSFERABLE; Brinewick's four-stabilizer primacy compound (CF-0038 canal-geometry singularity + path-dependence + migration-gravity flywheel + chartered-broker bench density) plus century-plus precedent-lock with chartered-guild concurrence makes single-generation replication in other polities prohibitive. SOC-4 chartered-guild-monopoly holds EVERYWHERE ELSE without exception; unchartered company operations outside Brinewick remain criminal under standard CF-0008 enforcement. Defector-specialists carry Brinewick-trained portable INDIVIDUAL reputation (fee-for-service) absorbed into existing chartered-extraction-guild labor pool elsewhere; no institutional replication. SOC-4 holds with this Brinewick-specific civic-charter-anomaly extension.

@@ -1,0 +1,84 @@
+change_id: CH-0006
+date: 2026-04-18
+change_type: addition
+affected_fact_ids:
+  - CF-0032
+  - CF-0010
+  - CF-0011
+  - CF-0018
+summary: |
+  ACCEPT_WITH_REQUIRED_UPDATES verdict on proposal PR-0007-oversize-saddlery- subsection-cluster-c.md. CF-0032 committed as soft_canon institution at regional / current / public scope, documenting an oversize-saddlery guild- subsection within wainwright and saddlery guilds of ancestral Cluster C polities, with reciprocal cross-polity journeyman circuit gating master-rank progression. The subsection adds a third named Cluster C labor specialty alongside haulage and anchor-infantry/tradition-keeping, functioning as a minority upward-mobility path while most Cluster C community members remain in haulage. The change also qualifies three existing CFs: CF-0010 (Cluster C architectural accommodation partially institutionalized via the subsection; species distinctness now includes trans-regional professional vector); CF-0011 (concrete Cluster C upward-mobility mechanism committed; global class-mobility scope preserved, mechanism regional-specific, apprenticeship not species-gated); CF-0018 (subsection guild-seal as narrow named exception to "socially legible without explicit guild branding" default; seal located in charter-and-apprenticeship register, not bloodline). Downstream updates applied to PEOPLES_AND_SPECIES.md (Cluster C labor catalogue extension + "older bloods" firewall cross-reference), INSTITUTIONS.md (Trade/Guilds, Law/Custom, Religion, Education/Apprenticeship, Recordkeeping annotations), ECONOMY_AND_RESOURCES.md (Wage Spreads, Value Stores, Wealth Creation, Inequality Patterns), EVERYDAY_LIFE.md (canal-town heartland + big-city estate clusters; silent absences in highland/drylands/fens), GEOGRAPHY.md (new "Regional Coordination on Cluster C Subsection Presence" section framed as agreement pattern, mirror image of the three disagreement- asymmetries CF-0021/CF-0024/CF-0031), TIMELINE.md (Layer 2 institutional- residue annotation), MYSTERY_RESERVE.md (M-4 firewall extension, M-7 firewall cross-application, new M-12 for craft antiquity), OPEN_QUESTIONS.md (Specific Guild Naming extension, Species Population Ratios annotation, two new deferred-question items). Six critic sub-agents dispatched at escalation gate (11 of 13 domains touched); convergent concerns around Rule 3 "older bloods" specialness-inflation, M-4 absent firewall, M-7 cross-application absent, Rule 4 architectural-sizing-drift leak, and AES-2 hero-drift risk all addressed in Phase 9 repair via three notes- field firewalls on CF-0032, Rule 4 partial concession clause, and MYSTERY_ RESERVE.md M-4/M-7 extensions + new M-12. Adjudication record: adjudications/PA-0005-accept_with_required_updates.md.
+reason:
+  - Commits institutional form for the Cluster C architectural-accommodation need already named in PEOPLES_AND_SPECIES.md Cluster C — filling a canon gap where the need is committed but the economic institutional form is thin.
+  - Adds a third named Cluster C labor specialty to balance the existing haulage and anchor-infantry/tradition-keeping options — creates concrete upward-mobility without displacing the haulage majority.
+  - Extends CF-0011 class-mobility from distribution claim to concrete Cluster C upward-mobility mechanism — Cluster A modern mammalian animal-folk have specialty-labor visibility across many crafts; Cluster C deserves a parallel concrete mechanism.
+  - Generates story engines in Animalia's natural registers (artisan-coalition, mixed-species-estate-succession, bardic-circuit) without activating cosmological battleground dynamics.
+scope:
+  local_or_global: local
+  changes_ordinary_life: true
+  creates_new_story_engines: true
+  mystery_reserve_effect: expands
+downstream_updates:
+  - PEOPLES_AND_SPECIES.md
+  - INSTITUTIONS.md
+  - ECONOMY_AND_RESOURCES.md
+  - EVERYDAY_LIFE.md
+  - GEOGRAPHY.md
+  - TIMELINE.md
+  - MYSTERY_RESERVE.md
+  - OPEN_QUESTIONS.md
+impact_on_existing_texts: []
+severity_before_fix: 0
+severity_after_fix: 0
+retcon_policy_checks:
+  no_silent_edit: true
+  replacement_noted: true
+  no_stealth_diegetic_rewrite: true
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+latent_burdens_introduced:
+  - "M-12 resolution: historical origin and antiquity of the oversize-saddlery craft and its reciprocal tradition remains bounded unknown (three contested readings preserved); future canon work must maintain the firewall against world-level antiquity resolution to preserve Rule 3 Cluster C stabilizer balance"
+  - "reciprocal-travel case law: magistrate precedent on reciprocal-journey abandonment, cross-polity guild-internal discipline vs civic-watch handoff, and extradition questions tied to subsection-master claims remains undeveloped (fourth docket class, categorically distinct from three polity-asymmetric extradition patterns)"
+  - "subsection-seal fraud precedent: magistrate precedent on subsection-seal forgery, counterfeit-seal prosecution, competing-polity seal-recognition disputes, and authentication-specialist false-certification liability remains undeveloped"
+  - "intra-Cluster-C stratification compounding: subsection-adjacent Cluster C households vs haulage-concentrated Cluster C households form divergent prestige strata in ancestral polities; placement-right inheritance + assortative sorting generates 3-generation concentration pattern parallel to CF-0031 registered-lineage intermarriage pressure (Rule 3 compounding)"
+  - "architectural sizing-norm drift to non-ancestral estates (Rule 4 partial concession named in CF notes): consumption-locality migration via mobile Cluster C estate-class residents is intended generational drift, but sizing-norm decoupling from Cluster C presence over multi-generation timescales is a monitored Rule 4 surface"
+  - "subsection-seal authentication cartel-formation pressure: parallel to CF-0028 authentication-specialist cartel pressure; authentication sub-specialty sits on regulatory-capture equilibrium and must be monitored to prevent collapse into either chartered-guild cartel or rival-killing informal discipline"
+notes: |
+  Six critic sub-agents dispatched at escalation gate: Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator. All six flagged concerns that Phase 9 repair addressed: - Continuity Archivist recommended qualification + pure addition framing
+    (adopted) over retcon; recommended notes-field modification pattern
+    on CF-0010/CF-0011/CF-0018 (adopted, mirroring CH-0002 precedent).
+  - Systems/Economy flagged four stabilizer weaknesses (ancestral-community
+    gates production not consumption; bespoke pricing supply-constraint-
+    bounded; reciprocal tradition cartel-adjacent; apprenticeship lineage
+    demand-bounded) and five missed consequences (Cluster-C haulage labor-
+    market substitution; material supply inflation on old-growth timber;
+    diaspora Cluster C universalization-pressure without rent-access;
+    dowry-asset compounding; authentication-cartel formation pressure
+    parallel to CF-0028). Repair response: Rule 4 partial concession
+    clause naming sizing-drift as intended; stabilizer (b) reinforced
+    via multi-year master-training + demographic ceiling; reciprocal
+    tradition explicitly framed as craft-discipline coordination NOT
+    rent-extraction cartel; intra-Cluster stratification named in
+    ECONOMY Inequality Patterns; authentication cartel pressure named
+    in INSTITUTIONS Trade/Guilds and ECONOMY Wealth Creation.
+  - Politics/Institution flagged reciprocal-journey tradition as a NEW
+    institutional TYPE (agreement pattern, NOT fourth instance of the
+    three polity-asymmetric disagreement-patterns); recommended explicit
+    non-species-gated apprenticeship clause (adopted); recommended new
+    archival category for reciprocal-journey verification (adopted);
+    identified religious response pattern most similar to CF-0031.
+  - Everyday-Life flagged AES-2 hero-drift risk (MODERATE-HIGH) and
+    recommended ordinary-commission tier surfacing (adopted in CF
+    visible_consequences + ECONOMY Wage Spreads + EVERYDAY_LIFE
+    patches); recommended silent absences in clusters (d) drylands and
+    (e) fenlands (adopted).
+  - Theme/Tone flagged specific in-register and out-of-register language
+    (adopted in patch prose); recommended reciprocal-journey framing as
+    journeyman economics NOT pilgrimage (adopted); identified genre-
+    drift risks (crafter-heroism romanticism, authenticity-prestige
+    drift, "ancient bloods" supremacy adjacency — all addressed).
+  - Mystery Curator identified M-4 firewall absent and M-7 cross-
+    application absent as the two most serious gaps (both repaired via
+    MYSTERY_RESERVE extensions); recommended new M-12 for craft
+    antiquity (adopted per Rule 7 obligation).
+  No critic dissented from the accept recommendation; all flagged risks either repaired in Phase 9 or logged as latent burdens above. Phase 14a validation: all 9 tests PASS with rationale recorded in adjudication record's Phase 14a Validation Checklist section. The split-option was considered and declined per Phase 9 split rubric: sub-facts share type (institution), Mystery Reserve exposure profile (M-4, M-7, M-12), distribution shape (all ancestral-polity-gated), and domains_affected set. Splitting would fragment integrity.

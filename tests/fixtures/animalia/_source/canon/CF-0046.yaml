@@ -1,0 +1,108 @@
+id: CF-0046
+title: Drylands caravan-corridor institutional-cultural complex
+status: hard_canon
+type: institution
+statement: |
+  In the drylands south, a regional caravan-corridor functions as an institutional-cultural complex — a node-network of wells, gate-stops, villages, and caravanserai operating under caravan-rotation social form (CF-0024 substrate); institutionally thin (thin civic registry, no civic-court reach, caravan-master corridor-internal customary adjudication of minor disputes, runner-reached village militia as informal emergency-response folk-practice); reciprocity-primary regional economy with SOC-3 coin-at-edges preservation for practical transactions (supply runs, heartland-border trade); drought-cycle pulse shaping traffic and water-pressure; oral-primary DIS-2-partial- literacy with memorized-repertoire, verse-counter, and sparse household-held station-logs kept by well-keepers (CF-0047) in DIS-2 trade-tongue as corridor lingua-franca. The complex is a regional-consensus institutional-thinness pattern stabilized by geographic non-transportability of canal-infrastructure; NOT a sixth Charter-Era polity-asymmetric structural-disagreement axis — drylands polities AGREE on the thin-institution equilibrium.
+scope:
+  geographic: regional
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - labor
+  - economy
+  - settlement_life
+  - law
+  - language
+  - daily_routine
+  - ecology
+  - mobility
+  - kinship
+  - status_signaling
+  - memory_and_myth
+prerequisites:
+  - drylands water-scarce geography (GEOGRAPHY Climate Bands)
+  - caravan-rotation social form (CF-0024)
+  - qanat / cistern / well infrastructure (EVERYDAY_LIFE §(d))
+  - CF-0009 copper/silver currency for coin-at-edges
+  - DIS-2 partial-literacy substrate with trade-tongue lingua franca
+  - CF-0034 caravan-master cargo-refusal judgment register baseline
+distribution:
+  who_can_do_it:
+    - drylands south caravan polities (full pattern)
+    - drylands-heartland border market-caravan interface (coin-at-edges contact surface)
+  who_cannot_easily_do_it:
+    - temperate canal heartland (full civic infrastructure; not part of the drylands pattern)
+    - big-city outskirts estates (canal-heartland default; drylands-trade-factor reciprocity-standing as dowager-gossip axis only)
+    - cold north highland clans (clan-custom hospitality handles equivalent social work)
+    - wet fenlands west (institutional-absence-acknowledged-in-silence discipline; amphibian-folk canary vigilance handles equivalent work)
+    - mountain east (seasonal institutional compression; mountain-valley inn-and-waystation infrastructure handles equivalent work where present)
+  why_not_universal:
+    - water-scarce geography + low tax-base + caravan-rotation population-swell combination exists only in drylands; heartland has canals (water-abundant), highland has clan-custom, fens have summon-not-post, mountain has seasonal-pass + CF-0037 stations
+    - "GEOGRAPHIC NON-TRANSPORTABILITY OF CANAL-INFRASTRUCTURE (load-bearing): heartland institutional thickness universalizes along canals (CF-0038 canal-geometry singularity, ECONOMY §Trade Flows); drylands lack water to float barges, so heartland's institutional-export mechanism physically cannot reach drylands corridors; institutional-thinness equilibrium holds indefinitely"
+    - reciprocity-economy returns-to-scale fall with institutional thickness; civic-registry introduction would DESTROY not merely compete with the economic substrate (networks function below governance threshold, decay above it)
+    - caravan-rotation population-swell means local population cannot amortize permanent civic-court infrastructure; tax-base is literally non-resident for half the year
+costs_and_limits:
+  - SOC-3 coin-contract sanctity preserved at coin-at-edges contact surface (per CH-0018 INVARIANTS SOC-3 clarification); reciprocity obligations are customary-reputation-enforced within the corridor, NOT a separate sacred tier parallel to SOC-3; drylanders honor coin when coin is contracted
+  - caravan-master adjudication is CORRIDOR-INTERNAL CUSTOMARY DISPUTE RESOLUTION only (intra-caravan labor, supply-share, verse-turn etiquette breach, well-share friction at corridor nodes); NOT magistrate-reachable; NOT extradition-carrying across polity lines; NOT a sixth Charter-Era structural axis (uncontested regional-consensus institutional-thinness pattern)
+  - multi-caravan-master network cross-corridor reputation-boycott is structural brake against graft and regulatory-capture — a caravan-master who sells rulings or systematically mis-adjudicates loses rotation standing at the multi-master network level; reputation-not-civic brake paralleling CF-0034 waiting-wolves and CF-0036 mix-sound judgment registers
+  - runner-reached village militia is informal emergency-response convention, NOT a new CF-0020 militia subtype, NOT dragoon-precursor (CF-0033 non-adoption preserved in drylands), NOT chartered watch (drylands has no chartered-watch infrastructure per institutional-thinness); pursuit beyond village jurisdiction defaults to CF-0034 hunter-contractor commission if the corridor justifies bounty-contract
+  - station-log is commercial-mundane caravan-corridor record, household-held by well-keepers (CF-0047) in DIS-2 trade-tongue; NOT a Maker-knowledge custody channel (CH-0018 MYSTERY_RESERVE M-9 extension firewall load-bearing); NOT an eleventh/twelfth archival category per Rule 3 firewall (CH-0018 INSTITUTIONS §Recordkeeping)
+  - trade-tongue is DIS-2-convergence mundane commercial lingua-franca (Reading 1 — existing Animalia cross-community commercial language applied in drylands corridor context), NOT a new distinct drylands-specific language; NOT evidence for or against Maker-Age linguistic survival or descent (CH-0018 OPEN_QUESTIONS §Maker-Age Linguistic Recovery DIS-2-convergence discharge)
+  - drylands corridor-infrastructure antiquity is ordinary author-side deferral (per OPEN_QUESTIONS §Drylands Caravan-Corridor Infrastructure Antiquity), NOT a Mystery Reserve entry; categorically distinct from Brinewick canal-and-underground-network bounded-unknown M-19 (CH-0018 MYSTERY_RESERVE M-19 scoped-distinct firewall); no sectarian Maker-mystic reading attaches at world level
+  - water-node wealth-concentration at well-keeper lineages across generations is stabilized by drought-cycle customary hospitality obligations + inter-corridor caravan-master reputation-boycott (reputation, not civic-registry, is the structural brake); a well-keeper who prices drought-year water as pure coin-commerce outside customary hospitality loses the well-stop at caravan-master-network level
+  - "WORKING-TEXTURE REGISTER PRESERVATION (AES-1 per CH-0018 INVARIANTS AES-1 extension) — forbidden registers: 'refined / sophisticated / cultured drylands,' 'noble caravan-master,' 'pristine pre-civic tradition,' 'pure reciprocity economy untainted by coin,' 'desert warriors / corridor princes,' 'the simple honest drylanders,' 'the drylands that coin had not yet corrupted,' 'legendary corridor,' 'destined caravan-master,' 'chosen well-line'; in-register: 'trade-useful,' 'working-texture,' 'station-log register,' 'runner-reached,' 'paid carrier of liability,' 'the corridor knows her name in two seasons,' 'the keeper sent the runner; the magistrate will come in four days'"
+  - CF-0036 cross-species friction-register PRESERVED at drylands corridor (scent-aversion, mix-sound crew-composition, one-fur-talk-now returning migrants, tavern joke-threshold register); drylands hospitality is CHARTER-CUSTOM OBLIGATION UNDER LOAD, NOT unearned harmony
+  - "NOT on any illegitimate-service rail (CH-0018 ECONOMY §Trade Flows reaffirmation): the drylands corridor institutional complex itself adds no new authentication-cartel product-line; drylands corridor transit may carry other-product-line contraband (CF-0021 grimoire-transit, CF-0028 ruin-cartography, etc.) but the drylands complex itself is not a new stream"
+  - geographic scope is drylands-bounded; commercial flows at heartland-border interface are coin-at-edges (ECONOMY §Trade Flows CH-0018 extension; heartland coin-inflow cross-subsidy stabilizes reciprocity-primary economy); no attempt to export drylands institutional-complex patterns into heartland polities (geographic non-transportability stabilizer prevents replication)
+visible_consequences:
+  - four-node-type corridor network (wells, gate-stops, villages, caravanserai) per GEOGRAPHY §Settlement Limits and EVERYDAY_LIFE §(d) Housing extensions (CH-0018)
+  - drylands caravan-master CORRIDOR-INTERNAL customary-adjudication of minor disputes, multi-master reputation-boycott as structural brake
+  - runner-reached village militia emergency-response folk-practice (informal, village-council directed, able-bodied volunteer rotation)
+  - reciprocity-primary regional economy with SOC-3 coin-at-edges preservation; obligation-denominated stratification register per ECONOMY §Inequality Patterns CH-0018 extension
+  - household-held station-log convention in DIS-2 trade-tongue; sparse, oral-primary-backed, NOT archival per M-9 firewall
+  - drought-cycle calendar-marker register reshapes ordinary life — drought-year marriage postponement, apprentice-placement deferral, keeping-book audit at drought-break; well-failure common fear register
+  - heartland inbound drylands-cadence tavern-fragment annotation per EVERYDAY_LIFE §(a) CH-0018 extension (one-way bardic-flow via CF-0017)
+  - outskirts-estate drylands-trade-factor reciprocity-standing as NINTH dowager-gossip axis per EVERYDAY_LIFE §(b) CH-0018 extension
+  - highland clansman-learned-the-gate-turn saga-fragment per EVERYDAY_LIFE §(c) CH-0018 extension (hearth-side register, not public-feast)
+  - extensive EVERYDAY_LIFE §(d) Drylands extensions — corridor-node typology, well-keeper labor rhythm, drought-cycle common fears and aspirations, verse-turn apprenticeship + station-log literacy register as fifth drylands oral register
+  - fenland non-participation via silence-discipline per EVERYDAY_LIFE §(e) CH-0018 extension (institutional-absence-acknowledged-in-silence)
+  - new GEOGRAPHY §Regional Asymmetry on Drylands Institutional Thinness section distinguishing uncontested regional-consensus pattern from the five polity-asymmetric structural-disagreement axes
+  - "new Breakage Point: drylands well-lineage failure / drought-corridor collapse / caravan-master reputation-network rupture per ECONOMY §Breakage Points CH-0018 extension"
+  - drylands regional reciprocity-primary wealth-creation as distinct regional path per ECONOMY §Wealth Creation CH-0018 extension
+  - three Mystery Reserve firewall extensions (M-7 well-keeper sub-specialty holding clause, M-9 station-log not-a-custody-channel, M-19 drylands-infrastructure scoped-distinct) protecting bounded-unknown discipline
+required_world_updates:
+  - WORLD_KERNEL
+  - INVARIANTS
+  - ONTOLOGY
+  - GEOGRAPHY
+  - PEOPLES_AND_SPECIES
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - OPEN_QUESTIONS
+  - MYSTERY_RESERVE
+  - TIMELINE
+source_basis:
+  direct_user_approval: true
+  derived_from:
+    - CF-0024
+    - DA-0001
+contradiction_risk:
+  hard: false
+  soft: true
+notes: |
+  Composite regional-institutional-cultural complex CF paralleling CF-0038 (Brinewick composite city) and CF-0033 (dragoon-adoption multi-axis) precedents for bundling multiple institutional strands into one CF rather than fragmenting across many narrow CFs. Primary type `institution` with secondary attachments enumerated per CH-0018 ONTOLOGY composite annotation (institution + route + ecological_system + text_tradition + historical_process + law/custom). Co-proposed with CF-0047 (drylands well-keeper as named customary-authority social role); the two CFs cross-reference tightly — CF-0047 operates within CF-0046's corridor- complex substrate, and CF-0046 names well-keeper as the corridor-node lineage-inheritance role.
+  CF-0037 soft-conflict resolution: water-node / road-rest-node firewall PRESERVES CF-0037 drylands-exclusion stabilizer through categorical distinction rather than scope-retcon — CF-0037 remains heartland/highland/ mountain-east-present and drylands-structurally-absent (family-handled waystation tradition); CF-0046/CF-0047 operates at drylands-scope with water-node-anchored household-enterprise as categorically distinct institutional form. CF-0037 receives modification_history entry at CH-0018 under axis (b)/(c) substantive extension — a future reader of CF-0037 alone needs to know about CF-0046/CF-0047 to avoid conflating the two. "The southern road keeps no stop" (CF-0037) remains intact; "the southern road keeps the corridor" (CF-0046 complement) coexists.
+  Reading 1 committed on trade-tongue interpretation: existing DIS-2 Animalia cross-community commercial lingua-franca applied in drylands corridor context, NOT a new distinct drylands-specific language. Smaller, more canon-consistent commitment per user confirmation at Phase 0 interpretive question. Reading 2 (distinct caravan-tongue) can be revisited in future canon work if story-demand requires.
+  Six CFs receive modification_history entries at CH-0018: CF-0024 (axis a from CF-0046 derived_from; caravan-master adjudication extension to caravan-rotation frame), CF-0031 (axis c; drylands registry-thinness alternative-institutional-substrate reason), CF-0033 (axis c; runner- militia ≠ dragoon-precursor firewall), CF-0034 (axis c; caravan-master corridor-adjudication extends waiting-wolves judgment register), CF-0037 (axis b/c; water-node/road-rest firewall), CF-0044 (axis a from CF-0047 derived_from; well-keeper formalized as verse-book custodian institutional convention).
+  CF-0017 is cross-referenced but does NOT receive modification_history — per axis-(c) decision test, CF-0017 is not substantively extended by CF-0046 (station-log convention is parallel cross-regional commitment, does not add content to CF-0017 that a future reader of CF-0017 alone would need to know to read CF-0017 correctly).
+  Phase 12a modification_history scan axis-(a) pre-scan verification per SKILL.md discipline: derived_from pared to [CF-0024, DA-0001] — CF-0009 copper/silver currency, CF-0034 caravan-master cargo-refusal, CF-0041 qanat-cleaning-rite, CF-0044 verse-convention, DIS-2 partial- literacy are prerequisite-substrate references (captured in prerequisites field) rather than axis-(a) derivation parents; only CF-0024 genuinely EXTENDS the new CF's content (caravan-rotation frame + caravanserai posting-board substrate that CF-0046 builds institutional- complex superstructure on). DA-0001 is diegetic pre-figuring per Rule 6 audit-trail preservation.
+  Critic synthesis: six critics dispatched at escalation gate (13/13 exposition domains touched); all six lean accept-with-revisions with thirteen synthesized commitments integrated across CF costs_and_limits enumeration, invariant clarification annotations, Mystery Reserve firewall extensions, and domain-file patches. Systems/Economy critic contributed the load-bearing geographic non-transportability of canal- infrastructure stabilizer. Mystery Curator confirmed no new Mystery Reserve entries warranted (Rule 7 obligation discharged with documented negative finding; three firewall extensions sufficient).
+  In-register language: "the corridor-complex," "the drylands corridor," "the well-stop," "the gate-stop," "the caravanserai," "the runner- reached militia," "caravan-master corridor-adjudication," "keeping-book," "station-log," "verse-counter," "reciprocity-primary economy," "coin-at-edges," "institutional thinness," "the southern road keeps the corridor," "drought-cycle keeping-book audit," "working-texture reputation," "trade-useful."
+  Out-of-register language (forbidden paralleling CH-0016 CF-0044 cadence): "refined / sophisticated / cultured drylands," "lyrical drylands," "pristine pre-civic tradition," "pure reciprocity economy untainted by coin," "the drylands that coin had not yet corrupted," "legendary corridor," "the great caravan-master of the Southern Pass," "destined caravan-master," "noble caravan-master adjudicating in timeless wisdom," "corridor princes," "desert warriors," "the simple honest drylanders," "wise well-keeper," "ancient keeper-lineage," "hereditary verse-lord," "the great keeper of the Third Well," "keeper-elite," "verse-caste," "chosen well-line," "the venerable gate-custom."
+  Adjudication record: adjudications/PA-0017-accept_with_required_updates.md.
+modification_history: []

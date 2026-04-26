@@ -17,18 +17,20 @@ import { context, validSection } from "../structural/helpers.js";
 
 const packageRoot = process.cwd();
 const repoRoot = path.resolve(packageRoot, "../..");
-const realAnimaliaRoot = path.join(repoRoot, "worlds", "animalia");
+const realAnimaliaRoot = path.join(repoRoot, "tests", "fixtures", "animalia");
 
 let tempRoot = "";
 let tempWorldRoot = "";
 let originalCwd = "";
 
-before(() => {
+before(async () => {
   tempRoot = mkdtempSync(path.join(os.tmpdir(), "worldloom-spec04-"));
   tempWorldRoot = path.join(tempRoot, "worlds", "animalia");
   mkdirSync(path.dirname(tempWorldRoot), { recursive: true });
   cpSync(realAnimaliaRoot, tempWorldRoot, { recursive: true });
   mkdirSync(path.join(tempRoot, "tools", "validators"), { recursive: true });
+  const { build } = await import("@worldloom/world-index/commands/build");
+  assert.equal(build(tempRoot, "animalia"), 0);
   originalCwd = process.cwd();
   process.chdir(path.join(tempRoot, "tools", "validators"));
 });

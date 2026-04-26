@@ -5,11 +5,13 @@ import test from "node:test";
 
 import { createTempRepoRoot, destroyTempRepoRoot } from "../tools/_shared";
 
+const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
+
 test("stdio server entrypoint stays alive as a child process until stdin closes", async () => {
   const root = createTempRepoRoot();
   const child = spawn(
     "node",
-    [path.join("/home/joeloverbeck/projects/worldloom", "tools", "world-mcp", "dist", "src", "server.js")],
+    [path.join(REPO_ROOT, "tools", "world-mcp", "dist", "src", "server.js")],
     {
       cwd: path.join(root, "tools", "world-mcp"),
       stdio: ["pipe", "pipe", "pipe"]

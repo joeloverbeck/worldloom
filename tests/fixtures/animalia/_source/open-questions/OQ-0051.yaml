@@ -1,0 +1,8 @@
+id: OQ-0051
+topic: Identity of the Most-Populated Heartland City
+body: |-
+  - CF-0038 commits Brinewick as **among the most populated heartland cities** (softened from the user-stated "second-most populated" ordinal per Phase 6b Continuity Archivist critic finding — the ordinal would have forced a committed-but-unnamed most-populated heartland city, a Rule 5 dangling consequence). Whether a distinct other heartland city is specifically most-populated — and whether its function is imperial-capital / older-coastal-port / ecclesiastical-or-ceremonial-center splitting political from commercial primacy, per Phase 6b Systems/Economy critic findings — remains deferred. Population comparison across heartland cities at world-scale remains unresolved.
+
+when_to_resolve: when a specific story or region-module forces the comparison (a diplomatic mission between Brinewick and another heartland city; a trade-war episode between the two; a migration story where the protagonist moves between the two).
+caution: any resolution here interacts with CF-0038's pragmatic-scale commerce primacy language ("world-renowned; among the foremost" rather than "#1 in the world") and with OPEN_QUESTIONS §Place and Polity Naming partial-resolution annotation. If another heartland city is committed as most-populated, the naming should be regional-scope per the existing §Place and Polity Naming discipline.
+extensions: []
