@@ -1,17 +1,19 @@
 # Canon Fact Record — template
 #
-# Matches docs/FOUNDATIONS.md §"Canon Fact Record Schema".
+# Matches docs/FOUNDATIONS.md §"Canon Fact Record Schema" and the patch-engine
+# CanonFactRecord type (@worldloom/world-index/public/types).
 #
 # SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain aligned
 # with the canon-addition output contract and the patch-engine CF schema.
 # Comments and example values may differ per skill context. When adding,
 # removing, or reshaping any field — including extending the `type:` enum —
-# update every CF producer/validator surface in the same change so grep-based
-# ledger discovery works uniformly.
+# update every CF producer/validator surface in the same change so the
+# `record_schema_compliance` validator continues to pass.
 #
-# create-base-world emits one record of this shape per accepted hard canon
-# fact at Phase 14. The full set is concatenated into
-# worlds/<world-slug>/CANON_LEDGER.md.
+# Post-SPEC-13, create-base-world emits CF-0001 as the genesis primary-difference
+# fact via mcp__worldloom__submit_patch_plan's create_cf_record op. The record
+# lands at worlds/<world-slug>/_source/canon/CF-0001.yaml as a single atomic file.
+# No monolithic CANON_LEDGER.md exists post-SPEC-13.
 #
 # Trim fields that do not apply to the fact's type (e.g., a pure-law fact
 # may omit distribution.who_cannot_easily_do_it).
@@ -74,21 +76,19 @@ costs_and_limits: []                       # stabilizers preventing universaliza
 
 visible_consequences: []                   # ordinary-life signals this fact produces — Rule 5 (No Consequence Evasion)
 
-required_world_updates: []                 # world files that reflect this fact
-                                           # Do NOT list CANON_LEDGER.md here — the CF record IS the ledger
-                                           # entry, and self-reference is redundant. required_world_updates
-                                           # is the list of DOMAIN files the fact's consequences must touch,
-                                           # parallel to downstream_updates in the change-log-entry template.
-                                           # At genesis, create-base-world writes all 13 mandatory files
-                                           # together; this field still names only the domain files whose
-                                           # prose reflects this CF's consequences (not CANON_LEDGER.md itself).
-  # - INSTITUTIONS.md
-  # - ECONOMY_AND_RESOURCES.md
-  # - EVERYDAY_LIFE.md
-  # - TIMELINE.md
+required_world_updates: []                 # canonical file-class names of every prose concern whose
+                                           # initial SEC must cite this CF in `touched_by_cf` (bidirectional
+                                           # CF ↔ SEC pointer enforced by `touched_by_cf_completeness`).
+                                           # Use UPPER_SNAKE without `.md`: GEOGRAPHY | PEOPLES_AND_SPECIES |
+                                           # INSTITUTIONS | ECONOMY_AND_RESOURCES | MAGIC_OR_TECH_SYSTEMS |
+                                           # EVERYDAY_LIFE | TIMELINE.
+  # - INSTITUTIONS
+  # - ECONOMY_AND_RESOURCES
+  # - EVERYDAY_LIFE
+  # - TIMELINE
 
 source_basis:
-  direct_user_approval: false              # set true once user explicitly accepts this fact at Phase 16
+  direct_user_approval: false              # set true once user explicitly accepts this fact at the Phase 10 HARD-GATE
   derived_from: []                         # list of parent CF ids if this is derived canon
 
 contradiction_risk:

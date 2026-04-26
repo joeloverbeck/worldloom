@@ -131,7 +131,7 @@ inspirations:
 anti_inspirations: [tolkien, dnd_default_settings]
 
 desired_mystery_level: high
-  rationale: "user explicitly wants questions the world never fully answers — feeds Phase 13 Mystery Reserve aggressively"
+  rationale: "user explicitly wants questions the world never fully answers — feeds Phase 5 Mystery Reserve aggressively"
 
 implied_derived_commitments:
   - magic_must_not_trivialize_ordinary_danger   # from premise + tonal register
@@ -147,9 +147,9 @@ implied_derived_commitments:
 Later phases read this brief like a contract:
 
 - **Phase 3 (Invariants)** will enforce `no_gods_acting_directly` as an *ontological invariant* and `magic_must_not_trivialize_ordinary_danger` as a *causal invariant*.
-- **Phase 5 (Ontological Systems)** will refuse any species design that reduces to "humans in a funny skin" (user prohibition + Rule 2).
-- **Phase 11 (Equilibrium Explanation)** will be asked to justify why the continent has remained fragmented — a derived commitment the brief elevated.
-- **Phase 13 (Mystery Reserve)** will be pushed toward the "high" end — more forbidden mysteries, deeper ruin-depth questions.
-- **Phase 15 (Validation)** will reject any species that ended up cosmetic, any magic without cost, any geography that fails to force fragmentation.
+- **Phase 4 (Initial Sections — peoples and species, magic / tech, etc.)** will refuse any species seed that reduces to "humans in a funny skin" (user prohibition + Rule 2).
+- **Phase 9 (Self-validation — Equilibrium Explanation)** will be asked to justify why the continent has remained fragmented — a derived commitment the brief elevated.
+- **Phase 5 (Mystery Reserve)** will be pushed toward the "high" end — more forbidden mysteries, deeper ruin-depth questions.
+- **Phase 9 (Self-validation — rejection tests)** will reject any species that ended up cosmetic, any magic without cost, any geography that fails to force fragmentation.
 
-A thin or vague brief will produce a thin Phase 0 extraction, which will fail Phase 15 downstream. Writing the brief well is leverage.
+A thin or vague brief will produce a thin Phase 0 extraction, which will fail Phase 9 downstream. Writing the brief well is leverage.

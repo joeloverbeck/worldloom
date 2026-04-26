@@ -1,17 +1,21 @@
 # Change Log Entry — template
 #
 # Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+# Mirrors the patch-engine ChangeLogEntry type
+# (@worldloom/world-index/public/types).
 #
 # SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
 # to canon-addition/templates/change-log-entry.yaml. Comments and example
 # values may differ per skill context. When adding, removing, or reshaping any
 # field — including extending the `change_type:` enum or adding new audit
 # fields like `latent_burdens_introduced` — update BOTH templates in the same
-# change so future ledger tooling parses both uniformly.
+# change so the `record_schema_compliance` validator continues to pass.
 #
-# create-base-world emits exactly ONE entry of this shape at Phase 16 — the
-# CH-0001 genesis entry. Subsequent canon-mutating skills must extend this
-# log; silent edits are forbidden.
+# Post-SPEC-13, create-base-world emits exactly ONE entry of this shape at
+# Phase 11 — the CH-0001 genesis entry — via mcp__worldloom__submit_patch_plan's
+# create_ch_record op. The record lands at
+# worlds/<world-slug>/_source/change-log/CH-0001.yaml as a single atomic file.
+# Subsequent canon-mutating skills must extend this log; silent edits are forbidden.
 #
 # All fields below are required unless explicitly marked optional.
 
@@ -38,9 +42,13 @@ scope:
   creates_new_story_engines: true          # genesis installs the initial engines
   mystery_reserve_effect: expands          # genesis installs the initial mystery reserve (from nothing, it expands)
 
-downstream_updates: []                     # genesis: empty. Subsequent entries list files updated to match the change.
-  # - INSTITUTIONS.md
-  # - GEOGRAPHY.md
+downstream_updates: []                     # genesis: empty. Subsequent entries list canonical file-class names
+                                           # of prose concerns whose SECs were updated to match the change.
+                                           # Use UPPER_SNAKE without `.md`: GEOGRAPHY | PEOPLES_AND_SPECIES |
+                                           # INSTITUTIONS | ECONOMY_AND_RESOURCES | MAGIC_OR_TECH_SYSTEMS |
+                                           # EVERYDAY_LIFE | TIMELINE.
+  # - INSTITUTIONS
+  # - GEOGRAPHY
 
 impact_on_existing_texts: []               # genesis: empty. Later entries note re-contextualized diegetic artifacts.
 
