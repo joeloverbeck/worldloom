@@ -94,7 +94,7 @@ Phase N+3: mcp__worldloom__submit_patch_plan(plan, approval_token)
 | Phase 15a checkpoint grep commands | SPEC-03 engine internal (atomicity replaces checkpoints) |
 | Anchor localization (Edit `old_string` construction) | SPEC-03 `expected_anchor_checksum` |
 | Write-order discipline (Phase 15a sub-step ordering) | SPEC-03 engine-enforced |
-| Attribution stamping (`<!-- added by CF-NNNN -->`, notes-field lines) | SPEC-03 engine auto-stamp |
+| Attribution stamping (`<!-- added by CF-NNNN -->`) | SPEC-03 engine auto-stamp where applicable; post-SPEC-13 CF retroactive-modification audit uses `modification_history[]` as the canonical structured surface, not mirrored `notes` prose |
 | Rule 1, 2, 4, 5, 6, 7 mechanical enforcement (Phase 14a Tests 1, 2, 3 mechanical, 4, 5, 6 mechanical, 7) | SPEC-04 validators (Rule 3 / Test 10 stays in-skill — see §What STAYS; archived `archive/specs/SPEC-04-validator-framework.md` §Risks "Rule 3 left unmechanized") |
 | Discovery-section canonical field names | SPEC-14 `record_schema_compliance` against the adjudication frontmatter schema (the legacy `adjudication_discovery_fields` validator is retired; PA records are now frontmatter+body hybrids) |
 | modification_history retrofit discipline | SPEC-04 `modification_history_retrofit` validator |
@@ -219,7 +219,7 @@ Notes: `Total canon-pipeline skill surface` row sums the 8 SKILL.md files only (
 | §Change Control Policy | Skills assemble patch plans; engine applies them — clean separation |
 | §Canonical Storage Layer | Skills route writes through engine ops on `_source/*.yaml` per SPEC-05 Part B Hook 3; reads via `get_record` / `get_context_packet` per Hook 2 redirection |
 | §Mandatory World Files (atomic-source classification) | Skills' world-state reads use atomic-record retrieval — no monolithic-markdown reads of retired files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, and the five large prose files) |
-| Rule 6 No Silent Retcons | Attribution stamping moves from skill-prose responsibility to engine-enforced; `modification_history_retrofit` validator catches unauthorized in-place CF mutations |
+| Rule 6 No Silent Retcons | Attribution comments move from skill-prose responsibility to engine-enforced where applicable; `modification_history[]` is the canonical structured audit surface for CF retroactive modifications, and the `modification_history_retrofit` validator catches historical notes-paragraph entries that lack matching structured history |
 | Rule 7 Preserve Mystery Deliberately | Mystery Reserve firewall judgment stays in skill (semantic); `rule7_mystery_reserve_preservation` validator catches mechanical violations |
 | HARD-GATE discipline | Gate remains at user-approval step; approval_token is the mechanism, not a replacement for the gate |
 

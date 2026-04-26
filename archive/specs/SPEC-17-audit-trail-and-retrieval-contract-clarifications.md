@@ -2,6 +2,7 @@
 
 # SPEC-17: Audit-Trail and Retrieval-Contract Clarifications
 
+**Status**: COMPLETED
 **Phase**: 2.7 (post-pilot retrieval refinements; independent of SPEC-09 canon-safety expansion)
 **Depends on**: SPEC-13 (Atomic-Source Migration, archived), SPEC-14 (PA Contract & Vocabulary Reconciliation, archived), SPEC-15 (Pilot Feedback Fixes, archived), SPEC-16 §C3 + §C5 (post-pilot retrieval refinements — must land first to make the §C2 contract softening ergonomic)
 **Blocks**: none
@@ -64,7 +65,7 @@ Two tracks, each with a documented A/B/C decision adopted by this spec. Either t
 
 The skill-creator CF template, the continuity-audit CF template, and the canon-addition references/ files are verified clean today; Track C1's Verification step revisits them as defense-in-depth.
 
-**`.claude/skills/create-base-world/templates/canon-fact-record.yaml`** — replace lines 97-118 (the `notes:` block instructing "append a standardized line: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ...`" plus the comment block over `modification_history: []` stating the notes-field line and the history entry are required together) with prose stating the post-SPEC-13 convention: free-form `notes:` continues to carry adjudication reasoning and scope-narrowing decisions; `modification_history[]` is the canonical structured audit surface for any future canon-addition run that modifies this CF; the engine's `append_modification_history_entry` op writes only to that field; future modifications do NOT also append a parallel notes paragraph. Cite this spec for the decision context. The forward-references to `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md` are stale (both files do not exist today) and should be removed in the same edit; the schema-uniformity claim those references supported is preserved by the deprecation prose itself.
+**`.claude/skills/create-base-world/templates/canon-fact-record.yaml`** — Track C1 replaced lines 97-118 (the `notes:` block instructing "append a standardized line: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ...`" plus the comment block over `modification_history: []` stating the notes-field line and the history entry are required together) with prose stating the post-SPEC-13 convention: free-form `notes:` continues to carry adjudication reasoning and scope-narrowing decisions; `modification_history[]` is the canonical structured audit surface for any future canon-addition run that modifies this CF; the engine's `append_modification_history_entry` op writes only to that field; future modifications do NOT also append a parallel notes paragraph. The removed forward-references to `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md` were historical references to deleted/absorbed SPEC-06 surfaces, not live implementation instructions; the schema-uniformity claim those references supported is preserved by the deprecation prose itself.
 
 **`.claude/skills/canon-addition/SKILL.md`** — add net-new prose explicitly stating `modification_history[]` is the canonical post-SPEC-13 audit surface, the engine's `append_modification_history_entry` op writes only to that field, and skills do NOT append a parallel notes paragraph. Land near the existing Phase 12a prose (which already references `modification_history` for the axis-(c) judgment) or under §Validation Rules This Skill Upholds → Rule 6 mechanism — implementer's choice; the prose must contain the literal phrase "`modification_history[]` is the canonical" so the post-apply grep can prove it landed. Cite this spec for the decision context. (No existing prescription needs replacing — verified clean by Step 3 grep.)
 
@@ -169,7 +170,7 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 
 - **Risk: Track C2 ships before SPEC-16 §C3 + §C5**. The FOUNDATIONS amendment cross-references `mcp__worldloom__get_record_field` (delivered by SPEC-16 §C3) and assumes auto-budget UX (SPEC-16 §C5) reduces friction enough to justify the prose softening. Mitigation: the implementation ticket for Track C2 includes an explicit pre-flight check (verify SPEC-16 archived; verify `get_record_field` registered) before applying the FOUNDATIONS edit. If SPEC-16 lands as planned, this risk does not materialize.
 - **Risk: Track C1 deprecation surprises a future skill author**. A future skill author authoring a new canon-mutating skill might re-invent the notes-paragraph convention by analogy to pre-SPEC-13 CFs. Mitigation: deprecation prose lands across **five surfaces** a skill author would naturally consult — the create-base-world CF template (where the prescription currently lives), canon-addition SKILL.md, the patch-engine README's new §Audit Trail Discipline section, the `append_modification_history_entry` op-file header comment, and the `modification_history_retrofit` validator file's header comment. Cross-coverage is defense-in-depth; the prescription is removed from the one surface that currently carries it and explicitly named-and-deprecated on four others.
-- **Risk: stale forward-references in `create-base-world/templates/canon-fact-record.yaml` (out of SPEC-17 Track C1 scope)**. The template forward-referenced `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md`, both of which do not exist (the canon-addition templates/ directory contains only `critic-prompt.md` and `critic-report-format.md`; there is no `accept-path.md` in canon-addition/references/). Track C1 removed these forward-references in `archive/tickets/SPEC17AUDTRARET-001.md`; the remaining spec-truthing / deleted-surface explanation is tracked by `tickets/SPEC17AUDTRARET-003.md`.
+- **Closed cleanup: stale forward-references in `create-base-world/templates/canon-fact-record.yaml`**. The template previously forward-referenced deleted canon-addition surfaces: `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md`. Live canon-addition templates now contain only `critic-prompt.md` and `critic-report-format.md`, and its references directory has no `accept-path.md`; those retired surfaces trace to the SPEC-06 atomic-source skill rewrite, which deleted or absorbed the old template/reference files. Track C1 removed the create-base-world forward-references in `archive/tickets/SPEC17AUDTRARET-001.md`; `archive/tickets/SPEC17AUDTRARET-003.md` completed the remaining active-spec truthing so no future implementer treats those deleted canon-addition files as live implementation surfaces.
 - **Risk: Track C2 prose softening reads as relaxation of FOUNDATIONS rigor**. The amendment preserves "non-negotiable" framing and adds a documented mechanism, not an exception. Mitigation: the cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md` keeps the operational details external; FOUNDATIONS prose stays principle-level.
 - **Open question: should `modification_history_retrofit` validator be removed eventually?** If pre-SPEC-13 CFs are eventually retroactively normalized (notes paragraphs deleted, leaving only `modification_history[]`), the one-way validator becomes unnecessary. Decision: keep the validator indefinitely as cheap defense-in-depth; removing it is YAGNI until a future cleanup spec needs the surface.
 - **Open question: ticket prefix.** Tickets under this spec take prefix `SPEC17AUDRET-NNN` (AUDit-trail and RETrieval-contract). Confirmed naming-convention-consistent with SPEC13ATOSRCMIG / SPEC14PAVOC / SPEC15PILFIX / SPEC16MCPRET.
@@ -180,17 +181,32 @@ Within SPEC-17 (full decomposition — two sub-tracks):
 
 1. **SPEC17AUDTRARET-001** — Track C1 (create-base-world CF-template replacement + canon-addition SKILL.md ADD prose + canon-addition references defense-in-depth verify + patch-engine README new §Audit Trail Discipline section + `append_modification_history_entry` op-file header comment + `modification_history_retrofit` validator file header comment + continuity-audit SKILL.md / retcon-proposal-card defense-in-depth verify + skill-creator and continuity-audit CF-template defense-in-depth verify). Completed and archived at `archive/tickets/SPEC17AUDTRARET-001.md`.
 2. **SPEC17AUDTRARET-002** — Track C2 (FOUNDATIONS §Tooling Recommendation prose softening + CONTEXT-PACKET-CONTRACT.md subsection + README cross-references + MACHINE-FACING-LAYER.md note). **Pre-flight check**: SPEC-16 §C3 + §C5 archival and `get_record_field` registration were verified before applying the FOUNDATIONS edit. Completed and archived at `archive/tickets/SPEC17AUDTRARET-002.md`.
+3. **SPEC17AUDTRARET-003** — Active-spec cleanup for the stale SPEC-06 notes-field row and the deleted canon-addition template/reference explanation. Completed and archived at `archive/tickets/SPEC17AUDTRARET-003.md`.
 
 SPEC-17 in total: ~0.5 session of effort, gated by SPEC-16's archival for Track C2.
 
 ## Outcome
 
-Implemented across the two SPEC-17 tickets:
+Completed: 2026-04-26.
+
+Implemented across the three SPEC-17 tickets:
 
 - `.claude/skills/create-base-world/templates/canon-fact-record.yaml` no longer prescribes the dual notes-paragraph + history-entry convention; `.claude/skills/canon-addition/SKILL.md` carries an explicit ADD-prose statement that `modification_history[]` is canonical; engine README + op-file header comment + validator file header comment carry the deprecation rationale inline.
 - `docs/FOUNDATIONS.md` §Tooling Recommendation explicitly endorses the documented context-packet + targeted-retrieval pattern, with cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md`.
 - `docs/CONTEXT-PACKET-CONTRACT.md` carries a §Index + Follow-Up Retrieval Pattern subsection.
 - A subsequent canon-addition run produces clean modification audit-trails without parallel notes paragraphs; the agent cites the documented retrieval pattern rather than apologizing for it.
 - All MCP retrieval-pipeline frictions surfaced by the 2026-04-26 PR-0015 pilot are resolved (SPEC-16 + SPEC-17 jointly).
+- `archive/tickets/SPEC17AUDTRARET-003.md` completed the active-spec cleanup for the stale SPEC-06 notes-field row and the deleted canon-addition template/reference explanation.
 
-`specs/IMPLEMENTATION-ORDER.md` is amended to record both C1 and C2 archived.
+Deviations from the original plan:
+
+- Track C1 stayed prose/comment-only and did not introduce engine, validator, schema, HARD-GATE, or world-content changes.
+- Track C2 waited for SPEC-16 §C3 + §C5 archival and `get_record_field` registration before landing the FOUNDATIONS wording change.
+- A third cleanup ticket, `archive/tickets/SPEC17AUDTRARET-003.md`, was added after post-review found stale active-spec references outside the two original implementation tickets.
+
+Verification results:
+
+- SPEC17AUDTRARET-001 positive/removal/defense-in-depth grep proofs passed, and `npm test` from `tools/validators` passed.
+- SPEC17AUDTRARET-002 verified SPEC-16 archival, `get_record_field` registration, and the FOUNDATIONS / CONTEXT-PACKET-CONTRACT / world-mcp / MACHINE-FACING-LAYER wording.
+- SPEC17AUDTRARET-003 verified `grep -n "notes-field lines" specs/SPEC-06-skill-rewrite-patterns.md` returned zero matches, SPEC-17 deleted-surface references were historical/explanatory only, and `git diff --check` passed.
+- `specs/IMPLEMENTATION-ORDER.md` is amended to record C1, C2, and the SPEC17AUDTRARET-003 cleanup archived.
