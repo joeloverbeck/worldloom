@@ -23,7 +23,10 @@ export interface SearchNodesArgs {
   query: string;
   filters?: SearchNodeFilters;
   ranking_profile?: RankingWeights;
+  exhaustive?: boolean;
 }
+
+export type SearchNodeMatchLocation = "body" | "heading_path" | "summary";
 
 export interface SearchNodeResult {
   id: string;
@@ -38,6 +41,7 @@ export interface SearchNodeResult {
     | "structured_record_edge"
     | "scoped_reference"
     | "lexical_evidence";
+  match_locations?: SearchNodeMatchLocation[];
 }
 
 export interface SearchNodesResponse {

@@ -74,7 +74,8 @@ const searchNodesInputSchema = z.object({
       entity_name: z.string().min(1).optional()
     })
     .optional(),
-  ranking_profile: z.record(z.string(), z.number()).optional()
+  ranking_profile: z.record(z.string(), z.number()).optional(),
+  exhaustive: z.boolean().optional()
 });
 
 const getNodeInputSchema = z.object({

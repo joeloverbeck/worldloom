@@ -114,7 +114,7 @@ const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
 **`tools/world-mcp/src/tools/_shared.ts`** — extend `SearchNodesArgs` with optional `exhaustive?: boolean` (default `false`).
 
 **`tools/world-mcp/src/tools/search-nodes.ts`** — when `exhaustive === true`:
-- Skip the `.slice(0, 20)` cap at line 370
+- Skip the `.slice(0, 20)` cap in the final `rankSearchRows(...).slice(0, 20)` default-mode result path
 - Replace the ranking-profile sort with a deterministic node-id sort
 - For each returned `SearchNodeResult`, populate a new `match_locations: ('body' | 'heading_path' | 'summary')[]` field by checking which source columns satisfied the lexical match. The `fts_nodes` virtual table indexes all three of `body`, `heading_path`, and `summary` (`tools/world-index/src/schema/migrations/001_initial.sql:88-95`); the per-row attribution can be computed by re-checking the `query` against each column post-fetch.
 

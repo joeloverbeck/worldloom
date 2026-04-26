@@ -52,6 +52,72 @@ test("searchNodes keeps an exact node id hit at the top and truncates to twenty 
   }
 });
 
+test("searchNodes exhaustive mode returns all matches sorted by node id with match locations", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const nodes = Array.from({ length: 22 }, (_, index) => ({
+      node_id: `SEED-${String(index + 1).padStart(4, "0")}`,
+      world_slug: "seeded",
+      file_path: "CANON_LEDGER.md",
+      heading_path: index === 4 ? "Needle civic heading" : null,
+      node_type: "canon_fact_record" as const,
+      body: index === 9 ? "Neutral body text." : `Needle body mention ${index + 1}.`,
+      summary: index === 9 ? "Needle summary only." : null
+    }));
+
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes
+    });
+
+    const result = await withRepoRoot(root, () =>
+      searchNodes({ query: "Needle", filters: { world_slug: "seeded" }, exhaustive: true })
+    );
+
+    assert.ok("nodes" in result);
+    assert.equal(result.nodes.length, 22);
+    assert.deepEqual(
+      result.nodes.map((node) => node.id),
+      nodes.map((node) => node.node_id).sort((left, right) => left.localeCompare(right))
+    );
+    assert.equal(result.nodes[4]?.id, "SEED-0005");
+    assert.deepEqual(result.nodes[4]?.match_locations, ["body", "heading_path"]);
+    assert.equal(result.nodes[9]?.id, "SEED-0010");
+    assert.deepEqual(result.nodes[9]?.match_locations, ["summary"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("searchNodes exhaustive mode returns an empty result for no matches", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "CANON_LEDGER.md",
+          node_type: "canon_fact_record",
+          body: "Brinewick canon fact"
+        }
+      ]
+    });
+
+    const result = await withRepoRoot(root, () =>
+      searchNodes({ query: "Needle", filters: { world_slug: "seeded" }, exhaustive: true })
+    );
+
+    assert.ok("nodes" in result);
+    assert.deepEqual(result.nodes, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("searchNodes honors a node_type filter", async () => {
   const root = createTempRepoRoot();
 

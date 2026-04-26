@@ -6,6 +6,7 @@ import {
   listIndexedWorldSlugs,
   makeBodyPreview,
   rankSearchRows,
+  type SearchNodeMatchLocation,
   type SearchNodeResult,
   type SearchNodesArgs,
   type SearchNodesResponse,
@@ -101,6 +102,53 @@ function buildSignalParams(query: string, entityName: string, referenceName: str
 
 function includeScopedReferenceNodes(args: SearchNodesArgs): boolean {
   return args.filters?.node_type === "scoped_reference";
+}
+
+function computeMatchLocations(query: string, row: SearchRow): SearchNodeMatchLocation[] {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  if (normalizedQuery.length === 0) {
+    return [];
+  }
+
+  const locations: SearchNodeMatchLocation[] = [];
+  const fields: Array<[SearchNodeMatchLocation, string | null]> = [
+    ["body", row.body],
+    ["heading_path", row.heading_path],
+    ["summary", row.summary]
+  ];
+
+  for (const [location, value] of fields) {
+    if (value !== null && value.toLocaleLowerCase().includes(normalizedQuery)) {
+      locations.push(location);
+    }
+  }
+
+  return locations;
+}
+
+function toSearchNodeResult(
+  row: SearchRow,
+  options: { matchLocations?: SearchNodeMatchLocation[] } = {}
+): SearchNodeResult {
+  return {
+    id: row.node_id,
+    world_slug: row.world_slug,
+    node_type: row.node_type,
+    heading_path: row.heading_path,
+    summary: row.summary ?? null,
+    body_preview: makeBodyPreview(row.body),
+    match_basis:
+      row.exact_id_match === 1
+        ? "exact_id"
+        : row.exact_entity_match_in_target_field === 1
+          ? "canonical_entity"
+          : row.exact_structured_record_edge_match === 1
+            ? "structured_record_edge"
+            : row.exact_scoped_reference_match === 1
+              ? "scoped_reference"
+              : "lexical_evidence",
+    ...(options.matchLocations !== undefined ? { match_locations: options.matchLocations } : {})
+  };
 }
 
 function loadFilteredRows(
@@ -285,6 +333,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
               lower(n.node_id) = lower(?)
               OR lower(n.body) LIKE ?
               OR lower(COALESCE(n.heading_path, '')) LIKE ?
+              OR lower(COALESCE(n.summary, '')) LIKE ?
           )
         `
       )
@@ -294,6 +343,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
         ...filterNodeIds,
         allowScopedReferenceNodes ? 1 : 0,
         args.query.trim(),
+        likeQuery,
         likeQuery,
         likeQuery
       ) as SearchRow[];
@@ -367,25 +417,17 @@ export async function searchNodes(args: SearchNodesArgs): Promise<SearchNodesRes
     rows.push(...worldRows);
   }
 
+  if (args.exhaustive === true) {
+    const exhaustiveRows = rows.sort((left, right) => left.node_id.localeCompare(right.node_id));
+    const nodes: SearchNodeResult[] = exhaustiveRows.map((row) =>
+      toSearchNodeResult(row, { matchLocations: computeMatchLocations(args.query, row) })
+    );
+
+    return { nodes };
+  }
+
   const rankedRows = rankSearchRows(rows, { query: args.query }, args.ranking_profile).slice(0, 20);
-  const nodes: SearchNodeResult[] = rankedRows.map((row) => ({
-    id: row.node_id,
-    world_slug: row.world_slug,
-    node_type: row.node_type,
-    heading_path: row.heading_path,
-    summary: row.summary ?? null,
-    body_preview: makeBodyPreview(row.body),
-    match_basis:
-      row.exact_id_match === 1
-        ? "exact_id"
-        : row.exact_entity_match_in_target_field === 1
-          ? "canonical_entity"
-          : row.exact_structured_record_edge_match === 1
-            ? "structured_record_edge"
-            : row.exact_scoped_reference_match === 1
-              ? "scoped_reference"
-              : "lexical_evidence"
-  }));
+  const nodes: SearchNodeResult[] = rankedRows.map((row) => toSearchNodeResult(row));
 
   return { nodes };
 }

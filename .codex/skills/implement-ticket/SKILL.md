@@ -33,7 +33,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
 - Keep a compact dirty-worktree ledger while working: `pre-existing unrelated`, `pre-existing same-seam`, `owned edits`, and `new/untracked owned files`. Refresh it before final response so untracked ticket/code files are not silently omitted.
-- For package/tool tickets, remember that common generated artifacts such as `node_modules/`, `dist/`, coverage output, caches, and compiled test output are often gitignored. After package-manager, build, test, formatter, generator, or codegen commands, run an ignored-aware targeted check for the affected package directories and classify ignored artifacts as `expected generated ignored artifacts`, `cleaned state`, or `unexpected fallout` in the ledger. Do not rely on `git status --short` alone for this class of side effect.
+- For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks. Before the first package command likely to create ignored artifacts, and again before final response, run an ignored-aware targeted status check for the affected package directory and classify the before/after ignored state in the ledger.
 - If dirty paths overlap the ticket's seam, inspect the live diffs before coding and classify them as unrelated local edits, partial implementation of the active ticket, or in-flight sibling-ticket work.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - For world-content writes, keep the write surface explicit:
@@ -47,8 +47,6 @@ Use this as the default path, then apply the detailed rules below when the ticke
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
 - In Codex, do not use `multi_tool_use.parallel` for build-then-test, generate-then-verify, or similar producer/consumer lanes; wait for the producer command to finish before launching dependent commands.
-- For local sibling package or `file:` dependency proof, use `references/package-tooling.md` for the dependency-refresh and installed-artifact checks; do not assume a consumer is exercising a changed producer until that reference's checks pass.
-- After any final producer-package edit in a local sibling `workspace` or `file:` dependency seam, re-check the consumer's installed dependency view before closeout. Record whether the consumer resolves a symlink or copied install, and verify the consumer-resolved runtime or declaration artifact contains the changed surface before trusting consumer proof.
 - Prefer the strongest truthful verification surface available for the ticket's owned invariant.
 - Update the ticket itself when reassessment changes scope, ownership, commands, or acceptance text.
 - Archive only when the user explicitly asks for full ticket completion or archival.
@@ -72,9 +70,9 @@ Use the classification to choose which repo surfaces must be read and which veri
 
 If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
 
-If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks.
+If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks. Keep specialized package behavior in that reference instead of expanding the top-level workflow.
 
-For package/tool tickets, do a compact package checkpoint before coding: inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
+For package/tool tickets, do a compact package checkpoint before coding: inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
 
 If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, or live-corpus validator baseline, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
 

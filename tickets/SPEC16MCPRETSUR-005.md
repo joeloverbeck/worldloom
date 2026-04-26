@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — updates `tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and `.claude/skills/canon-addition/references/retrieval-tool-tree.md` to document the four new MCP retrieval surfaces. No code change.
-**Deps**: archive/tickets/SPEC16MCPRETSUR-001.md, archive/tickets/SPEC16MCPRETSUR-002.md, archive/tickets/SPEC16MCPRETSUR-003.md, SPEC16MCPRETSUR-004
+**Deps**: archive/tickets/SPEC16MCPRETSUR-001.md, archive/tickets/SPEC16MCPRETSUR-002.md, archive/tickets/SPEC16MCPRETSUR-003.md, archive/tickets/SPEC16MCPRETSUR-004.md
 
 ## Problem
 

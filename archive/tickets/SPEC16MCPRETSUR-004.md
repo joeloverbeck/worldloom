@@ -1,6 +1,6 @@
 # SPEC16MCPRETSUR-004: `search_nodes` exhaustive mode
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `search_nodes` MCP tool with `exhaustive: boolean` parameter and a new `match_locations[]` response field. No new tool added; existing default behavior preserved.
@@ -12,11 +12,12 @@
 
 ## Assumption Reassessment (2026-04-26)
 
-1. The 20-result cap is at `tools/world-mcp/src/tools/search-nodes.ts:370`: `rankSearchRows(rows, { query: args.query }, args.ranking_profile).slice(0, 20)`. Confirmed. Skipping the cap when `exhaustive === true` is a one-line conditional.
-2. `SearchNodesArgs` lives in `tools/world-mcp/src/tools/_shared.ts:22`. Confirmed — the optional `exhaustive?: boolean` field is added there. The Zod input schema in `tools/world-mcp/src/server.ts:65` (`searchNodesInputSchema`) also needs the `exhaustive` field added. Same-package server contract tests in `tools/world-mcp/tests/server/dispatch.test.ts` and any input-schema fixtures for `search_nodes` may need updates if they assert the schema's accepted-fields surface; existing default-mode assertions must continue to pass since `exhaustive` defaults to `false`.
+1. The 20-result cap is at `tools/world-mcp/src/tools/search-nodes.ts:429`: `rankSearchRows(rows, { query: args.query }, args.ranking_profile).slice(0, 20)`. Confirmed. The exhaustive branch now bypasses that cap at `tools/world-mcp/src/tools/search-nodes.ts:420-427`.
+2. `SearchNodesArgs` lives in `tools/world-mcp/src/tools/_shared.ts:22-27`. Confirmed — the optional `exhaustive?: boolean` field is added there. The Zod input schema in `tools/world-mcp/src/server.ts:67-79` (`searchNodesInputSchema`) also has the `exhaustive` field. Same-package server contract tests in `tools/world-mcp/tests/server/dispatch.test.ts` passed; existing default-mode assertions continue to pass since `exhaustive` defaults to `false`.
 3. The `fts_nodes` virtual table indexes three columns: `body`, `heading_path`, AND `summary` (`tools/world-index/src/schema/migrations/001_initial.sql:88-95`). The 2026-04-26 reassessment Issue I2 caught this — `match_locations` MUST enumerate all three. A `summary`-only match would otherwise return an empty `match_locations` array, losing the per-row attribution that exhaustive mode is designed to provide.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) motivates this ticket. Rule 6 reads: "All canon changes must be logged with justification." Exhaustive lexical scan is the surface a Rule-6 pre-figuring audit-trail check needs — confirming absence of a name across all prose bodies before claiming the new CF introduces it. The current `search_nodes` ranking + 20-cap is suited to "find the most relevant," not "confirm absence."
 5. Schema extension: extends `SearchNodesArgs` (additive — new optional `exhaustive?: boolean` defaulting to `false`) and `SearchNodeResult` (additive — new optional `match_locations?: ('body' | 'heading_path' | 'summary')[]` populated only when `exhaustive === true`). Existing consumers continue to work unchanged.
+6. Reassessment classified this as a `tool or script implementation` ticket with an index-backed `world-mcp` retrieval surface. The active Codex session does not expose an external `mcp__worldloom__search_nodes` tool, so the manual smoke is recorded as a built-handler package-local substitute after `npm test` builds `dist/`. SPEC16MCPRETSUR-005 owns package README, MACHINE-FACING-LAYER, and canon-addition retrieval-tree documentation for the new surface; those docs are intentionally left untouched here.
 
 ## Architecture Check
 
@@ -40,7 +41,7 @@
 
 ### 1. Extend `SearchNodesArgs`
 
-`tools/world-mcp/src/tools/_shared.ts:22-26` — add `exhaustive?: boolean` to the interface:
+`tools/world-mcp/src/tools/_shared.ts:22-27` — add `exhaustive?: boolean` to the interface:
 
 ```ts
 export interface SearchNodesArgs {
@@ -53,15 +54,15 @@ export interface SearchNodesArgs {
 
 ### 2. Extend `SearchNodeResult`
 
-`tools/world-mcp/src/tools/_shared.ts:28-41` — add `match_locations?: ('body' | 'heading_path' | 'summary')[]` to the interface; populated only when the query was made with `exhaustive: true`.
+`tools/world-mcp/src/tools/_shared.ts:29-44` — add `match_locations?: ('body' | 'heading_path' | 'summary')[]` to the interface; populated only when the query was made with `exhaustive: true`.
 
 ### 3. Update Zod input schema
 
-`tools/world-mcp/src/server.ts:65` — add `exhaustive: z.boolean().optional()` to `searchNodesInputSchema`.
+`tools/world-mcp/src/server.ts:67-79` — add `exhaustive: z.boolean().optional()` to `searchNodesInputSchema`.
 
 ### 4. Modify `search_nodes` to honor `exhaustive`
 
-`tools/world-mcp/src/tools/search-nodes.ts:370` — branch on `args.exhaustive`:
+`tools/world-mcp/src/tools/search-nodes.ts:420-429` — branch on `args.exhaustive`:
 - When `args.exhaustive === true`:
   - Skip the `.slice(0, 20)` cap.
   - Replace the ranking-profile sort with a deterministic node-id sort (`rows.sort((a, b) => a.node_id.localeCompare(b.node_id))`).
@@ -81,7 +82,7 @@ Add cases (extend the existing test file if one exists; create if not):
 
 - `tools/world-mcp/src/tools/_shared.ts` (modify — `SearchNodesArgs` + `SearchNodeResult`)
 - `tools/world-mcp/src/server.ts` (modify — `searchNodesInputSchema`)
-- `tools/world-mcp/src/tools/search-nodes.ts` (modify — branch on `exhaustive` at line 370 area; compute `match_locations`)
+- `tools/world-mcp/src/tools/search-nodes.ts` (modify — branch on `exhaustive` at line 420 area; compute `match_locations`)
 - `tools/world-mcp/tests/tools/search-nodes.test.ts` (modify or create)
 
 ## Out of Scope
@@ -94,7 +95,7 @@ Add cases (extend the existing test file if one exists; create if not):
 ### Tests That Must Pass
 
 1. `cd tools/world-mcp && npm test` passes after the new test cases land.
-2. Manual smoke: invoke `mcp__worldloom__search_nodes(query='corner-share', exhaustive=true, filters={world_slug: 'animalia'})`; response includes prose-body matches in DA-0001 (or wherever 'corner-share' appears) with `match_locations` populated; total result count exceeds 20 if the corpus has more than 20 mentions.
+2. Package-local built-handler smoke after `cd tools/world-mcp && npm run build`: invoke `searchNodes({ query: 'corner-share', exhaustive: true, filters: { world_slug: 'animalia' } })`; response includes prose-body matches with `match_locations` populated. Current animalia result count is 11, so the live corpus does not exercise the >20 uncapping branch; the seeded unit test does.
 3. Default-mode invocation `search_nodes(query='X')` without `exhaustive` returns existing capped/ranked behavior.
 
 ### Invariants
@@ -112,4 +113,29 @@ Add cases (extend the existing test file if one exists; create if not):
 ### Commands
 
 1. `cd tools/world-mcp && npm test` — full package test suite.
-2. Smoke invocation through MCP after `cd tools/world-mcp && npm run build`.
+2. Built-handler smoke after `cd tools/world-mcp && npm run build`: `node -e "const { searchNodes } = require('./dist/src/tools/search-nodes.js'); searchNodes({ query: 'corner-share', exhaustive: true, filters: { world_slug: 'animalia' } }).then((result) => { if (!('nodes' in result)) { console.error(JSON.stringify(result)); process.exit(1); } console.log(JSON.stringify({ count: result.nodes.length, first: result.nodes[0], locations: [...new Set(result.nodes.flatMap((node) => node.match_locations || []))].sort() }, null, 2)); }).catch((error) => { console.error(error); process.exit(1); });"`
+
+## Outcome
+
+Completed on 2026-04-26.
+
+Implemented `search_nodes` exhaustive mode in `tools/world-mcp`:
+
+1. `SearchNodesArgs` now accepts optional `exhaustive?: boolean`; `SearchNodeResult` now accepts optional `match_locations?: ('body' | 'heading_path' | 'summary')[]`.
+2. The MCP server input schema accepts `exhaustive`.
+3. `searchNodes({ exhaustive: true })` now returns all rows without the 20-result cap, sorts by `node_id`, and emits per-row `match_locations`.
+4. Default mode still uses the existing ranked/capped path and does not emit `match_locations`.
+5. The fallback lexical query now includes `summary`, matching the three-column `fts_nodes` contract.
+6. `tools/world-mcp/tests/tools/search-nodes.test.ts` now covers default cap preservation, exhaustive >20 uncapping, deterministic ordering, body/heading/summary match attribution, and empty exhaustive results.
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm test` — passed. The run built the package and reported `pass 137`, `fail 0`.
+2. Built-handler smoke from `tools/world-mcp` after the package build — passed. `searchNodes({ query: 'corner-share', exhaustive: true, filters: { world_slug: 'animalia' } })` returned 11 nodes; the first result was `BATCH-0003`, and observed `match_locations` included `body` and `heading_path`.
+3. FOUNDATIONS Rule 6 alignment checked against `docs/FOUNDATIONS.md`: exhaustive lexical presence/absence scanning supports the "All canon changes must be logged with justification" audit trail without changing write-path discipline.
+
+## Deviations
+
+1. External `mcp__worldloom__search_nodes` invocation was unavailable in this Codex session, so the manual smoke used the compiled package handler directly. This proves the same handler behavior but does not claim external transport coverage.
+2. The current animalia corpus has 11 `corner-share` matches, not more than 20. The >20 uncapping invariant is therefore proven by the seeded unit test, not by the live-world smoke.
+3. SPEC16MCPRETSUR-005 owns user-facing documentation updates for `tools/world-mcp/README.md`, `docs/MACHINE-FACING-LAYER.md`, and `.claude/skills/canon-addition/references/retrieval-tool-tree.md`; those files were not edited by this implementation ticket.
