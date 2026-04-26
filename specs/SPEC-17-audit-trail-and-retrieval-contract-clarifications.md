@@ -149,7 +149,7 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 ### Track C2
 
 - **SPEC-16 prerequisite check**: confirm `archive/specs/SPEC-16-mcp-retrieval-surface-refinements.md` exists (SPEC-16 archived) AND `mcp__worldloom__get_record_field` is registered in `tools/world-mcp/src/tool-names.ts`. If either check fails, defer the Track C2 ticket.
-- `grep -A3 "should always receive" docs/FOUNDATIONS.md` returns the amended prose including the "or via the documented context-packet + targeted-retrieval pattern" clause.
+- `grep -nE "should always receive .*documented context-packet \+ targeted-retrieval pattern|mcp__worldloom__get_record_field" docs/FOUNDATIONS.md` returns the amended receive clause and the `mcp__worldloom__get_record_field` reference.
 - `docs/CONTEXT-PACKET-CONTRACT.md` contains the new §Index + Follow-Up Retrieval Pattern subsection.
 - `tools/world-mcp/README.md` includes the cross-reference under `get_context_packet`.
 - `docs/MACHINE-FACING-LAYER.md` includes the "Recommended composition" note.
@@ -179,13 +179,13 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 Within SPEC-17 (full decomposition — two sub-tracks):
 
 1. **SPEC17AUDTRARET-001** — Track C1 (create-base-world CF-template replacement + canon-addition SKILL.md ADD prose + canon-addition references defense-in-depth verify + patch-engine README new §Audit Trail Discipline section + `append_modification_history_entry` op-file header comment + `modification_history_retrofit` validator file header comment + continuity-audit SKILL.md / retcon-proposal-card defense-in-depth verify + skill-creator and continuity-audit CF-template defense-in-depth verify). Completed and archived at `archive/tickets/SPEC17AUDTRARET-001.md`.
-2. **SPEC17AUDRET-002** — Track C2 (FOUNDATIONS §Tooling Recommendation prose softening + CONTEXT-PACKET-CONTRACT.md subsection + README cross-references + MACHINE-FACING-LAYER.md note). **Pre-flight check**: verify SPEC-16 §C3 + §C5 archived before applying FOUNDATIONS edit. Estimated: 0.25 session.
+2. **SPEC17AUDTRARET-002** — Track C2 (FOUNDATIONS §Tooling Recommendation prose softening + CONTEXT-PACKET-CONTRACT.md subsection + README cross-references + MACHINE-FACING-LAYER.md note). **Pre-flight check**: SPEC-16 §C3 + §C5 archival and `get_record_field` registration were verified before applying the FOUNDATIONS edit. Completed and archived at `archive/tickets/SPEC17AUDTRARET-002.md`.
 
 SPEC-17 in total: ~0.5 session of effort, gated by SPEC-16's archival for Track C2.
 
 ## Outcome
 
-To be recorded after the two tickets complete. Expected post-completion state:
+Implemented across the two SPEC-17 tickets:
 
 - `.claude/skills/create-base-world/templates/canon-fact-record.yaml` no longer prescribes the dual notes-paragraph + history-entry convention; `.claude/skills/canon-addition/SKILL.md` carries an explicit ADD-prose statement that `modification_history[]` is canonical; engine README + op-file header comment + validator file header comment carry the deprecation rationale inline.
 - `docs/FOUNDATIONS.md` §Tooling Recommendation explicitly endorses the documented context-packet + targeted-retrieval pattern, with cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md`.
@@ -193,4 +193,4 @@ To be recorded after the two tickets complete. Expected post-completion state:
 - A subsequent canon-addition run produces clean modification audit-trails without parallel notes paragraphs; the agent cites the documented retrieval pattern rather than apologizing for it.
 - All MCP retrieval-pipeline frictions surfaced by the 2026-04-26 PR-0015 pilot are resolved (SPEC-16 + SPEC-17 jointly).
 
-`specs/IMPLEMENTATION-ORDER.md` is amended to reference the archived spec and tickets at completion.
+`specs/IMPLEMENTATION-ORDER.md` is amended to record both C1 and C2 archived.

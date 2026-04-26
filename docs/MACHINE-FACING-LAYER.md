@@ -70,6 +70,8 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
 | `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. It does not scan prose bodies; pair with `search_nodes(exhaustive: true)` for lexical-only Rule 6 evidence. |
 
+**Recommended composition**: packet first (locality survey via `get_context_packet`), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites. See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
+
 ## Trust tiers
 
 Retrieval now distinguishes four trust tiers instead of flattening everything into either canonical entities or lexical hits:

@@ -52,7 +52,7 @@ Update `specs/SPEC-17-audit-trail-and-retrieval-contract-clarifications.md` to r
 - Any change to `.claude/skills/canon-addition/`, `.claude/skills/create-base-world/`, `tools/patch-engine/`, or `tools/validators/`.
 - Any change to `docs/FOUNDATIONS.md` or the CF Record schema.
 - Backfilling, removing, or rewriting historical world `_source/canon/*.yaml` notes paragraphs.
-- Track C2 retrieval-contract work, owned by `tickets/SPEC17AUDTRARET-002.md`.
+- Track C2 retrieval-contract work, completed and archived at `archive/tickets/SPEC17AUDTRARET-002.md`.
 
 ## Acceptance Criteria
 

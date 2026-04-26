@@ -427,7 +427,7 @@ No change is complete until downstream files are updated.
 
 LLM agents should never operate on prose alone.
 
-They should always receive:
+They should always receive — directly or via the documented context-packet + targeted-retrieval pattern —:
 - current World Kernel
 - current Invariants
 - relevant canon fact records
@@ -435,7 +435,7 @@ They should always receive:
 - unresolved contradictions list
 - mystery reserve entries touching the same domain
 
-This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_packet`) is the machine-facing mechanism for delivering this set with completeness guarantees, but those guarantees only hold when the underlying authoring surfaces are explicit and truthful as well (for example: canonical entity declarations and scoped-reference blocks on authority-bearing records); raw file reads alone cannot enforce the contract.
+This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_packet`) is the machine-facing mechanism for delivering this set with completeness guarantees, complemented by targeted per-record retrieval (`mcp__worldloom__get_record`, `mcp__worldloom__get_record_field`) for full bodies of the load-bearing nodes the packet identifies; see [docs/CONTEXT-PACKET-CONTRACT.md](/home/joeloverbeck/projects/worldloom/docs/CONTEXT-PACKET-CONTRACT.md) for the documented pattern, but those guarantees only hold when the underlying authoring surfaces are explicit and truthful as well (for example: canonical entity declarations and scoped-reference blocks on authority-bearing records); raw file reads alone cannot enforce the contract.
 
 ---
 
