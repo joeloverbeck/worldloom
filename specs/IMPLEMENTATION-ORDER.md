@@ -1,12 +1,12 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
-This document sequences the active spec bundle (`SPEC-01` through `SPEC-14`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by archived `SPEC-13` and archived `SPEC-14`.
+This document sequences the active spec bundle (`SPEC-01` through `SPEC-17`) for implementation. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by archived `SPEC-13` and archived `SPEC-14`.
 
 ## Design read order (for reviewers)
 
-`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-13` → `SPEC-03` → `SPEC-04` → `SPEC-14` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09`
+`SPEC-01` → `SPEC-10` → `SPEC-11` → `SPEC-02` → `SPEC-12` → `SPEC-13` → `SPEC-03` → `SPEC-04` → `SPEC-14` → `SPEC-05` → `SPEC-06` → `SPEC-07` → `SPEC-08` → `SPEC-09` → `SPEC-15` → `SPEC-16` → `SPEC-17`
 
-This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then the **atomic-source migration** that moves canonical storage from monolithic markdown to per-record YAML (SPEC-13 — foundational for understanding how SPEC-03/04/05/06 now operate), then write surface (engine + validators, both reoriented to atomic records), then **PA contract & vocabulary reconciliation** (SPEC-14 — supersedes parts of archived SPEC-03 and SPEC-04 to align engine emission, validator parsing, and canonical vocabulary surfacing into a single contract), then enforcement (hooks, reoriented to `_source/` discipline), then consumption (skill rewrites against atomic records), then contract updates (docs), then sequencing (migration plan, amended by SPEC-13 and SPEC-14). SPEC-09 is read last as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc.
+This order builds conceptual understanding for the structure-aware retrieval bundle: foundation (index), then the entity-surface remediation that corrects the index's precision model, then the authority-surface remediation that makes canonical-entity completeness explicit and machine-readable, then the read surface (MCP), then the retrieval-reliability remediation that adds scoped references, structured cross-record locality, and packet-completeness discipline for downstream skills, then the **atomic-source migration** that moves canonical storage from monolithic markdown to per-record YAML (SPEC-13 — foundational for understanding how SPEC-03/04/05/06 now operate), then write surface (engine + validators, both reoriented to atomic records), then **PA contract & vocabulary reconciliation** (SPEC-14 — supersedes parts of archived SPEC-03 and SPEC-04 to align engine emission, validator parsing, and canonical vocabulary surfacing into a single contract), then enforcement (hooks, reoriented to `_source/` discipline), then consumption (skill rewrites against atomic records), then contract updates (docs), then sequencing (migration plan, amended by SPEC-13 and SPEC-14). SPEC-09 is read after the main retrieval bundle as an independent canon-safety expansion that depends on the bundle's validator framework and canon-addition rewrite but is not part of the retrieval bundle's architectural arc. SPEC-15, SPEC-16, and SPEC-17 are read last as the **post-pilot refinement track** surfaced by the 2026-04-26 first-live canon-addition run: SPEC-15 covers the immediately-actionable validator + documentation fixes (archived); SPEC-16 covers additive MCP retrieval-surface refinements (field-slice retrieval, schema discovery, auto-budget UX, exhaustive lexical scan); SPEC-17 covers the contract-level audit-trail and retrieval-contract clarifications (deprecating the notes-paragraph convention; softening FOUNDATIONS §Tooling Recommendation prose to endorse the index + follow-up-retrieval pattern). SPEC-17 §C2 depends on SPEC-16 §C3 + §C5 landing first.
 
 ## Implementation order (for builders)
 
@@ -187,6 +187,28 @@ Independent post-pilot fix track, surfaced by the 2026-04-26 first-live canon-ad
 - A subsequent canon-addition run uses `append_extension` ops successfully (validator returns clean) and references the retrieval-tool decision tree at the appropriate phases
 - SPEC-15 is archived at `archive/specs/SPEC-15-pilot-feedback-fixes.md`; SPEC15PILFIX-001 and SPEC15PILFIX-002 are both archived
 
+### Phase 2.7 — Post-Pilot Retrieval Refinements (SPEC-16, SPEC-17)
+
+Independent post-pilot refinement track, surfaced by the 2026-04-26 first-live canon-addition run (animalia PR-0015) alongside SPEC-15. SPEC-15 (archived) covered the immediately-actionable validator + documentation fixes; SPEC-16 + SPEC-17 cover the contract-decision and additive-MCP-tooling items that required a separate design pass before ticketing. Lands during or after Phase 2.5; not a blocker for any other phase.
+
+**Scope** (full decomposition):
+- **SPEC-16** MCP retrieval-surface refinements — four additive sub-tracks (`get_record_field` slice tool; `get_record_schema` discovery tool; per-task-type packet defaults + retry-hint error response; `search_nodes` exhaustive mode). All additive; no FOUNDATIONS amendments; no engine or validator changes.
+- **SPEC-17** Audit-trail and retrieval-contract clarifications — two sub-tracks. Track C1 deprecates the pre-SPEC-13 notes-paragraph CF-modification convention in favor of `modification_history[]` as the canonical audit surface (no FOUNDATIONS amendment; SKILL.md + engine/validator README clarifications only). Track C2 amends FOUNDATIONS.md §Tooling Recommendation to explicitly endorse the documented context-packet + targeted-retrieval pattern, conditional on SPEC-16 §C3 + §C5 landing first.
+
+**Parallelizable order**:
+
+**Tier 1 (independent of any other Phase 2.x work; Phase 2.5 may land in parallel)**:
+- `SPEC-16` four sub-tracks parallelizable internally (C3 / C4 / C5 / C6); recommended sub-order if serialized is C5 (smallest, smoothes pilot UX) → C3 + C4 (additive tools) → C6 (largest test surface).
+- `SPEC-17` Track C1 (notes-paragraph deprecation) — independent of SPEC-16; may land alongside.
+
+**Tier 2 (depends on Tier 1 SPEC-16 §C3 + §C5)**:
+- `SPEC-17` Track C2 (FOUNDATIONS prose softening) — pre-flight check verifies SPEC-16 archival before applying the FOUNDATIONS edit.
+
+**Phase 2.7 completion gate**:
+- All four SPEC-16 sub-tracks land with passing `cd tools/world-mcp && npm test` and updated `tools/world-mcp/README.md` documentation.
+- Both SPEC-17 sub-tracks land: `.claude/skills/canon-addition/SKILL.md` no longer prescribes the notes-paragraph convention; `docs/FOUNDATIONS.md` §Tooling Recommendation carries the index + follow-up-pattern endorsement; `docs/CONTEXT-PACKET-CONTRACT.md` carries the new §Index + Follow-Up Retrieval Pattern subsection.
+- A subsequent canon-addition run uses at least one of SPEC-16's new surfaces successfully (informal pilot evidence; not a gating criterion).
+
 ### Phase 3 — SUPERSEDED by Phase 1.5 (SPEC-13)
 
 Previously: "Atomic Source for CF/CH Records" — deferred, optional, conditional on Phase 2 stability. **Superseded** by SPEC-13 Atomic-Source Migration, which pulls CF/CH atomization plus the full 11-file atomization forward into Phase 1.5 ahead of Phase 2. Phase 3 slot is retired.
@@ -264,6 +286,23 @@ Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 
   ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
   └── docs/WORKFLOWS.md pointer
 
+Phase 2.6 (Pilot Feedback Fixes, SPEC-15) ← COMPLETE; archived
+  │
+  ├── Track A: rule5_no_consequence_evasion + append_extension recognition
+  └── Track B: pre_figured_by / find_named_entities / retrieval-tool-tree documentation
+
+Phase 2.7 (Post-Pilot Retrieval Refinements, SPEC-16 + SPEC-17) — independent post-pilot track
+  │
+  ├── SPEC-16 MCP retrieval-surface refinements (additive, parallelizable)
+  │     ├── C3: get_record_field slice tool
+  │     ├── C4: get_record_schema discovery tool
+  │     ├── C5: per-task-type packet defaults + retry_with error surface
+  │     └── C6: search_nodes exhaustive mode
+  │
+  └── SPEC-17 Audit-trail and retrieval-contract clarifications
+        ├── C1: deprecate notes-paragraph convention (independent of SPEC-16)
+        └── C2: FOUNDATIONS §Tooling Recommendation softening (depends on SPEC-16 C3 + C5)
+
 Phase 3 (old: Optional Atomic Source for CF/CH) ← SUPERSEDED by Phase 1.5 (SPEC-13)
 Phase 4 (old: High-Churn Prose Fragmentization) ← SUPERSEDED by Phase 1.5 (SPEC-13)
 ```
@@ -299,6 +338,10 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-07 Part B: 0.5 session
   - Animalia re-validation + cleanup: 0.5 session (lifted into SPEC-14 Tier 3)
 - **Phase 2.5** (SPEC-09 canon-safety expansion): 1–2 sessions
+- **Phase 2.6** (SPEC-15 pilot feedback fixes): COMPLETE 2026-04-26
+- **Phase 2.7** (SPEC-16 + SPEC-17 post-pilot retrieval refinements): 1–1.5 sessions
+  - SPEC-16 four sub-tracks (parallelizable): 0.75–1 session
+  - SPEC-17 two sub-tracks (Track C1 independent; Track C2 depends on SPEC-16): 0.5 session
 - **Phase 3** (old atomic-source): SUPERSEDED — not a separate phase
 - **Phase 4** (old prose fragmentization): SUPERSEDED — not a separate phase
 
@@ -339,7 +382,9 @@ If Phase 2 acceptance criteria fall short of ≥80%, investigate whether further
 | SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
 | SPEC-13 Atomic-Source Migration | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-13-atomic-source-migration.md`; delayed snapshot cleanup remains tracked by `tickets/SPEC13ATOSRCMIG-006.md` |
 | SPEC-14 PA Contract & Vocabulary Reconciliation | ✓ implemented 2026-04-25; archived at `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`; delivered PA contract reconciliation, canonical vocabulary surfacing, status-coupled Mystery Reserve validation, bidirectional CF/SEC engine checks, and Animalia zero-grandfathering closure via archived `SPEC14PAVOC-*` tickets |
-| SPEC-15 Pilot Feedback Fixes | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-15-pilot-feedback-fixes.md`; `SPEC15PILFIX-001` (rule5 + append_extension) completed and archived at `archive/tickets/SPEC15PILFIX-001.md`; `SPEC15PILFIX-002` (documentation + skill content) completed and archived at `archive/tickets/SPEC15PILFIX-002.md`. Engine-convention sync + MCP retrieval-surface refinements are scoped separately to `brainstorming/post-pilot-retrieval-refinements.md`, awaiting design calls before promotion to a follow-on spec. |
-| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14; amended 2026-04-26 per SPEC-15 |
+| SPEC-15 Pilot Feedback Fixes | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-15-pilot-feedback-fixes.md`; `SPEC15PILFIX-001` (rule5 + append_extension) completed and archived at `archive/tickets/SPEC15PILFIX-001.md`; `SPEC15PILFIX-002` (documentation + skill content) completed and archived at `archive/tickets/SPEC15PILFIX-002.md`. Engine-convention sync + MCP retrieval-surface refinements promoted from `brainstorming/post-pilot-retrieval-refinements.md` into SPEC-16 + SPEC-17. |
+| SPEC-16 MCP Retrieval-Surface Refinements | ✓ specified 2026-04-26; covers C3 (`get_record_field` slice tool) + C4 (`get_record_schema` discovery tool) + C5 (per-task-type packet defaults + `retry_with` error surface) + C6 (`search_nodes` exhaustive mode). Additive, no FOUNDATIONS amendments, parallelizable sub-tracks. Blocks SPEC-17 §C2 (FOUNDATIONS prose softening assumes SPEC-16 §C3 + §C5 are available). |
+| SPEC-17 Audit-Trail and Retrieval-Contract Clarifications | ✓ specified 2026-04-26; covers C1 (deprecate the pre-SPEC-13 CF-modification notes-paragraph convention; `modification_history[]` is the canonical audit surface) + C2 (FOUNDATIONS.md §Tooling Recommendation prose softening to endorse the documented context-packet + targeted-retrieval pattern). Track C1 independent of SPEC-16; Track C2 depends on SPEC-16 §C3 + §C5 archival. One FOUNDATIONS amendment required (Track C2). |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14; amended 2026-04-26 per SPEC-15; amended 2026-04-26 per SPEC-16 + SPEC-17 |
 
-SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots. **SPEC-14 is the contract-reconciliation umbrella surfaced by the 2026-04-25 grandfathering triage** (`docs/triage/2026-04-25-spec04-grandfathering-triage.md`): the SPEC-04 baseline run on animalia exposed three-way drift between engine emission (`append_adjudication_record`), validator parsing (`record_schema_compliance`), and existing PA file shape; archived SPEC-14 supersedes the relevant parts of archived SPEC-03 and SPEC-04, adds canonical-vocabulary surfacing via MCP, and decomposes the animalia bulk fix into Tier 3 tickets that empty `audits/validation-grandfathering.yaml` to zero entries.
+SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots. **SPEC-14 is the contract-reconciliation umbrella surfaced by the 2026-04-25 grandfathering triage** (`docs/triage/2026-04-25-spec04-grandfathering-triage.md`): the SPEC-04 baseline run on animalia exposed three-way drift between engine emission (`append_adjudication_record`), validator parsing (`record_schema_compliance`), and existing PA file shape; archived SPEC-14 supersedes the relevant parts of archived SPEC-03 and SPEC-04, adds canonical-vocabulary surfacing via MCP, and decomposes the animalia bulk fix into Tier 3 tickets that empty `audits/validation-grandfathering.yaml` to zero entries. **SPEC-15, SPEC-16, and SPEC-17 are the post-pilot refinement track surfaced by the 2026-04-26 first-live canon-addition run** (`brainstorming/post-pilot-retrieval-refinements.md`): SPEC-15 (archived) covers the immediately-actionable validator + documentation fixes; SPEC-16 covers four additive MCP retrieval-surface refinements (`get_record_field`, `get_record_schema`, per-task-type packet defaults + retry-hint, `search_nodes` exhaustive mode); SPEC-17 covers the two contract-level decisions (deprecating the pre-SPEC-13 notes-paragraph convention; softening FOUNDATIONS §Tooling Recommendation prose to endorse the index + follow-up-retrieval pattern). The split between SPEC-16 and SPEC-17 is by architectural register — SPEC-16 is mechanical and additive, SPEC-17 is FOUNDATIONS-touching — with SPEC-17 §C2 explicitly depending on SPEC-16 §C3 + §C5 landing first to make the contract softening ergonomic.
