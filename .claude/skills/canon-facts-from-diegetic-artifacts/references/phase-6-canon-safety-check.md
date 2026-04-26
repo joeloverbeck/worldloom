@@ -8,13 +8,13 @@ Five sub-checks run per card (6a-6d) then one batch-level check (6e). Any fail t
 
 ## 6a. Per-card Invariant Conformance
 
-Test against every invariant in INVARIANTS.md. Record tested invariant ids in `canon_safety_check.invariants_respected` (pass) or `invariants_violated` (fail).
+Test against every INV record retrieved into the packet; expand via `mcp__worldloom__search_nodes(node_type='invariant')` then `mcp__worldloom__get_record(<INV-id>)` if a card implicates an invariant not in the packet. Record tested invariant ids in `canon_safety_check.invariants_respected` (pass) or `invariants_violated` (fail).
 
 The sibling skill's `invariant_revision` status exception does NOT fire in this skill — a card requiring invariant revision must route to flagged-contradictions at Phase 2 (with R12 as Phase 5 safety net), never emit. Mining is a candidate-gathering operation, not a retcon-proposing operation.
 
 ## 6b. Per-card Mystery Reserve Firewall
 
-Iterate every entry in MYSTERY_RESERVE.md and record overlap status in `canon_safety_check.mystery_reserve_firewall`. Every MR id is recorded, overlap or not — an absent id is indistinguishable from an un-checked id, which Phase 7 Test T5 will flag as incomplete.
+Iterate every M record retrieved into the packet and record overlap status in `canon_safety_check.mystery_reserve_firewall`; expand via `mcp__worldloom__search_nodes(node_type='mystery_record')` then `mcp__worldloom__get_record(<M-id>)` if a card implicates an MR entry not in the packet. Every MR id is recorded, overlap or not — an absent id is indistinguishable from an un-checked id, which Phase 7 Test T5 will flag as incomplete.
 
 Decision rule per entry:
 - **Card overlaps an MR entry's forbidden-answer set** → reject.
@@ -25,8 +25,8 @@ Decision rule per entry:
 
 Validate `recommended_scope` + `why_not_universal` conformance per FOUNDATIONS Rule 4.
 
-- **`proposed_status = hard_canon` with `geographic: global`**: each `why_not_universal` entry must cite concrete CFs or domain-file prose. Without citations, the scope is a bare assertion and 6c fails.
-- **`proposed_status = soft_canon`**: scope must name the author's region or institution, cross-referenced in GEOGRAPHY.md or INSTITUTIONS.md (so a reviewer can verify the scope's real-world anchor).
+- **`proposed_status = hard_canon` with `geographic: global`**: each `why_not_universal` entry must cite concrete CF ids (resolved via `mcp__worldloom__get_record`) or `SEC-*` atomic-record prose (`mcp__worldloom__search_nodes(node_type='section', filters={file_class: ...})` then `get_record`). Without citations, the scope is a bare assertion and 6c fails.
+- **`proposed_status = soft_canon`**: scope must name the author's region or institution, cross-referenced against `SEC-GEO-*` or `SEC-INS-*` atomic records (retrieve via `mcp__worldloom__search_nodes(node_type='section', filters={file_class: 'geography'})` or `filters={file_class: 'institutions'}` then `get_record`) so a reviewer can verify the scope's real-world anchor.
 - **`proposed_status = contested_canon`**: scope typically `social: restricted_group` (the sect / faction / minority holding the belief); `why_not_universal` names why the broader population does NOT hold it.
 - **Rumor carve-out**: `social: rumor` does not require `why_not_universal` — rumors are definitionally distribution-constrained.
 
@@ -38,7 +38,7 @@ This mining-specific CSC layer is absent from the sibling skill. Three sub-tests
 
 ### 6d.1 Evidence-breadth test
 
-Can the fact be inferred from existing world state independent of this artifact? Cross-reference CANON_LEDGER CFs, domain-file prose, other diegetic artifacts on disk.
+Can the fact be inferred from existing world state independent of this artifact? Cross-reference CF records (`mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: ...})` then `mcp__worldloom__get_record`), `SEC-*` atomic-record prose (`search_nodes(node_type='section', filters={file_class: ...})` then `get_record`), and other diegetic artifacts on disk.
 
 Three pathways:
 
@@ -50,7 +50,7 @@ The three-pathway framing matters at Phase 4 scoring calibration: pure-sole-sour
 
 ### 6d.2 Epistemic-horizon test
 
-Is the claim within the author's plausible reach? Consult PEOPLES_AND_SPECIES.md (species-typical capability + embodiment), GEOGRAPHY.md (author's mobility + region), INSTITUTIONS.md (author's institutional access + taboos), and any author dossier lifted via the artifact's frontmatter `author` binding.
+Is the claim within the author's plausible reach? Consult `SEC-PAS-*` atomic records (species-typical capability + embodiment), `SEC-GEO-*` atomic records (author's mobility + region), `SEC-INS-*` atomic records (author's institutional access + taboos) — retrieve each set via `mcp__worldloom__search_nodes(node_type='section', filters={file_class: 'peoples-and-species' | 'geography' | 'institutions'})` then `mcp__worldloom__get_record` selectively — and any author dossier lifted via the artifact's frontmatter `author` binding.
 
 - **Within horizon** → pass. Record consulted files in `author_position_consulted`.
 - **Outside horizon** → Phase 6f repair: narrow scope (the author can speak only to their own region/institution, not the broader claim), OR reclassify as contested_canon (the author reports what they heard, not what they knew), OR reject.

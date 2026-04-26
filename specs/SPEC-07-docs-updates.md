@@ -157,7 +157,7 @@ The engine enforces a write order internally:
 2. `append_adjudication_record` (PA-NNNN file)
 3. `CANON_LEDGER.md` in strict sub-order: (a) in-place CF qualifications, (b) new CF records, (c) Change Log Entry
 
-Because the engine applies all ops atomically (two-phase commit with temp-file-rename), intermediate states never hit disk. The ordering is a recovery guarantee for the index-sync step: if sync is interrupted after engine commit, the ledger's append-last structure makes re-sync converge cleanly. Skills no longer need the inter-step structural-integrity grep checkpoints (`canon-addition/references/phase-15a-checkpoint-grep-reference.md`) — the engine's atomicity makes partial-apply structurally impossible.
+Because the engine applies all ops atomically (two-phase commit with temp-file-rename), intermediate states never hit disk. The ordering is a recovery guarantee for the index-sync step: if sync is interrupted after engine commit, the ledger's append-last structure makes re-sync converge cleanly. Skills no longer need the inter-step structural-integrity grep checkpoints that lived in earlier `canon-addition` reference material — the engine's atomicity makes partial-apply structurally impossible.
 ```
 
 #### `CLAUDE.md` — Non-Negotiables finalization
