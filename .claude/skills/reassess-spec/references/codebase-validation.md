@@ -143,7 +143,9 @@ Guidelines:
 
 ## 3.10 Project-Convention Drift (CLAUDE.md)
 
-For specs that reference structured-ID conventions (CF, CH, PA, CHAR, DA, PR, BATCH, NCP, NCB, AU, RP, or any new spec-introduced prefix), HARD-GATE semantics, worktree discipline, or any other project-level convention documented in `CLAUDE.md`:
+For specs that reference structured-ID conventions documented in `CLAUDE.md` §ID Allocation Conventions (canon-record IDs and skill-output IDs only — `CF`, `CH`, `INV`, `M`, `OQ`, `ENT`, `SEC`, `PA`, `CHAR`, `DA`, `PR`, `BATCH`, `NCP`, `NCB`, `AU`, `RP`, plus any new spec-introduced canon-record or skill-output prefix), HARD-GATE semantics, worktree discipline, or any other project-level convention documented in `CLAUDE.md`:
+
+> **Scope clarification**: Spec-decomposition ticket prefixes (`SPEC<NN><FAM>-NNN`, e.g., `SPEC17AUDRET-NNN`, `SPEC04VALFRA-NNN`) are governed by the spec's own §Risks / open-question section and are NOT documented in `CLAUDE.md` §ID Allocation Conventions. 3.10 does NOT apply to ticket-decomposition prefixes — a spec introducing a new ticket-prefix family is not a `CLAUDE.md` docs-gap finding.
 
 - Read `CLAUDE.md` §ID Allocation Conventions (and any other relevant convention tables).
 - For each structured-ID prefix the spec uses (extracted at Step 2 under "Structured-ID prefixes"), grep `CLAUDE.md` for the prefix. A prefix the spec uses that `CLAUDE.md` does not document is a MEDIUM Improvement finding — the reassessed spec should either (a) add a `CLAUDE.md` docs-gap ticket reference in its Risks section, or (b) extend `CLAUDE.md` as a separate deliverable (only when the spec's scope legitimately covers pipeline-level convention documentation; otherwise (a) is preferred to keep scope contained).

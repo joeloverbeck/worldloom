@@ -11,6 +11,7 @@ Check:
 - exact path and section references
 - whether the claimed contract already matches live behavior
 - whether acceptance criteria should be grep/manual-review based rather than runtime/tool based
+- if acceptance relies on negative grep removal, run the exact grep before edits and record all hit locations as owned hits or explicitly excluded hits
 
 ## skill rewrite or skill-local behavior
 

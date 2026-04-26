@@ -19,6 +19,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 - archive the reviewed ticket when its handoff is actually complete
 - create new tickets in `tickets/`
 - update existing active tickets when the completed work makes their current wording stale or their dependency chain wrong
+- update active specs or docs when archival changes their actionable implementation, dependency, or handoff wording
 
 **Forbidden**:
 - modifying skills, tools, hooks, validators, or world content as part of the review
@@ -128,6 +129,8 @@ If the review confirms archival readiness after the review-surface audit and fol
 2. Confirm the original active ticket path no longer exists.
 3. Record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
 4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. Prefer literal-safe searches such as `rg -n -F 'tickets/SPEC-EXAMPLE-001.md' tickets specs docs` or single-quoted regex patterns so ticket IDs, backticks, and path punctuation are not interpreted by the shell. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
+
+If this post-move sweep reveals a concrete adjacent concern that was not actionable until the archive path existed, create or update a bounded follow-up during the same review and report it as `review-created edits`. This is allowed only when the concern does not prove unfinished owned work inside the reviewed ticket; if it does, recover the ticket from the archive and report archival as blocked.
 
 If a blocker is discovered after the ticket has already been moved to the archive during the same review, recover immediately: move it back to `tickets/`, restore an active status such as `PENDING`, undo any archive-path dependency repairs that now imply completion, record the blocker in the ticket, and report archival as blocked.
 

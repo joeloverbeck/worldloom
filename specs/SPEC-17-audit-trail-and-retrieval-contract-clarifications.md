@@ -29,7 +29,7 @@ Two tracks, each with a documented A/B/C decision adopted by this spec. Either t
 **Recommended option**: **Option C from the brainstorming doc** — declare `modification_history[]` the canonical post-SPEC-13 audit surface; drop the requirement that the engine (or skill authors) maintain a parallel `notes` paragraph for each modification.
 
 **Rationale**:
-- **Load-bearing-ness check verified**: `continuity-audit/SKILL.md:314` and `continuity-audit/templates/retcon-proposal-card.md:131-141` reference `modification_history` (the structured field) for retcon planning and audit-trail tracking, NOT the notes paragraph. No current skill reads the notes paragraph for any audit purpose. The convention is pure human-ergonomics on visual scanning of a CF YAML file.
+- **Load-bearing-ness check verified**: `continuity-audit/SKILL.md:314` and `continuity-audit/templates/retcon-proposal-card.md:131-141` reference `modification_history` (the structured field) for retcon planning and audit-trail tracking, NOT the notes paragraph. No current skill reads the notes paragraph for any audit purpose. Reassessment surfaced that the dual-convention is currently prescribed only in **`.claude/skills/create-base-world/templates/canon-fact-record.yaml:97-118`** (template comments instructing future canon-addition runs to "append a standardized line: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ...`" and stating that "the notes-field line and the modification_history entry are required together"). The canon-addition SKILL.md, its references/, the skill-creator CF template, and the continuity-audit CF template do NOT contain the prescription. The convention is human-ergonomics scaffolding inherited from pre-SPEC-13 authoring, not load-bearing for any current skill's reading flow.
 - **FOUNDATIONS Rule 6 (No Silent Retcons)**: requires "all canon changes must be logged with justification." `modification_history[]` carries the structured log (`change_id`, `originating_cf`, `date`, `summary`). Rule 6 is satisfied by the structured field alone; the notes paragraph adds redundancy without enforcement value (only one direction of the redundancy is currently checked).
 - **Atomic-source coherence**: post-SPEC-13, atomic records are the canonical storage form. Asking the engine to maintain a derived prose-mirror inside the YAML file's `notes` field treats `notes` as a structured-output sink rather than as a free-form authoring surface — a category drift relative to the rest of the atomic-record discipline.
 - **Lowest blast radius**: no engine code change, no validator change, no migration. Just a SKILL.md prose update and a one-line README clarification.
@@ -52,17 +52,31 @@ Two tracks, each with a documented A/B/C decision adopted by this spec. Either t
 
 ## Deliverables
 
-### Track C1: SKILL.md update + README clarification
+### Track C1: Template + SKILL.md + engine/validator deprecation
 
-**`.claude/skills/canon-addition/SKILL.md`** — locate any prose that prescribes the `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <summary>` notes-paragraph convention (search terms: `Modified .* by CH-`, `notes paragraph`, `modification.*notes`). Replace with prose explicitly stating the post-SPEC-13 convention: `modification_history[]` is the canonical structured audit surface; the engine's `append_modification_history_entry` op writes only to that field; skills do NOT also append a parallel notes paragraph. Cite this spec for the decision context.
+**Surface inventory.** Reassessment surfaced that the dual-convention is prescribed only in the create-base-world CF template (the originally-listed canon-addition surfaces carry no such prescription today). Track C1 lands deprecation prose across **five surfaces** so a future skill author consulting any of them does not reinvent the dual-convention by analogy to pre-SPEC-13 CFs:
 
-**`.claude/skills/canon-addition/references/`** — if any reference file (e.g., `proposal-normalization.md`) duplicates the notes-paragraph convention, update it the same way. The retrieval-tool tree (added by SPEC15PILFIX-002) is unaffected.
+1. `.claude/skills/create-base-world/templates/canon-fact-record.yaml` — the actual prescription surface (replace).
+2. `.claude/skills/canon-addition/SKILL.md` — net-new ADD prose (defense-in-depth at the canonical canon-mutating skill).
+3. `tools/patch-engine/README.md` — new H2 §Audit Trail Discipline section.
+4. `tools/patch-engine/src/ops/append-modification-history-entry.ts` — header comment.
+5. `tools/validators/src/structural/modification-history-retrofit.ts` — header comment.
 
-**`.claude/skills/continuity-audit/SKILL.md`** — verify lines 309 and 314 already reference `modification_history` (the structured field) for retcon planning. No edit required if verification passes; this is a defense-in-depth check that the deprecated convention isn't load-bearing here.
+The skill-creator CF template, the continuity-audit CF template, and the canon-addition references/ files are verified clean today; Track C1's Verification step revisits them as defense-in-depth.
+
+**`.claude/skills/create-base-world/templates/canon-fact-record.yaml`** — replace lines 97-118 (the `notes:` block instructing "append a standardized line: `Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ...`" plus the comment block over `modification_history: []` stating the notes-field line and the history entry are required together) with prose stating the post-SPEC-13 convention: free-form `notes:` continues to carry adjudication reasoning and scope-narrowing decisions; `modification_history[]` is the canonical structured audit surface for any future canon-addition run that modifies this CF; the engine's `append_modification_history_entry` op writes only to that field; future modifications do NOT also append a parallel notes paragraph. Cite this spec for the decision context. The forward-references to `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md` are stale (both files do not exist today) and should be removed in the same edit; the schema-uniformity claim those references supported is preserved by the deprecation prose itself.
+
+**`.claude/skills/canon-addition/SKILL.md`** — add net-new prose explicitly stating `modification_history[]` is the canonical post-SPEC-13 audit surface, the engine's `append_modification_history_entry` op writes only to that field, and skills do NOT append a parallel notes paragraph. Land near the existing Phase 12a prose (which already references `modification_history` for the axis-(c) judgment) or under §Validation Rules This Skill Upholds → Rule 6 mechanism — implementer's choice; the prose must contain the literal phrase "`modification_history[]` is the canonical" so the post-apply grep can prove it landed. Cite this spec for the decision context. (No existing prescription needs replacing — verified clean by Step 3 grep.)
+
+**`.claude/skills/canon-addition/references/`** — defense-in-depth verify-only: confirm no reference file (consequence-analysis.md, counterfactual-and-verdict.md, proposal-normalization.md, retrieval-tool-tree.md) introduces the notes-paragraph convention. If a future reference duplicates it, edit accordingly; today's surfaces are clean. The retrieval-tool tree (added by SPEC15PILFIX-002) is unaffected.
+
+**`.claude/skills/continuity-audit/SKILL.md`** — verify lines 309 and 314 already reference `modification_history` (the structured field) for retcon planning. No edit required if verification passes; defense-in-depth check that the deprecated convention isn't load-bearing here.
 
 **`.claude/skills/continuity-audit/templates/retcon-proposal-card.md`** — verify lines 131-141 reference `modification_history` only. No edit required if verification passes.
 
-**`tools/patch-engine/README.md`** (or wherever the `append_modification_history_entry` op is documented) — add a sentence to the op's description: "This op writes only to `modification_history[]`. Post-SPEC-13, `modification_history[]` is the canonical audit surface for CF retroactive modifications; the engine does NOT mirror entries into the `notes` field. Pre-SPEC-13 CFs may carry dual notes-paragraph + history-entry records as historical artifact; new modifications use the structured field only."
+**`tools/patch-engine/README.md`** — add a new H2 §Audit Trail Discipline section after §Atomicity stating: "Post-SPEC-13, `modification_history[]` is the canonical audit surface for CF retroactive modifications. The `append_modification_history_entry` op writes only to that field; the engine does NOT mirror entries into the `notes` field. Pre-SPEC-13 CFs may carry dual notes-paragraph + history-entry records as historical artifact; new modifications use the structured field only. The `modification_history_retrofit` validator polices the historical convention in one direction only (notes → history); the reverse direction is intentionally unchecked because the engine no longer emits to `notes`." (The README has no per-op description structure — a new section is the publicly-visible landing surface.)
+
+**`tools/patch-engine/src/ops/append-modification-history-entry.ts`** — add a header comment (top-of-file, above the imports) stating the post-SPEC-13 convention parallel to the validator file's comment: "`modification_history[]` is the canonical post-SPEC-13 audit surface. This op intentionally writes only to that field. The engine does NOT mirror entries into `notes`. See SPEC-17 Track C1." This defends against re-introduction of the dual-convention during future op refactors.
 
 **`tools/validators/src/structural/modification-history-retrofit.ts`** — no code change. The validator continues to check notes → history one-way; this is correct under the deprecated convention (pre-SPEC-13 CFs that have notes paragraphs must still have matching history entries — the structured field is the source of truth, the prose paragraph is the backward-compatibility check). Add a header comment to the file briefly explaining the deprecation context so a future reader doesn't re-add the reverse-direction check.
 
@@ -87,12 +101,12 @@ This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_pac
 
 The amendment preserves the non-negotiable framing ("LLM agents should never operate on prose alone"; "this is non-negotiable") while explicitly endorsing the index + follow-up-retrieval pattern as a documented mechanism. The cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md` directs readers to the operational details. The reference to `mcp__worldloom__get_record_field` requires SPEC-16 §C3 to have shipped (the tool must exist when this prose lands).
 
-**`docs/CONTEXT-PACKET-CONTRACT.md`** — append a §Index + Follow-Up Retrieval Pattern subsection naming the pattern explicitly:
-> The context packet's five layers deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. This pattern keeps single-response packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval delivers the content.
+**`docs/CONTEXT-PACKET-CONTRACT.md`** — append a §Index + Follow-Up Retrieval Pattern subsection (placed after §Assembly Discipline and before §Example Roles) naming the pattern explicitly:
+> The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. This pattern keeps single-response packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval delivers the content.
 
 **`tools/world-mcp/README.md` §Tools** — under `get_context_packet`, add a one-sentence cross-reference: "See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern for the documented retrieval pattern that complements packet assembly."
 
-**`docs/MACHINE-FACING-LAYER.md`** — under the existing "scope of each retrieval tool" subsection (added by SPEC-15 Track B3), add a "Recommended composition" note pointing to the same pattern: packet first (locality survey), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites.
+**`docs/MACHINE-FACING-LAYER.md`** — under the existing `## Retrieval Tool Scope` subsection (line 58; added by SPEC-15 Track B3), add a "Recommended composition" note pointing to the same pattern: packet first (locality survey), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites. Cross-reference `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
 
 **Backwards compatibility**: pure-additive prose. No code change. Existing skills that already use the index + follow-up pattern (e.g., `canon-addition` post-SPEC-15) need no edits. Skills that have not yet adopted the pattern continue to work; FOUNDATIONS now explicitly endorses what they already do.
 
@@ -113,10 +127,23 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 
 ### Track C1
 
-- `grep -rn "Modified.*by CH-.*\\(CF-" .claude/skills/canon-addition/` returns no instructional prose prescribing the notes-paragraph convention (the search may still match historical examples in fixture files; verify hits are not normative prose).
-- `.claude/skills/canon-addition/SKILL.md` and any updated `.claude/skills/canon-addition/references/*.md` contain prose explicitly naming `modification_history[]` as the canonical post-SPEC-13 audit surface and explicitly noting the engine does NOT mirror to `notes`.
-- `tools/patch-engine/README.md` (or equivalent op-documentation surface) carries the engine-side clarification.
-- `tools/validators/src/structural/modification-history-retrofit.ts` carries a header comment noting the deprecation context (so a future reader doesn't re-add the reverse-direction check).
+**Positive verification (proves new prose landed)**:
+- `grep -n "modification_history\[\] is the canonical" .claude/skills/canon-addition/SKILL.md` returns ≥1 match (the new ADD prose).
+- `grep -n "canonical post-SPEC-13 audit surface\|canonical audit surface" .claude/skills/create-base-world/templates/canon-fact-record.yaml` returns ≥1 match (the replaced template comment).
+- `grep -n "Audit Trail Discipline" tools/patch-engine/README.md` returns ≥1 match (the new H2 section).
+- `grep -n "canonical post-SPEC-13 audit surface" tools/patch-engine/src/ops/append-modification-history-entry.ts` returns ≥1 match (the new header comment).
+- `grep -n "canonical post-SPEC-13 audit surface\|deprecation context" tools/validators/src/structural/modification-history-retrofit.ts` returns ≥1 match (the new header comment).
+
+**Removal verification (proves deprecated prescription is gone)**:
+- `grep -nE "Modified.*by CH-" .claude/skills/create-base-world/templates/canon-fact-record.yaml` returns 0 matches (the dual-convention prescription removed).
+- `grep -nE "notes-field.*line and the\|required together" .claude/skills/create-base-world/templates/canon-fact-record.yaml` returns 0 matches (the "required together" framing removed).
+
+**Defense-in-depth verification (other CF templates remain clean)**:
+- `grep -nE "Modified.*by CH-|notes-field" .claude/skills/skill-creator/templates/canon-fact-record.yaml .claude/skills/continuity-audit/templates/canon-fact-record.yaml .claude/skills/canon-addition/references/*.md .claude/skills/canon-addition/SKILL.md` returns 0 matches for the dual-convention pattern (skill-creator + continuity-audit CF templates verified clean at reassessment time; canon-addition surfaces remain free of the prescription except for the new ADD prose, which uses different phrasing).
+- `.claude/skills/continuity-audit/SKILL.md` lines 309 and 314 still reference `modification_history` (the structured field) for retcon planning — no edit required, defense-in-depth check.
+- `.claude/skills/continuity-audit/templates/retcon-proposal-card.md` lines 131-141 still reference `modification_history` only — no edit required, defense-in-depth check.
+
+**End-to-end behavioral verification**:
 - A subsequent canon-addition run produces a CF modification via `append_modification_history_entry` with no parallel notes-paragraph append; `world-validate` returns clean; `continuity-audit`, when next exercised, reads the structured field for retcon planning.
 
 ### Track C2
@@ -141,7 +168,8 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 ## Risks & Open Questions
 
 - **Risk: Track C2 ships before SPEC-16 §C3 + §C5**. The FOUNDATIONS amendment cross-references `mcp__worldloom__get_record_field` (delivered by SPEC-16 §C3) and assumes auto-budget UX (SPEC-16 §C5) reduces friction enough to justify the prose softening. Mitigation: the implementation ticket for Track C2 includes an explicit pre-flight check (verify SPEC-16 archived; verify `get_record_field` registered) before applying the FOUNDATIONS edit. If SPEC-16 lands as planned, this risk does not materialize.
-- **Risk: Track C1 deprecation surprises a future skill author**. A future skill author authoring a new canon-mutating skill might re-invent the notes-paragraph convention by analogy to pre-SPEC-13 CFs. Mitigation: the engine-side README clarification + the SKILL.md prose update + the validator file's header comment cover all three surfaces a skill author would naturally consult; cross-coverage is sufficient defense-in-depth.
+- **Risk: Track C1 deprecation surprises a future skill author**. A future skill author authoring a new canon-mutating skill might re-invent the notes-paragraph convention by analogy to pre-SPEC-13 CFs. Mitigation: deprecation prose lands across **five surfaces** a skill author would naturally consult — the create-base-world CF template (where the prescription currently lives), canon-addition SKILL.md, the patch-engine README's new §Audit Trail Discipline section, the `append_modification_history_entry` op-file header comment, and the `modification_history_retrofit` validator file's header comment. Cross-coverage is defense-in-depth; the prescription is removed from the one surface that currently carries it and explicitly named-and-deprecated on four others.
+- **Risk: stale forward-references in `create-base-world/templates/canon-fact-record.yaml` (out of SPEC-17 Track C1 scope)**. The template forward-referenced `canon-addition/templates/canon-fact-record.yaml` and `canon-addition/references/accept-path.md`, both of which do not exist (the canon-addition templates/ directory contains only `critic-prompt.md` and `critic-report-format.md`; there is no `accept-path.md` in canon-addition/references/). Track C1 removed these forward-references in `archive/tickets/SPEC17AUDTRARET-001.md`; the remaining spec-truthing / deleted-surface explanation is tracked by `tickets/SPEC17AUDTRARET-003.md`.
 - **Risk: Track C2 prose softening reads as relaxation of FOUNDATIONS rigor**. The amendment preserves "non-negotiable" framing and adds a documented mechanism, not an exception. Mitigation: the cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md` keeps the operational details external; FOUNDATIONS prose stays principle-level.
 - **Open question: should `modification_history_retrofit` validator be removed eventually?** If pre-SPEC-13 CFs are eventually retroactively normalized (notes paragraphs deleted, leaving only `modification_history[]`), the one-way validator becomes unnecessary. Decision: keep the validator indefinitely as cheap defense-in-depth; removing it is YAGNI until a future cleanup spec needs the surface.
 - **Open question: ticket prefix.** Tickets under this spec take prefix `SPEC17AUDRET-NNN` (AUDit-trail and RETrieval-contract). Confirmed naming-convention-consistent with SPEC13ATOSRCMIG / SPEC14PAVOC / SPEC15PILFIX / SPEC16MCPRET.
@@ -150,7 +178,7 @@ The amendment preserves the non-negotiable framing ("LLM agents should never ope
 
 Within SPEC-17 (full decomposition — two sub-tracks):
 
-1. **SPEC17AUDRET-001** — Track C1 (SKILL.md update + canon-addition references update + patch-engine README clarification + validator file header comment + continuity-audit verification). May land independently of SPEC-16. Estimated: 0.25 session.
+1. **SPEC17AUDTRARET-001** — Track C1 (create-base-world CF-template replacement + canon-addition SKILL.md ADD prose + canon-addition references defense-in-depth verify + patch-engine README new §Audit Trail Discipline section + `append_modification_history_entry` op-file header comment + `modification_history_retrofit` validator file header comment + continuity-audit SKILL.md / retcon-proposal-card defense-in-depth verify + skill-creator and continuity-audit CF-template defense-in-depth verify). Completed and archived at `archive/tickets/SPEC17AUDTRARET-001.md`.
 2. **SPEC17AUDRET-002** — Track C2 (FOUNDATIONS §Tooling Recommendation prose softening + CONTEXT-PACKET-CONTRACT.md subsection + README cross-references + MACHINE-FACING-LAYER.md note). **Pre-flight check**: verify SPEC-16 §C3 + §C5 archived before applying FOUNDATIONS edit. Estimated: 0.25 session.
 
 SPEC-17 in total: ~0.5 session of effort, gated by SPEC-16's archival for Track C2.
@@ -159,7 +187,7 @@ SPEC-17 in total: ~0.5 session of effort, gated by SPEC-16's archival for Track 
 
 To be recorded after the two tickets complete. Expected post-completion state:
 
-- `.claude/skills/canon-addition/SKILL.md` (and any reference files) drop the notes-paragraph convention; engine and validator surfaces carry the deprecation rationale inline.
+- `.claude/skills/create-base-world/templates/canon-fact-record.yaml` no longer prescribes the dual notes-paragraph + history-entry convention; `.claude/skills/canon-addition/SKILL.md` carries an explicit ADD-prose statement that `modification_history[]` is canonical; engine README + op-file header comment + validator file header comment carry the deprecation rationale inline.
 - `docs/FOUNDATIONS.md` §Tooling Recommendation explicitly endorses the documented context-packet + targeted-retrieval pattern, with cross-reference to `docs/CONTEXT-PACKET-CONTRACT.md`.
 - `docs/CONTEXT-PACKET-CONTRACT.md` carries a §Index + Follow-Up Retrieval Pattern subsection.
 - A subsequent canon-addition run produces clean modification audit-trails without parallel notes paragraphs; the agent cites the documented retrieval pattern rather than apologizing for it.

@@ -22,6 +22,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - When a proof command counts matches across a file glob, dry-run the exact command and confirm it emits the scalar value the ticket claims. Some tools, such as `grep -c file-*`, emit one count per file unless forced through `grep -h`, `wc -l`, `awk`, or another explicit aggregation.
 - For negative grep proofs, preserve the failure signal instead of hiding it behind `|| true`. Prefer an explicit command such as `if grep -R "needle" paths; then exit 1; fi` or `! grep -R "needle" paths`, then record that exact command and result in the ticket.
 - When searching for markdown or code literals that contain shell-active characters such as backticks, wrap the pattern in single quotes or escape those characters before running `grep`, `rg`, or similar commands. Do not let the shell execute a literal from the proof pattern.
+- When drafted proof literals contain Unicode punctuation but the landed repo prose uses ASCII equivalents, update the ticket's `Acceptance Criteria`, `Test Plan`, and verification result to the exact landed string before closeout.
 - If a grep-count proof is brittle or counts incidental spelling rather than behavior, rewrite the ticket to a stronger truthful proof surface instead of adding marker text solely to satisfy the count. Prefer exported registries, list/dispatch tests, direct tool calls, or focused runtime probes when they better prove the invariant.
 - Run dependent verification commands in dependency order, not in parallel. If a test command consumes compiled artifacts, generated files, or other build outputs, finish and confirm the producer step first, then run the dependent proof command.
 - For `tool or script implementation` tickets, dry-run the exact package-local command form (`cd` into the package, repo-local binary path, real config path) before trusting drafted `Test Plan` commands.
@@ -54,6 +55,7 @@ Before finishing, re-read the ticket and make it truthful:
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
 - illustrative code snippets, helper names, and scenario sketches still match the landed seam or have been replaced with prose
 - preserved original failure evidence is clearly historical, not phrased as a current-state claim after the ticket is complete
+- for completed tickets, `## Problem` no longer presents fixed intake conditions as current repo state; convert those claims to `At intake...`, `Before this ticket...`, or equivalent historical wording
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape

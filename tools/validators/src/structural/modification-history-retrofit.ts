@@ -1,3 +1,9 @@
+// SPEC-17 Track C1 deprecation context: modification_history[] is the canonical
+// post-SPEC-13 audit surface. This validator polices the historical convention
+// in one direction only (notes -> history); the reverse direction is
+// intentionally unchecked because the engine no longer emits to notes.
+// Pre-SPEC-13 CFs with dual notes-paragraph + history-entry records remain
+// valid under this one-way check.
 import type { Context, Validator, Verdict } from "../framework/types.js";
 import {
   asPlainRecord,

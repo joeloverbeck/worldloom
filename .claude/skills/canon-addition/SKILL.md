@@ -66,6 +66,8 @@ Phase 11: Verdict (phase-cited)
 - `create_oq_record` op per new Open Question raised by reasoning, with the resulting `OQ-NNNN` cited in the PA frontmatter's `open_questions_touched[]`.
 - `append_adjudication_record` op carrying SPEC-14 PA frontmatter (`pa_id`, canonical-enum `verdict`, `originating_skill: "canon-addition"`, `change_id`, four `*_touched` arrays) + `body_markdown` per §PA body_markdown structure.
 
+Per SPEC-17 Track C1, modification_history[] is the canonical post-SPEC-13 audit surface for CF retroactive modifications. The engine's `append_modification_history_entry` op writes only to that field; this skill does NOT append a parallel notes paragraph merely to mirror the structured audit entry.
+
 **Non-accept branch** (`REVISE_AND_RESUBMIT` / `REJECT`) — single-op patch plan with `append_adjudication_record` only. No `_source/` mutations.
 
 ## World-State Prerequisites

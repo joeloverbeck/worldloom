@@ -2,11 +2,12 @@
 #
 # Matches docs/FOUNDATIONS.md §"Canon Fact Record Schema".
 #
-# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain identical
-# to canon-addition/templates/canon-fact-record.yaml. Comments and example
-# values may differ per skill context. When adding, removing, or reshaping any
-# field — including extending the `type:` enum — update BOTH templates in the
-# same change so grep-based ledger discovery works uniformly.
+# SYNC DISCIPLINE: the FIELD STRUCTURE of this template must remain aligned
+# with the canon-addition output contract and the patch-engine CF schema.
+# Comments and example values may differ per skill context. When adding,
+# removing, or reshaping any field — including extending the `type:` enum —
+# update every CF producer/validator surface in the same change so grep-based
+# ledger discovery works uniformly.
 #
 # create-base-world emits one record of this shape per accepted hard canon
 # fact at Phase 14. The full set is concatenated into
@@ -97,23 +98,15 @@ contradiction_risk:
 notes: >
   Free-form notes: adjudication reasoning, scope-narrowing decisions,
   stabilizers added during equilibrium explanation, mystery-reserve interactions.
-  When a future canon-addition run modifies this CF, that run is responsible
-  for appending a standardized line:
-    Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): <one-sentence summary>.
-  create-base-world does not modify CFs (it only creates the genesis set);
-  this guidance is preserved here for schema uniformity with the
-  canon-addition skill.
+  Future canon-addition runs may preserve or extend free-form notes when
+  the new CF itself needs cross-reference prose, but they do not append a
+  parallel notes paragraph solely to mirror audit history.
 
-# CONDITIONALLY MANDATORY (schema-uniform with canon-addition):
-# structured modification trace. create-base-world ALWAYS leaves this
-# empty at genesis — the genesis set has no prior modifications to
-# record. Future canon-addition runs are REQUIRED to populate this
-# array with an entry for every modification the Phase 12a scan
-# identifies (per canon-addition/templates/canon-fact-record.yaml and
-# canon-addition/references/accept-path.md artifact 2); the notes-field
-# "Modified YYYY-MM-DD by CH-NNNN (CF-NNNN): ..." line and the
-# modification_history entry are required together whenever the scan
-# identifies the CF. Schema-uniform with canon-addition's paired
-# template (FIELD STRUCTURE identical; framing and discipline comments
-# harmonized).
+# CONDITIONALLY MANDATORY: structured modification trace.
+# create-base-world ALWAYS leaves this empty at genesis — the genesis set has
+# no prior modifications to record. Post-SPEC-13 / SPEC-17 Track C1,
+# modification_history[] is the canonical structured audit surface for future
+# canon-addition runs that modify this CF. The patch engine's
+# append_modification_history_entry op writes only to this field; future
+# modifications do NOT also append a parallel notes paragraph.
 modification_history: []

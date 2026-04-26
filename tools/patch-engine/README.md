@@ -29,3 +29,7 @@ Staging keeps an in-memory overlay of earlier same-plan atomic creates and updat
 ## Atomicity
 
 Phase A validates without source writes. Phase B writes temp files, fsyncs them, and renames each temp file over its target. Per-file rename is atomic; a mid-commit failure is forward-only and leaves the successfully renamed subset in place, with recovery via git rather than engine rollback.
+
+## Audit Trail Discipline
+
+Post-SPEC-13, `modification_history[]` is the canonical audit surface for CF retroactive modifications. The `append_modification_history_entry` op writes only to that field; the engine does NOT mirror entries into the `notes` field. Pre-SPEC-13 CFs may carry dual notes-paragraph + history-entry records as historical artifact; new modifications use the structured field only. The `modification_history_retrofit` validator polices the historical convention in one direction only (notes -> history); the reverse direction is intentionally unchecked because the engine no longer emits to `notes`. See `specs/SPEC-17-audit-trail-and-retrieval-contract-clarifications.md` Track C1.

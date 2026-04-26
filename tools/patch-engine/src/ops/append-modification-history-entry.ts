@@ -1,3 +1,6 @@
+// modification_history[] is the canonical post-SPEC-13 audit surface. This op
+// intentionally writes only to that field. The engine does NOT mirror entries
+// into notes. See SPEC-17 Track C1.
 import type { PatchOperation, PatchPlanEnvelope } from "../envelope/schema.js";
 import {
   loadExistingRecord,
