@@ -52,6 +52,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `list_records`, `get_record_field`, `get_neighbors`, `find_named_entities` |
 | Localize source-local names that are not world-level canonical entities | `find_named_entities.scoped_matches`, `get_node.scoped_references`, and `search_nodes` with `reference_name` or `include_scoped_references` |
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
+| Validate a patch plan envelope without mutating world content | `validate_patch_plan`, which returns `status: "pass"`, `status: "fail"` with validator verdicts, or `status: "skipped"` with a reason when the envelope cannot be validated |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
 | Prove structural integrity | `world-validate <world> --structural` |
 

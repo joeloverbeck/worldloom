@@ -68,20 +68,20 @@ function seedEmptyWorld(root: string): void {
   seedWorld(root, { worldSlug: "seeded", nodes: [] });
 }
 
-test("validatePatchPlan returns verdicts from the validators package", async () => {
+test("validatePatchPlan returns pass when validators run without failures", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);
 
   try {
     const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: buildValidPatchPlan() }));
 
-    assert.deepEqual(result, { verdicts: [] });
+    assert.deepEqual(result, { status: "pass", verdicts: [] });
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("validatePatchPlan surfaces rule verdicts from the validators package", async () => {
+test("validatePatchPlan returns fail and surfaces rule verdicts from the validators package", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);
 
@@ -91,13 +91,14 @@ test("validatePatchPlan surfaces rule verdicts from the validators package", asy
     const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
 
     assert.ok("verdicts" in result);
+    assert.equal(result.status, "fail");
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("validatePatchPlan rejects a malformed plan before validator delegation", async () => {
+test("validatePatchPlan returns skipped for a malformed plan before validator delegation", async () => {
   const result = await validatePatchPlan({
     patch_plan: {
       ...buildValidPatchPlan(),
@@ -105,12 +106,14 @@ test("validatePatchPlan rejects a malformed plan before validator delegation", a
     }
   });
 
-  assert.ok("code" in result);
-  assert.equal(result.code, "invalid_input");
-  assert.equal(result.details?.field, "patch_plan.plan_id");
+  assert.deepEqual(result, {
+    status: "skipped",
+    reason: "patch_plan.plan_id must be a non-empty string.",
+    verdicts: []
+  });
 });
 
-test("validatePatchPlan rejects an empty patch list before validator delegation", async () => {
+test("validatePatchPlan returns skipped for an empty patch list before validator delegation", async () => {
   const result = await validatePatchPlan({
     patch_plan: {
       ...buildValidPatchPlan(),
@@ -118,7 +121,9 @@ test("validatePatchPlan rejects an empty patch list before validator delegation"
     }
   });
 
-  assert.ok("code" in result);
-  assert.equal(result.code, "invalid_input");
-  assert.equal(result.details?.field, "patch_plan.patches");
+  assert.deepEqual(result, {
+    status: "skipped",
+    reason: "patch_plan.patches must be a non-empty array.",
+    verdicts: []
+  });
 });

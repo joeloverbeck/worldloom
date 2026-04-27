@@ -1,6 +1,6 @@
 # Package And Tooling Checks
 
-Use this reference for tickets whose owned seam includes `tools/`, package manifests, package-local commands, serializers, hashes/checksums, public exports, or package-local user-facing docs/examples.
+Use this reference for tickets whose owned seam includes `tools/`, package manifests, package-local commands, serializers, hashes/checksums, public exports, or package-local user-facing docs/examples. Also use the relevant verification-only parts when a docs/skill ticket keeps implementation out of `tools/` but proves its invariant through a read-only package handler, CLI, compiled artifact, or local package probe.
 
 ## Reassessment
 
@@ -10,6 +10,7 @@ Use this reference for tickets whose owned seam includes `tools/`, package manif
 - If a drafted proof command uses a workspace filter or root package-manager command (`pnpm --filter ...`, `npm --workspace ...`, `turbo ...`, etc.), verify the root workspace manifests and lockfiles exist before trusting it. If the repo has only package-local manifests, rewrite the proof to package-local commands during reassessment.
 - When a ticket mixes package-local build/test commands with a CLI that reads repo-root state via `process.cwd()` or a similar ambient root, split the proof surface truthfully: keep build/type/test commands at the package root, but run the CLI smoke check from the repo root that owns the world/artifact state. Do not force both onto one `cwd`.
 - If verification uses an exported function, inline `node -e` probe, or other package-local runtime entrypoint, run it from the package root when module resolution depends on package-local dependencies.
+- If verification uses compiled output such as `dist/src/...` or `dist/tests/...`, prove that the artifact is fresh for the exercised seam. Prefer running the package build before the probe; if rebuilding is outside the ticket boundary or would disturb unrelated dirty package work, compare the relevant source and compiled artifact or explicitly record why the existing compiled output is being treated as the proof surface.
 - If a staged package ticket describes future adapter or integration behavior over an opaque placeholder type, verify whether the active ticket owns the adapter/parser or only the core callable surface. If a later ticket owns materializing the opaque input into the current package's runtime shape, record that boundary in `Assumption Reassessment` before coding and do not invent a speculative adapter.
 - If a staged tool/schema ticket's public API omits a scope parameter but the current helper layer is scope-bound, verify whether the missing scope can be derived internally before broadening the public contract. If it can, keep the public API stable and record the helper-vs-tool mismatch in reassessment.
 - For scaffold, package, or build-surface tickets, verify every drafted built-artifact path, compiled entrypoint, registration target, or config target against the package's actual `tsconfig.json`, build script, and emitted output shape before implementation.

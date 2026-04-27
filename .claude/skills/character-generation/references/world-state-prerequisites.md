@@ -10,13 +10,13 @@ Pre-flight calls:
 mcp__worldloom__get_context_packet(
   task_type='character_generation',
   seed_nodes=[<brief-derived seed nodes>],
-  token_budget=16000
+  token_budget=33000
 )
 ```
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories, with full parsed `record` bodies) + relevant CFs + all Mystery Reserve records' Phase 7b firewall fields + named-entity neighbors + section context, with completeness guarantees against silent truncation.
 
-If the packet returns `packet_incomplete_required_classes`, retry with `token_budget` set to the response's `minimum_required_budget` field. The default above is calibrated for a typical call shape against a mature world; unusually large seed sets may exceed it.
+If the packet returns `packet_incomplete_required_classes`, retry with `token_budget` set to the response's `minimum_required_budget` field. The default above is calibrated for a typical 12-seed call shape against a mature world; unusually large seed sets may exceed it.
 
 Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, species, or capability domain. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
 

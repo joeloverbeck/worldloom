@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
-**Status**: Stdio MCP entrypoint registers 16 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`; `submit_patch_plan` delegates to `@worldloom/patch-engine`
+**Status**: Stdio MCP entrypoint registers 16 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`
 
 ## Tools
 
@@ -21,7 +21,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__find_named_entities(names)` — searches the entity registry's `canonical_name`, `entity_aliases.alias_text`, `scoped_references.display_name`, and `scoped_reference_aliases.alias_text` surfaces against the world index. It does not perform a lexical scan over prose body content such as section bodies, diegetic-artifact bodies, character dossiers, or adjudication prose. For Rule 6 pre-figuring scans where a string may exist only in prose, pair this with `mcp__worldloom__search_nodes(query, exhaustive: true)` to cover the FTS5 lexical layer exhaustively. Returns `canonical_matches[]`, `scoped_matches[]`, and `surface_matches[]`.
 - `mcp__worldloom__find_edit_anchors(targets)`
 - `mcp__worldloom__get_canonical_vocabulary(class)` *(returns shared canonical enum values for `domain`, `verdict`, `mystery_status`, and `mystery_resolution_safety`)*
-- `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ verdicts }`)*
+- `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ status: "pass" | "fail" | "skipped", verdicts, reason? }`)*
 - `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(delegates to SPEC-03 `@worldloom/patch-engine`)*
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)`
 
