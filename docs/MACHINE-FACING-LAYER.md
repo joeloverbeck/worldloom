@@ -49,7 +49,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Rebuild or refresh machine-readable world state | `world-index build <world>` / `world-index sync <world>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
-| Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `get_record_field`, `get_neighbors`, `find_named_entities` |
+| Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `list_records`, `get_record_field`, `get_neighbors`, `find_named_entities` |
 | Localize source-local names that are not world-level canonical entities | `find_named_entities.scoped_matches`, `get_node.scoped_references`, and `search_nodes` with `reference_name` or `include_scoped_references` |
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
@@ -62,6 +62,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `search_nodes` | FTS5 lexical node content plus structured filters such as node type, file path, canonical entity name, and scoped-reference name. Default mode is capped and ranked. Use `exhaustive: true` for Rule 6 audit scans that need presence/absence confirmation across prose bodies; exhaustive results are sorted by `node_id` and include `match_locations[]`. |
 | `get_node` | One indexed node plus its structured links, mentions, scoped references, and file metadata. |
 | `get_record` | The full parsed record for a structured id such as CF / CH / M / OQ / SEC / PA / DA / CHAR. Use this after context-packet previews before citing record content. |
+| `list_records` | All parsed atomic records for one supported record type, with optional top-level field projection. Use for bulk-type sweeps such as every invariant or every Mystery Reserve firewall block. `record_id` is always included in projected records; large CF or SEC sweeps should be reserved for deliberate audit workflows. |
 | `get_record_field` | A single field of a parsed atomic record. Use when the field is small and the record body is large, such as `touched_by_cf` on a large SEC record. Reuses `get_record`'s record-resolution path. |
 | `get_record_schema` | JSON Schema for a record class plus transitively referenced schemas. Use to discover field constraints, regex patterns, enum values, and required/optional fields before authoring a record draft. |
 | `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |

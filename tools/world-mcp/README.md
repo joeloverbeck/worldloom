@@ -4,13 +4,14 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
-**Status**: Stdio MCP entrypoint registers 15 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`; `submit_patch_plan` delegates to `@worldloom/patch-engine`
+**Status**: Stdio MCP entrypoint registers 16 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators`; `submit_patch_plan` delegates to `@worldloom/patch-engine`
 
 ## Tools
 
 - `mcp__worldloom__search_nodes(query, filters, exhaustive?)` — searches FTS5 lexical node content. Default mode preserves capped, ranked retrieval. Use `exhaustive: true` for Rule 6 presence/absence scans across prose bodies; exhaustive mode returns every match sorted by `node_id` and adds `match_locations: ('body' | 'heading_path' | 'summary')[]` per row.
 - `mcp__worldloom__get_node(node_id)`
 - `mcp__worldloom__get_record(record_id)`
+- `mcp__worldloom__list_records(world_slug, record_type, fields?)` — returns every parsed atomic record for one supported record type, with optional top-level field projection. `record_id` is always included in projected records. Use for bulk sweeps such as every invariant or every Mystery Reserve firewall block.
 - `mcp__worldloom__get_record_field(record_id, field_path, world_slug?)` — returns a single field from a parsed record without loading the full body. `field_path` is `(string | number)[]`: numeric segments index arrays, string segments address object keys. Examples: `get_record_field("SEC-ELF-001", ["touched_by_cf"])` for a CF list, or `get_record_field("CF-0042", ["extensions", 0, "body"])` for one extension body.
 - `mcp__worldloom__get_record_schema(node_type)` — returns the JSON Schema for a record class plus `source_path` and `referenced_schemas`, a map of transitively referenced schemas keyed by `$id` URL. Supported `node_type` values: `canon_fact_record`, `change_log_entry`, `invariant`, `mystery_reserve_entry`, `open_question_entry`, `named_entity`, `section`, `character_record`, `diegetic_artifact_record`, `adjudication_record`.
 - `mcp__worldloom__get_neighbors(node_id, edge_types, depth)`

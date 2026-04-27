@@ -1,22 +1,22 @@
 # CHARGENMCP-002: Add `list_records` bulk-typed retrieval primitive to world-mcp
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — new MCP tool `tools/world-mcp/src/tools/list-records.ts`; `tools/world-mcp/src/server.ts` registration; `tools/world-mcp/src/tool-names.ts`; `docs/MACHINE-FACING-LAYER.md` retrieval table; `tools/world-mcp/tests/tools/list-records.test.ts`
+**Engine Changes**: Yes — new MCP tool `tools/world-mcp/src/tools/list-records.ts`; `tools/world-mcp/src/server.ts` registration; `tools/world-mcp/src/tool-names.ts`; `docs/MACHINE-FACING-LAYER.md` retrieval table; `tools/world-mcp/README.md` tool inventory; `tools/world-mcp/tests/tools/list-records.test.ts`; server inventory/dispatch tests
 **Deps**: none
 
 ## Problem
 
-During the Namahan character-generation run (2026-04-27), satisfying Phase 7a (test against every invariant) and Phase 7b (record every M record into the firewall list) required one of three workarounds: (a) read every `worlds/animalia/_source/invariants/*.yaml` and `worlds/animalia/_source/mystery-reserve/*.yaml` file directly (Hook 2 carve-out for single-file reads — but the design intent is "always go through MCP for `_source/` reads"); (b) call `mcp__worldloom__search_nodes(node_type='invariant_record')` then N follow-up `mcp__worldloom__get_record(record_id)` calls (1 + N round-trips); (c) rely on `mcp__worldloom__get_context_packet` to bring all of them in (covered for `character_generation` by CHARGENMCP-001, but not a general solution for skills outside character-generation).
+At intake, during the Namahan character-generation run (2026-04-27), satisfying Phase 7a (test against every invariant) and Phase 7b (record every M record into the firewall list) required one of three workarounds: (a) read every `worlds/animalia/_source/invariants/*.yaml` and `worlds/animalia/_source/mystery-reserve/*.yaml` file directly (Hook 2 carve-out for single-file reads — but the design intent is "always go through MCP for `_source/` reads"); (b) call `mcp__worldloom__search_nodes(node_type='invariant_record')` then N follow-up `mcp__worldloom__get_record(record_id)` calls (1 + N round-trips); (c) rely on `mcp__worldloom__get_context_packet` to bring all of them in (covered for `character_generation` by CHARGENMCP-001, but not a general solution for skills outside character-generation).
 
-The general primitive missing from the MCP surface is "give me every record of type X with optional field projection." `mcp__worldloom__search_nodes(node_type=...)` returns matching node IDs but does not deliver bodies. `mcp__worldloom__get_record(record_id)` is one record at a time. `mcp__worldloom__get_context_packet` is task-typed and locality-first, not a general bulk fetch. `mcp__worldloom__get_canonical_vocabulary` is vocabulary-only. There is no single-call "fetch all invariants" or "fetch every M record's `disallowed_cheap_answers`" primitive.
+Before this ticket, the general primitive missing from the MCP surface was "give me every record of type X with optional field projection." `mcp__worldloom__search_nodes(node_type=...)` returned matching node IDs but did not deliver bodies. `mcp__worldloom__get_record(record_id)` was one record at a time. `mcp__worldloom__get_context_packet` was task-typed and locality-first, not a general bulk fetch. `mcp__worldloom__get_canonical_vocabulary` was vocabulary-only. There was no single-call "fetch all invariants" or "fetch every M record's `disallowed_cheap_answers`" primitive.
 
 A typed bulk retrieval would cleanly serve: `continuity-audit` (sweeps over all invariants and all CFs); `propose-new-canon-facts` (broad scan of mystery-reserve open questions); `canon-addition` adjudication when the proposed CF affects multiple invariants and the audit needs each invariant's full break-conditions; `world-validate` follow-ups; and any future skill needing per-record-type sweeps.
 
 ## Assumption Reassessment (2026-04-27)
 
-1. The MCP server (`tools/world-mcp/src/server.ts`) currently exposes 15 tools per `dist/src/server.js:210–224`. None match the "list every record of type X with optional field projection" shape. Verified by inspecting `tools/world-mcp/src/tools/` (`allocate-next-id`, `find-edit-anchors`, `find-impacted-fragments`, `find-named-entities`, `find-sections-touched-by`, `get-canonical-vocabulary`, `get-context-packet`, `get-neighbors`, `get-node`, `get-record`, `get-record-field`, `get-record-schema`, `search-nodes`, `submit-patch-plan`, `validate-patch-plan`).
+1. At reassessment before implementation, the MCP server (`tools/world-mcp/src/server.ts`, `tools/world-mcp/src/tool-names.ts`) exposed 15 source-registered tools. None matched the "list every record of type X with optional field projection" shape. Verified by inspecting `tools/world-mcp/src/tools/` (`allocate-next-id`, `find-edit-anchors`, `find-impacted-fragments`, `find-named-entities`, `find-sections-touched-by`, `get-canonical-vocabulary`, `get-context-packet`, `get-neighbors`, `get-node`, `get-record`, `get-record-field`, `get-record-schema`, `search-nodes`, `submit-patch-plan`, `validate-patch-plan`).
 2. `tools/world-index/` (the SQLite world index) already supports per-node-type queries — `tools/world-mcp/src/tools/search-nodes.ts` filters by `node_type`. The data substrate is in place; only the bulk-body-delivery layer is missing.
 3. Cross-skill / cross-artifact boundary under audit: the MCP retrieval surface contract documented in `docs/MACHINE-FACING-LAYER.md` §Localize, §Read full content, §Inspect a known field. The new tool slots into the "Read full content of multiple records of one type" axis, which is currently empty.
 4. FOUNDATIONS principle under audit: §Tooling Recommendation's "skills should always receive — directly or via the documented context-packet + targeted-retrieval pattern — current Invariants" and "mystery reserve entries touching the same domain". A bulk primitive strengthens "directly" — it adds a documented retrieval surface for the canonical "give me every X" use case without weakening either targeted or packet-based retrieval.
@@ -26,6 +26,9 @@ A typed bulk retrieval would cleanly serve: `continuity-audit` (sweeps over all 
 8. Adjacent contradictions exposed by reassessment:
    - `mcp__worldloom__get_record_field` (already implemented, registered, but not exposed in the tool surface during the Namahan session — runtime staleness, not a code gap) is the per-record analog of this primitive's per-field projection. The new `list_records` tool composes naturally with it: skill workflows can use `list_records` for the bulk shape and `get_record_field` for narrow lookups on already-known IDs.
    - CHARGENMCP-001 makes the character_generation packet complete-by-construction for invariants and M records; this ticket's primitive is the general analog for non-character-generation flows.
+9. Package-command mismatch corrected before implementation: this repo has no root `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, or `turbo` surface. `tools/world-mcp/package.json` is the truthful command root; the proof lane is `cd tools/world-mcp && npm run build`, then a compiled direct test such as `node --test dist/tests/tools/list-records.test.js`, then package-local `npm test`.
+10. Direct external `mcp__worldloom__list_records` invocation is not exposed in this Codex session before the tool lands. Registration and wrapped-tool behavior will be proved through the package's in-memory MCP client/server tests after build, not by overclaiming an external MCP probe.
+11. Live Animalia source counts remain the ticket's motivating witness: `worlds/animalia/_source/invariants/*.yaml` has 16 records and `worlds/animalia/_source/mystery-reserve/*.yaml` has 20 records. The checked-in package test will use the existing temp-index harness rather than depending on gitignored live-world state.
 
 ## Architecture Check
 
@@ -80,10 +83,10 @@ Update `docs/MACHINE-FACING-LAYER.md` retrieval table to add `list_records` row:
 ### 4. Tests
 
 Add `tools/world-mcp/tests/tools/list-records.test.ts`:
-- returns all 16 invariants for the Animalia fixture
-- returns all 20 M records for the Animalia fixture
+- returns all records for a requested atomic record type from a temp-index fixture
+- preserves the live Animalia motivating counts in reassessment without depending on gitignored world state
 - field projection returns only `record_id` + requested fields
-- unknown `record_type` returns a typed error, not a partial result
+- unsupported `record_type` returns a typed error, not a partial result
 
 ## Files to Touch
 
@@ -91,7 +94,10 @@ Add `tools/world-mcp/tests/tools/list-records.test.ts`:
 - `tools/world-mcp/src/server.ts` (modify — tool registration)
 - `tools/world-mcp/src/tool-names.ts` (modify — name constant)
 - `tools/world-mcp/tests/tools/list-records.test.ts` (new)
+- `tools/world-mcp/tests/server/list-tools.test.ts` (modify — tool inventory count)
+- `tools/world-mcp/tests/server/dispatch.test.ts` (modify — wrapped-tool dispatch)
 - `docs/MACHINE-FACING-LAYER.md` (modify — retrieval table)
+- `tools/world-mcp/README.md` (modify — tool inventory)
 
 ## Out of Scope
 
@@ -103,11 +109,11 @@ Add `tools/world-mcp/tests/tools/list-records.test.ts`:
 
 ### Tests That Must Pass
 
-1. `pnpm --filter world-mcp test --testPathPattern=tools/list-records` passes.
-2. `pnpm --filter world-mcp test` passes.
-3. `pnpm turbo test` passes (full pipeline gate).
-4. Manual MCP probe: from a skill or test harness, `mcp__worldloom__list_records(world_slug='animalia', record_type='invariant_record')` returns 16 records with full bodies.
-5. Manual MCP probe: `mcp__worldloom__list_records(world_slug='animalia', record_type='mystery_record', fields=['disallowed_cheap_answers'])` returns 20 records each with `record_id` + `disallowed_cheap_answers` and no other fields.
+1. `cd tools/world-mcp && npm run build` passes.
+2. `cd tools/world-mcp && node --test dist/tests/tools/list-records.test.js` passes.
+3. `cd tools/world-mcp && npm test` passes.
+4. In-memory MCP dispatch test proves `mcp__worldloom__list_records(world_slug='seeded', record_type='invariant_record')` returns records through the registered server wrapper.
+5. Handler-level test proves field projection for `record_type='mystery_record'` returns each record with `record_id` + requested fields and no unrelated fields.
 
 ### Invariants
 
@@ -120,11 +126,39 @@ Add `tools/world-mcp/tests/tools/list-records.test.ts`:
 
 ### New/Modified Tests
 
-1. `tools/world-mcp/tests/tools/list-records.test.ts` (new) — covers full-body retrieval, field projection, unknown-type error path, world-not-found error path.
+1. `tools/world-mcp/tests/tools/list-records.test.ts` (new) — covers full-body retrieval, field projection, invalid record-type error path, and world-not-found error path.
+2. `tools/world-mcp/tests/server/list-tools.test.ts` (modified) — proves the registered inventory count includes the new tool.
+3. `tools/world-mcp/tests/server/dispatch.test.ts` (modified) — proves the wrapped MCP server dispatches the new tool.
 
 ### Commands
 
-1. `pnpm --filter world-mcp test --testPathPattern=tools/list-records`
-2. `pnpm --filter world-mcp test`
-3. `pnpm turbo test`
-4. After build + Claude Code restart: `mcp__worldloom__list_records(world_slug='animalia', record_type='mystery_record')` should return 20 records.
+1. `cd tools/world-mcp && npm run build`
+2. `cd tools/world-mcp && node --test dist/tests/tools/list-records.test.js`
+3. `cd tools/world-mcp && npm test`
+4. Direct external MCP invocation after a Codex/Claude restart is an operational smoke only; it was not part of this run's acceptance surface because the new tool was not exposed in the active session before restart.
+
+## Outcome
+
+Completed on 2026-04-27.
+
+Implemented `mcp__worldloom__list_records` as an additive read-only `tools/world-mcp` retrieval primitive. The tool queries the world index by supported atomic record type, parses record YAML through the existing `get_record` parser path, returns full parsed records by default, and supports top-level field projection with `record_id` always included.
+
+The server registry, tool-name inventory, package README, and `docs/MACHINE-FACING-LAYER.md` now document the 16-tool MCP surface and the intended bulk-record sweep use case. Server inventory and dispatch tests were updated so registration is proved through the in-memory MCP wrapper, not only the direct handler.
+
+## Verification Result
+
+Passed:
+
+1. `cd tools/world-mcp && npm run build`
+2. `cd tools/world-mcp && node --test dist/tests/tools/list-records.test.js`
+3. `cd tools/world-mcp && npm test`
+
+Manual/source checks completed:
+
+1. Confirmed live Animalia motivating counts: 16 invariant YAML records and 20 Mystery Reserve YAML records under `worlds/animalia/_source/`.
+2. Confirmed no root pnpm workspace or turbo command surface exists; package-local npm commands are the truthful proof lane.
+3. Confirmed the active Codex session did not expose a direct `mcp__worldloom__list_records` tool before restart; package-local in-memory MCP tests are the accepted substitute proof.
+
+## Deviations
+
+The drafted `pnpm --filter world-mcp ...` and `pnpm turbo test` commands were replaced with the live package-local npm proof surface. The drafted direct post-build MCP probes were also replaced with direct handler and in-memory MCP server tests because the session toolset cannot expose a newly added MCP tool until the server is rebuilt and the client session restarts.

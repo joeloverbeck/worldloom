@@ -18,6 +18,7 @@ import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
+import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
 import { searchNodes } from "./tools/search-nodes";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan";
 import { validatePatchPlan } from "./tools/validate-patch-plan";
@@ -86,6 +87,12 @@ const getNodeInputSchema = z.object({
 const getRecordInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional()
+});
+
+const listRecordsInputSchema = z.object({
+  world_slug: z.string().min(1),
+  record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
+  fields: z.array(z.string().min(1)).optional()
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -229,6 +236,13 @@ export function createServer(): McpServer {
     "get_record: Fetch an atomic record's parsed YAML content with content_hash and file_path.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
+  );
+  registerWrappedTool(
+    server,
+    "list_records",
+    "list_records: Return all records of a given atomic record type, with optional field projection.",
+    listRecordsInputSchema,
+    async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0])
   );
   registerWrappedTool(
     server,
