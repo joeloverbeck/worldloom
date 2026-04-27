@@ -1,6 +1,6 @@
 # tools/
 
-Machine-facing layer for worldloom. Empty scaffold in Phase 0; populated progressively in Phases 1–2 per `specs/IMPLEMENTATION-ORDER.md`.
+Machine-facing layer for worldloom. Empty scaffold in Phase 0; populated progressively in Phases 1–2 per archived batch history `archive/specs/IMPLEMENTATION-ORDER-2026-04-27.md`.
 
 ## Sub-packages
 

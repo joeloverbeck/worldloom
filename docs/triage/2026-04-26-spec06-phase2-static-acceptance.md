@@ -146,7 +146,7 @@ The following SPEC-06 §Verification gates were retired on 2026-04-26 alongside 
 - **Reasoning preservation** — historical-adjudication re-runs retired. Mitigation survives structurally as judgment-reference-file preservation.
 - **Role split (Localizer–Editor–Auditor) instrumented dispatch** — retired as a measured gate. Pattern remains as implementation guidance in SPEC-06 §Agent role split.
 
-These retirements are recorded in `archive/specs/SPEC-06-skill-rewrite-patterns.md` §Retired verification gates (and the corresponding Phase 2 token-reduction pointers in `specs/SPEC-08-migration-and-phasing.md` and `specs/IMPLEMENTATION-ORDER.md`). This audit report intentionally does not re-litigate them; consult that section if the question of "why isn't the audit measuring tokens?" comes up later.
+These retirements are recorded in `archive/specs/SPEC-06-skill-rewrite-patterns.md` §Retired verification gates (and the corresponding Phase 2 token-reduction pointers in `archive/specs/SPEC-08-migration-and-phasing.md` and `archive/specs/IMPLEMENTATION-ORDER-2026-04-27.md`). This audit report intentionally does not re-litigate them; consult that section if the question of "why isn't the audit measuring tokens?" comes up later.
 
 ## §Capstone verdict
 

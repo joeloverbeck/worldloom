@@ -1,6 +1,6 @@
 # Validator And Schema Migration Checks
 
-Use this reference for tickets that change validators, JSON Schemas, hybrid frontmatter parsing, validator registries, grandfathering/waiver matchers, or live-corpus validator baselines.
+Use this reference for tickets that change validators, JSON Schemas, hybrid frontmatter parsing, validator registries, grandfathering/waiver matchers, live-corpus validator baselines, or validator-package capstone / verification-matrix coverage.
 
 ## Reassessment
 
@@ -12,6 +12,7 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 - Before deleting validator source or tests, check whether compiled outputs such as `dist/` may still be picked up by the package test command. Use the package clean script when available before the final proof, then classify the regenerated ignored output.
 - For live-corpus baselines, record both pre-change and post-change counts when the ticket changes emitted verdict shape or matching behavior. A non-zero post-change corpus result can be the correct acceptance state when a later content or migration ticket owns cleanup.
 - When a validator must temporarily read a prose/text surface because no structured schema field exists yet, define the accepted mini-format during reassessment, name the transitional source field explicitly, and record why a structured field is not currently available. Do not present the text convention as a stable schema contract or silently infer broad prose semantics.
+- For validator capstone or spec-verification matrix tickets, classify every named scenario before coding as `mechanized`, `surrogate`, `manual/organic`, or `dropped from capstone`. Preserve that classification in the ticket/spec when the implemented test cannot or should not exercise skill-flow behavior directly.
 
 ## Verification
 
@@ -21,6 +22,7 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 - Run the package's build/test lane from the package root after cleaning stale compiled output if files were renamed or deleted.
 - If a live-corpus command is part of acceptance, capture the post-change summary and the key targeted counts, including retired-validator zero-count checks and renamed-code counts.
 - For shared producer vocabularies or schemas consumed through a local `file:` or symlinked package, rebuild the producer and verify the consumer-resolved artifact before trusting consumer proof.
+- For capstone surrogates, prove the production/default validator or pre-apply path stays fail-closed and name what the surrogate does not prove, especially when a skill-flow scenario is represented by a hand-authored envelope, fixture, or direct validator call.
 
 ## Closeout
 
@@ -28,3 +30,4 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 - Label old failure evidence as historical intake evidence when the validator no longer emits the old code or message.
 - Record exact grandfathering/waiver matcher changes separately from content cleanup so the ticket does not imply canon/source normalization happened when only the matcher surface changed.
 - Name any remaining visible live-corpus failures and the ticket or spec that owns them.
+- For verification-matrix closeout, update same-seam spec/status docs when scenario ownership changes from full skill-flow proof to mechanized proof, surrogate proof, or manual/organic verification. Do not leave the spec implying an end-to-end skill run happened when only package-local validator coverage was executed.
