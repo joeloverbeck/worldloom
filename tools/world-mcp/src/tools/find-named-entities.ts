@@ -49,6 +49,14 @@ export interface FindNamedEntitiesResponse {
   canonical_matches: CanonicalMatch[];
   scoped_matches: ScopedMatch[];
   surface_matches: SurfaceMatch[];
+  hints?: FindNamedEntityHint[];
+}
+
+export interface FindNamedEntityHint {
+  query: string;
+  descriptor_kind: "region" | "era";
+  record_count: number;
+  message: string;
 }
 
 interface CanonicalEntityRow {
@@ -68,8 +76,92 @@ interface ScopedReferenceRow {
   target_node_id: string | null;
 }
 
+interface DescriptorHintRow {
+  record_count: number;
+}
+
 function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
+}
+
+function descriptorLikeClause(fileClass: "geography" | "timeline"): string {
+  const rootFile = fileClass === "geography" ? "GEOGRAPHY.md" : "TIMELINE.md";
+  return `
+    (
+      file_path = '${rootFile}'
+      OR file_path LIKE '_source/${fileClass}/%'
+    )
+  `;
+}
+
+function loadDescriptorHint(
+  db: import("better-sqlite3").Database,
+  worldSlug: string,
+  query: string
+): FindNamedEntityHint | undefined {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  if (normalizedQuery.length === 0) {
+    return undefined;
+  }
+
+  const loadCount = (fileClass: "geography" | "timeline"): number => {
+    const row = db
+      .prepare(
+        `
+          SELECT COUNT(DISTINCT node_id) AS record_count
+          FROM nodes
+          WHERE world_slug = ?
+            AND ${descriptorLikeClause(fileClass)}
+            AND (
+              instr(lower(coalesce(heading_path, '')), ?) > 0
+              OR instr(lower(coalesce(summary, '')), ?) > 0
+              OR instr(lower(body), ?) > 0
+            )
+        `
+      )
+      .get(worldSlug, normalizedQuery, normalizedQuery, normalizedQuery) as DescriptorHintRow;
+
+    return row.record_count;
+  };
+
+  const eraCount = loadCount("timeline");
+  const regionCount = loadCount("geography");
+  const looksEraLike = /\b(era|age|period|wave|epoch)\b/i.test(query);
+
+  if (eraCount > 0 && (regionCount === 0 || looksEraLike)) {
+    return {
+      query,
+      descriptor_kind: "era",
+      record_count: eraCount,
+      message: `no exact entity match; '${query}' appears as an era descriptor in ${eraCount} record${
+        eraCount === 1 ? "" : "s"
+      } - try search_nodes(world_slug, query='${query}') for content lookup`
+    };
+  }
+
+  if (regionCount > 0) {
+    return {
+      query,
+      descriptor_kind: "region",
+      record_count: regionCount,
+      message: `no exact entity match; '${query}' appears as a region descriptor in ${regionCount} record${
+        regionCount === 1 ? "" : "s"
+      } - try search_nodes(world_slug, query='${query}') for content lookup`
+    };
+  }
+
+  if (eraCount > 0) {
+    return {
+      query,
+      descriptor_kind: "era",
+      record_count: eraCount,
+      message: `no exact entity match; '${query}' appears as an era descriptor in ${eraCount} record${
+        eraCount === 1 ? "" : "s"
+      } - try search_nodes(world_slug, query='${query}') for content lookup`
+    };
+  }
+
+  return undefined;
 }
 
 function loadMentionGroups(
@@ -109,8 +201,10 @@ export async function findNamedEntities(
     const canonicalMatches: CanonicalMatch[] = [];
     const scopedMatches: ScopedMatch[] = [];
     const surfaceMatches: SurfaceMatch[] = [];
+    const hints: FindNamedEntityHint[] = [];
 
     for (const name of names) {
+      let queryHasMatches = false;
       const canonicalNameRows = opened.db
         .prepare(
           `
@@ -124,6 +218,7 @@ export async function findNamedEntities(
         .all(args.world_slug, name) as CanonicalEntityRow[];
 
       for (const row of canonicalNameRows) {
+        queryHasMatches = true;
         canonicalMatches.push({
           query: name,
           entity_id: row.entity_id,
@@ -159,6 +254,7 @@ export async function findNamedEntities(
       >;
 
       for (const row of aliasRows) {
+        queryHasMatches = true;
         canonicalMatches.push({
           query: name,
           entity_id: row.entity_id,
@@ -191,6 +287,7 @@ export async function findNamedEntities(
         .all(args.world_slug, name) as ScopedReferenceRow[];
 
       for (const row of scopedDisplayNameRows) {
+        queryHasMatches = true;
         scopedMatches.push({
           query: name,
           reference_id: row.reference_id,
@@ -231,6 +328,7 @@ export async function findNamedEntities(
       >;
 
       for (const row of scopedAliasRows) {
+        queryHasMatches = true;
         scopedMatches.push({
           query: name,
           reference_id: row.reference_id,
@@ -261,6 +359,7 @@ export async function findNamedEntities(
         .all(args.world_slug, name) as MentionNodeTypeGroup[];
 
       for (const row of unresolvedRows) {
+        queryHasMatches = true;
         surfaceMatches.push({
           query: name,
           surface_text: name,
@@ -268,6 +367,13 @@ export async function findNamedEntities(
           node_type: row.node_type,
           count: row.count
         });
+      }
+
+      if (!queryHasMatches) {
+        const hint = loadDescriptorHint(opened.db, args.world_slug, name);
+        if (hint !== undefined) {
+          hints.push(hint);
+        }
       }
     }
 
@@ -315,11 +421,17 @@ export async function findNamedEntities(
       return left.node_type.localeCompare(right.node_type);
     });
 
-    return {
+    const response: FindNamedEntitiesResponse = {
       canonical_matches: canonicalMatches,
       scoped_matches: scopedMatches,
       surface_matches: surfaceMatches
     };
+
+    if (hints.length > 0) {
+      response.hints = hints;
+    }
+
+    return response;
   } finally {
     opened.db.close();
   }

@@ -219,6 +219,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.list_records,
+        args: { world_slug: "seeded", record_type: "canon_fact" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.get_record_field,
         args: { record_id: "SEC-GEO-001", field_path: ["touched_by_cf"], world_slug: "seeded" },
         expectError: false
@@ -309,6 +314,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.search_nodes, args: {} },
       { name: MCP_TOOL_NAMES.get_node, args: {} },
       { name: MCP_TOOL_NAMES.get_record, args: {} },
+      { name: MCP_TOOL_NAMES.list_records, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_field, args: { record_id: "SEC-GEO-001", world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_schema, args: {} },
       { name: MCP_TOOL_NAMES.get_neighbors, args: { world_slug: "seeded", depth: 1 } },

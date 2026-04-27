@@ -18,6 +18,7 @@ import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
+import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
 import { searchNodes } from "./tools/search-nodes";
 import { handleSubmitPatchPlanTool } from "./tools/submit-patch-plan";
 import { validatePatchPlan } from "./tools/validate-patch-plan";
@@ -86,6 +87,12 @@ const getNodeInputSchema = z.object({
 const getRecordInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional()
+});
+
+const listRecordsInputSchema = z.object({
+  world_slug: z.string().min(1),
+  record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
+  fields: z.array(z.string().min(1)).optional()
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -232,6 +239,13 @@ export function createServer(): McpServer {
   );
   registerWrappedTool(
     server,
+    "list_records",
+    "list_records: Return all records of a given atomic record type, with optional field projection.",
+    listRecordsInputSchema,
+    async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0])
+  );
+  registerWrappedTool(
+    server,
     "get_record_field",
     "get_record_field: Fetch one field from an atomic record without returning the full parsed record.",
     getRecordFieldInputSchema,
@@ -275,7 +289,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "find_named_entities",
-    "Resolve exact canonical and unresolved surface-name matches.",
+    "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0])
   );
@@ -296,7 +310,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "validate_patch_plan",
-    "Validate a patch plan envelope without mutating world content.",
+    "Validate a patch plan envelope without mutating world content. Returns status: 'pass' | 'fail' | 'skipped' with verdicts and an optional skip reason.",
     validatePatchPlanInputSchema,
     async (args) => validatePatchPlan(args as unknown as Parameters<typeof validatePatchPlan>[0])
   );

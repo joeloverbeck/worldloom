@@ -4,7 +4,7 @@ The three sub-phases are independent checks with independent failure modes. All 
 
 ## Phase 7a: Invariant Conformance
 
-For every capability, belief, knowledge claim, material-reality fact, and perception trait generated in Phases 1-6, test against every INV record retrieved by the context packet (the `character_generation` ranking profile loads all five invariant categories — ONT-N / CAU-N / DIS-N / SOC-N / AES-N — by default; if any are missing, fetch via `mcp__worldloom__search_nodes(node_type='invariant_record')`). For each invariant tested, record the result into `world_consistency.invariants_respected` as the invariant id.
+For every capability, belief, knowledge claim, material-reality fact, and perception trait generated in Phases 1-6, test against every INV record retrieved by the context packet (the `character_generation` packet loads all five invariant categories — ONT-N / CAU-N / DIS-N / SOC-N / AES-N — by default, with full parsed `record` bodies in `governing_world_context.nodes`). For each invariant tested, record the result into `world_consistency.invariants_respected` as the invariant id.
 
 Fail triggers (send to Phase 7d):
 - direct violation of an ontological invariant (e.g., character "remembers a past life" in a no-resurrection world)
@@ -19,7 +19,7 @@ Fail triggers (send to Phase 7d):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__search_nodes(node_type='mystery_record')` if any are missing), check whether its `what_is_unknown` block overlaps the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
+For every M-NNNN record retrieved by the context packet (the `character_generation` packet loads all Mystery Reserve records' Phase 7b firewall fields in `governing_world_context.nodes`), check whether its `what_is_unknown` block overlaps the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
 
 For each entry where overlap IS found:
 

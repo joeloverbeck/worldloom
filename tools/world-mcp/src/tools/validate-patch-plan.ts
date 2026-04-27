@@ -11,9 +11,10 @@ export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
 }
 
-export interface ValidatePatchPlanResponse {
-  verdicts: Verdict[];
-}
+export type ValidatePatchPlanResponse =
+  | { status: "pass"; verdicts: Verdict[] }
+  | { status: "fail"; verdicts: Verdict[] }
+  | { status: "skipped"; reason: string; verdicts: [] };
 
 function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
@@ -28,8 +29,16 @@ export async function validatePatchPlan(
 
   const shapeError = validatePatchPlanEnvelopeShape(args.patch_plan);
   if (shapeError !== null) {
-    return shapeError;
+    return { status: "skipped", reason: shapeError.message, verdicts: [] };
   }
 
-  return runValidatePatchPlan(args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0]);
+  const result = await runValidatePatchPlan(
+    args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0]
+  );
+  const hasFailures = result.verdicts.some((verdict) => verdict.severity === "fail");
+
+  return {
+    status: hasFailures ? "fail" : "pass",
+    verdicts: result.verdicts
+  };
 }

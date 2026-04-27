@@ -32,7 +32,7 @@ governing_world_context:
   required_output_schema: []
   prohibited_moves: []
   open_risks: []
-  nodes: []
+  nodes: [] # node objects may include optional parsed record projections for mandatory governing records
   why_included: []
 impact_surfaces:
   nodes: []
@@ -95,6 +95,7 @@ This layer carries:
 - open risks
 - governing nodes such as required kernel or invariant files
 - Mystery Reserve firewall nodes when locality intersects protected unknowns
+- optional parsed `record` projections on mandatory governing nodes when a task requires full-record audit semantics rather than a body-preview index
 
 ### 6. Impact surfaces
 
@@ -131,7 +132,7 @@ The context packet's five content layers (`local_authority` through `impact_surf
 - `local_authority`: character-local record anchors and declared scoped references
 - `exact_record_links`: exact linked batches, artifacts, or source records
 - `scoped_local_context`: local place, institution, and relation nodes needed to avoid decontextualized generation
-- `governing_world_context`: no-world-write rules, distribution discipline, Mystery Reserve firewall
+- `governing_world_context`: no-world-write rules, distribution discipline, all invariant records with full parsed `record` bodies, all Mystery Reserve records with parsed firewall fields (`what_is_unknown`, `disallowed_cheap_answers`, `common_in_world_interpretations`, `status`), Mystery Reserve firewall on locality intersection nodes
 - `impact_surfaces`: adjacent dossier or audit surfaces likely to matter before closeout
 
 ### Continuity audit

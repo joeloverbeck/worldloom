@@ -31,6 +31,7 @@ Read `AGENTS.md` and `docs/FOUNDATIONS.md` before producing findings if they wer
    - concise `SKILL.md`
    - trigger text that clearly states when to use the skill
    - references or scripts only when they reduce repeated agent work
+5. If the target participates in a multi-skill workflow, identify sibling skills only from explicit references in the target skill or `docs/WORKFLOWS.md`. Read only sibling trigger text, handoff/guardrail sections, and directly named references needed to check terminology, path, or ownership conflicts. If no concrete sibling conflict is found, put unexercised sibling-flow coverage under `Not Exercised` instead of inventing a finding.
 
 ### 3. Reflect on session evidence
 
@@ -133,5 +134,5 @@ Return the report in the conversation using this structure:
 - Every Issue and Improvement must be backed by concrete session evidence.
 - Reject any proposed suggestion that would violate `docs/FOUNDATIONS.md`.
 - Keep scope discipline. Audit the skill as written; do not expand it into a different tool.
-- If the skill participates in a multi-skill workflow, check sibling skills for conflicting terminology, paths, or handoff assumptions and report concrete inconsistencies.
+- If the skill participates in a multi-skill workflow, apply the bounded sibling-skill check above and report only concrete inconsistencies.
 - When follow-up edits are requested, snapshot `git status --short`, distinguish pre-existing dirty work from the skill-edit ownership, apply suggestions in document order, and then re-read the changed sections to confirm the workflow still reads coherently. Final-report only the skill files changed by the follow-up, while noting any pre-existing unrelated dirt was left untouched.

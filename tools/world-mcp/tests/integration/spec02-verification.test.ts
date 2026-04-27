@@ -420,7 +420,7 @@ test("SPEC-04 integration: validate_patch_plan returns verdicts from the validat
       });
 
       assert.notEqual(result.isError, true);
-      assert.deepEqual(result.structuredContent, { verdicts: [] });
+      assert.deepEqual(result.structuredContent, { status: "pass", verdicts: [] });
 
       const rule4Plan = buildValidatorCleanPatchPlan();
       (rule4Plan.patches[0]!.payload as any).cf_record.distribution.why_not_universal = [];
@@ -430,7 +430,12 @@ test("SPEC-04 integration: validate_patch_plan returns verdicts from the validat
       });
 
       assert.notEqual(rule4Result.isError, true);
-      const verdicts = (rule4Result.structuredContent as { verdicts: Array<{ code: string }> }).verdicts;
+      const rule4Content = rule4Result.structuredContent as {
+        status?: string;
+        verdicts: Array<{ code: string }>;
+      };
+      assert.equal(rule4Content.status, "fail");
+      const verdicts = rule4Content.verdicts;
       assert.ok(verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
     });
   } finally {
