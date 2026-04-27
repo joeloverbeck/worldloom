@@ -32,9 +32,8 @@ Use this as the default path, then apply the detailed rules below when the ticke
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
-- Keep a compact dirty-worktree ledger while working: `pre-existing unrelated`, `pre-existing same-seam`, `owned edits`, `new/untracked owned files`, and `externally appeared unrelated`. Use `externally appeared unrelated` for paths that were clean at the initial snapshot but appear dirty later and are outside the active ticket seam. Refresh the ledger before final response so untracked ticket/code files and mid-run unrelated edits are not silently omitted.
-- For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks. Before the first package command likely to create ignored artifacts, and again before final response, run an ignored-aware targeted status check for the affected package directory and classify the before/after ignored state in the ledger.
-- If dirty paths overlap the ticket's seam, inspect the live diffs before coding and classify them as unrelated local edits, partial implementation of the active ticket, or in-flight sibling-ticket work.
+- Load `references/dirty-worktree-ledger.md` and keep the dirty-worktree ledger current throughout the run, including initial overlap, mid-run same-file changes, same-family sibling scope, and ignored artifacts.
+- For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - For world-content writes, keep the write surface explicit:
   - `_source/*.yaml` atomic canon records are engine-only. Use `mcp__worldloom__submit_patch_plan` when it is exposed.
@@ -321,7 +320,7 @@ Update the active ticket before finishing:
 - for tickets that add or change a user-facing CLI, workflow command, or machine-layer command surface, inspect repo-level quick-reference docs such as `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention that command surface; truth stale same-seam references or record why another ticket owns them
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
 - when a ticket belongs to an active spec family, check implementation-order or roadmap/status tables such as `specs/IMPLEMENTATION-ORDER.md` for same-seam pending/completed wording even when archival is not in scope
-- refresh the dirty-worktree ledger and explicitly distinguish `pre-existing unrelated`, `pre-existing same-seam`, `owned edits`, `new/untracked owned files`, `externally appeared unrelated`, and `expected ignored artifacts` in the final response or ticket closeout; do not omit same-family untracked sibling tickets just because they were not owned by the current ticket
+- apply `references/dirty-worktree-ledger.md` before final response; explicitly distinguish owned edits, untracked owned files, pre-existing dirt, externally appeared changes, same-family sibling scope, and expected ignored artifacts in the final response or ticket closeout
 - run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, or skill files
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 

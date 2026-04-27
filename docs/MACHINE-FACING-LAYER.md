@@ -65,12 +65,12 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `get_record_field` | A single field of a parsed atomic record. Use when the field is small and the record body is large, such as `touched_by_cf` on a large SEC record. Reuses `get_record`'s record-resolution path. |
 | `get_record_schema` | JSON Schema for a record class plus transitively referenced schemas. Use to discover field constraints, regex patterns, enum values, and required/optional fields before authoring a record draft. |
 | `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |
-| `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are truncated; full text requires `get_record`. Omitted budgets use per-task defaults (`canon_addition` currently 16000, others 8000), and incomplete-packet errors include `retry_with.token_budget`. |
+| `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are generally truncated and full text requires `get_record`; task-specific governing nodes may carry parsed `record` projections, such as `character_generation` invariant records and Mystery Reserve firewall fields. Omitted budgets use per-task defaults (`canon_addition` currently 16000, others 8000), and incomplete-packet errors include `retry_with.token_budget`. |
 | `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
 | `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
 | `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. It does not scan prose bodies; pair with `search_nodes(exhaustive: true)` for lexical-only Rule 6 evidence. |
 
-**Recommended composition**: packet first (locality survey via `get_context_packet`), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites. See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
+**Recommended composition**: packet first (locality survey via `get_context_packet`), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites unless a task-specific governing node already carries the required parsed `record` projection. See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
 
 ## Trust tiers
 

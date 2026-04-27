@@ -10,11 +10,13 @@ Pre-flight calls:
 mcp__worldloom__get_context_packet(
   task_type='character_generation',
   seed_nodes=[<brief-derived seed nodes>],
-  token_budget=10000
+  token_budget=16000
 )
 ```
 
-Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories) + relevant CFs + Mystery Reserve entries touching the character's domain + named-entity neighbors + section context, with completeness guarantees against silent truncation.
+Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories, with full parsed `record` bodies) + relevant CFs + all Mystery Reserve records' Phase 7b firewall fields + named-entity neighbors + section context, with completeness guarantees against silent truncation.
+
+If the packet returns `packet_incomplete_required_classes`, retry with `token_budget` set to the response's `minimum_required_budget` field. The default above is calibrated for a typical call shape against a mature world; unusually large seed sets may exceed it.
 
 Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, species, or capability domain. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
 
@@ -56,7 +58,7 @@ For continuity-preservation reads at Pre-flight:
 | Phase 5 | capability CFs (each capability's `who_can_do_it` distribution); SEC-PAS (embodiment); SEC-GEO (regional effects); SEC-MTS (loaded selectively if magic/tech capabilities present) | `search_nodes(node_type='canon_fact', filters={domain: ...})` + `get_record` |
 | Phase 6 | SEC-ELF (language patterns by class/region/religion); SEC-PAS (senses); SEC-INS (taboo system) | packet + `get_record` |
 | Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants are always loaded by the `character_generation` profile) |
-| Phase 7b | every M-NNNN record (firewall) | packet + `search_nodes(node_type='mystery_record')` if any are missing |
+| Phase 7b | every M-NNNN record (firewall) | packet (all M-record firewall fields are always loaded by the `character_generation` profile) |
 | Phase 7c | matching capability CFs from Phase 5 | (already retrieved at Phase 5) |
 
 ## Selectively loaded

@@ -173,7 +173,7 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
       );
     });
 
-    await t.test("context packets fit locality-first classes under the live 8000-token budget", async () => {
+    await t.test("context packets report insufficiency at 8000 and fit at the retry budget", async () => {
       const melissa = await withRepoRoot(root, () =>
         getContextPacket({
           task_type: "character_generation",
@@ -182,6 +182,40 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
           token_budget: 8000
         })
       );
+
+      assert.ok("code" in melissa);
+      assert.equal(melissa.code, "packet_incomplete_required_classes");
+      assert.equal(melissa.details?.requested_budget, 8000);
+
+      const melissaRetryBudget = melissa.details?.retry_with;
+      assert.ok(
+        typeof melissaRetryBudget === "object" &&
+          melissaRetryBudget !== null &&
+          "token_budget" in melissaRetryBudget &&
+          typeof melissaRetryBudget.token_budget === "number"
+      );
+      const melissaTokenBudget = melissaRetryBudget.token_budget;
+
+      const melissaRetry = await withRepoRoot(root, () =>
+        getContextPacket({
+          task_type: "character_generation",
+          world_slug: WORLD_SLUG,
+          seed_nodes: ["CHAR-0002"],
+          token_budget: melissaTokenBudget
+        })
+      );
+
+      assert.ok(!("code" in melissaRetry));
+      assert.equal(melissaRetry.task_header.token_budget.requested, melissaTokenBudget);
+      assert.ok(melissaRetry.task_header.token_budget.allocated <= melissaTokenBudget);
+      assert.ok(melissaRetry.local_authority.nodes.some((node) => node.id === "CHAR-0002"));
+      assert.ok(melissaRetry.scoped_local_context.nodes.length > 0);
+      assert.ok(
+        melissaRetry.governing_world_context.nodes.some(
+          (node) => node.node_type === "mystery_reserve_entry" && node.record !== undefined
+        )
+      );
+
       const artifact = await withRepoRoot(root, () =>
         getContextPacket({
           task_type: "character_generation",
@@ -191,20 +225,39 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
         })
       );
 
-      assert.ok(!("code" in melissa));
-      assert.equal(melissa.task_header.token_budget.requested, 8000);
-      assert.ok(melissa.task_header.token_budget.allocated <= 8000);
-      assert.ok(melissa.local_authority.nodes.some((node) => node.id === "CHAR-0002"));
-      assert.ok(melissa.scoped_local_context.nodes.length > 0);
-      assert.ok(melissa.governing_world_context.nodes.length > 0);
+      assert.ok("code" in artifact);
+      assert.equal(artifact.code, "packet_incomplete_required_classes");
+      assert.equal(artifact.details?.requested_budget, 8000);
 
-      assert.ok(!("code" in artifact));
-      assert.equal(artifact.task_header.token_budget.requested, 8000);
-      assert.ok(artifact.task_header.token_budget.allocated <= 8000);
-      assert.ok(artifact.local_authority.nodes.some((node) => node.id === "DA-0002"));
-      assert.ok(artifact.exact_record_links.nodes.some((node) => node.id === "CHAR-0002"));
-      assert.ok(artifact.scoped_local_context.nodes.length > 0);
-      assert.ok(artifact.governing_world_context.nodes.length > 0);
+      const artifactRetryBudget = artifact.details?.retry_with;
+      assert.ok(
+        typeof artifactRetryBudget === "object" &&
+          artifactRetryBudget !== null &&
+          "token_budget" in artifactRetryBudget &&
+          typeof artifactRetryBudget.token_budget === "number"
+      );
+      const artifactTokenBudget = artifactRetryBudget.token_budget;
+
+      const artifactRetry = await withRepoRoot(root, () =>
+        getContextPacket({
+          task_type: "character_generation",
+          world_slug: WORLD_SLUG,
+          seed_nodes: ["DA-0002"],
+          token_budget: artifactTokenBudget
+        })
+      );
+
+      assert.ok(!("code" in artifactRetry));
+      assert.equal(artifactRetry.task_header.token_budget.requested, artifactTokenBudget);
+      assert.ok(artifactRetry.task_header.token_budget.allocated <= artifactTokenBudget);
+      assert.ok(artifactRetry.local_authority.nodes.some((node) => node.id === "DA-0002"));
+      assert.ok(artifactRetry.exact_record_links.nodes.some((node) => node.id === "CHAR-0002"));
+      assert.ok(artifactRetry.scoped_local_context.nodes.length > 0);
+      assert.ok(
+        artifactRetry.governing_world_context.nodes.some(
+          (node) => node.node_type === "invariant" && node.record !== undefined
+        )
+      );
     });
   } finally {
     destroyTempRepoRoot(root);

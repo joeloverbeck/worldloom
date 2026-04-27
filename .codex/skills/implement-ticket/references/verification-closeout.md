@@ -59,6 +59,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape
+- dirty-worktree state has been refreshed using `references/dirty-worktree-ledger.md`, including hunk-level classification for mid-run changes in files you also touched and likely sibling-ticket ownership for same-family edits
 
 ## Archival
 

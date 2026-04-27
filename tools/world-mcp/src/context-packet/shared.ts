@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import YAML from "yaml";
 import type { NodeType } from "@worldloom/world-index/public/types";
 
 import type { TaskType } from "../ranking/profiles";
@@ -18,6 +19,7 @@ export interface ContextPacketNode {
   heading_path: string | null;
   summary: string | null;
   body_preview: string;
+  record?: Record<string, unknown>;
 }
 
 export interface ContextPacketRisk {
@@ -78,7 +80,7 @@ export const DEFAULT_BUDGET_SPLIT = {
   overhead: 0.1
 } as const;
 
-interface PacketNodeRow {
+export interface PacketNodeRow {
   node_id: string;
   world_slug: string;
   node_type: NodeType;
@@ -110,7 +112,8 @@ export function estimateNodeTokens(node: ContextPacketNode): number {
       node.file_path,
       node.heading_path ?? "",
       node.summary ?? "",
-      node.body_preview
+      node.body_preview,
+      node.record === undefined ? "" : JSON.stringify(node.record)
     ].join(" ")
   );
 }
@@ -174,7 +177,10 @@ export function estimatePacketTokens(packet: ContextPacket): number {
 export function loadPacketNodes(
   db: Database.Database,
   worldSlug: string,
-  nodeIds: readonly string[]
+  nodeIds: readonly string[],
+  options: {
+    recordProjection?: (row: PacketNodeRow) => Record<string, unknown> | undefined;
+  } = {}
 ): ContextPacketNode[] {
   const uniqueNodeIds = uniqueStrings(nodeIds);
   if (uniqueNodeIds.length === 0) {
@@ -193,9 +199,8 @@ export function loadPacketNodes(
     .all(worldSlug, ...uniqueNodeIds) as PacketNodeRow[];
 
   const byId = new Map(
-    rows.map((row) => [
-      row.node_id,
-      {
+    rows.map((row) => {
+      const node: ContextPacketNode = {
         id: row.node_id,
         world_slug: row.world_slug,
         node_type: row.node_type,
@@ -203,13 +208,34 @@ export function loadPacketNodes(
         heading_path: row.heading_path,
         summary: row.summary ?? null,
         body_preview: makeBodyPreview(row.body)
-      } satisfies ContextPacketNode
-    ])
+      };
+      const projectedRecord = options.recordProjection?.(row);
+      if (projectedRecord !== undefined) {
+        node.record = projectedRecord;
+      }
+
+      return [row.node_id, node] as const;
+    })
   );
 
   return uniqueNodeIds
     .map((nodeId) => byId.get(nodeId))
     .filter((node): node is ContextPacketNode => node !== undefined);
+}
+
+export function parsePacketNodeRecord(row: PacketNodeRow): Record<string, unknown> | undefined {
+  let parsed: unknown;
+  try {
+    parsed = YAML.parse(row.body);
+  } catch {
+    return undefined;
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return undefined;
+  }
+
+  return parsed as Record<string, unknown>;
 }
 
 export function trimPairedListToBudget<T>(

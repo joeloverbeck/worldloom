@@ -189,6 +189,29 @@ function cloneClassIntoPacket(
   }
 }
 
+function estimateSelfConsistentMinimumBudget(requiredPacket: ContextPacket): number {
+  let candidate = estimatePacketTokens(requiredPacket);
+
+  for (;;) {
+    const packetForEstimate: ContextPacket = {
+      ...requiredPacket,
+      task_header: {
+        ...requiredPacket.task_header,
+        token_budget: {
+          ...requiredPacket.task_header.token_budget,
+          requested: candidate
+        }
+      }
+    };
+    const adjusted = estimatePacketTokens(packetForEstimate);
+    if (adjusted <= candidate) {
+      return candidate;
+    }
+
+    candidate = adjusted;
+  }
+}
+
 function classifyBudgetInsufficiency(
   completePacket: ContextPacket,
   args: {
@@ -215,7 +238,7 @@ function classifyBudgetInsufficiency(
 
     if (estimatePacketTokens(candidatePacket) > args.tokenBudget) {
       return {
-        minimumRequiredBudget: estimatePacketTokens(requiredPacket),
+        minimumRequiredBudget: estimateSelfConsistentMinimumBudget(requiredPacket),
         missingClasses: REQUIRED_PACKET_CLASSES.filter(
           (requiredClassName) =>
             classHasRequiredContent(completePacket, requiredClassName) &&
