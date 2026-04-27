@@ -162,7 +162,7 @@ Order (single tier; internal parallelization minimal):
 4. **canon-addition skill updates** (Tests 11 & 12, PA checklist text, Phase 13a block-authoring) — completed via `archive/tickets/SPEC09CANSAFEXP-004.md`
 5. **continuity-audit skill updates** (Silent-Area Canonization check) — completed via `archive/tickets/SPEC09CANSAFEXP-005.md`
 6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block) — completed via `archive/tickets/SPEC09CANSAFEXP-006.md`
-7. **create-base-world genesis block-population guidance**
+7. **create-base-world genesis block-population guidance** — completed via `archive/tickets/SPEC09CANSAFEXP-007.md`
 
 **Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
 - `world-validate animalia --json` reports zero new failures on historical CFs (grandfather clause holds structurally)
