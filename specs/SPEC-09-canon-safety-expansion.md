@@ -102,12 +102,12 @@ Seven discrete edits, all additive or refinement:
 
 ### canon-addition skill updates
 
-- **`canon-addition/SKILL.md` Phase 14a (Validation)** — append Test 11 and Test 12 to the existing 10-test contiguous block. Phase 14a already anticipates this attachment: line 97 reads *"SPEC-09 Phase 2.5 will append Tests 11 (action-space) and 12 (redundancy) atop this contiguous block — preserve the numbering."* Each new test follows the existing PASS-with-rationale convention; bare PASS without rationale is treated as FAIL.
+- **`canon-addition/SKILL.md` Phase 14a (Validation)** — append Test 11 and Test 12 to the existing 10-test contiguous block. SPEC09CANSAFEXP-004 replaced the prior SPEC-09 anticipation sentence with the live 12-test checklist text. Each new test follows the existing PASS-with-rationale convention; bare PASS without rationale is treated as FAIL.
 
   - **Test 11 — Action-Space Integrity.** PASS requires: (a) identify whether the CF introduces or depends on exceptional capability; if not, PASS trivially with rationale; (b) if yes, name ≥3 distinct forms of leverage remaining to ordinary or mid-tier actors from the permissible-forms list, each tied to a concrete in-world mechanism.
   - **Test 12 — Redundancy.** PASS requires: (a) classify CF status (hard / derived / soft / contested / mystery-reserve); (b) if hard-canon core truth, name ≥2 distinct trace registers and the concrete in-world form each trace takes; (c) hidden-truth carve-out applies only when the hiding mechanism itself is canonized (cite the relevant CF or invariant).
 
-- **`canon-addition/references/counterfactual-and-verdict.md`** — extend with detailed criteria for Tests 11 and 12 (block formatting, rationale patterns, failure examples). The file already anticipates SPEC-09 at line 97 (*"SPEC-09 will append Tests 11/12 here"*); the extension lands at the existing 10-test reference block.
+- **`canon-addition/references/counterfactual-and-verdict.md`** — extend with detailed criteria for Tests 11 and 12 (block formatting, rationale patterns, failure examples). SPEC09CANSAFEXP-004 replaced the prior PA body-markdown placeholder with 12-test checklist wording and added an adjacent Tests 11/12 detail section.
 
 - **Phase 13a (patch plan assembly)** — update skill to populate `epistemic_profile` and `exception_governance` (or `n_a` with fact-type rationale) on every `create_cf_record` op before Phase 14a runs. If the skill cannot decide whether a block applies, it must surface the ambiguity to the user rather than defaulting to `n_a`.
 

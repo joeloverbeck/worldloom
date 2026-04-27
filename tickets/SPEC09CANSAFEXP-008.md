@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/tests/integration/spec09-verification.test.ts` (new) — exercises SPEC-09 §Verification scenarios 1-11 via fixture-driven assertions; no production code changes.
-**Deps**: SPEC09CANSAFEXP-004, SPEC09CANSAFEXP-005, SPEC09CANSAFEXP-007
+**Deps**: `archive/tickets/SPEC09CANSAFEXP-004.md`, `tickets/SPEC09CANSAFEXP-005.md`, `tickets/SPEC09CANSAFEXP-007.md`
 
 ## Problem
 
@@ -18,7 +18,7 @@ SPEC-09 §Verification enumerates 12 numbered scenarios spanning structural, fun
 4. **FOUNDATIONS principle motivating this ticket**: this ticket directly maps spec §Verification to executable assertions. Per FOUNDATIONS §Tooling Recommendation (`LLM agents should never operate on prose alone`), the spec's verification scenarios deserve executable proof, not only documentation-side enumeration.
 5. **Fixture-world copy strategy** (per /spec-to-tickets §Spec-Integration Ticket Shape): `fs.cpSync` to a temp root so the test never mutates the real `worlds/animalia/`. Equivalent to the pattern used by SPEC-13's atomic-source migration test fixtures and by the validators package's existing animalia-touching tests.
 6. **No measurable target for §Verification 12** (token-budget regression). Scenario 12 is informational measurement, not a CI gate. Capstone test does NOT include a wall-clock or token-budget assertion (per /spec-to-tickets §Spec-Integration Ticket Shape: `wall-clock perf assertion when the spec names a performance gate; leave the spec's aspirational target as a dev-loop expectation rather than a CI gate` — SPEC-09 §Verification 12 is aspirational, no specific threshold named).
-7. **Dependency selection**: this ticket lists -004 + -005 + -007 as Deps. Per /spec-to-tickets §Spec-Integration Ticket Shape: `prefer the transitive-head convention (single Deps: <transitive-head-ticket>) over enumerating every upstream ticket`. Here three terminal nodes exist: -004 transitively covers -001/-002/-003; -005 covers -001 only (not on the canon-addition chain); -007 covers -001/-002. Three terminals = three Deps. -006 is not listed because no §Verification scenario tests diegetic-artifact-generation cleanup.
+7. **Dependency selection**: this ticket lists archived -004 + active -005 + active -007 as Deps. Per /spec-to-tickets §Spec-Integration Ticket Shape: `prefer the transitive-head convention (single Deps: <transitive-head-ticket>) over enumerating every upstream ticket`. Here three terminal nodes exist: -004 transitively covers -001/-002/-003; -005 covers -001 only (not on the canon-addition chain); -007 covers -001/-002. Three terminals = three Deps. -006 is not listed because no §Verification scenario tests diegetic-artifact-generation cleanup.
 
 ## Architecture Check
 
