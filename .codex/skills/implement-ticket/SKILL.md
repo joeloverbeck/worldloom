@@ -290,6 +290,7 @@ Update the active ticket before finishing:
 - `Engine Changes`
 - `Assumption Reassessment`
 - `What to Change` / `Files to Touch` if reassessment changed scope
+- `Verification Layers` if the real proof surface changed
 - `Acceptance Criteria` / `Test Plan` if the real proof surface changed
 - `## Outcome`
 - `## Verification Result`
@@ -306,7 +307,7 @@ Update the active ticket before finishing:
 - if package-manager, build, test, formatter, generator, or codegen commands created or changed ignored package/tool artifacts such as `node_modules/`, `dist/`, coverage output, caches, or compiled test output, classify that ignored state explicitly as expected generated ignored artifacts, cleaned state, or unexpected fallout before finalizing
 - if a local sibling package or `file:` dependency was refreshed for proof, record whether the consumer's installed dependency was a symlink or copied install and cite the consumer-resolved artifact check used to prove the consumer saw the changed producer surface
 - if package-manager commands emitted security, deprecation, or funding warnings that were not repaired because they were outside scope, mention them in `## Verification Result` or `## Deviations` so closeout does not imply a cleaner dependency state than was observed
-- after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
+- after the final verification rerun, re-read the entire ticket top-to-bottom so earlier authored sections such as `What to Change`, `Architecture Check`, `Verification Layers`, `Acceptance Criteria`, and `Invariants` do not still contain stale pre-reassessment wording
 - for completed tickets, re-read `## Problem` specifically and rewrite fixed current-state claims as historical intake evidence (`At intake`, `Before this ticket`, or equivalent) so the completed record does not imply the defect still exists
 - when preserving original failure evidence in a completed ticket, label it as historical intake evidence (`At intake`, `Observed before this ticket`, or equivalent) so the completed record does not still read as if the fixed failure is current
 - if any explicit user-supplied reference spec/doc was used as the ticket's authority, grep that reference for corrected counts, enum members, command names, paths, default tables, proof commands, risk summaries, or other reassessed claims before final closeout; update same-seam stale reference lines or record why they are outside the active ticket boundary

@@ -58,7 +58,7 @@ If the skill's HARD-GATE (which gates the genesis patch plan submit) lists what 
 - Validator implementation (delivered by SPEC09CANSAFEXP-003)
 - canon-addition Phase 13a updates (delivered by `archive/tickets/SPEC09CANSAFEXP-004.md`; parallel mechanism for non-genesis CFs)
 - continuity-audit silent-area canonization check (delivered by SPEC09CANSAFEXP-005)
-- diegetic-artifact-generation template cleanup (delivered by SPEC09CANSAFEXP-006)
+- diegetic-artifact-generation template cleanup (delivered by `archive/tickets/SPEC09CANSAFEXP-006.md`)
 - Retroactive retrofit of existing animalia genesis CF-0001 (deferred to user-choice continuity-audit cycle per SPEC-09 §Out of Scope)
 
 ## Acceptance Criteria

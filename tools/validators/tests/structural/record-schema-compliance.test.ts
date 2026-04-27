@@ -160,6 +160,39 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped
   assert.equal(result.length, 0);
 });
 
+test("record_schema_compliance accepts diegetic-artifact frontmatter with explicit world relation fields", async () => {
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "diegetic-artifacts/DA-0003-test.md",
+          content: readFixture("diegetic-artifact-with-new-fields.md")
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.equal(result.length, 0);
+});
+
+test("record_schema_compliance rejects diegetic-artifact world_relation entries that are not CF ids", async () => {
+  const fixture = readFixture("diegetic-artifact-with-new-fields.md").replace("    - CF-0001", "    - INV-0001");
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: "diegetic-artifacts/DA-0004-test.md",
+          content: fixture
+        }
+      ]
+    },
+    context([])
+  );
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.pattern"));
+});
+
 test("record_schema_compliance rejects diegetic-artifact scoped_references entries missing required fields", async () => {
   const result = await recordSchemaCompliance.run(
     {
@@ -285,4 +318,8 @@ function fixtureCf(filename: string) {
   const parsed = yaml.load(readFileSync(filePath, "utf8"), { schema: yaml.JSON_SCHEMA }) as Record<string, unknown>;
   const id = String(parsed.id);
   return record("canon_fact_record", id, `_source/canon/${id}.yaml`, parsed);
+}
+
+function readFixture(filename: string): string {
+  return readFileSync(path.resolve(process.cwd(), "tests", "fixtures", filename), "utf8");
 }

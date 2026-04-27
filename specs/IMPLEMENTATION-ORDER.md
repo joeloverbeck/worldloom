@@ -161,7 +161,7 @@ Order (single tier; internal parallelization minimal):
 3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`) — completed via `archive/tickets/SPEC09CANSAFEXP-003.md`
 4. **canon-addition skill updates** (Tests 11 & 12, PA checklist text, Phase 13a block-authoring) — completed via `archive/tickets/SPEC09CANSAFEXP-004.md`
 5. **continuity-audit skill updates** (Silent-Area Canonization check) — completed via `archive/tickets/SPEC09CANSAFEXP-005.md`
-6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
+6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block) — completed via `archive/tickets/SPEC09CANSAFEXP-006.md`
 7. **create-base-world genesis block-population guidance**
 
 **Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
@@ -285,7 +285,7 @@ Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 
   ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
   ├── canon-addition skill updates (Tests 11/12, PA checklist text, Phase 13a block authoring)
   ├── continuity-audit skill update (silent-area-canonization check)
-  ├── diegetic-artifact-generation template cleanup
+  ├── diegetic-artifact-generation template cleanup — complete
   └── docs/WORKFLOWS.md pointer
 
 Phase 2.6 (Pilot Feedback Fixes, SPEC-15) ← COMPLETE; archived
