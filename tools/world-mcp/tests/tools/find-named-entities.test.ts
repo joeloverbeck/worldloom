@@ -41,6 +41,22 @@ function buildEntityWorld(root: string): void {
         body: "Brinewicker is a local adjective."
       },
       {
+        node_id: "seeded:_source/geography/SEC-GEO-001.yaml:SEC-GEO-001:0",
+        world_slug: "seeded",
+        file_path: "_source/geography/SEC-GEO-001.yaml",
+        heading_path: "SEC-GEO-001",
+        node_type: "section",
+        body: "The drylands corridor is a hard region for caravan passage."
+      },
+      {
+        node_id: "seeded:_source/timeline/SEC-TML-001.yaml:SEC-TML-001:0",
+        world_slug: "seeded",
+        file_path: "_source/timeline/SEC-TML-001.yaml",
+        heading_path: "SEC-TML-001",
+        node_type: "section",
+        body: "Charter-Era integration changed the region's trade law."
+      },
+      {
         node_id: "seeded:characters/melissa-threadscar.md:melissa-threadscar:0",
         world_slug: "seeded",
         file_path: "characters/melissa-threadscar.md",
@@ -341,6 +357,61 @@ test("findNamedEntities sorts scoped matches by kind, query, display name, then 
         "alias_text:Rill-of-the-Reeds:Rill:seeded:characters/melissa-threadscar.md:melissa-threadscar:0#scoped:rill:1"
       ]
     );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities returns descriptor hints for empty region and era queries", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildEntityWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({ world_slug: "seeded", names: ["drylands", "Charter-Era"] })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.canonical_matches, []);
+    assert.deepEqual(result.scoped_matches, []);
+    assert.deepEqual(result.surface_matches, []);
+    assert.deepEqual(result.hints, [
+      {
+        query: "drylands",
+        descriptor_kind: "region",
+        record_count: 1,
+        message:
+          "no exact entity match; 'drylands' appears as a region descriptor in 1 record - try search_nodes(world_slug, query='drylands') for content lookup"
+      },
+      {
+        query: "Charter-Era",
+        descriptor_kind: "era",
+        record_count: 1,
+        message:
+          "no exact entity match; 'Charter-Era' appears as an era descriptor in 1 record - try search_nodes(world_slug, query='Charter-Era') for content lookup"
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities omits descriptor hints for unknown empty queries", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildEntityWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({ world_slug: "seeded", names: ["No Such Descriptor"] })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.canonical_matches, []);
+    assert.deepEqual(result.scoped_matches, []);
+    assert.deepEqual(result.surface_matches, []);
+    assert.equal(result.hints, undefined);
   } finally {
     destroyTempRepoRoot(root);
   }

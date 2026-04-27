@@ -289,7 +289,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "find_named_entities",
-    "Resolve exact canonical and unresolved surface-name matches.",
+    "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0])
   );
