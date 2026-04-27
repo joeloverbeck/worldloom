@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/canon-addition/SKILL.md` Phase 14a (append Tests 11/12 to the contiguous test block); `.claude/skills/canon-addition/SKILL.md` Phase 13a (populate the new blocks on `create_cf_record` ops); `.claude/skills/canon-addition/references/counterfactual-and-verdict.md` (extend with detailed criteria for Tests 11/12 at the existing SPEC-09-anticipating anchor).
-**Deps**: `archive/tickets/SPEC09CANSAFEXP-001.md`, `archive/tickets/SPEC09CANSAFEXP-002.md`, SPEC09CANSAFEXP-003
+**Deps**: `archive/tickets/SPEC09CANSAFEXP-001.md`, `archive/tickets/SPEC09CANSAFEXP-002.md`, `archive/tickets/SPEC09CANSAFEXP-003.md`
 
 ## Problem
 

@@ -146,7 +146,7 @@ Both invocable via `world-validate <slug> --rules=11` / `--rules=12` (or combine
 
 ### CLI surface extension
 
-- **`tools/validators/src/cli/_helpers.ts`** — extend `RULE_FILTER_PATTERN` (currently `/^([124567])(?:,([124567]))*$/`) to accept `11` and `12`; update the `--rules` help-text rule list ("comma-separated rule numbers (1,2,4,5,6,7)") to include 11 and 12.
+- **`tools/validators/src/cli/_helpers.ts`** — extended `RULE_FILTER_PATTERN` to accept `11` and `12`; the `--rules` help-text rule list now includes `1,2,4,5,6,7,11,12`.
 
 ### Documentation
 

@@ -10,10 +10,12 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 - If the ticket changes validator `code`, `message`, `validator`, file path, or node-id formatting, inspect exact-match grandfathering/waiver rows. Update same-seam rows to preserve the intended disposition or record that they are intentionally left unmatched because a follow-up owns the baseline change.
 - Before deleting validator source or tests, check whether compiled outputs such as `dist/` may still be picked up by the package test command. Use the package clean script when available before the final proof, then classify the regenerated ignored output.
 - For live-corpus baselines, record both pre-change and post-change counts when the ticket changes emitted verdict shape or matching behavior. A non-zero post-change corpus result can be the correct acceptance state when a later content or migration ticket owns cleanup.
+- When a validator must temporarily read a prose/text surface because no structured schema field exists yet, define the accepted mini-format during reassessment, name the transitional source field explicitly, and record why a structured field is not currently available. Do not present the text convention as a stable schema contract or silently infer broad prose semantics.
 
 ## Verification
 
 - Add a narrow unit test for the new valid shape and a rejection-path test for the retired or legacy shape. For hybrid frontmatter migrations, include an absent-frontmatter fixture if legacy files exist.
+- For transitional prose/text-backed validator contracts, test the accepted mini-format, rejection or shortfall behavior, and any grandfathering or not-applicable path. Prefer focused synthetic records unless a live-corpus fixture is the actual authority.
 - Prove the old parser/helper/validator symbol is gone with a negative grep or equivalent symbol check when the ticket claims removal.
 - Run the package's build/test lane from the package root after cleaning stale compiled output if files were renamed or deleted.
 - If a live-corpus command is part of acceptance, capture the post-change summary and the key targeted counts, including retired-validator zero-count checks and renamed-code counts.

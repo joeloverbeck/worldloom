@@ -30,7 +30,7 @@ export interface ResolvedScope {
   explicitFiles: Array<{ path: string; content: string }>;
 }
 
-const RULE_FILTER_PATTERN = /^([124567])(?:,([124567]))*$/;
+const RULE_FILTER_PATTERN = /^(?:1[12]|[124567])(?:,(?:1[12]|[124567]))*$/;
 
 export function packageVersion(): string {
   const packageJsonPath = path.resolve(__dirname, "../../../package.json");
@@ -44,7 +44,7 @@ export function printHelp(): void {
 Run the SPEC-04 validator framework against a world's atomic-source tree.
 
 Options:
-  --rules=<list>        Comma-separated rule numbers (1,2,4,5,6,7). Mutually exclusive with --structural.
+  --rules=<list>        Comma-separated rule numbers (1,2,4,5,6,7,11,12). Mutually exclusive with --structural.
   --structural          Run structural validators only. Mutually exclusive with --rules.
   --json                Emit machine-readable JSON output.
   --file <path>         Narrow scope to a single file within worlds/<slug>/.
@@ -68,7 +68,7 @@ export function validateOptions(values: CliValues): string | null {
     return "--file and --since are mutually exclusive";
   }
   if (values.rules && !RULE_FILTER_PATTERN.test(values.rules)) {
-    return "--rules must be a comma-separated list of mechanized rule numbers 1,2,4,5,6,7";
+    return "--rules must be a comma-separated list of mechanized rule numbers 1,2,4,5,6,7,11,12";
   }
   return null;
 }

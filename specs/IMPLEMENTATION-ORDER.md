@@ -158,7 +158,7 @@ Order (single tier; internal parallelization minimal):
 
 1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause) — completed via `archive/tickets/SPEC09CANSAFEXP-001.md`
 2. **CF structural-schema extension** (`epistemic_profile`, `exception_governance`, current-write conditional presence, `n_a` rationale quality) — completed via `archive/tickets/SPEC09CANSAFEXP-002.md`
-3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`)
+3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`) — completed via `archive/tickets/SPEC09CANSAFEXP-003.md`
 4. **canon-addition skill updates** (Tests 11 & 12, template extension, Phase 13a block-authoring)
 5. **continuity-audit skill updates** (Silent-Area Canonization check)
 6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
@@ -281,10 +281,11 @@ Phase 2 (Write Path + All-Skill Migration) — revised per SPEC-13
 Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 + SPEC-06
   │
   ├── FOUNDATIONS.md edits (Rules 11/12, schema blocks, relations, default-reality paragraph)
+  ├── CF structural-schema extension (epistemic_profile, exception_governance)
+  ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
   ├── canon-addition skill updates (Tests 11/12, template, Phase 12 block authoring)
   ├── continuity-audit skill update (silent-area-canonization check)
   ├── diegetic-artifact-generation template cleanup
-  ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
   └── docs/WORKFLOWS.md pointer
 
 Phase 2.6 (Pilot Feedback Fixes, SPEC-15) ← COMPLETE; archived
