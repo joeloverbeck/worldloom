@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/tests/integration/spec09-verification.test.ts` (new) — exercises SPEC-09 §Verification scenarios 1-11 via fixture-driven assertions; no production code changes.
-**Deps**: `archive/tickets/SPEC09CANSAFEXP-004.md`, `tickets/SPEC09CANSAFEXP-005.md`, `tickets/SPEC09CANSAFEXP-007.md`
+**Deps**: `archive/tickets/SPEC09CANSAFEXP-004.md`, `archive/tickets/SPEC09CANSAFEXP-005.md`, `tickets/SPEC09CANSAFEXP-007.md`
 
 ## Problem
 

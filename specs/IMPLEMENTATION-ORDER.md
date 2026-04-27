@@ -160,7 +160,7 @@ Order (single tier; internal parallelization minimal):
 2. **CF structural-schema extension** (`epistemic_profile`, `exception_governance`, current-write conditional presence, `n_a` rationale quality) — completed via `archive/tickets/SPEC09CANSAFEXP-002.md`
 3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`) — completed via `archive/tickets/SPEC09CANSAFEXP-003.md`
 4. **canon-addition skill updates** (Tests 11 & 12, PA checklist text, Phase 13a block-authoring) — completed via `archive/tickets/SPEC09CANSAFEXP-004.md`
-5. **continuity-audit skill updates** (Silent-Area Canonization check)
+5. **continuity-audit skill updates** (Silent-Area Canonization check) — completed via `archive/tickets/SPEC09CANSAFEXP-005.md`
 6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
 7. **create-base-world genesis block-population guidance**
 

@@ -1,8 +1,8 @@
 # Audit Category Reasoning
 
-Eight load-bearing audit categories plus two structural cross-cuts. Each entry names the FOUNDATIONS rule it enforces, the enumeration entry-point (a typed MCP query, never raw `Read`), and the semantic judgment the operator must apply on top of the enumeration.
+Eight load-bearing audit categories plus one SPEC-09 check and two structural cross-cuts. Each entry names the FOUNDATIONS rule it enforces, the enumeration entry-point (a typed MCP query, never raw `Read`), and the semantic judgment the operator must apply on top of the enumeration.
 
-The eight named audit categories are: contradictions, scope drift, capability creep, dangling consequences, thematic erosion, hidden retcons, mystery corruption, diegetic leakage. Phase 4 implements them through ten sub-passes (4a–4j) because contradictions split across ontological / causal / distribution / timeline axes and consequence evasion splits across institutional / everyday-life surfaces. The audit report names the categories the audit ran. Categories with no findings produce explicit "no findings — audited and clean" entries; silent skipping is a Phase 1 violation.
+The eight named audit categories are: contradictions, scope drift, capability creep, dangling consequences, thematic erosion, hidden retcons, mystery corruption, diegetic leakage. Phase 4 implements them through eleven sub-passes/checks (4a–4k) because contradictions split across ontological / causal / distribution / timeline axes, consequence evasion splits across institutional / everyday-life surfaces, and SPEC-09 adds Silent-Area Canonization as an explicit Default Reality check. The audit report names the categories/checks the audit ran. Categories/checks with no findings produce explicit "no findings — audited and clean" entries; silent skipping is a Phase 1 violation.
 
 ## Sub-passes
 
@@ -66,6 +66,13 @@ The eight named audit categories are: contradictions, scope drift, capability cr
 - **Rule**: 4.
 - **Enumeration**: `search_nodes(filters={'scope.geographic': ['local'], 'scope.social': ['restricted_group']})`; `find_impacted_fragments(CF-id)` to enumerate prose surfaces.
 - **Judgment**: scoped CF whose downstream prose has dropped the scope qualifier. Distinct from 4c: 4j is the prose-level drift detection.
+
+### 4k — Silent-Area Canonization
+
+- **Rule**: 6 (No Silent Retcons) plus FOUNDATIONS §Default Reality.
+- **Enumeration**: `search_nodes(node_types=['canon_fact_record'])` to enumerate candidate CFs and their `domains_affected`; `get_record(CF-NNNN)` when `notes` or `source_basis` are needed for acknowledgment checks.
+- **Judgment**: a CF canonizes a domain absent from the prior `domains_affected` union and does not acknowledge that the area was previously unmodeled or silent. The operator decides whether the acknowledgment is explicit enough; accepted patterns include `previously unmodeled`, `previously silent`, `first canonization of <domain>`, `silent area`, and `default reality`. Findings emit retcon-proposal candidates, never hard failures, because `continuity-audit` proposes repairs and `canon-addition` applies them.
+- **Firewall**: this check does not inspect Mystery Reserve entries. A previously silent domain is not permission to answer a reserved mystery.
 
 ## Phase 6 — Burden Debt (Cross-cut)
 

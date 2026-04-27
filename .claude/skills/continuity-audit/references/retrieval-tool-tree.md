@@ -2,7 +2,7 @@
 
 Per-phase map of which MCP retrieval tool to invoke during `continuity-audit`. SKILL.md names the tools at key points; this reference records why each call belongs in that phase so the operator does not need to inspect TypeScript source mid-run.
 
-The audit is an enumerate-and-judge workflow: every category sub-pass enumerates candidate nodes via typed queries, then applies semantic judgment. Bulk reads of `_source/` are redirected by Hook 2 — do not reach for them.
+The audit is an enumerate-and-judge workflow: every category/check sub-pass enumerates candidate nodes via typed queries, then applies semantic judgment. Bulk reads of `_source/` are redirected by Hook 2 — do not reach for them.
 
 ## Pre-flight
 
@@ -30,7 +30,7 @@ The audit is an enumerate-and-judge workflow: every category sub-pass enumerates
 
 ## Phase 4: Audit Category Passes
 
-Each category names its preferred enumeration tool. All `_source/*.yaml` content arrives via these tools, never via raw `Read`.
+Each category/check names its preferred enumeration tool. All `_source/*.yaml` content arrives via these tools, never via raw `Read`.
 
 - **4a Ontological Contradictions** — `search_nodes(node_types=['canon_fact_record'], filters={type: ['species','entity','metaphysical_rule','hidden_truth']})`; for each, `get_neighbors(CF, edge_types=['conforms_to_invariant'])` then compare against ONT-N invariants.
 - **4b Causal Contradictions** — `search_nodes` for CFs with non-empty `costs_and_limits`; `get_neighbors(CF, edge_types=['referenced_by_cf'])` to surface CFs that USE a capability without paying the cost.
@@ -42,6 +42,7 @@ Each category names its preferred enumeration tool. All `_source/*.yaml` content
 - **4h Mystery Corruption** — `search_nodes(node_types=['mystery_reserve_entry'])`; for each, `get_neighbors(M-NNNN, edge_types=['threatened_by_cf'])` to surface CFs that may have softened the firewall.
 - **4i Diegetic Leakage** — `find_named_entities` to list `characters/` and `diegetic-artifacts/` records; `get_record` per dossier/artifact frontmatter; cross-check `known_firsthand` / `wrongly_believes` / artifact body claims against M-NNNN `disallowed cheap answers`.
 - **4j Local/Global Drift** — `search_nodes(filters={'scope.geographic': ['local'], 'scope.social': ['restricted_group']})`; `find_impacted_fragments(CF-id)` to enumerate prose surfaces and flag scope-qualifier-dropping.
+- **4k Silent-Area Canonization** — `search_nodes(node_types=['canon_fact_record'])` to enumerate CFs and `domains_affected`; `get_record(CF-NNNN)` for any candidate whose `notes` or `source_basis` acknowledgment surface is not fully available in the search result. Compare candidate domains against the prior CF-domain union from the Phase 2 delta window when present, or against all other CFs during full-history audits.
 
 ## Phase 6: Burden Debt Analysis
 
