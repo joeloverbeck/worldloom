@@ -84,6 +84,56 @@
       }
     },
     "notes": { "type": "string" },
+    "epistemic_profile": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "directly_observable_by": { "type": "array", "items": { "type": "string" } },
+            "inferable_by": { "type": "array", "items": { "type": "string" } },
+            "recorded_by": { "type": "array", "items": { "type": "string" } },
+            "suppressed_by": { "type": "array", "items": { "type": "string" } },
+            "distortion_vectors": { "type": "array", "items": { "type": "string" } },
+            "propagation_channels": { "type": "array", "items": { "type": "string" } },
+            "evidence_left": { "type": "array", "items": { "type": "string" } },
+            "knowledge_exclusions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n_a"],
+          "properties": {
+            "n_a": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "exception_governance": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "activation_conditions": { "type": "array", "items": { "type": "string" } },
+            "rate_limits": { "type": "array", "items": { "type": "string" } },
+            "mobility_limits": { "type": "array", "items": { "type": "string" } },
+            "diffusion_barriers": { "type": "array", "items": { "type": "string" } },
+            "countermeasures": { "type": "array", "items": { "type": "string" } },
+            "nondeployment_reasons": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n_a"],
+          "properties": {
+            "n_a": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
     "modification_history": {
       "type": "array",
       "items": {

@@ -10,7 +10,7 @@
 ## Source-of-truth pointers (do not duplicate content here — reference by path)
 
 - Umbrella spec: `archive/specs/SPEC-14-pa-contract-and-vocabulary-reconciliation.md`
-- Collateral amendments: `specs/SPEC-06-skill-rewrite-patterns.md`, `specs/SPEC-08-migration-and-phasing.md`, `docs/FOUNDATIONS.md`, `specs/IMPLEMENTATION-ORDER.md`
+- Collateral amendments: `archive/specs/SPEC-06-skill-rewrite-patterns.md`, `archive/specs/SPEC-08-migration-and-phasing.md`, `docs/FOUNDATIONS.md`, `archive/specs/IMPLEMENTATION-ORDER-2026-04-27.md`
 - Tickets: see SPEC-14 §Deliverables for the canonical decomposition
 
 ---
@@ -101,7 +101,7 @@ Engine test (`tools/patch-engine/tests/ops/append-adjudication-record.test.ts:13
 3. Collateral amendment to `specs/SPEC-06-skill-rewrite-patterns.md`.
 4. Collateral amendment to `specs/SPEC-08-migration-and-phasing.md`.
 5. Collateral amendment to `docs/FOUNDATIONS.md`.
-6. Update to `specs/IMPLEMENTATION-ORDER.md`.
+6. Update to `archive/specs/IMPLEMENTATION-ORDER-2026-04-27.md`.
 
 **Tier 2 — Implementation tickets** (decomposed from SPEC-14)
 

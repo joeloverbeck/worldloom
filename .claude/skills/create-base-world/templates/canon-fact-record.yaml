@@ -102,6 +102,40 @@ notes: >
   the new CF itself needs cross-reference prose, but they do not append a
   parallel notes paragraph solely to mirror audit history.
 
+# Genesis-world conditionally mandatory blocks (per SPEC-09).
+# New worlds adopt the full CF schema from CF-0001 onward. Use the
+# source-module helpers in tools/validators/src/structural/record-schema-compliance.ts:
+#   requiresEpistemicProfile(cf.type)
+#   requiresExceptionGovernance(cf.type)
+# to decide whether each block requires a populated form. If the helper does
+# not require a block, emit the n_a form with a fact-type rationale containing
+# a keyword from FOUNDATIONS.md §Ontology Categories. If the decision is
+# ambiguous, surface it to the user at the Phase 10 HARD-GATE rather than
+# defaulting to n_a.
+epistemic_profile:                         # required when knowability is non-trivial
+  directly_observable_by: []
+  inferable_by: []
+  recorded_by: []
+  suppressed_by: []
+  distortion_vectors: []
+  propagation_channels: []
+  evidence_left: []
+  knowledge_exclusions: []
+# OR, only when the fact type does not require a populated epistemic axis:
+# epistemic_profile:
+#   n_a: "Pure geography fact; no knowability axis."
+
+exception_governance:                      # required when CF introduces or depends on high-leverage exception
+  activation_conditions: []
+  rate_limits: []
+  mobility_limits: []
+  diffusion_barriers: []
+  countermeasures: []
+  nondeployment_reasons: []
+# OR, only when the fact type does not require a populated exception axis:
+# exception_governance:
+#   n_a: "Structural-institutional fact; no exception axis."
+
 # CONDITIONALLY MANDATORY: structured modification trace.
 # create-base-world ALWAYS leaves this empty at genesis — the genesis set has
 # no prior modifications to record. Post-SPEC-13 / SPEC-17 Track C1,

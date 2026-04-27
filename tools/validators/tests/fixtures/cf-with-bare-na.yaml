@@ -1,0 +1,27 @@
+id: CF-9005
+title: Bare n_a canon safety block
+status: hard_canon
+type: geography
+statement: A test fact uses an insufficient n_a rationale.
+scope:
+  geographic: local
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - geography
+required_world_updates:
+  - GEOGRAPHY
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+epistemic_profile:
+  n_a: "not applicable"
+exception_governance:
+  n_a: "Geography fact; no exception axis."
+extensions: []

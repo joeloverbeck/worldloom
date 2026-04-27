@@ -16,6 +16,8 @@ For each finding, record:
 
 Tag severity: CRITICAL (blocks tickets), HIGH (fix before tickets), MEDIUM (improves quality), LOW (nice to fix).
 
+**Severity-bump re-keying**: Severity-bumps that cross the must-fix threshold (HIGH and CRITICAL entail must-fix) cause re-keying from M-prefix (Improvement) to I-prefix (Issue) — a HIGH-severity finding belongs under "Issues (must fix)", not under "Improvements (should fix)", regardless of whether the initial classification placed it in Improvements. Severity-bumps within Improvement scope (LOW → MEDIUM) keep the M-prefix. Severity-drops follow the same rule in reverse: a finding initially keyed I-prefix that drops below HIGH severity moves to M-prefix. Re-key during draft, not during the user-facing presentation, so the final keys presented at Step 6 are stable and the user never sees a finding's key change between rounds.
+
 ## Step 6: Present Findings
 
 **Redesign-count checkpoint (before drafting the presentation)**: Count the deliverables whose approach was materially changed by the reassessment — eliminated, replaced with a different mechanism, or restructured such that the implementation path is not a refinement of the original. Include this count as `N / total`. If `N / total > 50%`, the Substantial Redesign Flag section below MUST appear in the output immediately above Questions. If `N / total <= 50%`, omit the Substantial Redesign Flag section entirely. Emit the `N / total` count as a one-line note at the top of the Step 6 `### Classification` block regardless of whether the flag fires — e.g., `Redesign count: 1/6 deliverables materially changed (below 50% threshold; Substantial Redesign Flag omitted)` — so the checkpoint's decision is auditable from the user-facing report.

@@ -21,6 +21,7 @@ artifact_id: DA-0000                         # canonical artifact ID, monotonic,
 slug: ""                                     # kebab-case of title, lowercase, punctuation-stripped
 title: ""                                    # in-world title of the artifact
 artifact_type: ""                            # chronicle | sermon | travelogue | herbal | cult_tract | legal_decree | funerary_inscription | manual | letter | folk_tale | fragmentary_myth | prison_confession | scholarly_dispute | battle_song | practical_treatise | grimoire_fragment | relic_manual | other_derived_from_world
+statement_of_existence: ""                   # one-line description of what physically exists in-world: paper, stone tablet, wax seal, oral performance record, woven pattern, scratched cave wall, etc.
 
 author: ""                                   # attributed author's name in-world (may be anonymous, pseudonymous, pen name, or institutional — "the charter-house of Port Serekh")
 author_character_id: null                    # CHAR-NNNN if character_path was used to lift author; else null
@@ -29,6 +30,12 @@ place: ""                                    # ENT/SEC-GEO-bound place of produc
 audience: ""                                 # SEC-INS stratum / SEC-ELF demographic / SEC-PAS cluster (not "the public")
 communicative_purpose: ""                    # legitimize | warn | memorialize | instruct | accuse | propitiate | narrate | contest
 desired_relation_to_truth: ""                # accurate | biased_but_mostly_true | propaganda | mythicized | fragmentary | deliberately_false_in_places
+world_relation:                              # explicit relation to canon facts; omit if relation is purely implicit in claim_map
+  corroborates: []                           # CF-NNNN list of canon facts this artifact reinforces
+  contests: []                               # CF-NNNN list this artifact disputes
+  conceals: []                               # CF-NNNN list this artifact hides or obscures
+  mythologizes: []                           # CF-NNNN list this artifact transforms into legend
+  ritualizes: []                             # CF-NNNN list this artifact embeds in ritual/ceremony
 
 # SOFT inputs — null is acceptable if unspecified; Phase 0 records derivation source in `notes` when defaulted
 canon_facts_accessible: null                 # explicit CF list if user-specified; null means "derived from author epistemic horizon" (note in `notes`)

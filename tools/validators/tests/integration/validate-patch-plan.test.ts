@@ -83,6 +83,29 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
   });
 });
 
+test("validatePatchPlan applies current CF safety blocks only to changed pre-apply records", async () => {
+  await withTempRoot(async () => {
+    seedIndexedCf("CF-0002", { ...completeCf, id: "CF-0002", type: "capability" });
+
+    const result = await validatePatchPlan(cleanPlan({
+      type: "capability",
+      epistemic_profile: { directly_observable_by: ["auditors"] },
+      exception_governance: { activation_conditions: ["test condition"] }
+    }) as unknown as PatchPlanEnvelope);
+
+    assert.ok(!result.verdicts.some(
+      (verdict) =>
+        verdict.location.node_id === "CF-0002" &&
+        verdict.code.startsWith("record_schema_compliance.missing_")
+    ));
+    assert.ok(!result.verdicts.some(
+      (verdict) =>
+        verdict.location.node_id === "CF-0001" &&
+        verdict.code.startsWith("record_schema_compliance.missing_")
+    ));
+  });
+});
+
 test("validatePatchPlan runs rule validators over materialized pre-apply records", async () => {
   await withTempRoot(async () => {
     const result = await validatePatchPlan(cleanPlan({ distribution: { why_not_universal: [] } }) as unknown as PatchPlanEnvelope);
@@ -101,3 +124,45 @@ test("validatePatchPlan keeps the patch plan available for rule5", async () => {
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule5.required_update_not_patched"));
   });
 });
+
+function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {
+  const dbPath = path.resolve(process.cwd(), "../../worlds/seeded/_index/world.db");
+  const db = new Database(dbPath);
+  try {
+    db.prepare(
+      `INSERT INTO nodes (
+        node_id,
+        world_slug,
+        file_path,
+        heading_path,
+        byte_start,
+        byte_end,
+        line_start,
+        line_end,
+        node_type,
+        body,
+        content_hash,
+        anchor_checksum,
+        summary,
+        created_at_index_version
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id,
+      "seeded",
+      `_source/canon/${id}.yaml`,
+      null,
+      0,
+      0,
+      1,
+      1,
+      "canon_fact_record",
+      JSON.stringify(parsed),
+      `hash-${id}`,
+      `anchor-${id}`,
+      null,
+      1
+    );
+  } finally {
+    db.close();
+  }
+}

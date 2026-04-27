@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { ruleValidators } from "../../src/public/registry.js";
 
-test("rule registry contains exactly the 6 SPEC-04 rule-derived validators", () => {
+test("rule registry contains exactly the 8 active rule-derived validators", () => {
   assert.deepEqual(
     ruleValidators.map((validator) => validator.name),
     [
@@ -12,7 +12,9 @@ test("rule registry contains exactly the 6 SPEC-04 rule-derived validators", () 
       "rule4_no_globalization_by_accident",
       "rule5_no_consequence_evasion",
       "rule6_no_silent_retcons",
-      "rule7_mystery_reserve_preservation"
+      "rule7_mystery_reserve_preservation",
+      "rule11_action_space",
+      "rule12_redundancy"
     ]
   );
 });

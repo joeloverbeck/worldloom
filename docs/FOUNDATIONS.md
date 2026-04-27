@@ -21,6 +21,8 @@ It is a constrained model of:
 
 Every canon fact must live somewhere inside that model.
 
+**Default Reality.** Silence is not permission to invent a supposedly long-standing truth later as if it had always been modeled. When a previously-unmodeled area is first canonized, the change must acknowledge that prior silence and route through Rule 6: no silent retcons. The world may grow, but growth must say what was newly modeled, what was already implied, and what remains deliberately unknown.
+
 ---
 
 ## Canon Layers
@@ -253,6 +255,12 @@ Examples:
 - ritualizes
 - militarizes
 - mythologizes
+- observed_by — names actors who can directly perceive the fact
+- recorded_in — names artifacts or records that capture the fact
+- suppressed_by — names actors who actively prevent propagation
+- distorted_by — names actors who systematically misrepresent the fact
+- countered_by — names mechanisms that limit the fact's effects
+- rate_limited_by — names mechanisms that throttle exercise of the fact
 
 ---
 
@@ -315,9 +323,36 @@ contradiction_risk:
   soft: true
 notes: >
   Accepted only with limiting conditions and downstream updates.
+
+# epistemic_profile: required when knowability is non-trivial; n_a permitted
+# only with one-line rationale tied to fact-type.
+epistemic_profile:
+  directly_observable_by: []
+  inferable_by: []
+  recorded_by: []
+  suppressed_by: []
+  distortion_vectors: []
+  propagation_channels: []
+  evidence_left: []
+  knowledge_exclusions: []
+exception_governance:
+  activation_conditions: []
+  rate_limits: []
+  mobility_limits: []
+  diffusion_barriers: []
+  countermeasures: []
+  nondeployment_reasons: []
+---
+# n_a forms are accepted only with one-line rationale tied to fact-type.
+epistemic_profile:
+  n_a: "Pure geography fact; no knowability axis."
+exception_governance:
+  n_a: "Structural-institutional fact; no exception axis."
 ```
 
 The optional `pre_figured_by[]` field, when present in machine-readable Canon Fact Records, accepts CF ids only and records CF-to-CF foreshadowing: an earlier accepted CF that hinted at the later commitment before it was canonized. Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references.
+
+*Genesis-world rule.* New worlds adopt the full schema from `CF-0001`. Existing worlds honor the append-only ledger — historical CFs predating a schema extension remain valid; new CFs appended after a schema extension meet the current schema.
 
 > **Canonical storage (machine-layer-enabled worlds, per SPEC-13)**: Canon Fact Records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-NNNN.yaml` — one record per file. The `notes` field and `modification_history[]` array are the authorized in-place mutation surfaces for an accepted CF; structural fields (`statement`, `scope`, `domains_affected`, `distribution`, etc.) are append-only in practice (changing them requires an explicit retcon attestation through the patch engine).
 
@@ -390,6 +425,20 @@ All canon changes must be logged with justification.
 Unknowns must be chosen, bounded, and tracked.
 They must not be side effects of weak design memory.
 
+### Rule 11: No Spectator Castes by Accident
+When a canon fact introduces or depends on exceptional capability, it must name at least three forms of leverage that remain available to ordinary or mid-tier actors.
+
+Permissible leverage includes locality, secrecy, legitimacy, bureaucracy, numbers, ritual authority, domain expertise, access, timing, social trust, deniability, and infrastructural control.
+
+Rule 9 (No Impossible Knowledge) is handled by character-generation Phase 7b and diegetic-artifact-generation Phase 7c distribution conformance checks.
+
+### Rule 12: No Single-Trace Truths
+Hard-canon core truths must leave traces in at least two distinct registers unless the truth is intentionally hidden and the hiding mechanism is itself canonized.
+
+Registers include law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, and other named in-world traces.
+
+Rule 10 (No Premise-Collapsing Exceptions) is handled by canon-addition Phase 5 Diffusion Analysis, Phase 7 Counterfactual Pressure Test, and Validation Tests 3 and 8 on stabilizer concreteness.
+
 ---
 
 ## Acceptance Tests
@@ -403,6 +452,7 @@ A world model is not ready until all these can be answered cleanly:
 - What does geography force?
 - What does embodiment force?
 - What does scarcity force?
+- When an exceptional capability exists, what leverage remains to ordinary, mid-tier, and institutional actors respectively?
 - What do people falsely believe?
 - What contradictions are permitted because they are diegetic rather than ontological?
 - What would a child, a laborer, a priest, a smuggler, and a ruler each think the world fundamentally is?

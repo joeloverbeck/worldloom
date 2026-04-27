@@ -1,7 +1,7 @@
 {
   "name": "@worldloom/validators",
   "version": "0.1.0",
-  "description": "Executable FOUNDATIONS Rule 1-7 plus structural invariant enforcement (SPEC-04).",
+  "description": "Executable FOUNDATIONS rule validators plus structural invariant enforcement (SPEC-04).",
   "private": true,
   "type": "commonjs",
   "main": "dist/src/public/index.js",

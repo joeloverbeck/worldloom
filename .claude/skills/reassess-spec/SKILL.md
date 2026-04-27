@@ -70,6 +70,17 @@ Step 8: Final summary + suggested next step
               +--(classification d)------> archive spec + reconcile IMPLEMENTATION-ORDER.md
 ```
 
+## Reference-Load Checklist
+
+This skill uses four reference files, each loaded with the Read tool at a specific step before the corresponding work begins. Each load requires a content-tied acknowledgment after the Read call (e.g., `Loaded <file> — opens with "<heading>"`); a bare `Loaded: <file>` is treated as a skipped load. Track all four through the full reassessment:
+
+- **Step 3** — `references/codebase-validation.md` (substep selection per classification, agent-delegation guidance, specialized sub-checks)
+- **Step 4** — `references/foundations-alignment.md` (FOUNDATIONS principle alignment classification)
+- **Steps 5-6** — `references/findings-and-questions.md` (finding classification, presentation template, question handling)
+- **Step 7** — `references/spec-writing-rules.md` (pre-apply verification, edit ordering, post-apply confirmation)
+
+Plan-mode invocations also load `references/plan-mode.md` at entry (see §Plan Mode Awareness). Steps 1, 2, and 8 use no reference file — their procedure is self-contained in this SKILL.md.
+
 ## Inputs
 
 **Required:**
@@ -163,9 +174,11 @@ Build a validation checklist. For specs with >15 references, use `TaskCreate` to
 
 Prioritize references most likely to have drifted: import paths, function signatures, types the spec extends, sibling-spec Dependency paths. Stable references (FOUNDATIONS.md principle names, Canon Fact Record field names) can be spot-checked.
 
+**Reference-count checkpoint**: Before starting Step 3, emit the extracted reference count as a one-line user-facing note naming the threshold-decision explicitly — e.g., `Reference count: 28 — TaskCreate recommended per Step 2 threshold` or `Reference count: 9 — mental tracking sufficient`. The note makes the >15 threshold-decision auditable and prompts actual TaskCreate invocation when warranted; auditors who skip the note tend to default to mental tracking regardless of count.
+
 ## Step 3: Codebase Validation
 
-**Read `references/codebase-validation.md` now, with the Read tool, before classification-driven substep selection.** Surface validation (listing directories, reading sibling specs, confirming referenced paths exist) may proceed in parallel with this load; the reference is required before the classification-sensitive work begins (which substeps apply per (a)/(b)/(c)/(d), specialized sub-checks per substep, agent-delegation guidance). Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded codebase-validation.md — top section is "3.0 Cross-Package Scope Establishment"`. A bare "Loaded: codebase-validation.md" is treated as a skipped load.
+**Read `references/codebase-validation.md` now, with the Read tool, before classification-driven substep selection.** Surface validation (listing directories, reading sibling specs, confirming referenced paths exist) may run in the same tool-call batch as the Read, but the Read must complete before classification-sensitive work begins (which substeps apply per (a)/(b)/(c)/(d), specialized sub-checks per substep, agent-delegation guidance). Surface validation does NOT substitute for the load — listing directories without consulting the reference's substep guidance is a skipped load. Emit a content-tied acknowledgment immediately after the Read call — e.g., `Loaded codebase-validation.md — top section is "3.0 Cross-Package Scope Establishment"`. A bare "Loaded: codebase-validation.md" is treated as a skipped load.
 
 Then validate every reference from Step 2, applying the substep subset determined by the Pre-Process classification (a/b/c/d + hybrids).
 

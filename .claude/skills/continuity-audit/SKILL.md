@@ -13,7 +13,7 @@ arguments:
 
 # Continuity Audit
 
-Audits an existing world for the eight audit categories — contradictions, scope drift, capability creep, dangling consequences, thematic erosion, hidden retcons, mystery corruption, diegetic leakage — and writes a consolidated audit report plus, for every finding at or above the configured severity floor, a retcon-proposal card whose path is directly consumable by `canon-addition`. This skill **proposes** retcons; it does not apply them. Canonization happens only when `canon-addition` runs on the emitted RP-NNNN card.
+Audits an existing world for the eight audit categories — contradictions, scope drift, capability creep, dangling consequences, thematic erosion, hidden retcons, mystery corruption, diegetic leakage — plus the SPEC-09 Silent-Area Canonization check, and writes a consolidated audit report plus, for every finding at or above the configured severity floor, a retcon-proposal card whose path is directly consumable by `canon-addition`. This skill **proposes** retcons; it does not apply them. Canonization happens only when `canon-addition` runs on the emitted RP-NNNN card.
 
 <HARD-GATE>
 Do NOT write any file — audit report, retcon-proposal card, INDEX.md update — until: (a) pre-flight allocates `AU-NNNN` via `mcp__worldloom__allocate_next_id`, loads the world-state context packet via `get_context_packet(task_type='continuity_audit', ...)`, and confirms `worlds/<world-slug>/` exists; (b) Phase 9 self-check passes for every finding (citation, severity rationale, retcon-type/repair conformance, repair-policy justification, schema parity); (c) Phase 12 validation passes at per-finding, per-card, and audit-level layers; (d) the user has explicitly approved the Phase 13 deliverable summary (full audit report body, every retcon card's full content, per-card Retcon Policy checklist, any Phase 9 repairs that fired, any findings or cards the user is dropping). The user's approval may include a drop-list of finding-IDs and/or RP-NNNN ids to exclude. Dropped findings are recorded in the audit report's `dropped_finding_ids` / `dropped_card_ids` frontmatter. The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
@@ -40,7 +40,7 @@ Phase 2:  Change Log Delta Analysis (per-CH risk profile via search_nodes
 Phase 3:  Continuity Lint Sweep (10 lint questions, candidate findings only)
       |
       v
-Phase 4:  Audit Category Passes 4a-4j (typed-query enumeration; semantic
+Phase 4:  Audit Category Passes 4a-4k (typed-query enumeration; semantic
                                        judgment per references/audit-categories.md)
       |
       v
@@ -99,7 +99,15 @@ If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create
 
 5. **Phase 3: Continuity Lint Sweep.** Run the 10 lint questions mechanically (see `templates/audit-report.md` §Continuity Lint Sweep Summary for the question list). Each question produces zero or more candidate anchors. Un-anchored flags are discarded; every candidate cites at least one CF id or concrete record/section anchor (e.g., `SEC-GEO-007 ¶3`). Phase 3 output is a candidate list, not findings.
 
-6. **Phase 4: Audit Category Passes.** Load `references/audit-categories.md`. One sub-pass per active category. Each sub-pass uses the typed MCP query named in `references/retrieval-tool-tree.md` §Phase 4 to enumerate candidates, then applies the semantic judgment described per category. Findings carry `finding_id` (`F-NN`), triggering category (`4a`–`4j`), cited CF ids and/or record anchors, one-paragraph description, and feed forward to Phase 5. **A category with no findings produces an explicit "no findings — audited and clean" entry; silent skipping is a Phase 1 violation.**
+6. **Phase 4: Audit Category Passes.** Load `references/audit-categories.md`. One sub-pass per active category/check. Each sub-pass uses the typed MCP query named in `references/retrieval-tool-tree.md` §Phase 4 to enumerate candidates, then applies the semantic judgment described per category. Findings carry `finding_id` (`F-NN`), triggering category/check (`4a`–`4k`), cited CF ids and/or record anchors, one-paragraph description, and feed forward to Phase 5. **A category or check with no findings produces an explicit "no findings — audited and clean" entry; silent skipping is a Phase 1 violation.**
+
+   **4k — Silent-Area Canonization (SPEC-09 / Default Reality).**
+   - **Trigger**: any CF added since the previous audit cycle, or every CF in scope for a full-history audit, whose `domains_affected` introduces at least one domain not previously covered by another CF in the audited set.
+   - **Detection inputs**: enumerate CF records through `mcp__worldloom__search_nodes(node_types=['canon_fact_record'])`, then use `mcp__worldloom__get_record(CF-NNNN)` for any body or frontmatter fields not present in the search result. For each candidate CF, compute the union of `domains_affected` across all other CFs in the comparison set. Mark a domain as previously silent if it appears in the candidate's `domains_affected` but is absent from that union.
+   - **Delta ordering**: when `recent_canon_addition_cutoff` is present, compare candidate CFs from the Phase 2 delta window against prior CFs outside that delta window. For full-history audits with no delta window, compare each candidate against all other CFs and treat the result as an audit finding candidate rather than a historical hard failure.
+   - **Acknowledgment surface**: accept a one-line acknowledgment in `cf.notes` or an explicit `cf.source_basis` annotation matching any of these case-insensitive patterns: `previously unmodeled`, `previously silent`, `first canonization of <domain>`, `silent area`, or `default reality`.
+   - **Output**: when acknowledgment is missing, emit a retcon-proposal candidate at `audits/AU-NNNN/retcon-proposals/RP-NNNN-<slug>.md`. The candidate's body cites the CF, names the silent domain, and proposes adding an acknowledgment line to `cf.notes` or `source_basis` in the Default Reality posture. Never hard-fail: the audit surfaces the gap; only `canon-addition` can apply the retcon.
+   - **Firewall**: this check reads `domains_affected`, `notes`, and `source_basis` only. It never reads or writes Mystery Reserve entries and never treats a previously silent domain as permission to resolve a mystery.
 
 7. **Phase 5: Severity Classification.** Assign 1–5 with one-line rationale per `references/repair-and-retcon.md` §Severity. Bare "Severity 4" without rationale fails Phase 9.
 
@@ -137,14 +145,14 @@ If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create
 
 ## Validation Rules This Skill Upholds
 
-This skill is the post-acceptance enforcer of all 7 Validation Rules:
+This skill is the post-acceptance enforcer of the original 7 Validation Rules plus SPEC-09's audit-side Default Reality check:
 
 - **Rule 1 (No Floating Facts)** — Phases 4a/4b; Phase 12 test 3 (CF-schema parity on emitted retcon cards).
 - **Rule 2 (No Pure Cosmetics)** — Phase 4f.
 - **Rule 3 (No Specialness Inflation)** — Phase 6 (acceptance-time enforcement is canon-addition's Phase 11).
 - **Rule 4 (No Globalization by Accident)** — Phase 4c (CF-level) + Phase 4j (prose-level).
 - **Rule 5 (No Consequence Evasion)** — Phase 4e + Phase 4f.
-- **Rule 6 (No Silent Retcons)** — Phase 2 delta detection + Phase 8 Retcon Policy Checklist per card.
+- **Rule 6 (No Silent Retcons)** — Phase 2 delta detection + Phase 4k Silent-Area Canonization + Phase 8 Retcon Policy Checklist per card.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 4h + Phase 4i.
 
 ## Guardrails

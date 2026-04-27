@@ -48,8 +48,8 @@ test("SPEC-04 capstone re-enumerates animalia source counts from the fixture cop
 
 test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {
   assert.equal(structuralValidators.length, 6);
-  assert.equal(ruleValidators.length, 6);
-  assert.equal([...structuralValidators, ...ruleValidators].length, 12);
+  assert.equal(ruleValidators.length, 8);
+  assert.equal([...structuralValidators, ...ruleValidators].length, 14);
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
@@ -115,6 +115,8 @@ test("SPEC-04 verification: Incremental mode filters to relevant validators", as
   assert.ok(run.summary.validators_run.includes("rule2_no_pure_cosmetics"));
   assert.ok(run.summary.validators_run.includes("rule4_no_globalization_by_accident"));
   assert.ok(run.summary.validators_run.includes("rule6_no_silent_retcons"));
+  assert.ok(run.summary.validators_run.includes("rule11_action_space"));
+  assert.ok(run.summary.validators_run.includes("rule12_redundancy"));
   assert.ok(run.summary.validators_run.includes("touched_by_cf_completeness"));
   assert.ok(!run.summary.validators_run.includes("rule5_no_consequence_evasion"));
   assert.ok(!run.summary.validators_run.includes("rule7_mystery_reserve_preservation"));
@@ -125,6 +127,8 @@ test("SPEC-04 verification: Phase 14a migration keeps Rule 3 skill-owned", () =>
   const ruleNames = ruleValidators.map((validator) => validator.name).sort();
 
   assert.deepEqual(ruleNames, [
+    "rule11_action_space",
+    "rule12_redundancy",
     "rule1_no_floating_facts",
     "rule2_no_pure_cosmetics",
     "rule4_no_globalization_by_accident",

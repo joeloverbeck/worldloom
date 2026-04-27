@@ -1,5 +1,7 @@
 # Implementation Order — Structure-Aware Retrieval & Surgical Edits
 
+**Status**: COMPLETED — archived 2026-04-27 as `archive/specs/IMPLEMENTATION-ORDER-2026-04-27.md`
+
 This document records the implemented spec bundle (`SPEC-01` through `SPEC-17`) and its historical implementation sequence. It is distinct from the **read order** (in which a reviewer encounters the specs) and follows the phased rollout defined in `SPEC-08` as amended by archived `SPEC-13`, archived `SPEC-14`, and the archived post-pilot refinement specs.
 
 ## Design read order (for reviewers)
@@ -156,19 +158,21 @@ Lands after Phase 2 completes. Independent of the structure-aware retrieval bund
 
 Order (single tier; internal parallelization minimal):
 
-1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause)
-2. **canon-addition skill updates** (Tests 11 & 12, template extension, Phase 12 block-authoring)
-3. **continuity-audit skill updates** (Silent-Area Canonization check)
-4. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
-5. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`)
-6. **docs/WORKFLOWS.md pointer** for the new tests
+1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause) — completed via `archive/tickets/SPEC09CANSAFEXP-001.md`
+2. **CF structural-schema extension** (`epistemic_profile`, `exception_governance`, current-write conditional presence, `n_a` rationale quality) — completed via `archive/tickets/SPEC09CANSAFEXP-002.md`
+3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`) — completed via `archive/tickets/SPEC09CANSAFEXP-003.md`
+4. **canon-addition skill updates** (Tests 11 & 12, PA checklist text, Phase 13a block-authoring) — completed via `archive/tickets/SPEC09CANSAFEXP-004.md`
+5. **continuity-audit skill updates** (Silent-Area Canonization check) — completed via `archive/tickets/SPEC09CANSAFEXP-005.md`
+6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block) — completed via `archive/tickets/SPEC09CANSAFEXP-006.md`
+7. **create-base-world genesis block-population guidance** — completed via `archive/tickets/SPEC09CANSAFEXP-007.md`
+8. **verification capstone** (mechanized validator/schema/pre-apply coverage for SPEC-09 §Verification scenarios 1-7, 9, 10-surrogate, 11-surrogate) — completed via `archive/tickets/SPEC09CANSAFEXP-008.md`
 
-**Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
+**Phase 2.5 completion gate**: `SPEC-09 Verification` keeps twelve spec-level checks, with the package capstone mechanizing the validator/schema/pre-apply subset and skill-flow-only checks remaining prose/organic verification. Specifically:
 - `world-validate animalia --json` reports zero new failures on historical CFs (grandfather clause holds structurally)
-- Synthetic capability CF without `exception_governance` FAILS Test 12
-- Synthetic geography CF with `exception_governance: { n_a: "..." }` PASSES
+- Synthetic capability CF without `exception_governance` FAILS `record_schema_compliance` on a current write path
+- Synthetic geography CF with `exception_governance: { n_a: "..." }` PASSES schema and Rule 11; Rule 12 remains trace-register based for hard-canon core truths
 - Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
-- `create-base-world` genesis test world emits CF-0001 with both blocks correctly populated or N/A'd per fact-type
+- Patch-plan envelope surrogates for a new animalia capability CF and a genesis-world bundle pass `validatePatchPlan` with zero verdicts; full `canon-addition`, `continuity-audit`, and `create-base-world` skill-flow exercise remains outside the package capstone
 
 ### Phase 2.6 — Pilot Feedback Fixes (SPEC-15)
 
@@ -280,10 +284,11 @@ Phase 2 (Write Path + All-Skill Migration) — revised per SPEC-13
 Phase 2.5 (Canon-Safety Expansion, SPEC-09) — independent; depends on SPEC-04 + SPEC-06
   │
   ├── FOUNDATIONS.md edits (Rules 11/12, schema blocks, relations, default-reality paragraph)
-  ├── canon-addition skill updates (Tests 11/12, template, Phase 12 block authoring)
-  ├── continuity-audit skill update (silent-area-canonization check)
-  ├── diegetic-artifact-generation template cleanup
+  ├── CF structural-schema extension (epistemic_profile, exception_governance)
   ├── SPEC-04 validator additions (validator-rule-11-action-space, validator-rule-12-redundancy)
+  ├── canon-addition skill updates (Tests 11/12, PA checklist text, Phase 13a block authoring)
+  ├── continuity-audit skill update (silent-area-canonization check)
+  ├── diegetic-artifact-generation template cleanup — complete
   └── docs/WORKFLOWS.md pointer
 
 Phase 2.6 (Pilot Feedback Fixes, SPEC-15) ← COMPLETE; archived
@@ -337,7 +342,7 @@ Estimates assume a single builder working at ~half-time; scale accordingly.
   - SPEC-06 (all 8 skills against atomic source): completed 2026-04-26; archived at `archive/specs/SPEC-06-skill-rewrite-patterns.md`
   - SPEC-07 Part B: completed 2026-04-26; archived at `archive/specs/SPEC-07-docs-updates.md` (HARD-GATE-DISCIPLINE.md write-order rewrite for engine's 3-tier ordering + CLAUDE.md non-negotiables phrasing refinement)
   - Animalia re-validation + cleanup: 0.5 session (lifted into SPEC-14 Tier 3)
-- **Phase 2.5** (SPEC-09 canon-safety expansion): 1–2 sessions
+- **Phase 2.5** (SPEC-09 canon-safety expansion): COMPLETE 2026-04-27; archived at `archive/specs/SPEC-09-canon-safety-expansion.md`
 - **Phase 2.6** (SPEC-15 pilot feedback fixes): COMPLETE 2026-04-26
 - **Phase 2.7** (SPEC-16 + SPEC-17 post-pilot retrieval refinements): COMPLETE 2026-04-26
   - SPEC-16 four sub-tracks: completed and archived at `archive/specs/SPEC-16-mcp-retrieval-surface-refinements.md`
@@ -374,7 +379,7 @@ If SPEC-06 Phase 2 skill rewrites reveal systematic reasoning gaps (judgment bei
 | SPEC-06 Skill Rewrite Patterns | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-06-skill-rewrite-patterns.md`. Per-skill ticket family `SPEC06SKIREWPAT-001..008` archived under `archive/tickets/` (canon-addition, create-base-world, character-generation, diegetic-artifact-generation, propose-new-canon-facts, canon-facts-from-diegetic-artifacts, propose-new-characters, continuity-audit). Static-audit capstone `SPEC06SKIREWPAT-009` archived at `archive/tickets/SPEC06SKIREWPAT-009.md` with audit report at `docs/triage/2026-04-26-spec06-phase2-static-acceptance.md`. Phase 2 completion gate closed via that capstone. Token-reduction / reasoning-preservation / role-split runtime gates retired per 2026-04-26 scope narrowing — recorded in archived spec §Retired verification gates. |
 | SPEC-07 Docs Updates | ✓ implemented; archived at `archive/specs/SPEC-07-docs-updates.md`. Part A implemented 2026-04-23 at `docs/FOUNDATIONS.md`, `CLAUDE.md`, `docs/HARD-GATE-DISCIPLINE.md`, `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md`, and `docs/CONTEXT-PACKET-CONTRACT.md`. Part B implemented 2026-04-26 at `docs/HARD-GATE-DISCIPLINE.md` (§Why write order matters rewrite for post-SPEC-13 3-tier engine ordering + §Execution pattern step 6 de-hedge) and `CLAUDE.md` (§Non-Negotiables HARD-GATE bullet refined for Hook 3 + approval-token structural enforcement; `_source/` engine-only-surfaces bullet refined to distinguish Hook-3-blocked `_source/<subdir>/*.yaml` from prescriptively-engine-routed hybrid artifacts). Part C retired by SPEC-13 (FOUNDATIONS atomic-source revision authored directly by SPEC-13 Stream A). |
 | SPEC-08 Migration & Phasing | ✅ COMPLETED — archived at `archive/specs/SPEC-08-migration-and-phasing.md`. Phases 0/1/1.5/2 all landed (Phase 0 closed 2026-04-22; Phase 1 substantially closed 2026-04-24 with SPEC-06 Part A pilot folded into Phase 2; Phase 1.5 closed 2026-04-24 via SPEC-13; Phase 2 closed 2026-04-26 via `SPEC06SKIREWPAT-009` static-audit capstone). Phase 3 / Phase 4 superseded by Phase 1.5 (SPEC-13). Outcome populated; `world-validate animalia --json` reports zero findings (Phase 2 / SPEC-14 acceptance gate). Open exception: `tickets/SPEC13ATOSRCMIG-006.md` (snapshot-soak cleanup, not a Phase 2 blocker). |
-| SPEC-09 Canon-Safety Expansion | ✓ specified (independent; depends on SPEC-04, SPEC-06) |
+| SPEC-09 Canon-Safety Expansion | ✓ implemented 2026-04-27; archived at `archive/specs/SPEC-09-canon-safety-expansion.md`; delivered FOUNDATIONS Rule 11/12 and Default Reality updates, CF schema blocks, validator rules, skill/template updates, genesis guidance, and the verification capstone via archived `SPEC09CANSAFEXP-*` tickets |
 | SPEC-10 Entity Surface Redesign | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-10-entity-surface-redesign.md` |
 | SPEC-11 Canonical Entity Authority Surfaces | ✓ implemented 2026-04-23; archived at `archive/specs/SPEC-11-canonical-entity-authority-surfaces.md` |
 | SPEC-12 Skill-Reliable Retrieval | ✓ implemented 2026-04-24; archived at `archive/specs/SPEC-12-skill-reliable-retrieval.md` |
@@ -383,6 +388,10 @@ If SPEC-06 Phase 2 skill rewrites reveal systematic reasoning gaps (judgment bei
 | SPEC-15 Pilot Feedback Fixes | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-15-pilot-feedback-fixes.md`; `SPEC15PILFIX-001` (rule5 + append_extension) completed and archived at `archive/tickets/SPEC15PILFIX-001.md`; `SPEC15PILFIX-002` (documentation + skill content) completed and archived at `archive/tickets/SPEC15PILFIX-002.md`. Engine-convention sync + MCP retrieval-surface refinements promoted from `brainstorming/post-pilot-retrieval-refinements.md` into SPEC-16 + SPEC-17. |
 | SPEC-16 MCP Retrieval-Surface Refinements | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-16-mcp-retrieval-surface-refinements.md`. Delivered C3 (`get_record_field` slice tool), C4 (`get_record_schema` discovery tool), C5 (per-task-type packet defaults + `retry_with` error surface), C6 (`search_nodes` exhaustive mode), and cross-track docs through `SPEC16MCPRETSUR-005`. Additive, no FOUNDATIONS amendments. SPEC-17 §C2 used the archived SPEC-16 §C3 + §C5 prerequisite before landing its FOUNDATIONS prose softening. |
 | SPEC-17 Audit-Trail and Retrieval-Contract Clarifications | ✓ implemented 2026-04-26; archived at `archive/specs/SPEC-17-audit-trail-and-retrieval-contract-clarifications.md`. C1 is completed and archived at `archive/tickets/SPEC17AUDTRARET-001.md` (deprecates the pre-SPEC-13 CF-modification notes-paragraph convention; `modification_history[]` is the canonical audit surface). C2 is completed and archived at `archive/tickets/SPEC17AUDTRARET-002.md` and amends FOUNDATIONS.md §Tooling Recommendation to endorse the documented context-packet + targeted-retrieval pattern after SPEC-16 §C3 + §C5 archival was verified. `archive/tickets/SPEC17AUDTRARET-003.md` completed active-spec truthing for the stale SPEC-06 notes-field row and deleted canon-addition template/reference explanation. No FOUNDATIONS amendment remains for SPEC-17. |
-| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14; amended 2026-04-26 per SPEC-15; amended 2026-04-26 per SPEC-16 + SPEC-17; updated 2026-04-26 after SPEC-16 implementation closeout; updated 2026-04-26 after SPEC-17 archival; updated 2026-04-26 after SPEC-06 archival (Phase 2 completion gate closed); updated 2026-04-26 after SPEC-07 Part B archival |
+| IMPLEMENTATION-ORDER.md (this file) | ✓ delivered; amended 2026-04-24 per SPEC-13; amended 2026-04-25 per SPEC-14; amended 2026-04-26 per SPEC-15; amended 2026-04-26 per SPEC-16 + SPEC-17; updated 2026-04-26 after SPEC-16 implementation closeout; updated 2026-04-26 after SPEC-17 archival; updated 2026-04-26 after SPEC-06 archival (Phase 2 completion gate closed); updated 2026-04-26 after SPEC-07 Part B archival; completed and archived 2026-04-27 after SPEC-09 archival |
 
 SPEC-01 through SPEC-08 are the Phase 0 deliverable of the brainstorm session captured in `brainstorming/structure-aware-retrieval.md`. SPEC-09 is the deliverable of a separate triage brainstorm over `brainstorming/foundational-improvements.md` (external worldbuilding review), sequenced as Phase 2.5 above. SPEC-10, SPEC-11, and SPEC-12 are architectural remediations of the original read-path contract: first the broad heuristic entity surface was narrowed, then canonical authority surfaces were made explicit, and finally downstream-skill retrieval reliability was formalized as a separate scoped-reference and packet-completeness layer. **SPEC-13 is the structural resolution of the condition the SPEC-10/11/12 arc revealed**: the remediations were patching a structural consequence of markdown-as-sole-storage. SPEC-13 moves canonical storage to atomic YAML under `_source/`, pulls the previously-deferred Phase 3 (CF/CH atomization) and Phase 4 (prose fragmentization) forward ahead of Phase 2, and retires both as separate phase slots. **SPEC-14 is the contract-reconciliation umbrella surfaced by the 2026-04-25 grandfathering triage** (`docs/triage/2026-04-25-spec04-grandfathering-triage.md`): the SPEC-04 baseline run on animalia exposed three-way drift between engine emission (`append_adjudication_record`), validator parsing (`record_schema_compliance`), and existing PA file shape; archived SPEC-14 supersedes the relevant parts of archived SPEC-03 and SPEC-04, adds canonical-vocabulary surfacing via MCP, and decomposes the animalia bulk fix into Tier 3 tickets that empty `audits/validation-grandfathering.yaml` to zero entries. **SPEC-15, SPEC-16, and SPEC-17 are the completed post-pilot refinement track surfaced by the 2026-04-26 first-live canon-addition run** (`brainstorming/post-pilot-retrieval-refinements.md`): SPEC-15 (archived) covers the immediately-actionable validator + documentation fixes; SPEC-16 (archived) covers four additive MCP retrieval-surface refinements (`get_record_field`, `get_record_schema`, per-task-type packet defaults + retry-hint, `search_nodes` exhaustive mode) plus cross-track docs; SPEC-17 (archived) covers the two contract-level decisions (deprecating the pre-SPEC-13 notes-paragraph convention; softening FOUNDATIONS §Tooling Recommendation prose to endorse the index + follow-up-retrieval pattern). The split between SPEC-16 and SPEC-17 is by architectural register — SPEC-16 is mechanical and additive, SPEC-17 is FOUNDATIONS-touching — and SPEC-17 §C2 landed only after SPEC-16 §C3 + §C5 were archived.
+
+## Outcome
+
+Completed and archived 2026-04-27 as the dated batch history for `SPEC-01` through `SPEC-17`, including the final SPEC-09 Phase 2.5 closeout. Future spec batches may create a fresh `specs/IMPLEMENTATION-ORDER.md` without overwriting this historical implementation order.

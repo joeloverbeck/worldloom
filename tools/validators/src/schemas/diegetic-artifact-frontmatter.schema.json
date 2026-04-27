@@ -10,6 +10,7 @@
     "slug": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "artifact_type": { "type": "string", "minLength": 1 },
+    "statement_of_existence": { "type": "string", "minLength": 1 },
     "author": { "type": "string" },
     "author_character_id": {
       "anyOf": [
@@ -36,6 +37,17 @@
     },
     "communicative_purpose": { "type": "string" },
     "desired_relation_to_truth": { "type": "string" },
+    "world_relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "corroborates": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "contests": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "conceals": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "mythologizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "ritualizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }
+      }
+    },
     "canon_facts_accessible": { "anyOf": [{ "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }, { "type": "null" }] },
     "taboo_censorship_conditions": { "anyOf": [{ "type": "array" }, { "type": "string" }, { "type": "null" }] },
     "desired_length": { "anyOf": [{ "type": "string" }, { "type": "integer" }, { "type": "null" }] },

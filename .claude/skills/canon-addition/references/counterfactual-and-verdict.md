@@ -94,10 +94,51 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 - `# Discovery` — top-of-file index mirroring the four `*_touched` frontmatter arrays for in-body grep. Match the frontmatter exactly: do not re-include UNCHANGED items here either.
 - `# Proposal` — verbatim copy of the proposal text + user-stated constraints (preferred scope, desired rarity, dramatic purpose, revision appetite, other).
 - `# Phase 0–11 Analysis` — full per-phase outputs (Phase 0 normalize / Phase 1 scope / Phase 2 invariants / Phase 3 capability / Phase 4 prerequisites / Phase 5 diffusion / Phase 6 consequence propagation, with first/second/third-order subsections / Phase 7 counterfactual + stated stabilizers / Phase 8 contradiction classification / Phase 9 repair pass — options considered / declined / adopted / Phase 10 narrative-and-thematic fit + OQ pressure scan results).
-- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 10 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. SPEC-09 will append Tests 11/12 here.
+- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 12 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. Tests 11 and 12 use the detailed criteria below.
 - `# Verdict` — one of `ACCEPT` / `ACCEPT_WITH_REQUIRED_UPDATES` / `ACCEPT_AS_LOCAL_EXCEPTION` / `ACCEPT_AS_CONTESTED_BELIEF` / `REVISE_AND_RESUBMIT` / `REJECT` (matches the canonical verdict enum).
 - `# Justification` — phase-cited reasoning. Every claim cites a specific phase finding.
 - `# Critic Reports` — verbatim, only if the Escalation Gate fired. One subsection per critic (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator) plus a Synthesis (Phase 6b) subsection covering convergent concerns, productive tensions resolved, and required CF-language commitments arising from synthesis.
 - `# Required World Updates Applied` — accept-only. One paragraph per affected section record summarising what the corresponding `append_extension` / `update_record_field` op added.
 - `# Resubmission Menu` (REVISE only) OR `# Why This Cannot Be Repaired` (REJECT only) — concrete; the user can act on it without further clarification.
 - `# User Override` — only if a Phase 14b user override fired (original verdict, override verdict, user reasoning, converted accept-branch outputs). Rule 6 compliance: overrides are logged.
+
+## Phase 14a Tests 11/12 Detailed Criteria
+
+### Test 11: Action-Space Integrity
+
+Applies when the CF introduces or depends on exceptional capability: bloodline power, high-leverage artifact, magical or technical discipline, divine action, or another fact that lets a narrow actor set decide outcomes ordinary actors could not normally decide.
+
+PASS requires:
+- State whether the CF is exceptional-capability-bearing. If no, PASS with a one-line rationale tied to the CF type.
+- If yes, name at least three distinct leverage forms remaining to ordinary or mid-tier actors from the SPEC-09 enum: locality, secrecy, legitimacy, bureaucracy, numbers, ritual authority, domain expertise, access, timing, social trust, deniability, infrastructural control.
+- Tie each leverage form to a concrete in-world mechanism. The mechanism can cite a law, route, institution, practice, material bottleneck, social norm, geography, taboo, or other canonical substrate. Generic claims such as "ordinary people still matter" are FAIL.
+
+FAIL examples:
+- A capability CF says elites remain balanced by "public resistance" without naming the public mechanism.
+- Three leverage entries repeat the same mechanism under different labels.
+- The leverage list satisfies the validator enum mechanically, but the rationale does not explain how those actors can actually exercise leverage in-world.
+
+Edge cases:
+- Local or soft-canon exceptions may PASS with a narrower leverage account if the rationale names the local scope and the actors who retain leverage inside that scope.
+- Contested beliefs still need action-space scrutiny when belief in the exception changes behavior; the test evaluates the social leverage created by the belief, not whether the belief is objectively true.
+- Hidden capabilities must name the actors or institutions whose secrecy, access, timing, or deniability governs use.
+
+### Test 12: Redundancy
+
+Applies to hard-canon core truths: world-level facts whose absence would materially change how the setting works. Soft, local, contested, or proposal-only claims can PASS trivially only with a status-based rationale.
+
+PASS requires:
+- Classify the CF status and whether it is a hard-canon core truth.
+- If it is not a hard-canon core truth, PASS with a one-line status rationale.
+- If it is hard-canon core truth, name at least two distinct trace registers and the concrete in-world form each trace takes. Registers include law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, or another named register.
+- For intentionally hidden truths, cite the `M-NNNN` Mystery Reserve entry or other canonized hiding mechanism that explains why ordinary trace redundancy is suppressed.
+
+FAIL examples:
+- A core truth appears only in one archive, one artifact, or one scholar's claim with no second register.
+- Two examples are both the same register, such as two laws or two maps, unless the rationale explains a genuinely distinct trace form.
+- The truth is called hidden, but no canonized hiding mechanism is cited.
+
+Edge cases:
+- A truth can use indirect traces, such as missing maps plus euphemistic slang, if the rationale explains how both point to the same underlying fact.
+- A new CF can create one trace immediately and require a second world update in the same patch plan; it must name both and the plan must include the corresponding updates.
+- Mystery Reserve carve-outs do not authorize vague absence. They only pass when the hiding mechanism itself is already or newly canonized in the same approved plan.
