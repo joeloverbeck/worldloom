@@ -1,0 +1,38 @@
+id: CF-9002
+title: Populated exception governance
+status: hard_canon
+type: capability
+statement: A test capability has limiting exception governance.
+scope:
+  geographic: local
+  temporal: current
+  social: elite
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - magic
+required_world_updates:
+  - MAGIC_OR_TECH_SYSTEMS
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+epistemic_profile:
+  n_a: "Magic practice fact; no knowability axis."
+exception_governance:
+  activation_conditions:
+    - lunar timing
+  rate_limits:
+    - once per season
+  mobility_limits:
+    - fixed shrine
+  diffusion_barriers:
+    - secret training
+  countermeasures:
+    - ritual interruption
+  nondeployment_reasons:
+    - public legitimacy cost
+extensions: []

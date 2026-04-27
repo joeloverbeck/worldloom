@@ -18,6 +18,61 @@ import { frontmatterFor } from "./yaml-parse-integrity.js";
 const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
 const validatorsByRecordType = loadSchemaValidators();
 
+export const EXCEPTION_GOVERNANCE_REQUIRED_TYPES = [
+  "capability",
+  "bloodline",
+  "magic_practice",
+  "technology",
+  "divine_action",
+  "artifact_dependent_truth",
+  "exception_introducing_fact"
+] as const;
+
+export const EPISTEMIC_PROFILE_REQUIRED_TYPES = [
+  ...EXCEPTION_GOVERNANCE_REQUIRED_TYPES,
+  "institution_with_secrecy",
+  "knowledge_asymmetric_fact"
+] as const;
+
+export const ONTOLOGY_CATEGORY_KEYWORDS = [
+  "entity",
+  "species",
+  "person",
+  "faction",
+  "institution",
+  "polity",
+  "place",
+  "region",
+  "route",
+  "resource",
+  "craft",
+  "technology",
+  "magic practice",
+  "magic",
+  "belief",
+  "ritual",
+  "law",
+  "taboo",
+  "artifact",
+  "hazard",
+  "event",
+  "historical process",
+  "historical",
+  "social role",
+  "text/tradition",
+  "text",
+  "tradition",
+  "ecological system",
+  "ecological",
+  "bodily condition",
+  "metaphysical rule",
+  "metaphysical",
+  "geography",
+  "physics",
+  "structural",
+  "institutional"
+] as const;
+
 export const recordSchemaCompliance: Validator = {
   name: "record_schema_compliance",
   severity_mode: "fail",
@@ -25,6 +80,7 @@ export const recordSchemaCompliance: Validator = {
   run: async (input: unknown, ctx: Context): Promise<Verdict[]> => {
     const verdicts: Verdict[] = [];
     const records = await queryStructuralRecords(ctx);
+    const preApplyTouchedFiles = touchedPreApplyFiles(input, ctx);
 
     for (const record of records) {
       if (!isInIncrementalScope(record.file_path, ctx)) {
@@ -37,6 +93,7 @@ export const recordSchemaCompliance: Validator = {
       if (!validate(record.parsed)) {
         verdicts.push(...schemaVerdicts(record, validate.errors ?? []));
       }
+      verdicts.push(...canonSafetyBlockVerdicts(record, ctx, preApplyTouchedFiles));
     }
 
     for (const hybrid of hybridRecordsFromFiles(input, ctx)) {
@@ -71,6 +128,106 @@ function schemaVerdicts(record: SchemaTarget, errors: ErrorObject[]): Verdict[] 
       node_id: record.node_id
     }
   }));
+}
+
+function canonSafetyBlockVerdicts(
+  record: SchemaTarget,
+  ctx: Context,
+  preApplyTouchedFiles: ReadonlySet<string>
+): Verdict[] {
+  if (record.node_type !== "canon_fact_record") {
+    return [];
+  }
+
+  const parsed = asPlainRecord(record.parsed);
+  const verdicts: Verdict[] = [];
+
+  if (currentSchemaRequiredFor(record, ctx, preApplyTouchedFiles)) {
+    const type = String(parsed.type ?? "");
+    if (requiresExceptionGovernance(type) && parsed.exception_governance === undefined) {
+      verdicts.push(customSchemaVerdict(
+        record,
+        "record_schema_compliance.missing_exception_governance",
+        `${record.node_id} canon safety block violation: type '${type}' requires exception_governance`
+      ));
+    }
+    if (requiresEpistemicProfile(type) && parsed.epistemic_profile === undefined) {
+      verdicts.push(customSchemaVerdict(
+        record,
+        "record_schema_compliance.missing_epistemic_profile",
+        `${record.node_id} canon safety block violation: type '${type}' requires epistemic_profile`
+      ));
+    }
+  }
+
+  verdicts.push(...naRationaleVerdicts(record, "epistemic_profile", parsed.epistemic_profile));
+  verdicts.push(...naRationaleVerdicts(record, "exception_governance", parsed.exception_governance));
+  return verdicts;
+}
+
+export function requiresExceptionGovernance(type: string): boolean {
+  return EXCEPTION_GOVERNANCE_REQUIRED_TYPES.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
+}
+
+export function requiresEpistemicProfile(type: string): boolean {
+  return EPISTEMIC_PROFILE_REQUIRED_TYPES.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
+}
+
+function currentSchemaRequiredFor(
+  record: SchemaTarget,
+  ctx: Context,
+  preApplyTouchedFiles: ReadonlySet<string>
+): boolean {
+  if (ctx.run_mode === "pre-apply") {
+    return preApplyTouchedFiles.has(toPosixPath(record.file_path));
+  }
+  if (ctx.run_mode === "incremental") {
+    return isInIncrementalScope(record.file_path, ctx);
+  }
+  return false;
+}
+
+function touchedPreApplyFiles(input: unknown, ctx: Context): ReadonlySet<string> {
+  if (ctx.run_mode !== "pre-apply") {
+    return new Set();
+  }
+  return new Set(fileInputsFrom(input, ctx).map((file) => toPosixPath(file.path)));
+}
+
+function naRationaleVerdicts(record: SchemaTarget, blockName: string, block: unknown): Verdict[] {
+  const value = asPlainRecord(block).n_a;
+  if (value === undefined) {
+    return [];
+  }
+  const rationale = typeof value === "string" ? value : "";
+  const lower = rationale.toLowerCase();
+  if (ONTOLOGY_CATEGORY_KEYWORDS.some((keyword) => lower.includes(keyword))) {
+    return [];
+  }
+  return [
+    customSchemaVerdict(
+      record,
+      "record_schema_compliance.na_rationale_quality",
+      `${record.node_id} canon safety block violation at /${blockName}/n_a: rationale must include a FOUNDATIONS ontology category keyword`
+    )
+  ];
+}
+
+function customSchemaVerdict(record: SchemaTarget, code: string, message: string): Verdict {
+  return {
+    validator: "record_schema_compliance",
+    severity: "fail",
+    code,
+    message,
+    location: {
+      file: record.file_path,
+      node_id: record.node_id
+    }
+  };
+}
+
+function normalizeType(type: string): string {
+  return type.trim().toLowerCase().replace(/[-\s]+/g, "_");
 }
 
 function loadSchemaValidators(): Map<string, ValidateFunction> {

@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/rules/rule11-action-space.ts` (new); `tools/validators/src/rules/rule12-redundancy.ts` (new); `tools/validators/src/public/registry.ts` registers both validators in `ruleValidators`; `tools/validators/src/cli/_helpers.ts` extends `RULE_FILTER_PATTERN` and `--rules` help-text rule list to accept 11 and 12.
-**Deps**: `archive/tickets/SPEC09CANSAFEXP-001.md`, SPEC09CANSAFEXP-002
+**Deps**: `archive/tickets/SPEC09CANSAFEXP-001.md`, `archive/tickets/SPEC09CANSAFEXP-002.md`
 
 ## Problem
 
-SPEC-09 Move 1 adds Rules 11 (No Spectator Castes by Accident) and 12 (No Single-Trace Truths). FOUNDATIONS.md declares the rules (delivered by `archive/tickets/SPEC09CANSAFEXP-001.md`), and the CF schema will encode the data shape they read (delivered by SPEC09CANSAFEXP-002). This ticket adds the executable rule validators that consume the schema-validated CF and emit Rule 11 / Rule 12 verdicts. Both validators must be invocable through `world-validate <slug> --rules=11` / `--rules=12` (or combined `--rules=11,12`), and the CLI's `RULE_FILTER_PATTERN` regex (currently `/^([124567])(?:,([124567]))*$/`, confirmed at `tools/validators/src/cli/_helpers.ts:33`) must be extended to accept these rule numbers. Without this ticket the rules are documentation-only.
+SPEC-09 Move 1 adds Rules 11 (No Spectator Castes by Accident) and 12 (No Single-Trace Truths). FOUNDATIONS.md declares the rules (delivered by `archive/tickets/SPEC09CANSAFEXP-001.md`), and the CF schema encodes the data shape they read (delivered by `archive/tickets/SPEC09CANSAFEXP-002.md`). This ticket adds the executable rule validators that consume the schema-validated CF and emit Rule 11 / Rule 12 verdicts. Both validators must be invocable through `world-validate <slug> --rules=11` / `--rules=12` (or combined `--rules=11,12`), and the CLI's `RULE_FILTER_PATTERN` regex (currently `/^([124567])(?:,([124567]))*$/`, confirmed at `tools/validators/src/cli/_helpers.ts:33`) must be extended to accept these rule numbers. Without this ticket the rules are documentation-only.
 
 ## Assumption Reassessment (2026-04-27)
 
@@ -17,7 +17,7 @@ SPEC-09 Move 1 adds Rules 11 (No Spectator Castes by Accident) and 12 (No Single
 3. `tools/validators/src/cli/_helpers.ts` declares `RULE_FILTER_PATTERN = /^([124567])(?:,([124567]))*$/` at line 33 and references it in `validateOptions()`. Help-text at the same file declares "Comma-separated rule numbers (1,2,4,5,6,7)" — both must be updated to include 11 and 12.
 4. **Cross-skill / cross-artifact boundary under audit**: this ticket extends the `ruleValidators` registry. Consumers of the registry — `world-validate` CLI, `validatePatchPlan` pre-apply gate, `selectValidators()` helper — pick up the new validators automatically once registered. Hook 5 stays structural-only per Q3=(b), so no Hook 5 update needed.
 5. **FOUNDATIONS principle motivating this ticket**: Rule 11 mechanizes "specialness must be balanced by ordinary-actor leverage" — extending Rule 3's judgment-only specialness check with a leverage-enumeration check that IS mechanizable. Rule 12 mechanizes "core truths leave traces in multiple registers" — directly instantiating Rule 5 (No Consequence Evasion) at canon level.
-6. **Schema dependency**: Rule 11 reads `cf.exception_governance` (populated form) for activation-conditions/rate-limits/mobility-limits/etc. AND looks for ≥3 leverage entries. Rule 12 reads `cf.status` (hard_canon trigger) and cross-references the world-index for trace-register coverage across SEC records. Both validators depend on SPEC09CANSAFEXP-002 having landed the schema extensions.
+6. **Schema dependency**: Rule 11 reads `cf.exception_governance` (populated form) for activation-conditions/rate-limits/mobility-limits/etc. AND looks for ≥3 leverage entries. Rule 12 reads `cf.status` (hard_canon trigger) and cross-references the world-index for trace-register coverage across SEC records. Both validators depend on `archive/tickets/SPEC09CANSAFEXP-002.md` having landed the schema extensions.
 7. **Mechanizable vs judgment surface (per /reassess-spec finding M3)**: Rule 11's mechanizable layer checks `≥3 entries from the permissible-forms enum`; the judgment layer ("each leverage entry tied to a concrete in-world mechanism") stays in canon-addition skill prose, NOT in the validator. Same shape as Phase 14a Test 8's mechanical/judgment split.
 8. **Rename/removal blast radius**: `RULE_FILTER_PATTERN` is referenced only at `tools/validators/src/cli/_helpers.ts` (one site). Help-text "1,2,4,5,6,7" appears in the same file. Pipeline-wide grep for `(1,2,4,5,6,7)` and `RULE_FILTER_PATTERN` confirms no external callers — this is a single-file regex extension.
 
@@ -42,7 +42,7 @@ SPEC-09 Move 1 adds Rules 11 (No Spectator Castes by Accident) and 12 (No Single
 
 Implement the validator following the existing `rule5-no-consequence-evasion.ts` pattern:
 
-- Export a `Validator` named `rule11_action_space` whose `applies_to(ctx)` predicate fires on every CF whose `type` matches the capability/exception-introducing taxonomy (importable from `@worldloom/validators/structural/record-schema-compliance` per SPEC09CANSAFEXP-002's exported helper `requiresExceptionGovernance`).
+- Export a `Validator` named `rule11_action_space` whose `applies_to(ctx)` predicate fires on every CF whose `type` matches the capability/exception-introducing taxonomy (import the source-module helper `requiresExceptionGovernance` from `../structural/record-schema-compliance.js`; `archive/tickets/SPEC09CANSAFEXP-002.md` did not add a package `exports` subpath for this internal helper).
 - For each applicable CF, parse `cf.exception_governance` (populated form). The validator OWNs the leverage-list location decision: prefer reading from a structured field if SPEC09CANSAFEXP-002 declared one; otherwise parse from `cf.notes` (transitional). Document the location explicitly in the validator's emitted `findings[].evidence` field.
 - Mechanizable check: count leverage entries; assert ≥3; assert each entry matches the permissible-forms enum (`locality`, `secrecy`, `legitimacy`, `bureaucracy`, `numbers`, `ritual_authority`, `domain_expertise`, `access`, `timing`, `social_trust`, `deniability`, `infrastructural_control`).
 - Judgment surface stays out: do NOT attempt to validate that each leverage entry "ties to a concrete in-world mechanism" — that's canon-addition Phase 14a Test 11's responsibility (delivered by SPEC09CANSAFEXP-004).
@@ -116,7 +116,7 @@ Add test fixtures and test cases:
 
 ## Out of Scope
 
-- Schema extension (delivered by SPEC09CANSAFEXP-002; this ticket consumes the conditionally-mandatory blocks)
+- Schema extension (delivered by `archive/tickets/SPEC09CANSAFEXP-002.md`; this ticket consumes the conditionally-mandatory blocks)
 - Skill-side judgment layer for Rule 11 ("each leverage entry tied to a concrete in-world mechanism") — delivered by SPEC09CANSAFEXP-004 in canon-addition Phase 14a Test 11
 - Hook 5 invocation — Hook 5 stays structural-only per Q3=(b); rule validators 11/12 run via pre-apply `validatePatchPlan` and direct `world-validate --rules=11,12` invocations
 - Trace-register taxonomy canonicalization (SPEC-09 §Open Question 2 — descriptive list for v1; canonicalize later if false-positive/false-negative rates are high)
@@ -128,7 +128,7 @@ Add test fixtures and test cases:
 
 1. `cd tools/validators && npm test` — full validator test suite passes including new tests for rule11, rule12, and the extended `RULE_FILTER_PATTERN`.
 2. `node tools/validators/dist/src/cli/world-validate.js --help` from repo root — help text shows `--rules=11`, `--rules=12`, `--rules=11,12` as accepted.
-3. `node tools/validators/dist/src/cli/world-validate.js animalia --rules=11 --json` from repo root — animalia regression: all 48 historical CFs PASS Rule 11 (grandfather clause holds: capability-type historical CFs grandfathered via `audits/validation-grandfathering.yaml`).
+3. `node tools/validators/dist/src/cli/world-validate.js animalia --rules=11 --json` from repo root — animalia regression: all 48 historical CFs PASS Rule 11 (historical full-world validation permits pre-SPEC-09 CFs without the new leverage surface; no `audits/validation-grandfathering.yaml` row is expected for this).
 4. `node tools/validators/dist/src/cli/world-validate.js animalia --rules=12 --json` from repo root — same regression for Rule 12.
 5. Synthetic fixture: capability-type CF with `exception_governance` populated but only 2 leverage entries → rule11 FAILS with a message naming the count shortfall.
 6. Synthetic fixture: hard-canon core-truth CF with only 1 trace register → rule12 FAILS with a message naming the count shortfall.

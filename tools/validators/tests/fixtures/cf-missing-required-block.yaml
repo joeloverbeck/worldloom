@@ -1,0 +1,26 @@
+id: CF-9004
+title: Missing required canon safety block
+status: hard_canon
+type: capability
+statement: A test capability omits exception governance.
+scope:
+  geographic: local
+  temporal: current
+  social: public
+truth_scope:
+  world_level: true
+  diegetic_status: objective
+domains_affected:
+  - technology
+required_world_updates:
+  - INSTITUTIONS
+source_basis:
+  direct_user_approval: true
+  derived_from: []
+contradiction_risk:
+  hard: false
+  soft: false
+epistemic_profile:
+  directly_observable_by:
+    - trained witnesses
+extensions: []

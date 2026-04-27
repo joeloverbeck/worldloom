@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
-import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
+import yaml from "js-yaml";
+
+import {
+  recordSchemaCompliance,
+  requiresEpistemicProfile,
+  requiresExceptionGovernance
+} from "../../src/structural/record-schema-compliance.js";
 import { context, record, validCf, validSection } from "./helpers.js";
 
 test("record_schema_compliance rejects prose-sourced MR fields and accepts data-layer MR fields", async () => {
@@ -208,3 +216,73 @@ test("record_schema_compliance ignores derived index nodes that share authority 
 
   assert.deepEqual(result, []);
 });
+
+test("record_schema_compliance accepts canon safety blocks in populated and n_a forms", async () => {
+  const records = [
+    fixtureCf("cf-with-populated-epistemic-profile.yaml"),
+    fixtureCf("cf-with-populated-exception-governance.yaml"),
+    fixtureCf("cf-with-na-blocks.yaml")
+  ];
+
+  const result = await recordSchemaCompliance.run({}, context(records, { run_mode: "pre-apply" }));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects current capability CFs missing required canon safety blocks", async () => {
+  const cf = fixtureCf("cf-missing-required-block.yaml");
+  const result = await recordSchemaCompliance.run(
+    {
+      files: [
+        {
+          path: cf.file_path,
+          content: ""
+        }
+      ]
+    },
+    context([cf], { run_mode: "pre-apply" })
+  );
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.missing_exception_governance"));
+  assert.ok(result.some((verdict) => verdict.message.includes("capability")));
+});
+
+test("record_schema_compliance preserves historical full-world CFs without new safety blocks", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+        ...validCf,
+        type: "capability"
+      })
+    ])
+  );
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects n_a rationales without ontology category keywords", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([fixtureCf("cf-with-bare-na.yaml")], { run_mode: "pre-apply" })
+  );
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.na_rationale_quality"));
+  assert.ok(result.some((verdict) => verdict.message.includes("/epistemic_profile/n_a")));
+});
+
+test("canon safety type taxonomy helpers classify required block types", () => {
+  assert.equal(requiresExceptionGovernance("capability"), true);
+  assert.equal(requiresExceptionGovernance("magic practice"), true);
+  assert.equal(requiresExceptionGovernance("institution"), false);
+  assert.equal(requiresEpistemicProfile("institution-with-secrecy"), true);
+  assert.equal(requiresEpistemicProfile("knowledge_asymmetric_fact"), true);
+  assert.equal(requiresEpistemicProfile("geography"), false);
+});
+
+function fixtureCf(filename: string) {
+  const filePath = path.resolve(process.cwd(), "tests", "fixtures", filename);
+  const parsed = yaml.load(readFileSync(filePath, "utf8"), { schema: yaml.JSON_SCHEMA }) as Record<string, unknown>;
+  const id = String(parsed.id);
+  return record("canon_fact_record", id, `_source/canon/${id}.yaml`, parsed);
+}

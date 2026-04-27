@@ -156,16 +156,17 @@ Lands after Phase 2 completes. Independent of the structure-aware retrieval bund
 
 Order (single tier; internal parallelization minimal):
 
-1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause)
-2. **canon-addition skill updates** (Tests 11 & 12, template extension, Phase 12 block-authoring)
-3. **continuity-audit skill updates** (Silent-Area Canonization check)
-4. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
-5. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`)
-6. **docs/WORKFLOWS.md pointer** for the new tests
+1. **FOUNDATIONS.md edits** (Rules 11 & 12, two conditionally-mandatory CF schema blocks, six new relation types, Default Reality paragraph, genesis-world clause) — completed via `archive/tickets/SPEC09CANSAFEXP-001.md`
+2. **CF structural-schema extension** (`epistemic_profile`, `exception_governance`, current-write conditional presence, `n_a` rationale quality) — completed via `archive/tickets/SPEC09CANSAFEXP-002.md`
+3. **SPEC-04 validator additions** (`validator-rule-11-action-space`, `validator-rule-12-redundancy`)
+4. **canon-addition skill updates** (Tests 11 & 12, template extension, Phase 13a block-authoring)
+5. **continuity-audit skill updates** (Silent-Area Canonization check)
+6. **diegetic-artifact-generation template cleanup** (`statement_of_existence`, explicit `world_relation` block)
+7. **create-base-world genesis block-population guidance**
 
 **Phase 2.5 completion gate**: `SPEC-09 Verification` checks 1–12 pass. Specifically:
 - `world-validate animalia --json` reports zero new failures on historical CFs (grandfather clause holds structurally)
-- Synthetic capability CF without `exception_governance` FAILS Test 12
+- Synthetic capability CF without `exception_governance` FAILS `record_schema_compliance` on a current write path
 - Synthetic geography CF with `exception_governance: { n_a: "..." }` PASSES
 - Bare `n_a: "not applicable"` FAILS regex-and-taxonomy check
 - `create-base-world` genesis test world emits CF-0001 with both blocks correctly populated or N/A'd per fact-type
