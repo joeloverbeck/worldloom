@@ -2,7 +2,12 @@ import type Database from "better-sqlite3";
 
 import type { TaskType } from "../ranking/profiles";
 
-import type { ContextPacketNode, ContextPacketRisk, PacketNodeRow } from "./shared";
+import type {
+  ContextPacketNode,
+  ContextPacketRisk,
+  DeliveryMode,
+  PacketNodeRow
+} from "./shared";
 import { loadPacketNodes, parsePacketNodeRecord, uniqueStrings } from "./shared";
 
 const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
@@ -265,7 +270,8 @@ export async function buildGoverningWorldContext(
   db: Database.Database,
   worldSlug: string,
   taskType: TaskType,
-  localityNodes: readonly ContextPacketNode[]
+  localityNodes: readonly ContextPacketNode[],
+  deliveryMode: DeliveryMode
 ): Promise<{
   active_rules: string[];
   protected_surfaces: string[];
@@ -299,9 +305,10 @@ export async function buildGoverningWorldContext(
   const nodes =
     taskType === "character_generation"
       ? loadPacketNodes(db, worldSlug, orderedNodeIds, {
-          recordProjection: projectCharacterGenerationGoverningRecord
+          recordProjection: projectCharacterGenerationGoverningRecord,
+          deliveryMode
         })
-      : loadPacketNodes(db, worldSlug, orderedNodeIds);
+      : loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
   const firewallRisks = nodes
     .filter((node) => node.node_type === "mystery_reserve_entry")
     .map((node) => ({

@@ -1,9 +1,13 @@
 import {
   submitPatchPlan,
   type EngineError,
-  type PatchReceipt
+  type PatchReceipt,
+  type ValidatorRunReceipt
 } from "@worldloom/patch-engine";
-import { validatePatchPlan as runPreApplyValidators } from "@worldloom/validators";
+import {
+  validatePatchPlan as runPreApplyValidators,
+  type ValidatorExecution
+} from "@worldloom/validators";
 
 import { createMcpError, type McpError } from "../errors";
 
@@ -44,17 +48,19 @@ export async function handleSubmitPatchPlanTool(
   return submitPatchPlan(envelope, args.approval_token, {
     preApplyValidator: async () => {
       try {
-        const { verdicts } = await runPreApplyValidators(envelope);
+        const { verdicts, executions } = await runPreApplyValidators(envelope);
+        const validators_run = projectExecutionsToReceipt(executions);
         const failures = verdicts.filter((verdict) => verdict.severity === "fail");
         if (failures.length > 0) {
           return {
             ok: false,
             code: "validator_failed",
             message: `Pre-apply validators reported ${failures.length} failure(s).`,
-            detail: { verdicts: failures }
+            detail: { verdicts: failures },
+            validators_run
           };
         }
-        return { ok: true };
+        return { ok: true, validators_run };
       } catch (err) {
         return {
           ok: false,
@@ -63,5 +69,19 @@ export async function handleSubmitPatchPlanTool(
         };
       }
     }
+  });
+}
+
+function projectExecutionsToReceipt(executions: ValidatorExecution[]): ValidatorRunReceipt[] {
+  return executions.map((execution) => {
+    const entry: ValidatorRunReceipt = {
+      validator_name: execution.name,
+      status: execution.status,
+      duration_ms: execution.duration_ms
+    };
+    if (execution.detail !== undefined) {
+      entry.detail = execution.detail;
+    }
+    return entry;
   });
 }

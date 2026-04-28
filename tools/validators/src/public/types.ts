@@ -5,6 +5,7 @@ export type {
   PatchPlanEnvelope,
   RunMode,
   Validator,
+  ValidatorExecution,
   ValidatorRun,
   Verdict,
   VerdictSeverity,

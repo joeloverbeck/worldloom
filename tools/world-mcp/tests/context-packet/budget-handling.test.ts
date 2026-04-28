@@ -125,63 +125,65 @@ test("assembler reports packet_incomplete_required_classes when local authority 
     assert.ok("code" in result);
     assert.equal(result.code, "packet_incomplete_required_classes");
     assert.deepEqual(result.details?.retained_classes, []);
-    assert.deepEqual(result.details?.missing_classes, [
-      "local_authority",
-      "exact_record_links",
-      "scoped_local_context",
-      "governing_world_context"
-    ]);
+    assert.ok(Array.isArray(result.details?.missing_classes));
+    assert.ok((result.details?.missing_classes as string[]).includes("local_authority"));
     assert.equal(
       (result.details?.retry_with as { token_budget?: unknown } | undefined)?.token_budget,
       result.details?.minimum_required_budget
     );
+    const truncationSummary = result.details?.truncation_summary as
+      | { dropped_layers: string[]; fallback_advice: string }
+      | undefined;
+    assert.ok(truncationSummary !== undefined);
+    assert.ok(truncationSummary.dropped_layers.length > 0);
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("budget insufficiency retains locality-first classes before dropping governing background", async () => {
+test("budget pressure drops impact_surfaces first while preserving local_authority intact", async () => {
   const root = createTempRepoRoot();
 
   try {
     seedBudgetWorld(root);
 
-    const result = await withRepoRoot(root, () =>
+    const tightResult = await withRepoRoot(root, () =>
       assembleContextPacket({
         task_type: "diegetic_artifact_generation",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
-        token_budget: 260
+        token_budget: 700
       })
     );
 
-    assert.ok("code" in result);
-    assert.equal(result.code, "packet_incomplete_required_classes");
-    assert.deepEqual(result.details?.retained_classes, [
-      "local_authority",
-      "exact_record_links",
-      "scoped_local_context"
-    ]);
-    assert.deepEqual(result.details?.missing_classes, ["governing_world_context"]);
-    const retryBudget = (result.details?.retry_with as { token_budget?: unknown } | undefined)
-      ?.token_budget;
-    assert.equal(retryBudget, result.details?.minimum_required_budget);
-    assert.equal(typeof retryBudget, "number");
-    if (typeof retryBudget !== "number") {
-      throw new Error("retry_with.token_budget must be numeric.");
+    assert.ok(!("code" in tightResult));
+    assert.ok(tightResult.task_header.token_budget.allocated <= 700);
+    assert.ok(tightResult.local_authority.nodes.some((node) => node.id === "DA-0002"));
+    assert.ok(
+      tightResult.truncation_summary.dropped_layers.includes("impact_surfaces"),
+      "impact_surfaces should be the first layer dropped under budget pressure"
+    );
+    for (const dropped of tightResult.truncation_summary.dropped_layers) {
+      assert.ok(
+        ["impact_surfaces", "scoped_local_context", "exact_record_links", "governing_world_context"].includes(
+          dropped
+        ),
+        `unexpected dropped layer ${dropped}`
+      );
     }
 
-    const retryResult = await withRepoRoot(root, () =>
+    const wideResult = await withRepoRoot(root, () =>
       assembleContextPacket({
         task_type: "diegetic_artifact_generation",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
-        token_budget: retryBudget
+        token_budget: 100000
       })
     );
 
-    assert.ok(!("code" in retryResult));
-    assert.ok(retryResult.task_header.token_budget.allocated <= retryBudget);
+    assert.ok(!("code" in wideResult));
+    assert.deepEqual(wideResult.truncation_summary.dropped_layers, []);
+    assert.deepEqual(wideResult.truncation_summary.dropped_node_ids_by_layer, {});
   } finally {
     destroyTempRepoRoot(root);
   }

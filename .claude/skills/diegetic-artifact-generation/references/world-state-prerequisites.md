@@ -18,6 +18,39 @@ Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (e
 
 Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, audience stratum, species cluster, era / TIMELINE layer, or capability domain referenced by the artifact's `desired_relation_to_truth` and `communicative_purpose`. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
 
+## Context-packet-too-large fallback
+
+The packet now enforces `token_budget` strictly per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement: under budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports the dropped layers in `response.truncation_summary` so the consumer can fetch the dropped node-ids via `mcp__worldloom__get_record` / `mcp__worldloom__get_record_field` rather than via overflow-to-file.
+
+This fallback covers the two cases the new contract surfaces:
+
+- the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (the common case for mature worlds at default budget);
+- the packet returns `packet_incomplete_required_classes` because even `local_authority` cannot fit (the rare case — typically a malformed seed or an unusually large authority-bearing record).
+
+In either case, do NOT silently proceed without world-state load. Apply this three-step fallback in order:
+
+**Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record). Retry the packet call. If `packet_incomplete_required_classes` was returned, retry at `response.details.retry_with.token_budget`. If the retry fits with empty `truncation_summary`, proceed normally.
+
+**Step 2 — Direct-Read root files + per-record retrieval for dropped layers.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires):
+
+- `Read docs/FOUNDATIONS.md` (Canon Layers + Rules + CF schema).
+- `Read worlds/<world-slug>/WORLD_KERNEL.md`.
+- `Read worlds/<world-slug>/ONTOLOGY.md`.
+- For every node-id under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but per-record `get_record` is the supported per-record path.
+- For each additional CF / M / INV record cited at Phase 3 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_record(record_id)` individually.
+- For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
+- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__search_nodes(node_type='mystery_record')` if `governing_world_context` was the dropped layer.
+
+**Step 3 — Dossier-trace shortcut (when `character_path` is provided).** The dossier's own canon-safety check trace is an authoritative shortcut for Phase 7 firewall coverage. The dossier was pre-cleared against the same world-state at its generation time; its enumerated trace fields carry forward to the artifact's Phase 7 trace as canonical firewall coverage. Retrieve the trace via `mcp__worldloom__get_record('CHAR-NNNN', section_path='frontmatter.world_consistency')` (the canonical path; a single call returns the projected `world_consistency` block — keys: `invariants_respected`, `mystery_reserve_firewall`, `canon_facts_consulted`). Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable.
+
+- `world_consistency.invariants_respected` → enumerates every INV record tested at the dossier's Phase 7a; the artifact's Phase 7a tests the same set against the artifact's claim surface.
+- `world_consistency.mystery_reserve_firewall` → enumerates every M-NNNN checked at the dossier's Phase 7b; the artifact's Phase 7b checks the same set against the artifact's claim surface.
+- `world_consistency.canon_facts_consulted` → enumerates every CF cited; the artifact's Phase 7c may cross-reference these CFs without re-retrieving each one (their distribution blocks are already canonical at dossier generation time).
+
+The dossier-trace shortcut is canon-safe because dossier records are append-only and the world-state reconciliation between dossier-generation-time and artifact-generation-time is bounded to canon mutations recorded in the change log. If the artifact-date significantly precedes or postdates the dossier's generation date AND substantive canon mutations have landed in between, retrieve those mutations explicitly via `mcp__worldloom__list_records(record_type='change_log_entry')` filtered to the relevant interval.
+
+**Audit-trail discipline.** When the fallback fires, record in frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet exceeded inline at minimum seed scope; loaded WORLD_KERNEL.md + ONTOLOGY.md + per-record `get_record` for the cited CF / M / INV ids; dossier-trace shortcut Step 3 covered Phase 7 firewall coverage from CHAR-NNNN.world_consistency"*). The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via dossier trace, per-record retrieval, or `search_nodes`), not from the packet alone.
+
 ## Targeted record retrieval (during reasoning)
 
 When a phase needs a specific record beyond what the packet returned:
@@ -36,13 +69,13 @@ These remain primary-authored at the world root and are read directly:
 - `worlds/<world-slug>/WORLD_KERNEL.md` — Phase 2 genre-convention calibration against world tonal contract; Phase 6 voice register; Phase 7e truth-discipline.
 - `worlds/<world-slug>/ONTOLOGY.md` — Categories + Relation Types + Notes; Phase 3 claim classification; Phase 7a invariant-type mapping.
 
-## Hybrid files (direct Read permitted)
+## Hybrid files
 
 For Author-lift and continuity reads:
 
-- `worlds/<world-slug>/characters/<char-slug>.md` — when `character_path` is provided, read frontmatter + prose body to lift the 15-field author profile per Phase 0b. If the dossier exceeds the Read tool's token limit, apply selective-read by structural anchors (`^## `, `^### `, `^character_id:`, `^## Epistemic Position`, `^## Voice and Perception`, `^## Institutional Embedding`) — established protagonist-tier dossiers commonly cross the limit and selective reading is the expected mode.
-- `worlds/<world-slug>/characters/INDEX.md` — quick scan for slug references when the brief mentions an existing character.
-- `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — read at Phase 9 to maintain alphabetic ordering on update.
+- `worlds/<world-slug>/characters/<char-slug>.md` — when `character_path` is provided, retrieve frontmatter + prose body via `mcp__worldloom__get_record('CHAR-NNNN')` (returns parsed frontmatter + body sections) or, for narrow needs, `get_record('CHAR-NNNN', section_path='frontmatter.author_profile')` / `section_path='body.Voice and Perception'`. The hybrid-record retrieval path is the canonical surface for the 15-field author profile per Phase 0b. Fallback: direct `Read` of the dossier file with selective-read by structural anchors (`^## `, `^### `, `^character_id:`, `^## Epistemic Position`, `^## Voice and Perception`, `^## Institutional Embedding`) for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable; established protagonist-tier dossiers commonly cross the Read tool's token limit, which `get_record` projection avoids.
+- `worlds/<world-slug>/characters/INDEX.md` — direct Read; quick scan for slug references when the brief mentions an existing character.
+- `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — direct Read at Phase 9 to maintain alphabetic ordering on update.
 
 ## Phase-to-record mapping
 

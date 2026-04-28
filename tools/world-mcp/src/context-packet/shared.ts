@@ -4,11 +4,17 @@ import type { NodeType } from "@worldloom/world-index/public/types";
 
 import type { TaskType } from "../ranking/profiles";
 
+export const DELIVERY_MODES = ["full", "summary_only"] as const;
+export type DeliveryMode = (typeof DELIVERY_MODES)[number];
+export const DEFAULT_DELIVERY_MODE: DeliveryMode = "full";
+
 export interface ContextPacketArgs {
   task_type: TaskType;
   world_slug: string;
   seed_nodes: string[];
   token_budget: number;
+  delivery_mode?: DeliveryMode;
+  node_classes?: NodeType[];
 }
 
 export interface ContextPacketNode {
@@ -18,7 +24,7 @@ export interface ContextPacketNode {
   file_path: string;
   heading_path: string | null;
   summary: string | null;
-  body_preview: string;
+  body_preview?: string;
   record?: Record<string, unknown>;
 }
 
@@ -28,6 +34,12 @@ export interface ContextPacketRisk {
   message: string;
   node_id: string | null;
   file_path: string | null;
+}
+
+export interface ContextPacketTruncationSummary {
+  dropped_layers: string[];
+  dropped_node_ids_by_layer: Record<string, string[]>;
+  fallback_advice: string;
 }
 
 export interface ContextPacket {
@@ -67,7 +79,11 @@ export interface ContextPacket {
     nodes: ContextPacketNode[];
     rationale: string[];
   };
+  truncation_summary: ContextPacketTruncationSummary;
 }
+
+export const TRUNCATION_FALLBACK_ADVICE =
+  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
 
 export const DEFAULT_PACKET_VERSION = 2 as const;
 
@@ -99,6 +115,56 @@ export function makeBodyPreview(body: string, maxLength = 280): string {
   return normalized.length <= maxLength ? normalized : `${normalized.slice(0, maxLength - 1)}...`;
 }
 
+export const SUMMARY_MAX_LENGTH = 100;
+
+export function deriveNodeSummary(body: string, dbSummary: string | null): string {
+  if (dbSummary !== null && dbSummary.trim().length > 0) {
+    return clipToSummaryLength(dbSummary);
+  }
+
+  const fromNotes = extractYamlNotesFirstLine(body);
+  if (fromNotes !== null) {
+    return clipToSummaryLength(fromNotes);
+  }
+
+  return clipToSummaryLength(extractFirstSentence(body));
+}
+
+function clipToSummaryLength(text: string): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= SUMMARY_MAX_LENGTH) {
+    return normalized;
+  }
+  return `${normalized.slice(0, SUMMARY_MAX_LENGTH - 3)}...`;
+}
+
+function extractYamlNotesFirstLine(body: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = YAML.parse(body);
+  } catch {
+    return null;
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return null;
+  }
+
+  const notes = (parsed as Record<string, unknown>).notes;
+  if (typeof notes !== "string") {
+    return null;
+  }
+
+  const firstLine = notes.split("\n").find((line) => line.trim().length > 0);
+  return firstLine?.trim() ?? null;
+}
+
+function extractFirstSentence(body: string): string {
+  const normalized = body.replace(/\s+/g, " ").trim();
+  const match = normalized.match(/^[^.!?]*[.!?]/);
+  return match?.[0]?.trim() ?? normalized;
+}
+
 export function estimateTextTokens(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
@@ -112,7 +178,7 @@ export function estimateNodeTokens(node: ContextPacketNode): number {
       node.file_path,
       node.heading_path ?? "",
       node.summary ?? "",
-      node.body_preview,
+      node.body_preview ?? "",
       node.record === undefined ? "" : JSON.stringify(node.record)
     ].join(" ")
   );
@@ -170,6 +236,7 @@ export function estimatePacketTokens(packet: ContextPacket): number {
     (sum, rationale) => sum + estimateTextTokens(rationale),
     0
   );
+  total += estimateTextTokens(JSON.stringify(packet.truncation_summary));
 
   return total;
 }
@@ -180,12 +247,15 @@ export function loadPacketNodes(
   nodeIds: readonly string[],
   options: {
     recordProjection?: (row: PacketNodeRow) => Record<string, unknown> | undefined;
+    deliveryMode?: DeliveryMode;
   } = {}
 ): ContextPacketNode[] {
   const uniqueNodeIds = uniqueStrings(nodeIds);
   if (uniqueNodeIds.length === 0) {
     return [];
   }
+
+  const deliveryMode: DeliveryMode = options.deliveryMode ?? DEFAULT_DELIVERY_MODE;
 
   const rows = db
     .prepare(
@@ -206,9 +276,14 @@ export function loadPacketNodes(
         node_type: row.node_type,
         file_path: row.file_path,
         heading_path: row.heading_path,
-        summary: row.summary ?? null,
-        body_preview: makeBodyPreview(row.body)
+        summary:
+          deliveryMode === "summary_only"
+            ? deriveNodeSummary(row.body, row.summary ?? null)
+            : (row.summary ?? null)
       };
+      if (deliveryMode === "full") {
+        node.body_preview = makeBodyPreview(row.body);
+      }
       const projectedRecord = options.recordProjection?.(row);
       if (projectedRecord !== undefined) {
         node.record = projectedRecord;
@@ -238,33 +313,3 @@ export function parsePacketNodeRecord(row: PacketNodeRow): Record<string, unknow
   return parsed as Record<string, unknown>;
 }
 
-export function trimPairedListToBudget<T>(
-  items: T[],
-  annotations: string[],
-  tokenBudget: number,
-  estimateItemTokens: (item: T, annotation: string) => number
-): void {
-  while (items.length > 0) {
-    const total = items.reduce(
-      (sum, item, index) => sum + estimateItemTokens(item, annotations[index] ?? ""),
-      0
-    );
-    if (total <= tokenBudget) {
-      return;
-    }
-
-    items.pop();
-    annotations.pop();
-  }
-}
-
-export function trimRisksToBudget(risks: ContextPacketRisk[], tokenBudget: number): void {
-  while (risks.length > 0) {
-    const total = risks.reduce((sum, risk) => sum + estimateTextTokens(JSON.stringify(risk)), 0);
-    if (total <= tokenBudget) {
-      return;
-    }
-
-    risks.pop();
-  }
-}

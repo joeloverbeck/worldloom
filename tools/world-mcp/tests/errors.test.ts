@@ -14,6 +14,7 @@ test("MCP_ERROR_CODES matches the registered MCP error taxonomy exactly", () => 
     "node_not_found",
     "record_not_found",
     "record_field_not_found",
+    "section_not_found",
     "token_invalid",
     "token_expired",
     "token_consumed",

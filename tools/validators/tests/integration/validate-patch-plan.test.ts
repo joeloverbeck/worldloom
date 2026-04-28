@@ -79,7 +79,13 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
   await withTempRoot(async () => {
     const result = await validatePatchPlan(cleanPlan() as unknown as PatchPlanEnvelope);
 
-    assert.deepEqual(result, { verdicts: [] });
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(Array.isArray(result.executions) && result.executions.length > 0);
+    for (const execution of result.executions) {
+      assert.equal(execution.status, "pass");
+      assert.equal(typeof execution.name, "string");
+      assert.ok(execution.duration_ms >= 0);
+    }
   });
 });
 

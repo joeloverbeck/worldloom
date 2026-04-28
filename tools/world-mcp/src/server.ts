@@ -5,6 +5,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
 
+import { NODE_TYPES } from "@worldloom/world-index/public/types";
+
+import { DELIVERY_MODES } from "./context-packet/shared";
 import { TASK_TYPES } from "./ranking/profiles";
 import { allocateNextId } from "./tools/allocate-next-id";
 import { findEditAnchors } from "./tools/find-edit-anchors";
@@ -13,6 +16,7 @@ import { findNamedEntities } from "./tools/find-named-entities";
 import { findSectionsTouchedBy } from "./tools/find-sections-touched-by";
 import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonical-vocabulary";
 import { getContextPacket } from "./tools/get-context-packet";
+import { getFirewallContent } from "./tools/get-firewall-content";
 import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
@@ -86,7 +90,8 @@ const getNodeInputSchema = z.object({
 
 const getRecordInputSchema = z.object({
   record_id: z.string().min(1),
-  world_slug: z.string().min(1).optional()
+  world_slug: z.string().min(1).optional(),
+  section_path: z.string().min(1).optional()
 });
 
 const listRecordsInputSchema = z.object({
@@ -116,7 +121,9 @@ const getContextPacketInputSchema = z.object({
   task_type: z.enum(TASK_TYPES),
   world_slug: z.string().min(1),
   seed_nodes: z.array(z.string().min(1)).min(1),
-  token_budget: z.number().int().positive().optional()
+  token_budget: z.number().int().positive().optional(),
+  delivery_mode: z.enum(DELIVERY_MODES).optional(),
+  node_classes: z.array(z.enum(NODE_TYPES)).optional()
 });
 
 const findImpactedFragmentsInputSchema = z.object({
@@ -188,6 +195,11 @@ const allocateNextIdInputSchema = z.object({
   id_class: z.enum(ID_CLASSES)
 });
 
+const getFirewallContentInputSchema = z.object({
+  world_slug: z.string().min(1),
+  m_ids: z.array(z.string().min(1)).optional()
+});
+
 function registerWrappedTool<TArgs extends Record<string, unknown>>(
   server: McpServer,
   key: ToolKey,
@@ -233,7 +245,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "get_record",
-    "get_record: Fetch an atomic record's parsed YAML content with content_hash and file_path.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset, e.g. 'frontmatter.world_consistency' or 'body.Capabilities'.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
@@ -327,6 +339,13 @@ export function createServer(): McpServer {
     "Allocate the next append-only id for a world-specific record class.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0])
+  );
+  registerWrappedTool(
+    server,
+    "get_firewall_content",
+    "get_firewall_content: Bulk retrieval of Mystery Reserve firewall fields (title, status, unknowns, common_interpretations, disallowed_cheap_answers) keyed by M-id. Optional m_ids filter; defaults to every M record in the world. Use for Phase 7b firewall audits to avoid budget-pressured packet calls or N per-record get_record calls.",
+    getFirewallContentInputSchema,
+    async (args) => getFirewallContent(args as unknown as Parameters<typeof getFirewallContent>[0])
   );
 
   return server;

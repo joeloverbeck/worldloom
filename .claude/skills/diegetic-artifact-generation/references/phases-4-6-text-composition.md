@@ -35,6 +35,8 @@ These do not appear as editor's notes — they are **baked into the composition*
 
 **FOUNDATIONS cross-refs**: Canon Layers §Contested Canon; World Kernel §Core Pressures.
 
+**Voice-author + framing-author dual-bias case** (cross-ref `references/phase-0-normalize-and-author.md` §Voice-author + framing-author sub-pattern). When the artifact captures a speaker's voice within an editorial frame by a different person (interview-transcription, oral-history, dictated-monologue letter, ethnographic interview, prison confession recorded by a clerk), Phase 5 carries TWO bias layers: (a) the speaker's bias (omissions / overstatements / moralizations / unthinkables / private register lifted from dossier), AND (b) the framing-author's editorial bias (which questions they asked, which answers they cut, which audience they framed for, which translation choices they imposed). Both layers shape what appears in the body. The framing-author's editorial choices are NOT annotated in the body — they are baked into what's present and absent. Record both bias layers in frontmatter `notes` (speaker's under the standard Phase 5 fields; framing-author's under a *"Framing-author editorial bias"* line in `notes`).
+
 ## Phase 6: Draft Artifact Text
 
 Compose the artifact body honoring Phases 1-5. The text as it would exist in-world — in the author's voice, in the genre's register, with Phase 4's texture embedded, Phase 5's distortions baked, and Phase 3's claims made (with prohibited claims absent).
@@ -42,6 +44,8 @@ Compose the artifact body honoring Phases 1-5. The text as it would exist in-wor
 The body must be **continuous in-world prose** (or continuous in-world verse / list / inscription / letter, as appropriate to the artifact_type). No editorial framing. No scare quotes around claims the narrator believes. No parenthetical "(this is of course false)" notes. The artifact IS the text — audit trails are for the frontmatter and the trace, not the body.
 
 Length honors SOFT input `desired_length` if specified; otherwise a length natural to the artifact_type.
+
+**Voice-author + framing-author composition case** (cross-ref `references/phase-0-normalize-and-author.md` §Voice-author + framing-author sub-pattern). When the artifact captures a speaker's voice within an editorial frame, the body is composed in the SPEAKER's voice (the dossier-lifted register at the artifact-date stage per Phase 0b §Back-projection math), shaped by the framing-author's editorial conventions: which questions are visible vs cut, what the framing-author chose to preserve verbatim vs paraphrase, where paragraph breaks land in transcribed monologue, what register the speaker uses knowing the framing-author's audience. The framing-author's voice does NOT appear in the body — only their editorial CHOICES (the cut questions, the kept passages, the framing-imposed paragraphing) appear. In-body editorial framing (preface, footnotes, parentheticals) is permissible only when the artifact_type's genre conventions specifically include it; otherwise the body remains pure speaker-voice and the editorial frame lives in `genre_conventions.breaks` per Phase 2.
 
 **Rule**: If the artifact body reads like a world-wiki summary, Phase 6 has failed. Diegetic texts are voices from within; they are not encyclopedia entries in disguise.
 

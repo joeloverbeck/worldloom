@@ -1,12 +1,18 @@
 import type Database from "better-sqlite3";
 
-import { loadPacketNodes, uniqueStrings, type ContextPacketNode } from "./shared";
+import {
+  loadPacketNodes,
+  uniqueStrings,
+  type ContextPacketNode,
+  type DeliveryMode
+} from "./shared";
 
 export function buildExactRecordLinks(
   db: Database.Database,
   worldSlug: string,
   sourceNodeIds: readonly string[],
-  excludedNodeIds: readonly string[]
+  excludedNodeIds: readonly string[],
+  deliveryMode: DeliveryMode
 ): {
   nodes: ContextPacketNode[];
   why_included: string[];
@@ -32,7 +38,7 @@ export function buildExactRecordLinks(
   const orderedNodeIds = uniqueStrings(
     rows.map((row) => row.target_node_id).filter((nodeId) => !excluded.has(nodeId))
   );
-  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds);
+  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
 
   return {
     nodes,

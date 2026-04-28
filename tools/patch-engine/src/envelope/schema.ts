@@ -81,6 +81,13 @@ export interface NewNodeReceipt {
   file_path: string;
 }
 
+export interface ValidatorRunReceipt {
+  validator_name: string;
+  status: "pass" | "fail" | "skipped";
+  duration_ms: number;
+  detail?: string;
+}
+
 export interface PatchReceipt {
   plan_id: string;
   applied_at: string;
@@ -88,6 +95,7 @@ export interface PatchReceipt {
   new_nodes: NewNodeReceipt[];
   id_allocations_consumed: IdAllocations;
   index_sync_duration_ms: number;
+  validators_run?: ValidatorRunReceipt[];
 }
 
 export type PatchOperation =

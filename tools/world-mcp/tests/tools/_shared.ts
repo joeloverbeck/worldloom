@@ -115,12 +115,15 @@ export function destroyTempRepoRoot(root: string): void {
   rmSync(root, { recursive: true, force: true });
 }
 
-export function withRepoRoot<T>(root: string, run: () => T): T {
+export async function withRepoRoot<T>(
+  root: string,
+  run: () => T | Promise<T>
+): Promise<T> {
   const originalCwd = process.cwd();
 
   try {
     process.chdir(path.join(root, "tools", "world-mcp"));
-    return run();
+    return await run();
   } finally {
     process.chdir(originalCwd);
   }

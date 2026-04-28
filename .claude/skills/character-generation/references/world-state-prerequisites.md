@@ -38,12 +38,12 @@ These remain primary-authored at the world root and are read directly:
 - `worlds/<world-slug>/WORLD_KERNEL.md` — genre / tonal / chronotope contract (Phase 0 input validation against world identity; Phase 6 voice register calibration).
 - `worlds/<world-slug>/ONTOLOGY.md` — Categories + Relation Types + Notes; Phase 5 capability classification.
 
-## Hybrid files (direct Read permitted)
+## Hybrid files
 
 For continuity-preservation reads at Pre-flight:
 
-- `worlds/<world-slug>/characters/<existing-slug>.md` — read frontmatter + `notes` block of any existing dossier whose contents constrain the new character (per the Pre-flight continuity-preservation step).
-- `worlds/<world-slug>/characters/INDEX.md` — quick scan for slug references when resolving "are any existing characters mentioned in this brief?"
+- `worlds/<world-slug>/characters/<existing-slug>.md` — retrieve any existing dossier whose contents constrain the new character via `mcp__worldloom__get_record('CHAR-NNNN')` (returns parsed frontmatter + body sections); use `get_record('CHAR-NNNN', section_path='frontmatter.notes')` or `section_path='body.Canon Safety Check Trace'` for narrow projection. Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable.
+- `worlds/<world-slug>/characters/INDEX.md` — direct Read; quick scan for slug references when resolving "are any existing characters mentioned in this brief?"
 
 ## Phase-to-record mapping
 

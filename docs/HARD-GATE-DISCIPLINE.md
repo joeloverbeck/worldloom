@@ -67,6 +67,28 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 
 The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
 
+### Submitting the plan: MCP path (default) and CLI path (size-constrained bypass)
+
+After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. Both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
+
+**MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
+
+**CLI path (size-constrained bypass)** — for plans whose envelope strains MCP transport (typical threshold: tens of KB; e.g., diegetic-artifact submissions with rich frontmatter and ~5K-word bodies, or canon-addition accept-paths with many ops), invoke the CLI parallel to the signer:
+
+```bash
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
+```
+
+The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON and exits 1 (or 2 for argv errors).
+
+**Equivalence guarantees**:
+
+- Same envelope shape validation, same approval-token verification, same expected-id-allocation race check, same pre-apply validators (Rule 1-7 + structural), same per-world write lock, same two-phase atomic commit, same index sync.
+- Same failure-mode codes: `approval_expired`, `approval_replayed`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.
+- The CLI is a thin delegator over `handleSubmitPatchPlanTool`; it is not a separate engine implementation.
+
+The MCP path remains the default. The CLI path exists strictly to bypass MCP transport for size-constrained envelopes, not as a general-purpose alternative.
+
 ## Why write order matters (engine-enforced)
 
 Post-SPEC-13, canonical storage is atomic YAML under `_source/`; there is no monolithic `CANON_LEDGER.md` to "announce" success last. Write order is now an engine concern, not a skill concern. The patch engine reorders every submitted plan into three tiers before staging (`tools/patch-engine/src/commit/order.ts`):

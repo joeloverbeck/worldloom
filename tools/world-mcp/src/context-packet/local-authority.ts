@@ -2,7 +2,12 @@ import type Database from "better-sqlite3";
 
 import { createMcpError, type McpError } from "../errors";
 
-import { loadPacketNodes, uniqueStrings, type ContextPacketNode } from "./shared";
+import {
+  loadPacketNodes,
+  uniqueStrings,
+  type ContextPacketNode,
+  type DeliveryMode
+} from "./shared";
 
 interface SeedNodeRow {
   node_id: string;
@@ -164,7 +169,8 @@ export async function findLocalAuthoritySourceNodeIds(
 export function buildLocalAuthority(
   db: Database.Database,
   worldSlug: string,
-  sourceNodeIds: readonly string[]
+  sourceNodeIds: readonly string[],
+  deliveryMode: DeliveryMode
 ): {
   nodes: ContextPacketNode[];
   why_included: string[];
@@ -190,7 +196,7 @@ export function buildLocalAuthority(
     );
   }
 
-  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds);
+  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
   return {
     nodes,
     why_included: nodes.map((node) => reasons.get(node.id) ?? "seed-local authority")

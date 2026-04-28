@@ -142,7 +142,7 @@ test("character_generation governing context includes all invariant records and 
     const ont1 = governingNodes.find((node) => node.id === "ONT-1");
     assert.equal(ont1?.record?.id, "ONT-1");
     assert.equal(ont1?.record?.break_conditions, LONG_BREAK_CONDITIONS);
-    assert.ok((ont1?.body_preview.length ?? 0) < LONG_BREAK_CONDITIONS.length);
+    assert.ok((ont1?.body_preview?.length ?? 0) < LONG_BREAK_CONDITIONS.length);
 
     const mystery = governingNodes.find((node) => node.id === "M-1");
     assert.deepEqual(mystery?.record, {
