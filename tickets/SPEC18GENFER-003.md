@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/create-base-world/SKILL.md` §Phase 9 + §Validation Rules This Skill Upholds
-**Deps**: SPEC18GENFER-002
+**Deps**: archive/tickets/SPEC18GENFER-002.md
 
 ## Problem
 
