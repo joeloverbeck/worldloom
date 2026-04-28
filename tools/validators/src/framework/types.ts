@@ -30,6 +30,13 @@ export interface Verdict {
   suggested_fix?: string;
 }
 
+export interface ValidatorExecution {
+  name: string;
+  status: "pass" | "fail" | "skipped";
+  duration_ms: number;
+  detail?: string;
+}
+
 export interface ValidatorRun {
   run_mode: RunMode;
   world_slug: string;
@@ -42,6 +49,7 @@ export interface ValidatorRun {
     info_count: number;
     validators_run: string[];
     validators_skipped: Array<{ name: string; reason: string }>;
+    executions: ValidatorExecution[];
   };
 }
 

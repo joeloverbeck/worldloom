@@ -9,7 +9,14 @@ import { acquirePerWorldLock, type PerWorldLockOptions } from "./commit/lock.js"
 import { reorderPatches } from "./commit/order.js";
 import { commitStaged, unlinkAllTempFiles } from "./commit/rename.js";
 import { stageAllOps } from "./commit/temp-file.js";
-import type { IdAllocations, NewNodeReceipt, PatchOperation, PatchPlanEnvelope, PatchReceipt } from "./envelope/schema.js";
+import type {
+  IdAllocations,
+  NewNodeReceipt,
+  PatchOperation,
+  PatchPlanEnvelope,
+  PatchReceipt,
+  ValidatorRunReceipt
+} from "./envelope/schema.js";
 import { validateEnvelopeShape } from "./envelope/validate.js";
 import { PatchEngineOpError } from "./ops/shared.js";
 import type { OpContext } from "./ops/types.js";
@@ -19,15 +26,20 @@ export type {
   PatchOperation,
   PatchPlanEnvelope,
   PatchReceipt,
-  RetconAttestation
+  RetconAttestation,
+  ValidatorRunReceipt
 } from "./envelope/schema.js";
 
 export { canonicalOpHash } from "./approval/verify-token.js";
 
+export type PreApplyValidatorSuccess = { ok: true; validators_run?: ValidatorRunReceipt[] };
+
+export type PreApplyValidatorResult = PreApplyValidatorSuccess | EngineError;
+
 export interface SubmitPatchPlanOptions extends PerWorldLockOptions {
   worldRoot?: string;
   hmacSecretPath?: string;
-  preApplyValidator?: () => Promise<{ ok: true } | EngineError> | { ok: true } | EngineError;
+  preApplyValidator?: () => Promise<PreApplyValidatorResult> | PreApplyValidatorResult;
 }
 
 export type EngineError = {
@@ -35,6 +47,7 @@ export type EngineError = {
   code: string;
   message: string;
   detail?: unknown;
+  validators_run?: ValidatorRunReceipt[];
 };
 
 export function submitPatchPlan(
@@ -85,6 +98,7 @@ async function submitPatchPlanImpl(
     if (!validator.ok) {
       return validator;
     }
+    const validatorsRun = validator.validators_run;
 
     const reorderedPatches = reorderPatches(envelope.patches);
     const stageResult = await stageAllOps({ ...envelope, patches: reorderedPatches }, reorderedPatches, ctx);
@@ -131,6 +145,9 @@ async function submitPatchPlanImpl(
       id_allocations_consumed: envelope.expected_id_allocations,
       index_sync_duration_ms: indexSyncDurationMs
     };
+    if (validatorsRun !== undefined) {
+      receipt.validators_run = validatorsRun;
+    }
 
     if (indexSyncError !== undefined) {
       return {
@@ -231,7 +248,7 @@ function nextIdFor(
   return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
 }
 
-async function runPreApplyValidators(opts: SubmitPatchPlanOptions): Promise<{ ok: true } | EngineError> {
+async function runPreApplyValidators(opts: SubmitPatchPlanOptions): Promise<PreApplyValidatorResult> {
   if (opts.preApplyValidator !== undefined) {
     return opts.preApplyValidator();
   }

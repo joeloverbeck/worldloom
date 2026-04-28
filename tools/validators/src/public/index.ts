@@ -14,6 +14,7 @@ export type {
   IndexedRecordValue,
   RunMode,
   Validator,
+  ValidatorExecution,
   ValidatorRun,
   Verdict,
   VerdictSeverity,
@@ -22,9 +23,10 @@ export type {
 
 export type { PatchPlanEnvelope };
 
-export async function validatePatchPlan(
-  envelope: PatchPlanEnvelope
-): Promise<{ verdicts: import("./types.js").Verdict[] }> {
+export async function validatePatchPlan(envelope: PatchPlanEnvelope): Promise<{
+  verdicts: import("./types.js").Verdict[];
+  executions: import("./types.js").ValidatorExecution[];
+}> {
   const db = openWorldIndex(envelope.target_world);
   try {
     const run = await runValidators(
@@ -41,7 +43,7 @@ export async function validatePatchPlan(
         patch_plan: envelope
       }
     );
-    return { verdicts: run.verdicts };
+    return { verdicts: run.verdicts, executions: run.summary.executions };
   } finally {
     db.close();
   }

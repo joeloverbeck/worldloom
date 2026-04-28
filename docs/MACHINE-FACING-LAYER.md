@@ -13,7 +13,7 @@ This doc is the operational overview. The design details still live in the numbe
 3. **Patch engine (`tools/patch-engine/`, SPEC-03)**  
    Applies typed patch plans with anchor-based targeting, append-only vocabulary, two-phase commit, and engine-controlled write ordering.
 4. **Validators (`tools/validators/`, SPEC-04)**  
-   Turn FOUNDATIONS Rules 1 through 7 and structural invariants into executable checks, exposed through `world-validate` and the engine pre-apply gate.
+   Turn FOUNDATIONS Rules 1 through 7 and structural invariants into executable checks, exposed through `world-validate` and the engine pre-apply gate. On the patch-engine submission path, validator-run telemetry is reported via `PatchReceipt.validators_run[]` (success) or `EngineError.validators_run[]` (failure) — each entry carries `validator_name`, `status` (`pass` / `fail` / `skipped`), `duration_ms`, and an optional `detail` populated when status is not `pass`. Consumers that don't read `validators_run` are unaffected by its presence.
 5. **Hooks (`tools/hooks/`, SPEC-05)**  
    Make retrieval and mutation discipline structural in Claude Code by blocking oversized reads, blocking direct writes to engine-only surfaces, bootstrapping subagents, and auto-running validation.
 
