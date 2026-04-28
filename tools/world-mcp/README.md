@@ -23,7 +23,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__get_canonical_vocabulary(class)` *(returns shared canonical enum values for `domain`, `verdict`, `mystery_status`, and `mystery_resolution_safety`)*
 - `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ status: "pass" | "fail" | "skipped", verdicts, reason? }`)*
 - `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(delegates to SPEC-03 `@worldloom/patch-engine`)*
-- `mcp__worldloom__allocate_next_id(world_slug, id_class)`
+- `mcp__worldloom__allocate_next_id(world_slug, id_class)` — allocates append-only world-scoped IDs from a world's index. Pipeline-scoped proposal IDs use `world_slug: "__pipeline__"` with `id_class: "NWB"` for `world-proposals/batches/NWB-*.md` and `id_class: "NWP"` for `world-proposals/NWP-*.md`.
 
 ## Retrieval policy
 

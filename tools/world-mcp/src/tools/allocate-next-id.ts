@@ -1,4 +1,9 @@
+import { readdirSync } from "node:fs";
+import path from "node:path";
+
 import { openIndexDb } from "../db";
+import { resolveRepoRoot } from "../db/path";
+import { createMcpError } from "../errors";
 import type { McpError } from "../errors";
 
 export const ID_CLASS_FORMATS = {
@@ -9,6 +14,8 @@ export const ID_CLASS_FORMATS = {
   DA: { width: 4, zeroPad: true, regex: /^DA-(\d{4})$/ },
   PR: { width: 4, zeroPad: true, regex: /^PR-(\d{4})$/ },
   BATCH: { width: 4, zeroPad: true, regex: /^BATCH-(\d{4})$/ },
+  NWB: { width: 4, zeroPad: true, regex: /^NWB-(\d{4})$/ },
+  NWP: { width: 4, zeroPad: true, regex: /^NWP-(\d{4})$/ },
   NCP: { width: 4, zeroPad: true, regex: /^NCP-(\d{4})$/ },
   NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
@@ -41,12 +48,56 @@ export interface AllocateNextIdResponse {
   next_id: string;
 }
 
+const PIPELINE_WORLD_SLUG = "__pipeline__";
+const PIPELINE_ID_CLASSES = new Set<IdClass>(["NWB", "NWP"]);
+
 function isIdClass(value: string): value is IdClass {
   return value in ID_CLASS_FORMATS;
 }
 
+function isPipelineIdClass(value: IdClass): boolean {
+  return PIPELINE_ID_CLASSES.has(value);
+}
+
 function formatNumericValue(value: number, width: number, zeroPad: boolean): string {
   return zeroPad ? String(value).padStart(width, "0") : String(value);
+}
+
+function findHighestPipelineId(idClass: IdClass): number {
+  const format = ID_CLASS_FORMATS[idClass];
+  const relativeDirectory =
+    idClass === "NWB" ? path.join("world-proposals", "batches") : "world-proposals";
+  const directory = path.join(resolveRepoRoot(), relativeDirectory);
+  let maxValue = 0;
+
+  let fileNames: string[];
+  try {
+    fileNames = readdirSync(directory);
+  } catch {
+    return maxValue;
+  }
+
+  for (const fileName of fileNames) {
+    if (!fileName.endsWith(".md")) {
+      continue;
+    }
+
+    const stem = fileName.slice(0, -".md".length);
+    const idCandidate = idClass === "NWP" ? stem.slice(0, "NWP-0000".length) : stem;
+    const match = format.regex.exec(idCandidate);
+    if (match === null) {
+      continue;
+    }
+
+    const parsedValue = Number.parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(parsedValue)) {
+      continue;
+    }
+
+    maxValue = Math.max(maxValue, parsedValue);
+  }
+
+  return maxValue;
 }
 
 export async function allocateNextId(
@@ -57,6 +108,31 @@ export async function allocateNextId(
   }
 
   const format = ID_CLASS_FORMATS[args.id_class];
+  const pipelineIdClass = isPipelineIdClass(args.id_class);
+
+  if (pipelineIdClass && args.world_slug !== PIPELINE_WORLD_SLUG) {
+    return createMcpError(
+      "invalid_input",
+      `id_class '${args.id_class}' is pipeline-scoped and requires world_slug '${PIPELINE_WORLD_SLUG}'.`,
+      { required_world_slug: PIPELINE_WORLD_SLUG, id_class: args.id_class }
+    );
+  }
+
+  if (!pipelineIdClass && args.world_slug === PIPELINE_WORLD_SLUG) {
+    return createMcpError(
+      "invalid_input",
+      `world_slug '${PIPELINE_WORLD_SLUG}' is only valid for pipeline-scoped id_class values: NWB, NWP.`,
+      { pipeline_id_classes: [...PIPELINE_ID_CLASSES].sort() }
+    );
+  }
+
+  if (pipelineIdClass) {
+    const nextValue = findHighestPipelineId(args.id_class) + 1;
+    return {
+      next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
+    };
+  }
+
   const opened = openIndexDb(args.world_slug);
   if (!("db" in opened)) {
     return opened;
