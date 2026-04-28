@@ -4,7 +4,7 @@ Four independent sub-phases with independent failure modes. All four MUST run pe
 
 ## Phase 10a: Per-seed Invariant Conformance
 
-For every capability, belief, knowledge claim, material-reality fact, and perception trait in the seed, test against every invariant returned in the context packet (ONT-N / CAU-N / DIS-N / SOC-N / AES-N). The `'other'` packet profile loads invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id into the seed's `canon_safety_check.invariants_respected`, pass or fail.
+For every capability, belief, knowledge claim, material-reality fact, and perception trait in the seed, test against every invariant returned in the context packet (ONT-N / CAU-N / DIS-N / SOC-N / AES-N). The `propose_new_characters` packet profile lifts invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id into the seed's `canon_safety_check.invariants_respected`, pass or fail.
 
 Fail triggers (→ Phase 10e):
 
@@ -20,7 +20,9 @@ Fail triggers (→ Phase 10e):
 
 ## Phase 10b: Per-seed Mystery Reserve Firewall
 
-For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `search_nodes(node_type='mystery_record')` then `get_record`), check whether its `what_is_unknown` overlaps the seed's `known_firsthand`, `known_by_rumor`, or `wrongly_believes`. Record every checked M-NNNN id into `canon_safety_check.mystery_reserve_firewall` regardless of overlap — the list is proof-of-check audit trail.
+**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
+
+For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `get_firewall_content(world_slug)` and use `get_record` only for full-record context), check whether its `what_is_unknown` overlaps the seed's `known_firsthand`, `known_by_rumor`, or `wrongly_believes`. Record every checked M-NNNN id into `canon_safety_check.mystery_reserve_firewall` regardless of overlap — the list is proof-of-check audit trail.
 
 For each overlap: the seed MAY hold folk-belief or rumor about the mystery (MR entry's `common in-world interpretations` ARE permitted in `known_by_rumor` / `wrongly_believes`); the seed MUST NOT contain any `disallowed cheap answers` item in `known_firsthand` or `wrongly_believes`.
 

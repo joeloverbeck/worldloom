@@ -28,8 +28,11 @@ Apply the author's worldview pressure. For the bound Author, populate:
 - **unthinkables**: what they cannot imagine otherwise
 - **audience pressures**: what their audience expects, fears, rewards, punishes
 - **institutional pressures**: which SEC-INS body they must flatter or fear
+- **adaptive-but-wrong distortion** (Pattern #80): whether a claim preserves correct adaptive behavior under a wrong ontology / explanation
 
 These do not appear as editor's notes — they are **baked into the composition**. An omission is text-that-isn't-there; an overstatement is a phrase calibrated to the bias, not annotated; a moralization is a sentence the author writes believing it is true.
+
+**Adaptive-but-wrong distortion**: If the artifact is composed for an in-world explanatory genre (folk myth, cult tract, propaganda, herbal, settlement law, oral history, sermon, prayer, folk tale) AND the author is plausibly mistaken about mechanism while plausibly correct about prescribed action, tag the relevant claim's `adaptive_behavior_preserved_under_wrong_ontology: true`. The wrong explanation IS the distortion; the right behavior is what the distortion preserves. Not every claim needs the tag; tag only claims where the divergence between explanation and behavior is the load-bearing rhetorical shape. For artifacts whose author is canonically informed (trained scholar, primary witness), this prompt may yield zero tagged claims — that is acceptable and is captured at Phase 8 Test 12 via the NONE-with-rationale path.
 
 **Rule (from proposal)**: This is where the text becomes alive.
 

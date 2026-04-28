@@ -85,7 +85,7 @@ Phase 7: Canon Safety Check
                         --unrepairable--> loop to Phase 0)
       |
       v
-Phase 8: Validation and Rejection Tests (11 tests)
+Phase 8: Validation and Rejection Tests (12 tests)
          --any fail--> loop to responsible phase
       |
     pass
@@ -99,7 +99,7 @@ Phase 9: Commit (HARD-GATE approval -->
 
 ## Output
 
-- **Diegetic artifact file** at `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` — hybrid YAML frontmatter + markdown body. Frontmatter fields enumerated in `templates/diegetic-artifact.md` (the authoritative schema; the field names and shapes in the Phase 9 write MUST match the template exactly): `artifact_id` (DA-NNNN), `slug`, `title`, `artifact_type`, `statement_of_existence`, `author`, `author_character_id` (CHAR-NNNN if `character_path` was used; else null), `date`, `place`, `audience`, `communicative_purpose`, `desired_relation_to_truth`, `world_relation`, the 8 SOFT-input fields, `genre_conventions`, `author_profile` (15 Phase 0b fields), `epistemic_horizon`, `claim_map`, `canon_links`, `cannot_know`, `world_consistency`, `source_basis`, `notes`. Body sections: the **artifact text itself** (the in-world content, in the author's voice, with Phase 5 distortions baked in — NOT annotated), followed by a clearly demarcated **Canon Safety Check Trace** section (Phase 7a-7e results + Phase 8 11-test results). Engine validates the frontmatter against `record_schema_compliance` post-write.
+- **Diegetic artifact file** at `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` — hybrid YAML frontmatter + markdown body. Frontmatter fields enumerated in `templates/diegetic-artifact.md` (the authoritative schema; the field names and shapes in the Phase 9 write MUST match the template exactly): `artifact_id` (DA-NNNN), `slug`, `title`, `artifact_type`, `statement_of_existence`, `author`, `author_character_id` (CHAR-NNNN if `character_path` was used; else null), `date`, `place`, `audience`, `communicative_purpose`, `desired_relation_to_truth`, `world_relation`, the 8 SOFT-input fields, `genre_conventions`, `author_profile` (15 Phase 0b fields), `epistemic_horizon`, `claim_map`, `canon_links`, `cannot_know`, `world_consistency`, `source_basis`, `notes`. Body sections: the **artifact text itself** (the in-world content, in the author's voice, with Phase 5 distortions baked in — NOT annotated), followed by a clearly demarcated **Canon Safety Check Trace** section (Phase 7a-7e results + Phase 8 12-test results). Engine validates the frontmatter against `record_schema_compliance` post-write.
 - **INDEX.md update** at `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — one line per artifact in the form `- [<title>](<slug>.md) — <artifact_type>, <date>, <author>, <place>`, re-sorted alphabetically by slug on every write. Created with header `# Diegetic Artifacts — <World-Slug-TitleCased>` + blank line if absent. **Field-style guidance**: prefer short forms in the four placeholder fields — `<artifact_type>` is the bare type (`chapter`, `travelogue`, `after-action report`); `<date>` is a short anchor (`Year 412`, `Layer 4`, `~2 yrs before CHAR-NNNN dossier-present`); `<author>` is the byline name only; `<place>` is the bare place name. Long descriptive context belongs in the artifact's frontmatter `statement_of_existence`, not in the INDEX line. The INDEX is for scanning; the artifact is for reading.
 
 **No canon-file mutations.** This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/<subdir>/*.yaml` record. Hook 3 enforces. **No CF / CH / INV / M / OQ / ENT / SEC record is emitted.** The artifact's claims are *contested canon* (FOUNDATIONS §Canon Layers) at their strongest — an in-world voice, not a world-level truth. If the user later wants a claim from the artifact canonized at the world level, that runs through `canon-addition` (or `canon-facts-from-diegetic-artifacts` to mine the artifact for proposal cards first), whose proposal may cite the artifact by DA-id.
@@ -128,7 +128,7 @@ Load `references/phase-0-normalize-and-author.md`. Parse the brief's 7 HARD + 8 
 
 ### 3. Phases 1-3: Claim Planning
 
-Load `references/phases-1-3-claim-planning.md`. Build the Author's epistemic horizon (Phase 1: six source tags — `witnessed`, `learned_from_authority`, `inherited_tradition`, `common_rumor`, `contested_scholarship`, `impossible_for_narrator_to_verify` — including dossier-transfer when `character_path` is provided), apply in-world genre conventions (Phase 2), build the tagged claim list (Phase 3: `canon_status`, `narrator_belief`, `source`, `contradiction_risk`, `mode`, `cf_id`, `mr_id`, `repair_trace`).
+Load `references/phases-1-3-claim-planning.md`. Build the Author's epistemic horizon (Phase 1: six source tags — `witnessed`, `learned_from_authority`, `inherited_tradition`, `common_rumor`, `contested_scholarship`, `impossible_for_narrator_to_verify` — including dossier-transfer when `character_path` is provided), apply in-world genre conventions (Phase 2), build the tagged claim list (Phase 3: `canon_status`, `narrator_belief`, `source`, `contradiction_risk`, `mode`, `adaptive_behavior_preserved_under_wrong_ontology`, `cf_id`, `mr_id`, `repair_trace`).
 
 ### 4. Phases 4-6: Text Composition
 
@@ -140,14 +140,14 @@ Load `references/phase-7-canon-safety-check.md`. Run all five sub-phases — 7a 
 
 ### 6. Phase 8: Validation and Rejection Tests
 
-Load `references/phase-8-validation-tests.md`. Run all 11 tests and record each as PASS / FAIL with a one-line rationale into the Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
+Load `references/phase-8-validation-tests.md`. Run all 12 tests and record each as PASS / FAIL with a one-line rationale into the Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
 
 ### 7. Phase 9: Commit
 
 Present the deliverable summary to the user:
 1. Full frontmatter
 2. Artifact body text (the in-world text)
-3. Canon Safety Check Trace (Phase 7a-7e results + Phase 8 11-test results with rationales)
+3. Canon Safety Check Trace (Phase 7a-7e results + Phase 8 12-test results with rationales)
 4. Phase 7f canon-safety repair sub-passes that fired (if any), each framed as "preserved: <brief intent> / sacrificed: <what was retagged, rescoped, moved, or removed>"
 5. Phase 6 chronology-coherence revisions that fired (if any) — back-projection consequences during composition, categorically distinct from Phase 7f canon-safety repairs; each framed in the same preserved/sacrificed shape (see `references/phase-0-normalize-and-author.md` §Back-projection math for the rule)
 6. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`

@@ -93,8 +93,8 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 
 - `# Discovery` — top-of-file index mirroring the four `*_touched` frontmatter arrays for in-body grep. Match the frontmatter exactly: do not re-include UNCHANGED items here either.
 - `# Proposal` — verbatim copy of the proposal text + user-stated constraints (preferred scope, desired rarity, dramatic purpose, revision appetite, other).
-- `# Phase 0–11 Analysis` — full per-phase outputs (Phase 0 normalize / Phase 1 scope / Phase 2 invariants / Phase 3 capability / Phase 4 prerequisites / Phase 5 diffusion / Phase 6 consequence propagation, with first/second/third-order subsections / Phase 7 counterfactual + stated stabilizers / Phase 8 contradiction classification / Phase 9 repair pass — options considered / declined / adopted / Phase 10 narrative-and-thematic fit + OQ pressure scan results).
-- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 12 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. Tests 11 and 12 use the detailed criteria below.
+- `# Phase 0–11 Analysis` — full per-phase outputs (Phase 0 normalize, including a required `## Phase 0 — Proposal Normalization and Misrecognition Probe` sub-heading with `misrecognition_probe:` layer-captured details OR `NONE` plus one-line rationale / Phase 1 scope / Phase 2 invariants / Phase 3 capability / Phase 4 prerequisites / Phase 5 diffusion / Phase 6 consequence propagation, with first/second/third-order subsections / Phase 7 counterfactual + stated stabilizers / Phase 8 contradiction classification / Phase 9 repair pass — options considered / declined / adopted / Phase 10 narrative-and-thematic fit + OQ pressure scan results).
+- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 13 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. Tests 11, 12, and 13 use the detailed criteria below.
 - `# Verdict` — one of `ACCEPT` / `ACCEPT_WITH_REQUIRED_UPDATES` / `ACCEPT_AS_LOCAL_EXCEPTION` / `ACCEPT_AS_CONTESTED_BELIEF` / `REVISE_AND_RESUBMIT` / `REJECT` (matches the canonical verdict enum).
 - `# Justification` — phase-cited reasoning. Every claim cites a specific phase finding.
 - `# Critic Reports` — verbatim, only if the Escalation Gate fired. One subsection per critic (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator) plus a Synthesis (Phase 6b) subsection covering convergent concerns, productive tensions resolved, and required CF-language commitments arising from synthesis.
@@ -102,7 +102,7 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 - `# Resubmission Menu` (REVISE only) OR `# Why This Cannot Be Repaired` (REJECT only) — concrete; the user can act on it without further clarification.
 - `# User Override` — only if a Phase 14b user override fired (original verdict, override verdict, user reasoning, converted accept-branch outputs). Rule 6 compliance: overrides are logged.
 
-## Phase 14a Tests 11/12 Detailed Criteria
+## Phase 14a Tests 11/12/13 Detailed Criteria
 
 ### Test 11: Action-Space Integrity
 
@@ -142,3 +142,16 @@ Edge cases:
 - A truth can use indirect traces, such as missing maps plus euphemistic slang, if the rationale explains how both point to the same underlying fact.
 - A new CF can create one trace immediately and require a second world update in the same patch plan; it must name both and the plan must include the corresponding updates.
 - Mystery Reserve carve-outs do not authorize vague absence. They only pass when the hiding mechanism itself is already or newly canonized in the same approved plan.
+
+### Test 13: Misrecognition probe addressed
+
+Applies to every new canon fact after SPEC-18. The test is judgment-only and checks that FOUNDATIONS §Acceptance Tests #9 was explicitly addressed during Phase 0.
+
+PASS requires one of these Phase 0 outcomes in the PA body:
+- Misrecognition layer captured: state what people falsely believe, what is canon-true, the chosen `truth_scope.diegetic_status`, and at least one `epistemic_profile.distortion_vectors[]` or `knowledge_exclusions[]` entry on the new CF.
+- `misrecognition_probe: NONE`: state the NONE result with a one-line rationale explaining why the fact has no observation-perspective asymmetry.
+
+FAIL examples:
+- The Phase 0 analysis does not mention misrecognition.
+- The PA says `misrecognition_probe: NONE` with no rationale.
+- The prose describes a false public belief but leaves both `epistemic_profile.distortion_vectors[]` and `knowledge_exclusions[]` empty.

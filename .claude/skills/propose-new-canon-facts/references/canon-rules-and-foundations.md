@@ -20,7 +20,7 @@ No Canon Fact Record emitted. No Change Log Entry emitted. This skill does not m
 
 | Principle | Phase | Mechanism |
 |-----------|-------|-----------|
-| Tooling Recommendation (non-negotiable) | Pre-flight | `docs/FOUNDATIONS.md` + `WORLD_KERNEL.md` + `ONTOLOGY.md` (direct Read at world root) + atomic-record world-state slice via `mcp__worldloom__get_context_packet(task_type='other', ...)` (Kernel concepts + INV records + relevant CFs + named-entity neighbors + section context); on-demand `get_record` / `search_nodes` / `get_neighbors` retrieval during diagnosis (Phases 1-2), seed generation (Phase 3), and the Phase 7 sub-checks |
+| Tooling Recommendation (non-negotiable) | Pre-flight | `docs/FOUNDATIONS.md` + `WORLD_KERNEL.md` + `ONTOLOGY.md` (direct Read at world root) + atomic-record world-state slice via `mcp__worldloom__get_context_packet(task_type='propose_new_canon_facts', ...)` (Kernel concepts + INV records + relevant CFs + named-entity neighbors + section context); on-demand `get_record` / `search_nodes` / `get_neighbors` retrieval during diagnosis (Phases 1-2), seed generation (Phase 3), and the Phase 7 sub-checks |
 | Canon Layers §Hard / Soft / Contested / Mystery Reserve | Phases 6, 7 | Each card declares `proposed_status`; 7a respects invariants; 7b firewalls MR; Family J opens new MR entries rather than closing old ones |
 | Canon Layers §Derived Canon | Phases 3, 4, 6 | Seed generation + scoring's `propagation_value` favor seeds deriving from existing facts; card's `source_basis.derived_from_cfs` cites parent CFs explicitly |
 | Ontology Categories | Phases 2, 6 | Enrichment categories map to ontology categories via card's `type` field |

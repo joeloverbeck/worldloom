@@ -29,6 +29,21 @@ Phase 0 conceptual labels feed a single `type` value in the new CF record (`_sou
 - `text / tradition` → `text_tradition` (texts, fragmentary corpora, translation status)
 - `hazard` → `hazard` (recurring environmental or bodily danger)
 
+## Misrecognition Probe
+
+Ask: *Does this fact have a public misrecognition layer? What does the broader world believe vs. what is canon-true?*
+
+If yes, capture the layer in both surfaces:
+
+1. Set `truth_scope.diegetic_status` per the FOUNDATIONS enum: `objective | believed | disputed | propagandistic | legendary`.
+2. Populate at least one `epistemic_profile.distortion_vectors[]` entry (named actors who systematically misrepresent the fact) OR `epistemic_profile.knowledge_exclusions[]` entry (groups deliberately kept ignorant).
+
+If no, record `misrecognition_probe: NONE` in the PA `body_markdown` `## Phase 0 — Proposal Normalization and Misrecognition Probe` sub-section with a one-line rationale, such as "this fact is a pure geographic distribution; no observation-perspective asymmetry."
+
+The probe captures both directions: presence and explicit absence-with-rationale. Many facts are symmetric across observation perspectives; the probe makes that symmetry an explicit decision rather than an unexamined default.
+
+**FOUNDATIONS cross-ref**: §Acceptance Tests #9 ("What do people falsely believe?"); §Canon Fact Record Schema (`truth_scope.diegetic_status`, `epistemic_profile.distortion_vectors`, `epistemic_profile.knowledge_exclusions`).
+
 ## Tie-Break Criteria for Overlapping Types
 
 Some proposals straddle `institution` / `law` / `ritual` / `resource_distribution` / `craft` / `technology` without a clear single answer (e.g., a welfare registry is simultaneously an organized body, a statute, and a distribution mechanism). Apply this rubric before falling through to the Phase 9 split option:

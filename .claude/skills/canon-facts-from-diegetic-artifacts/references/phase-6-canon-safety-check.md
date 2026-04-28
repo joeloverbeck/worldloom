@@ -14,7 +14,7 @@ The sibling skill's `invariant_revision` status exception does NOT fire in this 
 
 ## 6b. Per-card Mystery Reserve Firewall
 
-Iterate every M record retrieved into the packet and record overlap status in `canon_safety_check.mystery_reserve_firewall`; expand via `mcp__worldloom__search_nodes(node_type='mystery_record')` then `mcp__worldloom__get_record(<M-id>)` if a card implicates an MR entry not in the packet. Every MR id is recorded, overlap or not — an absent id is indistinguishable from an un-checked id, which Phase 7 Test T5 will flag as incomplete.
+Iterate every M record retrieved into the packet and record overlap status in `canon_safety_check.mystery_reserve_firewall`; expand via `mcp__worldloom__get_firewall_content(world_slug)` if a card implicates an MR entry not in the packet, using `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection. Every MR id is recorded, overlap or not — an absent id is indistinguishable from an un-checked id, which Phase 7 Test T5 will flag as incomplete.
 
 **Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
 

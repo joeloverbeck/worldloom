@@ -203,3 +203,35 @@ test("getContextPacket keeps the existing 8000 default for character_generation"
     destroyTempRepoRoot(root);
   }
 });
+
+test("getContextPacket accepts canon-pipeline-adjacent task types with specific default budgets", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildContextPacketWorld(root);
+
+    const cases = [
+      ["propose_new_canon_facts", 15000],
+      ["propose_new_characters", 15000],
+      ["propose_new_worlds_from_preferences", 12000],
+      ["canon_facts_from_diegetic_artifacts", 12000]
+    ] as const;
+
+    for (const [taskType, defaultBudget] of cases) {
+      const result = await withRepoRoot(root, () =>
+        getContextPacket({
+          task_type: taskType,
+          world_slug: "seeded",
+          seed_nodes: ["DA-0002"]
+        })
+      );
+
+      assert.ok(!("code" in result), `${taskType} should produce a packet response`);
+      assert.equal(result.task_header.task_type, taskType);
+      assert.equal(result.task_header.token_budget.requested, defaultBudget);
+      assert.ok(result.task_header.token_budget.allocated <= defaultBudget);
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

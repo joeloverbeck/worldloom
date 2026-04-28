@@ -7,7 +7,11 @@ import {
   type DeliveryMode
 } from "../context-packet/shared";
 import type { McpError } from "../errors";
-import { TASK_TYPES, type TaskType } from "../ranking/profiles";
+import {
+  DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE,
+  TASK_TYPES,
+  type TaskType
+} from "../ranking/profiles";
 
 export interface GetContextPacketArgs {
   task_type: TaskType;
@@ -17,14 +21,6 @@ export interface GetContextPacketArgs {
   delivery_mode?: DeliveryMode;
   node_classes?: NodeType[];
 }
-
-const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
-  canon_addition: 16000,
-  character_generation: 8000,
-  diegetic_artifact_generation: 8000,
-  continuity_audit: 8000,
-  other: 8000
-};
 
 function assertValidArgs(args: GetContextPacketArgs): void {
   if (args.world_slug.trim().length === 0) {

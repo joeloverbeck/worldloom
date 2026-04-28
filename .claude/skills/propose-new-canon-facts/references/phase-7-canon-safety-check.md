@@ -4,7 +4,7 @@ Four sub-phases (three per-card, one batch-level) are independent checks with in
 
 ## Phase 7a: Per-card Invariant Conformance
 
-For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every `INV` record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) returned in the context packet. The `'other'` packet profile loads invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id tested into the card's `canon_safety_check.invariants_respected`.
+For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every `INV` record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) returned in the context packet. The `propose_new_canon_facts` packet profile lifts invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id tested into the card's `canon_safety_check.invariants_respected`.
 
 Fail triggers (→ Phase 7e):
 - violates an ontological invariant (card introduces an ontology the world disallows)
@@ -21,7 +21,7 @@ Fail triggers (→ Phase 7e):
 
 ## Phase 7b: Per-card Mystery Reserve Firewall
 
-For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `mcp__worldloom__search_nodes(node_type='mystery_record')` then `get_record`), check whether its `what_is_unknown` or `disallowed_cheap_answers` blocks overlap the card's `canon_fact_statement`, `immediate_consequences`, or `longer_term_consequences`. Record every checked M-NNNN id into the card's `canon_safety_check.mystery_reserve_firewall` **regardless of overlap** — the firewall list is a proof-of-check audit trail. Document overlap status per entry in the card's Canon Safety Check Trace prose.
+For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `mcp__worldloom__get_firewall_content(world_slug)` and use `get_record('M-NNNN')` only for full-record context), check whether its `what_is_unknown` or `disallowed_cheap_answers` blocks overlap the card's `canon_fact_statement`, `immediate_consequences`, or `longer_term_consequences`. Record every checked M-NNNN id into the card's `canon_safety_check.mystery_reserve_firewall` **regardless of overlap** — the firewall list is a proof-of-check audit trail. Document overlap status per entry in the card's Canon Safety Check Trace prose.
 
 **Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
 

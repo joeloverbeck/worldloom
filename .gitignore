@@ -143,6 +143,8 @@ briefs/*
 !briefs/.gitkeep
 worlds/*
 !worlds/.gitkeep
+world-proposals/*
+!world-proposals/.gitkeep
 
 # Machine-facing layer (per specs/SPEC-08 Phase 0)
 # Note: all worlds/* content is ignored by the public pipeline repo.

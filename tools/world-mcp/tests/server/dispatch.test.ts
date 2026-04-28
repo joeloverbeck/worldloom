@@ -283,6 +283,11 @@ test("registered tools dispatch with either a success payload or the documented 
         name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SEC-GEO" },
         expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "__pipeline__", id_class: "NWB" },
+        expectError: false
       }
     ] as const;
 
@@ -350,5 +355,33 @@ test("unsupported id classes fail at the MCP validation boundary", async () => {
 
     assert.equal(result.isError, true);
     assert.match(textContent(result), /invalid/i);
+  });
+});
+
+test("pipeline-scoped id classes reject non-pipeline world slugs at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "NWP" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /__pipeline__/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("pipeline sentinel rejects world-scoped id classes at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "__pipeline__", id_class: "CF" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /NWB, NWP/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
   });
 });

@@ -16,7 +16,7 @@ Fail triggers (send to Phase 7f):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__search_nodes(node_type='mystery_record')` if any are missing), check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
+For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__get_firewall_content(world_slug)` if any are missing, using `get_record('M-NNNN')` only for full-record context), check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
 
 **Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
 

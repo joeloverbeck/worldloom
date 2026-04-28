@@ -169,6 +169,8 @@ export const ID_CLASSES = [
   "DA",
   "PR",
   "BATCH",
+  "NWB",
+  "NWP",
   "NCP",
   "NCB",
   "AU",
@@ -336,7 +338,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "allocate_next_id",
-    "Allocate the next append-only id for a world-specific record class.",
+    "Allocate the next append-only id for a world-specific or pipeline-scoped record class.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0])
   );

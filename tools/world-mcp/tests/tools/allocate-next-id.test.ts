@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import {
@@ -83,7 +85,7 @@ test("allocateNextId returns the next id for all supported classes", async () =>
   }
 });
 
-test("allocateNextId returns first-run ids for missing classes", async () => {
+test("allocateNextId returns first-run ids for missing world-scoped classes", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -132,7 +134,74 @@ test("allocateNextId returns first-run ids for missing classes", async () => {
   }
 });
 
-test("allocateNextId exposes all 26 id classes with existing formats preserved", () => {
+test("allocateNextId returns the next pipeline-scoped ids from world-proposals", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    mkdirSync(path.join(root, "world-proposals", "batches"), { recursive: true });
+    writeFileSync(path.join(root, "world-proposals", "batches", "NWB-0001.md"), "batch", "utf8");
+    writeFileSync(path.join(root, "world-proposals", "NWP-0008-the-cipher.md"), "card", "utf8");
+    writeFileSync(path.join(root, "world-proposals", "NWP-not-an-id.md"), "ignored", "utf8");
+
+    const batchResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "NWB" })
+    );
+    const proposalResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "NWP" })
+    );
+
+    assert.ok(!("code" in batchResult));
+    assert.ok(!("code" in proposalResult));
+    assert.equal(batchResult.next_id, "NWB-0002");
+    assert.equal(proposalResult.next_id, "NWP-0009");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId returns first-run pipeline ids when world-proposals is absent", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const batchResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "NWB" })
+    );
+    const proposalResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "NWP" })
+    );
+
+    assert.ok(!("code" in batchResult));
+    assert.ok(!("code" in proposalResult));
+    assert.equal(batchResult.next_id, "NWB-0001");
+    assert.equal(proposalResult.next_id, "NWP-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId rejects cross-scope world_slug and id_class combinations", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const pipelineClassWithWorldSlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "NWB" })
+    );
+    const worldClassWithPipelineSlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "CF" })
+    );
+
+    assert.ok("code" in pipelineClassWithWorldSlug);
+    assert.ok("code" in worldClassWithPipelineSlug);
+    assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
+    assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
+    assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
+    assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId exposes all 28 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -141,6 +210,8 @@ test("allocateNextId exposes all 26 id classes with existing formats preserved",
     "DA",
     "PR",
     "BATCH",
+    "NWB",
+    "NWP",
     "NCP",
     "NCB",
     "AU",
@@ -161,7 +232,7 @@ test("allocateNextId exposes all 26 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 26);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 28);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
@@ -170,6 +241,8 @@ test("allocateNextId exposes all 26 id classes with existing formats preserved",
   assert.match("AES-1", ID_CLASS_FORMATS.AES.regex);
   assert.equal(ID_CLASS_FORMATS["SEC-GEO"].width, 3);
   assert.match("SEC-GEO-001", ID_CLASS_FORMATS["SEC-GEO"].regex);
+  assert.match("NWB-0001", ID_CLASS_FORMATS.NWB.regex);
+  assert.match("NWP-0001", ID_CLASS_FORMATS.NWP.regex);
 });
 
 test("allocateNextId class formats stay in lockstep with the MCP input enum", () => {

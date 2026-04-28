@@ -83,6 +83,7 @@ claim_map:                                   # Phase 3 output — every claim co
     source: ""                               # witnessed | learned_from_authority | inherited_tradition | common_rumor | contested_scholarship | impossible_for_narrator_to_verify
     contradiction_risk: ""                   # none | soft | hard
     mode: ""                                 # direct | implied | symbolic
+    adaptive_behavior_preserved_under_wrong_ontology: false # optional; true when wrong explanation preserves correct adaptive behavior (Phase 8 Test 12)
     cf_id: null                              # required if canon_status == canonically_true; must resolve via mcp__worldloom__get_record
     mr_id: null                              # required if canon_status == mystery_adjacent; must resolve via mcp__worldloom__get_record
     repair_trace: null                       # if this claim was repaired at Phase 7f, record the repair type + reason here
@@ -187,6 +188,7 @@ No `direct_knowledge` / `inferred_knowledge` / `wrongly_believed` / `claim_map` 
 - Test 9 (Phase 7d / four diegetic-safety rules): PASS — <each of the four rules named and verified>
 - Test 10 (Phase 7e / truth discipline): PASS — <World-Truth + Narrator-Truth both verified>
 - Test 11 (Schema completeness): PASS — <no frontmatter field left TODO/placeholder/empty; body non-empty; trace populated>
+- Test 12 (Contested Canon / adaptive-but-wrong): PASS — <tagged adaptive-but-wrong claim cited with wrong ontology + canon-true behavior, OR NONE/N/A rationale supplied>
 
 ### Phase 7f Repair Sub-Passes Fired
 

@@ -8,13 +8,13 @@ Pre-flight calls:
 
 ```
 mcp__worldloom__get_context_packet(
-  task_type='other',
+  task_type='propose_new_characters',
   seed_nodes=[<registry-and-domain anchor seeds>],
   token_budget=15000
 )
 ```
 
-`'other'` is the registered fallback in the TASK_TYPES enum (`canon_addition` | `character_generation` | `diegetic_artifact_generation` | `continuity_audit` | `other`); a `propose_new_characters` task type is NOT registered, and adding it is out of scope for this skill rewrite. The `'other'` profile applies the default ranking weights — sufficient because this skill's reasoning ranges across institutions, peoples-and-species, everyday-life, geography, and timeline domains.
+`propose_new_characters` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile prioritizes character/person-registry-adjacent records, named-entity neighbors, invariants, Mystery Reserve entries, and local section context while preserving broad reasoning across institutions, peoples-and-species, everyday-life, geography, and timeline domains.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phases 1–11 expand on demand via record-addressed retrieval.
 
@@ -32,8 +32,8 @@ When a phase needs records beyond what the packet returned:
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans:
   - `node_type='section', filters={file_class: 'institutions'}` — Phase 5 institutions-without-insiders/dissenters/enforcers; analogously for `everyday-life`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline`.
   - `node_type='canon_fact', filters={domain: ...}` — Phase 10c distribution discipline lookups (capability CFs whose `who_can_do_it` / `who_cannot_easily_do_it` blocks bear on the seeds under consideration).
-  - `node_type='mystery_record'` — Phase 10b firewall expansion when a seed implicates an M entry not in the packet.
   - `node_type='invariant'` — Phase 10a expansion when the packet did not surface an invariant the seed implicates.
+- `mcp__worldloom__get_firewall_content(world_slug)` — Phase 10b bulk firewall projection when a seed implicates an M entry not in the packet; use `get_record('M-NNNN')` only when full M-record context is needed beyond the projection.
 - `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species / characters).
 - `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-NNNN` ids; also used at Phase 1 to surface registry-occupying figures the artifact frontmatter names.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 2 needs to ground a CF against the section context where it was applied.
