@@ -8,7 +8,7 @@ Quick reference for invoking each skill. For detailed skill behavior, see the sk
 - **Add a canon fact to an existing world**: `/canon-addition` with `world_slug` and `proposal_path`. Accept outcomes extend the ledger and patch affected domain files; non-accept outcomes write only an adjudication record.
 - **Audit a world for contradictions, drift, or dangling consequences**: `/continuity-audit` with `world_slug`. Produces an audit report at `worlds/<slug>/audits/AU-NNNN-<date>.md` and optional retcon-proposal cards directly consumable as `canon-addition`'s `proposal_path`.
 
-Canon-addition validation now includes Test 11 (action-space leverage) and Test 12 (trace redundancy), with `epistemic_profile` and `exception_governance` governed by the conditional-mandate regime in `docs/FOUNDATIONS.md` §Canon Fact Record Schema and §Validation Rules.
+Canon-addition validation now includes Test 11 (action-space leverage), Test 12 (trace redundancy), and Test 13 (misrecognition probe addressed). `epistemic_profile` and `exception_governance` remain governed by the conditional-mandate regime in `docs/FOUNDATIONS.md` §Canon Fact Record Schema and §Validation Rules.
 
 ## Canon fact generation
 

@@ -1,25 +1,27 @@
 # SPEC18GENFER-004: canon-addition misrecognition probe end-to-end
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `.claude/skills/canon-addition/SKILL.md` §Procedure step 2 (Phase 0) + §Procedure step 8 (Phase 14a) + §PA `body_markdown` Structure; `.claude/skills/canon-addition/references/proposal-normalization.md` (new §Misrecognition Probe section)
+**Engine Changes**: Yes — `.claude/skills/canon-addition/SKILL.md` §Procedure step 2 (Phase 0) + §Procedure step 8 (Phase 14a) + §PA `body_markdown` Structure; `.claude/skills/canon-addition/references/proposal-normalization.md` (new §Misrecognition Probe section); `.claude/skills/canon-addition/references/counterfactual-and-verdict.md` PA structure/Test 13 reference; `docs/WORKFLOWS.md` quick-reference update; `specs/SPEC-18-genesis-fertility-and-misrecognition.md` status/current-state truthing
 **Deps**: None
 
 ## Problem
 
-`canon-addition/SKILL.md` Phase 0 normalizes the proposal and classifies fact type but does not actively probe the misrecognition layer. FOUNDATIONS §Acceptance Test #9 ("What do people falsely believe?") is currently exercised only at world creation — and even there, only partially. Proposers can canonize facts as `diegetic_status: objective` without ever being asked whether the fact has a public misrecognition layer, even when the in-world population's belief is materially divergent from the canonical truth.
+At intake, `canon-addition/SKILL.md` Phase 0 normalized the proposal and classified fact type but did not actively probe the misrecognition layer. FOUNDATIONS §Acceptance Test #9 ("What do people falsely believe?") was exercised only at world creation — and even there, only partially. Proposers could canonize facts as `diegetic_status: objective` without ever being asked whether the fact had a public misrecognition layer, even when the in-world population's belief was materially divergent from the canonical truth.
 
 This is not a schema gap (the CF Record Schema's `truth_scope.diegetic_status` enum, `epistemic_profile.distortion_vectors[]`, and `epistemic_profile.knowledge_exclusions[]` blocks already support misrecognition layering) — it is a flow-blindness gap. The misrecognition layer rides for free in the schema; the skill flow does not invite proposers to populate it.
 
-The Phase 14a 12-test checklist has no Test 13 enforcing misrecognition-probe addressment, and the PA `body_markdown` Structure has no Phase 0 sub-heading carrying the probe outcome.
+The Phase 14a 12-test checklist had no Test 13 enforcing misrecognition-probe addressment, and the PA `body_markdown` Structure had no Phase 0 sub-heading carrying the probe outcome.
 
 ## Assumption Reassessment (2026-04-28)
 
-1. Existing surfaces confirmed: Phase 0 reference at `.claude/skills/canon-addition/SKILL.md:83` (loads `references/proposal-normalization.md`); proposal-normalization.md (146 lines) covers fact-type classification, retcon-proposal inputs, place-type / polity composite handling, compound-brief CF-count rubric, and selective domain-file loading — no misrecognition probe currently exists. Phase 14a 12-test checklist at `canon-addition/SKILL.md:99-112` (Tests 11 + 12 introduced by SPEC-09 per the prose at line 99). PA `body_markdown` Structure at `canon-addition/SKILL.md:116-118` — `# Phase 0–11 Analysis` is one section; no Phase 0 sub-heading currently exists.
+1. Intake surfaces confirmed: Phase 0 reference at `.claude/skills/canon-addition/SKILL.md:83` loaded `references/proposal-normalization.md`; proposal-normalization.md covered fact-type classification, retcon-proposal inputs, place-type / polity composite handling, compound-brief CF-count rubric, and selective domain-file loading, with no misrecognition probe at intake. Phase 14a had a 12-test checklist at `canon-addition/SKILL.md:99-112` (Tests 11 + 12 introduced by SPEC-09 per the prose at line 99). PA `body_markdown` Structure at `canon-addition/SKILL.md:116-118` used `# Phase 0–11 Analysis` as one section with no Phase 0 sub-heading at intake. The completed skill now adds the proposal-normalization misrecognition section, Phase 14a Test 13, and the Phase 0 PA sub-heading.
 2. SPEC-18 §Approach Track B1/B2/B3 (lines 76-90); §Deliverables B1-B3 (lines 106-111). Track B1 explicitly permits the author to choose the landing surface (SKILL.md §Procedure step 2 OR `references/proposal-normalization.md`); the SKILL.md must reference whichever surface receives it. Decision: land the probe sub-step in `references/proposal-normalization.md` as a new §Misrecognition Probe section, since Phase 0 details already live in proposal-normalization.md per the existing SKILL.md Procedure step 2 reference. Update SKILL.md Procedure step 2 to reference the new sub-section so the discoverability path is preserved.
 3. Cross-skill / schema boundary: existing CF schema fields `truth_scope.diegetic_status` (enum: `objective | believed | disputed | propagandistic | legendary`), `epistemic_profile.distortion_vectors[]`, `epistemic_profile.knowledge_exclusions[]` per FOUNDATIONS §Canon Fact Record Schema (`docs/FOUNDATIONS.md:271-345`) are confirmed present and unchanged. The probe consumes these existing fields additively; no schema modification.
 4. FOUNDATIONS §Acceptance Tests #9, Rule 6 (No Silent Retcons via PA audit trail), and Rule 7 (No silent MR resolution — misrecognition is contested-canon, not mystery-reserve, per SPEC-18 §FOUNDATIONS Alignment Rule 7 entry) motivate this. The probe distinguishes "the population is wrong about a known canon fact" (contested-canon) from "the canon doesn't know either" (mystery-reserve) cleanly — Rule 7 firewall is preserved.
+5. Same-seam reference fallout confirmed during implementation: `.claude/skills/canon-addition/references/counterfactual-and-verdict.md` repeated the PA body template and "12 tests" wording; `docs/WORKFLOWS.md` advertised only Tests 11 and 12. Both are owned by this ticket because they document the same canon-addition validation surface.
+6. SPEC-18 same-seam current-state truthing is owned by this ticket after Track B lands. The spec status is now IMPLEMENTED, with archival left out of scope because this run did not request archival.
 
 ## Architecture Check
 
@@ -28,6 +30,7 @@ The Phase 14a 12-test checklist has no Test 13 enforcing misrecognition-probe ad
 3. Test 13 is judgment-only (no validator binding) — consistent with the SPEC-09-introduced Test 11 + 12 discipline at Phase 14a. The bare-absence-fails rule closes the bare-omission gap.
 4. The PA `body_markdown` Phase 0 sub-heading carries the probe outcome in audit-trail prose, satisfying Rule 6 (No Silent Retcons) — every CF acceptance leaves a probe trace whether the layer is captured or explicitly NONE.
 5. No backwards-compat shim — Test 13 only fires on PA records produced after SPEC-18 lands (per spec §Out of Scope: no retroactive misrecognition probes on previously-accepted CFs).
+6. Same-seam docs/reference truthing keeps the skill's active contract single-sourced across SKILL.md, its detailed adjudication reference, and the workflow quick-reference.
 
 ## Verification Layers
 
@@ -35,25 +38,16 @@ The Phase 14a 12-test checklist has no Test 13 enforcing misrecognition-probe ad
 2. `canon-addition/SKILL.md` §Procedure step 2 references the new sub-section → codebase grep-proof
 3. `canon-addition/SKILL.md` Phase 14a contains 13 tests (was 12) including Test 13 by name → codebase grep-proof
 4. `canon-addition/SKILL.md` §PA `body_markdown` Structure references the Phase 0 sub-heading → codebase grep-proof
-5. Skill dry-run: invoke canon-addition without misrecognition probe — Phase 14a Test 13 must FAIL with rationale → skill dry-run
-6. Skill dry-run: invoke canon-addition with `misrecognition_probe: NONE` rationale — Test 13 must PASS → skill dry-run
+5. Manual skill-flow review: invoke canon-addition without misrecognition probe — Phase 14a Test 13 must FAIL with rationale → manual review
+6. Manual skill-flow review: invoke canon-addition with `misrecognition_probe: NONE` rationale — Test 13 must PASS → manual review
 7. CF schema fields used by the probe (`truth_scope.diegetic_status`, `epistemic_profile.distortion_vectors`, `epistemic_profile.knowledge_exclusions`) exist unchanged in FOUNDATIONS.md → FOUNDATIONS alignment check at `docs/FOUNDATIONS.md:271-345`
+8. Same-seam PA structure/test wording in `counterfactual-and-verdict.md` and `docs/WORKFLOWS.md` reflects Test 13 → codebase grep-proof/manual review
 
 ## What to Change
 
 ### 1. `references/proposal-normalization.md` — Add Misrecognition Probe section
 
-After the existing §Template `type` Mapping section (or at an appropriate location preserving the current section flow), add a new section:
-
-```markdown
-## Misrecognition Probe
-
-Ask: *Does this fact have a public misrecognition layer? What does the broader world believe vs. what is canon-true?* If yes, capture the layer in two surfaces: (a) set `truth_scope.diegetic_status` per the FOUNDATIONS enum (`objective | believed | disputed | propagandistic | legendary`); (b) populate `epistemic_profile.distortion_vectors[]` (named actors who systematically misrepresent the fact) and `epistemic_profile.knowledge_exclusions[]` (groups deliberately kept ignorant). If no, the proposal must record `misrecognition_probe: NONE` in the PA `body_markdown` Phase 0 sub-section with a one-line rationale (e.g., "this fact is a pure geographic distribution; no observation-perspective asymmetry").
-
-The probe captures BOTH directions (presence and explicit absence-with-rationale) — the skill-flow gap is closed by making the question mandatory, not by requiring the answer to always be "yes." Many facts are symmetric across observation perspectives; the probe makes that symmetry an explicit decision rather than an unexamined default.
-
-**FOUNDATIONS cross-ref**: §Acceptance Tests #9 ("What do people falsely believe?"); §Canon Fact Record Schema (`truth_scope.diegetic_status`, `epistemic_profile.distortion_vectors`, `epistemic_profile.knowledge_exclusions`).
-```
+After the existing §Template `type` Mapping section, add a new §Misrecognition Probe section. The landed section asks whether the fact has a public misrecognition layer, records a captured layer via existing `truth_scope.diegetic_status` and `epistemic_profile.distortion_vectors[]` / `knowledge_exclusions[]` fields, or records `misrecognition_probe: NONE` with a one-line rationale in the PA `body_markdown` `## Phase 0 — Proposal Normalization and Misrecognition Probe` sub-section. The section explicitly ties the probe to FOUNDATIONS §Acceptance Tests #9 and the existing Canon Fact Record Schema fields.
 
 ### 2. `canon-addition/SKILL.md` §Procedure step 2 — Reference the misrecognition probe
 
@@ -81,6 +75,9 @@ In the §PA `body_markdown` Structure prose at `canon-addition/SKILL.md:116-118`
 
 - `.claude/skills/canon-addition/SKILL.md` (modify)
 - `.claude/skills/canon-addition/references/proposal-normalization.md` (modify)
+- `.claude/skills/canon-addition/references/counterfactual-and-verdict.md` (modify — same-seam PA structure/Test 13 reference truthing)
+- `docs/WORKFLOWS.md` (modify — canon-addition validation quick-reference)
+- `specs/SPEC-18-genesis-fertility-and-misrecognition.md` (modify — same-seam status/current-state truthing)
 
 ## Out of Scope
 
@@ -101,8 +98,8 @@ In the §PA `body_markdown` Structure prose at `canon-addition/SKILL.md:116-118`
 4. `grep -F "Phase 0 — Proposal Normalization and Misrecognition Probe" .claude/skills/canon-addition/SKILL.md` returns 1+ match (PA structure references the sub-heading)
 5. `grep -F "13 tests" .claude/skills/canon-addition/SKILL.md` returns 1+ match (count updated from 12)
 6. `grep -F "Misrecognition Probe" .claude/skills/canon-addition/SKILL.md` returns 1+ match (Procedure step 2 references the new sub-section)
-7. Skill dry-run: invoke canon-addition with a proposal where the misrecognition probe is bypassed (no Phase 0 sub-heading content) — Phase 14a Test 13 must FAIL with rationale "bare absence"
-8. Skill dry-run: invoke canon-addition with `misrecognition_probe: NONE` and rationale "geographic distribution; no observation-perspective asymmetry" — Test 13 must PASS
+7. Manual skill-flow review: invoke canon-addition with a proposal where the misrecognition probe is bypassed (no Phase 0 sub-heading content) — Phase 14a Test 13 must FAIL with rationale "bare absence"
+8. Manual skill-flow review: invoke canon-addition with `misrecognition_probe: NONE` and rationale "geographic distribution; no observation-perspective asymmetry" — Test 13 must PASS
 
 ### Invariants
 
@@ -116,7 +113,7 @@ In the §PA `body_markdown` Structure prose at `canon-addition/SKILL.md:116-118`
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage (the SKILL.md HARD-GATE clause enumerating skill-side judgment-only tests, the existing Phase 14a 12-test infrastructure, and the existing CF schema fields per FOUNDATIONS) is named in Assumption Reassessment.
+1. None — documentation-only ticket; verification is command-based and manual skill-flow review. Existing pipeline coverage (the SKILL.md HARD-GATE clause enumerating skill-side judgment-only tests, the existing Phase 14a validation infrastructure, and the existing CF schema fields per FOUNDATIONS) is named in Assumption Reassessment.
 
 ### Commands
 
@@ -124,3 +121,34 @@ In the §PA `body_markdown` Structure prose at `canon-addition/SKILL.md:116-118`
 2. `grep -F "Misrecognition probe addressed" .claude/skills/canon-addition/SKILL.md`
 3. `grep -F "Phase 0 — Proposal Normalization and Misrecognition Probe" .claude/skills/canon-addition/SKILL.md`
 4. `grep -nE "13 tests|Test 13|Tests 9, 10, 11, 12, 13" .claude/skills/canon-addition/SKILL.md` (confirms count + HARD-GATE enumeration updated)
+
+## Outcome
+
+Completed on 2026-04-28.
+
+`canon-addition` Phase 0 now requires the SPEC-18 misrecognition probe via `references/proposal-normalization.md` §Misrecognition Probe. The skill records either a captured misrecognition layer using existing CF schema fields (`truth_scope.diegetic_status` plus `epistemic_profile.distortion_vectors[]` or `knowledge_exclusions[]`) or `misrecognition_probe: NONE` with a one-line rationale in the PA body.
+
+Phase 14a now has 13 tests. Test 13, "Misrecognition probe addressed," is judgment-only, fails on bare absence, and is included in the HARD-GATE skill-side PASS+rationale list. The PA body structure now requires `## Phase 0 — Proposal Normalization and Misrecognition Probe` inside `# Phase 0–11 Analysis`.
+
+Same-seam references were updated: `counterfactual-and-verdict.md` now documents the Phase 0 sub-heading and Test 13 criteria; `docs/WORKFLOWS.md` lists Test 13 in the canon-addition quick-reference; SPEC-18 is marked IMPLEMENTED with Track B current-state wording truth-fixed. No schema, validator, engine, or world-content files changed.
+
+## Verification Result
+
+Completed on 2026-04-28:
+
+1. `grep -F "Misrecognition Probe" .claude/skills/canon-addition/references/proposal-normalization.md` — passed; returned the new section header and cross-reference.
+2. `grep -F "misrecognition_probe: NONE" .claude/skills/canon-addition/references/proposal-normalization.md` — passed.
+3. `grep -F "Misrecognition probe addressed" .claude/skills/canon-addition/SKILL.md` — passed; returned Test 13.
+4. `grep -F "Phase 0 — Proposal Normalization and Misrecognition Probe" .claude/skills/canon-addition/SKILL.md` — passed.
+5. `grep -F "13 tests" .claude/skills/canon-addition/SKILL.md` — passed.
+6. `grep -F "Misrecognition Probe" .claude/skills/canon-addition/SKILL.md` — passed.
+7. `grep -nE "13 tests|Test 13|Tests 9, 10, 11, 12, 13" .claude/skills/canon-addition/SKILL.md` — passed; confirms count and HARD-GATE enumeration.
+8. `grep -nE "13 tests|Test 13|Misrecognition probe addressed|Phase 0 — Proposal Normalization and Misrecognition Probe" .claude/skills/canon-addition/references/counterfactual-and-verdict.md docs/WORKFLOWS.md specs/SPEC-18-genesis-fertility-and-misrecognition.md` — passed for same-seam reference truthing.
+9. Manual skill-flow review — passed for both drafted cases: missing Phase 0 misrecognition content fails Test 13 as bare absence; `misrecognition_probe: NONE` with rationale passes Test 13.
+10. FOUNDATIONS alignment review — passed; the probe consumes existing `truth_scope.diegetic_status`, `epistemic_profile.distortion_vectors[]`, and `epistemic_profile.knowledge_exclusions[]` fields, preserves Rule 6 audit trail via PA body text, and preserves the Rule 7 Mystery Reserve firewall by treating misrecognition as contested-canon rather than unknown canon.
+11. `git diff --check` — passed.
+
+## Deviations
+
+- The drafted "skill dry-run" proof was completed as manual skill-flow review because `canon-addition` is a HARD-GATE prose workflow, not an executable harness. The landed Test 13 wording gives deterministic PASS/FAIL criteria for the two cases.
+- Same-seam reference truthing widened the file set to `counterfactual-and-verdict.md`, `docs/WORKFLOWS.md`, and SPEC-18. This did not widen behavior beyond the canon-addition skill contract.

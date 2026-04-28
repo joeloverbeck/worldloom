@@ -2,7 +2,7 @@
 
 # SPEC-18: Genesis-CF Fertility and Misrecognition Alignment
 
-**Status**: PROPOSED
+**Status**: COMPLETED (archived 2026-04-28; SPEC18GENFER-001 through SPEC18GENFER-004 landed and are archived under `archive/tickets/`)
 **Phase**: post-pilot world-creation hardening (independent of SPEC-09 / SPEC-15 / SPEC-16 / SPEC-17 — touches different skill surfaces)
 **Depends on**: none (additive-only changes to two skills)
 **Blocks**: none
@@ -10,7 +10,7 @@
 
 ## Problem Statement
 
-Two structural gaps in canon-mutating skills mean that worldloom worlds can pass current skill validation while failing FOUNDATIONS' own §Acceptance Tests, and can accept canon facts that ignore one of FOUNDATIONS' load-bearing acceptance questions ("what do people falsely believe?").
+At SPEC-18 intake, two structural gaps in canon-mutating skills meant that worldloom worlds could pass then-current skill validation while failing FOUNDATIONS' own §Acceptance Tests, and could accept canon facts that ignored one of FOUNDATIONS' load-bearing acceptance questions ("what do people falsely believe?"). SPEC18GENFER-001 through SPEC18GENFER-004 have landed the remediation described below.
 
 ### Gap 1: Worlds born via `create-base-world` are structurally thinner at genesis than worlds born from a `propose-new-worlds-from-preferences` NWP card
 
@@ -37,7 +37,7 @@ The asymmetry matters because `create-base-world` is the genesis surface for eve
 
 The CF Record Schema's `truth_scope.diegetic_status` enum (`objective | believed | disputed | propagandistic | legendary`) and `epistemic_profile.distortion_vectors[]` / `knowledge_exclusions[]` blocks already support misrecognition layering — a fact can be world-level true while the broader population believes a coherent and adaptive falsehood about it (Pattern #19 old catastrophe misunderstood by present, #54 misrecognition as worldbuilding, #69 distorted self-explanation, #80 documents preserve adaptive behavior under wrong explanation, #81 multi-truth layers).
 
-`canon-addition/SKILL.md` Phase 0 normalizes the proposal and classifies fact type but does not actively probe the misrecognition layer. The FOUNDATIONS Acceptance Test "What do people falsely believe?" remains absent from the per-fact addition flow where it is most actionable. Proposers can canonize facts as `diegetic_status: objective` without ever being asked whether the fact has a public misrecognition layer, even when the in-world population's belief is materially divergent from the canonical truth.
+At SPEC-18 intake, `canon-addition/SKILL.md` Phase 0 normalized the proposal and classified fact type but did not actively probe the misrecognition layer. The FOUNDATIONS Acceptance Test "What do people falsely believe?" was absent from the per-fact addition flow where it is most actionable. SPEC18GENFER-004 lands the Phase 0 misrecognition probe, PA body sub-heading, and Phase 14a Test 13 so proposers must now either capture a public misrecognition layer or record `misrecognition_probe: NONE` with rationale.
 
 This is not a schema gap (the schema supports it) — it is a flow-blindness gap. The misrecognition layer rides for free in the schema; the skill flow does not invite proposers to populate it.
 
@@ -76,7 +76,7 @@ Each new test follows Phase 9's existing format: a one-line failure trigger and 
 
 Two sub-changes to `canon-addition/SKILL.md`:
 
-**B1. Phase 0 — misrecognition probe sub-step.** Currently Phase 0 normalizes the proposal (parse OR interview; classify fact type). Track B1 adds an explicit sub-step after fact-type classification:
+**B1. Phase 0 — misrecognition probe sub-step.** Before SPEC18GENFER-004, Phase 0 normalized the proposal (parse OR interview; classify fact type). Track B1 adds an explicit sub-step after fact-type classification:
 
 > **Misrecognition probe.** Ask: *Does this fact have a public misrecognition layer? What does the broader world believe vs. what is canon-true?* If yes, capture the layer in two surfaces: (a) set `truth_scope.diegetic_status` per the FOUNDATIONS enum (`objective | believed | disputed | propagandistic | legendary`); (b) populate `epistemic_profile.distortion_vectors[]` (named actors who systematically misrepresent the fact) and `epistemic_profile.knowledge_exclusions[]` (groups deliberately kept ignorant). If no, the proposal must record `misrecognition_probe: NONE` in the PA `body_markdown` Phase 0 section with a one-line rationale (e.g., "this fact is a pure geographic distribution; no observation-perspective asymmetry").
 
@@ -114,7 +114,7 @@ PASS rationale formats:
 
 | Principle | Stance | Rationale |
 |---|---|---|
-| §Acceptance Tests (11 questions) | aligns | Track A3 adds 5 missing Acceptance Tests to Phase 9; Track B2 adds the 9th Acceptance Test ("What do people falsely believe?") to canon-addition Phase 14a. |
+| §Acceptance Tests (11 questions) | aligns | Track A3 adds 5 missing Acceptance Tests to Phase 9; Track B2 adds the 9th Acceptance Test ("What do people falsely believe?") to canon-addition Phase 14a. All SPEC-18 tracks are now landed via SPEC18GENFER-001 through SPEC18GENFER-004. |
 | §Canon Layers (Hard / Derived / Soft / Contested / Mystery-Reserve) | aligns | Track B uses the existing `truth_scope.diegetic_status` enum to capture contested / legendary / propagandistic layers; no new layer is introduced. |
 | §Canon Fact Record Schema | aligns | Both tracks consume schema fields that already exist (`truth_scope.diegetic_status`, `epistemic_profile.distortion_vectors`, `epistemic_profile.knowledge_exclusions`, `domains_affected`, `visible_consequences`); no schema extension. |
 | Rule 11 (No Spectator Castes by Accident) | aligns | Track A2 brings the Rule 11 leverage check forward to genesis (before SPEC18GENFER-002, it was first applied in the per-CF Phase 14a Test 11). |
@@ -132,8 +132,8 @@ PASS rationale formats:
 | Genesis spectator-caste check fires for capability-bearing CF-0001 | manual skill-flow review — CF-0001 of type `capability` with empty leverage block fails; CF-0001 of type `geography` with empty leverage block passes conditionally |
 | One-Sentence Fertility test rejects vague wonders | manual skill-flow review — CF-0001 statement "magic exists" (Pattern #98 weak example) fails the Phase 9 rejection wording |
 | Native Story Procedures test rejects worlds without procedures | manual skill-flow review — a world without enumerated story procedures fails the Phase 9 rejection wording |
-| Phase 0 misrecognition probe is mandatory | skill dry-run — invoke `canon-addition` and inspect PA `body_markdown` Phase 0 section; either layer-captured or NONE-with-rationale must be present |
-| Test 13 fires when probe is absent | skill dry-run — bypass the probe (force-skip Phase 0 sub-step); Phase 14a Test 13 must FAIL with rationale |
+| Phase 0 misrecognition probe is mandatory | manual skill-flow review — invoke `canon-addition` conceptually and inspect PA `body_markdown` Phase 0 section; either layer-captured or NONE-with-rationale must be present |
+| Test 13 fires when probe is absent | manual skill-flow review — bypass the probe (force-skip Phase 0 sub-step); Phase 14a Test 13 must FAIL with rationale |
 | FOUNDATIONS alignment is documented per Acceptance Test | FOUNDATIONS alignment check — Phase 9 covers ATs #1, #2, #3, #4, #5, #6, #7, #8, #11 (6 by name via Track A3, 3 via existing rejection triggers); Phase 14a Test 13 covers AT #9 via Track B2; AT #10 ('diegetic contradictions permitted') is deferred to a future spec |
 
 ## Out of Scope
@@ -150,6 +150,21 @@ PASS rationale formats:
 
 1. **Interview burden on canon-addition for misrecognition-irrelevant facts.** Many facts (geographic distributions, ontology-of-physics rules, language-vocabulary additions) are symmetric across observation perspectives — the misrecognition probe answer is NONE-with-rationale. The probe still adds a Phase 0 question to every run. Mitigation: the NONE path is a one-line answer; the cost is a few sentences in the PA `body_markdown`. If post-landing observation shows >70% NONE rate with stereotyped rationales, consider deprecating the probe to fact-type-conditional invocation (skip for `geography` / `language` / `physics` types). Not an SPEC-18 deliverable.
 2. **Genesis bar may be too high for "small" or "minimalist-by-design" worlds.** Some worlds the user wants to author may be deliberately thin (e.g., a single-village setting for a one-shot campaign). The new Phase 9 tests assume the world wants to support institutional / faction / multi-perspective depth. Mitigation: Phase 9 is judgment-only; the user can override with rationale documented in the world's WORLD_KERNEL.md. If override frequency is high, consider a Phase 0 scope-declaration parameter (genesis-scope: `full` / `compact`) — out of SPEC-18 scope.
-3. **Three-orders-of-consequence at genesis competes with FOUNDATIONS' "world starts thin and grows" stance.** The current `create-base-world` SKILL.md §Phase 4 reads: "The world starts thin and grows via `canon-addition`; one section per concern is sufficient." Track A1 partially contradicts this. Resolution: thin-but-rooted, not stub-and-defer. The world still grows; Phase 4 sections still seed forward. The SPEC-18 amendment sharpens "thin" from "stubs allowed" to "first-order consequences materialized; second / third-order can grow via canon-addition." **Resolved by Track A1's two-part deliverable**: the existing "thin and grows" line is rewritten to "thin in coverage, not in concrete commitment" alongside the new substantive-section requirement; both edits land in the same Track A1 deliverable so the two prose surfaces remain coherent.
+3. **Three-orders-of-consequence at genesis competed with FOUNDATIONS' "world starts thin and grows" stance at intake.** Before SPEC18GENFER-001, `create-base-world` SKILL.md §Phase 4 read: "The world starts thin and grows via `canon-addition`; one section per concern is sufficient." Track A1 resolved this as thin-but-rooted, not stub-and-defer. The world still grows; Phase 4 sections still seed forward. The SPEC-18 amendment sharpened "thin" from "stubs allowed" to "first-order consequences materialized; second / third-order can grow via canon-addition." **Resolved by Track A1's two-part deliverable**: the existing "thin and grows" line was rewritten to "thin in coverage, not in concrete commitment" alongside the new substantive-section requirement.
 4. **Misrecognition probe may surface a layer the user doesn't want canonized.** A proposer answering "yes, the population believes X" is committing to a population belief as part of the CF. If the user wants the misrecognition layer left implicit / undocumented, the probe forces an explicit commitment. Resolution: the NONE-with-rationale path covers "I don't want to commit to a misrecognition layer right now"; the rationale documents the intentional deferral. Future canon-addition can revisit.
 5. **`misrecognition_probe` body-prose convention is grep-only, not query-typed.** The probe outcome lands as `misrecognition_probe: NONE` (or layer-captured prose) inside the PA `body_markdown` Phase 0 sub-section rather than in PA frontmatter. Future audits asking "show all PAs where misrecognition was probed and found symmetric" must grep across PA bodies; structured retrieval via `mcp__worldloom__search_nodes` or PA frontmatter projection is unavailable. Mitigation: out-of-scope for SPEC-18 per §Approach (no schema changes); a follow-up spec could elevate the probe outcome to PA frontmatter (e.g., `misrecognition_probe: layer_captured | none`, optional `misrecognition_rationale`) once enough probe-bearing PAs accumulate to justify the schema extension. Tracked here as future-improvement seed.
+
+## Outcome
+
+Completed 2026-04-28.
+
+SPEC18GENFER-001 through SPEC18GENFER-004 landed the SPEC-18 remediation across the intended skill surfaces:
+
+- `create-base-world` now requires substantive CF-0001-touched section materialization, propagation breadth, first / second / third-order visible consequences, and genesis Rule 11 leverage checks.
+- `create-base-world` Phase 9 now carries the SPEC-18 judgment-only acceptance-test additions for counterfactual pressure, inequality structure, embodiment, scarcity, multi-perspective divergence, one-sentence fertility, native story procedures, and the genesis spectator-caste check.
+- `canon-addition` now includes the Phase 0 misrecognition probe, PA body structure support, and Phase 14a Test 13 for FOUNDATIONS Acceptance Test #9.
+- `docs/WORKFLOWS.md` and the canon-addition reference files were updated so the new misrecognition probe is discoverable from the workflow surface.
+
+Deviations from the original plan: verification stayed at the truthful prose-skill boundary. The `canon-addition` and `create-base-world` surfaces are judgment-driven workflow skills, so the closeout uses manual skill-flow review and grep-backed reference checks rather than claiming an executable dry-run harness. No schema, validator, engine, or world-content backfill was added; those were explicit SPEC-18 non-goals.
+
+Verification results: archived tickets `archive/tickets/SPEC18GENFER-001.md` through `archive/tickets/SPEC18GENFER-004.md` record the completed proof surfaces for each implementation slice. This spec was truth-fixed from proposed/current-state wording to completed/historical wording before archival, then moved to `archive/specs/SPEC-18-genesis-fertility-and-misrecognition.md`.
