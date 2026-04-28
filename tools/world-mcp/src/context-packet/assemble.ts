@@ -1,3 +1,5 @@
+import type { NodeType } from "@worldloom/world-index/public/types";
+
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 import type { TaskType } from "../ranking/profiles";
@@ -17,6 +19,7 @@ import {
   estimatePacketTokens,
   uniqueStrings,
   type ContextPacket,
+  type ContextPacketNode,
   type ContextPacketTruncationSummary,
   type DeliveryMode
 } from "./shared";
@@ -140,6 +143,24 @@ function recordDrop(packet: ContextPacket, layer: DroppableLayer, nodeIds: strin
   packet.truncation_summary.dropped_node_ids_by_layer[layer] = nodeIds;
 }
 
+function applyClassFilter(
+  packet: ContextPacket,
+  nodeClasses: readonly NodeType[] | undefined
+): void {
+  if (nodeClasses === undefined) {
+    return;
+  }
+
+  const allowed = new Set<NodeType>(nodeClasses);
+  const keep = (node: ContextPacketNode): boolean => allowed.has(node.node_type);
+
+  packet.local_authority.nodes = packet.local_authority.nodes.filter(keep);
+  packet.exact_record_links.nodes = packet.exact_record_links.nodes.filter(keep);
+  packet.scoped_local_context.nodes = packet.scoped_local_context.nodes.filter(keep);
+  packet.governing_world_context.nodes = packet.governing_world_context.nodes.filter(keep);
+  packet.impact_surfaces.nodes = packet.impact_surfaces.nodes.filter(keep);
+}
+
 function estimateStablePacketSize(packet: ContextPacket): number {
   const originalAllocated = packet.task_header.token_budget.allocated;
   const originalRequested = packet.task_header.token_budget.requested;
@@ -182,6 +203,7 @@ export async function assembleContextPacket(args: {
   seed_nodes: string[];
   token_budget: number;
   delivery_mode?: DeliveryMode;
+  node_classes?: NodeType[];
 }): Promise<ContextPacket | McpError> {
   const opened = openIndexDb(args.world_slug);
   if (!("db" in opened)) {
@@ -248,6 +270,8 @@ export async function assembleContextPacket(args: {
       ],
       deliveryMode
     );
+
+    applyClassFilter(packet, args.node_classes);
 
     enforceBudget(packet, args.token_budget);
 

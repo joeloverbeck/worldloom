@@ -5,6 +5,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
 
+import { NODE_TYPES } from "@worldloom/world-index/public/types";
+
 import { DELIVERY_MODES } from "./context-packet/shared";
 import { TASK_TYPES } from "./ranking/profiles";
 import { allocateNextId } from "./tools/allocate-next-id";
@@ -118,7 +120,8 @@ const getContextPacketInputSchema = z.object({
   world_slug: z.string().min(1),
   seed_nodes: z.array(z.string().min(1)).min(1),
   token_budget: z.number().int().positive().optional(),
-  delivery_mode: z.enum(DELIVERY_MODES).optional()
+  delivery_mode: z.enum(DELIVERY_MODES).optional(),
+  node_classes: z.array(z.enum(NODE_TYPES)).optional()
 });
 
 const findImpactedFragmentsInputSchema = z.object({

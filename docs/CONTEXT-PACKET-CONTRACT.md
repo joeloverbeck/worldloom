@@ -167,6 +167,84 @@ Use `summary_only` when consumers only need an "index of what exists" — e.g. P
 - `summary_only` summary fields are ≤100 characters.
 - Default behavior (no `delivery_mode` parameter) is identical to `delivery_mode: 'full'`.
 
+## Class Filtering
+
+`get_context_packet` accepts an optional `node_classes` parameter that restricts every layer's `nodes` array to the specified node-type set. Layer assembly, `why_included` arrays, `task_header` metadata, governing-context guardrails (`active_rules`, `protected_surfaces`, `required_output_schema`, `prohibited_moves`, `open_risks`), and the five-layer structure are unchanged — only per-layer `nodes` lists are filtered post-assembly, before budget enforcement.
+
+### Parameter shape
+
+`node_classes` is an array of `NodeType` values (the same enum used by `node.node_type` throughout the index). Valid entries include `canon_fact_record`, `change_log_entry`, `mystery_reserve_entry`, `open_question_entry`, `invariant`, `named_entity`, `section`, `character_record`, `diegetic_artifact_record`, and the rest of the indexed node types. Unrecognized entries are rejected before assembly.
+
+### Default behavior
+
+When `node_classes` is absent, no filtering is applied — every layer's `nodes` array contains the full mix of classes the assembler produced. This preserves the legacy contract for callers that do not opt in.
+
+### Empty array
+
+`node_classes: []` is a degenerate-but-valid request: the filter retains nothing, every layer's `nodes` array is empty, and the rest of the packet (task_header, why_included arrays, governing-context guardrails, truncation_summary) is preserved. Budget enforcement still runs against the now-empty layers and may not need to drop anything.
+
+### Use cases
+
+- A `character_generation` Phase 7a invariant-conformance call requests `node_classes: ['invariant']` and uses the full token budget for invariant coverage rather than spending it on canon facts and section bodies.
+- A `character_generation` Phase 7b Mystery Reserve firewall call requests `node_classes: ['mystery_reserve_entry']` and uses the full token budget for M-record coverage.
+- A `character_generation` Phase 7c distribution-conformance call requests `node_classes: ['canon_fact_record']` and uses the full token budget for CF coverage.
+
+### Composition with `delivery_mode`
+
+`node_classes` and `delivery_mode` compose orthogonally: a request with `node_classes: ['mystery_reserve_entry']` and `delivery_mode: 'summary_only'` returns mystery-only nodes carrying `summary` (≤100 chars) with `body_preview` omitted. Governing-context `record` projections (e.g. `character_generation` invariant and Mystery Reserve fields) are unaffected by either parameter and remain attached when their task-specific assembly normally includes them.
+
+### Filter invariants
+
+- The filter applies per-layer post-assembly. Seed nodes are not filtered at the input level — `seed_nodes` may contain any `NodeType`, but a seed whose class is excluded by `node_classes` will be filtered out of `local_authority`.
+- The five-layer structure is preserved even when some layers' `nodes` arrays are empty post-filter.
+- Default (absent parameter) → current full-mix behavior.
+
+### Worked example
+
+A `diegetic-artifact-generation` Phase 7b firewall scoping call:
+
+```yaml
+request:
+  task_type: diegetic_artifact_generation
+  world_slug: animalia
+  seed_nodes: [CF-0044]
+  token_budget: 8000
+  node_classes: [mystery_reserve_entry]
+
+response (selected fields):
+  task_header:
+    task_type: diegetic_artifact_generation
+    world_slug: animalia
+    token_budget: { requested: 8000, allocated: 4200 }
+    seed_nodes: [CF-0044]
+    packet_version: 2
+  local_authority:
+    nodes: []                        # CF-0044 filtered out (canon_fact_record not in node_classes)
+    why_included: ["seed node supplied by caller"]
+  exact_record_links:
+    nodes: []
+    why_included: []
+  scoped_local_context:
+    nodes: []
+    why_included: []
+  governing_world_context:
+    active_rules: ["No silent canon mutation from diegetic generation", "Rule 7: preserve Mystery Reserve deliberately"]
+    protected_surfaces: [...]
+    nodes:
+      - { id: M-0003, node_type: mystery_reserve_entry, ... }
+      - { id: M-0007, node_type: mystery_reserve_entry, ... }
+    why_included: ["Mystery Reserve firewall for the locality-first packet", ...]
+  impact_surfaces:
+    nodes: []
+    rationale: []
+  truncation_summary:
+    dropped_layers: []
+    dropped_node_ids_by_layer: {}
+    fallback_advice: "..."
+```
+
+The response's `nodes` arrays contain only `mystery_reserve_entry` records; the full `token_budget` is available for M-record coverage rather than being split across canon facts, sections, and other classes the firewall scoping does not read.
+
 ## Example Roles
 
 ### Canon addition

@@ -1,3 +1,5 @@
+import { NODE_TYPES, type NodeType } from "@worldloom/world-index/public/types";
+
 import { assembleContextPacket, type ContextPacket } from "../context-packet/assemble";
 import {
   DEFAULT_DELIVERY_MODE,
@@ -13,6 +15,7 @@ export interface GetContextPacketArgs {
   seed_nodes: string[];
   token_budget?: number;
   delivery_mode?: DeliveryMode;
+  node_classes?: NodeType[];
 }
 
 const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
@@ -43,6 +46,14 @@ function assertValidArgs(args: GetContextPacketArgs): void {
   if (args.delivery_mode !== undefined && !DELIVERY_MODES.includes(args.delivery_mode)) {
     throw new Error(`Unsupported delivery_mode '${args.delivery_mode}'.`);
   }
+
+  if (args.node_classes !== undefined) {
+    for (const nodeClass of args.node_classes) {
+      if (!NODE_TYPES.includes(nodeClass)) {
+        throw new Error(`Unsupported node_classes entry '${nodeClass}'.`);
+      }
+    }
+  }
 }
 
 export async function getContextPacket(
@@ -55,6 +66,7 @@ export async function getContextPacket(
     world_slug: args.world_slug,
     seed_nodes: args.seed_nodes,
     token_budget: args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type],
-    delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE
+    delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE,
+    ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes })
   });
 }

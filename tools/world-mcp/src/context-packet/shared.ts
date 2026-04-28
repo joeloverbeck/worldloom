@@ -14,6 +14,7 @@ export interface ContextPacketArgs {
   seed_nodes: string[];
   token_budget: number;
   delivery_mode?: DeliveryMode;
+  node_classes?: NodeType[];
 }
 
 export interface ContextPacketNode {
