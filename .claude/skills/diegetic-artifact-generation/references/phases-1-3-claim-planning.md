@@ -85,11 +85,14 @@ Build the artifact's claim list. For each claim, record:
 | `source` | one of the six Phase 1 tags |
 | `contradiction_risk` | `none` \| `soft` \| `hard` |
 | `mode` | `direct` \| `implied` \| `symbolic` |
+| `adaptive_behavior_preserved_under_wrong_ontology` | optional boolean, default false. When true, the narrator's explanation diverges from canon while the prescribed behavior implied by the claim is correct survival / social / ritual behavior under canon truth. Pattern #80: the wrong explanation is the distortion, and the right behavior is what the distortion preserves. |
 | `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve to a `_source/canon/CF-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
 | `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve to a `_source/mystery-reserve/M-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
 | `repair_trace` | null by default; populated by Phase 7f with `{repair_type, reason}` when the claim is retagged, rescoped, moved, or removed |
 
 Every claim with `canon_status: canonically_true` must populate `cf_id` with a CF-id resolvable via `mcp__worldloom__get_record`. Every claim with `canon_status: mystery_adjacent` must populate `mr_id` with an MR-id resolvable via `mcp__worldloom__get_record`. Every claim repaired at Phase 7f must record the repair under `repair_trace`. Every claim tagged `prohibited_for_this_artifact` is **removed from the artifact body** — it stays in the record as an audit trail of what was considered and rejected.
+
+The `adaptive_behavior_preserved_under_wrong_ontology` tag is not a canon-promotion signal. It is contested-canon metadata on a claim whose author is wrong about mechanism but right about the behavior the audience should perform. Examples: a folk-myth claim "the Rot is the breath of the dead, mask yourself" where canon truth is "the Rot is planetary medicine, and masking is still correct because spores are toxic to humans"; a cult-tract claim "blood healing is sacrament, attend ministration only at consecrated hours" where canon truth is "the blood is contaminated, and the consecrated-hours schedule slows infection-vector saturation."
 
 **Rule (from proposal Phase 3)**: The `truth_status` taxonomy is the firewall against Rule 7 failures by commission. A claim that would resolve a mystery must be tagged `prohibited_for_this_artifact` here, not caught at Phase 7b.
 
