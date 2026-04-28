@@ -11,12 +11,14 @@ import {
 import { buildImpactSurfaces } from "./impact-surfaces";
 import { buildScopedLocalContext } from "./scoped-local-context";
 import {
+  DEFAULT_DELIVERY_MODE,
   DEFAULT_PACKET_VERSION,
   TRUNCATION_FALLBACK_ADVICE,
   estimatePacketTokens,
   uniqueStrings,
   type ContextPacket,
-  type ContextPacketTruncationSummary
+  type ContextPacketTruncationSummary,
+  type DeliveryMode
 } from "./shared";
 
 export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
@@ -179,11 +181,14 @@ export async function assembleContextPacket(args: {
   world_slug: string;
   seed_nodes: string[];
   token_budget: number;
+  delivery_mode?: DeliveryMode;
 }): Promise<ContextPacket | McpError> {
   const opened = openIndexDb(args.world_slug);
   if (!("db" in opened)) {
     return opened;
   }
+
+  const deliveryMode: DeliveryMode = args.delivery_mode ?? DEFAULT_DELIVERY_MODE;
 
   try {
     const packet = makeEmptyPacket({
@@ -202,18 +207,25 @@ export async function assembleContextPacket(args: {
       return localAuthoritySourceIds;
     }
 
-    packet.local_authority = buildLocalAuthority(opened.db, args.world_slug, localAuthoritySourceIds);
+    packet.local_authority = buildLocalAuthority(
+      opened.db,
+      args.world_slug,
+      localAuthoritySourceIds,
+      deliveryMode
+    );
     packet.exact_record_links = buildExactRecordLinks(
       opened.db,
       args.world_slug,
       localAuthoritySourceIds,
-      packet.local_authority.nodes.map((node) => node.id)
+      packet.local_authority.nodes.map((node) => node.id),
+      deliveryMode
     );
     packet.scoped_local_context = buildScopedLocalContext(
       opened.db,
       args.world_slug,
       localAuthoritySourceIds,
-      [...packet.local_authority.nodes, ...packet.exact_record_links.nodes]
+      [...packet.local_authority.nodes, ...packet.exact_record_links.nodes],
+      deliveryMode
     );
     packet.governing_world_context = await buildGoverningWorldContext(
       opened.db,
@@ -223,13 +235,19 @@ export async function assembleContextPacket(args: {
         ...packet.local_authority.nodes,
         ...packet.exact_record_links.nodes,
         ...packet.scoped_local_context.nodes
-      ]
+      ],
+      deliveryMode
     );
-    packet.impact_surfaces = await buildImpactSurfaces(opened.db, args.world_slug, [
-      ...packet.local_authority.nodes,
-      ...packet.exact_record_links.nodes,
-      ...packet.scoped_local_context.nodes
-    ]);
+    packet.impact_surfaces = await buildImpactSurfaces(
+      opened.db,
+      args.world_slug,
+      [
+        ...packet.local_authority.nodes,
+        ...packet.exact_record_links.nodes,
+        ...packet.scoped_local_context.nodes
+      ],
+      deliveryMode
+    );
 
     enforceBudget(packet, args.token_budget);
 

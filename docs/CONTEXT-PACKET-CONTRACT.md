@@ -145,6 +145,28 @@ truncation_summary:
 
 The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. This pattern keeps single-response packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval delivers the content.
 
+## Delivery Modes
+
+`get_context_packet` accepts an optional `delivery_mode` parameter that selects per-node payload shape. Layer assembly, `why_included` arrays, `task_header` metadata, governing-context guardrails, and per-layer node-id sets are identical across modes — only per-node content differs.
+
+### `full` (default)
+
+Each node carries a `body_preview` string (truncated body snippet, capped at ~280 characters) plus the `summary` field as recorded in the index. This is the legacy shape; callers that omit `delivery_mode` get this behavior unchanged.
+
+Use `full` when downstream consumers need preview-level content for ranking, citation, or in-line skim before deciding whether to fetch full bodies.
+
+### `summary_only`
+
+Each node carries a non-null `summary` field (≤100 characters, derived from the index `summary`, or the record's `notes` first line, or the body's first sentence if no DB summary is present) and **omits** `body_preview` entirely. Governing-context `record` projections (e.g. `character_generation` invariant and Mystery Reserve fields) are unaffected by the delivery mode and remain attached when their task-specific assembly normally includes them.
+
+Use `summary_only` when consumers only need an "index of what exists" — e.g. Phase 7 firewall scoping in `canon-addition`, or Phase 1-3 claim planning in `diegetic-artifact-generation` — and will retrieve specific bodies via `mcp__worldloom__get_record(record_id)` per identified id. The compact shape lets the same `token_budget` cover materially broader locality coverage.
+
+### Mode invariants
+
+- Both modes return the same `node.id` set per layer for the same `task_type`, `seed_nodes`, and world state.
+- `summary_only` summary fields are ≤100 characters.
+- Default behavior (no `delivery_mode` parameter) is identical to `delivery_mode: 'full'`.
+
 ## Example Roles
 
 ### Canon addition

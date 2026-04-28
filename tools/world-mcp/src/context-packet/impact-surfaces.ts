@@ -2,13 +2,14 @@ import type Database from "better-sqlite3";
 
 import { findImpactedFragments } from "../tools/find-impacted-fragments";
 
-import type { ContextPacketNode } from "./shared";
+import type { ContextPacketNode, DeliveryMode } from "./shared";
 import { loadPacketNodes } from "./shared";
 
 export async function buildImpactSurfaces(
   db: Database.Database,
   worldSlug: string,
-  localityNodes: ContextPacketNode[]
+  localityNodes: ContextPacketNode[],
+  deliveryMode: DeliveryMode
 ): Promise<{
   nodes: ContextPacketNode[];
   rationale: string[];
@@ -25,7 +26,8 @@ export async function buildImpactSurfaces(
   const impactedNodes = loadPacketNodes(
     db,
     worldSlug,
-    impactResponse.impacted.map((fragment) => fragment.id)
+    impactResponse.impacted.map((fragment) => fragment.id),
+    { deliveryMode }
   );
 
   return {
