@@ -8,13 +8,13 @@ Pre-flight calls:
 
 ```
 mcp__worldloom__get_context_packet(
-  task_type='other',
+  task_type='canon_facts_from_diegetic_artifacts',
   seed_nodes=[<artifact-anchor seeds>],
   token_budget=12000
 )
 ```
 
-`'other'` is the registered fallback in the TASK_TYPES enum (`canon_addition` | `character_generation` | `diegetic_artifact_generation` | `continuity_audit` | `other`); `canon_facts_from_diegetic_artifacts` is NOT a registered task type, and adding it is out of scope for this skill rewrite. The `'other'` profile applies the default ranking weights — sufficient because the artifact's claim ledger drives Phase 2 lookups across many domains rather than concentrating on a single locality.
+`canon_facts_from_diegetic_artifacts` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile prioritizes the source artifact, referenced records, named-entity neighbors, canon facts, invariants, Mystery Reserve entries, and artifact-local section context while preserving the broad Phase 2 grounding scan.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phase 2 and Phase 6 expand on demand via record-addressed retrieval.
 

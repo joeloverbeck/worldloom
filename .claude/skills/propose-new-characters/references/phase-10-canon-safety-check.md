@@ -4,7 +4,7 @@ Four independent sub-phases with independent failure modes. All four MUST run pe
 
 ## Phase 10a: Per-seed Invariant Conformance
 
-For every capability, belief, knowledge claim, material-reality fact, and perception trait in the seed, test against every invariant returned in the context packet (ONT-N / CAU-N / DIS-N / SOC-N / AES-N). The `'other'` packet profile loads invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id into the seed's `canon_safety_check.invariants_respected`, pass or fail.
+For every capability, belief, knowledge claim, material-reality fact, and perception trait in the seed, test against every invariant returned in the context packet (ONT-N / CAU-N / DIS-N / SOC-N / AES-N). The `propose_new_characters` packet profile lifts invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id into the seed's `canon_safety_check.invariants_respected`, pass or fail.
 
 Fail triggers (→ Phase 10e):
 

@@ -4,7 +4,7 @@ Four sub-phases (three per-card, one batch-level) are independent checks with in
 
 ## Phase 7a: Per-card Invariant Conformance
 
-For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every `INV` record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) returned in the context packet. The `'other'` packet profile loads invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id tested into the card's `canon_safety_check.invariants_respected`.
+For every card, test its `canon_fact_statement`, implied distribution, and implied consequences against every `INV` record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) returned in the context packet. The `propose_new_canon_facts` packet profile lifts invariants by default; if any are missing, retrieve via `mcp__worldloom__search_nodes(node_type='invariant')` then `get_record`. Record each invariant id tested into the card's `canon_safety_check.invariants_respected`.
 
 Fail triggers (→ Phase 7e):
 - violates an ontological invariant (card introduces an ontology the world disallows)

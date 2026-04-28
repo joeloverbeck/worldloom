@@ -8,13 +8,13 @@ Pre-flight calls:
 
 ```
 mcp__worldloom__get_context_packet(
-  task_type='other',
+  task_type='propose_new_canon_facts',
   seed_nodes=[<diagnosis-anchor seeds>],
   token_budget=15000
 )
 ```
 
-`'other'` is the registered fallback in the TASK_TYPES enum (`canon_addition` | `character_generation` | `diegetic_artifact_generation` | `continuity_audit` | `other`); a `propose_new_canon_facts` task type is NOT registered, and adding it is out of scope for this skill rewrite. The `'other'` profile applies the default ranking weights — sufficient because this skill's reasoning is intentionally broad-domain (thinness scans target every world concern, not a single locality).
+`propose_new_canon_facts` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile keeps this skill's broad-domain thinness scan while lifting canon facts, invariants, Mystery Reserve entries, named-entity neighbors, and section context above the generic fallback.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phases 1-7 expand on demand via record-addressed retrieval.
 

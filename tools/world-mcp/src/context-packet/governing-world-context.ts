@@ -20,6 +20,21 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
   ],
   diegetic_artifact_generation: ["WORLD_KERNEL.md", "INVARIANTS.md", "EVERYDAY_LIFE.md"],
   continuity_audit: ["WORLD_KERNEL.md", "INVARIANTS.md", "CANON_LEDGER.md"],
+  propose_new_canon_facts: ["WORLD_KERNEL.md", "INVARIANTS.md", "CANON_LEDGER.md"],
+  propose_new_characters: [
+    "WORLD_KERNEL.md",
+    "INVARIANTS.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "EVERYDAY_LIFE.md"
+  ],
+  propose_new_worlds_from_preferences: ["WORLD_KERNEL.md", "ONTOLOGY.md", "INVARIANTS.md"],
+  canon_facts_from_diegetic_artifacts: [
+    "WORLD_KERNEL.md",
+    "INVARIANTS.md",
+    "CANON_LEDGER.md",
+    "MYSTERY_RESERVE.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -43,6 +58,26 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 1: no floating facts",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  propose_new_canon_facts: [
+    "Proposal-only surface; canonization happens in canon-addition",
+    "Rule 1: no floating facts",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
+  propose_new_characters: [
+    "Proposal-only surface; character realization happens in character-generation",
+    "Rule 4: distribution discipline",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
+  propose_new_worlds_from_preferences: [
+    "Pre-world proposal surface; create-base-world owns realization",
+    "Rule 7: preserve Mystery Reserve deliberately",
+    "Cross-world distinctness must be explicit when existing worlds are present"
+  ],
+  canon_facts_from_diegetic_artifacts: [
+    "Proposal-only surface; canonization happens in canon-addition",
+    "Rule 5: separate diegetic claims from world-level truth",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -51,6 +86,10 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
   character_generation: ["Character dossier", "Scoped support artifacts only"],
   diegetic_artifact_generation: ["Diegetic artifact record", "Scoped support artifacts only"],
   continuity_audit: ["Audit record", "Optional retcon proposal follow-up"],
+  propose_new_canon_facts: ["Proposal card", "Batch manifest"],
+  propose_new_characters: ["Character proposal card", "Character proposal batch manifest"],
+  propose_new_worlds_from_preferences: ["World proposal card", "World proposal batch manifest"],
+  canon_facts_from_diegetic_artifacts: ["Proposal card", "Batch manifest"],
   other: ["Task-specific output approved by workflow"]
 };
 
@@ -70,6 +109,22 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
   continuity_audit: [
     "Do not mutate canon during an audit-only pass",
     "Do not silently retcon contradictions"
+  ],
+  propose_new_canon_facts: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or SEC records",
+    "Do not treat proposal cards as accepted canon"
+  ],
+  propose_new_characters: [
+    "Do not write character dossiers or mandatory world files",
+    "Do not launder proposed character assumptions into accepted canon"
+  ],
+  propose_new_worlds_from_preferences: [
+    "Do not mutate existing world canon files",
+    "Do not resolve existing worlds' Mystery Reserve entries while comparing worlds"
+  ],
+  canon_facts_from_diegetic_artifacts: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or SEC records",
+    "Do not launder diegetic narration into world-level truth without canon flow"
   ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };

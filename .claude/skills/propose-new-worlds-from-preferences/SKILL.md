@@ -39,7 +39,7 @@ Phases 1-2: Parse Preference Document → Compress to Design Grammar
       |
       v
 Phase 3:    Essence-Map Existing Worlds
-            ├── Standard Path: get_context_packet(world_slug, task_type='other')
+            ├── Standard Path: get_context_packet(world_slug, task_type='propose_new_worlds_from_preferences')
             │                  per world; derive 14-layer essence profile per world
             └── Empty Worlds Path: skip mapping; set distinctness_enforced=false
       |
@@ -129,7 +129,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 This skill's distinctness discipline depends on a registry assembled across **every existing world**. Build it at Pre-flight by scanning `worlds/` and, for each `worlds/<slug>/` directory present:
 
 - Direct `Read` of `worlds/<slug>/WORLD_KERNEL.md` and `worlds/<slug>/ONTOLOGY.md` (primary-authored at world root; not in `_source/`).
-- `mcp__worldloom__get_context_packet(world_slug=<slug>, task_type='other', seed_nodes=[<world-kernel anchor entities + INV ids surfaced by ONTOLOGY>], token_budget=12000)` per world — `'other'` is the registered fallback (this skill is not in the TASK_TYPES enum and adding it is out of scope; mirrors `propose-new-characters`'s posture).
+- `mcp__worldloom__get_context_packet(world_slug=<slug>, task_type='propose_new_worlds_from_preferences', seed_nodes=[<world-kernel anchor entities + INV ids surfaced by ONTOLOGY>], token_budget=12000)` per world — MCPENH-002 registered this cross-world profile so each per-world packet prioritizes kernel/ontology-adjacent section context, invariants, forbidden Mystery Reserve firewalls, and entity anchors.
 - For records the packet does not surface, retrieve on demand: `mcp__worldloom__get_record(record_id)` for specific INV / M / CF / SEC; `mcp__worldloom__search_nodes(node_type='invariant', filters={world_slug: <slug>})` for full INV scan when Phase 11a needs every invariant; `mcp__worldloom__search_nodes(node_type='mystery_record', filters={world_slug: <slug>})` for full M scan when Phase 11a firewall expands.
 - Direct `Read` of `worlds/<slug>/_source/` subdirectories is redirected to MCP retrieval by Hook 2 — do not bulk-read.
 

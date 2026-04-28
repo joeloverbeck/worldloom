@@ -197,6 +197,7 @@ For skill tickets, verify:
 - Keep changes surgical and aligned with the ticket's owned boundary.
 - Prefer existing repo contracts over ad hoc patterns.
 - Do not broaden into unrelated cleanup unless reassessment proves it is required consequence fallout.
+- For manual code, docs, ticket, or skill edits, use `apply_patch`; do not use shell rewrite commands such as `perl -pi`, `sed -i`, or similar when replacement text contains markdown/code literals, backticks, `$`, quotes, or other shell-active characters.
 - If reassessment proves required consequence fallout, keep the implementation inside the same owned seam and record the widened-but-still-owned boundary in the ticket before closeout.
 - After package-manager, lockfile, formatter, generator, or codegen commands, re-read the touched contract files and confirm the generated diff still satisfies ticket invariants before closeout.
 - If package-manager output reports audit vulnerabilities, deprecations, or funding notices outside the ticket's owned dependency-remediation scope, record the relevant warning in closeout instead of running broad audit fixes. Only run package-manager repair commands when the ticket explicitly owns dependency remediation or the user approves that scope.
