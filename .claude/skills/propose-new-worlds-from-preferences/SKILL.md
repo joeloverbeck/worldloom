@@ -1,6 +1,6 @@
 ---
 name: propose-new-worlds-from-preferences
-description: "Use when generating candidate story-world proposals from a user preference document while avoiding repetition of existing worlds — option-card batches covering preference-aligned niches in unoccupied possibility space. Each card is directly consumable as create-base-world's premise_path; downstream selection of one card produces a full world bundle. Produces: NWP-NNNN-<slug>.md cards at world-proposals/ + NWB-NNNN.md batch manifest at world-proposals/batches/ + auto-updated world-proposals/INDEX.md + (first-run-only) world-proposals/.gitkeep with corresponding .gitignore entry. Mutates: only root-level world-proposals/ and one append to .gitignore (first run only — never WORLD_KERNEL.md, ONTOLOGY.md, any _source/ atomic record, or any existing world's surface)."
+description: "Use when generating candidate story-world proposals from a user preference document while avoiding repetition of existing worlds — option-card batches covering preference-aligned niches in unoccupied possibility space. Each card is directly consumable as create-base-world's premise_path; downstream selection of one card produces a full world bundle. Produces: NWP-NNNN-<slug>.md cards at world-proposals/ + NWB-NNNN.md batch manifest at world-proposals/batches/ + auto-updated world-proposals/INDEX.md + appended row to world-proposals/LINEAGE.md (cross-batch lineage record) + (first-run-only) world-proposals/.gitkeep with corresponding .gitignore entry. Mutates: only root-level world-proposals/ and one append to .gitignore (first run only — never WORLD_KERNEL.md, ONTOLOGY.md, any _source/ atomic record, or any existing world's surface)."
 user-invocable: true
 arguments:
   - name: preference_path
@@ -16,18 +16,19 @@ arguments:
 Generates a diversified batch of candidate story-world proposals from a user preference document while reading every existing world's atomic-source state to avoid niche repetition. Each emitted card is directly consumable as `create-base-world`'s `premise_path`; downstream selection of one card produces a full world bundle.
 
 <HARD-GATE>
-Do NOT write any file — proposal card, batch manifest, INDEX.md update, .gitkeep bootstrap, .gitignore append — until: (a) pre-flight resolves the preference document, allocates the next NWB-NNNN via `mcp__worldloom__allocate_next_id`, loads FOUNDATIONS, and either builds the cross-world essence map (Standard Path) or marks distinctness-skipped (Empty Worlds Path per Phase 3); (b) Phase 11 Canon Safety Check passes for every surviving card with zero unrepaired violations across 11a per-card cross-world Mystery Reserve firewall, 11b per-card forbidden-mystery presence, 11c batch-level mutual distinctness, and 11d batch-level world-grammar fidelity; (c) Phase 12 Validation Tests pass with zero failures — all 17 tests run with one-line rationale per PASS (bare PASS = FAIL); (d) the user has explicitly approved the Phase 14 deliverable summary (preference essence report, existing world essence map OR distinctness-skipped flag, vacancy map, every card's frontmatter + body, every card's Canon Safety Check trace, batch-level distinctness audit, any Phase 11e repairs that fired, any cards the user is dropping). The user's approval may include a drop-list of NWP-IDs to exclude from the write; dropped cards are never written and are recorded in the batch manifest's `dropped_card_ids`. When existing worlds are absent, the Phase 14 deliverable summary MUST surface a top-line "DISTINCTNESS UNENFORCED — no existing worlds to compare against" banner so the user accepts proposals deliberately rather than by default. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
+Do NOT write any file — proposal card, batch manifest, INDEX.md update, LINEAGE.md append, .gitkeep bootstrap, .gitignore append — until: (a) pre-flight resolves the preference document, allocates the next NWB-NNNN (manual-scan path is current; see Pre-flight Step 4), loads FOUNDATIONS, consults `world-proposals/LINEAGE.md` for prior-batch context (Pre-flight Step 9), and either builds the cross-world essence map (Standard Path) or marks distinctness-skipped (Empty Worlds Path per Phase 3); (b) Phase 11 Canon Safety Check passes for every surviving card with zero unrepaired violations across 11a per-card cross-world Mystery Reserve firewall, 11b per-card forbidden-mystery presence, 11c batch-level mutual distinctness, and 11d batch-level world-grammar fidelity; (c) Phase 12 Validation Tests pass with zero failures — all 19 tests run with one-line rationale per PASS (bare PASS = FAIL); (d) the user has explicitly approved the Phase 14 deliverable summary (preference essence report, existing world essence map OR distinctness-skipped flag, vacancy map, every card's frontmatter + body, every card's Canon Safety Check trace, batch-level distinctness audit, any Phase 11e repairs that fired, any cards the user is dropping). The user's approval may include a drop-list of NWP-IDs to exclude from the write; dropped cards are never written and are recorded in the batch manifest's `dropped_card_ids`. When existing worlds are absent, the Phase 14 deliverable summary MUST surface a top-line "DISTINCTNESS UNENFORCED — no existing worlds to compare against" banner so the user accepts proposals deliberately rather than by default. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
 </HARD-GATE>
 
 ## Process Flow
 
 ```
 Pre-flight (verify preference_path readable;
-            allocate_next_id NWB → NWB-NNNN;
+            allocate next NWB-NNNN via manual scan of world-proposals/batches/;
             load FOUNDATIONS;
             scan worlds/ for existing-world list;
             scan world-proposals/ for slug collisions;
-            detect bootstrap state — defer .gitkeep + .gitignore writes to Phase 14)
+            detect bootstrap state — defer .gitkeep + .gitignore writes to Phase 14;
+            consult world-proposals/LINEAGE.md for prior-batch cluster coverage)
       |
       v
 Phase 0:    Normalize Generation Parameters (parse parameters_path OR interview)
@@ -80,14 +81,15 @@ Phase 11:   Canon Safety Check (cross-world)
             --any fail--> 11e Repair Sub-Pass
       |
       v
-Phase 12:   Validation Tests (17 tests; PASS+rationale or FAIL)
+Phase 12:   Validation Tests (19 tests; PASS+rationale or FAIL)
       |
       v
 Phase 13:   Compose NWP cards + NWB manifest + INDEX.md (in-memory)
       |
       v
 Phase 14:   HARD-GATE deliverable summary
-            ─ on approval → bootstrap (if needed) → cards → manifest → INDEX
+            ─ post-drop cluster-coverage check (offer backfill / accept-gap / revise-drop)
+            ─ on approval → bootstrap (if needed) → cards → manifest → INDEX → LINEAGE append
               (root-level world-proposals/ is the skill's own write surface;
                not Hook 3-blocked because not under _source/)
 ```
@@ -107,6 +109,8 @@ Phase 14:   HARD-GATE deliverable summary
 - **Batch manifest** at `world-proposals/batches/NWB-NNNN.md` — hybrid file per `templates/batch-manifest.md`. Frontmatter: `batch_id`, `source_preference_document`, `parameters` (with inferred-default annotations), `proposal_count_requested`, `existing_worlds_scanned[]`, `distinctness_enforced`, `card_ids`, `dropped_card_ids`, `bootstrap_writes_required`, `user_approved`, `generated_date`. Body: Preference Essence Report, Existing World Essence Map (or "no worlds scanned" stub), Niche Vacancy Map, Phase 5 Seed Generation Log, Phase 6 Sanity-Pass Rejection Log, Phase 8 Distinctness-Check Log (or skipped notice), Phase 9 Score Matrix + Max-Min Selection Trace, Phase 11 Canon Safety Check Audit, Phase 11e Repair Log, Phase 12 Validation Test Results.
 
 - **INDEX.md update** at `world-proposals/INDEX.md` — one line per non-dropped card in the form `- [<title>](NWP-NNNN-<slug>.md) — <chronotope_summary> / <core_sentence_truncated>, batch NWB-NNNN`, sorted by NWP-NNNN ascending. Created with header `# World Proposal Cards` followed by a blank line if absent.
+
+- **LINEAGE.md append** at `world-proposals/LINEAGE.md` — one row per batch in the form `- NWB-NNNN | YYYY-MM-DD | seeds:N | finalists:M | dropped:K | written:W | clusters:<comma-list>`, sorted by NWB-NNNN ascending. Created with header `# World Proposals Lineage` followed by a blank line if absent. Consumed by future invocations' Pre-flight Step 9 + Phase 4 cross-batch context so prior-batch cluster coverage and dropped-card lineage inform the next vacancy map.
 
 - **Bootstrap artifacts (first run only)**: `world-proposals/.gitkeep` (empty file) + a two-line append to repo-root `.gitignore` (`world-proposals/*` and `!world-proposals/.gitkeep`). Mirrors the existing `briefs/*` + `!briefs/.gitkeep` pattern. Subsequent runs detect these and skip the bootstrap.
 
@@ -142,11 +146,12 @@ Run before Phase 0; if any precondition fails, abort.
 1. **Argument validation**: verify `preference_path` exists and is readable. Abort on missing.
 2. **FOUNDATIONS load**: direct `Read` `docs/FOUNDATIONS.md` into working context.
 3. **Vocabulary resolution**: `mcp__worldloom__get_canonical_vocabulary({class: "domain"})` and `({class: "mystery_resolution_safety"})` so emitted card fields use canonical enum values from Phase 10 onward.
-4. **NWB allocation**: `mcp__worldloom__allocate_next_id(world_slug='__pipeline__', id_class='NWB')` → `NWB-NNNN`. The `__pipeline__` sentinel scopes the allocation to root-level `world-proposals/batches/`. If the index does not yet support the sentinel, fall back to a manual scan of `world-proposals/batches/NWB-*.md` and increment.
+4. **NWB allocation**: scan `world-proposals/batches/NWB-*.md` and increment to derive the next `NWB-NNNN`. **This is the current path** — the MCP `allocate_next_id` tool's `id_class` enum (per `tools/world-mcp`) does not yet include `NWB` or `NWP`, so a call like `mcp__worldloom__allocate_next_id(world_slug='__pipeline__', id_class='NWB')` will fail schema-validation today and is NOT the primary path. When the enum is extended in a future MCP iteration (out-of-scope for this skill), the MCP call becomes the primary path with the manual scan as fallback; until then, manual-scan is primary.
 5. **Existing-world enumeration**: list `worlds/*/` directories. Empty list → mark `distinctness_enforced=false` and set the Empty Worlds Path flag for downstream phases.
 6. **Cross-world essence map build (Standard Path only)**: per §World-State Prerequisites — direct `Read` WORLD_KERNEL + ONTOLOGY for every existing world; assemble context packets; capture the 14-layer essence profile per world.
 7. **Slug-collision pre-scan**: list `world-proposals/NWP-*.md` to seed the slug-collision check that fires at Phase 9 finalist allocation.
 8. **Bootstrap state detection**: detect `world-proposals/.gitkeep` and `.gitignore` containing `world-proposals/*`. Record `bootstrap_writes_required: true|false` in the batch manifest. The bootstrap writes themselves are deferred to Phase 14 (HARD-GATE) — do NOT pre-write infrastructure before user approval.
+9. **LINEAGE consultation**: read `world-proposals/LINEAGE.md` if present (skip silently if absent — the file is created on the first batch's Phase 14 append). Surface the prior-batch cluster coverage and dropped-card lineage into working state so Phase 4 vacancy mapping can mark proposed-but-not-realized niches as **soft-occupied (proposed in NWB-NNNN, dropped at gate)** rather than **open**. Empty LINEAGE (file present but no batch rows yet) and absent LINEAGE both yield the empty cross-batch context — Phase 4 then runs against existing-worlds-only state.
 
 ## Phase 0: Normalize Generation Parameters
 
@@ -179,6 +184,8 @@ Skip mapping entirely. Manifest body §"Existing World Essence Map" is a single 
 ## Phase 4: Build Niche Occupancy Map
 
 Compare the cross-world essence map against the Phase 2 design grammar. Classify per-niche as **hard-occupied** / **soft-occupied** / **ambient-only-motif** / **open** / **especially-promising vacancy**. Run the source proposal's 9 vacancy-diagnosis questions. Output schema matches the source proposal's `world_niche_vacancy_map` block. Under Empty Worlds Path: map degenerates to "all niches open"; vacancy diagnosis runs against the design grammar alone.
+
+**Cross-batch context (when LINEAGE.md surfaced prior batches at Pre-flight Step 9)**: mark each prior-batch covered cluster as **soft-occupied (proposed in NWB-NNNN)** with the originating batch noted, and each prior-batch dropped-cluster as **soft-occupied (proposed in NWB-NNNN, dropped at gate)** so the current vacancy map represents BOTH realized-world coverage AND prior-batch proposed coverage. The user's `existing_world_policy` parameter governs avoidance of REALIZED worlds (hard-occupied); the cross-batch context makes proposed-but-unrealized niches visible at soft-occupied tier so the current batch can intentionally either backfill an earlier dropped niche or prefer an open one. Empty Worlds Path with empty LINEAGE remains the all-niches-open degenerate case.
 
 **Critic pass (inline)**: *Niche Diversity Critic*. Recorded in `critic_pass_trace.phase_4_niche_diversity`.
 
@@ -226,7 +233,7 @@ Apply **max-min selection**: choose the highest-quality viable seed first; for e
 
 A slightly lower-scoring proposal IS preferred if it opens a truly unoccupied niche.
 
-After selection settles, allocate one `NWP-NNNN` per finalist via `mcp__worldloom__allocate_next_id(world_slug='__pipeline__', id_class='NWP')`, in selection order. **Slug collision check**: if `world-proposals/NWP-NNNN-<slug>.md` would collide with an existing card on disk, abort and ask the user to resolve before continuing.
+After selection settles, allocate one `NWP-NNNN` per finalist via manual scan of `world-proposals/NWP-*.md` and increment, in selection order. (Per Pre-flight Step 4, the MCP `allocate_next_id` enum does not yet include `NWP`; manual scan is the current path until the enum is extended.) **Slug collision check**: if `world-proposals/NWP-NNNN-<slug>.md` would collide with an existing card on disk, abort and ask the user to resolve before continuing.
 
 **Critic passes (inline)**: *Theme/Tone Critic*; *Mystery Curator* (flags mystery-flattening risk). Recorded in `critic_pass_trace.phase_9_*`.
 
@@ -261,7 +268,7 @@ On any fail: identify which finalist + which check; if 11a/11b at card level →
 
 ## Phase 12: Validation Tests
 
-Run all 17 tests. Each test reports PASS+rationale or FAIL. **Bare PASS without one-line rationale = FAIL** per CLAUDE.md and FOUNDATIONS skill discipline. Any FAIL halts the phase and loops to the responsible upstream phase.
+Run all 19 tests. Each test reports PASS+rationale or FAIL. **Bare PASS without one-line rationale = FAIL** per CLAUDE.md and FOUNDATIONS skill discipline. Any FAIL halts the phase and loops to the responsible upstream phase.
 
 The source proposal's 15 tests:
 1. **One-Sentence Fertility** — Phase 10 core sentence fertile in one concrete impossible sentence.
@@ -280,10 +287,12 @@ The source proposal's 15 tests:
 14. **Existing-World Non-Redundancy** — avoids hard-occupied niches (skipped under Empty Worlds Path with rationale `no_existing_worlds`).
 15. **Tone Contract** — one obvious genre import would break the world; recorded as future invariant candidate.
 
-Plus 2 added by this skill:
+Plus 4 added by this skill:
 
 16. **Canonical Vocabulary Conformance** — every `domains_affected` in card frontmatter uses a canonical domain enum (per Pre-flight `get_canonical_vocabulary`); every `future_resolution_safety` value matches the canonical vocab and the `forbidden ⇒ none` coupling.
 17. **Create-Base-World Readiness** — card body parses as a freeform premise brief: contains Genre Contract / Tone Contract / Primary Difference / Core Pressures readable as `create-base-world` Phase 0 inputs. No required body section is empty / TODO / `<placeholder>`.
+18. **Spectator-Caste Leverage** (Rule 11) — each card's combined Professions + Folk/Local Institutions + Crimes lists ≥3 named forms of leverage available to ordinary or mid-tier actors (per FOUNDATIONS §Rule 11 permissible leverage: locality, secrecy, legitimacy, bureaucracy, numbers, ritual authority, domain expertise, access, timing, social trust, deniability, infrastructural control). PASS requires explicit enumeration of the leverage forms in the rationale.
+19. **Multi-Register Truth** (Rule 12) — each card's primary-difference fact has ≥2 distinct register traces named across the Local Documents and Artifact Potential, Ordinary-Life Proof, and Native Story Procedures sections (per FOUNDATIONS §Rule 12 registers: law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, and other named in-world traces). PASS requires naming the traces in the rationale.
 
 ## Phase 13: Compose NWP cards + NWB manifest + INDEX.md
 
@@ -305,10 +314,12 @@ Present the deliverable summary to the user with these top-level sections, in or
 8. **Phase 9 Score Matrix + Max-Min Selection Trace**.
 9. **Per-card section** for every finalist: NWP-id, slug, title, core sentence, niche summary, the card's full body, Canon Safety Check Trace (11a/11b), Phase 11e repairs (if any).
 10. **Phase 11c-d Batch-level Audit**.
-11. **Phase 12 Validation Test Results** (all 17, with rationale per PASS).
+11. **Phase 12 Validation Test Results** (all 19, with rationale per PASS).
 12. **Phase 11e Repair Log** (if any repairs fired).
 
 **HARD-GATE fires here.** User may (a) approve as-is, (b) approve with drop-list of NWP-IDs, (c) request revisions (loop to named phase), (d) reject and abort.
+
+**Post-drop cluster-coverage check** (only when option (b) was taken with a non-empty drop-list): after collecting the drop-list and BEFORE starting any writes, recompute Phase 11d World-Grammar Fidelity over the post-drop finalist set. If any `favored_*` cluster from the Phase 2 design grammar becomes uncovered as a result of the drops, surface the gap to the user with three explicit options before proceeding: (a) accept and proceed — the batch manifest's Phase 11 §11d block records the gap as informational, naming the affected cluster(s) and the dropped finalist(s) that previously covered them; (b) re-run Phase 9 selection with the missing-cluster constraint added — loops back to Phase 9, picks a substitute finalist from the seed pool, returns to Phase 14 after Phase 11 + Phase 12 re-validation; (c) revise the drop-list — replays the HARD-GATE response. Default action under Auto Mode without explicit user response: option (a) with the gap recorded. Any post-drop 11c (mutual distinctness) regressions must also be re-checked here, even though dropping cards cannot decrease mutual distinctness in practice.
 
 On approval, write in this order — sequencing matters because the tool environment cannot guarantee transactional atomicity:
 
@@ -317,9 +328,10 @@ On approval, write in this order — sequencing matters because the tool environ
    - Append two lines to repo-root `.gitignore`: `world-proposals/*` and `!world-proposals/.gitkeep`. Use direct `Edit` to append after the `briefs/*` block; if `.gitignore` does not exist, create it with the two lines via `Write`. Do not duplicate lines already present.
 2. **Each non-dropped card next**: `world-proposals/NWP-NNNN-<slug>.md` via direct `Write`. Set `source_basis.user_approved: true` immediately before each write. `user_approved: true` here means "kept in batch after review", NOT "world has been created from this proposal".
 3. **Batch manifest**: `world-proposals/batches/NWB-NNNN.md` via direct `Write` with `dropped_card_ids` populated and `user_approved: true`. Create `world-proposals/batches/` if absent (mkdir -p before write).
-4. **INDEX.md last**: `Read` existing file (create with header `# World Proposal Cards` followed by a blank line if absent), append one line per non-dropped card sorted by NWP-NNNN ascending, write back via direct `Edit`.
+4. **INDEX.md update**: `Read` existing file (create with header `# World Proposal Cards` followed by a blank line if absent), append one line per non-dropped card sorted by NWP-NNNN ascending, write back via direct `Edit`.
+5. **LINEAGE.md append last**: `Read` existing file (create with header `# World Proposals Lineage` followed by a blank line if absent), append one row per batch in the form `- NWB-NNNN | YYYY-MM-DD | seeds:N | finalists:M | dropped:K | written:W | clusters:<comma-list-of-Phase-2-favored_*-cluster-names-this-batch-covered>` so future Pre-flight Step 9 can re-derive cross-batch cluster coverage from lineage state. Sort rows by NWB-NNNN ascending; use direct `Edit` to insert at the correct ascending position. The clusters list reflects the SHIPPED finalists (post-drop) — dropped cards do NOT contribute to the clusters column.
 
-All paths sit under root-level `world-proposals/` (or repo-root `.gitignore`); none are under `_source/`, so Hook 3 does not block these writes. Bootstrap-first sequencing means a partial-failure state has either bootstrap-without-cards or cards-without-index. **Recovery is manual.**
+All paths sit under root-level `world-proposals/` (or repo-root `.gitignore`); none are under `_source/`, so Hook 3 does not block these writes. Bootstrap-first sequencing means a partial-failure state has either bootstrap-without-cards or cards-without-index-or-lineage. **Recovery is manual.**
 
 Report all written paths. Do NOT commit to git.
 
@@ -329,6 +341,8 @@ Report all written paths. Do NOT commit to git.
 - **Rule 3 (No Specialness Inflation)** — enforced at Phase 6 (rejects "too many disconnected impossible facts" and "explains itself too completely") and Phase 12 Test 2 (Minimal Departure).
 - **Rule 5 (No Consequence Evasion)** — enforced at Phase 7 (3-order consequence requirement) and Phase 12 Test 3 (≥8 domains affected).
 - **Rule 7 (Preserve Mystery Deliberately)** — four-point enforcement: Phase 3 Standard Path (no transcription of forbidden M `unknowns` into essence map); Phase 10 (every card mandates one forbidden mystery with `future_resolution_safety: none`); Phase 11a (cross-world MR firewall, Empty-Worlds-conditional); Phase 11b (per-card forbidden-mystery presence verification, always runs).
+- **Rule 11 (No Spectator Castes by Accident)** — enforced at Phase 7 Propagation Skeletons (≥3 leverage forms required in skeleton) and Phase 12 Test 18 (Spectator-Caste Leverage). Phase 10 deepening must materialize the leverage forms in Professions + Folk/Local Institutions + Crimes sections; Test 18 backstops the skeleton-to-card materialization.
+- **Rule 12 (No Single-Trace Truths)** — enforced at Phase 10 Deepen Finalists (Local Documents + Ordinary-Life Proof + Native Story Procedures provide ≥2 register traces per primary-difference fact) and Phase 12 Test 19 (Multi-Register Truth).
 
 Rule 1 (No Floating Facts) is structurally enforced at the schema level — every required card frontmatter and body section corresponds to a CF-Record-equivalent field. Recorded in the FOUNDATIONS Alignment table.
 
@@ -351,8 +365,8 @@ Rules 4 and 6 are N/A — see FOUNDATIONS Alignment table.
 | Rule 5: No Consequence Evasion | Phase 7, 12 | 3-order consequence requirement + Test 3 (≥8 domains). |
 | Rule 6: No Silent Retcons | N/A | Not applicable — canon-reading skill emits no Change Log Entry. Handoff to `create-base-world` (CH-0001 genesis) and `canon-addition` (subsequent CHs). |
 | Rule 7: Preserve Mystery Deliberately | Phase 3, 10, 11a, 11b | Four-point enforcement. |
-| Rule 11: No Spectator Castes by Accident | Phase 7, 10 | ≥3 leverage forms in propagation skeleton; Ordinary-Life Proof (≥10 consequences across 10 domains). |
-| Rule 12: No Single-Trace Truths | Phase 10 | Local Documents + Ordinary-Life Proof + Native Story Procedures provide ≥2 register traces. |
+| Rule 11: No Spectator Castes by Accident | Phase 7, 10, 12 | ≥3 leverage forms in propagation skeleton; Ordinary-Life Proof (≥10 consequences across 10 domains); Phase 12 Test 18 (Spectator-Caste Leverage) verifies skeleton-to-card materialization. |
+| Rule 12: No Single-Trace Truths | Phase 10, 12 | Local Documents + Ordinary-Life Proof + Native Story Procedures provide ≥2 register traces; Phase 12 Test 19 (Multi-Register Truth) verifies the trace count. |
 | Tooling Recommendation | Pre-flight | FOUNDATIONS loaded; cross-world essence map via `get_context_packet` per world; Hook 2 redirects bulk `_source/` reads. |
 | Mandatory World Files (atomic-source) | Pre-flight reading discipline | Reads existing worlds' atomic records via MCP; never writes `_source/` (Hook 3 blocks); card body's "future world" sections are forward-looking guidance for `create-base-world`. |
 | Canon Fact Record Schema | Templates | Proposal-card body sections align structurally with future-world CF Record Schema fields so `create-base-world`'s Phase 8 (compose CF-0001) can lift content directly. |

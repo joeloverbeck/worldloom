@@ -139,8 +139,10 @@ mystery_reserve_seeds:
 
 canon_safety_check:
   cross_world_mr_firewall:
-    checked: []                              # empty in this illustrative example;
-                                             # a real run would list every checked M-id per existing world
+    checked:                                 # format: "<world_slug>/<M-id>" strings, one per checked forbidden M
+      - "animalia/M-5"                       # synthetic illustrative entry — a real run would list every checked
+                                             # forbidden M-id per existing world (e.g., adding "<other-world>/M-7"
+                                             # if a second world contributed another forbidden mystery to firewall against)
     skipped: false
     skipped_reason: ""
     overlap_findings: []

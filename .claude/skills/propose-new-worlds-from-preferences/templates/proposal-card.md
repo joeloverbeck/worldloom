@@ -38,9 +38,15 @@ core_sentence: >
   The shortest accurate statement of what makes the world impossible.
   One concrete impossible sentence — not a genre, not an aesthetic, not a vibe.
 
-intended_canon_layer: hard_canon             # hard_canon | soft_canon | contested_canon
-                                             # — the canon layer the primary-difference targets when create-base-world
-                                             # composes CF-0001 from this card.
+intended_canon_layer: hard_canon             # hard_canon (default — primary-difference facts almost always
+                                             # land here for create-base-world's CF-0001 lift).
+                                             # FOUNDATIONS §Canon Layers enumerates five layers
+                                             # (hard_canon | derived_canon | soft_canon | contested_canon |
+                                             # mystery_reserve); a primary-difference proposal targeting any of the
+                                             # other four (e.g., a world built around a contested-canon central
+                                             # truth, or a mystery_reserve-as-foundation premise) MAY use the
+                                             # corresponding label, with the card body's Distinctness section
+                                             # explaining why the non-default layer is correct for this premise.
 
 # ===== niche metadata =====
 
@@ -117,7 +123,12 @@ mystery_reserve_seeds:
 
 canon_safety_check:
   cross_world_mr_firewall:
-    checked: []                              # every existing world's forbidden M-id checked at Phase 11a
+    checked: []                              # list of "<world_slug>/<M-id>" strings (e.g., "animalia/M-5") —
+                                             # every existing world's forbidden M-id checked at Phase 11a.
+                                             # The world_slug prefix is mandatory — bare "M-N" is ambiguous once
+                                             # multiple worlds exist. Empty list ONLY when skipped=true (Empty
+                                             # Worlds Path); a non-empty cross-world map with an empty checked[]
+                                             # is internally inconsistent and fails Phase 11b verification.
     skipped: false                           # true under Empty Worlds Path
     skipped_reason: ""                       # populated when skipped=true
     overlap_findings: []                     # list of {world_slug, m_id, overlap_kind, repair_action}
