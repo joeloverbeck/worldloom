@@ -41,7 +41,7 @@ In either case, do NOT silently proceed without world-state load. Apply this thr
 - For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
 - For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__search_nodes(node_type='mystery_record')` if `governing_world_context` was the dropped layer.
 
-**Step 3 — Dossier-trace shortcut (when `character_path` is provided).** The dossier's own canon-safety check trace is an authoritative shortcut for Phase 7 firewall coverage. The dossier was pre-cleared against the same world-state at its generation time; its enumerated trace fields carry forward to the artifact's Phase 7 trace as canonical firewall coverage:
+**Step 3 — Dossier-trace shortcut (when `character_path` is provided).** The dossier's own canon-safety check trace is an authoritative shortcut for Phase 7 firewall coverage. The dossier was pre-cleared against the same world-state at its generation time; its enumerated trace fields carry forward to the artifact's Phase 7 trace as canonical firewall coverage. Retrieve the trace via `mcp__worldloom__get_record('CHAR-NNNN', section_path='frontmatter.world_consistency')` (the canonical path; a single call returns the projected `world_consistency` block — keys: `invariants_respected`, `mystery_reserve_firewall`, `canon_facts_consulted`). Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable.
 
 - `world_consistency.invariants_respected` → enumerates every INV record tested at the dossier's Phase 7a; the artifact's Phase 7a tests the same set against the artifact's claim surface.
 - `world_consistency.mystery_reserve_firewall` → enumerates every M-NNNN checked at the dossier's Phase 7b; the artifact's Phase 7b checks the same set against the artifact's claim surface.
@@ -69,13 +69,13 @@ These remain primary-authored at the world root and are read directly:
 - `worlds/<world-slug>/WORLD_KERNEL.md` — Phase 2 genre-convention calibration against world tonal contract; Phase 6 voice register; Phase 7e truth-discipline.
 - `worlds/<world-slug>/ONTOLOGY.md` — Categories + Relation Types + Notes; Phase 3 claim classification; Phase 7a invariant-type mapping.
 
-## Hybrid files (direct Read permitted)
+## Hybrid files
 
 For Author-lift and continuity reads:
 
-- `worlds/<world-slug>/characters/<char-slug>.md` — when `character_path` is provided, read frontmatter + prose body to lift the 15-field author profile per Phase 0b. If the dossier exceeds the Read tool's token limit, apply selective-read by structural anchors (`^## `, `^### `, `^character_id:`, `^## Epistemic Position`, `^## Voice and Perception`, `^## Institutional Embedding`) — established protagonist-tier dossiers commonly cross the limit and selective reading is the expected mode.
-- `worlds/<world-slug>/characters/INDEX.md` — quick scan for slug references when the brief mentions an existing character.
-- `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — read at Phase 9 to maintain alphabetic ordering on update.
+- `worlds/<world-slug>/characters/<char-slug>.md` — when `character_path` is provided, retrieve frontmatter + prose body via `mcp__worldloom__get_record('CHAR-NNNN')` (returns parsed frontmatter + body sections) or, for narrow needs, `get_record('CHAR-NNNN', section_path='frontmatter.author_profile')` / `section_path='body.Voice and Perception'`. The hybrid-record retrieval path is the canonical surface for the 15-field author profile per Phase 0b. Fallback: direct `Read` of the dossier file with selective-read by structural anchors (`^## `, `^### `, `^character_id:`, `^## Epistemic Position`, `^## Voice and Perception`, `^## Institutional Embedding`) for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable; established protagonist-tier dossiers commonly cross the Read tool's token limit, which `get_record` projection avoids.
+- `worlds/<world-slug>/characters/INDEX.md` — direct Read; quick scan for slug references when the brief mentions an existing character.
+- `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — direct Read at Phase 9 to maintain alphabetic ordering on update.
 
 ## Phase-to-record mapping
 
