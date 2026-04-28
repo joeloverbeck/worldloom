@@ -16,7 +16,7 @@ Two structural gaps in canon-mutating skills mean that worldloom worlds can pass
 
 `propose-new-worlds-from-preferences/SKILL.md` Phase 7 enforces a 3-order consequence skeleton and ≥3 spectator-caste leverage forms; Phase 10 enforces ≥7 institution categories, ≥4 factions, ≥10 ordinary-life consequences, and an equilibrium explanation per NWP card; Phase 12 backstops with 19 tests including One-Sentence Fertility (Test 1), Minimal Departure (Test 2), and Spectator-Caste Leverage (Test 18).
 
-`create-base-world/SKILL.md` Phase 4–9 emit one minimal section per prose concern, a CF-0001 with no required propagation breadth, and a Phase 9 self-validation list of ~10 inline rejection tests. Cross-checked against FOUNDATIONS §Acceptance Tests (11 questions), Phase 9 covers ~6 of 11. Five FOUNDATIONS Acceptance Tests are absent or partial:
+At SPEC-18 intake, `create-base-world/SKILL.md` Phase 4–9 emitted one minimal section per prose concern, a CF-0001 with no required propagation breadth, and a Phase 9 self-validation list of ~10 inline rejection tests. Cross-checked against FOUNDATIONS §Acceptance Tests (11 questions), Phase 9 covered ~6 of 11. SPEC18GENFER-001 / 002 / 003 land the Track A remediation for this gap. The five originally absent or partial FOUNDATIONS Acceptance Tests were:
 
 1. **Counterfactual** — "Why does the world currently look like this and not some nearby alternative?"
 2. **Inequality structure** — "What forms of inequality are structurally produced?"
@@ -24,7 +24,7 @@ Two structural gaps in canon-mutating skills mean that worldloom worlds can pass
 4. **Scarcity-forces** — "What does scarcity force?"
 5. **Multi-perspective** — "What would a child, a laborer, a priest, a smuggler, and a ruler each think the world fundamentally is?"
 
-Additionally absent at genesis but present in the NWP-card pipeline:
+Additionally absent at genesis but present in the NWP-card pipeline at intake:
 
 - **One-Sentence Fertility** (Pattern #1, #98 — concrete impossibility vs. vague wonder; "dragons exist" is weak, "dragon bones anchor cities against earthquakes" is fertile).
 - **3-order consequence propagation** (Pattern #2, #67 — first / second / third-order effects across ≥N domains required at genesis, not deferred to subsequent canon-addition runs).
@@ -37,7 +37,7 @@ The asymmetry matters because `create-base-world` is the genesis surface for eve
 
 The CF Record Schema's `truth_scope.diegetic_status` enum (`objective | believed | disputed | propagandistic | legendary`) and `epistemic_profile.distortion_vectors[]` / `knowledge_exclusions[]` blocks already support misrecognition layering — a fact can be world-level true while the broader population believes a coherent and adaptive falsehood about it (Pattern #19 old catastrophe misunderstood by present, #54 misrecognition as worldbuilding, #69 distorted self-explanation, #80 documents preserve adaptive behavior under wrong explanation, #81 multi-truth layers).
 
-`canon-addition/SKILL.md` Phase 0 normalizes the proposal and classifies fact type but does not actively probe the misrecognition layer. The FOUNDATIONS Acceptance Test "What do people falsely believe?" is currently exercised only at world creation (and even there, only partially per Gap 1) — not at per-fact addition where it is most actionable. Proposers can canonize facts as `diegetic_status: objective` without ever being asked whether the fact has a public misrecognition layer, even when the in-world population's belief is materially divergent from the canonical truth.
+`canon-addition/SKILL.md` Phase 0 normalizes the proposal and classifies fact type but does not actively probe the misrecognition layer. The FOUNDATIONS Acceptance Test "What do people falsely believe?" remains absent from the per-fact addition flow where it is most actionable. Proposers can canonize facts as `diegetic_status: objective` without ever being asked whether the fact has a public misrecognition layer, even when the in-world population's belief is materially divergent from the canonical truth.
 
 This is not a schema gap (the schema supports it) — it is a flow-blindness gap. The misrecognition layer rides for free in the schema; the skill flow does not invite proposers to populate it.
 
@@ -49,7 +49,7 @@ Two tracks, each additive to existing skill prose. No engine changes, no validat
 
 Three sub-changes to `create-base-world/SKILL.md`:
 
-**A1. Phase 4 — substantive initial-section materialization.** Currently Phase 4 emits one minimal section per prose concern with `touched_by_cf: [CF-0001]` for sections whose file class appears in CF-0001's `required_world_updates`. The bidirectional pointer holds, but the section bodies are not required to materialize CF-0001's first-order consequences in prose — the body can be a stub with the pointer carrying all the weight. Track A1 amends Phase 4 to require each touched section's body to enumerate ≥1 first-order consequence of CF-0001 in concrete prose (food / labor / law / mourning / class / etc., domain-appropriate to the section's file class). Stubs that defer materialization to later `canon-addition` runs are rejected at Phase 9.
+**A1. Phase 4 — substantive initial-section materialization.** Before SPEC18GENFER-001, Phase 4 emitted one minimal section per prose concern with `touched_by_cf: [CF-0001]` for sections whose file class appears in CF-0001's `required_world_updates`. The bidirectional pointer held, but the section bodies were not required to materialize CF-0001's first-order consequences in prose — the body could be a stub with the pointer carrying all the weight. Track A1 amends Phase 4 to require each touched section's body to enumerate ≥1 first-order consequence of CF-0001 in concrete prose (food / labor / law / mourning / class / etc., domain-appropriate to the section's file class). Stubs that defer materialization to later `canon-addition` runs are rejected at Phase 9.
 
 **A2. Phase 8 — CF-0001 propagation breadth + Rule 11 leverage at genesis.** Before SPEC18GENFER-002, Phase 8 required `domains_affected[]` to be populated with canonical-domain values but set no minimum spread. Track A2 amends Phase 8 to:
 
@@ -127,11 +127,11 @@ PASS rationale formats:
 | Invariant | Verification surface |
 |---|---|
 | Phase 9 covers 9 of 11 FOUNDATIONS Acceptance Tests (6 by name, 3 via existing rejection triggers); ATs #9 / #10 land at canon-addition Phase 14a Test 13 / deferred respectively | codebase grep-proof — `.claude/skills/create-base-world/SKILL.md` §Phase 9 contains the 6 net-new test names verbatim (Counterfactual, Inequality structure, Embodiment-forces, Scarcity-forces, Multi-perspective, Genesis spectator-caste check); existing rejection triggers cover AT #2, #3, #5 |
-| Phase 4 substantive-section requirement is enforceable | skill dry-run — invoke `create-base-world` with a deliberately stub-only initial-section attempt; Phase 9 must reject |
-| Phase 8 propagation-breadth requirement fires | skill dry-run — submit a CF-0001 with `domains_affected: [magic]` only (1 domain); Phase 9 must reject |
-| Genesis spectator-caste check fires for capability-bearing CF-0001 | skill dry-run — CF-0001 of type `capability` with empty leverage block; Phase 9 must reject. Equivalently: CF-0001 of type `geography` with empty leverage block — Phase 9 must PASS (capability test conditional, not universal) |
-| One-Sentence Fertility test rejects vague wonders | skill dry-run — CF-0001 statement "magic exists" (Pattern #98 weak example); Phase 9 must reject |
-| Native Story Procedures test rejects worlds without procedures | skill dry-run — world without enumerated story procedures; Phase 9 must reject |
+| Phase 4 substantive-section requirement is enforceable | manual skill-flow review — a deliberately stub-only initial-section attempt fails the Phase 9 rejection wording; `create-base-world` is a prose skill, not an executable harness |
+| Phase 8 propagation-breadth requirement fires | manual skill-flow review — a CF-0001 with `domains_affected: [magic]` only (1 domain) fails the Phase 9 rejection wording |
+| Genesis spectator-caste check fires for capability-bearing CF-0001 | manual skill-flow review — CF-0001 of type `capability` with empty leverage block fails; CF-0001 of type `geography` with empty leverage block passes conditionally |
+| One-Sentence Fertility test rejects vague wonders | manual skill-flow review — CF-0001 statement "magic exists" (Pattern #98 weak example) fails the Phase 9 rejection wording |
+| Native Story Procedures test rejects worlds without procedures | manual skill-flow review — a world without enumerated story procedures fails the Phase 9 rejection wording |
 | Phase 0 misrecognition probe is mandatory | skill dry-run — invoke `canon-addition` and inspect PA `body_markdown` Phase 0 section; either layer-captured or NONE-with-rationale must be present |
 | Test 13 fires when probe is absent | skill dry-run — bypass the probe (force-skip Phase 0 sub-step); Phase 14a Test 13 must FAIL with rationale |
 | FOUNDATIONS alignment is documented per Acceptance Test | FOUNDATIONS alignment check — Phase 9 covers ATs #1, #2, #3, #4, #5, #6, #7, #8, #11 (6 by name via Track A3, 3 via existing rejection triggers); Phase 14a Test 13 covers AT #9 via Track B2; AT #10 ('diegetic contradictions permitted') is deferred to a future spec |
