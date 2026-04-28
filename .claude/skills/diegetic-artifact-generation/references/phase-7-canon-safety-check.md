@@ -18,6 +18,8 @@ Fail triggers (send to Phase 7f):
 
 For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__search_nodes(node_type='mystery_record')` if any are missing), check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
 
+**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
+
 For each entry where overlap IS found:
 - the artifact MAY reference the mystery's `common in-world interpretations` (contested-canon folk theories the world itself tracks).
 - the artifact MUST NOT assert, even as narrator error, any item from the mystery's `disallowed cheap answers`. A narrator holding a forbidden answer as `wrongly_believed` is still a commitment of the forbidden answer to text and fails this check.

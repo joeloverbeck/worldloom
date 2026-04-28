@@ -16,6 +16,7 @@ import { findNamedEntities } from "./tools/find-named-entities";
 import { findSectionsTouchedBy } from "./tools/find-sections-touched-by";
 import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonical-vocabulary";
 import { getContextPacket } from "./tools/get-context-packet";
+import { getFirewallContent } from "./tools/get-firewall-content";
 import { getNeighbors } from "./tools/get-neighbors";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
@@ -194,6 +195,11 @@ const allocateNextIdInputSchema = z.object({
   id_class: z.enum(ID_CLASSES)
 });
 
+const getFirewallContentInputSchema = z.object({
+  world_slug: z.string().min(1),
+  m_ids: z.array(z.string().min(1)).optional()
+});
+
 function registerWrappedTool<TArgs extends Record<string, unknown>>(
   server: McpServer,
   key: ToolKey,
@@ -333,6 +339,13 @@ export function createServer(): McpServer {
     "Allocate the next append-only id for a world-specific record class.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0])
+  );
+  registerWrappedTool(
+    server,
+    "get_firewall_content",
+    "get_firewall_content: Bulk retrieval of Mystery Reserve firewall fields (title, status, unknowns, common_interpretations, disallowed_cheap_answers) keyed by M-id. Optional m_ids filter; defaults to every M record in the world. Use for Phase 7b firewall audits to avoid budget-pressured packet calls or N per-record get_record calls.",
+    getFirewallContentInputSchema,
+    async (args) => getFirewallContent(args as unknown as Parameters<typeof getFirewallContent>[0])
   );
 
   return server;

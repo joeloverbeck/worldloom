@@ -14,7 +14,8 @@ export const MCP_TOOL_NAMES = {
   get_canonical_vocabulary: "mcp__worldloom__get_canonical_vocabulary",
   validate_patch_plan: "mcp__worldloom__validate_patch_plan",
   submit_patch_plan: "mcp__worldloom__submit_patch_plan",
-  allocate_next_id: "mcp__worldloom__allocate_next_id"
+  allocate_next_id: "mcp__worldloom__allocate_next_id",
+  get_firewall_content: "mcp__worldloom__get_firewall_content"
 } as const;
 
 export type ToolKey = keyof typeof MCP_TOOL_NAMES;
@@ -36,5 +37,6 @@ export const MCP_TOOL_ORDER: McpToolName[] = [
   MCP_TOOL_NAMES.get_canonical_vocabulary,
   MCP_TOOL_NAMES.validate_patch_plan,
   MCP_TOOL_NAMES.submit_patch_plan,
-  MCP_TOOL_NAMES.allocate_next_id
+  MCP_TOOL_NAMES.allocate_next_id,
+  MCP_TOOL_NAMES.get_firewall_content
 ];

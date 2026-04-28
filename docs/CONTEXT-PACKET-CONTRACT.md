@@ -145,6 +145,17 @@ truncation_summary:
 
 The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. This pattern keeps single-response packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval delivers the content.
 
+## Focused Retrieval Tools
+
+Beyond the general packet retrieval, a small set of use-case-specific tools project just the fields a recurring audit needs, keyed by record id. They sit alongside `get_record` and `get_record_field`: prefer them when the audit is mechanical and field-bounded, and the alternatives would be either a budget-pressured packet call or N per-record `get_record` calls.
+
+| Tool | Use case | Returns |
+|---|---|---|
+| `get_record_field(record_id, field_path)` | Read a single field of a single atomic record without paying the full-record parse cost. | `{ value, content_hash, file_path }` |
+| `get_firewall_content(world_slug, m_ids?)` | Phase 7b Mystery Reserve firewall audits — bulk projection of every (or selected) M record's firewall-relevant fields in a single call. | `{ records: { [m_id]: { title, status, unknowns, common_interpretations, disallowed_cheap_answers } }, not_found: string[] }` |
+
+`get_firewall_content` is the canonical bulk-retrieval path for Phase 7b firewall scoping. Use `get_record('M-NNNN')` instead when the audit needs full M-record context (e.g., `notes`, `extensions`, or `modification_history`); use `get_context_packet(... node_classes: ['mystery_reserve_entry'])` for discovery (which M records exist around the seed) rather than for the firewall projection itself.
+
 ## Delivery Modes
 
 `get_context_packet` accepts an optional `delivery_mode` parameter that selects per-node payload shape. Layer assembly, `why_included` arrays, `task_header` metadata, governing-context guardrails, and per-layer node-id sets are identical across modes — only per-node content differs.

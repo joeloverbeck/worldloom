@@ -23,6 +23,8 @@ Fail triggers (→ Phase 7e):
 
 For every `M-NNNN` record returned in the context packet (and any additional M records implicated by a seed but not in the packet — retrieve via `mcp__worldloom__search_nodes(node_type='mystery_record')` then `get_record`), check whether its `what_is_unknown` or `disallowed_cheap_answers` blocks overlap the card's `canon_fact_statement`, `immediate_consequences`, or `longer_term_consequences`. Record every checked M-NNNN id into the card's `canon_safety_check.mystery_reserve_firewall` **regardless of overlap** — the firewall list is a proof-of-check audit trail. Document overlap status per entry in the card's Canon Safety Check Trace prose.
 
+**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
+
 For cards of Proposal Family J (Mystery Seeding), the check is **inverted**: they MUST open a new bounded unknown. A Family J card that closes an existing MR entry, or merely re-frames one without adding a new bounded unknown, fails.
 
 Fail triggers (→ 7e):

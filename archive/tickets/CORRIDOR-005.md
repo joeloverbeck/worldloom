@@ -1,6 +1,6 @@
 # CORRIDOR-005: New `get_firewall_content` MCP tool — focused Mystery Reserve disallowed-cheap-answers retrieval
 
-**Status**: PENDING
+**Status**: DONE
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp/` (new tool); `docs/CONTEXT-PACKET-CONTRACT.md` cross-reference; `.claude/skills/` Phase 7b firewall procedures (cross-reference)
