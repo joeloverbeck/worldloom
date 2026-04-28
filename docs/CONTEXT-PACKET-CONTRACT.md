@@ -37,6 +37,10 @@ governing_world_context:
 impact_surfaces:
   nodes: []
   rationale: []
+truncation_summary:
+  dropped_layers: []
+  dropped_node_ids_by_layer: {}
+  fallback_advice: ""
 ```
 
 ## Layer Semantics
@@ -108,10 +112,34 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 - Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
 - Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
 - Establish locality before governing background, and establish governing background before advisory impact surfaces.
-- If required classes cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality.
-- `packet_incomplete_required_classes` must report `missing_classes`, `requested_budget`, `minimum_required_budget`, and `retained_classes`.
+- If `local_authority` cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality. The other four content layers are droppable under budget pressure (see §Budget Enforcement) — completeness insufficiency now triggers only when even seed-local authority overflows the requested budget.
+- `packet_incomplete_required_classes` must report `missing_classes`, `requested_budget`, `minimum_required_budget`, `retained_classes`, and `truncation_summary` (listing every droppable layer that was emptied during the failed fit attempt).
 - `budget_exhausted_nucleus` is removed; completeness insufficiency is represented only through `packet_incomplete_required_classes`.
 - Retrieval should remain deterministic for the same world state, task type, seed set, and budget.
+
+## Budget Enforcement
+
+The packet's serialized response size is strictly bounded by the requested `token_budget`. The assembler builds all five content layers, then drops layers in priority order (cheapest-to-drop first) until the response fits:
+
+1. `impact_surfaces`
+2. `scoped_local_context`
+3. `exact_record_links`
+4. `governing_world_context`
+
+`local_authority` and `task_header` are never dropped. If even `local_authority` exceeds budget alone, the assembler returns `packet_incomplete_required_classes` (see §Assembly Discipline) with `truncation_summary` populated for every droppable layer that was emptied.
+
+Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. Consumers route those node ids through `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped; targeted retrieval delivers the content.
+
+`truncation_summary` is always present on a successful packet response. When no truncation occurred, `dropped_layers` is an empty array, `dropped_node_ids_by_layer` is an empty object, and `fallback_advice` carries the standard per-record retrieval guidance (so consumers can read it unconditionally without branching on presence). Schema:
+
+```yaml
+truncation_summary:
+  dropped_layers: ["impact_surfaces", "scoped_local_context"]   # ordered by priority
+  dropped_node_ids_by_layer:
+    impact_surfaces: ["SEC-INS-007", "SEC-ELF-002"]
+    scoped_local_context: ["CF-0033", "M-12"]
+  fallback_advice: "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed."
+```
 
 ## Index + Follow-Up Retrieval Pattern
 

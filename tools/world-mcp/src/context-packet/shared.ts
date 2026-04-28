@@ -30,6 +30,12 @@ export interface ContextPacketRisk {
   file_path: string | null;
 }
 
+export interface ContextPacketTruncationSummary {
+  dropped_layers: string[];
+  dropped_node_ids_by_layer: Record<string, string[]>;
+  fallback_advice: string;
+}
+
 export interface ContextPacket {
   task_header: {
     task_type: TaskType;
@@ -67,7 +73,11 @@ export interface ContextPacket {
     nodes: ContextPacketNode[];
     rationale: string[];
   };
+  truncation_summary: ContextPacketTruncationSummary;
 }
+
+export const TRUNCATION_FALLBACK_ADVICE =
+  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
 
 export const DEFAULT_PACKET_VERSION = 2 as const;
 
@@ -170,6 +180,7 @@ export function estimatePacketTokens(packet: ContextPacket): number {
     (sum, rationale) => sum + estimateTextTokens(rationale),
     0
   );
+  total += estimateTextTokens(JSON.stringify(packet.truncation_summary));
 
   return total;
 }
@@ -238,33 +249,3 @@ export function parsePacketNodeRecord(row: PacketNodeRow): Record<string, unknow
   return parsed as Record<string, unknown>;
 }
 
-export function trimPairedListToBudget<T>(
-  items: T[],
-  annotations: string[],
-  tokenBudget: number,
-  estimateItemTokens: (item: T, annotation: string) => number
-): void {
-  while (items.length > 0) {
-    const total = items.reduce(
-      (sum, item, index) => sum + estimateItemTokens(item, annotations[index] ?? ""),
-      0
-    );
-    if (total <= tokenBudget) {
-      return;
-    }
-
-    items.pop();
-    annotations.pop();
-  }
-}
-
-export function trimRisksToBudget(risks: ContextPacketRisk[], tokenBudget: number): void {
-  while (risks.length > 0) {
-    const total = risks.reduce((sum, risk) => sum + estimateTextTokens(JSON.stringify(risk)), 0);
-    if (total <= tokenBudget) {
-      return;
-    }
-
-    risks.pop();
-  }
-}

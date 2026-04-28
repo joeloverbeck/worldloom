@@ -11,28 +11,33 @@ import {
 import { buildImpactSurfaces } from "./impact-surfaces";
 import { buildScopedLocalContext } from "./scoped-local-context";
 import {
-  DEFAULT_BUDGET_SPLIT,
   DEFAULT_PACKET_VERSION,
-  estimateNodeTokens,
+  TRUNCATION_FALLBACK_ADVICE,
   estimatePacketTokens,
-  estimateTextTokens,
-  trimPairedListToBudget,
-  trimRisksToBudget,
   uniqueStrings,
-  type ContextPacket
+  type ContextPacket,
+  type ContextPacketTruncationSummary
 } from "./shared";
 
 export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
 export type { ContextPacket, ContextPacketArgs } from "./shared";
 
-const REQUIRED_PACKET_CLASSES = [
-  "local_authority",
-  "exact_record_links",
+const DROP_PRIORITY = [
+  "impact_surfaces",
   "scoped_local_context",
+  "exact_record_links",
   "governing_world_context"
 ] as const;
 
-type RequiredPacketClass = (typeof REQUIRED_PACKET_CLASSES)[number];
+type DroppableLayer = (typeof DROP_PRIORITY)[number];
+
+function makeEmptyTruncationSummary(): ContextPacketTruncationSummary {
+  return {
+    dropped_layers: [],
+    dropped_node_ids_by_layer: {},
+    fallback_advice: TRUNCATION_FALLBACK_ADVICE
+  };
+}
 
 function makeEmptyPacket(args: {
   taskType: TaskType;
@@ -76,183 +81,98 @@ function makeEmptyPacket(args: {
     impact_surfaces: {
       nodes: [],
       rationale: []
-    }
+    },
+    truncation_summary: makeEmptyTruncationSummary()
   };
 }
 
-function trimPacketToBudget(packet: ContextPacket, requestedBudget: number): void {
-  const suggestedBudget = Math.max(
-    0,
-    Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.impact_surfaces)
-  );
-  trimPairedListToBudget(
-    packet.impact_surfaces.nodes,
-    packet.impact_surfaces.rationale,
-    suggestedBudget,
-    (node, rationale) => estimateNodeTokens(node) + estimateTextTokens(rationale)
-  );
-
-  const fixedConstraintTokens =
-    packet.governing_world_context.active_rules.reduce(
-      (sum, rule) => sum + estimateTextTokens(rule),
-      0
-    ) +
-    packet.governing_world_context.protected_surfaces.reduce(
-      (sum, surface) => sum + estimateTextTokens(surface),
-      0
-    ) +
-    packet.governing_world_context.required_output_schema.reduce(
-      (sum, schema) => sum + estimateTextTokens(schema),
-      0
-    ) +
-    packet.governing_world_context.prohibited_moves.reduce(
-      (sum, move) => sum + estimateTextTokens(move),
-      0
-    ) +
-    packet.governing_world_context.nodes.reduce((sum, node) => sum + estimateNodeTokens(node), 0) +
-    packet.governing_world_context.why_included.reduce(
-      (sum, reason) => sum + estimateTextTokens(reason),
-      0
-    );
-
-  const riskBudget = Math.max(
-    0,
-    Math.floor(requestedBudget * DEFAULT_BUDGET_SPLIT.governing_world_context) - fixedConstraintTokens
-  );
-  trimRisksToBudget(packet.governing_world_context.open_risks, riskBudget);
-
-  while (estimatePacketTokens(packet) > requestedBudget && packet.impact_surfaces.nodes.length > 0) {
-    packet.impact_surfaces.nodes.pop();
-    packet.impact_surfaces.rationale.pop();
-  }
-
-  while (
-    estimatePacketTokens(packet) > requestedBudget &&
-    packet.governing_world_context.open_risks.length > 0
-  ) {
-    packet.governing_world_context.open_risks.pop();
-  }
-}
-
-function classHasRequiredContent(packet: ContextPacket, className: RequiredPacketClass): boolean {
-  switch (className) {
-    case "local_authority":
-    case "exact_record_links":
+function isLayerEmpty(packet: ContextPacket, layer: DroppableLayer): boolean {
+  switch (layer) {
+    case "impact_surfaces":
+      return packet.impact_surfaces.nodes.length === 0;
     case "scoped_local_context":
-      return packet[className].nodes.length > 0;
-    case "governing_world_context":
+      return packet.scoped_local_context.nodes.length === 0;
+    case "exact_record_links":
+      return packet.exact_record_links.nodes.length === 0;
+    case "governing_world_context": {
+      const g = packet.governing_world_context;
       return (
-        packet.governing_world_context.nodes.length > 0 ||
-        packet.governing_world_context.active_rules.length > 0 ||
-        packet.governing_world_context.protected_surfaces.length > 0 ||
-        packet.governing_world_context.required_output_schema.length > 0 ||
-        packet.governing_world_context.prohibited_moves.length > 0 ||
-        packet.governing_world_context.open_risks.length > 0
+        g.nodes.length === 0 &&
+        g.active_rules.length === 0 &&
+        g.protected_surfaces.length === 0 &&
+        g.required_output_schema.length === 0 &&
+        g.prohibited_moves.length === 0 &&
+        g.open_risks.length === 0
       );
+    }
   }
 }
 
-function cloneClassIntoPacket(
-  packet: ContextPacket,
-  source: ContextPacket,
-  className: RequiredPacketClass
-): void {
-  switch (className) {
-    case "local_authority":
-      packet.local_authority = {
-        nodes: [...source.local_authority.nodes],
-        why_included: [...source.local_authority.why_included]
-      };
-      return;
-    case "exact_record_links":
-      packet.exact_record_links = {
-        nodes: [...source.exact_record_links.nodes],
-        why_included: [...source.exact_record_links.why_included]
-      };
+function clearLayer(packet: ContextPacket, layer: DroppableLayer): void {
+  switch (layer) {
+    case "impact_surfaces":
+      packet.impact_surfaces = { nodes: [], rationale: [] };
       return;
     case "scoped_local_context":
-      packet.scoped_local_context = {
-        nodes: [...source.scoped_local_context.nodes],
-        why_included: [...source.scoped_local_context.why_included]
-      };
+      packet.scoped_local_context = { nodes: [], why_included: [] };
+      return;
+    case "exact_record_links":
+      packet.exact_record_links = { nodes: [], why_included: [] };
       return;
     case "governing_world_context":
       packet.governing_world_context = {
-        active_rules: [...source.governing_world_context.active_rules],
-        protected_surfaces: [...source.governing_world_context.protected_surfaces],
-        required_output_schema: [...source.governing_world_context.required_output_schema],
-        prohibited_moves: [...source.governing_world_context.prohibited_moves],
-        open_risks: [...source.governing_world_context.open_risks],
-        nodes: [...source.governing_world_context.nodes],
-        why_included: [...source.governing_world_context.why_included]
+        active_rules: [],
+        protected_surfaces: [],
+        required_output_schema: [],
+        prohibited_moves: [],
+        open_risks: [],
+        nodes: [],
+        why_included: []
       };
+      return;
   }
 }
 
-function estimateSelfConsistentMinimumBudget(requiredPacket: ContextPacket): number {
-  let candidate = estimatePacketTokens(requiredPacket);
+function recordDrop(packet: ContextPacket, layer: DroppableLayer, nodeIds: string[]): void {
+  packet.truncation_summary.dropped_layers.push(layer);
+  packet.truncation_summary.dropped_node_ids_by_layer[layer] = nodeIds;
+}
 
-  for (;;) {
-    const packetForEstimate: ContextPacket = {
-      ...requiredPacket,
-      task_header: {
-        ...requiredPacket.task_header,
-        token_budget: {
-          ...requiredPacket.task_header.token_budget,
-          requested: candidate
-        }
+function estimateStablePacketSize(packet: ContextPacket): number {
+  const originalAllocated = packet.task_header.token_budget.allocated;
+  const originalRequested = packet.task_header.token_budget.requested;
+  try {
+    let candidate = estimatePacketTokens(packet);
+    for (;;) {
+      packet.task_header.token_budget.allocated = candidate;
+      packet.task_header.token_budget.requested = Math.max(originalRequested, candidate);
+      const adjusted = estimatePacketTokens(packet);
+      if (adjusted <= candidate) {
+        return candidate;
       }
-    };
-    const adjusted = estimatePacketTokens(packetForEstimate);
-    if (adjusted <= candidate) {
-      return candidate;
+      candidate = adjusted;
     }
-
-    candidate = adjusted;
+  } finally {
+    packet.task_header.token_budget.allocated = originalAllocated;
+    packet.task_header.token_budget.requested = originalRequested;
   }
 }
 
-function classifyBudgetInsufficiency(
-  completePacket: ContextPacket,
-  args: {
-    taskType: TaskType;
-    worldSlug: string;
-    seedNodes: string[];
-    tokenBudget: number;
-  }
-): { minimumRequiredBudget: number; missingClasses: string[]; retainedClasses: string[] } | null {
-  const requiredPacket = makeEmptyPacket(args);
-  const retainedClasses: string[] = [];
-
-  for (const className of REQUIRED_PACKET_CLASSES) {
-    if (!classHasRequiredContent(completePacket, className)) {
+function enforceBudget(packet: ContextPacket, requestedBudget: number): void {
+  for (const layer of DROP_PRIORITY) {
+    if (estimateStablePacketSize(packet) <= requestedBudget) {
+      return;
+    }
+    if (isLayerEmpty(packet, layer)) {
       continue;
     }
 
-    cloneClassIntoPacket(requiredPacket, completePacket, className);
-
-    const candidatePacket = makeEmptyPacket(args);
-    for (const retainedClassName of [...retainedClasses, className] as RequiredPacketClass[]) {
-      cloneClassIntoPacket(candidatePacket, completePacket, retainedClassName);
-    }
-
-    if (estimatePacketTokens(candidatePacket) > args.tokenBudget) {
-      return {
-        minimumRequiredBudget: estimateSelfConsistentMinimumBudget(requiredPacket),
-        missingClasses: REQUIRED_PACKET_CLASSES.filter(
-          (requiredClassName) =>
-            classHasRequiredContent(completePacket, requiredClassName) &&
-            !retainedClasses.includes(requiredClassName)
-        ),
-        retainedClasses
-      };
-    }
-
-    retainedClasses.push(className);
+    const nodeIds = packet[layer].nodes.map((node) => node.id);
+    clearLayer(packet, layer);
+    recordDrop(packet, layer, nodeIds);
   }
-
-  return null;
 }
+
 
 export async function assembleContextPacket(args: {
   task_type: TaskType;
@@ -305,35 +225,31 @@ export async function assembleContextPacket(args: {
         ...packet.scoped_local_context.nodes
       ]
     );
-
-    const insufficiency = classifyBudgetInsufficiency(packet, {
-      taskType: args.task_type,
-      worldSlug: args.world_slug,
-      seedNodes: args.seed_nodes,
-      tokenBudget: args.token_budget
-    });
-    if (insufficiency !== null) {
-      return createMcpError(
-        "packet_incomplete_required_classes",
-        "The requested token budget cannot fit the required locality-first packet classes.",
-        {
-          missing_classes: insufficiency.missingClasses,
-          requested_budget: args.token_budget,
-          minimum_required_budget: insufficiency.minimumRequiredBudget,
-          retry_with: { token_budget: insufficiency.minimumRequiredBudget },
-          retained_classes: insufficiency.retainedClasses
-        }
-      );
-    }
-
     packet.impact_surfaces = await buildImpactSurfaces(opened.db, args.world_slug, [
       ...packet.local_authority.nodes,
       ...packet.exact_record_links.nodes,
       ...packet.scoped_local_context.nodes
     ]);
 
-    trimPacketToBudget(packet, args.token_budget);
-    packet.task_header.token_budget.allocated = estimatePacketTokens(packet);
+    enforceBudget(packet, args.token_budget);
+
+    const stableAllocated = estimateStablePacketSize(packet);
+    if (stableAllocated > args.token_budget) {
+      return createMcpError(
+        "packet_incomplete_required_classes",
+        "The requested token budget cannot fit local_authority alone.",
+        {
+          missing_classes: ["local_authority", ...packet.truncation_summary.dropped_layers],
+          requested_budget: args.token_budget,
+          minimum_required_budget: stableAllocated,
+          retry_with: { token_budget: stableAllocated },
+          retained_classes: [],
+          truncation_summary: packet.truncation_summary
+        }
+      );
+    }
+
+    packet.task_header.token_budget.allocated = stableAllocated;
 
     return packet;
   } finally {
