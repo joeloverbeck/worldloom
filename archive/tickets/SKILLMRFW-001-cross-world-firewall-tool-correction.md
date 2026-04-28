@@ -30,7 +30,7 @@ At intake, this was the most consequential gap encountered in the session: the s
 6. Not applicable — no output schema (proposal card frontmatter, batch manifest) is extended. The change is purely on the retrieval-tool surface used INSIDE Phase 11a.
 7. The change replaces one MCP call family with the canonical firewall projection; no tool symbol is renamed or removed. Blast radius scan: `rg -n "search_nodes.*status:" .claude/skills` returns one owned hit (the broken Phase 11a line in `propose-new-worlds-from-preferences`). `propose-new-characters` Phase 10b uses `search_nodes(node_type='mystery_record')` without a status filter; reassessment confirmed that this is also stale for `search_nodes`, so this ticket upgrades the two named `propose-new-characters` surfaces to `get_firewall_content`.
 8. Adjacent contradiction surfaced during reassessment: `propose-new-worlds-from-preferences` World-State Prerequisites also references `mcp__worldloom__search_nodes(node_type='mystery_record', filters={world_slug: <slug>})`; updating it for consistency with the Phase 11a fix is a required consequence of this ticket and lives in §Files to Touch.
-9. Separate adjacent cleanup: sibling skills outside this ticket's named write set still contain live-guidance examples of `search_nodes(node_type='mystery_record')` despite already documenting `get_firewall_content`. That broader sibling cleanup is tracked in `tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`; this ticket does not absorb it.
+9. Separate adjacent cleanup: sibling skills outside this ticket's named write set still contain live-guidance examples of `search_nodes(node_type='mystery_record')` despite already documenting `get_firewall_content`. That broader sibling cleanup was completed and archived in `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`; this ticket did not absorb it.
 
 ## Architecture Check
 
@@ -72,12 +72,12 @@ In `.claude/skills/propose-new-characters/SKILL.md` Phase 10b (line 94) and `.cl
 - `.claude/skills/propose-new-characters/SKILL.md` (modify — Phase 10b line 94 area)
 - `.claude/skills/propose-new-characters/references/phase-10-canon-safety-check.md` (modify — line 23 area)
 - `tickets/SKILLMRFW-001-cross-world-firewall-tool-correction.md` (modify — reassessment and closeout truthing)
-- `tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md` (new — follow-up for adjacent sibling stale examples)
+- `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md` (follow-up for adjacent sibling stale examples; completed and archived)
 
 ## Out of Scope
 
 - Extending `search_nodes` to support a `status` filter. `get_firewall_content` already covers the bulk-firewall use case; adding a duplicative path on `search_nodes` increases the API surface without adding capability.
-- Fixing every remaining sibling `search_nodes(node_type='mystery_record')` example. SKILLMRFW-001 owns `propose-new-worlds-from-preferences` and the named `propose-new-characters` consistency edits; broader sibling cleanup is tracked by `tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`.
+- Fixing every remaining sibling `search_nodes(node_type='mystery_record')` example. SKILLMRFW-001 owns `propose-new-worlds-from-preferences` and the named `propose-new-characters` consistency edits; broader sibling cleanup is completed in `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`.
 - Any change to the firewall-recording invariant (every checked M-id in `cross_world_mr_firewall.checked[]` regardless of overlap). The audit-trail proof-of-check discipline is preserved verbatim.
 
 ## Acceptance Criteria
@@ -110,7 +110,9 @@ In `.claude/skills/propose-new-characters/SKILL.md` Phase 10b (line 94) and `.cl
 
 Completed 2026-04-28. `propose-new-worlds-from-preferences` now routes the World-State Prerequisites full-M firewall projection and Phase 11a forbidden-M audit through `mcp__worldloom__get_firewall_content(world_slug)`, with `get_record('M-NNNN')` reserved for full-record context. `propose-new-characters` now names the same bulk firewall projection in its prerequisites, Phase 10 overview, and Phase 10b reference.
 
-The ticket was truth-corrected during reassessment: the live issue is not only an unsupported `status` filter but also stale `mystery_record` wording on the `search_nodes` path. Broader sibling cleanup is tracked in `tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`.
+The ticket was truth-corrected during reassessment: the live issue is not only an unsupported `status` filter but also stale `mystery_record` wording on the `search_nodes` path. Broader sibling cleanup is completed in `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`.
+
+Outcome amended: 2026-04-28. The broader sibling cleanup follow-up was completed and archived at `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md`; stale active-ticket handoff references in this archived record were updated accordingly.
 
 ## Verification Result
 
@@ -123,4 +125,4 @@ The ticket was truth-corrected during reassessment: the live issue is not only a
 ## Deviations
 
 - The drafted operator dry-run was narrowed to grep-proof plus manual review. This is a skill-prose-only ticket; invoking the full content-generation skill would not add stronger proof for the corrected documented retrieval path.
-- Reassessment exposed broader sibling `search_nodes(node_type='mystery_record')` drift outside this ticket's named write set. That work was not absorbed; follow-up `tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md` was created.
+- Reassessment exposed broader sibling `search_nodes(node_type='mystery_record')` drift outside this ticket's named write set. That work was not absorbed; follow-up `archive/tickets/SKILLMRFW-002-sibling-mystery-node-type-alias-cleanup.md` was completed and archived.

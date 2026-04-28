@@ -31,8 +31,8 @@ When a phase needs a record beyond what the packet returned:
 - `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC). Used by Phase 2 grounding, Phase 6a invariant conformance, Phase 6b MR firewall expansion.
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans:
   - `node_type='canon_fact', filters={domain: ...}` — Phase 2 grounding for a specific claim's apparent domain; Phase 6c distribution-discipline lookups.
-  - `node_type='mystery_record'` — Phase 6b firewall expansion when a card implicates an M not in the packet.
   - `node_type='invariant_record', filters={category: ...}` — Phase 6a expansion if a card touches a category whose INVs were not packet-surfaced.
+- `mcp__worldloom__get_firewall_content(world_slug)` — Phase 6b bulk firewall projection when a card implicates an M not in the packet; use `get_record('M-NNNN')` only when full M-record context is needed beyond the projection.
 - `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species). Used in Phase 6d.2 epistemic-horizon reasoning.
 - `mcp__worldloom__find_named_entities(names)` — resolve names parsed from the artifact prose to `ENT-NNNN` ids during seed selection AND during Phase 2 when a claim names a previously-unseeded entity.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` — when grounding a candidate against the section context where a related CF was applied (Phase 2 partially_grounded detection).

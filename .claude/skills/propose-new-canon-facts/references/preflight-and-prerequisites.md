@@ -32,7 +32,7 @@ When a phase needs a record beyond what the packet returned:
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans:
   - `node_type='section', filters={file_class: 'institutions'}` — Phase 1 thinness scan over institutional sections; analogously for `everyday-life`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline`.
   - `node_type='canon_fact', filters={domain: ...}` — Phase 5 redundancy filter; Phase 7c distribution discipline lookups.
-  - `node_type='mystery_record'` — Phase 7b firewall expansion when a seed implicates an M entry not in the packet.
+- `mcp__worldloom__get_firewall_content(world_slug)` — Phase 7b bulk firewall projection when a seed implicates an M entry not in the packet; use `get_record('M-NNNN')` only when full M-record context is needed beyond the projection.
 - `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species).
 - `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-NNNN` ids.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 1 needs to ground a CF against the section context where it was applied.

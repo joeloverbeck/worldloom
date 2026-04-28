@@ -39,7 +39,7 @@ In either case, do NOT silently proceed without world-state load. Apply this thr
 - For every node-id under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but per-record `get_record` is the supported per-record path.
 - For each additional CF / M / INV record cited at Phase 3 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_record(record_id)` individually.
 - For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
-- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__search_nodes(node_type='mystery_record')` if `governing_world_context` was the dropped layer.
+- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__get_firewall_content(world_slug)` if `governing_world_context` was the dropped layer; use `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection.
 
 **Step 3 — Dossier-trace shortcut (when `character_path` is provided).** The dossier's own canon-safety check trace is an authoritative shortcut for Phase 7 firewall coverage. The dossier was pre-cleared against the same world-state at its generation time; its enumerated trace fields carry forward to the artifact's Phase 7 trace as canonical firewall coverage. Retrieve the trace via `mcp__worldloom__get_record('CHAR-NNNN', section_path='frontmatter.world_consistency')` (the canonical path; a single call returns the projected `world_consistency` block — keys: `invariants_respected`, `mystery_reserve_firewall`, `canon_facts_consulted`). Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable.
 
@@ -90,7 +90,7 @@ For Author-lift and continuity reads:
 | Phase 5 | SEC-INS (institution the author must flatter or fear); WORLD_KERNEL §Core Pressures (audience-shaped pressures) | packet + direct Read |
 | Phase 6 | (composition phase — no new retrieval; uses Phases 1-5 outputs) | — |
 | Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants always loaded by the `diegetic_artifact_generation` profile) |
-| Phase 7b | every M-NNNN record (firewall) | packet + `search_nodes(node_type='mystery_record')` if any are missing |
+| Phase 7b | every M-NNNN record (firewall) | packet + `get_firewall_content(world_slug)` if any are missing; `get_record('M-NNNN')` only for full-record context |
 | Phase 7c | capability CFs cited at Phase 5 + world-fact CFs cited at Phase 3 | (already retrieved) + `get_record` for any not yet loaded |
 | Phase 7d | SEC-* records the artifact body draws on (no-silent-canon-creation check); CAU-3-style restricted vocabulary CFs (no-restricted-knowledge-leakage check) | (already retrieved) + `search_nodes` if a referenced entity was not yet resolved |
 
