@@ -119,13 +119,13 @@ Load `references/phase-7-canon-safety-check.md`. Run all three sub-phases — 7a
 
 ### 5. Phase 8: Validation and Rejection Tests
 
-Load `references/phase-8-validation-tests.md`. Run all 9 tests and record each as PASS / FAIL with a one-line rationale into the dossier's Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
+Load `references/phase-8-validation-tests.md`. Run all 10 tests and record each as PASS / FAIL with a one-line rationale into the dossier's Canon Safety Check Trace section. Any FAIL halts and loops back to the originating phase. Do NOT proceed to Phase 9 until every test records PASS with rationale.
 
 ### 6. Phase 9: Commit
 
 Present the deliverable summary to the user:
 1. Full character dossier — inline the frontmatter and a section-by-section summary of the body; if the body exceeds ~10KB, point the user to the working file path (e.g., `/tmp/<char-slug>-body.md`) for full review rather than inlining the entire body. The HARD-GATE response is summary-plus-pointer, not literal-full-content.
-2. Canon Safety Check Trace (9 test results with rationales)
+2. Canon Safety Check Trace (10 test results with rationales)
 3. Phase 7d repair sub-passes that fired (if any), each framed as "preserved: <user intent> / sacrificed: <what was narrowed or reclassified>"
 4. `world_consistency` audit fields: `canon_facts_consulted`, `invariants_respected`, `mystery_reserve_firewall`, `distribution_exceptions`, `continuity_checked_with`
 5. Continuity-constraint summary (if the Pre-flight continuity-preservation read loaded any existing dossiers): one line per dossier consulted, naming the CHAR-id and the specific commitments honored. If any Phase 1-6 work would have required contradicting a constraint, list it here as a named continuity-conflict item for user adjudication.

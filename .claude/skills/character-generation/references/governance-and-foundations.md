@@ -4,7 +4,7 @@ Cross-cutting reference material: which validation rules this skill upholds, the
 
 ## Validation Rules This Skill Upholds
 
-- **Rule 2: No Pure Cosmetics** — Phase 1 (every material-reality fact must cite a loaded file) + Phase 2 (institutional embedding required; "modern individual in costume" rejected) + Phase 5 (capabilities grounded in world mechanisms) + Phase 6 (voice shaped by embedding, not chosen as flavor) + Phase 8 Tests 1-2.
+- **Rule 2: No Pure Cosmetics** — Phase 1 (every material-reality fact must cite a loaded file) + Phase 2 (institutional embedding required; "modern individual in costume" rejected) + Phase 5 (capabilities grounded in world mechanisms) + Phase 6 (voice shaped by embedding, not chosen as flavor) + Phase 8 Tests 1-2 and 10.
 - **Rule 3: No Specialness Inflation** — Phase 5 (every capability has `how_learned` / `cost_to_acquire` / `teachers_institutions` / `unusual_or_ordinary` / `body_class_place_shape`) + Phase 7d (repair stabilizers must name concrete mechanisms — no "they just don't use it much") + Phase 8 Test 3.
 - **Rule 4: No Globalization by Accident** — Phase 5 (first-pass CF distribution check) + Phase 7c (hard gate: every capability either fits `distribution.who_can_do_it` or has a Phase-2-embedded exception recorded in `world_consistency.distribution_exceptions`) + Phase 8 Tests 4 + 7.
 - **Rule 7: Preserve Mystery Deliberately** — Phase 3 (epistemic position includes explicit `cannot know` and `wrongly believes` fields) + Phase 7b (firewall with explicit `world_consistency.mystery_reserve_firewall` audit list) + Phase 8 Tests 5-6 (empty firewall with non-empty Mystery Reserve fails; forbidden-answer leakage into `known_firsthand` or `wrongly_believes` fails).
@@ -28,6 +28,7 @@ No Canon Fact Record or Change Log Entry is emitted — see the thin SKILL.md's 
 | Rule 3 (No Specialness Inflation) | Phases 5, 7d, 8 | Stabilizer-required + no-hand-wave repairs + Test 3 |
 | Rule 4 (No Globalization by Accident) | Phases 5, 7c, 8 | First-pass CF check + hard-gate distribution conformance + Tests 4 + 7 |
 | Rule 7 (Preserve Mystery Deliberately) | Phases 3, 7b, 8 | Epistemic position with explicit cannot-know + firewall audit + Tests 5-6 |
+| World Queries #6 ("What kinds of people can plausibly exist here?") | Phase 8 | Test 10 requires at least 3 cited world-grown specificity axes across profession, capability, institution, voice, body/personhood, and epistemic position |
 | World Kernel §Core Pressures | Phase 4 | Character internal contradictions instantiate world core pressures at individual scale |
 | World Kernel §Tonal Contract | Phase 6 | Voice calibrated to world tonal register |
 | Change Control Policy | N/A | Not applicable — this skill is canon-reading; no Change Log Entry emitted. Future canonization of a specific NPC is handled by `canon-addition`, which emits the Change Log Entry there. |

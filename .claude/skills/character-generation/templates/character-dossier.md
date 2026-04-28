@@ -184,7 +184,8 @@ notes: >
  `world_consistency.distribution_exceptions` in the frontmatter.>
 
 ### Phase 8 Validation Checklist
-<Record each of the 9 tests as one line in the form:
+<Record each of the 10 tests as one line in the form:
  `- Test N (Rule R / topic): PASS — <one-line rationale>`
- A PASS without rationale is treated as FAIL. All 9 must PASS before
+ Test 10's rationale must enumerate at least 3 world-specificity axes with
+ citations. A PASS without rationale is treated as FAIL. All 10 must PASS before
  Phase 9 HARD-GATE fires.>
