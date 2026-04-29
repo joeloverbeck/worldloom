@@ -18,7 +18,7 @@ Worldloom skills currently load 6+ world files totaling 2,800–12,000 lines at 
 - Thirteen mandatory world files — 12,111 lines total
 - Plus 17 PA-NNNN adjudications, 2 character dossiers, 2 diegetic artifacts, 12 proposal cards (PR-NNNN) with 3 BATCH-NNNN manifests, 7 character-proposal cards (NCP-NNNN) with 1 NCB-NNNN manifest, 1 audit record (AU-NNNN), and 1 retcon-proposal card (RP-NNNN).
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §1 ("Introduce a local structure-aware world index") and §2 ("Build the index with a markdown parser, not regex spaghetti"). Brainstorm decisions: TypeScript + `unified`/`remark`; SQLite + FTS5; embeddings deferred to an optional later phase; index is derived, markdown remains source of truth in Phase 1.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §1 ("Introduce a local structure-aware world index") and §2 ("Build the index with a markdown parser, not regex spaghetti"). Brainstorm decisions: TypeScript + `unified`/`remark`; SQLite + FTS5; embeddings deferred to an optional later phase; index is derived, markdown remains source of truth in Phase 1.
 
 ## Approach
 

@@ -14,9 +14,11 @@ mcp__worldloom__get_context_packet(
 )
 ```
 
-Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories, with full parsed `record` bodies) + relevant CFs + all Mystery Reserve records' Phase 7b firewall fields + named-entity neighbors + section context, with completeness guarantees against silent truncation.
+Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories, with full parsed `record` bodies) + relevant CFs + Mystery Reserve nodes whose parsed `record` bodies carry the Phase 7b firewall fields (`id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`) + named-entity neighbors + section context, with completeness guarantees against silent truncation. Use `mcp__worldloom__get_firewall_content(world_slug)` as a parallel bulk projection when the audit needs every M record regardless of seed locality; use per-id `get_record('M-NNNN')` when `notes` or `modification_history` are load-bearing.
 
 If the packet returns `packet_incomplete_required_classes`, retry with `token_budget` set to the response's `minimum_required_budget` field. The default above is calibrated for a typical 12-seed call shape against a mature world; unusually large seed sets may exceed it.
+
+When the packet response exceeds the MCP transport's inline limit and is redirected to a persisted-output file (typical of mature worlds at 40+ CFs / 15+ M records — the redirect itself is the signal), do NOT attempt to inline the raw packet body — main-conversation context is the wrong layer for the raw payload, and partial reads of the persisted JSON via line-based `Read offset/limit` will not chunk the structure usefully. Delegate extraction to a subagent (via the `Agent` tool with `subagent_type='general-purpose'`) with a structured-extract prompt covering: `governing_world_context.active_rules` / `protected_surfaces` / `prohibited_moves` / `open_risks`; all parsed invariants with full bodies; M-record firewall fields from the parsed packet records; the bound CFs' full bodies (read from `_source/canon/CF-NNNN.yaml` directly when the packet exposes only `body_preview`); and SEC summaries grouped by `file_class`. The subagent's structured report becomes the working context for Phases 0-7; the raw persisted-output file stays out of the main conversation.
 
 Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, species, or capability domain. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
 
@@ -58,7 +60,7 @@ For continuity-preservation reads at Pre-flight:
 | Phase 5 | capability CFs (each capability's `who_can_do_it` distribution); SEC-PAS (embodiment); SEC-GEO (regional effects); SEC-MTS (loaded selectively if magic/tech capabilities present) | `search_nodes(node_type='canon_fact', filters={domain: ...})` + `get_record` |
 | Phase 6 | SEC-ELF (language patterns by class/region/religion); SEC-PAS (senses); SEC-INS (taboo system) | packet + `get_record` |
 | Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants are always loaded by the `character_generation` profile) |
-| Phase 7b | every M-NNNN record (firewall) | packet (all M-record firewall fields are always loaded by the `character_generation` profile) |
+| Phase 7b | every M-NNNN record (firewall) | packet (M-record Phase 7b fields: `id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`) + `mcp__worldloom__get_firewall_content(world_slug)` when the audit needs every M record regardless of seed locality, or per-id `get_record('M-NNNN')` when `notes` / `modification_history` are load-bearing |
 | Phase 7c | matching capability CFs from Phase 5 | (already retrieved at Phase 5) |
 
 ## Selectively loaded

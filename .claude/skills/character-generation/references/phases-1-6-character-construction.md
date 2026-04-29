@@ -41,7 +41,7 @@ Specify the character's relation to every institutional axis present in the SEC-
 Define, for this specific character at this specific date:
 - what the character knows firsthand (witnessed, experienced, handled)
 - what they know only by rumor (heard from neighbors, priests, travelers, merchants)
-- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-NNNN records and any M-NNNN records whose `what_is_unknown` block overlaps their epistemic surface)
+- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-NNNN records and any M-NNNN records whose `unknowns` block overlaps their epistemic surface)
 - what they firmly believe but are wrong about (folk theories, propaganda, inherited superstitions — SEC-INS religious/ideological blocks + SEC-ELF common beliefs)
 - what words they have for major world phenomena (their vocabulary, per SEC-ELF language/slang by region/class)
 - what categories they lack entirely (concepts foreign to their class/region/education)

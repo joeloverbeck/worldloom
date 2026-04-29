@@ -19,17 +19,17 @@ Fail triggers (send to Phase 7d):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every M-NNNN record retrieved by the context packet (the `character_generation` packet loads all Mystery Reserve records' Phase 7b firewall fields in `governing_world_context.nodes`), check whether its `what_is_unknown` block overlaps the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
+For every M-NNNN record retrieved by the context packet (the parsed `record` body in `governing_world_context.nodes` carries the Phase 7b firewall fields: `id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`), check whether its `unknowns` overlap the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
 
-**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
+**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` when the audit needs every M record regardless of seed locality — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `modification_history`) is needed.
 
 For each entry where overlap IS found:
 
-- the character MAY hold a folk-belief or rumor *about* the mystery (recorded in `known_by_rumor` or `wrongly_believes`). **Permitted content**: the M record's `common_in_world_interpretations` ARE allowed in these fields — they are contested-canon folk theories the world itself tracks. Only items in the M record's `disallowed_cheap_answers` list are forbidden.
+- the character MAY hold a folk-belief or rumor *about* the mystery (recorded in `known_by_rumor` or `wrongly_believes`). **Permitted content**: the M record's `common_interpretations` ARE allowed in these fields — they are contested-canon folk theories the world itself tracks. Only items in the M record's `disallowed_cheap_answers` list are forbidden.
 - the character MUST NOT "know" the mystery's forbidden answer (i.e., no entry in `known_firsthand` or `wrongly_believes` may match any item in the M record's `disallowed_cheap_answers` list).
 
 Fail triggers (send to Phase 7d):
-- character's `known_firsthand` contains content that answers an M record's `what_is_unknown`
+- character's `known_firsthand` contains content that answers an M record's `unknowns`
 - character's `wrongly_believes` contains a statement matching any `disallowed_cheap_answers` item (even as "they are wrong about it" — this still commits the forbidden answer to canon-adjacent text)
 
 **Rule**: The firewall list is the audit trail. An empty `world_consistency.mystery_reserve_firewall` when the world has any M records fails Phase 8 Test 5 — silent firewall means no firewall. Recording every checked entry (including no-overlap entries, with that status noted in the trace prose) is the only correct behavior.

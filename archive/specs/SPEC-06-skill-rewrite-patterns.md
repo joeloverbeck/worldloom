@@ -39,7 +39,7 @@ The eight canon-reading / canon-mutating skills contain thousands of lines of pr
 - Discovery-section canonical field-name enforcement
 - modification_history retrofit discipline
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §6 (thin orchestrators), §8 (split retrieval and editing). Brainstorm decision: skills retain judgment; mechanism moves to code.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §6 (thin orchestrators), §8 (split retrieval and editing). Brainstorm decision: skills retain judgment; mechanism moves to code.
 
 ## Approach
 

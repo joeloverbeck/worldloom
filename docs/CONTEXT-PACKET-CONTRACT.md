@@ -271,7 +271,7 @@ The response's `nodes` arrays contain only `mystery_reserve_entry` records; the 
 - `local_authority`: character-local record anchors and declared scoped references
 - `exact_record_links`: exact linked batches, artifacts, or source records
 - `scoped_local_context`: local place, institution, and relation nodes needed to avoid decontextualized generation
-- `governing_world_context`: no-world-write rules, distribution discipline, all invariant records with full parsed `record` bodies, all Mystery Reserve records with parsed firewall fields (`what_is_unknown`, `disallowed_cheap_answers`, `common_in_world_interpretations`, `status`), Mystery Reserve firewall on locality intersection nodes
+- `governing_world_context`: no-world-write rules, distribution discipline, all invariant records with full parsed `record` bodies, all Mystery Reserve records with parsed firewall fields (`id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`), Mystery Reserve firewall on locality intersection nodes
 - `impact_surfaces`: adjacent dossier or audit surfaces likely to matter before closeout
 
 ### Continuity audit

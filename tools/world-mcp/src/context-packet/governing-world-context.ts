@@ -284,10 +284,14 @@ function projectCharacterGenerationGoverningRecord(
   if (row.node_type === "mystery_reserve_entry") {
     return {
       id: parsed.id,
+      title: parsed.title,
       status: parsed.status,
-      what_is_unknown: parsed.what_is_unknown,
+      knowns: parsed.knowns,
+      unknowns: parsed.unknowns,
+      common_interpretations: parsed.common_interpretations,
       disallowed_cheap_answers: parsed.disallowed_cheap_answers,
-      common_in_world_interpretations: parsed.common_in_world_interpretations
+      domains_touched: parsed.domains_touched,
+      extensions: parsed.extensions
     };
   }
 

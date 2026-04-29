@@ -80,14 +80,23 @@ test("character_generation governing context includes all invariant records and 
             "id: M-1",
             "title: The drowned bell",
             "status: active",
-            "what_is_unknown: Who rings the drowned bell under Brinewick.",
-            "known_around_it:",
+            "knowns:",
             "  - Bells are heard in fog.",
+            "unknowns:",
+            "  - Who rings the drowned bell under Brinewick.",
             "disallowed_cheap_answers:",
             "  - A hidden clockwork automaton.",
-            "common_in_world_interpretations:",
+            "common_interpretations:",
             "  - Harbor ghosts.",
-            "future_resolution_safety: low"
+            "domains_touched:",
+            "  - mystery",
+            "future_resolution_safety: low",
+            "extensions:",
+            "  - originating_cf: CF-0037",
+            "    change_id: CH-0009",
+            "    date: 2026-04-28",
+            "    label: Stationkeeper firewall clause",
+            "    body: Keep stationkeeper sub-specialties unresolved."
           ].join("\n")
         },
         {
@@ -99,14 +108,18 @@ test("character_generation governing context includes all invariant records and 
             "id: M-2",
             "title: The salt birthmark",
             "status: passive",
-            "what_is_unknown: Why some children are born with salt-white palms.",
-            "known_around_it:",
+            "knowns:",
             "  - Midwives track the mark.",
+            "unknowns:",
+            "  - Why some children are born with salt-white palms.",
             "disallowed_cheap_answers:",
             "  - A universal royal bloodline.",
-            "common_in_world_interpretations:",
+            "common_interpretations:",
             "  - Tide blessing.",
-            "future_resolution_safety: medium"
+            "domains_touched:",
+            "  - embodiment",
+            "future_resolution_safety: medium",
+            "extensions: []"
           ].join("\n")
         }
       ]
@@ -147,11 +160,33 @@ test("character_generation governing context includes all invariant records and 
     const mystery = governingNodes.find((node) => node.id === "M-1");
     assert.deepEqual(mystery?.record, {
       id: "M-1",
+      title: "The drowned bell",
       status: "active",
-      what_is_unknown: "Who rings the drowned bell under Brinewick.",
+      knowns: ["Bells are heard in fog."],
+      unknowns: ["Who rings the drowned bell under Brinewick."],
+      common_interpretations: ["Harbor ghosts."],
       disallowed_cheap_answers: ["A hidden clockwork automaton."],
-      common_in_world_interpretations: ["Harbor ghosts."]
+      domains_touched: ["mystery"],
+      extensions: [
+        {
+          originating_cf: "CF-0037",
+          change_id: "CH-0009",
+          date: "2026-04-28",
+          label: "Stationkeeper firewall clause",
+          body: "Keep stationkeeper sub-specialties unresolved."
+        }
+      ]
     });
+    assert.equal(
+      Object.hasOwn(mystery?.record ?? {}, "what_is_unknown"),
+      false,
+      "projection must not expose the stale what_is_unknown key"
+    );
+    assert.equal(
+      Object.hasOwn(mystery?.record ?? {}, "common_in_world_interpretations"),
+      false,
+      "projection must not expose the stale common_in_world_interpretations key"
+    );
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -191,7 +226,22 @@ test("canon_addition governing context does not promote every atomic invariant a
           world_slug: "seeded",
           file_path: "_source/mystery-reserve/M-1.yaml",
           node_type: "mystery_reserve_entry",
-          body: "id: M-1\nstatus: active\nwhat_is_unknown: Mystery.\n"
+          body: [
+            "id: M-1",
+            "title: Mystery",
+            "status: active",
+            "knowns:",
+            "  - Something is known.",
+            "unknowns:",
+            "  - Mystery.",
+            "common_interpretations: []",
+            "disallowed_cheap_answers: []",
+            "domains_touched:",
+            "  - mystery",
+            "future_resolution_safety: low",
+            "extensions: []",
+            ""
+          ].join("\n")
         }
       ]
     });

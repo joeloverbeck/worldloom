@@ -17,7 +17,7 @@
 
 Current worldloom discipline ("don't over-read", "don't bypass the gate", "use grep-then-targeted-read") lives in prose: `CLAUDE.md` non-negotiables, `canon-addition/SKILL.md` Large-file method, `canon-addition/references/guardrails.md`. Compliance is probabilistic — the model may drift under pressure or in long sessions. FOUNDATIONS' "LLM agents should never operate on prose alone" cannot be structurally enforced while the only enforcement surface is more prose.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §7 (hooks aggressively). Brainstorm decision: make compliance structural via Claude Code's hook system; blocking is safer than nagging.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §7 (hooks aggressively). Brainstorm decision: make compliance structural via Claude Code's hook system; blocking is safer than nagging.
 
 ## Approach
 
