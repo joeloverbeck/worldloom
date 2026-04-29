@@ -264,3 +264,123 @@ test("canon_addition governing context does not promote every atomic invariant a
     destroyTempRepoRoot(root);
   }
 });
+
+test("character_generation packets project full bodies for seed CFs and touched priority SEC records", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0037",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0037.yaml",
+          heading_path: "Family-handled waystations",
+          node_type: "canon_fact_record",
+          body: [
+            "id: CF-0037",
+            "title: Family-handled waystations",
+            "status: hard_canon",
+            "distribution:",
+            "  who_can_do_it:",
+            "    - stationkeeper children",
+            "  who_cannot_easily_do_it:",
+            "    - outsiders",
+            "costs_and_limits:",
+            "  - Requires family trust.",
+            "visible_consequences:",
+            "  - Children know lock ledgers early.",
+            "notes: Seed CF body must not be preview-only."
+          ].join("\n")
+        },
+        {
+          node_id: "SEC-ELF-001",
+          world_slug: "seeded",
+          file_path: "_source/everyday-life/SEC-ELF-001.yaml",
+          heading_path: "Canal households",
+          node_type: "section",
+          body: [
+            "id: SEC-ELF-001",
+            "file_class: EVERYDAY_LIFE",
+            "order: 1",
+            "heading: Canal households",
+            "heading_level: 2",
+            "body: Children in waystation households sort ropes, keys, and ledgers before adulthood.",
+            "extensions: []",
+            "touched_by_cf:",
+            "  - CF-0037"
+          ].join("\n")
+        },
+        {
+          node_id: "SEC-MTS-002",
+          world_slug: "seeded",
+          file_path: "_source/magic-or-tech-systems/SEC-MTS-002.yaml",
+          heading_path: "Auxiliary locks",
+          node_type: "section",
+          body: [
+            "id: SEC-MTS-002",
+            "file_class: MAGIC_OR_TECH_SYSTEMS",
+            "order: 2",
+            "heading: Auxiliary locks",
+            "heading_level: 2",
+            "body: Lock systems are specialized context and should remain preview-only here.",
+            "extensions: []",
+            "touched_by_cf:",
+            "  - CF-0037"
+          ].join("\n")
+        }
+      ],
+      edges: [
+        {
+          source_node_id: "SEC-ELF-001",
+          target_node_id: "CF-0037",
+          edge_type: "patched_by"
+        },
+        {
+          source_node_id: "SEC-MTS-002",
+          target_node_id: "CF-0037",
+          edge_type: "patched_by"
+        }
+      ]
+    });
+
+    const packet = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "character_generation",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0037"],
+        token_budget: 8000
+      })
+    );
+
+    assert.ok(!("code" in packet));
+
+    const allNodes = [
+      ...packet.local_authority.nodes,
+      ...packet.exact_record_links.nodes,
+      ...packet.scoped_local_context.nodes,
+      ...packet.governing_world_context.nodes,
+      ...packet.impact_surfaces.nodes
+    ];
+    const seedCf = allNodes.find((node) => node.id === "CF-0037");
+    assert.equal(seedCf?.record?.id, "CF-0037");
+    assert.deepEqual(seedCf?.record?.distribution, {
+      who_can_do_it: ["stationkeeper children"],
+      who_cannot_easily_do_it: ["outsiders"]
+    });
+    assert.deepEqual(seedCf?.record?.costs_and_limits, ["Requires family trust."]);
+    assert.equal(seedCf?.record?.notes, "Seed CF body must not be preview-only.");
+
+    const prioritySection = allNodes.find((node) => node.id === "SEC-ELF-001");
+    assert.equal(prioritySection?.record?.id, "SEC-ELF-001");
+    assert.equal(prioritySection?.record?.file_class, "EVERYDAY_LIFE");
+    assert.deepEqual(prioritySection?.record?.touched_by_cf, ["CF-0037"]);
+
+    const nonPrioritySection = allNodes.find((node) => node.id === "SEC-MTS-002");
+    assert.equal(nonPrioritySection?.record, undefined);
+    assert.equal(typeof nonPrioritySection?.body_preview, "string");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

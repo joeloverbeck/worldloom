@@ -6,7 +6,8 @@ import type {
   ContextPacketNode,
   ContextPacketRisk,
   DeliveryMode,
-  PacketNodeRow
+  PacketNodeRow,
+  PacketRecordProjection
 } from "./shared";
 import { loadPacketNodes, parsePacketNodeRecord, uniqueStrings } from "./shared";
 
@@ -150,6 +151,16 @@ const PROTECTED_SURFACES = [
   "audits/"
 ] as const;
 
+const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
+  "EVERYDAY_LIFE",
+  "PEOPLES_AND_SPECIES",
+  "INSTITUTIONS",
+  "ECONOMY_AND_RESOURCES",
+  "GEOGRAPHY"
+]);
+
+const CF_ID_PATTERN = /^CF-\d{4}$/;
+
 function addReason(
   orderedNodeIds: string[],
   reasons: Map<string, string>,
@@ -269,8 +280,121 @@ function findCharacterGenerationRequiredNodeIds(
   }));
 }
 
-function projectCharacterGenerationGoverningRecord(
-  row: PacketNodeRow
+function stringArrayField(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+function loadSeedRelevantCanonFactIds(
+  db: Database.Database,
+  worldSlug: string,
+  seedNodeIds: readonly string[]
+): Set<string> {
+  const seedIds = uniqueStrings(seedNodeIds);
+  const relevant = new Set<string>();
+
+  if (seedIds.length === 0) {
+    return relevant;
+  }
+
+  const seedRows = db
+    .prepare(
+      `
+        SELECT node_id, node_type, body
+        FROM nodes
+        WHERE world_slug = ?
+          AND node_id IN (${seedIds.map(() => "?").join(", ")})
+      `
+    )
+    .all(worldSlug, ...seedIds) as Array<{ node_id: string; node_type: string; body: string }>;
+
+  for (const row of seedRows) {
+    if (row.node_type === "canon_fact_record" && CF_ID_PATTERN.test(row.node_id)) {
+      relevant.add(row.node_id);
+    }
+
+    if (row.node_type === "section") {
+      const parsed = parsePacketNodeRecord({
+        node_id: row.node_id,
+        world_slug: worldSlug,
+        node_type: "section",
+        file_path: "",
+        heading_path: null,
+        body: row.body,
+        summary: null
+      });
+      for (const cfId of stringArrayField(parsed?.touched_by_cf)) {
+        if (CF_ID_PATTERN.test(cfId)) {
+          relevant.add(cfId);
+        }
+      }
+    }
+  }
+
+  const edgeRows = db
+    .prepare(
+      `
+        SELECT e.source_node_id, e.target_node_id, e.target_unresolved_ref, source.node_type AS source_type, target.node_type AS target_type
+        FROM edges e
+        LEFT JOIN nodes source
+          ON source.world_slug = ?
+          AND source.node_id = e.source_node_id
+        LEFT JOIN nodes target
+          ON target.world_slug = ?
+          AND target.node_id = e.target_node_id
+        WHERE e.source_node_id IN (${seedIds.map(() => "?").join(", ")})
+          OR e.target_node_id IN (${seedIds.map(() => "?").join(", ")})
+      `
+    )
+    .all(worldSlug, worldSlug, ...seedIds, ...seedIds) as Array<{
+      source_node_id: string;
+      target_node_id: string | null;
+      target_unresolved_ref: string | null;
+      source_type: string | null;
+      target_type: string | null;
+    }>;
+
+  for (const row of edgeRows) {
+    if (row.source_type === "canon_fact_record" && CF_ID_PATTERN.test(row.source_node_id)) {
+      relevant.add(row.source_node_id);
+    }
+    if (
+      row.target_node_id !== null &&
+      row.target_type === "canon_fact_record" &&
+      CF_ID_PATTERN.test(row.target_node_id)
+    ) {
+      relevant.add(row.target_node_id);
+    }
+    if (row.target_unresolved_ref !== null && CF_ID_PATTERN.test(row.target_unresolved_ref)) {
+      relevant.add(row.target_unresolved_ref);
+    }
+  }
+
+  return relevant;
+}
+
+function normalizedFileClass(value: unknown): string | null {
+  return typeof value === "string" ? value.trim().toUpperCase() : null;
+}
+
+export function createCharacterGenerationRecordProjection(
+  db: Database.Database,
+  worldSlug: string,
+  seedNodeIds: readonly string[]
+): PacketRecordProjection {
+  const seedRelevantCanonFactIds = loadSeedRelevantCanonFactIds(db, worldSlug, seedNodeIds);
+
+  return (row: PacketNodeRow): Record<string, unknown> | undefined => {
+    return projectCharacterGenerationRecord(row, seedRelevantCanonFactIds);
+  };
+}
+
+function projectCharacterGenerationRecord(
+  row: PacketNodeRow,
+  seedRelevantCanonFactIds: ReadonlySet<string>
 ): Record<string, unknown> | undefined {
   const parsed = parsePacketNodeRecord(row);
   if (parsed === undefined) {
@@ -293,6 +417,22 @@ function projectCharacterGenerationGoverningRecord(
       domains_touched: parsed.domains_touched,
       extensions: parsed.extensions
     };
+  }
+
+  if (row.node_type === "canon_fact_record" && seedRelevantCanonFactIds.has(row.node_id)) {
+    return parsed;
+  }
+
+  if (row.node_type === "section") {
+    const fileClass = normalizedFileClass(parsed.file_class);
+    const touchedByCf = stringArrayField(parsed.touched_by_cf);
+    if (
+      fileClass !== null &&
+      CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES.has(fileClass) &&
+      touchedByCf.some((cfId) => seedRelevantCanonFactIds.has(cfId))
+    ) {
+      return parsed;
+    }
   }
 
   return undefined;
@@ -330,7 +470,8 @@ export async function buildGoverningWorldContext(
   worldSlug: string,
   taskType: TaskType,
   localityNodes: readonly ContextPacketNode[],
-  deliveryMode: DeliveryMode
+  deliveryMode: DeliveryMode,
+  recordProjection?: PacketRecordProjection
 ): Promise<{
   active_rules: string[];
   protected_surfaces: string[];
@@ -361,10 +502,13 @@ export async function buildGoverningWorldContext(
     addReason(orderedNodeIds, reasons, nodeId, "Mystery Reserve firewall for the locality-first packet");
   }
 
+  const characterGenerationProjection =
+    recordProjection ?? createCharacterGenerationRecordProjection(db, worldSlug, []);
+
   const nodes =
     taskType === "character_generation"
       ? loadPacketNodes(db, worldSlug, orderedNodeIds, {
-          recordProjection: projectCharacterGenerationGoverningRecord,
+          recordProjection: characterGenerationProjection,
           deliveryMode
         })
       : loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });

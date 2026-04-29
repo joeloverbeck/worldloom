@@ -168,7 +168,7 @@ Use `full` when downstream consumers need preview-level content for ranking, cit
 
 ### `summary_only`
 
-Each node carries a non-null `summary` field (≤100 characters, derived from the index `summary`, or the record's `notes` first line, or the body's first sentence if no DB summary is present) and **omits** `body_preview` entirely. Governing-context `record` projections (e.g. `character_generation` invariant and Mystery Reserve fields) are unaffected by the delivery mode and remain attached when their task-specific assembly normally includes them.
+Each node carries a non-null `summary` field (≤100 characters, derived from the index `summary`, or the record's `notes` first line, or the body's first sentence if no DB summary is present) and **omits** `body_preview` entirely. Task-specific `record` projections (e.g. `character_generation` invariant fields, Mystery Reserve firewall fields, seed-relevant CF records, and seed-touched priority SEC records) are unaffected by the delivery mode and remain attached when their task-specific assembly normally includes them.
 
 Use `summary_only` when consumers only need an "index of what exists" — e.g. Phase 7 firewall scoping in `canon-addition`, or Phase 1-3 claim planning in `diegetic-artifact-generation` — and will retrieve specific bodies via `mcp__worldloom__get_record(record_id)` per identified id. The compact shape lets the same `token_budget` cover materially broader locality coverage.
 
@@ -202,7 +202,7 @@ When `node_classes` is absent, no filtering is applied — every layer's `nodes`
 
 ### Composition with `delivery_mode`
 
-`node_classes` and `delivery_mode` compose orthogonally: a request with `node_classes: ['mystery_reserve_entry']` and `delivery_mode: 'summary_only'` returns mystery-only nodes carrying `summary` (≤100 chars) with `body_preview` omitted. Governing-context `record` projections (e.g. `character_generation` invariant and Mystery Reserve fields) are unaffected by either parameter and remain attached when their task-specific assembly normally includes them.
+`node_classes` and `delivery_mode` compose orthogonally: a request with `node_classes: ['mystery_reserve_entry']` and `delivery_mode: 'summary_only'` returns mystery-only nodes carrying `summary` (≤100 chars) with `body_preview` omitted. Task-specific `record` projections (e.g. `character_generation` invariant fields, Mystery Reserve firewall fields, seed-relevant CF records, and seed-touched priority SEC records) are unaffected by either parameter and remain attached when their task-specific assembly normally includes them.
 
 ### Filter invariants
 
@@ -272,6 +272,7 @@ The response's `nodes` arrays contain only `mystery_reserve_entry` records; the 
 - `exact_record_links`: exact linked batches, artifacts, or source records
 - `scoped_local_context`: local place, institution, and relation nodes needed to avoid decontextualized generation
 - `governing_world_context`: no-world-write rules, distribution discipline, all invariant records with full parsed `record` bodies, all Mystery Reserve records with parsed firewall fields (`id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`), Mystery Reserve firewall on locality intersection nodes
+- task-specific projections: for `character_generation`, seed-relevant `canon_fact_record` nodes and seed-touched priority `section` nodes (`EVERYDAY_LIFE`, `PEOPLES_AND_SPECIES`, `INSTITUTIONS`, `ECONOMY_AND_RESOURCES`, `GEOGRAPHY`) carry full parsed `record` bodies wherever they appear in packet layers; non-priority and non-seed-touched sections remain preview/summary-only unless retrieved via `get_record`
 - `impact_surfaces`: adjacent dossier or audit surfaces likely to matter before closeout
 
 ### Continuity audit

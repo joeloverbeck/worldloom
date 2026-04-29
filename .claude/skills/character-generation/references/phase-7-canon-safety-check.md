@@ -38,7 +38,7 @@ Fail triggers (send to Phase 7d):
 
 ## Phase 7c: Distribution/Scope Conformance
 
-For every capability listed in the character's `capabilities` block, look up matching Canon Fact Records via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: <capability domain>})` filtered to capability / technology / magic practice / artifact CFs and `get_record(cf_id)` for each candidate. For each match:
+For every capability listed in the character's `capabilities` block, first use any seed-relevant Canon Fact Records already delivered by the context packet with full parsed `record` bodies. For capability CFs not pulled in as seeds, look up matching records via `mcp__worldloom__search_nodes(node_type='canon_fact_record', filters={domain: <capability domain>})` filtered to capability / technology / magic practice / artifact CFs and `get_record(cf_id)` for each candidate. For each match:
 
 - if the character belongs to a group named in `distribution.who_can_do_it`, pass.
 - if the character belongs to a group named in `distribution.who_cannot_easily_do_it`, fail unless Phase 2 institutional embedding explicitly justifies the exception (e.g., "daughter of a smuggler initiated into the craft at age eight, against her clan's taboo"). Exceptions are recorded in `world_consistency.distribution_exceptions` with the form `<CF-id>: <justification citing Phase 2 embedding>`.

@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 
-import type { ContextPacketNode, DeliveryMode } from "./shared";
+import type { ContextPacketNode, DeliveryMode, PacketRecordProjection } from "./shared";
 import { loadPacketNodes } from "./shared";
 
 const LOCAL_CONTEXT_EDGE_TYPES = [
@@ -119,7 +119,8 @@ export function buildScopedLocalContext(
   worldSlug: string,
   sourceNodeIds: readonly string[],
   baseNodes: readonly ContextPacketNode[],
-  deliveryMode: DeliveryMode
+  deliveryMode: DeliveryMode,
+  recordProjection?: PacketRecordProjection
 ): {
   nodes: ContextPacketNode[];
   why_included: string[];
@@ -149,7 +150,12 @@ export function buildScopedLocalContext(
     addReason(orderedNodeIds, reasons, nodeId, "adjacent same-file context for the local authority");
   }
 
-  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
+  const nodes = loadPacketNodes(
+    db,
+    worldSlug,
+    orderedNodeIds,
+    recordProjection === undefined ? { deliveryMode } : { deliveryMode, recordProjection }
+  );
   return {
     nodes,
     why_included: nodes.map((node) => reasons.get(node.id) ?? "scoped local context")

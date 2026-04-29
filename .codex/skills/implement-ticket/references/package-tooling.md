@@ -4,6 +4,12 @@ Use this reference for tickets whose owned seam includes `tools/`, package manif
 
 ## Reassessment
 
+### Compact Package Checkpoint
+
+Before coding a package/tool ticket, inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
+
+For `tools/world-mcp` context-packet projection or payload-shape tickets, verify where the target node types actually appear across all packet layers before coding. Do not assume the named layer in the ticket is the only implementation seam: inspect `local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, and `impact_surfaces` call sites, then pass projection or payload changes through every layer that can carry the target nodes. Record any broader-than-drafted but same-seam layer coverage in `Assumption Reassessment` and closeout.
+
 - Inspect the package's `package.json`, `tsconfig.json`, and existing package-local docs/examples before trusting drafted command shapes, module formats, or emitted artifact paths.
 - Before the first package-manager, build, test, formatter, generator, or codegen command likely to create ignored artifacts, run `git status --short --ignored <package-dir>` or an equivalent package-scoped ignored-aware check. Repeat it before final response, then classify ignored artifacts as pre-existing, expected generated artifacts, cleaned state, or unexpected fallout. Do not rely on `git status --short` alone for `node_modules/`, `dist/`, coverage output, caches, or compiled test output.
 - If a verification command builds or tests multiple packages, snapshot ignored state for every package the command may touch before the sweep when feasible. If you skip non-owned package snapshots, record that limitation before closeout so later `dist/`, `node_modules/`, cache, or coverage dirt is not over-attributed to the active ticket.

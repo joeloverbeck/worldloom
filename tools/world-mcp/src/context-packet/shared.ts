@@ -106,6 +106,8 @@ export interface PacketNodeRow {
   summary: string | null;
 }
 
+export type PacketRecordProjection = (row: PacketNodeRow) => Record<string, unknown> | undefined;
+
 export function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values)];
 }
@@ -246,7 +248,7 @@ export function loadPacketNodes(
   worldSlug: string,
   nodeIds: readonly string[],
   options: {
-    recordProjection?: (row: PacketNodeRow) => Record<string, unknown> | undefined;
+    recordProjection?: PacketRecordProjection;
     deliveryMode?: DeliveryMode;
   } = {}
 ): ContextPacketNode[] {
@@ -312,4 +314,3 @@ export function parsePacketNodeRecord(row: PacketNodeRow): Record<string, unknow
 
   return parsed as Record<string, unknown>;
 }
-

@@ -4,7 +4,8 @@ import {
   loadPacketNodes,
   uniqueStrings,
   type ContextPacketNode,
-  type DeliveryMode
+  type DeliveryMode,
+  type PacketRecordProjection
 } from "./shared";
 
 export function buildExactRecordLinks(
@@ -12,7 +13,8 @@ export function buildExactRecordLinks(
   worldSlug: string,
   sourceNodeIds: readonly string[],
   excludedNodeIds: readonly string[],
-  deliveryMode: DeliveryMode
+  deliveryMode: DeliveryMode,
+  recordProjection?: PacketRecordProjection
 ): {
   nodes: ContextPacketNode[];
   why_included: string[];
@@ -38,7 +40,12 @@ export function buildExactRecordLinks(
   const orderedNodeIds = uniqueStrings(
     rows.map((row) => row.target_node_id).filter((nodeId) => !excluded.has(nodeId))
   );
-  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
+  const nodes = loadPacketNodes(
+    db,
+    worldSlug,
+    orderedNodeIds,
+    recordProjection === undefined ? { deliveryMode } : { deliveryMode, recordProjection }
+  );
 
   return {
     nodes,
