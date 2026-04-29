@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: No engine code; documentation propagation across `.claude/skills/canon-addition/`, `.claude/skills/create-base-world/`, `.claude/skills/diegetic-artifact-generation/` — three skill prose files plus their relevant references covering: (a) `validator_failed` engine response and unrelated-state escalation rule; (b) `world-index sync <world-slug>` requirement after direct-Edit to schema-validated hybrid frontmatter; (c) submit-path-by-envelope-size selection (MCP path vs CLI path); (d) `index_stale` engine response handling once ENGINESYNC-001 lands.
-**Deps**: Pairs with ENGINESYNC-001 — when ENGINESYNC-001 lands, this ticket must include `index_stale` alongside `validator_failed` in each sibling skill's failure-mode discussion. The ticket can be implemented in two passes: (1) propagate the existing character-generation guidance now (validator_failed + index-sync + CLI path); (2) when ENGINESYNC-001 ships the new error code, add `index_stale` to the same skill prose. Recommended single-shot implementation: land both tickets in the same release.
+**Engine Changes**: No engine code; documentation propagation across `.claude/skills/canon-addition/`, `.claude/skills/create-base-world/`, `.claude/skills/diegetic-artifact-generation/` — three skill prose files plus their relevant references covering: (a) `validator_failed` engine response and unrelated-state escalation rule; (b) `world-index sync <world-slug>` requirement after direct-Edit to schema-validated hybrid frontmatter; (c) submit-path-by-envelope-size selection (MCP path vs CLI path); (d) `index_stale` engine response handling now that ENGINESYNC-001 has landed.
+**Deps**: Pairs with `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md` — ENGINESYNC-001 landed the `index_stale` engine error code and character-generation source prose, so this ticket must include `index_stale` alongside `validator_failed` in each sibling skill's failure-mode discussion. Recommended implementation: land the sibling-skill propagation before release so the engine and skill prose ship together.
 
 ## Problem
 
@@ -32,7 +32,7 @@ This ticket propagates the character-generation guidance to the three siblings a
 7. Schema impact: documentation only. No engine code changes; no skill output schema changes; no consumer-skill schema migration. Pure prose propagation.
 8. Adjacent contradictions exposed by reassessment: each sibling skill may already have its own Phase-N or step-N commit guidance with partially-overlapping content. The propagation must not duplicate existing guidance — read each sibling's existing commit-step prose during implementation, identify what is already covered, and add only the missing pieces. For example, if canon-addition's accept-path.md already documents the `world-index sync` requirement (because canon-addition was the first skill to write `_source/` records and may have inherited the discipline), this ticket should not double-document.
 9. Pipeline-wide grep for current coverage: `rg -n "validator_failed|world-index sync|submit-path selection|index_stale" .claude/skills/` shows the current state per skill. After implementation, all four engine-submitting skills should match on these tokens with consistent operational prose.
-10. Coordination with ENGINESYNC-001: the `index_stale` error code does not exist yet. This ticket can land in two stages — stage 1 propagates the three currently-documented topics (validator_failed unrelated-state, index-sync after direct-Edit, CLI path); stage 2 adds `index_stale` once ENGINESYNC-001 ships. Recommended: single-shot release in which both tickets ship together so the skill prose introduces the error code at the same time the engine emits it.
+10. Coordination with ENGINESYNC-001: `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md` landed the `index_stale` error code, `docs/HARD-GATE-DISCIPLINE.md` update, and character-generation source prose. This ticket should now propagate all four topics, including `index_stale`, to the three sibling engine-submitting skills before release.
 
 ## Architecture Check
 
@@ -42,7 +42,7 @@ This ticket propagates the character-generation guidance to the three siblings a
 
 ## Verification Layers
 
-1. Each of the three sibling skills' commit-step prose includes the four documented topics (validator_failed unrelated-state escalation; index-sync after direct-Edit; CLI path size selection; `index_stale` once ENGINESYNC-001 lands) → grep-proof: `rg -n "validator_failed|world-index sync|<path>/cli/submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
+1. Each of the three sibling skills' commit-step prose includes the four documented topics (validator_failed unrelated-state escalation; index-sync after direct-Edit; CLI path size selection; `index_stale`) → grep-proof: `rg -n "validator_failed|world-index sync|<path>/cli/submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
 2. The propagated prose is operator-runnable — file paths, command strings, and engine response codes match the actual engine + indexer + CLI submission paths in `tools/patch-engine/`, `tools/world-index/`, `tools/world-mcp/` → manual review during implementation against the same paths character-generation cites.
 3. Each sibling skill's prose does NOT duplicate guidance that already exists in that skill (no double-documentation) → manual review during implementation.
 4. No engine behavior changes; pure documentation → no test coverage required, but `cd tools/world-mcp && npm test` and `cd tools/patch-engine && npm test` should still pass (regression baseline; documentation-only ticket).
@@ -81,9 +81,9 @@ For each sibling skill missing this guidance, add:
 
 > **Submit-path selection by envelope size**: for envelopes >50KB (typical of full-prose artifacts; canon-addition accept-paths and diegetic-artifact-generation submit-paths frequently exceed this; create-base-world genesis bundles routinely exceed it), submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Submitting the plan: MCP path (default) and CLI path (size-constrained bypass) for full equivalence guarantees.
 
-### 5. Add `index_stale` clause (paired with ENGINESYNC-001)
+### 5. Add `index_stale` clause
 
-When ENGINESYNC-001 ships the new error code, add to each sibling skill's commit-step prose:
+Because ENGINESYNC-001 has shipped the new error code, add to each sibling skill's commit-step prose:
 
 > On `index_stale`, the engine has detected that the world index has diverged from on-disk content (typically because a direct-Edit to a hybrid-file frontmatter was not followed by an index sync). The error response's `detail.divergent_files[].file_path` names the divergent files. Run `node tools/world-index/dist/src/cli.js sync <world-slug>` to refresh the index, then resubmit the patch plan with the same approval token (no re-sign required as long as the token has not expired).
 
@@ -99,14 +99,14 @@ After all three sibling skills' propagation lands, grep for the four topics acro
 - `.claude/skills/diegetic-artifact-generation/SKILL.md` (modify — commit-step prose; structurally mirrors character-generation Phase 9)
 - `.claude/skills/diegetic-artifact-generation/references/<commit-step>.md` (modify if the commit-step lives in a reference file; verify during implementation)
 
-The character-generation skill is the SOURCE of the propagation, not a target — its prose was added during the recent audit and is the canonical pattern. No edits to `.claude/skills/character-generation/` in this ticket EXCEPT if ENGINESYNC-001's `index_stale` clause (which lands in character-generation's Phase 9 step 1 per ENGINESYNC-001 §What to Change item 5) is co-released with this ticket — in that case the character-generation edit is already covered by ENGINESYNC-001 and is not duplicated here.
+The character-generation skill is the SOURCE of the propagation, not a target — its prose was added during the recent audit and the `index_stale` clause landed with `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md`. Do not duplicate that character-generation edit here.
 
 ## Out of Scope
 
-- Engine code changes. This is a documentation-propagation ticket. Engine-side improvements (the `index_stale` error code, content_hash divergence detection) live in ENGINESYNC-001.
+- Engine code changes. This is a documentation-propagation ticket. Engine-side improvements (the `index_stale` error code, content_hash divergence detection) live in `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md`.
 - Centralizing the operational guidance into `docs/HARD-GATE-DISCIPLINE.md` instead of skill prose. The current pattern (skill prose carries discipline; HARD-GATE-DISCIPLINE.md carries the canonical reference) matches the character-generation audit; this ticket preserves the pattern for consistency. A future consolidation ticket can revisit if the per-skill prose drifts.
 - Adding new failure-mode codes beyond `validator_failed` / `index_stale` / `approval_expired` / `approval_replayed`. The current set is documented in `docs/HARD-GATE-DISCIPLINE.md`; this ticket propagates them, not invents new ones.
-- Updating `docs/HARD-GATE-DISCIPLINE.md` itself. The character-generation audit already pointed at HARD-GATE-DISCIPLINE.md as the canonical reference; this ticket adds skill-prose pointers to that doc, not the doc itself. ENGINESYNC-001 owns the HARD-GATE-DISCIPLINE.md update (adding `index_stale` to the failure-mode list).
+- Updating `docs/HARD-GATE-DISCIPLINE.md` itself. The character-generation audit already pointed at HARD-GATE-DISCIPLINE.md as the canonical reference; this ticket adds skill-prose pointers to that doc, not the doc itself. `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md` owns the HARD-GATE-DISCIPLINE.md update that added `index_stale` to the failure-mode list.
 - Auditing the three sibling skills for unrelated improvements. This is a focused propagation ticket; broader sibling audits remain separate skill-audit invocations.
 
 ## Acceptance Criteria
@@ -117,7 +117,7 @@ The character-generation skill is the SOURCE of the propagation, not a target �
 2. Grep-proof: `rg -n "validator_failed" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
 3. Grep-proof: `rg -n "world-index sync|tools/world-index/dist/src/cli.js sync" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
 4. Grep-proof: `rg -n "submit-patch-plan.js|CLI path" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
-5. (When ENGINESYNC-001 lands) Grep-proof: `rg -n "index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
+5. Grep-proof: `rg -n "index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
 
 ### Invariants
 

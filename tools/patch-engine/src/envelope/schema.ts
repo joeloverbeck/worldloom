@@ -98,6 +98,22 @@ export interface PatchReceipt {
   validators_run?: ValidatorRunReceipt[];
 }
 
+export type EngineErrorCode =
+  | "approval_expired"
+  | "approval_hash_mismatch"
+  | "approval_invalid_hmac"
+  | "approval_malformed"
+  | "approval_replayed"
+  | "envelope_shape_invalid"
+  | "id_allocation_race"
+  | "index_stale"
+  | "patch_engine_error"
+  | "validator_error"
+  | "validator_failed"
+  | "validator_unavailable"
+  | "world_locked"
+  | (string & {});
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
