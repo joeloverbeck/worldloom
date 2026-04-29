@@ -1,6 +1,6 @@
 # COMMITGUIDE-001: Propagate Phase 9 commit failure-mode discipline to sibling engine-submitting skills
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: No engine code; documentation propagation across `.claude/skills/canon-addition/`, `.claude/skills/create-base-world/`, `.claude/skills/diegetic-artifact-generation/` — three skill prose files plus their relevant references covering: (a) `validator_failed` engine response and unrelated-state escalation rule; (b) `world-index sync <world-slug>` requirement after direct-Edit to schema-validated hybrid frontmatter; (c) submit-path-by-envelope-size selection (MCP path vs CLI path); (d) `index_stale` engine response handling now that ENGINESYNC-001 has landed.
@@ -8,31 +8,31 @@
 
 ## Problem
 
-A character-generation skill audit (this session, 2026-04-28) added documentation to its Phase 9 commit step covering three operational gaps surfaced during the CHAR-0004 (Rill) generation run:
+At intake, a character-generation skill audit (2026-04-28) had added documentation to its Phase 9 commit step covering three operational gaps surfaced during the CHAR-0004 (Rill) generation run:
 
 1. **`validator_failed` failure-mode response**: The engine's pre-apply validator runs against the indexed world state; failures can name files unrelated to the new artifact being submitted. The skill now documents the response: if the cited file is the new artifact, fix and resubmit; if the cited file is unrelated existing world state, pause and escalate to the user — the canon-reading skill must not silently modify other canon-adjacent files.
 2. **`world-index sync <world-slug>` after direct-Edit to hybrid frontmatter**: After any user-authorized direct-Edit to a schema-validated hybrid frontmatter file (`worlds/<slug>/characters/`, `diegetic-artifacts/`, `adjudications/`), the world index must be re-synced before resubmitting; otherwise the validator returns the identical-looking error against the stale index.
 3. **Submit-path-by-envelope-size selection**: For envelopes >50KB (typical of full-prose dossiers), the CLI submit path (`node tools/world-mcp/dist/src/cli/submit-patch-plan.js`) bypasses MCP transport size constraints. Functionally equivalent to the MCP path; same engine code, same `PatchReceipt`, same failure-mode codes.
 
-These same gaps exist in three sibling engine-submitting skills: `canon-addition`, `create-base-world`, `diegetic-artifact-generation`. All three submit patch plans via `mcp__worldloom__submit_patch_plan` and would experience the same friction on (a) unrelated-state validator failures (especially canon-addition, which writes multiple `_source/` records and is the most likely to hit pre-existing schema violations elsewhere in the world); (b) post-direct-Edit index staleness (any audit-flow that modifies a non-engine surface to fix a blocking issue); (c) large-envelope submissions (canon-addition's accept-path can produce 50-100KB envelopes; create-base-world's genesis multi-record set is also large).
+At intake, those same gaps existed in three sibling engine-submitting skills: `canon-addition`, `create-base-world`, `diegetic-artifact-generation`. All three submit patch plans via `mcp__worldloom__submit_patch_plan` and would experience the same friction on (a) unrelated-state validator failures (especially canon-addition, which writes multiple `_source/` records and is the most likely to hit pre-existing schema violations elsewhere in the world); (b) post-direct-Edit index staleness (any audit-flow that modifies a non-engine surface to fix a blocking issue); (c) large-envelope submissions (canon-addition's accept-path can produce 50-100KB envelopes; create-base-world's genesis multi-record set is also large).
 
-This ticket propagates the character-generation guidance to the three siblings as documentation-only edits.
+This ticket propagated the character-generation guidance to the three siblings as documentation-only edits.
 
 ## Assumption Reassessment (2026-04-29)
 
 1. The source of the propagation is `.claude/skills/character-generation/SKILL.md` Phase 9 step 1, last edited during the recent character-generation audit-implementation pass. Verified by grep: `rg -n "Submit-path selection by envelope size|validator_failed|world-index sync" .claude/skills/character-generation/SKILL.md` returns hits in Phase 9 step 1's failure-mode discussion.
 2. The three sibling engine-submitting skills are: `canon-addition` (submits CF / CH / INV / M / OQ / ENT / SEC creation + extension append plans); `create-base-world` (submits genesis multi-record world-bundle plans); `diegetic-artifact-generation` (submits `append_diegetic_artifact_record` plans, structurally identical to character-generation's `append_character_record` plans). Verified by grep: `rg -n "submit_patch_plan" .claude/skills/` returns hits in each of these four skills.
 3. Each sibling skill's commit step lives in a slightly different location:
-   - `canon-addition`: per `.claude/skills/canon-addition/SKILL.md` and the references it loads (likely `references/accept-path.md` for the accept-outcome submit path; verify exact file during implementation by listing `.claude/skills/canon-addition/references/`).
-   - `create-base-world`: per `.claude/skills/create-base-world/SKILL.md` (likely a single-file skill or with templates; verify during implementation).
-   - `diegetic-artifact-generation`: per `.claude/skills/diegetic-artifact-generation/SKILL.md` and its references; the structure mirrors character-generation.
+   - `canon-addition`: `.claude/skills/canon-addition/SKILL.md` Phase 15a submit prose, plus the phase-local summary in `.claude/skills/canon-addition/references/retrieval-tool-tree.md`. The drafted `references/accept-path.md` candidate does not exist in the live repo.
+   - `create-base-world`: `.claude/skills/create-base-world/SKILL.md` Phase 11.
+   - `diegetic-artifact-generation`: `.claude/skills/diegetic-artifact-generation/SKILL.md` Phase 9.
 4. Cross-skill boundary under audit: the operational contract between the four engine-submitting skills (consumers of the patch engine's submit response) and the engine response shape (provider). Pre-fix, only character-generation documents the full failure-mode response; the three siblings rely on `docs/HARD-GATE-DISCIPLINE.md` for the canonical reference. The `HARD-GATE-DISCIPLINE.md` doc covers approval_token discipline + sign-and-submit but not the validator_failed unrelated-state escalation rule, the index-sync requirement, or the CLI path size threshold.
 5. FOUNDATIONS principle motivating this ticket: §Tooling Recommendation + §Change Control Policy. Engine-submitting skills are the canonical write surface for canon mutations; their commit step is the operator's main interaction with the engine's safety mechanisms. Documenting failure modes consistently across the four skills lets operators rely on the same recovery flow regardless of which skill they are running.
 6. HARD-GATE / canon-write ordering: not weakened. The propagated prose adds operational guidance for failure modes; it does not change the HARD-GATE structural enforcement (Hook 3 blocks raw `Edit`/`Write` on `_source/<subdir>/*.yaml`; the engine validates and writes atomically; user approval gates the submit). The new `index_stale` error code (from ENGINESYNC-001) is a fail-loud safety net, not a HARD-GATE bypass.
 7. Schema impact: documentation only. No engine code changes; no skill output schema changes; no consumer-skill schema migration. Pure prose propagation.
-8. Adjacent contradictions exposed by reassessment: each sibling skill may already have its own Phase-N or step-N commit guidance with partially-overlapping content. The propagation must not duplicate existing guidance — read each sibling's existing commit-step prose during implementation, identify what is already covered, and add only the missing pieces. For example, if canon-addition's accept-path.md already documents the `world-index sync` requirement (because canon-addition was the first skill to write `_source/` records and may have inherited the discipline), this ticket should not double-document.
-9. Pipeline-wide grep for current coverage: `rg -n "validator_failed|world-index sync|submit-path selection|index_stale" .claude/skills/` shows the current state per skill. After implementation, all four engine-submitting skills should match on these tokens with consistent operational prose.
-10. Coordination with ENGINESYNC-001: `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md` landed the `index_stale` error code, `docs/HARD-GATE-DISCIPLINE.md` update, and character-generation source prose. This ticket should now propagate all four topics, including `index_stale`, to the three sibling engine-submitting skills before release.
+8. Adjacent contradictions exposed by reassessment: the sibling skills already had approval-expiry/replay guidance, but only character-generation carried the full failure-mode block. The implementation extended the existing commit-step paragraphs rather than creating a second disconnected commit section.
+9. Pipeline-wide grep for current coverage: `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` now returns hits in each target skill. `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/character-generation/SKILL.md` confirms the source skill still carries the canonical pattern.
+10. Coordination with ENGINESYNC-001: `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md` landed the `index_stale` error code, `docs/HARD-GATE-DISCIPLINE.md` update, and character-generation source prose. This ticket propagated all four topics, including `index_stale`, to the three sibling engine-submitting skills before release.
 
 ## Architecture Check
 
@@ -42,7 +42,7 @@ This ticket propagates the character-generation guidance to the three siblings a
 
 ## Verification Layers
 
-1. Each of the three sibling skills' commit-step prose includes the four documented topics (validator_failed unrelated-state escalation; index-sync after direct-Edit; CLI path size selection; `index_stale`) → grep-proof: `rg -n "validator_failed|world-index sync|<path>/cli/submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
+1. Each of the three sibling skills' commit-step prose includes the four documented topics (validator_failed unrelated-state escalation; index-sync after direct-Edit; CLI path size selection; `index_stale`) → grep-proof: `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` returns hits in each skill.
 2. The propagated prose is operator-runnable — file paths, command strings, and engine response codes match the actual engine + indexer + CLI submission paths in `tools/patch-engine/`, `tools/world-index/`, `tools/world-mcp/` → manual review during implementation against the same paths character-generation cites.
 3. Each sibling skill's prose does NOT duplicate guidance that already exists in that skill (no double-documentation) → manual review during implementation.
 4. No engine behavior changes; pure documentation → no test coverage required, but `cd tools/world-mcp && npm test` and `cd tools/patch-engine && npm test` should still pass (regression baseline; documentation-only ticket).
@@ -54,10 +54,10 @@ This ticket propagates the character-generation guidance to the three siblings a
 
 Before propagating, for each of `canon-addition`, `create-base-world`, `diegetic-artifact-generation`:
 
-- List the skill directory (`.claude/skills/<skill>/`) and locate the commit-step prose. Likely candidates:
-  - `canon-addition`: `references/accept-path.md` for the accept-outcome submit; possibly `SKILL.md` Phase N for general submit-path guidance.
-  - `create-base-world`: `SKILL.md` (single-file or near-single-file skill).
-  - `diegetic-artifact-generation`: `SKILL.md` Phase N; structurally mirrors character-generation, so the commit-step location is likely a Phase 9-equivalent.
+- List the skill directory (`.claude/skills/<skill>/`) and locate the commit-step prose. Live locations:
+  - `canon-addition`: `SKILL.md` Phase 15a plus `references/retrieval-tool-tree.md` Phase 15a.
+  - `create-base-world`: `SKILL.md` Phase 11.
+  - `diegetic-artifact-generation`: `SKILL.md` Phase 9.
 - Read the existing commit-step prose; identify which of the four topics are already covered.
 - Compose the per-skill addition that adds only the missing topics.
 
@@ -93,11 +93,10 @@ After all three sibling skills' propagation lands, grep for the four topics acro
 
 ## Files to Touch
 
-- `.claude/skills/canon-addition/SKILL.md` (modify — commit-step prose; verify exact location during implementation)
-- `.claude/skills/canon-addition/references/accept-path.md` (modify — accept-outcome submit-path commit step; verify exact file during implementation by listing `references/`)
+- `.claude/skills/canon-addition/SKILL.md` (modify — Phase 15a submit prose)
+- `.claude/skills/canon-addition/references/retrieval-tool-tree.md` (modify — Phase 15a submit reference)
 - `.claude/skills/create-base-world/SKILL.md` (modify — commit-step prose)
-- `.claude/skills/diegetic-artifact-generation/SKILL.md` (modify — commit-step prose; structurally mirrors character-generation Phase 9)
-- `.claude/skills/diegetic-artifact-generation/references/<commit-step>.md` (modify if the commit-step lives in a reference file; verify during implementation)
+- `.claude/skills/diegetic-artifact-generation/SKILL.md` (modify — Phase 9 commit prose)
 
 The character-generation skill is the SOURCE of the propagation, not a target — its prose was added during the recent audit and the `index_stale` clause landed with `archive/tickets/ENGINESYNC-001-stale-index-detection-on-pre-apply-validation.md`. Do not duplicate that character-generation edit here.
 
@@ -136,3 +135,27 @@ The character-generation skill is the SOURCE of the propagation, not a target �
 1. `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` — confirms the four topics land in each sibling skill.
 2. `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/character-generation` — confirms the source skill remains the canonical pattern (regression baseline; should be unchanged unless ENGINESYNC-001 adds `index_stale` here in the same release).
 3. `cd tools/world-mcp && npm test` and `cd tools/patch-engine && npm test` — regression baseline; this ticket does not touch engine code, so both should pass without changes.
+
+## Outcome
+
+Completed: 2026-04-29.
+
+Propagated the character-generation Phase 9 commit failure-mode discipline to the three sibling engine-submitting skills:
+
+1. `.claude/skills/canon-addition/SKILL.md` Phase 15a and `.claude/skills/canon-addition/references/retrieval-tool-tree.md` now document submit-path-by-envelope-size selection, `index_stale`, `validator_failed` unrelated-state escalation, and post-direct-Edit `world-index sync` recovery.
+2. `.claude/skills/create-base-world/SKILL.md` Phase 11 now documents the same failure-mode set for genesis patch-plan submission.
+3. `.claude/skills/diegetic-artifact-generation/SKILL.md` Phase 9 now mirrors the character-generation operational guidance for artifact writes.
+
+## Verification Result
+
+1. `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/canon-addition .claude/skills/create-base-world .claude/skills/diegetic-artifact-generation` — passed; each target skill now exposes all four topics.
+2. `rg -n "validator_failed|world-index sync|submit-patch-plan.js|index_stale" .claude/skills/character-generation/SKILL.md` — passed; the source skill still carries the canonical pattern.
+3. `git diff --check` — passed.
+4. `cd tools/world-mcp && npm test` — passed, 206/206 tests.
+5. `cd tools/patch-engine && npm test` — passed, 50/50 tests.
+6. Ignored artifact check: `git status --short --ignored tools/world-mcp tools/patch-engine` shows expected ignored package artifacts from build/test surfaces: `tools/world-mcp/dist/`, `tools/world-mcp/node_modules/`, `tools/world-mcp/.secret`, `tools/patch-engine/dist/`, and `tools/patch-engine/node_modules/`.
+
+## Deviations
+
+1. The drafted `canon-addition/references/accept-path.md` and `diegetic-artifact-generation/references/<commit-step>.md` targets do not exist in the live repo. The landed edits use the live commit-step surfaces instead: `canon-addition/SKILL.md`, `canon-addition/references/retrieval-tool-tree.md`, `create-base-world/SKILL.md`, and `diegetic-artifact-generation/SKILL.md`.
+2. No engine code or tests changed. This remained documentation-only propagation, so the package test commands are regression baselines rather than owned behavior tests.
