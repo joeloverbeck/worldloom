@@ -13,7 +13,7 @@ arguments:
 
 # Emergent Pressure Events
 
-Generates a diversified batch of candidate pressure-event cards for an existing worldloom world — events the world's existing pressures plausibly produce right now, traceable to specific CFs, routed canonize / story_fuel / ambient with explicit rationale. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='emergent_pressure_events', ...)` plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; per-record retrieval pulls atomic CF / INV / M / OQ / SEC records on demand via `search_nodes` / `get_record`; surviving cards write direct-Edit on hybrid files (pressure-events are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each canonize-routed card's sidecar path is directly consumable as `canon-addition`'s `proposal_path` for separate adjudication.
+Generates a diversified batch of candidate pressure-event cards for an existing worldloom world — events the world's existing pressures plausibly produce right now, traceable to specific CFs, routed canonize / story_fuel / ambient with explicit rationale. Pre-flight loads world state primarily via direct per-record-class retrieval (`list_records` for CF / INV / M / OQ; targeted `search_nodes` / `get_record` for follow-up) plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; `get_context_packet(task_type='other', ...)` is available as a complement when explicit record-ID-shaped seed_nodes are resolvable; surviving cards write direct-Edit on hybrid files (pressure-events are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each canonize-routed card's sidecar path is directly consumable as `canon-addition`'s `proposal_path` for separate adjudication.
 
 <HARD-GATE>
 Do NOT write any file — pressure-event card, sidecar proposal card, batch manifest, INDEX.md update — until: (a) pre-flight resolves `worlds/<world-slug>/`, allocates the next `BATCH-NNNN` via `mcp__worldloom__allocate_next_id`, and loads the context packet plus FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; (b) Phase 4 Traceability Anchoring has dropped every untraceable seed (slot left empty as diagnostic signal); (c) Phase 6 Canon Safety Check passes for every surviving card with zero unrepaired violations; (d) Phase 7 Validation Tests pass with zero failures at both per-card and batch levels; (e) the user has explicitly approved the Phase 8 deliverable summary (full batch + pressure inventory + diversification audit + Canon Safety Check Trace + sidecar `proposal_card_extract` previews for every canonize-routed card + any 6e repairs + any drops). The user's approval may include a drop-list of card-IDs to exclude; dropped cards are never written, and dropped cards' sidecars are never emitted. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
@@ -88,7 +88,7 @@ Phase 8:    HARD-GATE deliverable summary --> on approval, direct-Edit
   - `batch_size` (default 5; >=1)
   - `novelty_range` (conservative / moderate / bold; default moderate)
   - `origin_type_focus` (subset of the 14-value origin_type taxonomy; empty = unrestricted)
-  - `taboo_areas` (free-form list of pressures or domains to exclude)
+  - `taboo_areas` (free-form list of pressures or domains to exclude; accepts an empty list / unset for unrestricted, a list of strings, or a sentinel phrase — `nothing`, `none`, `unrestricted`, `n/a` — interpreted as empty list. Free-text strings outside these forms are normalized to single-element lists during Phase 0 parsing.)
   - `current_date` (ISO date; default today's date)
   - `current_season` (free-form; default derived from current_date if the world has a calendar declaration in WORLD_KERNEL or ONTOLOGY, else null)
 
@@ -105,7 +105,7 @@ Phase 8:    HARD-GATE deliverable summary --> on approval, direct-Edit
 
 ## World-State Prerequisites
 
-`docs/FOUNDATIONS.md`, `worlds/<slug>/WORLD_KERNEL.md`, and `worlds/<slug>/ONTOLOGY.md` load via direct `Read` (primary-authored at the world root; not in `_source/`). The atomic-record world-state slice loads via `mcp__worldloom__get_context_packet(task_type='emergent_pressure_events', seed_nodes=[<pressure-anchor seeds>], token_budget=15000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. MCPENH-005 registered this task-specific profile so the packet prioritizes recent CH records, pressure-bearing CFs, every INV and M record, and the institution / economy-and-resources / magic-or-tech-systems / peoples-and-species sections that drive Phase 1 pressure inventory and Phase 6 Canon Safety Check. Pre-flight seeds the packet from a small set of high-pressure anchor nodes named in WORLD_KERNEL §Core Pressures plus any `parameters_path`-supplied origin_type_focus list.
+`docs/FOUNDATIONS.md`, `worlds/<slug>/WORLD_KERNEL.md`, and `worlds/<slug>/ONTOLOGY.md` load via direct `Read` (primary-authored at the world root; not in `_source/`). The atomic-record world-state slice loads primarily via direct per-record-class retrieval — `list_records(world_slug, record_type=...)` for every CF / INV / M / OQ batch + `search_nodes` / `get_record` for targeted follow-up — because `get_context_packet`'s registered `task_type` enum does not yet include `'emergent_pressure_events'`. When `get_context_packet` is invoked as a complement, use `task_type='other'` with explicit `seed_nodes` (record-ID-shaped — e.g., `CF-0007`, `M-1`, `SEC-INS-005`; NOT prose pressure labels from WORLD_KERNEL §Core Pressures, NOT taxonomy values from `parameters_path.origin_type_focus`). To resolve a §Core Pressures prose label or an `origin_type_focus` taxonomy value to seed-able record IDs, call `search_nodes(query='<label>')` first and feed the resolved record IDs to `seed_nodes`. (Forward note: when the MCP server registers `task_type='emergent_pressure_events'` per the planned MCPENH-005 profile — prioritizing recent CH records, pressure-bearing CFs, every INV and M record, and the institution / economy-and-resources / magic-or-tech-systems / peoples-and-species sections — this skill should be updated to use that task_type as the primary loading path.)
 
 For records the packet does not surface, retrieve on demand:
 
@@ -128,14 +128,14 @@ Runs before Phase 0. On any failure, abort before pipeline begins.
 2. Verify `worlds/<world-slug>/` exists. If absent, abort with the create-base-world instruction.
 3. Allocate the batch id: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-NNNN`.
 4. Load FOUNDATIONS + WORLD_KERNEL + ONTOLOGY via direct `Read`.
-5. Load the context packet per §World-State Prerequisites with `seed_nodes` derived from `parameters_path.origin_type_focus` if present, else from a small set of high-pressure anchor nodes from WORLD_KERNEL §Core Pressures.
+5. Load world state per §World-State Prerequisites: primary path is per-record-class retrieval via `list_records` for CF / INV / M / OQ + targeted `search_nodes` / `get_record` for follow-up. If invoking `get_context_packet` as a complement, derive `seed_nodes` as record-ID-shaped — resolve `parameters_path.origin_type_focus` taxonomy values (e.g., `'scarcity'`) and §Core Pressures prose labels (e.g., `'artifact unearthing'`) to record IDs first via `search_nodes(query=<label>)`, then feed the resolved record IDs (e.g., `CF-0007`, `M-1`) to `seed_nodes`. Never pass raw prose labels or taxonomy values directly to `seed_nodes`.
 6. List `worlds/<slug>/pressure-events/EPE-*.md` (filenames + slug parsing only; no per-file Read) to populate the recurrence-detection registry. Empty pool is acceptable — first run.
 
 ## Procedure
 
 ### Phase 0: Normalize Generation Parameters
 
-Parse `parameters_path` if provided. Else interview the user for: `batch_size` (default 5), `novelty_range` (conservative / moderate / bold; default moderate), `origin_type_focus` (subset of the 14-value taxonomy; empty = unrestricted), `taboo_areas`, `current_date` (default today), `current_season` (default null if no calendar declaration).
+Parse `parameters_path` if provided. For any fields omitted from the file, apply their stated defaults under Auto Mode; without Auto Mode, interview the user only on omitted fields lacking documented defaults (currently: none — every field below has a default). If `parameters_path` itself is absent, interview the user for all fields under non-Auto-Mode (Auto Mode falls through to documented defaults). Field defaults: `batch_size` (default 5), `novelty_range` (conservative / moderate / bold; default moderate), `origin_type_focus` (subset of the 14-value taxonomy; default empty = unrestricted), `taboo_areas` (default empty), `current_date` (default today), `current_season` (default null if no calendar declaration).
 
 **Reject attempts to dictate specific events.** Parameters are search-space, not content. A `parameters_path` that names a specific event ("a plague hits the western city") is rejected with: "Phase 0 accepts pressure-space scoping, not pre-specified events; remove the dictated event and re-run."
 
@@ -178,7 +178,7 @@ Slot assignment honors `parameters_path.origin_type_focus` (if present, restrict
 
 ### Phase 3: Seed Generation
 
-For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-NNNN` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`.
+For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-NNNN` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`. If the MCP call errors with `Unsupported id_class`, fall back to scanning `worlds/<world-slug>/pressure-events/EPE-*.md` for the highest existing id and incrementing; this fallback is a defensive recovery path for environments where the MCP server is older than this skill.
 
 Seeds inherit the pressure-inventory source records as **provisional traceability** — Phase 4 verifies and finalizes.
 
@@ -263,7 +263,7 @@ Run all 8 tests (4 per-card + 4 batch-level). Each result is PASS / FAIL with a 
 
 Present the deliverable summary:
 
-1. **Full batch**: every surviving card's frontmatter + body
+1. **Full batch**: every surviving card's full frontmatter; body sections may be presented as one-paragraph summaries with full prose deferred to commit, provided commit-time prose remains faithful to the frontmatter (no new commitments introduced; no consequence-field divergence beyond what the frontmatter previewed). Verbatim full-body inline is permitted but not required for batches of 4+ cards. Forbidden: introducing new commitments at commit time that the user did not approve via the deliverable summary.
 2. **Sidecar previews**: every canonize-routed card's `proposal_card_extract` block (so the user can sanity-check parse-readiness before sidecars land)
 3. **Batch manifest**: pressure inventory, origin-type mapping table, seed log, Phase 4 drop log, diversification audit (with empty-slot rationales), Phase 6d trace, Phase 6e repair log, Phase 7 test results
 4. **Target write paths** (per card + per sidecar + batch manifest + INDEX.md)

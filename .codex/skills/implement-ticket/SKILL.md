@@ -263,6 +263,7 @@ When the fix changes a shared producer/parser/contract seam, recompute any ticke
 
 Update the active ticket before finishing:
 
+- title / H1 and summary metadata such as `Status`, `Priority`, `Effort`, `Engine Changes`, and `Deps`
 - `Status`
 - `Engine Changes`
 - `Assumption Reassessment`

@@ -25,6 +25,7 @@ const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }
   { idClass: "NCB", highest: "NCB-0001", expected: "NCB-0002" },
   { idClass: "AU", highest: "AU-0002", expected: "AU-0003" },
   { idClass: "RP", highest: "RP-0005", expected: "RP-0006" },
+  { idClass: "EPE", highest: "EPE-0005", expected: "EPE-0006" },
   { idClass: "M", highest: "M-20", expected: "M-21" },
   { idClass: "ONT", highest: "ONT-3", expected: "ONT-4" },
   { idClass: "CAU", highest: "CAU-2", expected: "CAU-3" },
@@ -71,6 +72,17 @@ test("allocateNextId returns the next id for all supported classes", async () =>
 
   try {
     seedAllocationWorld(root);
+    mkdirSync(path.join(root, "worlds", "seeded", "pressure-events"), { recursive: true });
+    writeFileSync(
+      path.join(root, "worlds", "seeded", "pressure-events", "EPE-0005-spring-fever.md"),
+      "event",
+      "utf8"
+    );
+    writeFileSync(
+      path.join(root, "worlds", "seeded", "pressure-events", "EPE-0008-sidecar.proposal.md"),
+      "proposal",
+      "utf8"
+    );
 
     for (const entry of CLASS_CASES) {
       const result = await withRepoRoot(root, () =>
@@ -118,17 +130,22 @@ test("allocateNextId returns first-run ids for missing world-scoped classes", as
     const secResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "empty-fixture", id_class: "SEC-GEO" })
     );
+    const epeResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "empty-fixture", id_class: "EPE" })
+    );
 
     assert.ok(!("code" in cfResult));
     assert.ok(!("code" in ncpResult));
     assert.ok(!("code" in mysteryResult));
     assert.ok(!("code" in aesResult));
     assert.ok(!("code" in secResult));
+    assert.ok(!("code" in epeResult));
     assert.equal(cfResult.next_id, "CF-0001");
     assert.equal(ncpResult.next_id, "NCP-0001");
     assert.equal(mysteryResult.next_id, "M-1");
     assert.equal(aesResult.next_id, "AES-1");
     assert.equal(secResult.next_id, "SEC-GEO-001");
+    assert.equal(epeResult.next_id, "EPE-0001");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -189,11 +206,16 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const worldClassWithPipelineSlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "__pipeline__", id_class: "CF" })
     );
+    const epeWithPipelineSlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "EPE" })
+    );
 
     assert.ok("code" in pipelineClassWithWorldSlug);
     assert.ok("code" in worldClassWithPipelineSlug);
+    assert.ok("code" in epeWithPipelineSlug);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
     assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
+    assert.equal(epeWithPipelineSlug.code, "invalid_input");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
   } finally {
@@ -201,7 +223,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 28 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 29 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -216,6 +238,7 @@ test("allocateNextId exposes all 28 id classes with existing formats preserved",
     "NCB",
     "AU",
     "RP",
+    "EPE",
     "M",
     "ONT",
     "CAU",
@@ -232,7 +255,7 @@ test("allocateNextId exposes all 28 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 28);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 29);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
@@ -243,6 +266,7 @@ test("allocateNextId exposes all 28 id classes with existing formats preserved",
   assert.match("SEC-GEO-001", ID_CLASS_FORMATS["SEC-GEO"].regex);
   assert.match("NWB-0001", ID_CLASS_FORMATS.NWB.regex);
   assert.match("NWP-0001", ID_CLASS_FORMATS.NWP.regex);
+  assert.match("EPE-0001", ID_CLASS_FORMATS.EPE.regex);
 });
 
 test("allocateNextId class formats stay in lockstep with the MCP input enum", () => {

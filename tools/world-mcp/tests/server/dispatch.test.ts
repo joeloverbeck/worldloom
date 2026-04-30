@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -174,6 +175,15 @@ function seedServerWorld(root: string): void {
       }
     ]
   });
+
+  const pressureEventsDirectory = path.join(root, "worlds", "seeded", "pressure-events");
+  mkdirSync(pressureEventsDirectory, { recursive: true });
+  writeFileSync(path.join(pressureEventsDirectory, "EPE-0003-salt-riot.md"), "event", "utf8");
+  writeFileSync(
+    path.join(pressureEventsDirectory, "EPE-0004-salt-riot.proposal.md"),
+    "proposal",
+    "utf8"
+  );
 }
 
 async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise<T> {
@@ -286,6 +296,11 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "EPE" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "__pipeline__", id_class: "NWB" },
         expectError: false
       }
@@ -358,6 +373,19 @@ test("unsupported id classes fail at the MCP validation boundary", async () => {
   });
 });
 
+test("EPE id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "EPE" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "EPE-0004");
+  });
+});
+
 test("pipeline-scoped id classes reject non-pipeline world slugs at the MCP handler boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -377,6 +405,20 @@ test("pipeline sentinel rejects world-scoped id classes at the MCP handler bound
     const result = await client.callTool({
       name: MCP_TOOL_NAMES.allocate_next_id,
       arguments: { world_slug: "__pipeline__", id_class: "CF" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /NWB, NWP/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("pipeline sentinel rejects EPE at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "__pipeline__", id_class: "EPE" }
     });
 
     assert.equal(result.isError, true);
