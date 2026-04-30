@@ -82,9 +82,9 @@ the generated skill numbers it concretely based on its own phase count.>
 
 ## Canon Safety Check phase             [canon-reading with in-world output; recommended for canon-mutating]
 <Placed after the last operational phase and before Commit. Per-artifact sub-phases:
- - Invariant conformance (vs INVARIANTS.md) — record tested invariant ids
- - Mystery Reserve firewall (vs MYSTERY_RESERVE.md) — record every checked MR id, overlap or not
- - Distribution/scope conformance (vs CANON_LEDGER.md distribution blocks)
+ - Invariant conformance (vs every INV record retrieved via `search_nodes(node_type='invariant')`) — record tested invariant ids
+ - Mystery Reserve firewall (vs every M record retrieved via `search_nodes(node_type='mystery_reserve')`) — record every checked MR id, overlap or not
+ - Distribution/scope conformance (vs capability CFs filtered by domain via `search_nodes(node_type='canon_fact', filters={domain: ...})`)
  Repair Sub-Pass on any fail; unrepairable → loop to earliest relevant phase.
  For batch-producing skills: add a batch-level check as a peer sub-phase catching
  cross-artifact collisions (e.g., two artifacts jointly resolving a Mystery Reserve

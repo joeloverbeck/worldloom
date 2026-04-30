@@ -28,7 +28,7 @@ Classify the target pipeline into exactly one class:
 
 | Class | Behavior | Triggers classification |
 |---|---|---|
-| **canon-mutating** | Writes or alters world files, `CANON_LEDGER.md`, `INVARIANTS.md`, `WORLD_KERNEL.md`, or other world-state files. | Pipeline output includes world-file updates; pipeline accepts/rejects/revises canon facts; pipeline creates initial world state. |
+| **canon-mutating** | Writes or alters `_source/<subdir>/*.yaml` records (CF / CH / INV / M / OQ / ENT / SEC) via the patch engine, OR alters `WORLD_KERNEL.md` / `ONTOLOGY.md`. | Pipeline output includes atomic-record creation or modification; pipeline accepts/rejects/revises canon facts; pipeline creates initial world state. |
 | **canon-reading** | Consumes world-state; produces artifacts that are NOT world-level canon (diegetic texts, characters, option cards, event seeds). May operate in a **pre-world subclass mode** where the primary input is a user preference document and cross-world reading is for distinctness only — the skill emits IDs at pipeline scope, writes to a root-level surface (e.g., `world-proposals/`), and feeds `create-base-world` rather than `canon-addition`. | Pipeline output is downstream artifacts, proposals, or candidates requiring separate adjudication before they reach canon. |
 | **meta-tooling** | Operates on canon structure and pipeline infrastructure (audits, linters, retcon management, spec/ticket/plan generation). Produces reports, recommendations, and pipeline-level work artifacts; never writes canon by its own authority. | Pipeline output is findings, severity reports, repair menus, or pipeline-level work artifacts (tickets, specs, plans, triage files, validator configs). |
 
@@ -40,7 +40,7 @@ State the classification to the user explicitly and wait for acknowledgment (`ok
 
 When the pipeline's class is ambiguous, apply these heuristics in order:
 
-1. **Does the output include file writes to any of `WORLD_KERNEL.md`, `INVARIANTS.md`, `ONTOLOGY.md`, `CANON_LEDGER.md`, or named world-state files?** → canon-mutating.
+1. **Does the output include file writes to any of `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/<subdir>/*.yaml` record (CF / CH / INV / M / OQ / ENT / SEC)?** → canon-mutating.
 2. **Does the output include new Canon Fact Record entries (even candidates)?** → If the skill itself applies them: canon-mutating. If it only proposes them for separate adjudication: canon-reading.
 3. **Does the output include in-world artifacts that are not world-level canon (diegetic texts, character data, faction profiles, option cards, event seeds, or other artifacts whose content could leak canon-adjacent state)?** → canon-reading. These artifacts are NOT canon; they are voices or instances from within canon.
 4. **Does the output include reports, severity findings, repair menus, or pipeline-level work artifacts (tickets, specs, plans, triage files, validator configs) — rather than world-level canon?** → meta-tooling.

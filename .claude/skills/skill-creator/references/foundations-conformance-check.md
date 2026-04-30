@@ -25,7 +25,7 @@ Before any file is written, audit the draft against class-specific requirements.
 
 ## canon-reading Additional Checks
 
-- [ ] Contains an explicit rule: "This skill MUST NOT write to world files, `CANON_LEDGER.md`, or `INVARIANTS.md`."
+- [ ] Contains an explicit rule that the skill MUST NOT write to canon surfaces — `_source/<subdir>/*.yaml` records (Hook 3 enforces) and `WORLD_KERNEL.md` / `ONTOLOGY.md` (post-SPEC-13 storage form per FOUNDATIONS §Canonical Storage Layer).
 - [ ] If the output carries in-world knowledge, beliefs, or capabilities (diegetic texts, character data, faction profiles, event seeds, option cards, or any artifact whose content could leak Mystery Reserve forbidden answers): includes a Canon Safety Check phase preventing accidental mystery resolution, restricted-knowledge leaks, or silent canon creation (Rule 7: Preserve Mystery Deliberately). This gate matches the failure mode it catches: any artifact carrying in-world content, not only text artifacts.
 - [ ] If proposal-generating (produces candidate facts): explicit note that output is NOT canon until it passes the canon-addition skill.
 - [ ] If the output carries in-world content: Rule 7 is explicitly listed in the generated skill's "Validation Rules This Skill Upholds" section (the Canon Safety Check phase satisfies the structural check above; listing Rule 7 in the Validation Rules section is the separate documentation check).
