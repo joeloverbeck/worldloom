@@ -19,14 +19,14 @@ It is especially useful for:
 
 Three pipelines occupy overlapping territory around "candidate canon material." The boundaries:
 
-### vs `story-kernel-generation`
+### vs `branching-story-bootstrap` and `branching-story-page-cycle`
 Emergent pressure events are **world-level** — they can exist without a protagonist. A trade collapse, a rumor wave, a ritual breach. They describe what the world is doing.
 
-Story kernels are **narrative-bound** — they require a protagonist under incompatible pressure, a dramatic question, tellability. A kernel *consumes* pressure events (among other inputs) but adds character-specific structure, four-lens evaluation, and scene yield.
+Branching stories are **narrative-bound** — they require a cast under incompatible pressures, the seven causal-engine ledgers (facts, events, obligations, threads, intentions, storylets, pages), and structurally-isolated branches. `branching-story-bootstrap` (creating a new story) and `branching-story-page-cycle` (the runtime tick) *consume* pressure events as initial-thread / initial-obligation seeds at bootstrap, and as JIT storylet seed material during play.
 
-Pressure events that never become stories are still valuable — they season the world's background and may inform later campaign play or future canon.
+Pressure events that never become stories are still valuable — they season the world's background and may inform later canon-addition runs.
 
-`story-kernel-generation` Phase 1 consumes the current EPE card pool; it does not re-generate world-level pressure material that EPE already owns.
+`branching-story-bootstrap` Phase 1 (premise normalization) and Phase 5 (initial threads + obligations) may consume EPE cards from the world's `pressure-events/` pool. `branching-story-page-cycle` Phase 4 (storylet selection) may seed JIT storylet generation from EPE cards when the existing pool is thin and an EPE card matches the current state. Neither pipeline re-generates world-level pressure material that EPE already owns.
 
 ### vs `propose-new-canon-facts`
 `propose-new-canon-facts` diagnoses **thinness gaps** in existing canon — synchronic enrichment aimed at closing missing domains (institutional adaptations, contested knowledge, mystery seeds, cross-domain couplings).
@@ -134,7 +134,7 @@ Use when:
 ### `story_fuel`
 The event is narratively pregnant but not itself canon-needing — the pressure it names is real, but the event is a temporary disturbance rather than a world-level truth.
 
-Downstream: the card is listed as a dynamic input to `story-kernel-generation` Phase 1.
+Downstream: the card is consumed as a dynamic input to `branching-story-bootstrap` Phase 1 (premise normalization) and Phase 5 (initial threads + obligations), and as JIT storylet seed material in `branching-story-page-cycle` Phase 4 when the existing pool is thin.
 
 Use when:
 - the event creates a concrete pressure collision a protagonist could inherit
