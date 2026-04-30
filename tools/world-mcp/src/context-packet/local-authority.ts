@@ -6,7 +6,8 @@ import {
   loadPacketNodes,
   uniqueStrings,
   type ContextPacketNode,
-  type DeliveryMode
+  type DeliveryMode,
+  type PacketRecordProjection
 } from "./shared";
 
 interface SeedNodeRow {
@@ -170,7 +171,8 @@ export function buildLocalAuthority(
   db: Database.Database,
   worldSlug: string,
   sourceNodeIds: readonly string[],
-  deliveryMode: DeliveryMode
+  deliveryMode: DeliveryMode,
+  recordProjection?: PacketRecordProjection
 ): {
   nodes: ContextPacketNode[];
   why_included: string[];
@@ -196,7 +198,12 @@ export function buildLocalAuthority(
     );
   }
 
-  const nodes = loadPacketNodes(db, worldSlug, orderedNodeIds, { deliveryMode });
+  const nodes = loadPacketNodes(
+    db,
+    worldSlug,
+    orderedNodeIds,
+    recordProjection === undefined ? { deliveryMode } : { deliveryMode, recordProjection }
+  );
   return {
     nodes,
     why_included: nodes.map((node) => reasons.get(node.id) ?? "seed-local authority")

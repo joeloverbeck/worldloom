@@ -5,7 +5,10 @@ import { createMcpError, type McpError } from "../errors";
 import type { TaskType } from "../ranking/profiles";
 
 import { buildExactRecordLinks } from "./exact-record-links";
-import { buildGoverningWorldContext } from "./governing-world-context";
+import {
+  buildGoverningWorldContext,
+  createCharacterGenerationRecordProjection
+} from "./governing-world-context";
 import {
   buildLocalAuthority,
   findLocalAuthoritySourceNodeIds
@@ -229,25 +232,37 @@ export async function assembleContextPacket(args: {
       return localAuthoritySourceIds;
     }
 
+    const recordProjection =
+      args.task_type === "character_generation"
+        ? createCharacterGenerationRecordProjection(
+            opened.db,
+            args.world_slug,
+            localAuthoritySourceIds
+          )
+        : undefined;
+
     packet.local_authority = buildLocalAuthority(
       opened.db,
       args.world_slug,
       localAuthoritySourceIds,
-      deliveryMode
+      deliveryMode,
+      recordProjection
     );
     packet.exact_record_links = buildExactRecordLinks(
       opened.db,
       args.world_slug,
       localAuthoritySourceIds,
       packet.local_authority.nodes.map((node) => node.id),
-      deliveryMode
+      deliveryMode,
+      recordProjection
     );
     packet.scoped_local_context = buildScopedLocalContext(
       opened.db,
       args.world_slug,
       localAuthoritySourceIds,
       [...packet.local_authority.nodes, ...packet.exact_record_links.nodes],
-      deliveryMode
+      deliveryMode,
+      recordProjection
     );
     packet.governing_world_context = await buildGoverningWorldContext(
       opened.db,
@@ -258,7 +273,8 @@ export async function assembleContextPacket(args: {
         ...packet.exact_record_links.nodes,
         ...packet.scoped_local_context.nodes
       ],
-      deliveryMode
+      deliveryMode,
+      recordProjection
     );
     packet.impact_surfaces = await buildImpactSurfaces(
       opened.db,
@@ -268,7 +284,8 @@ export async function assembleContextPacket(args: {
         ...packet.exact_record_links.nodes,
         ...packet.scoped_local_context.nodes
       ],
-      deliveryMode
+      deliveryMode,
+      recordProjection
     );
 
     applyClassFilter(packet, args.node_classes);

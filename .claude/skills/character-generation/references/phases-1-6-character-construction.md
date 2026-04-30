@@ -41,7 +41,7 @@ Specify the character's relation to every institutional axis present in the SEC-
 Define, for this specific character at this specific date:
 - what the character knows firsthand (witnessed, experienced, handled)
 - what they know only by rumor (heard from neighbors, priests, travelers, merchants)
-- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-NNNN records and any M-NNNN records whose `what_is_unknown` block overlaps their epistemic surface)
+- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-NNNN records and any M-NNNN records whose `unknowns` block overlaps their epistemic surface)
 - what they firmly believe but are wrong about (folk theories, propaganda, inherited superstitions — SEC-INS religious/ideological blocks + SEC-ELF common beliefs)
 - what words they have for major world phenomena (their vocabulary, per SEC-ELF language/slang by region/class)
 - what categories they lack entirely (concepts foreign to their class/region/education)
@@ -75,7 +75,7 @@ For every skill, craft, knowledge, or ability declared in Phases 0-4 or added he
 - why is this unusual or ordinary? (against SEC-ELF baseline for their region/class/species)
 - how do body, class, and place shape competence? (per SEC-PAS embodiment + SEC-GEO regional effects)
 
-Cross-reference every capability against the relevant capability CFs — retrieve via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: <capability domain>})` and `get_record(cf_id)` for each match. If a capability matches an existing CF's `distribution.who_can_do_it`, verify the character fits that group. If not, the capability must either be reclassified (to rumor, failed attempt, or folk imitation) or the character must have a Phase 2 institutional embedding that justifies the exception. Exceptions are recorded in `world_consistency.distribution_exceptions`. Record each CF-id consulted into `world_consistency.canon_facts_consulted` regardless of whether it produced an exception — the list is the audit trail of which CFs informed the capability check, accumulated across Phase 5 and Phase 7c.
+Cross-reference every capability against the relevant capability CFs — use seed-relevant CF `record` bodies already delivered by the packet, then retrieve deeper non-seed matches via `mcp__worldloom__search_nodes(node_type='canon_fact_record', filters={domain: <capability domain>})` and `get_record(cf_id)` for each match. If a capability matches an existing CF's `distribution.who_can_do_it`, verify the character fits that group. If not, the capability must either be reclassified (to rumor, failed attempt, or folk imitation) or the character must have a Phase 2 institutional embedding that justifies the exception. Exceptions are recorded in `world_consistency.distribution_exceptions`. Record each CF-id consulted into `world_consistency.canon_facts_consulted` regardless of whether it produced an exception — the list is the audit trail of which CFs informed the capability check, accumulated across Phase 5 and Phase 7c.
 
 **Rule** (from proposal): Reject characters whose abilities bypass the world model.
 

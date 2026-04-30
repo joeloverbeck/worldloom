@@ -1,7 +1,9 @@
+import { existsSync, readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { sync } from "@worldloom/world-index/commands/sync";
+import { sha256Hex } from "@worldloom/world-index/hash/content";
 import { openExistingIndex } from "@worldloom/world-index/index/open";
 
 import { markTokenConsumed as consumeApprovalToken, verifyApprovalToken as verifyToken } from "./approval/verify-token.js";
@@ -11,6 +13,7 @@ import { commitStaged, unlinkAllTempFiles } from "./commit/rename.js";
 import { stageAllOps } from "./commit/temp-file.js";
 import type {
   IdAllocations,
+  EngineErrorCode,
   NewNodeReceipt,
   PatchOperation,
   PatchPlanEnvelope,
@@ -44,7 +47,7 @@ export interface SubmitPatchPlanOptions extends PerWorldLockOptions {
 
 export type EngineError = {
   ok: false;
-  code: string;
+  code: EngineErrorCode;
   message: string;
   detail?: unknown;
   validators_run?: ValidatorRunReceipt[];
@@ -92,6 +95,11 @@ async function submitPatchPlanImpl(
     const allocationError = verifyExpectedIdAllocations(db, envelope.target_world, envelope.expected_id_allocations);
     if (allocationError !== null) {
       return allocationError;
+    }
+
+    const staleIndex = detectStaleIndex(db, worldRoot, envelope.target_world);
+    if (staleIndex !== null) {
+      return staleIndex;
     }
 
     const validator = await runPreApplyValidators(opts);
@@ -246,6 +254,63 @@ function nextIdFor(
 
   const nextValue = maxValue + 1;
   return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
+}
+
+interface StaleIndexFile {
+  file_path: string;
+  on_disk_content_hash: string | null;
+  indexed_content_hash: string;
+}
+
+function detectStaleIndex(db: OpContext["db"], worldRoot: string, worldSlug: string): EngineError | null {
+  const rows = db
+    .prepare(
+      `
+        SELECT file_path, content_hash
+        FROM file_versions
+        WHERE world_slug = ?
+          AND (
+            file_path LIKE 'characters/%.md'
+            OR file_path LIKE 'diegetic-artifacts/%.md'
+            OR file_path LIKE 'adjudications/%.md'
+          )
+        ORDER BY file_path
+      `
+    )
+    .all(worldSlug) as Array<{ file_path: string; content_hash: string }>;
+
+  const divergentFiles: StaleIndexFile[] = [];
+  const worldDirectory = path.join(worldRoot, "worlds", worldSlug);
+  for (const row of rows) {
+    const absolutePath = path.join(worldDirectory, row.file_path);
+    if (!existsSync(absolutePath)) {
+      divergentFiles.push({
+        file_path: row.file_path,
+        on_disk_content_hash: null,
+        indexed_content_hash: row.content_hash
+      });
+      continue;
+    }
+
+    const onDiskContentHash = sha256Hex(readFileSync(absolutePath, "utf8"));
+    if (onDiskContentHash !== row.content_hash) {
+      divergentFiles.push({
+        file_path: row.file_path,
+        on_disk_content_hash: onDiskContentHash,
+        indexed_content_hash: row.content_hash
+      });
+    }
+  }
+
+  if (divergentFiles.length === 0) {
+    return null;
+  }
+
+  return error(
+    "index_stale",
+    `World index is stale relative to on-disk content. Run 'node tools/world-index/dist/src/cli.js sync ${worldSlug}' before resubmitting.`,
+    { divergent_files: divergentFiles }
+  );
 }
 
 async function runPreApplyValidators(opts: SubmitPatchPlanOptions): Promise<PreApplyValidatorResult> {

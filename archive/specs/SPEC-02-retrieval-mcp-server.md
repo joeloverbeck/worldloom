@@ -12,7 +12,7 @@
 
 Even with SPEC-01's index, skills need an ergonomic API to retrieve nodes, traverse edges, and assemble context packets. SPEC-05's Hook 2 needs somewhere to redirect blocked raw reads. The current canon-addition pre-flight loads 6 mandatory files + FOUNDATIONS + selective domain files + adjudication directory + templates + pre-figuring scans — each of these should become a single API call returning only the relevant nodes.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §3 (retrieval MCP server), §12 (context packet contract), §14 (ranking strategy). Brainstorm decision: exact-match-first retrieval ordering; semantic retrieval as fallback only, not foundation.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §3 (retrieval MCP server), §12 (context packet contract), §14 (ranking strategy). Brainstorm decision: exact-match-first retrieval ordering; semantic retrieval as fallback only, not foundation.
 
 ## Approach
 

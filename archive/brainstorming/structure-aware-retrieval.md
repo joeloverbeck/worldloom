@@ -1,5 +1,7 @@
 # Proposal: add a structure-aware retrieval and patching layer for worldloom markdown
 
+**Status**: COMPLETED (archived 2026-04-28)
+
 ## Bottom line
 
 Do not try to solve this by “better chunking” alone.
@@ -774,3 +776,20 @@ If you do three things, make `CANON_LEDGER.md` generated from atomic source reco
 That is the path that turns your repo from “LLM reading a pile of giant markdown blobs” into “LLM operating a world compiler.”
 
 That is also the path that will actually cut tokens without sacrificing correctness.
+
+## Outcome
+
+Completed 2026-04-28.
+
+This brainstorm was implemented through the structure-aware retrieval spec family and follow-on architecture work:
+
+- `archive/specs/SPEC-01-world-index.md` landed the SQLite-backed world index direction.
+- `archive/specs/SPEC-02-retrieval-mcp-server.md` and `archive/specs/SPEC-02-phase2-tooling.md` landed the MCP retrieval surface and later retrieval-tool refinements.
+- `archive/specs/SPEC-03-patch-engine.md`, `archive/specs/SPEC-04-validator-framework.md`, and `archive/specs/SPEC-05-hooks-discipline.md` landed the deterministic patching, validation, and hook-discipline architecture.
+- `archive/specs/SPEC-06-skill-rewrite-patterns.md` and `archive/specs/SPEC-07-docs-updates.md` moved the workflow/documentation contract toward thin orchestration and machine-facing retrieval.
+- `archive/specs/SPEC-08-migration-and-phasing.md` captured the phased rollout plan.
+- `archive/specs/SPEC-13-atomic-source-migration.md` completed the structural resolution by moving canonical world storage to atomic YAML under `_source/`, superseding the brainstorm's earlier markdown-first migration staging where necessary.
+
+Deviations from the original proposal: the eventual architecture pulled atomic source migration forward via SPEC-13 instead of leaving it as a later optional phase, and subsequent SPEC-10 through SPEC-17 refinements narrowed or extended the original read-path contract based on live implementation feedback. The core recommendation still landed: exact indexed retrieval, MCP access, deterministic patch plans, validators, and thinner workflow skills.
+
+Verification results: the active tooling and documentation surfaces now include `tools/world-index/`, `tools/world-mcp/`, `tools/patch-engine/`, `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, and archived SPEC-01 through SPEC-17 implementation records. This brainstorming note is archived as `archive/brainstorming/structure-aware-retrieval.md`.

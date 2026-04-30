@@ -140,7 +140,7 @@ For non-redundant instructions (those surviving Steps 2-5), tighten prose:
 
 Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Match Step 9's zero-count convention — include any category with no findings as a brief one-line note so the reader sees the category was considered. Keep total pre-write summary under ~15 lines. Not the full diff summary.
 
-Write the consolidated SKILL.md in-place at `<skill-path>/SKILL.md`.
+Write the consolidated file in-place at the path resolved in Step 1 — `<skill-path>` directly when `<skill-path>` ends in `.md`, otherwise `<skill-path>/SKILL.md`.
 
 The rewritten file must:
 1. **Preserve frontmatter exactly** — do not modify name, description, arguments, or any YAML field

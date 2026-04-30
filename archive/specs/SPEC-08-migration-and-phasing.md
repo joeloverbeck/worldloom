@@ -29,7 +29,7 @@ The Phase 1 and Phase 2 animalia resolution paths originally allowed grandfather
 
 Landing the full machine-facing layer (SPEC-01 through SPEC-07) in a single change would be high-risk: all eight canon/content-generation skills break simultaneously if any one component regresses. The existing `animalia` world (47 CF + 18 CH + 17 PA + 3 characters + 3 diegetic artifacts + 14 proposals) is real user data — migration must be non-destructive and rollback-able. The greenfield framing permits clean architectural choices, but does not license data-loss-risking transitions. (Historical framing preserved as written at Phase 0 authoring time. The phased approach landed end-to-end without rollback being needed; the animalia world inventory has since grown via subsequent canon-addition runs — see §Outcome.)
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §10 (migrate the ledger first, not the whole repo), §17 (phased implementation plan). Brainstorm decision: each phase ships standalone value; rollback preserves prior-phase wins.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §10 (migrate the ledger first, not the whole repo), §17 (phased implementation plan). Brainstorm decision: each phase ships standalone value; rollback preserves prior-phase wins.
 
 ## Approach
 

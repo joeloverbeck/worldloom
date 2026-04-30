@@ -44,4 +44,5 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 
 - Persist the final envelope to `/tmp/<plan-id>.json`.
 - Issue the approval token with `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>`.
-- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval.
+- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`.
+- On `approval_expired`, re-sign and resubmit. On `approval_replayed`, do not resubmit. On `index_stale`, run `node tools/world-index/dist/src/cli.js sync <world-slug>` and resubmit the unchanged patch plan with the same approval token if it has not expired. On `validator_failed`, inspect `detail.verdicts[].location.file`: fix and resubmit only when the cited file is one of the records or hybrid PA/adjudication targets this patch plan creates or extends; if it names unrelated existing world state, pause and escalate instead of editing another canon-adjacent file.

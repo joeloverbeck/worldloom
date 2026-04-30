@@ -64,6 +64,7 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 - `Plan must include a non-empty 'plan_id' string` (etc.) — malformed envelope.
 - Token returned but submit returns `approval_expired` — round-trip exceeded the window. Re-sign (the plan is unchanged, hashes match, no other edits required) and resubmit.
 - Token returned but submit returns `approval_replayed` — token already consumed by a prior successful submit. This is structural single-use enforcement; do not attempt to re-submit the same plan.
+- Submit returns `index_stale` — the world index has diverged from on-disk hybrid-file content before pre-apply validators ran. Run `node tools/world-index/dist/src/cli.js sync <world-slug>`, then resubmit the unchanged patch plan with the same approval token if it has not expired. The token remains plan-valid because the patch plan content did not change.
 
 The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
 
@@ -84,7 +85,7 @@ The CLI requires the plan to be persisted to a JSON file (skills already do this
 **Equivalence guarantees**:
 
 - Same envelope shape validation, same approval-token verification, same expected-id-allocation race check, same pre-apply validators (Rule 1-7 + structural), same per-world write lock, same two-phase atomic commit, same index sync.
-- Same failure-mode codes: `approval_expired`, `approval_replayed`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.
+- Same failure-mode codes: `approval_expired`, `approval_replayed`, `index_stale`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.
 - The CLI is a thin delegator over `handleSubmitPatchPlanTool`; it is not a separate engine implementation.
 
 The MCP path remains the default. The CLI path exists strictly to bypass MCP transport for size-constrained envelopes, not as a general-purpose alternative.

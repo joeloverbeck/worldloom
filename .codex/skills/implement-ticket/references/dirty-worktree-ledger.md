@@ -25,6 +25,8 @@ If dirty paths overlap the active ticket seam, inspect their diffs before coding
 
 If the overlap belongs to an in-flight sibling ticket, narrow, widen, or rewrite the active ticket boundary before code edits instead of treating the seam as clean ownership.
 
+When a file is already dirty before the run and the active ticket also needs to edit that same file, record final ownership at hunk or topic level in the ticket closeout or final response. Distinguish the ticket-owned hunks from pre-existing same-file edits instead of describing the whole file as owned or unrelated.
+
 ## Mid-Run Changes
 
 If a path that was clean at the initial snapshot becomes dirty later, inspect it before closeout.

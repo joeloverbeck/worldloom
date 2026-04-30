@@ -19,7 +19,7 @@ Large canon-addition deliveries fire 25+ Edit tool calls per run, each vulnerabl
 
 **Post-SPEC-13 context**: canonical storage is atomic YAML under `worlds/<slug>/_source/` (one file per CF / CH / INV / M / OQ / ENT / SEC record). The 11 monolithic mandatory-markdown files are retired; no compiled views exist. The patch engine operates on atomic records directly — markdown-anchor navigation is replaced by record-ID addressing, and attribution is a structured field on the target record rather than an HTML-comment inserted into prose.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §4 (deterministic patch engine), §13 (edit contract), and SPEC-13 §C (amendments to this spec). Brainstorm decision: skills emit structured patch plans; code applies; engine fails closed on missing/malformed records.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §4 (deterministic patch engine), §13 (edit contract), and SPEC-13 §C (amendments to this spec). Brainstorm decision: skills emit structured patch plans; code applies; engine fails closed on missing/malformed records.
 
 ## Approach
 

@@ -73,7 +73,7 @@ If the primary class is `docs-only / contract-truthing` or `skill rewrite or ski
 
 If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks. Keep specialized package behavior in that reference instead of expanding the top-level workflow.
 
-For package/tool tickets, do a compact package checkpoint before coding: inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
+For package/tool tickets, do the compact package checkpoint in `references/package-tooling.md` before coding.
 
 If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
 

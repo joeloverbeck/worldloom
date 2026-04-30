@@ -13,7 +13,7 @@ FOUNDATIONS.md Rules 1–7 currently live as prose assertions in `canon-addition
 
 **Post-SPEC-13 context**: validators consume atomic YAML records from `worlds/<slug>/_source/` directly. No markdown parse step is needed for CF / CH / INV / M / OQ / ENT / SEC records. Hybrid files keep their structured surfaces: characters and diegetic artifacts use YAML frontmatter; adjudications use a canonical Discovery block. The validator inputs are simpler, typed, and schema-validatable.
 
-**Source context**: `brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions for structural checks; semantic rules remain skill-judgment. Validators must be deterministic code, not prose heuristics.
+**Source context**: `archive/brainstorming/structure-aware-retrieval.md` §5 (validators) and SPEC-13 §C (amendments to this spec). Brainstorm decision: executable validators replace prose assertions for structural checks; semantic rules remain skill-judgment. Validators must be deterministic code, not prose heuristics.
 
 ## Approach
 
