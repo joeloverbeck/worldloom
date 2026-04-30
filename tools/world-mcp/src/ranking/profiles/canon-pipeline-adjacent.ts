@@ -81,3 +81,27 @@ export const canonFactsFromDiegeticArtifactsRankingProfile: RankingWeights = {
     firewall_for: 8
   }
 };
+
+export const emergentPressureEventsRankingProfile: RankingWeights = {
+  ...defaultRankingProfile,
+  file_class_priority: {
+    ...defaultRankingProfile.file_class_priority,
+    invariant: 1.35,
+    mystery_reserve_entry: 1.35,
+    canon_fact_record: 1.3,
+    change_log_entry: 1.25,
+    section: 1.15,
+    domain_file: 1.0,
+    open_question_entry: 0.7,
+    named_entity: 0.85
+  },
+  recency_of_modification_bonus: 18,
+  edge_type_boost: {
+    mentions_entity: 8,
+    references_record: 8,
+    required_world_update: 7,
+    firewall_for: 12,
+    applies_to: 6,
+    pressures: 10
+  }
+};

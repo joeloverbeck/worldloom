@@ -36,6 +36,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "CANON_LEDGER.md",
     "MYSTERY_RESERVE.md"
   ],
+  emergent_pressure_events: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "INVARIANTS.md",
+    "CANON_LEDGER.md",
+    "MYSTERY_RESERVE.md",
+    "INSTITUTIONS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "PEOPLES_AND_SPECIES.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -79,6 +90,13 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 5: separate diegetic claims from world-level truth",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  emergent_pressure_events: [
+    "Pressure events are proposal inputs, not accepted canon",
+    "Rule 2: visible consequences are required",
+    "Rule 4: distribution discipline",
+    "Rule 5: separate candidate events from world-level truth",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -91,6 +109,11 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
   propose_new_characters: ["Character proposal card", "Character proposal batch manifest"],
   propose_new_worlds_from_preferences: ["World proposal card", "World proposal batch manifest"],
   canon_facts_from_diegetic_artifacts: ["Proposal card", "Batch manifest"],
+  emergent_pressure_events: [
+    "Pressure-event card",
+    "Pressure-event batch manifest",
+    "Sidecar proposal card for canonize-routed events"
+  ],
   other: ["Task-specific output approved by workflow"]
 };
 
@@ -126,6 +149,11 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
   canon_facts_from_diegetic_artifacts: [
     "Do not write CF, CH, INV, M, OQ, ENT, or SEC records",
     "Do not launder diegetic narration into world-level truth without canon flow"
+  ],
+  emergent_pressure_events: [
+    "Do not write _source records, WORLD_KERNEL.md, or ONTOLOGY.md",
+    "Do not treat pressure-event cards as accepted canon",
+    "Do not resolve or pre-empt Mystery Reserve answers"
   ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
@@ -249,9 +277,10 @@ function findFirewallNodeIds(
     .filter((nodeId): nodeId is string => nodeId !== null);
 }
 
-function findCharacterGenerationRequiredNodeIds(
+function findAllSafetyRequiredNodeIds(
   db: Database.Database,
-  worldSlug: string
+  worldSlug: string,
+  reasonPrefix: string
 ): Array<{ node_id: string; reason: string }> {
   const rows = db
     .prepare(
@@ -275,8 +304,8 @@ function findCharacterGenerationRequiredNodeIds(
     node_id: row.node_id,
     reason:
       row.node_type === "mystery_reserve_entry"
-        ? "character_generation requires every Mystery Reserve firewall record"
-        : "character_generation requires every invariant record"
+        ? `${reasonPrefix} requires every Mystery Reserve firewall record`
+        : `${reasonPrefix} requires every invariant record`
   }));
 }
 
@@ -488,8 +517,8 @@ export async function buildGoverningWorldContext(
     addReason(orderedNodeIds, reasons, nodeId, `${taskType} governing file required by FOUNDATIONS`);
   }
 
-  if (taskType === "character_generation") {
-    for (const row of findCharacterGenerationRequiredNodeIds(db, worldSlug)) {
+  if (taskType === "character_generation" || taskType === "emergent_pressure_events") {
+    for (const row of findAllSafetyRequiredNodeIds(db, worldSlug, taskType)) {
       addReason(orderedNodeIds, reasons, row.node_id, row.reason);
     }
   }
