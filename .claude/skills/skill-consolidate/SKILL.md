@@ -42,6 +42,8 @@ Resolve the target file from `<skill-path>`:
 - Otherwise, treat `<skill-path>` as a skill directory and read `<skill-path>/SKILL.md`.
 - If the resolved file does not exist, stop and report the error.
 
+**Oversize-file handling.** If the file exceeds the Read tool's token limit (currently 25000 tokens), read it in sequential offset/limit chunks that cumulatively cover the full file. Track the cumulative line range across reads to ensure complete coverage — partial reads that silently miss content undermine Step 8's preservation check (which can only verify content the consolidator knows existed in the original). Consolidation requires complete coverage; topic-targeted partial reads (acceptable for skill-audit Step 2's FOUNDATIONS.md scan) are not sufficient here.
+
 Parse into logical blocks:
 - **Frontmatter**: YAML metadata between `---` delimiters (SKILL.md targets only)
 - **Sections**: Top-level headings (`##`) and their content
@@ -142,6 +144,8 @@ Before writing, briefly summarize planned changes in the conversation so the use
 
 Write the consolidated file in-place at the path resolved in Step 1 — `<skill-path>` directly when `<skill-path>` ends in `.md`, otherwise `<skill-path>/SKILL.md`.
 
+**Tool preference**: Use the Edit tool with targeted `old_string` / `new_string` pairs for surgical consolidations (the common case — most consolidations remove redundancies and restructure specific regions while leaving the bulk of the file unchanged). Reserve the Write tool for full rewrites where the file structure changes wholesale (uncommon — typically only when consolidation amounts to extraction-style restructuring parallel to skill-extract-references workflows). Edit calls preserve unaltered regions byte-for-byte and reduce the risk of accidentally dropping content that Step 8's sampled spot-check might miss; full Write rewrites require reconstructing every line from memory and concentrate that risk into a single tool call.
+
 The rewritten file must:
 1. **Preserve frontmatter exactly** — do not modify name, description, arguments, or any YAML field
 2. **Maintain workflow phase ordering** — if the original has phases 1-7 in sequence, the consolidated version keeps the same logical sequence
@@ -190,6 +194,8 @@ After writing, present a structured summary in the conversation:
 ### Observations (if any)
 [Gaps noticed during consolidation that were not filled (per No Scope Expansion guardrail).]
 ```
+
+**Cross-reference Hygiene counts**: This category counts both (a) repairs of broken or obsolete cross-references and (b) new cross-references added when factoring out a shared reference per Step 5 §Cross-reference hygiene. A factor-out edit that introduces a "see §X" pointer to replace inlined content counts as one Cross-reference Hygiene entry — it is the visible cost of the factor-out, not a free byproduct. Counting only repairs (omitting added forward-references) understates the diff surface and breaks audit-trail reconstructibility for future consolidation passes.
 
 Categories with 0 findings: include the heading with `(0)` and a one-line note explaining why the category didn't apply (preserves audit trail showing the category was considered, not skipped).
 
