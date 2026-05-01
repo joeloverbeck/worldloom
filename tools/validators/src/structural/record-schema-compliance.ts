@@ -5,6 +5,10 @@ import Ajv2020 from "ajv/dist/2020";
 import type { AnySchema, ErrorObject, ValidateFunction } from "ajv";
 import yaml from "js-yaml";
 
+import {
+  CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
+  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED
+} from "@worldloom/world-index/public/canonical-vocabularies";
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   RECORD_TYPE_TO_SCHEMA,
@@ -18,21 +22,10 @@ import { frontmatterFor } from "./yaml-parse-integrity.js";
 const ajv = new Ajv2020({ allErrors: true, strict: true, formats: { date: true } });
 const validatorsByRecordType = loadSchemaValidators();
 
-export const EXCEPTION_GOVERNANCE_REQUIRED_TYPES = [
-  "capability",
-  "bloodline",
-  "magic_practice",
-  "technology",
-  "divine_action",
-  "artifact_dependent_truth",
-  "exception_introducing_fact"
-] as const;
-
-export const EPISTEMIC_PROFILE_REQUIRED_TYPES = [
-  ...EXCEPTION_GOVERNANCE_REQUIRED_TYPES,
-  "institution_with_secrecy",
-  "knowledge_asymmetric_fact"
-] as const;
+export {
+  CF_TYPE_EPISTEMIC_PROFILE_REQUIRED as EPISTEMIC_PROFILE_REQUIRED_TYPES,
+  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED as EXCEPTION_GOVERNANCE_REQUIRED_TYPES
+} from "@worldloom/world-index/public/canonical-vocabularies";
 
 export const ONTOLOGY_CATEGORY_KEYWORDS = [
   "entity",
@@ -166,11 +159,11 @@ function canonSafetyBlockVerdicts(
 }
 
 export function requiresExceptionGovernance(type: string): boolean {
-  return EXCEPTION_GOVERNANCE_REQUIRED_TYPES.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
+  return CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
 }
 
 export function requiresEpistemicProfile(type: string): boolean {
-  return EPISTEMIC_PROFILE_REQUIRED_TYPES.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
+  return CF_TYPE_EPISTEMIC_PROFILE_REQUIRED.some((requiredType) => normalizeType(type) === normalizeType(requiredType));
 }
 
 function currentSchemaRequiredFor(

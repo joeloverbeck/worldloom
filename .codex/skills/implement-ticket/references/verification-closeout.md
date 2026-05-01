@@ -22,7 +22,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - When a proof command counts matches across a file glob, dry-run the exact command and confirm it emits the scalar value the ticket claims. Some tools, such as `grep -c file-*`, emit one count per file unless forced through `grep -h`, `wc -l`, `awk`, or another explicit aggregation.
 - For negative grep proofs, preserve the failure signal instead of hiding it behind `|| true`. Prefer an explicit command such as `if grep -R "needle" paths; then exit 1; fi` or `! grep -R "needle" paths`, then record that exact command and result in the ticket.
 - When searching for markdown or code literals that contain shell-active characters such as backticks, wrap the pattern in single quotes or escape those characters before running `grep`, `rg`, or similar commands. Do not let the shell execute a literal from the proof pattern.
-- For stale-anchor sweeps that include markdown code spans, default to a single-quoted pattern, for example: `rg -n 'No \`foo\` entry' ticket.md`.
+- For stale-anchor sweeps that include markdown code spans, first check whether the pattern contains backticks, `$`, pipes, parentheses, or other shell-active characters. Use a single-quoted literal pattern, escape the active characters, or split the search into simpler safe patterns; do not use double quotes. Example: `rg -n 'No \`foo\` entry' ticket.md`.
 - For negative stale-anchor sweeps, prefer the exact old phrase or command fragment over a broad positive phrase. When the active ticket records the sweep in `## Verification Result`, do not count that newly written proof prose as a stale hit unless you are intentionally checking the ticket text itself.
 - When old failure terms are intentionally preserved in the completed ticket as labelled historical evidence, scope the negative grep to the consumer docs, skills, tests, or package surfaces that were meant to be cleaned. Record the active-ticket preservation separately instead of treating historical intake evidence as a stale consumer hit.
 - When drafted proof literals contain Unicode punctuation but the landed repo prose uses ASCII equivalents, update the ticket's `Acceptance Criteria`, `Test Plan`, and verification result to the exact landed string before closeout.
@@ -35,6 +35,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - For TS packages that run tests from compiled output such as `dist/tests/*.test.js`, treat new test-time file reads as part of the proof contract: verify that fixtures, SQL files, and other disk reads resolve from the compiled test runtime, or anchor them explicitly from the source tree / repo root.
 - For atomic-source `world-index` tickets, confirm `world-index verify` understands synthetic logical rows before using it as acceptance proof. If it treats retired root markdown paths as disk paths or otherwise reports atomic-mode drift, use `build`, focused validators, and direct DB checks as the truthful proof surface, then record the verify limitation.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
+- If a broad package suite rebuilds successfully and the owned focused compiled tests pass, but the broad suite still exits non-zero, classify the failure before closeout instead of forcing the broad lane. Name the exact unrelated failing test files or subtests, the diagnostic command used to isolate them, and the focused owned proof command that remains the ticket's truthful acceptance surface in `## Deviations` / `## Verification Result`.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
 
@@ -56,6 +57,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Assumption Reassessment` captures the final boundary
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
+- completed implementation tickets convert planned sections such as `What to Change` to landed facts; if preserving the section as the final implementation record, prefer renaming it to `Landed Changes`
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
 - illustrative code snippets, helper names, and scenario sketches still match the landed seam or have been replaced with prose
 - preserved original failure evidence is clearly historical, not phrased as a current-state claim after the ticket is complete

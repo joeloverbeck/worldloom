@@ -66,6 +66,8 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
 7. Treat this step as a provisional readiness check only. Do not move the ticket to `archive/tickets/` until after the review surface, FOUNDATIONS/contract audit, and follow-up/blocker decision are complete.
 
+If archival is blocked because same-seam implementation work remains in skills, tools, hooks, validators, or world content, stay inside review boundaries: report the blocker, record it in the ticket when doing so clarifies the handoff, and resume implementation only under `implement-ticket` or an explicit user instruction to continue implementation.
+
 ### 3. Establish the review surface
 
 Review the real local implementation state, not an idealized committed state.
@@ -128,7 +130,7 @@ If the review confirms archival readiness after the review-surface audit and fol
 1. Move the ticket to `archive/tickets/`.
 2. Confirm the original active ticket path no longer exists.
 3. Record whether the move appeared as a tracked rename or an untracked archive file created from an untracked source.
-4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. Prefer literal-safe searches such as `rg -n -F 'tickets/SPEC-EXAMPLE-001.md' tickets specs docs` or single-quoted regex patterns so ticket IDs, backticks, and path punctuation are not interpreted by the shell. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
+4. Grep active tickets, specs, and docs for the old active path and same-family dependency references. When the reviewed ticket changed or named skills, tools, validators, hooks, or workflow docs, include those directly touched or ticket-named paths in the literal sweep as well. Prefer literal-safe searches such as `rg -n -F 'tickets/SPEC-EXAMPLE-001.md' tickets specs docs .claude/skills/<skill> .codex/skills/<skill> tools/<package>` or single-quoted regex patterns so ticket IDs, backticks, and path punctuation are not interpreted by the shell. Classify each hit as stale, historical, or intentionally review-created. Repair `Deps`, target snippets, and actionable handoff instructions to the archived path when the completed ticket is now the prerequisite. Leave ordinary historical ID mentions and intentional follow-up references alone unless they claim a live path or would mislead implementation; report intentional review-created references in the handoff instead of "repairing" them.
 
 If this post-move sweep reveals a concrete adjacent concern that was not actionable until the archive path existed, create or update a bounded follow-up during the same review and report it as `review-created edits`. This is allowed only when the concern does not prove unfinished owned work inside the reviewed ticket; if it does, recover the ticket from the archive and report archival as blocked.
 
@@ -162,6 +164,13 @@ When the reviewed ticket's narrow proof is cheap and local, rerun it after imple
 ### 8. Present the report
 
 Use this structure. In `Verification And Handoff`, use severity-shaped entries only when a real handoff gap remains; if verification is clean, concise evidence bullets are acceptable.
+
+For blocked archival, keep the same report shape but make the handoff explicit:
+- name the blocker files or workflow surfaces
+- state the owned invariant that remains unproven or unfinished
+- state why the blocker cannot be fixed inside post-ticket-review boundaries
+- name the next implementation action or skill
+- name the proof that must pass before re-review or archival
 
 ```markdown
 # Post-Ticket Review: <ticket-id>

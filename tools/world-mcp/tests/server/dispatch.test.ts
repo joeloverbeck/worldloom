@@ -301,6 +301,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.find_named_entities,
+        args: { world_slug: "seeded", names: ["Brinewick"], node_type_filter: ["character_record"] },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.find_edit_anchors,
         args: { world_slug: "seeded", targets: ["CF-0001"] },
         expectError: false

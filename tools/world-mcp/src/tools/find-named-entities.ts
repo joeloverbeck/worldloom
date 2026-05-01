@@ -7,6 +7,7 @@ import type { McpError } from "../errors";
 export interface FindNamedEntitiesArgs {
   world_slug: string;
   names: string[];
+  node_type_filter?: NodeType[];
 }
 
 export interface MentionNodeTypeGroup {
@@ -22,6 +23,11 @@ export interface CanonicalMatch {
   provenance_scope: "world" | "proposal" | "diegetic" | "audit";
   match_kind: "canonical_name" | "alias";
   matched_text: string;
+  /**
+   * When node_type_filter is provided, this array contains only mention groups
+   * whose node_type is in the filter. Canonical matches with no remaining
+   * mention groups are omitted from the response.
+   */
   mentions_by_node_type: MentionNodeTypeGroup[];
 }
 
@@ -168,8 +174,21 @@ function loadDescriptorHint(
 function loadMentionGroups(
   db: import("better-sqlite3").Database,
   worldSlug: string,
-  entityId: string
+  entityId: string,
+  nodeTypeFilter: readonly NodeType[] | undefined
 ): MentionNodeTypeGroup[] {
+  const filteredNodeTypes =
+    nodeTypeFilter === undefined ? undefined : unique(nodeTypeFilter);
+
+  if (filteredNodeTypes?.length === 0) {
+    return [];
+  }
+
+  const filterSql =
+    filteredNodeTypes === undefined
+      ? ""
+      : `AND n.node_type IN (${filteredNodeTypes.map(() => "?").join(", ")})`;
+
   return db
     .prepare(
       `
@@ -178,11 +197,12 @@ function loadMentionGroups(
         INNER JOIN nodes n ON n.node_id = em.node_id
         WHERE n.world_slug = ?
           AND em.resolved_entity_id = ?
+          ${filterSql}
         GROUP BY n.node_type
         ORDER BY n.node_type
       `
     )
-    .all(worldSlug, entityId) as MentionNodeTypeGroup[];
+    .all(worldSlug, entityId, ...(filteredNodeTypes ?? [])) as MentionNodeTypeGroup[];
 }
 
 async function findNamedEntitiesImpl(
@@ -219,6 +239,16 @@ async function findNamedEntitiesImpl(
         .all(args.world_slug, name) as CanonicalEntityRow[];
 
       for (const row of canonicalNameRows) {
+        const mentionGroups = loadMentionGroups(
+          opened.db,
+          args.world_slug,
+          row.entity_id,
+          args.node_type_filter
+        );
+        if (args.node_type_filter !== undefined && mentionGroups.length === 0) {
+          continue;
+        }
+
         queryHasMatches = true;
         canonicalMatches.push({
           query: name,
@@ -228,7 +258,7 @@ async function findNamedEntitiesImpl(
           provenance_scope: row.provenance_scope,
           match_kind: "canonical_name",
           matched_text: row.canonical_name,
-          mentions_by_node_type: loadMentionGroups(opened.db, args.world_slug, row.entity_id)
+          mentions_by_node_type: mentionGroups
         });
       }
 
@@ -255,6 +285,16 @@ async function findNamedEntitiesImpl(
       >;
 
       for (const row of aliasRows) {
+        const mentionGroups = loadMentionGroups(
+          opened.db,
+          args.world_slug,
+          row.entity_id,
+          args.node_type_filter
+        );
+        if (args.node_type_filter !== undefined && mentionGroups.length === 0) {
+          continue;
+        }
+
         queryHasMatches = true;
         canonicalMatches.push({
           query: name,
@@ -264,7 +304,7 @@ async function findNamedEntitiesImpl(
           provenance_scope: row.provenance_scope,
           match_kind: "alias",
           matched_text: row.alias_text,
-          mentions_by_node_type: loadMentionGroups(opened.db, args.world_slug, row.entity_id)
+          mentions_by_node_type: mentionGroups
         });
       }
 

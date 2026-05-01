@@ -408,6 +408,34 @@ test("SPEC-02 capstone: world-index public contract export imports cleanly", () 
   assert.equal(typeof exported.CURRENT_INDEX_VERSION, "number");
 });
 
+function assertValidatorRunReceipts(
+  value: unknown
+): Array<{ validator_name: string; status: string; duration_ms: number; detail?: string }> {
+  assert.ok(Array.isArray(value), "validators_run must be an array");
+
+  for (const entry of value) {
+    assert.ok(entry && typeof entry === "object", "validators_run entries must be objects");
+    const receipt = entry as {
+      validator_name?: unknown;
+      status?: unknown;
+      duration_ms?: unknown;
+      detail?: unknown;
+    };
+    assert.equal(typeof receipt.validator_name, "string");
+    assert.equal(typeof receipt.status, "string");
+    const durationMs = receipt.duration_ms;
+    if (typeof durationMs !== "number") {
+      assert.fail("validators_run duration_ms must be a number");
+    }
+    assert.ok(durationMs >= 0);
+    if ("detail" in receipt) {
+      assert.equal(typeof receipt.detail, "string");
+    }
+  }
+
+  return value;
+}
+
 test("SPEC-04 integration: validate_patch_plan returns verdicts from the validator framework", async () => {
   const root = createSpec02FixtureRoot();
   buildValidatorFixture(root);
@@ -420,7 +448,15 @@ test("SPEC-04 integration: validate_patch_plan returns verdicts from the validat
       });
 
       assert.notEqual(result.isError, true);
-      assert.deepEqual(result.structuredContent, { status: "pass", verdicts: [] });
+      const passContent = result.structuredContent as {
+        status?: string;
+        verdicts?: Array<{ code: string }>;
+        validators_run?: unknown;
+      };
+      assert.equal(passContent.status, "pass");
+      assert.deepEqual(passContent.verdicts, []);
+      const passRuns = assertValidatorRunReceipts(passContent.validators_run);
+      assert.ok(passRuns.some((entry) => entry.status === "pass"));
 
       const rule4Plan = buildValidatorCleanPatchPlan();
       (rule4Plan.patches[0]!.payload as any).cf_record.distribution.why_not_universal = [];
@@ -433,10 +469,20 @@ test("SPEC-04 integration: validate_patch_plan returns verdicts from the validat
       const rule4Content = rule4Result.structuredContent as {
         status?: string;
         verdicts: Array<{ code: string }>;
+        validators_run?: unknown;
       };
       assert.equal(rule4Content.status, "fail");
       const verdicts = rule4Content.verdicts;
       assert.ok(verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
+      const rule4Runs = assertValidatorRunReceipts(rule4Content.validators_run);
+      assert.ok(
+        rule4Runs.some(
+          (entry) =>
+            entry.validator_name === "rule4_no_globalization_by_accident" &&
+            entry.status === "fail" &&
+            entry.detail?.includes("why_not_universal")
+        )
+      );
     });
   } finally {
     destroyTempRepoRoot(root);

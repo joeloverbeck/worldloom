@@ -72,7 +72,7 @@ Evaluate: deepens identity? creates tensions? trivializes struggle? universalize
 - **NEW** — the proposal creates a deferred item; emit a `create_oq_record` op for the new `OQ-NNNN` and cite the resulting id in `open_questions_touched[]`. PA frontmatter no longer carries free-form OQ topic-strings — it carries `OQ-NNNN` ids only (per SPEC-14).
 - **RESOLVED** — the proposal commits on a previously-deferred question (rare). Treat with Phase 10 narrative-fit scrutiny — a resolved OQ is a deliberate commitment, not a silent one, and its resolution must be justified in the PA's Justification section. Silent OQ resolution violates Rule 6 (No Silent Retcons).
 
-Record the full list (every OQ examined, with classification) in the PA `body_markdown` Discovery section, but populate the frontmatter `open_questions_touched[]` array with PRESSURED + NEW + RESOLVED ids only — UNCHANGED items are the unstated complement (do not enumerate them in the frontmatter array, but the scan itself MUST cover them to produce the PRESSURED / NEW / RESOLVED list correctly). Missing this scan produces silent OQ drift: a pressured item that receives no extension carries a reader into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
+Record the full list (every OQ examined, with classification) in the PA `body_markdown` `# Phase 0–11 Analysis` → Phase 10 sub-section, NOT in `# Discovery` (which is reserved for substantively-touched items per SKILL.md §PA body_markdown Structure and the §PA body-markdown structural template below). Populate the frontmatter `open_questions_touched[]` array with PRESSURED + NEW + RESOLVED ids only — UNCHANGED items appear only in the Phase 10 sub-section enumeration (the scan itself MUST cover them to produce the PRESSURED / NEW / RESOLVED list correctly, but they do NOT enter the frontmatter array or the Discovery section). Missing this scan produces silent OQ drift: a pressured item that receives no extension carries a reader into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
 
 ## Phase 11: Adjudication
 
@@ -94,7 +94,7 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 - `# Discovery` — top-of-file index mirroring the four `*_touched` frontmatter arrays for in-body grep. Match the frontmatter exactly: do not re-include UNCHANGED items here either.
 - `# Proposal` — verbatim copy of the proposal text + user-stated constraints (preferred scope, desired rarity, dramatic purpose, revision appetite, other).
 - `# Phase 0–11 Analysis` — full per-phase outputs (Phase 0 normalize, including a required `## Phase 0 — Proposal Normalization and Misrecognition Probe` sub-heading with `misrecognition_probe:` layer-captured details OR `NONE` plus one-line rationale / Phase 1 scope / Phase 2 invariants / Phase 3 capability / Phase 4 prerequisites / Phase 5 diffusion / Phase 6 consequence propagation, with first/second/third-order subsections / Phase 7 counterfactual + stated stabilizers / Phase 8 contradiction classification / Phase 9 repair pass — options considered / declined / adopted / Phase 10 narrative-and-thematic fit + OQ pressure scan results).
-- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 13 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. Tests 11, 12, and 13 use the detailed criteria below.
+- `# Phase 14a Validation Checklist` — required for accept branches (smaller subset for non-accept). Each of the 14 tests as PASS/FAIL with one-line rationale; bare PASS treated as FAIL. Tests 11, 12, 13, and 14 use the detailed criteria below.
 - `# Verdict` — one of `ACCEPT` / `ACCEPT_WITH_REQUIRED_UPDATES` / `ACCEPT_AS_LOCAL_EXCEPTION` / `ACCEPT_AS_CONTESTED_BELIEF` / `REVISE_AND_RESUBMIT` / `REJECT` (matches the canonical verdict enum).
 - `# Justification` — phase-cited reasoning. Every claim cites a specific phase finding.
 - `# Critic Reports` — verbatim, only if the Escalation Gate fired. One subsection per critic (Continuity Archivist, Systems/Economy, Politics/Institution, Everyday-Life, Theme/Tone, Mystery Curator) plus a Synthesis (Phase 6b) subsection covering convergent concerns, productive tensions resolved, and required CF-language commitments arising from synthesis.
@@ -103,6 +103,8 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 - `# User Override` — only if a Phase 14b user override fired (original verdict, override verdict, user reasoning, converted accept-branch outputs). Rule 6 compliance: overrides are logged.
 
 ## Phase 14a Tests 11/12/13 Detailed Criteria
+
+For mechanical-layer checklist entries, use `validate_patch_plan` / `validate-patch-plan` response `validators_run[]` as the run-confirmation source. Each entry carries `validator_name`, `status`, `duration_ms`, and optional `detail`; a `skipped` envelope-shape response has an empty `validators_run[]` and must be repaired before checklist PASS claims are recorded.
 
 ### Test 11: Action-Space Integrity
 
@@ -155,3 +157,25 @@ FAIL examples:
 - The Phase 0 analysis does not mention misrecognition.
 - The PA says `misrecognition_probe: NONE` with no rationale.
 - The prose describes a false public belief but leaves both `epistemic_profile.distortion_vectors[]` and `knowledge_exclusions[]` empty.
+
+### Test 14: OQ pressure scan completed
+
+Applies to every accept-branch and non-accept-branch adjudication. The test is judgment-only and confirms the Phase 10 Open Questions pressure scan was actually run and recorded in the PA body — closing the Rule 6 audit-trail gap that an unrecorded scan opens.
+
+PASS requires:
+- The PA `body_markdown` `# Phase 0–11 Analysis` → Phase 10 sub-section enumerates every `OQ-NNNN` record returned by the pre-flight context packet (or backfilled via `mcp__worldloom__list_records({record_type: 'open_question_record'})` if the packet under-covered).
+- Each enumerated `OQ-NNNN` is classified as one of `{UNCHANGED, PRESSURED, NEW, RESOLVED}`.
+- The frontmatter `open_questions_touched[]` array contains the PRESSURED + NEW + RESOLVED subset; UNCHANGED items appear only in the Phase 10 sub-section enumeration, not the frontmatter or the `# Discovery` section.
+- For each PRESSURED item, an `append_extension` op on the target `OQ-NNNN.yaml` exists in the patch plan; for each NEW item, a `create_oq_record` op exists; for each RESOLVED item, the Justification section explains the resolution explicitly (Rule 6 — silent OQ resolution is forbidden).
+
+FAIL examples:
+- The Phase 10 sub-section omits the enumeration entirely (the scan was skipped).
+- The Phase 10 sub-section names only the PRESSURED / NEW / RESOLVED items and leaves UNCHANGED items unaccounted for (incomplete scan — UNCHANGED items must be enumerated to confirm the scan covered them).
+- The frontmatter `open_questions_touched[]` array contains an OQ id not classified PRESSURED, NEW, or RESOLVED in the Phase 10 sub-section, or the Phase 10 sub-section names a PRESSURED / NEW / RESOLVED item the frontmatter omits (frontmatter ↔ enumeration mismatch).
+- A pressured item received no `append_extension` op despite the PRESSURED classification (the extension is the audit-trail trace; absent it, the classification is unsupported and the deferral silently shifts).
+- The `# Discovery` section enumerates UNCHANGED OQ items (Discovery is reserved for substantively-touched items per SKILL.md §PA body_markdown Structure).
+
+Edge cases:
+- A run that runs the scan and finds every OQ classified UNCHANGED still PASSES, provided the Phase 10 sub-section explicitly enumerates each OQ as UNCHANGED. The empty `open_questions_touched[]` frontmatter array is correct in that case.
+- For non-accept verdicts (`REVISE_AND_RESUBMIT` / `REJECT`), the scan still runs and is recorded in the Phase 10 sub-section; no `append_extension` / `create_oq_record` ops fire (no `_source/` mutations on non-accept), but the enumeration discipline is unchanged.
+- For clarificatory retcons (`change_type: clarification`, typically `retcon_type: A`), the scan covers the OQs the retcon touches plus the full pre-flight set. A clarificatory retcon that pressures additional OQs records them as PRESSURED; one that touches only the target CF's annotations records all OQs as UNCHANGED.

@@ -70,7 +70,7 @@ The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on fir
 
 ### Validating and submitting the plan: MCP path (default) and CLI path (size-constrained bypass)
 
-Before approval, a patch plan can be validated through either the MCP tool or the CLI size-bypass path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, reason?, details? }` object; malformed envelopes with multiple shape errors include `details.additional_errors[]` on the `skipped` response. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
+Before approval, a patch plan can be validated through either the MCP tool or the CLI size-bypass path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, validators_run, reason?, details? }` object; `validators_run[]` carries per-validator `{ validator_name, status, duration_ms, detail? }` telemetry and is empty on `skipped` because the envelope never reached validation. Malformed envelopes with multiple shape errors include `details.additional_errors[]` on the `skipped` response. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
 
 **Validate MCP path (default)** — call `mcp__worldloom__validate_patch_plan(plan)` with the plan envelope. This is the canonical pre-apply validation path for ordinary plan sizes.
 
@@ -80,7 +80,7 @@ Before approval, a patch plan can be validated through either the MCP tool or th
 node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
 ```
 
-On `pass`, the CLI prints the validate status object to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
+On `pass`, the CLI prints the validate status object, including `validators_run[]`, to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
 
 **MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
 

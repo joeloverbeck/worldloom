@@ -3,6 +3,9 @@ import test from "node:test";
 
 import {
   CANONICAL_DOMAINS,
+  CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
+  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
+  CF_TYPE_VALUES,
   CHANGE_TYPE_VALUES,
   ENTITY_KIND_VALUES,
   INVARIANT_CATEGORY_VALUES,
@@ -91,6 +94,41 @@ test("getCanonicalVocabulary returns invariant revision difficulties", async () 
   assert.deepEqual(result.canonical_values, [...REVISION_DIFFICULTY_VALUES]);
 });
 
+test("getCanonicalVocabulary returns canon fact types and conditional block coupling", async () => {
+  const result = await getCanonicalVocabulary({ class: "cf_type" });
+
+  assert.ok(!("code" in result));
+  assert.deepEqual(result.canonical_values, [...CF_TYPE_VALUES]);
+  assert.ok(result.canonical_values.includes("institution_with_secrecy"));
+  assert.ok(result.canonical_values.includes("knowledge_asymmetric_fact"));
+  assert.deepEqual(result.coupling, {
+    field: "type",
+    rule: "Types in CF_TYPE_EPISTEMIC_PROFILE_REQUIRED require populated epistemic_profile. Types in CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED additionally require populated exception_governance. Validator: record_schema_compliance."
+  });
+
+  const byValue = new Map(result.per_value_coupling?.map((entry) => [entry.value, entry]) ?? []);
+  assert.equal(byValue.get("institution_with_secrecy")?.requires_epistemic_profile, true);
+  assert.equal(byValue.get("institution_with_secrecy")?.requires_exception_governance, false);
+  assert.equal(byValue.get("capability")?.requires_epistemic_profile, true);
+  assert.equal(byValue.get("capability")?.requires_exception_governance, true);
+  assert.deepEqual(
+    new Set(
+      result.per_value_coupling
+        ?.filter((entry) => entry.requires_epistemic_profile)
+        .map((entry) => entry.value)
+    ),
+    new Set(CF_TYPE_EPISTEMIC_PROFILE_REQUIRED)
+  );
+  assert.deepEqual(
+    new Set(
+      result.per_value_coupling
+        ?.filter((entry) => entry.requires_exception_governance)
+        .map((entry) => entry.value)
+    ),
+    new Set(CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED)
+  );
+});
+
 test("getCanonicalVocabulary rejects unsupported vocabulary classes", async () => {
   const result = await getCanonicalVocabulary({ class: "not_real" as never });
 
@@ -105,6 +143,7 @@ test("getCanonicalVocabulary rejects unsupported vocabulary classes", async () =
     "entity_kind",
     "sec_file_class",
     "change_type",
-    "revision_difficulty"
+    "revision_difficulty",
+    "cf_type"
   ]);
 });

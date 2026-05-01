@@ -75,7 +75,11 @@ test("validatePatchPlan returns pass when validators run without failures", asyn
   try {
     const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: buildValidPatchPlan() }));
 
-    assert.deepEqual(result, { status: "pass", verdicts: [] });
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass");
+    assert.deepEqual(result.verdicts, []);
+    assertValidatorRunEntries(result.validators_run);
+    assert.ok(result.validators_run.some((entry) => entry.status === "pass"));
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -93,6 +97,8 @@ test("validatePatchPlan returns fail and surfaces rule verdicts from the validat
     assert.ok("verdicts" in result);
     assert.equal(result.status, "fail");
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
+    assertValidatorRunEntries(result.validators_run);
+    assert.ok(result.validators_run.some((entry) => entry.status === "fail"));
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -109,7 +115,8 @@ test("validatePatchPlan returns skipped for a malformed plan before validator de
   assert.deepEqual(result, {
     status: "skipped",
     reason: "patch_plan.plan_id must be a non-empty string.",
-    verdicts: []
+    verdicts: [],
+    validators_run: []
   });
 });
 
@@ -124,7 +131,8 @@ test("validatePatchPlan returns skipped for an empty patch list before validator
   assert.deepEqual(result, {
     status: "skipped",
     reason: "patch_plan.patches must be a non-empty array.",
-    verdicts: []
+    verdicts: [],
+    validators_run: []
   });
 });
 
@@ -140,6 +148,7 @@ test("validatePatchPlan preserves additional envelope-shape errors on skipped re
   assert.ok("status" in result);
   assert.equal(result.status, "skipped");
   assert.equal(result.reason, "patch_plan.patches[0].op must be a non-empty string.");
+  assert.deepEqual(result.validators_run, []);
   assert.ok(result.details !== undefined);
   assert.equal(result.details.field, "patch_plan.patches[0].op");
   assert.deepEqual(
@@ -153,3 +162,19 @@ test("validatePatchPlan preserves additional envelope-shape errors on skipped re
     ]
   );
 });
+
+function assertValidatorRunEntries(
+  entries: Array<{ validator_name: string; status: string; duration_ms: number; detail?: string }>
+): void {
+  assert.ok(entries.length > 0);
+  for (const entry of entries) {
+    assert.equal(typeof entry.validator_name, "string");
+    assert.match(entry.validator_name, /.+/);
+    assert.ok(["pass", "fail", "skipped"].includes(entry.status));
+    assert.equal(typeof entry.duration_ms, "number");
+    assert.ok(entry.duration_ms >= 0);
+    if (entry.detail !== undefined) {
+      assert.equal(typeof entry.detail, "string");
+    }
+  }
+}

@@ -119,6 +119,89 @@ export const REVISION_DIFFICULTY_VALUES = ["low", "medium", "high"] as const;
 
 export type RevisionDifficultyValue = (typeof REVISION_DIFFICULTY_VALUES)[number];
 
+export const CF_TYPE_COMMON_VALUES = [
+  "capability",
+  "artifact",
+  "law",
+  "belief",
+  "event",
+  "institution",
+  "species",
+  "ritual",
+  "taboo",
+  "technology",
+  "resource_distribution",
+  "hidden_truth",
+  "local_anomaly",
+  "metaphysical_rule",
+  "historical_process",
+  "text_tradition",
+  "hazard",
+  "craft",
+  "place",
+  "polity",
+  "route",
+  "social_role",
+  "ecological_system"
+] as const;
+
+export type CfTypeCommonValue = (typeof CF_TYPE_COMMON_VALUES)[number];
+
+export const CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED = [
+  "capability",
+  "bloodline",
+  "magic_practice",
+  "technology",
+  "divine_action",
+  "artifact_dependent_truth",
+  "exception_introducing_fact"
+] as const;
+
+export type CfTypeExceptionGovernanceRequiredValue = (typeof CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED)[number];
+
+export const CF_TYPE_EPISTEMIC_PROFILE_REQUIRED = [
+  ...CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
+  "institution_with_secrecy",
+  "knowledge_asymmetric_fact"
+] as const;
+
+export type CfTypeEpistemicProfileRequiredValue = (typeof CF_TYPE_EPISTEMIC_PROFILE_REQUIRED)[number];
+
+export const CF_TYPE_VALUES = [
+  "capability",
+  "artifact",
+  "law",
+  "belief",
+  "event",
+  "institution",
+  "species",
+  "ritual",
+  "taboo",
+  "technology",
+  "resource_distribution",
+  "hidden_truth",
+  "local_anomaly",
+  "metaphysical_rule",
+  "historical_process",
+  "text_tradition",
+  "hazard",
+  "craft",
+  "place",
+  "polity",
+  "route",
+  "social_role",
+  "ecological_system",
+  "bloodline",
+  "magic_practice",
+  "divine_action",
+  "artifact_dependent_truth",
+  "exception_introducing_fact",
+  "institution_with_secrecy",
+  "knowledge_asymmetric_fact"
+] as const;
+
+export type CfTypeValue = (typeof CF_TYPE_VALUES)[number];
+
 const CANONICAL_DOMAIN_SET = new Set<string>(CANONICAL_DOMAINS);
 
 export function isCanonicalDomain(value: string): value is CanonicalDomain {

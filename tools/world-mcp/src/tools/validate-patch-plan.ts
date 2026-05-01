@@ -1,6 +1,7 @@
 import { createMcpError, type McpError } from "../errors";
+import type { ValidatorRunReceipt } from "@worldloom/patch-engine";
 import { validatePatchPlan as runValidatePatchPlan } from "@worldloom/validators";
-import type { Verdict } from "@worldloom/validators/public/types";
+import type { ValidatorExecution, Verdict } from "@worldloom/validators/public/types";
 
 import {
   type PatchPlanEnvelope,
@@ -12,9 +13,9 @@ export interface ValidatePatchPlanArgs {
 }
 
 export type ValidatePatchPlanResponse =
-  | { status: "pass"; verdicts: Verdict[] }
-  | { status: "fail"; verdicts: Verdict[] }
-  | { status: "skipped"; reason: string; verdicts: []; details?: Record<string, unknown> };
+  | { status: "pass"; verdicts: Verdict[]; validators_run: ValidatorRunReceipt[] }
+  | { status: "fail"; verdicts: Verdict[]; validators_run: ValidatorRunReceipt[] }
+  | { status: "skipped"; reason: string; verdicts: []; validators_run: []; details?: Record<string, unknown> };
 
 function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
@@ -34,10 +35,11 @@ export async function validatePatchPlan(
         status: "skipped",
         reason: shapeError.message,
         verdicts: [],
+        validators_run: [],
         details: shapeError.details
       };
     }
-    return { status: "skipped", reason: shapeError.message, verdicts: [] };
+    return { status: "skipped", reason: shapeError.message, verdicts: [], validators_run: [] };
   }
 
   const result = await runValidatePatchPlan(
@@ -47,6 +49,21 @@ export async function validatePatchPlan(
 
   return {
     status: hasFailures ? "fail" : "pass",
-    verdicts: result.verdicts
+    verdicts: result.verdicts,
+    validators_run: projectExecutionsToReceipt(result.executions)
   };
+}
+
+function projectExecutionsToReceipt(executions: ValidatorExecution[]): ValidatorRunReceipt[] {
+  return executions.map((execution) => {
+    const entry: ValidatorRunReceipt = {
+      validator_name: execution.name,
+      status: execution.status,
+      duration_ms: execution.duration_ms
+    };
+    if (execution.detail !== undefined) {
+      entry.detail = execution.detail;
+    }
+    return entry;
+  });
 }

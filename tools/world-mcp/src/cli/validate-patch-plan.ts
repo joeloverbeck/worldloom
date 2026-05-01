@@ -33,7 +33,7 @@ Options:
   --help                  Show this help and exit.
 
 Output:
-  On pass: { status: "pass", verdicts } printed to stdout as JSON; exit code 0.
+  On pass: { status: "pass", verdicts, validators_run } printed to stdout as JSON; exit code 0.
   On fail/skipped: the same status object printed to stderr as JSON; exit code 1.
 
 Example:
