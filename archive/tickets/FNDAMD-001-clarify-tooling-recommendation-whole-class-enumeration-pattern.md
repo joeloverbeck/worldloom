@@ -1,14 +1,14 @@
 # FNDAMD-001: Clarify FOUNDATIONS §Tooling Recommendation to name whole-class enumeration as a legitimate primary loading pattern
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: No tool / engine / validator code is touched. Documentation-only — `docs/FOUNDATIONS.md` (additive paragraph appended to §Tooling Recommendation); `docs/CONTEXT-PACKET-CONTRACT.md` (cross-reference to the new clarification); optional ripple to skills whose §FOUNDATIONS Alignment table cites §Tooling Recommendation against a whole-class load (`emergent-pressure-events`, `continuity-audit`) — defer to per-skill audits rather than touch every consumer in this ticket.
+**Engine Changes**: No tool / engine / validator code is touched. Documentation-only — `docs/FOUNDATIONS.md` (additive paragraph appended to §Tooling Recommendation). `docs/CONTEXT-PACKET-CONTRACT.md`, `emergent-pressure-events`, and `continuity-audit` already carry the whole-class enumeration contract from MCPENH-007; this ticket leaves those consumers untouched except for verification.
 **Deps**: `archive/tickets/MCPENH-007-bulk-full-body-fetch-for-whole-class-firewall-loads.md` (completed provider for `mcp__worldloom__list_records(... include_full_body=true)`, which this amendment live-cites).
 
 ## Problem
 
-`docs/FOUNDATIONS.md` §Tooling Recommendation (currently lines 478–488 in the in-context Read from this session) reads:
+At intake, `docs/FOUNDATIONS.md` §Tooling Recommendation (lines 478–488 in the in-context read from that session) read:
 
 > LLM agents should never operate on prose alone.
 >
@@ -25,23 +25,23 @@ The bolded "touching the same domain" is scoped phrasing — it implies that mys
 1. **`emergent-pressure-events`** Phase 6a (Per-card Invariant Conformance): "test against every INV record in the loaded packet"; Phase 6b (Per-card Mystery Reserve Firewall): "test against every M record in the loaded packet — overlap or not." Every-record discipline is the firewall's runtime expression; without it, the skill's Rule 7 commitment ("Preserve Mystery Deliberately") cannot be enforced at the candidate-event scale.
 2. **`continuity-audit`**: cross-checks every CF against every INV against every M record. Same whole-class shape.
 
-The current FOUNDATIONS text and these skills' firewall discipline are in mild tension: the "directly or via context-packet" permission above the bullet list is broad enough to legally cover whole-class loads (the "directly" branch encompasses any retrieval shape including `list_records(... include_full_body=true)`), but the "touching the same domain" mystery-reserve bullet pulls toward scoped retrieval, leaving skill authors to re-derive the legitimacy of whole-class loads from the broader permission rather than citing an explicit named pattern.
+At intake, the current FOUNDATIONS text and these skills' firewall discipline were in mild tension: the "directly or via context-packet" permission above the bullet list was broad enough to legally cover whole-class loads (the "directly" branch encompasses any retrieval shape including `list_records(... include_full_body=true)`), but the "touching the same domain" mystery-reserve bullet pulled toward scoped retrieval, leaving skill authors to re-derive the legitimacy of whole-class loads from the broader permission rather than citing an explicit named pattern.
 
 Session evidence from BATCH-0004 emergent-pressure-events run (2026-04-30): the skill's Phase 6 load went through `list_records(record_type='mystery_record', fields=[...])` plus N individual `get_record(record_id='M-N')` follow-up calls because (a) the deployed MCP server's `task_type` schema didn't accept `emergent_pressure_events` (motivating ENGINESYNC-002) and (b) before MCPENH-007 landed, `list_records` did not yet expose `include_full_body=true`. The skill's firewall discipline survived the friction because the operator (me) re-derived the whole-class legitimacy from §Tooling Recommendation's broader "directly" branch — but this re-derivation should not be load-bearing on operator judgment. A named pattern in FOUNDATIONS would let skill authors cite the principle directly.
 
 This ticket adds a clarification paragraph naming "whole-class enumeration" as a legitimate primary loading pattern alongside seed-based context-packet retrieval. The clarification is purely additive: no existing principle is narrowed, no Validation Rule is changed, no schema is touched. The intent is to make the load-shape choice explicit so future skills with firewall discipline don't re-derive it.
 
-## Assumption Reassessment (2026-04-30)
+## Assumption Reassessment (2026-05-01)
 
-1. `docs/FOUNDATIONS.md` exists; §Tooling Recommendation is identified by the level-2 header `## Tooling Recommendation`. Section anchor (not line number) is the durable reference. Current paragraph order: (a) one-line "operate on prose alone" assertion; (b) bullet list of six items; (c) one-paragraph "non-negotiable" mechanism statement. The amendment lands as a NEW paragraph (d) appended after (c), before the section closes with `---`.
-2. `docs/CONTEXT-PACKET-CONTRACT.md` exists and is referenced inline in §Tooling Recommendation paragraph (c). This ticket adds a back-reference: docs/CONTEXT-PACKET-CONTRACT.md gets a brief cross-reference to the new FOUNDATIONS clarification so the two documents stay in sync. MCPENH-007 already added the broader context-packet contract text; this ticket owns the FOUNDATIONS clarification and any remaining back-reference needed to connect the two documents.
-3. **Cross-skill / cross-artifact boundary under audit**: the contract between (a) `docs/FOUNDATIONS.md` (authoritative design-contract surface) and (b) skill prose that cites §Tooling Recommendation in the FOUNDATIONS Alignment table — currently `emergent-pressure-events` lines 312 and 323 (in the post-prior-audit revision); `continuity-audit` SKILL.md (verify exact line at implementation time). The amendment changes (a); the consequent skill prose updates that benefit from the clearer reference are NOT mandated by this ticket — they're per-skill audit ripple.
+1. `docs/FOUNDATIONS.md` exists; §Tooling Recommendation is identified by the level-2 header `## Tooling Recommendation`. Section anchor (not line number) is the durable reference. Current paragraph order is still: (a) one-line "operate on prose alone" assertion; (b) bullet list of six items; (c) one-paragraph "non-negotiable" mechanism statement. The amendment lands as a NEW paragraph (d) appended after (c), before the section closes with `---`.
+2. `docs/CONTEXT-PACKET-CONTRACT.md` already contains the back-reference this draft originally proposed. Its `## Index + Follow-Up Retrieval Pattern` section says skills whose validation surface intentionally tests every record of a class may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load, and the `## Focused Retrieval Tools` table names whole-class loads for EPE Phase 6 and continuity-audit. No context-packet doc edit remains owned by this ticket.
+3. **Cross-skill / cross-artifact boundary under audit**: the contract between (a) `docs/FOUNDATIONS.md` (authoritative design-contract surface) and (b) existing consumer prose in `docs/CONTEXT-PACKET-CONTRACT.md`, `.claude/skills/emergent-pressure-events/SKILL.md`, and `.claude/skills/continuity-audit/SKILL.md`. Reassessment confirmed the consumers already name `include_full_body=true` whole-class loads; the remaining mismatch is that FOUNDATIONS itself does not yet name the pattern.
 4. **FOUNDATIONS principle motivating this ticket**: §Tooling Recommendation itself. The amendment is a CLARIFICATION of the existing principle, not a substantive revision. The "directly or via the documented context-packet + targeted-retrieval pattern" permission already legally covers whole-class enumeration as the "directly" branch. The amendment makes this branch named and discoverable. Per `tickets/README.md` §Mandatory Pre-Implementation Checks item 9: this ticket touches a FOUNDATIONS-aligned enforcement surface (Canon Safety Check load shape), so the principle is restated above and the amendment is verified against it. The Mystery Reserve firewall enforcement at runtime is UNCHANGED — only the LOAD shape's legitimacy is named more explicitly. Rule 7 ("Preserve Mystery Deliberately") is not weakened; if anything, it is strengthened, because skill authors can now cite a named pattern when committing to whole-class M-record firewall discipline rather than re-deriving the legitimacy.
 5. Not applicable per template item 5 — this ticket does not touch HARD-GATE semantics, canon-write ordering, or the Canon Safety Check enforcement mechanism. It touches the LOAD shape only. HARD-GATE, write ordering, firewall-test logic, and the Mystery Reserve firewall semantics remain identical.
 6. Not applicable per template item 6 — no output schema (CF / CH / proposal card / dossier / artifact) is extended. The change is documentation prose only. The §Tooling Recommendation section's structural shape (header + intro line + bullet list + mechanism paragraph + new clarification paragraph) is preserved.
-7. The change adds one paragraph; it does not rename, remove, or repurpose any existing principle, rule, schema, or relation type. Blast radius scan: `rg -n "Tooling Recommendation|whole-class enumeration|whole class" docs/ .claude/skills/ archive/specs/ archive/tickets/ specs/` shows references to §Tooling Recommendation in 14 skills' FOUNDATIONS Alignment tables, but the amendment does NOT invalidate any of them — those alignment-table entries cite §Tooling Recommendation generically, and the amendment is additive prose under the same header. Skills whose FOUNDATIONS Alignment table specifically wants to cite the new clarification (currently `emergent-pressure-events` Phase 1 + Pre-flight rows; `continuity-audit` cross-check rows) can update during their next audit cycle; the existing generic citations remain valid in the meantime.
-8. Adjacent contradiction surfaced during reassessment: the `emergent-pressure-events` SKILL.md FOUNDATIONS Alignment table's Tooling Recommendation row (line 312, post-prior-audit revision) currently reads: "Pre-flight loads context packet via `mcp__worldloom__get_context_packet`; Phase 1 + Phase 6 expand via `search_nodes` / `get_record` / `get_neighbors`." The post-prior-audit text says the primary loading path is per-record-class retrieval via `list_records`, but the FOUNDATIONS Alignment table row was not updated to reflect this in the prior audit's edits. After FNDAMD-001 lands, the alignment-table row CAN be updated to cite the named whole-class enumeration pattern explicitly — but this is per-skill audit ripple, not mandated by this ticket. Recording it here as adjacent context for the next emergent-pressure-events audit cycle.
-9. The FOUNDATIONS amendment is the smallest possible change to surface the legitimacy of whole-class enumeration: ONE paragraph appended to ONE section. The existing precedents for FOUNDATIONS amendments (SPEC09CANSAFEXP-001 added Rules 11 + 12 plus two CF schema blocks plus six relation types — a much larger surface; SPEC17AUDTRARET-002 clarified audit-trail retention semantics — a smaller but still SPEC-backed amendment) suggest amendments are typically backed by a SPEC document. This ticket is a borderline case: the change is small enough that drafting a full `specs/SPEC-NN-...md` design proposal feels heavyweight for what amounts to a one-paragraph clarification of an already-permitted pattern. The SPEC-backed convention exists for amendments that introduce new rules / schemas / relation types — this amendment introduces none. See §Architecture Check item 3 for the explicit rationale.
+7. The change adds one paragraph; it does not rename, remove, or repurpose any existing principle, rule, schema, or relation type. Blast radius scan: `rg -n "Tooling Recommendation" .claude/skills -g 'SKILL.md'` shows generic §Tooling Recommendation citations in five skills. The amendment is additive prose under the same header and does not invalidate those entries.
+8. Prior adjacent contradiction is already resolved: `.claude/skills/emergent-pressure-events/SKILL.md` now says Pre-flight loads atomic records via `mcp__worldloom__list_records`; Phase 6 uses `include_full_body=true` for whole-class INV / M firewall loads; targeted follow-up uses `search_nodes` / `get_record` / `get_neighbors`. `.claude/skills/continuity-audit/SKILL.md` likewise names `list_records(... include_full_body=true)` for deliberate whole-class audit passes. No skill-side ripple remains owned by this ticket.
+9. The FOUNDATIONS amendment remains the smallest possible change to surface the legitimacy of whole-class enumeration: ONE paragraph appended to ONE section. The existing precedents for FOUNDATIONS amendments (SPEC09CANSAFEXP-001 added Rules 11 + 12 plus two CF schema blocks plus six relation types — a much larger surface; SPEC17AUDTRARET-002 clarified audit-trail retention semantics — a smaller but still SPEC-backed amendment) suggest amendments are typically backed by a SPEC document. This ticket is a borderline case: the change is small enough that drafting a full `specs/SPEC-NN-...md` design proposal feels heavyweight for what amounts to a one-paragraph clarification of an already-permitted pattern. The SPEC-backed convention exists for amendments that introduce new rules / schemas / relation types — this amendment introduces none. See §Architecture Check item 3 for the explicit rationale.
 
 ## Architecture Check
 
@@ -70,28 +70,16 @@ Notes for the editor at implementation time:
 - MCPENH-007 has landed and is archived, so the bare `list_records(... include_full_body=true)` reference is live-cited.
 - The paragraph leads with a bolded principle name to mirror the §Validation Rules sub-headers (e.g., "**Rule 11: No Spectator Castes by Accident**") — this preserves FOUNDATIONS' typographic register for principle declarations.
 
-### 2. Add a back-reference in docs/CONTEXT-PACKET-CONTRACT.md
+### 2. Verify existing consumer/back-reference surfaces
 
-In `docs/CONTEXT-PACKET-CONTRACT.md`, add a brief subsection or footnote that cross-references the FOUNDATIONS amendment. Suggested text:
-
-> **Whole-class enumeration vs seed-based packet retrieval.** Some skills' Canon Safety Check discipline requires testing against every record of a class (`emergent-pressure-events` Phase 6 firewalls; `continuity-audit` cross-checks). For these skills, `mcp__worldloom__list_records(... include_full_body=true)` is the primary loading affordance — distinct from `get_context_packet(...)`'s seed-based retrieval but equally first-class under FOUNDATIONS §Tooling Recommendation. See FOUNDATIONS §Tooling Recommendation for the named pattern.
-
-Placement: append to whichever existing subsection of CONTEXT-PACKET-CONTRACT.md most naturally hosts it — either the introduction (so readers see the alternative pattern up-front) or a dedicated "Loading patterns" subsection (creating one if absent). Defer the placement detail to the implementer.
-
-### 3. Optional skill-side ripple (defer to per-skill audits)
-
-Skills whose §FOUNDATIONS Alignment table cites §Tooling Recommendation against a whole-class load can update during their next audit cycle to reference the new named pattern explicitly:
-- `.claude/skills/emergent-pressure-events/SKILL.md` Phase 1 + Pre-flight FOUNDATIONS Alignment row (line 312 in the post-prior-audit revision).
-- `.claude/skills/continuity-audit/SKILL.md` (verify table location at the next continuity-audit audit).
-
-These are NOT mandated by this ticket — the existing generic citations remain valid post-amendment. Per-skill audit cycles handle the ripple.
+`docs/CONTEXT-PACKET-CONTRACT.md`, `.claude/skills/emergent-pressure-events/SKILL.md`, and `.claude/skills/continuity-audit/SKILL.md` already name whole-class enumeration via `list_records(... include_full_body=true)`. Do not edit them in this ticket unless final verification exposes a same-seam contradiction.
 
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify — append clarification paragraph to §Tooling Recommendation)
-- `docs/CONTEXT-PACKET-CONTRACT.md` (modify — add back-reference subsection or footnote)
-- `.claude/skills/emergent-pressure-events/SKILL.md` (defer — per next audit)
-- `.claude/skills/continuity-audit/SKILL.md` (defer — per next audit)
+- `docs/CONTEXT-PACKET-CONTRACT.md` (verify only — existing back-reference already present)
+- `.claude/skills/emergent-pressure-events/SKILL.md` (verify only — existing whole-class load prose already present)
+- `.claude/skills/continuity-audit/SKILL.md` (verify only — existing whole-class load prose already present)
 
 ## Out of Scope
 
@@ -108,10 +96,10 @@ These are NOT mandated by this ticket — the existing generic citations remain 
 
 1. `rg -n "Whole-class enumeration is a legitimate primary loading pattern" docs/FOUNDATIONS.md` returns exactly one hit, located within §Tooling Recommendation (between the "non-negotiable" mechanism paragraph and the section's closing `---`).
 2. `rg -n "list_records.*include_full_body" docs/FOUNDATIONS.md` returns at least one hit confirming the cross-reference to MCPENH-007's affordance.
-3. `rg -n "emergent-pressure-events.*Phase 6\|continuity-audit.*cross-check" docs/FOUNDATIONS.md` returns at least one hit confirming the named-skill citations.
-4. `rg -n "whole-class enumeration\|FOUNDATIONS §Tooling Recommendation" docs/CONTEXT-PACKET-CONTRACT.md` returns at least one hit confirming the back-reference landed.
+3. `rg -n "emergent-pressure-events.*Phase 6|continuity-audit.*cross-check" docs/FOUNDATIONS.md` returns at least one hit confirming the named-skill citations.
+4. `rg -n "whole-class enumeration|FOUNDATIONS §Tooling Recommendation" docs/CONTEXT-PACKET-CONTRACT.md` returns at least one hit confirming the existing back-reference remains present.
 5. The amended FOUNDATIONS.md continues to render as well-formed Markdown — no broken header structure, no orphaned blockquote, no lost cross-references → manual review (`cat docs/FOUNDATIONS.md` followed by visual inspection of §Tooling Recommendation).
-6. The Mystery Reserve firewall behavior at runtime is unchanged → manual review of FOUNDATIONS Rule 7 (no edit) and `emergent-pressure-events` SKILL.md Phase 6b text (no behavior change in the firewall test logic; only the loading-path prose may eventually update via per-skill ripple).
+6. The Mystery Reserve firewall behavior at runtime is unchanged → manual review of FOUNDATIONS Rule 7 (no edit) and `emergent-pressure-events` SKILL.md Phase 6b text (no behavior change in the firewall test logic).
 
 ### Invariants
 
@@ -128,7 +116,30 @@ These are NOT mandated by this ticket — the existing generic citations remain 
 ### Commands
 
 1. `rg -n "Whole-class enumeration is a legitimate primary loading pattern" docs/FOUNDATIONS.md` — confirms the principle name landed.
-2. `rg -n "list_records.*include_full_body\|emergent-pressure-events.*Phase 6\|continuity-audit.*cross-check" docs/FOUNDATIONS.md` — confirms the cross-references and named-skill citations landed.
-3. `rg -n "whole-class enumeration\|FOUNDATIONS §Tooling Recommendation" docs/CONTEXT-PACKET-CONTRACT.md` — confirms the back-reference landed.
+2. `rg -n "list_records.*include_full_body|emergent-pressure-events.*Phase 6|continuity-audit.*cross-check" docs/FOUNDATIONS.md` — confirms the cross-references and named-skill citations landed.
+3. `rg -n "whole-class enumeration|FOUNDATIONS §Tooling Recommendation" docs/CONTEXT-PACKET-CONTRACT.md` — confirms the existing back-reference remains present.
 4. Manual review: read the amended §Tooling Recommendation top-to-bottom and confirm the new paragraph is faithful to FOUNDATIONS' existing register (declarative, terse, principle-named-then-rationale) and does not introduce contradictions with the existing bullet list or mechanism paragraph.
 5. Manual review: spot-check 3 skills' FOUNDATIONS Alignment tables (`emergent-pressure-events`, `propose-new-canon-facts`, `character-generation`) and confirm their generic citations of §Tooling Recommendation remain accurate post-amendment.
+
+## Outcome
+
+Completed on 2026-05-01.
+
+- Added the whole-class enumeration clarification paragraph to `docs/FOUNDATIONS.md` §Tooling Recommendation.
+- Reassessed the ticket against the live repo and narrowed the owned implementation to `docs/FOUNDATIONS.md`; `docs/CONTEXT-PACKET-CONTRACT.md`, `.claude/skills/emergent-pressure-events/SKILL.md`, and `.claude/skills/continuity-audit/SKILL.md` already carried the MCPENH-007 whole-class load contract.
+- No tool, engine, validator, skill, schema, HARD-GATE, or canon-write behavior changed.
+
+## Verification Result
+
+1. `rg -n "Whole-class enumeration is a legitimate primary loading pattern" docs/FOUNDATIONS.md` — passed; returned exactly one hit in §Tooling Recommendation.
+2. `rg -n "list_records.*include_full_body" docs/FOUNDATIONS.md` — passed; returned the new clarification paragraph.
+3. `rg -n "emergent-pressure-events.*Phase 6|continuity-audit.*cross-check" docs/FOUNDATIONS.md` — passed; returned the new clarification paragraph.
+4. `rg -n "whole-class enumeration|FOUNDATIONS §Tooling Recommendation" docs/CONTEXT-PACKET-CONTRACT.md` — passed; returned existing hits in the truncation guidance and whole-class retrieval pattern text.
+5. Manual review of `docs/FOUNDATIONS.md` §Tooling Recommendation — passed; the new paragraph sits after the non-negotiable mechanism paragraph and before the section-closing `---`, and preserves the section's additive clarification shape.
+6. Manual review of FOUNDATIONS Rule 7 and `.claude/skills/emergent-pressure-events/SKILL.md` Phase 6b — passed; Rule 7 and the skill's Mystery Reserve firewall behavior were not edited.
+7. Manual spot-check of FOUNDATIONS Alignment entries in `.claude/skills/emergent-pressure-events/SKILL.md`, `.claude/skills/propose-new-canon-facts/references/canon-rules-and-foundations.md`, and `.claude/skills/character-generation/references/governance-and-foundations.md` — passed; generic §Tooling Recommendation citations remain accurate after the additive clarification.
+
+## Deviations
+
+- The drafted `docs/CONTEXT-PACKET-CONTRACT.md` edit was already present before this ticket's implementation, so this ticket verified that surface instead of editing it.
+- The drafted skill-side ripple was already present in `emergent-pressure-events` and `continuity-audit`; this ticket left those files untouched.
