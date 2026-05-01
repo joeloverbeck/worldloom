@@ -66,7 +66,7 @@ Phase 11: Direct-write WORLD_KERNEL.md + ONTOLOGY.md → bootstrap empty index �
 1. Derive `<world-slug>` from `world_name` (kebab-case, lowercase, punctuation-stripped).
 2. If `worlds/<world-slug>/` already exists, **abort**. Overwriting is forbidden.
 3. Load `docs/FOUNDATIONS.md` into working context (§Canon Layers, §Mandatory World Files atomic-source classification, §World Kernel template, §Invariants schema, §Canon Fact Record Schema, §Validation Rules, §Canonical Storage Layer).
-4. Resolve canonical vocabularies via `mcp__worldloom__get_canonical_vocabulary({class: "domain"})`, `({class: "verdict"})`, `({class: "mystery_resolution_safety"})` — apply at synthesis time so emitted records use canonical enum values from the start.
+4. Resolve canonical vocabularies via `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, and `revision_difficulty` — apply at synthesis time so emitted records use canonical enum values from the start.
 
 ## Phase 0: Normalize the User Premise
 

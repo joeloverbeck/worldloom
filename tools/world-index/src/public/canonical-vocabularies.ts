@@ -48,6 +48,77 @@ export const MYSTERY_RESOLUTION_SAFETY_ENUM = ["none", "low", "medium", "high"] 
 
 export type MysteryResolutionSafetyEnumValue = (typeof MYSTERY_RESOLUTION_SAFETY_ENUM)[number];
 
+export const INVARIANT_CATEGORY_VALUES = [
+  "ontological",
+  "causal",
+  "distribution",
+  "social",
+  "aesthetic_thematic"
+] as const;
+
+export type InvariantCategoryValue = (typeof INVARIANT_CATEGORY_VALUES)[number];
+
+export const ENTITY_KIND_VALUES = [
+  "entity",
+  "species",
+  "person",
+  "faction",
+  "institution",
+  "polity",
+  "place",
+  "region",
+  "route",
+  "resource",
+  "craft",
+  "technology",
+  "magic_practice",
+  "belief",
+  "ritual",
+  "law",
+  "taboo",
+  "artifact",
+  "hazard",
+  "event",
+  "historical_process",
+  "social_role",
+  "text_tradition",
+  "ecological_system",
+  "bodily_condition",
+  "metaphysical_rule"
+] as const;
+
+export type EntityKindValue = (typeof ENTITY_KIND_VALUES)[number];
+
+export const SEC_FILE_CLASS_VALUES = [
+  "GEOGRAPHY",
+  "PEOPLES_AND_SPECIES",
+  "INSTITUTIONS",
+  "ECONOMY_AND_RESOURCES",
+  "MAGIC_OR_TECH_SYSTEMS",
+  "EVERYDAY_LIFE",
+  "TIMELINE"
+] as const;
+
+export type SecFileClassValue = (typeof SEC_FILE_CLASS_VALUES)[number];
+
+export const CHANGE_TYPE_VALUES = [
+  "addition",
+  "addition_with_qualification",
+  "scope_retcon",
+  "cost_retcon",
+  "perspective_retcon",
+  "chronology_retcon",
+  "ontology_retcon",
+  "clarification",
+  "de_canonization"
+] as const;
+
+export type ChangeTypeValue = (typeof CHANGE_TYPE_VALUES)[number];
+
+export const REVISION_DIFFICULTY_VALUES = ["low", "medium", "high"] as const;
+
+export type RevisionDifficultyValue = (typeof REVISION_DIFFICULTY_VALUES)[number];
+
 const CANONICAL_DOMAIN_SET = new Set<string>(CANONICAL_DOMAINS);
 
 export function isCanonicalDomain(value: string): value is CanonicalDomain {

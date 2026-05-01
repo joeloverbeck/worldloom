@@ -5,7 +5,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 ## Pre-flight
 
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)` for each needed id class. Allocate `PA` for every run, `CF` / `CH` for accept branches, and `M` / `OQ` only when repair work manufactures bounded unknowns or open questions.
-- `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, and `mystery_resolution_safety`. This catches enum drift before patch-plan validation.
+- `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, and `revision_difficulty`. This catches enum drift before patch-plan validation.
 - `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed_nodes>])` to gather Kernel, Invariants, relevant CF / CH / M / OQ records, named-entity neighbors, and section context. The canon-addition default budget is 16000; if the packet is incomplete, retry once with `retry_with.token_budget`. Treat packet `body_preview` fields as an index; follow up with `get_record` for full content before citing a record.
 
 ## Phase 0-2: Normalize, Scope, Invariants
