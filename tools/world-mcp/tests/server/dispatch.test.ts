@@ -188,6 +188,14 @@ function seedServerWorld(root: string): void {
     "proposal",
     "utf8"
   );
+
+  const toolResultsDirectory = path.join(root, "tool-results");
+  mkdirSync(toolResultsDirectory, { recursive: true });
+  writeFileSync(
+    path.join(toolResultsDirectory, "packet.json"),
+    JSON.stringify({ governing_world_context: { nodes: [{ id: "CF-0001" }] } }),
+    "utf8"
+  );
 }
 
 async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise<T> {
@@ -195,7 +203,9 @@ async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise
   seedServerWorld(root);
 
   const originalCwd = process.cwd();
+  const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
   process.chdir(path.join(root, "tools", "world-mcp"));
+  process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = path.join(root, "tool-results");
 
   const server = createServer();
   const client = new Client({
@@ -210,6 +220,11 @@ async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise
   } finally {
     await Promise.all([client.close(), server.close()]);
     process.chdir(originalCwd);
+    if (originalResultsDir === undefined) {
+      delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+    } else {
+      process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
+    }
     destroyTempRepoRoot(root);
   }
 }
@@ -230,6 +245,19 @@ test("registered tools dispatch with either a success payload or the documented 
       {
         name: MCP_TOOL_NAMES.get_record,
         args: { record_id: "CF-0001", world_slug: "seeded" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.get_records,
+        args: { record_ids: ["CF-0001", "SEC-GEO-001"], world_slug: "seeded" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.get_persisted_packet_slice,
+        args: {
+          persisted_path: path.join(process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR!, "packet.json"),
+          slice_path: "governing_world_context.nodes"
+        },
         expectError: false
       },
       {
@@ -348,6 +376,8 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.search_nodes, args: {} },
       { name: MCP_TOOL_NAMES.get_node, args: {} },
       { name: MCP_TOOL_NAMES.get_record, args: {} },
+      { name: MCP_TOOL_NAMES.get_records, args: { world_slug: "seeded" } },
+      { name: MCP_TOOL_NAMES.get_persisted_packet_slice, args: { slice_path: "governing_world_context.nodes" } },
       { name: MCP_TOOL_NAMES.list_records, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_field, args: { record_id: "SEC-GEO-001", world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_schema, args: {} },

@@ -17,7 +17,10 @@ task_header:
   seed_nodes:
     - CHAR-0002
   full_body_classes_delivered: []
+  harness_ceiling_chars: 80000
+  estimator_version: chars-per-token-v1
   packet_version: 2
+  delivery_status: inline
 local_authority:
   nodes: []
   why_included: []
@@ -56,6 +59,9 @@ Describes the invocation context:
 - requested versus allocated budget
 - seed nodes
 - `full_body_classes_delivered`, the live node classes that actually received `full_body` after budget allocation
+- `harness_ceiling_chars`, the effective serialized-response character ceiling used for this request
+- `estimator_version`, the packet-size estimator contract used for `token_budget.allocated`
+- `delivery_status`, either `inline` for a normal packet or `persisted_with_summary` for the overflow-recovery summary shape
 - generation timestamp
 
 ### 2. Local authority
@@ -121,18 +127,27 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 
 ## Budget Enforcement
 
-The packet's serialized response size is strictly bounded by the requested `token_budget`. The assembler builds all five content layers, then drops layers in priority order (cheapest-to-drop first) until the response fits:
+The packet response must satisfy two ceilings:
+
+- `token_budget`, the caller-facing budget reported in `task_header.token_budget` and estimated with the package's deterministic `chars-per-token-v1` estimator.
+- `harness_ceiling_chars`, the serialized JSON character ceiling used to stay below Claude Code MCP inline-response limits. The default is `80000` characters and can be overridden for the server process with `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=<positive integer>`.
+
+The assembler builds all five content layers. If the fully assembled packet would exceed `harness_ceiling_chars`, the server writes that full packet JSON to its package-local tool-results directory and returns a bounded inline summary with `task_header.delivery_status: persisted_with_summary` and `task_header.persisted_output_path`.
+
+For token-budget pressure where the full packet still fits the serialized-response ceiling, the assembler drops layers in priority order (cheapest-to-drop first) until both `estimateStablePacketSize(packet) <= token_budget` and `JSON.stringify(packet).length <= harness_ceiling_chars` hold:
 
 1. `impact_surfaces`
 2. `scoped_local_context`
 3. `exact_record_links`
 4. `governing_world_context`
 
-`local_authority` and `task_header` are never dropped. If even `local_authority` exceeds budget alone, the assembler returns `packet_incomplete_required_classes` (see §Assembly Discipline) with `truncation_summary` populated for every droppable layer that was emptied.
+`local_authority` and `task_header` are never dropped. If even `local_authority` exceeds the requested token budget after every droppable layer is emptied and no persisted-summary response can fit inline, the assembler returns `packet_incomplete_required_classes` (see §Assembly Discipline) with `truncation_summary` populated for every droppable layer that was emptied. The error details include the usual token retry hint plus `harness_ceiling_chars` and `minimum_required_harness_ceiling_chars` so operators can distinguish token-budget insufficiency from transport-ceiling insufficiency.
 
-Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. High-value `full_body` delivery is downgraded node-by-node before it can force additional layer drops; downgraded nodes remain present with their normal preview/summary shape and are listed under `truncation_summary.full_body_downgrades`. Consumers route dropped or downgraded node ids through `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped or downgraded; targeted retrieval delivers the content.
+Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. High-value `full_body` delivery is downgraded node-by-node before it can exceed either ceiling; downgraded nodes remain present with their normal preview/summary shape and are listed under `truncation_summary.full_body_downgrades`. Consumers route dropped or downgraded node ids through `mcp__worldloom__get_record(record_id)` / `mcp__worldloom__get_records(record_ids)` (full bodies) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped or downgraded; targeted retrieval delivers the content.
 
-`truncation_summary` is always present on a successful packet response. When no truncation occurred, `dropped_layers` is an empty array, `dropped_node_ids_by_layer` is an empty object, and `fallback_advice` carries the standard per-record retrieval guidance (so consumers can read it unconditionally without branching on presence). Schema:
+Worked example: a request with `token_budget: 33000` can still serialize to more than `harness_ceiling_chars` because JSON keys, structural repetition, and actual tokenizer behavior differ from the package's approximate token estimator. In that case, the assembler persists the full packet and returns the fast-summary inline shape rather than letting the external MCP harness reject the response.
+
+`truncation_summary` is always present on a successful packet response. When no truncation occurred, `dropped_layers` is an empty array, `dropped_node_ids_by_layer` is an empty object, and `fallback_advice` carries the standard targeted-retrieval guidance (so consumers can read it unconditionally without branching on presence). Schema:
 
 ```yaml
 truncation_summary:
@@ -145,12 +160,23 @@ truncation_summary:
       node_id: ONT-1
       node_type: invariant
       reason: high_value_full_body_budget_exceeded
-  fallback_advice: "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed."
+  fallback_advice: "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed."
 ```
+
+## Fast-Summary Inline Delivery
+
+When `task_header.delivery_status === 'persisted_with_summary'`, the inline response is a recovery summary instead of the full packet. It includes:
+
+- `task_header.persisted_output_path`, pointing at the package-persisted full packet JSON.
+- `governing_summary`, containing full `active_rules`, `protected_surfaces`, `prohibited_moves`, `required_output_schema`, plus id lists for open risks, invariants, seed-relevant CFs, and the omitted node ids grouped by node class.
+- Empty inline layer `nodes` arrays; omitted ids are listed in `governing_summary.dropped_node_ids_by_class`, and `body_preview`, `full_body`, parsed `record`, and full layer payloads live in the persisted full packet.
+- `truncation_summary.fallback_advice` naming `mcp__worldloom__get_persisted_packet_slice` plus `get_record` / `get_records` for structured recovery.
+
+Use `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` for structured extraction from the full packet. Dot paths address object fields (`governing_world_context.nodes`) and may select array entries by id (`local_authority.nodes[id=entity:donostia]`).
 
 ## Index + Follow-Up Retrieval Pattern
 
-The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation. For selected task-critical classes, nodes in `local_authority`, `governing_world_context`, and `exact_record_links` may also carry an additive `full_body` string. Skills that need the full body of a load-bearing node that was not delivered retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus N per-record fetches. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; task-aware `full_body`, targeted retrieval, and whole-class enumeration deliver the required content.
+The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation. For selected task-critical classes, nodes in `local_authority`, `governing_world_context`, and `exact_record_links` may also carry an additive `full_body` string. Skills that need the full body of one load-bearing node that was not delivered retrieve it via `mcp__worldloom__get_record(record_id)`; skills that already have a known set of ids retrieve them via `mcp__worldloom__get_records(record_ids)` to preserve order and avoid N round trips. Skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. When a packet returns `delivery_status: persisted_with_summary`, skills retrieve structured slices from the persisted full packet via `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus a known-id batch. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; task-aware `full_body`, targeted retrieval, batched targeted retrieval, persisted-packet slice retrieval, and whole-class enumeration deliver the required content.
 
 ## Task-Aware Full-Body Delivery
 
@@ -168,15 +194,17 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
 | `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
 
-The assembler first fits the normal preview/summary packet under the requested token budget. It then adds candidate `full_body` values one node at a time. If a candidate would exceed the budget, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after this allocation pass.
+The assembler first fits the normal preview/summary packet under the requested token budget and configured harness character ceiling. It then adds candidate `full_body` values one node at a time. If a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after this allocation pass.
 
 ## Focused Retrieval Tools
 
-Beyond the general packet retrieval, a small set of use-case-specific tools project just the fields a recurring audit needs, keyed by record id. They sit alongside `get_record` and `get_record_field`: prefer them when the audit is mechanical and field-bounded, and the alternatives would be either a budget-pressured packet call or N per-record `get_record` calls.
+Beyond the general packet retrieval, a small set of use-case-specific tools project just the fields a recurring audit needs, keyed by record id. They sit alongside `get_record`, `get_records`, and `get_record_field`: prefer them when the audit is mechanical and field-bounded, and the alternatives would be either a budget-pressured packet call or a broader retrieval than the audit requires.
 
 | Tool | Use case | Returns |
 |---|---|---|
 | `list_records(world_slug, record_type, include_full_body=true)` | Whole-class loads where the consumer must test every atomic record of a supported class, such as EPE Phase 6 invariant / Mystery Reserve firewall checks or continuity-audit cross-checks. | `{ records: [{ record_id, content_hash, file_path, body }], total, truncated: false }` |
+| `get_records(record_ids, world_slug?)` | Known-id follow-up loads where the packet, claim map, audit window, or dossier trace already names multiple records and whole-class enumeration would be too broad. | `{ records: [{ record_id, found, record?, content_hash?, file_path?, error? }] }` in request order |
+| `get_persisted_packet_slice(persisted_path, slice_path)` | Structured recovery from a `get_context_packet` `persisted_with_summary` response. | `{ found, slice?, error? }` for dot paths such as `governing_world_context.nodes` or `local_authority.nodes[id=entity:donostia]` |
 | `get_record_field(record_id, field_path)` | Read a single field of a single atomic record without paying the full-record parse cost. | `{ value, content_hash, file_path }` |
 | `get_firewall_content(world_slug, m_ids?)` | Phase 7b Mystery Reserve firewall audits — bulk projection of every (or selected) M record's firewall-relevant fields in a single call. | `{ records: { [m_id]: { title, status, unknowns, common_interpretations, disallowed_cheap_answers } }, not_found: string[] }` |
 
@@ -255,6 +283,8 @@ response (selected fields):
     world_slug: animalia
     token_budget: { requested: 8000, allocated: 4200 }
     seed_nodes: [CF-0044]
+    harness_ceiling_chars: 80000
+    estimator_version: chars-per-token-v1
     packet_version: 2
   local_authority:
     nodes: []                        # CF-0044 filtered out (canon_fact_record not in node_classes)

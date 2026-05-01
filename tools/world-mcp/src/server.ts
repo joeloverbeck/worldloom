@@ -22,9 +22,11 @@ import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonica
 import { getContextPacket } from "./tools/get-context-packet";
 import { getFirewallContent } from "./tools/get-firewall-content";
 import { getNeighbors } from "./tools/get-neighbors";
+import { getPersistedPacketSlice } from "./tools/get-persisted-packet-slice";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
+import { getRecords } from "./tools/get-records";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
 import { searchNodes } from "./tools/search-nodes";
@@ -96,6 +98,16 @@ const getRecordInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
   section_path: z.string().min(1).optional()
+});
+
+const getRecordsInputSchema = z.object({
+  record_ids: z.array(z.string().min(1)).min(1),
+  world_slug: z.string().min(1).optional()
+});
+
+const getPersistedPacketSliceInputSchema = z.object({
+  persisted_path: z.string().min(1),
+  slice_path: z.string().min(1)
 });
 
 const listRecordsInputSchema = z.object({
@@ -277,6 +289,18 @@ export function createServer(): McpServer {
     "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset, e.g. 'frontmatter.world_consistency' or 'body.Capabilities'.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
+  );
+  registerToolWithCapability(
+    "get_records",
+    "get_records: Fetch multiple records by id in one call. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
+    getRecordsInputSchema,
+    async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
+  );
+  registerToolWithCapability(
+    "get_persisted_packet_slice",
+    "get_persisted_packet_slice: Read a structured dot-path slice from a package-persisted full context packet emitted by get_context_packet delivery_status='persisted_with_summary'.",
+    getPersistedPacketSliceInputSchema,
+    async (args) => getPersistedPacketSlice(args as unknown as Parameters<typeof getPersistedPacketSlice>[0])
   );
   registerToolWithCapability(
     "list_records",

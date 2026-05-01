@@ -10,15 +10,39 @@ Pre-flight calls:
 mcp__worldloom__get_context_packet(
   task_type='character_generation',
   seed_nodes=[<brief-derived seed nodes>],
-  token_budget=33000
+  token_budget=18000
 )
 ```
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories, with full parsed `record` bodies) + seed-relevant CFs with full parsed `record` bodies + seed-touched priority SEC records (`EVERYDAY_LIFE`, `PEOPLES_AND_SPECIES`, `INSTITUTIONS`, `ECONOMY_AND_RESOURCES`, `GEOGRAPHY`) with full parsed `record` bodies + Mystery Reserve nodes whose parsed `record` bodies carry the Phase 7b firewall fields (`id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`) + named-entity neighbors + section context, with completeness guarantees against silent truncation. Use `mcp__worldloom__get_firewall_content(world_slug)` as a parallel bulk projection when the audit needs every M record regardless of seed locality; use per-id `get_record('M-NNNN')` when `notes` or `modification_history` are load-bearing.
 
-If the packet returns `packet_incomplete_required_classes`, retry with `token_budget` set to the response's `minimum_required_budget` field. The default above is calibrated for a typical 12-seed call shape against a mature world; unusually large seed sets may exceed it.
+## Context-packet-too-large fallback
 
-When the packet response exceeds the MCP transport's inline limit and is redirected to a persisted-output file (typical of mature worlds at 40+ CFs / 15+ M records — the redirect itself is the signal), do NOT attempt to inline the raw packet body — main-conversation context is the wrong layer for the raw payload, and partial reads of the persisted JSON via line-based `Read offset/limit` will not chunk the structure usefully. Delegate extraction to a subagent (via the `Agent` tool with `subagent_type='general-purpose'`) with a structured-extract prompt covering: `governing_world_context.active_rules` / `protected_surfaces` / `prohibited_moves` / `open_risks`; all parsed invariants with full bodies; M-record firewall fields from the parsed packet records; seed-relevant CF full bodies from packet `record` fields; seed-touched priority SEC full bodies from packet `record` fields; and remaining SEC summaries grouped by `file_class`. The subagent's structured report becomes the working context for Phases 0-7; the raw persisted-output file stays out of the main conversation.
+The packet enforces `token_budget` and the serialized-response ceiling (`task_header.harness_ceiling_chars`, default 80000) per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement. Under token-budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports dropped node ids in `response.truncation_summary`. Under serialized-response pressure it returns `task_header.delivery_status === 'persisted_with_summary'`, a small inline `governing_summary`, and `task_header.persisted_output_path` for structured slice recovery via `mcp__worldloom__get_persisted_packet_slice`.
+
+This fallback covers the three cases the call shape surfaces:
+
+- the packet returns `packet_incomplete_required_classes` because even `local_authority` cannot fit (the rare case — typically a malformed seed or an unusually large authority-bearing record);
+- the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (expected for broad seeds in mature worlds, and recoverable through targeted retrieval);
+- the packet returns `task_header.delivery_status === 'persisted_with_summary'` because the full packet exceeded the MCP transport inline limit and was package-persisted (now rare at the default budget; it usually signals an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling).
+
+In any case, do NOT silently proceed without world-state load. Apply this two-step fallback in order:
+
+**Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record, the named species's SEC-PAS record). Retry the packet call. If `packet_incomplete_required_classes` was returned, retry at `response.details.retry_with.token_budget`. If the retry fits with empty `truncation_summary` and inline return, proceed normally.
+
+**Step 2 — Use inline summary + targeted retrieval, then slice the persisted packet only when needed.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires, or `delivery_status === 'persisted_with_summary'`):
+
+- `Read docs/FOUNDATIONS.md` (Canon Layers + Rules + CF schema).
+- `Read worlds/<world-slug>/WORLD_KERNEL.md`.
+- `Read worlds/<world-slug>/ONTOLOGY.md`.
+- If `delivery_status === 'persisted_with_summary'`, first use `governing_summary.active_rules`, `protected_surfaces`, `prohibited_moves`, `required_output_schema`, `open_risk_ids`, `invariant_ids`, and `seed_relevant_cf_ids` as the fast canon-safety scope. Retrieve specific bodies with `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` or structured packet slices with `mcp__worldloom__get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<path>')`.
+- For every known set of node ids under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for full bodies, or `mcp__worldloom__get_record_field(record_id, field_path)` when only one field is needed — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but targeted record retrieval is the supported path.
+- For each additional known set of CF / M / INV records cited at Phase 5 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)`; use singular `get_record` only when the next id depends on reading the prior result.
+- For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
+- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__get_firewall_content(world_slug)` if `governing_world_context` was the dropped layer; use `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection.
+- **Legacy fallback only:** use subagent extraction of the persisted file only when `governing_summary` plus `get_records` and `get_persisted_packet_slice` cannot express the needed recovery slice. Do not inline the raw packet body into the main conversation.
+
+**Audit-trail discipline.** When the fallback fires, record in the dossier's frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet returned persisted_with_summary; governing_summary plus batched `get_records` recovered Phase 5 / 7b / 7c coverage"*). If legacy subagent extraction was needed, mention it explicitly. The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via targeted retrieval, `get_firewall_content`, `get_persisted_packet_slice`, or `search_nodes`), not from the packet alone.
 
 Seed nodes are derived from the brief: Phase 0 inputs that name a region, settlement, institution, profession, species, or capability domain. For thinly-specified briefs (interview-driven), seed with the world overview node and the highest-domain Kernel concept.
 
@@ -27,6 +51,8 @@ Seed nodes are derived from the brief: Phase 0 inputs that name a region, settle
 When a phase needs a specific record beyond what the packet returned:
 
 - `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC).
+- `mcp__worldloom__get_records(record_ids, world_slug?)` — known-id batch retrieval; prefer when a phase already has multiple CF / M / INV / SEC / hybrid ids to fetch.
+- `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` — structured recovery from a `persisted_with_summary` packet when a specific persisted packet slice is needed.
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans, e.g., capability CFs whose distribution touches the character's social position.
 - `mcp__worldloom__get_neighbors(node_id)` — pull the relation graph around a resolved entity (regions / institutions / species).
 - `mcp__worldloom__find_named_entities(names)` — resolve current_location / place_of_origin / institution names from the brief to `ENT-NNNN` ids.
@@ -57,7 +83,7 @@ For continuity-preservation reads at Pre-flight:
 | Phase 2 | SEC-INS (every institutional axis: family / law / religion / employer / military / debt / taboo / literacy / inheritance) | packet full `record` bodies for seed-touched priority SECs + `search_nodes(node_type='section', filters={file_class: 'INSTITUTIONS'})` |
 | Phase 3 | M-NNNN (Mystery Reserve `what is unknown` overlap); OQ-NNNN (deliberately undecided questions); SEC-INS (ideological environment); SEC-ELF (common beliefs, vocabulary) | packet + `search_nodes` |
 | Phase 4 | WORLD_KERNEL §Core Pressures; SEC-* identifying `major_local_pressures` | direct Read + packet |
-| Phase 5 | capability CFs (each capability's `who_can_do_it` distribution); SEC-PAS (embodiment); SEC-GEO (regional effects); SEC-MTS (loaded selectively if magic/tech capabilities present) | packet full `record` bodies for seed-relevant CFs + `search_nodes(node_type='canon_fact_record', filters={domain: ...})` and `get_record` for deeper non-seed CFs |
+| Phase 5 | capability CFs (each capability's `who_can_do_it` distribution); SEC-PAS (embodiment); SEC-GEO (regional effects); SEC-MTS (loaded selectively if magic/tech capabilities present) | packet full `record` bodies for seed-relevant CFs + `search_nodes(node_type='canon_fact_record', filters={domain: ...})` and `get_records` for deeper known-set non-seed CFs |
 | Phase 6 | SEC-ELF (language patterns by class/region/religion); SEC-PAS (senses); SEC-INS (taboo system) | packet full `record` bodies for seed-touched priority SECs + `get_record` for deeper non-seed sections |
 | Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants are always loaded by the `character_generation` profile) |
 | Phase 7b | every M-NNNN record (firewall) | packet (M-record Phase 7b fields: `id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`) + `mcp__worldloom__get_firewall_content(world_slug)` when the audit needs every M record regardless of seed locality, or per-id `get_record('M-NNNN')` when `notes` / `modification_history` are load-bearing |

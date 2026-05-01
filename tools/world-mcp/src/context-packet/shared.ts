@@ -49,6 +49,19 @@ export interface ContextPacketTruncationSummary {
   }>;
 }
 
+export type ContextPacketDeliveryStatus = "inline" | "persisted_with_summary";
+
+export interface ContextPacketGoverningSummary {
+  active_rules: string[];
+  protected_surfaces: string[];
+  prohibited_moves: string[];
+  required_output_schema: string[];
+  open_risk_ids: string[];
+  invariant_ids: string[];
+  seed_relevant_cf_ids: string[];
+  dropped_node_ids_by_class: Record<string, string[]>;
+}
+
 export interface ContextPacket {
   task_header: {
     task_type: TaskType;
@@ -60,7 +73,11 @@ export interface ContextPacket {
     };
     seed_nodes: string[];
     full_body_classes_delivered: NodeType[];
+    harness_ceiling_chars: number;
+    estimator_version: string;
     packet_version: 2;
+    delivery_status: ContextPacketDeliveryStatus;
+    persisted_output_path?: string;
   };
   local_authority: {
     nodes: ContextPacketNode[];
@@ -87,13 +104,16 @@ export interface ContextPacket {
     nodes: ContextPacketNode[];
     rationale: string[];
   };
+  governing_summary?: ContextPacketGoverningSummary;
   truncation_summary: ContextPacketTruncationSummary;
 }
 
 export const TRUNCATION_FALLBACK_ADVICE =
-  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
+  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
 
 export const DEFAULT_PACKET_VERSION = 2 as const;
+export const DEFAULT_HARNESS_CEILING_CHARS = 80000;
+export const CONTEXT_PACKET_ESTIMATOR_VERSION = "chars-per-token-v1";
 
 export const DEFAULT_BUDGET_SPLIT = {
   local_authority: 0.25,
@@ -252,6 +272,10 @@ export function estimatePacketTokens(packet: ContextPacket): number {
   return total;
 }
 
+export function estimatePacketChars(packet: ContextPacket): number {
+  return JSON.stringify(packet).length;
+}
+
 export function estimateStablePacketSize(packet: ContextPacket): number {
   const originalAllocated = packet.task_header.token_budget.allocated;
   const originalRequested = packet.task_header.token_budget.requested;
@@ -270,6 +294,35 @@ export function estimateStablePacketSize(packet: ContextPacket): number {
     packet.task_header.token_budget.allocated = originalAllocated;
     packet.task_header.token_budget.requested = originalRequested;
   }
+}
+
+export function estimateStablePacketChars(packet: ContextPacket): number {
+  const originalAllocated = packet.task_header.token_budget.allocated;
+  try {
+    let candidate = estimatePacketChars(packet);
+    for (;;) {
+      packet.task_header.token_budget.allocated = candidate;
+      const adjusted = estimatePacketChars(packet);
+      if (adjusted <= candidate) {
+        return candidate;
+      }
+      candidate = adjusted;
+    }
+  } finally {
+    packet.task_header.token_budget.allocated = originalAllocated;
+  }
+}
+
+export function resolveHarnessCeilingChars(
+  env: NodeJS.ProcessEnv = process.env
+): number {
+  const raw = env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  if (raw === undefined || raw.trim() === "") {
+    return DEFAULT_HARNESS_CEILING_CHARS;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_HARNESS_CEILING_CHARS;
 }
 
 export function loadPacketNodes(

@@ -92,10 +92,10 @@ canon_links: []                              # flat list of CF-ids the artifact 
 cannot_know: []                              # explicit list of MR-ids + CAU-3-style restricted items this narrator cannot know — paired with epistemic_horizon.impossible_knowledge but indexed
 
 world_consistency:                           # audit trail — what was checked, what was found
-  canon_facts_consulted: []                  # every CF-id read at Phase 3 or Phase 7c
-  invariants_respected: []                   # every invariant id tested at Phase 7a
-  mystery_reserve_firewall: []               # every MR-id checked at Phase 7b, regardless of overlap (proof-of-check)
-  distribution_exceptions: []                # list of "<CF-id>: <Phase 0b embedding that justifies the exception>"
+  canon_facts_consulted: []                  # bare CF-NNNN ids only (regex ^CF-[0-9]{4}$); every CF read at Phase 3 or Phase 7c. Add descriptive context to the Phase 7c trace prose, NOT to this array — record_schema_compliance rejects mixed-format entries
+  invariants_respected: []                   # bare invariant ids only — ONT-N / CAU-N / DIS-N / SOC-N / AES-N (regex ^(ONT|CAU|DIS|SOC|AES)-[0-9]+$); every invariant tested at Phase 7a
+  mystery_reserve_firewall: []               # bare M-NNNN ids only (regex ^M-[0-9]+$); every MR checked at Phase 7b, regardless of overlap (proof-of-check). Per-entry overlap-or-no-overlap status belongs in the Phase 7b trace prose
+  distribution_exceptions: []                # free-form strings of form "<CF-id>: <Phase 0b embedding that justifies the exception>"
 
 source_basis:
   world_slug: ""

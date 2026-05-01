@@ -5,6 +5,7 @@ import type { NodeType } from "@worldloom/world-index/public/types";
 import type { TaskType } from "../ranking/profiles";
 
 import {
+  estimateStablePacketChars,
   estimateStablePacketSize,
   uniqueStrings,
   type ContextPacket,
@@ -179,6 +180,7 @@ export function applyTaskTypeFullBodyDelivery(
     taskType: TaskType;
     worldSlug: string;
     tokenBudget: number;
+    harnessCeilingChars: number;
   }
 ): void {
   const rules = FULL_BODY_RULES_BY_TASK_TYPE[args.taskType];
@@ -200,7 +202,10 @@ export function applyTaskTypeFullBodyDelivery(
       }
 
       node.full_body = body;
-      if (estimateStablePacketSize(packet) > args.tokenBudget) {
+      if (
+        estimateStablePacketSize(packet) > args.tokenBudget ||
+        estimateStablePacketChars(packet) > args.harnessCeilingChars
+      ) {
         delete node.full_body;
         recordFullBodyDowngrade(packet, layer, node);
       }
