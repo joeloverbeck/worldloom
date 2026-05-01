@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modify `tools/world-mcp/src/context-packet/assemble.ts` and the response-shape contract under `docs/CONTEXT-PACKET-CONTRACT.md` to emit a fast-summary inline payload when the harness redirects oversize responses; add a new MCP tool `mcp__worldloom__get_persisted_packet_slice` for structured slice extraction; update consumer SKILLs (`character-generation`, `diegetic-artifact-generation`) to use the inline summary as the fast path
-**Deps**: `archive/tickets/WMCP-005-reconcile-context-packet-budget-harness-ceiling.md` (this ticket builds on the completed harness-ceiling-aware budget enforcement; overflow is now the exception rather than the typical path, but this ticket is still load-bearing for the cases that genuinely exceed the ceiling — large worlds, broad seed sets, or the rare ceiling-edge call)
+**Deps**: `archive/tickets/WMCP-005-reconcile-context-packet-budget-harness-ceiling.md` (completed harness-ceiling-aware budget enforcement; overflow is now the exception rather than the typical path, but this ticket is still load-bearing for the cases that genuinely exceed the ceiling — large worlds, broad seed sets, or the rare ceiling-edge call); `archive/tickets/WMCP-006.md` (completed `get_records` batch retrieval surface used by this ticket's persisted-packet recovery guidance)
 
 ## Problem
 
@@ -128,17 +128,17 @@ output: {
 
 The tool reads the persisted file from disk (the path is harness-controlled, never user-controlled, so no path-traversal concern; validate that the path is under the harness's tool-results directory). Parses the JSON and extracts the slice via the dot-path syntax. Returns the slice or a `not found` error.
 
-This tool sits alongside `get_record` and `get_records` (per WMCP-006) as a third targeted-retrieval surface, specifically for the persisted-packet recovery flow.
+This tool sits alongside `get_record` and `get_records` (per archived `archive/tickets/WMCP-006.md`) as a third targeted-retrieval surface, specifically for the persisted-packet recovery flow.
 
 ### 4. Register the new tool and update the dispatcher
 
-Same pattern as WMCP-006: register `mcp__worldloom__get_persisted_packet_slice` in `tools/world-mcp/src/server.ts`; extend `tools/world-mcp/tests/server/dispatch.test.ts` coverage.
+Same pattern as archived `archive/tickets/WMCP-006.md`: register `mcp__worldloom__get_persisted_packet_slice` in `tools/world-mcp/src/server.ts`; extend `tools/world-mcp/tests/server/dispatch.test.ts` coverage.
 
 ### 5. Update consumer SKILL fallback prose
 
 `character-generation/references/world-state-prerequisites.md` §Context-packet-too-large fallback (added per the May 2026 skill audit) currently describes a "Step 2 — direct-Read root files + per-record retrieval for dropped layers, OR subagent-extraction for persisted-output redirect" recovery path. With this ticket landed, the persisted-output-redirect case becomes:
 
-> **Step 2a (after WMCP-007) — fast-summary inline payload**: when `task_header.delivery_status === 'persisted_with_summary'`, the inline response already carries the governing_summary (active_rules, protected_surfaces, prohibited_moves, required_output_schema), the open_risk_ids list (Phase 7b firewall scope), the invariant_ids list (Phase 7a scope), and the seed_relevant_cf_ids list (Phase 7c scope). Use these to scope the canon-safety checks; for any specific id whose body is needed, call `mcp__worldloom__get_record(id)` (or `get_records([...])` per WMCP-006) directly. The persisted file is available at `task_header.persisted_output_path` for slice extraction via `mcp__worldloom__get_persisted_packet_slice` if the fast-summary plus per-id retrieval doesn't cover the need.
+> **Step 2a (after WMCP-007) — fast-summary inline payload**: when `task_header.delivery_status === 'persisted_with_summary'`, the inline response already carries the governing_summary (active_rules, protected_surfaces, prohibited_moves, required_output_schema), the open_risk_ids list (Phase 7b firewall scope), the invariant_ids list (Phase 7a scope), and the seed_relevant_cf_ids list (Phase 7c scope). Use these to scope the canon-safety checks; for any specific id whose body is needed, call `mcp__worldloom__get_record(id)` (or `get_records([...])` per archived `archive/tickets/WMCP-006.md`) directly. The persisted file is available at `task_header.persisted_output_path` for slice extraction via `mcp__worldloom__get_persisted_packet_slice` if the fast-summary plus per-id retrieval doesn't cover the need.
 
 > **Step 2b (legacy) — subagent extraction of persisted file**: only required when the fast-summary doesn't expose what's needed AND the slice path isn't easily expressible via `get_persisted_packet_slice`.
 

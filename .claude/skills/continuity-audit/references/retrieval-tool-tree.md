@@ -18,7 +18,7 @@ The audit is an enumerate-and-judge workflow: every category/check sub-pass enum
 ## Phase 2: Change Log Delta Analysis
 
 - `mcp__worldloom__search_nodes(node_types=['change_log_entry'], filters={...})` to enumerate CH records inside the cutoff window.
-- For each CH in the window: `mcp__worldloom__get_record(CH-NNNN)` for `affected_fact_ids`, `required_world_updates`, `change_type`.
+- For each known CH window: `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for `affected_fact_ids`, `required_world_updates`, `change_type`. Use singular `get_record(CH-NNNN)` only for the one latest-CH cutoff check or when later ids depend on reading an earlier record.
 - `mcp__worldloom__get_neighbors(CH-NNNN, edge_types=['affects_cf', 'touches_invariant', 'touches_mystery_reserve'])` to fan out from each CH to its affected CFs, invariants, and mystery interactions.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` per affected CF to verify the `required_world_updates` list reflects actual `touched_by_cf` state on the SEC records (Rule 6 surface: a CH whose stated required updates do not match the SEC `touched_by_cf` arrays is a silent-retcon candidate).
 
@@ -53,7 +53,7 @@ Each category/check names its preferred enumeration tool. All `_source/*.yaml` c
 ## Phase 8: Retcon Card Drafting
 
 - `mcp__worldloom__allocate_next_id(world_slug, 'RP')` per emitted card. Cards-without-target-CF (escalation cases) consume no RP id.
-- `mcp__worldloom__get_record(target_CF-NNNN)` to verify each `target_cf_ids` entry exists before writing the card.
+- `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` to verify known `target_cf_ids` entries exist before writing the card.
 - `mcp__worldloom__get_canonical_vocabulary({class: 'domain'})` to validate the card's `domains_affected` values before writing.
 
 ## Phase 13: Commit

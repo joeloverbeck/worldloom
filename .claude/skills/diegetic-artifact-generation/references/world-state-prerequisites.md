@@ -20,7 +20,7 @@ Seed nodes are derived from the brief: Phase 0 inputs that name a region, settle
 
 ## Context-packet-too-large fallback
 
-The packet enforces `token_budget` and the serialized-response ceiling (`task_header.harness_ceiling_chars`, default 80000) per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement: under budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports the dropped layers in `response.truncation_summary` so the consumer can fetch the dropped node-ids via `mcp__worldloom__get_record` / `mcp__worldloom__get_record_field` rather than via overflow-to-file.
+The packet enforces `token_budget` and the serialized-response ceiling (`task_header.harness_ceiling_chars`, default 80000) per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement: under budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports the dropped layers in `response.truncation_summary` so the consumer can fetch dropped node-id sets via `mcp__worldloom__get_records`, individual nodes via `mcp__worldloom__get_record`, or single fields via `mcp__worldloom__get_record_field` rather than via overflow-to-file.
 
 This fallback covers the three cases the contract surfaces:
 
@@ -32,13 +32,13 @@ In either case, do NOT silently proceed without world-state load. Apply this thr
 
 **Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record). Retry the packet call. If `packet_incomplete_required_classes` was returned, retry at `response.details.retry_with.token_budget`. If the retry fits with empty `truncation_summary`, proceed normally.
 
-**Step 2 — Direct-Read root files + per-record retrieval for dropped layers.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires, or the rare persisted-output redirect fires):
+**Step 2 — Direct-Read root files + targeted retrieval for dropped layers.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires, or the rare persisted-output redirect fires):
 
 - `Read docs/FOUNDATIONS.md` (Canon Layers + Rules + CF schema).
 - `Read worlds/<world-slug>/WORLD_KERNEL.md`.
 - `Read worlds/<world-slug>/ONTOLOGY.md`.
-- For every node-id under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but per-record `get_record` is the supported per-record path.
-- For each additional CF / M / INV record cited at Phase 3 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_record(record_id)` individually.
+- For every known set of node ids under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for full bodies, or `mcp__worldloom__get_record_field(record_id, field_path)` when only one field is needed — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but targeted record retrieval is the supported path.
+- For each additional known set of CF / M / INV records cited at Phase 3 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)`; use singular `get_record` only when the next id depends on reading the prior result.
 - For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
 - For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__get_firewall_content(world_slug)` if `governing_world_context` was the dropped layer; use `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection.
 
@@ -50,13 +50,14 @@ In either case, do NOT silently proceed without world-state load. Apply this thr
 
 The dossier-trace shortcut is canon-safe because dossier records are append-only and the world-state reconciliation between dossier-generation-time and artifact-generation-time is bounded to canon mutations recorded in the change log. If the artifact-date significantly precedes or postdates the dossier's generation date AND substantive canon mutations have landed in between, retrieve those mutations explicitly via `mcp__worldloom__list_records(record_type='change_log_entry')` filtered to the relevant interval.
 
-**Audit-trail discipline.** When the fallback fires, record in frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet dropped governing-world-context at default budget; loaded WORLD_KERNEL.md + ONTOLOGY.md + per-record `get_record` for cited CF / M / INV ids; dossier-trace shortcut Step 3 covered Phase 7 firewall coverage from CHAR-NNNN.world_consistency"*). If the rare persisted-output redirect fires, mention the persisted-output recovery path explicitly. The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via dossier trace, per-record retrieval, or `search_nodes`), not from the packet alone.
+**Audit-trail discipline.** When the fallback fires, record in frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet dropped governing-world-context at default budget; loaded WORLD_KERNEL.md + ONTOLOGY.md + batched `get_records` for cited CF / M / INV ids; dossier-trace shortcut Step 3 covered Phase 7 firewall coverage from CHAR-NNNN.world_consistency"*). If the rare persisted-output redirect fires, mention the persisted-output recovery path explicitly. The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via dossier trace, targeted retrieval, or `search_nodes`), not from the packet alone.
 
 ## Targeted record retrieval (during reasoning)
 
 When a phase needs a specific record beyond what the packet returned:
 
 - `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC).
+- `mcp__worldloom__get_records(record_ids, world_slug?)` — known-id batch retrieval; prefer when a phase already has multiple CF / M / INV / SEC / hybrid ids to fetch.
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans, e.g., capability CFs whose distribution touches the author's social position; SEC-INS axes the artifact must respect.
 - `mcp__worldloom__get_neighbors(node_id)` — pull the relation graph around a resolved entity (regions / institutions / species).
 - `mcp__worldloom__find_named_entities(names)` — resolve the brief's place / institution / audience / character names to `ENT-NNNN` ids.
@@ -92,7 +93,7 @@ For Author-lift and continuity reads:
 | Phase 6 | (composition phase — no new retrieval; uses Phases 1-5 outputs) | — |
 | Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants always loaded by the `diegetic_artifact_generation` profile) |
 | Phase 7b | every M-NNNN record (firewall) | packet + `get_firewall_content(world_slug)` if any are missing; `get_record('M-NNNN')` only for full-record context |
-| Phase 7c | capability CFs cited at Phase 5 + world-fact CFs cited at Phase 3 | (already retrieved) + `get_record` for any not yet loaded |
+| Phase 7c | capability CFs cited at Phase 5 + world-fact CFs cited at Phase 3 | (already retrieved) + `get_records` for any known id set not yet loaded |
 | Phase 7d | SEC-* records the artifact body draws on (no-silent-canon-creation check); CAU-3-style restricted vocabulary CFs (no-restricted-knowledge-leakage check) | (already retrieved) + `search_nodes` if a referenced entity was not yet resolved |
 
 ## Selectively loaded

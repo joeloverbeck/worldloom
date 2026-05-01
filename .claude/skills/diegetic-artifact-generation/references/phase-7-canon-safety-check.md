@@ -31,7 +31,7 @@ Fail triggers (send to Phase 7f):
 
 ## Phase 7c: Distribution/Scope Conformance
 
-For every capability the artifact attributes to its Author, look up matching CFs via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: <capability domain>})` and `get_record(cf_id)` for each candidate. Apply the three-case rule:
+For every capability the artifact attributes to its Author, look up matching CFs via `mcp__worldloom__search_nodes(node_type='canon_fact', filters={domain: <capability domain>})` and `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for the known candidate set. Use singular `get_record(cf_id)` only when the next candidate depends on reading the prior result. Apply the three-case rule:
 - Author fits `distribution.who_can_do_it` → pass.
 - Author fits `distribution.who_cannot_easily_do_it` → fail unless Phase 0b institutional embedding justifies the exception (recorded in `world_consistency.distribution_exceptions`).
 - No matching CF → pass at ordinary-person scope, UNLESS the relevant SEC-ELF section places the capability outside the Author's class/region/species baseline without Phase 0b training path.
