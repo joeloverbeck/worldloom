@@ -81,7 +81,7 @@ HARD-GATE → Phase 13 Commit (cards-first → report → INDEX.md; partial-fail
 
 ## World-State Prerequisites
 
-`docs/FOUNDATIONS.md` plus the world-state slice the audit touches arrive via `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if a category sub-pass needs more than the packet's `body_preview` carries, follow up with `mcp__worldloom__get_record(record_id)`. Direct `Read` of `_source/<subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read.
+`docs/FOUNDATIONS.md` plus the world-state slice the audit touches arrive via `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if a category sub-pass needs more than the packet's `body_preview` carries, follow up with `mcp__worldloom__get_record(record_id)`. For deliberate whole-class audit passes, use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` rather than looping over individual `get_record` calls. Direct `Read` of `_source/<subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read.
 
 For per-phase retrieval-tool selection, see `references/retrieval-tool-tree.md`. Every Phase 4 sub-pass, the Phase 2 delta scan, and the Phase 6 burden-debt scan name the typed query they consume.
 

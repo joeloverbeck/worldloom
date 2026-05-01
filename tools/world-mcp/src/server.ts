@@ -97,7 +97,8 @@ const getRecordInputSchema = z.object({
 const listRecordsInputSchema = z.object({
   world_slug: z.string().min(1),
   record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
-  fields: z.array(z.string().min(1)).optional()
+  fields: z.array(z.string().min(1)).optional(),
+  include_full_body: z.boolean().optional()
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -255,7 +256,7 @@ export function createServer(): McpServer {
   registerWrappedTool(
     server,
     "list_records",
-    "list_records: Return all records of a given atomic record type, with optional field projection.",
+    "list_records: Return all records of a given atomic record type, with optional field projection or include_full_body metadata/body records.",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0])
   );

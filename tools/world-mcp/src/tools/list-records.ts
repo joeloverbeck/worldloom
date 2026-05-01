@@ -21,14 +21,22 @@ export interface ListRecordsArgs {
   world_slug: string;
   record_type: ListRecordType;
   fields?: string[];
+  include_full_body?: boolean;
 }
 
 export interface ListedRecord extends Record<string, unknown> {
   record_id: string;
 }
 
+export interface ListedFullBodyRecord {
+  record_id: string;
+  content_hash: string;
+  file_path: string;
+  body: ParsedRecord;
+}
+
 export interface ListRecordsResponse {
-  records: ListedRecord[];
+  records: Array<ListedRecord | ListedFullBodyRecord>;
   total: number;
   truncated: false;
 }
@@ -72,6 +80,15 @@ function projectRecord(record: ListedRecord, fields: string[] | undefined): List
   return projected;
 }
 
+function withFullBody(row: RecordRow, record: ParsedRecord): ListedFullBodyRecord {
+  return {
+    record_id: row.node_id,
+    content_hash: row.content_hash,
+    file_path: row.file_path,
+    body: record
+  };
+}
+
 export async function listRecords(args: ListRecordsArgs): Promise<ListRecordsResponse | McpError> {
   if (!isSupportedRecordType(args.record_type)) {
     return createMcpError("invalid_input", `record_type '${args.record_type}' is not supported.`, {
@@ -100,13 +117,17 @@ export async function listRecords(args: ListRecordsArgs): Promise<ListRecordsRes
       )
       .all(args.world_slug, nodeType) as RecordRow[];
 
-    const records: ListedRecord[] = [];
+    const records: Array<ListedRecord | ListedFullBodyRecord> = [];
     for (const row of rows) {
       const parsed = parseRecordBody(row);
       if (isMcpError(parsed)) {
         return parsed;
       }
-      records.push(projectRecord(withRecordId(row, parsed), args.fields));
+      records.push(
+        args.include_full_body === true
+          ? withFullBody(row, parsed)
+          : projectRecord(withRecordId(row, parsed), args.fields)
+      );
     }
 
     return {

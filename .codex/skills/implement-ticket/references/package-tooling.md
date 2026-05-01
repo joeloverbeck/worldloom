@@ -8,6 +8,8 @@ Use this reference for tickets whose owned seam includes `tools/`, package manif
 
 Before coding a package/tool ticket, inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
 
+If reassessment changes the ticket's problem model, proof surface, public response shape, package command shape, or consumer contract, patch the active ticket before source edits. This is a hard pre-edit stop even when the implementation remains same-seam and obvious. Update `Problem`, `Assumption Reassessment`, `What to Change`, `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, and `Test Plan` enough that the later code edit is implementing the live contract rather than the stale draft.
+
 For `tools/world-mcp` context-packet projection or payload-shape tickets, verify where the target node types actually appear across all packet layers before coding. Do not assume the named layer in the ticket is the only implementation seam: inspect `local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, and `impact_surfaces` call sites, then pass projection or payload changes through every layer that can carry the target nodes. Record any broader-than-drafted but same-seam layer coverage in `Assumption Reassessment` and closeout.
 
 - Inspect the package's `package.json`, `tsconfig.json`, and existing package-local docs/examples before trusting drafted command shapes, module formats, or emitted artifact paths.

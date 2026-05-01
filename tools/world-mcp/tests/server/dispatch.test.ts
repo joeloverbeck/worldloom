@@ -373,6 +373,37 @@ test("unsupported id classes fail at the MCP validation boundary", async () => {
   });
 });
 
+test("list_records include_full_body dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        record_type: "canon_fact",
+        fields: ["title"],
+        include_full_body: true
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      records?: Array<{
+        record_id?: string;
+        content_hash?: string;
+        file_path?: string;
+        body?: { record_kind?: string; title?: string };
+      }>;
+    };
+    const record = structured.records?.[0];
+    assert.equal(record?.record_id, "CF-0001");
+    assert.equal(record?.file_path, "_source/canon/CF-0001.yaml");
+    assert.equal(typeof record?.content_hash, "string");
+    assert.equal(record?.body?.record_kind, "canon_fact");
+    assert.equal(record?.body?.title, "Brinewick Lighthouse");
+    assert.equal("title" in record!, false);
+  });
+});
+
 test("EPE id_class dispatches through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({

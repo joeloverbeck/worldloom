@@ -5,6 +5,13 @@ import { listRecords } from "../../src/tools/list-records";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
 
+interface FullBodyTestRecord {
+  record_id: string;
+  content_hash: string;
+  file_path: string;
+  body: Record<string, unknown>;
+}
+
 function buildSeededRecordWorld(root: string): void {
   seedWorld(root, {
     worldSlug: "seeded",
@@ -74,6 +81,106 @@ function buildSeededRecordWorld(root: string): void {
           "extensions: []",
           ""
         ].join("\n")
+      },
+      {
+        node_id: "CF-0001",
+        world_slug: "seeded",
+        file_path: "_source/canon/CF-0001.yaml",
+        node_type: "canon_fact_record",
+        body: [
+          "id: CF-0001",
+          "title: Embodied Speech",
+          "status: hard_canon",
+          "type: capability",
+          "statement: Speaking animals rely on embodied breath.",
+          "scope:",
+          "  geographic: global",
+          "  temporal: current",
+          "  social: public",
+          "truth_scope:",
+          "  world_level: true",
+          "  diegetic_status: objective",
+          "domains_affected:",
+          "  - ontology",
+          "required_world_updates:",
+          "  - ONTOLOGY.md",
+          "source_basis:",
+          "  direct_user_approval: true",
+          "costs_and_limits:",
+          "  - Speech requires breath.",
+          "visible_consequences:",
+          "  - Speech changes social access.",
+          "distribution:",
+          "  why_not_universal: Body plans vary.",
+          "epistemic_profile:",
+          "  known_to: public",
+          "extensions: []",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: "CH-0001",
+        world_slug: "seeded",
+        file_path: "_source/change-log/CH-0001.yaml",
+        node_type: "change_log_entry",
+        body: [
+          "id: CH-0001",
+          "date: 2026-04-30",
+          "summary: Added embodied speech.",
+          "change_type: canon_addition",
+          "affected_records:",
+          "  - CF-0001",
+          "extensions: []",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: "OQ-0001",
+        world_slug: "seeded",
+        file_path: "_source/open-questions/OQ-0001.yaml",
+        node_type: "open_question_entry",
+        body: [
+          "id: OQ-0001",
+          "question: Who first codified embodied speech law?",
+          "status: open",
+          "domains_touched:",
+          "  - law",
+          "extensions: []",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: "ENT-0001",
+        world_slug: "seeded",
+        file_path: "_source/entities/ENT-0001.yaml",
+        node_type: "named_entity",
+        body: [
+          "id: ENT-0001",
+          "name: Brinewick",
+          "entity_type: place",
+          "aliases:",
+          "  - Salt Port",
+          "extensions: []",
+          ""
+        ].join("\n")
+      },
+      {
+        node_id: "SEC-ELF-001",
+        world_slug: "seeded",
+        file_path: "_source/everyday-life/SEC-ELF-001.yaml",
+        node_type: "section",
+        body: [
+          "id: SEC-ELF-001",
+          "file_class: EVERYDAY_LIFE",
+          "order: 1",
+          "heading: Public Speech",
+          "heading_level: 2",
+          "body: Public speech is shaped by breath and body.",
+          "touched_by_cf:",
+          "  - CF-0001",
+          "extensions: []",
+          ""
+        ].join("\n")
       }
     ]
   });
@@ -96,8 +203,9 @@ test("listRecords returns every record for a requested atomic record type", asyn
       result.records.map((record) => record.record_id),
       ["ONT-1", "SOC-1"]
     );
-    assert.equal(result.records[0]?.record_kind, "invariant");
-    assert.equal(result.records[0]?.title, "Embodied sentience");
+    const record = result.records[0] as Record<string, unknown> | undefined;
+    assert.equal(record?.record_kind, "invariant");
+    assert.equal(record?.title, "Embodied sentience");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -123,7 +231,82 @@ test("listRecords field projection always includes record_id and requested field
       "disallowed_cheap_answers",
       "record_id"
     ]);
-    assert.deepEqual(result.records[0]?.disallowed_cheap_answers, ["It was only the wind."]);
+    const record = result.records[0] as Record<string, unknown> | undefined;
+    assert.deepEqual(record?.disallowed_cheap_answers, ["It was only the wind."]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords include_full_body returns get_record-style metadata and parsed bodies", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "mystery_record",
+        fields: ["title"],
+        include_full_body: true
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    const record = result.records[0]! as FullBodyTestRecord;
+    assert.equal(record.record_id, "M-1");
+    assert.equal(record.file_path, "_source/mystery-reserve/M-1.yaml");
+    assert.equal(typeof record.content_hash, "string");
+    assert.ok("body" in record);
+    assert.deepEqual(Object.keys(record).sort(), [
+      "body",
+      "content_hash",
+      "file_path",
+      "record_id"
+    ]);
+    assert.equal(record.body.record_kind, "mystery_reserve");
+    assert.deepEqual(record.body.disallowed_cheap_answers, ["It was only the wind."]);
+    assert.deepEqual(record.body.extensions, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords include_full_body covers every supported atomic record type", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const expectedKinds = new Map([
+      ["canon_fact", "canon_fact"],
+      ["change_log_entry", "change_log"],
+      ["invariant_record", "invariant"],
+      ["mystery_record", "mystery_reserve"],
+      ["open_question_record", "open_question"],
+      ["named_entity_record", "named_entity"],
+      ["section_record", "section"]
+    ]);
+
+    for (const [recordType, expectedKind] of expectedKinds) {
+      const result = await withRepoRoot(root, () =>
+        listRecords({
+          world_slug: "seeded",
+          record_type: recordType as Parameters<typeof listRecords>[0]["record_type"],
+          include_full_body: true
+        })
+      );
+
+      assert.ok("records" in result);
+      assert.ok(result.total >= 1);
+      const record = result.records[0]! as FullBodyTestRecord;
+      assert.ok("body" in record);
+      assert.equal(record.body.record_kind, expectedKind);
+      assert.equal(typeof record.content_hash, "string");
+      assert.equal(typeof record.file_path, "string");
+    }
   } finally {
     destroyTempRepoRoot(root);
   }
