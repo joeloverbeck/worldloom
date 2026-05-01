@@ -2,7 +2,7 @@
 
 Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` format, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
 
-The canonical schema source-of-truth is `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records under `tools/validators/src/schemas/`. A deployed `mcp__worldloom__describe_envelope_schema(op_kind?)` MCP introspection tool is anticipated but not yet shipped — until then, read the source files. This file documents the operationally-relevant subset and the discovered workarounds.
+Query `mcp__worldloom__describe_envelope_schema(op_kind?)` for the deployed envelope schema and per-op payload wrappers before assembling or debugging a genesis patch plan. The canonical schema source-of-truth remains `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records under `tools/validators/src/schemas/`. This file documents the operationally-relevant subset and the discovered workarounds.
 
 ---
 
@@ -26,7 +26,7 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
 
 Every field is required. `approval_token` is a placeholder string in the JSON (see §4); the real signed token is computed from the envelope bytes and passed alongside the envelope at submit time. `verdict: "APPROVED"` is the only legal value for a `create-base-world` genesis plan. `originating_skill` is `"create-base-world"` literally.
 
-A deployed `mcp__worldloom__describe_envelope_schema()` MCP introspection tool is anticipated but not yet shipped — until then, this reference is the operational source for the envelope shape; the engine source files cited above remain the canonical authority.
+Use `mcp__worldloom__describe_envelope_schema()` as the operational introspection path for the envelope shape; the engine source files cited above remain the canonical authority.
 
 ---
 
@@ -45,7 +45,7 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 
 Required fields: `op`, `target_world`, **`target_file`**, **`payload`**. The typed-record key (`cf_record`, `ch_record`, `inv_record`, etc.) lives **inside `payload`**, not at the op's top level. `target_file` is a relative path under `worlds/<world-slug>/`; the engine resolves it against `target_world`. No `expected_content_hash` (creates), no `expected_anchor_checksum` (atomic-record ops).
 
-A per-op-shape introspection tool (`mcp__worldloom__describe_envelope_schema({op_kind: "create_cf_record"})`) is anticipated but not yet shipped; until then, the per-op payload types live in `tools/patch-engine/src/envelope/schema.ts` and the per-record JSON schemas under `tools/validators/src/schemas/`.
+For a focused per-op view, call `mcp__worldloom__describe_envelope_schema({op_kind: "create_cf_record"})`. The per-op payload types live in `tools/patch-engine/src/envelope/schema.ts` and the per-record JSON schemas under `tools/validators/src/schemas/`.
 
 ### File-class → directory mapping for `target_file` paths
 
