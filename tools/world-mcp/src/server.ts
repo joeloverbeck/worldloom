@@ -7,9 +7,11 @@ import * as z from "zod/v4";
 
 import { NODE_TYPES } from "@worldloom/world-index/public/types";
 
+import { createBuildInfo } from "./build-info";
 import { DELIVERY_MODES } from "./context-packet/shared";
 import { TASK_TYPES } from "./ranking/profiles";
 import { allocateNextId } from "./tools/allocate-next-id";
+import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities";
 import { findEditAnchors } from "./tools/find-edit-anchors";
 import { findImpactedFragments } from "./tools/find-impacted-fragments";
 import { findNamedEntities } from "./tools/find-named-entities";
@@ -204,6 +206,8 @@ const getFirewallContentInputSchema = z.object({
   m_ids: z.array(z.string().min(1)).optional()
 });
 
+const describeCapabilitiesInputSchema = z.object({}).strict();
+
 function registerWrappedTool<TArgs extends Record<string, unknown>>(
   server: McpServer,
   key: ToolKey,
@@ -232,124 +236,143 @@ export function createServer(): McpServer {
     version: readPackageVersion()
   });
 
-  registerWrappedTool(
-    server,
+  const registeredCapabilities: ToolCapability[] = [];
+  const registerToolWithCapability = <TArgs extends Record<string, unknown>>(
+    key: ToolKey,
+    description: string,
+    inputSchema: z.ZodType<TArgs>,
+    handler: (args: TArgs) => Promise<object | McpError>,
+    inputSchemaEnums: Record<string, readonly string[]> = {}
+  ) => {
+    registeredCapabilities.push({
+      name: MCP_TOOL_NAMES[key],
+      description,
+      input_schema_enums: inputSchemaEnums
+    });
+    registerWrappedTool(server, key, description, inputSchema, handler);
+  };
+
+  registerToolWithCapability(
     "search_nodes",
     "Search indexed world nodes with exact-match-first retrieval ordering.",
     searchNodesInputSchema,
     async (args) => searchNodes(args as unknown as Parameters<typeof searchNodes>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_node",
     "Fetch a node with body, edges, mentions, hashes, and anchor details.",
     getNodeInputSchema,
     async (args) => getNode(args as unknown as Parameters<typeof getNode>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_record",
     "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset, e.g. 'frontmatter.world_consistency' or 'body.Capabilities'.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "list_records",
     "list_records: Return all records of a given atomic record type, with optional field projection or include_full_body metadata/body records.",
     listRecordsInputSchema,
-    async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0])
+    async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
+    { record_type: SUPPORTED_LIST_RECORD_TYPES }
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_record_field",
     "get_record_field: Fetch one field from an atomic record without returning the full parsed record.",
     getRecordFieldInputSchema,
     async (args) => getRecordField(args as unknown as Parameters<typeof getRecordField>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_record_schema",
     "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type.",
     getRecordSchemaInputSchema,
-    async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0])
+    async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0]),
+    { node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_neighbors",
     "Expand graph neighbors around a seed node across one or two hops.",
     getNeighborsInputSchema,
     async (args) => getNeighbors(args as unknown as Parameters<typeof getNeighbors>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_context_packet",
     "Assemble a bounded context packet for a retrieval task.",
     getContextPacketInputSchema,
-    async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0])
+    async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
+    { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "find_impacted_fragments",
     "Find downstream world fragments impacted by proposed node mutations.",
     findImpactedFragmentsInputSchema,
     async (args) => findImpactedFragments(args as unknown as Parameters<typeof findImpactedFragments>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "find_sections_touched_by",
     "mcp__worldloom__find_sections_touched_by: Reverse-index CF to SEC lookup across touched_by_cf and extension attribution.",
     findSectionsTouchedByInputSchema,
     async (args) => findSectionsTouchedBy(args as unknown as Parameters<typeof findSectionsTouchedBy>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "find_named_entities",
     "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "find_edit_anchors",
     "Return anchor checksums, content hashes, and anchor text for targets.",
     findEditAnchorsInputSchema,
     async (args) => findEditAnchors(args as unknown as Parameters<typeof findEditAnchors>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_canonical_vocabulary",
     "Return canonical validator vocabulary values for skill reasoning before patch-plan submission.",
     getCanonicalVocabularyInputSchema,
-    async (args) => getCanonicalVocabulary(args as unknown as Parameters<typeof getCanonicalVocabulary>[0])
+    async (args) => getCanonicalVocabulary(args as unknown as Parameters<typeof getCanonicalVocabulary>[0]),
+    { class: VOCABULARY_CLASSES }
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "validate_patch_plan",
     "Validate a patch plan envelope without mutating world content. Returns status: 'pass' | 'fail' | 'skipped' with verdicts and an optional skip reason.",
     validatePatchPlanInputSchema,
     async (args) => validatePatchPlan(args as unknown as Parameters<typeof validatePatchPlan>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "submit_patch_plan",
     "Submit a patch plan using an approval token through the patch engine.",
     submitPatchPlanInputSchema,
     async (args) => handleSubmitPatchPlanTool(args as unknown as Parameters<typeof handleSubmitPatchPlanTool>[0])
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "allocate_next_id",
     "Allocate the next append-only id for a world-specific or pipeline-scoped record class.",
     allocateNextIdInputSchema,
-    async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0])
+    async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0]),
+    { id_class: ID_CLASSES }
   );
-  registerWrappedTool(
-    server,
+  registerToolWithCapability(
     "get_firewall_content",
     "get_firewall_content: Bulk retrieval of Mystery Reserve firewall fields (title, status, unknowns, common_interpretations, disallowed_cheap_answers) keyed by M-id. Optional m_ids filter; defaults to every M record in the world. Use for Phase 7b firewall audits to avoid budget-pressured packet calls or N per-record get_record calls.",
     getFirewallContentInputSchema,
     async (args) => getFirewallContent(args as unknown as Parameters<typeof getFirewallContent>[0])
+  );
+
+  const describeCapability: ToolCapability = {
+    name: MCP_TOOL_NAMES.describe_capabilities,
+    description: "Return this MCP server's startup build metadata, registered tool names, and enum-valued input contracts.",
+    input_schema_enums: {}
+  };
+  const describedTools = [...registeredCapabilities, describeCapability];
+  const buildInfo = createBuildInfo(describedTools);
+  registerWrappedTool(
+    server,
+    "describe_capabilities",
+    describeCapability.description,
+    describeCapabilitiesInputSchema,
+    async () => describeCapabilities({ buildInfo, tools: describedTools })
   );
 
   return server;

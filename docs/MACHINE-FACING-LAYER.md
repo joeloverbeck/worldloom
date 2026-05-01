@@ -71,8 +71,13 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
 | `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
 | `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. This is exact-match resolution, not full-text search. Region descriptors (`drylands`, `canal-heartland`) and era descriptors (`Charter-Era`, `Incident Wave`) that appear only as parts of compound tokens may return empty with `hints[]`; use `search_nodes(query=...)` for those content lookups. Pair with `search_nodes(exhaustive: true)` for lexical-only Rule 6 evidence. |
+| `describe_capabilities` | Read-only server introspection. Returns server-start build metadata plus registered tool names and enum-valued input contracts, so skills can compare their assumed `task_type`, `id_class`, or `record_type` values against the deployed MCP server instead of only against source. |
 
 **Recommended composition**: packet first (locality survey via `get_context_packet`), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites unless a task-specific governing node already carries the required parsed `record` projection. See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
+
+## Schema Currency Verification
+
+When source adds a new MCP enum value or tool, the running server may still be older than the checkout if `tools/world-mcp/dist/` was not rebuilt or the MCP server/client session was not restarted. Use `mcp__worldloom__describe_capabilities()` to inspect the deployed server's build metadata and enum-valued input contracts. If the deployed contract is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`.
 
 ## Trust tiers
 
@@ -88,6 +93,7 @@ Retrieval now distinguishes four trust tiers instead of flattening everything in
 | Symptom | Likely cause | What to do |
 |---|---|---|
 | Retrieval tools report missing or stale nodes | `_index/world.db` is absent or out of date | Run `world-index build <world>` or `world-index sync <world>` |
+| A tool rejects an enum value that exists in source, such as a new `task_type` or `id_class` | The running MCP server is older than the source checkout, or `tools/world-mcp/dist/` was not rebuilt after the source change | Run `mcp__worldloom__describe_capabilities()` to inspect the deployed enum contract. If it is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`. This is the schema currency verification path introduced after the MCPENH-005 / ENGINESYNC-002 friction case. |
 | A skill still wants giant raw reads | Retrieval integration is incomplete for that skill or phase | Use the current skill contract, but treat the context-packet path as the target state |
 | Direct Edit/Write is blocked on protected paths | Hook 3 sees an engine-only surface | Route the change through a patch plan instead of direct file editing |
 | Validation fails after a write | Rule or structural invariant violation | Fix the underlying world state and rerun validation; do not bypass the validator surface |

@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
-**Status**: Stdio MCP entrypoint registers 16 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`
+**Status**: Stdio MCP entrypoint registers 18 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks.
 
 ## Tools
 
@@ -24,6 +24,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__validate_patch_plan(patch_plan)` *(runs `@worldloom/validators` in pre-apply mode and returns `{ status: "pass" | "fail" | "skipped", verdicts, reason? }`)*
 - `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(delegates to SPEC-03 `@worldloom/patch-engine`)*
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)` — allocates append-only world-scoped IDs. Most world-scoped classes allocate from the world's index; `EPE` scans `worlds/<slug>/pressure-events/EPE-*.md` directly because pressure-event cards are hybrid, pre-canon files. Pipeline-scoped proposal IDs use `world_slug: "__pipeline__"` with `id_class: "NWB"` for `world-proposals/batches/NWB-*.md` and `id_class: "NWP"` for `world-proposals/NWP-*.md`.
+- `mcp__worldloom__describe_capabilities()` — returns the running server's `build_info` (`git_commit_hash`, server-start `build_timestamp`, `source_schema_hash`) plus registered tool names, descriptions, and enum-valued input contracts such as `get_context_packet.task_type`, `allocate_next_id.id_class`, and `list_records.record_type`. Use this when a skill or ticket needs to verify the deployed MCP server accepts a newly added enum value after source changes.
 
 ## Retrieval policy
 

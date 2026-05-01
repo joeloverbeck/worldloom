@@ -1,9 +1,9 @@
 # ENGINESYNC-002: MCP server schema introspection + deployed-vs-source schema currency detection
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/world-mcp/src/tools/describe-capabilities.ts` (new tool); `tools/world-mcp/src/server.ts` (tool registration + Zod schema for the new tool); `tools/world-mcp/src/build-info.ts` (new module exposing build metadata: git commit hash, build timestamp, source schema hash); `tools/world-mcp/tests/tools/describe-capabilities.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts` (package-local proof); `tools/world-mcp/README.md` (tool documentation); `docs/MACHINE-FACING-LAYER.md` (operational note about server reload + schema currency); skill prose updates in skills that reference task_type or id_class enums in their forward-notes (defensive skills should call `describe_capabilities` at Pre-flight to verify their assumed contract).
+**Engine Changes**: Yes — `tools/world-mcp/src/tools/describe-capabilities.ts` (new read-only tool); `tools/world-mcp/src/build-info.ts` (new startup metadata/hash helper); `tools/world-mcp/src/tool-names.ts` and `tools/world-mcp/src/server.ts` (tool inventory, registration, Zod schema, enum manifest wiring); `tools/world-mcp/tests/tools/describe-capabilities.test.ts`, `tools/world-mcp/tests/server/dispatch.test.ts`, and `tools/world-mcp/tests/server/list-tools.test.ts` (package-local proof); `tools/world-mcp/README.md` (tool documentation); `docs/MACHINE-FACING-LAYER.md` (operational note about server reload + schema currency); `.claude/skills/emergent-pressure-events/SKILL.md` (defensive Pre-flight use of `describe_capabilities` when available).
 **Deps**: MCPENH-005 (registered the `emergent_pressure_events` task_type and surfaced the deployed-vs-source schema gap that motivated this ticket); `archive/tickets/MCPENH-006-add-epe-to-id-class-enum.md` (registers `EPE` id_class — same shape of source-vs-deployed gap risk).
 
 ## Problem
@@ -24,17 +24,19 @@ The fix is to add a server-side introspection tool — `mcp__worldloom__describe
 
 ## Assumption Reassessment (2026-04-30)
 
-1. The MCP server source at `tools/world-mcp/src/server.ts` registers tools via `server.tool(name, schema, handler)` calls. Build output lands in `tools/world-mcp/dist/`. At intake (2026-04-30), `tools/world-mcp/dist/` exists but my `ls` of it returned only `src` and `tests` subdirectories — the `dist/server.js` file (the built MCP server entry point) was not present, suggesting either an incomplete build or a non-standard build layout. Either way, the operator-facing recovery path ("rebuild dist/ + restart MCP server") is not currently surfaced as a machine-readable signal — it's tacit operational knowledge.
+1. The MCP server source at `tools/world-mcp/src/server.ts` registers tools via `server.registerTool(name, { description, inputSchema }, handler)` calls, with the current tool inventory centralized in `tools/world-mcp/src/tool-names.ts`. Build output lands under `tools/world-mcp/dist/src/`; the package README confirms the built stdio entrypoint is `tools/world-mcp/dist/src/server.js`, not `dist/server.js`. The operator-facing recovery path ("rebuild dist/ + restart MCP server") is still not surfaced as a machine-readable signal — it is tacit operational knowledge.
 2. The `TASK_TYPES` tuple at `tools/world-mcp/src/ranking/profiles/index.ts:14–25` currently enumerates 10 values (the 9 pre-MCPENH-005 set plus `emergent_pressure_events` at line 23). The deployed MCP server schema in my session enumerated 9 values (the pre-MCPENH-005 set). Source-vs-deployed delta confirmed.
 3. The `ID_CLASSES` tuple at `tools/world-mcp/src/server.ts:164–193` currently enumerates 27 values. The deployed MCP server schema in my session also enumerated 27 values — matching source. So the deployed-vs-source gap is enum-specific and time-of-build-specific, not uniform across the server.
 4. Cross-tool boundary under audit: the contract between (a) the deployed MCP server (Zod schema enforcement on every tool call) and (b) every consumer skill that depends on a specific enum value being accepted (`emergent-pressure-events` for `task_type='emergent_pressure_events'`; future consumers of `id_class='EPE'` per MCPENH-006; any future enum extension). The shared contract is the runtime Zod schema; the failure mode is silent staleness — schema enforcement returns a generic enum-validation error that does not distinguish "value never registered" from "value registered in source but not yet deployed".
 5. FOUNDATIONS principle motivating this ticket: §Tooling Recommendation — "LLM agents should never operate on prose alone … the context-packet API is the machine-facing mechanism for delivering this set with completeness guarantees." The MCP's schema enforcement is part of the same machine-facing contract; without introspection, every consumer skill operates on prose-driven assumptions (reading skill text + reading source) about what the server accepts. An introspection endpoint makes the deployed contract first-class machine-readable.
 6. Additionally relevant: FOUNDATIONS §Machine-Facing Layer — "Once the retrieval surface is active, every 'skills should always receive X' item above is delivered by `mcp__worldloom__get_context_packet(task_type, seed_nodes, token_budget)`." This ticket extends the same principle to the meta-level: skills should be able to ask the server "what tools and enum values do you currently accept?" rather than inferring from source code.
 7. Not applicable — this ticket does not touch HARD-GATE semantics, canon-write ordering, or Canon Safety Check enforcement. The change is purely on the introspection surface; no canon mutation path is altered.
-8. Schema extension: additive — `describe_capabilities` is a new tool; existing tools and their schemas are unchanged. The new tool's response schema is documented in the tool's own description and the README.
+8. Schema extension: additive — `describe_capabilities` is a new tool; existing tools and their schemas are unchanged. The live package also requires adding the tool to `tools/world-mcp/src/tool-names.ts` and `tools/world-mcp/tests/server/list-tools.test.ts`, because current registration/listing tests derive from the centralized inventory rather than grepping `server.ts` only.
 9. Adjacent contradiction surfaced during reassessment: skills that currently carry forward-notes about deferred MCP enum extensions (e.g., the EPE skill's pre-prior-audit Phase 3 forward-note about `id_class='EPE'`; any future skill with similar deferred-MCPENH guardrails) could call `describe_capabilities` at Pre-flight to programmatically verify whether the assumed enum value is currently accepted. After this ticket lands, that verification step becomes an option for defensive skill discipline; whether to adopt it is a per-skill operator judgment, not mandated by this ticket.
 10. The deployed-vs-source gap may be transient (resolved by rebuild + restart) or persistent (a release-management concern). This ticket addresses the OBSERVABILITY of the gap — making it machine-readable rather than requiring source inspection. It does NOT mandate a build/deploy cadence change; that's a separate operational concern.
-11. Pipeline-wide grep for current MCP introspection patterns: no `describe_capabilities` or equivalent introspection tool exists in `tools/world-mcp/src/tools/`. The closest analog is the OpenAPI-style schema returned by `ToolSearch` from the calling Claude environment, which reflects the deployed server's schema but does not include build metadata or a source/deployed delta.
+11. Pipeline-wide grep for current MCP introspection patterns: no `describe_capabilities` or equivalent introspection tool exists in `tools/world-mcp/src/tools/`. The closest analog is the OpenAPI-style schema returned by `ToolSearch` from the calling environment, which reflects the deployed server's schema but does not include build metadata or a source/deployed delta.
+12. The active Codex toolset does not expose a live `mcp__worldloom__describe_capabilities` call before this ticket lands and the external MCP server is rebuilt/restarted. Package-local proof must therefore use a direct handler test and an in-memory MCP client/server dispatch test. A direct external MCP call remains a post-restart operational smoke check, not a final acceptance command for this implementation session.
+13. Build metadata can be captured once when `createServer()` initializes instead of generating and overwriting a tracked source file on every build. This preserves the ticket invariant that repeated calls return the same `build_info` until server restart, avoids tracked generated-file churn, and still reports the git commit, server-start timestamp, and source schema hash for the deployed process.
 
 ## Architecture Check
 
@@ -44,9 +46,9 @@ The fix is to add a server-side introspection tool — `mcp__worldloom__describe
 
 ## Verification Layers
 
-1. `mcp__worldloom__describe_capabilities()` returns a manifest including `build_info.git_commit_hash`, `build_info.build_timestamp`, `tools[*].name`, and `tools[*].input_schema.enums[*]` for each tool with enum-typed parameters → package-local direct handler test in `tools/world-mcp/tests/tools/describe-capabilities.test.ts`.
+1. `mcp__worldloom__describe_capabilities()` returns a manifest including `build_info.git_commit_hash`, `build_info.build_timestamp`, `tools[*].name`, and `tools[*].input_schema_enums` for each tool with enum-typed parameters → package-local direct handler test in `tools/world-mcp/tests/tools/describe-capabilities.test.ts`.
 2. The manifest's `tools` list includes (at minimum): `allocate_next_id`, `get_context_packet`, `search_nodes`, `get_record`, `get_neighbors`, `find_named_entities`, `list_records`, `submit_patch_plan`, `find_edit_anchors`, `find_impacted_fragments`, `find_named_entities`, `find_sections_touched_by`, `get_canonical_vocabulary`, `get_firewall_content`, `get_node`, `get_record_field`, `get_record_schema`, `validate_patch_plan`, plus this new `describe_capabilities` tool itself → same test file.
-3. The manifest's `tools[name='allocate_next_id'].input_schema.enums.id_class` matches the current `ID_CLASSES` tuple in source — confirming source-deployed parity for that enum at test time → same test file.
+3. The manifest's `tools[name='allocate_next_id'].input_schema_enums.id_class` matches the current `ID_CLASSES` tuple in source — confirming source-deployed parity for that enum at test time → same test file.
 4. The MCP server's wrapped Zod input schema accepts `describe_capabilities()` with no arguments and returns the structured manifest → in-memory MCP server dispatch test in `tools/world-mcp/tests/server/dispatch.test.ts`.
 5. Operational documentation: `docs/MACHINE-FACING-LAYER.md` includes a "Schema currency verification" subsection naming the recovery path (rebuild dist/ + restart MCP server) and citing `describe_capabilities` as the introspection tool → grep-proof: `rg -n "describe_capabilities|Schema currency" docs/MACHINE-FACING-LAYER.md` returns hits.
 
@@ -61,7 +63,7 @@ Create `tools/world-mcp/src/tools/describe-capabilities.ts`:
   {
     build_info: {
       git_commit_hash: string,
-      build_timestamp: string,  // ISO-8601
+      build_timestamp: string,  // ISO-8601 server-start timestamp
       source_schema_hash: string  // sha256 over the tool registration block at server.ts startup
     },
     tools: Array<{
@@ -71,19 +73,19 @@ Create `tools/world-mcp/src/tools/describe-capabilities.ts`:
     }>
   }
   ```
-- Implementation: the build metadata fields are populated at server startup from a generated `build-info.ts` module (see §2 below). The `tools` list is iterated from the registered tool registry; for each tool, the input schema is introspected and enum-typed parameters are extracted.
+- Implementation: the build metadata fields are populated once at server startup by `build-info.ts` (see §2 below). The `tools` list is assembled from the same registered tool metadata used by `server.ts`; enum-typed parameters are derived from the source tuples (`ID_CLASSES`, `TASK_TYPES`, `SUPPORTED_LIST_RECORD_TYPES`, etc.) so new enum values propagate through the manifest when those tuples change.
 
 ### 2. Add a build-info module
 
 Create `tools/world-mcp/src/build-info.ts`:
-- Exports a `BUILD_INFO` constant populated at build time by a small build-step script that reads `git rev-parse HEAD` and `Date.now()`.
-- The `source_schema_hash` is computed at server startup over the concatenated string representation of all tool input schemas (using Zod's `.toString()` or a stable JSON serialization). This gives a content-addressable identifier for the deployed schema set.
+- Exports a helper that captures `git rev-parse HEAD` and an ISO-8601 server-start timestamp once per `createServer()` call.
+- The `source_schema_hash` is computed at server startup over a stable JSON serialization of the registered tool names, descriptions, and enum metadata. This gives a content-addressable identifier for the deployed schema set without rewriting tracked source during every build.
 
 ### 3. Register the tool in the MCP server
 
 In `tools/world-mcp/src/server.ts`:
 - Import the new tool's input/output schemas and handler.
-- Add a `server.tool('describe_capabilities', ...)` registration block alongside the existing tool registrations.
+- Add a `server.registerTool('describe_capabilities', ...)` registration block alongside the existing tool registrations.
 - The Zod input schema is `z.object({}).strict()` — empty object only.
 
 ### 4. Add tests
@@ -120,12 +122,13 @@ In `.claude/skills/emergent-pressure-events/SKILL.md`:
 - `tools/world-mcp/src/tools/describe-capabilities.ts` (new)
 - `tools/world-mcp/src/build-info.ts` (new)
 - `tools/world-mcp/src/server.ts` (modify — tool registration)
+- `tools/world-mcp/src/tool-names.ts` (modify — tool inventory/order)
 - `tools/world-mcp/tests/tools/describe-capabilities.test.ts` (new)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify — add `describe_capabilities` schema-acceptance coverage)
+- `tools/world-mcp/tests/server/list-tools.test.ts` (modify — expected inventory count)
 - `tools/world-mcp/README.md` (modify — `describe_capabilities` documentation)
 - `docs/MACHINE-FACING-LAYER.md` (modify — Schema currency verification subsection)
 - `.claude/skills/emergent-pressure-events/SKILL.md` (modify — Phase 3 forward-note + relevant guardrails reference `describe_capabilities` as a Pre-flight verification option)
-- Build script extension (e.g., `tools/world-mcp/package.json` `scripts.build` or a dedicated `prebuild` step) to generate `build-info.ts` with the current git commit hash and timestamp at every build.
 
 ## Out of Scope
 
@@ -139,7 +142,7 @@ In `.claude/skills/emergent-pressure-events/SKILL.md`:
 
 ### Tests That Must Pass
 
-1. `mcp__worldloom__describe_capabilities()` returns a manifest with `build_info.git_commit_hash` (40-char hex), `build_info.build_timestamp` (ISO-8601), `build_info.source_schema_hash` (sha256 hex), and a `tools[]` array whose names match the registered tools.
+1. Package-local direct handler and in-memory MCP dispatch proof show `mcp__worldloom__describe_capabilities()` returns a manifest with `build_info.git_commit_hash` (40-char hex or `unknown` only outside a git checkout), `build_info.build_timestamp` (ISO-8601 server-start timestamp), `build_info.source_schema_hash` (sha256 hex), and a `tools[]` array whose names match the registered tools.
 2. `describe_capabilities().tools.find(t => t.name === 'allocate_next_id').input_schema_enums.id_class` matches the current `ID_CLASSES` tuple — confirming source-deployed parity at the time of the test.
 3. `describe_capabilities().tools.find(t => t.name === 'get_context_packet').input_schema_enums.task_type` matches the current `TASK_TYPES` tuple.
 4. `describe_capabilities().tools.find(t => t.name === 'list_records').input_schema_enums.record_type` matches the current `record_type` enum.
@@ -163,8 +166,32 @@ In `.claude/skills/emergent-pressure-events/SKILL.md`:
 
 ### Commands
 
-1. `cd tools/world-mcp && npm run build` — rebuild dist/ including the new build-info generation step.
+1. `cd tools/world-mcp && npm run build` — rebuild dist/ including the new introspection tool.
 2. `cd tools/world-mcp && npm test` — runs the full package test suite including the new `describe-capabilities` assertions.
-3. `mcp__worldloom__describe_capabilities()` invoked against the live MCP server (after rebuild + restart) — returns the structured manifest.
+3. In-memory MCP dispatch invokes `mcp__worldloom__describe_capabilities` against `createServer()` after `npm run build` — returns the structured manifest. A direct external MCP call remains post-restart operational smoke because this session cannot expose a newly registered tool until the external server/client is rebuilt and restarted.
 4. `rg -n "describe_capabilities" tools/world-mcp/src/ docs/ .claude/skills/emergent-pressure-events/` — confirms the tool registration, documentation, and skill-side reference all landed.
 5. Comparison check (manual or scripted): given the source-side `TASK_TYPES` tuple at `tools/world-mcp/src/ranking/profiles/index.ts:14–25` and the deployed-schema response from `describe_capabilities()`, assert they are equal — confirming source-deployed parity at test time, and providing a direct verification path if the parity ever breaks.
+
+## Outcome
+
+Completed on 2026-05-01.
+
+- Added `mcp__worldloom__describe_capabilities` as a read-only MCP tool. It returns startup `build_info` (`git_commit_hash`, ISO `build_timestamp`, and `source_schema_hash`) plus registered tool names, descriptions, and enum-valued input contracts.
+- Wired the new tool through `tool-names.ts`, `server.ts`, in-memory MCP dispatch coverage, and list-tools inventory coverage.
+- Added startup build/schema metadata without a generated tracked source file. `createServer()` captures the timestamp and schema hash once, so repeated calls from the same server instance return stable build metadata.
+- Documented schema-currency recovery in `docs/MACHINE-FACING-LAYER.md` and `tools/world-mcp/README.md`, including the rebuild + MCP server restart path.
+- Updated `emergent-pressure-events` Pre-flight/Phase 3 prose so it can use `describe_capabilities` defensively when checking whether deployed enum contracts include `task_type='emergent_pressure_events'` and `id_class='EPE'`.
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm run build` — passed.
+2. `cd tools/world-mcp && node --test dist/tests/tools/describe-capabilities.test.js dist/tests/server/dispatch.test.js dist/tests/server/list-tools.test.js` — passed; 3 compiled test files passed.
+3. `cd tools/world-mcp && npm test` — passed; package build plus 214 tests passed with 0 failures.
+4. `rg -n "describe_capabilities|Schema currency" tools/world-mcp/src tools/world-mcp/tests docs/MACHINE-FACING-LAYER.md tools/world-mcp/README.md .claude/skills/emergent-pressure-events/SKILL.md` — returned hits in the new tool registration, tests, docs, and EPE skill defensive prose.
+5. `git diff --check` — passed.
+
+## Deviations
+
+- The draft's generated `build-info.ts` build step was replaced with a startup-captured helper to avoid rewriting tracked source on every build while preserving stable per-server `build_info`.
+- A direct external `mcp__worldloom__describe_capabilities()` smoke call was not run in this Codex session because the newly registered tool will not exist on the already-running external MCP server/client until the package is rebuilt and that server/client is restarted. The accepted proof is the package-local direct handler test plus in-memory MCP dispatch test.
+- `tools/world-mcp/.secret`, `tools/world-mcp/dist/`, and `tools/world-mcp/node_modules/` are ignored package artifacts present after verification. `dist/` is expected generated output from build/test; `.secret` and `node_modules/` were already present in the initial package ignored-status snapshot and are not ticket-owned source edits.

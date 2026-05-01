@@ -129,8 +129,9 @@ Runs before Phase 0. On any failure, abort before pipeline begins.
 2. Verify `worlds/<world-slug>/` exists. If absent, abort with the create-base-world instruction.
 3. Allocate the batch id: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-NNNN`.
 4. Load FOUNDATIONS + WORLD_KERNEL + ONTOLOGY via direct `Read`.
-5. Load world state per §World-State Prerequisites: primary path is per-record-class retrieval via `list_records` for CF / OQ and `list_records(..., include_full_body=true)` for INV / M Phase 6 firewall loads, plus targeted `search_nodes` / `get_record` for follow-up. If invoking `get_context_packet` as a complement, derive `seed_nodes` as record-ID-shaped — resolve `parameters_path.origin_type_focus` taxonomy values (e.g., `'scarcity'`) and §Core Pressures prose labels (e.g., `'artifact unearthing'`) to record IDs first via `search_nodes(query=<label>)`, then feed the resolved record IDs (e.g., `CF-0007`, `M-1`) to `seed_nodes`. Never pass raw prose labels or taxonomy values directly to `seed_nodes`.
-6. List `worlds/<slug>/pressure-events/EPE-*.md` (filenames + slug parsing only; no per-file Read) to populate the recurrence-detection registry. Empty pool is acceptable — first run.
+5. Optionally call `mcp__worldloom__describe_capabilities()` when available to verify the running MCP server currently accepts `task_type='emergent_pressure_events'` and `id_class='EPE'`. If the tool is unavailable or reports a stale enum set, continue with the documented older-server fallbacks rather than treating source prose as deployed-schema proof.
+6. Load world state per §World-State Prerequisites: primary path is per-record-class retrieval via `list_records` for CF / OQ and `list_records(..., include_full_body=true)` for INV / M Phase 6 firewall loads, plus targeted `search_nodes` / `get_record` for follow-up. If invoking `get_context_packet` as a complement, derive `seed_nodes` as record-ID-shaped — resolve `parameters_path.origin_type_focus` taxonomy values (e.g., `'scarcity'`) and §Core Pressures prose labels (e.g., `'artifact unearthing'`) to record IDs first via `search_nodes(query=<label>)`, then feed the resolved record IDs (e.g., `CF-0007`, `M-1`) to `seed_nodes`. Never pass raw prose labels or taxonomy values directly to `seed_nodes`.
+7. List `worlds/<slug>/pressure-events/EPE-*.md` (filenames + slug parsing only; no per-file Read) to populate the recurrence-detection registry. Empty pool is acceptable — first run.
 
 ## Procedure
 
@@ -179,7 +180,7 @@ Slot assignment honors `parameters_path.origin_type_focus` (if present, restrict
 
 ### Phase 3: Seed Generation
 
-For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-NNNN` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`. If the MCP call errors with `Unsupported id_class`, fall back to scanning `worlds/<world-slug>/pressure-events/EPE-*.md` for the highest existing id and incrementing; this fallback is a defensive recovery path for environments where the MCP server is older than this skill.
+For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-NNNN` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`. If `describe_capabilities` reported that `id_class='EPE'` is unavailable, or if the allocator call errors with `Unsupported id_class`, fall back to scanning `worlds/<world-slug>/pressure-events/EPE-*.md` for the highest existing id and incrementing; this fallback is a defensive recovery path for environments where the MCP server is older than this skill.
 
 Seeds inherit the pressure-inventory source records as **provisional traceability** — Phase 4 verifies and finalizes.
 

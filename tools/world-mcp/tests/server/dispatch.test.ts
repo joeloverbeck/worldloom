@@ -6,8 +6,10 @@ import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
-import { createServer } from "../../src/server";
+import { TASK_TYPES } from "../../src/ranking/profiles";
+import { createServer, ID_CLASSES } from "../../src/server";
 import { MCP_TOOL_NAMES } from "../../src/tool-names";
+import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
 function textContent(result: any): string {
@@ -303,6 +305,11 @@ test("registered tools dispatch with either a success payload or the documented 
         name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "__pipeline__", id_class: "NWB" },
         expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.describe_capabilities,
+        args: {},
+        expectError: false
       }
     ] as const;
 
@@ -456,5 +463,39 @@ test("pipeline sentinel rejects EPE at the MCP handler boundary", async () => {
     assert.match(textContent(result), /NWB, NWP/);
     const structured = result.structuredContent as { code?: string };
     assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("describe_capabilities dispatches through the MCP boundary with no arguments", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_capabilities,
+      arguments: {}
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      build_info?: {
+        git_commit_hash?: string;
+        build_timestamp?: string;
+        source_schema_hash?: string;
+      };
+      tools?: Array<{
+        name?: string;
+        input_schema_enums?: Record<string, string[]>;
+      }>;
+    };
+
+    assert.match(structured.build_info?.git_commit_hash ?? "", /^[0-9a-f]{40}$|^unknown$/);
+    assert.ok(!Number.isNaN(Date.parse(structured.build_info?.build_timestamp ?? "")));
+    assert.match(structured.build_info?.source_schema_hash ?? "", /^[0-9a-f]{64}$/);
+
+    const byName = new Map(structured.tools?.map((tool) => [tool.name, tool]) ?? []);
+    assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums?.id_class, [...ID_CLASSES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums?.task_type, [...TASK_TYPES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
+      ...SUPPORTED_LIST_RECORD_TYPES
+    ]);
   });
 });
