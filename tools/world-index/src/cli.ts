@@ -5,6 +5,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 
 import { build } from "./commands/build";
+import { init } from "./commands/init";
 import { inspect } from "./commands/inspect";
 import { stats } from "./commands/stats";
 import { sync } from "./commands/sync";
@@ -29,6 +30,7 @@ function renderHelp(): string {
     "Usage: world-index <command> [options]",
     "",
     "Commands:",
+    "  init <world-slug>     initialize an empty world index",
     "  build <world-slug>    full rebuild",
     "  sync <world-slug>     incremental sync",
     "  inspect <node-id>     dump one node as JSON",
@@ -103,6 +105,8 @@ function main(argv: string[]): number {
     switch (command) {
       case "build":
         return typeof argument === "string" ? build(worldRoot, argument) : printUsage(1);
+      case "init":
+        return typeof argument === "string" ? init(worldRoot, argument) : printUsage(1);
       case "sync":
         return typeof argument === "string" ? sync(worldRoot, argument) : printUsage(1);
       case "inspect":

@@ -6,9 +6,10 @@ SQLite-backed structure-aware index over worldloom world sources. Parsed nodes, 
 **Phase**: 1
 **Status**: core package implemented; public types entry added for SPEC-02
 
-## Planned CLI
+## CLI
 
 ```
+world-index init <world-slug>            # initialize an empty schema-applied world.db
 world-index build <world-slug>           # full rebuild
 world-index sync <world-slug>            # incremental
 world-index inspect <node-id>            # JSON dump of a single node

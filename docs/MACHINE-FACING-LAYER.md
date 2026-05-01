@@ -21,7 +21,7 @@ This doc is the operational overview. The design details still live in the numbe
 
 ```text
 world markdown/YAML
-  -> world-index build/sync
+  -> world-index init/build/sync
   -> _index/world.db
   -> world-mcp retrieval tools
   -> context packet or localized node reads
@@ -46,7 +46,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 | Need | Reach for |
 |---|---|
-| Rebuild or refresh machine-readable world state | `world-index build <world>` / `world-index sync <world>` |
+| Bootstrap, rebuild, or refresh machine-readable world state | `world-index init <world>`, `world-index build <world>`, or `world-index sync <world>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
 | Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `list_records`, `get_record_field`, `get_neighbors`, `find_named_entities` |
@@ -97,7 +97,7 @@ Retrieval now distinguishes four trust tiers instead of flattening everything in
 
 | Symptom | Likely cause | What to do |
 |---|---|---|
-| Retrieval tools report missing or stale nodes | `_index/world.db` is absent or out of date | Run `world-index build <world>` or `world-index sync <world>` |
+| Retrieval tools report missing or stale nodes | `_index/world.db` is absent or out of date | Run `world-index init <world>` for an empty bootstrap, or `world-index build <world>` / `world-index sync <world>` for populated world state |
 | A tool rejects an enum value that exists in source, such as a new `task_type` or `id_class` | The running MCP server is older than the source checkout, or `tools/world-mcp/dist/` was not rebuilt after the source change | Run `mcp__worldloom__describe_capabilities()` to inspect the deployed enum contract. If it is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`. This is the schema currency verification path introduced after the MCPENH-005 / ENGINESYNC-002 friction case. |
 | A skill still wants giant raw reads | Retrieval integration is incomplete for that skill or phase | Use the current skill contract, but treat the context-packet path as the target state |
 | Direct Edit/Write is blocked on protected paths | Hook 3 sees an engine-only surface | Route the change through a patch plan instead of direct file editing |
