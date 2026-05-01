@@ -137,7 +137,7 @@ test("packet-delivery-mode summary_only response is materially smaller than full
 
     const fullPacket = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 100000,
@@ -148,7 +148,7 @@ test("packet-delivery-mode summary_only response is materially smaller than full
 
     const summaryPacket = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 100000,

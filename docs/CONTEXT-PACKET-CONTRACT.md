@@ -16,6 +16,7 @@ task_header:
     allocated: 9800
   seed_nodes:
     - CHAR-0002
+  full_body_classes_delivered: []
   packet_version: 2
 local_authority:
   nodes: []
@@ -54,6 +55,7 @@ Describes the invocation context:
 - packet version
 - requested versus allocated budget
 - seed nodes
+- `full_body_classes_delivered`, the live node classes that actually received `full_body` after budget allocation
 - generation timestamp
 
 ### 2. Local authority
@@ -99,7 +101,7 @@ This layer carries:
 - open risks
 - governing nodes such as required kernel or invariant files
 - Mystery Reserve firewall nodes when locality intersects protected unknowns
-- optional parsed `record` projections on mandatory governing nodes when a task requires full-record audit semantics rather than a body-preview index
+- optional parsed `record` projections on mandatory governing nodes when a task requires structured audit semantics rather than a body-preview index
 
 ### 6. Impact surfaces
 
@@ -128,7 +130,7 @@ The packet's serialized response size is strictly bounded by the requested `toke
 
 `local_authority` and `task_header` are never dropped. If even `local_authority` exceeds budget alone, the assembler returns `packet_incomplete_required_classes` (see §Assembly Discipline) with `truncation_summary` populated for every droppable layer that was emptied.
 
-Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. Consumers route those node ids through `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped; targeted retrieval delivers the content.
+Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. High-value `full_body` delivery is downgraded node-by-node before it can force additional layer drops; downgraded nodes remain present with their normal preview/summary shape and are listed under `truncation_summary.full_body_downgrades`. Consumers route dropped or downgraded node ids through `mcp__worldloom__get_record(record_id)` (full body) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped or downgraded; targeted retrieval delivers the content.
 
 `truncation_summary` is always present on a successful packet response. When no truncation occurred, `dropped_layers` is an empty array, `dropped_node_ids_by_layer` is an empty object, and `fallback_advice` carries the standard per-record retrieval guidance (so consumers can read it unconditionally without branching on presence). Schema:
 
@@ -138,12 +140,35 @@ truncation_summary:
   dropped_node_ids_by_layer:
     impact_surfaces: ["SEC-INS-007", "SEC-ELF-002"]
     scoped_local_context: ["CF-0033", "M-12"]
+  full_body_downgrades:
+    - layer: governing_world_context
+      node_id: ONT-1
+      node_type: invariant
+      reason: high_value_full_body_budget_exceeded
   fallback_advice: "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed."
 ```
 
 ## Index + Follow-Up Retrieval Pattern
 
-The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus N per-record fetches. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval and whole-class enumeration deliver the required content.
+The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation. For selected task-critical classes, nodes in `local_authority`, `governing_world_context`, and `exact_record_links` may also carry an additive `full_body` string. Skills that need the full body of a load-bearing node that was not delivered retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus N per-record fetches. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; task-aware `full_body`, targeted retrieval, and whole-class enumeration deliver the required content.
+
+## Task-Aware Full-Body Delivery
+
+`full_body` is an optional per-node string sourced from the same indexed canonical body as `body_preview`. It is additive: consumers that read only `body_preview`, `summary`, or parsed `record` projections continue to work unchanged.
+
+Full bodies are considered only for `local_authority`, `governing_world_context`, and `exact_record_links`, in that priority order. `scoped_local_context` and `impact_surfaces` remain preview/summary-first to avoid spending the packet budget on broad advisory surfaces.
+
+| task_type | Full-body candidates |
+|---|---|
+| `canon_addition` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
+| `character_generation` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` or `EVERYDAY_LIFE` |
+| `diegetic_artifact_generation` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `section` records whose `file_class` is `TIMELINE` or `INSTITUTIONS` |
+| `propose_new_canon_facts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
+| `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
+| `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
+| `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
+
+The assembler first fits the normal preview/summary packet under the requested token budget. It then adds candidate `full_body` values one node at a time. If a candidate would exceed the budget, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after this allocation pass.
 
 ## Focused Retrieval Tools
 
@@ -163,13 +188,13 @@ Beyond the general packet retrieval, a small set of use-case-specific tools proj
 
 ### `full` (default)
 
-Each node carries a `body_preview` string (truncated body snippet, capped at ~280 characters) plus the `summary` field as recorded in the index. This is the legacy shape; callers that omit `delivery_mode` get this behavior unchanged.
+Each node carries a `body_preview` string (truncated body snippet, capped at ~280 characters) plus the `summary` field as recorded in the index. Eligible high-value nodes may additionally carry `full_body`. Callers that omit `delivery_mode` get this behavior.
 
 Use `full` when downstream consumers need preview-level content for ranking, citation, or in-line skim before deciding whether to fetch full bodies.
 
 ### `summary_only`
 
-Each node carries a non-null `summary` field (≤100 characters, derived from the index `summary`, or the record's `notes` first line, or the body's first sentence if no DB summary is present) and **omits** `body_preview` entirely. Task-specific `record` projections (e.g. `character_generation` invariant fields, Mystery Reserve firewall fields, seed-relevant CF records, and seed-touched priority SEC records) are unaffected by the delivery mode and remain attached when their task-specific assembly normally includes them.
+Each node carries a non-null `summary` field (≤100 characters, derived from the index `summary`, or the record's `notes` first line, or the body's first sentence if no DB summary is present) and **omits** `body_preview` entirely. Task-specific `record` projections (e.g. `character_generation` invariant fields, Mystery Reserve firewall fields, seed-relevant CF records, and seed-touched priority SEC records) and eligible `full_body` fields are unaffected by the delivery mode and remain attached when their task-specific assembly normally includes them.
 
 Use `summary_only` when consumers only need an "index of what exists" — e.g. Phase 7 firewall scoping in `canon-addition`, or Phase 1-3 claim planning in `diegetic-artifact-generation` — and will retrieve specific bodies via `mcp__worldloom__get_record(record_id)` per identified id. The compact shape lets the same `token_budget` cover materially broader locality coverage.
 
@@ -178,6 +203,7 @@ Use `summary_only` when consumers only need an "index of what exists" — e.g. P
 - Both modes return the same `node.id` set per layer for the same `task_type`, `seed_nodes`, and world state.
 - `summary_only` summary fields are ≤100 characters.
 - Default behavior (no `delivery_mode` parameter) is identical to `delivery_mode: 'full'`.
+- `full_body` eligibility and budget downgrade behavior are independent of `delivery_mode`.
 
 ## Class Filtering
 

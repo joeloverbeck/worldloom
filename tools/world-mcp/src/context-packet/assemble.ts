@@ -4,6 +4,7 @@ import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 import type { TaskType } from "../ranking/profiles";
 
+import { applyTaskTypeFullBodyDelivery } from "./full-body-delivery";
 import { buildExactRecordLinks } from "./exact-record-links";
 import {
   buildGoverningWorldContext,
@@ -19,7 +20,7 @@ import {
   DEFAULT_DELIVERY_MODE,
   DEFAULT_PACKET_VERSION,
   TRUNCATION_FALLBACK_ADVICE,
-  estimatePacketTokens,
+  estimateStablePacketSize,
   uniqueStrings,
   type ContextPacket,
   type ContextPacketNode,
@@ -63,6 +64,7 @@ function makeEmptyPacket(args: {
         allocated: 0
       },
       seed_nodes: uniqueStrings(args.seedNodes),
+      full_body_classes_delivered: [],
       packet_version: DEFAULT_PACKET_VERSION
     },
     local_authority: {
@@ -162,26 +164,6 @@ function applyClassFilter(
   packet.scoped_local_context.nodes = packet.scoped_local_context.nodes.filter(keep);
   packet.governing_world_context.nodes = packet.governing_world_context.nodes.filter(keep);
   packet.impact_surfaces.nodes = packet.impact_surfaces.nodes.filter(keep);
-}
-
-function estimateStablePacketSize(packet: ContextPacket): number {
-  const originalAllocated = packet.task_header.token_budget.allocated;
-  const originalRequested = packet.task_header.token_budget.requested;
-  try {
-    let candidate = estimatePacketTokens(packet);
-    for (;;) {
-      packet.task_header.token_budget.allocated = candidate;
-      packet.task_header.token_budget.requested = Math.max(originalRequested, candidate);
-      const adjusted = estimatePacketTokens(packet);
-      if (adjusted <= candidate) {
-        return candidate;
-      }
-      candidate = adjusted;
-    }
-  } finally {
-    packet.task_header.token_budget.allocated = originalAllocated;
-    packet.task_header.token_budget.requested = originalRequested;
-  }
 }
 
 function enforceBudget(packet: ContextPacket, requestedBudget: number): void {
@@ -292,22 +274,29 @@ export async function assembleContextPacket(args: {
 
     enforceBudget(packet, args.token_budget);
 
-    const stableAllocated = estimateStablePacketSize(packet);
-    if (stableAllocated > args.token_budget) {
+    const previewAllocated = estimateStablePacketSize(packet);
+    if (previewAllocated > args.token_budget) {
       return createMcpError(
         "packet_incomplete_required_classes",
         "The requested token budget cannot fit local_authority alone.",
         {
           missing_classes: ["local_authority", ...packet.truncation_summary.dropped_layers],
           requested_budget: args.token_budget,
-          minimum_required_budget: stableAllocated,
-          retry_with: { token_budget: stableAllocated },
+          minimum_required_budget: previewAllocated,
+          retry_with: { token_budget: previewAllocated },
           retained_classes: [],
           truncation_summary: packet.truncation_summary
         }
       );
     }
 
+    applyTaskTypeFullBodyDelivery(opened.db, packet, {
+      taskType: args.task_type,
+      worldSlug: args.world_slug,
+      tokenBudget: args.token_budget
+    });
+
+    const stableAllocated = estimateStablePacketSize(packet);
     packet.task_header.token_budget.allocated = stableAllocated;
 
     return packet;

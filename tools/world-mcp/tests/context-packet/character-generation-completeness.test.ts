@@ -192,7 +192,7 @@ test("character_generation governing context includes all invariant records and 
   }
 });
 
-test("canon_addition governing context does not promote every atomic invariant and Mystery Reserve record", async () => {
+test("canon_addition governing context includes atomic invariant and Mystery Reserve full bodies", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -257,8 +257,27 @@ test("canon_addition governing context does not promote every atomic invariant a
 
     assert.ok(!("code" in packet));
     assert.equal(
-      packet.governing_world_context.nodes.some((node) => node.id === "ONT-1" || node.id === "M-1"),
-      false
+      packet.governing_world_context.nodes.find((node) => node.id === "ONT-1")?.full_body,
+      "id: ONT-1\nstatement: Invariant.\n"
+    );
+    assert.equal(
+      packet.governing_world_context.nodes.find((node) => node.id === "M-1")?.full_body,
+      [
+        "id: M-1",
+        "title: Mystery",
+        "status: active",
+        "knowns:",
+        "  - Something is known.",
+        "unknowns:",
+        "  - Mystery.",
+        "common_interpretations: []",
+        "disallowed_cheap_answers: []",
+        "domains_touched:",
+        "  - mystery",
+        "future_resolution_safety: low",
+        "extensions: []",
+        ""
+      ].join("\n")
     );
   } finally {
     destroyTempRepoRoot(root);

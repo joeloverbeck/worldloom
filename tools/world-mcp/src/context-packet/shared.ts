@@ -25,6 +25,7 @@ export interface ContextPacketNode {
   heading_path: string | null;
   summary: string | null;
   body_preview?: string;
+  full_body?: string;
   record?: Record<string, unknown>;
 }
 
@@ -40,6 +41,12 @@ export interface ContextPacketTruncationSummary {
   dropped_layers: string[];
   dropped_node_ids_by_layer: Record<string, string[]>;
   fallback_advice: string;
+  full_body_downgrades?: Array<{
+    layer: string;
+    node_id: string;
+    node_type: NodeType;
+    reason: "high_value_full_body_budget_exceeded";
+  }>;
 }
 
 export interface ContextPacket {
@@ -52,6 +59,7 @@ export interface ContextPacket {
       allocated: number;
     };
     seed_nodes: string[];
+    full_body_classes_delivered: NodeType[];
     packet_version: 2;
   };
   local_authority: {
@@ -181,6 +189,7 @@ export function estimateNodeTokens(node: ContextPacketNode): number {
       node.heading_path ?? "",
       node.summary ?? "",
       node.body_preview ?? "",
+      node.full_body ?? "",
       node.record === undefined ? "" : JSON.stringify(node.record)
     ].join(" ")
   );
@@ -241,6 +250,26 @@ export function estimatePacketTokens(packet: ContextPacket): number {
   total += estimateTextTokens(JSON.stringify(packet.truncation_summary));
 
   return total;
+}
+
+export function estimateStablePacketSize(packet: ContextPacket): number {
+  const originalAllocated = packet.task_header.token_budget.allocated;
+  const originalRequested = packet.task_header.token_budget.requested;
+  try {
+    let candidate = estimatePacketTokens(packet);
+    for (;;) {
+      packet.task_header.token_budget.allocated = candidate;
+      packet.task_header.token_budget.requested = Math.max(originalRequested, candidate);
+      const adjusted = estimatePacketTokens(packet);
+      if (adjusted <= candidate) {
+        return candidate;
+      }
+      candidate = adjusted;
+    }
+  } finally {
+    packet.task_header.token_budget.allocated = originalAllocated;
+    packet.task_header.token_budget.requested = originalRequested;
+  }
 }
 
 export function loadPacketNodes(
