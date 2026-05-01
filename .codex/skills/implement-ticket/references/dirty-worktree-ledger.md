@@ -31,6 +31,8 @@ When a file is already dirty before the run and the active ticket also needs to 
 
 If a path that was clean at the initial snapshot becomes dirty later, inspect it before closeout.
 
+MCP connector discovery, tool approval, or local session configuration can create or modify files such as `.codex/config.toml` while a ticket is in progress. Treat that as `externally appeared unrelated` unless the active ticket explicitly owns Codex/MCP configuration. Do not include those changes in the ticket file set; remove only the incidental hunks you created yourself, and never revert user-authored config changes.
+
 When mid-run dirt appears in a file you also touched, classify at hunk level:
 
 - `owned edits`: hunks required by the active ticket
