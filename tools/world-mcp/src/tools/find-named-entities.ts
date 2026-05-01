@@ -1,5 +1,6 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import type { McpError } from "../errors";
 
@@ -184,7 +185,7 @@ function loadMentionGroups(
     .all(worldSlug, entityId) as MentionNodeTypeGroup[];
 }
 
-export async function findNamedEntities(
+async function findNamedEntitiesImpl(
   args: FindNamedEntitiesArgs
 ): Promise<FindNamedEntitiesResponse | McpError> {
   const opened = openIndexDb(args.world_slug);
@@ -436,3 +437,5 @@ export async function findNamedEntities(
     opened.db.close();
   }
 }
+
+export const findNamedEntities = withIndexFreshnessGuard(findNamedEntitiesImpl);

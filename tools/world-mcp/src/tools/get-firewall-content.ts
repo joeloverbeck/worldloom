@@ -1,5 +1,6 @@
 import YAML from "yaml";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -63,7 +64,7 @@ function projectFirewallFields(row: RecordRow): FirewallContent | McpError {
   };
 }
 
-export async function getFirewallContent(
+async function getFirewallContentImpl(
   args: GetFirewallContentArgs
 ): Promise<GetFirewallContentResponse | McpError> {
   if (args.m_ids !== undefined) {
@@ -128,3 +129,5 @@ export async function getFirewallContent(
     opened.db.close();
   }
 }
+
+export const getFirewallContent = withIndexFreshnessGuard(getFirewallContentImpl);

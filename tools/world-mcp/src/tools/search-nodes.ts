@@ -1,3 +1,4 @@
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import type { McpError } from "../errors";
 
@@ -398,7 +399,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
   }
 }
 
-export async function searchNodes(args: SearchNodesArgs): Promise<SearchNodesResponse | McpError> {
+async function searchNodesImpl(args: SearchNodesArgs): Promise<SearchNodesResponse | McpError> {
   const worldSlugs =
     args.filters?.world_slug !== undefined ? [args.filters.world_slug] : listIndexedWorldSlugs();
 
@@ -431,3 +432,14 @@ export async function searchNodes(args: SearchNodesArgs): Promise<SearchNodesRes
 
   return { nodes };
 }
+
+export const searchNodes = withIndexFreshnessGuard(searchNodesImpl, {
+  getWorldSlug: (args, error) => {
+    const detailWorldSlug = error.details?.world_slug;
+    if (typeof detailWorldSlug === "string" && detailWorldSlug.length > 0) {
+      return detailWorldSlug;
+    }
+
+    return args.filters?.world_slug;
+  }
+});

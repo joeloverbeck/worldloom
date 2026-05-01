@@ -1,5 +1,6 @@
 import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -76,7 +77,7 @@ interface NodeRow {
   anchor_checksum: string;
 }
 
-export async function getNode(args: GetNodeArgs): Promise<NodeDetail | McpError> {
+async function getNodeImpl(args: GetNodeArgs): Promise<NodeDetail | McpError> {
   const resolved = resolveNodeWorld(args.node_id, args.world_slug);
   if ("code" in resolved) {
     return resolved;
@@ -282,3 +283,5 @@ export async function getNode(args: GetNodeArgs): Promise<NodeDetail | McpError>
     opened.db.close();
   }
 }
+
+export const getNode = withIndexFreshnessGuard(getNodeImpl);

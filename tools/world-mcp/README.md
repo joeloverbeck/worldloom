@@ -6,6 +6,8 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
 **Status**: Stdio MCP entrypoint registers 19 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks; `describe_envelope_schema` exposes the patch-plan envelope and per-op payload schema contract for envelope assembly.
 
+Explicit-world retrieval calls auto-sync and retry once when `openIndexDb()` detects `stale_index`. Recovered responses include `freshness_audit.pre_call_index_was_stale: true`; persistent staleness still returns `stale_index` with recovery details. Patch-plan submit-time `index_stale` remains a separate fail-closed engine result.
+
 ## Tools
 
 - `mcp__worldloom__search_nodes(query, filters, exhaustive?)` — searches FTS5 lexical node content. Default mode preserves capped, ranked retrieval. Use `exhaustive: true` for Rule 6 presence/absence scans across prose bodies; exhaustive mode returns every match sorted by `node_id` and adds `match_locations: ('body' | 'heading_path' | 'summary')[]` per row.
