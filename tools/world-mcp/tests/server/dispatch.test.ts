@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
-import { createServer } from "../../src/server";
+import { TASK_TYPES } from "../../src/ranking/profiles";
+import { createServer, ID_CLASSES } from "../../src/server";
 import { MCP_TOOL_NAMES } from "../../src/tool-names";
+import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
 function textContent(result: any): string {
@@ -174,6 +177,15 @@ function seedServerWorld(root: string): void {
       }
     ]
   });
+
+  const pressureEventsDirectory = path.join(root, "worlds", "seeded", "pressure-events");
+  mkdirSync(pressureEventsDirectory, { recursive: true });
+  writeFileSync(path.join(pressureEventsDirectory, "EPE-0003-salt-riot.md"), "event", "utf8");
+  writeFileSync(
+    path.join(pressureEventsDirectory, "EPE-0004-salt-riot.proposal.md"),
+    "proposal",
+    "utf8"
+  );
 }
 
 async function withServerClient<T>(run: (client: Client) => Promise<T>): Promise<T> {
@@ -286,7 +298,22 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "EPE" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "__pipeline__", id_class: "NWB" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.describe_capabilities,
+        args: {},
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.describe_envelope_schema,
+        args: { op_kind: "create_cf_record" },
         expectError: false
       }
     ] as const;
@@ -358,6 +385,50 @@ test("unsupported id classes fail at the MCP validation boundary", async () => {
   });
 });
 
+test("list_records include_full_body dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        record_type: "canon_fact",
+        fields: ["title"],
+        include_full_body: true
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      records?: Array<{
+        record_id?: string;
+        content_hash?: string;
+        file_path?: string;
+        body?: { record_kind?: string; title?: string };
+      }>;
+    };
+    const record = structured.records?.[0];
+    assert.equal(record?.record_id, "CF-0001");
+    assert.equal(record?.file_path, "_source/canon/CF-0001.yaml");
+    assert.equal(typeof record?.content_hash, "string");
+    assert.equal(record?.body?.record_kind, "canon_fact");
+    assert.equal(record?.body?.title, "Brinewick Lighthouse");
+    assert.equal("title" in record!, false);
+  });
+});
+
+test("EPE id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "EPE" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "EPE-0004");
+  });
+});
+
 test("pipeline-scoped id classes reject non-pipeline world slugs at the MCP handler boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -383,5 +454,99 @@ test("pipeline sentinel rejects world-scoped id classes at the MCP handler bound
     assert.match(textContent(result), /NWB, NWP/);
     const structured = result.structuredContent as { code?: string };
     assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("pipeline sentinel rejects EPE at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "__pipeline__", id_class: "EPE" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /NWB, NWP/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("describe_capabilities dispatches through the MCP boundary with no arguments", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_capabilities,
+      arguments: {}
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      build_info?: {
+        git_commit_hash?: string;
+        build_timestamp?: string;
+        source_schema_hash?: string;
+      };
+      tools?: Array<{
+        name?: string;
+        input_schema_enums?: Record<string, string[]>;
+      }>;
+    };
+
+    assert.match(structured.build_info?.git_commit_hash ?? "", /^[0-9a-f]{40}$|^unknown$/);
+    assert.ok(!Number.isNaN(Date.parse(structured.build_info?.build_timestamp ?? "")));
+    assert.match(structured.build_info?.source_schema_hash ?? "", /^[0-9a-f]{64}$/);
+
+    const byName = new Map(structured.tools?.map((tool) => [tool.name, tool]) ?? []);
+    assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums?.id_class, [...ID_CLASSES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums?.task_type, [...TASK_TYPES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
+      ...SUPPORTED_LIST_RECORD_TYPES
+    ]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
+      "create_cf_record",
+      "create_ch_record",
+      "create_inv_record",
+      "create_m_record",
+      "create_oq_record",
+      "create_ent_record",
+      "create_sec_record",
+      "update_record_field",
+      "append_extension",
+      "append_touched_by_cf",
+      "append_modification_history_entry",
+      "append_adjudication_record",
+      "append_character_record",
+      "append_diegetic_artifact_record"
+    ]);
+  });
+});
+
+test("describe_envelope_schema dispatches through the MCP boundary with an op filter", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_envelope_schema,
+      arguments: { op_kind: "create_cf_record" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      envelope_schema?: { properties?: Record<string, unknown> };
+      op_schemas?: Record<string, { properties?: Record<string, unknown>; required?: string[] }>;
+      referenced_schemas?: Record<string, { required?: string[] }>;
+    };
+
+    assert.ok(structured.envelope_schema?.properties?.patches);
+    assert.deepEqual(Object.keys(structured.op_schemas ?? {}), ["create_cf_record"]);
+    assert.deepEqual(structured.op_schemas?.create_cf_record?.required, [
+      "op",
+      "target_world",
+      "target_file",
+      "payload"
+    ]);
+    assert.ok(
+      structured.referenced_schemas?.["https://worldloom.local/schemas/canon-fact-record.schema.json"]?.required?.includes(
+        "required_world_updates"
+      )
+    );
   });
 });

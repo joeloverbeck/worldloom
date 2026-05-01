@@ -1,13 +1,28 @@
 import {
   CANONICAL_DOMAINS,
+  CHANGE_TYPE_VALUES,
+  ENTITY_KIND_VALUES,
+  INVARIANT_CATEGORY_VALUES,
   MYSTERY_RESOLUTION_SAFETY_ENUM,
   MYSTERY_STATUS_ENUM,
+  REVISION_DIFFICULTY_VALUES,
+  SEC_FILE_CLASS_VALUES,
   VERDICT_ENUM
 } from "@worldloom/world-index/public/canonical-vocabularies";
 
 import { createMcpError, type McpError } from "../errors";
 
-export const VOCABULARY_CLASSES = ["domain", "verdict", "mystery_status", "mystery_resolution_safety"] as const;
+export const VOCABULARY_CLASSES = [
+  "domain",
+  "verdict",
+  "mystery_status",
+  "mystery_resolution_safety",
+  "invariant_category",
+  "entity_kind",
+  "sec_file_class",
+  "change_type",
+  "revision_difficulty"
+] as const;
 
 export type VocabularyClass = (typeof VOCABULARY_CLASSES)[number];
 
@@ -53,5 +68,15 @@ export async function getCanonicalVocabulary(
           rule: "forbidden allows only none; active, passive, and passive_depth allow low, medium, or high"
         }
       };
+    case "invariant_category":
+      return { canonical_values: [...INVARIANT_CATEGORY_VALUES] };
+    case "entity_kind":
+      return { canonical_values: [...ENTITY_KIND_VALUES] };
+    case "sec_file_class":
+      return { canonical_values: [...SEC_FILE_CLASS_VALUES] };
+    case "change_type":
+      return { canonical_values: [...CHANGE_TYPE_VALUES] };
+    case "revision_difficulty":
+      return { canonical_values: [...REVISION_DIFFICULTY_VALUES] };
   }
 }

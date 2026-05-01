@@ -15,6 +15,7 @@ import {
   createIndexedTestWorld,
   createOp,
   extension,
+  invariant,
   nextId,
   openQuestion,
   section,
@@ -298,6 +299,71 @@ test("submitPatchPlan creates OQ records before adjudications that cite them", a
   );
 });
 
+test("submitPatchPlan accepts per-prefix invariant id allocations without phantom INV ids", async (t) => {
+  const world = createIndexedTestWorld(t);
+  const secret = Buffer.from("integration-inv-prefix-secret");
+  const secretPath = writeSecret(world.worldRoot, secret);
+  const patches = [
+    createInvariantPatch(world.worldSlug, "ONT-2", "ontological"),
+    createInvariantPatch(world.worldSlug, "ONT-3", "ontological"),
+    createInvariantPatch(world.worldSlug, "CAU-1", "causal"),
+    createInvariantPatch(world.worldSlug, "DIS-1", "distribution"),
+    createInvariantPatch(world.worldSlug, "SOC-1", "social"),
+    createInvariantPatch(world.worldSlug, "AES-1", "aesthetic_thematic")
+  ];
+  const envelope = envelopeForPatches(
+    world,
+    { inv_ids: ["ONT-2", "ONT-3", "CAU-1", "DIS-1", "SOC-1", "AES-1"] },
+    patches
+  );
+
+  const result = await submitPatchPlan(envelope, signedToken({ envelope, secret, expiresAt: "2999-01-01T00:00:00.000Z" }), {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+
+  assertPatchReceipt(result);
+  assert.deepEqual(result.id_allocations_consumed.inv_ids, ["ONT-2", "ONT-3", "CAU-1", "DIS-1", "SOC-1", "AES-1"]);
+  assert.ok(result.files_written.some((write) => write.file_path.endsWith("_source/invariants/ONT-3.yaml")));
+});
+
+test("submitPatchPlan rejects phantom INV id allocations", async (t) => {
+  const world = createIndexedTestWorld(t);
+  const secret = Buffer.from("integration-inv-phantom-secret");
+  const secretPath = writeSecret(world.worldRoot, secret);
+  const envelope = envelopeForPatches(world, { inv_ids: ["INV-1", "ONT-2"] }, [
+    createInvariantPatch(world.worldSlug, "ONT-2", "ontological")
+  ]);
+
+  const result = await submitPatchPlan(envelope, signedToken({ envelope, secret, expiresAt: "2999-01-01T00:00:00.000Z" }), {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+
+  assertEngineError(result, "id_allocation_race");
+  assert.equal(result.message, "Invalid inv_ids allocation INV-1.");
+});
+
+test("submitPatchPlan rejects non-next invariant allocations per prefix", async (t) => {
+  const world = createIndexedTestWorld(t);
+  const secret = Buffer.from("integration-inv-race-secret");
+  const secretPath = writeSecret(world.worldRoot, secret);
+  const envelope = envelopeForPatches(world, { inv_ids: ["ONT-3"] }, [
+    createInvariantPatch(world.worldSlug, "ONT-3", "ontological")
+  ]);
+
+  const result = await submitPatchPlan(envelope, signedToken({ envelope, secret, expiresAt: "2999-01-01T00:00:00.000Z" }), {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+
+  assertEngineError(result, "id_allocation_race");
+  assert.equal(result.message, "inv_ids allocation race: expected ONT-3, current next id is ONT-2.");
+});
+
 interface CanonAdditionIds {
   cfId: string;
   chId: string;
@@ -414,6 +480,24 @@ function envelopeForPatches(
     target_world: world.worldSlug,
     patches
   };
+}
+
+function createInvariantPatch(
+  worldSlug: string,
+  id: string,
+  category: ReturnType<typeof invariant>["category"]
+): Extract<PatchOperation, { op: "create_inv_record" }> {
+  return createOp({
+    op: "create_inv_record",
+    target_world: worldSlug,
+    target_file: `_source/invariants/${id}.yaml`,
+    payload: {
+      inv_record: {
+        ...invariant(id),
+        category
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_inv_record" }>);
 }
 
 function seedHashes(world: ReturnType<typeof createIndexedTestWorld>): { cfHash: string; secHash: string } {

@@ -68,9 +68,19 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 
 The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
 
-### Submitting the plan: MCP path (default) and CLI path (size-constrained bypass)
+### Validating and submitting the plan: MCP path (default) and CLI path (size-constrained bypass)
 
-After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. Both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
+Before approval, a patch plan can be validated through either the MCP tool or the CLI size-bypass path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, reason? }` object. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
+
+**Validate MCP path (default)** — call `mcp__worldloom__validate_patch_plan(plan)` with the plan envelope. This is the canonical pre-apply validation path for ordinary plan sizes.
+
+**Validate CLI path (size-constrained bypass)** — for plans whose envelope strains MCP transport, persist the envelope JSON and invoke:
+
+```bash
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
+```
+
+On `pass`, the CLI prints the validate status object to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
 
 **MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
 
@@ -82,7 +92,7 @@ node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
 
 The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON and exits 1 (or 2 for argv errors).
 
-**Equivalence guarantees**:
+**Submit equivalence guarantees**:
 
 - Same envelope shape validation, same approval-token verification, same expected-id-allocation race check, same pre-apply validators (Rule 1-7 + structural), same per-world write lock, same two-phase atomic commit, same index sync.
 - Same failure-mode codes: `approval_expired`, `approval_replayed`, `index_stale`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.

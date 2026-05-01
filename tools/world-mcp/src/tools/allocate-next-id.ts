@@ -1,8 +1,8 @@
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import { openIndexDb } from "../db";
-import { resolveRepoRoot } from "../db/path";
+import { resolveRepoRoot, resolveWorldDirectory } from "../db/path";
 import { createMcpError } from "../errors";
 import type { McpError } from "../errors";
 
@@ -20,6 +20,7 @@ export const ID_CLASS_FORMATS = {
   NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
+  EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
   M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
   ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
   CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
@@ -50,6 +51,7 @@ export interface AllocateNextIdResponse {
 
 const PIPELINE_WORLD_SLUG = "__pipeline__";
 const PIPELINE_ID_CLASSES = new Set<IdClass>(["NWB", "NWP"]);
+const PRESSURE_EVENT_ID_CLASSES = new Set<IdClass>(["EPE"]);
 
 function isIdClass(value: string): value is IdClass {
   return value in ID_CLASS_FORMATS;
@@ -100,6 +102,47 @@ function findHighestPipelineId(idClass: IdClass): number {
   return maxValue;
 }
 
+function findHighestPressureEventId(worldSlug: string): number | McpError {
+  const worldDirectory = resolveWorldDirectory(worldSlug);
+  if (!existsSync(worldDirectory)) {
+    return createMcpError("world_not_found", `World '${worldSlug}' does not exist.`, {
+      world_slug: worldSlug
+    });
+  }
+
+  const format = ID_CLASS_FORMATS.EPE;
+  const directory = path.join(worldDirectory, "pressure-events");
+  let maxValue = 0;
+
+  let fileNames: string[];
+  try {
+    fileNames = readdirSync(directory);
+  } catch {
+    return maxValue;
+  }
+
+  for (const fileName of fileNames) {
+    if (!fileName.endsWith(".md") || fileName.endsWith(".proposal.md")) {
+      continue;
+    }
+
+    const idCandidate = fileName.slice(0, "EPE-0000".length);
+    const match = format.regex.exec(idCandidate);
+    if (match === null) {
+      continue;
+    }
+
+    const parsedValue = Number.parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(parsedValue)) {
+      continue;
+    }
+
+    maxValue = Math.max(maxValue, parsedValue);
+  }
+
+  return maxValue;
+}
+
 export async function allocateNextId(
   args: AllocateNextIdArgs
 ): Promise<AllocateNextIdResponse | McpError> {
@@ -128,6 +171,18 @@ export async function allocateNextId(
 
   if (pipelineIdClass) {
     const nextValue = findHighestPipelineId(args.id_class) + 1;
+    return {
+      next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
+    };
+  }
+
+  if (PRESSURE_EVENT_ID_CLASSES.has(args.id_class)) {
+    const highestValue = findHighestPressureEventId(args.world_slug);
+    if (typeof highestValue !== "number") {
+      return highestValue;
+    }
+
+    const nextValue = highestValue + 1;
     return {
       next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
     };

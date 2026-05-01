@@ -143,7 +143,7 @@ truncation_summary:
 
 ## Index + Follow-Up Retrieval Pattern
 
-The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. This pattern keeps single-response packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval delivers the content.
+The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation, not the full bodies of every node. Skills that need the full body of a load-bearing node retrieve it via `mcp__worldloom__get_record(record_id)`; skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus N per-record fetches. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; targeted retrieval and whole-class enumeration deliver the required content.
 
 ## Focused Retrieval Tools
 
@@ -151,6 +151,7 @@ Beyond the general packet retrieval, a small set of use-case-specific tools proj
 
 | Tool | Use case | Returns |
 |---|---|---|
+| `list_records(world_slug, record_type, include_full_body=true)` | Whole-class loads where the consumer must test every atomic record of a supported class, such as EPE Phase 6 invariant / Mystery Reserve firewall checks or continuity-audit cross-checks. | `{ records: [{ record_id, content_hash, file_path, body }], total, truncated: false }` |
 | `get_record_field(record_id, field_path)` | Read a single field of a single atomic record without paying the full-record parse cost. | `{ value, content_hash, file_path }` |
 | `get_firewall_content(world_slug, m_ids?)` | Phase 7b Mystery Reserve firewall audits — bulk projection of every (or selected) M record's firewall-relevant fields in a single call. | `{ records: { [m_id]: { title, status, unknowns, common_interpretations, disallowed_cheap_answers } }, not_found: string[] }` |
 

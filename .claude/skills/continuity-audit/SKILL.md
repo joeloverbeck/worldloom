@@ -23,7 +23,7 @@ Do NOT write any file — audit report, retcon-proposal card, INDEX.md update �
 
 ```
 Pre-flight (allocate_next_id AU; get_context_packet for world state;
-            get_canonical_vocabulary for domain/verdict/mystery enums)
+            get_canonical_vocabulary for domain/verdict/mystery/record-construction enums)
       |
       v
 Phase 0:  Normalize Parameters (parse OR interview; verify cutoff CH-id)
@@ -81,7 +81,7 @@ HARD-GATE → Phase 13 Commit (cards-first → report → INDEX.md; partial-fail
 
 ## World-State Prerequisites
 
-`docs/FOUNDATIONS.md` plus the world-state slice the audit touches arrive via `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if a category sub-pass needs more than the packet's `body_preview` carries, follow up with `mcp__worldloom__get_record(record_id)`. Direct `Read` of `_source/<subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read.
+`docs/FOUNDATIONS.md` plus the world-state slice the audit touches arrive via `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` per `docs/CONTEXT-PACKET-CONTRACT.md`. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if a category sub-pass needs more than the packet's `body_preview` carries, follow up with `mcp__worldloom__get_record(record_id)`. For deliberate whole-class audit passes, use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` rather than looping over individual `get_record` calls. Direct `Read` of `_source/<subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read.
 
 For per-phase retrieval-tool selection, see `references/retrieval-tool-tree.md`. Every Phase 4 sub-pass, the Phase 2 delta scan, and the Phase 6 burden-debt scan name the typed query they consume.
 
@@ -89,7 +89,7 @@ If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create
 
 ## Procedure
 
-1. **Pre-flight.** Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`). Allocate `AU-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'AU')`; do NOT pre-allocate RP ids — allocate lazily at Phase 8 per emitted card. Load the context packet (per §World-State Prerequisites). Look up canonical vocabularies via `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_resolution_safety` so any retcon card's `domains_affected` and any narrowed-mystery extension reference is validated at reasoning time. Read existing `audits/INDEX.md` if present; record its current content for Phase 13 append.
+1. **Pre-flight.** Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`). Allocate `AU-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'AU')`; do NOT pre-allocate RP ids — allocate lazily at Phase 8 per emitted card. Load the context packet (per §World-State Prerequisites). Look up canonical vocabularies via `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, and `revision_difficulty` so any retcon card's `domains_affected`, change-log/proposal repair type, and narrowed-mystery extension references are validated at reasoning time. Read existing `audits/INDEX.md` if present; record its current content for Phase 13 append.
 
 2. **Phase 0: Normalize Parameters.** Parse `parameters_path` if provided, otherwise interview the user one question at a time. Bind `audit_scope`, `severity_floor` (default 3), `focus_domains`, `trigger_context`, `recent_canon_addition_cutoff`. **Cutoff verification**: if `recent_canon_addition_cutoff` is a CH-NNNN id, search the index for it before proceeding. If absent, abort: "Cutoff change_id not found in ledger." **Cutoff semantics**: if the cutoff equals the latest CH, treat as inclusive anchor (Phase 2 includes it); otherwise apply strict newer-than. Record the disambiguation in the audit report body. Reject any parameter trying to dictate that a specific CF "should" be retconned — that is canon-addition's territory.
 

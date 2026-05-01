@@ -38,21 +38,24 @@ export interface PatchPlanEnvelope {
   patches: PatchOperation[];
 }
 
-export type OperationKind =
-  | "create_cf_record"
-  | "create_ch_record"
-  | "create_inv_record"
-  | "create_m_record"
-  | "create_oq_record"
-  | "create_ent_record"
-  | "create_sec_record"
-  | "update_record_field"
-  | "append_extension"
-  | "append_touched_by_cf"
-  | "append_modification_history_entry"
-  | "append_adjudication_record"
-  | "append_character_record"
-  | "append_diegetic_artifact_record";
+export const OPERATION_KINDS = [
+  "create_cf_record",
+  "create_ch_record",
+  "create_inv_record",
+  "create_m_record",
+  "create_oq_record",
+  "create_ent_record",
+  "create_sec_record",
+  "update_record_field",
+  "append_extension",
+  "append_touched_by_cf",
+  "append_modification_history_entry",
+  "append_adjudication_record",
+  "append_character_record",
+  "append_diegetic_artifact_record"
+] as const;
+
+export type OperationKind = (typeof OPERATION_KINDS)[number];
 
 export interface RetconAttestation {
   retcon_type: "A" | "B" | "C" | "D" | "E" | "F";

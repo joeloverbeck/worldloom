@@ -21,7 +21,7 @@ This doc is the operational overview. The design details still live in the numbe
 
 ```text
 world markdown/YAML
-  -> world-index build/sync
+  -> world-index init/build/sync
   -> _index/world.db
   -> world-mcp retrieval tools
   -> context packet or localized node reads
@@ -46,14 +46,15 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 | Need | Reach for |
 |---|---|
-| Rebuild or refresh machine-readable world state | `world-index build <world>` / `world-index sync <world>` |
+| Bootstrap, rebuild, or refresh machine-readable world state | `world-index init <world>`, `world-index build <world>`, or `world-index sync <world>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
 | Localize a specific node, record field, entity, or neighborhood | `search_nodes`, `get_node`, `get_record`, `list_records`, `get_record_field`, `get_neighbors`, `find_named_entities` |
 | Localize source-local names that are not world-level canonical entities | `find_named_entities.scoped_matches`, `get_node.scoped_references`, and `search_nodes` with `reference_name` or `include_scoped_references` |
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
-| Validate a patch plan envelope without mutating world content | `validate_patch_plan`, which returns `status: "pass"`, `status: "fail"` with validator verdicts, or `status: "skipped"` with a reason when the envelope cannot be validated |
+| Validate a patch plan envelope without mutating world content | `validate_patch_plan`, which returns `status: "pass"`, `status: "fail"` with validator verdicts, or `status: "skipped"` with a reason when the envelope cannot be validated. For envelopes too large for MCP transport, use the equivalent CLI path: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
+| Inspect the patch-plan envelope and per-op payload contract before assembly | `describe_envelope_schema`, optionally filtered by `op_kind` |
 | Prove structural integrity | `world-validate <world> --structural` |
 
 ## Retrieval Tool Scope
@@ -63,16 +64,25 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `search_nodes` | FTS5 lexical node content plus structured filters such as node type, file path, canonical entity name, and scoped-reference name. Default mode is capped and ranked. Use `exhaustive: true` for Rule 6 audit scans that need presence/absence confirmation across prose bodies; exhaustive results are sorted by `node_id` and include `match_locations[]`. |
 | `get_node` | One indexed node plus its structured links, mentions, scoped references, and file metadata. |
 | `get_record` | The full parsed record for a structured id such as CF / CH / M / OQ / SEC / PA / DA / CHAR. Use this after context-packet previews before citing record content. |
-| `list_records` | All parsed atomic records for one supported record type, with optional top-level field projection. Use for bulk-type sweeps such as every invariant or every Mystery Reserve firewall block. `record_id` is always included in projected records; large CF or SEC sweeps should be reserved for deliberate audit workflows. |
+| `list_records` | All parsed atomic records for one supported record type. Default/projection mode supports optional top-level field projection; `record_id` is always included in projected records. `include_full_body: true` returns `{ record_id, content_hash, file_path, body }` per record and ignores `fields`. Use full-body mode for deliberate whole-class sweeps such as every invariant or every Mystery Reserve firewall block; large CF or SEC sweeps should be reserved for deliberate audit workflows. |
 | `get_record_field` | A single field of a parsed atomic record. Use when the field is small and the record body is large, such as `touched_by_cf` on a large SEC record. Reuses `get_record`'s record-resolution path. |
 | `get_record_schema` | JSON Schema for a record class plus transitively referenced schemas. Use to discover field constraints, regex patterns, enum values, and required/optional fields before authoring a record draft. |
+| `describe_envelope_schema` | JSON Schema for the `validate_patch_plan` / `submit_patch_plan` envelope plus per-op payload wrappers. Use before assembling patch plans so required transport fields such as `approval_token`, `patches[].target_file`, `expected_id_allocations`, and typed payload keys are machine-readable instead of copied from prose. |
 | `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |
 | `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are generally truncated and full text requires `get_record`; task-specific governing nodes may carry parsed `record` projections, such as `character_generation` invariant records and Mystery Reserve firewall fields. Omitted budgets use per-task defaults (`canon_addition` currently 16000; `propose_new_canon_facts`, `propose_new_characters`, and `emergent_pressure_events` 15000; `propose_new_worlds_from_preferences` and `canon_facts_from_diegetic_artifacts` 12000; remaining task types 8000), and incomplete-packet errors include `retry_with.token_budget`. Optional `delivery_mode: 'full' \| 'summary_only'` (default `'full'`) selects per-node payload shape — `summary_only` replaces every node's `body_preview` with a ≤100-char `summary` for "what's relevant" index passes (see `docs/CONTEXT-PACKET-CONTRACT.md` §Delivery Modes). |
 | `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
 | `find_sections_touched_by` | SEC records whose `touched_by_cf[]` currently cites a candidate CF. Use for modification-history axis-(c) judgments. |
 | `find_named_entities` | Canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases. This is exact-match resolution, not full-text search. Region descriptors (`drylands`, `canal-heartland`) and era descriptors (`Charter-Era`, `Incident Wave`) that appear only as parts of compound tokens may return empty with `hints[]`; use `search_nodes(query=...)` for those content lookups. Pair with `search_nodes(exhaustive: true)` for lexical-only Rule 6 evidence. |
+| `get_canonical_vocabulary` | Shared canonical enum values for skill reasoning before patch-plan submission. Current classes are `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, and `revision_difficulty` (expanded by MCPENH-008). |
+| `describe_capabilities` | Read-only server introspection. Returns server-start build metadata plus registered tool names and enum-valued input contracts, so skills can compare their assumed `task_type`, `id_class`, or `record_type` values against the deployed MCP server instead of only against source. |
 
 **Recommended composition**: packet first (locality survey via `get_context_packet`), then `get_record` / `get_record_field` for full bodies of load-bearing nodes the packet cites unless a task-specific governing node already carries the required parsed `record` projection. See `docs/CONTEXT-PACKET-CONTRACT.md` §Index + Follow-Up Retrieval Pattern.
+
+## Schema Currency Verification
+
+When source adds a new MCP enum value or tool, the running server may still be older than the checkout if `tools/world-mcp/dist/` was not rebuilt or the MCP server/client session was not restarted. Use `mcp__worldloom__describe_capabilities()` to inspect the deployed server's build metadata and enum-valued input contracts. If the deployed contract is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`.
+
+For patch-plan assembly, use `mcp__worldloom__describe_envelope_schema(op_kind?)` to retrieve the current deployed envelope and operation-payload shapes for `validate_patch_plan` and `submit_patch_plan`. This is the machine-readable path for fields that previously lived only in skill prose, such as `patch_plan.approval_token`, `patches[].target_file`, and `payload.cf_record`.
 
 ## Trust tiers
 
@@ -87,7 +97,8 @@ Retrieval now distinguishes four trust tiers instead of flattening everything in
 
 | Symptom | Likely cause | What to do |
 |---|---|---|
-| Retrieval tools report missing or stale nodes | `_index/world.db` is absent or out of date | Run `world-index build <world>` or `world-index sync <world>` |
+| Retrieval tools report missing or stale nodes | `_index/world.db` is absent or out of date | Run `world-index init <world>` for an empty bootstrap, or `world-index build <world>` / `world-index sync <world>` for populated world state |
+| A tool rejects an enum value that exists in source, such as a new `task_type` or `id_class` | The running MCP server is older than the source checkout, or `tools/world-mcp/dist/` was not rebuilt after the source change | Run `mcp__worldloom__describe_capabilities()` to inspect the deployed enum contract. If it is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`. This is the schema currency verification path introduced after the MCPENH-005 / ENGINESYNC-002 friction case. |
 | A skill still wants giant raw reads | Retrieval integration is incomplete for that skill or phase | Use the current skill contract, but treat the context-packet path as the target state |
 | Direct Edit/Write is blocked on protected paths | Hook 3 sees an engine-only surface | Route the change through a patch plan instead of direct file editing |
 | Validation fails after a write | Rule or structural invariant violation | Fix the underlying world state and rerun validation; do not bypass the validator surface |
