@@ -188,7 +188,6 @@ function verifyExpectedIdAllocations(
   const classByKey: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
     ["cf_ids", "CF", /^CF-(\d{4})$/, 4, true],
     ["ch_ids", "CH", /^CH-(\d{4})$/, 4, true],
-    ["inv_ids", "INV", /^INV-(\d+)$/, 1, false],
     ["m_ids", "M", /^M-(\d+)$/, 1, false],
     ["oq_ids", "OQ", /^OQ-(\d{4})$/, 4, true],
     ["ent_ids", "ENT", /^ENT-(\d{4})$/, 4, true],
@@ -207,6 +206,22 @@ function verifyExpectedIdAllocations(
     if (ids[0] !== nextId) {
       return error("id_allocation_race", `${key} allocation race: expected ${ids[0]}, current next id is ${nextId}.`);
     }
+  }
+
+  const invIds = allocations.inv_ids ?? [];
+  const invPrefixCounts = new Map<string, number>();
+  for (const invId of invIds) {
+    const match = /^(ONT|CAU|DIS|SOC|AES)-\d+$/.exec(invId);
+    if (match === null) {
+      return error("id_allocation_race", `Invalid inv_ids allocation ${invId}.`);
+    }
+    const prefix = match[1] ?? "";
+    const allocatedForPrefix = invPrefixCounts.get(prefix) ?? 0;
+    const nextId = nextIdFor(db, worldSlug, prefix, new RegExp(`^${prefix}-(\\d+)$`), 1, false, allocatedForPrefix);
+    if (invId !== nextId) {
+      return error("id_allocation_race", `inv_ids allocation race: expected ${invId}, current next id is ${nextId}.`);
+    }
+    invPrefixCounts.set(prefix, allocatedForPrefix + 1);
   }
 
   const secIds = allocations.sec_ids ?? [];
@@ -231,7 +246,8 @@ function nextIdFor(
   prefix: string,
   regex: RegExp,
   width: number,
-  zeroPad: boolean
+  zeroPad: boolean,
+  alreadyAllocated = 0
 ): string {
   const rows = db
     .prepare(
@@ -253,7 +269,7 @@ function nextIdFor(
     maxValue = Math.max(maxValue, Number.parseInt(match[1] ?? "0", 10));
   }
 
-  const nextValue = maxValue + 1;
+  const nextValue = maxValue + 1 + alreadyAllocated;
   return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
 }
 

@@ -1,6 +1,6 @@
 # Patch Engine Envelope Shape — Reference
 
-Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` workaround for invariants, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
+Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` format, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
 
 The canonical schema source-of-truth is the deployed `mcp__worldloom__describe_envelope_schema(op_kind?)` introspection tool, backed by `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records. This file documents the operationally-relevant subset and the discovered workarounds.
 
@@ -68,28 +68,13 @@ The directory portion is lowercase-kebab-case; the file class inside the SEC rec
 The engine's pre-apply check has **two layers** that both run on `expected_id_allocations`:
 
 1. **Per-op check** (`tools/patch-engine/src/ops/shared.ts` `stageNewRecordFile`): every `create_*_record` op verifies its `record.id` appears in the corresponding allocation list via `.includes()`.
-2. **Verifier check** (`tools/patch-engine/src/apply.ts` `verifyExpectedIdAllocations`): for each allocation class, verifies `ids[0]` matches the engine's next-id calculation for that class.
+2. **Verifier check** (`tools/patch-engine/src/apply.ts` `verifyExpectedIdAllocations`): verifies that allocated IDs match the engine's next-id calculation for that class. Multi-prefix classes (`inv_ids`, `sec_ids`) are checked per prefix.
 
 Most classes are consistent across both layers — `cf_ids` uses `CF-NNNN` (4-digit zero-padded), `ch_ids` uses `CH-NNNN`, `m_ids` uses `M-N`, `oq_ids` uses `OQ-NNNN`, `ent_ids` uses `ENT-NNNN`. These pass both layers when populated with their natural format.
 
-`sec_ids` uses `SEC-<PREFIX>-NNN` (e.g., `SEC-GEO-001`); the verifier scans nodes per-prefix, so each SEC ID's first appearance in the list is checked against the next-id for that specific prefix. Lay them out in the order ops are emitted (`SEC-GEO-001`, `SEC-PAS-001`, `SEC-INS-001`, ...).
+`sec_ids` uses `SEC-<PREFIX>-NNN` (e.g., `SEC-GEO-001`); the verifier scans nodes per-prefix, so each SEC ID is checked against the next-id for that specific prefix. Lay them out in the order ops are emitted (`SEC-GEO-001`, `SEC-PAS-001`, `SEC-INS-001`, ...).
 
-### `inv_ids` workaround (engine asymmetry)
-
-`inv_ids` has a documented asymmetry between the two layers:
-
-- **Per-op check** validates each invariant's ID against `/^(ONT|CAU|DIS|SOC|AES)-\d+$/` (per `tools/patch-engine/src/ops/create-inv-record.ts`) and requires every category-prefix ID (`ONT-1`, `ONT-2`, `CAU-1`, ...) to appear in `inv_ids`.
-- **Verifier check** treats `inv_ids` as a flat `INV-N` counter, computing next-id by scanning for `/^INV-(\d+)$/` matches; for an empty world it returns `INV-1`. If `inv_ids[0]` is not `INV-1`, it returns `id_allocation_race`.
-
-**Workaround**: place `INV-1` as a phantom first entry, followed by the real category-prefix IDs:
-
-```json
-"inv_ids": ["INV-1", "ONT-1", "ONT-2", "CAU-1", "CAU-2", "DIS-1", "DIS-2", "SOC-1", "SOC-2", "AES-1", "AES-2"]
-```
-
-The verifier sees `INV-1` matching the empty-world next-id and passes; the per-op check uses `.includes()` to find each real category-prefix ID and passes; no `INV-N` record is actually created.
-
-This is an **engine bug** worth tracking for a future patch — the per-op and verifier checks should converge on the same ID format. Until that lands, the workaround is required for any genesis envelope creating invariants.
+`inv_ids` uses category-prefix IDs directly (`ONT-N`, `CAU-N`, `DIS-N`, `SOC-N`, `AES-N`). After PATCHENG-001, the verifier scans per category prefix just like `sec_ids`; do not include any `INV-N` sentinel. For multiple new invariants under the same category, list them in monotonic order (`ONT-1`, `ONT-2`, ...).
 
 ### Full `expected_id_allocations` shape
 
@@ -97,7 +82,7 @@ This is an **engine bug** worth tracking for a future patch — the per-op and v
 {
   "cf_ids": ["CF-0001"],
   "ch_ids": ["CH-0001"],
-  "inv_ids": ["INV-1", "ONT-1", "ONT-2", "CAU-1", "CAU-2", "DIS-1", "DIS-2", "SOC-1", "SOC-2", "AES-1", "AES-2"],
+  "inv_ids": ["ONT-1", "ONT-2", "CAU-1", "CAU-2", "DIS-1", "DIS-2", "SOC-1", "SOC-2", "AES-1", "AES-2"],
   "m_ids": ["M-1", "M-2", "M-3"],
   "oq_ids": ["OQ-0001", "OQ-0002", "OQ-0003", "OQ-0004", "OQ-0005", "OQ-0006", "OQ-0007"],
   "ent_ids": ["ENT-0001", "ENT-0002", ...],
@@ -152,7 +137,7 @@ The patch engine surfaces these failure modes; map each to the appropriate skill
 | `target_file_missing` / `target_file_outside_world` | Op's `target_file` is empty or escapes the world root. | Fix the op's `target_file` path; resubmit. |
 | `op_target_class_mismatch` | Typed payload key (e.g., `cf_record`) doesn't match `op` kind (e.g., `create_inv_record`). | Fix the op's payload key to match the op kind; resubmit. |
 | `record_already_exists` | A `create_*_record` op's record-id already exists on disk. | Abort and investigate — the world is not actually empty, or the IDs are stale. Do not blindly re-allocate. |
-| `id_allocation_race` | Verifier sees `expected_id_allocations[<class>][0]` not matching the engine's next-id for that class. Either another plan landed concurrently or the allocation list is malformed (e.g., `inv_ids` missing the `INV-1` phantom). | Re-allocate IDs against current world state and rebuild the envelope; or fix the malformed list per §3. |
+| `id_allocation_race` | Verifier sees an allocation that does not match the engine's next-id calculation for that class or per-prefix class. Either another plan landed concurrently or the allocation list is malformed (for example, `inv_ids` contains an `INV-N` sentinel or skips the next category-prefix ID). | Re-allocate IDs against current world state and rebuild the envelope; or fix the malformed list per §3. |
 | `missing_expected_id_allocation` | Per-op check found a `record.id` not listed in the corresponding allocation array. | Add the missing ID to the allocation list; resubmit. |
 
 ### Approval-token errors
