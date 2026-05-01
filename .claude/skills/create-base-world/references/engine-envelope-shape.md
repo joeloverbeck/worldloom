@@ -2,7 +2,7 @@
 
 Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` format, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
 
-The canonical schema source-of-truth is the deployed `mcp__worldloom__describe_envelope_schema(op_kind?)` introspection tool, backed by `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records. This file documents the operationally-relevant subset and the discovered workarounds.
+The canonical schema source-of-truth is `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records under `tools/validators/src/schemas/`. A deployed `mcp__worldloom__describe_envelope_schema(op_kind?)` MCP introspection tool is anticipated but not yet shipped — until then, read the source files. This file documents the operationally-relevant subset and the discovered workarounds.
 
 ---
 
@@ -26,7 +26,7 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
 
 Every field is required. `approval_token` is a placeholder string in the JSON (see §4); the real signed token is computed from the envelope bytes and passed alongside the envelope at submit time. `verdict: "APPROVED"` is the only legal value for a `create-base-world` genesis plan. `originating_skill` is `"create-base-world"` literally.
 
-For machine-readable retrieval of the current deployed envelope shape, call `mcp__worldloom__describe_envelope_schema()`. This reference is a human-readable supplement.
+A deployed `mcp__worldloom__describe_envelope_schema()` MCP introspection tool is anticipated but not yet shipped — until then, this reference is the operational source for the envelope shape; the engine source files cited above remain the canonical authority.
 
 ---
 
@@ -45,7 +45,7 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 
 Required fields: `op`, `target_world`, **`target_file`**, **`payload`**. The typed-record key (`cf_record`, `ch_record`, `inv_record`, etc.) lives **inside `payload`**, not at the op's top level. `target_file` is a relative path under `worlds/<world-slug>/`; the engine resolves it against `target_world`. No `expected_content_hash` (creates), no `expected_anchor_checksum` (atomic-record ops).
 
-For machine-readable retrieval of a current per-op payload shape, call `mcp__worldloom__describe_envelope_schema({op_kind: "create_cf_record"})` or the relevant op kind before assembly.
+A per-op-shape introspection tool (`mcp__worldloom__describe_envelope_schema({op_kind: "create_cf_record"})`) is anticipated but not yet shipped; until then, the per-op payload types live in `tools/patch-engine/src/envelope/schema.ts` and the per-record JSON schemas under `tools/validators/src/schemas/`.
 
 ### File-class → directory mapping for `target_file` paths
 
@@ -152,7 +152,8 @@ The patch engine surfaces these failure modes; map each to the appropriate skill
 
 | Code | Meaning | Response |
 |---|---|---|
-| `index_stale` | Engine detected the world index has diverged from on-disk content (typically a prior direct-`Edit` to hybrid-file frontmatter without index sync). `detail.divergent_files[].file_path` names the divergent files. | Run `node tools/world-index/dist/src/cli.js sync <world-slug>`; resubmit with the same approval token if it has not expired. |
+| `index_stale` (submit-time) | Engine detected the world index has diverged from on-disk content (typically a prior direct-`Edit` to hybrid-file frontmatter without index sync). `detail.divergent_files[].file_path` names the divergent files. | Run `node tools/world-index/dist/src/cli.js sync <world-slug>`; resubmit with the same approval token if it has not expired. |
+| `stale_index` (retrieval-time) | Returned by `mcp__worldloom__get_context_packet`, `get_record`, `find_named_entities`, and other retrieval tools when the world index is stale relative to source files. `details.drifted_files[]` (or `divergent_files[]`) names the stale paths. The staleness can pre-date the current skill's run — e.g., a prior session edited a hybrid-file frontmatter without index sync. Pre-flight retrieval is the more common firing point because it is the first MCP call most skills make. | Run `node tools/world-index/dist/src/cli.js sync <world-slug>` and retry the retrieval call. The recovery is identical to the submit-time `index_stale` handling above. |
 | `validator_failed` | A pre-apply validator (Rule 1-7 + structural) returned a failing verdict. `detail.verdicts[].location.file` names the offending file. | If the cited file is one of the genesis records this plan is creating (per `expected_id_allocations`), the schema violation is in this skill's output — fix and resubmit. **If the cited file is unrelated existing world state, pause and escalate to the user — this skill must not silently modify other canon-adjacent files.** |
 
 After any user-authorized direct-`Edit` to a hybrid-file frontmatter under `worlds/<slug>/characters/`, `diegetic-artifacts/`, or `adjudications/` (the surfaces under `record_schema_compliance` validator scope), run `node tools/world-index/dist/src/cli.js sync <world-slug>` before resubmitting — the validator runs against the indexed world state, not against on-disk content. INDEX.md edits do not require sync (not under validator scope).
