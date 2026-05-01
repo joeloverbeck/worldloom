@@ -1,29 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { OPERATION_KINDS, type OperationKind } from "@worldloom/patch-engine";
+
 import { MCP_TOOL_NAMES } from "../tool-names";
 
 type JsonObject = { [key: string]: JsonValue };
 type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
-
-export const OPERATION_KINDS = [
-  "create_cf_record",
-  "create_ch_record",
-  "create_inv_record",
-  "create_m_record",
-  "create_oq_record",
-  "create_ent_record",
-  "create_sec_record",
-  "update_record_field",
-  "append_extension",
-  "append_touched_by_cf",
-  "append_modification_history_entry",
-  "append_adjudication_record",
-  "append_character_record",
-  "append_diegetic_artifact_record"
-] as const;
-
-export type OperationKind = (typeof OPERATION_KINDS)[number];
 
 export interface DescribeEnvelopeSchemaArgs {
   op_kind?: OperationKind;

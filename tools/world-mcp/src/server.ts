@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as z from "zod/v4";
 
+import { OPERATION_KINDS } from "@worldloom/patch-engine";
 import { NODE_TYPES } from "@worldloom/world-index/public/types";
 
 import { createBuildInfo } from "./build-info";
@@ -12,7 +13,7 @@ import { DELIVERY_MODES } from "./context-packet/shared";
 import { TASK_TYPES } from "./ranking/profiles";
 import { allocateNextId } from "./tools/allocate-next-id";
 import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities";
-import { describeEnvelopeSchema, OPERATION_KINDS } from "./tools/describe-envelope-schema";
+import { describeEnvelopeSchema } from "./tools/describe-envelope-schema";
 import { findEditAnchors } from "./tools/find-edit-anchors";
 import { findImpactedFragments } from "./tools/find-impacted-fragments";
 import { findNamedEntities } from "./tools/find-named-entities";

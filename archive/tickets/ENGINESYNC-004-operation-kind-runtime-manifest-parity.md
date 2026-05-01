@@ -1,6 +1,6 @@
 # ENGINESYNC-004: Operation-kind runtime manifest parity
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/patch-engine` runtime exports and `tools/world-mcp` envelope schema introspection
@@ -8,19 +8,21 @@
 
 ## Problem
 
-ENGINESYNC-003 added `mcp__worldloom__describe_envelope_schema` so agents can retrieve the deployed patch-plan envelope and per-operation payload shapes. That implementation currently carries a local `OPERATION_KINDS` tuple in `tools/world-mcp/src/tools/describe-envelope-schema.ts`, while the patch engine owns the canonical `OperationKind` union in `tools/patch-engine/src/envelope/schema.ts`.
+At intake, ENGINESYNC-003 had added `mcp__worldloom__describe_envelope_schema` so agents could retrieve the deployed patch-plan envelope and per-operation payload shapes. That implementation carried a local `OPERATION_KINDS` tuple in `tools/world-mcp/src/tools/describe-envelope-schema.ts`, while the patch engine owned the canonical `OperationKind` union in `tools/patch-engine/src/envelope/schema.ts`.
 
-Type-only exports erase at runtime, so a future patch-engine operation can be added to `PatchOperation` and `OperationKind` without forcing the MCP schema-introspection manifest to update. The machine-facing schema path should not rely on a manually mirrored operation vocabulary.
+Type-only exports erase at runtime, so a future patch-engine operation could have been added to `PatchOperation` and `OperationKind` without forcing the MCP schema-introspection manifest to update. The machine-facing schema path should not rely on a manually mirrored operation vocabulary.
 
 ## Assumption Reassessment (2026-05-01)
 
-1. `tools/world-mcp/src/tools/describe-envelope-schema.ts` defines a runtime `OPERATION_KINDS` tuple and derives its local `OperationKind` type from that tuple.
-2. `tools/patch-engine/src/envelope/schema.ts` currently owns the `OperationKind` type union and `PatchOperation` union, but does not expose a runtime operation-kind tuple.
+1. At reassessment, `tools/world-mcp/src/tools/describe-envelope-schema.ts` defined a runtime `OPERATION_KINDS` tuple and derived its local `OperationKind` type from that tuple.
+2. At reassessment, `tools/patch-engine/src/envelope/schema.ts` owned the `OperationKind` type union and `PatchOperation` union, but did not expose a runtime operation-kind tuple.
 3. The shared boundary under audit is patch-engine operation vocabulary -> world-mcp envelope schema introspection.
 4. `docs/FOUNDATIONS.md` Tooling Recommendation requires agents to use machine-readable interfaces rather than prose-only contracts; a drift-prone manual manifest weakens that contract.
 5. This ticket does not change canon-write ordering, approval-token verification, HARD-GATE semantics, Mystery Reserve handling, or any world-level canon file.
 6. `tickets/PATCHENG-001-converge-inv-ids-verifier-and-per-op-check.md` and `tickets/PATCHENG-002-validate-patch-plan-cli-parity.md` mention schema introspection as out of scope, but they do not own operation-kind runtime manifest parity.
 7. Adjacent contradiction classified as future cleanup: ENGINESYNC-003 is complete and archive-ready, but the new introspection surface exposed that operation-kind vocabulary should have one runtime authority.
+8. Reassessment also found a second patch-engine-local runtime vocabulary in `tools/patch-engine/src/envelope/validate.ts`; because it validates the same operation-kind surface, this ticket owns replacing that private set with the exported patch-engine tuple.
+9. `tools/world-mcp/node_modules/@worldloom/patch-engine` is a symlink to `../../../patch-engine`, so the consumer proof only needs a patch-engine build before the world-mcp build; no copied dependency refresh was required.
 
 ## Architecture Check
 
@@ -55,11 +57,14 @@ Update or add tests proving the schema manifest still includes every operation k
 ## Files to Touch
 
 - `tools/patch-engine/src/envelope/schema.ts` (modify)
+- `tools/patch-engine/src/envelope/validate.ts` (modify)
 - `tools/patch-engine/src/apply.ts` (modify)
+- `tools/patch-engine/README.md` (modify)
 - `tools/world-mcp/src/tools/describe-envelope-schema.ts` (modify)
 - `tools/world-mcp/tests/tools/describe-envelope-schema.test.ts` (modify)
-- `tools/world-mcp/tests/server/dispatch.test.ts` (modify if imports or expected names change)
-- `tools/world-mcp/tests/server/list-tools.test.ts` (modify only if inventory assertions require refresh)
+- `tools/world-mcp/src/server.ts` (modify)
+- `tools/world-mcp/tests/server/dispatch.test.ts` (verified; no source edit required)
+- `tools/world-mcp/tests/server/list-tools.test.ts` (verified; no source edit required)
 
 ## Out of Scope
 
@@ -87,7 +92,7 @@ Update or add tests proving the schema manifest still includes every operation k
 ### New/Modified Tests
 
 1. `tools/world-mcp/tests/tools/describe-envelope-schema.test.ts` — verify the manifest and filtered schema path consume the patch-engine-owned operation-kind tuple.
-2. `tools/world-mcp/tests/server/dispatch.test.ts` — keep dispatch coverage for the introspection tool if import or export shape changes.
+2. `tools/world-mcp/tests/server/dispatch.test.ts` — existing dispatch coverage remains valid for the introspection tool; no source edit was required.
 3. `None in world content — this is package-runtime manifest work and does not touch canon records.`
 
 ### Commands
@@ -95,3 +100,29 @@ Update or add tests proving the schema manifest still includes every operation k
 1. `cd tools/patch-engine && npm test`
 2. `cd tools/world-mcp && npm run build`
 3. `cd tools/world-mcp && node --test dist/tests/tools/describe-envelope-schema.test.js dist/tests/server/dispatch.test.js dist/tests/server/list-tools.test.js`
+
+## Outcome
+
+Completed on 2026-05-01.
+
+- Added `OPERATION_KINDS` as the exported runtime operation manifest in `tools/patch-engine/src/envelope/schema.ts` and derived `OperationKind` from that tuple.
+- Replaced the patch-engine envelope validator's private operation-kind set with a `Set` built from the exported tuple.
+- Re-exported `OPERATION_KINDS` from the patch-engine public entrypoint and documented it in `tools/patch-engine/README.md`.
+- Updated `tools/world-mcp` schema introspection and server registration to import the runtime manifest from `@worldloom/patch-engine` instead of carrying a local duplicate.
+- Updated the focused schema-introspection test so its expected operation list also comes from `@worldloom/patch-engine`.
+
+## Verification Result
+
+1. `cd tools/patch-engine && npm test` — passed; package build plus 50 tests passed.
+2. `cd tools/world-mcp && npm run build` — passed.
+3. `cd tools/world-mcp && node --test dist/tests/tools/describe-envelope-schema.test.js dist/tests/server/dispatch.test.js dist/tests/server/list-tools.test.js` — passed; 3 compiled test files passed.
+4. `cd tools/world-mcp && npm test` — passed; package build plus 218 tests passed.
+5. `rg -n "export const OPERATION_KINDS|const OPERATION_KINDS|OPERATION_KINDS = \\[|OPERATION_KIND_SET|from \\\"@worldloom/patch-engine\\\"|from \\\"\\.\\/tools\\/describe-envelope-schema\\\"" tools/patch-engine/src tools/world-mcp/src tools/world-mcp/tests` — confirmed the only runtime tuple definition is in `tools/patch-engine/src/envelope/schema.ts`; `world-mcp` imports the manifest from the patch-engine package.
+6. `git diff --check` — passed.
+
+## Deviations
+
+- `tools/patch-engine/src/envelope/validate.ts` was added to the file set because reassessment found it had the same operation-kind vocabulary as a private validation set.
+- `tools/patch-engine/README.md` was added to the file set because the package public surface now includes `OPERATION_KINDS`.
+- `tools/world-mcp/tests/server/dispatch.test.ts` and `tools/world-mcp/tests/server/list-tools.test.ts` did not require source edits; the existing compiled tests still prove dispatch and inventory after the server import moved.
+- Ignored package artifacts were present before verification: `tools/patch-engine/dist/`, `tools/patch-engine/node_modules/`, `tools/world-mcp/.secret`, `tools/world-mcp/dist/`, and `tools/world-mcp/node_modules/`. `dist/` was rebuilt by the verification commands; the ignored paths are expected package artifacts, not ticket-owned source.

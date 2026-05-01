@@ -1,21 +1,6 @@
-import type { OperationKind, PatchPlanEnvelope } from "./schema.js";
+import { OPERATION_KINDS, type OperationKind, type PatchPlanEnvelope } from "./schema.js";
 
-const OPERATION_KINDS = new Set<OperationKind>([
-  "create_cf_record",
-  "create_ch_record",
-  "create_inv_record",
-  "create_m_record",
-  "create_oq_record",
-  "create_ent_record",
-  "create_sec_record",
-  "update_record_field",
-  "append_extension",
-  "append_touched_by_cf",
-  "append_modification_history_entry",
-  "append_adjudication_record",
-  "append_character_record",
-  "append_diegetic_artifact_record"
-]);
+const OPERATION_KIND_SET = new Set<OperationKind>(OPERATION_KINDS);
 
 export type EnvelopeValidationResult =
   | { ok: true; envelope: PatchPlanEnvelope }
@@ -60,7 +45,7 @@ function validatePatches(patches: unknown[], targetWorld: unknown, errors: strin
       return;
     }
 
-    if (typeof patch.op !== "string" || !OPERATION_KINDS.has(patch.op as OperationKind)) {
+    if (typeof patch.op !== "string" || !OPERATION_KIND_SET.has(patch.op as OperationKind)) {
       errors.push(`${prefix}.op must be a supported operation kind`);
     }
 

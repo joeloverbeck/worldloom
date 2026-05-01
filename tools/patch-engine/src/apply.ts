@@ -33,6 +33,7 @@ export type {
   ValidatorRunReceipt
 } from "./envelope/schema.js";
 
+export { OPERATION_KINDS } from "./envelope/schema.js";
 export { canonicalOpHash } from "./approval/verify-token.js";
 
 export type PreApplyValidatorSuccess = { ok: true; validators_run?: ValidatorRunReceipt[] };

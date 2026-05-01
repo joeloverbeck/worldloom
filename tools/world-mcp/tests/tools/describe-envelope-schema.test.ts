@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  describeEnvelopeSchema,
-  OPERATION_KINDS
-} from "../../src/tools/describe-envelope-schema";
+import { OPERATION_KINDS } from "@worldloom/patch-engine";
+
+import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
 
 test("describeEnvelopeSchema returns the full envelope and every operation schema", async () => {
   const manifest = await describeEnvelopeSchema({});
