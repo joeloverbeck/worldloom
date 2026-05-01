@@ -20,18 +20,19 @@ Seed nodes are derived from the brief: Phase 0 inputs that name a region, settle
 
 ## Context-packet-too-large fallback
 
-The packet now enforces `token_budget` strictly per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement: under budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports the dropped layers in `response.truncation_summary` so the consumer can fetch the dropped node-ids via `mcp__worldloom__get_record` / `mcp__worldloom__get_record_field` rather than via overflow-to-file.
+The packet enforces `token_budget` and the serialized-response ceiling (`task_header.harness_ceiling_chars`, default 80000) per `docs/CONTEXT-PACKET-CONTRACT.md` §Budget Enforcement: under budget pressure the assembler drops layers in priority order (`impact_surfaces` → `scoped_local_context` → `exact_record_links` → `governing_world_context`) and reports the dropped layers in `response.truncation_summary` so the consumer can fetch the dropped node-ids via `mcp__worldloom__get_record` / `mcp__worldloom__get_record_field` rather than via overflow-to-file.
 
-This fallback covers the two cases the new contract surfaces:
+This fallback covers the three cases the contract surfaces:
 
-- the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (the common case for mature worlds at default budget);
+- the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (expected for broad seeds in mature worlds, and recoverable through targeted retrieval);
 - the packet returns `packet_incomplete_required_classes` because even `local_authority` cannot fit (the rare case — typically a malformed seed or an unusually large authority-bearing record).
+- the packet's serialized response exceeds the MCP transport's inline limit and is redirected to a persisted-output file (now rare at the default budget; it usually signals an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling).
 
 In either case, do NOT silently proceed without world-state load. Apply this three-step fallback in order:
 
 **Step 1 — Reduce seed nodes and retry, or honor the suggested retry budget.** Narrow `seed_nodes` to the 3–5 most-cited records in the brief (the named CFs the brief explicitly references, the named place's SEC-GEO record, the named institution's SEC-INS record). Retry the packet call. If `packet_incomplete_required_classes` was returned, retry at `response.details.retry_with.token_budget`. If the retry fits with empty `truncation_summary`, proceed normally.
 
-**Step 2 — Direct-Read root files + per-record retrieval for dropped layers.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires):
+**Step 2 — Direct-Read root files + per-record retrieval for dropped layers.** If `truncation_summary.dropped_layers` is still non-empty after Step 1 (or `packet_incomplete_required_classes` still fires, or the rare persisted-output redirect fires):
 
 - `Read docs/FOUNDATIONS.md` (Canon Layers + Rules + CF schema).
 - `Read worlds/<world-slug>/WORLD_KERNEL.md`.
@@ -49,7 +50,7 @@ In either case, do NOT silently proceed without world-state load. Apply this thr
 
 The dossier-trace shortcut is canon-safe because dossier records are append-only and the world-state reconciliation between dossier-generation-time and artifact-generation-time is bounded to canon mutations recorded in the change log. If the artifact-date significantly precedes or postdates the dossier's generation date AND substantive canon mutations have landed in between, retrieve those mutations explicitly via `mcp__worldloom__list_records(record_type='change_log_entry')` filtered to the relevant interval.
 
-**Audit-trail discipline.** When the fallback fires, record in frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet exceeded inline at minimum seed scope; loaded WORLD_KERNEL.md + ONTOLOGY.md + per-record `get_record` for the cited CF / M / INV ids; dossier-trace shortcut Step 3 covered Phase 7 firewall coverage from CHAR-NNNN.world_consistency"*). The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via dossier trace, per-record retrieval, or `search_nodes`), not from the packet alone.
+**Audit-trail discipline.** When the fallback fires, record in frontmatter `notes` under a *"Context-packet fallback"* line which step(s) executed (e.g., *"Context-packet fallback: Step 2 fired — packet dropped governing-world-context at default budget; loaded WORLD_KERNEL.md + ONTOLOGY.md + per-record `get_record` for cited CF / M / INV ids; dossier-trace shortcut Step 3 covered Phase 7 firewall coverage from CHAR-NNNN.world_consistency"*). If the rare persisted-output redirect fires, mention the persisted-output recovery path explicitly. The fallback preserves Phase 7 firewall completeness because the eventual list of MR-ids checked still derives from the world's full M-record set (via dossier trace, per-record retrieval, or `search_nodes`), not from the packet alone.
 
 ## Targeted record retrieval (during reasoning)
 
