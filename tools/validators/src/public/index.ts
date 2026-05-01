@@ -23,6 +23,11 @@ export type {
 
 export type { PatchPlanEnvelope };
 
+export {
+  EPISTEMIC_PROFILE_REQUIRED_TYPES,
+  EXCEPTION_GOVERNANCE_REQUIRED_TYPES
+} from "../structural/record-schema-compliance.js";
+
 export async function validatePatchPlan(envelope: PatchPlanEnvelope): Promise<{
   verdicts: import("./types.js").Verdict[];
   executions: import("./types.js").ValidatorExecution[];

@@ -12,7 +12,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 ## Phase 0-2: Normalize, Scope, Invariants
 
 - `mcp__worldloom__get_record(record_id)` for every CF / M / OQ / SEC id the proposal cites directly or indirectly. Do not reason from context-packet previews alone when validating a proposal's claim about existing canon.
-- `mcp__worldloom__get_record_schema(node_type)` as a one-time discovery call when the record class is unfamiliar. Use it before drafting or repairing records whose constraints are easy to misremember, such as `pre_figured_by`'s `CF-NNNN` pattern.
+- `mcp__worldloom__get_record_schema(node_type)` before drafting or repairing structured records whose constraints are easy to misremember, such as `pre_figured_by`'s `CF-NNNN` pattern or CF taxonomy rules that require `epistemic_profile` / `exception_governance` blocks.
 - `mcp__worldloom__find_named_entities(names)` for pre-figuring scans of named entities the proposal commits, filtered to `node_type` values relevant to character or diegetic-artifact records. This searches canonical entity names, entity aliases, scoped-reference display names, and scoped-reference aliases; it does not scan prose bodies.
 - Pair `find_named_entities` with `mcp__worldloom__search_nodes(query, exhaustive: true)` when the target string may appear only inside section, diegetic-artifact, character, or adjudication prose. Exhaustive `search_nodes` exercises the lexical layer as an audit scan rather than a best-N relevance search.
 
