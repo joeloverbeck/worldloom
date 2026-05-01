@@ -1,5 +1,8 @@
 import {
   CANONICAL_DOMAINS,
+  CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
+  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
+  CF_TYPE_VALUES,
   CHANGE_TYPE_VALUES,
   ENTITY_KIND_VALUES,
   INVARIANT_CATEGORY_VALUES,
@@ -21,7 +24,8 @@ export const VOCABULARY_CLASSES = [
   "entity_kind",
   "sec_file_class",
   "change_type",
-  "revision_difficulty"
+  "revision_difficulty",
+  "cf_type"
 ] as const;
 
 export type VocabularyClass = (typeof VOCABULARY_CLASSES)[number];
@@ -35,9 +39,16 @@ export interface VocabularyCoupling {
   rule: string;
 }
 
+export interface PerValueCoupling {
+  value: string;
+  requires_epistemic_profile: boolean;
+  requires_exception_governance: boolean;
+}
+
 export interface GetCanonicalVocabularyResponse {
   canonical_values: string[];
   coupling?: VocabularyCoupling;
+  per_value_coupling?: PerValueCoupling[];
 }
 
 function isVocabularyClass(value: string): value is VocabularyClass {
@@ -78,5 +89,18 @@ export async function getCanonicalVocabulary(
       return { canonical_values: [...CHANGE_TYPE_VALUES] };
     case "revision_difficulty":
       return { canonical_values: [...REVISION_DIFFICULTY_VALUES] };
+    case "cf_type":
+      return {
+        canonical_values: [...CF_TYPE_VALUES],
+        coupling: {
+          field: "type",
+          rule: "Types in CF_TYPE_EPISTEMIC_PROFILE_REQUIRED require populated epistemic_profile. Types in CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED additionally require populated exception_governance. Validator: record_schema_compliance."
+        },
+        per_value_coupling: CF_TYPE_VALUES.map((value) => ({
+          value,
+          requires_epistemic_profile: (CF_TYPE_EPISTEMIC_PROFILE_REQUIRED as readonly string[]).includes(value),
+          requires_exception_governance: (CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED as readonly string[]).includes(value)
+        }))
+      };
   }
 }
