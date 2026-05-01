@@ -179,6 +179,15 @@ const PROTECTED_SURFACES = [
   "audits/"
 ] as const;
 
+const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> = {
+  canon_addition: ["invariant", "mystery_reserve_entry", "open_question_entry"],
+  character_generation: ["invariant", "mystery_reserve_entry"],
+  diegetic_artifact_generation: ["invariant", "mystery_reserve_entry"],
+  propose_new_canon_facts: ["invariant", "mystery_reserve_entry", "open_question_entry"],
+  propose_new_characters: ["invariant"],
+  canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"]
+};
+
 const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
   "EVERYDAY_LIFE",
   "PEOPLES_AND_SPECIES",
@@ -277,35 +286,38 @@ function findFirewallNodeIds(
     .filter((nodeId): nodeId is string => nodeId !== null);
 }
 
-function findAllSafetyRequiredNodeIds(
+function findAllNodesByTypes(
   db: Database.Database,
   worldSlug: string,
+  nodeTypes: readonly string[],
   reasonPrefix: string
 ): Array<{ node_id: string; reason: string }> {
+  if (nodeTypes.length === 0) {
+    return [];
+  }
+
   const rows = db
     .prepare(
       `
         SELECT node_id, node_type
         FROM nodes
         WHERE world_slug = ?
-          AND node_type IN ('invariant', 'mystery_reserve_entry')
+          AND node_type IN (${nodeTypes.map(() => "?").join(", ")})
         ORDER BY
           CASE node_type
             WHEN 'invariant' THEN 0
             WHEN 'mystery_reserve_entry' THEN 1
-            ELSE 2
+            WHEN 'open_question_entry' THEN 2
+            ELSE 3
           END,
           node_id
       `
     )
-    .all(worldSlug) as Array<{ node_id: string; node_type: string }>;
+    .all(worldSlug, ...nodeTypes) as Array<{ node_id: string; node_type: string }>;
 
   return rows.map((row) => ({
     node_id: row.node_id,
-    reason:
-      row.node_type === "mystery_reserve_entry"
-        ? `${reasonPrefix} requires every Mystery Reserve firewall record`
-        : `${reasonPrefix} requires every invariant record`
+    reason: `${reasonPrefix} requires every ${row.node_type} governing record`
   }));
 }
 
@@ -517,8 +529,18 @@ export async function buildGoverningWorldContext(
     addReason(orderedNodeIds, reasons, nodeId, `${taskType} governing file required by FOUNDATIONS`);
   }
 
-  if (taskType === "character_generation" || taskType === "emergent_pressure_events") {
-    for (const row of findAllSafetyRequiredNodeIds(db, worldSlug, taskType)) {
+  const governingAtomicNodeTypes = GOVERNING_ATOMIC_NODE_TYPES[taskType] ?? [];
+  for (const row of findAllNodesByTypes(db, worldSlug, governingAtomicNodeTypes, taskType)) {
+    addReason(orderedNodeIds, reasons, row.node_id, row.reason);
+  }
+
+  if (taskType === "emergent_pressure_events") {
+    for (const row of findAllNodesByTypes(
+      db,
+      worldSlug,
+      ["invariant", "mystery_reserve_entry"],
+      taskType
+    )) {
       addReason(orderedNodeIds, reasons, row.node_id, row.reason);
     }
   }

@@ -1,6 +1,7 @@
 import { NODE_TYPES, type NodeType } from "@worldloom/world-index/public/types";
 
 import { assembleContextPacket, type ContextPacket } from "../context-packet/assemble";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import {
   DEFAULT_DELIVERY_MODE,
   DELIVERY_MODES,
@@ -52,7 +53,7 @@ function assertValidArgs(args: GetContextPacketArgs): void {
   }
 }
 
-export async function getContextPacket(
+async function getContextPacketImpl(
   args: GetContextPacketArgs
 ): Promise<ContextPacket | McpError> {
   assertValidArgs(args);
@@ -66,3 +67,5 @@ export async function getContextPacket(
     ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes })
   });
 }
+
+export const getContextPacket = withIndexFreshnessGuard(getContextPacketImpl);

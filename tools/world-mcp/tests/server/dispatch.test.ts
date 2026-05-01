@@ -9,6 +9,8 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { TASK_TYPES } from "../../src/ranking/profiles";
 import { createServer, ID_CLASSES } from "../../src/server";
 import { MCP_TOOL_NAMES } from "../../src/tool-names";
+import { VOCABULARY_CLASSES } from "../../src/tools/get-canonical-vocabulary";
+import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema";
 import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
@@ -429,6 +431,77 @@ test("EPE id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("get_canonical_vocabulary accepts every registered vocabulary class through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    for (const vocabularyClass of VOCABULARY_CLASSES) {
+      const result = await client.callTool({
+        name: MCP_TOOL_NAMES.get_canonical_vocabulary,
+        arguments: { class: vocabularyClass }
+      });
+
+      assert.notEqual(result.isError, true);
+      const structured = result.structuredContent as { canonical_values?: string[] };
+      assert.ok(Array.isArray(structured.canonical_values));
+      assert.ok(structured.canonical_values.length > 0);
+    }
+  });
+});
+
+test("get_record_schema accepts every registered node type through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    for (const nodeType of SUPPORTED_RECORD_SCHEMA_NODE_TYPES) {
+      const result = await client.callTool({
+        name: MCP_TOOL_NAMES.get_record_schema,
+        arguments: { node_type: nodeType }
+      });
+
+      assert.notEqual(result.isError, true);
+      const structured = result.structuredContent as {
+        node_type?: string;
+        schema?: { $id?: string };
+        source_path?: string;
+        required_fields?: string[];
+        conditional_blocks?: Record<string, unknown>;
+      };
+      assert.equal(structured.node_type, nodeType);
+      assert.ok(structured.schema?.$id);
+      assert.match(structured.source_path ?? "", /^tools\/validators\/src\/schemas\//);
+      assert.ok(Array.isArray(structured.required_fields));
+      assert.ok(structured.conditional_blocks);
+    }
+  });
+});
+
+test("get_record_schema exposes canon safety conditional blocks through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.get_record_schema,
+      arguments: { node_type: "canon_fact_record" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      conditional_blocks?: {
+        epistemic_profile?: { required_for_types?: string[] };
+        exception_governance?: { required_for_types?: string[] };
+      };
+    };
+
+    assert.deepEqual(structured.conditional_blocks?.exception_governance?.required_for_types, [
+      "capability",
+      "bloodline",
+      "magic_practice",
+      "technology",
+      "divine_action",
+      "artifact_dependent_truth",
+      "exception_introducing_fact"
+    ]);
+    assert.ok(
+      structured.conditional_blocks?.epistemic_profile?.required_for_types?.includes("knowledge_asymmetric_fact")
+    );
+  });
+});
+
 test("pipeline-scoped id classes reject non-pipeline world slugs at the MCP handler boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -499,6 +572,12 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums?.id_class, [...ID_CLASSES]);
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums?.task_type, [...TASK_TYPES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
+      ...VOCABULARY_CLASSES
+    ]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums?.node_type, [
+      ...SUPPORTED_RECORD_SCHEMA_NODE_TYPES
+    ]);
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);

@@ -1,5 +1,6 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -89,7 +90,7 @@ function withFullBody(row: RecordRow, record: ParsedRecord): ListedFullBodyRecor
   };
 }
 
-export async function listRecords(args: ListRecordsArgs): Promise<ListRecordsResponse | McpError> {
+async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsResponse | McpError> {
   if (!isSupportedRecordType(args.record_type)) {
     return createMcpError("invalid_input", `record_type '${args.record_type}' is not supported.`, {
       field: "record_type",
@@ -139,3 +140,5 @@ export async function listRecords(args: ListRecordsArgs): Promise<ListRecordsRes
     opened.db.close();
   }
 }
+
+export const listRecords = withIndexFreshnessGuard(listRecordsImpl);

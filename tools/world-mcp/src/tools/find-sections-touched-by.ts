@@ -1,5 +1,6 @@
 import YAML from "yaml";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -77,7 +78,7 @@ function classifySectionMatch(row: SectionCandidateRow, cfId: string): SectionMa
   return matches;
 }
 
-export async function findSectionsTouchedBy(
+async function findSectionsTouchedByImpl(
   args: FindSectionsTouchedByArgs
 ): Promise<FindSectionsTouchedByResponse | McpError> {
   if (!CF_ID_PATTERN.test(args.cf_id)) {
@@ -116,3 +117,5 @@ export async function findSectionsTouchedBy(
     opened.db.close();
   }
 }
+
+export const findSectionsTouchedBy = withIndexFreshnessGuard(findSectionsTouchedByImpl);

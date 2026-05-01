@@ -4,6 +4,18 @@ import { queryCanonFacts } from "./_shared/rule-utils.js";
 
 const VALIDATOR = "rule5_no_consequence_evasion";
 
+const SEC_FILE_CLASS_PREFIXES: Readonly<Record<string, string>> = {
+  EVERYDAY_LIFE: "SEC-ELF-",
+  INSTITUTIONS: "SEC-INS-",
+  MAGIC_OR_TECH_SYSTEMS: "SEC-MTS-",
+  GEOGRAPHY: "SEC-GEO-",
+  ECONOMY_AND_RESOURCES: "SEC-ECR-",
+  PEOPLES_AND_SPECIES: "SEC-PAS-",
+  TIMELINE: "SEC-TML-"
+};
+
+const SEC_FILE_CLASSES = Object.keys(SEC_FILE_CLASS_PREFIXES);
+
 export const rule5NoConsequenceEvasion: Validator = {
   name: VALIDATOR,
   severity_mode: "fail",
@@ -27,7 +39,7 @@ export const rule5NoConsequenceEvasion: Validator = {
             validator: VALIDATOR,
             severity: "fail",
             code: "rule5.required_update_not_patched",
-            message: `${cf.id} requires ${fileClass}, but the patch plan has no matching SEC operation`,
+            message: requiredUpdateNotPatchedMessage(cf.id, fileClass),
             location: { file: patchTargetFile(patch, cf.id), node_id: cf.id }
           });
         }
@@ -141,18 +153,13 @@ function hasMatchingPatchForFileClass(patches: PatchInfo[], fileClass: string): 
 }
 
 function sectionIdMatchesFileClass(recordId: string, fileClass: string): boolean {
-  const prefixes: Readonly<Record<string, string>> = {
-    EVERYDAY_LIFE: "SEC-ELF-",
-    INSTITUTIONS: "SEC-INS-",
-    MAGIC_OR_TECH_SYSTEMS: "SEC-MTS-",
-    GEOGRAPHY: "SEC-GEO-",
-    ECONOMY_AND_RESOURCES: "SEC-ECR-",
-    PEOPLES_AND_SPECIES: "SEC-PAS-",
-    TIMELINE: "SEC-TML-"
-  };
-  return recordId.startsWith(prefixes[fileClass] ?? "\u0000");
+  return recordId.startsWith(SEC_FILE_CLASS_PREFIXES[fileClass] ?? "\u0000");
 }
 
 function patchTargetFile(patch: PatchInfo, fallbackId: string): string {
   return patch.target_file ?? patch.target_record_id ?? patch.target_node_id ?? fallbackId;
+}
+
+function requiredUpdateNotPatchedMessage(cfId: string, fileClass: string): string {
+  return `${cfId}.required_world_updates contains '${fileClass}'; only the seven SEC file classes are permissible (${SEC_FILE_CLASSES.join(", ")}). For non-SEC mutations (invariant extensions, mystery-reserve entries, open-question entries, modification_history appends), use CH.downstream_updates[] free prose; required_world_updates is reserved for SEC file classes the patch plan must touch via append_touched_by_cf or append_extension on a SEC record.`;
 }

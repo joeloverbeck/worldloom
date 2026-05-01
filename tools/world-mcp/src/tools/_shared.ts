@@ -305,87 +305,115 @@ function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
 }
 
+function combineShapeErrors(errors: McpError[]): McpError | null {
+  const [first, ...additionalErrors] = errors;
+  if (first === undefined) {
+    return null;
+  }
+  if (additionalErrors.length === 0) {
+    return first;
+  }
+
+  return createMcpError(first.code, first.message, {
+    ...(first.details ?? {}),
+    additional_errors: additionalErrors
+  });
+}
+
 export function validatePatchPlanEnvelopeShape(plan: unknown): McpError | null {
   if (!isRecord(plan)) {
     return invalidInput("patch_plan must be an object.", "patch_plan");
   }
 
+  const errors: McpError[] = [];
+
   if (!isNonEmptyString(plan.plan_id)) {
-    return invalidInput("patch_plan.plan_id must be a non-empty string.", "patch_plan.plan_id");
+    errors.push(invalidInput(
+      "patch_plan.plan_id must be a non-empty string.",
+      "patch_plan.plan_id"
+    ));
   }
 
   if (!isNonEmptyString(plan.target_world)) {
-    return invalidInput(
+    errors.push(invalidInput(
       "patch_plan.target_world must be a non-empty string.",
       "patch_plan.target_world"
-    );
+    ));
   }
 
   if (!isNonEmptyString(plan.approval_token)) {
-    return invalidInput(
+    errors.push(invalidInput(
       "patch_plan.approval_token must be a non-empty string.",
       "patch_plan.approval_token"
-    );
+    ));
   }
 
   if (!isNonEmptyString(plan.verdict)) {
-    return invalidInput("patch_plan.verdict must be a non-empty string.", "patch_plan.verdict");
+    errors.push(invalidInput(
+      "patch_plan.verdict must be a non-empty string.",
+      "patch_plan.verdict"
+    ));
   }
 
   if (!isNonEmptyString(plan.originating_skill)) {
-    return invalidInput(
+    errors.push(invalidInput(
       "patch_plan.originating_skill must be a non-empty string.",
       "patch_plan.originating_skill"
-    );
+    ));
   }
 
   if (!isRecord(plan.expected_id_allocations)) {
-    return invalidInput(
+    errors.push(invalidInput(
       "patch_plan.expected_id_allocations must be an object.",
       "patch_plan.expected_id_allocations"
-    );
+    ));
   }
 
   if (!Array.isArray(plan.patches) || plan.patches.length === 0) {
-    return invalidInput(
+    errors.push(invalidInput(
       "patch_plan.patches must be a non-empty array.",
       "patch_plan.patches"
-    );
+    ));
+    return combineShapeErrors(errors);
   }
 
   for (const [index, patch] of plan.patches.entries()) {
     if (!isRecord(patch)) {
-      return invalidInput(`patch_plan.patches[${index}] must be an object.`, `patch_plan.patches[${index}]`);
+      errors.push(invalidInput(
+        `patch_plan.patches[${index}] must be an object.`,
+        `patch_plan.patches[${index}]`
+      ));
+      continue;
     }
 
     if (!isNonEmptyString(patch.op)) {
-      return invalidInput(
+      errors.push(invalidInput(
         `patch_plan.patches[${index}].op must be a non-empty string.`,
         `patch_plan.patches[${index}].op`
-      );
+      ));
     }
 
     if (!isNonEmptyString(patch.target_world)) {
-      return invalidInput(
+      errors.push(invalidInput(
         `patch_plan.patches[${index}].target_world must be a non-empty string.`,
         `patch_plan.patches[${index}].target_world`
-      );
+      ));
     }
 
     if (!isNonEmptyString(patch.target_file)) {
-      return invalidInput(
+      errors.push(invalidInput(
         `patch_plan.patches[${index}].target_file must be a non-empty string.`,
         `patch_plan.patches[${index}].target_file`
-      );
+      ));
     }
 
     if (!("payload" in patch)) {
-      return invalidInput(
+      errors.push(invalidInput(
         `patch_plan.patches[${index}].payload is required.`,
         `patch_plan.patches[${index}].payload`
-      );
+      ));
     }
   }
 
-  return null;
+  return combineShapeErrors(errors);
 }

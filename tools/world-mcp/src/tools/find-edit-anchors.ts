@@ -1,3 +1,4 @@
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -23,7 +24,7 @@ function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
 }
 
-export async function findEditAnchors(
+async function findEditAnchorsImpl(
   args: FindEditAnchorsArgs
 ): Promise<FindEditAnchorsResponse | McpError> {
   const opened = openIndexDb(args.world_slug);
@@ -68,3 +69,5 @@ export async function findEditAnchors(
     opened.db.close();
   }
 }
+
+export const findEditAnchors = withIndexFreshnessGuard(findEditAnchorsImpl);

@@ -11,6 +11,7 @@ import type {
 } from "@worldloom/world-index/public/types";
 
 import { openIndexDb } from "../db";
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { createMcpError, type McpError } from "../errors";
 
 import { listIndexedWorldSlugs } from "./_shared";
@@ -398,7 +399,7 @@ function enumerateValidPaths(parts: HybridFileParts): string[] {
   return paths;
 }
 
-export async function getRecord(args: GetRecordArgs): Promise<GetRecordResponse | McpError> {
+async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | McpError> {
   const idError = validateRecordId(args.record_id);
   if (idError !== null) {
     return idError;
@@ -478,3 +479,5 @@ export async function getRecord(args: GetRecordArgs): Promise<GetRecordResponse 
     file_path: resolved.row.file_path
   };
 }
+
+export const getRecord = withIndexFreshnessGuard(getRecordImpl);

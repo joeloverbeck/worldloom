@@ -1,5 +1,6 @@
 import type { NodeType } from "@worldloom/world-index/public/types";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -56,7 +57,7 @@ function findMissingNodeId(
   return nodeIds.find((nodeId) => !present.has(nodeId)) ?? null;
 }
 
-export async function findImpactedFragments(
+async function findImpactedFragmentsImpl(
   args: FindImpactedFragmentsArgs
 ): Promise<FindImpactedFragmentsResponse | McpError> {
   const opened = openIndexDb(args.world_slug);
@@ -155,3 +156,5 @@ export async function findImpactedFragments(
     opened.db.close();
   }
 }
+
+export const findImpactedFragments = withIndexFreshnessGuard(findImpactedFragmentsImpl);

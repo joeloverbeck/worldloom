@@ -1,3 +1,4 @@
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { createMcpError, type McpError } from "../errors";
 
 import {
@@ -57,7 +58,7 @@ function projectField(record: unknown, fieldPath: Array<string | number>): unkno
   return current;
 }
 
-export async function getRecordField(
+async function getRecordFieldImpl(
   args: GetRecordFieldArgs
 ): Promise<GetRecordFieldResponse | McpError> {
   const idError = validateRecordId(args.record_id);
@@ -86,3 +87,5 @@ export async function getRecordField(
     file_path: resolved.row.file_path
   };
 }
+
+export const getRecordField = withIndexFreshnessGuard(getRecordFieldImpl);

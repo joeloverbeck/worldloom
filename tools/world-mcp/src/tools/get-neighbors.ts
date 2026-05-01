@@ -1,5 +1,6 @@
 import type { EdgeType, NodeType } from "@worldloom/world-index/public/types";
 
+import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
@@ -125,7 +126,7 @@ function loadNeighborNodes(
     .sort((left, right) => left.node_id.localeCompare(right.node_id));
 }
 
-export async function getNeighbors(args: GetNeighborsArgs): Promise<NeighborGraph | McpError> {
+async function getNeighborsImpl(args: GetNeighborsArgs): Promise<NeighborGraph | McpError> {
   const resolved = resolveNodeWorld(args.node_id, args.world_slug);
   if ("code" in resolved) {
     return resolved;
@@ -200,3 +201,5 @@ export async function getNeighbors(args: GetNeighborsArgs): Promise<NeighborGrap
     opened.db.close();
   }
 }
+
+export const getNeighbors = withIndexFreshnessGuard(getNeighborsImpl);

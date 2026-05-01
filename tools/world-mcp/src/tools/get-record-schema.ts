@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import {
+  EPISTEMIC_PROFILE_REQUIRED_TYPES,
+  EXCEPTION_GOVERNANCE_REQUIRED_TYPES
+} from "@worldloom/validators";
+
 import { createMcpError, type McpError } from "../errors";
 
 type JsonObject = { [key: string]: JsonValue };
@@ -16,7 +21,8 @@ export const SUPPORTED_RECORD_SCHEMA_NODE_TYPES = [
   "section",
   "character_record",
   "diegetic_artifact_record",
-  "adjudication_record"
+  "adjudication_record",
+  "extension_entry"
 ] as const;
 
 export type SupportedRecordSchemaNodeType = (typeof SUPPORTED_RECORD_SCHEMA_NODE_TYPES)[number];
@@ -26,9 +32,12 @@ export interface GetRecordSchemaArgs {
 }
 
 export interface GetRecordSchemaResponse {
+  node_type: SupportedRecordSchemaNodeType;
   schema: JsonObject;
   source_path: string;
   referenced_schemas: Record<string, JsonObject>;
+  required_fields: string[];
+  conditional_blocks: Record<string, JsonValue>;
 }
 
 const NODE_TYPE_TO_SCHEMA_FILE: Record<SupportedRecordSchemaNodeType, string> = {
@@ -41,7 +50,8 @@ const NODE_TYPE_TO_SCHEMA_FILE: Record<SupportedRecordSchemaNodeType, string> = 
   section: "section.schema.json",
   character_record: "character-frontmatter.schema.json",
   diegetic_artifact_record: "diegetic-artifact-frontmatter.schema.json",
-  adjudication_record: "adjudication-frontmatter.schema.json"
+  adjudication_record: "adjudication-frontmatter.schema.json",
+  extension_entry: "_shared/extension-entry.schema.json"
 };
 
 const schemaCache = new Map<string, JsonObject>();
@@ -160,6 +170,27 @@ function collectReferencedSchemas(
   return referencedSchemas;
 }
 
+function requiredFields(schema: JsonObject): string[] {
+  return Array.isArray(schema.required)
+    ? schema.required.filter((field): field is string => typeof field === "string")
+    : [];
+}
+
+function conditionalBlocks(nodeType: SupportedRecordSchemaNodeType): Record<string, JsonValue> {
+  if (nodeType !== "canon_fact_record") {
+    return {};
+  }
+
+  return {
+    epistemic_profile: {
+      required_for_types: [...EPISTEMIC_PROFILE_REQUIRED_TYPES]
+    },
+    exception_governance: {
+      required_for_types: [...EXCEPTION_GOVERNANCE_REQUIRED_TYPES]
+    }
+  };
+}
+
 export async function getRecordSchema(
   args: GetRecordSchemaArgs
 ): Promise<GetRecordSchemaResponse | McpError> {
@@ -175,8 +206,11 @@ export async function getRecordSchema(
   const schema = parseJsonSchema(schemaPath);
 
   return {
+    node_type: args.node_type,
     schema,
     source_path: path.join("tools", "validators", "src", "schemas", schemaFile),
-    referenced_schemas: collectReferencedSchemas(schemaRoot, schema)
+    referenced_schemas: collectReferencedSchemas(schemaRoot, schema),
+    required_fields: requiredFields(schema),
+    conditional_blocks: conditionalBlocks(args.node_type)
   };
 }

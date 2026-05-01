@@ -138,6 +138,48 @@ test("rule5_no_consequence_evasion ignores non-SEC append_extension targets", as
   assert.deepEqual(verdicts.map((verdict) => verdict.code), ["rule5.required_update_not_patched"]);
 });
 
+test("rule5_no_consequence_evasion explains that required_world_updates is SEC-only", async () => {
+  const verdicts = await rule5NoConsequenceEvasion.run(
+    {},
+    {
+      ...testContext([]),
+      run_mode: "pre-apply",
+      patch_plan: {
+        patches: [
+          {
+            op: "create_cf_record",
+            target_world: "test",
+            target_file: "_source/canon/CF-0001.yaml",
+            payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INVARIANTS"] } }
+          },
+          {
+            op: "append_extension",
+            target_world: "test",
+            target_file: "_source/invariants/ONT-2.yaml",
+            payload: {
+              target_record_id: "ONT-2",
+              extension: {
+                originating_cf: "CF-0001",
+                change_id: "CH-0001",
+                date: "2026-04-26",
+                label: "Invariant extension",
+                body: "Extension body."
+              }
+            }
+          }
+        ]
+      } as unknown as PatchPlanEnvelope
+    }
+  );
+
+  assert.equal(verdicts.length, 1);
+  assert.match(verdicts[0]!.message, /only the seven SEC file classes are permissible/);
+  for (const [fileClass] of secClassCases) {
+    assert.match(verdicts[0]!.message, new RegExp(fileClass));
+  }
+  assert.match(verdicts[0]!.message, /CH\.downstream_updates\[\]/);
+});
+
 test("rule5_no_consequence_evasion is pre-apply only", () => {
   assert.equal(rule5NoConsequenceEvasion.applies_to(testContext([])), false);
 });
