@@ -81,15 +81,7 @@ For staged validator/schema/parser details, prefer `references/validator-schema-
 
 When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
 
-For validator, audit, or live-corpus baseline tickets, run the smallest truthful live-corpus probe before coding when acceptance claims zero findings or a clean baseline. Classify every finding as validator/tool bug, current-ticket cleanup, or pre-existing corpus baseline for a named bootstrap/audit owner; do not suppress real findings or force stale zero-fail acceptance when the live corpus truthfully exposes existing defects. For schema/parser migration specifics, apply `references/validator-schema-migrations.md`.
-
-For spec or validator capstone tickets whose verification matrix mixes package-mechanized surfaces with skill-flow-only scenarios, classify each scenario during reassessment as `mechanized`, `surrogate`, `manual/organic`, or `dropped from capstone`. Do not invoke expensive skill flows or fabricate skill harnesses unless the ticket explicitly owns that surface. Truth the active ticket and same-seam spec/status docs so the final closeout distinguishes validator/pre-apply proof from skill-flow/manual verification.
-
-When a validator, audit, or live-corpus baseline ticket claims grandfathering, waiver rows, allowlists, or other disposition metadata can change the command's pass/fail result, verify the live validator/CLI actually consumes that mechanism before accepting it as an acceptance path. If the mechanism is only persisted audit data and emitted verdicts are recomputed independently, keep the findings visible, rewrite the active ticket to the truthful baseline/proof seam, and route real cleanup or policy implementation to a separate owner.
-
-If a validator grandfathering, waiver, baseline, or allowlist mechanism is implemented in a shared validator runner, also prove that pre-apply and other hard-gate paths remain fail-closed unless the ticket explicitly owns weakening that gate. A full-world bootstrap disposition must not accidentally downgrade engine pre-apply failures, Hook failures, or other canon-mutation gate verdicts.
-
-For explicit validator grandfathering policies, require an auditable minimum shape before treating the policy as real: stable disposition id, human rationale, exact validator name, exact code, exact file path, optional node id, and exact original message or another equivalently collision-resistant finding key. The implementation must downgrade only exact matched findings, preserve the finding as a queryable emitted verdict such as `info`, avoid DB-only insertion as the source of truth, and leave unmatched/new findings as failures.
+For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, or validator capstone tickets, apply the focused live-corpus, disposition-policy, fail-closed, and mechanized-vs-manual scenario guidance in `references/validator-schema-migrations.md`.
 
 ### 1. Load the ticket context
 

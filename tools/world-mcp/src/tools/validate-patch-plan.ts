@@ -14,7 +14,7 @@ export interface ValidatePatchPlanArgs {
 export type ValidatePatchPlanResponse =
   | { status: "pass"; verdicts: Verdict[] }
   | { status: "fail"; verdicts: Verdict[] }
-  | { status: "skipped"; reason: string; verdicts: [] };
+  | { status: "skipped"; reason: string; verdicts: []; details?: Record<string, unknown> };
 
 function invalidInput(message: string, field: string): McpError {
   return createMcpError("invalid_input", message, { field });
@@ -29,6 +29,14 @@ export async function validatePatchPlan(
 
   const shapeError = validatePatchPlanEnvelopeShape(args.patch_plan);
   if (shapeError !== null) {
+    if (shapeError.details !== undefined && "additional_errors" in shapeError.details) {
+      return {
+        status: "skipped",
+        reason: shapeError.message,
+        verdicts: [],
+        details: shapeError.details
+      };
+    }
     return { status: "skipped", reason: shapeError.message, verdicts: [] };
   }
 

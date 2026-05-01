@@ -127,3 +127,29 @@ test("validatePatchPlan returns skipped for an empty patch list before validator
     verdicts: []
   });
 });
+
+test("validatePatchPlan preserves additional envelope-shape errors on skipped responses", async () => {
+  const plan = buildValidPatchPlan();
+  plan.patches = [
+    { op: "", target_world: "seeded", target_file: "", payload: {} },
+    { op: "create_sec_record", target_world: "", target_file: "_source/institutions/SEC-INS-001.yaml" }
+  ] as unknown as ReturnType<typeof buildValidPatchPlan>["patches"];
+
+  const result = await validatePatchPlan({ patch_plan: plan });
+
+  assert.ok("status" in result);
+  assert.equal(result.status, "skipped");
+  assert.equal(result.reason, "patch_plan.patches[0].op must be a non-empty string.");
+  assert.ok(result.details !== undefined);
+  assert.equal(result.details.field, "patch_plan.patches[0].op");
+  assert.deepEqual(
+    (result.details.additional_errors as Array<{ details?: { field?: string } }>).map(
+      (entry) => entry.details?.field
+    ),
+    [
+      "patch_plan.patches[0].target_file",
+      "patch_plan.patches[1].target_world",
+      "patch_plan.patches[1].payload"
+    ]
+  );
+});

@@ -146,7 +146,7 @@ The patch engine and retrieval tools surface these failure modes; map each to th
 
 | Code | Meaning | Response |
 |---|---|---|
-| `invalid_input` | Envelope or op field missing / malformed (e.g., empty `approval_token`, missing `target_file`, missing `payload`). The error's `details.field` names the offending path. | Fix the envelope; re-validate. The signed approval token does NOT need to be re-signed if the envelope content does not change — but if the envelope IS changed, re-sign before submit. |
+| `invalid_input` | Envelope or op field missing / malformed (e.g., empty `approval_token`, missing `target_file`, missing `payload`). The error's `details.field` names the first offending path. When multiple shape errors are present, `details.additional_errors[]` lists the remaining invalid-input errors for the same call. | Fix the envelope; re-validate. The signed approval token does NOT need to be re-signed if the envelope content does not change — but if the envelope IS changed, re-sign before submit. |
 | `envelope_shape_invalid` | Same family as `invalid_input`; structural shape rejected before per-op validation. | Same as `invalid_input`. |
 | `target_file_missing` / `target_file_outside_world` | Op's `target_file` is empty, missing, or escapes the world root (or for hybrid-file ops, doesn't start with the expected directory prefix). | Fix the op's `target_file` per §2; re-validate. |
 | `op_target_class_mismatch` | Typed payload key (e.g., `cf_record`) doesn't match `op` kind (e.g., `create_inv_record`). | Fix the op's payload key to match the op kind; re-validate. |
