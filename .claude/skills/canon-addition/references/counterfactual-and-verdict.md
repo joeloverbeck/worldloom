@@ -104,6 +104,8 @@ The `append_adjudication_record` op carries the SPEC-14 PA frontmatter (`pa_id`,
 
 ## Phase 14a Tests 11/12/13 Detailed Criteria
 
+For mechanical-layer checklist entries, use `validate_patch_plan` / `validate-patch-plan` response `validators_run[]` as the run-confirmation source. Each entry carries `validator_name`, `status`, `duration_ms`, and optional `detail`; a `skipped` envelope-shape response has an empty `validators_run[]` and must be repaired before checklist PASS claims are recorded.
+
 ### Test 11: Action-Space Integrity
 
 Applies when the CF introduces or depends on exceptional capability: bloodline power, high-leverage artifact, magical or technical discipline, divine action, or another fact that lets a narrow actor set decide outcomes ordinary actors could not normally decide.

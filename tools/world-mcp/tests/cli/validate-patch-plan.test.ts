@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -10,7 +9,6 @@ import { validatePatchPlan } from "../../src/tools/validate-patch-plan";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
-const CLI_SCRIPT = path.join(REPO_ROOT, "tools", "world-mcp", "dist", "src", "cli", "validate-patch-plan.js");
 
 function buildValidPatchPlan() {
   return {
@@ -109,11 +107,18 @@ test("cli-validate-patch-plan: CLI delegates pass results to the same validate h
 
     const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
     const mcpResult = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+    const cliPayload = JSON.parse(cliResult.stdout);
 
     assert.equal(cliResult.exitCode, 0);
     assert.equal(cliResult.stderr, "");
-    assert.deepEqual(JSON.parse(cliResult.stdout), mcpResult);
-    assert.deepEqual(mcpResult, { status: "pass", verdicts: [] });
+    assert.ok("status" in mcpResult);
+    assert.equal(cliPayload.status, mcpResult.status);
+    assert.deepEqual(cliPayload.verdicts, mcpResult.verdicts);
+    assert.deepEqual(stableValidatorRunShape(cliPayload.validators_run), stableValidatorRunShape(mcpResult.validators_run));
+    assert.equal(mcpResult.status, "pass");
+    assert.deepEqual(mcpResult.verdicts, []);
+    assert.ok(Array.isArray(mcpResult.validators_run));
+    assert.ok(mcpResult.validators_run.length > 0);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
     destroyTempRepoRoot(root);
@@ -131,12 +136,17 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on validator f
 
     const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
     const mcpResult = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+    const cliPayload = JSON.parse(cliResult.stderr);
 
     assert.equal(cliResult.exitCode, 1);
     assert.equal(cliResult.stdout, "");
-    assert.deepEqual(JSON.parse(cliResult.stderr), mcpResult);
     assert.ok("status" in mcpResult);
+    assert.equal(cliPayload.status, mcpResult.status);
+    assert.deepEqual(cliPayload.verdicts, mcpResult.verdicts);
+    assert.deepEqual(stableValidatorRunShape(cliPayload.validators_run), stableValidatorRunShape(mcpResult.validators_run));
     assert.equal(mcpResult.status, "fail");
+    assert.ok(Array.isArray(mcpResult.validators_run));
+    assert.ok(mcpResult.validators_run.some((entry) => entry.status === "fail"));
   } finally {
     rmSync(tmp, { recursive: true, force: true });
     destroyTempRepoRoot(root);
@@ -156,40 +166,35 @@ test("cli-validate-patch-plan: CLI exits 1 and prints skipped status for malform
     const status = JSON.parse(cliResult.stderr) as { status: string; reason?: string };
     assert.equal(status.status, "skipped");
     assert.match(status.reason ?? "", /patch_plan\.patches\[0\]\.target_file/);
+    assert.deepEqual((status as { validators_run?: unknown[] }).validators_run, []);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
 });
 
-test("cli-validate-patch-plan: --help prints usage to stdout and exits 0", () => {
-  const result = spawnSync("node", [CLI_SCRIPT, "--help"], {
-    encoding: "utf8"
-  });
+test("cli-validate-patch-plan: --help prints usage to stdout and exits 0", async () => {
+  const result = await runValidatePatchPlanCli(["--help"]);
 
-  assert.equal(result.status, 0);
+  assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /Usage: validate-patch-plan/);
   assert.equal(result.stderr, "");
 });
 
-test("cli-validate-patch-plan: missing plan path exits 2", () => {
-  const result = spawnSync("node", [CLI_SCRIPT], {
-    encoding: "utf8"
-  });
+test("cli-validate-patch-plan: missing plan path exits 2", async () => {
+  const result = await runValidatePatchPlanCli([]);
 
-  assert.equal(result.status, 2);
+  assert.equal(result.exitCode, 2);
   assert.equal(result.stdout, "");
   assert.match(result.stderr, /<plan-path> is required/);
 });
 
-test("cli-validate-patch-plan: nonexistent plan file exits 1", () => {
+test("cli-validate-patch-plan: nonexistent plan file exits 1", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = path.join(tmp, "missing.json");
-    const result = spawnSync("node", [CLI_SCRIPT, planPath], {
-      encoding: "utf8"
-    });
+    const result = await runValidatePatchPlanCli([planPath]);
 
-    assert.equal(result.status, 1);
+    assert.equal(result.exitCode, 1);
     assert.equal(result.stdout, "");
     assert.match(result.stderr, /Failed to read plan file/);
     assert.match(result.stderr, /ENOENT/);
@@ -198,19 +203,37 @@ test("cli-validate-patch-plan: nonexistent plan file exits 1", () => {
   }
 });
 
-test("cli-validate-patch-plan: malformed JSON exits 1", () => {
+test("cli-validate-patch-plan: malformed JSON exits 1", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = path.join(tmp, "plan.json");
     writeFileSync(planPath, "{not-json", "utf8");
-    const result = spawnSync("node", [CLI_SCRIPT, planPath], {
-      encoding: "utf8"
-    });
+    const result = await runValidatePatchPlanCli([planPath]);
 
-    assert.equal(result.status, 1);
+    assert.equal(result.exitCode, 1);
     assert.equal(result.stdout, "");
     assert.match(result.stderr, /is not valid JSON/);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+function stableValidatorRunShape(
+  entries: Array<{ validator_name: string; status: string; duration_ms: number; detail?: string }>
+): Array<{ validator_name: string; status: string; detail?: string }> {
+  assert.ok(Array.isArray(entries));
+  for (const entry of entries) {
+    assert.equal(typeof entry.duration_ms, "number");
+    assert.ok(entry.duration_ms >= 0);
+  }
+  return entries.map((entry) => {
+    const stable: { validator_name: string; status: string; detail?: string } = {
+      validator_name: entry.validator_name,
+      status: entry.status
+    };
+    if (entry.detail !== undefined) {
+      stable.detail = entry.detail;
+    }
+    return stable;
+  });
+}

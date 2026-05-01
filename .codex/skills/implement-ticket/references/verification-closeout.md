@@ -35,6 +35,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - For TS packages that run tests from compiled output such as `dist/tests/*.test.js`, treat new test-time file reads as part of the proof contract: verify that fixtures, SQL files, and other disk reads resolve from the compiled test runtime, or anchor them explicitly from the source tree / repo root.
 - For atomic-source `world-index` tickets, confirm `world-index verify` understands synthetic logical rows before using it as acceptance proof. If it treats retired root markdown paths as disk paths or otherwise reports atomic-mode drift, use `build`, focused validators, and direct DB checks as the truthful proof surface, then record the verify limitation.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
+- If a broad package suite rebuilds successfully and the owned focused compiled tests pass, but the broad suite still exits non-zero, classify the failure before closeout instead of forcing the broad lane. Name the exact unrelated failing test files or subtests, the diagnostic command used to isolate them, and the focused owned proof command that remains the ticket's truthful acceptance surface in `## Deviations` / `## Verification Result`.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
 
