@@ -27,10 +27,12 @@ import {
   resolveHarnessCeilingChars,
   uniqueStrings,
   type ContextPacket,
+  type ContextPacketGoverningSummary,
   type ContextPacketNode,
   type ContextPacketTruncationSummary,
   type DeliveryMode
 } from "./shared";
+import { persistContextPacket } from "./persistence";
 
 export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
 export type { ContextPacket, ContextPacketArgs } from "./shared";
@@ -72,7 +74,8 @@ function makeEmptyPacket(args: {
       full_body_classes_delivered: [],
       harness_ceiling_chars: args.harnessCeilingChars,
       estimator_version: CONTEXT_PACKET_ESTIMATOR_VERSION,
-      packet_version: DEFAULT_PACKET_VERSION
+      packet_version: DEFAULT_PACKET_VERSION,
+      delivery_status: "inline"
     },
     local_authority: {
       nodes: [],
@@ -101,6 +104,78 @@ function makeEmptyPacket(args: {
     },
     truncation_summary: makeEmptyTruncationSummary()
   };
+}
+
+function clonePacket(packet: ContextPacket): ContextPacket {
+  return JSON.parse(JSON.stringify(packet)) as ContextPacket;
+}
+
+function allPacketNodes(packet: ContextPacket): ContextPacketNode[] {
+  return [
+    ...packet.local_authority.nodes,
+    ...packet.exact_record_links.nodes,
+    ...packet.scoped_local_context.nodes,
+    ...packet.governing_world_context.nodes,
+    ...packet.impact_surfaces.nodes
+  ];
+}
+
+function groupNodeIdsByClass(nodes: readonly ContextPacketNode[]): Record<string, string[]> {
+  const grouped: Record<string, string[]> = {};
+  for (const node of nodes) {
+    grouped[node.node_type] ??= [];
+    grouped[node.node_type]!.push(node.id);
+  }
+  return Object.fromEntries(
+    Object.entries(grouped).map(([nodeType, ids]) => [nodeType, uniqueStrings(ids)])
+  );
+}
+
+function buildGoverningSummary(packet: ContextPacket): ContextPacketGoverningSummary {
+  const nodes = allPacketNodes(packet);
+  return {
+    active_rules: [...packet.governing_world_context.active_rules],
+    protected_surfaces: [...packet.governing_world_context.protected_surfaces],
+    prohibited_moves: [...packet.governing_world_context.prohibited_moves],
+    required_output_schema: [...packet.governing_world_context.required_output_schema],
+    open_risk_ids: uniqueStrings(
+      packet.governing_world_context.open_risks
+        .map((risk) => risk.node_id)
+        .filter((nodeId): nodeId is string => nodeId !== null)
+    ),
+    invariant_ids: uniqueStrings(
+      nodes.filter((node) => node.node_type === "invariant").map((node) => node.id)
+    ),
+    seed_relevant_cf_ids: uniqueStrings(
+      nodes.filter((node) => node.node_type === "canon_fact_record").map((node) => node.id)
+    ),
+    dropped_node_ids_by_class: groupNodeIdsByClass(nodes)
+  };
+}
+
+function buildFastSummaryPacket(packet: ContextPacket, persistedOutputPath: string): ContextPacket {
+  const summary = clonePacket(packet);
+  summary.task_header.delivery_status = "persisted_with_summary";
+  summary.task_header.persisted_output_path = persistedOutputPath;
+  summary.task_header.full_body_classes_delivered = [];
+  summary.governing_summary = buildGoverningSummary(packet);
+
+  summary.local_authority.nodes = [];
+  summary.exact_record_links.nodes = [];
+  summary.scoped_local_context.nodes = [];
+  summary.governing_world_context.nodes = [];
+  summary.impact_surfaces.nodes = [];
+
+  summary.truncation_summary = {
+    dropped_layers: [],
+    dropped_node_ids_by_layer: {},
+    fallback_advice:
+      "Full packet body persisted at task_header.persisted_output_path. Use mcp__worldloom__get_persisted_packet_slice for structured slice extraction, or mcp__worldloom__get_record / mcp__worldloom__get_records for individual records by id."
+  };
+
+  const allocated = estimateStablePacketSize(summary);
+  summary.task_header.token_budget.allocated = allocated;
+  return summary;
 }
 
 function isLayerEmpty(packet: ContextPacket, layer: DroppableLayer): boolean {
@@ -305,6 +380,18 @@ export async function assembleContextPacket(args: {
     );
 
     applyClassFilter(packet, args.node_classes);
+
+    const fullPacketChars = estimateStablePacketChars(packet);
+    if (fullPacketChars > harnessCeilingChars) {
+      const persistedPacket = clonePacket(packet);
+      persistedPacket.task_header.delivery_status = "inline";
+      persistedPacket.task_header.token_budget.allocated = estimateStablePacketSize(persistedPacket);
+      const persistedOutputPath = persistContextPacket(persistedPacket);
+      const summaryPacket = buildFastSummaryPacket(packet, persistedOutputPath);
+      if (estimatePacketChars(summaryPacket) <= harnessCeilingChars) {
+        return summaryPacket;
+      }
+    }
 
     enforceBudget(packet, args.token_budget, harnessCeilingChars);
 

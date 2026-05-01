@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import { assembleContextPacket } from "../../src/context-packet/assemble";
@@ -61,7 +63,15 @@ function seedHarnessCeilingWorld(root: string): void {
         node_type: "scoped_reference",
         body: "Harrowgate",
         summary: "Harrowgate."
-      }
+      },
+      ...Array.from({ length: 20 }, (_, index) => ({
+        node_id: `CF-${String(index + 1).padStart(4, "0")}`,
+        world_slug: "seeded",
+        file_path: `_source/canon/CF-${String(index + 1).padStart(4, "0")}.yaml`,
+        node_type: "canon_fact_record" as const,
+        body: `id: CF-${String(index + 1).padStart(4, "0")}\ntitle: Large linked fact ${index}\n`,
+        summary: largeSummary
+      }))
     ],
     edges: [
       {
@@ -78,7 +88,12 @@ function seedHarnessCeilingWorld(root: string): void {
         source_node_id: "DA-0002",
         target_node_id: "seeded:GEOGRAPHY.md:Harrowgate:0",
         edge_type: "required_world_update"
-      }
+      },
+      ...Array.from({ length: 20 }, (_, index) => ({
+        source_node_id: "DA-0002",
+        target_node_id: `CF-${String(index + 1).padStart(4, "0")}`,
+        edge_type: "references_record" as const
+      }))
     ],
     scopedReferences: [
       {
@@ -93,10 +108,12 @@ function seedHarnessCeilingWorld(root: string): void {
   });
 }
 
-test("assembler drops layers until the serialized packet fits the configured harness ceiling", async () => {
+test("assembler emits a persisted full packet plus inline summary when the full packet exceeds the harness ceiling", async () => {
   const root = createTempRepoRoot();
   const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
-  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "4500";
+  const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "8000";
+  process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = path.join(root, "tool-results");
 
   try {
     seedHarnessCeilingWorld(root);
@@ -111,25 +128,36 @@ test("assembler drops layers until the serialized packet fits the configured har
     );
 
     assert.ok(!("code" in result), `expected packet response, got ${"code" in result ? result.code : "n/a"}`);
-    assert.equal(result.task_header.harness_ceiling_chars, 4500);
+    assert.equal(result.task_header.harness_ceiling_chars, 8000);
+    assert.equal(result.task_header.delivery_status, "persisted_with_summary");
     assert.equal(result.task_header.estimator_version, "chars-per-token-v1");
+    assert.equal(typeof result.task_header.persisted_output_path, "string");
     assert.ok(
       JSON.stringify(result).length <= result.task_header.harness_ceiling_chars,
       "serialized response must fit the configured harness ceiling"
     );
+    assert.ok(result.governing_summary);
+    assert.deepEqual(result.governing_summary.active_rules, result.governing_world_context.active_rules);
+    assert.ok(result.governing_summary.dropped_node_ids_by_class.section?.length);
+    assert.deepEqual(result.local_authority.nodes, []);
+    assert.ok(existsSync(result.task_header.persisted_output_path!));
+
+    const persisted = JSON.parse(readFileSync(result.task_header.persisted_output_path!, "utf8"));
+    assert.equal(persisted.task_header.delivery_status, "inline");
     assert.ok(
-      result.truncation_summary.dropped_layers.length > 0,
-      "character-ceiling pressure must record layer drops"
-    );
-    assert.ok(
-      result.truncation_summary.dropped_layers.includes("impact_surfaces"),
-      "lower-priority impact surfaces should drop under character-ceiling pressure"
+      JSON.stringify(persisted).length > result.task_header.harness_ceiling_chars,
+      "persisted full packet should be the oversize body that the summary replaces"
     );
   } finally {
     if (originalCeiling === undefined) {
       delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
     } else {
       process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+    if (originalResultsDir === undefined) {
+      delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+    } else {
+      process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
     }
     destroyTempRepoRoot(root);
   }

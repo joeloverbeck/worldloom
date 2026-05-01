@@ -49,6 +49,19 @@ export interface ContextPacketTruncationSummary {
   }>;
 }
 
+export type ContextPacketDeliveryStatus = "inline" | "persisted_with_summary";
+
+export interface ContextPacketGoverningSummary {
+  active_rules: string[];
+  protected_surfaces: string[];
+  prohibited_moves: string[];
+  required_output_schema: string[];
+  open_risk_ids: string[];
+  invariant_ids: string[];
+  seed_relevant_cf_ids: string[];
+  dropped_node_ids_by_class: Record<string, string[]>;
+}
+
 export interface ContextPacket {
   task_header: {
     task_type: TaskType;
@@ -63,6 +76,8 @@ export interface ContextPacket {
     harness_ceiling_chars: number;
     estimator_version: string;
     packet_version: 2;
+    delivery_status: ContextPacketDeliveryStatus;
+    persisted_output_path?: string;
   };
   local_authority: {
     nodes: ContextPacketNode[];
@@ -89,11 +104,12 @@ export interface ContextPacket {
     nodes: ContextPacketNode[];
     rationale: string[];
   };
+  governing_summary?: ContextPacketGoverningSummary;
   truncation_summary: ContextPacketTruncationSummary;
 }
 
 export const TRUNCATION_FALLBACK_ADVICE =
-  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id) or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
+  "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
 
 export const DEFAULT_PACKET_VERSION = 2 as const;
 export const DEFAULT_HARNESS_CEILING_CHARS = 80000;

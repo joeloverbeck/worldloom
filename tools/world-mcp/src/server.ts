@@ -22,6 +22,7 @@ import { getCanonicalVocabulary, VOCABULARY_CLASSES } from "./tools/get-canonica
 import { getContextPacket } from "./tools/get-context-packet";
 import { getFirewallContent } from "./tools/get-firewall-content";
 import { getNeighbors } from "./tools/get-neighbors";
+import { getPersistedPacketSlice } from "./tools/get-persisted-packet-slice";
 import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
@@ -102,6 +103,11 @@ const getRecordInputSchema = z.object({
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
   world_slug: z.string().min(1).optional()
+});
+
+const getPersistedPacketSliceInputSchema = z.object({
+  persisted_path: z.string().min(1),
+  slice_path: z.string().min(1)
 });
 
 const listRecordsInputSchema = z.object({
@@ -289,6 +295,12 @@ export function createServer(): McpServer {
     "get_records: Fetch multiple records by id in one call. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
     getRecordsInputSchema,
     async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
+  );
+  registerToolWithCapability(
+    "get_persisted_packet_slice",
+    "get_persisted_packet_slice: Read a structured dot-path slice from a package-persisted full context packet emitted by get_context_packet delivery_status='persisted_with_summary'.",
+    getPersistedPacketSliceInputSchema,
+    async (args) => getPersistedPacketSlice(args as unknown as Parameters<typeof getPersistedPacketSlice>[0])
   );
   registerToolWithCapability(
     "list_records",
