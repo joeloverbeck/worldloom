@@ -38,7 +38,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 
 ## Phase 14a: Validation
 
-- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. Treat any failure as a loop-back to the phase that produced the bad field or missing update.
+- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. Treat any `fail` as a loop-back to the phase that produced the bad field or missing update; treat `skipped` as envelope-shape repair before signing or submit.
 
 ## Phase 15a: Submit After HARD-GATE
 

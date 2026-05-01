@@ -97,6 +97,7 @@ Most classes are consistent across both layers — `cf_ids` uses `CF-NNNN` (4-di
 The envelope JSON itself carries an `approval_token` field, but its value at envelope-construction time is a **placeholder string** (e.g., `"placeholder"`). The real signed approval token is computed from the envelope bytes by the `sign-approval-token` CLI and passed alongside the envelope at submit time:
 
 ```bash
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/<plan-id>.json
 node tools/world-mcp/dist/src/cli/sign-approval-token.js /tmp/<plan-id>.json > /tmp/<plan-id>.token
 node tools/world-mcp/dist/src/cli/submit-patch-plan.js /tmp/<plan-id>.json /tmp/<plan-id>.token
 ```
@@ -111,16 +112,16 @@ The envelope-shape validator requires `approval_token` to be a non-empty string,
 
 ---
 
-## 5. Submit-path selection by envelope size
+## 5. Validate/submit path selection by envelope size
 
-| Envelope size | Submit path |
-|---|---|
-| ≤ 50KB | MCP path: `mcp__worldloom__submit_patch_plan(envelope, approval_token)` |
-| > 50KB (typical genesis) | CLI path: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` |
+| Envelope size | Validate path | Submit path |
+|---|---|---|
+| ≤ 50KB | MCP path: `mcp__worldloom__validate_patch_plan(envelope)` | MCP path: `mcp__worldloom__submit_patch_plan(envelope, approval_token)` |
+| > 50KB (typical genesis) | CLI path: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` | CLI path: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` |
 
-Both paths route through the same `submitPatchPlan` engine code (`tools/patch-engine/src/apply.ts`) and produce the same `PatchReceipt`. The CLI exists to bypass MCP transport size constraints for large envelopes; the genesis envelope for `create-base-world` typically lands at 80-100KB (42 ops with full prose bodies), so the CLI path is the default. See `docs/HARD-GATE-DISCIPLINE.md` §Submitting the plan: MCP path (default) and CLI path (size-constrained bypass) for the canonical write-up.
+Both validate paths route through the same `validate_patch_plan` handler and return the same `pass` / `fail` / `skipped` status object. Both submit paths route through the same `submitPatchPlan` engine code (`tools/patch-engine/src/apply.ts`) and produce the same `PatchReceipt`. The CLIs exist to bypass MCP transport size constraints for large envelopes; the genesis envelope for `create-base-world` typically lands at 80-100KB (42 ops with full prose bodies), so the CLI paths are the default for genesis validation and submit. See `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan: MCP path (default) and CLI path (size-constrained bypass) for the canonical write-up.
 
-When using the CLI path, persist the envelope JSON to `/tmp/<plan-id>.json` and the signed token to `/tmp/<plan-id>.token` (single line, base64) before invoking the CLI.
+When using the submit CLI path, persist the envelope JSON to `/tmp/<plan-id>.json` and the signed token to `/tmp/<plan-id>.token` (single line, base64) before invoking the CLI. The validate CLI requires only the envelope JSON.
 
 ---
 

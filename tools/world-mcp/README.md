@@ -45,6 +45,17 @@ The CLI reads a JSON patch-plan envelope, computes `canonicalOpHash` for every `
 
 `--expiry-minutes` defaults to 20, accommodating the 50KB+ envelopes typical of full canon-addition submissions; the engine's verifier only checks `expires_at <= now` and accepts longer windows. Override via flag or `WORLD_MCP_TOKEN_EXPIRY_MIN` env var.
 
+## Patch-plan CLIs
+
+Large patch-plan envelopes can bypass MCP transport while still using the same handler code as the MCP tools:
+
+```bash
+node dist/src/cli/validate-patch-plan.js <plan-path>
+node dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
+```
+
+`validate-patch-plan` prints the same status object as `mcp__worldloom__validate_patch_plan`: `pass` exits 0 on stdout; `fail` and `skipped` exit 1 on stderr. `submit-patch-plan` prints the same `PatchReceipt` / error family as `mcp__worldloom__submit_patch_plan`; it requires a signed approval token file.
+
 ## Configuration
 
 Registered via `.mcp.json`. See `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).
