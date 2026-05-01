@@ -54,6 +54,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Estimate downstream impact before a write | `find_impacted_fragments`, then validators |
 | Validate a patch plan envelope without mutating world content | `validate_patch_plan`, which returns `status: "pass"`, `status: "fail"` with validator verdicts, or `status: "skipped"` with a reason when the envelope cannot be validated |
 | Apply world-level changes on machine-layer-enabled worlds | `submit_patch_plan` via the patch engine |
+| Inspect the patch-plan envelope and per-op payload contract before assembly | `describe_envelope_schema`, optionally filtered by `op_kind` |
 | Prove structural integrity | `world-validate <world> --structural` |
 
 ## Retrieval Tool Scope
@@ -66,6 +67,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | `list_records` | All parsed atomic records for one supported record type. Default/projection mode supports optional top-level field projection; `record_id` is always included in projected records. `include_full_body: true` returns `{ record_id, content_hash, file_path, body }` per record and ignores `fields`. Use full-body mode for deliberate whole-class sweeps such as every invariant or every Mystery Reserve firewall block; large CF or SEC sweeps should be reserved for deliberate audit workflows. |
 | `get_record_field` | A single field of a parsed atomic record. Use when the field is small and the record body is large, such as `touched_by_cf` on a large SEC record. Reuses `get_record`'s record-resolution path. |
 | `get_record_schema` | JSON Schema for a record class plus transitively referenced schemas. Use to discover field constraints, regex patterns, enum values, and required/optional fields before authoring a record draft. |
+| `describe_envelope_schema` | JSON Schema for the `validate_patch_plan` / `submit_patch_plan` envelope plus per-op payload wrappers. Use before assembling patch plans so required transport fields such as `approval_token`, `patches[].target_file`, `expected_id_allocations`, and typed payload keys are machine-readable instead of copied from prose. |
 | `get_neighbors` | Graph edges from the indexed node/record graph. Use for ontology and locality expansion. |
 | `get_context_packet` | Ranked packet of Kernel, Invariants, relevant records, neighbors, and section context. Body previews are generally truncated and full text requires `get_record`; task-specific governing nodes may carry parsed `record` projections, such as `character_generation` invariant records and Mystery Reserve firewall fields. Omitted budgets use per-task defaults (`canon_addition` currently 16000; `propose_new_canon_facts`, `propose_new_characters`, and `emergent_pressure_events` 15000; `propose_new_worlds_from_preferences` and `canon_facts_from_diegetic_artifacts` 12000; remaining task types 8000), and incomplete-packet errors include `retry_with.token_budget`. Optional `delivery_mode: 'full' \| 'summary_only'` (default `'full'`) selects per-node payload shape — `summary_only` replaces every node's `body_preview` with a ≤100-char `summary` for "what's relevant" index passes (see `docs/CONTEXT-PACKET-CONTRACT.md` §Delivery Modes). |
 | `find_impacted_fragments` | Records and fragments likely affected by proposed changes to named nodes or CFs. Use before write assembly to catch incomplete downstream-update lists. |
@@ -78,6 +80,8 @@ The docs describe the intended steady-state contract, but any workflow should st
 ## Schema Currency Verification
 
 When source adds a new MCP enum value or tool, the running server may still be older than the checkout if `tools/world-mcp/dist/` was not rebuilt or the MCP server/client session was not restarted. Use `mcp__worldloom__describe_capabilities()` to inspect the deployed server's build metadata and enum-valued input contracts. If the deployed contract is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`.
+
+For patch-plan assembly, use `mcp__worldloom__describe_envelope_schema(op_kind?)` to retrieve the current deployed envelope and operation-payload shapes for `validate_patch_plan` and `submit_patch_plan`. This is the machine-readable path for fields that previously lived only in skill prose, such as `patch_plan.approval_token`, `patches[].target_file`, and `payload.cf_record`.
 
 ## Trust tiers
 

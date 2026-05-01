@@ -4,7 +4,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 
 **Design**: `archive/specs/SPEC-02-retrieval-mcp-server.md`
 **Phase**: 2 (read side plus SPEC-03 patch-engine delegation)
-**Status**: Stdio MCP entrypoint registers 18 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks.
+**Status**: Stdio MCP entrypoint registers 19 tools in `src/server.ts`; `validate_patch_plan` delegates to `@worldloom/validators` and returns an explicit validation status; `submit_patch_plan` delegates to `@worldloom/patch-engine`; `describe_capabilities` exposes server-start build metadata plus the deployed tool/enum contract for schema-currency checks; `describe_envelope_schema` exposes the patch-plan envelope and per-op payload schema contract for envelope assembly.
 
 ## Tools
 
@@ -25,6 +25,7 @@ MCP retrieval server exposing the world index (`tools/world-index/`) as a struct
 - `mcp__worldloom__submit_patch_plan(patch_plan, approval_token)` *(delegates to SPEC-03 `@worldloom/patch-engine`)*
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)` — allocates append-only world-scoped IDs. Most world-scoped classes allocate from the world's index; `EPE` scans `worlds/<slug>/pressure-events/EPE-*.md` directly because pressure-event cards are hybrid, pre-canon files. Pipeline-scoped proposal IDs use `world_slug: "__pipeline__"` with `id_class: "NWB"` for `world-proposals/batches/NWB-*.md` and `id_class: "NWP"` for `world-proposals/NWP-*.md`.
 - `mcp__worldloom__describe_capabilities()` — returns the running server's `build_info` (`git_commit_hash`, server-start `build_timestamp`, `source_schema_hash`) plus registered tool names, descriptions, and enum-valued input contracts such as `get_context_packet.task_type`, `allocate_next_id.id_class`, and `list_records.record_type`. Use this when a skill or ticket needs to verify the deployed MCP server accepts a newly added enum value after source changes.
+- `mcp__worldloom__describe_envelope_schema(op_kind?)` — returns the patch-plan envelope JSON Schema plus per-operation payload schemas for `validate_patch_plan` / `submit_patch_plan`. Pass an `op_kind` such as `create_cf_record` to limit the response to one operation; omit it to retrieve every current patch operation. The response cites the source contract paths and includes referenced record schemas for payload keys such as `cf_record`, `adjudication_frontmatter`, `char_record`, and `da_record`.
 
 ## Retrieval policy
 

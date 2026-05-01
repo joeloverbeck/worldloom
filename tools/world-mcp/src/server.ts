@@ -12,6 +12,7 @@ import { DELIVERY_MODES } from "./context-packet/shared";
 import { TASK_TYPES } from "./ranking/profiles";
 import { allocateNextId } from "./tools/allocate-next-id";
 import { describeCapabilities, type ToolCapability } from "./tools/describe-capabilities";
+import { describeEnvelopeSchema, OPERATION_KINDS } from "./tools/describe-envelope-schema";
 import { findEditAnchors } from "./tools/find-edit-anchors";
 import { findImpactedFragments } from "./tools/find-impacted-fragments";
 import { findNamedEntities } from "./tools/find-named-entities";
@@ -208,6 +209,12 @@ const getFirewallContentInputSchema = z.object({
 
 const describeCapabilitiesInputSchema = z.object({}).strict();
 
+const describeEnvelopeSchemaInputSchema = z
+  .object({
+    op_kind: z.enum(OPERATION_KINDS).optional()
+  })
+  .strict();
+
 function registerWrappedTool<TArgs extends Record<string, unknown>>(
   server: McpServer,
   key: ToolKey,
@@ -365,6 +372,20 @@ export function createServer(): McpServer {
     description: "Return this MCP server's startup build metadata, registered tool names, and enum-valued input contracts.",
     input_schema_enums: {}
   };
+  const describeEnvelopeCapability: ToolCapability = {
+    name: MCP_TOOL_NAMES.describe_envelope_schema,
+    description:
+      "Return the patch-plan envelope schema and per-operation payload schemas for validate_patch_plan and submit_patch_plan.",
+    input_schema_enums: { op_kind: OPERATION_KINDS }
+  };
+  registerToolWithCapability(
+    "describe_envelope_schema",
+    describeEnvelopeCapability.description,
+    describeEnvelopeSchemaInputSchema,
+    async (args) => describeEnvelopeSchema(args as unknown as Parameters<typeof describeEnvelopeSchema>[0]),
+    describeEnvelopeCapability.input_schema_enums
+  );
+
   const describedTools = [...registeredCapabilities, describeCapability];
   const buildInfo = createBuildInfo(describedTools);
   registerWrappedTool(

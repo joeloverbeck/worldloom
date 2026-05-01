@@ -2,7 +2,7 @@
 
 Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` workaround for invariants, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
 
-The canonical schema source-of-truth is `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces) plus `tools/patch-engine/src/apply.ts` (`verifyExpectedIdAllocations`); this file documents the operationally-relevant subset and the discovered workarounds.
+The canonical schema source-of-truth is the deployed `mcp__worldloom__describe_envelope_schema(op_kind?)` introspection tool, backed by `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records. This file documents the operationally-relevant subset and the discovered workarounds.
 
 ---
 
@@ -26,6 +26,8 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
 
 Every field is required. `approval_token` is a placeholder string in the JSON (see §4); the real signed token is computed from the envelope bytes and passed alongside the envelope at submit time. `verdict: "APPROVED"` is the only legal value for a `create-base-world` genesis plan. `originating_skill` is `"create-base-world"` literally.
 
+For machine-readable retrieval of the current deployed envelope shape, call `mcp__worldloom__describe_envelope_schema()`. This reference is a human-readable supplement.
+
 ---
 
 ## 2. Per-op payload shape
@@ -42,6 +44,8 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 ```
 
 Required fields: `op`, `target_world`, **`target_file`**, **`payload`**. The typed-record key (`cf_record`, `ch_record`, `inv_record`, etc.) lives **inside `payload`**, not at the op's top level. `target_file` is a relative path under `worlds/<world-slug>/`; the engine resolves it against `target_world`. No `expected_content_hash` (creates), no `expected_anchor_checksum` (atomic-record ops).
+
+For machine-readable retrieval of a current per-op payload shape, call `mcp__worldloom__describe_envelope_schema({op_kind: "create_cf_record"})` or the relevant op kind before assembly.
 
 ### File-class → directory mapping for `target_file` paths
 

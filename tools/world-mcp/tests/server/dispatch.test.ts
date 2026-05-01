@@ -310,6 +310,11 @@ test("registered tools dispatch with either a success payload or the documented 
         name: MCP_TOOL_NAMES.describe_capabilities,
         args: {},
         expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.describe_envelope_schema,
+        args: { op_kind: "create_cf_record" },
+        expectError: false
       }
     ] as const;
 
@@ -497,5 +502,51 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
+      "create_cf_record",
+      "create_ch_record",
+      "create_inv_record",
+      "create_m_record",
+      "create_oq_record",
+      "create_ent_record",
+      "create_sec_record",
+      "update_record_field",
+      "append_extension",
+      "append_touched_by_cf",
+      "append_modification_history_entry",
+      "append_adjudication_record",
+      "append_character_record",
+      "append_diegetic_artifact_record"
+    ]);
+  });
+});
+
+test("describe_envelope_schema dispatches through the MCP boundary with an op filter", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.describe_envelope_schema,
+      arguments: { op_kind: "create_cf_record" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      envelope_schema?: { properties?: Record<string, unknown> };
+      op_schemas?: Record<string, { properties?: Record<string, unknown>; required?: string[] }>;
+      referenced_schemas?: Record<string, { required?: string[] }>;
+    };
+
+    assert.ok(structured.envelope_schema?.properties?.patches);
+    assert.deepEqual(Object.keys(structured.op_schemas ?? {}), ["create_cf_record"]);
+    assert.deepEqual(structured.op_schemas?.create_cf_record?.required, [
+      "op",
+      "target_world",
+      "target_file",
+      "payload"
+    ]);
+    assert.ok(
+      structured.referenced_schemas?.["https://worldloom.local/schemas/canon-fact-record.schema.json"]?.required?.includes(
+        "required_world_updates"
+      )
+    );
   });
 });
