@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — new MCP tool in `tools/world-mcp/`; reference in `canon-addition/references/retrieval-tool-tree.md` to lose the "as a one-time discovery call" framing once it ships
-**Deps**: None (independent of WMCP-001 and WMCP-002, but conceptually adjacent)
+**Deps**: None (independent of archived siblings `archive/tickets/WMCP-001.md` and `archive/tickets/WMCP-002.md`, but conceptually adjacent)
 
 ## Problem
 
@@ -76,7 +76,7 @@ After the tool ships, edit `canon-addition/references/retrieval-tool-tree.md` li
 
 - Changing any authored-record JSON schema (this ticket exposes the existing schemas; it does not alter them).
 - Implementing `describe_envelope_schema` (sibling ticket WMCP-001).
-- Extending `get_canonical_vocabulary` enum coverage (sibling ticket WMCP-002).
+- Extending `get_canonical_vocabulary` enum coverage (archived sibling `archive/tickets/WMCP-002.md`).
 
 ## Acceptance Criteria
 

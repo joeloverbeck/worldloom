@@ -9,6 +9,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { TASK_TYPES } from "../../src/ranking/profiles";
 import { createServer, ID_CLASSES } from "../../src/server";
 import { MCP_TOOL_NAMES } from "../../src/tool-names";
+import { VOCABULARY_CLASSES } from "../../src/tools/get-canonical-vocabulary";
 import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld } from "../tools/_shared";
 
@@ -429,6 +430,22 @@ test("EPE id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("get_canonical_vocabulary accepts every registered vocabulary class through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    for (const vocabularyClass of VOCABULARY_CLASSES) {
+      const result = await client.callTool({
+        name: MCP_TOOL_NAMES.get_canonical_vocabulary,
+        arguments: { class: vocabularyClass }
+      });
+
+      assert.notEqual(result.isError, true);
+      const structured = result.structuredContent as { canonical_values?: string[] };
+      assert.ok(Array.isArray(structured.canonical_values));
+      assert.ok(structured.canonical_values.length > 0);
+    }
+  });
+});
+
 test("pipeline-scoped id classes reject non-pipeline world slugs at the MCP handler boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -499,6 +516,9 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums?.id_class, [...ID_CLASSES]);
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums?.task_type, [...TASK_TYPES]);
+    assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
+      ...VOCABULARY_CLASSES
+    ]);
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);
