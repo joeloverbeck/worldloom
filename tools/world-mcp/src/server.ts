@@ -155,7 +155,8 @@ const findSectionsTouchedByInputSchema = z.object({
 
 const findNamedEntitiesInputSchema = z.object({
   world_slug: z.string().min(1),
-  names: z.array(z.string().min(1))
+  names: z.array(z.string().min(1)),
+  node_type_filter: z.array(z.enum(NODE_TYPES)).optional()
 });
 
 const findEditAnchorsInputSchema = z.object({
@@ -351,7 +352,8 @@ export function createServer(): McpServer {
     "find_named_entities",
     "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
     findNamedEntitiesInputSchema,
-    async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0])
+    async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0]),
+    { node_type_filter: NODE_TYPES }
   );
   registerToolWithCapability(
     "find_edit_anchors",

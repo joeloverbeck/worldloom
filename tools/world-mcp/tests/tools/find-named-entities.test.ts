@@ -62,7 +62,15 @@ function buildEntityWorld(root: string): void {
         file_path: "characters/melissa-threadscar.md",
         heading_path: "Melissa Threadscar",
         node_type: "character_record",
-        body: "Melissa Threadscar keeps local names in scope."
+        body: "Melissa Threadscar keeps local names in scope near Brinewick."
+      },
+      {
+        node_id: "seeded:diegetic-artifacts/harbor-ballad.md:harbor-ballad:0",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/harbor-ballad.md",
+        heading_path: "Harbor Ballad",
+        node_type: "diegetic_artifact_record",
+        body: "The harbor ballad calls Brinewick the salt gate."
       },
       {
         node_id: "seeded:characters/melissa-threadscar.md:melissa-threadscar:0#scoped:mudbrook:0",
@@ -148,6 +156,20 @@ function buildEntityWorld(root: string): void {
         surface_text: "Brinewicker",
         resolution_kind: "unresolved",
         extraction_method: "heuristic_phrase"
+      },
+      {
+        node_id: "seeded:characters/melissa-threadscar.md:melissa-threadscar:0",
+        surface_text: "Brinewick",
+        resolved_entity_id: "entity:brinewick",
+        resolution_kind: "canonical",
+        extraction_method: "exact_canonical"
+      },
+      {
+        node_id: "seeded:diegetic-artifacts/harbor-ballad.md:harbor-ballad:0",
+        surface_text: "Brinewick",
+        resolved_entity_id: "entity:brinewick",
+        resolution_kind: "canonical",
+        extraction_method: "exact_canonical"
       }
     ]
   });
@@ -168,8 +190,79 @@ test("findNamedEntities returns canonical matches for exact names", async () => 
     assert.equal(result.canonical_matches[0]?.match_kind, "canonical_name");
     assert.equal(result.canonical_matches[0]?.canonical_name, "Brinewick");
     assert.deepEqual(result.canonical_matches[0]?.mentions_by_node_type, [
+      { node_type: "character_record", count: 1 },
+      { node_type: "diegetic_artifact_record", count: 1 },
       { node_type: "section", count: 2 }
     ]);
+    assert.deepEqual(result.scoped_matches, []);
+    assert.deepEqual(result.surface_matches, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities filters canonical mention groups by node type", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildEntityWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({
+        world_slug: "seeded",
+        names: ["Brinewick"],
+        node_type_filter: ["character_record", "diegetic_artifact_record"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.canonical_matches.length, 1);
+    assert.deepEqual(result.canonical_matches[0]?.mentions_by_node_type, [
+      { node_type: "character_record", count: 1 },
+      { node_type: "diegetic_artifact_record", count: 1 }
+    ]);
+    assert.deepEqual(result.scoped_matches, []);
+    assert.deepEqual(result.surface_matches, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities drops canonical matches with no filtered mention groups", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildEntityWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({
+        world_slug: "seeded",
+        names: ["Brinewick"],
+        node_type_filter: ["invariant"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.canonical_matches, []);
+    assert.deepEqual(result.scoped_matches, []);
+    assert.deepEqual(result.surface_matches, []);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities accepts an empty node type filter as no canonical matches", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildEntityWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({ world_slug: "seeded", names: ["Brinewick"], node_type_filter: [] })
+    );
+
+    assert.ok(!("code" in result));
+    assert.deepEqual(result.canonical_matches, []);
     assert.deepEqual(result.scoped_matches, []);
     assert.deepEqual(result.surface_matches, []);
   } finally {
