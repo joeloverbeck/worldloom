@@ -28,6 +28,7 @@ author_character_id: null                    # CHAR-NNNN if character_path was u
 date: ""                                     # world-calendar date per SEC-TML records (e.g., "Year 412 After Flood")
 place: ""                                    # ENT/SEC-GEO-bound place of production (settlement, region, or institutional site)
 audience: ""                                 # SEC-INS stratum / SEC-ELF demographic / SEC-PAS cluster (not "the public")
+scoped_references: []                        # Phase 0c output — list of cast-at-artifact-personal-scope persons who appear in the artifact but are NOT canonized as ENT records (e.g., the unnamed girl Iker walks with, the gym day-pass receptionist, the doormen). Each entry: {name, relation, kind?, aliases?}. Author-personal-scope only — NOT a vehicle for canon-creating new named entities.
 communicative_purpose: ""                    # legitimize | warn | memorialize | instruct | accuse | propitiate | narrate | contest
 desired_relation_to_truth: ""                # accurate | biased_but_mostly_true | propaganda | mythicized | fragmentary | deliberately_false_in_places
 world_relation:                              # explicit relation to canon facts; omit if relation is purely implicit in claim_map
