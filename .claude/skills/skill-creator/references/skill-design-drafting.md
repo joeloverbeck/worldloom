@@ -39,9 +39,21 @@ context — invoking this skill does not constitute approval of the deliverable 
 - <name> — <type> — <purpose>
 
 ## Output
+
+[Choose one shape based on emission semantics. Default is the Flat-list shape; use the Table shape only when the skill emits multiple record classes per invocation with conditional emission semantics.]
+
+[Flat-list shape — default; use when emission is unconditional (every invocation produces every named record) or when there is one primary artifact per invocation:]
 - <artifact> — <format>
 - <canon record> — matches FOUNDATIONS §Canon Fact Record Schema   [if canon-mutating]
 - <change log entry> — matches templates/change-log-entry.yaml     [if canon-mutating]
+
+[Table shape — use when the skill emits multiple record classes per invocation with conditional emission semantics (some classes always, some only when a triggering condition fires); the per-class conditionality is load-bearing for the runtime contract and a flat list buries it. The "Created when" column names the triggering condition explicitly:]
+| Class | File path | Created when |
+|---|---|---|
+| <Always-class> | <path-template> | Always |
+| <Conditional-class> | <path-template> | IF <triggering condition stated in skill phase prose> |
+
+[Worked precedent: branching-story-page-cycle's §Output section uses the Table shape across 14+ classes ranging from "Always" (PG-NNNN, SE-NNNN, rendered prose) to "IF Phase 4 JIT expansion fired" (SLT-NNNN) to "IF a new story-local location is introduced this turn" (STLOC-NNNN) — Flat-list would have collapsed the per-turn conditionality that maintainers need to read off the runtime contract.]
 
 ## World-State Prerequisites            [mandatory — every class]
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
@@ -67,6 +79,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
  - for non-bootstrap canon-mutating skills: verify the target world state DOES exist and required files are readable
  - for meta-with-multi-world-read skills: enumerate `worlds/*/` and assemble the cross-world read aggregate; if empty, set the degraded-mode flag (e.g., `distinctness_enforced=false`) and surface the absent-distinctness-checks signal at the HARD-GATE deliverable per the skill's design
  - for skills with monotonic-ID outputs at pipeline scope (e.g., NWP-NNNN, NWB-NNNN, or any pipeline-scoped class whose output lives at root-level rather than under `worlds/<slug>/`): allocate via `mcp__worldloom__allocate_next_id(world_slug='__pipeline__', id_class=...)`; if the index does not yet support the `__pipeline__` sentinel, fall back to a manual scan of the pipeline-scoped output directory and increment
+ - for skills with monotonic-ID outputs at sub-world scope (e.g., per-story-bundle classes like PG-NNNN / SE-NNNN / OBL-NNNN whose output lives nested under `worlds/<slug>/stories/<story-slug>/_source/<class>/` — uniqueness is per-bundle, not per-world or per-pipeline): allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)` (or the equivalent sub-world-key argument); if the allocator does not yet support the sub-world-key argument, fall back to a manual scan of the bundle subdirectory and increment per `tickets/MCPENH-011`. Distinct from world-scoped (e.g., CHAR-NNNN, AU-NNNN) which scans `worlds/<slug>/<class>/` and from pipeline-scoped (NWP-NNNN, NWB-NNNN) which uses the `__pipeline__` sentinel.
  - for skills with runtime-read supporting files declared at the gap-filler interview §"Generated skill's supporting files" (a): verify each supporting file exists and is readable (e.g., `tickets/_TEMPLATE.md`, `tickets/README.md`, validator fixtures, hook scripts) — abort with a clear missing-file error on fail
  - for skills with first-run bootstrap supporting files declared at the gap-filler interview §"Generated skill's supporting files" (b): detect bootstrap state (e.g., `<output-dir>/.gitkeep` presence, `.gitignore` containing the output-dir pattern); record `bootstrap_writes_required: true|false` in the batch manifest or equivalent; defer the bootstrap writes themselves to the gated Commit phase — never pre-write infrastructure before HARD-GATE approval
  - parse any user input files

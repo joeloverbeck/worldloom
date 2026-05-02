@@ -361,7 +361,7 @@ Generate `storylet_pool_seed_size` (default ~20) `SLT-NNNN` records under `_sour
 **Rules**:
 - Seed pool storylets carry NO `created_at_page` — they are author-pool storylets, globally visible across all branches (per the proposal's branch-isolation exception).
 - Every seed SLT must be cross-checked against the whole-class M load — its `fact_effects` may NOT resolve a `forbidden`-status M, and its `mystery_safety` is `pass` if and only if no `M_resolution_claims` carry `canon_candidate` authority.
-- **Seam**: when `storylet-pool-authoring` ships, refactor Phase 6 to delegate to its seed-mode entrypoint (`focus_area: bootstrap_mix`, `target_pool_size: <seed-size>`, `source_audit_path: null`). Until then, this skill inlines the minimal seed shape.
+- Seam: when `storylet-pool-authoring` ships, refactor Phase 6 to delegate to its seed-mode entrypoint (`focus_area: bootstrap_mix`, `target_pool_size: <seed-size>`, `source_audit_path: null`). Until then, this skill inlines the minimal seed shape.
 
 ## Phase 7: Root Page Render
 
@@ -406,15 +406,24 @@ LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — d
 
 Up to 3 re-prompts before escalating to user with the constraint failures inlined in the message.
 
-**Emit PG-0001 record** (full schema in `templates/story-records.yaml`) — `id: PG-0001`, `branch_id: BR-0001`, `parent_page_id: null`, `branch_path: [PG-0001]`, `storylet_realized`, `applied_event_ops: [SE-0001]`, `state_hash`, `prose_path: pages-prose/PG-0001.md`, `state_snapshot` (canon_revision, objective_facts, apparent_facts, disputed_facts, reader_known_facts, belief_state_by_actor, rumor_state, obligations_open, obligations_paid_off=[], consequences_pending, consequences_addressed=[], threads_active, relationships_current, intentions_current, cast_present, current_location, accessible_locations, objects_in_scope, inventory_by_entity, entity_status), `narrative_health` (open_obligation_count, high_salience_unpaid_count, average_obligation_age=0, contradiction_risk=0.0, causal_connectivity=1.0, character_motivation_coverage, unresolved_threat_pressure, recent_consequence_density=0.0, recent_reflection_density=0.0, novelty=1.0, tension, agency_score=1.0), `content_intensity`, `created_at`.
+**Emit PG-0001 record** (page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story-page-cycle` §Record Schemas §Page Record is the runtime authority) — `id: PG-0001`, `story_id`, `branch_id: BR-0001`, `parent_page_id: null`, `branch_path: [PG-0001]`, `chosen_choice_id: null`, `write_in_used: false`, `write_in_routing: null`, `storylet_realized`, `applied_event_ops: [SE-0001]`, `state_hash`, `parent_state_hash: null`, `branch_terminal: false`, `terminal_reason: null`, `prose_path: pages-prose/PG-0001.md`, `state_snapshot` (canon_revision, objective_facts, apparent_facts, disputed_facts, reader_known_facts, belief_state_by_actor, rumor_state, obligations_open, obligations_paid_off=[], obligations_complicated=[], obligations_abandoned=[], consequences_pending, consequences_addressed=[], threads_active, relationships_current, intentions_current, cast_present, current_location, accessible_locations, objects_in_scope, inventory_by_entity, entity_status), `narrative_health` (open_obligation_count, high_salience_unpaid_count, average_obligation_age=0, contradiction_risk=0.0, causal_connectivity=1.0, character_motivation_coverage, unresolved_threat_pressure, recent_consequence_density=0.0, recent_reflection_density=0.0, novelty=1.0, tension, agency_score=1.0), `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (Phase 9 gates 1-12 with one-line PASS rationales), `created_at`.
 
 **Emit BR-0001 record** — `id: BR-0001`, `root_page_id: PG-0001`, `current_leaf_page_id: PG-0001`, `forked_from_*: null`, `branch_path: [PG-0001]`, `status: active`, `canon_revision`, `created_at_page: PG-0001`, `notes: "Root branch."`.
 
-**Emit SE-0001 bootstrap event** (inline minimal SE schema — seam: refactor when `branching-story-page-cycle` defines the production op vocabulary) — `id: SE-0001`, `type: bootstrap`, `applied_ops: []`, `created_at_page: PG-0001`, `prior_state_hash: null`, `posterior_state_hash: <PG-0001.state_hash>`, `notes: "Genesis event for STORY-NNN."`.
+**Emit SE-0001 bootstrap event** (page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story-page-cycle` §Record Schemas §Story Event Record is the runtime authority) — `id: SE-0001`, `story_id`, `branch_id: BR-0001`, `created_at_page: PG-0001`, `source.parent_page_id: null`, `source.chosen_choice_id: null`, `source.write_in_text_hash: null`, `source.storylet_realized: <selected SLT id>`, `actor: system`, `action: bootstrap`, `target: null`, `instrument: null`, `preconditions_checked: []`, `ops: []`, `state_hash_before: null`, `state_hash_after: <PG-0001.state_hash>`, `notes: "Genesis event for STORY-NNN — bootstrap emission, no preceding state."`.
 
 ## Phase 8: Initial Choice Generation
 
-Inline minimal choice generation (seam: when `branching-story-page-cycle` ships its Phase 8, refactor this phase to delegate to its Amendment-B steps).
+Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline), applying the same production CHC contract to the genesis state produced by Phases 2, 3, 5, 6, and 7. Bootstrap supplies `PG-0001.state_snapshot` as the current state, the selected root storylet's `choice_templates` as anchors, and uses `governor_nudge: "bootstrap root; favor premise-aligned entry pressure and initial agency spread"`.
+
+Run the six page-cycle Phase 8 steps in order:
+
+1. Affordance Space Collection over `PG-0001.state_snapshot`.
+2. Salient-Affordance Shortlist + LLM Proposer, with the selected root storylet's `choice_templates` as anchors.
+3. Engine Validation Pass.
+4. Diversification + Scoring.
+5. Surface Label Rendering.
+6. Runtime write-in slot N+1 (not stored as CHC at bootstrap).
 
 Emit 4-6 `CHC-NNNN` records into `_source/choices/`. Required diversification:
 
@@ -423,10 +432,13 @@ Emit 4-6 `CHC-NNNN` records into `_source/choices/`. Required diversification:
 - one choice that addresses a specific **OBL** (typically a high-urgency one)
 - one choice that explores a **less-obvious path** (low-obvious-payoff but high agency)
 - one or two **diversification** slots
+- at least 3 distinct `choice_mode` values
+- at least 3 distinct `poetic_effect` values
+- across the set, engage at least 60% of currently open high-salience OBLs when enough high-salience OBLs exist
 
 The write-in slot is N+1 (handled by the runtime, not stored as CHC at bootstrap).
 
-CHC fields (full schema in `templates/story-records.yaml`): `id`, `story_id`, `page_id: PG-0001`, `label` (the user-facing prose), `intent_type` (`thread_engagement | relationship_engagement | obligation_engagement | exploration | diversification`), `engages_threads[THR]`, `engages_obligations[OBL]`, `engages_cast[STENT]`, `continuation_storylets[SLT]` (hint set — at least one continuation must be present in the seed pool OR JIT-generatable; runtime validates), `projected_consequences[]`, `content_intensity` (inherits page baseline unless explicitly overridden), `created_at`, `notes`.
+CHC fields (page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story-page-cycle` Phase 8 step 5 is the runtime authority): `id`, `story_id`, `emitted_at_page: PG-0001`, `created_at_page: PG-0001`, `operation`, `actor`, `target`, `uses_fact`, `choice_contract` (`user_intent`, `guaranteed_action`, `success_policy`, `allowed_outcome_band`, `forbidden_outcomes`, `minimum_state_change`), `likely_effects[]`, `choice_mode`, `poetic_effect`, `content_intensity_implied`, and `label` (the user-facing prose).
 
 **Consequence-capacity check**: every emitted CHC must have at least one continuation storylet (in the seed pool or marked as `jit_generatable: true` with a one-line shape spec). A CHC with no continuation is dead-end at runtime — halt and re-derive.
 
@@ -570,8 +582,9 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
   - Per-story-scoped allocator classes (STENT, SF, SE, etc.) and Hook 3 / engine-op / validator extensions are NOT scoped for this generation; they will be designed when the runtime page-cycle stabilizes the schemas. Until then, manual filesystem scan and direct `Write` are the correct mechanisms.
 - **Sibling interop**:
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
-  - **Consumes (future, not yet shipping)**: `storylet-pool-authoring` (Phase 6 delegation seam); `branching-story-page-cycle` (SE op vocabulary, CHC generation amendments); `branching-story-health-audit`; `story-fact-promotion-to-canon`.
-  - **Produces inputs for**: the future runtime / audit / promotion skills above. No existing skill consumes this skill's output today.
+  - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.
+  - **Consumes (future, not yet shipping)**: `storylet-pool-authoring` (Phase 6 delegation seam); `branching-story-health-audit`; `story-fact-promotion-to-canon`.
+  - **Produces inputs for**: `branching-story-page-cycle` and the future audit / promotion skills above.
 - **Content policy is a contract, not a setting.** The NC-21 block embedded in `templates/content-policy.txt` is the skill's discipline floor. It is embedded verbatim in STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.
 - **Do NOT commit to git.** Writes land in the working tree only; the user reviews the diff and commits.

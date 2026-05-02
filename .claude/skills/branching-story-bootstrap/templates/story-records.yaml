@@ -17,7 +17,7 @@
 #   - paid-off / addressed / archived collections are []
 #   - novelty: 1.0; causal_connectivity: 1.0; agency_score: 1.0
 #   - average_obligation_age: 0; recent_consequence_density: 0.0
-#   - parent_state_hash: null; prior_state_hash: null
+#   - parent_state_hash: null; state_hash_before: null
 ---
 # STENT-NNNN — Story Entity (mirror of world ENT or story-only)
 
@@ -85,16 +85,33 @@ evidence:
 notes: >
   ...
 ---
-# SE-NNNN — Story Event (bootstrap minimal schema; refactor when branching-story-page-cycle ships its op vocabulary)
+# SE-NNNN — Story Event (bootstrap genesis example; schema authority is branching-story-page-cycle)
 
 id: SE-0001
 story_id: STORY-0001
-type: bootstrap                          # bootstrap | choice_apply | jit_consequence | runtime_drift | page_render
-applied_ops: []                          # bootstrap has no prior state to mutate; runtime SE records carry structured ops here
+branch_id: BR-0001
 created_at_page: PG-0001
-prior_state_hash: null                   # null at bootstrap
-posterior_state_hash: ""                 # PG-0001.state_hash at bootstrap
-notes: "Genesis event for STORY-NNNN."
+
+source:
+  parent_page_id: null                   # null at genesis
+  chosen_choice_id: null                 # no prior choice
+  write_in_text_hash: null
+  storylet_realized: SLT-0001
+
+actor: system                            # STENT-NNNN | system | environment
+action: bootstrap                        # canonical verb
+target: null                             # STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract | null
+instrument: null                         # STENT-NNNN | STOBJ-NNNN | SF-NNNN | null
+
+preconditions_checked: []                # no preconditions for genesis
+
+ops: []                                  # no event ops fire at genesis; PG-0001.state_snapshot is the bedrock
+
+state_hash_before: null                  # null at bootstrap
+state_hash_after: ""                     # PG-0001.state_hash at bootstrap
+
+notes: >
+  Genesis event for STORY-0001 — bootstrap emission, no preceding state.
 ---
 # OBL-NNNN — Obligation Ledger Entry
 
@@ -289,6 +306,8 @@ branch_id: BR-0001
 parent_page_id: null
 branch_path: [PG-0001]
 chosen_choice_id: null                   # null for root page
+write_in_used: false                     # true if Path B was the route
+write_in_routing: null                   # null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
 
 storylet_realized: SLT-0001
 applied_event_ops: [SE-0001]
@@ -309,6 +328,8 @@ state_snapshot:
   rumor_state: []                        # SF ids with epistemic_class: rumor
   obligations_open: []                   # OBL ids
   obligations_paid_off: []               # [] at bootstrap
+  obligations_complicated: []            # [] at bootstrap
+  obligations_abandoned: []              # [] at bootstrap
   consequences_pending: []               # CNSQ ids
   consequences_addressed: []             # [] at bootstrap
   threads_active: []                     # THR ids
@@ -338,28 +359,53 @@ narrative_health:
   tension: 0.0                           # 0..1
   agency_score: 1.0
 
+governor_nudge_applied: "bootstrap root; no prior-page governor"
 content_intensity: mature                # tame | mature | explicit
+validation_trace:                        # Phase 9 gates 1-12 with one-line PASS rationales
+  mystery_firewall: PASS - <rationale>
+  invariant_compatibility: PASS - <rationale>
+  recursive_reference_closure: PASS - <rationale>
+  snapshot_replay_equality: PASS - <rationale>
+  id_uniqueness: PASS - <rationale>
+  content_policy_presence: PASS - <rationale>
+  prose_ledger_consistency: PASS - <rationale>
+  choice_contract_integrity: PASS - <rationale>
+  choice_consequence_capacity: PASS - <rationale>
+  state_snapshot_integrity: PASS - <rationale>
+  epistemic_class_declared: PASS - <rationale>
+  consequence_persistence: PASS - <rationale>
 created_at: <iso8601>
 ---
 # CHC-NNNN — Choice (4-6 emitted at PG-0001; write-in slot is N+1 at runtime)
 
 id: CHC-0001
 story_id: STORY-0001
-page_id: PG-0001
+emitted_at_page: PG-0001
+created_at_page: PG-0001
+
+operation: investigate                   # canonical verb from Phase 8 affordance vocabulary
+actor: STENT-0001
+target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract
+uses_fact: SF-NNNN | null
+
+choice_contract:
+  user_intent: >
+    What the player is signaling they want to accomplish.
+  guaranteed_action: >
+    What WILL definitely be attempted or performed if this choice is selected.
+  success_policy: guaranteed             # guaranteed | attempted | uncertain | opposed
+  allowed_outcome_band:
+    - succeeds
+    - partially_succeeds
+    - fails_with_consequence
+    - backfires
+  forbidden_outcomes:
+    - <outcome that would betray the label>
+  minimum_state_change:
+    - fact                              # fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
+
+likely_effects: []                       # structured effect sketches; runtime validates before commit
+choice_mode: thread_engagement           # e.g. moral | strategic | emotional | investigative | risky | self_protective
+poetic_effect: obvious                   # e.g. relaxed | obvious | dilemma | risky_truth | sacrifice | seduction | desperation | revelation
+content_intensity_implied: mature        # tame | mature | explicit
 label: ""                                # user-facing prose ("Confront the magistrate", "Walk away", etc.)
-intent_type: thread_engagement           # thread_engagement | relationship_engagement | obligation_engagement | exploration | diversification
-
-engages_threads: []                      # THR ids
-engages_obligations: []                  # OBL ids
-engages_cast: []                         # STENT ids the choice routes through
-
-continuation_storylets: []               # SLT ids — at least one must be present in seed pool OR jit_generatable: true (consequence-capacity check)
-jit_generatable: false                   # true if the runtime is expected to JIT-generate a continuation matching the listed shape spec
-jit_shape_spec: null                     # one-line shape descriptor when jit_generatable is true
-
-projected_consequences: []               # narrative-level consequence sketches (CNSQ ids if pre-installed at bootstrap; otherwise empty)
-content_intensity: mature                # inherits page baseline unless explicitly overridden
-
-created_at: <iso8601>
-notes: >
-  ...
