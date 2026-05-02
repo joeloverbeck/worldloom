@@ -59,10 +59,18 @@ Before finishing, re-read the ticket and make it truthful:
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
 - completed implementation tickets convert planned sections such as `What to Change` to landed facts; if preserving the section as the final implementation record, prefer renaming it to `Landed Changes`
+- re-read the entire ticket top-to-bottom so earlier authored sections such as `Problem`, `What to Change`, `Architecture Check`, `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, `Test Plan`, and `Invariants` do not still contain stale pre-reassessment wording
+- rewrite fixed current-state claims in `## Problem` as historical intake evidence (`At intake`, `Before this ticket`, or equivalent) so the completed record does not imply the defect still exists
+- when preserving original failure evidence, label it as historical intake evidence (`At intake`, `Observed before this ticket`, or equivalent) so the completed record does not still read as if the fixed failure is current
+- convert planned work in `What to Change`, `Acceptance Criteria`, and `Test Plan` to landed facts, or explicitly label those sections as the historical plan if preserving the original plan is necessary
+- grep or scan for draft/future-tense planning markers such as `After this ticket lands`, `should be updated`, `verify exact`, `or current`, `if applicable`, `or extend existing`, and similar placeholder phrases; rewrite same-seam hits to landed facts or remove them before final response
+- if any explicit user-supplied reference spec/doc was used as the ticket's authority, grep that reference for corrected counts, enum members, command names, paths, default tables, proof commands, risk summaries, or other reassessed claims before final closeout; update same-seam stale reference lines or record why they are outside the active ticket boundary
+- when reassessment replaces a central proof surface, run a targeted grep over the active ticket and explicit reference specs/docs for a few old anchor phrases such as stale command names, fixture names, expected error codes, count claims, zero-fail or baseline claims, old command fragments, old tool boundaries, manual-smoke lines, and verification prose; truth any same-seam hits or record why they are intentionally outside the active ticket
+- when the proof command shape changes, treat old-command cleanup as a hard closeout stop: grep the active ticket for the previous command fragment and update every same-seam occurrence in `Verification Layers`, `Acceptance Criteria`, `Test Plan`, `## Verification Result`, and `## Deviations` before final response
+- when an explicit reference spec/doc contains remaining stale same-seam claims that are intentionally outside the active ticket boundary, record the boundary explicitly in closeout rather than leaving the reference check implicit
+- re-read the ticket again after completed-ticket truth edits so the final record is internally consistent
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
 - illustrative code snippets, helper names, and scenario sketches still match the landed seam or have been replaced with prose
-- preserved original failure evidence is clearly historical, not phrased as a current-state claim after the ticket is complete
-- for completed tickets, `## Problem` no longer presents fixed intake conditions as current repo state; convert those claims to `At intake...`, `Before this ticket...`, or equivalent historical wording
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape

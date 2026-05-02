@@ -27,6 +27,7 @@ import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
 import { getRecords } from "./tools/get-records";
+import { getRecordsField } from "./tools/get-records-field";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
 import { searchNodes } from "./tools/search-nodes";
@@ -102,6 +103,12 @@ const getRecordInputSchema = z.object({
 
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
+  world_slug: z.string().min(1).optional()
+});
+
+const getRecordsFieldInputSchema = z.object({
+  record_ids: z.array(z.string().min(1)).min(1),
+  field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
   world_slug: z.string().min(1).optional()
 });
 
@@ -296,6 +303,12 @@ export function createServer(): McpServer {
     "get_records: Fetch multiple records by id in one call. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
     getRecordsInputSchema,
     async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
+  );
+  registerToolWithCapability(
+    "get_records_field",
+    "get_records_field: Fetch one field from multiple parsed atomic records in one ordered response. Returns per-id field_value entries or per-id errors without aborting the batch.",
+    getRecordsFieldInputSchema,
+    async (args) => getRecordsField(args as unknown as Parameters<typeof getRecordsField>[0])
   );
   registerToolWithCapability(
     "get_persisted_packet_slice",
