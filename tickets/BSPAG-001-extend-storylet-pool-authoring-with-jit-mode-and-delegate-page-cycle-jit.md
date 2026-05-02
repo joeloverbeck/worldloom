@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/storylet-pool-authoring/SKILL.md` (new `jit` mode added to Inputs + Phase 1 / Phase 2 / Phase 3 / Phase 4 / Phase 5 / Phase 6 / Phase 7 sub-routes), `.claude/skills/branching-story-page-cycle/SKILL.md` (Phase 4 JIT expansion prose; Future-sibling seam removed; Guardrails sibling-interop)
-**Deps**: `.claude/skills/storylet-pool-authoring/SKILL.md` (now shipping; this ticket extends it with the runtime JIT mode and closes the seam page-cycle named at lines 565, 1228); BSBOOT-002 (precedent for sub-routine invocation pattern via `parent_skill_invocation` flag)
+**Deps**: `.claude/skills/storylet-pool-authoring/SKILL.md` (now shipping; this ticket extends it with the runtime JIT mode and closes the seam page-cycle named at lines 565, 1228); archive/tickets/BSBOOT-002-delegate-storylet-seed-pool-to-storylet-pool-authoring.md (precedent for sub-routine invocation pattern via `parent_skill_invocation` flag)
 
 ## Problem
 
@@ -97,7 +97,7 @@ After landing, run `branching-story-page-cycle` against a fixture story bundle i
 
 ## Out of Scope
 
-- BSBOOT-002 (bootstrap delegation) — separate ticket; landed independently. The `parent_skill_invocation` flag is shared infrastructure introduced by BSBOOT-002 and reused here.
+- Bootstrap seed delegation — separate ticket; landed independently at archive/tickets/BSBOOT-002-delegate-storylet-seed-pool-to-storylet-pool-authoring.md. The `parent_skill_invocation` flag is shared infrastructure introduced there and reused here.
 - MCPENH-013 landed independently at archive/tickets/MCPENH-013-register-storylet-pool-authoring-task-type.md; MCPENH-014 landed independently at archive/tickets/MCPENH-014-add-slb-id-class-to-allocator.md and is not a blocker.
 - Patch-engine ops for SLT records — Shape A integration posture preserved (direct Write remains correct).
 - `branching-story-health-audit` — deferred sibling, not closing this seam set.
