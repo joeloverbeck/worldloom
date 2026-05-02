@@ -144,6 +144,7 @@ export const GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE: Record<
   canon_facts_from_diegetic_artifacts: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
   emergent_pressure_events: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
   story_bootstrap: { invariants: "reserve", mystery_reserve: "reserve" },
+  story_page_cycle: { invariants: "reserve", mystery_reserve: "reserve" },
   other: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY
 };
 

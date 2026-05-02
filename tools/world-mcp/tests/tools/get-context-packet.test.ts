@@ -56,6 +56,20 @@ function buildContextPacketWorld(root: string): void {
         body: "The original brine source remains unknown."
       },
       {
+        node_id: "CH-0002",
+        world_slug: "seeded",
+        file_path: "_source/change-log/CH-0002.yaml",
+        node_type: "change_log_entry",
+        body: "id: CH-0002\nsummary: Older canon revision.\n"
+      },
+      {
+        node_id: "CH-0003",
+        world_slug: "seeded",
+        file_path: "_source/change-log/CH-0003.yaml",
+        node_type: "change_log_entry",
+        body: "id: CH-0003\nsummary: Latest canon revision.\n"
+      },
+      {
         node_id: "seeded:GEOGRAPHY.md:Brinewick:0",
         world_slug: "seeded",
         file_path: "GEOGRAPHY.md",
@@ -216,7 +230,8 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
       ["propose_new_worlds_from_preferences", 12000],
       ["canon_facts_from_diegetic_artifacts", 12000],
       ["emergent_pressure_events", 15000],
-      ["story_bootstrap", 18000]
+      ["story_bootstrap", 18000],
+      ["story_page_cycle", 18000]
     ] as const;
 
     for (const [taskType, defaultBudget] of cases) {
@@ -233,6 +248,35 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
       assert.equal(result.task_header.token_budget.requested, defaultBudget);
       assert.ok(result.task_header.token_budget.allocated <= defaultBudget);
     }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket story_page_cycle includes the latest change-log entry", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildContextPacketWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_page_cycle",
+        world_slug: "seeded",
+        seed_nodes: ["DA-0002"]
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.task_header.task_type, "story_page_cycle");
+    assert.equal(result.task_header.token_budget.requested, 18000);
+    assert.ok(result.governing_world_context.nodes.some((node) => node.id === "CH-0003"));
+    assert.ok(!result.governing_world_context.nodes.some((node) => node.id === "CH-0002"));
+    assert.ok(
+      result.governing_world_context.why_included.some((reason) =>
+        reason.includes("latest change-log entry")
+      )
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

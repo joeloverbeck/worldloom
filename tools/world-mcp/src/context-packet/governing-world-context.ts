@@ -58,6 +58,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
+  story_page_cycle: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "TIMELINE.md",
+    "GEOGRAPHY.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "EVERYDAY_LIFE.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -115,6 +126,14 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 5: separate story-local truth from world-level canon",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  story_page_cycle: [
+    "Story page cycle is story-local; world canon remains read-only",
+    "Rule 1: imported facts must cite world authority",
+    "Rule 4: distribution discipline",
+    "Rule 5: separate story-local truth from world-level canon",
+    "Rule 6: story state changes remain append-only by supersession",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -138,6 +157,14 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Story-local atomic records",
     "Per-bundle INDEX.md",
     "Per-world stories INDEX.md"
+  ],
+  story_page_cycle: [
+    "Page record",
+    "Story event record",
+    "Story-local atomic records",
+    "Rendered page prose",
+    "Choice records",
+    "Per-bundle INDEX.md"
   ],
   other: ["Task-specific output approved by workflow"]
 };
@@ -186,6 +213,13 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not resolve or pre-empt forbidden Mystery Reserve answers",
     "Do not treat story-local facts as accepted world canon"
   ],
+  story_page_cycle: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
+    "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
+    "Do not resolve or pre-empt forbidden Mystery Reserve answers",
+    "Do not treat story-local facts as accepted world canon",
+    "Do not read sibling-branch pages as continuity context"
+  ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
 
@@ -217,7 +251,8 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   propose_new_canon_facts: ["invariant", "mystery_reserve_entry", "open_question_entry"],
   propose_new_characters: ["invariant"],
   canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"],
-  story_bootstrap: ["invariant", "mystery_reserve_entry"]
+  story_bootstrap: ["invariant", "mystery_reserve_entry"],
+  story_page_cycle: ["invariant", "mystery_reserve_entry"]
 };
 
 const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
@@ -351,6 +386,23 @@ function findAllNodesByTypes(
     node_id: row.node_id,
     reason: `${reasonPrefix} requires every ${row.node_type} governing record`
   }));
+}
+
+function findLatestChangeLogNodeId(db: Database.Database, worldSlug: string): string | null {
+  const row = db
+    .prepare(
+      `
+        SELECT node_id
+        FROM nodes
+        WHERE world_slug = ?
+          AND node_type = 'change_log_entry'
+        ORDER BY node_id DESC
+        LIMIT 1
+      `
+    )
+    .get(worldSlug) as { node_id: string } | undefined;
+
+  return row?.node_id ?? null;
 }
 
 function stringArrayField(value: unknown): string[] {
@@ -574,6 +626,18 @@ export async function buildGoverningWorldContext(
       taskType
     )) {
       addReason(orderedNodeIds, reasons, row.node_id, row.reason);
+    }
+  }
+
+  if (taskType === "story_page_cycle") {
+    const latestChangeLogNodeId = findLatestChangeLogNodeId(db, worldSlug);
+    if (latestChangeLogNodeId !== null) {
+      addReason(
+        orderedNodeIds,
+        reasons,
+        latestChangeLogNodeId,
+        "story_page_cycle includes the latest change-log entry for canon revision audit trail"
+      );
     }
   }
 
