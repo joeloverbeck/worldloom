@@ -136,6 +136,10 @@ the generated skill numbers it concretely based on its own phase count.>
 <One-sentence discipline the skill enforces.>
 ```
 
+## HARD-GATE drafting — numerical-citation discipline
+
+When the HARD-GATE clause names a numerical count (e.g., "all N gates pass", "all M axes pass", "every one of N principles", "all P checks record PASS"), recount against the proposal's source enumeration BEFORE presenting Section 2. Numerical citations that drift from the proposal will be caught later by the conformance check's Process Flow consistency check (per `references/foundations-conformance-check.md` §Universal Checks) and by Procedure §6's reconciliation precondition (per `SKILL.md`), but catching at draft time avoids the reconciliation-at-write-time backstop firing for purely arithmetic drift. The recount discipline applies to gate counts (Phase N's per-storylet validation gates), axis counts (Phase M's batch-level diversity audit axes), principle counts (FOUNDATIONS Validation Rules cited), and any other enumerated quantity the HARD-GATE clause references — wherever the count is sourced from a proposal table or list, re-walk the source and tally explicitly rather than transcribing a previously-stated count. Worked precedent: storylet-pool-authoring's Section 2 / Section 3 initially said "8 Phase 4 gates"; Section 6b's gate-table draft re-tallied to 9 (the proposal's Phase 4 table enumerates Mystery firewall, Resolution-authority declaration, Invariant compatibility, Consequence capacity, Dedup, Content-intensity coherence, Predicate DSL parsability, Branch-contamination, and Schema completeness — 9 gates); the reconciliation precondition resolved the meaning at write time, but a draft-time recount would have produced the correct count at Section 2 presentation. Distinct from the reconciliation precondition (which is the recovery-side backstop catching drift at write time per `SKILL.md` Procedure §6); this discipline is the prevention-side draft-time check.
+
 ## Section Order for Presentation
 
 1. Frontmatter + Title + one-line purpose

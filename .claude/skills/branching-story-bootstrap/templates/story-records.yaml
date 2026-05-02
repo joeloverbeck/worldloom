@@ -191,7 +191,7 @@ created_at_page: PG-0001
 notes: >
   ...
 ---
-# SLT-NNNN — Storylet (bootstrap minimal seed shape; refactor when storylet-pool-authoring ships)
+# SLT-NNNN — Storylet (bootstrap minimal seed shape; delegation refactor pending BSBOOT-002 — see .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml for the production schema)
 
 id: SLT-0001
 story_id: STORY-0001

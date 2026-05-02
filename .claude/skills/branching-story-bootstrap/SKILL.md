@@ -115,8 +115,9 @@ Phase 6: Storylet Pool Seed           (~20 SLT-NNNN covering entry pressure,
                                        relational dynamics, routine
                                        disruption, aftermath/sequel,
                                        reflection/dilemma; mystery_safety
-                                       check per storylet; seam: future
-                                       delegation to storylet-pool-authoring)
+                                       check per storylet; seam: delegation
+                                       to storylet-pool-authoring pending
+                                       BSBOOT-002)
       |
       v
 Phase 7: Root Page Render             (select PG-0001 storylet;
@@ -361,7 +362,7 @@ Generate `storylet_pool_seed_size` (default ~20) `SLT-NNNN` records under `_sour
 **Rules**:
 - Seed pool storylets carry NO `created_at_page` — they are author-pool storylets, globally visible across all branches (per the proposal's branch-isolation exception).
 - Every seed SLT must be cross-checked against the whole-class M load — its `fact_effects` may NOT resolve a `forbidden`-status M, and its `mystery_safety` is `pass` if and only if no `M_resolution_claims` carry `canon_candidate` authority.
-- Seam: when `storylet-pool-authoring` ships, refactor Phase 6 to delegate to its seed-mode entrypoint (`focus_area: bootstrap_mix`, `target_pool_size: <seed-size>`, `source_audit_path: null`). Until then, this skill inlines the minimal seed shape.
+- Seam: delegation to `storylet-pool-authoring` seed mode is pending BSBOOT-002. The storylet skill ships at `.claude/skills/storylet-pool-authoring/`; until BSBOOT-002 lands the delegation refactor (and adds the `parent_skill_invocation: true` sub-routine flag the storylet skill needs to suppress its own HARD-GATE inside bootstrap's higher-level gate), this skill inlines the minimal seed shape. The delegation target is `mode='seed'` (or equivalently `focus_area='bootstrap_mix'`), `target_pool_size: <seed-size>`, `source_audit_path: null`.
 
 ## Phase 7: Root Page Render
 
@@ -583,7 +584,8 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 - **Sibling interop**:
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
   - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.
-  - **Consumes (future, not yet shipping)**: `storylet-pool-authoring` (Phase 6 delegation seam); `branching-story-health-audit`; `story-fact-promotion-to-canon`.
+  - **Consumes (existing; delegation refactor pending)**: `storylet-pool-authoring` ships at `.claude/skills/storylet-pool-authoring/` and is the production authority for storylet authoring; Phase 6 still inlines the minimal seed shape until BSBOOT-002 lands the delegation refactor.
+  - **Consumes (future, not yet shipping)**: `branching-story-health-audit`; `story-fact-promotion-to-canon`.
   - **Produces inputs for**: `branching-story-page-cycle` and the future audit / promotion skills above.
 - **Content policy is a contract, not a setting.** The NC-21 block embedded in `templates/content-policy.txt` is the skill's discipline floor. It is embedded verbatim in STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.

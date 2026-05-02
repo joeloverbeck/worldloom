@@ -1,0 +1,113 @@
+# Storylet Record — template (SLT-NNNN)
+#
+# Matches the Storylet Schema in brainstorming/storylet-pool-authoring.md
+# (now archived under archive/brainstorming/) and the runtime contract in
+# .claude/skills/branching-story-page-cycle (Phase 4 selection reads
+# visibility, hard_preconds, soft_preconds, mystery_safety,
+# M_resolution_claims, cast_required, content_intensity).
+#
+# DOWNSTREAM CONSUMER PARITY: this template's structural fields
+# (visibility, hard_preconds, soft_preconds, mystery_safety,
+# M_resolution_claims, provenance, choice_templates, content_intensity)
+# are byte-compatible with branching-story-page-cycle's Phase 4 reader.
+# Schema evolution must preserve that parity or land in lockstep with
+# the page-cycle skill.
+#
+# Required structural fields (Phase 4 gate 9 schema-completeness check):
+#   id, story_id, title, shape, content_intensity,
+#   hard_preconds, soft_preconds, cast_requirements, location_requirements,
+#   opens_obligations, pays_off_obligations, complicates_obligations,
+#   transfers_obligations, fact_effects, relationship_effects,
+#   tone_tags, theme_tags, tension_delta, aftermath_weight,
+#   mystery_safety (with all sub-fields), choice_templates (4-6 entries),
+#   provenance (with all sub-fields), visibility (with scope + scoping fields).
+#
+# A record missing any of those violates Rule 1 (No Floating Facts) and is
+# HARD-REJECTed at Phase 4 gate 9.
+
+id: SLT-0019                               # per-story append-only; allocated via allocate_next_id(world_slug, 'SLT', story_slug=...)
+story_id: STORY-0001                       # the parent story bundle's STORY-NNN
+title: ""                                  # short human label
+shape: relational_dynamics                 # entry_pressure | cast_introduction | threat_escalation | relational_dynamics | routine_disruption | aftermath_sequel | reflection_dilemma | mystery_edge_brush | fork_recovery | thread_resolution | aftermath_residue | intimacy | confrontation | other
+content_intensity: mature                  # tame | mature | explicit (must be within STORY_KERNEL.content_intensity_baseline ± 1 band; gate 6)
+
+# Engine-facing structural fields — predicates per templates/predicate-dsl.md.
+# Phase 4 gate 7 HARD-REJECTs storylets whose predicates do not parse against the DSL.
+
+hard_preconds:                             # MUST be true for storylet to be eligible
+  - {pred: ...}                            # see templates/predicate-dsl.md
+soft_preconds:                             # contribute to score, not to eligibility
+  - {pred: ..., weight: 1.0}
+cast_requirements:                         # roles or STENTs the storylet needs present
+  - {role: protagonist, predicates: [{pred: entity_state, entity: role:protagonist, property: present, op: ==, value: true}]}
+location_requirements:
+  - {pred: ...}                            # optional; empty list permitted
+
+# Obligation interactions (engine instantiates obligation_template at apply time)
+
+opens_obligations: []                      # new OBLs the storylet opens — each is an obligation_template (type, owner, salience_min, etc.)
+pays_off_obligations: []                   # OBL field-matchers; matching open OBLs are paid off when the storylet realizes
+complicates_obligations: []                # OBL field-matchers; matching open OBLs are complicated (urgency or salience delta)
+transfers_obligations: []                  # {from_owner, to_owner_pattern, obligation_matcher} entries
+
+# Fact + relationship effects (structured ops; free-form prose is gate-9 rejected)
+
+fact_effects:                              # one entry per fact created or invalidated
+  - {op: create, fact_template: {...}}     # fact_template includes epistemic_class
+  # - {op: invalidate, fact_id_matcher: {...}}
+
+relationship_effects:                      # produce superseding SREL records, not loose deltas
+  - {from: role:protagonist, to: role:antagonist,
+     axes_delta: {trust: -2, fear: +1},
+     public_status_change: null,
+     source_event: SE-template}
+
+# Tone / theme tagging + aggregate signals
+
+tone_tags: []                              # arbitrary tags — Phase 5 diversity audit checks no tag exceeds 40%
+theme_tags: []                             # Phase 5 diversity audit checks no theme exceeds 50%
+tension_delta: 0                           # -2..+2 — runtime governor reads this
+aftermath_weight: 0.0                      # 0.0..1.0 — runtime narrative-health uses this for recent_consequence_density
+
+# Mystery safety + resolution authority — MANDATORY (Phase 4 gates 1 + 2)
+
+mystery_safety:
+  forbidden_M_resolved: false              # MUST be false; Phase 4 gate 1 hard-rejects true
+  M_touched: []                            # M-NNNN ids the storylet brushes (no resolution claimed)
+  M_progressed: []                         # M-NNNN ids advanced (clue / partial reveal) without resolution
+  M_resolution_claims: []                  # one entry per M the storylet claims authority to resolve
+    # - m_id: M-NNNN
+    #   resolution_authority: apparent | branch_local_counterfactual | canon_candidate
+    #   claim_strength: clue | theory | confession | proof | objective_event
+    #   requires_canon_promotion: false    # MUST be true iff resolution_authority == canon_candidate (gate 2)
+  resolution_safety_per_M: {}              # M-NNNN -> forbidden | low | medium | high — must match the M record's actual future_resolution_safety (gate 2)
+
+# Choice templates — scaffolds the runtime LLM proposer uses as anchors (4-6 entries)
+
+choice_templates:
+  - operation: ""                          # e.g., "confront" | "investigate" | "flee" | "intimacy_advance"
+    target_role: ""                        # cast-role bound to a STENT at render time
+    uses_fact_role: ""                     # optional fact-role anchor
+    likely_effects: []                     # likely fact_effects + relationship_effects
+    choice_mode: ""                        # public_confrontation | private_negotiation | covert_action | reveal | concealment | bargain | sacrifice | refuse | flee | intimate_advance | violence | discovery | other
+    poetic_effect: ""                      # relaxed | obvious | dilemma | risky_truth | sacrifice | tragic_irony | seduction | desperation | revelation | flight
+
+# Provenance — load-bearing for branch isolation + audit trail
+
+provenance:
+  origin: focus_authoring                  # bootstrap_seed | focus_authoring | audit_remediation | runtime_jit
+  source_audit: null                       # SAU-NNNN if origin == audit_remediation, else null
+  source_rsp: null                         # RSP-NNNN if origin == audit_remediation, else null
+  created_at_page: null                    # null for global_author_pool storylets; PG-NNNN for branch-scoped runtime-JIT storylets
+
+# Visibility — load-bearing for branch isolation (Phase 4 gate 8 + Phase 5 batch-level)
+
+visibility:
+  scope: global_author_pool                # global_author_pool | branch_prefix_scoped | branch_scoped
+  visible_from_page: null                  # PG-NNNN — required when scope == branch_prefix_scoped
+  visible_branch_path_prefix: null         # [PG-NNNN, ...] — required when scope == branch_prefix_scoped
+  allowed_branch_ids: null                 # [BR-NNNN, ...] — optional explicit allowlist
+
+notes: >
+  Free-form authorial notes — design rationale, mystery-edge sensitivity, tone
+  intent, alternate-realization considerations.
