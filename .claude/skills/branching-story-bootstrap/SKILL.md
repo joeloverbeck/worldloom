@@ -581,7 +581,8 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
   - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.
   - **Consumes (existing)**: `storylet-pool-authoring` seed-mode storylet authority. Phase 6 uses it with `focus_area: bootstrap_mix` and `parent_skill_invocation: true`, returning approved seed SLTs in memory for bootstrap's Phase 11 write transaction.
-  - **Consumes (future, not yet shipping)**: `branching-story-health-audit`; `story-fact-promotion-to-canon`.
+  - **Consumes (existing)**: `branching-story-health-audit` — once a bootstrapped bundle has accumulated pages via `branching-story-page-cycle`, the audit's report informs re-bootstrap considerations and surfaces structural issues (branch isolation, snapshot drift, mystery firewall) the bootstrap should be aware of for any future bundles in the same world.
+  - **Consumes (future, not yet shipping)**: `story-fact-promotion-to-canon`.
   - **Produces inputs for**: `branching-story-page-cycle` and the future audit / promotion skills above.
 - **Content policy is a contract, not a setting.** The NC-21 block embedded in `templates/content-policy.txt` is the skill's discipline floor. It is embedded verbatim in STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.

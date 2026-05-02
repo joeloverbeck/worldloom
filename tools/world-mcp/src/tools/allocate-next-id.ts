@@ -22,6 +22,7 @@ export const ID_CLASS_FORMATS = {
   NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
+  SAU: { width: 4, zeroPad: true, regex: /^SAU-(\d{4})(?:-.+)?$/ },
   EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
   STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
   PG: { width: 4, zeroPad: true, regex: /^PG-(\d{4})$/ },
@@ -83,6 +84,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   STINT: "intentions",
   SLT: "storylets",
   SLB: "storylet-batches",
+  SAU: "audits",
   STLOC: "locations",
   STOBJ: "objects",
   BR: "branches",
@@ -288,10 +290,10 @@ function findHighestStoryScopedId(
 
   const format = ID_CLASS_FORMATS[idClass];
   const directory =
-    idClass === "SLB"
+    idClass === "SLB" || idClass === "SAU"
       ? path.join(storyDirectory, STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass])
       : path.join(storyDirectory, "_source", STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass]);
-  const extension = idClass === "SLB" ? ".md" : ".yaml";
+  const extension = idClass === "SLB" || idClass === "SAU" ? ".md" : ".yaml";
   let maxValue = 0;
 
   let fileNames: string[];

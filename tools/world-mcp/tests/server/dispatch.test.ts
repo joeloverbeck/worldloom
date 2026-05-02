@@ -202,6 +202,9 @@ function seedServerWorld(root: string): void {
   const storyletBatchesDirectory = path.join(storiesDirectory, "storylet-batches");
   mkdirSync(storyletBatchesDirectory, { recursive: true });
   writeFileSync(path.join(storyletBatchesDirectory, "SLB-0003.md"), "# SLB-0003\n", "utf8");
+  const auditsDirectory = path.join(storiesDirectory, "audits");
+  mkdirSync(auditsDirectory, { recursive: true });
+  writeFileSync(path.join(auditsDirectory, "SAU-0003-2026-05-03.md"), "# SAU-0003\n", "utf8");
 
   const toolResultsDirectory = path.join(root, "tool-results");
   mkdirSync(toolResultsDirectory, { recursive: true });
@@ -372,6 +375,11 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "SAU", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "__pipeline__", id_class: "NWB" },
         expectError: false
       },
@@ -537,6 +545,19 @@ test("SLB id_class dispatches through the MCP boundary", async () => {
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
     assert.equal(structured.next_id, "SLB-0004");
+  });
+});
+
+test("SAU id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "SAU", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "SAU-0004");
   });
 });
 
