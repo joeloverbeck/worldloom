@@ -44,6 +44,29 @@ const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }
   { idClass: "SEC-TML", highest: "SEC-TML-001", expected: "SEC-TML-002" }
 ];
 
+const STORY_CLASS_CASES: Array<{
+  idClass: IdClass;
+  subdir: string;
+  fileName: string;
+  expected: string;
+}> = [
+  { idClass: "PG", subdir: "pages", fileName: "PG-0007.yaml", expected: "PG-0008" },
+  { idClass: "SE", subdir: "events", fileName: "SE-0007.yaml", expected: "SE-0008" },
+  { idClass: "SF", subdir: "facts", fileName: "SF-0007.yaml", expected: "SF-0008" },
+  { idClass: "OBL", subdir: "obligations", fileName: "OBL-0007.yaml", expected: "OBL-0008" },
+  { idClass: "CNSQ", subdir: "consequences", fileName: "CNSQ-0007.yaml", expected: "CNSQ-0008" },
+  { idClass: "THR", subdir: "threads", fileName: "THR-0007.yaml", expected: "THR-0008" },
+  { idClass: "SREL", subdir: "relationships", fileName: "SREL-0007.yaml", expected: "SREL-0008" },
+  { idClass: "STINT", subdir: "intentions", fileName: "STINT-0007-rill.yaml", expected: "STINT-0008" },
+  { idClass: "SLT", subdir: "storylets", fileName: "SLT-0007.yaml", expected: "SLT-0008" },
+  { idClass: "STLOC", subdir: "locations", fileName: "STLOC-0007.yaml", expected: "STLOC-0008" },
+  { idClass: "STOBJ", subdir: "objects", fileName: "STOBJ-0007.yaml", expected: "STOBJ-0008" },
+  { idClass: "BR", subdir: "branches", fileName: "BR-0007.yaml", expected: "BR-0008" },
+  { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-0008" },
+  { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-0008" },
+  { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-0008" }
+];
+
 function seedAllocationWorld(root: string): void {
   seedWorld(root, {
     worldSlug: "seeded",
@@ -72,6 +95,12 @@ function writeStoryKernel(root: string, storySlug: string, content: string): voi
   const directory = path.join(root, "worlds", "seeded", "stories", storySlug);
   mkdirSync(directory, { recursive: true });
   writeFileSync(path.join(directory, "STORY_KERNEL.md"), content, "utf8");
+}
+
+function writeStoryRecord(root: string, storySlug: string, subdir: string, fileName: string): void {
+  const directory = path.join(root, "worlds", "seeded", "stories", storySlug, "_source", subdir);
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(path.join(directory, fileName), "id: placeholder\n", "utf8");
 }
 
 test("allocateNextId returns the next id for all supported classes", async () => {
@@ -202,6 +231,82 @@ test("allocateNextId scans STORY_KERNEL frontmatter for story ids", async () => 
   }
 });
 
+test("allocateNextId returns the next id for story-scoped classes", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+
+    for (const entry of STORY_CLASS_CASES) {
+      writeStoryRecord(root, "wolf-tale", entry.subdir, entry.fileName);
+      writeStoryRecord(root, "wolf-tale", entry.subdir, `${entry.idClass}-0003.yaml`);
+      writeStoryRecord(root, "other-story", entry.subdir, `${entry.idClass}-0099.yaml`);
+    }
+
+    for (const entry of STORY_CLASS_CASES) {
+      const result = await withRepoRoot(root, () =>
+        allocateNextId({
+          world_slug: "seeded",
+          id_class: entry.idClass,
+          story_slug: "wolf-tale"
+        })
+      );
+
+      assert.ok(!("code" in result));
+      assert.equal(result.next_id, entry.expected);
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId returns first-run story-scoped ids", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "empty-story"), { recursive: true });
+
+    const pageResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "PG", story_slug: "empty-story" })
+    );
+    const stintResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "STINT", story_slug: "empty-story" })
+    );
+
+    assert.ok(!("code" in pageResult));
+    assert.ok(!("code" in stintResult));
+    assert.equal(pageResult.next_id, "PG-0001");
+    assert.equal(stintResult.next_id, "STINT-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("allocateNextId returns the next pipeline-scoped ids from world-proposals", async () => {
   const root = createTempRepoRoot();
 
@@ -251,6 +356,20 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   const root = createTempRepoRoot();
 
   try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+
     const pipelineClassWithWorldSlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "NWB" })
     );
@@ -263,23 +382,40 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const storyWithPipelineSlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "__pipeline__", id_class: "STORY" })
     );
+    const storyScopedWithoutStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "PG" })
+    );
+    const worldScopedWithStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "CF", story_slug: "wolf-tale" })
+    );
+    const storyScopedMissingStory = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "PG", story_slug: "missing-story" })
+    );
 
     assert.ok("code" in pipelineClassWithWorldSlug);
     assert.ok("code" in worldClassWithPipelineSlug);
     assert.ok("code" in epeWithPipelineSlug);
     assert.ok("code" in storyWithPipelineSlug);
+    assert.ok("code" in storyScopedWithoutStorySlug);
+    assert.ok("code" in worldScopedWithStorySlug);
+    assert.ok("code" in storyScopedMissingStory);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
     assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
     assert.equal(epeWithPipelineSlug.code, "invalid_input");
     assert.equal(storyWithPipelineSlug.code, "invalid_input");
+    assert.equal(storyScopedWithoutStorySlug.code, "invalid_input");
+    assert.equal(worldScopedWithStorySlug.code, "invalid_input");
+    assert.equal(storyScopedMissingStory.code, "invalid_input");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
+    assert.match(storyScopedWithoutStorySlug.message, /requires story_slug/);
+    assert.match(worldScopedWithStorySlug.message, /does not accept story_slug/);
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("allocateNextId exposes all 30 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 44 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -296,6 +432,20 @@ test("allocateNextId exposes all 30 id classes with existing formats preserved",
     "RP",
     "EPE",
     "STORY",
+    "PG",
+    "SE",
+    "SF",
+    "OBL",
+    "CNSQ",
+    "THR",
+    "SREL",
+    "STINT",
+    "SLT",
+    "STLOC",
+    "STOBJ",
+    "BR",
+    "CHC",
+    "STENT",
     "M",
     "ONT",
     "CAU",
@@ -312,10 +462,13 @@ test("allocateNextId exposes all 30 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 30);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 44);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
+  assert.equal(ID_CLASS_FORMATS.PG.zeroPad, true);
+  assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
+  assert.match("STINT-0008-rill", ID_CLASS_FORMATS.STINT.regex);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
   assert.match("OQ-0001", ID_CLASS_FORMATS.OQ.regex);
