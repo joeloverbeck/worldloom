@@ -17,6 +17,8 @@ Bind each HARD input to specific world entities resolved through `find_named_ent
 
 **Conditional packet expansion**: when the brief's `artifact_type` is magic-or-tech-adjacent, the author's profession/institution touches a magical or technological system, the audience does, or generated claims at Phase 3 produce claims in those domains, expand retrieval via `mcp__worldloom__search_nodes(node_type='section', filters={file_class: 'magic-or-tech-systems'})` and `get_record(sec_id)` for each relevant SEC-MTS record. Skipped otherwise to avoid context bloat on ordinary-register artifacts.
 
+**Region/era descriptor binding fallback**: `find_named_entities` performs exact-match resolution against the entity registry. Region and era descriptors that appear only inside compound tokens may return empty canonical matches because they are not registered as standalone entities. When the response includes `hints[]`, prefer each hint's `matching_record_ids[]` (up to 10 SEC-GEO / SEC-TML source records) and bind the descriptor to those records by reference rather than to a single `ENT-NNNN` id. Use `mcp__worldloom__search_nodes(world_slug, query='<descriptor>')` only when `matching_record_ids[]` is empty, absent, or capped below `record_count`.
+
 ## Phase 0b: Author Reality Construction
 
 If `character_path` provided: lift the following fields from the dossier, in priority order (dossier → world-gleaning fallback for gaps):

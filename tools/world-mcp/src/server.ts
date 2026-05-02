@@ -363,7 +363,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "find_named_entities",
-    "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
+    "Resolve exact canonical and unresolved surface-name matches. Region/era descriptor hints include capped matching_record_ids for direct get_record lookup, with search_nodes(query=...) as the broad fallback.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0]),
     { node_type_filter: NODE_TYPES }
