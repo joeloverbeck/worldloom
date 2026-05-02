@@ -315,7 +315,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 | Story threads | `threads/THR-NNNN.yaml` | One per thread state change (status / pressure delta) |
 | Story relationships | `relationships/SREL-NNNN.yaml` | One per relationship state change (axes deltas / public_status / private_status_by_actor) |
 | Story intentions | `intentions/STINT-NNNN-<char>.yaml` | One per major character whose pressure / emotional_state / beliefs shifted |
-| Storylet (JIT only) | `storylets/SLT-NNNN.yaml` | IF Phase 4 JIT expansion fired; carries `created_at_page: this_PG` and `visibility.scope: branch_scoped` |
+| Storylet (JIT only) | `storylets/SLT-NNNN.yaml` | IF Phase 4 JIT expansion fired via `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped` |
 | Story location | `locations/STLOC-NNNN.yaml` | IF a new story-local location is introduced this turn |
 | Story object | `objects/STOBJ-NNNN.yaml` | IF a new story-local object is introduced or an existing object's state changed via supersession |
 | Story-local diegetic artifact | `artifacts/DA-NNNN.yaml` | IF a diegetic artifact is created in-story this turn (a letter authored, recording produced, etc.) |
@@ -337,7 +337,7 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 
 ### ID Conventions — branch-isolation invariant
 
-All emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / PG / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. Author-pool storylets are the one exception: they retain `created_at_page: null` and are globally visible (set at storylet-pool-authoring time).
+All emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / PG / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. Author-pool storylets are the one exception: they retain `created_at_page: null` and are globally visible (set by storylet-pool-authoring at authoring time in seed/focus modes).
 
 The branch-isolation invariant is structurally enforced by this field combined with Phase 9's recursive reference closure validation gate.
 
@@ -555,14 +555,14 @@ Pick K = 5. Weight each by score (softmax-style). Sample one. **NEVER always-tak
 
 ### JIT Expansion Trigger
 
-If no candidate scores above threshold (typically: top-K all score below `(median(score) + 1.0)`), AND the consequence-capacity check (Phase 3) passed only by JIT-generatable continuation, invoke a **single-storylet JIT generator**:
+If no candidate scores above threshold (typically: top-K all score below `(median(score) + 1.0)`), AND the consequence-capacity check (Phase 3) passed only by JIT-generatable continuation, invoke `storylet-pool-authoring` as the **single-storylet JIT generator**:
 
-- LLM proposes a structured SLT record using current state as seed (cast_present, open OBLs, active THRs, recent prose context).
-- Engine runs a condensed validation pass inline (mystery_safety check, cast/location validation, content_intensity band).
-- New SLT carries `created_at_page: this_PG`, `visibility.scope: branch_scoped` — branch-scoped, never globally visible.
-- Selection then picks this JIT storylet.
+- Call shape: `mode='jit'`, `parent_skill_invocation=true`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, `caller_state_snapshot=<this_state_snapshot>`, plus the current branch-local pool/OBL/CNSQ/THR/cast/recent-prose context already assembled by this phase.
+- The delegated call returns exactly ONE approved SLT record plus its internal validation packet. The returned SLT carries `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped`; a global-author-pool JIT result is structurally invalid.
+- `storylet-pool-authoring` runs its Phase 4 9-gate set over the candidate, including mystery firewall, resolution-authority declaration, predicate parsability, and branch-contamination. Its Phase 5 diversity audit is bypassed because a single runtime storylet has no batch diversity surface.
+- Selection then picks this JIT storylet. Phase 5 applies its effects, Phase 9 rechecks the full page-cycle validation gates, and Phase 11 writes the returned SLT-NNNN.yaml inside the same page-tick transaction as the new PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records.
 
-JIT generation is not free — it expands the engine prompt budget and may produce lower-quality storylets than the author pool. **Future-sibling seam**: `storylet-pool-authoring` ships at `.claude/skills/storylet-pool-authoring/` and is the production authority for storylet authoring; the delegation of Phase 4 JIT expansion to its (forthcoming) `jit` mode is pending BSPAG-001 (which both extends the storylet skill with a JIT mode and refactors this skill's Phase 4 to delegate). Until BSPAG-001 lands, this skill inlines the minimal JIT shape per the proposal. `branching-story-health-audit` (still deferred) consumes the `flagged_for_audit` and high-JIT-rate signals.
+JIT generation is not free — it expands the engine prompt budget and may produce lower-quality storylets than the author pool. `branching-story-health-audit` (still deferred) consumes the `flagged_for_audit` and high-JIT-rate signals.
 
 ### Phase 4.5: Mystery Resolution Authority
 
@@ -576,7 +576,7 @@ The selected storylet's `mystery_safety.M_resolution_claims` enumerates per-M re
 | `branch_local_counterfactual` | Page-cycle continues only if `STORY_KERNEL.counterfactual_mystery_mode == true`. The branch becomes a "what-if" exploration. | `objective` with `canon_relation: canon_divergent` or `canon_unknown` | no |
 | `canon_candidate` | Page-cycle PAUSES. Hands off to `story-fact-promotion-to-canon` regardless of `execution_mode` (HARD-GATE preserved in EVERY mode — this is the moment the player becomes the author again). | On accept: SF mirrors the new CF with `derived_from_cf: <new-CF-id>` | yes (on user-approved promotion) |
 
-A `forbidden`-status M is **never** resolved at any authority level — hard-rejected at storylet-pool-authoring time AND re-rejected here as defense-in-depth.
+A `forbidden`-status M is **never** resolved at any authority level — hard-rejected by storylet-pool-authoring's Phase 4 gates AND re-rejected here as defense-in-depth.
 
 On promotion non-accept (user rejects via `story-fact-promotion-to-canon`'s HARD-GATE), the storylet is rejected and re-selection runs (Phase 4 re-runs with this storylet excluded).
 
@@ -1011,7 +1011,7 @@ Single transaction. File order matters because partial-failure recovery depends 
 1. `Write _source/pages/PG-NNNN.yaml` (the new page record with state_snapshot + state_hash + emitted_choices + narrative_health + governor_nudge_applied + canon_revision audit-trail field).
 2. `Write _source/events/SE-NNNN.yaml` (the structured-op event applied this turn — the SE record owns `applied_event_ops` per the closed `op_type` enum, and `op_id` values are unique within the event).
 3. `Write` per-class records emitted this turn — deterministic order: `_source/facts/SF-NNNN.yaml` → `_source/obligations/OBL-NNNN.yaml` → `_source/consequences/CNSQ-NNNN.yaml` → `_source/threads/THR-NNNN.yaml` → `_source/relationships/SREL-NNNN.yaml` → `_source/intentions/STINT-NNNN-<char>.yaml` → `_source/choices/CHC-NNNN.yaml`.
-4. `Write _source/storylets/SLT-NNNN.yaml` IF Phase 4 JIT expansion fired (carries `created_at_page: this_PG` and `visibility.scope: branch_scoped`).
+4. `Write _source/storylets/SLT-NNNN.yaml` IF Phase 4 JIT expansion fired (returned by `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped`).
 5. `Write _source/locations/STLOC-NNNN.yaml`, `_source/objects/STOBJ-NNNN.yaml`, `_source/artifacts/DA-NNNN.yaml` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
 6. `Write _source/branches/BR-NNNN.yaml` — new BR if this run is a fork; OR superseder of the existing BR's `current_leaf_page_id` (and `status: terminal` if Phase 3 §Terminal Feasibility flagged this page as terminal) on continuation.
 7. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
@@ -1036,7 +1036,7 @@ Run the page-cycle turn through these critics where applicable:
 - **Choice Proposer** — Phase 8 step 2.
 - **Choice Renderer** — Phase 8 step 5 (surface labels).
 - **Prose Renderer** — Phase 7.
-- **JIT Storylet Generator** — Phase 4 fallback only.
+- **JIT Storylet Generator** — Phase 4 fallback only; delegated to `storylet-pool-authoring` `mode=jit`.
 - **Continuity Critic** — Phase 7 post-render claim classification + Phase 9 gate 7 cross-check.
 - **Mystery Curator** — Phase 9 gate 1 firewall check.
 - **Pacing Critic** — verifies the page lands at a real choice point (Phase 7 fail-fast checks).
@@ -1051,7 +1051,7 @@ The proposer / renderer / parser are the LLM's first-class roles per the proposa
 | Rule 4: No Globalization by Accident | Phase 3 + Phase 9 gate 2 | Phase 3 INV check runs the proposed event against every world INV's `break_conditions` (whole-class load from Pre-flight). Phase 9 gate 2 is the structural backstop. |
 | Rule 5: No Consequence Evasion | Phase 2 + Phase 5 + Phase 9 gate 12 | Phase 2 emits `required_aftermath` per impact analysis (transferable_functions, body_discovery, faction_reaction, etc.). Phase 5 instantiates each `required_aftermath` item as a `CNSQ-NNNN` record (or routes it to a newly-opened OBL). Phase 9 gate 12 enforces no item silently dropped. |
 | Rule 6: No Silent Retcons (story-scope analogue + world-scope handoff) | Phase 5 + Phase 4.5 | Story-bundle records are append-only via supersession (new record cites `supersedes`, original retained for branch-replay). The Rule-6 enforcement surface for world-canon retcon is `canon-addition` via the Phase 4.5 `canon_candidate` handoff to `story-fact-promotion-to-canon` — never elided. |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 + Phase 4.5 + Phase 7 + Phase 9 gate 1 | Phase 4 hard-filters storylets whose `mystery_safety.forbidden_M_resolved == true`. Phase 4.5 routes `M_resolution_claims` per per-claim authority, with `forbidden`-status M never resolved at any authority level. Phase 7 cross-check rejects prose with `mystery-risk` classification. Phase 9 gate 1 is the structural backstop. Whole-class M-record load via `mcp__worldloom__list_records(record_type='mystery_record', include_full_body=true)` powers all four enforcement points. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 storylet selection + delegated `storylet-pool-authoring` JIT gate set + Phase 4.5 per-claim authority routing + Phase 7 prose `mystery-risk` rejection + Phase 9 gate 1 | Phase 4 hard-filters existing storylets whose `mystery_safety.forbidden_M_resolved == true`; delegated JIT candidates also pass storylet-pool-authoring gates 1 and 2 before selection. Phase 4.5 routes `M_resolution_claims` per per-claim authority, with `forbidden`-status M never resolved at any authority level. Phase 7 cross-check rejects prose with `mystery-risk` classification. Phase 9 gate 1 is the structural backstop. Whole-class M-record load via `mcp__worldloom__list_records(record_type='mystery_record', include_full_body=true)` powers all enforcement points. |
 
 ## Record Schemas
 
@@ -1148,7 +1148,7 @@ target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract | null
 instrument: STENT-NNNN | STOBJ-NNNN | SF-NNNN | null
 
 preconditions_checked:
-  - predicate: <engine-checkable predicate per the Predicate DSL in storylet-pool-authoring>
+  - predicate: <engine-checkable predicate per templates/predicate-dsl.md in `.claude/skills/storylet-pool-authoring/`>
     result: pass | fail
     evidence: <record-id>
 
@@ -1191,7 +1191,7 @@ The remaining classes (SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, DA-st
 - **THR-NNNN** — append-only; supersession on `status` or `current_pressure` change.
 - **SREL-NNNN** — append-only; supersession on `axes` / `public_status` / `private_status_by_actor` change.
 - **STINT-NNNN-<char>** — append-only; replaces prior STINT for that character on intention refresh.
-- **SLT-NNNN (JIT only)** — branch-scoped (`visibility.scope: branch_scoped`); carries `created_at_page: this_PG`.
+- **SLT-NNNN (JIT only)** — branch-scoped (`visibility.scope: branch_scoped`); carries `provenance.origin: runtime_jit` and `created_at_page: this_PG`; produced by `storylet-pool-authoring` `mode=jit` and written by this skill in Phase 11.
 - **STLOC-NNNN / STOBJ-NNNN** — append-only; introduced when a new story-local location/object enters scope.
 - **DA-NNNN (story-local)** — created when a diegetic artifact is authored in-story this turn; carries `story_id` (distinct from world-level DA).
 - **BR-NNNN** — new on fork; superseder of `current_leaf_page_id` (and `status` if terminal) on continuation.
@@ -1211,7 +1211,7 @@ No Canon Fact Record template; no Change Log Entry template — both N/A in the 
 | Rule 4: No Globalization by Accident | Phase 3 continuation feasibility check + Phase 9 gate 2 backstop. INV `break_conditions` enforced against every applied_event_op via the whole-class INV load. | Distribution check is the concern of source CFs imported as SFs; this skill does not introduce world-level distribution claims. |
 | Rule 5: No Consequence Evasion | Phase 2 emits `required_aftermath`; Phase 5 persists each item as CNSQ (or routes to newly-opened OBL); Phase 9 gate 12 enforces no item silently dropped. | The proposal's central design rule — runtime engine forgetting consequences turns the promise/consequence engine into a goldfish. |
 | Rule 6: No Silent Retcons | Story-bundle records are append-only via supersession (new record cites `supersedes`; original retained); world-canon retcon route is `canon-addition` via Phase 4.5 `canon_candidate` handoff (never elided). | Story-scope supersession is Rule 6 applied by analogy at story scope; world-scope Rule 6 is `canon-addition`'s territory. |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 mystery firewall + Phase 4.5 per-claim authority routing + Phase 7 prose `mystery-risk` rejection + Phase 9 gate 1 backstop. | `forbidden`-status M resolutions hard-rejected at every enforcement point; whole-class M load powers all four. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 storylet selection + delegated `storylet-pool-authoring` JIT gate set + Phase 4.5 per-claim authority routing + Phase 7 prose `mystery-risk` rejection + Phase 9 gate 1 backstop. | `forbidden`-status M resolutions hard-rejected at every enforcement point; whole-class M load powers storylet-pool-authoring's JIT gates and page-cycle's defense-in-depth checks. |
 | Rule 11: No Spectator Castes by Accident | N/A | Not applicable — canon-reading skill introduces no exceptional capability that could create spectator castes. The enforcement surface is `canon-addition` Phase 5 + `propose-new-canon-facts` (CF leverage-enumeration). Story-local cast capabilities inherit from the source CF's distribution + costs. |
 | Rule 12: No Single-Trace Truths | N/A | Not applicable — same reasoning as Rule 2 / 3 / 11; the trace-multiplicity discipline applies to new world-level hard-canon truths, not to story-local imports/mutations. The enforcement surface is `canon-addition` + `propose-new-canon-facts`. |
 | Canon Layering | Phase 5 SF mutations preserve `derived_from_cf` and `canon_relation`; Phase 4.5 firewall preserves Mystery Reserve layer; story-only entities (created via Phase 5 `cast_change` ops with `world_ent_id: null`) marked `story_only: true` (a soft-canon-local-to-story register, not promoted to any world canon layer without explicit `story-fact-promotion-to-canon`). | Story bundle is its own per-story layer below world canon. |
@@ -1225,11 +1225,11 @@ No Canon Fact Record template; no Change Log Entry template — both N/A in the 
 - **Records are append-only via supersession.** A new page that "updates" an existing OBL writes a NEW record citing `supersedes: OBL-NNNN`; the original record is never edited. The branch-replay contract depends on this.
 - **Direct `Write` is the correct mutation surface for story-bundle records under the Shape A integration posture.** Hook 3's match pattern is `worlds/<slug>/_source/...` which does NOT match `worlds/<slug>/stories/<slug>/_source/...`. Story records are not world canon and no engine ops exist for them. A future maintainer who "upgrades" the skill to engine routing must FIRST land patch-engine ops + Hook 3 namespace extension + record-schema validators for the story-record classes (deferred-integration tickets named below).
 - **Future siblings (named in proposal; not yet shipping)**:
-  - **`storylet-pool-authoring`** — ships at `.claude/skills/storylet-pool-authoring/` as the production authority for `seed` and `focus` mode batch authoring. `branching-story-bootstrap` Phase 6 consumes the seed-mode entrypoint through the `parent_skill_invocation: true` sub-routine pattern landed in archive/tickets/BSBOOT-002-delegate-storylet-seed-pool-to-storylet-pool-authoring.md. The `jit`-mode entrypoint for Phase 4 fallback storylet generation is pending BSPAG-001, which both extends the storylet skill with a `jit` mode and refactors this skill's Phase 4 to delegate. Until BSPAG-001 lands, this skill inlines the minimal JIT shape per the proposal's discipline.
   - **`story-fact-promotion-to-canon`** — the canon-mutation HARD-GATE handoff for Phase 4.5 `canon_candidate` resolutions. Until shipping, a `canon_candidate` resolution at runtime aborts the page-cycle with a clear "blocked on `story-fact-promotion-to-canon`" message — the skill does NOT silently degrade to `apparent` because that would erode the canon-mutation HARD-GATE invariant.
   - **`branching-story-health-audit`** — consumes `narrative_health.flagged_for_audit` and high-JIT-rate signals to surface branches needing curation. Until shipping, the flag is persisted but not consumed.
 - **Sibling interop (existing)**:
   - **Consumes**: `branching-story-bootstrap` outputs (the story bundle this skill operates over).
+  - **Consumes**: `storylet-pool-authoring` `mode=jit` as the Phase 4 fallback storylet generator. Page-cycle calls it with `parent_skill_invocation: true`, receives one branch-scoped `runtime_jit` SLT plus validation packet, applies the SLT in Phase 5, rechecks in Phase 9, and writes it in Phase 11 if the page tick commits.
   - **Consumes (own outputs across turns)**: this skill's PG-NNNN / SE-NNNN / CHC-NNNN / SF-NNNN / etc. records produced on prior turns are read on subsequent turns.
 - **Content policy is a contract, not a setting.** The NC-21 block from this skill's `templates/content-policy.txt` is prepended verbatim to EVERY LLM prompt assembled by this skill — the parser, the proposer, the renderer, the prose render, the JIT storylet generator. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor. Phase 9 gate 6 is the structural backstop.
 - **The LLM is never the continuity database.** All state lives in `worlds/<slug>/stories/<slug>/_source/*.yaml`; the LLM proposes structured outputs (parser → ProposedEvent; proposer → CHCs; renderer → prose) that the engine validates and commits. A maintainer who would rewrite a phase to "let the LLM track state" violates the proposal's load-bearing rule.

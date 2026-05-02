@@ -1,6 +1,6 @@
 ---
 name: storylet-pool-authoring
-description: "Use when authoring or expanding the storylet reservoir of an existing branching story bundle inside an existing worldloom world — `seed` mode (~20 storylets, invoked by branching-story-bootstrap Phase 6 as a no-write sub-routine), `focus` mode (10-15 storylets in a named focus_area), or `audit` mode (deferred until branching-story-health-audit ships). Direct invocation produces: SLT-NNNN.yaml records under worlds/<world-slug>/stories/<story-slug>/_source/storylets/ + an SLB-NNNN.md batch manifest under worlds/<world-slug>/stories/<story-slug>/storylet-batches/ + an updated worlds/<world-slug>/stories/<story-slug>/INDEX.md storylet-pool summary. Mutates: only worlds/<world-slug>/stories/<story-slug>/ on direct invocation (never WORLD_KERNEL.md, ONTOLOGY.md, or any worlds/<world-slug>/_source/<world-subdir>/*.yaml record); world-canon mutation routes through story-fact-promotion-to-canon (HARD-GATE preserved)."
+description: "Use when authoring or expanding the storylet reservoir of an existing branching story bundle inside an existing worldloom world — `seed` mode (~20 storylets, invoked by branching-story-bootstrap Phase 6 as a no-write sub-routine), `focus` mode (10-15 storylets in a named focus_area), `jit` mode (one runtime branch-scoped storylet invoked by branching-story-page-cycle Phase 4 as a no-write sub-routine), or `audit` mode (deferred until branching-story-health-audit ships). Direct invocation produces: SLT-NNNN.yaml records under worlds/<world-slug>/stories/<story-slug>/_source/storylets/ + an SLB-NNNN.md batch manifest under worlds/<world-slug>/stories/<story-slug>/storylet-batches/ + an updated worlds/<world-slug>/stories/<story-slug>/INDEX.md storylet-pool summary. Mutates: only worlds/<world-slug>/stories/<story-slug>/ on direct invocation (never WORLD_KERNEL.md, ONTOLOGY.md, or any worlds/<world-slug>/_source/<world-subdir>/*.yaml record); world-canon mutation routes through story-fact-promotion-to-canon (HARD-GATE preserved)."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Directory slug of an existing story bundle under worlds/<world-slug>/stories/<story-slug>/. Pre-flight aborts if missing, except for parent_skill_invocation=true bootstrap seed generation where branching-story-bootstrap is constructing the bundle in memory."
     required: true
   - name: mode
-    description: "One of: seed | focus | audit. Default: inferred from inputs (source_audit_path → audit; focus_area → focus; otherwise → seed). Audit mode is deferred and aborts at Pre-flight until branching-story-health-audit ships."
+    description: "One of: seed | focus | audit | jit. Default: inferred from inputs (source_audit_path → audit; focus_area → focus; otherwise → seed). Audit mode is deferred and aborts at Pre-flight until branching-story-health-audit ships. JIT mode is sub-routine-only for branching-story-page-cycle Phase 4."
     required: false
   - name: focus_area
     description: "One of: bootstrap_mix | entry_pressure | threat_escalation | relational_dynamics | aftermath_consequences | mystery_edge_brushes | fork_recovery | thread_resolution_options | aftermath_residue | content_intensity_lift. Required when mode=focus; ignored when mode=seed (uses bootstrap_mix implicitly)."
@@ -27,6 +27,12 @@ arguments:
   - name: source_audit_path
     description: "Path to a SAU-NNNN audit report under worlds/<world-slug>/stories/<story-slug>/audits/. Required when mode=audit. DEFERRED — Pre-flight aborts until branching-story-health-audit ships."
     required: false
+  - name: created_at_page
+    description: "PG-NNNN. Required when mode=jit; ignored otherwise. Populates provenance.created_at_page and anchors branch_scoped visibility for the returned runtime storylet."
+    required: false
+  - name: caller_state_snapshot
+    description: "Inline page-cycle state_snapshot. Required when mode=jit and parent_skill_invocation=true; ignored otherwise. Drives the reduced Phase 1 diagnosis and Phase 2 single seed."
+    required: false
   - name: tone_override
     description: "Free-form tone hint (overrides the story kernel's default tone weighting for this batch). Optional."
     required: false
@@ -34,16 +40,16 @@ arguments:
     description: "One of: tame | mature | explicit. Overrides the story's content_intensity_baseline ±1 band for this batch. Never lifts the NC-21 content_policy."
     required: false
   - name: parent_skill_invocation
-    description: "Boolean. Default false. When true, this skill runs as a no-write sub-routine for a parent skill. Currently documented for branching-story-bootstrap Phase 6 seed generation; the parent skill supplies in-memory context and owns the user-facing HARD-GATE/write transaction."
+    description: "Boolean. Default false. When true, this skill runs as a no-write sub-routine for a parent skill. Documented for branching-story-bootstrap Phase 6 seed generation and branching-story-page-cycle Phase 4 JIT generation; the parent skill supplies in-memory context and owns the user-facing HARD-GATE/write transaction."
     required: false
 ---
 
 # Storylet Pool Authoring
 
-Authors or expands the structured-content reservoir for an existing branching story bundle by generating per-mode batches (seed, focus, or — once branching-story-health-audit ships — audit) of `SLT-NNNN` storylets that satisfy the Predicate DSL, the per-storylet validation gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate parsability, branch-contamination, schema completeness), and the batch-level diversity audit (shape, tone, content_intensity, OBL-engagement, theme, cast usage), then atomically writes the approved storylets, a batch manifest, and an updated per-bundle index after explicit user approval at the HARD-GATE. When `branching-story-bootstrap` invokes this skill as a `parent_skill_invocation: true` seed sub-routine, this skill returns approved SLT records in memory and performs no writes; bootstrap's Phase 10 HARD-GATE and Phase 11 write transaction govern the resulting bundle.
+Authors or expands the structured-content reservoir for an existing branching story bundle by generating per-mode batches (seed, focus, or — once branching-story-health-audit ships — audit) of `SLT-NNNN` storylets, or a single runtime JIT storylet when invoked by `branching-story-page-cycle`. Every produced storylet satisfies the Predicate DSL and the per-storylet validation gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate parsability, branch-contamination, schema completeness). Direct batches also satisfy the batch-level diversity audit (shape, tone, content_intensity, OBL-engagement, theme, cast usage), then atomically write approved storylets, a batch manifest, and an updated per-bundle index after explicit user approval at the HARD-GATE. When `branching-story-bootstrap` invokes this skill as a `parent_skill_invocation: true` seed sub-routine, or `branching-story-page-cycle` invokes it as a `parent_skill_invocation: true` JIT sub-routine, this skill returns approved SLT records in memory and performs no writes; the parent skill's HARD-GATE/write transaction governs the resulting bundle.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/_source/storylets/`, do NOT create any file under `worlds/<world-slug>/stories/<story-slug>/storylet-batches/`, and do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the parent story bundle exists with a readable `STORY_KERNEL.md`, refuses with a specific-sibling-missing error if `mode=audit` (deferred until `branching-story-health-audit` ships), allocates the next `SLB-NNNN` and the next available `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, loads the current storylet pool + open OBLs + active THRs + recent page history along the longest active branch_path, loads world canon (whole-class M + INV records and a `task_type='storylet_pool_authoring'` context packet for governing CFs), and confirms the content_policy block (NC-21 verbatim) is loaded for downstream LLM prompt assembly; (b) every surviving candidate SLT in the batch records PASS with a one-line rationale across all nine Phase 4 per-storylet gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate DSL parsability, branch-contamination, schema completeness) AND the batch as a whole records PASS with a one-line rationale across all six Phase 5 diversity-audit checks (shape distribution, tone distribution, content_intensity distribution, OBL-engagement distribution, theme distribution, cast usage) plus the Phase 5 batch-level branch-contamination audit; (c) the user has explicitly approved the Phase 6 batch manifest deliverable summary (per-storylet titles + shape + intensity + OBL/THR engagement + mystery_safety verdict, plus the diversity summary, the rejected-candidates count, and the target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable. `parent_skill_invocation: true` is a documented no-write sub-routine path: for bootstrap seed generation, this skill may return an internal validation packet and approved SLT records to `branching-story-bootstrap`, but it must not write storylet files, create SLB manifests, or edit indexes; bootstrap's own HARD-GATE is then the user-facing approval surface. The Phase 4 mystery-firewall hard-reject of any storylet whose `M_resolution_claims` carry `canon_candidate` authority is a separate, never-elided refusal that fires before the user-facing HARD-GATE — author-pool storylets MAY NOT carry `canon_candidate` authority because they are globally visible across branches and would launder a runtime canon-promotion handoff into authoring time. The runtime page-cycle's `story-fact-promotion-to-canon` handoff remains the sole legitimate canon-promotion path; this skill never makes that handoff.
+Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/_source/storylets/`, do NOT create any file under `worlds/<world-slug>/stories/<story-slug>/storylet-batches/`, and do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the parent story bundle exists with a readable `STORY_KERNEL.md`, refuses with a specific-sibling-missing error if `mode=audit` (deferred until `branching-story-health-audit` ships), refuses direct `mode=jit` invocation unless `parent_skill_invocation=true` from `branching-story-page-cycle`, allocates the next `SLB-NNNN` and the next available `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)` for direct batches, loads the current storylet pool + open OBLs + active THRs + recent page history along the longest active branch_path, loads world canon (whole-class M + INV records and a `task_type='storylet_pool_authoring'` context packet for governing CFs), and confirms the content_policy block (NC-21 verbatim) is loaded for downstream LLM prompt assembly; (b) every surviving candidate SLT in the batch records PASS with a one-line rationale across all nine Phase 4 per-storylet gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate DSL parsability, branch-contamination, schema completeness) AND every direct batch records PASS with a one-line rationale across all six Phase 5 diversity-audit checks (shape distribution, tone distribution, content_intensity distribution, OBL-engagement distribution, theme distribution, cast usage) plus the Phase 5 batch-level branch-contamination audit; (c) the user has explicitly approved the Phase 6 batch manifest deliverable summary (per-storylet titles + shape + intensity + OBL/THR engagement + mystery_safety verdict, plus the diversity summary, the rejected-candidates count, and the target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable. `parent_skill_invocation: true` is a documented no-write sub-routine path: for bootstrap seed generation and page-cycle JIT generation, this skill may return an internal validation packet and approved SLT records to the caller, but it must not write storylet files, create SLB manifests, or edit indexes; the parent skill's own HARD-GATE/write transaction is then the user-facing approval surface. The Phase 4 mystery-firewall hard-reject of any storylet whose `M_resolution_claims` carry `canon_candidate` authority is a separate, never-elided refusal that fires before the user-facing HARD-GATE — author-pool storylets MAY NOT carry `canon_candidate` authority because they are globally visible across branches and would launder a runtime canon-promotion handoff into authoring time. Runtime JIT storylets MAY carry `canon_candidate` authority only when `visibility.scope: branch_scoped` and `requires_canon_promotion: true`, and the runtime page-cycle's `story-fact-promotion-to-canon` handoff remains the sole legitimate canon-promotion path; this skill never makes that handoff.
 </HARD-GATE>
 
 ## Process Flow
@@ -51,8 +57,11 @@ Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/_source/st
 ```
 Pre-flight (resolve worlds/<world-slug>/stories/<story-slug>/;
             refuse mode=audit until branching-story-health-audit ships;
+            refuse mode=jit unless parent_skill_invocation=true from
+            branching-story-page-cycle with created_at_page +
+            caller_state_snapshot;
             allocate next SLB-NNNN + reserve SLT-NNNN range via
-            allocate_next_id; determine mode; load STORY_KERNEL.md;
+            allocate_next_id for direct batches; determine mode; load STORY_KERNEL.md;
             load current storylet pool filtered by visibility;
             load open OBLs + active THRs from this bundle's _source/;
             load recent page history — last ~10 pages along the longest
@@ -72,7 +81,9 @@ Phase 1: Coverage Diagnosis     (scan current pool + open-state for
                                  mysteries_in_play[] entries with no
                                  touching storylet; recent-history
                                  repetition signal; emit diagnosis matrix
-                                 driving Phase 2)
+                                 driving Phase 2; jit mode reduces to
+                                 one continuation-failure row from the
+                                 caller_state_snapshot)
       |
       v
 Phase 2: Generation Seeds       (produce target_pool_size + ~30% seeds —
@@ -80,7 +91,9 @@ Phase 2: Generation Seeds       (produce target_pool_size + ~30% seeds —
                                  tone register, content_intensity band,
                                  implied state preconditions, core
                                  dramatic transaction; seeds are proposals,
-                                 not yet structured records)
+                                 not yet structured records; jit mode
+                                 produces exactly one seed from the
+                                 continuation-failure context)
       |
       v
 Phase 3: Structured Drafting    (per seed: assemble LLM prompt with
@@ -116,7 +129,8 @@ Phase 5: Diversity Audit        (across surviving SLTs: shape
                                  branch-contamination audit verifying
                                  no global_author_pool storylet leaks
                                  branch-local IDs; up to 2 diversity-
-                                 correction iterations before escalating)
+                                 correction iterations before escalating;
+                                 jit mode bypasses batch diversity)
       |
       v
 Phase 6: Approval / Return      (direct invocation: HARD-GATE summary
@@ -127,7 +141,8 @@ Phase 6: Approval / Return      (direct invocation: HARD-GATE summary
                                  diversity summary + rejected-candidates
                                  count + target write paths;
                                  parent_skill_invocation: internal
-                                 validation packet returned to caller;
+                                 validation packet returned to caller
+                                 with approved SLT records;
                                  --user options-->
                                  ACCEPT BATCH / ACCEPT WITH SELECTIONS /
                                  REVISE-diversity / REVISE-focus / REJECT)
@@ -140,7 +155,9 @@ Phase 7: Atomic Write           (direct invocation only: each SLT-NNNN.yaml
                                  storylet-batches/; INDEX.md updated
                                  LAST so partial failure leaves index
                                  unmutated; parent_skill_invocation
-                                 returns before write; NO git commit)
+                                 returns before write; page-cycle writes
+                                 JIT SLTs in its Phase 11 transaction;
+                                 NO git commit)
 ```
 
 ## Inputs
@@ -152,15 +169,17 @@ Phase 7: Atomic Write           (direct invocation only: each SLT-NNNN.yaml
 
 ### Optional
 
-- `mode` — `seed | focus | audit`. Default: inferred from inputs (`source_audit_path` → audit; `focus_area` → focus; otherwise → seed). Audit mode aborts at Pre-flight until `branching-story-health-audit` ships.
+- `mode` — `seed | focus | audit | jit`. Default: inferred from inputs (`source_audit_path` → audit; `focus_area` → focus; otherwise → seed). Audit mode aborts at Pre-flight until `branching-story-health-audit` ships. JIT mode is the runtime sub-routine for `branching-story-page-cycle` Phase 4 and requires `parent_skill_invocation: true`.
 - `focus_area` — one of {`bootstrap_mix`, `entry_pressure`, `threat_escalation`, `relational_dynamics`, `aftermath_consequences`, `mystery_edge_brushes`, `fork_recovery`, `thread_resolution_options`, `aftermath_residue`, `content_intensity_lift`}. Required when `mode=focus`; ignored when `mode=seed` (uses `bootstrap_mix` implicitly).
 - `target_pool_size` — default ~20 in seed mode, 10–15 in focus mode.
 - `source_obligations` — comma-separated `OBL-NNNN` ids the new storylets should engage.
 - `source_threads` — comma-separated `THR-NNNN` ids.
 - `source_audit_path` — path to a `SAU-NNNN` audit report. Required when `mode=audit`. **Deferred until `branching-story-health-audit` ships.**
+- `created_at_page` — `PG-NNNN`. Required when `mode=jit`; ignored otherwise. Used for `provenance.created_at_page` and branch-scoped visibility.
+- `caller_state_snapshot` — inline page-cycle `state_snapshot`. Required when `mode=jit` and `parent_skill_invocation=true`; ignored otherwise. Supplies the current branch state and continuation-failure reason for reduced diagnosis and seed generation.
 - `tone_override` — free-form tone hint per batch.
 - `content_intensity_override` — `tame | mature | explicit`; ±1 band override.
-- `parent_skill_invocation` — boolean, default `false`. When `true`, this skill runs as a no-write sub-routine for a parent skill. Currently documented for `branching-story-bootstrap` Phase 6 only: `mode=seed`, `focus_area=bootstrap_mix`, and bootstrap supplies in-memory Phases 1-5 context for a story bundle that may not exist on disk yet.
+- `parent_skill_invocation` — boolean, default `false`. When `true`, this skill runs as a no-write sub-routine for a parent skill. Documented shapes: `branching-story-bootstrap` Phase 6 uses `mode=seed`, `focus_area=bootstrap_mix`, and bootstrap-supplied in-memory Phases 1-5 context for a story bundle that may not exist on disk yet; `branching-story-page-cycle` Phase 4 uses `mode=jit`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, and `caller_state_snapshot=<this_state_snapshot>`.
 
 ## Output
 
@@ -168,7 +187,7 @@ Phase 7: Atomic Write           (direct invocation only: each SLT-NNNN.yaml
 - `worlds/<world-slug>/stories/<story-slug>/storylet-batches/SLB-NNNN.md` — batch manifest summarizing the run (mode, focus area, source obligations/threads, approved storylets table, diversity summary, rejected-candidates breakdown). Schema in `templates/storylet-batch-manifest.md`.
 - `worlds/<world-slug>/stories/<story-slug>/INDEX.md` — updated in place; storylet-pool section receives new total count + per-shape distribution + per-content_intensity distribution.
 
-When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4/5 validation verdicts, and diversity summaries. `branching-story-bootstrap` assigns final SLT ids and writes those records during its Phase 11 transaction.
+When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` assigns final SLT ids and writes seed records during its Phase 11 transaction. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick transaction.
 
 ### No canon-file mutations
 
@@ -179,6 +198,8 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 Direct invocation allocates `SLT-NNNN` (per-story append-only, shared with runtime JIT-generated storylets — Phase 4 of `branching-story-page-cycle` may write the next-numbered SLT between batches) and `SLB-NNNN` (per-story append-only batch manifests) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
 
 For `parent_skill_invocation: true` bootstrap seed generation, this skill does not allocate `SLB` and does not reserve the SLT range itself. `branching-story-bootstrap` owns final SLT id assignment because it is constructing a new story bundle and writes the returned storylets inside its Phase 11 transaction.
+
+For `parent_skill_invocation: true` page-cycle JIT generation, this skill does not allocate `SLB`. `branching-story-page-cycle` allocates or reserves the next SLT id as part of its page-tick write set and passes that id in the caller context; the returned SLT must carry `provenance.origin: runtime_jit`, `provenance.created_at_page: <created_at_page>`, and `visibility.scope: branch_scoped`.
 
 ## World-State Prerequisites
 
@@ -206,7 +227,7 @@ A conceptual aggregate assembled by reading `worlds/<world-slug>/stories/<story-
 
 Sibling-branch SLT records are NOT loaded — cross-branch dedup would homogenize divergent branches at authoring time and silently corrupt branch isolation. The aggregate drives Phase 1 coverage diagnosis (over- and under-represented shapes), Phase 4 dedup (`hard_preconds + tone_tags + theme_tags + shape` similarity threshold), and Phase 5 diversity audit (current pool composition feeds the target-distribution arithmetic).
 
-If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first. If `worlds/<world-slug>/stories/<story-slug>/` is missing, abort and instruct the user to run `branching-story-bootstrap` first, except for the documented `parent_skill_invocation: true` + `mode=seed` + `focus_area=bootstrap_mix` path where bootstrap is currently constructing that bundle in memory. If `mode=audit`, abort with "audit mode requires `branching-story-health-audit`, which is not yet shipping; use `mode=seed` or `mode=focus` until it lands."
+If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first. If `worlds/<world-slug>/stories/<story-slug>/` is missing, abort and instruct the user to run `branching-story-bootstrap` first, except for the documented `parent_skill_invocation: true` + `mode=seed` + `focus_area=bootstrap_mix` path where bootstrap is currently constructing that bundle in memory. If `mode=audit`, abort with "audit mode requires `branching-story-health-audit`, which is not yet shipping; use `mode=seed` or `mode=focus` until it lands." If `mode=jit` without `parent_skill_invocation: true` and a page-cycle caller context, abort with "jit mode is available only as a branching-story-page-cycle Phase 4 sub-routine."
 
 Direct `Read` of `worlds/<world-slug>/_source/<world-subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read world canon. Direct `Read` of `worlds/<world-slug>/stories/<story-slug>/_source/<story-subdir>/` is the correct surface (Hook 2's match pattern is `worlds/<slug>/_source/...` which does NOT match the nested story bundle).
 
@@ -219,10 +240,12 @@ Run before Phase 1; abort if any precondition fails.
 - Validate `story_slug` is kebab-case (`[a-z0-9-]+`); resolve `worlds/<world-slug>/stories/<story-slug>/`. Abort if missing — instruct the user to run `branching-story-bootstrap` first, except when `parent_skill_invocation: true`, `mode=seed`, and `focus_area=bootstrap_mix` are all present.
 - Resolve `mode`: explicit input override → inferred (`source_audit_path` → audit; `focus_area` → focus; otherwise → seed).
 - **If `mode=audit`: abort immediately** with the deferred-sibling error message. This is the Shape (c) fail-fast — `source_audit_path` is read for the error message but no `audits/SAU-NNNN-*.md` resolution is attempted.
+- If `mode=jit`: require `parent_skill_invocation: true`, `target_pool_size=1`, `created_at_page=PG-NNNN`, and `caller_state_snapshot`. The caller must be `branching-story-page-cycle` Phase 4 and must supply the page-tick context: the allocated/next SLT id, the current branch's state snapshot, open OBLs, pending CNSQs, active THRs, cast_present, recent branch prose context, whole-class M/INV loads, and loaded content_policy. This path is no-write and returns exactly one approved SLT plus validation verdicts to the parent; it does not create an SLB manifest or edit INDEX.md.
 - If `mode=focus` and `focus_area` is absent: abort and instruct the user to supply a `focus_area` from the documented enum.
-- If `parent_skill_invocation: true`: require `mode=seed` and `focus_area=bootstrap_mix`. The parent must provide bootstrap Phases 1-5 in-memory context: normalized premise/designing principle, bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and loaded content_policy. This path is no-write and returns approved SLTs to the parent; it does not create an SLB manifest or edit INDEX.md.
-- Allocate `SLB-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLB', story_slug=<story_slug>)`.
-- Reserve next `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLT', story_slug=<story_slug>)` — this is the starting point; subsequent allocations within the run advance from this base sequentially as candidates pass Phase 4. The runtime page-cycle's JIT-generated SLT records share this namespace, so a re-scan at Phase 7 confirms no collision before write.
+- If `parent_skill_invocation: true` and `mode=seed`: require `focus_area=bootstrap_mix`. The parent must provide bootstrap Phases 1-5 in-memory context: normalized premise/designing principle, bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and loaded content_policy. This path is no-write and returns approved SLTs to the parent; it does not create an SLB manifest or edit INDEX.md.
+- If `parent_skill_invocation: true` with any mode other than `seed` or `jit`, abort; no other sub-routine shapes are documented.
+- For direct invocation only, allocate `SLB-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLB', story_slug=<story_slug>)`.
+- For direct invocation only, reserve next `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLT', story_slug=<story_slug>)` — this is the starting point; subsequent allocations within the run advance from this base sequentially as candidates pass Phase 4. The runtime page-cycle's JIT-generated SLT records share this namespace, so a re-scan at Phase 7 confirms no collision before write.
 - Read `worlds/<world-slug>/WORLD_KERNEL.md`, `worlds/<world-slug>/ONTOLOGY.md`, and `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` directly.
 - Determine the **longest active branch_path** by scanning `_source/pages/PG-*.yaml` for the longest `branch_path` array among pages whose `branch_terminal: false`. Ties broken by most-recent `created_at`.
 - Assemble the Mandatory Current Storylet Pool aggregate (per §World-State Prerequisites scoping rule).
@@ -235,13 +258,26 @@ Run before Phase 1; abort if any precondition fails.
 - Load whole-class Invariant audit: `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`.
 - Confirm content_policy block (NC-21 verbatim text from `templates/content-policy.txt`) is loaded for downstream prompt assembly. Without it, Phase 3 cannot legitimately render storylet content. This is the FIRST condition of the HARD-GATE.
 
-For `parent_skill_invocation: true`, skip the direct-invocation-only file-system steps that require an existing story bundle: SLB allocation, current-pool load, longest-branch page-history load, and `STORY_KERNEL.md` read. Use the parent-supplied bootstrap context instead. Bootstrap owns SLT id assignment because this is a new story bundle; SLT records returned by this sub-routine must carry `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`.
+For `parent_skill_invocation: true`, skip direct-invocation-only file-system steps that the parent already owns.
+
+- Bootstrap seed sub-routine: skip SLB allocation, current-pool load, longest-branch page-history load, and `STORY_KERNEL.md` read. Use the parent-supplied bootstrap context instead. Bootstrap owns SLT id assignment because this is a new story bundle; SLT records returned by this sub-routine must carry `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`.
+- Page-cycle JIT sub-routine: skip SLB allocation and batch-manifest setup, but use the parent-supplied page-cycle context for current pool, branch-local state, recent branch prose, whole-class M/INV loads, and content_policy. Page-cycle owns the Phase 11 write transaction; the returned SLT must carry `provenance.origin: runtime_jit`, `provenance.created_at_page: <created_at_page>`, and `visibility.scope: branch_scoped`.
 
 ## Phase 1: Coverage Diagnosis
 
 Scan the current pool and the open-state for thinness. Emit a structured diagnosis matrix that drives Phase 2 seed generation.
 
 For `parent_skill_invocation: true` from `branching-story-bootstrap`, the "current pool" is empty because the story bundle is not on disk yet. Diagnose against the parent-supplied bootstrap state instead: initial THRs/OBLs, cast-bound STENT/STINT records, imported SFs, premise tone/themes, `mysteries_in_play[]`, and the loaded whole-class M/INV context. The bootstrap-mix weighting in Phase 2 supplies the shape-distribution target.
+
+For `parent_skill_invocation: true` from `branching-story-page-cycle` with `mode=jit`, diagnosis is reduced to the single continuation failure that triggered JIT. Emit one row:
+
+```yaml
+gap_kind: continuation_failure
+target_record_id: <caller_state_snapshot.current_storylet_eligibility_failure_reason.record_id | null>
+priority_weight: max
+```
+
+Use `caller_state_snapshot.current_storylet_eligibility_failure_reason` when present; otherwise derive the row from page-cycle's Phase 3 consequence-capacity result and the failed Phase 4 eligibility/scoring context. Do not run a full pool-health scan or longest-branch recent-history scan inside this sub-routine; page-cycle has already assembled the relevant branch-local state.
 
 **Diagnose**:
 
@@ -272,6 +308,8 @@ Seeds are proposals, not yet structured records. They live only in the in-memory
 **Bootstrap-mix shape weighting** (when `mode=seed` or `focus_area=bootstrap_mix`): apply the weighting from the proposal's bootstrap mix table — entry_pressure 3-5, cast_introduction 1 per non-protagonist major, threat_escalation 2-4, relational_dynamics 3-5, routine_disruption 2-3, aftermath_sequel 2-3, reflection_dilemma 2-3.
 
 **Focus-mode shape weighting** (when `mode=focus` and `focus_area` is a non-bootstrap_mix value): all seeds match the requested `focus_area`'s implied shape, with a 20% off-shape allowance for diversity (e.g., `focus_area=threat_escalation` → ~80% threat_escalation seeds + ~20% adjacent shapes per Phase 1's gap analysis).
+
+**JIT-mode single seed** (when `mode=jit` and `parent_skill_invocation: true`): produce exactly ONE seed sized to the caller's continuation-failure context. `target_pool_size` must be 1. Shape distribution and +30% replacement buffering are bypassed because this is not a batch; the seed should address the failed eligibility / pending-consequence / required-aftermath condition that made page-cycle Phase 3 pass only by JIT-generatable continuation.
 
 ## Phase 3: Structured Drafting
 
@@ -324,8 +362,9 @@ mode-and-source-driven rule below.
 **Visibility scope assignment** (per the proposal's Visibility Scope Semantics):
 
 - `mode=seed` or `mode=focus`: `visibility.scope: global_author_pool`, `provenance.created_at_page: null` — these batches are author-pool storylets visible across every branch.
+- `mode=jit`: `visibility.scope: branch_scoped`, `provenance.created_at_page: <created_at_page>`, `provenance.origin: runtime_jit` — runtime JIT storylets are visible only on the branch containing the calling page and are never added to the global author pool.
 - `mode=audit` (deferred): visibility inherits from the source RSP card's `target_branch` field — `global pool` → `global_author_pool`; concrete branch path → `branch_prefix_scoped` with that prefix; branch-local-fact-dependent → `branch_scoped`.
-- `provenance.origin`: `bootstrap_seed` when invoked by `branching-story-bootstrap` Phase 6 (detected by `mode=seed` + `focus_area=bootstrap_mix`); `focus_authoring` for user-driven `mode=focus`; `audit_remediation` deferred.
+- `provenance.origin`: `bootstrap_seed` when invoked by `branching-story-bootstrap` Phase 6 (detected by `mode=seed` + `focus_area=bootstrap_mix`); `runtime_jit` when invoked by `branching-story-page-cycle` Phase 4 with `mode=jit`; `focus_authoring` for user-driven `mode=focus`; `audit_remediation` deferred.
 
 **Engine wraps the LLM output**:
 
@@ -339,6 +378,8 @@ mode-and-source-driven rule below.
 ## Phase 4: Per-Storylet Validation Gates (Canon Safety Check phase, per-storylet)
 
 Each candidate SLT runs all **9** gates. A failed gate either HARD-REJECTs the candidate (replaced with a fresh seed from Phase 1's next-priority gap) or routes to revise (LLM re-prompted with the failure inlined; up to 2 retries per gate).
+
+For `mode=jit`, run this structural precondition before gate 1: `visibility.scope` MUST be `branch_scoped`, `provenance.origin` MUST be `runtime_jit`, and `provenance.created_at_page` MUST equal the supplied `created_at_page`. Failure is a structural HARD-REJECT and re-prompt, not a new 10th gate. Gate 8 remains the general branch-contamination enforcement surface.
 
 | # | Gate | Check | On fail |
 |---|---|---|---|
@@ -362,6 +403,8 @@ Each candidate SLT runs all **9** gates. A failed gate either HARD-REJECTs the c
 ## Phase 5: Diversity Audit (Canon Safety Check phase, batch-level)
 
 Across the surviving SLT records in this batch, verify diversity. **Six diversity-axis checks plus one batch-level branch-contamination audit must pass before the batch can advance to Phase 6.**
+
+For `mode=jit`, bypass Phase 5 diversity audit. A single runtime storylet has no meaningful batch diversity surface; Phase 4 gate 8 already covers the only branch-contamination check meaningful for one branch-scoped record. Record the bypass in the internal validation packet as `Phase 5: BYPASSED — single-storylet runtime JIT sub-routine`.
 
 ### Diversity-axis checks
 
@@ -460,9 +503,11 @@ When `parent_skill_invocation: true`, do not present a user-facing HARD-GATE and
 
 For the bootstrap path, the caller is `branching-story-bootstrap` Phase 6. Bootstrap includes this validation packet in its own Phase 10 deliverable summary and writes the returned SLTs in Phase 11 only after the user approves the complete bootstrap bundle.
 
+For the JIT path, the caller is `branching-story-page-cycle` Phase 4. Page-cycle includes the returned SLT and validation packet in its own Phase 10 deliverable summary when that gate is visible, applies the SLT in Phase 5, rechecks it through Phase 9, and writes it in Phase 11 only if the page tick commits.
+
 ## Phase 7: Atomic Write + INDEX Update
 
-Skip this phase entirely when `parent_skill_invocation: true`; this skill has already returned the approved SLTs to the caller and must perform no writes.
+Skip this phase entirely when `parent_skill_invocation: true`; this skill has already returned the approved SLTs to the caller and must perform no writes. For JIT mode, `branching-story-page-cycle` Phase 11 writes the returned `SLT-NNNN.yaml` and updates `INDEX.md` inside the page tick's single transaction.
 
 Single transaction. Write order matters — `INDEX.md` is the LAST write so partial failure leaves the per-bundle index unmutated:
 
@@ -484,7 +529,7 @@ Report all written paths. **Do NOT commit to git.** The user reviews the diff an
 | Rule 1: No Floating Facts | Phase 4 gates 7 + 9; structural via SLT schema | Every SLT carries `mystery_safety`, `content_intensity`, `provenance`, `visibility`, `cast_required`, `hard_preconds`, `fact_effects`, and `choice_templates` (no null-pres-and-effects shortcuts allowed). Every predicate in `hard_preconds` / `soft_preconds` / `cast_requirements` / `location_requirements` / choice-template preconditions parses against the Predicate DSL grammar (gate 7 HARD-REJECT on parse failure). Gate 9 (schema completeness) is the structural backstop. |
 | Rule 4: No Globalization by Accident | Phase 4 gates 3 + 8; Phase 5 batch-level branch-contamination audit | Gate 3 audits every `fact_effects` and `relationship_effects` entry against every INV record's `break_conditions` from the whole-class INV load (HARD-REJECT). Gate 8 enforces branch-isolation at story scope: `global_author_pool` storylets may NOT directly reference any story-local record id whose `created_at_page` is non-null (post-PG-0001) — preventing branch-local invention from silently leaking across branches. Phase 5's batch-level audit catches systemic visibility-scope errors that gate 8 may have missed for indirect references. |
 | Rule 5: No Consequence Evasion | Phase 4 gate 4; Phase 5 OBL-engagement diversity check | Gate 4 verifies that applying a candidate storylet's exit state to the bundle's current state leaves at least one continuation storylet eligible (in current pool OR JIT-generatable per a brief LLM probe) — HARD-REJECT a storylet whose exit state would produce a dead-end branch. Phase 5's OBL-engagement check (≥60% of open OBLs engaged in seed mode; every `source_obligations` id hit in focus mode) prevents the proposal's "thin pool produces brittle story" failure mode at batch granularity. |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 gates 1 + 2; Phase 6 HARD-GATE / internal return packet | Gate 1 hard-rejects any storylet whose `M_resolution_claims` resolves a `forbidden`-status M from the whole-class M load. Gate 2 enforces resolution-authority discipline: `canon_candidate` authority requires `requires_canon_promotion: true` AND `visibility.scope: branch_scoped` (never `global_author_pool` — would launder a runtime canon-promotion handoff into authoring time); `apparent` and `branch_local_counterfactual` require the cited M's `resolution_safety_per_M[m_id]` to match the M record's actual `future_resolution_safety`. Phase 6 surfaces the count of `canon_candidate`-claim storylets either in the direct-invocation HARD-GATE summary or, for `parent_skill_invocation: true`, in the internal return packet consumed by the parent skill's HARD-GATE. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 gates 1 + 2; Phase 6 HARD-GATE / internal return packet | Gate 1 hard-rejects any storylet whose `M_resolution_claims` resolves a `forbidden`-status M from the whole-class M load. Gate 2 enforces resolution-authority discipline: `canon_candidate` authority requires `requires_canon_promotion: true` AND `visibility.scope: branch_scoped` (never `global_author_pool` — would launder a runtime canon-promotion handoff into authoring time); `apparent` and `branch_local_counterfactual` require the cited M's `resolution_safety_per_M[m_id]` to match the M record's actual `future_resolution_safety`. Phase 6 surfaces the count of `canon_candidate`-claim storylets either in the direct-invocation HARD-GATE summary or, for `parent_skill_invocation: true`, in the internal return packet consumed by the parent skill's HARD-GATE. In `mode=jit`, the parent is page-cycle, and page-cycle Phase 4.5 remains the canon-promotion handoff owner. |
 
 ## Record Schemas
 
@@ -504,13 +549,13 @@ This skill's outputs are story-bundle records and a markdown manifest. None are 
 | Rule 1: No Floating Facts | Phase 4 gates 7 + 9; structural via SLT schema requiring `mystery_safety`, `provenance`, `visibility`, predicate-DSL preconds, structured fact/relationship effects. | Free-form prose predicates / effects fail gate 7 / gate 9. |
 | Rule 2: No Pure Cosmetics | N/A | Not applicable — canon-reading skill produces story-local content scaffolds (storylets), NOT new world-level species / rituals / technologies / artifacts / institutions. The Rule 2 enforcement surface is `canon-addition` Phase 5 (Diffusion Analysis) and `propose-new-canon-facts` Phase 4 (Domain Coverage); SLT records are not Rule-2-eligible because they are story-scoped content scaffolds, not world-canon. |
 | Rule 3: No Specialness Inflation | N/A | Not applicable — canon-reading skill produces no new world-level capability, artifact, or species. The enforcement surface is `canon-addition` (CF stabilizers + Rule-3 audit). Storylet capability assertions inherit from the story's already-imported world-canon SFs (per `branching-story-bootstrap` Phase 3); they do not inflate world-level specialness. |
-| Rule 4: No Globalization by Accident | Phase 4 gates 3 + 8; Phase 5 batch-level branch-contamination audit. | INV `break_conditions` enforced against every storylet's effects; story-scope branch-isolation enforced against author-pool storylets. |
+| Rule 4: No Globalization by Accident | Phase 4 gates 3 + 8; Phase 5 batch-level branch-contamination audit for direct batches; JIT structural precondition for runtime branch-scoped storylets. | INV `break_conditions` enforced against every storylet's effects; story-scope branch-isolation enforced against author-pool storylets and runtime JIT storylets. |
 | Rule 5: No Consequence Evasion | Phase 4 gate 4 (consequence-capacity); Phase 5 OBL-engagement diversity check. | A storylet with no continuation path is dead-end; a batch that engages <60% of open OBLs is brittle. |
 | Rule 6: No Silent Retcons | N/A | Not applicable — canon-reading skill emits no Change Log Entries because it does not mutate world canon. Storylet-pool changes are append-only at the file-system level (new SLT-NNNN records with `provenance` declared); the Rule 6 enforcement surface for any later promotion of story-local facts to world canon is `canon-addition` (via the future `story-fact-promotion-to-canon` skill). |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 gates 1 + 2; Phase 6 direct HARD-GATE summary or parent internal return packet; whole-class M load. | `forbidden`-status M resolutions hard-rejected; `canon_candidate` authority forbidden on author-pool storylets (laundering firewall). |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 gates 1 + 2; Phase 6 direct HARD-GATE summary or parent internal return packet; whole-class M load. | `forbidden`-status M resolutions hard-rejected; `canon_candidate` authority forbidden on author-pool storylets and allowed for runtime JIT only when branch-scoped and routed back through page-cycle Phase 4.5. |
 | Rule 11: No Spectator Castes by Accident | N/A | Not applicable — canon-reading skill introduces no new exceptional capability that could create spectator castes. The enforcement surface is `canon-addition` Phase 5 + `propose-new-canon-facts` (CF leverage-enumeration). Storylet `cast_required` and `cast_optional` rosters draw from the bundle's existing STENT pool whose dossiers' world-CFs are already enumerated. |
 | Rule 12: No Single-Trace Truths | N/A | Not applicable — same reasoning as Rule 2 / 3 / 11; the trace-multiplicity discipline applies to new world-level hard-canon truths, not to story-local content scaffolds. The enforcement surface is `canon-addition` + `propose-new-canon-facts`. |
-| Canon Layering | Phase 4 gate 2 enforces resolution-authority discipline (apparent / branch_local_counterfactual / canon_candidate) preserving the contested vs hard vs mystery layer separation; gate 1 preserves the Mystery Reserve layer. Storylets carry `provenance.origin` (`bootstrap_seed | focus_authoring | audit_remediation`) marking their layer-of-origin. | Storylet pool is its own per-story layer below world canon — not promoted to any world canon layer without explicit `story-fact-promotion-to-canon`. |
+| Canon Layering | Phase 4 gate 2 enforces resolution-authority discipline (apparent / branch_local_counterfactual / canon_candidate) preserving the contested vs hard vs mystery layer separation; gate 1 preserves the Mystery Reserve layer. Storylets carry `provenance.origin` (`bootstrap_seed | focus_authoring | audit_remediation | runtime_jit`) marking their layer-of-origin. | Storylet pool is its own per-story layer below world canon. Runtime JIT storylets are branch-scoped and are not promoted to any world canon layer without explicit `story-fact-promotion-to-canon` through page-cycle Phase 4.5. |
 | Change Control Policy | N/A | Not applicable — canon-reading skill emits no Change Log Entries. Per FOUNDATIONS §Change Control Policy, "every approved change must get a record" applies to world-level canon mutations; storylet-pool authoring mutates story-bundle state, not world canon. The handoff is `canon-addition` for any later promotion via `story-fact-promotion-to-canon`. |
 
 ## Guardrails
@@ -518,19 +563,19 @@ This skill's outputs are story-bundle records and a markdown manifest. None are 
 - **HARD-GATE is absolute for direct invocation** (see top of file). No file is written until Phase 4 records 9 PASSes per surviving SLT (with one-line rationale per gate per storylet) AND Phase 5 records 6 diversity-axis PASSes plus the batch-level branch-contamination PASS AND the user explicitly approves the Phase 6 batch manifest deliverable. Auto Mode does not override. `parent_skill_invocation: true` is a no-write sub-routine exception: this skill returns validated SLTs to the parent without writing, and the parent skill's HARD-GATE governs the eventual write.
 - **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted by this skill.
 - **Never promote to world canon by storylet authority.** A storylet's `M_resolution_claims` with `canon_candidate` authority is ONLY legal on `branch_scoped` runtime-JIT storylets (emitted by `branching-story-page-cycle` Phase 4 JIT expansion). This skill produces author-pool batches in `seed` and `focus` modes; Phase 4 gate 2 hard-rejects any author-pool candidate carrying `canon_candidate` authority. The runtime page-cycle's `story-fact-promotion-to-canon` handoff (HARD-GATE preserved, never elided in any execution_mode) is the sole legitimate canon-promotion path.
+- **JIT mode is sub-routine only.** `mode=jit` requires `parent_skill_invocation: true`, `target_pool_size=1`, `created_at_page`, and `caller_state_snapshot` from `branching-story-page-cycle` Phase 4. Direct user invocation with `mode=jit` aborts before allocation or write. The returned SLT is branch-scoped, carries `provenance.origin: runtime_jit`, and is written only by page-cycle Phase 11 if the page tick commits.
 - **Never overwrite an existing storylet.** SLT records are append-only at the file-system level: each invocation allocates fresh SLT-NNNN ids beyond the highest existing id (allocator scan + reserved range). To revise an existing storylet, the discipline is to author a new SLT with a `provenance.origin: focus_authoring` (or future `audit_remediation`) and the same gap target, NOT edit the prior SLT. Dropped-at-HARD-GATE ids become permanent allocation gaps.
 - **Direct `Write` is the correct mutation surface for story-bundle records under the Shape A integration posture.** Hook 3's match pattern is `worlds/<slug>/_source/...` which does NOT match `worlds/<slug>/stories/<slug>/_source/...`. SLT/SLB records are not world canon and no engine ops exist for them. A future maintainer who "upgrades" the skill to engine routing must FIRST land patch-engine ops + Hook 3 namespace extension + record-schema validators for the SLT/SLB classes (deferred-integration tickets named below).
 - **Known integration debt** (deferred per Shape A; design exploits these once landed):
   - **`branching-story-health-audit` (future skill)** — Pre-flight aborts on `mode=audit` until this skill ships. The audit skill is expected to produce SAU-NNNN reports whose `target_branch` and `remediation_storylets[]` fields drive this skill's audit-mode visibility-inheritance and seed-generation logic. Filing the audit-skill ticket is out of scope for the current ticket batch; the deferral is disclosed here for maintainability.
-  - **BSPAG-001: extend `storylet-pool-authoring` with a `jit` mode and refactor `branching-story-page-cycle` Phase 4 JIT expansion to delegate to it** — page-cycle currently inlines minimal JIT SLT shape with seam references in SKILL.md Phase 4. This skill does NOT currently expose a `jit` mode — that's part of the BSPAG-001 scope; today, Phase 4 JIT expansion stays inlined in page-cycle, and the JIT-shape seams stay open until BSPAG-001 lands.
 - **Sibling interop**:
   - **Consumes (existing)**: `branching-story-bootstrap` outputs (story bundle structure including STORY_KERNEL.md, _source/obligations/, _source/threads/, _source/storylets/ initial seed pool); `branching-story-page-cycle` outputs (page records, JIT-generated SLTs sharing the SLT-NNNN namespace).
   - **Consumes (deferred)**: `branching-story-health-audit` (SAU-NNNN reports for audit mode — abort-until-shipping per Shape (c)).
-  - **Produces inputs for**: `branching-story-page-cycle` Phase 4 storylet selection (the runtime reads SLT records by visibility scope and salience-scores them); `branching-story-bootstrap` Phase 6 (bootstrap uses this skill's seed mode with `parent_skill_invocation: true` and writes the returned SLTs in its own Phase 11 transaction).
+  - **Produces inputs for**: `branching-story-page-cycle` Phase 4 storylet selection (the runtime reads SLT records by visibility scope and salience-scores them); `branching-story-page-cycle` Phase 4 JIT fallback (page-cycle invokes this skill with `mode=jit`, `parent_skill_invocation: true`, `target_pool_size=1`, and writes the returned branch-scoped SLT in Phase 11); `branching-story-bootstrap` Phase 6 (bootstrap uses this skill's seed mode with `parent_skill_invocation: true` and writes the returned SLTs in its own Phase 11 transaction).
 - **Content policy is a contract, not a setting.** The NC-21 block in `templates/content-policy.txt` is the skill's discipline floor. It is prepended to every Phase 3 LLM prompt as the FIRST block. `content_intensity` (`tame | mature | explicit`) is a routing tag for tone consistency within branches — never a censor. `content_intensity_override` shifts the band ±1 for a given batch but never lifts the NC-21 policy.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.
 - **Do NOT commit to git.** Writes land in the working tree only; the user reviews the diff and commits.
 
 ## Final Rule
 
-A storylet pool is not authored because storylets were generated. It is authored only when the firewall is intact (every M's `forbidden` status respected; no `canon_candidate` authority on author-pool storylets), the diversity axes meet target distribution, the open obligations have payoff routes, the active threads have escalation storylets, every predicate parses against the engine-checkable Predicate DSL, the branch-isolation invariant holds (no `global_author_pool` storylet leaks branch-local IDs), and the user has explicitly approved the batch through this skill's direct HARD-GATE or through the parent skill's HARD-GATE when `parent_skill_invocation: true` — because the runtime page-cycle's salience scoring is only as good as the pool it scores, and a brittle pool produces a brittle story.
+A storylet pool is not authored because storylets were generated. It is authored only when the firewall is intact (every M's `forbidden` status respected; no `canon_candidate` authority on author-pool storylets), the diversity axes meet target distribution, the open obligations have payoff routes, the active threads have escalation storylets, every predicate parses against the engine-checkable Predicate DSL, the branch-isolation invariant holds (no `global_author_pool` storylet leaks branch-local IDs), and the user has explicitly approved the batch through this skill's direct HARD-GATE or through the parent skill's HARD-GATE when `parent_skill_invocation: true`. A runtime JIT storylet is valid only when the same per-storylet firewall and predicate gates pass, it is branch-scoped to the calling page, and page-cycle commits it through Phase 11 — because the runtime page-cycle's salience scoring is only as good as the pool it scores, and a brittle pool produces a brittle story.
