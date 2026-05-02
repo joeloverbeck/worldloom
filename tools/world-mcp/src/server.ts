@@ -211,6 +211,7 @@ export const ID_CLASSES = [
   "SREL",
   "STINT",
   "SLT",
+  "SLB",
   "STLOC",
   "STOBJ",
   "BR",

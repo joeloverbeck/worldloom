@@ -6,7 +6,8 @@ import {
   proposeNewCharactersRankingProfile,
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
-  storyPageCycleRankingProfile
+  storyPageCycleRankingProfile,
+  storyletPoolAuthoringRankingProfile
 } from "./canon-pipeline-adjacent";
 import { canonAdditionRankingProfile } from "./canon-addition";
 import { characterGenerationRankingProfile } from "./character-generation";
@@ -25,6 +26,7 @@ export const TASK_TYPES = [
   "emergent_pressure_events",
   "story_bootstrap",
   "story_page_cycle",
+  "storylet_pool_authoring",
   "other"
 ] as const;
 
@@ -42,6 +44,7 @@ export const rankingProfilesByTaskType: Record<TaskType, RankingWeights> = {
   emergent_pressure_events: emergentPressureEventsRankingProfile,
   story_bootstrap: storyBootstrapRankingProfile,
   story_page_cycle: storyPageCycleRankingProfile,
+  storylet_pool_authoring: storyletPoolAuthoringRankingProfile,
   other: defaultRankingProfile
 };
 
@@ -57,6 +60,7 @@ export const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
   emergent_pressure_events: 15000,
   story_bootstrap: 18000,
   story_page_cycle: 18000,
+  storylet_pool_authoring: 18000,
   other: 8000
 };
 
@@ -75,5 +79,6 @@ export {
   proposeNewCharactersRankingProfile,
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
-  storyPageCycleRankingProfile
+  storyPageCycleRankingProfile,
+  storyletPoolAuthoringRankingProfile
 };

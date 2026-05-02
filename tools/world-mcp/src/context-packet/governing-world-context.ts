@@ -69,6 +69,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
+  storylet_pool_authoring: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "TIMELINE.md",
+    "GEOGRAPHY.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "EVERYDAY_LIFE.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -134,6 +145,14 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 6: story state changes remain append-only by supersession",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  storylet_pool_authoring: [
+    "Storylet pool authoring is story-local; world canon remains read-only",
+    "Rule 1: imported facts must cite world authority",
+    "Rule 4: distribution discipline",
+    "Rule 5: separate story-local truth from world-level canon",
+    "Rule 6: storylet records remain append-only by new allocation",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -164,6 +183,12 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Story-local atomic records",
     "Rendered page prose",
     "Choice records",
+    "Per-bundle INDEX.md"
+  ],
+  storylet_pool_authoring: [
+    "Storylet record",
+    "Storylet batch manifest",
+    "Story-local atomic records",
     "Per-bundle INDEX.md"
   ],
   other: ["Task-specific output approved by workflow"]
@@ -220,6 +245,13 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not treat story-local facts as accepted world canon",
     "Do not read sibling-branch pages as continuity context"
   ],
+  storylet_pool_authoring: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
+    "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
+    "Do not resolve or pre-empt forbidden Mystery Reserve answers",
+    "Do not treat story-local facts as accepted world canon",
+    "Do not use sibling-branch storylets as authoring context"
+  ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
 
@@ -252,7 +284,8 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   propose_new_characters: ["invariant"],
   canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"],
   story_bootstrap: ["invariant", "mystery_reserve_entry"],
-  story_page_cycle: ["invariant", "mystery_reserve_entry"]
+  story_page_cycle: ["invariant", "mystery_reserve_entry"],
+  storylet_pool_authoring: ["invariant", "mystery_reserve_entry"]
 };
 
 const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([

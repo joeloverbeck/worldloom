@@ -98,7 +98,7 @@ After landing, run `branching-story-page-cycle` against a fixture story bundle i
 ## Out of Scope
 
 - BSBOOT-002 (bootstrap delegation) — separate ticket; landed independently. The `parent_skill_invocation` flag is shared infrastructure introduced by BSBOOT-002 and reused here.
-- MCPENH-013 / MCPENH-014 — landed independently; not blocked.
+- MCPENH-013 landed independently at archive/tickets/MCPENH-013-register-storylet-pool-authoring-task-type.md; MCPENH-014 landed independently at archive/tickets/MCPENH-014-add-slb-id-class-to-allocator.md and is not a blocker.
 - Patch-engine ops for SLT records — Shape A integration posture preserved (direct Write remains correct).
 - `branching-story-health-audit` — deferred sibling, not closing this seam set.
 - The Phase 4.5 canon-promotion handoff to story-fact-promotion-to-canon — untouched by this ticket; the JIT-mode delegation preserves the existing handoff path.

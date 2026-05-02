@@ -172,6 +172,8 @@ Before the first file edit, give the user a concise checkpoint naming:
 - the authoritative boundary you are treating as the ticket's owner
 - whether any sibling scope was absorbed, excluded, or left untouched
 
+Before the first source edit, if reassessment changed the file set, proof surface, docs consumers, or shared-contract boundary, patch the active ticket now. Do not wait for closeout to add newly discovered same-seam docs, tests, or command substitutions to `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, or `Test Plan`.
+
 If a numbered family's decomposition failed during reassessment, also name:
 
 - which sibling tickets are being absorbed into the active ticket

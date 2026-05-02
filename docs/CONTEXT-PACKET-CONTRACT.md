@@ -8,7 +8,7 @@ The packet is locality-first. It must secure seed-local authority and the govern
 
 ```yaml
 task_header:
-  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | story_bootstrap | story_page_cycle | other
+  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | story_bootstrap | story_page_cycle | storylet_pool_authoring | other
   world_slug: animalia
   generated_at: "2026-04-24T00:00:00Z"
   token_budget:
@@ -200,6 +200,7 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
 | `story_page_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
+| `storylet_pool_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
 
 The assembler first fits the normal preview/summary packet under the requested token budget and configured harness character ceiling. It then applies this per-task governing-context priority table before opportunistic full-body allocation:
@@ -210,6 +211,7 @@ The assembler first fits the normal preview/summary packet under the requested t
 | `diegetic_artifact_generation` | `reserve` | `reserve` |
 | `story_bootstrap` | `reserve` | `reserve` |
 | `story_page_cycle` | `reserve` | `reserve` |
+| `storylet_pool_authoring` | `reserve` | `reserve` |
 | all other task types | `opportunistic` | `opportunistic` |
 
 `reserve` means every matching governing-context node receives its `full_body` before any opportunistic layer spends full-body budget. If the packet can no longer fit after dropping `impact_surfaces`, `scoped_local_context`, and `exact_record_links`, the assembler returns `packet_incomplete_required_classes` with `missing_classes: ['governing_world_context.full_body']` rather than silently downgrading those governing full bodies. `opportunistic` means the existing one-node-at-a-time allocation applies: if a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.governing_full_body_priority` reports the active policy, and `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after allocation and layer enforcement.
@@ -219,6 +221,12 @@ The assembler first fits the normal preview/summary packet under the requested t
 `story_page_cycle` is the registered context-packet profile for `branching-story-page-cycle` Pre-flight. The skill derives `seed_nodes` from the parent page state: cast members' resolved world entity ids, current location, and active period. The profile uses an 18000 default budget and prioritizes seed-scoped canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and a latest `change_log_entry` node in `governing_world_context` so the page can persist `state_snapshot.canon_revision`.
 
 The profile is still world-canon read-only. Story-bundle records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='story_page_cycle', ...)` returns only world-canon/indexed context and the governing audit trail needed to interpret the story-local turn safely.
+
+### Storylet Pool Authoring Profile
+
+`storylet_pool_authoring` is the registered context-packet profile for `storylet-pool-authoring` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids, recent page-history named entities, and the active story period. The profile uses an 18000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and ontology-grounding context.
+
+The profile is world-canon read-only. Storylet-pool records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='storylet_pool_authoring', ...)` returns only world-canon/indexed context used to author story-local SLT records without promoting storylet claims to world canon.
 
 ## Focused Retrieval Tools
 

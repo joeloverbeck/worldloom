@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-bootstrap/SKILL.md` (Phase 6 prose; FOUNDATIONS Alignment; Guardrails sibling-interop), `.claude/skills/branching-story-bootstrap/templates/story-records.yaml` (SLT seam markers reverted; SLT shape inherited via cross-reference rather than inlined)
-**Deps**: `.claude/skills/storylet-pool-authoring/SKILL.md` (now shipping; this ticket closes the seam BSBOOT named at line 364 / line 586 / line 119); archive/tickets/BSBOOT-001-delegate-bootstrap-seams-to-page-cycle.md (precedent for closing inlined-with-seams to a now-shipping sibling); MCPENH-014 (SLB allocator support — closes the SLB defensive-recovery fallback path bootstrap inherits if it delegates with explicit allocation control); MCPENH-013 (storylet_pool_authoring task type — registered profile improves retrieval prioritization for the delegated seed batch)
+**Deps**: `.claude/skills/storylet-pool-authoring/SKILL.md` (now shipping; this ticket closes the seam BSBOOT named at line 364 / line 586 / line 119); archive/tickets/BSBOOT-001-delegate-bootstrap-seams-to-page-cycle.md (precedent for closing inlined-with-seams to a now-shipping sibling); archive/tickets/MCPENH-014-add-slb-id-class-to-allocator.md (SLB allocator support — closes the SLB defensive-recovery fallback path bootstrap inherits if it delegates with explicit allocation control); archive/tickets/MCPENH-013-register-storylet-pool-authoring-task-type.md (storylet_pool_authoring task type — registered profile improves retrieval prioritization for the delegated seed batch)
 
 ## Problem
 
@@ -102,7 +102,7 @@ After landing, run `branching-story-bootstrap` against a fixture world to confir
 ## Out of Scope
 
 - BSPAG-001 (page-cycle JIT delegation) — separate ticket.
-- MCPENH-013 / MCPENH-014 — landed independently; not blocked.
+- MCPENH-013 landed independently at archive/tickets/MCPENH-013-register-storylet-pool-authoring-task-type.md; MCPENH-014 landed independently at archive/tickets/MCPENH-014-add-slb-id-class-to-allocator.md and is not a blocker.
 - Patch-engine ops for SLT records — Shape A integration posture preserved (direct Write remains correct).
 - `branching-story-health-audit` — deferred sibling, not closing this seam set.
 
