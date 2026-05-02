@@ -414,19 +414,19 @@ Completed on 2026-04-24.
 SPEC-13's Phase 1.5 contract is now the live repository contract:
 
 - `docs/FOUNDATIONS.md` and `docs/MACHINE-FACING-LAYER.md` describe `_source/` atomic YAML as the canonical storage form for the eleven atomized concerns on machine-layer-enabled worlds, while `WORLD_KERNEL.md` and `ONTOLOGY.md` remain root primary-authored files.
-- The Animalia world-content repository was migrated in user-owned commit `99f6a97` (`Atomized animalia.`, committed `2026-04-24 18:55:41 +0200`): `worlds/animalia/_source/` contains 225 YAML records, and the root now contains only `WORLD_KERNEL.md` and `ONTOLOGY.md`.
+- The Animalia world-content repository was migrated in user-owned commit `99f6a97` (`Atomized animalia.`, committed `2026-04-24 18:55:41 +0200`): `worlds/animalia/_source/` contained 225 YAML records at migration closeout, and the root now contains only `WORLD_KERNEL.md` and `ONTOLOGY.md`. Later canon growth brought the live `_source/` tree to 229 YAML records by the 2026-05-02 snapshot-cleanup run.
 - `tools/world-index` now builds, syncs, verifies, and enumerates the atomic-source form. Legacy successful world-build dispatch for the eleven retired root markdown files has been removed; worlds without recognized SPEC-13 `_source/*.yaml` records fail with exit code 3 and an actionable migration/create-base-world message.
-- The SPEC-13 ticket family is complete through `SPEC13ATOSRCMIG-005` and archived. `tickets/SPEC13ATOSRCMIG-006.md` remains active as the explicit one-week delayed cleanup for `.pre-migration-snapshot/animalia/`; that retained restore snapshot is temporary local safety state, not incomplete canonical migration work.
+- The SPEC-13 ticket family is complete through `SPEC13ATOSRCMIG-006`. `archive/tickets/SPEC13ATOSRCMIG-006.md` removed the explicit one-week delayed restore snapshot `.pre-migration-snapshot/animalia/` on 2026-05-02; that cleanup was temporary local safety-state removal, not canonical migration work.
 
 Deviations from the original spec:
 
 - `world-validate animalia --structural` was not the final proof lane because the validator framework remains Phase 2 work. The truthful Phase 1.5 proof is `world-index` build/test/verify coverage plus direct source-shape checks.
-- The post-commit snapshot cleanup is intentionally deferred for one week by `SPEC13ATOSRCMIG-006`.
+- The post-commit snapshot cleanup was intentionally deferred for one week and then completed by `SPEC13ATOSRCMIG-006` on 2026-05-02.
 - Phase 2 work remains as planned: validators, patch engine, hook write discipline, MCP write/tool updates, skill rewrites, and `create-base-world` atomic emission.
 
 Verification:
 
-- `find worlds/animalia/_source -type f -name '*.yaml' | wc -l` returned 225.
+- `find worlds/animalia/_source -type f -name '*.yaml' | wc -l` returned 225 at migration closeout and 229 during the 2026-05-02 snapshot-cleanup run.
 - `find worlds/animalia -maxdepth 1 -type f | sort` showed only `ONTOLOGY.md` and `WORLD_KERNEL.md` at the root.
 - `git -C worlds show -s --format='%h%n%ci%n%s' 99f6a97` confirmed the user-owned Animalia migration commit.
 - `cd tools/world-index && npm run build` passed.
