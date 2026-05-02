@@ -1,6 +1,6 @@
 # EPE-001: Truth story_fuel consumer status after story siblings shipped
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/emergent-pressure-events/SKILL.md` (story_fuel consumer/status prose only)
@@ -8,13 +8,13 @@
 
 ## Problem
 
-`emergent-pressure-events` still tells maintainers that `branching-story-bootstrap` and `branching-story-page-cycle` are not-yet-implemented brainstorming proposals, and that `story_fuel` cards remain inert until those siblings ship. That was true when EPE shipped, but post-review evidence now shows the story siblings exist and the page-cycle context-packet profile is registered.
+At intake, `emergent-pressure-events` still told maintainers that `branching-story-bootstrap` and `branching-story-page-cycle` were not-yet-implemented brainstorming proposals, and that `story_fuel` cards remained inert until those siblings shipped. That was true when EPE shipped, but post-review evidence showed the story siblings exist and the page-cycle context-packet profile is registered.
 
-Leaving this stale prose in Guardrails risks misleading future maintainers about the state of the story-fuel handoff. The `story_fuel` routing remains passive and does not invoke downstream skills, but its consumer status should be described as shipped-story-engine inputs rather than planned-only placeholders.
+Leaving that stale prose in Guardrails risked misleading future maintainers about the state of the story-fuel handoff. The `story_fuel` routing remains passive and does not invoke downstream skills, but its consumer status is now described as shipped-story-engine inputs rather than planned-only placeholders.
 
 ## Assumption Reassessment (2026-05-02)
 
-1. Live stale prose appears in `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails: it says `branching-story-bootstrap` and `branching-story-page-cycle` exist as `brainstorming/*.md` proposals and that `story_fuel` cards are inert until those siblings ship.
+1. At intake, live stale prose appeared in `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails: it said `branching-story-bootstrap` and `branching-story-page-cycle` exist as `brainstorming/*.md` proposals and that `story_fuel` cards are inert until those siblings ship.
 2. Current shipped story siblings exist under `.claude/skills/branching-story-bootstrap/SKILL.md` and `.claude/skills/branching-story-page-cycle/SKILL.md`. Archived `BSBOOT-001` records bootstrap/page-cycle schema delegation, and archived `MCPENH-012` records the registered `story_page_cycle` context-packet task type.
 3. Shared boundary under audit: EPE `downstream_routing: story_fuel` prose and its passive-consumer handoff to the story-engine skills. This ticket is prose-only; it does not change EPE card schema, routing values, generation phases, or downstream skill behavior.
 4. FOUNDATIONS principle: Canon Layers and Change Control Policy remain unchanged. EPE cards are candidates, not accepted canon; story_fuel cards must still avoid asserting world-level truth or invoking canon mutation.
@@ -22,6 +22,7 @@ Leaving this stale prose in Guardrails risks misleading future maintainers about
 6. No schema extension. `downstream_routing` values remain `canonize | story_fuel | ambient`; `proposal_card_extract` stays null for story_fuel cards.
 7. No skill / tool / hook / validator / schema field is renamed or removed.
 8. Adjacent contradiction classification: this is separate skill-prose drift exposed during MCPENH-012 post-ticket review, not unfinished MCPENH-012 implementation work.
+9. Same-seam correction: reassessment also found `.claude/skills/emergent-pressure-events/SKILL.md` §Final Rule still described `story_fuel` as for "future story-engine siblings"; this was the same planned-consumer prose drift and was corrected in this ticket.
 
 ## Architecture Check
 
@@ -34,15 +35,19 @@ Leaving this stale prose in Guardrails risks misleading future maintainers about
 2. Passive routing invariant preserved -> manual review of EPE §Guardrails and downstream_routing phases to confirm `story_fuel` remains a label, not a callback.
 3. FOUNDATIONS alignment -> manual review confirming EPE cards remain candidates and story_fuel cards do not assert accepted canon or emit canon-addition sidecars.
 
-## What to Change
+## Landed Changes
 
 ### 1. Truth EPE story_fuel consumer prose
 
-Update `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails to say `branching-story-bootstrap` and `branching-story-page-cycle` now exist, and that `story_fuel` cards are passive inputs for separately invoked story-engine workflows.
+Updated `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails to say `branching-story-bootstrap` and `branching-story-page-cycle` now exist as workflow skills, and that `story_fuel` cards are passive inputs for separately invoked story-engine workflows.
 
 ### 2. Preserve passive-routing and non-canon constraints
 
-Keep the current no-chaining rule, candidate-only framing, and sidecar conditionality intact.
+Kept the no-chaining rule, candidate-only framing, and sidecar conditionality intact. The EPE skill still does not invoke story siblings, and story_fuel / ambient cards still keep `proposal_card_extract` null.
+
+### 3. Truth final summary wording
+
+Updated `.claude/skills/emergent-pressure-events/SKILL.md` §Final Rule so `story_fuel` is described as input for separately invoked story-engine workflows, not "future story-engine siblings."
 
 ## Files to Touch
 
@@ -78,3 +83,22 @@ Keep the current no-chaining rule, candidate-only framing, and sidecar condition
 
 1. `rg -n 'not-yet-implemented|brainstorming/\*\.md proposals|inert until those siblings ship' .claude/skills/emergent-pressure-events/SKILL.md`
 2. `rg -n 'Skills do not chain|downstream_routing|story_fuel|proposal_card_extract' .claude/skills/emergent-pressure-events/SKILL.md`
+
+## Outcome
+
+Completed on 2026-05-02.
+
+- `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails now describes `story_fuel` cards as passive inputs for separately invoked `branching-story-bootstrap` / `branching-story-page-cycle` workflows.
+- The stale planned-consumer guardrail and final-summary phrase were removed.
+- The no-chaining rule, candidate-only framing, and sidecar conditionality remain unchanged.
+
+## Verification Result
+
+1. `rg -n 'not-yet-implemented|brainstorming/\*\.md proposals|inert until those siblings ship' .claude/skills/emergent-pressure-events/SKILL.md` returned no hits.
+2. `rg -n 'Skills do not chain|downstream_routing|story_fuel|proposal_card_extract|Story-fuel routing|future story-engine siblings|future-consumer filtering' .claude/skills/emergent-pressure-events/SKILL.md` confirmed the passive-routing, non-canon, and sidecar-null language remains present while the stale `future story-engine siblings` and `future-consumer filtering` phrases no longer appear.
+3. Manual review of `.claude/skills/emergent-pressure-events/SKILL.md` §Guardrails and §Final Rule confirmed EPE remains a candidate-emitting workflow and does not invoke downstream story-engine skills.
+
+## Deviations
+
+1. Same-seam final-summary stale prose was corrected in addition to the drafted §Guardrails edit. No schema, template, runtime, MCP, or HARD-GATE behavior changed.
+2. Archived on 2026-05-02 during post-ticket review after the completed closeout and live EPE skill prose were rechecked.
