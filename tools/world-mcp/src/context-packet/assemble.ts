@@ -20,6 +20,8 @@ import {
   CONTEXT_PACKET_ESTIMATOR_VERSION,
   DEFAULT_DELIVERY_MODE,
   DEFAULT_PACKET_VERSION,
+  ENVELOPE_OVERHEAD_RESERVE_CHARS,
+  GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE,
   TRUNCATION_FALLBACK_ADVICE,
   estimatePacketChars,
   estimateStablePacketChars,
@@ -73,6 +75,8 @@ function makeEmptyPacket(args: {
       seed_nodes: uniqueStrings(args.seedNodes),
       full_body_classes_delivered: [],
       harness_ceiling_chars: args.harnessCeilingChars,
+      envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+      governing_full_body_priority: GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE[args.taskType],
       estimator_version: CONTEXT_PACKET_ESTIMATOR_VERSION,
       packet_version: DEFAULT_PACKET_VERSION,
       delivery_status: "inline"
@@ -261,11 +265,11 @@ function applyClassFilter(
 function packetFitsBudget(
   packet: ContextPacket,
   requestedBudget: number,
-  harnessCeilingChars: number
+  effectiveHarnessCeilingChars: number
 ): boolean {
   return (
     estimateStablePacketSize(packet) <= requestedBudget &&
-    estimateStablePacketChars(packet) <= harnessCeilingChars
+    estimateStablePacketChars(packet) <= effectiveHarnessCeilingChars
   );
 }
 
@@ -275,7 +279,8 @@ function enforceBudget(
   harnessCeilingChars: number
 ): void {
   for (const layer of DROP_PRIORITY) {
-    if (packetFitsBudget(packet, requestedBudget, harnessCeilingChars)) {
+    const effectiveHarnessCeilingChars = effectivePacketBodyCeilingChars(harnessCeilingChars);
+    if (packetFitsBudget(packet, requestedBudget, effectiveHarnessCeilingChars)) {
       return;
     }
     if (isLayerEmpty(packet, layer)) {
@@ -288,6 +293,24 @@ function enforceBudget(
   }
 }
 
+function effectivePacketBodyCeilingChars(harnessCeilingChars: number): number {
+  return Math.max(1, harnessCeilingChars - ENVELOPE_OVERHEAD_RESERVE_CHARS);
+}
+
+function usesReserveGoverningFullBodyPriority(taskType: TaskType): boolean {
+  const priority = GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE[taskType];
+  return priority.invariants === "reserve" || priority.mystery_reserve === "reserve";
+}
+
+function minimumPacketWithGoverningContext(packet: ContextPacket): ContextPacket {
+  const minimumPacket = clonePacket(packet);
+  for (const layer of ["impact_surfaces", "scoped_local_context", "exact_record_links"] as const) {
+    if (!isLayerEmpty(minimumPacket, layer)) {
+      clearLayer(minimumPacket, layer);
+    }
+  }
+  return minimumPacket;
+}
 
 export async function assembleContextPacket(args: {
   task_type: TaskType;
@@ -304,6 +327,7 @@ export async function assembleContextPacket(args: {
 
   const deliveryMode: DeliveryMode = args.delivery_mode ?? DEFAULT_DELIVERY_MODE;
   const harnessCeilingChars = resolveHarnessCeilingChars();
+  const effectiveHarnessCeilingChars = effectivePacketBodyCeilingChars(harnessCeilingChars);
 
   try {
     const packet = makeEmptyPacket({
@@ -382,13 +406,13 @@ export async function assembleContextPacket(args: {
     applyClassFilter(packet, args.node_classes);
 
     const fullPacketChars = estimateStablePacketChars(packet);
-    if (fullPacketChars > harnessCeilingChars) {
+    if (fullPacketChars > effectiveHarnessCeilingChars) {
       const persistedPacket = clonePacket(packet);
       persistedPacket.task_header.delivery_status = "inline";
       persistedPacket.task_header.token_budget.allocated = estimateStablePacketSize(persistedPacket);
       const persistedOutputPath = persistContextPacket(persistedPacket);
       const summaryPacket = buildFastSummaryPacket(packet, persistedOutputPath);
-      if (estimatePacketChars(summaryPacket) <= harnessCeilingChars) {
+      if (estimatePacketChars(summaryPacket) <= effectiveHarnessCeilingChars) {
         return summaryPacket;
       }
     }
@@ -397,7 +421,7 @@ export async function assembleContextPacket(args: {
 
     const previewAllocated = estimateStablePacketSize(packet);
     const previewChars = estimateStablePacketChars(packet);
-    if (previewAllocated > args.token_budget || previewChars > harnessCeilingChars) {
+    if (previewAllocated > args.token_budget || previewChars > effectiveHarnessCeilingChars) {
       return createMcpError(
         "packet_incomplete_required_classes",
         "The requested budget cannot fit local_authority under the configured context-packet ceilings.",
@@ -407,6 +431,8 @@ export async function assembleContextPacket(args: {
           minimum_required_budget: previewAllocated,
           retry_with: { token_budget: previewAllocated },
           harness_ceiling_chars: harnessCeilingChars,
+          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
           minimum_required_harness_ceiling_chars: previewChars,
           retained_classes: [],
           truncation_summary: packet.truncation_summary
@@ -414,18 +440,65 @@ export async function assembleContextPacket(args: {
       );
     }
 
-    applyTaskTypeFullBodyDelivery(opened.db, packet, {
+    const fullBodyDeliveryResult = applyTaskTypeFullBodyDelivery(opened.db, packet, {
       taskType: args.task_type,
       worldSlug: args.world_slug,
       tokenBudget: args.token_budget,
-      harnessCeilingChars
+      effectiveHarnessCeilingChars
     });
+    if (!fullBodyDeliveryResult.ok) {
+      return createMcpError(
+        "packet_incomplete_required_classes",
+        "The requested budget cannot fit required governing-context full bodies under the configured context-packet ceilings.",
+        {
+          missing_classes: fullBodyDeliveryResult.missing_classes,
+          requested_budget: args.token_budget,
+          minimum_required_budget: fullBodyDeliveryResult.minimum_required_budget,
+          retry_with: { token_budget: fullBodyDeliveryResult.minimum_required_budget },
+          harness_ceiling_chars: harnessCeilingChars,
+          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
+          minimum_required_harness_ceiling_chars:
+            fullBodyDeliveryResult.minimum_required_harness_ceiling_chars,
+          governing_full_body_priority: packet.task_header.governing_full_body_priority,
+          retained_classes: [],
+          truncation_summary: packet.truncation_summary
+        }
+      );
+    }
+
+    const packetWithRequiredGoverningBodies = usesReserveGoverningFullBodyPriority(args.task_type)
+      ? clonePacket(packet)
+      : undefined;
 
     enforceBudget(packet, args.token_budget, harnessCeilingChars);
+    if (
+      packetWithRequiredGoverningBodies !== undefined &&
+      packet.truncation_summary.dropped_layers.includes("governing_world_context")
+    ) {
+      const minimumPacket = minimumPacketWithGoverningContext(packetWithRequiredGoverningBodies);
+      return createMcpError(
+        "packet_incomplete_required_classes",
+        "The requested budget cannot fit required governing-context full bodies under the configured context-packet ceilings.",
+        {
+          missing_classes: ["governing_world_context.full_body"],
+          requested_budget: args.token_budget,
+          minimum_required_budget: estimateStablePacketSize(minimumPacket),
+          retry_with: { token_budget: estimateStablePacketSize(minimumPacket) },
+          harness_ceiling_chars: harnessCeilingChars,
+          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
+          minimum_required_harness_ceiling_chars: estimateStablePacketChars(minimumPacket),
+          governing_full_body_priority: packet.task_header.governing_full_body_priority,
+          retained_classes: ["local_authority", "governing_world_context"],
+          truncation_summary: minimumPacket.truncation_summary
+        }
+      );
+    }
 
     const stableAllocated = estimateStablePacketSize(packet);
     packet.task_header.token_budget.allocated = stableAllocated;
-    if (stableAllocated > args.token_budget || estimatePacketChars(packet) > harnessCeilingChars) {
+    if (stableAllocated > args.token_budget || estimatePacketChars(packet) > effectiveHarnessCeilingChars) {
       return createMcpError(
         "packet_incomplete_required_classes",
         "The context packet exceeded the configured ceilings after full-body allocation.",
@@ -435,6 +508,8 @@ export async function assembleContextPacket(args: {
           minimum_required_budget: stableAllocated,
           retry_with: { token_budget: stableAllocated },
           harness_ceiling_chars: harnessCeilingChars,
+          envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,
+          effective_harness_ceiling_chars: effectiveHarnessCeilingChars,
           minimum_required_harness_ceiling_chars: estimatePacketChars(packet),
           retained_classes: [],
           truncation_summary: packet.truncation_summary

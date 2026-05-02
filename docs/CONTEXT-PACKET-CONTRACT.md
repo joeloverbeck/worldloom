@@ -17,7 +17,11 @@ task_header:
   seed_nodes:
     - CHAR-0002
   full_body_classes_delivered: []
-  harness_ceiling_chars: 80000
+  harness_ceiling_chars: 60000
+  envelope_overhead_reserve_chars: 4000
+  governing_full_body_priority:
+    invariants: reserve
+    mystery_reserve: reserve
   estimator_version: chars-per-token-v1
   packet_version: 2
   delivery_status: inline
@@ -59,7 +63,9 @@ Describes the invocation context:
 - requested versus allocated budget
 - seed nodes
 - `full_body_classes_delivered`, the live node classes that actually received `full_body` after budget allocation
-- `harness_ceiling_chars`, the effective serialized-response character ceiling used for this request
+- `harness_ceiling_chars`, the gross serialized-response character ceiling used for this request
+- `envelope_overhead_reserve_chars`, the reserved margin for MCP response-envelope overhead outside the packet body
+- `governing_full_body_priority`, the per-task policy for invariant and Mystery Reserve full-body reservation
 - `estimator_version`, the packet-size estimator contract used for `token_budget.allocated`
 - `delivery_status`, either `inline` for a normal packet or `persisted_with_summary` for the overflow-recovery summary shape
 - generation timestamp
@@ -130,22 +136,23 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 The packet response must satisfy two ceilings:
 
 - `token_budget`, the caller-facing budget reported in `task_header.token_budget` and estimated with the package's deterministic `chars-per-token-v1` estimator.
-- `harness_ceiling_chars`, the serialized JSON character ceiling used to stay below Claude Code MCP inline-response limits. The default is `80000` characters and can be overridden for the server process with `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=<positive integer>`.
+- `harness_ceiling_chars`, the gross serialized MCP response character ceiling used to stay below Claude Code MCP inline-response limits. The default is `60000` characters and can be overridden for the server process with `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=<positive integer>`.
+- `envelope_overhead_reserve_chars`, the fixed packet-body reserve for MCP response-envelope overhead. The default is `4000` characters.
 
-The assembler builds all five content layers. If the fully assembled packet would exceed `harness_ceiling_chars`, the server writes that full packet JSON to its package-local tool-results directory and returns a bounded inline summary with `task_header.delivery_status: persisted_with_summary` and `task_header.persisted_output_path`.
+The effective inline packet-body ceiling is `harness_ceiling_chars - envelope_overhead_reserve_chars` (`56000` characters by default). The assembler builds all five content layers. If the fully assembled packet would exceed that effective ceiling, the server writes that full packet JSON to its package-local tool-results directory and returns a bounded inline summary with `task_header.delivery_status: persisted_with_summary` and `task_header.persisted_output_path`.
 
-For token-budget pressure where the full packet still fits the serialized-response ceiling, the assembler drops layers in priority order (cheapest-to-drop first) until both `estimateStablePacketSize(packet) <= token_budget` and `JSON.stringify(packet).length <= harness_ceiling_chars` hold:
+For token-budget pressure where the full packet still fits the effective serialized-response ceiling, the assembler drops layers in priority order (cheapest-to-drop first) until both `estimateStablePacketSize(packet) <= token_budget` and `JSON.stringify(packet).length <= harness_ceiling_chars - envelope_overhead_reserve_chars` hold:
 
 1. `impact_surfaces`
 2. `scoped_local_context`
 3. `exact_record_links`
 4. `governing_world_context`
 
-`local_authority` and `task_header` are never dropped. If even `local_authority` exceeds the requested token budget after every droppable layer is emptied and no persisted-summary response can fit inline, the assembler returns `packet_incomplete_required_classes` (see §Assembly Discipline) with `truncation_summary` populated for every droppable layer that was emptied. The error details include the usual token retry hint plus `harness_ceiling_chars` and `minimum_required_harness_ceiling_chars` so operators can distinguish token-budget insufficiency from transport-ceiling insufficiency.
+`local_authority` and `task_header` are never dropped. For task types whose `task_header.governing_full_body_priority` reserves invariants or Mystery Reserve entries, `governing_world_context` also becomes required once those governing full bodies are allocated: if the packet cannot fit that layer plus local authority under the requested token or effective harness ceiling, the assembler returns `packet_incomplete_required_classes` instead of silently downgrading those governing full bodies. If even `local_authority` exceeds the requested token budget after every droppable layer is emptied and no persisted-summary response can fit inline, the assembler returns the same structured code. The error details include the usual token retry hint plus `harness_ceiling_chars`, `envelope_overhead_reserve_chars`, `effective_harness_ceiling_chars`, and `minimum_required_harness_ceiling_chars` so operators can distinguish token-budget insufficiency from transport-ceiling insufficiency.
 
-Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. High-value `full_body` delivery is downgraded node-by-node before it can exceed either ceiling; downgraded nodes remain present with their normal preview/summary shape and are listed under `truncation_summary.full_body_downgrades`. Consumers route dropped or downgraded node ids through `mcp__worldloom__get_record(record_id)` / `mcp__worldloom__get_records(record_ids)` (full bodies) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped or downgraded; targeted retrieval delivers the content.
+Drops are layer-granular: when a layer is dropped, its entire `nodes` list is cleared and the cleared node ids are recorded under `truncation_summary.dropped_node_ids_by_layer`. High-value `full_body` delivery is downgraded node-by-node before it can exceed either ceiling unless the node is a governing-context invariant or Mystery Reserve entry covered by a `reserve` priority. Downgraded nodes remain present with their normal preview/summary shape and are listed under `truncation_summary.full_body_downgrades`; reserve-priority governing nodes either retain full bodies or produce `packet_incomplete_required_classes`. Consumers route dropped or downgraded node ids through `mcp__worldloom__get_record(record_id)` / `mcp__worldloom__get_records(record_ids)` (full bodies) or `mcp__worldloom__get_record_field(record_id, field_path)` (single field) per FOUNDATIONS §Tooling Recommendation — the packet identifies WHAT was dropped or downgraded; targeted retrieval delivers the content.
 
-Worked example: a request with `token_budget: 33000` can still serialize to more than `harness_ceiling_chars` because JSON keys, structural repetition, and actual tokenizer behavior differ from the package's approximate token estimator. In that case, the assembler persists the full packet and returns the fast-summary inline shape rather than letting the external MCP harness reject the response.
+Worked example: a request with `token_budget: 33000` can still serialize to more than `harness_ceiling_chars - envelope_overhead_reserve_chars` because JSON keys, structural repetition, response-envelope overhead, and actual tokenizer behavior differ from the package's approximate token estimator. In that case, the assembler persists the full packet and returns the fast-summary inline shape rather than letting the external MCP harness reject the response.
 
 `truncation_summary` is always present on a successful packet response. When no truncation occurred, `dropped_layers` is an empty array, `dropped_node_ids_by_layer` is an empty object, and `fallback_advice` carries the standard targeted-retrieval guidance (so consumers can read it unconditionally without branching on presence). Schema:
 
@@ -194,7 +201,15 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
 | `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
 
-The assembler first fits the normal preview/summary packet under the requested token budget and configured harness character ceiling. It then adds candidate `full_body` values one node at a time. If a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after this allocation pass.
+The assembler first fits the normal preview/summary packet under the requested token budget and configured harness character ceiling. It then applies this per-task governing-context priority table before opportunistic full-body allocation:
+
+| task_type | invariant full bodies in `governing_world_context` | Mystery Reserve full bodies in `governing_world_context` |
+|---|---|---|
+| `character_generation` | `reserve` | `reserve` |
+| `diegetic_artifact_generation` | `reserve` | `reserve` |
+| all other task types | `opportunistic` | `opportunistic` |
+
+`reserve` means every matching governing-context node receives its `full_body` before any opportunistic layer spends full-body budget. If the packet can no longer fit after dropping `impact_surfaces`, `scoped_local_context`, and `exact_record_links`, the assembler returns `packet_incomplete_required_classes` with `missing_classes: ['governing_world_context.full_body']` rather than silently downgrading those governing full bodies. `opportunistic` means the existing one-node-at-a-time allocation applies: if a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.governing_full_body_priority` reports the active policy, and `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after allocation and layer enforcement.
 
 ## Focused Retrieval Tools
 
@@ -283,7 +298,8 @@ response (selected fields):
     world_slug: animalia
     token_budget: { requested: 8000, allocated: 4200 }
     seed_nodes: [CF-0044]
-    harness_ceiling_chars: 80000
+    harness_ceiling_chars: 60000
+    envelope_overhead_reserve_chars: 4000
     estimator_version: chars-per-token-v1
     packet_version: 2
   local_authority:

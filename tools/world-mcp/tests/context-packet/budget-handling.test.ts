@@ -115,7 +115,7 @@ test("assembler reports packet_incomplete_required_classes when local authority 
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 20
@@ -149,7 +149,7 @@ test("budget pressure drops impact_surfaces first while preserving local_authori
 
     const tightResult = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 700
@@ -174,7 +174,7 @@ test("budget pressure drops impact_surfaces first while preserving local_authori
 
     const wideResult = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 100000

@@ -103,7 +103,7 @@ test("packet response strictly respects token_budget at every fit point", async 
     for (const budget of [800, 1000, 1500, 4000, 100000]) {
       const result = await withRepoRoot(root, () =>
         assembleContextPacket({
-          task_type: "diegetic_artifact_generation",
+          task_type: "other",
           world_slug: "seeded",
           seed_nodes: ["DA-0002"],
           token_budget: budget
@@ -137,7 +137,7 @@ test("packet returns packet_incomplete_required_classes when even local_authorit
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 20
@@ -171,7 +171,7 @@ test("packet retry at minimum_required_budget succeeds with local_authority inta
 
     const initial = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 20
@@ -186,7 +186,7 @@ test("packet retry at minimum_required_budget succeeds with local_authority inta
 
     const retry = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: retryBudget as number
