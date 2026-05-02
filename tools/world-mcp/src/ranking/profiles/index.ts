@@ -1,5 +1,6 @@
 import type { RankingWeights } from "../policy";
 import {
+  branchingStoryHealthAuditRankingProfile,
   canonFactsFromDiegeticArtifactsRankingProfile,
   emergentPressureEventsRankingProfile,
   proposeNewCanonFactsRankingProfile,
@@ -27,6 +28,7 @@ export const TASK_TYPES = [
   "story_bootstrap",
   "story_page_cycle",
   "storylet_pool_authoring",
+  "branching_story_health_audit",
   "other"
 ] as const;
 
@@ -45,6 +47,7 @@ export const rankingProfilesByTaskType: Record<TaskType, RankingWeights> = {
   story_bootstrap: storyBootstrapRankingProfile,
   story_page_cycle: storyPageCycleRankingProfile,
   storylet_pool_authoring: storyletPoolAuthoringRankingProfile,
+  branching_story_health_audit: branchingStoryHealthAuditRankingProfile,
   other: defaultRankingProfile
 };
 
@@ -61,6 +64,7 @@ export const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
   story_bootstrap: 18000,
   story_page_cycle: 18000,
   storylet_pool_authoring: 18000,
+  branching_story_health_audit: 12000,
   other: 8000
 };
 
@@ -69,6 +73,7 @@ export function getRankingProfile(taskType: string): RankingWeights {
 }
 
 export {
+  branchingStoryHealthAuditRankingProfile,
   canonFactsFromDiegeticArtifactsRankingProfile,
   canonAdditionRankingProfile,
   characterGenerationRankingProfile,

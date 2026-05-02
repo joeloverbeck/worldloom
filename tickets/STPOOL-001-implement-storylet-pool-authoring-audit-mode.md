@@ -129,7 +129,7 @@ Add a fixture: a synthetic RSP card under a synthetic SAU directory; run storyle
 ## Out of Scope
 
 - Page-cycle audit-flag wiring — separate ticket BSPAG-002.
-- SAU allocator support — completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support — completed in `archive/tickets/MCPENH-016-add-rsp-id-class-to-allocator-sub-audit-scoped.md`; audit task-type ranking remains tracked in MCPENH-017.
+- SAU allocator support — completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support — completed in `archive/tickets/MCPENH-016-add-rsp-id-class-to-allocator-sub-audit-scoped.md`; audit task-type ranking — completed in `archive/tickets/MCPENH-017-register-branching-story-health-audit-task-type.md`.
 - Tuning audit-mode diversity-audit threshold relaxation (Phase 5 bypass vs weakened) — pick one for now; tune after real-world use.
 - Multi-card-batched RSP consumption optimization (e.g., one storylet that addresses multiple findings simultaneously) — defer to later iteration after single-card consumption proves out.
 

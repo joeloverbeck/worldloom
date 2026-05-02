@@ -842,6 +842,11 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
         .get(MCP_TOOL_NAMES.get_context_packet)
         ?.input_schema_enums?.task_type?.includes("storylet_pool_authoring")
     );
+    assert.ok(
+      byName
+        .get(MCP_TOOL_NAMES.get_context_packet)
+        ?.input_schema_enums?.task_type?.includes("branching_story_health_audit")
+    );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
       ...VOCABULARY_CLASSES
     ]);

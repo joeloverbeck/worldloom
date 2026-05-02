@@ -88,9 +88,9 @@ HIGH JIT-RATE BRANCHES:
 
 If `story-fact-promotion-to-canon` or other genuinely-not-yet-shipping siblings remain in the "Future siblings" paragraph, keep them; only move the entries that no longer match the "not yet shipping" framing.
 
-### 6. Cross-link to completed MCPENH-015 / MCPENH-016, active MCPENH-017, and STPOOL-001 in the audit skill
+### 6. Cross-link to completed MCPENH-015 / MCPENH-016 / MCPENH-017 and STPOOL-001 in the audit skill
 
-The audit skill's Guardrails §Known integration debt section already names BSPAG-002. Verify the ticket-numbering reference is correct after this ticket lands and the ticket file path matches.
+The audit skill's Guardrails §Known integration debt section already names BSPAG-002. Verify the ticket-numbering reference is correct after this ticket lands, and treat the completed audit task-type registration as archived in `archive/tickets/MCPENH-017-register-branching-story-health-audit-task-type.md`.
 
 ## Files to Touch
 

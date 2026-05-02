@@ -80,6 +80,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
+  branching_story_health_audit: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "TIMELINE.md",
+    "GEOGRAPHY.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "EVERYDAY_LIFE.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -153,6 +164,13 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 6: storylet records remain append-only by new allocation",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  branching_story_health_audit: [
+    "Branching story health audit is diagnostic; world canon remains read-only",
+    "Rule 1: findings must cite world and story authority",
+    "Rule 4: branch-local facts must not globalize by accident",
+    "Rule 5: consequence and obligation debt must remain visible",
+    "Rule 7: preserve Mystery Reserve deliberately"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -190,6 +208,11 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Storylet batch manifest",
     "Story-local atomic records",
     "Per-bundle INDEX.md"
+  ],
+  branching_story_health_audit: [
+    "Story audit report",
+    "Optional remediation-storylet-proposal cards",
+    "Per-bundle audits INDEX.md"
   ],
   other: ["Task-specific output approved by workflow"]
 };
@@ -252,6 +275,13 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not treat story-local facts as accepted world canon",
     "Do not use sibling-branch storylets as authoring context"
   ],
+  branching_story_health_audit: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
+    "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
+    "Do not resolve or pre-empt forbidden Mystery Reserve answers",
+    "Do not treat audit findings or RSP cards as accepted world canon",
+    "Do not read sibling-branch pages as continuity context"
+  ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
 
@@ -285,7 +315,8 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"],
   story_bootstrap: ["invariant", "mystery_reserve_entry"],
   story_page_cycle: ["invariant", "mystery_reserve_entry"],
-  storylet_pool_authoring: ["invariant", "mystery_reserve_entry"]
+  storylet_pool_authoring: ["invariant", "mystery_reserve_entry"],
+  branching_story_health_audit: ["invariant", "mystery_reserve_entry"]
 };
 
 const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
@@ -662,14 +693,14 @@ export async function buildGoverningWorldContext(
     }
   }
 
-  if (taskType === "story_page_cycle") {
+  if (taskType === "story_page_cycle" || taskType === "branching_story_health_audit") {
     const latestChangeLogNodeId = findLatestChangeLogNodeId(db, worldSlug);
     if (latestChangeLogNodeId !== null) {
       addReason(
         orderedNodeIds,
         reasons,
         latestChangeLogNodeId,
-        "story_page_cycle includes the latest change-log entry for canon revision audit trail"
+        `${taskType} includes the latest change-log entry for canon revision audit trail`
       );
     }
   }

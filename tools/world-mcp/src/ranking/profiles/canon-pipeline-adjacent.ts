@@ -179,3 +179,27 @@ export const storyletPoolAuthoringRankingProfile: RankingWeights = {
     pressures: 8
   }
 };
+
+export const branchingStoryHealthAuditRankingProfile: RankingWeights = {
+  ...defaultRankingProfile,
+  file_class_priority: {
+    ...defaultRankingProfile.file_class_priority,
+    canon_fact_record: 1.4,
+    invariant: 1.3,
+    mystery_reserve_entry: 1.3,
+    named_entity: 1.25,
+    section: 1.05,
+    domain_file: 1.0,
+    change_log_entry: 1.15
+  },
+  recency_of_modification_bonus: 14,
+  edge_type_boost: {
+    mentions_entity: 14,
+    references_record: 11,
+    references_scoped_name: 10,
+    required_world_update: 8,
+    firewall_for: 13,
+    applies_to: 8,
+    pressures: 8
+  }
+};

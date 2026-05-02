@@ -232,7 +232,8 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
       ["emergent_pressure_events", 15000],
       ["story_bootstrap", 18000],
       ["story_page_cycle", 18000],
-      ["storylet_pool_authoring", 18000]
+      ["storylet_pool_authoring", 18000],
+      ["branching_story_health_audit", 12000]
     ] as const;
 
     for (const [taskType, defaultBudget] of cases) {
@@ -254,30 +255,31 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
   }
 });
 
-test("getContextPacket story_page_cycle includes the latest change-log entry", async () => {
+test("getContextPacket story audit task types include the latest change-log entry", async () => {
   const root = createTempRepoRoot();
 
   try {
     buildContextPacketWorld(root);
 
-    const result = await withRepoRoot(root, () =>
-      getContextPacket({
-        task_type: "story_page_cycle",
-        world_slug: "seeded",
-        seed_nodes: ["DA-0002"]
-      })
-    );
+    for (const taskType of ["story_page_cycle", "branching_story_health_audit"] as const) {
+      const result = await withRepoRoot(root, () =>
+        getContextPacket({
+          task_type: taskType,
+          world_slug: "seeded",
+          seed_nodes: ["DA-0002"]
+        })
+      );
 
-    assert.ok(!("code" in result));
-    assert.equal(result.task_header.task_type, "story_page_cycle");
-    assert.equal(result.task_header.token_budget.requested, 18000);
-    assert.ok(result.governing_world_context.nodes.some((node) => node.id === "CH-0003"));
-    assert.ok(!result.governing_world_context.nodes.some((node) => node.id === "CH-0002"));
-    assert.ok(
-      result.governing_world_context.why_included.some((reason) =>
-        reason.includes("latest change-log entry")
-      )
-    );
+      assert.ok(!("code" in result));
+      assert.equal(result.task_header.task_type, taskType);
+      assert.ok(result.governing_world_context.nodes.some((node) => node.id === "CH-0003"));
+      assert.ok(!result.governing_world_context.nodes.some((node) => node.id === "CH-0002"));
+      assert.ok(
+        result.governing_world_context.why_included.some((reason) =>
+          reason.includes("latest change-log entry")
+        )
+      );
+    }
   } finally {
     destroyTempRepoRoot(root);
   }
