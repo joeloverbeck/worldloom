@@ -117,7 +117,7 @@ Once landed, edit `.claude/skills/branching-story-health-audit/SKILL.md`:
 
 ## Out of Scope
 
-- SAU allocator support is completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support remains tracked in MCPENH-016.
+- SAU allocator support is completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support is completed in `archive/tickets/MCPENH-016-add-rsp-id-class-to-allocator-sub-audit-scoped.md`.
 - Page-cycle audit-flag wiring — tracked in BSPAG-002.
 - Storylet-pool-authoring audit-mode wiring — tracked in STPOOL-001.
 - Tuning the ranking profile's exact weights based on real audit-run packet quality — defer to after a few real-world audit invocations produce evidence.

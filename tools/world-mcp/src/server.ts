@@ -200,6 +200,7 @@ export const ID_CLASSES = [
   "NCB",
   "AU",
   "RP",
+  "RSP",
   "SAU",
   "EPE",
   "STORY",
@@ -238,7 +239,8 @@ export const ID_CLASSES = [
 const allocateNextIdInputSchema = z.object({
   world_slug: z.string().min(1),
   id_class: z.enum(ID_CLASSES),
-  story_slug: z.string().min(1).optional()
+  story_slug: z.string().min(1).optional(),
+  audit_id: z.string().min(1).optional()
 });
 
 const getFirewallContentInputSchema = z.object({
@@ -413,7 +415,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "allocate_next_id",
-    "Allocate the next append-only id for a world-specific, story-bundle-scoped, or pipeline-scoped record class.",
+    "Allocate the next append-only id for a world-specific, story-bundle-scoped, sub-audit-scoped, or pipeline-scoped record class. RSP requires story_slug and audit_id.",
     allocateNextIdInputSchema,
     async (args) => allocateNextId(args as unknown as Parameters<typeof allocateNextId>[0]),
     { id_class: ID_CLASSES }

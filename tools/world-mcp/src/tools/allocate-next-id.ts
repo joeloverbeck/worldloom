@@ -22,6 +22,7 @@ export const ID_CLASS_FORMATS = {
   NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
+  RSP: { width: 4, zeroPad: true, regex: /^RSP-(\d{4})(?:-.+)?$/ },
   SAU: { width: 4, zeroPad: true, regex: /^SAU-(\d{4})(?:-.+)?$/ },
   EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
   STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
@@ -63,6 +64,7 @@ export interface AllocateNextIdArgs {
   world_slug: string;
   id_class: IdClass;
   story_slug?: string;
+  audit_id?: string;
 }
 
 export interface AllocateNextIdResponse {
@@ -95,6 +97,12 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
 
 type StoryScopedIdClass = keyof typeof STORY_SCOPED_ID_CLASS_DIRECTORIES;
 
+const SUB_AUDIT_SCOPED_ID_CLASS_DIRECTORIES = {
+  RSP: "remediation-storylet-proposals"
+} as const satisfies Partial<Record<IdClass, string>>;
+
+type SubAuditScopedIdClass = keyof typeof SUB_AUDIT_SCOPED_ID_CLASS_DIRECTORIES;
+
 function isIdClass(value: string): value is IdClass {
   return value in ID_CLASS_FORMATS;
 }
@@ -105,6 +113,10 @@ function isPipelineIdClass(value: IdClass): boolean {
 
 function isStoryScopedIdClass(value: IdClass): value is StoryScopedIdClass {
   return value in STORY_SCOPED_ID_CLASS_DIRECTORIES;
+}
+
+function isSubAuditScopedIdClass(value: IdClass): value is SubAuditScopedIdClass {
+  return value in SUB_AUDIT_SCOPED_ID_CLASS_DIRECTORIES;
 }
 
 function formatNumericValue(value: number, width: number, zeroPad: boolean): string {
@@ -325,6 +337,74 @@ function findHighestStoryScopedId(
   return maxValue;
 }
 
+function findHighestSubAuditScopedId(
+  worldSlug: string,
+  storySlug: string,
+  auditId: string,
+  idClass: SubAuditScopedIdClass
+): number | McpError {
+  const worldDirectory = resolveWorldDirectory(worldSlug);
+  if (!existsSync(worldDirectory)) {
+    return createMcpError("world_not_found", `World '${worldSlug}' does not exist.`, {
+      world_slug: worldSlug
+    });
+  }
+
+  const storyDirectory = path.join(worldDirectory, "stories", storySlug);
+  if (!existsSync(storyDirectory)) {
+    return createMcpError(
+      "invalid_input",
+      `Story '${storySlug}' does not exist in world '${worldSlug}'.`,
+      { world_slug: worldSlug, story_slug: storySlug }
+    );
+  }
+
+  if (!/^SAU-\d{4}$/.test(auditId)) {
+    return createMcpError(
+      "invalid_input",
+      `audit_id must match pattern 'SAU-NNNN'; got '${auditId}'.`,
+      { audit_id: auditId }
+    );
+  }
+
+  const format = ID_CLASS_FORMATS[idClass];
+  const directory = path.join(
+    storyDirectory,
+    "audits",
+    auditId,
+    SUB_AUDIT_SCOPED_ID_CLASS_DIRECTORIES[idClass]
+  );
+  let maxValue = 0;
+
+  let fileNames: string[];
+  try {
+    fileNames = readdirSync(directory);
+  } catch {
+    return maxValue;
+  }
+
+  for (const fileName of fileNames) {
+    if (!fileName.endsWith(".md")) {
+      continue;
+    }
+
+    const stem = fileName.slice(0, -".md".length);
+    const match = format.regex.exec(stem);
+    if (match === null) {
+      continue;
+    }
+
+    const parsedValue = Number.parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(parsedValue)) {
+      continue;
+    }
+
+    maxValue = Math.max(maxValue, parsedValue);
+  }
+
+  return maxValue;
+}
+
 export async function allocateNextId(
   args: AllocateNextIdArgs
 ): Promise<AllocateNextIdResponse | McpError> {
@@ -336,10 +416,13 @@ export async function allocateNextId(
   const pipelineIdClass = isPipelineIdClass(args.id_class);
   const storySlug = args.story_slug?.trim();
   const hasStorySlug = storySlug !== undefined && storySlug.length > 0;
+  const auditId = args.audit_id?.trim();
+  const hasAuditId = auditId !== undefined && auditId.length > 0;
   const storyScopedIdClass =
     isStoryScopedIdClass(args.id_class) && (args.id_class !== "DA" || hasStorySlug)
       ? args.id_class
       : null;
+  const subAuditScopedIdClass = isSubAuditScopedIdClass(args.id_class) ? args.id_class : null;
 
   if (pipelineIdClass && args.world_slug !== PIPELINE_WORLD_SLUG) {
     return createMcpError(
@@ -365,7 +448,15 @@ export async function allocateNextId(
     );
   }
 
-  if (hasStorySlug && storyScopedIdClass === null) {
+  if (hasAuditId && subAuditScopedIdClass === null) {
+    return createMcpError(
+      "invalid_input",
+      `id_class '${args.id_class}' is not sub-audit-scoped and does not accept audit_id.`,
+      { id_class: args.id_class, audit_id: auditId }
+    );
+  }
+
+  if (hasStorySlug && storyScopedIdClass === null && subAuditScopedIdClass === null) {
     return createMcpError(
       "invalid_input",
       `id_class '${args.id_class}' is world-scoped and does not accept story_slug.`,
@@ -373,10 +464,18 @@ export async function allocateNextId(
     );
   }
 
-  if (!hasStorySlug && storyScopedIdClass !== null) {
+  if (!hasStorySlug && (storyScopedIdClass !== null || subAuditScopedIdClass !== null)) {
     return createMcpError(
       "invalid_input",
       `story-scoped id_class '${args.id_class}' requires story_slug.`,
+      { id_class: args.id_class }
+    );
+  }
+
+  if (subAuditScopedIdClass !== null && !hasAuditId) {
+    return createMcpError(
+      "invalid_input",
+      `sub-audit-scoped id_class '${args.id_class}' requires audit_id.`,
       { id_class: args.id_class }
     );
   }
@@ -414,6 +513,23 @@ export async function allocateNextId(
 
   if (storyScopedIdClass !== null && storySlug !== undefined) {
     const highestValue = findHighestStoryScopedId(args.world_slug, storySlug, storyScopedIdClass);
+    if (typeof highestValue !== "number") {
+      return highestValue;
+    }
+
+    const nextValue = highestValue + 1;
+    return {
+      next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
+    };
+  }
+
+  if (subAuditScopedIdClass !== null && storySlug !== undefined && auditId !== undefined) {
+    const highestValue = findHighestSubAuditScopedId(
+      args.world_slug,
+      storySlug,
+      auditId,
+      subAuditScopedIdClass
+    );
     if (typeof highestValue !== "number") {
       return highestValue;
     }

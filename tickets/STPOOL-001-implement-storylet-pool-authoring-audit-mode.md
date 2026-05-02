@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/storylet-pool-authoring/SKILL.md` (replace audit-mode "deferred until branching-story-health-audit ships" with full audit-mode implementation: parse `source_audit_path`, drive Phase 1 diagnosis from RSP card targeting fields, drive Phase 2 seed generation from RSP `sketch` block, propagate `provenance.origin: audit_remediation` and `visibility` per RSP `proposed_visibility.scope`); update Pre-flight to allow `mode=audit` (currently aborts); extend tests / fixtures
-**Deps**: branching-story-health-audit shipping (already landed in this batch — produces RSP cards consumable as `source_audit_path`); MCPENH-016 helpful but not strictly required (RSP allocation works via manual scan in the interim per the audit skill's Phase 8)
+**Deps**: branching-story-health-audit shipping (already landed in this batch — produces RSP cards consumable as `source_audit_path`); `archive/tickets/MCPENH-016-add-rsp-id-class-to-allocator-sub-audit-scoped.md` completed RSP allocator support, so audit-produced RSP ids now come from `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id=<SAU-NNNN>)`
 
 ## Problem
 
@@ -129,7 +129,7 @@ Add a fixture: a synthetic RSP card under a synthetic SAU directory; run storyle
 ## Out of Scope
 
 - Page-cycle audit-flag wiring — separate ticket BSPAG-002.
-- SAU allocator support — completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support and audit task-type ranking remain tracked in MCPENH-016 / MCPENH-017.
+- SAU allocator support — completed in `archive/tickets/MCPENH-015-add-sau-id-class-to-allocator.md`; RSP allocator support — completed in `archive/tickets/MCPENH-016-add-rsp-id-class-to-allocator-sub-audit-scoped.md`; audit task-type ranking remains tracked in MCPENH-017.
 - Tuning audit-mode diversity-audit threshold relaxation (Phase 5 bypass vs weakened) — pick one for now; tune after real-world use.
 - Multi-card-batched RSP consumption optimization (e.g., one storylet that addresses multiple findings simultaneously) — defer to later iteration after single-card consumption proves out.
 

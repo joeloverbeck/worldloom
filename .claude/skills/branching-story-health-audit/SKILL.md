@@ -95,8 +95,8 @@ Phase 7: Findings Consolidation         (group by severity; per-finding
       |
       v
 Phase 8: Remediation Proposals          (per remediable finding: draft
-       + Per-Card Validation             RSP-NNNN [allocate lazily;
-        (optional)                       manual scan until MCPENH-016]
+       + Per-Card Validation             RSP-NNNN via allocate_next_id
+        (optional)                       with story_slug + audit_id)
                                          OR manual-intervention flag;
                                          per-card schema parity check
                                          against storylet-pool-authoring's
@@ -148,7 +148,7 @@ This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, any `worlds/<world-
 
 ### ID Allocation
 - `SAU-NNNN` — per-story-bundle, append-only. Allocated at Pre-flight via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`; the skill composes the returned bare id into `SAU-NNNN-<YYYY-MM-DD>.md`.
-- `RSP-NNNN` — per-SAU, append-only. Allocated lazily at Phase 8 per emitted card by manual scan of `audits/SAU-NNNN/remediation-storylet-proposals/RSP-*.md` (highest existing + 1; for the first card in a fresh SAU, starts at `RSP-0001`). Once **MCPENH-016** lands, switch to `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id=<SAU-NNNN>)` (the new sub-audit-scoped tier).
+- `RSP-NNNN` — per-SAU, append-only. Allocated lazily at Phase 8 per emitted card via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id=<SAU-NNNN>)`; for the first card in a fresh SAU, starts at `RSP-0001`.
 - ID-collision abort: if pre-flight `next_sau_id` or any per-card `next_rsp_id` allocation would collide with an existing file, abort. Never overwrite an existing audit report, RSP card, or INDEX row.
 - Dropped-at-HARD-GATE ids become permanent gaps and are never reused (append-only ID discipline; parallels `continuity-audit` and `storylet-pool-authoring`).
 
@@ -312,7 +312,7 @@ For each remediable finding above `severity_threshold`, produce one of:
 
 Used when a new storylet would close the gap (e.g., "OBL-NNNN has no payoff route" → propose a storylet that pays it off).
 
-- Allocate `RSP-NNNN` lazily per emitted card by manual scan of `audits/SAU-NNNN/remediation-storylet-proposals/RSP-*.md` (highest existing + 1; first card in fresh SAU = `RSP-0001`). Switch to `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id=<SAU-NNNN>)` once **MCPENH-016** lands.
+- Allocate `RSP-NNNN` lazily per emitted card with `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id=<SAU-NNNN>)` (first card in a fresh SAU = `RSP-0001`).
 - Compose the card per `templates/remediation-storylet-proposal-card.md`. Required frontmatter (parallels `storylet-pool-authoring`'s `source_audit_path` parse-time consumer schema): `rsp_id`, `audit_id`, `story_id`, `finding_ids[]`, `target_obligation` (or null), `target_thread` (or null), `target_consequence` (or null), `target_relationship` (or null), `proposed_shape` (per the SLT shape enum), `proposed_intensity` (`tame | mature | explicit`), `target_branch` (a branch_path | `"all branches"` | `"global pool"`), `proposed_visibility` (with `scope: global_author_pool | branch_scoped | branch_prefix_scoped` and `visible_branch_path_prefix`), `sketch` (with `hard_preconds`, `fact_effects`, `pays_off_obligations`, `opens_obligations`, `addresses_consequences`, `choice_templates`), `rationale`. Body sections: Diagnosis / Proposed remediation / Routing.
 
 ### B. Manual-Intervention Flag (in-report)
@@ -465,7 +465,6 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
   - **Produces inputs for**: `storylet-pool-authoring` mode=audit (RSP cards directly consumable as `source_audit_path` — wired post-STPOOL-001).
   - **Future consumers (deferred)**: `story-fact-promotion-to-canon` — manual-intervention flags about unauthorized canon promotion route to it manually until that skill ships.
 - **Known integration debt** (deferred — see filed tickets):
-  - **MCPENH-016**: Add `RSP` id-class to allocator (sub-audit-scoped tier — new nesting under `audits/SAU-NNNN/remediation-storylet-proposals/RSP-*.md`). Until landed: Phase 8 allocates RSP lazily via manual scan.
   - **MCPENH-017**: Register `branching_story_health_audit` task_type with ranking profile + token budget. Until landed: Pre-flight uses `task_type='other'` with explicit 12000-token budget.
   - **BSPAG-002**: Wire `branching-story-page-cycle`'s `narrative_health.flagged_for_audit` and high-JIT-rate signals into this audit's branch-prioritization input AND replace page-cycle's "deferred sibling" / "Until shipping..." prose with factual references to this skill.
   - **STPOOL-001**: Implement audit mode in `storylet-pool-authoring` — currently aborts at Pre-flight. Once landed: audit-mode storylet generation consumes `source_audit_path` and applies RSP-driven seed generation, replacing storylet-pool-authoring's "audit mode... deferred until branching-story-health-audit ships" prose with factual references.

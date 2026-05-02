@@ -108,6 +108,26 @@ function writeStoryRecord(root: string, storySlug: string, subdir: string, fileN
   writeFileSync(path.join(directory, fileName), "id: placeholder\n", "utf8");
 }
 
+function writeRemediationProposal(
+  root: string,
+  storySlug: string,
+  auditId: string,
+  fileName: string
+): void {
+  const directory = path.join(
+    root,
+    "worlds",
+    "seeded",
+    "stories",
+    storySlug,
+    "audits",
+    auditId,
+    "remediation-storylet-proposals"
+  );
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(path.join(directory, fileName), "rsp_id: placeholder\n", "utf8");
+}
+
 test("allocateNextId returns the next id for all supported classes", async () => {
   const root = createTempRepoRoot();
 
@@ -322,6 +342,56 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
   }
 });
 
+test("allocateNextId returns next sub-audit-scoped RSP ids per SAU directory", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "wolf-tale"), { recursive: true });
+    writeRemediationProposal(root, "wolf-tale", "SAU-0003", "RSP-0001-payoff.md");
+    writeRemediationProposal(root, "wolf-tale", "SAU-0003", "RSP-0003-escalation.md");
+    writeRemediationProposal(root, "wolf-tale", "SAU-0003", "not-an-rsp.md");
+    writeRemediationProposal(root, "wolf-tale", "SAU-0007", "RSP-0099-other-audit.md");
+    writeRemediationProposal(root, "other-story", "SAU-0003", "RSP-0088-other-story.md");
+
+    const nextForAudit = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "wolf-tale",
+        audit_id: "SAU-0003"
+      })
+    );
+    const firstRunForMissingAuditDirectory = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "wolf-tale",
+        audit_id: "SAU-0004"
+      })
+    );
+
+    assert.ok(!("code" in nextForAudit));
+    assert.ok(!("code" in firstRunForMissingAuditDirectory));
+    assert.equal(nextForAudit.next_id, "RSP-0004");
+    assert.equal(firstRunForMissingAuditDirectory.next_id, "RSP-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("allocateNextId returns the next pipeline-scoped ids from world-proposals", async () => {
   const root = createTempRepoRoot();
 
@@ -384,6 +454,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
         }
       ]
     });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "wolf-tale"), { recursive: true });
 
     const pipelineClassWithWorldSlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "NWB" })
@@ -406,6 +477,28 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const sauWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SAU" })
     );
+    const rspWithoutStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "RSP", audit_id: "SAU-0001" })
+    );
+    const rspWithoutAuditId = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "RSP", story_slug: "wolf-tale" })
+    );
+    const rspWithMalformedAuditId = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "wolf-tale",
+        audit_id: "SAU-99"
+      })
+    );
+    const nonSubAuditScopedWithAuditId = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "SAU",
+        story_slug: "wolf-tale",
+        audit_id: "SAU-0001"
+      })
+    );
     const worldScopedWithStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "CF", story_slug: "wolf-tale" })
     );
@@ -420,6 +513,10 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in sauWithPipelineSlug);
     assert.ok("code" in storyScopedWithoutStorySlug);
     assert.ok("code" in sauWithoutStorySlug);
+    assert.ok("code" in rspWithoutStorySlug);
+    assert.ok("code" in rspWithoutAuditId);
+    assert.ok("code" in rspWithMalformedAuditId);
+    assert.ok("code" in nonSubAuditScopedWithAuditId);
     assert.ok("code" in worldScopedWithStorySlug);
     assert.ok("code" in storyScopedMissingStory);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
@@ -429,6 +526,10 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(sauWithPipelineSlug.code, "invalid_input");
     assert.equal(storyScopedWithoutStorySlug.code, "invalid_input");
     assert.equal(sauWithoutStorySlug.code, "invalid_input");
+    assert.equal(rspWithoutStorySlug.code, "invalid_input");
+    assert.equal(rspWithoutAuditId.code, "invalid_input");
+    assert.equal(rspWithMalformedAuditId.code, "invalid_input");
+    assert.equal(nonSubAuditScopedWithAuditId.code, "invalid_input");
     assert.equal(worldScopedWithStorySlug.code, "invalid_input");
     assert.equal(storyScopedMissingStory.code, "invalid_input");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
@@ -436,13 +537,17 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);
     assert.match(storyScopedWithoutStorySlug.message, /requires story_slug/);
     assert.match(sauWithoutStorySlug.message, /requires story_slug/);
+    assert.match(rspWithoutStorySlug.message, /requires story_slug/);
+    assert.match(rspWithoutAuditId.message, /requires audit_id/);
+    assert.match(rspWithMalformedAuditId.message, /SAU-NNNN/);
+    assert.match(nonSubAuditScopedWithAuditId.message, /does not accept audit_id/);
     assert.match(worldScopedWithStorySlug.message, /does not accept story_slug/);
   } finally {
     destroyTempRepoRoot(root);
   }
 });
 
-test("allocateNextId exposes all 46 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 47 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -457,6 +562,7 @@ test("allocateNextId exposes all 46 id classes with existing formats preserved",
     "NCB",
     "AU",
     "RP",
+    "RSP",
     "SAU",
     "EPE",
     "STORY",
@@ -491,7 +597,7 @@ test("allocateNextId exposes all 46 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 46);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 47);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
@@ -499,6 +605,7 @@ test("allocateNextId exposes all 46 id classes with existing formats preserved",
   assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-0008-rill", ID_CLASS_FORMATS.STINT.regex);
   assert.match("SLB-0008", ID_CLASS_FORMATS.SLB.regex);
+  assert.match("RSP-0008-payoff", ID_CLASS_FORMATS.RSP.regex);
   assert.match("SAU-0008-2026-05-03", ID_CLASS_FORMATS.SAU.regex);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);

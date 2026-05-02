@@ -79,7 +79,7 @@ Skills divide into three categories, and these distinctions are load-bearing.
 
 The three skill categories remain load-bearing, but the machine-facing retrieval and mutation contract sits beside the human-facing skill prose. Post-SPEC-13, canonical storage is atomic YAML under `_source/`; the machine layer reads and writes atomic records directly.
 
-- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation for world-scoped, story-bundle-scoped, and pipeline-scoped classes (including CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP, and SAU); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
+- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation for world-scoped, story-bundle-scoped, sub-audit-scoped, and pipeline-scoped classes (including CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP, SAU, and RSP); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
 - **Localization**: `mcp__worldloom__search_nodes`, `get_record`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`, `find_sections_touched_by` localize relevant world state via per-record retrieval, with scoped-reference middle tier between canonical entity retrieval and lexical evidence fallback for source-local names.
 - **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path. Ops are record-ID-addressed: `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, plus hybrid-file ops (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`).
 - **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks (including `record_schema_compliance` and `touched_by_cf_completeness`) into executable gates; `world-validate` is the CLI surface.
@@ -92,7 +92,7 @@ Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` blo
 
 ## ID Allocation Conventions
 
-IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?)`, which scans the indexed world state or the class-specific direct filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan); story-bundle-scoped classes require `story_slug`. Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
+IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific direct filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan); story-bundle-scoped classes require `story_slug`, and sub-audit-scoped classes require `story_slug` plus `audit_id`. Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
 
 - `CF-NNNN` — Canon Fact Records (`worlds/<slug>/_source/canon/CF-NNNN.yaml`)
 - `CH-NNNN` — Change Log Entries (`worlds/<slug>/_source/change-log/CH-NNNN.yaml`; `CH-0001` is always the genesis entry)
@@ -109,6 +109,7 @@ IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight 
 - `AU-NNNN` — audit reports (`worlds/<slug>/audits/`)
 - `RP-NNNN` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
 - `SAU-NNNN` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN-<date>.md`; allocate with `story_slug`)
+- `RSP-NNNN` — remediation-storylet proposal cards (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md`; allocate with `story_slug` and `audit_id: SAU-NNNN`)
 
 ## Common Workflows
 

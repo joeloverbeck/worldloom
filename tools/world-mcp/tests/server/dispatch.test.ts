@@ -205,6 +205,9 @@ function seedServerWorld(root: string): void {
   const auditsDirectory = path.join(storiesDirectory, "audits");
   mkdirSync(auditsDirectory, { recursive: true });
   writeFileSync(path.join(auditsDirectory, "SAU-0003-2026-05-03.md"), "# SAU-0003\n", "utf8");
+  const remediationDirectory = path.join(auditsDirectory, "SAU-0003", "remediation-storylet-proposals");
+  mkdirSync(remediationDirectory, { recursive: true });
+  writeFileSync(path.join(remediationDirectory, "RSP-0003-payoff.md"), "# RSP-0003\n", "utf8");
 
   const toolResultsDirectory = path.join(root, "tool-results");
   mkdirSync(toolResultsDirectory, { recursive: true });
@@ -376,6 +379,16 @@ test("registered tools dispatch with either a success payload or the documented 
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SAU", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        args: {
+          world_slug: "seeded",
+          id_class: "RSP",
+          story_slug: "opening-bells",
+          audit_id: "SAU-0003"
+        },
         expectError: false
       },
       {
@@ -561,6 +574,24 @@ test("SAU id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("RSP id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "opening-bells",
+        audit_id: "SAU-0003"
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "RSP-0004");
+  });
+});
+
 test("get_canonical_vocabulary accepts every registered vocabulary class through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     for (const vocabularyClass of VOCABULARY_CLASSES) {
@@ -697,6 +728,58 @@ test("story-scoped id classes require story_slug at the MCP handler boundary", a
 
     assert.equal(result.isError, true);
     assert.match(textContent(result), /requires story_slug/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("sub-audit-scoped id classes require audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "RSP", story_slug: "opening-bells" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /requires audit_id/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("sub-audit-scoped id classes validate audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "opening-bells",
+        audit_id: "SAU-99"
+      }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /SAU-NNNN/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("non-sub-audit-scoped id classes reject audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "SAU",
+        story_slug: "opening-bells",
+        audit_id: "SAU-0003"
+      }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /does not accept audit_id/);
     const structured = result.structuredContent as { code?: string };
     assert.equal(structured.code, "invalid_input");
   });
