@@ -1,0 +1,153 @@
+# WMCP-015: Adopt `list_records(... include_full_body=true)` as the canonical Phase 7a primary load in canon-reading content-generation skills
+
+**Status**: COMPLETED
+**Priority**: MEDIUM
+**Effort**: Small
+**Engine Changes**: No tool / engine / validator code is touched. Skill-prose-only — `.claude/skills/diegetic-artifact-generation/SKILL.md`, `.claude/skills/diegetic-artifact-generation/references/world-state-prerequisites.md`, `.claude/skills/diegetic-artifact-generation/references/phase-7-canon-safety-check.md`, `.claude/skills/diegetic-artifact-generation/references/canon-rules-and-foundations.md`, `.claude/skills/character-generation/SKILL.md`, `.claude/skills/character-generation/references/world-state-prerequisites.md`, `.claude/skills/character-generation/references/phase-7-canon-safety-check.md`, `.claude/skills/character-generation/references/governance-and-foundations.md`.
+**Deps**: `archive/tickets/FNDAMD-001-clarify-tooling-recommendation-whole-class-enumeration-pattern.md` (FOUNDATIONS §Tooling Recommendation amendment naming whole-class enumeration as a legitimate primary loading pattern); `archive/tickets/MCPENH-007-bulk-full-body-fetch-for-whole-class-firewall-loads.md` (provides `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)`); `archive/tickets/WMCP-012.md` (governing-context reserve policy whose persisted-with-summary fallback this ticket structurally avoids for Phase 7a/7b firewall loads).
+
+## Problem
+
+`docs/FOUNDATIONS.md` §Tooling Recommendation now names whole-class enumeration via `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)` as a legitimate primary loading branch for skills whose Canon Safety Check tests a candidate against every record of a class. The amendment cites `emergent-pressure-events` Phase 6a (every INV record) and Phase 6b (every M record) plus `continuity-audit` cross-checks as the existing consumers.
+
+At intake, `character-generation` Phase 7a (every INV) + 7b (every M) and `diegetic-artifact-generation` Phase 7a (every INV) + 7b (every M) had the same whole-class firewall shape but had NOT adopted the `list_records` primary load. They routed through `mcp__worldloom__get_context_packet` and relied on the WMCP-012 reserve policy to deliver INV/M full bodies. Phase 7b in both skills additionally cited `mcp__worldloom__get_firewall_content(world_slug)` as a parallel bulk projection (M-only). Phase 7a in both skills cited only `mcp__worldloom__search_nodes(node_type='invariant_record')` as a fallback when `governing_world_context` was the dropped layer — and `search_nodes` returns metadata, not necessarily full bodies, leaving the operator to issue per-id `get_record` follow-ups for the parsed `record` content Phase 7a actually needs.
+
+Session evidence from the 2026-05-02 `diegetic-artifact-generation` run that produced `DA-0001` (`marla-kerns-journal-the-iker-entries`) against `worlds/erotica-world`:
+
+- `mcp__worldloom__get_context_packet(task_type='diegetic_artifact_generation', seed_nodes=[28 nodes], token_budget=12000)` returned `delivery_status: 'persisted_with_summary'` with `task_header.token_budget.allocated: 2353` (vs requested 12000). The full packet body (including the 10 reserved INV bodies and 4 reserved M bodies) was persisted to `/tmp/worldloom-mcp-tool-results/...json` and the inline response carried only the `governing_summary` (IDs only, no parsed bodies). This is the documented WMCP-005 + WMCP-011 dual-ceiling overflow handler firing correctly — but it forced a recovery round-trip.
+- The recovery was a single `mcp__worldloom__get_records(record_ids=[CF-0001, CF-0002, CF-0003, M-1, M-2, M-3, M-4, ONT-1, ONT-2, CAU-1, CAU-2, DIS-1, DIS-2, SOC-1, SOC-2, AES-1, AES-2])` call returning a 61-KB response that itself exceeded the harness inline cap and was persisted to a second tool-results file requiring file-read recovery.
+- Net cost: 1 packet call + 1 batch retrieval + 1 file-read recovery + the operator's mental decision-tree about which fallback step to take. The persisted-summary path is canon-safe — Phase 7 firewall completeness is preserved by the eventual full-record list — but the canonical FOUNDATIONS-named pattern would have been: `list_records(invariant_record, include_full_body=true)` (1 call → 10 INV bodies) + `list_records(mystery_record, include_full_body=true)` or `get_firewall_content(world_slug)` (1 call → 4 M bodies) + a NARROWER `get_context_packet` call seeded only with the seed-relevant CFs / SEC / named entities (which would have fit inline at the same 12000 token_budget without persistence).
+
+The asymmetry is structurally avoidable: Phase 7a in both skills should name `list_records(record_type='invariant_record', include_full_body=true)` as its canonical primary load (paralleling Phase 6a in `emergent-pressure-events`), and Phase 7b should harmonize its existing bulk-firewall guidance to name `list_records(record_type='mystery_record', include_full_body=true)` as a co-equal primary alongside the M-only `get_firewall_content` shortcut. `get_context_packet` remains the primary load for seed-relevant CFs / SEC / named entities — a much narrower seed set without the whole-class INV/M load embedded in it.
+
+## Assumption Reassessment (2026-05-02)
+
+1. `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)` is exposed by the deployed MCP server per archived `MCPENH-007`. The deferred-tool registry surfaced earlier in the 2026-05-02 session lists `mcp__worldloom__mcp__worldloom__list_records` as available, and `archive/tickets/FNDAMD-001-clarify-tooling-recommendation-whole-class-enumeration-pattern.md` line 130 confirms `list_records` whole-class loads were live-cited at the time of the FOUNDATIONS amendment. No new tool work is required.
+2. `docs/FOUNDATIONS.md` §Tooling Recommendation lines 488-490 carry the FNDAMD-001 amendment naming whole-class enumeration as a legitimate primary load and citing `emergent-pressure-events` Phase 6 + `continuity-audit` cross-checks as the existing consumers. `character-generation` and `diegetic-artifact-generation` are NOT named in the amendment because they had not adopted the pattern at the time. This ticket extends the named-consumer set to the canon-reading content-generation skills.
+3. Cross-skill / cross-artifact boundary under audit: the contract between (a) `docs/FOUNDATIONS.md` §Tooling Recommendation amendment + (b) the four reference files plus two SKILL.md bodies in `.claude/skills/character-generation/` and `.claude/skills/diegetic-artifact-generation/`. `emergent-pressure-events/SKILL.md` is the model-citizen reference (lines 16, 108, 112, 133, 224, 226 of `.claude/skills/emergent-pressure-events/SKILL.md` per the 2026-05-02 grep show the canonical phrasing). The cascade target is the parallel surface in the two canon-reading content-generation skills; no new structural-identity claim is introduced.
+4. FOUNDATIONS principle motivating this ticket: §Tooling Recommendation as amended by FNDAMD-001. The amendment's intent ("the load shape is the skill's choice, named explicitly in its FOUNDATIONS Alignment table and governed by its Canon Safety Check discipline") permits but does not mandate adoption. This ticket changes the SKILLS' load-shape choice to align with the canonical pattern; FOUNDATIONS itself is unchanged. Per `tickets/README.md` Mandatory Pre-Implementation Check 9: this ticket touches Canon Safety Check load surfaces (Phase 7a, 7b — Mystery Reserve firewall enforcement at runtime), but the runtime test logic is unchanged. Only the LOAD shape changes (whole-class enumeration replaces packet-with-fallback). Rule 7 (Preserve Mystery Deliberately) is structurally STRENGTHENED, not weakened: the skill no longer depends on the WMCP-012 reserve policy + persisted-with-summary fallback chain to deliver every INV/M body — it loads them directly via the FOUNDATIONS-named primary load.
+5. Schema extension audit per `tickets/README.md` Pre-Implementation Check 10: this ticket does NOT extend any output schema (CF / CH / proposal card / dossier / artifact). It is purely skill-prose. The `world_consistency.invariants_respected` and `world_consistency.mystery_reserve_firewall` arrays in the dossier and artifact outputs continue to carry bare IDs as before; the change is upstream of the array population, not in the array shape.
+6. Pipeline-wide blast radius: scoped to the six skill files named in §Engine Changes plus a regression check against the existing `emergent-pressure-events` model-citizen prose to confirm phrasing parallelism. No FOUNDATIONS edit, no MCP server edit, no validator edit, no template edit. Existing FOUNDATIONS Alignment tables in `character-generation/references/governance-and-foundations.md` and `diegetic-artifact-generation/references/canon-rules-and-foundations.md` may need a one-line addition naming the new load shape as the Phase 7a/7b firewall primary; check at implementation time and include if present.
+7. Adjacent contradictions: the existing Phase 7b bulk-firewall guidance citing `get_firewall_content(world_slug)` is COMPLEMENTARY to `list_records(mystery_record, include_full_body=true)` — both are bulk M-record retrievals and both serve the firewall purpose. This ticket does NOT remove `get_firewall_content`; it harmonizes the prose so `list_records` is the canonical bulk pattern (matching FOUNDATIONS' named pattern) and `get_firewall_content` is named as the equivalent M-only shortcut for skills that prefer the projection-shaped surface. The fork is the skill author's choice. For Phase 7a the existing `search_nodes(node_type='invariant_record')` fallback is REPLACED by `list_records(invariant_record, include_full_body=true)` because `search_nodes` returns metadata-shaped results that do not include the full `statement`, `examples`, `non_examples`, `break_conditions` fields Phase 7a tests against — `list_records(... include_full_body=true)` returns the full INV body in one call.
+8. Mismatch + correction: the ticket title's "primary load" framing implies a structural change to `get_context_packet`'s role. The truthful landed contract is narrower: `get_context_packet` REMAINS the primary load for the seed-relevant CFs / SEC records / named-entity neighbors — exactly the layers it was designed for. The change is that the whole-class INV/M load is FACTORED OUT of the packet's seed_nodes set into separate `list_records(... include_full_body=true)` calls. The packet's seed_nodes can shrink correspondingly, which keeps the inline-vs-persisted threshold favorable. This is a load-shape factoring, not a packet-replacement.
+
+## Architecture Check
+
+1. **Whole-class enumeration via `list_records` is structurally cleaner than packet-with-fallback for class-bounded firewalls.** The packet contract is seed-relevance + completeness-across-loaded-layers; for a class-bounded firewall (every INV / every M) the seed-relevance dimension is moot — the firewall needs the entire class regardless of which seeds the operator chose. Routing the whole-class load through `list_records` directly gives the operator a single-call, bounded-output retrieval that does not depend on the packet's reserve policy + harness-ceiling math + persisted-summary fallback. The packet remains the right tool for seed-relevant slices that benefit from the assembler's prioritization across multiple layers (CFs touched by seeds + SEC sections touched by seeds + named-entity neighbors).
+2. **Aligning canon-reading content-generation skills with the canonical FOUNDATIONS-named pattern eliminates per-skill retrieval-shape divergence.** Currently `emergent-pressure-events` uses `list_records` whole-class; `character-generation` and `diegetic-artifact-generation` use packet-with-fallback. A future skill author looking at the three for guidance gets two patterns where one canonical pattern is named in FOUNDATIONS. Harmonizing all three on the FOUNDATIONS pattern reduces cognitive load and makes the canon-reading family internally consistent.
+3. No backwards-compatibility aliasing/shims introduced. `get_context_packet` remains valid; existing `get_firewall_content` remains valid as the M-only shortcut; existing `search_nodes` remains valid for targeted follow-up. The change is which tool the skill prose names as the PRIMARY load for Phase 7a/7b firewall completeness — additive guidance, not breaking removal.
+
+## Verification Layers
+
+1. Phase 7a primary load adoption -> codebase grep-proof: `rg -n "list_records.*invariant_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` returns at least one hit per skill, located in the Phase 7a / world-state-prerequisites prose.
+2. Phase 7b primary load harmonization -> codebase grep-proof: `rg -n "list_records.*mystery_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` returns at least one hit per skill; the existing `get_firewall_content(world_slug)` references remain intact (no removal) and are described as the equivalent M-only shortcut.
+3. Phase 7a runtime test logic unchanged -> manual review of the Phase 7a sub-section in `phase-7-canon-safety-check.md` confirms the test logic ("for every claim in the artifact body and `claim_map`, and every asserted capability or knowledge of the Author, test against every INV record") is identical pre/post-edit; only the LOAD path that produces the INV record set changes.
+4. Phase 7b firewall enforcement unchanged -> manual review of the Phase 7b sub-section confirms the firewall test logic and the `world_consistency.mystery_reserve_firewall` audit-trail population logic are identical pre/post-edit.
+5. Cross-skill prose parallelism -> manual review against `emergent-pressure-events/SKILL.md` lines 108, 112, 224, 226 to confirm the canon-reading content-generation skills' Phase 7 prose now uses parallel phrasing for the bulk INV/M loads.
+6. FOUNDATIONS alignment check: §Tooling Recommendation amendment (FOUNDATIONS.md lines 488-490) now extends in spirit to two additional consumer skills. No FOUNDATIONS edit is required because the amendment's intent ("the load shape is the skill's choice ... named explicitly in its FOUNDATIONS Alignment table") is satisfied by the per-skill prose update. Both `governance-and-foundations.md` (character-generation) and `canon-rules-and-foundations.md` (diegetic-artifact-generation) carried FOUNDATIONS Alignment table lines for §Tooling Recommendation, so both now cite the new bulk-load adoption.
+7. WMCP-012 reserve-policy compatibility -> manual review: with INV/M factored out of the packet's seed_nodes, the packet's reserve-policy budget is no longer competing for INV/M bodies. The reserve policy remains in place for any seed_nodes-resolved CF that lands in `governing_world_context` (rare for canon-reading content-generation; more common for `canon_addition`). The `task_header.governing_full_body_priority` telemetry continues to surface; the persisted-with-summary fallback path remains valid for legitimately-too-large packets.
+
+## Landed Changes
+
+### 1. Factored Phase 7 whole-class firewall loads out of the context packet
+
+`character-generation` and `diegetic-artifact-generation` now describe `get_context_packet` as the primary load for seed-relevant CF / SEC / entity context, while Phase 7a and 7b whole-class firewall coverage load separately through:
+
+- `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`
+- `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)`
+
+### 2. Updated Phase 7a invariant prose in both skills
+
+Both `phase-7-canon-safety-check.md` files now name `list_records(record_type='invariant_record', include_full_body=true)` as the Phase 7a full-body primary. `search_nodes(node_type='invariant_record')` remains documented only for targeted INV-id discovery, not as the whole-class full-body fallback.
+
+### 3. Harmonized Phase 7b Mystery Reserve retrieval
+
+Both `phase-7-canon-safety-check.md` files now name `list_records(record_type='mystery_record', include_full_body=true)` as the FOUNDATIONS-named whole-class full-body load. `get_firewall_content(world_slug)` remains documented as the equivalent M-only projection shortcut, and per-id `get_record('M-NNNN')` remains the fallback for additional full-record context.
+
+### 4. Updated thin SKILL.md pre-flight and Phase 7 summaries
+
+Both thin skill bodies now surface the split retrieval model in their descriptions, process flows, World-State Prerequisites, Pre-flight instructions, and Phase 7 summaries: packet for seed-relevant context; `list_records(... include_full_body=true)` for whole-class INV/M firewall bodies.
+
+### 5. Updated FOUNDATIONS Alignment rows
+
+`character-generation/references/governance-and-foundations.md` and `diegetic-artifact-generation/references/canon-rules-and-foundations.md` both had Tooling Recommendation rows, so both now cite the whole-class `list_records(... include_full_body=true)` Phase 7 adoption.
+
+## Files to Touch
+
+- `.claude/skills/diegetic-artifact-generation/SKILL.md` (modify — §World-State Prerequisites, §Procedure §1 Pre-flight, §Procedure §5 Phase 7)
+- `.claude/skills/diegetic-artifact-generation/references/world-state-prerequisites.md` (modify — primary-load section, retrieval menu)
+- `.claude/skills/diegetic-artifact-generation/references/phase-7-canon-safety-check.md` (modify — Phase 7a primary load adoption, Phase 7b bulk-firewall harmonization)
+- `.claude/skills/character-generation/SKILL.md` (modify — parallel updates to §World-State Prerequisites, §Procedure pre-flight, §Procedure §4 Phase 7)
+- `.claude/skills/character-generation/references/world-state-prerequisites.md` (modify — primary-load section, retrieval menu)
+- `.claude/skills/character-generation/references/phase-7-canon-safety-check.md` (modify — Phase 7a primary load adoption, Phase 7b bulk-firewall harmonization)
+- `.claude/skills/character-generation/references/governance-and-foundations.md` (modify — §Tooling Recommendation Alignment row cites whole-class Phase 7 firewall load)
+- `.claude/skills/diegetic-artifact-generation/references/canon-rules-and-foundations.md` (modify — §Tooling Recommendation Alignment row cites whole-class Phase 7 firewall load)
+
+## Out of Scope
+
+1. **Removing `get_firewall_content(world_slug)` from the toolset.** The M-only projection-shaped surface remains valid as a smaller-payload alternative to `list_records(mystery_record, include_full_body=true)`. Skill authors choose; both are canonical.
+2. **Removing `mcp__worldloom__get_context_packet(task_type='diegetic_artifact_generation' | 'character_generation')` profiles.** The packet remains the primary load for seed-relevant CFs / SEC records / named-entity neighbors. The reserve policy from WMCP-012 remains in place for any CF that lands in `governing_world_context` via seed expansion.
+3. **Updating `emergent-pressure-events/SKILL.md` or `continuity-audit/SKILL.md`.** Those skills already use `list_records(... include_full_body=true)` as the canonical primary load per FNDAMD-001's named consumers. No change needed.
+4. **Engine / tool / validator changes.** The MCP affordance exists (MCPENH-007); the tool registry includes `list_records`; `task_header.governing_full_body_priority` telemetry exists (WMCP-012). No engine change required.
+5. **Adopting `list_records` for non-firewall classes (CF / OQ / SEC / ENT).** Those classes have seed-relevance dimensions where the packet's prioritization adds value. The factoring-out applies to class-bounded firewall surfaces (INV, M) only.
+6. **Per-call benchmarking against representative worlds.** WMCP-012 already calibrated the reserve-policy thresholds for `worlds/erotica-world`. With INV/M factored out of seed_nodes, packet calls in this skill should reliably fit inline at the documented `token_budget=10000` for `diegetic_artifact_generation` and `token_budget=18000` for `character_generation`. If a future representative world surfaces a different threshold, that's its own ticket.
+
+## Acceptance Criteria
+
+### Tests That Must Pass
+
+1. `rg -n "list_records.*invariant_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` returns at least 4 hits (Phase 7a primary load named in both `world-state-prerequisites.md` files and both `phase-7-canon-safety-check.md` files).
+2. `rg -n "list_records.*mystery_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` returns at least 4 hits (Phase 7b primary load named alongside `get_firewall_content`).
+3. `rg -n "get_firewall_content" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` returns at least 4 hits (existing M-only projection surface preserved as the equivalent shortcut).
+4. `rg -n "test against every INV record|every INV record" .claude/skills/character-generation/references/phase-7-canon-safety-check.md .claude/skills/diegetic-artifact-generation/references/phase-7-canon-safety-check.md` returns the unchanged Phase 7a runtime test logic in both skills (the LOAD path changed, the test logic did not).
+5. Manual review: re-read both skills' Phase 7 sub-sections end-to-end and confirm the prose parallels `emergent-pressure-events/SKILL.md` lines 108-112, 224-226 in shape and authority citation. The §FOUNDATIONS-§Tooling-Recommendation cross-reference is present at least once per skill.
+6. `cd tools/world-mcp && npm test` — full package suite passes (no engine change; included as guard against accidental skill-prose-edit-breaking-test-fixture state).
+
+### Invariants
+
+1. After this ticket, `character-generation` Phase 7a/7b and `diegetic-artifact-generation` Phase 7a/7b name `mcp__worldloom__list_records(record_type=..., include_full_body=true)` as the canonical primary load for whole-class firewall coverage. `get_context_packet` remains primary for seed-relevant slices but is no longer the documented Phase 7a/7b firewall primary.
+2. Phase 7b runtime firewall test logic and `world_consistency.mystery_reserve_firewall` audit-trail population logic are identical pre/post-edit. Phase 7a runtime test logic is identical. Only the load shape changes.
+3. `get_firewall_content(world_slug)` remains a documented M-only shortcut alongside `list_records(mystery_record, include_full_body=true)`. No tool removal.
+4. The two canon-reading content-generation skills are consistent with each other in Phase 7 retrieval-shape prose. Both are also consistent with the FNDAMD-001-named canonical pattern via `emergent-pressure-events`.
+
+## Test Plan
+
+### New/Modified Tests
+
+1. `None — documentation-only ticket; verification is grep-and-manual-review and existing pipeline coverage is named in §Acceptance Criteria.` Per `tickets/README.md` allowed phrasing for documentation-only tickets.
+
+### Commands
+
+1. `rg -n "list_records.*invariant_record.*include_full_body|list_records.*mystery_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` — confirms the canonical primary loads landed in both skills.
+2. `rg -n "get_firewall_content|search_nodes.*invariant_record" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` — confirms the existing fallback/shortcut surfaces remain documented.
+3. `rg -n "test against every INV record|every M record|world_consistency\.mystery_reserve_firewall" .claude/skills/character-generation/references/phase-7-canon-safety-check.md .claude/skills/diegetic-artifact-generation/references/phase-7-canon-safety-check.md` — confirms the runtime test logic and audit-trail discipline are unchanged.
+4. `cd tools/world-mcp && npm test` — full package proof; guards against accidental skill-prose-edit-breaking test-fixture state (no engine code touched, but prose edits to `references/world-state-prerequisites.md` are sometimes covered by skill-prose snapshot tests; run as a regression guard).
+5. Manual review: spot-check `.claude/skills/emergent-pressure-events/SKILL.md` lines 108-112, 224-226 against the canon-reading content-generation skills' updated Phase 7 prose to confirm phrasing parallelism and authority citation parity.
+
+## Outcome
+
+Completed on 2026-05-02.
+
+- Updated `character-generation` and `diegetic-artifact-generation` so Phase 7a/7b whole-class firewall bodies load via `mcp__worldloom__list_records(..., include_full_body=true)`.
+- Preserved `get_context_packet` as the primary seed-relevant CF / SEC / entity context load.
+- Preserved `get_firewall_content(world_slug)` as the M-only projection shortcut and `get_record('M-NNNN')` as the per-id full-context fallback.
+- Updated both skills' FOUNDATIONS Alignment rows to cite the whole-class enumeration amendment.
+- No engine, MCP handler, validator, output schema, or canon-write behavior changed.
+
+## Verification Result
+
+Passed:
+
+1. `rg -n "list_records.*invariant_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` — returned hits in both thin SKILL bodies, both world-state prerequisite files, both Phase 7 references, and both FOUNDATIONS Alignment rows.
+2. `rg -n "list_records.*mystery_record.*include_full_body" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` — returned hits in both thin SKILL bodies, both world-state prerequisite files, both Phase 7 references, and both FOUNDATIONS Alignment rows.
+3. `rg -n "get_firewall_content" .claude/skills/character-generation/ .claude/skills/diegetic-artifact-generation/` — returned preserved M-only projection shortcut references in both skills.
+4. `rg -n "test against every INV record|every INV record|every M record|world_consistency\.mystery_reserve_firewall" .claude/skills/character-generation/references/phase-7-canon-safety-check.md .claude/skills/diegetic-artifact-generation/references/phase-7-canon-safety-check.md` — returned the unchanged every-record Phase 7a/7b test and audit-trail wording in both references.
+5. Manual review of both updated Phase 7 references and both world-state prerequisite references — passed; the load path changed, while the Phase 7 conformance / firewall checks and audit-field population remain the same.
+6. Manual comparison against `.claude/skills/emergent-pressure-events/SKILL.md` Phase 6 load wording — passed; the content-generation skills now use the same whole-class INV/M full-body retrieval shape.
+7. `cd tools/world-mcp && npm test` — passed; package build plus `node --test "dist/tests/**/*.test.js"` completed with 266 passing assertions.
+8. `git diff --check` — passed.
+
+## Deviations
+
+- The implementation also updated the two FOUNDATIONS Alignment reference files because both carried §Tooling Recommendation rows; this was listed as conditional in the ticket and proved applicable.
+- Verification used package-local `tools/world-mcp` tests as the guard lane. No direct external MCP invocation was needed because this ticket changed skill prose only.

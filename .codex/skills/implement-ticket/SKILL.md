@@ -42,6 +42,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
   - Derived artifacts such as `_index/world.db` are regenerated, not hand-edited.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - Open every explicit `Deps` path, evidence-ticket path, or archived-ticket path named by the ticket before coding. For completed or archived dependencies, inspect closeout sections such as `## Outcome`, `## Verification Result`, and `## Deviations` for same-seam fallout that may already partially implement, narrow, or contradict the active ticket. If a named dependency is intentionally not authoritative for this run, record why in `Assumption Reassessment`.
+- If a `Deps` entry is a symbolic ticket/spec id rather than a path, resolve it with `rg --files` or an equivalent exact-path search before treating it as missing.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - For detailed package/tool command, fixture, workspace, dependency, and compile-gate checks, use `references/package-tooling.md` after classification instead of keeping those narrow rules in the top-level flow.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
@@ -88,15 +89,16 @@ For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, o
 
 1. Read the target ticket file.
 2. Read every directly relevant reference it names: spec files, docs, skill files, tool files, templates, examples, or archived tickets/specs.
-3. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
-4. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
-5. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
-6. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
-7. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-8. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-9. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-10. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
-11. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+3. If a named reference is historical provenance rather than the current authority, such as an archived brainstorming note for a live skill, you may use the live skill/tool/doc as the authority instead. Record the skipped provenance reference in `Assumption Reassessment` when it affects scope, proof, or ownership.
+4. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
+5. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
+6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
+7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
+8. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+9. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+10. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+11. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+12. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -280,13 +282,16 @@ Update the active ticket before finishing:
 - if a local sibling package or `file:` dependency was refreshed for proof, record whether the consumer's installed dependency was a symlink or copied install and cite the consumer-resolved artifact check used to prove the consumer saw the changed producer surface
 - if package-manager commands emitted security, deprecation, or funding warnings that were not repaired because they were outside scope, mention them in `## Verification Result` or `## Deviations` so closeout does not imply a cleaner dependency state than was observed
 - after the final verification rerun, run the detailed completed-ticket truth pass and stale-anchor sweeps in `references/verification-closeout.md`
+- when stale-anchor sweeps search for markdown/code literals containing backticks, `$`, pipes, parentheses, or similar shell-active characters, use single-quoted literal patterns, escaped patterns, or split simpler patterns; never trust a sweep that may have executed part of the search string in the shell
 - after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
+- after changing an MCP tool's public behavior, enum surface, input schema, or scope, grep registered tool descriptions and `describe_capabilities`-visible metadata for stale same-seam wording before final response
 - after editing `.claude/skills/<skill>/references/*` or another skill-local reference for a changed command, tool, fallback, or contract shape, grep and re-read the parent `.claude/skills/<skill>/SKILL.md` for stale same-seam summary language before final response; truth it in the active ticket when the parent skill still prescribes the old behavior
 - for `tool or script implementation` tickets whose landed behavior changes a package-local contract, perform the package/tool closeout hard stop in `references/package-tooling.md`: inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly, then either truth them or record why they are outside the active seam
 - for tickets that add or change a user-facing CLI, workflow command, or machine-layer command surface, inspect repo-level quick-reference docs such as `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention that command surface; truth stale same-seam references or record why another ticket owns them
 - for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
 - when a ticket belongs to an active spec family, check implementation-order or roadmap/status tables such as `specs/IMPLEMENTATION-ORDER.md` for same-seam pending/completed wording even when archival is not in scope
 - apply `references/dirty-worktree-ledger.md` before final response; explicitly distinguish owned edits, untracked owned files, pre-existing dirt, externally appeared changes, same-family sibling scope, and expected ignored artifacts in the final response or ticket closeout
+- for completed tickets, replace directory-level `Files to Touch`, `New/Modified Tests`, or proof placeholders with the concrete landed file paths unless the whole directory was genuinely owned; directory placeholders are acceptable in a plan but not as the final file-set record
 - run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, or skill files
 - when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
 

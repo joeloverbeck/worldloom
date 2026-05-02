@@ -1,6 +1,6 @@
 # Drafting the Skill Design (Step 5)
 
-Present the draft in this order. Get user approval per section. After 2 consecutive approvals under auto mode (3 otherwise), batch remaining sections into groups of 2-3. Keep any substantially higher-risk section standalone. Under auto mode, after 5+ consecutive approvals with no substantive pushback, single-message batches covering all remaining sections are acceptable provided no section is higher-risk AND the Notes-on-the-shape discipline is preserved per section (rationale notes must still appear for each section in the batch). The "groups of 2-3" rule remains the default; the 5+-sustained-approval case is the explicit relaxation for prolonged agreement.
+Present the draft in this order. Get user approval per section. After 2 consecutive approvals under auto mode (3 otherwise), batch remaining sections into groups of 2-3. Keep any substantially higher-risk section standalone. Under auto mode, after 5+ consecutive approvals with no substantive pushback, single-message batches covering all remaining sections are acceptable provided no section is higher-risk AND the Notes-on-the-shape discipline is preserved per section (rationale notes must still appear for each section in the batch). The "groups of 2-3" rule remains the default; the 5+-sustained-approval case is the explicit relaxation for prolonged agreement. The Phase breakdown exception below overrides this relaxation for Section 6 specifically — the two halves (pre/post seam) MUST be presented as a structured batch (either as a single message containing both halves clearly delineated as 6a + 6b, or as two consecutive standalone messages). Collapsing Section 6 + Sections 7–9 into one global single-message batch violates the higher-risk-section-standalone rule and is forbidden, because Section 6 is itself the highest-risk section per the Phase breakdown exception's existence; the relaxation rule's "no section is higher-risk" precondition is structurally not satisfiable when Section 6 is in the remaining batch.
 
 **Phase breakdown exception**: Phase breakdowns routinely exceed 10 phases plus branch logic across all classes (canon-mutating consequence-propagation branches, canon-reading multi-sub-check Canon Safety phases, meta-tooling per-severity repair menus). When the phase breakdown exceeds ~8 phases OR contains explicit branch logic (accept/non-accept, pre/post-audit, pre/post Canon Safety Check), split into at most 2 presentations along a natural pipeline seam — pre/post Canon Safety Check [canon-reading with in-world output; canon-mutating], pre/post adjudication [canon-mutating], or pre/post escalation gate [canon-mutating with multi-critic phases]. Never split at an arbitrary phase number.
 
@@ -39,9 +39,21 @@ context — invoking this skill does not constitute approval of the deliverable 
 - <name> — <type> — <purpose>
 
 ## Output
+
+[Choose one shape based on emission semantics. Default is the Flat-list shape; use the Table shape only when the skill emits multiple record classes per invocation with conditional emission semantics.]
+
+[Flat-list shape — default; use when emission is unconditional (every invocation produces every named record) or when there is one primary artifact per invocation:]
 - <artifact> — <format>
 - <canon record> — matches FOUNDATIONS §Canon Fact Record Schema   [if canon-mutating]
 - <change log entry> — matches templates/change-log-entry.yaml     [if canon-mutating]
+
+[Table shape — use when the skill emits multiple record classes per invocation with conditional emission semantics (some classes always, some only when a triggering condition fires); the per-class conditionality is load-bearing for the runtime contract and a flat list buries it. The "Created when" column names the triggering condition explicitly:]
+| Class | File path | Created when |
+|---|---|---|
+| <Always-class> | <path-template> | Always |
+| <Conditional-class> | <path-template> | IF <triggering condition stated in skill phase prose> |
+
+[Worked precedent: branching-story-page-cycle's §Output section uses the Table shape across 14+ classes ranging from "Always" (PG-NNNN, SE-NNNN, rendered prose) to "IF Phase 4 JIT expansion fired" (SLT-NNNN) to "IF a new story-local location is introduced this turn" (STLOC-NNNN) — Flat-list would have collapsed the per-turn conditionality that maintainers need to read off the runtime contract.]
 
 ## World-State Prerequisites            [mandatory — every class]
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
@@ -67,6 +79,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
  - for non-bootstrap canon-mutating skills: verify the target world state DOES exist and required files are readable
  - for meta-with-multi-world-read skills: enumerate `worlds/*/` and assemble the cross-world read aggregate; if empty, set the degraded-mode flag (e.g., `distinctness_enforced=false`) and surface the absent-distinctness-checks signal at the HARD-GATE deliverable per the skill's design
  - for skills with monotonic-ID outputs at pipeline scope (e.g., NWP-NNNN, NWB-NNNN, or any pipeline-scoped class whose output lives at root-level rather than under `worlds/<slug>/`): allocate via `mcp__worldloom__allocate_next_id(world_slug='__pipeline__', id_class=...)`; if the index does not yet support the `__pipeline__` sentinel, fall back to a manual scan of the pipeline-scoped output directory and increment
+ - for skills with monotonic-ID outputs at sub-world scope (e.g., per-story-bundle classes like PG-NNNN / SE-NNNN / OBL-NNNN whose output lives nested under `worlds/<slug>/stories/<story-slug>/_source/<class>/` — uniqueness is per-bundle, not per-world or per-pipeline): allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`. Distinct from world-scoped (e.g., CHAR-NNNN, AU-NNNN) which scans `worlds/<slug>/<class>/` and from pipeline-scoped (NWP-NNNN, NWB-NNNN) which uses the `__pipeline__` sentinel.
  - for skills with runtime-read supporting files declared at the gap-filler interview §"Generated skill's supporting files" (a): verify each supporting file exists and is readable (e.g., `tickets/_TEMPLATE.md`, `tickets/README.md`, validator fixtures, hook scripts) — abort with a clear missing-file error on fail
  - for skills with first-run bootstrap supporting files declared at the gap-filler interview §"Generated skill's supporting files" (b): detect bootstrap state (e.g., `<output-dir>/.gitkeep` presence, `.gitignore` containing the output-dir pattern); record `bootstrap_writes_required: true|false` in the batch manifest or equivalent; defer the bootstrap writes themselves to the gated Commit phase — never pre-write infrastructure before HARD-GATE approval
  - parse any user input files

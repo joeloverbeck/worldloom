@@ -8,6 +8,7 @@ Maintain a compact ledger with these categories:
 
 - `pre-existing unrelated`: dirty paths present in the initial snapshot and outside the ticket seam.
 - `pre-existing same-seam`: dirty paths present in the initial snapshot that overlap the active ticket, sibling-ticket family, or shared contract.
+- `pre-existing untracked same-seam`: untracked paths present in the initial snapshot that overlap the active ticket, sibling-ticket family, or shared contract.
 - `owned edits`: tracked paths intentionally changed for the active ticket.
 - `new/untracked owned files`: untracked files intentionally created for the active ticket.
 - `externally appeared unrelated`: paths that were clean at the initial snapshot but appear dirty later outside the active ticket seam.
@@ -26,6 +27,8 @@ If dirty paths overlap the active ticket seam, inspect their diffs before coding
 If the overlap belongs to an in-flight sibling ticket, narrow, widen, or rewrite the active ticket boundary before code edits instead of treating the seam as clean ownership.
 
 When a file is already dirty before the run and the active ticket also needs to edit that same file, record final ownership at hunk or topic level in the ticket closeout or final response. Distinguish the ticket-owned hunks from pre-existing same-file edits instead of describing the whole file as owned or unrelated.
+
+When a same-seam file lives under a path that was already untracked at initial snapshot, normal `git diff` and path-specific tracked diffs will not show its content. Re-read the file directly, or use an explicit no-index/status-aware inspection, before and after editing. Classify the path as `pre-existing untracked same-seam` and distinguish the active ticket's hunks from the pre-existing untracked directory or sibling-ticket work; do not describe the whole untracked directory as newly created by the active ticket unless this run created it.
 
 ## Mid-Run Changes
 

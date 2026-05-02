@@ -1,0 +1,411 @@
+# Story records — schema reference for branching-story-bootstrap
+#
+# One YAML document per record class. Each document carries the required +
+# optional field enumeration with example values. Phase 11 emits one file per
+# record under worlds/<world-slug>/stories/<story-slug>/_source/<class>/<id>.yaml.
+#
+# Conventions:
+#   - All ids are story-scoped (e.g. STENT-0001 in story A and story B do not collide).
+#   - All record schemas declare `story_id` so a record can be traced to its bundle.
+#   - All emergent records carry `created_at_page` (a PG-id at which the record
+#     entered branch state). Author-pool storylets are the lone exception:
+#     `created_at_page: null` marks them globally legal across all branches.
+#   - All `*_id` lists are bare ids (e.g. `[STENT-0001, STENT-0003]`) — no
+#     prose mixed in.
+#
+# Bootstrap-time defaults — at PG-0001 the runtime is at tick 0:
+#   - paid-off / addressed / archived collections are []
+#   - novelty: 1.0; causal_connectivity: 1.0; agency_score: 1.0
+#   - average_obligation_age: 0; recent_consequence_density: 0.0
+#   - parent_state_hash: null; state_hash_before: null
+---
+# STENT-NNNN — Story Entity (mirror of world ENT or story-only)
+
+id: STENT-0001
+story_id: STORY-0001
+world_ent_id: ENT-0042                   # null when story_only: true
+character_id: CHAR-0007                  # null for non-CHAR entities
+name: ""
+role_in_story: protagonist               # protagonist | major | supporting | antagonist | foil
+present_at_start: true
+intention_snapshot_id: STINT-0001-<char-slug>   # null for non-driving entities
+story_only: false                        # true if invented for this story; promotion is story-fact-promotion-to-canon's job
+created_at_page: PG-0001
+notes: >
+  Free-form notes carrying material reality, institutional embedding, and
+  voice-and-perception summaries lifted from the world dossier.
+---
+# STINT-NNNN-<char-slug> — Character Intention Snapshot
+
+id: STINT-0001-<char-slug>
+story_id: STORY-0001
+character_id: STENT-0001
+goals: []                                # what this character is actively trying to do
+fears: []                                # what they actively avoid
+secrets: []                              # SF-NNNN ids — facts they alone know (or know in a small circle)
+beliefs: []                              # SF-NNNN ids — facts they hold as true (may be wrong; epistemic_class: belief)
+relationships: {}                        # { STENT-id: <relationship state> }
+emotional_state: {}
+current_pressure: 0                      # 0..10
+traits: []
+values: {}                               # { value_axis: weight }
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# SF-NNNN — Story-Local Fact
+
+id: SF-0001
+story_id: STORY-0001
+logical_id: SF-0001                      # logical id stays stable when the SF is superseded
+supersedes: null                         # SF-NNNN id this supersedes (runtime-page-cycle concern; null at bootstrap)
+created_at_page: PG-0001
+
+subject: STENT-0001                      # STENT | STOBJ | STLOC | "abstract"
+predicate: ""                            # engine-checkable predicate
+object: ""                               # value
+
+epistemic_class: objective               # objective | belief | rumor | reader_inference | apparent | disputed
+truth_value: true                        # true | false | unknown | contested
+certainty: 1.0                           # 0.0..1.0
+
+known_by: []                             # STENT ids
+believed_by: []                          # for belief / apparent class
+disbelieved_by: []
+visible_to_reader: true
+
+derived_from_cf: CF-0042                 # null for premise-specific facts
+canon_relation: canon_consistent         # canon_consistent | canon_divergent | canon_unknown | not_applicable
+
+evidence:
+  - event_id: SE-0001
+    page_id: PG-0001
+    strength: weak                       # weak | moderate | strong | decisive
+
+notes: >
+  ...
+---
+# SE-NNNN — Story Event (bootstrap genesis example; schema authority is branching-story-page-cycle)
+
+id: SE-0001
+story_id: STORY-0001
+branch_id: BR-0001
+created_at_page: PG-0001
+
+source:
+  parent_page_id: null                   # null at genesis
+  chosen_choice_id: null                 # no prior choice
+  write_in_text_hash: null
+  storylet_realized: SLT-0001
+
+actor: system                            # STENT-NNNN | system | environment
+action: bootstrap                        # canonical verb
+target: null                             # STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract | null
+instrument: null                         # STENT-NNNN | STOBJ-NNNN | SF-NNNN | null
+
+preconditions_checked: []                # no preconditions for genesis
+
+ops: []                                  # no event ops fire at genesis; PG-0001.state_snapshot is the bedrock
+
+state_hash_before: null                  # null at bootstrap
+state_hash_after: ""                     # PG-0001.state_hash at bootstrap
+
+notes: >
+  Genesis event for STORY-0001 — bootstrap emission, no preceding state.
+---
+# OBL-NNNN — Obligation Ledger Entry
+
+id: OBL-0001
+story_id: STORY-0001
+type: ""                                 # mystery | foreshadowed_object | threat | relationship_tension | secret | moral_debt | quest | motif | prophecy | character_goal | reader_expectation
+introduced_at_event: SE-0001
+introduced_at_page: PG-0001
+owner: STENT-0001                        # null for ownerless reader-expectation obligations
+subjects: []                             # STENT ids
+visible_to_reader: true
+known_by: []                             # STENT ids — actors aware of the obligation
+salience: 5                              # 0..10 — REQUIRED at bootstrap
+urgency: 5                               # 0..10 — REQUIRED at bootstrap
+emotional_weight: 5                      # 0..10
+decay_rate: 0.0                          # 0..1 per page tick
+required_closure: false
+possible_payoff_modes:                   # ≥2 REQUIRED at bootstrap (Rule 5 halt rule)
+  - literal_fulfillment
+  - ironic_reversal
+  # Other valid modes: failed_expectation | symbolic_echo | transfer | red_herring | tragic_loss | abandon_with_acknowledgment
+constraints: []                          # predicate strings
+dependent_facts: []                      # SF ids
+coverage_cache:                          # advisory only — runtime recomputes against current branch
+  compatible_storylets: []               # SLT ids
+  checked_at_page: null
+  checked_at_storylet_pool_hash: null
+status: open                             # open | paid_off | abandoned | failed
+notes: >
+  ...
+---
+# CNSQ-NNNN — Persisted Consequence (initialized empty at bootstrap; runtime populates)
+
+id: CNSQ-0001
+story_id: STORY-0001
+type: ""                                 # body_discovery | rumor_wave | faction_reaction | grief_state | physical_injury | reputation_shift | etc
+introduced_at_event: SE-NNNN
+introduced_at_page: PG-NNNN
+subjects: []                             # STENT ids
+salience: 5                              # 0..10
+visible_to_reader: true
+addressed_at_page: null                  # null until runtime addresses
+addressed_at_event: null
+notes: >
+  ...
+---
+# THR-NNNN — Live Narrative Thread
+
+id: THR-0001
+story_id: STORY-0001
+type: ""                                 # mystery | relationship | threat | quest | theme | survival
+status: active                           # dormant | active | pressured | critical | resolved | failed
+title: ""
+owner_cast: []                           # STENT ids
+obligations: []                          # OBL ids
+current_pressure: 5                      # 0..10
+desired_cadence: 5                       # 0..10 — how often runtime should attend to this thread
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# SREL-NNNN — Story Relationship State (between two STENTs)
+
+id: SREL-0001
+story_id: STORY-0001
+participants:                            # exactly 2 STENT ids; canonical sort order by lexical id
+  - STENT-0001
+  - STENT-0002
+relation_type: ""                        # parent | sibling | lover | friend | rival | mentor | enemy | ally | etc — extensible
+trust: 5                                 # 0..10
+intimacy: 5                              # 0..10
+power_balance: 0                         # -10..10 (negative = first participant subordinate)
+visible_to_reader: true
+known_by: []                             # STENT ids — third parties aware of the relation
+last_meaningful_interaction: null        # PG-NNNN — null at bootstrap
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# SLT-NNNN — Storylet (bootstrap minimal seed shape; refactor when storylet-pool-authoring ships)
+
+id: SLT-0001
+story_id: STORY-0001
+shape: entry_pressure                    # entry_pressure | cast_introduction | threat_escalation | relational_dynamics | routine_disruption | aftermath_sequel | reflection_dilemma
+title: ""
+
+hard_preconds: []                        # predicates over state_snapshot for selection eligibility
+soft_preconds: []                        # advisory hints
+
+fact_effects: []                         # SF / SREL / STINT mutations the storylet asserts when realized
+opens_obligations: []                    # new OBL ids the storylet may introduce
+choice_templates: []                     # 4-6 candidate next-page direction descriptors
+
+tone_tags: []
+mystery_safety: pass                     # pass | branch_local_counterfactual | canon_candidate (Phase 7 hard-filters seed pool to pass)
+M_resolution_claims: []                  # M-NNNN ids the storylet claims authority to touch (must be empty for seed pool)
+content_intensity: mature                # tame | mature | explicit
+
+cast_required: []                        # STENT ids the storylet needs present
+cast_optional: []                        # STENT ids that enrich but do not require
+
+provenance:
+  origin: bootstrap_seed                 # bootstrap_seed | jit_runtime | author_pool_extension
+  authored_at: <iso8601>
+
+visibility:
+  scope: global_author_pool              # global_author_pool | branch_local
+  # author-pool storylets carry NO created_at_page; branch-local carry the PG that introduced them.
+
+created_at_page: null                    # null for global_author_pool; PG-id for branch_local
+notes: >
+  ...
+---
+# STLOC-NNNN — Story-Local Location
+
+id: STLOC-0001
+story_id: STORY-0001
+world_geo_anchor: SEC-GEO-NNN            # null for story-only locations
+parent_location: null                    # STLOC-id for nested locations
+name: ""
+description: >
+  ...
+accessible_from: []                      # STLOC ids
+present_objects: []                      # STOBJ ids
+ambient_facts: []                        # SF ids — facts that hold ambiently in this location
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# STOBJ-NNNN — Story-Local Object / Instrument
+
+id: STOBJ-0001
+story_id: STORY-0001
+world_artifact_anchor: null              # CF-id for world-canonical artifacts; null for story-only
+type: ""                                 # weapon | tool | document | ritual_object | clothing | currency | medicine | drug | etc
+name: ""
+description: >
+  ...
+current_location: STLOC-0001             # STLOC-id; null if held by an entity (use inventory_by_entity instead)
+current_holder: null                     # STENT-id; null if at-location
+properties: {}                           # free-form mechanical properties
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# DA-NNNN — Story-Local Diegetic Artifact (letter, decree, recording, relic, etc)
+
+id: DA-0001
+story_id: STORY-0001                     # delta from world-level DA: story_id added
+world_da_anchor: null                    # DA-id from worlds/<slug>/diegetic-artifacts/ if mirrored; null for story-only
+artifact_type: ""                        # letter | decree | recording | relic | journal_entry | broadside | confession | etc
+title: ""
+in_world_author: STENT-0001              # null for anonymous / unknown
+in_world_date: ""
+truth_register: ""                       # accurate | propagandistic | misremembered | forged | partial | etc
+content: >
+  Verbatim diegetic content. Treated as a voice from within the story; NOT
+  world-level canon. Promotion to world-level DA is story-fact-promotion-to-canon's
+  job. (See worlds/<slug>/diegetic-artifacts/ for the world-DA frontmatter
+  shape this template inherits from — story-local DAs carry an additional
+  story_id field and a world_da_anchor pointer.)
+known_by: []                             # STENT ids
+created_at_page: PG-0001
+notes: >
+  ...
+---
+# BR-NNNN — Branch (bootstrap creates BR-0001 only; runtime forks allocate further BRs)
+
+id: BR-0001
+story_id: STORY-0001
+root_page_id: PG-0001
+current_leaf_page_id: PG-0001
+
+forked_from_branch_id: null
+forked_from_page_id: null
+forked_from_choice_id: null
+forked_from_write_in_hash: null
+
+branch_path: [PG-0001]
+status: active                           # active | terminal | archived | corrupt | contradicted_by_promoted_canon
+canon_revision: ""                       # CH-id visible at branch root; null if world has no CH yet
+
+created_at_page: PG-0001
+created_at: <iso8601>
+notes: "Root branch."
+---
+# PG-NNNN — Page Record (bootstrap creates PG-0001 only)
+
+id: PG-0001
+story_id: STORY-0001
+branch_id: BR-0001
+parent_page_id: null
+branch_path: [PG-0001]
+chosen_choice_id: null                   # null for root page
+write_in_used: false                     # true if Path B was the route
+write_in_routing: null                   # null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
+
+storylet_realized: SLT-0001
+applied_event_ops: [SE-0001]
+
+state_hash: ""
+parent_state_hash: null
+
+branch_terminal: false
+terminal_reason: null
+
+state_snapshot:
+  canon_revision: ""                     # CH-id; null if world has no CH yet
+  objective_facts: []                    # SF ids with epistemic_class: objective
+  apparent_facts: []                     # SF ids with epistemic_class: apparent
+  disputed_facts: []                     # SF ids with epistemic_class: disputed
+  reader_known_facts: []                 # SF ids with visible_to_reader: true
+  belief_state_by_actor: {}              # { STENT-id: [SF-id, ...] } — beliefs held by this actor
+  rumor_state: []                        # SF ids with epistemic_class: rumor
+  obligations_open: []                   # OBL ids
+  obligations_paid_off: []               # [] at bootstrap
+  obligations_complicated: []            # [] at bootstrap
+  obligations_abandoned: []              # [] at bootstrap
+  consequences_pending: []               # CNSQ ids
+  consequences_addressed: []             # [] at bootstrap
+  threads_active: []                     # THR ids
+  relationships_current: []              # SREL ids
+  intentions_current: []                 # STINT ids
+  cast_present: []                       # STENT ids physically present
+  current_location: STLOC-0001
+  accessible_locations: []               # STLOC ids
+  objects_in_scope: []                   # STOBJ ids
+  inventory_by_entity: {}                # { STENT-id: [STOBJ-id, ...] }
+  entity_status: {}                      # { STENT-id: { alive, conscious, present, mobile, restrained } }
+
+prose_path: pages-prose/PG-0001.md
+emitted_choices: []                      # CHC ids — populated at Phase 8
+
+narrative_health:
+  open_obligation_count: 0
+  high_salience_unpaid_count: 0
+  average_obligation_age: 0
+  contradiction_risk: 0.0
+  causal_connectivity: 1.0
+  character_motivation_coverage: 0.0     # 0..1
+  unresolved_threat_pressure: 0.0        # 0..1
+  recent_consequence_density: 0.0
+  recent_reflection_density: 0.0
+  novelty: 1.0
+  tension: 0.0                           # 0..1
+  agency_score: 1.0
+
+governor_nudge_applied: "bootstrap root; no prior-page governor"
+content_intensity: mature                # tame | mature | explicit
+validation_trace:                        # Phase 9 gates 1-12 with one-line PASS rationales
+  mystery_firewall: PASS - <rationale>
+  invariant_compatibility: PASS - <rationale>
+  recursive_reference_closure: PASS - <rationale>
+  snapshot_replay_equality: PASS - <rationale>
+  id_uniqueness: PASS - <rationale>
+  content_policy_presence: PASS - <rationale>
+  prose_ledger_consistency: PASS - <rationale>
+  choice_contract_integrity: PASS - <rationale>
+  choice_consequence_capacity: PASS - <rationale>
+  state_snapshot_integrity: PASS - <rationale>
+  epistemic_class_declared: PASS - <rationale>
+  consequence_persistence: PASS - <rationale>
+created_at: <iso8601>
+---
+# CHC-NNNN — Choice (4-6 emitted at PG-0001; write-in slot is N+1 at runtime)
+
+id: CHC-0001
+story_id: STORY-0001
+emitted_at_page: PG-0001
+created_at_page: PG-0001
+
+operation: investigate                   # canonical verb from Phase 8 affordance vocabulary
+actor: STENT-0001
+target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract
+uses_fact: SF-NNNN | null
+
+choice_contract:
+  user_intent: >
+    What the player is signaling they want to accomplish.
+  guaranteed_action: >
+    What WILL definitely be attempted or performed if this choice is selected.
+  success_policy: guaranteed             # guaranteed | attempted | uncertain | opposed
+  allowed_outcome_band:
+    - succeeds
+    - partially_succeeds
+    - fails_with_consequence
+    - backfires
+  forbidden_outcomes:
+    - <outcome that would betray the label>
+  minimum_state_change:
+    - fact                              # fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
+
+likely_effects: []                       # structured effect sketches; runtime validates before commit
+choice_mode: thread_engagement           # e.g. moral | strategic | emotional | investigative | risky | self_protective
+poetic_effect: obvious                   # e.g. relaxed | obvious | dilemma | risky_truth | sacrifice | seduction | desperation | revelation
+content_intensity_implied: mature        # tame | mature | explicit
+label: ""                                # user-facing prose ("Confront the magistrate", "Walk away", etc.)

@@ -4,7 +4,7 @@ Five independent sub-checks. All must run; failure on any triggers Phase 7f Repa
 
 ## Phase 7a: Invariant Conformance
 
-For every claim in the artifact body and `claim_map`, and every asserted capability or knowledge of the Author, test against every INV record retrieved by the context packet (the `diegetic_artifact_generation` ranking profile loads all five invariant categories — ONT-N / CAU-N / DIS-N / SOC-N / AES-N — by default; if any are missing, fetch via `mcp__worldloom__search_nodes(node_type='invariant_record')`). Record each tested invariant's id into `world_consistency.invariants_respected`.
+For every claim in the artifact body and `claim_map`, and every asserted capability or knowledge of the Author, test against every INV record retrieved via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`. Use `mcp__worldloom__search_nodes(node_type='invariant_record')` only for targeted INV-id discovery when the operator needs to investigate a specific term or category. Record each tested invariant's id into `world_consistency.invariants_respected`.
 
 Fail triggers (send to Phase 7f):
 - an objective claim (i.e., `canon_status: canonically_true` or `partially_true` with a direct-assertion mode) that breaks an ontological / causal / distribution / social / aesthetic invariant.
@@ -16,9 +16,9 @@ Fail triggers (send to Phase 7f):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every M-NNNN record retrieved by the context packet (or via `mcp__worldloom__get_firewall_content(world_slug)` if any are missing, using `get_record('M-NNNN')` only for full-record context), check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
+For every M-NNNN record retrieved via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` or the equivalent M-only projection shortcut `mcp__worldloom__get_firewall_content(world_slug)`, check overlap with the artifact body + `claim_map` + `epistemic_horizon.direct_knowledge` + `epistemic_horizon.inferred_knowledge` + `epistemic_horizon.wrongly_believed`. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of overlap** — the firewall list is a proof-of-check audit trail.
 
-**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` for the audit's projection step — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `extensions`, `modification_history`) is needed.
+**Bulk firewall retrieval**: prefer `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` as the FOUNDATIONS-named whole-class full-body load. `mcp__worldloom__get_firewall_content(world_slug)` remains the equivalent M-only projection shortcut when the audit only needs every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when additional full-record context (`notes`, `extensions`, `modification_history`) is needed.
 
 For each entry where overlap IS found:
 - the artifact MAY reference the mystery's `common in-world interpretations` (contested-canon folk theories the world itself tracks).

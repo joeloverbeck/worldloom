@@ -65,6 +65,15 @@ const FULL_BODY_RULES_BY_TASK_TYPE: Record<TaskType, readonly FullBodyRule[]> = 
     { nodeType: "diegetic_artifact_record" }
   ],
   emergent_pressure_events: [],
+  story_bootstrap: [
+    { nodeType: "invariant" },
+    { nodeType: "mystery_reserve_entry" }
+  ],
+  story_page_cycle: [
+    { nodeType: "canon_fact_record" },
+    { nodeType: "invariant" },
+    { nodeType: "mystery_reserve_entry" }
+  ],
   other: []
 };
 

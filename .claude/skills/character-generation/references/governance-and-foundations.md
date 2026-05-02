@@ -19,7 +19,7 @@ No Canon Fact Record or Change Log Entry is emitted — see the thin SKILL.md's 
 
 | Principle | Phase | Mechanism |
 |-----------|-------|-----------|
-| Tooling Recommendation (non-negotiable) | Pre-flight | docs/FOUNDATIONS.md (direct Read) + WORLD_KERNEL.md + ONTOLOGY.md (direct Read) + atomic-record context packet via `mcp__worldloom__get_context_packet(task_type='character_generation', ...)`; SEC-MTS records selectively retrieved at Phase 0 via `search_nodes` if magical/tech capability is implicated |
+| Tooling Recommendation (non-negotiable) | Pre-flight | docs/FOUNDATIONS.md (direct Read) + WORLD_KERNEL.md + ONTOLOGY.md (direct Read) + atomic-record context packet via `mcp__worldloom__get_context_packet(task_type='character_generation', ...)` for seed-relevant CF / SEC / entity context + `list_records(record_type='invariant_record'|'mystery_record', include_full_body=true)` for whole-class Phase 7 firewall bodies per the whole-class enumeration amendment; SEC-MTS records selectively retrieved at Phase 0 via `search_nodes` if magical/tech capability is implicated |
 | Canon Layers §Hard / Soft / Contested | Phase 7 | Character beliefs classified against their source: hard canon in `known_firsthand` only if observably true; folk beliefs and propaganda routed to `known_by_rumor` or `wrongly_believes`; no character silently promotes contested canon to objective truth |
 | Canon Layers §Mystery Reserve | Phase 7b | Explicit firewall with audit list in `world_consistency.mystery_reserve_firewall` |
 | Invariants §full schema | Phase 7a | Every invariant tested; `break conditions` and `revision difficulty` fields guide Phase 7d repair paths |
