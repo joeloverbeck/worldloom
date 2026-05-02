@@ -201,6 +201,7 @@ export const ID_CLASSES = [
   "AU",
   "RP",
   "EPE",
+  "STORY",
   "M",
   "ONT",
   "CAU",

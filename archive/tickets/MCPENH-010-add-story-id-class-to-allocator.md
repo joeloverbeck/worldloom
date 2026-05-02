@@ -1,24 +1,24 @@
 # MCPENH-010: Add `STORY` to id_class enum for allocate_next_id
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp/src/tools/allocate-next-id.ts` (`ID_CLASS_FORMATS` extension + STORY world-scoped filesystem scan); `tools/world-mcp/src/server.ts` (`ID_CLASSES` extension); `tools/world-mcp/tests/tools/allocate-next-id.test.ts` and `tools/world-mcp/tests/server/dispatch.test.ts` (package-local proof); `.claude/skills/branching-story-bootstrap/SKILL.md` (Pre-flight: revert manual-scan-as-fallback framing — MCP becomes primary, fallback survives only as defensive recovery for old MCP servers); `tools/world-mcp/README.md` (allocator scope note for STORY).
-**Deps**: MCPENH-001 precedent for additive id_class enum extension; MCPENH-006 precedent for filesystem-scan-backed world-scoped id classes (EPE — same shape as STORY); the `branching-story-bootstrap` skill (consumer; ships with manual-scan-on-`Unsupported id_class`-fallback until this ticket lands).
+**Deps**: MCPENH-001 precedent for additive id_class enum extension; MCPENH-006 precedent for filesystem-scan-backed world-scoped id classes (EPE — same shape as STORY); the `branching-story-bootstrap` skill (consumer; shipped with manual-scan-on-`Unsupported id_class` defensive recovery before this ticket).
 
 ## Problem
 
-At intake (2026-05-02), `mcp__worldloom__allocate_next_id` does not accept `STORY` as an `id_class` value. The `ID_CLASS_FORMATS` map at `tools/world-mcp/src/tools/allocate-next-id.ts` and the `ID_CLASSES` tuple at `tools/world-mcp/src/server.ts` enumerate 28+ values (CF, CH, PA, CHAR, DA, PR, BATCH, NWB, NWP, NCP, NCB, AU, RP, EPE, M, ONT, CAU, DIS, SOC, AES, OQ, ENT, SEC-ELF, SEC-INS, SEC-MTS, SEC-GEO, SEC-ECR, SEC-PAS, SEC-TML) — `STORY` is absent.
+At intake (2026-05-02), `mcp__worldloom__allocate_next_id` did not accept `STORY` as an `id_class` value. The `ID_CLASS_FORMATS` map at `tools/world-mcp/src/tools/allocate-next-id.ts` and the `ID_CLASSES` tuple at `tools/world-mcp/src/server.ts` enumerated 28+ values (CF, CH, PA, CHAR, DA, PR, BATCH, NWB, NWP, NCP, NCB, AU, RP, EPE, M, ONT, CAU, DIS, SOC, AES, OQ, ENT, SEC-ELF, SEC-INS, SEC-MTS, SEC-GEO, SEC-ECR, SEC-PAS, SEC-TML) — `STORY` was absent.
 
-The `branching-story-bootstrap` skill (created 2026-05-02 from `archive/brainstorming/branching-story-bootstrap.md`) writes `STORY-NNNN`-keyed story bundles under `worlds/<world-slug>/stories/STORY-NNNN-<slug>/` (the `STORY-NNNN` is recorded in `STORY_KERNEL.md` frontmatter as `story_id`; the directory itself is keyed by user-supplied `story_slug`). Pre-flight needs to allocate the next STORY id per bootstrap. The skill currently calls `mcp__worldloom__allocate_next_id(world_slug, 'STORY')` as primary with a documented manual-scan fallback for the period before this ticket lands:
+The `branching-story-bootstrap` skill (created 2026-05-02 from `archive/brainstorming/branching-story-bootstrap.md`) writes `STORY-NNNN`-keyed story bundles under `worlds/<world-slug>/stories/<story-slug>/` (the `STORY-NNNN` is recorded in `STORY_KERNEL.md` frontmatter as `story_id`; the directory itself is keyed by user-supplied `story_slug`). Pre-flight needed to allocate the next STORY id per bootstrap. Before this ticket, the skill called `mcp__worldloom__allocate_next_id(world_slug, 'STORY')` as primary with a documented manual-scan fallback for the period before this ticket landed:
 
 > **Fallback path** (if the allocator returns `Unsupported id_class 'STORY'`): manually scan `worlds/<world-slug>/stories/STORY-*/STORY_KERNEL.md`, extract `story_id` from frontmatter, increment to next 4-digit zero-padded id. Defensive recovery — survives in environments where MCPENH-010 has not yet landed.
 
-The skill's Guardrails name this ticket as the upgrade path:
+Before this ticket, the skill's Guardrails named this ticket as the upgrade path:
 
 > `MCPENH-010: Add STORY id_class to allocate_next_id` — when landed, Pre-flight's allocator path becomes the primary; the manual-scan fallback can be removed in a follow-up. Until then, the fallback is the correct path on `Unsupported id_class` errors.
 
-The gap is structurally identical to MCPENH-006 (EPE) — additive enum extension for an id introduced after the original enum definition, with a world-scoped filesystem scan backing the allocator path because the world-index does not yet index `stories/`.
+The gap was structurally identical to MCPENH-006 (EPE) — additive enum extension for an id introduced after the original enum definition, with a world-scoped filesystem scan backing the allocator path because the world-index does not yet index `stories/`.
 
 ## Assumption Reassessment (2026-05-02)
 
@@ -30,7 +30,8 @@ The gap is structurally identical to MCPENH-006 (EPE) — additive enum extensio
 6. Not applicable — this ticket does not touch HARD-GATE semantics, canon-write ordering, or Canon Safety Check surfaces. STORY ids belong to story bundles which are NOT canon (per `.claude/skills/branching-story-bootstrap/SKILL.md` §FOUNDATIONS Alignment); the IDs allocated here belong to per-story-bundle artifacts, not canon records.
 7. Not applicable — no existing output schema (CF / CH / proposal card / dossier / artifact / EPE card / sidecar / batch manifest) is extended. The change is purely on the allocation surface.
 8. The change adds one enum value (`STORY`); it does not rename or remove any existing value. Blast radius scan: `rg -n "stories/|STORY-|allocate_next_id.*STORY" tools docs .claude/skills/branching-story-bootstrap` shows the skill's Pre-flight allocator-and-fallback prose at the §Pre-flight Check section, which requires revert. `tools/world-mcp/README.md` documents `allocate_next_id`, so its allocator scope note also requires update.
-9. Adjacent contradiction surfaced during reassessment: the skill ships with the manual-scan fallback as documented defensive recovery. After this ticket lands, the skill's Pre-flight should downgrade the fallback prose to a one-line note (or remove entirely if the user's environment is guaranteed to be on the post-MCPENH-010 server) — parallel to MCPENH-006's revert of `emergent-pressure-events`'s manual-scan-as-primary framing. That revert is a required consequence of this ticket and is captured in §Files to Touch.
+9. Adjacent contradiction surfaced during reassessment: the skill shipped with the manual-scan fallback as documented defensive recovery. This ticket downgraded the skill's Pre-flight fallback prose to a one-line older-server note and removed the `MCPENH-010` Guardrails debt bullet, parallel to MCPENH-006's revert of `emergent-pressure-events`'s manual-scan-as-primary framing.
+10. Verification correction: direct external `mcp__worldloom__allocate_next_id(...)` invocation is not exposed as a callable Codex tool in this session, so acceptance uses package-local direct handler tests and in-memory MCP server dispatch tests after `npm run build`. This is the truthful post-change substitute for schema/handler behavior because it exercises fresh compiled artifacts without requiring a restarted external MCP client.
 
 ## Architecture Check
 
@@ -43,20 +44,20 @@ The gap is structurally identical to MCPENH-006 (EPE) — additive enum extensio
 2. A successful `allocate_next_id(world_slug='<world>', id_class='STORY')` call against a world with no `stories/STORY-*/STORY_KERNEL.md` files returns `STORY-0001`; against a directory with `stories/<slug-1>/STORY_KERNEL.md` (frontmatter `story_id: STORY-0005`) and `stories/<slug-2>/STORY_KERNEL.md` (frontmatter `story_id: STORY-0007`) present returns `STORY-0008` while ignoring directories without a `STORY_KERNEL.md` and ignoring malformed frontmatter → package-local direct handler tests in `tools/world-mcp/tests/tools/allocate-next-id.test.ts`.
 3. The MCP server's wrapped Zod input schema accepts `STORY` as a valid `id_class` and routes to the STORY world-scoped filesystem scan path (NOT the pipeline-scoped path used by NWB / NWP and NOT the index-backed ordinary world-class path) → in-memory MCP server dispatch tests in `tools/world-mcp/tests/server/dispatch.test.ts`.
 4. After the skill text reverts (§Files to Touch §3), `.claude/skills/branching-story-bootstrap/SKILL.md` Pre-flight prose downgrades the manual-scan fallback to a one-line defensive-recovery note → grep-proof: `rg -n "manually scan worlds/<world-slug>/stories/STORY-\*/STORY_KERNEL.md" .claude/skills/branching-story-bootstrap/SKILL.md` returns zero hits (the multi-line fallback paragraph is gone), and the simpler one-line "fall back to filesystem scan" note remains.
-5. The skill's Guardrails `MCPENH-010` entry can be removed (or marked LANDED) → grep-proof: the deferred-debt bullet block in §Guardrails no longer carries the `MCPENH-010` line.
+5. The skill's Guardrails `MCPENH-010` entry was removed → grep-proof: the deferred-debt bullet block in §Guardrails no longer carries the `MCPENH-010` line.
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend the id_class enum
 
 In `tools/world-mcp/src/tools/allocate-next-id.ts`:
-- Add an entry to `ID_CLASS_FORMATS` between `EPE` and `M` (preserving the lexical grouping of 4-digit zero-padded ids before the variable-width invariant prefix block):
+- Added an entry to `ID_CLASS_FORMATS` between `EPE` and `M` (preserving the lexical grouping of 4-digit zero-padded ids before the variable-width invariant prefix block):
   ```ts
   STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
   ```
 
 In `tools/world-mcp/src/server.ts`:
-- Add `"STORY"` to the `ID_CLASSES` tuple between `"EPE"` and `"M"`:
+- Added `"STORY"` to the `ID_CLASSES` tuple between `"EPE"` and `"M"`:
   ```ts
   "EPE",
   "STORY",
@@ -65,35 +66,35 @@ In `tools/world-mcp/src/server.ts`:
 
 ### 2. Add the STORY scan path
 
-The ordinary world-scoped allocator path remains index-backed. Add a narrowly scoped STORY path in `allocate-next-id.ts` that:
+The ordinary world-scoped allocator path remains index-backed. Added a narrowly scoped STORY path in `allocate-next-id.ts` that:
 - verifies `worlds/<world-slug>/` exists and returns the existing `world_not_found` style error if absent;
 - scans `worlds/<world-slug>/stories/`;
 - enumerates only direct subdirectories (not files);
 - for each subdirectory, reads `<subdir>/STORY_KERNEL.md` and parses YAML frontmatter to extract `story_id`;
 - ignores subdirectories without a `STORY_KERNEL.md` file (defensive — partial-failure bundles or directories not yet bootstrapped);
-- ignores malformed frontmatter (warn-and-skip rather than abort);
+- ignores malformed frontmatter by skipping the bundle rather than aborting;
 - collects all extracted `story_id` values matching `^STORY-(\d{4})$`;
 - returns the next 4-digit zero-padded id (max + 1, or `STORY-0001` if none found).
 
 ### 3. Revert the skill's manual-scan-as-fallback framing
 
 In `.claude/skills/branching-story-bootstrap/SKILL.md`:
-- **§Pre-flight Check (Allocate next STORY-NNN bullet)**: replace the multi-line fallback paragraph ("Fallback path (if the allocator returns `Unsupported id_class 'STORY'`): manually scan ...") with a one-line defensive-recovery note: "Defensive recovery: if the allocator returns `Unsupported id_class 'STORY'` (older MCP server), fall back to scanning `worlds/<world-slug>/stories/*/STORY_KERNEL.md` for the highest existing `story_id` and incrementing."
-- **§Guardrails "Known integration debt" block**: remove the `MCPENH-010` bullet (or mark it LANDED).
+- **§Pre-flight Check (Allocate next STORY-NNN bullet)**: replaced the multi-line fallback paragraph ("Fallback path (if the allocator returns `Unsupported id_class 'STORY'`): manually scan ...") with a one-line defensive-recovery note: "Defensive recovery: if the allocator returns `Unsupported id_class 'STORY'` from an older MCP server, fall back to scanning `worlds/<world-slug>/stories/*/STORY_KERNEL.md` for the highest existing `story_id` and incrementing."
+- **§Guardrails "Known integration debt" block**: removed the `MCPENH-010` bullet.
 
 ### 4. Update tests
 
-- `tools/world-mcp/tests/tools/allocate-next-id.test.ts`: add cases for `STORY` happy-path:
+- `tools/world-mcp/tests/tools/allocate-next-id.test.ts`: added cases for `STORY` happy-path:
   - clean directory (no `stories/`) returns `STORY-0001`;
   - directory with `stories/foo/STORY_KERNEL.md` (frontmatter `story_id: STORY-0001`) returns `STORY-0002`;
   - directory with multiple subdirectories at varying frontmatter ids returns `max + 1`;
   - directory with a subdirectory missing `STORY_KERNEL.md` is skipped gracefully;
-  - directory with a subdirectory whose `STORY_KERNEL.md` has malformed frontmatter is skipped gracefully (warn but do not abort).
-- `tools/world-mcp/tests/server/dispatch.test.ts`: add an MCP-server-boundary test asserting `STORY` is accepted by the Zod enum and routes to the world-scoped scan path.
+  - directory with a subdirectory whose `STORY_KERNEL.md` has malformed frontmatter is skipped gracefully without aborting.
+- `tools/world-mcp/tests/server/dispatch.test.ts`: added MCP-server-boundary tests asserting `STORY` is accepted by the Zod enum and routes to the world-scoped scan path, and that the pipeline sentinel rejects `STORY`.
 
 ### 5. README pointer
 
-In `tools/world-mcp/README.md`, add `STORY` to any enumerated id_class lists alongside CF / CHAR / DA / EPE / etc.
+In `tools/world-mcp/README.md`, added `STORY` to the allocator scope note alongside EPE and the pipeline-scoped NWB/NWP classes.
 
 ## Files to Touch
 
@@ -141,3 +142,26 @@ In `tools/world-mcp/README.md`, add `STORY` to any enumerated id_class lists alo
 1. `cd tools/world-mcp && npm test`
 2. `rg -n '"STORY"' tools/world-mcp/src/`
 3. `rg -n "manually scan" .claude/skills/branching-story-bootstrap/SKILL.md`
+
+## Outcome
+
+Completion date: 2026-05-02.
+
+- Added `STORY` to `tools/world-mcp` allocator format metadata and the MCP server input enum.
+- Added a STORY-specific world-scoped story-bundle scan that reads direct subdirectories under `worlds/<slug>/stories/`, parses `STORY_KERNEL.md` frontmatter, skips missing or malformed kernels, and returns the next 4-digit STORY id without requiring story bundles to be indexed.
+- Updated direct handler and in-memory MCP dispatch tests for STORY first-run, populated-world, malformed-frontmatter, missing-kernel, and `__pipeline__` rejection behavior.
+- Updated `tools/world-mcp/README.md` with the STORY allocator scope note.
+- Updated `branching-story-bootstrap` so `mcp__worldloom__allocate_next_id(world_slug, 'STORY')` is the documented primary path; the old unsupported-server scan survives only as a one-line defensive recovery note, and the `MCPENH-010` integration-debt bullet is gone.
+
+## Verification Result
+
+1. `cd tools/world-mcp && npm test` — passed; package build succeeded and the full compiled test suite reported 270 passing tests.
+2. `rg -n '"STORY"|STORY:' tools/world-mcp/src/tools/allocate-next-id.ts tools/world-mcp/src/server.ts` — returned hits in `ID_CLASS_FORMATS`, `STORY_ID_CLASSES`, and `ID_CLASSES`.
+3. `rg -n 'manually scan worlds/<world-slug>/stories/STORY-\*/STORY_KERNEL.md' .claude/skills/branching-story-bootstrap/SKILL.md` — returned no hits.
+4. `rg -n 'manually scan' .claude/skills/branching-story-bootstrap/SKILL.md` — returned no hits.
+5. `git status --short --ignored tools/world-mcp` — showed the owned tracked package edits plus pre-existing ignored `tools/world-mcp/.secret`, `tools/world-mcp/dist/`, and `tools/world-mcp/node_modules/` artifacts; ignored artifact state was unchanged in kind by this run.
+
+## Deviations
+
+- Direct external `mcp__worldloom__allocate_next_id(...)` invocation was unavailable in this Codex session, so verification used the package-local direct handler tests and in-memory MCP server dispatch tests after build. This proves the source, fresh compiled artifact, Zod enum, and wrapped server dispatch seam without claiming a restarted external MCP client smoke.
+- The landed STORY scan silently skips malformed `STORY_KERNEL.md` frontmatter rather than warning, matching the ticket's defensive "do not abort" invariant while avoiding a new user-facing warning channel in the allocator response shape.

@@ -26,6 +26,7 @@ const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }
   { idClass: "AU", highest: "AU-0002", expected: "AU-0003" },
   { idClass: "RP", highest: "RP-0005", expected: "RP-0006" },
   { idClass: "EPE", highest: "EPE-0005", expected: "EPE-0006" },
+  { idClass: "STORY", highest: "STORY-0007", expected: "STORY-0008" },
   { idClass: "M", highest: "M-20", expected: "M-21" },
   { idClass: "ONT", highest: "ONT-3", expected: "ONT-4" },
   { idClass: "CAU", highest: "CAU-2", expected: "CAU-3" },
@@ -67,6 +68,12 @@ function seedAllocationWorld(root: string): void {
   });
 }
 
+function writeStoryKernel(root: string, storySlug: string, content: string): void {
+  const directory = path.join(root, "worlds", "seeded", "stories", storySlug);
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(path.join(directory, "STORY_KERNEL.md"), content, "utf8");
+}
+
 test("allocateNextId returns the next id for all supported classes", async () => {
   const root = createTempRepoRoot();
 
@@ -83,6 +90,7 @@ test("allocateNextId returns the next id for all supported classes", async () =>
       "proposal",
       "utf8"
     );
+    writeStoryKernel(root, "current-high", "---\nstory_id: STORY-0007\n---\n# Current High\n");
 
     for (const entry of CLASS_CASES) {
       const result = await withRepoRoot(root, () =>
@@ -133,6 +141,9 @@ test("allocateNextId returns first-run ids for missing world-scoped classes", as
     const epeResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "empty-fixture", id_class: "EPE" })
     );
+    const storyResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "empty-fixture", id_class: "STORY" })
+    );
 
     assert.ok(!("code" in cfResult));
     assert.ok(!("code" in ncpResult));
@@ -140,12 +151,52 @@ test("allocateNextId returns first-run ids for missing world-scoped classes", as
     assert.ok(!("code" in aesResult));
     assert.ok(!("code" in secResult));
     assert.ok(!("code" in epeResult));
+    assert.ok(!("code" in storyResult));
     assert.equal(cfResult.next_id, "CF-0001");
     assert.equal(ncpResult.next_id, "NCP-0001");
     assert.equal(mysteryResult.next_id, "M-1");
     assert.equal(aesResult.next_id, "AES-1");
     assert.equal(secResult.next_id, "SEC-GEO-001");
     assert.equal(epeResult.next_id, "EPE-0001");
+    assert.equal(storyResult.next_id, "STORY-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId scans STORY_KERNEL frontmatter for story ids", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+
+    writeStoryKernel(root, "opening-bells", "---\nstory_id: STORY-0005\n---\n# Opening Bells\n");
+    writeStoryKernel(root, "salt-thread", "---\nstory_id: STORY-0007\n---\n# Salt Thread\n");
+    writeStoryKernel(root, "malformed", "---\nstory_id: [not-valid\n---\n# Malformed\n");
+    writeStoryKernel(root, "wrong-id-class", "---\nstory_id: PG-0009\n---\n# Wrong Class\n");
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "partial-bundle"), {
+      recursive: true
+    });
+    writeFileSync(path.join(root, "worlds", "seeded", "stories", "README.md"), "ignored", "utf8");
+
+    const result = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "STORY" })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.next_id, "STORY-0008");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -209,13 +260,18 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const epeWithPipelineSlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "__pipeline__", id_class: "EPE" })
     );
+    const storyWithPipelineSlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "__pipeline__", id_class: "STORY" })
+    );
 
     assert.ok("code" in pipelineClassWithWorldSlug);
     assert.ok("code" in worldClassWithPipelineSlug);
     assert.ok("code" in epeWithPipelineSlug);
+    assert.ok("code" in storyWithPipelineSlug);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
     assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
     assert.equal(epeWithPipelineSlug.code, "invalid_input");
+    assert.equal(storyWithPipelineSlug.code, "invalid_input");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
   } finally {
@@ -223,7 +279,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 29 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 30 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -239,6 +295,7 @@ test("allocateNextId exposes all 29 id classes with existing formats preserved",
     "AU",
     "RP",
     "EPE",
+    "STORY",
     "M",
     "ONT",
     "CAU",
@@ -255,8 +312,10 @@ test("allocateNextId exposes all 29 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 29);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 30);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
+  assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
+  assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
   assert.match("OQ-0001", ID_CLASS_FORMATS.OQ.regex);

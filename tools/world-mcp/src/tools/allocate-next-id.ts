@@ -1,5 +1,7 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+
+import YAML from "yaml";
 
 import { openIndexDb } from "../db";
 import { resolveRepoRoot, resolveWorldDirectory } from "../db/path";
@@ -21,6 +23,7 @@ export const ID_CLASS_FORMATS = {
   AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
   EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
+  STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
   M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
   ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
   CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
@@ -52,6 +55,7 @@ export interface AllocateNextIdResponse {
 const PIPELINE_WORLD_SLUG = "__pipeline__";
 const PIPELINE_ID_CLASSES = new Set<IdClass>(["NWB", "NWP"]);
 const PRESSURE_EVENT_ID_CLASSES = new Set<IdClass>(["EPE"]);
+const STORY_ID_CLASSES = new Set<IdClass>(["STORY"]);
 
 function isIdClass(value: string): value is IdClass {
   return value in ID_CLASS_FORMATS;
@@ -143,6 +147,84 @@ function findHighestPressureEventId(worldSlug: string): number | McpError {
   return maxValue;
 }
 
+function extractFrontmatter(raw: string): string | null {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(raw);
+  return match?.[1] ?? null;
+}
+
+function extractStoryIdFromKernel(kernelPath: string): string | null {
+  let raw: string;
+  try {
+    raw = readFileSync(kernelPath, "utf8");
+  } catch {
+    return null;
+  }
+
+  const frontmatter = extractFrontmatter(raw);
+  if (frontmatter === null) {
+    return null;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = YAML.parse(frontmatter);
+  } catch {
+    return null;
+  }
+
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return null;
+  }
+
+  const storyId = (parsed as Record<string, unknown>).story_id;
+  return typeof storyId === "string" ? storyId : null;
+}
+
+function findHighestStoryId(worldSlug: string): number | McpError {
+  const worldDirectory = resolveWorldDirectory(worldSlug);
+  if (!existsSync(worldDirectory)) {
+    return createMcpError("world_not_found", `World '${worldSlug}' does not exist.`, {
+      world_slug: worldSlug
+    });
+  }
+
+  const format = ID_CLASS_FORMATS.STORY;
+  const directory = path.join(worldDirectory, "stories");
+  let maxValue = 0;
+
+  let entries: Array<{ name: string; isDirectory: () => boolean }>;
+  try {
+    entries = readdirSync(directory, { withFileTypes: true });
+  } catch {
+    return maxValue;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const storyId = extractStoryIdFromKernel(path.join(directory, entry.name, "STORY_KERNEL.md"));
+    if (storyId === null) {
+      continue;
+    }
+
+    const match = format.regex.exec(storyId);
+    if (match === null) {
+      continue;
+    }
+
+    const parsedValue = Number.parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(parsedValue)) {
+      continue;
+    }
+
+    maxValue = Math.max(maxValue, parsedValue);
+  }
+
+  return maxValue;
+}
+
 export async function allocateNextId(
   args: AllocateNextIdArgs
 ): Promise<AllocateNextIdResponse | McpError> {
@@ -178,6 +260,18 @@ export async function allocateNextId(
 
   if (PRESSURE_EVENT_ID_CLASSES.has(args.id_class)) {
     const highestValue = findHighestPressureEventId(args.world_slug);
+    if (typeof highestValue !== "number") {
+      return highestValue;
+    }
+
+    const nextValue = highestValue + 1;
+    return {
+      next_id: `${args.id_class}-${formatNumericValue(nextValue, format.width, format.zeroPad)}`
+    };
+  }
+
+  if (STORY_ID_CLASSES.has(args.id_class)) {
+    const highestValue = findHighestStoryId(args.world_slug);
     if (typeof highestValue !== "number") {
       return highestValue;
     }

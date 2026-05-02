@@ -42,6 +42,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
   - Derived artifacts such as `_index/world.db` are regenerated, not hand-edited.
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - Open every explicit `Deps` path, evidence-ticket path, or archived-ticket path named by the ticket before coding. For completed or archived dependencies, inspect closeout sections such as `## Outcome`, `## Verification Result`, and `## Deviations` for same-seam fallout that may already partially implement, narrow, or contradict the active ticket. If a named dependency is intentionally not authoritative for this run, record why in `Assumption Reassessment`.
+- If a `Deps` entry is a symbolic ticket/spec id rather than a path, resolve it with `rg --files` or an equivalent exact-path search before treating it as missing.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - For detailed package/tool command, fixture, workspace, dependency, and compile-gate checks, use `references/package-tooling.md` after classification instead of keeping those narrow rules in the top-level flow.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
@@ -88,15 +89,16 @@ For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, o
 
 1. Read the target ticket file.
 2. Read every directly relevant reference it names: spec files, docs, skill files, tool files, templates, examples, or archived tickets/specs.
-3. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
-4. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
-5. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
-6. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
-7. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-8. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-9. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-10. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
-11. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+3. If a named reference is historical provenance rather than the current authority, such as an archived brainstorming note for a live skill, you may use the live skill/tool/doc as the authority instead. Record the skipped provenance reference in `Assumption Reassessment` when it affects scope, proof, or ownership.
+4. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
+5. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
+6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
+7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
+8. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+9. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+10. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+11. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+12. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
