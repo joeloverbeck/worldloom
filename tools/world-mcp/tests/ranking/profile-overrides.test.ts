@@ -11,7 +11,8 @@ import {
   emergentPressureEventsRankingProfile,
   proposeNewCanonFactsRankingProfile,
   proposeNewCharactersRankingProfile,
-  proposeNewWorldsFromPreferencesRankingProfile
+  proposeNewWorldsFromPreferencesRankingProfile,
+  storyBootstrapRankingProfile
 } from "../../src/ranking/profiles";
 
 test("canon_addition lifts canon-facing file class priorities above default", () => {
@@ -50,7 +51,8 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
     proposeNewCharactersRankingProfile,
     proposeNewWorldsFromPreferencesRankingProfile,
     canonFactsFromDiegeticArtifactsRankingProfile,
-    emergentPressureEventsRankingProfile
+    emergentPressureEventsRankingProfile,
+    storyBootstrapRankingProfile
   ];
 
   for (const profile of adjacentProfiles) {
@@ -83,6 +85,15 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
       (defaultRankingProfile.file_class_priority.mystery_reserve_entry ?? 0)
   );
   assert.ok((emergentPressureEventsRankingProfile.edge_type_boost?.pressures ?? 0) > 0);
+  assert.ok(
+    (storyBootstrapRankingProfile.file_class_priority.mystery_reserve_entry ?? 0) >
+      (defaultRankingProfile.file_class_priority.mystery_reserve_entry ?? 0)
+  );
+  assert.ok(
+    (storyBootstrapRankingProfile.file_class_priority.invariant ?? 0) >
+      (defaultRankingProfile.file_class_priority.invariant ?? 0)
+  );
+  assert.ok((storyBootstrapRankingProfile.edge_type_boost?.references_scoped_name ?? 0) > 0);
 });
 
 test("canon-pipeline-adjacent task types have task-specific default budgets", () => {
@@ -91,5 +102,6 @@ test("canon-pipeline-adjacent task types have task-specific default budgets", ()
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.propose_new_worlds_from_preferences, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.canon_facts_from_diegetic_artifacts, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.emergent_pressure_events, 15000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_bootstrap, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.other, 8000);
 });

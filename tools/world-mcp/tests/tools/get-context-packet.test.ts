@@ -215,7 +215,8 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
       ["propose_new_characters", 15000],
       ["propose_new_worlds_from_preferences", 12000],
       ["canon_facts_from_diegetic_artifacts", 12000],
-      ["emergent_pressure_events", 15000]
+      ["emergent_pressure_events", 15000],
+      ["story_bootstrap", 18000]
     ] as const;
 
     for (const [taskType, defaultBudget] of cases) {

@@ -213,6 +213,60 @@ test("reserve-policy task types keep governing full bodies ahead of opportunisti
   }
 });
 
+test("story_bootstrap reserves governing invariant and Mystery Reserve full bodies", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: `id: CF-0001\nstatement: ${"Story premise fact. ".repeat(600)}\n`
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: "id: ONT-1\nstatement: Embodiment remains required.\n"
+        },
+        {
+          node_id: "M-1",
+          world_slug: "seeded",
+          file_path: "_source/mystery-reserve/M-1.yaml",
+          node_type: "mystery_reserve_entry",
+          body: "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n"
+        }
+      ]
+    });
+
+    const packet = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_bootstrap",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 9000
+      })
+    );
+
+    assert.ok(!("code" in packet));
+    assert.deepEqual(
+      packet.task_header.governing_full_body_priority,
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.story_bootstrap
+    );
+
+    const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));
+    assert.equal(nodesById.get("ONT-1")?.full_body, "id: ONT-1\nstatement: Embodiment remains required.\n");
+    assert.equal(nodesById.get("M-1")?.full_body, "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("reserve-policy task types fail loudly when required governing full bodies cannot fit", async () => {
   const root = createTempRepoRoot();
 

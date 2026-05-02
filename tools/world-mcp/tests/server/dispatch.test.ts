@@ -613,6 +613,11 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums?.id_class, [...ID_CLASSES]);
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums?.task_type, [...TASK_TYPES]);
+    assert.ok(
+      byName
+        .get(MCP_TOOL_NAMES.get_context_packet)
+        ?.input_schema_enums?.task_type?.includes("story_bootstrap")
+    );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
       ...VOCABULARY_CLASSES
     ]);
