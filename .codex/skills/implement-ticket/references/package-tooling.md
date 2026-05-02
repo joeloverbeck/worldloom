@@ -18,6 +18,8 @@ For `tools/world-mcp` context-packet tickets that make a payload, node class, la
 
 For `tools/world-mcp` context-packet tickets that edit canonical docs examples such as `docs/CONTEXT-PACKET-CONTRACT.md`, inspect tests that parse those examples before source edits. In particular, check shape/contract fixtures like `tests/context-packet/shape-conformance.test.ts` so indentation, key order, and documented YAML shape stay test-truthful while the implementation changes.
 
+For `tools/world-mcp` `get_context_packet` task-type or profile changes, treat `docs/CONTEXT-PACKET-CONTRACT.md` as a reassessment surface before source edits. Inspect and truth task-type enum prose, full-body candidate tables, reserve-policy tables, profile sections, and any parsed examples alongside package README, `docs/MACHINE-FACING-LAYER.md`, registered metadata, and tests.
+
 For `tools/world-mcp` tickets whose draft says a tool is absent or new, first verify the live split between source registration and the running MCP connector with `src/tool-names.ts`, `src/server.ts`, tests/docs, and `mcp__worldloom__describe_capabilities()` when available. If the tool already exists and only its response shape, enum, docs, or coverage is incomplete, rewrite the ticket to an existing-tool completion before coding. Preserve the live tool names and enum values unless the ticket explicitly owns a rename; do not add backwards-compatibility aliases just because the draft used older or friendlier names.
 
 - Inspect the package's `package.json`, `tsconfig.json`, and existing package-local docs/examples before trusting drafted command shapes, module formats, or emitted artifact paths.

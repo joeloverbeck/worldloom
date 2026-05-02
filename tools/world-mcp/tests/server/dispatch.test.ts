@@ -199,6 +199,9 @@ function seedServerWorld(root: string): void {
   const pagesDirectory = path.join(storiesDirectory, "_source", "pages");
   mkdirSync(pagesDirectory, { recursive: true });
   writeFileSync(path.join(pagesDirectory, "PG-0003.yaml"), "id: PG-0003\n", "utf8");
+  const storyletBatchesDirectory = path.join(storiesDirectory, "storylet-batches");
+  mkdirSync(storyletBatchesDirectory, { recursive: true });
+  writeFileSync(path.join(storyletBatchesDirectory, "SLB-0003.md"), "# SLB-0003\n", "utf8");
 
   const toolResultsDirectory = path.join(root, "tool-results");
   mkdirSync(toolResultsDirectory, { recursive: true });
@@ -364,6 +367,11 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "SLB", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "__pipeline__", id_class: "NWB" },
         expectError: false
       },
@@ -519,6 +527,19 @@ test("story-scoped id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("SLB id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "SLB", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "SLB-0004");
+  });
+});
+
 test("get_canonical_vocabulary accepts every registered vocabulary class through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     for (const vocabularyClass of VOCABULARY_CLASSES) {
@@ -650,7 +671,7 @@ test("story-scoped id classes require story_slug at the MCP handler boundary", a
   await withServerClient(async (client) => {
     const result = await client.callTool({
       name: MCP_TOOL_NAMES.allocate_next_id,
-      arguments: { world_slug: "seeded", id_class: "PG" }
+      arguments: { world_slug: "seeded", id_class: "SLB" }
     });
 
     assert.equal(result.isError, true);
@@ -711,6 +732,11 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
       byName
         .get(MCP_TOOL_NAMES.get_context_packet)
         ?.input_schema_enums?.task_type?.includes("story_page_cycle")
+    );
+    assert.ok(
+      byName
+        .get(MCP_TOOL_NAMES.get_context_packet)
+        ?.input_schema_enums?.task_type?.includes("storylet_pool_authoring")
     );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
       ...VOCABULARY_CLASSES

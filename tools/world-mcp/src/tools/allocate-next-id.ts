@@ -33,6 +33,7 @@ export const ID_CLASS_FORMATS = {
   SREL: { width: 4, zeroPad: true, regex: /^SREL-(\d{4})$/ },
   STINT: { width: 4, zeroPad: true, regex: /^STINT-(\d{4})(?:-.+)?$/ },
   SLT: { width: 4, zeroPad: true, regex: /^SLT-(\d{4})$/ },
+  SLB: { width: 4, zeroPad: true, regex: /^SLB-(\d{4})$/ },
   STLOC: { width: 4, zeroPad: true, regex: /^STLOC-(\d{4})$/ },
   STOBJ: { width: 4, zeroPad: true, regex: /^STOBJ-(\d{4})$/ },
   BR: { width: 4, zeroPad: true, regex: /^BR-(\d{4})$/ },
@@ -81,6 +82,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   SREL: "relationships",
   STINT: "intentions",
   SLT: "storylets",
+  SLB: "storylet-batches",
   STLOC: "locations",
   STOBJ: "objects",
   BR: "branches",
@@ -285,7 +287,11 @@ function findHighestStoryScopedId(
   }
 
   const format = ID_CLASS_FORMATS[idClass];
-  const directory = path.join(storyDirectory, "_source", STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass]);
+  const directory =
+    idClass === "SLB"
+      ? path.join(storyDirectory, STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass])
+      : path.join(storyDirectory, "_source", STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass]);
+  const extension = idClass === "SLB" ? ".md" : ".yaml";
   let maxValue = 0;
 
   let fileNames: string[];
@@ -296,11 +302,11 @@ function findHighestStoryScopedId(
   }
 
   for (const fileName of fileNames) {
-    if (!fileName.endsWith(".yaml")) {
+    if (!fileName.endsWith(extension)) {
       continue;
     }
 
-    const stem = fileName.slice(0, -".yaml".length);
+    const stem = fileName.slice(0, -extension.length);
     const match = format.regex.exec(stem);
     if (match === null) {
       continue;

@@ -110,13 +110,11 @@ Phase 5: Initial Threads +            (2-5 THR-NNNN — main + relationship +
                                        initialize consequences ledger)
       |
       v
-Phase 6: Storylet Pool Seed           (~20 SLT-NNNN covering entry pressure,
-                                       cast introduction, threat escalation,
-                                       relational dynamics, routine
-                                       disruption, aftermath/sequel,
-                                       reflection/dilemma; mystery_safety
-                                       check per storylet; seam: future
-                                       delegation to storylet-pool-authoring)
+Phase 6: Storylet Pool Seed           (delegated to storylet-pool-authoring
+                                       seed mode with focus_area:
+                                       bootstrap_mix and
+                                       parent_skill_invocation: true;
+                                       returns approved SLTs in memory)
       |
       v
 Phase 7: Root Page Render             (select PG-0001 storylet;
@@ -207,7 +205,8 @@ This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<wor
 Inlined in this skill's templates (per the Shape A integration posture — no engine ops exist for story records yet):
 
 - STORY_KERNEL.md → `templates/story-kernel.md`
-- STENT-NNNN, SF-NNNN, SE-NNNN, OBL-NNNN, CNSQ-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, SLT-NNNN, STLOC-NNNN, STOBJ-NNNN, BR-NNNN, PG-NNNN, CHC-NNNN → `templates/story-records.yaml` (one document per record class with required+optional field enumeration and example values)
+- STENT-NNNN, SF-NNNN, SE-NNNN, OBL-NNNN, CNSQ-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, BR-NNNN, PG-NNNN, CHC-NNNN → `templates/story-records.yaml` (one document per record class with required+optional field enumeration and example values)
+- SLT-NNNN → `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` (bootstrap delegates Phase 6 to storylet-pool-authoring and writes the returned records in Phase 11)
 - DA-NNNN (story-local) → derived from world-level DA frontmatter shape with `story_id` field added; documented in `templates/story-records.yaml`.
 - Per-bundle INDEX.md → `templates/story-bundle-index.md`
 - Content policy block (NC-21 verbatim) → `templates/content-policy.txt`
@@ -344,24 +343,22 @@ For each thread, generate initial `OBL-NNNN`. OBL fields include `type`, `introd
 
 ## Phase 6: Storylet Pool Seed
 
-Generate `storylet_pool_seed_size` (default ~20) `SLT-NNNN` records under `_source/storylets/`. Required coverage:
+Use `storylet-pool-authoring` as an in-memory sub-routine to generate `storylet_pool_seed_size` (default ~20) approved `SLT-NNNN` records for `_source/storylets/`.
 
-| Shape | Target count | Notes |
-|---|---|---|
-| Entry pressure | 3-5 | Loaded normality + first disturbance |
-| Cast introduction | 1 per non-protagonist major | Each major needs an introducer |
-| Threat escalation | 2-4 | One per threat thread plus reserves |
-| Relational dynamics | 3-5 | Conversation, intimacy, conflict, betrayal-edge |
-| Routine disruption | 2-3 | Ordinary-life moments interrupted |
-| Aftermath / sequel | 2-3 | Consequence absorption after disasters |
-| Reflection / dilemma | 2-3 | Internal pressure + decision-forcing |
+Delegation contract:
 
-**Storylet schema (inline minimal seed shape)** — every seed SLT carries `id`, `story_id`, `shape` (one of the table rows), `hard_preconds` (predicates over `state_snapshot` for selection eligibility), `fact_effects` (SFs/SREL/STINT mutations the storylet asserts when realized), `opens_obligations[]` (new OBL ids the storylet introduces), `choice_templates[]` (4-6 candidate next-page directions), `tone_tags[]`, **`mystery_safety: pass | branch_local_counterfactual | canon_candidate`** (Phase 7 hard-filters to `pass`), `content_intensity` (`tame | mature | explicit`), `cast_required[STENT]`, `cast_optional[STENT]`, `provenance: { origin: bootstrap_seed, authored_at: <iso8601> }`, `visibility: { scope: global_author_pool }`. Full schema in `templates/story-records.yaml`.
+- `mode: seed`
+- `focus_area: bootstrap_mix`
+- `target_pool_size: <storylet_pool_seed_size>`
+- `source_audit_path: null`
+- `parent_skill_invocation: true`
+- caller context: normalized premise, cast-bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and content_policy already loaded by bootstrap Phases 1-5
 
-**Rules**:
-- Seed pool storylets carry NO `created_at_page` — they are author-pool storylets, globally visible across all branches (per the proposal's branch-isolation exception).
-- Every seed SLT must be cross-checked against the whole-class M load — its `fact_effects` may NOT resolve a `forbidden`-status M, and its `mystery_safety` is `pass` if and only if no `M_resolution_claims` carry `canon_candidate` authority.
-- Seam: when `storylet-pool-authoring` ships, refactor Phase 6 to delegate to its seed-mode entrypoint (`focus_area: bootstrap_mix`, `target_pool_size: <seed-size>`, `source_audit_path: null`). Until then, this skill inlines the minimal seed shape.
+`storylet-pool-authoring` Phase 2 §Bootstrap-mix shape weighting is the coverage contract: entry_pressure 3-5, cast_introduction 1 per non-protagonist major, threat_escalation 2-4, relational_dynamics 3-5, routine_disruption 2-3, aftermath_sequel 2-3, reflection_dilemma 2-3.
+
+The delegated sub-routine applies storylet-pool-authoring Phase 4's 9 per-storylet gates and Phase 5's diversity audit, then returns the approved SLT records and validation summaries in memory. It does not allocate or write an SLB manifest, does not edit the story bundle INDEX, and does not require `worlds/<world-slug>/stories/<story-slug>/` to exist yet. Bootstrap assigns the new bundle's `SLT-NNNN` ids and writes the returned records in Phase 11's single transaction.
+
+Returned seed storylets must carry `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`. They use the schema authority at `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`; this skill's `templates/story-records.yaml` only cross-references that authority for SLT records.
 
 ## Phase 7: Root Page Render
 
@@ -373,8 +370,8 @@ Generate `storylet_pool_seed_size` (default ~20) `SLT-NNNN` records under `_sour
 
 **Hard filters**:
 
-- SLT's `mystery_safety` must be `pass`.
-- SLT must NOT carry `branch_local_counterfactual` or `canon_candidate` authority (bootstrap doesn't promote).
+- SLT's `mystery_safety.forbidden_M_resolved` must be `false`.
+- SLT must NOT carry `M_resolution_claims` with `resolution_authority: canon_candidate` (bootstrap doesn't promote).
 
 **LLM prompt assembly** (the order matters; content_policy is FIRST so it binds the model before any other instruction):
 
@@ -539,15 +536,15 @@ Report all written paths. **Do NOT commit to git.** The user reviews the diff an
 | Rule | Phase enforced | Mechanism |
 |---|---|---|
 | Rule 1: No Floating Facts | Phase 3 | Every imported SF declares `epistemic_class`, `truth_value`, `certainty`, `known_by`, `subject/predicate/object`; world-canon imports declare `derived_from_cf` + `canon_relation: canon_consistent`; premise-specific facts declare `derived_from_cf: null` + `canon_relation: not_applicable` rather than null prerequisites. Story-local facts that aren't world canon get explicit `not_applicable`, never silent omission. Phase 9 gate 8 is the structural backstop. |
-| Rule 4: No Globalization by Accident | Phase 2 + Phase 4 + Phase 7 | Phase 2 cast binding respects each CHAR's `current_location` and institutional embedding from the world dossier (cast cannot be teleported by binding). Phase 4 Invariant Audit runs the premise + cast + initial threads + initial obligations against every INV record loaded whole-class at Pre-flight; unresolvable tensions hard-reject. Phase 7 storylet selection enforces `mystery_safety: pass` + cast-presence + tone alignment so PG-0001 cannot inadvertently universalize a local capability. Phase 9 gate 2 is the structural backstop. |
+| Rule 4: No Globalization by Accident | Phase 2 + Phase 4 + Phase 7 | Phase 2 cast binding respects each CHAR's `current_location` and institutional embedding from the world dossier (cast cannot be teleported by binding). Phase 4 Invariant Audit runs the premise + cast + initial threads + initial obligations against every INV record loaded whole-class at Pre-flight; unresolvable tensions hard-reject. Phase 7 storylet selection enforces storylet-pool-authoring's returned Rule-4/Rule-7 validation verdicts plus cast-presence + tone alignment so PG-0001 cannot inadvertently universalize a local capability. Phase 9 gate 2 is the structural backstop. |
 | Rule 5: No Consequence Evasion | Phase 5 | Every initial OBL must declare `salience`, `urgency`, AND ≥2 `possible_payoff_modes` (halt-on-violation, NOT a soft warning). Consequences ledger initialized at PG-0001 with `consequences_pending: []` and `consequences_addressed: []` so the runtime has a tracking surface from the first tick. Phase 9 gate 7 is the structural backstop. |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 + Phase 6 + Phase 7 + Phase 9 | Phase 4 Mystery Firewall declares `mysteries_in_play[]` with each M's `status` + `future_resolution_safety` and hard-rejects `forbidden`-status M resolutions. Phase 6 storylet seed-pool generation cross-checks each SLT's `fact_effects` against whole-class M loads — `mystery_safety: pass` is required and `M_resolution_claims` carrying `canon_candidate` authority is forbidden in seed-pool storylets. Phase 7 hard-filters PG-0001 storylet selection to `mystery_safety: pass`. Phase 9 gate 1 cross-checks the rendered prose. Whole-class M-record load via `mcp__worldloom__list_records(record_type='mystery_record', include_full_body=true)` is named in §World-State Prerequisites. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 + Phase 6 + Phase 7 + Phase 9 | Phase 4 Mystery Firewall declares `mysteries_in_play[]` with each M's `status` + `future_resolution_safety` and hard-rejects `forbidden`-status M resolutions. Phase 6 delegates seed-pool validation to `storylet-pool-authoring`, whose Phase 4 gates 1 and 2 cross-check each SLT against whole-class M loads and forbid `canon_candidate` authority on author-pool storylets. Phase 7 hard-filters PG-0001 storylet selection to storylets with `mystery_safety.forbidden_M_resolved: false` and no `canon_candidate` resolution authority. Phase 9 gate 1 cross-checks the rendered prose. Whole-class M-record load via `mcp__worldloom__list_records(record_type='mystery_record', include_full_body=true)` is named in §World-State Prerequisites. |
 
 ## Record Schemas
 
 This skill's outputs are story-bundle records. None are Canon Fact Records or Change Log Entries (canon-reading skill — N/A).
 
-- **Story records (atomic-YAML, one file per record)**: STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, BR, PG, CHC, plus story-local DA. Schemas at `templates/story-records.yaml` (one document per class with required + optional field enumeration and a worked example value per class).
+- **Story records (atomic-YAML, one file per record)**: STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, plus story-local DA. Schemas at `templates/story-records.yaml` (one document per class with required + optional field enumeration and a worked example value per class). SLT records use `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` as the schema authority.
 - **STORY_KERNEL.md** — markdown with frontmatter and body sections. Template at `templates/story-kernel.md`.
 - **Per-bundle INDEX.md** — Branches table, Active threads table, Mysteries in play table, Storylet pool shape distribution. Template at `templates/story-bundle-index.md`.
 - **Content policy block** (NC-21 verbatim) — at `templates/content-policy.txt`. Embedded into STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. Phase 9 gate 3 is the structural backstop.
@@ -566,7 +563,7 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 | Rule 4: No Globalization by Accident | Phase 2 cast binding respects CHAR `current_location`; Phase 4 Invariant Audit (whole-class INV load); Phase 7 storylet selection respects distribution; Phase 9 gate 2 backstop. | INV `break_conditions` enforced against premise + cast + threads + obligations. |
 | Rule 5: No Consequence Evasion | Phase 5 OBL halt-rule: salience + urgency + ≥2 payoff_modes mandatory; consequences ledger initialized at PG-0001; Phase 9 gate 7 backstop. | An OBL with one payoff mode halts the bootstrap. |
 | Rule 6: No Silent Retcons | N/A | Not applicable — canon-reading skill emits no Change Log Entries because it does not mutate world canon. Story-local supersession (`SF.supersedes`) is a runtime-page-cycle concern, not a Rule-6 surface. The Rule 6 enforcement surface for any later promotion of story-local facts to world canon is `canon-addition` (via the future `story-fact-promotion-to-canon` skill). |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 mystery firewall (whole-class M load); Phase 6 SLT cross-check; Phase 7 storylet hard-filter; Phase 9 gate 1 backstop. | `forbidden`-status M resolutions hard-reject the bootstrap. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 mystery firewall (whole-class M load); Phase 6 delegates SLT validation to `storylet-pool-authoring` Phase 4 gates 1 and 2; Phase 7 storylet hard-filter; Phase 9 gate 1 backstop. | `forbidden`-status M resolutions hard-reject the bootstrap; author-pool seed storylets with `canon_candidate` authority are rejected by the delegated storylet-pool validation packet before bootstrap's Phase 10 HARD-GATE. |
 | Rule 11: No Spectator Castes by Accident | N/A | Not applicable — canon-reading skill introduces no exceptional capability that could create spectator castes. The enforcement surface is `canon-addition` Phase 5 + `propose-new-canon-facts` (CF leverage-enumeration). Story-local cast capabilities inherit from the source CF's distribution + costs. |
 | Rule 12: No Single-Trace Truths | N/A | Not applicable — same reasoning as Rule 2 / 3 / 11; the trace-multiplicity discipline applies to new world-level hard-canon truths, not to story-local imports. The enforcement surface is `canon-addition` + `propose-new-canon-facts`. |
 | Canon Layering | Phase 3 imported SFs preserve `derived_from_cf` and `canon_relation`; Phase 4 firewall preserves Mystery Reserve layer; story-only entities marked `story_only: true` (a soft-canon-local-to-story register, not promoted to any world canon layer without explicit `story-fact-promotion-to-canon`). | Story bundle is its own per-story layer below world canon. |
@@ -583,7 +580,8 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 - **Sibling interop**:
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
   - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.
-  - **Consumes (future, not yet shipping)**: `storylet-pool-authoring` (Phase 6 delegation seam); `branching-story-health-audit`; `story-fact-promotion-to-canon`.
+  - **Consumes (existing)**: `storylet-pool-authoring` seed-mode storylet authority. Phase 6 uses it with `focus_area: bootstrap_mix` and `parent_skill_invocation: true`, returning approved seed SLTs in memory for bootstrap's Phase 11 write transaction.
+  - **Consumes (future, not yet shipping)**: `branching-story-health-audit`; `story-fact-promotion-to-canon`.
   - **Produces inputs for**: `branching-story-page-cycle` and the future audit / promotion skills above.
 - **Content policy is a contract, not a setting.** The NC-21 block embedded in `templates/content-policy.txt` is the skill's discipline floor. It is embedded verbatim in STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.
