@@ -173,7 +173,7 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
       );
     });
 
-    await t.test("context packets respect 8000 budget by dropping layers in priority order with truncation_summary", async () => {
+    await t.test("context packets protect reserve-priority governing bodies at 8000 budget", async () => {
       const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
       process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "1000000";
 
@@ -187,37 +187,13 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
           })
         );
 
-        assert.ok(!("code" in melissa));
-        assert.equal(melissa.task_header.token_budget.requested, 8000);
-        assert.ok(melissa.task_header.token_budget.allocated <= 8000);
-        assert.ok(melissa.local_authority.nodes.some((node) => node.id === "CHAR-0002"));
-        assert.ok(
-          melissa.truncation_summary.dropped_layers.length > 0,
-          "mature animalia world at budget=8000 should require at least one layer drop"
-        );
-        const PRIORITY_ORDER = [
-          "impact_surfaces",
-          "scoped_local_context",
-          "exact_record_links",
-          "governing_world_context"
-        ];
-        let priorityIndex = 0;
-        for (const layer of melissa.truncation_summary.dropped_layers) {
-          while (priorityIndex < PRIORITY_ORDER.length && PRIORITY_ORDER[priorityIndex] !== layer) {
-            priorityIndex += 1;
-          }
-          assert.ok(
-            priorityIndex < PRIORITY_ORDER.length,
-            `dropped_layers must follow priority order; got ${JSON.stringify(melissa.truncation_summary.dropped_layers)}`
-          );
-          priorityIndex += 1;
-        }
-        for (const droppedLayer of melissa.truncation_summary.dropped_layers) {
-          assert.ok(
-            Array.isArray(melissa.truncation_summary.dropped_node_ids_by_layer[droppedLayer]),
-            `dropped_node_ids_by_layer.${droppedLayer} must be present`
-          );
-        }
+        assert.ok("code" in melissa);
+        assert.equal(melissa.code, "packet_incomplete_required_classes");
+        assert.deepEqual(melissa.details?.missing_classes, ["governing_world_context.full_body"]);
+        assert.deepEqual(melissa.details?.governing_full_body_priority, {
+          invariants: "reserve",
+          mystery_reserve: "reserve"
+        });
 
         const melissaWide = await withRepoRoot(root, () =>
           getContextPacket({
@@ -246,10 +222,13 @@ test("SPEC-12 live corpus capstone proves the repaired animalia retrieval seam",
           })
         );
 
-        assert.ok(!("code" in artifact));
-        assert.equal(artifact.task_header.token_budget.requested, 8000);
-        assert.ok(artifact.task_header.token_budget.allocated <= 8000);
-        assert.ok(artifact.local_authority.nodes.some((node) => node.id === "DA-0002"));
+        assert.ok("code" in artifact);
+        assert.equal(artifact.code, "packet_incomplete_required_classes");
+        assert.deepEqual(artifact.details?.missing_classes, ["governing_world_context.full_body"]);
+        assert.deepEqual(artifact.details?.governing_full_body_priority, {
+          invariants: "reserve",
+          mystery_reserve: "reserve"
+        });
 
         const artifactWide = await withRepoRoot(root, () =>
           getContextPacket({

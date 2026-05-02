@@ -74,6 +74,8 @@ export interface ContextPacket {
     seed_nodes: string[];
     full_body_classes_delivered: NodeType[];
     harness_ceiling_chars: number;
+    envelope_overhead_reserve_chars: number;
+    governing_full_body_priority: GoverningFullBodyPriority;
     estimator_version: string;
     packet_version: 2;
     delivery_status: ContextPacketDeliveryStatus;
@@ -112,8 +114,37 @@ export const TRUNCATION_FALLBACK_ADVICE =
   "Retrieve dropped nodes via mcp__worldloom__get_record(record_id), mcp__worldloom__get_records(record_ids), or mcp__worldloom__get_record_field(record_id, field_path) as needed.";
 
 export const DEFAULT_PACKET_VERSION = 2 as const;
-export const DEFAULT_HARNESS_CEILING_CHARS = 80000;
+export const DEFAULT_HARNESS_CEILING_CHARS = 60000;
+export const ENVELOPE_OVERHEAD_RESERVE_CHARS = 4000;
 export const CONTEXT_PACKET_ESTIMATOR_VERSION = "chars-per-token-v1";
+
+export type GoverningFullBodyPriorityMode = "opportunistic" | "reserve";
+
+export interface GoverningFullBodyPriority {
+  invariants: GoverningFullBodyPriorityMode;
+  mystery_reserve: GoverningFullBodyPriorityMode;
+}
+
+export const OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY: GoverningFullBodyPriority = {
+  invariants: "opportunistic",
+  mystery_reserve: "opportunistic"
+};
+
+export const GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE: Record<
+  TaskType,
+  GoverningFullBodyPriority
+> = {
+  canon_addition: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  character_generation: { invariants: "reserve", mystery_reserve: "reserve" },
+  diegetic_artifact_generation: { invariants: "reserve", mystery_reserve: "reserve" },
+  continuity_audit: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  propose_new_canon_facts: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  propose_new_characters: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  propose_new_worlds_from_preferences: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  canon_facts_from_diegetic_artifacts: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  emergent_pressure_events: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY,
+  other: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY
+};
 
 export const DEFAULT_BUDGET_SPLIT = {
   local_authority: 0.25,

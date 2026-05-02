@@ -210,7 +210,7 @@ test("packet-class-filter filtered request yields >= mystery-record coverage of 
   try {
     seedClassFilterFixture(root);
 
-    const tightBudget = 1500;
+    const tightBudget = 3000;
 
     const unfiltered = await withRepoRoot(root, () =>
       getContextPacket({

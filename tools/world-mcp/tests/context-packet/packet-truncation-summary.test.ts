@@ -102,7 +102,7 @@ test("truncation_summary is always present with the documented schema keys", asy
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 100000
@@ -132,7 +132,7 @@ test("truncation_summary records every dropped layer and its emptied node-id lis
 
     const fullPacket = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 100000
@@ -145,7 +145,7 @@ test("truncation_summary records every dropped layer and its emptied node-id lis
 
     const truncated = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 800
@@ -202,7 +202,7 @@ test("dropped layer entries appear only for layers that actually held content", 
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "diegetic_artifact_generation",
+        task_type: "other",
         world_slug: "seeded",
         seed_nodes: ["DA-0002"],
         token_budget: 400

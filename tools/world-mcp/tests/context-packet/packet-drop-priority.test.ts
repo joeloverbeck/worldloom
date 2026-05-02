@@ -126,7 +126,7 @@ test("dropped layers always follow priority order: impact → scoped → exact �
     for (const budget of [60, 400, 700, 720, 800, 1500, 4000]) {
       const result = await withRepoRoot(root, () =>
         assembleContextPacket({
-          task_type: "diegetic_artifact_generation",
+          task_type: "other",
           world_slug: "seeded",
           seed_nodes: ["DA-0002"],
           token_budget: budget
@@ -158,7 +158,7 @@ test("local_authority and task_header survive every drop pass", async () => {
     for (const budget of [400, 700, 720, 800, 1500, 4000]) {
       const result = await withRepoRoot(root, () =>
         assembleContextPacket({
-          task_type: "diegetic_artifact_generation",
+          task_type: "other",
           world_slug: "seeded",
           seed_nodes: ["DA-0002"],
           token_budget: budget
@@ -175,7 +175,7 @@ test("local_authority and task_header survive every drop pass", async () => {
       );
       assert.equal(
         result.task_header.task_type,
-        "diegetic_artifact_generation",
+        "other",
         `budget=${budget}: task_header must remain populated`
       );
       assert.ok(
@@ -199,7 +199,7 @@ test("at strict budget pressure, lower-priority layers are dropped before higher
     for (const budget of budgets) {
       const result = await withRepoRoot(root, () =>
         assembleContextPacket({
-          task_type: "diegetic_artifact_generation",
+          task_type: "other",
           world_slug: "seeded",
           seed_nodes: ["DA-0002"],
           token_budget: budget

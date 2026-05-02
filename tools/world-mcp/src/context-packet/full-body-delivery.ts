@@ -5,6 +5,7 @@ import type { NodeType } from "@worldloom/world-index/public/types";
 import type { TaskType } from "../ranking/profiles";
 
 import {
+  GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE,
   estimateStablePacketChars,
   estimateStablePacketSize,
   uniqueStrings,
@@ -126,6 +127,17 @@ function isHighValueNode(
   return FULL_BODY_RULES_BY_TASK_TYPE[taskType].some((rule) => matchesRule(node, body, rule));
 }
 
+function isReserveGoverningNode(taskType: TaskType, node: ContextPacketNode): boolean {
+  const priority = GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE[taskType];
+  if (node.node_type === "invariant") {
+    return priority.invariants === "reserve";
+  }
+  if (node.node_type === "mystery_reserve_entry") {
+    return priority.mystery_reserve === "reserve";
+  }
+  return false;
+}
+
 function loadBodiesByNodeId(
   db: Database.Database,
   worldSlug: string,
@@ -173,6 +185,52 @@ function refreshDeliveredClasses(packet: ContextPacket): void {
   packet.task_header.full_body_classes_delivered = [...delivered].sort();
 }
 
+export type FullBodyDeliveryResult =
+  | { ok: true }
+  | {
+      ok: false;
+      missing_classes: string[];
+      minimum_required_budget: number;
+      minimum_required_harness_ceiling_chars: number;
+    };
+
+function packetExceedsCeilings(
+  packet: ContextPacket,
+  tokenBudget: number,
+  effectiveHarnessCeilingChars: number
+): boolean {
+  return (
+    estimateStablePacketSize(packet) > tokenBudget ||
+    estimateStablePacketChars(packet) > effectiveHarnessCeilingChars
+  );
+}
+
+function applyReserveGoverningBodies(
+  packet: ContextPacket,
+  args: {
+    taskType: TaskType;
+  },
+  bodiesByNodeId: ReadonlyMap<string, string>
+): FullBodyDeliveryResult {
+  const reserveNodes = packet.governing_world_context.nodes.filter((node) =>
+    isReserveGoverningNode(args.taskType, node)
+  );
+  if (reserveNodes.length === 0) {
+    return { ok: true };
+  }
+
+  for (const node of reserveNodes) {
+    const body = bodiesByNodeId.get(node.id);
+    if (body === undefined) {
+      continue;
+    }
+
+    node.full_body = body;
+  }
+
+  return { ok: true };
+}
+
 export function applyTaskTypeFullBodyDelivery(
   db: Database.Database,
   packet: ContextPacket,
@@ -180,13 +238,13 @@ export function applyTaskTypeFullBodyDelivery(
     taskType: TaskType;
     worldSlug: string;
     tokenBudget: number;
-    harnessCeilingChars: number;
+    effectiveHarnessCeilingChars: number;
   }
-): void {
+): FullBodyDeliveryResult {
   const rules = FULL_BODY_RULES_BY_TASK_TYPE[args.taskType];
   if (rules.length === 0) {
     packet.task_header.full_body_classes_delivered = [];
-    return;
+    return { ok: true };
   }
 
   const candidateNodeIds = FULL_BODY_LAYER_PRIORITY.flatMap((layer) =>
@@ -194,18 +252,24 @@ export function applyTaskTypeFullBodyDelivery(
   );
   const bodiesByNodeId = loadBodiesByNodeId(db, args.worldSlug, candidateNodeIds);
 
+  const reserveResult = applyReserveGoverningBodies(packet, args, bodiesByNodeId);
+  if (!reserveResult.ok) {
+    refreshDeliveredClasses(packet);
+    return reserveResult;
+  }
+
   for (const layer of FULL_BODY_LAYER_PRIORITY) {
     for (const node of nodesForLayer(packet, layer)) {
+      if (node.full_body !== undefined || isReserveGoverningNode(args.taskType, node)) {
+        continue;
+      }
       const body = bodiesByNodeId.get(node.id);
       if (body === undefined || !isHighValueNode(args.taskType, node, body)) {
         continue;
       }
 
       node.full_body = body;
-      if (
-        estimateStablePacketSize(packet) > args.tokenBudget ||
-        estimateStablePacketChars(packet) > args.harnessCeilingChars
-      ) {
+      if (packetExceedsCeilings(packet, args.tokenBudget, args.effectiveHarnessCeilingChars)) {
         delete node.full_body;
         recordFullBodyDowngrade(packet, layer, node);
       }
@@ -213,4 +277,5 @@ export function applyTaskTypeFullBodyDelivery(
   }
 
   refreshDeliveredClasses(packet);
+  return { ok: true };
 }

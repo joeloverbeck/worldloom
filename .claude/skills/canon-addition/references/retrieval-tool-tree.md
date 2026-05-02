@@ -6,7 +6,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)` for each needed id class. Allocate `PA` for every run, `CF` / `CH` for accept branches, and `M` / `OQ` only when repair work manufactures bounded unknowns or open questions.
 - `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, `revision_difficulty`, and `cf_type`. This catches enum drift before patch-plan validation and exposes CF-type conditional-block coupling before record assembly.
-- `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed_nodes>])` to gather Kernel, Invariants, relevant CF / CH / M / OQ records, named-entity neighbors, and section context. The canon-addition default budget is 16000; if the packet is incomplete, retry once with `retry_with.token_budget`. Treat packet `body_preview` fields as an index; follow up with `get_record` for one id or `get_records` for a known id set before citing records.
+- `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed_nodes>])` to gather Kernel, Invariants, relevant CF / CH / M / OQ records, named-entity neighbors, and section context. The canon-addition default budget is 16000; if the packet is incomplete, retry once with `retry_with.token_budget`. Treat packet `body_preview` fields as an index; follow up with `get_record` for one id, `get_records` for a known id set, or `get_records_field` when the known id set only needs one shared field before citing records.
 - **Retrieval freshness audit**: retrieval tools auto-sync and retry once when they detect a stale explicit world index. When that recovery happens, successful responses include `freshness_audit.pre_call_index_was_stale: true` plus the synced drifted paths. Persistent retrieval staleness still surfaces `stale_index` for diagnosis. Submit-time `index_stale` handling remains under §Phase 15a.
 
 ## Phase 0-2: Normalize, Scope, Invariants
@@ -20,7 +20,8 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 
 - `mcp__worldloom__get_neighbors(node_id, edge_types, depth)` for one-hop ontology neighbors when scope detection is unclear or when candidate CFs need disambiguation.
 - `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for SEC records listed in `likely_required_downstream_updates`, because Phase 13a needs the current `touched_by_cf[]` and `extensions[]` state before assembling a patch plan.
-- `mcp__worldloom__get_record_field(record_id, field_path)` for narrow inspection of large records when only one field is needed.
+- `mcp__worldloom__get_records_field(record_ids=[...], field_path=[...], world_slug=<slug>)` for narrow batch inspection of parsed atomic records when the same field is needed across a known id set, such as capability CF `distribution` blocks.
+- `mcp__worldloom__get_record_field(record_id, field_path)` for narrow inspection of one large atomic record when only one field is needed.
 
 ## Escalation Gate / Phase 6b
 
@@ -31,6 +32,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 
 - `mcp__worldloom__find_sections_touched_by(cf_id)` for each candidate parent CF from axis (a) `derived_from_cfs`. Use the returned SEC set to decide whether the new CF extends the candidate's substantive footprint or is only an orthogonal cross-reference.
 - `mcp__worldloom__get_record_field(SEC-id, ["touched_by_cf"])` when the only needed fact from a large SEC record is its current CF list.
+- `mcp__worldloom__get_records_field(record_ids=[...SEC-ids...], field_path=["touched_by_cf"], world_slug=<slug>)` when axis-(c) judgment needs the current CF lists across several known SEC records.
 - `mcp__worldloom__find_impacted_fragments(node_ids)` for candidate accepted CFs, parent CFs, and named seed nodes when the proposal's downstream-update list may be incomplete. Use it to identify additional CFs, SECs, and hybrid artifacts that may need review before Phase 13a.
 
 ## Phase 13a: Patch-Plan Assembly

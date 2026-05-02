@@ -4,6 +4,10 @@ import path from "node:path";
 import test from "node:test";
 
 import { assembleContextPacket } from "../../src/context-packet/assemble";
+import {
+  DEFAULT_HARNESS_CEILING_CHARS,
+  ENVELOPE_OVERHEAD_RESERVE_CHARS
+} from "../../src/context-packet/shared";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
 
@@ -112,7 +116,7 @@ test("assembler emits a persisted full packet plus inline summary when the full 
   const root = createTempRepoRoot();
   const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
   const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
-  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "8000";
+  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "12000";
   process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = path.join(root, "tool-results");
 
   try {
@@ -128,13 +132,16 @@ test("assembler emits a persisted full packet plus inline summary when the full 
     );
 
     assert.ok(!("code" in result), `expected packet response, got ${"code" in result ? result.code : "n/a"}`);
-    assert.equal(result.task_header.harness_ceiling_chars, 8000);
+    assert.equal(result.task_header.harness_ceiling_chars, 12000);
+    assert.equal(result.task_header.envelope_overhead_reserve_chars, ENVELOPE_OVERHEAD_RESERVE_CHARS);
     assert.equal(result.task_header.delivery_status, "persisted_with_summary");
     assert.equal(result.task_header.estimator_version, "chars-per-token-v1");
     assert.equal(typeof result.task_header.persisted_output_path, "string");
     assert.ok(
-      JSON.stringify(result).length <= result.task_header.harness_ceiling_chars,
-      "serialized response must fit the configured harness ceiling"
+      JSON.stringify(result).length <=
+        result.task_header.harness_ceiling_chars -
+          result.task_header.envelope_overhead_reserve_chars,
+      "serialized response must fit the effective harness ceiling after envelope reserve"
     );
     assert.ok(result.governing_summary);
     assert.deepEqual(result.governing_summary.active_rules, result.governing_world_context.active_rules);
@@ -146,7 +153,7 @@ test("assembler emits a persisted full packet plus inline summary when the full 
     assert.equal(persisted.task_header.delivery_status, "inline");
     assert.ok(
       JSON.stringify(persisted).length > result.task_header.harness_ceiling_chars,
-      "persisted full packet should be the oversize body that the summary replaces"
+      "persisted full packet should exceed the gross ceiling that the summary replaces"
     );
   } finally {
     if (originalCeiling === undefined) {
@@ -158,6 +165,36 @@ test("assembler emits a persisted full packet plus inline summary when the full 
       delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
     } else {
       process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
+    }
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("assembler reports the default harness ceiling and envelope reserve", async () => {
+  const root = createTempRepoRoot();
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+
+  try {
+    seedHarnessCeilingWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "diegetic_artifact_generation",
+        world_slug: "seeded",
+        seed_nodes: ["DA-0002"],
+        token_budget: 100000
+      })
+    );
+
+    assert.ok(!("code" in result), `expected packet response, got ${"code" in result ? result.code : "n/a"}`);
+    assert.equal(result.task_header.harness_ceiling_chars, DEFAULT_HARNESS_CEILING_CHARS);
+    assert.equal(result.task_header.envelope_overhead_reserve_chars, ENVELOPE_OVERHEAD_RESERVE_CHARS);
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
     }
     destroyTempRepoRoot(root);
   }

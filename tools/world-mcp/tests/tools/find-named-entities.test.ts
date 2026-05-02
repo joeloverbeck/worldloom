@@ -41,7 +41,7 @@ function buildEntityWorld(root: string): void {
         body: "Brinewicker is a local adjective."
       },
       {
-        node_id: "seeded:_source/geography/SEC-GEO-001.yaml:SEC-GEO-001:0",
+        node_id: "SEC-GEO-001",
         world_slug: "seeded",
         file_path: "_source/geography/SEC-GEO-001.yaml",
         heading_path: "SEC-GEO-001",
@@ -49,7 +49,7 @@ function buildEntityWorld(root: string): void {
         body: "The drylands corridor is a hard region for caravan passage."
       },
       {
-        node_id: "seeded:_source/timeline/SEC-TML-001.yaml:SEC-TML-001:0",
+        node_id: "SEC-TML-001",
         world_slug: "seeded",
         file_path: "_source/timeline/SEC-TML-001.yaml",
         heading_path: "SEC-TML-001",
@@ -474,17 +474,95 @@ test("findNamedEntities returns descriptor hints for empty region and era querie
         query: "drylands",
         descriptor_kind: "region",
         record_count: 1,
+        matching_record_ids: ["SEC-GEO-001"],
         message:
-          "no exact entity match; 'drylands' appears as a region descriptor in 1 record - try search_nodes(world_slug, query='drylands') for content lookup"
+          "no exact entity match; 'drylands' appears as a region descriptor in 1 record (see matching_record_ids); use get_record(record_id) for full body"
       },
       {
         query: "Charter-Era",
         descriptor_kind: "era",
         record_count: 1,
+        matching_record_ids: ["SEC-TML-001"],
         message:
-          "no exact entity match; 'Charter-Era' appears as an era descriptor in 1 record - try search_nodes(world_slug, query='Charter-Era') for content lookup"
+          "no exact entity match; 'Charter-Era' appears as an era descriptor in 1 record (see matching_record_ids); use get_record(record_id) for full body"
       }
     ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities returns all descriptor matching record ids at the cap", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: Array.from({ length: 10 }, (_, index) => {
+        const id = `SEC-GEO-${String(index + 1).padStart(3, "0")}`;
+        return {
+          node_id: id,
+          world_slug: "seeded",
+          file_path: `_source/geography/${id}.yaml`,
+          heading_path: id,
+          node_type: "section",
+          body: `The canal-heartland descriptor appears in ${id}.`
+        };
+      })
+    });
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({ world_slug: "seeded", names: ["canal-heartland"] })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.hints?.[0]?.record_count, 10);
+    assert.deepEqual(
+      result.hints?.[0]?.matching_record_ids,
+      Array.from({ length: 10 }, (_, index) => `SEC-GEO-${String(index + 1).padStart(3, "0")}`)
+    );
+    assert.equal(
+      result.hints?.[0]?.message,
+      "no exact entity match; 'canal-heartland' appears as a region descriptor in 10 records (see matching_record_ids); use get_record(record_id) for full body"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("findNamedEntities caps broad descriptor matching record ids", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: Array.from({ length: 15 }, (_, index) => {
+        const id = `SEC-GEO-${String(index + 1).padStart(3, "0")}`;
+        return {
+          node_id: id,
+          world_slug: "seeded",
+          file_path: `_source/geography/${id}.yaml`,
+          heading_path: id,
+          node_type: "section",
+          body: `The canal-heartland descriptor appears in ${id}.`
+        };
+      })
+    });
+
+    const result = await withRepoRoot(root, () =>
+      findNamedEntities({ world_slug: "seeded", names: ["canal-heartland"] })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.hints?.[0]?.record_count, 15);
+    assert.deepEqual(
+      result.hints?.[0]?.matching_record_ids,
+      Array.from({ length: 10 }, (_, index) => `SEC-GEO-${String(index + 1).padStart(3, "0")}`)
+    );
+    assert.equal(
+      result.hints?.[0]?.message,
+      "no exact entity match; 'canal-heartland' appears as a region descriptor in 15 records; matching_record_ids capped at 10; use search_nodes(world_slug, query='canal-heartland') for full ranked list"
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

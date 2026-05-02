@@ -253,6 +253,11 @@ test("registered tools dispatch with either a success payload or the documented 
         expectError: false
       },
       {
+        name: MCP_TOOL_NAMES.get_records_field,
+        args: { record_ids: ["CF-0001", "SEC-GEO-001"], field_path: ["touched_by_cf"], world_slug: "seeded" },
+        expectError: false
+      },
+      {
         name: MCP_TOOL_NAMES.get_persisted_packet_slice,
         args: {
           persisted_path: path.join(process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR!, "packet.json"),
@@ -382,6 +387,7 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
       { name: MCP_TOOL_NAMES.get_node, args: {} },
       { name: MCP_TOOL_NAMES.get_record, args: {} },
       { name: MCP_TOOL_NAMES.get_records, args: { world_slug: "seeded" } },
+      { name: MCP_TOOL_NAMES.get_records_field, args: { record_ids: ["CF-0001"], world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_persisted_packet_slice, args: { slice_path: "governing_world_context.nodes" } },
       { name: MCP_TOOL_NAMES.list_records, args: { world_slug: "seeded" } },
       { name: MCP_TOOL_NAMES.get_record_field, args: { record_id: "SEC-GEO-001", world_slug: "seeded" } },

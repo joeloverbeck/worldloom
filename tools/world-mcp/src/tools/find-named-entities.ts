@@ -63,6 +63,7 @@ export interface FindNamedEntityHint {
   query: string;
   descriptor_kind: "region" | "era";
   record_count: number;
+  matching_record_ids: string[];
   message: string;
 }
 
@@ -84,8 +85,15 @@ interface ScopedReferenceRow {
 }
 
 interface DescriptorHintRow {
+  node_id: string;
+  hit_count: number;
+}
+
+interface DescriptorHintCountRow {
   record_count: number;
 }
+
+export const HINT_MATCHING_RECORD_IDS_CAP = 10;
 
 function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
@@ -111,8 +119,10 @@ function loadDescriptorHint(
     return undefined;
   }
 
-  const loadCount = (fileClass: "geography" | "timeline"): number => {
-    const row = db
+  const loadMatches = (
+    fileClass: "geography" | "timeline"
+  ): { recordCount: number; matchingRecordIds: string[] } => {
+    const countRow = db
       .prepare(
         `
           SELECT COUNT(DISTINCT node_id) AS record_count
@@ -126,46 +136,90 @@ function loadDescriptorHint(
             )
         `
       )
-      .get(worldSlug, normalizedQuery, normalizedQuery, normalizedQuery) as DescriptorHintRow;
+      .get(
+        worldSlug,
+        normalizedQuery,
+        normalizedQuery,
+        normalizedQuery
+      ) as DescriptorHintCountRow;
 
-    return row.record_count;
+    const rows = db
+      .prepare(
+        `
+          SELECT
+            node_id,
+            (
+              CASE WHEN instr(lower(coalesce(heading_path, '')), ?) > 0 THEN 1 ELSE 0 END
+              + CASE WHEN instr(lower(coalesce(summary, '')), ?) > 0 THEN 1 ELSE 0 END
+              + CASE WHEN instr(lower(body), ?) > 0 THEN 1 ELSE 0 END
+            ) AS hit_count
+          FROM nodes
+          WHERE world_slug = ?
+            AND ${descriptorLikeClause(fileClass)}
+            AND (
+              instr(lower(coalesce(heading_path, '')), ?) > 0
+              OR instr(lower(coalesce(summary, '')), ?) > 0
+              OR instr(lower(body), ?) > 0
+            )
+          ORDER BY hit_count DESC, node_id
+          LIMIT ?
+        `
+      )
+      .all(
+        normalizedQuery,
+        normalizedQuery,
+        normalizedQuery,
+        worldSlug,
+        normalizedQuery,
+        normalizedQuery,
+        normalizedQuery,
+        HINT_MATCHING_RECORD_IDS_CAP
+      ) as DescriptorHintRow[];
+
+    return {
+      recordCount: countRow.record_count,
+      matchingRecordIds: rows.map((row) => row.node_id)
+    };
   };
 
-  const eraCount = loadCount("timeline");
-  const regionCount = loadCount("geography");
+  const eraMatches = loadMatches("timeline");
+  const regionMatches = loadMatches("geography");
   const looksEraLike = /\b(era|age|period|wave|epoch)\b/i.test(query);
 
-  if (eraCount > 0 && (regionCount === 0 || looksEraLike)) {
+  const buildHint = (
+    descriptorKind: "region" | "era",
+    matches: { recordCount: number; matchingRecordIds: string[] }
+  ): FindNamedEntityHint => {
+    const capped = matches.recordCount > HINT_MATCHING_RECORD_IDS_CAP;
+    const descriptorArticle = descriptorKind === "era" ? "an" : "a";
     return {
       query,
-      descriptor_kind: "era",
-      record_count: eraCount,
-      message: `no exact entity match; '${query}' appears as an era descriptor in ${eraCount} record${
-        eraCount === 1 ? "" : "s"
-      } - try search_nodes(world_slug, query='${query}') for content lookup`
+      descriptor_kind: descriptorKind,
+      record_count: matches.recordCount,
+      matching_record_ids: matches.matchingRecordIds,
+      message: capped
+        ? `no exact entity match; '${query}' appears as ${descriptorArticle} ${descriptorKind} descriptor in ${
+            matches.recordCount
+          } records; matching_record_ids capped at ${HINT_MATCHING_RECORD_IDS_CAP}; use search_nodes(world_slug, query='${query}') for full ranked list`
+        : `no exact entity match; '${query}' appears as ${descriptorArticle} ${descriptorKind} descriptor in ${
+            matches.recordCount
+          } record${matches.recordCount === 1 ? "" : "s"} (see matching_record_ids); use get_record(record_id) for full body`
     };
+  };
+
+  if (
+    eraMatches.recordCount > 0 &&
+    (regionMatches.recordCount === 0 || looksEraLike)
+  ) {
+    return buildHint("era", eraMatches);
   }
 
-  if (regionCount > 0) {
-    return {
-      query,
-      descriptor_kind: "region",
-      record_count: regionCount,
-      message: `no exact entity match; '${query}' appears as a region descriptor in ${regionCount} record${
-        regionCount === 1 ? "" : "s"
-      } - try search_nodes(world_slug, query='${query}') for content lookup`
-    };
+  if (regionMatches.recordCount > 0) {
+    return buildHint("region", regionMatches);
   }
 
-  if (eraCount > 0) {
-    return {
-      query,
-      descriptor_kind: "era",
-      record_count: eraCount,
-      message: `no exact entity match; '${query}' appears as an era descriptor in ${eraCount} record${
-        eraCount === 1 ? "" : "s"
-      } - try search_nodes(world_slug, query='${query}') for content lookup`
-    };
+  if (eraMatches.recordCount > 0) {
+    return buildHint("era", eraMatches);
   }
 
   return undefined;

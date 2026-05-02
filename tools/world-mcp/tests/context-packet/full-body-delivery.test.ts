@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { getContextPacket } from "../../src/tools/get-context-packet";
+import { GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE } from "../../src/context-packet/shared";
 
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "../tools/_shared";
 
@@ -146,6 +147,115 @@ test("full-body delivery downgrades high-value nodes when the requested budget c
       ),
       "truncation_summary should record the high-value full-body downgrade"
     );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("reserve-policy task types keep governing full bodies ahead of opportunistic layers", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: `id: CF-0001\nstatement: ${"Large local authority body. ".repeat(1000)}\n`
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: "id: ONT-1\nstatement: Embodiment remains required.\n"
+        },
+        {
+          node_id: "M-1",
+          world_slug: "seeded",
+          file_path: "_source/mystery-reserve/M-1.yaml",
+          node_type: "mystery_reserve_entry",
+          body: "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n"
+        }
+      ]
+    });
+
+    const packet = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "character_generation",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 8000
+      })
+    );
+
+    assert.ok(!("code" in packet));
+    assert.deepEqual(
+      packet.task_header.governing_full_body_priority,
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.character_generation
+    );
+
+    const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));
+    assert.equal(nodesById.get("ONT-1")?.full_body, "id: ONT-1\nstatement: Embodiment remains required.\n");
+    assert.equal(nodesById.get("M-1")?.full_body, "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n");
+    assert.equal(nodesById.get("CF-0001")?.full_body, undefined);
+    assert.ok(
+      packet.truncation_summary.full_body_downgrades?.some(
+        (entry) => entry.layer === "local_authority" && entry.node_id === "CF-0001"
+      ),
+      "opportunistic local_authority full body should be downgraded after governing reserves are kept"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("reserve-policy task types fail loudly when required governing full bodies cannot fit", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: "id: CF-0001\nstatement: Seed.\n"
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: `id: ONT-1\nstatement: ${"Required governing body. ".repeat(500)}\n`
+        }
+      ]
+    });
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "diegetic_artifact_generation",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 900
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "packet_incomplete_required_classes");
+    assert.ok(result.details);
+    assert.deepEqual(
+      result.details.governing_full_body_priority,
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.diegetic_artifact_generation
+    );
+    assert.deepEqual(result.details.retry_with, {
+      token_budget: result.details.minimum_required_budget
+    });
   } finally {
     destroyTempRepoRoot(root);
   }

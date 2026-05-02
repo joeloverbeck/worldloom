@@ -27,6 +27,7 @@ import { getNode } from "./tools/get-node";
 import { getRecord } from "./tools/get-record";
 import { getRecordField } from "./tools/get-record-field";
 import { getRecords } from "./tools/get-records";
+import { getRecordsField } from "./tools/get-records-field";
 import { getRecordSchema, SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "./tools/get-record-schema";
 import { listRecords, SUPPORTED_LIST_RECORD_TYPES } from "./tools/list-records";
 import { searchNodes } from "./tools/search-nodes";
@@ -102,6 +103,12 @@ const getRecordInputSchema = z.object({
 
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
+  world_slug: z.string().min(1).optional()
+});
+
+const getRecordsFieldInputSchema = z.object({
+  record_ids: z.array(z.string().min(1)).min(1),
+  field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
   world_slug: z.string().min(1).optional()
 });
 
@@ -298,6 +305,12 @@ export function createServer(): McpServer {
     async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
   );
   registerToolWithCapability(
+    "get_records_field",
+    "get_records_field: Fetch one field from multiple parsed atomic records in one ordered response. Returns per-id field_value entries or per-id errors without aborting the batch.",
+    getRecordsFieldInputSchema,
+    async (args) => getRecordsField(args as unknown as Parameters<typeof getRecordsField>[0])
+  );
+  registerToolWithCapability(
     "get_persisted_packet_slice",
     "get_persisted_packet_slice: Read a structured dot-path slice from a package-persisted full context packet emitted by get_context_packet delivery_status='persisted_with_summary'.",
     getPersistedPacketSliceInputSchema,
@@ -350,7 +363,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "find_named_entities",
-    "Resolve exact canonical and unresolved surface-name matches. For region/era descriptors and compound tokens that may not match an indexed entity exactly, use search_nodes(query=...) for content lookup.",
+    "Resolve exact canonical and unresolved surface-name matches. Region/era descriptor hints include capped matching_record_ids for direct get_record lookup, with search_nodes(query=...) as the broad fallback.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0]),
     { node_type_filter: NODE_TYPES }
