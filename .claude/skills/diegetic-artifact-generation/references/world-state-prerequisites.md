@@ -2,7 +2,9 @@
 
 Post-SPEC-13, world canon lives as atomic YAML records under `worlds/<slug>/_source/`. Skills do NOT bulk-read those subdirectories — Hook 2 redirects oversized `_source/` directory reads to MCP retrieval. The retrieval contract for this skill:
 
-## Primary load: context packet
+## Primary loads
+
+### Context packet for seed-relevant state
 
 Pre-flight calls:
 
@@ -14,7 +16,11 @@ mcp__worldloom__get_context_packet(
 )
 ```
 
-Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + invariants (every INV record across all five categories) + relevant CFs + Mystery Reserve entries touching the artifact's claim domain + named-entity neighbors + section context, with completeness guarantees against silent truncation.
+Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel + relevant CFs + named-entity neighbors + section context, with completeness guarantees against silent truncation.
+
+### Whole-class Phase 7 firewall loads
+
+Per `docs/FOUNDATIONS.md` §Tooling Recommendation, whole-class enumeration is a legitimate primary loading pattern when a skill's Canon Safety Check tests every record of a class. This skill uses the same shape as `emergent-pressure-events` Phase 6: load Phase 7a with `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)` and load Phase 7b with `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)`. `mcp__worldloom__get_firewall_content(world_slug)` remains the equivalent M-only projection shortcut when the audit needs every M record regardless of seed locality but does not need full M bodies; use per-id `get_record('M-NNNN')` when `notes`, `extensions`, or `modification_history` are load-bearing.
 
 **`seed_nodes` accept canonical node ids only.** The valid forms are `entity:<slug>` for named entities (e.g., `entity:donostia`, `entity:basque-country`), bare record ids for atomic records (`CF-NNNN`, `M-NNNN`, `OQ-NNNN`, `SEC-XXX-NNN`, `ENT-NNNN`), and bare invariant ids (`ONT-N` / `CAU-N` / `DIS-N` / `SOC-N` / `AES-N`). Display names are NOT accepted — a `seed_nodes=['<display-name>']` form returns `node_not_found: Node '<display-name>' does not exist.` because no graph node carries the bare display name as its id. **Resolve brief-derived display names BEFORE the first packet call** via `mcp__worldloom__find_named_entities(names)`, which returns canonical `entity:<slug>` ids in its `canonical_matches[]` plus region/era-descriptor `hints[]` for compound tokens that are not registered as standalone entities; pass the resolved canonical ids into `seed_nodes`. For region or era descriptors that surface only as hints, prefer the hint's `matching_record_ids[]` as packet seeds and fetch full bodies with `get_record` when needed. Use `mcp__worldloom__search_nodes(world_slug, query='<descriptor>')` only when `matching_record_ids[]` is empty, absent, or capped below `record_count`.
 
@@ -42,8 +48,8 @@ In any case, do NOT silently proceed without world-state load. Apply this three-
 - If `delivery_status === 'persisted_with_summary'`, first use `governing_summary.active_rules`, `protected_surfaces`, `prohibited_moves`, `required_output_schema`, `open_risk_ids`, `invariant_ids`, and `seed_relevant_cf_ids` as the fast canon-safety scope. Retrieve specific bodies with `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)`, field batches with `mcp__worldloom__get_records_field(record_ids=[...], field_path=[...], world_slug=<slug>)`, or structured packet slices with `mcp__worldloom__get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<path>')`.
 - For every known set of node ids under `truncation_summary.dropped_node_ids_by_layer`, call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for full bodies, `mcp__worldloom__get_records_field(record_ids=[...], field_path=[...], world_slug=<slug>)` when the same field is needed across many atomic records, or `mcp__worldloom__get_record_field(record_id, field_path)` when only one field on one record is needed — the packet listed exactly what to fetch. Hook 2 redirects bulk `_source/<subdir>/` reads but targeted record retrieval is the supported path.
 - For each additional known set of CF / M / INV records cited at Phase 3 / 7a / 7b that did not appear in `truncation_summary` (i.e. was never in the packet at any layer), call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)`; use singular `get_record` only when the next id depends on reading the prior result.
-- For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__search_nodes(node_type='invariant_record')` if `governing_world_context` was the dropped layer.
-- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__get_firewall_content(world_slug)` if `governing_world_context` was the dropped layer; use `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection.
+- For Phase 7a invariant conformance, retrieve every INV record across all five categories via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`. Use `search_nodes(node_type='invariant_record')` only for targeted INV-id discovery.
+- For Phase 7b Mystery Reserve firewall, retrieve every M-NNNN record via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` or the equivalent M-only projection shortcut `mcp__worldloom__get_firewall_content(world_slug)`; use `mcp__worldloom__get_record('M-NNNN')` only when full M-record context is needed beyond the firewall projection.
 
 **Step 3 — Dossier-trace shortcut (when `character_path` is provided).** The dossier's own canon-safety check trace is an authoritative shortcut for Phase 7 firewall coverage. The dossier was pre-cleared against the same world-state at its generation time; its enumerated trace fields carry forward to the artifact's Phase 7 trace as canonical firewall coverage. Retrieve the trace via `mcp__worldloom__get_record('CHAR-NNNN', section_path='frontmatter.world_consistency')` (the canonical path; a single call returns the projected `world_consistency` block — keys: `invariants_respected`, `mystery_reserve_firewall`, `canon_facts_consulted`). Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable.
 
@@ -63,6 +69,9 @@ When a phase needs a specific record beyond what the packet returned:
 - `mcp__worldloom__get_records(record_ids, world_slug?)` — known-id batch retrieval; prefer when a phase already has multiple CF / M / INV / SEC / hybrid ids to fetch.
 - `mcp__worldloom__get_records_field(record_ids, field_path, world_slug?)` — known-id batch field projection for parsed atomic records; prefer when a phase needs the same small field across many CF / M / INV / SEC ids, such as Phase 7c distribution checks with `field_path=['distribution', 'who_can_do_it']`.
 - `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` — structured recovery from a `persisted_with_summary` packet when a specific persisted packet slice is needed.
+- `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)` — whole-class Phase 7a primary load; returns every INV full body in one call.
+- `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` — whole-class Phase 7b primary load; returns every M full body in one call.
+- `mcp__worldloom__get_firewall_content(world_slug)` — M-only Phase 7b projection shortcut when full M bodies are not needed.
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans, e.g., capability CFs whose distribution touches the author's social position; SEC-INS axes the artifact must respect.
 - `mcp__worldloom__get_neighbors(node_id)` — pull the relation graph around a resolved entity (regions / institutions / species).
 - `mcp__worldloom__find_named_entities(names)` — resolve the brief's place / institution / audience / character names to `ENT-NNNN` ids.
@@ -96,8 +105,8 @@ For Author-lift and continuity reads:
 | Phase 4 | SEC-GEO (local measurements, terrain, calendrical markers); SEC-ECR (currency, weight, scarcity diction); SEC-ELF (food, tools, class diction, honorifics, body metaphors); SEC-INS (ritual gestures, legal phrases); SEC-PAS (species-inflected metaphor, embodiment) | packet + `search_nodes(node_type='section')` |
 | Phase 5 | SEC-INS (institution the author must flatter or fear); WORLD_KERNEL §Core Pressures (audience-shaped pressures) | packet + direct Read |
 | Phase 6 | (composition phase — no new retrieval; uses Phases 1-5 outputs) | — |
-| Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | packet (invariants always loaded by the `diegetic_artifact_generation` profile) |
-| Phase 7b | every M-NNNN record (firewall) | packet + `get_firewall_content(world_slug)` if any are missing; `get_record('M-NNNN')` only for full-record context |
+| Phase 7a | every INV record (ONT-N / CAU-N / DIS-N / SOC-N / AES-N) | `list_records(record_type='invariant_record', include_full_body=true)` |
+| Phase 7b | every M-NNNN record (firewall) | `list_records(record_type='mystery_record', include_full_body=true)` or `get_firewall_content(world_slug)` for the M-only projection shortcut; `get_record('M-NNNN')` only for full-record context |
 | Phase 7c | capability CFs cited at Phase 5 + world-fact CFs cited at Phase 3 | (already retrieved) + `get_records` for any known id set not yet loaded |
 | Phase 7d | SEC-* records the artifact body draws on (no-silent-canon-creation check); CAU-3-style restricted vocabulary CFs (no-restricted-knowledge-leakage check) | (already retrieved) + `search_nodes` if a referenced entity was not yet resolved |
 

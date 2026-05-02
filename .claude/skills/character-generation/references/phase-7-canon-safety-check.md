@@ -4,7 +4,7 @@ The three sub-phases are independent checks with independent failure modes. All 
 
 ## Phase 7a: Invariant Conformance
 
-For every capability, belief, knowledge claim, material-reality fact, and perception trait generated in Phases 1-6, test against every INV record retrieved by the context packet (the `character_generation` packet loads all five invariant categories — ONT-N / CAU-N / DIS-N / SOC-N / AES-N — by default, with full parsed `record` bodies in `governing_world_context.nodes`). For each invariant tested, record the result into `world_consistency.invariants_respected` as the invariant id.
+For every capability, belief, knowledge claim, material-reality fact, and perception trait generated in Phases 1-6, test against every INV record retrieved via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`. Use `mcp__worldloom__search_nodes(node_type='invariant_record')` only for targeted INV-id discovery when the operator needs to investigate a specific term or category. For each invariant tested, record the result into `world_consistency.invariants_respected` as the invariant id.
 
 Fail triggers (send to Phase 7d):
 - direct violation of an ontological invariant (e.g., character "remembers a past life" in a no-resurrection world)
@@ -19,9 +19,9 @@ Fail triggers (send to Phase 7d):
 
 ## Phase 7b: Mystery Reserve Firewall
 
-For every M-NNNN record retrieved by the context packet (the parsed `record` body in `governing_world_context.nodes` carries the Phase 7b firewall fields: `id`, `title`, `status`, `knowns`, `unknowns`, `common_interpretations`, `disallowed_cheap_answers`, `domains_touched`, `extensions`), check whether its `unknowns` overlap the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
+For every M-NNNN record retrieved via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` or the equivalent M-only projection shortcut `mcp__worldloom__get_firewall_content(world_slug)`, check whether its `unknowns` overlap the character's `known_firsthand`, `known_by_rumor`, or `wrongly_believes` fields from Phase 3. **Record every checked entry's id into `world_consistency.mystery_reserve_firewall`, regardless of whether overlap was found** — the firewall list is a proof-of-check audit trail, not an overlap register. Document the overlap-or-no-overlap status per entry in the Canon Safety Check Trace prose.
 
-**Bulk firewall retrieval**: prefer `mcp__worldloom__get_firewall_content(world_slug)` when the audit needs every M record regardless of seed locality — one call returns every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when full M-record context (`notes`, `modification_history`) is needed.
+**Bulk firewall retrieval**: prefer `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` as the FOUNDATIONS-named whole-class full-body load. `mcp__worldloom__get_firewall_content(world_slug)` remains the equivalent M-only projection shortcut when the audit only needs every M record's `disallowed_cheap_answers`, `common_interpretations`, `unknowns`, `status`, and `title`. Fall back to `mcp__worldloom__get_record('M-NNNN')` per id when additional full-record context (`notes`, `modification_history`) is needed.
 
 For each entry where overlap IS found:
 
