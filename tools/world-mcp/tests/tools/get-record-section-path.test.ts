@@ -86,6 +86,43 @@ test("get-record-section-path projects a frontmatter block", async () => {
   }
 });
 
+test("get-record-section-path projects the full frontmatter block", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededHybridWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "CHAR-0003",
+        world_slug: "seeded",
+        section_path: "frontmatter"
+      })
+    );
+
+    assert.ok("section_path" in result, "expected section response shape");
+    assert.equal(result.section_path, "frontmatter");
+    assert.equal(result.record_kind, "character");
+    assert.ok(!("body_sections" in result), "frontmatter projection must not include body sections");
+    assert.deepEqual(result.value, {
+      character_id: "CHAR-0003",
+      slug: "namahan-of-the-third-gate",
+      name: "Namahan of the Third Gate",
+      world_consistency: {
+        invariants_respected: ["ONT-1", "SOC-2", "AES-1"],
+        mystery_reserve_firewall: ["M-1", "M-7"],
+        canon_facts_consulted: ["CF-0044", "CF-0046"]
+      },
+      author_profile: {
+        voice_register: "drylands gate-turn cadence",
+        embodiment: "hare-folk drylands-adapted"
+      }
+    });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("get-record-section-path projects a nested frontmatter field", async () => {
   const root = createTempRepoRoot();
 
@@ -131,6 +168,39 @@ test("get-record-section-path projects a body section by heading", async () => {
   }
 });
 
+test("get-record-section-path projects the full body section map", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededHybridWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "CHAR-0003",
+        world_slug: "seeded",
+        section_path: "body"
+      })
+    );
+
+    assert.ok("section_path" in result, "expected section response shape");
+    assert.equal(result.section_path, "body");
+    assert.ok(!("frontmatter" in result), "body projection must not include frontmatter");
+    assert.deepEqual(Object.keys(result.value as Record<string, unknown>), [
+      "Namahan of the Third Gate",
+      "Material Reality",
+      "Capabilities",
+      "Voice and Perception"
+    ]);
+    const sections = result.value as Record<string, string>;
+    assert.equal(sections["Namahan of the Third Gate"], "");
+    assert.ok(sections["Material Reality"]?.includes("Third Gate well-stop"));
+    assert.ok(sections["Capabilities"]?.includes("verse-keeping"));
+    assert.ok(sections["Voice and Perception"]?.includes("short-clause"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("get-record-section-path-missing returns section_not_found with valid_paths hint", async () => {
   const root = createTempRepoRoot();
 
@@ -151,7 +221,9 @@ test("get-record-section-path-missing returns section_not_found with valid_paths
     assert.equal(result.details?.record_id, "CHAR-0003");
     const validPaths = result.details?.valid_paths;
     assert.ok(Array.isArray(validPaths));
+    assert.ok((validPaths as string[]).includes("body"));
     assert.ok((validPaths as string[]).includes("body.Capabilities"));
+    assert.ok((validPaths as string[]).includes("frontmatter"));
     assert.ok((validPaths as string[]).includes("frontmatter.world_consistency"));
   } finally {
     destroyTempRepoRoot(root);
@@ -216,13 +288,15 @@ test("get-record-section-path rejects section_path on atomic record ids", async 
       ]
     });
 
-    const result = await withRepoRoot(root, () =>
-      getRecord({ record_id: "CF-0001", world_slug: "seeded", section_path: "frontmatter.x" })
-    );
+    for (const sectionPath of ["frontmatter", "body", "frontmatter.x"]) {
+      const result = await withRepoRoot(root, () =>
+        getRecord({ record_id: "CF-0001", world_slug: "seeded", section_path: sectionPath })
+      );
 
-    assert.ok("code" in result);
-    assert.equal(result.code, "invalid_input");
-    assert.equal(result.details?.field, "section_path");
+      assert.ok("code" in result, `expected error for section_path '${sectionPath}'`);
+      assert.equal(result.code, "invalid_input");
+      assert.equal(result.details?.field, "section_path");
+    }
   } finally {
     destroyTempRepoRoot(root);
   }
