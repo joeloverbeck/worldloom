@@ -66,7 +66,7 @@ These remain primary-authored at the world root and are read directly:
 ## ID allocation
 
 - Pre-flight: `mcp__worldloom__allocate_next_id(world_slug, 'NCB')` → `NCB-NNNN`. Single call.
-- Phase 13 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'NCP')` per slot-filling card, called in card order. `NCP-NNNN` IDs are bound to surviving cards before Phase 14 begins so the audit trail (Phase 10 sub-phases, Phase 10e repairs, Phase 15 tests) can reference them.
+- Phase 13 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'NCP')` per slot-filling card, called in card order. `NCP-NNNN` IDs are bound to surviving cards before Phase 14 begins so the audit trail (Phase 10 sub-phases, Phase 10e repairs, Phase 15 tests) can reference them. Note: the allocator is idempotent in absence of disk writes — calling `allocate_next_id(world_slug, 'NCP')` N times before any card lands on disk returns the same next-id N times. Reserve NCP-NNNNs in card order (first call returns `NCP-N`; assign `NCP-N` to card 1, `NCP-(N+1)` to card 2, ..., `NCP-(N+M-1)` to card M); the disk writes at Phase 16 commit (cards written in card order) bump the counter for the next batch.
 
 The allocator scans the indexed world state for the highest existing id of the requested class and returns the next. Drops at Phase 10e or Phase 16 leave permanent gaps — the next batch's allocator picks up at `highest_existing + 1`, never reusing a dropped id.
 

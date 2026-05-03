@@ -54,7 +54,7 @@ For Pre-flight allocation discipline:
 ## ID allocation
 
 - Pre-flight: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-NNNN`. Single call.
-- Phase 6 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'PR')` per slot-filling card, called in card order. `PR-NNNN` IDs are bound to surviving cards before Phase 7 begins so the audit trail (Phase 7 sub-phases, Phase 7e repairs, Phase 8 tests) can reference them.
+- Phase 6 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'PR')` per slot-filling card, called in card order. `PR-NNNN` IDs are bound to surviving cards before Phase 7 begins so the audit trail (Phase 7 sub-phases, Phase 7e repairs, Phase 8 tests) can reference them. Note: the allocator is idempotent in absence of disk writes — calling `allocate_next_id(world_slug, 'PR')` N times before any card lands on disk returns the same next-id N times. Reserve PR-NNNNs in card order (first call returns `PR-N`; assign `PR-N` to card 1, `PR-(N+1)` to card 2, ..., `PR-(N+M-1)` to card M); the disk writes at Phase 9 commit (cards written in card order) bump the counter for the next batch.
 
 The allocator scans the indexed world state for the highest existing id of the requested class and returns the next. Drops at Phase 7e or Phase 9 leave permanent gaps — the next batch's allocator picks up at `highest_existing + 1`, never reusing a dropped id.
 

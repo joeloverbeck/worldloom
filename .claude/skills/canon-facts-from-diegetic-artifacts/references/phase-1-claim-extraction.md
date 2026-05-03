@@ -8,6 +8,8 @@ Read the artifact body prose as the PRIMARY source. Frontmatter claim tags (if p
 
 **Why prose-primary is load-bearing**: Phase 6d.1 evidence-breadth assumes claims were extracted from prose with narrator-stance observed from the prose itself, not copied from potentially-stale frontmatter tags. If a future maintainer tilts Phase 1 toward frontmatter-primary for speed, Phase 6d.1 silently loses effectiveness. This ordering must be preserved across refactors.
 
+**Frontmatter material other than claim tags**: the same prose-primacy discipline applies to frontmatter material OTHER than claim tags. `author_profile`, `epistemic_horizon`, `statement_of_existence`, and `world_consistency` blocks (typically present when the artifact was authored by `diegetic-artifact-generation`) are operator-authored auxiliary context — they document the AUTHOR'S epistemic position and the artifact's CANON-AWARENESS at generation time, not narrator-asserted claim material. Phase 3 narrator-reliability mapping (consults `author_profile` for stance assessment) and Phase 6d.2 epistemic-horizon (consults author position) USE these blocks as input, but Phase 1 mining draws claims only from the artifact's body prose. Frontmatter-only material that does not appear in body prose is NOT extractable as a candidate canon fact regardless of its plausibility — the absence-from-prose is itself the discipline signal.
+
 ## Unified Claim Ledger
 
 Construct a ledger with one row per distinct factual assertion found in prose. Per claim, record:
@@ -33,6 +35,7 @@ Extract at **independent-factual-assertion granularity**: one claim per independ
 | Chronicle / institutional deposition / charter recital | ~2500-3500 words | 80-130 |
 | Dense charter-recital or after-action report (institutional register) | 3500+ words | 150-200 |
 | Short voice-heavy artifact (travelogue, sermon, personal letter) | < 2000 words | 40-100 — the higher count reflects independent-assertion granularity on voice-rich prose where rhetorical flourishes and narrator asides each produce claim rows that Phase 5 R10 later winnows |
+| Long voice-heavy artifact (private journal, multi-entry diaristic, extended personal letter) | 2000-5000 words | 80-150 — voice-register density still produces independent-assertion claims at chronicle-band rates, but R10 winnowing typically removes a higher fraction than chronicle bands at Phase 5; expect surviving-card yields proportionally lower per claim extracted |
 | Fragmentary myth / inscription / short legal decree | < 500 words | 10-40 |
 
 Counts well below the low band suggest under-extraction; counts well above the high band suggest a Phase 5 R10 surge is coming but is not itself a problem at Phase 1.
