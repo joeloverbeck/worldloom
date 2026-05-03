@@ -37,8 +37,10 @@ import {
   ATOMIC_LOGICAL_WORLD_FILES,
   createAtomicLogicalFileResults,
   hasAtomicSourceRecords,
+  listStoryBundleSourceFiles,
   loadAtomicEntityRegistry,
-  parseAtomicSourceFile
+  parseAtomicSourceFile,
+  parseStoryBundleSourceFile
 } from "../parse/atomic";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
@@ -60,7 +62,22 @@ export const MENTION_EVIDENCE_SOURCE_NODE_TYPES = new Set([
   "proposal_card",
   "proposal_batch",
   "character_proposal_batch",
-  "retcon_proposal_card"
+  "retcon_proposal_card",
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "story_diegetic_artifact_record"
 ]);
 
 export interface ParsedFileResult {
@@ -346,11 +363,13 @@ function reindexAllFiles(
     ? indexable.filter(
         (filePath) =>
           !filePath.startsWith("_source/") &&
+          !filePath.startsWith("stories/") &&
           !(ATOMIC_LOGICAL_WORLD_FILES as readonly string[]).includes(filePath)
       )
     : indexable;
   const atomicLogicalFiles = atomicMode ? createAtomicLogicalFileResults(worldSlug) : [];
   const atomicFiles = atomicMode ? indexable.filter((filePath) => filePath.startsWith("_source/")) : [];
+  const storyFiles = listStoryBundleSourceFiles(worldDirectory);
   const indexedBefore = new Set(listIndexedFiles(db, worldSlug));
   let changedNodeCount = 0;
   let yamlBlockCount = 0;
@@ -397,6 +416,26 @@ function reindexAllFiles(
 
   for (const relativeFilePath of atomicFiles) {
     const parsed = parseAtomicSourceFile(worldRoot, worldSlug, relativeFilePath);
+    const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
+    const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
+
+    yamlBlockCount += parsed.yamlBlockCount;
+    yamlFailureCount += parsed.yamlFailureCount;
+    indexedBefore.delete(relativeFilePath);
+
+    if (!shouldProcess) {
+      continue;
+    }
+
+    db.transaction(() => {
+      insertParsedFile(db, worldSlug, parsed);
+      upsertFileVersion(db, worldSlug, relativeFilePath, parsed.contentHash);
+    })();
+    changedNodeCount += parsed.nodes.length;
+  }
+
+  for (const relativeFilePath of storyFiles) {
+    const parsed = parseStoryBundleSourceFile(worldRoot, worldSlug, relativeFilePath);
     const previousHash = getFileVersion(db, worldSlug, relativeFilePath);
     const shouldProcess = fullBuild || previousHash !== parsed.contentHash;
 

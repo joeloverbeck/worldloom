@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-mcp/src/tools/list-records.ts`, `get-record.ts`, `get-neighbors.ts`, `find-named-entities.ts`, `search-nodes.ts` to accept story-bundle record types and a `story_slug` parameter. No skill changes; story-pipeline skills can adopt the new surface as a follow-up.
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, MCPENH-025
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`
 
 ## Problem
 
@@ -162,4 +162,4 @@ Mutation routing for story-bundle records is out of scope — that's PEENH-001. 
 ### Commands
 
 1. `pnpm --filter world-mcp lint && pnpm --filter world-mcp typecheck && pnpm --filter world-mcp test` (targeted pipeline verification).
-2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js < <(echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"mcp__worldloom__list_records","arguments":{"world_slug":"erotica-world","record_type":"storylet_record","story_slug":"marla-kern-seduction"}},"id":1}')` (full-pipeline integration check after MCPENH-025 lands and the index is rebuilt).
+2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js < <(echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"mcp__worldloom__list_records","arguments":{"world_slug":"erotica-world","record_type":"storylet_record","story_slug":"marla-kern-seduction"}},"id":1}')` (full-pipeline integration check after `archive/tickets/MCPENH-025.md` has landed and the index is rebuilt).

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Large
 **Engine Changes**: Yes — adds patch-engine ops for every story-bundle record class; extends Hook 3's match pattern to cover `worlds/<slug>/stories/<slug>/_source/`; adds record-schema validators for each story-bundle class; migrates the five story-pipeline skills' write disciplines from Shape A (direct Write) to Shape B (engine-routed via `submit_patch_plan`).
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, MCPENH-025, VALENH-001 (record-schema validators per class)
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, VALENH-001 (record-schema validators per class)
 
 ## Problem
 

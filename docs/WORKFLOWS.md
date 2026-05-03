@@ -31,6 +31,7 @@ Canon-addition validation now includes Test 11 (action-space leverage), Test 12 
 
 - **Bootstrap, build, or refresh a world's index**: `world-index init <world-slug>` for an empty schema-applied bootstrap, `world-index build <world-slug>` for a full rebuild, `world-index sync <world-slug>` for an incremental refresh.
 - **Inspect index state**: `world-index stats <world-slug>` for counts and freshness; `world-index inspect <node-id>` for a single-node dump.
+- **Render story-bundle records for human inspection**: `world-index render <world-slug> --story <story-slug>` emits a merged read-only markdown view from indexed story-bundle records.
 - **Verify index integrity**: `world-index verify <world-slug>` re-parses disk-backed indexed files, skips synthetic atomic logical rows for retired root markdown concerns, and reports drift.
 - **Validate a world's state**: `world-validate <world-slug>` runs the SPEC-04 validator CLI against the world's index; `--structural` narrows to structural checks and `--rules=1,2,4,5,6,7,11,12` targets mechanized rule validators.
 - **MCP retrieval surface**: Claude Code will use `.mcp.json` plus `tools/world-mcp/` to expose `mcp__worldloom__*` retrieval tools. Explicit-world retrieval calls auto-sync and retry once when the index is stale; a successful response with `freshness_audit.pre_call_index_was_stale: true` is diagnostic only. If a retrieval call still returns persistent `stale_index`, inspect the drifted paths and refresh the index before debugging the skill itself.

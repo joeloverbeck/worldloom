@@ -7,6 +7,7 @@ import { parseArgs } from "node:util";
 import { build } from "./commands/build";
 import { init } from "./commands/init";
 import { inspect } from "./commands/inspect";
+import { render } from "./commands/render";
 import { stats } from "./commands/stats";
 import { sync } from "./commands/sync";
 import { verify } from "./commands/verify";
@@ -34,6 +35,7 @@ function renderHelp(): string {
     "  build <world-slug>    full rebuild",
     "  sync <world-slug>     incremental sync",
     "  inspect <node-id>     dump one node as JSON",
+    "  render <world-slug>   render indexed records; use --story <story-slug> for story bundles",
     "  stats <world-slug>    print node counts and file freshness",
     "  verify <world-slug>   re-parse disk-backed indexed files and flag content-hash drift",
     "",
@@ -79,7 +81,8 @@ function main(argv: string[]): number {
     args: argv.slice(2),
     options: {
       help: { type: "boolean", short: "h" },
-      version: { type: "boolean", short: "v" }
+      version: { type: "boolean", short: "v" },
+      story: { type: "string" }
     },
     allowPositionals: true,
     strict: false
@@ -111,6 +114,13 @@ function main(argv: string[]): number {
         return typeof argument === "string" ? sync(worldRoot, argument) : printUsage(1);
       case "inspect":
         return typeof argument === "string" ? inspect(worldRoot, argument) : printUsage(1);
+      case "render":
+        if (typeof argument !== "string") {
+          return printUsage(1);
+        }
+        return typeof parsed.values.story === "string"
+          ? render(worldRoot, argument, { storySlug: parsed.values.story })
+          : render(worldRoot, argument, {});
       case "stats":
         return typeof argument === "string" ? stats(worldRoot, argument) : printUsage(1);
       case "verify":

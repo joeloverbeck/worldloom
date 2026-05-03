@@ -13,6 +13,8 @@ world-index init <world-slug>            # initialize an empty schema-applied wo
 world-index build <world-slug>           # full rebuild
 world-index sync <world-slug>            # incremental
 world-index inspect <node-id>            # JSON dump of a single node
+world-index render <world-slug> --story <story-slug>
+                                         # merged markdown view of indexed story-bundle records
 world-index stats <world-slug>           # counts by node_type; file freshness
 world-index verify <world-slug>          # re-parse disk-backed indexed files; skip synthetic atomic logical rows; flag drift
 ```
@@ -36,4 +38,4 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 
 ## Output location per world
 
-`worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown and `_source/*.yaml` atomic records).
+`worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown, `_source/*.yaml` atomic records, and story-bundle records under `stories/<story-slug>/_source/**/*.yaml`).

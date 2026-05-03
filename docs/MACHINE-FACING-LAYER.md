@@ -37,7 +37,7 @@ Read-side work can stop after the retrieval layer. Write-side work adds validato
 ## Phase Boundaries
 
 - **Phase 1 live surface**: `world-index` is implemented; the docs now reserve the retrieval and hook contract that SPEC-02, SPEC-05 Part A, and SPEC-06 Part A target.
-- **Phase 1.5 canonical storage layer**: on machine-layer-enabled worlds, `_source/` atomic YAML is the sole source-of-truth for atomized CF / CH / INV / M / OQ / ENT / SEC records. The retired root-level files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, and `PEOPLES_AND_SPECIES.md`) do not exist on those worlds. Merged markdown views, if produced, are human-facing surfaces only (see `world-index render <world-slug> [--file <class>]` CLI — not delivered in this phase; driven by a future human-UX spec if/when authored); they are read-only and are not persisted. LLM agents consume atomic records via `mcp__worldloom__get_record` / `get_context_packet` instead. See SPEC-13 and `docs/FOUNDATIONS.md` §Canonical Storage Layer for the full contract.
+- **Phase 1.5 canonical storage layer**: on machine-layer-enabled worlds, `_source/` atomic YAML is the sole source-of-truth for atomized CF / CH / INV / M / OQ / ENT / SEC records. The retired root-level files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, `EVERYDAY_LIFE.md`, `INSTITUTIONS.md`, `MAGIC_OR_TECH_SYSTEMS.md`, `GEOGRAPHY.md`, `ECONOMY_AND_RESOURCES.md`, and `PEOPLES_AND_SPECIES.md`) do not exist on those worlds. Merged markdown views are human-facing, read-only, and not persisted; story-bundle records can be rendered with `world-index render <world-slug> --story <story-slug>`, while world-canon `--file <class>` rendering remains a future human-UX surface. LLM agents consume atomic world records via `mcp__worldloom__get_record` / `get_context_packet` instead. See SPEC-13 and `docs/FOUNDATIONS.md` §Canonical Storage Layer for the full contract.
 - **Phase 2 live surface**: patch-engine writes, validator gating, and engine-only mutation guards become active.
 
 The docs describe the intended steady-state contract, but any workflow should still be read against the phase it is actually running in.
@@ -47,6 +47,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Need | Reach for |
 |---|---|
 | Bootstrap, rebuild, or refresh machine-readable world state | `world-index init <world>`, `world-index build <world>`, or `world-index sync <world>` |
+| Render indexed story-bundle records for human inspection | `world-index render <world> --story <story-slug>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
 | Localize specific nodes, records, persisted-packet slices, record fields, entities, or neighborhoods | `search_nodes`, `get_node`, `get_record`, `get_records`, `get_records_field`, `get_persisted_packet_slice`, `list_records`, `get_record_field`, `get_neighbors`, `find_named_entities` |

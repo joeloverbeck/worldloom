@@ -1,1 +1,1 @@
-export const CURRENT_INDEX_VERSION = 3;
+export const CURRENT_INDEX_VERSION = 4;

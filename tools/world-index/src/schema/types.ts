@@ -23,6 +23,25 @@ export const NODE_TYPES = [
   "character_proposal_batch",
   "retcon_proposal_card",
   "audit_record",
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "story_diegetic_artifact_record",
+  "audit_record_story",
+  "promotion_record",
+  "storylet_batch_manifest",
+  "remediation_storylet_proposal_card",
   "named_entity",
   "scoped_reference"
 ] as const;
@@ -56,11 +75,28 @@ export const SCOPED_EDGE_TYPES = ["references_scoped_name", "references_record"]
 
 export type ScopedEdgeType = (typeof SCOPED_EDGE_TYPES)[number];
 
+export const STORY_EDGE_TYPES = [
+  "world_entity_binding",
+  "story_fact_derived_from",
+  "created_at_page",
+  "opens_obligation",
+  "pays_off_obligation",
+  "complicates_obligation",
+  "transfers_obligation",
+  "parent_page",
+  "leaf_page",
+  "dependent_fact",
+  "thread_obligation"
+] as const;
+
+export type StoryEdgeType = (typeof STORY_EDGE_TYPES)[number];
+
 export const EDGE_TYPES = [
   ...YAML_EDGE_TYPES,
   ...ATTRIBUTION_EDGE_TYPES,
   ...ENTITY_EDGE_TYPES,
-  ...SCOPED_EDGE_TYPES
+  ...SCOPED_EDGE_TYPES,
+  ...STORY_EDGE_TYPES
 ] as const;
 
 export type EdgeType = (typeof EDGE_TYPES)[number];
@@ -320,6 +356,7 @@ export interface DiegeticArtifactFrontmatter {
 export interface NodeRow {
   node_id: string;
   world_slug: string;
+  story_slug?: string | null;
   file_path: string;
   heading_path: string | null;
   byte_start: number;
@@ -336,6 +373,7 @@ export interface NodeRow {
 
 export interface EdgeRow {
   edge_id: number;
+  story_slug?: string | null;
   source_node_id: string;
   target_node_id: string | null;
   target_unresolved_ref: string | null;
@@ -344,6 +382,7 @@ export interface EdgeRow {
 
 export interface EntityMentionRow {
   mention_id: number;
+  story_slug?: string | null;
   node_id: string;
   surface_text: string;
   resolved_entity_id: string | null;

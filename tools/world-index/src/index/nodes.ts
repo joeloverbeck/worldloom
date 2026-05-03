@@ -17,6 +17,7 @@ export function insertNodes(db: Database.Database, rows: NodeRow[]): void {
       INSERT INTO nodes (
         node_id,
         world_slug,
+        story_slug,
         file_path,
         heading_path,
         byte_start,
@@ -32,6 +33,7 @@ export function insertNodes(db: Database.Database, rows: NodeRow[]): void {
       ) VALUES (
         @node_id,
         @world_slug,
+        @story_slug,
         @file_path,
         @heading_path,
         @byte_start,
@@ -48,7 +50,7 @@ export function insertNodes(db: Database.Database, rows: NodeRow[]): void {
     `);
 
     for (const row of batch) {
-      statement.run(row);
+      statement.run({ story_slug: null, ...row });
     }
   })(rows);
 }
@@ -248,6 +250,7 @@ export function insertEntityMentions(
     const statement = db.prepare(`
       INSERT INTO entity_mentions (
         mention_id,
+        story_slug,
         node_id,
         surface_text,
         resolved_entity_id,
@@ -255,6 +258,7 @@ export function insertEntityMentions(
         extraction_method
       ) VALUES (
         @mention_id,
+        @story_slug,
         @node_id,
         @surface_text,
         @resolved_entity_id,
@@ -264,7 +268,7 @@ export function insertEntityMentions(
     `);
 
     for (const row of batch) {
-      statement.run(row);
+      statement.run({ story_slug: null, ...row });
     }
   })(rows);
 }

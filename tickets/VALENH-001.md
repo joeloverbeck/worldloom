@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — adds `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts` and registers it with the validator framework. No skill changes; storylet-pool-authoring's Phase 4 gate 7 already documents the prose-side rule, this ticket adds the machine-layer enforcement.
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, MCPENH-025 (validator queries indexed SLT nodes)
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md` (validator queries indexed SLT nodes)
 
 ## Problem
 
@@ -169,4 +169,4 @@ Per Verification Layers; comprehensive fixtures.
 ### Commands
 
 1. `pnpm --filter validators lint && pnpm --filter validators typecheck && pnpm --filter validators test` (targeted pipeline verification).
-2. `cd tools/validators && pnpm build && node dist/cli/world-validate.js worlds/erotica-world --story marla-kern-seduction --rules storylet_predicate_dsl_parsability` (full-pipeline integration check after MCPENH-025 lands and the index is rebuilt).
+2. `cd tools/validators && pnpm build && node dist/cli/world-validate.js worlds/erotica-world --story marla-kern-seduction --rules storylet_predicate_dsl_parsability` (full-pipeline integration check after `archive/tickets/MCPENH-025.md` has landed and the index is rebuilt).

@@ -121,6 +121,99 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "body: Brinewick wardens keep the public salt measures.",
     "touched_by_cf: [CF-0001]"
   ]);
+  writeStory(world, "harborwatch", "entities", "STENT-0001.yaml", [
+    "id: STENT-0001",
+    "story_id: STORY-0001",
+    "world_ent_id: ENT-0001",
+    "character_id: null",
+    "name: Brinewick",
+    "role_in_story: protagonist",
+    "present_at_start: true",
+    "story_only: false",
+    "created_at_page: PG-0001",
+    "notes: Brinewick anchors the harborwatch story."
+  ]);
+  writeStory(world, "harborwatch", "facts", "SF-0001.yaml", [
+    "id: SF-0001",
+    "story_id: STORY-0001",
+    "created_at_page: PG-0001",
+    "subject: STENT-0001",
+    "predicate: guards",
+    "object: salt gate",
+    "epistemic_class: objective",
+    "truth_value: true",
+    "derived_from_cf: CF-0001",
+    "notes: Brinewick knows the salt gate."
+  ]);
+  writeStory(world, "harborwatch", "obligations", "OBL-0001.yaml", [
+    "id: OBL-0001",
+    "story_id: STORY-0001",
+    "type: mystery",
+    "introduced_at_page: PG-0001",
+    "owner: STENT-0001",
+    "dependent_facts: [SF-0001]",
+    "status: open",
+    "notes: Resolve the salt gate question."
+  ]);
+  writeStory(world, "harborwatch", "threads", "THR-0001.yaml", [
+    "id: THR-0001",
+    "story_id: STORY-0001",
+    "type: mystery",
+    "status: active",
+    "title: Gate watch",
+    "obligations: [OBL-0001]",
+    "created_at_page: PG-0001",
+    "notes: Gate watch remains open."
+  ]);
+  writeStory(world, "harborwatch", "branches", "BR-0001.yaml", [
+    "id: BR-0001",
+    "story_id: STORY-0001",
+    "root_page_id: PG-0001",
+    "current_leaf_page_id: PG-0001",
+    "forked_from_page_id: null"
+  ]);
+  writeStory(world, "harborwatch", "pages", "PG-0001.yaml", [
+    "id: PG-0001",
+    "story_id: STORY-0001",
+    "branch_id: BR-0001",
+    "parent_page_id: null",
+    "branch_path: [PG-0001]",
+    "state_snapshot:",
+    "  objective_facts: [SF-0001]",
+    "notes: Brinewick watches the gate."
+  ]);
+  writeStory(world, "harborwatch", "choices", "CHC-0001.yaml", [
+    "id: CHC-0001",
+    "story_id: STORY-0001",
+    "parent_page_id: PG-0001",
+    "choice_text: Keep watching.",
+    "notes: Continue the watch."
+  ]);
+  writeStory(world, "harborwatch", "storylets", "SLT-0001.yaml", [
+    "id: SLT-0001",
+    "story_id: STORY-0001",
+    "title: Watch the salt gate",
+    "opens_obligations:",
+    "  - id: OBL-0001",
+    "pays_off_obligations:",
+    "  - obligation_id_matcher:",
+    "      id: OBL-0001",
+    "provenance:",
+    "  origin: bootstrap_seed",
+    "  created_at_page: PG-0001",
+    "notes: Brinewick can decide whether to keep watching."
+  ]);
+  writeStory(world, "harborwatch-alt", "storylets", "SLT-0001.yaml", [
+    "id: SLT-0001",
+    "story_id: STORY-0002",
+    "title: Alternate watch",
+    "opens_obligations: []",
+    "pays_off_obligations: []",
+    "provenance:",
+    "  origin: bootstrap_seed",
+    "  created_at_page: null",
+    "notes: Duplicate bare storylet ids are legal across stories."
+  ]);
 
   return root;
 }
@@ -141,6 +234,18 @@ export function cleanup(root: string): void {
 
 function writeAtomic(world: string, directory: string, fileName: string, lines: string[]): void {
   const targetDirectory = path.join(world, "_source", directory);
+  mkdirSync(targetDirectory, { recursive: true });
+  writeFileSync(path.join(targetDirectory, fileName), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStory(
+  world: string,
+  storySlug: string,
+  directory: string,
+  fileName: string,
+  lines: string[]
+): void {
+  const targetDirectory = path.join(world, "stories", storySlug, "_source", directory);
   mkdirSync(targetDirectory, { recursive: true });
   writeFileSync(path.join(targetDirectory, fileName), `${lines.join("\n")}\n`, "utf8");
 }

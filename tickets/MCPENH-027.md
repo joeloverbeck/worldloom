@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-mcp/src/tools/get-context-packet.ts` and `tools/world-mcp/src/context-packet/*.ts` to assemble a `story_bundle_context` layer for story-pipeline task_types. Requires `story_slug` parameter when task_type is story-pipeline-scoped.
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, MCPENH-025, MCPENH-026
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, MCPENH-026
 
 ## Problem
 
@@ -168,4 +168,4 @@ Update `docs/CONTEXT-PACKET-CONTRACT.md` (the documented context-packet contract
 ### Commands
 
 1. `pnpm --filter world-mcp lint && pnpm --filter world-mcp typecheck && pnpm --filter world-mcp test` (targeted pipeline verification).
-2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js` running locally; invoke `mcp__worldloom__get_context_packet` with the marla-kern-seduction bundle as the integration check after MCPENH-025/026 land and the index is rebuilt.
+2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js` running locally; invoke `mcp__worldloom__get_context_packet` with the marla-kern-seduction bundle as the integration check after `archive/tickets/MCPENH-025.md` and MCPENH-026 land and the index is rebuilt.
