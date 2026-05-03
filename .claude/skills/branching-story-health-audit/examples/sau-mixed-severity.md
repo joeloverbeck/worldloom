@@ -141,7 +141,7 @@ user_approved: true
 | RSP-0002 | Quiet Provocation | relational_dynamics | mature | PG-0042 (branch B) | F-02 |
 | RSP-0003 | (dropped by user at Phase 9) — would have addressed F-08 with three pool-fillers; user preferred to leave the pool slightly under-utilized as evidence of designing-principle constraint | | | | |
 
-Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-0003/remediation-storylet-proposals/` is directly consumable as `storylet-pool-authoring`'s `source_audit_path` input (mode=audit; abort-until-shipping per current Pre-flight; the STPOOL-001 ticket wires consumption).
+Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-0003/remediation-storylet-proposals/` is directly consumable as `storylet-pool-authoring`'s `source_audit_path` input in `mode=audit`.
 
 ## Manual Intervention Flags
 

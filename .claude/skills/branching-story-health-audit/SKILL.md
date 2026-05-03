@@ -462,11 +462,11 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 - **Empty findings are diagnostic, not silence.** A category audited and clean is named in Per-Category Findings as such ("no findings — audited and clean"); silently omitting a category whose `audit_focus` matched is a Phase 1 violation. A bundle whose audit produces zero findings overall is a legitimate clean audit, recorded as such with `finding_count_by_severity: {error: 0, warning: 0, info: 0}`.
 - **Sibling interop**:
   - **Consumes (existing)**: `branching-story-bootstrap` outputs (story bundle structure including STORY_KERNEL.md, `_source/<class>/`, `pages-prose/`); `branching-story-page-cycle` outputs (PG / SE / CHC records and `narrative_health` flags including `flagged_for_audit`); `storylet-pool-authoring` outputs (SLT records — visibility scopes audited at Phase 3 Storylet-Scope Leakage).
-  - **Produces inputs for**: `storylet-pool-authoring` mode=audit (RSP cards directly consumable as `source_audit_path` — wired post-STPOOL-001).
+  - **Produces inputs for**: `storylet-pool-authoring` mode=audit (RSP cards directly consumable as `source_audit_path`).
   - **Future consumers (deferred)**: `story-fact-promotion-to-canon` — manual-intervention flags about unauthorized canon promotion route to it manually until that skill ships.
 - **Known integration debt** (deferred — see filed tickets):
   - **BSPAG-002**: Wire `branching-story-page-cycle`'s `narrative_health.flagged_for_audit` and high-JIT-rate signals into this audit's branch-prioritization input AND replace page-cycle's "deferred sibling" / "Until shipping..." prose with factual references to this skill.
-  - **STPOOL-001**: Implement audit mode in `storylet-pool-authoring` — currently aborts at Pre-flight. Once landed: audit-mode storylet generation consumes `source_audit_path` and applies RSP-driven seed generation, replacing storylet-pool-authoring's "audit mode... deferred until branching-story-health-audit ships" prose with factual references.
+  - **STPOOL-001**: Completed the `storylet-pool-authoring` audit-mode consumer. Audit-mode storylet generation now consumes `source_audit_path` and applies RSP-driven diagnosis, seed generation, visibility inheritance, and provenance propagation.
 - **Worktree discipline.** All paths resolve from the worktree root if invoked inside a worktree.
 - **No git commit.** Writes land in the working tree only; the user reviews the diff and commits.
 

@@ -37,7 +37,7 @@ The factual prose correction is half-1 (cited-site repair); the consumption wiri
 2. **`audit_focus=flagged_pages_priority` scopes correctly** → invoking the audit with this focus produces a report that audits ONLY branches whose `branch_path` contains a flagged page; non-flagged-bearing branches appear in the report as "out of scope due to focus".
 3. **High-JIT-rate signal surfaces** → on a bundle whose page-cycle Phase 5 wrote JIT-expansion events on > 30% of recent pages, the deliverable summary surfaces "HIGH JIT-RATE BRANCH: PG-NNNN leaf — 7 of last 20 pages used JIT expansion (35%)".
 4. **Page-cycle prose corrections land** → grep `branching-story-page-cycle/SKILL.md` for "deferred sibling", "Until shipping", "not yet shipping" and confirm those phrases are gone OR clarified to refer to the wiring-refactor ticket (this one) rather than the audit skill's existence.
-5. **Page-cycle-side §Sibling Interop** updated to "Consumes (existing): branching-story-health-audit's RSP cards (post-STPOOL-001 wiring); produces inputs for branching-story-health-audit's flagged_for_audit + JIT-rate prioritization (BSPAG-002 wiring)" — replacing the current "Future siblings (named in proposal; not yet shipping)" framing.
+5. **Page-cycle-side §Sibling Interop** updated to name shipping siblings truthfully: `storylet-pool-authoring` mode=audit RSP consumption is completed in `archive/tickets/STPOOL-001-implement-storylet-pool-authoring-audit-mode.md`, and page-cycle produces inputs for `branching-story-health-audit`'s `flagged_for_audit` + JIT-rate prioritization (BSPAG-002 wiring) — replacing the current "Future siblings (named in proposal; not yet shipping)" framing.
 
 ## What to Change
 
@@ -88,9 +88,9 @@ HIGH JIT-RATE BRANCHES:
 
 If `story-fact-promotion-to-canon` or other genuinely-not-yet-shipping siblings remain in the "Future siblings" paragraph, keep them; only move the entries that no longer match the "not yet shipping" framing.
 
-### 6. Cross-link to completed MCPENH-015 / MCPENH-016 / MCPENH-017 and STPOOL-001 in the audit skill
+### 6. Cross-link to completed MCPENH-015 / MCPENH-016 / MCPENH-017 and archived STPOOL-001 in the audit skill
 
-The audit skill's Guardrails §Known integration debt section already names BSPAG-002. Verify the ticket-numbering reference is correct after this ticket lands, and treat the completed audit task-type registration as archived in `archive/tickets/MCPENH-017-register-branching-story-health-audit-task-type.md`.
+The audit skill's Guardrails §Known integration debt section already names BSPAG-002 and still carries a completed STPOOL-001 cross-link. Verify the ticket-numbering references after this ticket lands, treat the completed audit task-type registration as archived in `archive/tickets/MCPENH-017-register-branching-story-health-audit-task-type.md`, and move/remove the completed STPOOL-001 entry from active known-debt wording so that section contains only real remaining integration debt.
 
 ## Files to Touch
 
@@ -99,7 +99,7 @@ The audit skill's Guardrails §Known integration debt section already names BSPA
 
 ## Out of Scope
 
-- Wiring the audit's RSP cards into `storylet-pool-authoring` mode=audit — separate ticket STPOOL-001.
+- Wiring the audit's RSP cards into `storylet-pool-authoring` mode=audit — completed in `archive/tickets/STPOOL-001-implement-storylet-pool-authoring-audit-mode.md`.
 - New page-cycle behavior for emitting `flagged_for_audit` — the field is already written by page-cycle's existing Phase 5/6; this ticket only consumes it.
 - Tuning the JIT-rate threshold (currently illustrative as "30% of last 20 pages") — defer to real-world calibration after a few audits run.
 

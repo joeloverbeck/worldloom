@@ -11,7 +11,7 @@ parse time): this card's frontmatter mirrors storylet-pool-authoring's
 `source_audit_path` parse-time consumer schema byte-for-byte. Preserve every
 field name and shape on schema evolution; downstream acceptance is a field-copy,
 NOT a field-re-derivation. Named consumer: storylet-pool-authoring (mode=audit;
-abort-until-shipping currently per §Pre-flight; STPOOL-001 wires consumption).
+consumes this card through `source_audit_path`).
 -->
 ---
 rsp_id: RSP-NNNN
