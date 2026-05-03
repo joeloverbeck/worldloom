@@ -1,0 +1,7 @@
+# MCP Integration Audit
+
+Ever since we created the world-index DB - MCP - validator pipeline, which is relevant for most of the skills in .claude/skills (for example, branching-story-bootstrap, branching-story-health-audit, canon-addition), whenever we finish the work with that skill, I always ask this in the same Claude session:
+
+"Please reflect upon your work with the skill [SKILL_NAME]. Did you find issues with it that need to be fixed? Regarding integration with the world-index DB - MCP - validator pipeline, did you find yourself hoping that the MCP would provide some functionality or return some data, but it didn't? When you had to retrieve context through the MCP, did you feel the context it provided wasn't as complete as you expected? Any other suggestions you may have, make them. If changes are warranted, create tickets in tickets/* with the specifications aligned with docs/FOUNDATIONS.md . If you believe amendments to FOUNDATIONS.md are truly warranted, then include them in tickets."
+
+Given that I always write a text like this for the same purposes, this should be formalized into a new skill. The purpose of this skill should be to identify from the work done to use the mentioned skill whether we have gaps or issues with our world-index DB - MCP - validators pipeline, and create tickets in tickets/* that the user with implement in another session, to remedy those issues and gaps. We want the pipeline to be as robust as possible.

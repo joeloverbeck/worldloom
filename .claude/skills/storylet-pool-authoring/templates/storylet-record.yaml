@@ -44,11 +44,41 @@ location_requirements:
   - {pred: ...}                            # optional; empty list permitted
 
 # Obligation interactions (engine instantiates obligation_template at apply time)
+#
+# OBLIGATION MATCHER SCHEMA — used by pays_off_obligations, complicates_obligations,
+# and the obligation_matcher sub-field of transfers_obligations. Allowed keys:
+#   id                — exact OBL-NNNN id match
+#   type              — OBL type literal (secret | reader_expectation |
+#                       relationship_tension | motif | character_goal |
+#                       foreshadowed_object | moral_debt | ...)
+#   owner             — STENT-NNNN id or role:<role> matcher binding owner field
+#   subjects          — list of STENT-NNNN ids or role-matchers; matches OBLs whose
+#                       subjects array contains all listed entries (logical AND)
+#   salience_min      — integer 0..10; matches OBLs with salience >= value
+#   urgency_min       — integer 0..10; matches OBLs with urgency >= value
+#   status            — open | paid_off | complicated | abandoned
+#   payoff_mode_filter — list of payoff-mode strings (literal_fulfillment |
+#                        ironic_reversal | failed_expectation | symbolic_echo |
+#                        transfer | red_herring | tragic_loss |
+#                        abandon_with_acknowledgment); REQUIRED when an OBL has
+#                        multiple possible_payoff_modes and the storylet claims
+#                        to pay off the OBL via a specific subset
+#
+# A single matcher may combine multiple keys; all listed keys must match (AND).
+# Full schema documented in templates/predicate-dsl.md §Obligation matcher schema.
 
 opens_obligations: []                      # new OBLs the storylet opens — each is an obligation_template (type, owner, salience_min, etc.)
 pays_off_obligations: []                   # OBL field-matchers; matching open OBLs are paid off when the storylet realizes
-complicates_obligations: []                # OBL field-matchers; matching open OBLs are complicated (urgency or salience delta)
+                                           # Worked example:
+                                           # - {obligation_id_matcher: {id: OBL-0006, payoff_mode_filter: [literal_fulfillment]}}
+                                           # - {obligation_id_matcher: {type: secret, owner: role:antagonist, status: open, payoff_mode_filter: [ironic_reversal]}}
+complicates_obligations: []                # OBL field-matchers + delta fields; matching open OBLs are complicated by the listed deltas
+                                           # Worked example:
+                                           # - {obligation_id_matcher: {id: OBL-0002}, salience_delta: +2, urgency_delta: +1}
+                                           # - {obligation_id_matcher: {type: relationship_tension, status: open}, urgency_delta: +1}
 transfers_obligations: []                  # {from_owner, to_owner_pattern, obligation_matcher} entries
+                                           # Worked example:
+                                           # - {from_owner: role:antagonist, to_owner_pattern: role:cuadrilla_member, obligation_matcher: {type: secret, status: open}}
 
 # Fact + relationship effects (structured ops; free-form prose is gate-9 rejected)
 

@@ -489,6 +489,8 @@ This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_pac
 
 **Whole-class enumeration is a legitimate primary loading pattern.** For skills whose validation discipline tests a candidate against every record of a class — the `emergent-pressure-events` Phase 6 firewalls (every INV record at Phase 6a; every Mystery Reserve entry at Phase 6b) and the `continuity-audit` cross-checks — whole-class enumeration via `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)` is a recognized primary loading branch of the "directly or via context-packet" permission above. The "touching the same domain" mystery-reserve scoping in the bullet list applies to skills with domain-bounded firewall surfaces; whole-class scoping applies to skills whose firewall is class-bounded by their own Canon Safety Check commitments. The load shape is the skill's choice, named explicitly in its FOUNDATIONS Alignment table and governed by its Canon Safety Check discipline.
 
+Story-pipeline skills (Skill Category 2c) depend on this same MCP retrieval surface for world-canon reads; their story-bundle-local context layer is defined in §Story Bundles, with packet extension work deferred to MCPENH-027.
+
 ---
 
 ## Machine-Facing Layer
@@ -518,3 +520,59 @@ Canonical storage for world state is atomic YAML under `worlds/<slug>/_source/` 
 **Authored-primary surfaces**: `WORLD_KERNEL.md` and the reduced `ONTOLOGY.md` (Categories / Relation Types / Notes) remain directly editable at the world root. `characters/`, `diegetic-artifacts/`, `proposals/`, `audits/`, `adjudications/` continue as hybrid YAML-frontmatter-plus-markdown per-file artifacts (skill-owned mutation via engine ops; not atomized further).
 
 **Migration history**: the one-time migration of `worlds/animalia/` from monolithic markdown to atomic YAML is documented in SPEC-13 Atomic-Source Migration. Worlds created after the migration (via `create-base-world`) start in atomic-source form directly; no legacy form accumulates.
+
+---
+
+## Story Bundles
+
+### 1. What A Story Bundle Is
+
+A story bundle is a per-world derived layer at `worlds/<slug>/stories/<story-slug>/`. It carries a localized causal-engine state bound to a specific premise, cast, and tone contract: story-local entities, facts, events, obligations, consequences, threads, relationships, intentions, locations, objects, pages, branches, choices, storylets, and artifacts.
+
+Story bundles are distinct from world canon. Story-bundle records are story-local truths: they can be branch-scoped, counterfactual, provisional, or true only inside a particular narrative run. World canon remains world-level truth, expressed through CF / CH / INV / M / OQ / ENT / SEC records under `worlds/<slug>/_source/`.
+
+### 2. Storage Form
+
+`STORY_KERNEL.md` is primary-authored at the story-bundle root, parallel to `WORLD_KERNEL.md` at the world root. Atomic YAML story records live under `worlds/<slug>/stories/<story-slug>/_source/<class>/<ID>.yaml`, one file per record per class, following the SPEC-13 atomic-source convention. A per-bundle `INDEX.md` is a derived rendering of the bundle's branch, thread, mystery, cast, pool, and page state.
+
+### 3. Read Discipline
+
+Story-bundle records are read directly as files. Hook 2's world-canon match pattern is `worlds/<slug>/_source/...`; it does not match `worlds/<slug>/stories/<story-slug>/_source/...`, so direct reads of story-bundle source records are not redirected to MCP retrieval.
+
+World canon read by story-pipeline skills still routes through `mcp__worldloom__get_record`, `mcp__worldloom__get_context_packet`, `mcp__worldloom__list_records`, and the other targeted retrieval tools named in §Tooling Recommendation.
+
+### 4. Write Discipline
+
+Story-bundle writes currently use Shape A: direct `Write` / `Edit` to story-bundle files under `worlds/<slug>/stories/<story-slug>/`. Future Shape B will route story-bundle record ops through `mcp__worldloom__submit_patch_plan`; PEENH-001 owns the patch-engine ops and hook-pattern extension needed for that migration.
+
+Hook 3's world-canon match pattern is `worlds/<slug>/_source/...`; it does not currently match `worlds/<slug>/stories/<story-slug>/_source/...`. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
+
+### 5. Validation Rules At Story Scope
+
+Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_safety`, `provenance`, `visibility`, predicate-DSL preconditions, and structured fact / relationship effects per `storylet-pool-authoring/templates/storylet-record.yaml`.
+
+Rule 4 (No Globalization by Accident) governs story-scope branch isolation. Global author-pool storylets must not reference branch-local record IDs whose `created_at_page` is non-null.
+
+Rule 5 (No Consequence Evasion) governs per-page consequence capacity. Every page must leave at least one continuation storylet eligible.
+
+Rule 7 (Preserve Mystery Deliberately) governs story-local `M_resolution_claims` authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate.
+
+Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces such as `canon-addition`, `propose-new-canon-facts`, and `create-base-world`; they are not story-scope record validators by default.
+
+### 6. Story-Bundle ID Classes
+
+Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-NNN` is per-world. Per-bundle records include STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit.
+
+Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
+
+### 7. Story-Pipeline Skill Category
+
+The five story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-page-cycle`, `storylet-pool-authoring`, `branching-story-health-audit`, and `story-fact-promotion-to-canon`.
+
+FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the predicate DSL, the STENT `role_in_story` enum, the `state_snapshot` schema, the RSP card schema, and the shared `content_policy` block.
+
+### 8. Story Bundle As Derived Per-World Layer
+
+Story bundles are not canonical world state in the sense of world canon. They are derivative narrative-content layers attached to a world. Multiple story bundles can coexist under one world at `worlds/<slug>/stories/`, one per story slug, and each bundle is independent.
+
+Story-bundle deletion is permitted at the bundle level. Within a retained bundle, atomic YAML records remain append-only at the filesystem level, following the same record-append-only discipline that governs `_source/<world-subdir>/*.yaml`.
