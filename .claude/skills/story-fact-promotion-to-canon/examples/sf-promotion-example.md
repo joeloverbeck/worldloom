@@ -22,8 +22,8 @@ A branching story `harborwatch-conspiracy` in world `animalia` reaches PG-0042 w
 - `worlds/animalia/stories/harborwatch-conspiracy/` exists ✓
 - `worlds/animalia/stories/harborwatch-conspiracy/_source/facts/SF-0042.yaml` exists ✓
 - promotion_branch_path validated: PG-0001 → PG-0007 → PG-0024 → PG-0042 (all exist; chain parent-traversable) ✓
-- SP-0001 allocated (first promotion in this story) — manual scan fallback used (MCPENH-018 not yet landed) ✓
-- World canon loaded via `task_type='canon_addition'` (MCPENH-019 fallback) — packet includes Animalia's invariants, CFs touching `economy-and-resources` and `institutions` domains, and every M-NNNN ✓
+- SP-0001 allocated via `mcp__worldloom__allocate_next_id(world_slug='animalia', id_class='SP', story_slug='harborwatch-conspiracy')` ✓
+- World canon loaded via `task_type='story_fact_promotion_to_canon'` — packet includes reserve-priority full bodies for Animalia's invariants and Mystery Reserve records, plus CFs touching `economy-and-resources` and `institutions` domains ✓
 - Whole-class M load: 47 M-records loaded with full bodies for Phase 4 firewall ✓
 - content_policy block (NC-21) loaded ✓
 
