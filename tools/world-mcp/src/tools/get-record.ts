@@ -115,7 +115,7 @@ function getRecordKind(nodeType: NodeType): ParsedRecord["record_kind"] | null {
   return NODE_TYPE_TO_RECORD_KIND[nodeType] ?? null;
 }
 
-function getHybridKind(nodeType: NodeType): HybridRecordKind | null {
+export function getHybridKind(nodeType: NodeType): HybridRecordKind | null {
   return NODE_TYPE_TO_HYBRID_KIND[nodeType] ?? null;
 }
 
@@ -244,12 +244,12 @@ export function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
   } as ParsedRecord;
 }
 
-interface HybridFileParts {
+export interface HybridFileParts {
   frontmatter: Record<string, unknown>;
   body_sections: Record<string, string>;
 }
 
-function parseHybridFile(
+export function parseHybridFile(
   recordId: string,
   fileBody: string
 ): HybridFileParts | McpError {

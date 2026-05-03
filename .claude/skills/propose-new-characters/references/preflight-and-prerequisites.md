@@ -55,11 +55,9 @@ When a phase needs records beyond what the packet returned:
 
 Existing characters and diegetic-artifact figures occupy niches even without a dedicated dossier — Phase 1's registry is constructed from:
 
-- `worlds/<world-slug>/characters/INDEX.md` — direct `Read` to enumerate dossier slugs. Hybrid-file path; permitted by Hook 3's hybrid-file allowlist.
-- `worlds/<world-slug>/characters/<char-slug>.md` — direct `Read` per dossier (frontmatter + body sections); hybrid-file path. Phase 2 essence extraction reads body sections selectively (typically Institutional Embedding + Voice and Perception + Capabilities + Epistemic Position; other sections only on demand).
-- `worlds/<world-slug>/diegetic-artifacts/INDEX.md` — direct `Read`.
-- `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` — direct `Read` for frontmatter (author / speaker / annotator / correspondent / scribe / censor / patron / copyist metadata). Bodies are read only when an authored persona is being profiled at Phase 2.
-- `worlds/<world-slug>/adjudications/PA-NNNN-accept*.md` — direct `Read` for any historically-salient figure canonized via `canon-addition`.
+- `mcp__worldloom__list_records(world_slug, record_type='character_record', include_full_body=true)` — enumerates dossier frontmatter and body sections for Phase 1 registry and Phase 2 essence extraction.
+- `mcp__worldloom__list_records(world_slug, record_type='diegetic_artifact_record', include_full_body=true)` — enumerates artifact frontmatter (author / speaker / annotator / correspondent / scribe / censor / patron / copyist metadata). Bodies are read from the returned `body_sections` only when an authored persona is being profiled at Phase 2.
+- `mcp__worldloom__list_records(world_slug, record_type='adjudication_record', include_full_body=true)` — enumerates accept-flavored PA frontmatter for any historically-salient figure canonized via `canon-addition`.
 
 Missing `characters/` or `diegetic-artifacts/` directories are NOT abort conditions — they are valid empty-registry states. Phase 0's density rule applies character-sparse mode in that case.
 

@@ -250,7 +250,7 @@ Beyond the general packet retrieval, a small set of use-case-specific tools proj
 
 | Tool | Use case | Returns |
 |---|---|---|
-| `list_records(world_slug, record_type, include_full_body=true)` | Whole-class loads where the consumer must test every atomic record of a supported class, such as EPE Phase 6 invariant / Mystery Reserve firewall checks or continuity-audit cross-checks. | `{ records: [{ record_id, content_hash, file_path, body }], total, truncated: false }` |
+| `list_records(world_slug, record_type, include_full_body=true)` | Whole-class loads where the consumer must test every record of a supported atomic or hybrid class, such as EPE Phase 6 invariant / Mystery Reserve firewall checks, continuity-audit cross-checks, or CHAR/DA/PA registry enumeration. | `{ records: [{ record_id, content_hash, file_path, body }], total, truncated: false }`; hybrid `body` is `{ record_kind, frontmatter, body_sections }` |
 | `get_records(record_ids, world_slug?)` | Known-id follow-up loads where the packet, claim map, audit window, or dossier trace already names multiple records and whole-class enumeration would be too broad. | `{ records: [{ record_id, found, record?, content_hash?, file_path?, error? }] }` in request order |
 | `get_persisted_packet_slice(persisted_path, slice_path)` | Structured recovery from a `get_context_packet` `persisted_with_summary` response. | `{ found, slice?, error? }` for dot paths such as `governing_world_context.nodes` or `local_authority.nodes[id=entity:donostia]` |
 | `get_record_field(record_id, field_path)` | Read a single field of a single atomic record without paying the full-record parse cost. | `{ value, content_hash, file_path }` |

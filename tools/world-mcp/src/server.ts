@@ -339,7 +339,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return all records of a given atomic record type, with optional field projection or include_full_body metadata/body records.",
+    "list_records: Return all indexed records of a supported atomic or hybrid record type, with optional field projection or include_full_body metadata/body records.",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }

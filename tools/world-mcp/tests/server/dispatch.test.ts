@@ -120,6 +120,25 @@ function seedServerWorld(root: string): void {
         heading_path: "M-1",
         node_type: "mystery_reserve_entry",
         body: "The drowned bell has an unknown caller."
+      },
+      {
+        node_id: "DA-0002",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/brinewick-harbor-letter.md",
+        node_type: "diegetic_artifact_record",
+        body: [
+          "---",
+          "artifact_id: DA-0002",
+          "slug: brinewick-harbor-letter",
+          "title: Brinewick Harbor Letter",
+          "---",
+          "# Brinewick Harbor Letter",
+          "",
+          "## Body",
+          "",
+          "The harbor letter names Brinewick.",
+          ""
+        ].join("\n")
       }
     ],
     edges: [
@@ -514,6 +533,31 @@ test("list_records include_full_body dispatches through the MCP boundary", async
     assert.equal(record?.body?.record_kind, "canon_fact");
     assert.equal(record?.body?.title, "Brinewick Lighthouse");
     assert.equal("title" in record!, false);
+  });
+});
+
+test("list_records accepts hybrid record types through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        record_type: "diegetic_artifact_record",
+        fields: ["record_id", "file_path"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      records?: Array<{
+        record_id?: string;
+        file_path?: string;
+      }>;
+    };
+    const record = structured.records?.[0];
+    assert.equal(record?.record_id, "DA-0002");
+    assert.equal(record?.file_path, "diegetic-artifacts/brinewick-harbor-letter.md");
+    assert.deepEqual(Object.keys(record!).sort(), ["file_path", "record_id"]);
   });
 });
 
