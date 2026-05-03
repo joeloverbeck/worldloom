@@ -29,7 +29,7 @@ Canon-addition validation now includes Test 11 (action-space leverage), Test 12 
 
 ## Machine-facing layer CLI
 
-- **Bootstrap, build, or refresh a world's index**: `world-index init <world-slug>` for an empty schema-applied bootstrap, `world-index build <world-slug>` for a full rebuild, `world-index sync <world-slug>` for an incremental refresh.
+- **Bootstrap, build, or refresh a world's index**: `world-index init <world-slug>` for an empty schema-applied bootstrap, `world-index build <world-slug>` for a full rebuild, `world-index sync <world-slug>` for an incremental refresh. If sync reports skipped schema-failed records, inspect `worlds/<slug>/_index/world.db.skipped_records.log`; `world-index sync <world-slug> --quiet` suppresses per-record warnings but still writes the log.
 - **Inspect index state**: `world-index stats <world-slug>` for counts and freshness; `world-index inspect <node-id>` for a single-node dump.
 - **Render story-bundle records for human inspection**: `world-index render <world-slug> --story <story-slug>` emits a merged read-only markdown view from indexed story-bundle records.
 - **Verify index integrity**: `world-index verify <world-slug>` re-parses disk-backed indexed files, skips synthetic atomic logical rows for retired root markdown concerns, and reports drift.

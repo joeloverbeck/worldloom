@@ -150,6 +150,7 @@ world-proposals/*
 # Note: all worlds/* content is ignored by the public pipeline repo.
 # Canonical _source/ files are tracked by the private world-content repo.
 worlds/*/_index/
+worlds/*/_index/world.db.skipped_records.log
 .pre-migration-snapshot/
 tools/*/dist/
 tools/*/node_modules/

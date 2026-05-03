@@ -1,0 +1,51 @@
+# Pre-flight and World-State Prerequisites
+
+This reference covers what must be loaded into context before Phase 1 acts (the World-State Prerequisites contract) and the procedural Pre-flight check that validates inputs and assembles state for the rest of the page-cycle turn.
+
+## World-State Prerequisites
+
+Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation and §Canonical Storage Layer):
+
+- `docs/FOUNDATIONS.md` — read at Pre-flight; the rules that govern Phase 1 four-way routing (Rule 5 No Consequence Evasion at story scope), Phase 4 storylet selection (Rule 7 Mystery Reserve Preservation), Phase 5 append-only supersession discipline (Rule 6 No Silent Retcons applied at story scope by analogy), Phase 7 prose render constraints, Phase 9 validation gates, and the Phase 4.5 canon-promotion handoff to `story-fact-promotion-to-canon` all live there.
+- `worlds/<world-slug>/WORLD_KERNEL.md` — primary-authored; read directly per FOUNDATIONS §Canonical Storage Layer §Authored-primary surfaces. Provides genre/tonal contract that grounds Phase 7 prose render.
+- `worlds/<world-slug>/ONTOLOGY.md` — primary-authored; read directly. Provides Categories + Relation Types for Phase 2 impact analysis vocabulary alignment.
+- `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` — direct Read (story-bundle root file, not engine-routed). Provides designing principle, content_intensity_baseline, mysteries_in_play[], invariants_acknowledged[], execution_mode_default.
+- `worlds/<world-slug>/stories/<story-slug>/_source/pages/<parent_page_id>.yaml` — direct Read (Hook 2's world-canon read redirection matches `worlds/<slug>/_source/...`; it does not match nested story-bundle `_source` paths). Bedrock state for this turn — `parent_page.state_snapshot` is the authoritative branch state at the fork point.
+- The records cited by `parent_page.state_snapshot` — direct Read of `worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml` for every cited SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, BR.
+- Pages along `parent_page.branch_path` for prose continuity — last ~2 pages of `worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-NNNN.md` ALONG THIS BRANCH ONLY. The engine NEVER reads sibling-branch pages; Phase 9's recursive reference closure validation enforces structurally.
+- Current storylet pool — `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-*.yaml` filtered by `visibility` block:
+  - `visibility.scope == global_author_pool` → visible to all branches.
+  - `visibility.scope == branch_prefix_scoped` → visible iff `visibility.visible_branch_path_prefix` is a prefix of `this_page.branch_path`.
+  - `visibility.scope == branch_scoped` → visible iff `created_at_page ∈ this_page.branch_path`.
+- **Premise-and-state-bounded world-canon retrieval** via `mcp__worldloom__get_context_packet(world_slug, task_type='story_page_cycle', seed_nodes=[<resolved entity:slug ids from cast_present STENT.world_ent_id + parent_page.current_location + active period>], token_budget=18000)`. The `seed_nodes` are resolved via `mcp__worldloom__find_named_entities(names)` BEFORE the context-packet call.
+  - **Packet-too-large fallback**: if the packet returns `delivery_status='persisted_with_summary'` OR `packet_incomplete_required_classes` OR non-empty `truncation_summary.dropped_layers`, reduce `seed_nodes` and retry; use `governing_summary` inline; `get_records(record_ids=[...])` for known-id sets; `get_persisted_packet_slice` for structured persisted-packet recovery. Same fallback shape as `branching-story-bootstrap`.
+- **Whole-class Mystery Reserve firewall load** via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` — every M record body is needed at Phase 4 (storylet `mystery_safety` cross-check), Phase 4.5 (per-claim resolution authority routing), and Phase 9 gate 1 (no `forbidden`-status M resolved by any applied op or rendered prose). Whole-class enumeration is authorized for skills "whose firewall is class-bounded" per FOUNDATIONS §Tooling Recommendation.
+- **Whole-class Invariant audit load** via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)` — every INV record body is needed at Phase 3 (continuation-feasibility INV check) and Phase 9 gate 2 (all `applied_event_ops` respect every world INV).
+
+If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first. If `worlds/<world-slug>/stories/<story-slug>/` is missing, abort and instruct the user to run `branching-story-bootstrap` first. If `parent_page_id` does not exist or does not belong to this story, abort with a specific-id error.
+
+Direct `Read` of `worlds/<world-slug>/_source/<world-subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read world canon. Direct `Read` of `worlds/<world-slug>/stories/<story-slug>/_source/<story-subdir>/` is the correct surface (Hook 2's match pattern is `worlds/<slug>/_source/...` which does NOT match the nested story bundle).
+
+## Pre-flight Check
+
+Run before Phase 1; abort if any precondition fails.
+
+- Load `docs/FOUNDATIONS.md` into working context.
+- Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`); resolve `worlds/<world-slug>/`. Abort if missing — instruct the user to run `create-base-world` first.
+- Validate `story_slug` is kebab-case (`[a-z0-9-]+`); resolve `worlds/<world-slug>/stories/<story-slug>/`. Abort if missing — instruct the user to run `branching-story-bootstrap` first.
+- Validate `parent_page_id` exists at `worlds/<world-slug>/stories/<story-slug>/_source/pages/<parent_page_id>.yaml` and that the loaded record's `story_id` matches the `STORY-NNN` resolved from `STORY_KERNEL.md`. Abort with a specific-id error otherwise.
+- Validate exactly one of `{chosen_choice_id, manual_action_text}` is present. Abort if neither or both.
+- If `chosen_choice_id` is provided: load `_source/choices/<chosen_choice_id>.yaml` and verify it appears in `parent_page.emitted_choices`. Abort with a specific-id error if missing or out-of-set.
+- Resolve `execution_mode`: input override → `STORY_KERNEL.execution_mode_default` → `authoring`.
+- Allocate the next `PG-NNNN` for this story via `mcp__worldloom__allocate_next_id(world_slug, id_class='PG', story_slug=<story_slug>)`.
+- Detect fork: scan `_source/pages/PG-*.yaml` for any descendant whose `branch_path[..-1] == parent_page.branch_path` AND `branch_id == parent_page.branch_id`. If any descendant exists on the parent's branch, this run produces a NEW branch — allocate the next `BR-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, id_class='BR', story_slug=<story_slug>)`. Otherwise this run extends `parent_page.branch_id` (BR is updated via supersession at Phase 11, not new-allocated).
+- Read `worlds/<world-slug>/WORLD_KERNEL.md`, `worlds/<world-slug>/ONTOLOGY.md`, and `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` directly.
+- Direct Read of `_source/pages/<parent_page_id>.yaml` and every record cited in `parent_page.state_snapshot` (objective_facts, apparent_facts, disputed_facts, reader_known_facts, belief_state_by_actor.*, rumor_state, obligations_*, consequences_*, threads_active, relationships_current, intentions_current, cast_present, current_location, accessible_locations, objects_in_scope, inventory_by_entity.*).
+- Direct Read of last ~2 pages along `parent_page.branch_path` from `pages-prose/PG-NNNN.md` (prose continuity context — branch only, never sibling branches).
+- Load current storylet pool — `_source/storylets/SLT-*.yaml` filtered by `visibility` per Phase 4 hard filters.
+- Resolve premise-relevant entities: for each STENT in `cast_present`, follow `world_ent_id` to the world ENT id; collect `parent_page.current_location` and the active period. Resolve to `entity:<slug>` ids via `mcp__worldloom__find_named_entities(names)`.
+- Load premise-bounded world-canon retrieval via `mcp__worldloom__get_context_packet(world_slug, task_type='story_page_cycle', seed_nodes=[<resolved ids>], token_budget=18000)`. Apply the packet-too-large fallback per §World-State Prerequisites if the response signals overflow.
+- Load whole-class Mystery Reserve firewall: `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)`.
+- Load whole-class Invariant audit: `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`.
+- Read current world canon revision (latest `CH-NNNN.yaml` from `worlds/<world-slug>/_source/change-log/`) and record it as `state_snapshot.canon_revision` on the new page (audit trail per the proposal's §World-Canon Propagation Note — supports forensic reconstruction when canon promotions later land between branch ticks).
+- Confirm content_policy block (NC-21 verbatim text from `templates/content-policy.txt`) is loaded for downstream prompt assembly. Without it, Phase 7 cannot legitimately render prose. This is the FIRST condition of the HARD-GATE.

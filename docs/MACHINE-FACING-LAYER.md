@@ -46,7 +46,7 @@ The docs describe the intended steady-state contract, but any workflow should st
 
 | Need | Reach for |
 |---|---|
-| Bootstrap, rebuild, or refresh machine-readable world state | `world-index init <world>`, `world-index build <world>`, or `world-index sync <world>` |
+| Bootstrap, rebuild, or refresh machine-readable world state | `world-index init <world>`, `world-index build <world>`, or `world-index sync <world>`; inspect `_index/world.db.skipped_records.log` when sync reports schema-failed skipped records |
 | Render indexed story-bundle records for human inspection | `world-index render <world> --story <story-slug>` |
 | Inspect indexed structure or diagnose retrieval misses | `world-index stats`, `world-index inspect`, or retrieval MCP tools |
 | Gather a skill-sized input bundle | `mcp__worldloom__get_context_packet` |
@@ -104,6 +104,7 @@ Retrieval now distinguishes four trust tiers instead of flattening everything in
 | Symptom | Likely cause | What to do |
 |---|---|---|
 | Retrieval tools report missing nodes or persistent `stale_index` | `_index/world.db` is absent, incompatible, or still stale after the retrieval layer's one-shot auto-sync recovery | Run `world-index init <world>` for an empty bootstrap, or `world-index build <world>` / `world-index sync <world>` for populated world state. If a successful retrieval response includes `freshness_audit.pre_call_index_was_stale: true`, auto-sync already recovered the stale index and no manual retry is needed. |
+| A record exists under `_source/` or `stories/<story>/_source/` but is missing from retrieval/index queries | The record's extracted id failed the registered schema pattern, so `world-index build` / `sync` skipped it instead of inserting an invalid node | Inspect `worlds/<slug>/_index/world.db.skipped_records.log` for the file path, node type, extracted id, skip reason, and expected pattern. Legacy suffixed STINT ids such as `STINT-NNNN-<char>` are preserved on disk but skipped by the current bare-numeric `STINT-NNNN` index contract. |
 | A tool rejects an enum value that exists in source, such as a new `task_type` or `id_class` | The running MCP server is older than the source checkout, or `tools/world-mcp/dist/` was not rebuilt after the source change | Run `mcp__worldloom__describe_capabilities()` to inspect the deployed enum contract. If it is stale, run `cd tools/world-mcp && npm run build`, then restart the MCP server/client session so it loads `tools/world-mcp/dist/src/server.js`. This is the schema currency verification path introduced after the MCPENH-005 / ENGINESYNC-002 friction case. |
 | A skill still wants giant raw reads | Retrieval integration is incomplete for that skill or phase | Use the current skill contract, but treat the context-packet path as the target state |
 | Direct Edit/Write is blocked on protected paths | Hook 3 sees an engine-only surface | Route the change through a patch plan instead of direct file editing |

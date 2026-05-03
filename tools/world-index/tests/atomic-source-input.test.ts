@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -113,6 +113,111 @@ test("build reads SPEC-13 atomic source records without retired root markdown fi
     } finally {
       db.close();
     }
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build logs and skips story records whose id fails the registered schema pattern", () => {
+  const root = createAtomicRepoRoot();
+
+  try {
+    const intentionDirectory = path.join(
+      root,
+      "worlds",
+      "atomic-world",
+      "stories",
+      "harborwatch",
+      "_source",
+      "intentions"
+    );
+    mkdirSync(intentionDirectory, { recursive: true });
+    writeFileSync(
+      path.join(intentionDirectory, "STINT-0001-iker.yaml"),
+      [
+        "id: STINT-0001-iker",
+        "story_id: STORY-0001",
+        "character_id: STENT-0001",
+        "goal: Keep watch at the salt gate.",
+        "status: active",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    assert.equal(build(root, "atomic-world", { quiet: true }), 0);
+
+    const db = new Database(path.join(root, "worlds", "atomic-world", "_index", "world.db"), {
+      readonly: true
+    });
+    try {
+      const skippedNode = db
+        .prepare("SELECT node_id FROM nodes WHERE node_id = 'harborwatch:STINT-0001-iker'")
+        .get();
+      assert.equal(skippedNode, undefined);
+    } finally {
+      db.close();
+    }
+
+    const skipLog = readFileSync(
+      path.join(root, "worlds", "atomic-world", "_index", "world.db.skipped_records.log"),
+      "utf8"
+    );
+    assert.match(skipLog, /stories\/harborwatch\/_source\/intentions\/STINT-0001-iker\.yaml/);
+    assert.match(skipLog, /\tintention_record\tSTINT-0001-iker\tschema_pattern_mismatch\t\^STINT-\[0-9\]\{4\}\$/);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("build indexes valid story intention records without creating a skip log", () => {
+  const root = createAtomicRepoRoot();
+
+  try {
+    const intentionDirectory = path.join(
+      root,
+      "worlds",
+      "atomic-world",
+      "stories",
+      "harborwatch",
+      "_source",
+      "intentions"
+    );
+    mkdirSync(intentionDirectory, { recursive: true });
+    writeFileSync(
+      path.join(intentionDirectory, "STINT-0001.yaml"),
+      [
+        "id: STINT-0001",
+        "story_id: STORY-0001",
+        "character_id: STENT-0001",
+        "goal: Keep watch at the salt gate.",
+        "status: active",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    assert.equal(build(root, "atomic-world", { quiet: true }), 0);
+
+    const db = new Database(path.join(root, "worlds", "atomic-world", "_index", "world.db"), {
+      readonly: true
+    });
+    try {
+      const validNode = db
+        .prepare("SELECT node_id, node_type FROM nodes WHERE node_id = 'harborwatch:STINT-0001'")
+        .get() as { node_id: string; node_type: string };
+      assert.deepEqual(validNode, {
+        node_id: "harborwatch:STINT-0001",
+        node_type: "intention_record"
+      });
+    } finally {
+      db.close();
+    }
+
+    assert.equal(
+      existsSync(path.join(root, "worlds", "atomic-world", "_index", "world.db.skipped_records.log")),
+      false
+    );
   } finally {
     cleanup(root);
   }

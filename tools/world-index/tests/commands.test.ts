@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -260,6 +260,60 @@ test("unresolved attribution warnings are recomputed after full-world resolution
 
     assert.equal(sync(root, "atomic-world"), 0);
     assert.deepEqual(unresolvedAttributionRows(root), []);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test("sync reports schema-failed record skips and quiet mode suppresses per-record warnings", () => {
+  const root = createAtomicRepoRoot();
+
+  try {
+    assert.equal(build(root, "atomic-world", { quiet: true }), 0);
+
+    const intentionDirectory = path.join(
+      root,
+      "worlds",
+      "atomic-world",
+      "stories",
+      "harborwatch",
+      "_source",
+      "intentions"
+    );
+    mkdirSync(intentionDirectory, { recursive: true });
+    writeFileSync(
+      path.join(intentionDirectory, "STINT-0001-iker.yaml"),
+      [
+        "id: STINT-0001-iker",
+        "story_id: STORY-0001",
+        "character_id: STENT-0001",
+        "goal: Keep watch at the salt gate.",
+        "status: active",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    const noisySync = withCapturedOutput(() => sync(root, "atomic-world"));
+    assert.equal(noisySync.result, 0);
+    assert.match(noisySync.stdout, /Warning: skipped schema-failed record stories\/harborwatch\/_source\/intentions\/STINT-0001-iker\.yaml/);
+    assert.match(noisySync.stdout, /id=STINT-0001-iker/);
+    assert.match(noisySync.stdout, /expected=\^STINT-\[0-9\]\{4\}\$/);
+    assert.match(noisySync.stdout, /Skipped 1 records due to schema-pattern mismatch; see /);
+
+    const quietSync = withCapturedOutput(() => sync(root, "atomic-world", { quiet: true }));
+    assert.equal(quietSync.result, 0);
+    assert.doesNotMatch(quietSync.stdout, /Warning: skipped schema-failed record/);
+    assert.match(quietSync.stdout, /Skipped 1 records due to schema-pattern mismatch; see /);
+
+    const skipLog = readFileSync(
+      path.join(root, "worlds", "atomic-world", "_index", "world.db.skipped_records.log"),
+      "utf8"
+    );
+    const skipLines = skipLog
+      .split(/\r?\n/)
+      .filter((line) => line.includes("STINT-0001-iker"));
+    assert.equal(skipLines.length, 2);
   } finally {
     cleanup(root);
   }
