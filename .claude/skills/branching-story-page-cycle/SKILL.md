@@ -1004,27 +1004,28 @@ User options:
 
 When the gate is hidden per `execution_mode`, the engine auto-commits to Phase 11 after Phase 9 records all 12 PASSes. On Phase 9 FAIL the engine surfaces the failure and routes per the responsible-phase column — **the auto-commit posture does NOT mask validation failures**. The Phase 9 gates run in every mode (per the proposal's "rules that hold in every mode"); only the Phase 10 user-approval pause is conditionally lifted.
 
-## Phase 11: Atomic Write + INDEX Update
+## Phase 11: Engine Submit + Markdown Writes
 
-Single transaction. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST write so a partial state never appears in the per-bundle index:
+Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
 
-1. `Write _source/pages/PG-NNNN.yaml` (the new page record with state_snapshot + state_hash + emitted_choices + narrative_health + governor_nudge_applied + canon_revision audit-trail field).
-2. `Write _source/events/SE-NNNN.yaml` (the structured-op event applied this turn — the SE record owns `applied_event_ops` per the closed `op_type` enum, and `op_id` values are unique within the event).
-3. `Write` per-class records emitted this turn — deterministic order: `_source/facts/SF-NNNN.yaml` → `_source/obligations/OBL-NNNN.yaml` → `_source/consequences/CNSQ-NNNN.yaml` → `_source/threads/THR-NNNN.yaml` → `_source/relationships/SREL-NNNN.yaml` → `_source/intentions/STINT-NNNN-<char>.yaml` → `_source/choices/CHC-NNNN.yaml`.
-4. `Write _source/storylets/SLT-NNNN.yaml` IF Phase 4 JIT expansion fired (returned by `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped`).
-5. `Write _source/locations/STLOC-NNNN.yaml`, `_source/objects/STOBJ-NNNN.yaml`, `_source/artifacts/DA-NNNN.yaml` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
-6. `Write _source/branches/BR-NNNN.yaml` — new BR if this run is a fork; OR superseder of the existing BR's `current_leaf_page_id` (and `status: terminal` if Phase 3 §Terminal Feasibility flagged this page as terminal) on continuation.
-7. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
-8. `Edit worlds/<world-slug>/stories/<story-slug>/INDEX.md` LAST:
+1. Assemble and submit one `mcp__worldloom__submit_patch_plan` envelope for all emitted `_source` records:
+   - `create_pg_record` for `_source/pages/PG-NNNN.yaml` (the new page record with state_snapshot + state_hash + emitted_choices + narrative_health + governor_nudge_applied + canon_revision audit-trail field).
+   - `create_se_record` for `_source/events/SE-NNNN.yaml`.
+   - Per-class create ops for emitted SF / OBL / CNSQ / THR / SREL / STINT / CHC records.
+   - `create_slt_record` IF Phase 4 JIT expansion fired.
+   - `create_stloc_record`, `create_stobj_record`, and `append_story_diegetic_artifact_record` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
+   - `create_br_record` for a new fork BR, or a superseding BR create op when updating an existing branch's leaf/status.
+2. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
+3. `Edit worlds/<world-slug>/stories/<story-slug>/INDEX.md` LAST:
    - Update the branch's leaf entry (or add a new branch row if fork).
    - Update active-thread status changes.
    - Update the latest health snapshot.
    - If terminal: mark the branch's row terminal with the `terminal_reason`.
    - `INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Edit`.
 
-**Direct `Write` is the correct mutation surface** (per the Shape A integration posture inherited from `branching-story-bootstrap` — story records are not world canon; no engine ops exist for story-record classes; Hook 3's match pattern `worlds/<slug>/_source/...` does NOT match `worlds/<slug>/stories/<slug>/_source/...`).
+Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. Page prose and `INDEX.md` remain direct markdown writes.
 
-**Partial-failure recovery**: if any write in steps 1-7 fails, the user receives the failure with the specific path and instruction to either manually clean up the partial records or re-invoke the skill (which will detect the partial state at Pre-flight by ID-uniqueness scan). The `INDEX.md` write at step 8 is intentionally LAST so a partial state never appears in the bundle index.
+**Partial-failure recovery**: if patch-engine submission fails, no `_source` YAML should land; report the engine error and do not write page prose or `INDEX.md`. If a later markdown write fails, report the specific path and leave the accepted YAML records as the authoritative state. The `INDEX.md` write at step 3 is intentionally LAST so a partial state never appears in the bundle index.
 
 Report all written paths. **Do NOT commit to git.** The user reviews the diff and commits.
 
@@ -1223,7 +1224,7 @@ No Canon Fact Record template; no Change Log Entry template — both N/A in the 
 - **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted by this skill — the Phase 4.5 `canon_candidate` route hands off to `story-fact-promotion-to-canon` for that.
 - **Never read sibling-branch pages.** State assembly at Pre-flight reads only pages along `parent_page.branch_path`. Phase 9 gate 3 (recursive reference closure) is the structural enforcement; the read scope discipline at Pre-flight is the procedural enforcement. Both are load-bearing.
 - **Records are append-only via supersession.** A new page that "updates" an existing OBL writes a NEW record citing `supersedes: OBL-NNNN`; the original record is never edited. The branch-replay contract depends on this.
-- **Direct `Write` is the correct mutation surface for story-bundle records under the Shape A integration posture.** Hook 3's match pattern is `worlds/<slug>/_source/...` which does NOT match `worlds/<slug>/stories/<slug>/_source/...`. Story records are not world canon and no engine ops exist for them. A future maintainer who "upgrades" the skill to engine routing must FIRST land patch-engine ops + Hook 3 namespace extension + record-schema validators for the story-record classes (deferred-integration tickets named below).
+- **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3. Use `mcp__worldloom__submit_patch_plan` with story-bundle create ops after the Phase 10 gate or auto-commit validation path. Page prose and `INDEX.md` remain direct markdown surfaces.
 - **Canon-mutation handoff sibling (existing, shipping)**:
   - **`story-fact-promotion-to-canon`** — the canon-mutation HARD-GATE handoff for Phase 4.5 `canon_candidate` resolutions. The page-cycle PAUSES at Phase 4.5 and presents a handoff message; the user separately invokes `story-fact-promotion-to-canon` (worldloom skills are non-chaining). The skill does NOT silently degrade to `apparent` on a `canon_candidate` resolution because that would erode the canon-mutation HARD-GATE invariant. A future page-cycle delegation refactor (extracting the pause-and-prompt to a sub-routine call) is anticipated but out-of-scope for this skill; the current pause-and-tell-the-user shape is the correct posture under the worldloom non-chaining contract.
 - **Existing siblings (audit feedback consumers)**:

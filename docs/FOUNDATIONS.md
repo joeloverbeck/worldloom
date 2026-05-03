@@ -543,9 +543,9 @@ World canon read by story-pipeline skills still routes through `mcp__worldloom__
 
 ### 4. Write Discipline
 
-Story-bundle writes currently use Shape A: direct `Write` / `Edit` to story-bundle files under `worlds/<slug>/stories/<story-slug>/`. Future Shape B will route story-bundle record ops through `mcp__worldloom__submit_patch_plan`; PEENH-001 owns the patch-engine ops and hook-pattern extension needed for that migration.
+Story-bundle `_source/<class>/*.yaml` writes use Shape B: they route through `mcp__worldloom__submit_patch_plan` with story-bundle record ops such as `create_slt_record`, `create_pg_record`, and `append_story_diegetic_artifact_record`. PEENH-001 landed this migration from the earlier Shape A direct-write posture.
 
-Hook 3's world-canon match pattern is `worlds/<slug>/_source/...`; it does not currently match `worlds/<slug>/stories/<story-slug>/_source/...`. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
+Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. Story-bundle markdown surfaces remain direct-write surfaces: `STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `audits/`, `storylet-batches/`, `story-promotions/`, and remediation proposal cards are not atomic `_source/*.yaml` records. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
 
 ### 5. Validation Rules At Story Scope
 

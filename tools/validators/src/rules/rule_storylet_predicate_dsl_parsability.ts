@@ -58,6 +58,7 @@ export const storyletPredicateDslParsability: Validator = {
   severity_mode: "fail",
   applies_to: (ctx: Context): boolean =>
     ctx.run_mode === "full-world" ||
+    (ctx.run_mode === "pre-apply" && (ctx.patch_plan?.patches ?? []).some((patch) => patch.op === "create_slt_record")) ||
     (ctx.run_mode === "incremental" && ctx.touched_files.some((file) => /(?:^|\/)stories\/[^/]+\/_source\/storylets\/SLT-\d{4}\.yaml$|(?:^|\/)_source\/storylets\/SLT-\d{4}\.yaml$/.test(file))),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {
     const storylets = await queryStoryScoped(ctx, "storylet_record");

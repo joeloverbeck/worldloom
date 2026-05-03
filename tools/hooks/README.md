@@ -12,7 +12,7 @@ Claude Code hooks that make retrieval and mutation discipline structural rather 
 |---|---|---|---|
 | 1 | `UserPromptSubmit` | Inject context preface (world slug, relevant nodes, size warnings) | 1 |
 | 2 | `PreToolUse:Read` | Block wasteful reads of large world files; redirect to MCP | 1 |
-| 3 | `PreToolUse:Edit\|Write` | Block direct mutation of `_source/*.yaml` records; redirect to `submit_patch_plan`. Allow `WORLD_KERNEL.md`, `ONTOLOGY.md`, `_source/<subdir>/README.md`, and hybrid artifacts (`characters/`, `diegetic-artifacts/`, `adjudications/`, `proposals/`, `audits/`). | 2 |
+| 3 | `PreToolUse:Edit\|Write` | Block direct mutation of world-canon and story-bundle `_source/*.yaml` records; redirect to `submit_patch_plan`. Allow primary-authored markdown, `_source/<subdir>/README.md`, hybrid artifacts (`characters/`, `diegetic-artifacts/`, `adjudications/`, `proposals/`, `audits/`), and story-bundle markdown surfaces such as `INDEX.md`, `pages-prose/`, `storylet-batches/`, and `story-promotions/`. | 2 |
 | 4 | `SubagentStart` | Bootstrap localization sub-agents with retrieval discipline | 1 |
 | 5 | `PostToolUse:submit_patch_plan` | Auto-run `record_schema_compliance` + `id_uniqueness` + `cross_file_reference` + `touched_by_cf_completeness` against the just-written world; surface drift via `<system-reminder>` | 2 |
 

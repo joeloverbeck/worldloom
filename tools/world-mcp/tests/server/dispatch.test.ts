@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { OPERATION_KINDS } from "@worldloom/patch-engine";
 
 import { TASK_TYPES } from "../../src/ranking/profiles";
 import { createServer, ID_CLASSES } from "../../src/server";
@@ -930,21 +931,7 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
       byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("storylet_record")
     );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
-      "create_cf_record",
-      "create_ch_record",
-      "create_inv_record",
-      "create_m_record",
-      "create_oq_record",
-      "create_ent_record",
-      "create_sec_record",
-      "update_record_field",
-      "remove_ch_affected_cf_ids",
-      "append_extension",
-      "append_touched_by_cf",
-      "append_modification_history_entry",
-      "append_adjudication_record",
-      "append_character_record",
-      "append_diegetic_artifact_record"
+      ...OPERATION_KINDS
     ]);
   });
 });

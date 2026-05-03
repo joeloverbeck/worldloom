@@ -36,7 +36,10 @@ function classifyPath(filePath: string): { decision: "block" | "allow"; relative
     return null;
   }
 
-  if (!rest.startsWith("_source/")) {
+  const isWorldAtomicSource = rest.startsWith("_source/");
+  const isStoryAtomicSource = /^stories\/[^/]+\/_source\//.test(rest);
+
+  if (!isWorldAtomicSource && !isStoryAtomicSource) {
     return { decision: "allow", relativePath: rest };
   }
 

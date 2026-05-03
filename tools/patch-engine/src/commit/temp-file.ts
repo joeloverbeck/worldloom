@@ -13,6 +13,7 @@ import { stageCreateInvRecord } from "../ops/create-inv-record.js";
 import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
+import { stageCreateStoryRecord, storyRecordMetadata } from "../ops/create-story-record.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
@@ -104,6 +105,24 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
       return { nodeId: patch.payload.ent_record.id, nodeType: "named_entity" };
     case "create_sec_record":
       return { nodeId: patch.payload.sec_record.id, nodeType: "section" };
+    case "create_stent_record":
+    case "create_sf_record":
+    case "create_se_record":
+    case "create_obl_record":
+    case "create_cnsq_record":
+    case "create_thr_record":
+    case "create_srel_record":
+    case "create_stint_record":
+    case "create_stloc_record":
+    case "create_stobj_record":
+    case "create_br_record":
+    case "create_pg_record":
+    case "create_chc_record":
+    case "create_slt_record":
+    case "append_story_diegetic_artifact_record": {
+      const metadata = storyRecordMetadata(patch);
+      return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
+    }
     case "update_record_field":
     case "append_extension":
       return metadataForTargetRecordId(patch.payload.target_record_id);
@@ -184,5 +203,21 @@ function stageOne(
       return stageAppendCharacterRecord(envelope, patch, ctx);
     case "append_diegetic_artifact_record":
       return stageAppendDiegeticArtifactRecord(envelope, patch, ctx);
+    case "create_stent_record":
+    case "create_sf_record":
+    case "create_se_record":
+    case "create_obl_record":
+    case "create_cnsq_record":
+    case "create_thr_record":
+    case "create_srel_record":
+    case "create_stint_record":
+    case "create_stloc_record":
+    case "create_stobj_record":
+    case "create_br_record":
+    case "create_pg_record":
+    case "create_chc_record":
+    case "create_slt_record":
+    case "append_story_diegetic_artifact_record":
+      return stageCreateStoryRecord(envelope, patch, ctx);
   }
 }

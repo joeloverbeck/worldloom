@@ -15,7 +15,22 @@ export const STRUCTURAL_NODE_TYPES = [
   "section",
   "character_record",
   "diegetic_artifact_record",
-  "adjudication_record"
+  "adjudication_record",
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "story_diegetic_artifact_record"
 ] as const;
 
 export const FILE_CLASS_TO_SUBDIR: Readonly<Record<string, string>> = {
@@ -60,7 +75,22 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   section: "section",
   adjudication_record: "adjudication-frontmatter",
   character_record: "character-frontmatter",
-  diegetic_artifact_record: "diegetic-artifact-frontmatter"
+  diegetic_artifact_record: "diegetic-artifact-frontmatter",
+  story_entity_record: "story-entity",
+  story_fact_record: "story-fact",
+  story_event_record: "story-event",
+  obligation_record: "story-obligation",
+  consequence_record: "story-consequence",
+  thread_record: "story-thread",
+  relationship_record_story: "story-relationship",
+  intention_record: "story-intention",
+  story_location_record: "story-location",
+  story_object_record: "story-object",
+  branch_record: "story-branch",
+  page_record: "story-page",
+  choice_record: "story-choice",
+  storylet_record: "story-storylet",
+  story_diegetic_artifact_record: "story-diegetic-artifact"
 };
 
 export interface FileInput {
@@ -207,6 +237,51 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   }
   if (record.node_type === "adjudication_record") {
     return /^adjudications\/PA-\d+[^/]*\.md$/.test(filePath);
+  }
+  if (record.node_type === "story_entity_record") {
+    return /^stories\/[^/]+\/_source\/entities\/STENT-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_fact_record") {
+    return /^stories\/[^/]+\/_source\/facts\/SF-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_event_record") {
+    return /^stories\/[^/]+\/_source\/events\/SE-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "obligation_record") {
+    return /^stories\/[^/]+\/_source\/obligations\/OBL-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "consequence_record") {
+    return /^stories\/[^/]+\/_source\/consequences\/CNSQ-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "thread_record") {
+    return /^stories\/[^/]+\/_source\/threads\/THR-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "relationship_record_story") {
+    return /^stories\/[^/]+\/_source\/relationships\/SREL-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "intention_record") {
+    return /^stories\/[^/]+\/_source\/intentions\/STINT-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_location_record") {
+    return /^stories\/[^/]+\/_source\/locations\/STLOC-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_object_record") {
+    return /^stories\/[^/]+\/_source\/objects\/STOBJ-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "branch_record") {
+    return /^stories\/[^/]+\/_source\/branches\/BR-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "page_record") {
+    return /^stories\/[^/]+\/_source\/pages\/PG-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "choice_record") {
+    return /^stories\/[^/]+\/_source\/choices\/CHC-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "storylet_record") {
+    return /^stories\/[^/]+\/_source\/storylets\/SLT-\d+\.yaml$/.test(filePath);
+  }
+  if (record.node_type === "story_diegetic_artifact_record") {
+    return /^stories\/[^/]+\/_source\/artifacts\/DA-\d+\.yaml$/.test(filePath);
   }
 
   return false;

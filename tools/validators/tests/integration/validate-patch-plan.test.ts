@@ -148,6 +148,65 @@ test("validatePatchPlan skips storylet predicate parsing until story-bundle ops 
   });
 });
 
+test("validatePatchPlan runs storylet predicate parsing for Shape B storylet ops", async () => {
+  await withTempRoot(async () => {
+    const plan = storyletPlan({
+      id: "SLT-0001",
+      story_id: "STORY-001",
+      hard_preconds: [{ pred: "unknown_predicate", op: "==", value: true }]
+    });
+
+    const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
+    const execution = result.executions.find(
+      (row) => row.name === "storylet_predicate_dsl_parsability"
+    );
+
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some((verdict) => verdict.code === "predicate.unknown_pred"));
+  });
+});
+
+test("validatePatchPlan applies story-bundle record schemas to Shape B story ops", async () => {
+  await withTempRoot(async () => {
+    const plan = storyletPlan({
+      id: "SLT-0001",
+      hard_preconds: []
+    });
+
+    const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "record_schema_compliance" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.code === "record_schema_compliance.required"
+    ));
+  });
+});
+
+function storyletPlan(record: Record<string, unknown>) {
+  return {
+    plan_id: "plan-story-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "storylet-pool-authoring",
+    expected_id_allocations: {
+      slt_ids: [String(record.id ?? "SLT-0001")]
+    },
+    patches: [
+      {
+        op: "create_slt_record" as const,
+        target_world: "seeded",
+        payload: {
+          story_slug: "marla-kern-seduction",
+          record
+        }
+      }
+    ]
+  };
+}
+
 function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {
   const dbPath = path.resolve(process.cwd(), "../../worlds/seeded/_index/world.db");
   const db = new Database(dbPath);

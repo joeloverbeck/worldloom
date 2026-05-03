@@ -78,6 +78,51 @@ test("hook3 blocks Write on _source/*.yaml records under any subdirectory", () =
   }
 });
 
+test("hook3 blocks story-bundle _source YAML but allows bundle markdown surfaces", () => {
+  const root = createTempRepoRoot();
+
+  try {
+    const blocked = runCompiledHook(
+      "hook3-guard-direct-edit.js",
+      {
+        hook_event_name: "PreToolUse",
+        cwd: root,
+        tool_name: "Write",
+        tool_input: buildToolInput(
+          path.join(root, "worlds", "animalia", "stories", "marla-kern-seduction", "_source", "storylets", "SLT-0001.yaml")
+        )
+      },
+      { cwd: root, projectDir: root }
+    );
+
+    assert.equal(blocked.status, 0, blocked.stderr);
+    assert.match(blocked.stdout, /"permissionDecision":"deny"/);
+    assert.match(blocked.stdout, /stories\/marla-kern-seduction\/_source\/storylets\/SLT-0001.yaml/);
+
+    for (const allowedPath of [
+      path.join(root, "worlds", "animalia", "stories", "marla-kern-seduction", "INDEX.md"),
+      path.join(root, "worlds", "animalia", "stories", "marla-kern-seduction", "storylet-batches", "SLB-0001.md"),
+      path.join(root, "worlds", "animalia", "stories", "marla-kern-seduction", "audits", "SAU-0001.md")
+    ]) {
+      const allowed = runCompiledHook(
+        "hook3-guard-direct-edit.js",
+        {
+          hook_event_name: "PreToolUse",
+          cwd: root,
+          tool_name: "Edit",
+          tool_input: buildToolInput(allowedPath)
+        },
+        { cwd: root, projectDir: root }
+      );
+
+      assert.equal(allowed.status, 0, allowed.stderr);
+      assert.equal(allowed.stdout, "", `expected pass-through for ${allowedPath}`);
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("hook3 allows direct edits to WORLD_KERNEL.md, ONTOLOGY.md, hybrid artifacts, and _source READMEs", () => {
   const root = createTempRepoRoot();
 

@@ -7,7 +7,22 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "create_m_record",
   "create_oq_record",
   "create_ent_record",
-  "create_sec_record"
+  "create_sec_record",
+  "create_stent_record",
+  "create_sf_record",
+  "create_se_record",
+  "create_obl_record",
+  "create_cnsq_record",
+  "create_thr_record",
+  "create_srel_record",
+  "create_stint_record",
+  "create_stloc_record",
+  "create_stobj_record",
+  "create_br_record",
+  "create_pg_record",
+  "create_chc_record",
+  "create_slt_record",
+  "append_story_diegetic_artifact_record"
 ]);
 
 const TIER_TWO = new Set<PatchOperation["op"]>([

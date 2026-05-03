@@ -150,10 +150,12 @@ Phase 10: HARD-GATE Approval          (deliverable summary: designing
    accept
       |
       v
-Phase 11: Commit / Atomic Write       (single transaction: create
+Phase 11: Commit / Engine Submit      (create
                                        stories/<story-slug>/ tree;
-                                       write STORY_KERNEL.md, all
-                                       _source/<class>/<ID>.yaml records,
+                                       write markdown root/prose/index files
+                                       directly; submit all
+                                       _source/<class>/<ID>.yaml records
+                                       through the patch engine,
                                        pages-prose/PG-0001.md,
                                        stories/<story-slug>/INDEX.md;
                                        append/create
@@ -202,7 +204,7 @@ This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<wor
 
 ### Record schemas
 
-Inlined in this skill's templates (per the Shape A integration posture — no engine ops exist for story records yet):
+Inlined in this skill's templates and backed by story-bundle patch-engine ops / record-schema validators for `_source/<class>/*.yaml` records:
 
 - STORY_KERNEL.md → `templates/story-kernel.md`
 - STENT-NNNN, SF-NNNN, SE-NNNN, OBL-NNNN, CNSQ-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, BR-NNNN, PG-NNNN, CHC-NNNN → `templates/story-records.yaml` (one document per record class with required+optional field enumeration and example values)
@@ -523,13 +525,13 @@ User options:
 
 **HARD-GATE fires here**: no file is written until the user explicitly ACCEPTs. Auto Mode does not override.
 
-## Phase 11: Commit / Atomic Write
+## Phase 11: Commit / Engine Submit
 
-Single transaction (file order matters — directory tree first, then files in deterministic dependency order; the per-world INDEX.md is the LAST write so partial failure leaves the per-world index unmutated):
+Directory setup plus a patch-engine transaction for atomic YAML records, followed by direct markdown writes. File order matters — the per-world INDEX.md is the LAST direct write so partial failure leaves the per-world index unmutated:
 
 1. `mkdir -p worlds/<world-slug>/stories/<story-slug>/_source/{entities,facts,events,obligations,consequences,threads,relationships,intentions,storylets,locations,objects,artifacts,branches,pages,choices}` and `worlds/<world-slug>/stories/<story-slug>/pages-prose`. Touch a `.gitkeep` in any `_source/<class>/` subdirectory that does NOT receive a record at this bootstrap (typically `consequences/`, `objects/`, `artifacts/` — runtime page-cycle JIT-creates records here). The `.gitkeep` files preserve the directory tree under `git add` so the runtime page-cycle can JIT-write into the structurally-expected paths without first having to recreate the subdirectories.
 2. `Write worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` (premise + content_policy preamble verbatim + designing principle + cast bind list + themes + content_intensity baseline + POV mode + central dramatic question + `mysteries_in_play[]` + `invariants_acknowledged[]` + `execution_mode_default` + `validation_trace` + STORY-NNN frontmatter; template at `templates/story-kernel.md`).
-3. `Write` each `_source/<class>/<ID>.yaml` record (deterministic order: entities → facts → events (SE-0001) → obligations → threads → relationships → intentions → storylets → locations → objects → artifacts → branches (BR-0001) → pages (PG-0001) → choices). Schemas at `templates/story-records.yaml`.
+3. Submit one `mcp__worldloom__submit_patch_plan` envelope containing `create_stent_record`, `create_sf_record`, `create_se_record`, `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stint_record`, `create_stloc_record`, `create_stobj_record`, `append_story_diegetic_artifact_record`, `create_br_record`, `create_pg_record`, `create_chc_record`, and `create_slt_record` ops for each `_source/<class>/<ID>.yaml` record. Schemas at `templates/story-records.yaml` and the storylet template.
 4. `Write worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-0001.md` (the rendered opening prose from Phase 7's working buffer).
 5. `Write worlds/<world-slug>/stories/<story-slug>/INDEX.md` (per-bundle index — branches / leaves / threads / mysteries / storylet-shape distribution; template at `templates/story-bundle-index.md`).
 6. **Per-world index** at `worlds/<world-slug>/stories/INDEX.md`:
@@ -537,9 +539,9 @@ Single transaction (file order matters — directory tree first, then files in d
    - If file exists: read; append the new story's line in the format `- [STORY-NNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-N, M-N | execution_mode: <mode> | created: <iso8601>`; re-sort alphabetically by `STORY-NNN`; write back via direct `Edit`.
    - `worlds/<world-slug>/stories/INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Write` / `Edit`.
 
-**Direct `Write` is the correct mutation surface** (per the Shape A integration posture — story records are not world canon, no engine ops exist for story-record classes, and Hook 3's match pattern `worlds/<slug>/_source/...` does NOT match `worlds/<slug>/stories/<slug>/_source/...`).
+Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. `STORY_KERNEL.md`, page prose, per-bundle `INDEX.md`, and `stories/INDEX.md` remain direct markdown writes.
 
-**Partial-failure recovery**: if any write in steps 1-5 fails, the user receives the failure with the specific path and instruction to either manually clean up the partial bundle or re-invoke the skill (which will abort at Pre-flight's slug-collision check on the partial bundle's existence). The per-world INDEX.md write at step 6 is intentionally LAST so a partial bundle never appears in the per-world index.
+**Partial-failure recovery**: if patch-engine submission fails, no `_source` YAML should land; report the engine error and do not write page prose or indexes. If a later markdown write fails, the user receives the failure with the specific path and instruction to either manually clean up the partial bundle or repair the markdown surface. The per-world INDEX.md write at step 6 is intentionally LAST so a partial bundle never appears in the per-world index.
 
 Report all written paths. **Do NOT commit to git.** The user reviews the diff and commits.
 
@@ -586,9 +588,7 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 - **HARD-GATE is absolute** (see top of file). No file is written until Phase 9 records 12 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
 - **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted by this skill.
 - **Never overwrite an existing story bundle.** Pre-flight slug-collision aborts when `worlds/<world-slug>/stories/<story-slug>/` exists. To re-run with corrected inputs, the user must either supply a different `story_slug` OR manually delete the existing bundle.
-- **Direct `Write` is the correct mutation surface for story-bundle records under the Shape A integration posture.** Hook 3's match pattern is `worlds/<slug>/_source/...` which does NOT match `worlds/<slug>/stories/<slug>/_source/...`. Story records are not world canon and no engine ops exist for them. A future maintainer who "upgrades" the skill to engine routing must FIRST land patch-engine ops + Hook 3 namespace extension + record-schema validators for the story-record classes (deferred-integration tickets named below).
-- **Known integration debt** (deferred per Shape A; design exploits these once landed):
-  - Hook 3 / engine-op / validator extensions are NOT scoped for this generation; they will be designed when the runtime page-cycle stabilizes the schemas. Story-bundle IDs use `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; direct `Write` remains the correct mutation surface.
+- **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3. Use `mcp__worldloom__submit_patch_plan` with story-bundle create ops after HARD-GATE approval. Story-bundle IDs still use `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
 - **Sibling interop**:
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
   - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.

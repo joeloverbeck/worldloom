@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-fact.schema.json",
+  "type": "object",
+  "required": ["id", "story_id"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^SF-[0-9]{4}$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+  },
+  "additionalProperties": true
+}

@@ -9,8 +9,9 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
-OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, and DA frontmatter record
-classes. The PA schema validates YAML frontmatter parsed from
+OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
+atomic YAML record classes (STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
+STOBJ, BR, PG, CHC, SLT, and story-local DA). The PA schema validates YAML frontmatter parsed from
 `adjudications/PA-NNNN-*.md`; PA body prose is not schema-constrained.
 
 ## Validator Inventory
