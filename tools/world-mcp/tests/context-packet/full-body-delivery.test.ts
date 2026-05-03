@@ -248,6 +248,7 @@ test("story_bootstrap reserves governing invariant and Mystery Reserve full bodi
       getContextPacket({
         task_type: "story_bootstrap",
         world_slug: "seeded",
+        story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
         token_budget: 9000
       })
@@ -302,6 +303,7 @@ test("story_page_cycle reserves governing invariant and Mystery Reserve full bod
       getContextPacket({
         task_type: "story_page_cycle",
         world_slug: "seeded",
+        story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
         token_budget: 9000
       })
@@ -356,6 +358,7 @@ test("storylet_pool_authoring reserves governing invariant and Mystery Reserve f
       getContextPacket({
         task_type: "storylet_pool_authoring",
         world_slug: "seeded",
+        story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
         token_budget: 9000
       })
@@ -410,6 +413,7 @@ test("branching_story_health_audit reserves governing invariant and Mystery Rese
       getContextPacket({
         task_type: "branching_story_health_audit",
         world_slug: "seeded",
+        story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
         token_budget: 9000
       })
@@ -471,6 +475,7 @@ test("story_fact_promotion_to_canon reserves governing full bodies and delivers 
       getContextPacket({
         task_type: "story_fact_promotion_to_canon",
         world_slug: "seeded",
+        story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
         token_budget: 12000
       })

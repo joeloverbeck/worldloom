@@ -221,7 +221,7 @@ test("packet-delivery-mode summary_only nodes omit body_preview and carry a non-
     assert.ok(!("code" in summaryPacket));
 
     const allNodes = collectAllNodes(summaryPacket);
-    assert.ok(allNodes.length > 0, "fixture should produce at least one node across the five layers");
+    assert.ok(allNodes.length > 0, "fixture should produce at least one node across packet layers");
 
     for (const node of allNodes) {
       assert.equal(

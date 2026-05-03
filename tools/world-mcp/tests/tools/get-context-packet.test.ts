@@ -242,6 +242,11 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
         getContextPacket({
           task_type: taskType,
           world_slug: "seeded",
+          ...(taskType.startsWith("story_") ||
+          taskType === "storylet_pool_authoring" ||
+          taskType === "branching_story_health_audit"
+            ? { story_slug: "default-budget-fixture" }
+            : {}),
           seed_nodes: ["DA-0002"]
         })
       );
@@ -271,6 +276,7 @@ test("getContextPacket story audit task types include the latest change-log entr
         getContextPacket({
           task_type: taskType,
           world_slug: "seeded",
+          story_slug: "change-log-fixture",
           seed_nodes: ["DA-0002"]
         })
       );

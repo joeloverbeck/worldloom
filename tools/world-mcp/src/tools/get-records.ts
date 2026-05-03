@@ -5,6 +5,7 @@ import { getRecord, isMcpError, type GetRecordResponse } from "./get-record";
 export interface GetRecordsArgs {
   record_ids: string[];
   world_slug?: string;
+  story_slug?: string;
 }
 
 export interface GetRecordsSuccessEntry {
@@ -29,12 +30,20 @@ export interface GetRecordsResponse {
 
 async function resolveOne(
   recordId: string,
-  worldSlug: string | undefined
+  worldSlug: string | undefined,
+  storySlug: string | undefined
 ): Promise<GetRecordsEntry> {
   const result = await getRecord(
     worldSlug === undefined
-      ? { record_id: recordId }
-      : { record_id: recordId, world_slug: worldSlug }
+      ? {
+          record_id: recordId,
+          ...(storySlug !== undefined ? { story_slug: storySlug } : {})
+        }
+      : {
+          record_id: recordId,
+          world_slug: worldSlug,
+          ...(storySlug !== undefined ? { story_slug: storySlug } : {})
+        }
   );
 
   if (isMcpError(result)) {
@@ -62,7 +71,7 @@ export async function getRecords(args: GetRecordsArgs): Promise<GetRecordsRespon
   }
 
   const records = await Promise.all(
-    args.record_ids.map((recordId) => resolveOne(recordId, args.world_slug))
+    args.record_ids.map((recordId) => resolveOne(recordId, args.world_slug, args.story_slug))
   );
 
   return { records };

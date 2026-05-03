@@ -107,14 +107,18 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         indexes.map(({ name }) => name),
         [
           "idx_edges_source",
+          "idx_edges_story",
           "idx_edges_target",
           "idx_entities_name",
           "idx_entities_scope",
           "idx_entity_alias_text",
           "idx_entity_alias_unique",
           "idx_entity_mentions_resolved",
+          "idx_entity_mentions_story",
           "idx_entity_mentions_surface",
           "idx_nodes_file",
+          "idx_nodes_world_story_node",
+          "idx_nodes_world_story_type",
           "idx_nodes_world_type",
           "idx_scoped_reference_alias_text",
           "idx_scoped_reference_alias_unique",
@@ -132,6 +136,13 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         triggers.map(({ name }) => name),
         ["nodes_ad", "nodes_ai", "nodes_au"]
       );
+
+      const nodeColumns = db.pragma("table_info(nodes)") as Array<{ name: string }>;
+      assert.equal(nodeColumns.some((column) => column.name === "story_slug"), true);
+      const edgeColumns = db.pragma("table_info(edges)") as Array<{ name: string }>;
+      assert.equal(edgeColumns.some((column) => column.name === "story_slug"), true);
+      const mentionColumns = db.pragma("table_info(entity_mentions)") as Array<{ name: string }>;
+      assert.equal(mentionColumns.some((column) => column.name === "story_slug"), true);
 
       const foreignKeys = db.pragma("foreign_keys", { simple: true }) as number;
       assert.equal(foreignKeys, 1);

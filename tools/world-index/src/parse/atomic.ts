@@ -57,8 +57,26 @@ const ATOMIC_DIRS = new Map<string, { nodeType: NodeType; idField: string }>([
   ["peoples-and-species", { nodeType: "section", idField: "id" }],
   ["timeline", { nodeType: "section", idField: "id" }]
 ]);
+const STORY_DIRS = new Map<string, { nodeType: NodeType; idField: string }>([
+  ["entities", { nodeType: "story_entity_record", idField: "id" }],
+  ["facts", { nodeType: "story_fact_record", idField: "id" }],
+  ["events", { nodeType: "story_event_record", idField: "id" }],
+  ["obligations", { nodeType: "obligation_record", idField: "id" }],
+  ["consequences", { nodeType: "consequence_record", idField: "id" }],
+  ["threads", { nodeType: "thread_record", idField: "id" }],
+  ["relationships", { nodeType: "relationship_record_story", idField: "id" }],
+  ["intentions", { nodeType: "intention_record", idField: "id" }],
+  ["locations", { nodeType: "story_location_record", idField: "id" }],
+  ["objects", { nodeType: "story_object_record", idField: "id" }],
+  ["branches", { nodeType: "branch_record", idField: "id" }],
+  ["pages", { nodeType: "page_record", idField: "id" }],
+  ["choices", { nodeType: "choice_record", idField: "id" }],
+  ["storylets", { nodeType: "storylet_record", idField: "id" }],
+  ["artifacts", { nodeType: "story_diegetic_artifact_record", idField: "id" }]
+]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
+const STORY_REF_REGEX = /\b(STENT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA)-[A-Za-z0-9-]+\b/g;
 
 export function hasAtomicSourceRecords(worldDirectory: string): boolean {
   return listAtomicSourceFiles(worldDirectory).length > 0;
@@ -80,6 +98,42 @@ export function listAtomicSourceFiles(worldDirectory: string): string[] {
     for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
       if (entry.isFile() && entry.name.endsWith(".yaml")) {
         relativePaths.push(toPosixPath(path.join("_source", directoryName, entry.name)));
+      }
+    }
+  }
+
+  return relativePaths.sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+export function listStoryBundleSourceFiles(worldDirectory: string): string[] {
+  const storiesDirectory = path.join(worldDirectory, "stories");
+  if (!existsSync(storiesDirectory)) {
+    return [];
+  }
+
+  const relativePaths: string[] = [];
+  for (const storyEntry of readdirSync(storiesDirectory, { withFileTypes: true })) {
+    if (!storyEntry.isDirectory()) {
+      continue;
+    }
+
+    const sourceDirectory = path.join(storiesDirectory, storyEntry.name, "_source");
+    if (!existsSync(sourceDirectory)) {
+      continue;
+    }
+
+    for (const [directoryName] of STORY_DIRS) {
+      const absoluteDirectory = path.join(sourceDirectory, directoryName);
+      if (!existsSync(absoluteDirectory)) {
+        continue;
+      }
+
+      for (const entry of readdirSync(absoluteDirectory, { withFileTypes: true })) {
+        if (entry.isFile() && entry.name.endsWith(".yaml")) {
+          relativePaths.push(
+            toPosixPath(path.join("stories", storyEntry.name, "_source", directoryName, entry.name))
+          );
+        }
       }
     }
   }
@@ -135,6 +189,79 @@ export function parseAtomicSourceFile(
   });
 
   edges.push(...edgesForAtomicRecord(node, record, worldSlug));
+
+  return {
+    relativeFilePath,
+    contentHash: contentHashForProse(source),
+    nodes: [node],
+    edges,
+    validationResults,
+    yamlBlockCount: 1,
+    yamlFailureCount,
+    tree: emptyTree()
+  };
+}
+
+export function parseStoryBundleSourceFile(
+  worldRoot: string,
+  worldSlug: string,
+  relativeFilePath: string
+): ParsedFileResult {
+  const worldDirectory = path.resolve(worldRoot, "worlds", worldSlug);
+  const source = readFileSync(path.join(worldDirectory, relativeFilePath), "utf8");
+  const lines = source.split(/\r?\n/);
+  const spec = specForStoryPath(relativeFilePath);
+  const validationResults: ValidationResultRow[] = [];
+  const edges: EdgeRow[] = [];
+  let parsed: unknown;
+  let yamlFailureCount = 0;
+
+  try {
+    parsed = parseYamlWithRecovery(source);
+  } catch (error) {
+    yamlFailureCount = 1;
+    validationResults.push(
+      createParseIssue({
+        worldSlug,
+        filePath: relativeFilePath,
+        lineStart: 1,
+        lineEnd: lines.length,
+        severity: "warn",
+        code: "story_yaml_syntax_error",
+        message: error instanceof Error ? error.message : String(error)
+      })
+    );
+
+    return {
+      relativeFilePath,
+      contentHash: contentHashForProse(source),
+      nodes: [],
+      edges: [],
+      validationResults,
+      yamlBlockCount: 1,
+      yamlFailureCount,
+      tree: emptyTree()
+    };
+  }
+
+  const record = isRecord(parsed) ? parsed : {};
+  const authoredId = stringField(record, spec.idField) ?? syntheticAtomicNodeId(worldSlug, relativeFilePath);
+  const nodeId = storyNodeId(spec.storySlug, authoredId);
+  const node = createNodeRow({
+    worldSlug,
+    storySlug: spec.storySlug,
+    relativeFilePath,
+    nodeType: spec.nodeType,
+    nodeId,
+    headingPath: headingPathForRecord(spec.nodeType, record, authoredId),
+    lineStart: 1,
+    lineEnd: lines.length,
+    body: source,
+    lines,
+    contentHash: contentHashForYaml(parsed)
+  });
+
+  edges.push(...edgesForStoryRecord(node, record, spec.storySlug));
 
   return {
     relativeFilePath,
@@ -242,6 +369,21 @@ function specForAtomicPath(relativeFilePath: string): { nodeType: NodeType; idFi
   return spec;
 }
 
+function specForStoryPath(relativeFilePath: string): {
+  nodeType: NodeType;
+  idField: string;
+  storySlug: string;
+} {
+  const segments = relativeFilePath.split("/");
+  const storySlug = segments[1];
+  const sourceDirectory = segments[3];
+  const spec = sourceDirectory ? STORY_DIRS.get(sourceDirectory) : undefined;
+  if (!storySlug || !spec) {
+    throw new Error(`Unsupported story-bundle source path '${relativeFilePath}'.`);
+  }
+  return { ...spec, storySlug };
+}
+
 function edgesForAtomicRecord(node: NodeRow, record: Record<string, unknown>, worldSlug: string): EdgeRow[] {
   const edges: EdgeRow[] = [];
   const push = (edge: Omit<EdgeRow, "edge_id">): void => {
@@ -294,6 +436,74 @@ function edgesForAtomicRecord(node: NodeRow, record: Record<string, unknown>, wo
   return edges;
 }
 
+function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, storySlug: string): EdgeRow[] {
+  const edges: EdgeRow[] = [];
+  const push = (edge: Omit<EdgeRow, "edge_id">): void => {
+    edges.push({ edge_id: edges.length + 1, story_slug: storySlug, ...edge });
+  };
+  const pushStoryRef = (edgeType: EdgeRow["edge_type"], target: string | null): void => {
+    if (!target) {
+      return;
+    }
+    push(createStoryRefEdge(node.node_id, edgeType, storySlug, target));
+  };
+
+  if (node.node_type === "story_entity_record") {
+    const worldEntId = stringField(record, "world_ent_id");
+    if (worldEntId) {
+      push(createRefEdge(node.node_id, "world_entity_binding", worldEntId));
+    }
+  }
+
+  if (node.node_type === "story_fact_record") {
+    const derivedFromCf = stringField(record, "derived_from_cf");
+    if (derivedFromCf) {
+      push(createRefEdge(node.node_id, "story_fact_derived_from", derivedFromCf));
+    }
+  }
+
+  pushStoryRef("created_at_page", stringField(record, "created_at_page"));
+  pushStoryRef("created_at_page", stringField(record, "created_at_page", ["provenance"]));
+
+  if (node.node_type === "storylet_record") {
+    for (const target of storyRefsInField(record, "opens_obligations", "OBL")) {
+      pushStoryRef("opens_obligation", target);
+    }
+    for (const target of storyRefsInField(record, "pays_off_obligations", "OBL")) {
+      pushStoryRef("pays_off_obligation", target);
+    }
+    for (const target of storyRefsInField(record, "complicates_obligations", "OBL")) {
+      pushStoryRef("complicates_obligation", target);
+    }
+    for (const target of storyRefsInField(record, "transfers_obligations", "OBL")) {
+      pushStoryRef("transfers_obligation", target);
+    }
+  }
+
+  if (node.node_type === "page_record" || node.node_type === "choice_record") {
+    pushStoryRef("parent_page", stringField(record, "parent_page_id"));
+  }
+
+  if (node.node_type === "branch_record") {
+    pushStoryRef("parent_page", stringField(record, "forked_from_page_id"));
+    pushStoryRef("leaf_page", stringField(record, "current_leaf_page_id"));
+  }
+
+  if (node.node_type === "obligation_record") {
+    for (const target of stringArrayField(record, "dependent_facts")) {
+      pushStoryRef("dependent_fact", target);
+    }
+  }
+
+  if (node.node_type === "thread_record") {
+    for (const target of stringArrayField(record, "obligations")) {
+      pushStoryRef("thread_obligation", target);
+    }
+  }
+
+  return edges;
+}
+
 function resolveWorldUpdateTarget(worldSlug: string, target: string): string | null {
   const withoutSuffix = target.replace(/\.md$/i, "");
   const logicalFile = FILE_CLASS_TO_LOGICAL_FILE.get(withoutSuffix);
@@ -329,6 +539,61 @@ function createRefEdge(
   };
 }
 
+function createStoryRefEdge(
+  sourceNodeId: string,
+  edgeType: EdgeRow["edge_type"],
+  storySlug: string,
+  targetRef: string
+): Omit<EdgeRow, "edge_id"> {
+  return {
+    source_node_id: sourceNodeId,
+    target_node_id: null,
+    target_unresolved_ref: storyNodeId(storySlug, targetRef),
+    edge_type: edgeType,
+    story_slug: storySlug
+  };
+}
+
+function storyNodeId(storySlug: string, recordId: string): string {
+  return `${storySlug}:${recordId}`;
+}
+
+function storyRefsInField(
+  record: Record<string, unknown>,
+  field: string,
+  prefix: string
+): string[] {
+  const value = record[field];
+  const refs = new Set<string>();
+  collectStoryRefs(value, refs, prefix);
+  return [...refs].sort((left, right) => left.localeCompare(right, "en-US"));
+}
+
+function collectStoryRefs(value: unknown, refs: Set<string>, prefix: string): void {
+  if (typeof value === "string") {
+    for (const match of value.match(STORY_REF_REGEX) ?? []) {
+      if (match.startsWith(`${prefix}-`)) {
+        refs.add(match);
+      }
+    }
+    STORY_REF_REGEX.lastIndex = 0;
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectStoryRefs(item, refs, prefix);
+    }
+    return;
+  }
+
+  if (isRecord(value)) {
+    for (const item of Object.values(value)) {
+      collectStoryRefs(item, refs, prefix);
+    }
+  }
+}
+
 function extractFirewallTargets(record: Record<string, unknown>): string[] {
   const targets = new Set<string>();
   for (const key of ["firewall", "firewall_for", "forbidden_answers"]) {
@@ -344,6 +609,7 @@ function extractFirewallTargets(record: Record<string, unknown>): string[] {
 
 function createNodeRow(args: {
   worldSlug: string;
+  storySlug?: string | null;
   relativeFilePath: string;
   nodeType: NodeType;
   nodeId: string;
@@ -357,6 +623,7 @@ function createNodeRow(args: {
   return {
     node_id: args.nodeId,
     world_slug: args.worldSlug,
+    story_slug: args.storySlug ?? null,
     file_path: args.relativeFilePath,
     heading_path: args.headingPath,
     byte_start: 0,

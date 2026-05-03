@@ -10,7 +10,7 @@ Construct a single registry of all person-like entities. For each entry track:
 - `living_dead_mythologized_uncertain`
 - `has_stable_voice_worldview_position`
 
-Phase 1 sources: `characters/INDEX.md` + every dossier (frontmatter + body-section headers); `diegetic-artifacts/INDEX.md` + every artifact frontmatter (author / speaker / annotator / correspondent / scribe / censor / patron / copyist metadata; bodies are NOT loaded at Phase 1); `adjudications/PA-NNNN-accept*.md` frontmatter for historically-salient figures canonized via `canon-addition`. Use `find_named_entities` to surface registry-occupying personas the artifact frontmatter names if any are not already in the dossier set.
+Phase 1 sources: `list_records(record_type='character_record', include_full_body=true)` for every dossier (frontmatter + body-section headers); `list_records(record_type='diegetic_artifact_record', include_full_body=true)` for every artifact frontmatter (author / speaker / annotator / correspondent / scribe / censor / patron / copyist metadata; bodies are not profiled at Phase 1 unless a person-like voice must be disambiguated); `list_records(record_type='adjudication_record', include_full_body=true)` filtered to accept-flavored PA frontmatter for historically-salient figures canonized via `canon-addition`. Use `find_named_entities` to surface registry-occupying personas the artifact frontmatter names if any are not already in the dossier set.
 
 **Rule**: A sermon writer with a clear ideology, access pattern, and speech register occupies a niche even without a formal dossier. Registry inclusion is determined by narrative-gravity, not by file-existence.
 

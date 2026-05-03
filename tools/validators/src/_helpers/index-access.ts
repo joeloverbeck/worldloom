@@ -20,6 +20,7 @@ interface NodeRow {
   node_id: string;
   node_type: string;
   world_slug: string;
+  story_slug?: string | null;
   file_path: string;
   body: string;
 }
@@ -32,11 +33,11 @@ export function openWorldIndex(worldSlug: string, repoRoot = resolveRepoRootForW
 
 export function buildFullWorldReadSurface(db: Database.Database, worldSlug: string): WorldIndexReadSurface {
   return {
-    query: async ({ record_type, world_slug }) => {
+    query: async ({ record_type, world_slug, story_slug }) => {
       if (world_slug !== worldSlug) {
         return [];
       }
-      return queryRows(db, worldSlug, record_type);
+      return queryRows(db, worldSlug, record_type, story_slug);
     }
   };
 }
@@ -49,14 +50,17 @@ export function buildPreApplyReadSurface(
   const overlay = buildOverlayRecords(db, envelope);
 
   return {
-    query: async ({ record_type, world_slug }) => {
+    query: async ({ record_type, world_slug, story_slug }) => {
       if (world_slug !== worldSlug) {
         return [];
       }
-      const records = queryRows(db, worldSlug, record_type);
+      const records = queryRows(db, worldSlug, record_type, story_slug);
       const byKey = new Map(records.map((record) => [recordKey(record), record]));
       for (const record of overlay) {
         if (record_type !== undefined && record.node_type !== record_type) {
+          continue;
+        }
+        if (story_slug !== undefined && record.story_slug !== story_slug) {
           continue;
         }
         byKey.set(recordKey(record), record);
@@ -79,17 +83,27 @@ export function buildPreApplyFileInputs(
 function queryRows(
   db: Database.Database,
   worldSlug: string,
-  recordType?: string
+  recordType?: string,
+  storySlug?: string | null
 ): IndexedRecord[] {
-  const rows = (recordType
-    ? db
-        .prepare(
-          "SELECT node_id, node_type, world_slug, file_path, body FROM nodes WHERE world_slug = ? AND node_type = ?"
-        )
-        .all(worldSlug, recordType)
-    : db
-        .prepare("SELECT node_id, node_type, world_slug, file_path, body FROM nodes WHERE world_slug = ?")
-        .all(worldSlug)) as NodeRow[];
+  const hasStorySlug = tableHasColumn(db, "nodes", "story_slug");
+  const selectedColumns = hasStorySlug
+    ? "node_id, node_type, world_slug, story_slug, file_path, body"
+    : "node_id, node_type, world_slug, NULL AS story_slug, file_path, body";
+  const predicates = ["world_slug = ?"];
+  const params: unknown[] = [worldSlug];
+  if (recordType !== undefined) {
+    predicates.push("node_type = ?");
+    params.push(recordType);
+  }
+  if (storySlug !== undefined && storySlug !== null && hasStorySlug) {
+    predicates.push("story_slug = ?");
+    params.push(storySlug);
+  }
+
+  const rows = db
+    .prepare(`SELECT ${selectedColumns} FROM nodes WHERE ${predicates.join(" AND ")}`)
+    .all(...params) as NodeRow[];
 
   return rows.map(rowToIndexedRecord);
 }
@@ -143,7 +157,51 @@ function recordForCreatePatch(worldSlug: string, patch: PatchOperation): Indexed
     const subdir = FILE_CLASS_TO_SUBDIR[patch.payload.sec_record.file_class] ?? "";
     return recordFromParsed(worldSlug, "section", patch.payload.sec_record.id, `_source/${subdir}/${patch.payload.sec_record.id}.yaml`, patch.payload.sec_record as unknown as MutableRecord);
   }
+  const story = storyRecordForCreatePatch(worldSlug, patch);
+  if (story !== null) {
+    return story;
+  }
   return null;
+}
+
+const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: string }>> = {
+  create_stent_record: { nodeType: "story_entity_record", sourceDir: "entities" },
+  create_sf_record: { nodeType: "story_fact_record", sourceDir: "facts" },
+  create_se_record: { nodeType: "story_event_record", sourceDir: "events" },
+  create_obl_record: { nodeType: "obligation_record", sourceDir: "obligations" },
+  create_cnsq_record: { nodeType: "consequence_record", sourceDir: "consequences" },
+  create_thr_record: { nodeType: "thread_record", sourceDir: "threads" },
+  create_srel_record: { nodeType: "relationship_record_story", sourceDir: "relationships" },
+  create_stint_record: { nodeType: "intention_record", sourceDir: "intentions" },
+  create_stloc_record: { nodeType: "story_location_record", sourceDir: "locations" },
+  create_stobj_record: { nodeType: "story_object_record", sourceDir: "objects" },
+  create_br_record: { nodeType: "branch_record", sourceDir: "branches" },
+  create_pg_record: { nodeType: "page_record", sourceDir: "pages" },
+  create_chc_record: { nodeType: "choice_record", sourceDir: "choices" },
+  create_slt_record: { nodeType: "storylet_record", sourceDir: "storylets" },
+  append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
+};
+
+function storyRecordForCreatePatch(worldSlug: string, patch: PatchOperation): IndexedRecord | null {
+  const spec = STORY_CREATE_OPS[patch.op];
+  if (spec === undefined) {
+    return null;
+  }
+  const payload = patch.payload as { story_slug?: unknown; record?: unknown };
+  const storySlug = typeof payload.story_slug === "string" ? payload.story_slug : "";
+  const parsed = asPlainRecord(payload.record);
+  const recordId = typeof parsed.id === "string" ? parsed.id : "";
+  if (storySlug.length === 0 || recordId.length === 0) {
+    return null;
+  }
+  return recordFromParsed(
+    worldSlug,
+    spec.nodeType,
+    `${storySlug}:${recordId}`,
+    `stories/${storySlug}/_source/${spec.sourceDir}/${recordId}.yaml`,
+    parsed,
+    storySlug
+  );
 }
 
 function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperation): string | null {
@@ -260,6 +318,7 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
     node_id: row.node_id,
     node_type: row.node_type,
     world_slug: row.world_slug,
+    story_slug: row.story_slug ?? null,
     file_path: toPosixPath(row.file_path),
     parsed: parsedBodyFor(row)
   };
@@ -285,12 +344,14 @@ function recordFromParsed(
   nodeType: string,
   nodeId: string,
   filePath: string,
-  parsed: MutableRecord
+  parsed: MutableRecord,
+  storySlug: string | null = null
 ): IndexedRecord {
   return {
     node_id: nodeId,
     node_type: nodeType,
     world_slug: worldSlug,
+    story_slug: storySlug,
     file_path: filePath,
     parsed
   };
@@ -321,4 +382,9 @@ function resolveRepoRootForWorld(worldSlug: string): string {
   }
 
   throw new Error(`index missing at worlds/${worldSlug}/_index/world.db; run 'world-index build ${worldSlug}' first`);
+}
+
+function tableHasColumn(db: Database.Database, tableName: string, columnName: string): boolean {
+  const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
+  return rows.some((row) => row.name === columnName);
 }

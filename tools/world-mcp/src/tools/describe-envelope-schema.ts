@@ -33,7 +33,22 @@ const ID_ALLOCATION_KEYS = [
   "sec_ids",
   "pa_ids",
   "char_ids",
-  "da_ids"
+  "da_ids",
+  "stent_ids",
+  "sf_ids",
+  "se_ids",
+  "obl_ids",
+  "cnsq_ids",
+  "thr_ids",
+  "srel_ids",
+  "stint_ids",
+  "stloc_ids",
+  "stobj_ids",
+  "br_ids",
+  "pg_ids",
+  "chc_ids",
+  "slt_ids",
+  "story_da_ids"
 ] as const;
 
 const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
@@ -46,7 +61,22 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   sec_record: "section.schema.json",
   adjudication_frontmatter: "adjudication-frontmatter.schema.json",
   char_record: "character-frontmatter.schema.json",
-  da_record: "diegetic-artifact-frontmatter.schema.json"
+  da_record: "diegetic-artifact-frontmatter.schema.json",
+  story_entity_record: "story-entity.schema.json",
+  story_fact_record: "story-fact.schema.json",
+  story_event_record: "story-event.schema.json",
+  story_obligation_record: "story-obligation.schema.json",
+  story_consequence_record: "story-consequence.schema.json",
+  story_thread_record: "story-thread.schema.json",
+  story_relationship_record: "story-relationship.schema.json",
+  story_intention_record: "story-intention.schema.json",
+  story_location_record: "story-location.schema.json",
+  story_object_record: "story-object.schema.json",
+  story_branch_record: "story-branch.schema.json",
+  story_page_record: "story-page.schema.json",
+  story_choice_record: "story-choice.schema.json",
+  storylet_record: "story-storylet.schema.json",
+  story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
 const schemaCache = new Map<string, JsonObject>();
@@ -193,6 +223,18 @@ function payloadWithRecord(payloadKey: keyof typeof RECORD_SCHEMA_BY_PAYLOAD_KEY
   };
 }
 
+function storyPayloadWithRecord(payloadKey: keyof typeof RECORD_SCHEMA_BY_PAYLOAD_KEY): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["story_slug", "record"],
+    properties: {
+      story_slug: stringSchema("^[a-z0-9-]+$"),
+      record: { $ref: schemaRef(payloadKey) }
+    }
+  };
+}
+
 function operationSchema(kind: OperationKind): JsonObject {
   switch (kind) {
     case "create_cf_record":
@@ -297,6 +339,36 @@ function operationSchema(kind: OperationKind): JsonObject {
           filename: stringSchema()
         }
       });
+    case "create_stent_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_entity_record"));
+    case "create_sf_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_fact_record"));
+    case "create_se_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_event_record"));
+    case "create_obl_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_obligation_record"));
+    case "create_cnsq_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_consequence_record"));
+    case "create_thr_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_thread_record"));
+    case "create_srel_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_relationship_record"));
+    case "create_stint_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_intention_record"));
+    case "create_stloc_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_location_record"));
+    case "create_stobj_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_object_record"));
+    case "create_br_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_branch_record"));
+    case "create_pg_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_page_record"));
+    case "create_chc_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_choice_record"));
+    case "create_slt_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
+    case "append_story_diegetic_artifact_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }
 }
 

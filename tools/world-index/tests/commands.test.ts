@@ -7,6 +7,7 @@ import Database from "better-sqlite3";
 
 import { build } from "../src/commands/build";
 import { inspect } from "../src/commands/inspect";
+import { render } from "../src/commands/render";
 import { stats } from "../src/commands/stats";
 import { sync } from "../src/commands/sync";
 import { verify } from "../src/commands/verify";
@@ -103,6 +104,39 @@ test("build, inspect, stats, sync, and verify work against an atomic fixture wor
         .prepare("SELECT node_id FROM nodes WHERE node_type = 'named_entity' AND node_id = 'entity:brinewick'")
         .get() as { node_id: string };
       assert.equal(entityRow.node_id, "entity:brinewick");
+
+      const storyletRows = db
+        .prepare(
+          `
+            SELECT node_id, story_slug
+            FROM nodes
+            WHERE node_type = 'storylet_record'
+            ORDER BY story_slug
+          `
+        )
+        .all() as Array<{ node_id: string; story_slug: string }>;
+      assert.deepEqual(storyletRows, [
+        { node_id: "harborwatch:SLT-0001", story_slug: "harborwatch" },
+        { node_id: "harborwatch-alt:SLT-0001", story_slug: "harborwatch-alt" }
+      ]);
+
+      const storyEdge = db
+        .prepare(
+          `
+            SELECT target_node_id, target_unresolved_ref, story_slug
+            FROM edges
+            WHERE source_node_id = 'harborwatch:SF-0001'
+              AND edge_type = 'story_fact_derived_from'
+          `
+        )
+        .get() as {
+        target_node_id: string | null;
+        target_unresolved_ref: string | null;
+        story_slug: string | null;
+      };
+      assert.equal(storyEdge.target_node_id, "CF-0001");
+      assert.equal(storyEdge.target_unresolved_ref, null);
+      assert.equal(storyEdge.story_slug, "harborwatch");
     } finally {
       db.close();
     }
@@ -122,7 +156,16 @@ test("build, inspect, stats, sync, and verify work against an atomic fixture wor
     const statsResult = withCapturedOutput(() => stats(root, "atomic-world"));
     assert.equal(statsResult.result, 0);
     assert.match(statsResult.stdout, /canon_fact_record: 1/);
+    assert.match(statsResult.stdout, /storylet_record: 2/);
     assert.match(statsResult.stdout, /INSTITUTIONS\.md:/);
+
+    const renderResult = withCapturedOutput(() =>
+      render(root, "atomic-world", { storySlug: "harborwatch" })
+    );
+    assert.equal(renderResult.result, 0);
+    assert.match(renderResult.stdout, /# Story Bundle: harborwatch/);
+    assert.match(renderResult.stdout, /node_type: storylet_record/);
+    assert.match(renderResult.stdout, /Watch the salt gate/);
 
     const institutionsPath = path.join(
       root,

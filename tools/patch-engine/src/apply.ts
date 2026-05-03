@@ -22,6 +22,7 @@ import type {
 } from "./envelope/schema.js";
 import { validateEnvelopeShape } from "./envelope/validate.js";
 import { PatchEngineOpError } from "./ops/shared.js";
+import { storyRecordMetadata } from "./ops/create-story-record.js";
 import type { OpContext } from "./ops/types.js";
 
 export type {
@@ -93,7 +94,7 @@ async function submitPatchPlanImpl(
       return error(approval.code, `Approval token rejected: ${approval.code}.`, approval.detail);
     }
 
-    const allocationError = verifyExpectedIdAllocations(db, envelope.target_world, envelope.expected_id_allocations);
+    const allocationError = verifyExpectedIdAllocations(db, envelope.target_world, envelope.expected_id_allocations, envelope.patches);
     if (allocationError !== null) {
       return allocationError;
     }
@@ -183,7 +184,8 @@ function defaultSecretPath(worldRoot: string): string {
 function verifyExpectedIdAllocations(
   db: OpContext["db"],
   worldSlug: string,
-  allocations: IdAllocations
+  allocations: IdAllocations,
+  patches: PatchOperation[]
 ): EngineError | null {
   const classByKey: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
     ["cf_ids", "CF", /^CF-(\d{4})$/, 4, true],
@@ -237,6 +239,41 @@ function verifyExpectedIdAllocations(
     }
   }
 
+  const storyAllocations: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
+    ["stent_ids", "STENT", /^STENT-(\d{4})$/, 4, true],
+    ["sf_ids", "SF", /^SF-(\d{4})$/, 4, true],
+    ["se_ids", "SE", /^SE-(\d{4})$/, 4, true],
+    ["obl_ids", "OBL", /^OBL-(\d{4})$/, 4, true],
+    ["cnsq_ids", "CNSQ", /^CNSQ-(\d{4})$/, 4, true],
+    ["thr_ids", "THR", /^THR-(\d{4})$/, 4, true],
+    ["srel_ids", "SREL", /^SREL-(\d{4})$/, 4, true],
+    ["stint_ids", "STINT", /^STINT-(\d{4})$/, 4, true],
+    ["stloc_ids", "STLOC", /^STLOC-(\d{4})$/, 4, true],
+    ["stobj_ids", "STOBJ", /^STOBJ-(\d{4})$/, 4, true],
+    ["br_ids", "BR", /^BR-(\d{4})$/, 4, true],
+    ["pg_ids", "PG", /^PG-(\d{4})$/, 4, true],
+    ["chc_ids", "CHC", /^CHC-(\d{4})$/, 4, true],
+    ["slt_ids", "SLT", /^SLT-(\d{4})$/, 4, true],
+    ["story_da_ids", "DA", /^DA-(\d{4})$/, 4, true]
+  ];
+
+  for (const [key, prefix, regex, width, zeroPad] of storyAllocations) {
+    const ids = allocations[key] ?? [];
+    if (ids.length === 0) {
+      continue;
+    }
+    const storySlug = firstStorySlugForAllocatedPrefix(patches, prefix);
+    if (storySlug === null) {
+      return error("id_allocation_race", `${key} allocation ${ids[0]} has no matching story-bundle create op.`);
+    }
+    for (const [offset, id] of ids.entries()) {
+      const nextId = nextStoryIdFor(db, worldSlug, storySlug, prefix, regex, width, zeroPad, offset);
+      if (id !== nextId) {
+        return error("id_allocation_race", `${key} allocation race for story '${storySlug}': expected ${id}, current next id is ${nextId}.`);
+      }
+    }
+  }
+
   return null;
 }
 
@@ -271,6 +308,69 @@ function nextIdFor(
 
   const nextValue = maxValue + 1 + alreadyAllocated;
   return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
+}
+
+function firstStorySlugForAllocatedPrefix(patches: PatchOperation[], prefix: string): string | null {
+  for (const patch of patches) {
+    const metadata = storyRecordMetadata(patch);
+    if (metadata === null || !metadata.recordId.startsWith(`${prefix}-`)) {
+      continue;
+    }
+    return metadata.storySlug;
+  }
+  return null;
+}
+
+function nextStoryIdFor(
+  db: OpContext["db"],
+  worldSlug: string,
+  storySlug: string,
+  prefix: string,
+  regex: RegExp,
+  width: number,
+  zeroPad: boolean,
+  alreadyAllocated = 0
+): string {
+  const hasStorySlug = tableHasColumn(db, "nodes", "story_slug");
+  const rows = hasStorySlug
+    ? db
+        .prepare(
+          `
+            SELECT node_id
+            FROM nodes
+            WHERE world_slug = ? AND story_slug = ?
+            ORDER BY node_id
+          `
+        )
+        .all(worldSlug, storySlug) as Array<{ node_id: string }>
+    : db
+        .prepare(
+          `
+            SELECT node_id
+            FROM nodes
+            WHERE world_slug = ? AND node_id LIKE ?
+            ORDER BY node_id
+          `
+        )
+        .all(worldSlug, `${storySlug}:%`) as Array<{ node_id: string }>;
+
+  let maxValue = 0;
+  for (const row of rows) {
+    const bareId = row.node_id.includes(":") ? row.node_id.split(":").at(-1) ?? row.node_id : row.node_id;
+    const match = regex.exec(bareId);
+    if (match === null) {
+      continue;
+    }
+    maxValue = Math.max(maxValue, Number.parseInt(match[1] ?? "0", 10));
+  }
+
+  const nextValue = maxValue + 1 + alreadyAllocated;
+  return `${prefix}-${zeroPad ? String(nextValue).padStart(width, "0") : String(nextValue)}`;
+}
+
+function tableHasColumn(db: OpContext["db"], tableName: string, columnName: string): boolean {
+  const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
+  return rows.some((row) => row.name === columnName);
 }
 
 interface StaleIndexFile {
@@ -358,6 +458,26 @@ function collectNewNodes(patches: PatchOperation[]): NewNodeReceipt[] {
         return [{ node_id: String(patch.payload.ent_record.id), node_type: "named_entity", file_path: "" }];
       case "create_sec_record":
         return [{ node_id: String(patch.payload.sec_record.id), node_type: "section", file_path: "" }];
+      case "create_stent_record":
+      case "create_sf_record":
+      case "create_se_record":
+      case "create_obl_record":
+      case "create_cnsq_record":
+      case "create_thr_record":
+      case "create_srel_record":
+      case "create_stint_record":
+      case "create_stloc_record":
+      case "create_stobj_record":
+      case "create_br_record":
+      case "create_pg_record":
+      case "create_chc_record":
+      case "create_slt_record":
+      case "append_story_diegetic_artifact_record": {
+        const metadata = storyRecordMetadata(patch);
+        return metadata === null
+          ? []
+          : [{ node_id: metadata.nodeId, node_type: metadata.nodeType, file_path: "" }];
+      }
       default:
         return [];
     }

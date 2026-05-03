@@ -3,10 +3,12 @@ import type { NodeType } from "@worldloom/world-index/public/types";
 import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
+import { isStoryBundleRecordId, toStoryScopedNodeId } from "./_shared";
 
 export interface FindImpactedFragmentsArgs {
   world_slug: string;
   node_ids: string[];
+  story_slug?: string;
 }
 
 export interface ImpactedFragment {
@@ -30,6 +32,22 @@ interface NodeSummaryRow {
 
 function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
+}
+
+function resolveInputNodeId(nodeId: string, storySlug: string | undefined): string | McpError {
+  if (!isStoryBundleRecordId(nodeId)) {
+    return nodeId;
+  }
+
+  if (storySlug === undefined) {
+    return createMcpError(
+      "invalid_input",
+      `story_slug required for node_id=${nodeId}; bundle-scoped IDs are not unique across bundles within a world.`,
+      { field: "story_slug", node_id: nodeId }
+    );
+  }
+
+  return toStoryScopedNodeId(nodeId, storySlug);
 }
 
 function findMissingNodeId(
@@ -66,7 +84,16 @@ async function findImpactedFragmentsImpl(
   }
 
   try {
-    const nodeIds = unique(args.node_ids);
+    const resolvedNodeIds: string[] = [];
+    for (const nodeId of args.node_ids) {
+      const resolvedNodeId = resolveInputNodeId(nodeId, args.story_slug);
+      if (typeof resolvedNodeId !== "string") {
+        return resolvedNodeId;
+      }
+      resolvedNodeIds.push(resolvedNodeId);
+    }
+
+    const nodeIds = unique(resolvedNodeIds);
     if (nodeIds.length === 0) {
       return { impacted: [] };
     }

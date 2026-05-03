@@ -1,6 +1,6 @@
 ---
 name: story-fact-promotion-to-canon
-description: "Use when promoting a story-local fact (SF-NNNN), mystery resolution (M-NNNN with `canon_candidate`-authority resolving event), character-arc outcome (STENT-NNNN), or in-story diegetic artifact (story-local DA-NNNN) into world-level canon — the ONLY lawful path by which a branching story may mutate world canon. Produces: SP-NNNN.md promotion-ledger entry under worlds/<world-slug>/stories/<story-slug>/story-promotions/ + a structured proposal package handed to canon-addition (which assembles the actual CF/CH/PA patch plan); on accept-flavored adjudication, also writes a superseding story-local source record adding `promoted_to_cf: CF-NNNN`. Mutates: worlds/<world-slug>/stories/<story-slug>/ directly (story-promotion ledger + superseding story records) plus, transitively via canon-addition, worlds/<world-slug>/_source/canon/CF-NNNN.yaml + worlds/<world-slug>/_source/change-log/CH-NNNN.yaml + extension/touched_by_cf appends to affected M/OQ/SEC/CF records + worlds/<world-slug>/adjudications/PA-NNNN-*.md (and, for source_kind=artifact_canonization on accept, a new world-level worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md routed via append_diegetic_artifact_record); story-bundle records via direct Write (Hook 3 does not match worlds/<slug>/stories/<slug>/...); world-canon mutations via canon-addition's mcp__worldloom__submit_patch_plan."
+description: "Use when promoting a story-local fact (SF-NNNN), mystery resolution (M-NNNN with `canon_candidate`-authority resolving event), character-arc outcome (STENT-NNNN), or in-story diegetic artifact (story-local DA-NNNN) into world-level canon — the ONLY lawful path by which a branching story may mutate world canon. Produces: SP-NNNN.md promotion-ledger entry under worlds/<world-slug>/stories/<story-slug>/story-promotions/ + a structured proposal package handed to canon-addition (which assembles the actual CF/CH/PA patch plan); on accept-flavored adjudication, also submits superseding story-local source records adding `promoted_to_cf: CF-NNNN`. Mutates: worlds/<world-slug>/stories/<story-slug>/ directly for markdown promotion ledgers/indexes and through story-bundle patch-engine ops for superseding source records, plus, transitively via canon-addition, worlds/<world-slug>/_source/canon/CF-NNNN.yaml + worlds/<world-slug>/_source/change-log/CH-NNNN.yaml + extension/touched_by_cf appends to affected M/OQ/SEC/CF records + worlds/<world-slug>/adjudications/PA-NNNN-*.md (and, for source_kind=artifact_canonization on accept, a new world-level worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md routed via append_diegetic_artifact_record); world-canon mutations via canon-addition's mcp__worldloom__submit_patch_plan."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -486,9 +486,9 @@ Direct `Write` to `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-
 
 ### Step 2: Story-Local Source Update (on accept-flavored verdicts only)
 
-If canon-addition returned ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF, append a new superseding record to the story's source. The story-local source is NEVER deleted; story-local truth and world-level truth are tracked separately even after promotion. Per source_kind:
+If canon-addition returned ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF, assemble a story-bundle patch plan that appends a new superseding record to the story's source. The story-local source is NEVER deleted; story-local truth and world-level truth are tracked separately even after promotion. Per source_kind:
 
-**story_fact**: write `worlds/<world-slug>/stories/<story-slug>/_source/facts/SF-<new-id>.yaml` allocated via `mcp__worldloom__allocate_next_id(world_slug, 'SF', story_slug=<story_slug>)`:
+**story_fact**: submit `create_sf_record` for `worlds/<world-slug>/stories/<story-slug>/_source/facts/SF-<new-id>.yaml` allocated via `mcp__worldloom__allocate_next_id(world_slug, 'SF', story_slug=<story_slug>)`:
 
 ```yaml
 id: SF-<new-id>
@@ -500,7 +500,7 @@ promoted_to_cf: CF-NNNN
 # all other fields inherited from original SF
 ```
 
-**character_arc_outcome**: write `worlds/<world-slug>/stories/<story-slug>/_source/entities/STENT-<new-id>.yaml` allocated via the same allocator pattern:
+**character_arc_outcome**: submit `create_stent_record` for `worlds/<world-slug>/stories/<story-slug>/_source/entities/STENT-<new-id>.yaml` allocated via the same allocator pattern:
 
 ```yaml
 id: STENT-<new-id>
@@ -512,7 +512,7 @@ arc_outcome_promoted_summary: "<arc_outcome_summary argument>"
 # all other fields inherited from original STENT
 ```
 
-**artifact_canonization**: write `worlds/<world-slug>/stories/<story-slug>/_source/artifacts/DA-<new-story-id>.yaml`:
+**artifact_canonization**: submit `append_story_diegetic_artifact_record` for `worlds/<world-slug>/stories/<story-slug>/_source/artifacts/DA-<new-story-id>.yaml`:
 
 ```yaml
 id: DA-<new-story-id>
@@ -532,8 +532,8 @@ promoted_to_world_da: <new world-DA id from canon-addition's append_diegetic_art
 If accepted AND `contradiction_handling_preference != leave_branches_alone`:
 
 **For each contradicting branch in this story** (per Phase 5 enumeration):
-- `flag_contradicting_branches`: write a superseding `BR-NNNN.yaml` allocated via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` with `supersedes: <original BR id>`, `status: contradicted_by_promoted_canon`, `contradicted_by_sp: SP-NNNN`, `contradicted_by_cf: CF-NNNN`. The branch may continue (page-cycle ticks remain valid) but every subsequent INDEX render shows the flag.
-- `archive_contradicting_branches`: write a superseding `BR-NNNN.yaml` with `status: archived`, `archived_by_sp: SP-NNNN`, `archived_by_cf: CF-NNNN`. Future page-cycle invocations on this branch are blocked (`branching-story-page-cycle` Pre-flight reads BR.status and aborts on `archived`). Use sparingly per the source proposal — branches are usually preserved as counterfactuals rather than archived.
+- `flag_contradicting_branches`: submit `create_br_record` for a superseding `BR-NNNN.yaml` allocated via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` with `supersedes: <original BR id>`, `status: contradicted_by_promoted_canon`, `contradicted_by_sp: SP-NNNN`, `contradicted_by_cf: CF-NNNN`. The branch may continue (page-cycle ticks remain valid) but every subsequent INDEX render shows the flag.
+- `archive_contradicting_branches`: submit `create_br_record` for a superseding `BR-NNNN.yaml` with `status: archived`, `archived_by_sp: SP-NNNN`, `archived_by_cf: CF-NNNN`. Future page-cycle invocations on this branch are blocked (`branching-story-page-cycle` Pre-flight reads BR.status and aborts on `archived`). Use sparingly per the source proposal — branches are usually preserved as counterfactuals rather than archived.
 
 **For each contradicting cross-story** (if scan was performed): always emit a `flag` action via the cross-story's own BR supersession (write a superseding BR in the OTHER story's `_source/branches/`); never auto-archive across stories.
 
@@ -576,7 +576,7 @@ Do NOT `git commit`.
 
 - Canon Fact Record (CF candidate at Phase 2) → see `templates/canon-fact-record.yaml` (structurally identical to FOUNDATIONS §Canon Fact Record Schema). canon-addition emits the actual `_source/canon/CF-NNNN.yaml` via `create_cf_record` patch op.
 - Change Log Entry (CH at canon-addition Phase 13a) → see `templates/change-log-entry.yaml`. This skill does NOT emit CH records directly — canon-addition emits them via `create_ch_record` patch op on accept. The promotion provenance flows into CH `reason` and `notes` via the proposal_package handoff at Phase 9.
-- Story Promotion Ledger (SP-NNNN.md) → see `templates/story-promotion-ledger.md` (markdown template; this skill writes directly via `Write` since the path is outside Hook 3's `_source/<subdir>/*.yaml` pattern).
+- Story Promotion Ledger (SP-NNNN.md) → see `templates/story-promotion-ledger.md` (markdown template; this skill writes directly via `Write` since the path is outside the story-bundle `_source/*.yaml` surface covered by Hook 3).
 - Proposal Package (SP-NNNN-proposal-package.yaml) → see `templates/proposal-package.yaml` (the Phase 6 schema serialized as canon-addition's `proposal_path` input; downstream-consumer parity preserved — canon-addition's Phase 0 parses the embedded `cf_candidate` block directly).
 
 ## FOUNDATIONS Alignment
@@ -597,7 +597,7 @@ Do NOT `git commit`.
 | Rule 12: No Single-Trace Truths | Phase 7 (Rule 12 Two-Trace Critic) | Conditional on `proposed_status: hard_canon`; ≥ 2 distinct registers required, structurally distinct. canon-addition's `rule12_redundancy` validator re-checks at Phase 14a Test 12. |
 | Change Control Policy | Phase 9 (handoff) + Phase 10 (ledger) + (downstream) canon-addition CH emission | Per FOUNDATIONS §Change Control Policy, "every approved change must get a record." This skill emits the SP-NNNN ledger (always); canon-addition emits the CH-NNNN Change Log Entry (on accept) carrying `affected_fact_ids`, `change_type`, `summary`, `reason`, `scope`, `downstream_updates`, `retcon_policy_checks`. The promotion provenance flows from this skill's proposal_package into canon-addition's CH `reason` field. |
 | Multi-world directory discipline | Pre-flight + every phase | This skill is **single-world** — required `world_slug` argument identifies the target; ALL world-file reads and writes rooted at `worlds/<world-slug>/`. Story-bundle reads/writes scoped to `worlds/<world-slug>/stories/<story-slug>/`. Cross-story scan (when `cross_story_impact_scan: true`) is bounded to `worlds/<world-slug>/stories/*/` — never crosses world boundaries. |
-| Canonical Storage Layer (post-SPEC-13) | Phase 9 + Phase 10 | World-canon mutation routes exclusively through canon-addition's `mcp__worldloom__submit_patch_plan` (engine-only writes to `_source/<subdir>/*.yaml`). Story-bundle records (SP ledger, superseding SF/STENT/story-DA, BR supersession) are written via direct `Write` — outside Hook 3's regex match. Hybrid `worlds/<slug>/diegetic-artifacts/DA-NNNN.md` (created on artifact_canonization accept) routes through canon-addition's `append_diegetic_artifact_record` op. |
+| Canonical Storage Layer (post-SPEC-13) | Phase 9 + Phase 10 | World-canon mutation routes exclusively through canon-addition's `mcp__worldloom__submit_patch_plan` (engine-only writes to `_source/<subdir>/*.yaml`). Story-bundle `_source` records (superseding SF/STENT/story-DA, BR supersession) route through story-bundle patch-engine ops. SP ledgers and story indexes are markdown surfaces and remain direct writes. Hybrid `worlds/<slug>/diegetic-artifacts/DA-NNNN.md` (created on artifact_canonization accept) routes through canon-addition's `append_diegetic_artifact_record` op. |
 
 ## Guardrails
 

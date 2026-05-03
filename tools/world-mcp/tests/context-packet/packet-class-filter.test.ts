@@ -150,7 +150,7 @@ test("packet-class-filter multi-class restricts every layer's nodes to the reque
   }
 });
 
-test("packet-class-filter empty array yields empty layer node arrays while preserving five-layer shape", async () => {
+test("packet-class-filter empty array yields empty layer node arrays while preserving packet shape", async () => {
   const root = createTempRepoRoot();
 
   try {

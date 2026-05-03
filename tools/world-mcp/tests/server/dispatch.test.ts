@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { OPERATION_KINDS } from "@worldloom/patch-engine";
 
 import { TASK_TYPES } from "../../src/ranking/profiles";
 import { createServer, ID_CLASSES } from "../../src/server";
@@ -120,6 +121,25 @@ function seedServerWorld(root: string): void {
         heading_path: "M-1",
         node_type: "mystery_reserve_entry",
         body: "The drowned bell has an unknown caller."
+      },
+      {
+        node_id: "DA-0002",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/brinewick-harbor-letter.md",
+        node_type: "diegetic_artifact_record",
+        body: [
+          "---",
+          "artifact_id: DA-0002",
+          "slug: brinewick-harbor-letter",
+          "title: Brinewick Harbor Letter",
+          "---",
+          "# Brinewick Harbor Letter",
+          "",
+          "## Body",
+          "",
+          "The harbor letter names Brinewick.",
+          ""
+        ].join("\n")
       }
     ],
     edges: [
@@ -517,6 +537,31 @@ test("list_records include_full_body dispatches through the MCP boundary", async
   });
 });
 
+test("list_records accepts hybrid record types through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        record_type: "diegetic_artifact_record",
+        fields: ["record_id", "file_path"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      records?: Array<{
+        record_id?: string;
+        file_path?: string;
+      }>;
+    };
+    const record = structured.records?.[0];
+    assert.equal(record?.record_id, "DA-0002");
+    assert.equal(record?.file_path, "diegetic-artifacts/brinewick-harbor-letter.md");
+    assert.deepEqual(Object.keys(record!).sort(), ["file_path", "record_id"]);
+  });
+});
+
 test("EPE id_class dispatches through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -882,22 +927,11 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);
+    assert.ok(
+      byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("storylet_record")
+    );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
-      "create_cf_record",
-      "create_ch_record",
-      "create_inv_record",
-      "create_m_record",
-      "create_oq_record",
-      "create_ent_record",
-      "create_sec_record",
-      "update_record_field",
-      "remove_ch_affected_cf_ids",
-      "append_extension",
-      "append_touched_by_cf",
-      "append_modification_history_entry",
-      "append_adjudication_record",
-      "append_character_record",
-      "append_diegetic_artifact_record"
+      ...OPERATION_KINDS
     ]);
   });
 });

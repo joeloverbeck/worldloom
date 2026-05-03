@@ -12,13 +12,26 @@ import type {
 
 import { openIndexDb } from "../db";
 import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
+import { persistToolResultJson } from "../context-packet/persistence";
+import {
+  ENVELOPE_OVERHEAD_RESERVE_CHARS,
+  resolveHarnessCeilingChars
+} from "../context-packet/shared";
 import { createMcpError, type McpError } from "../errors";
 
-import { listIndexedWorldSlugs } from "./_shared";
+import {
+  STORY_BUNDLE_NODE_TYPES,
+  isStoryBundleNodeType,
+  isStoryBundleRecordId,
+  listIndexedWorldSlugs,
+  toStoryScopedNodeId,
+  type StoryBundleNodeType
+} from "./_shared";
 
 export interface GetRecordArgs {
   record_id: string;
   world_slug?: string;
+  story_slug?: string;
   section_path?: string;
 }
 
@@ -29,7 +42,15 @@ export type ParsedRecord =
   | ({ record_kind: "mystery_reserve" } & MysteryRecord)
   | ({ record_kind: "open_question" } & OpenQuestionRecord)
   | ({ record_kind: "named_entity" } & NamedEntityRecord)
-  | ({ record_kind: "section" } & SectionRecord);
+  | ({ record_kind: "section" } & SectionRecord)
+  | StoryParsedRecord;
+
+export type StoryRecordKind = StoryBundleNodeType;
+
+export type StoryParsedRecord = {
+  record_kind: StoryRecordKind;
+  [key: string]: unknown;
+};
 
 export type HybridRecordKind = "character" | "diegetic_artifact" | "adjudication";
 
@@ -57,13 +78,29 @@ export interface GetRecordSectionResponse {
   file_path: string;
 }
 
+export interface GetRecordOversizeResponse {
+  record_id: string;
+  record_kind: HybridRecordKind;
+  delivery_status: "oversize_with_projection_suggestions";
+  persisted_output_path: string;
+  total_chars: number;
+  response_cap_chars: number;
+  suggested_section_paths: string[];
+  suggested_section_paths_omitted_count?: number;
+  fallback_advice: string;
+  content_hash: string;
+  file_path: string;
+}
+
 export type GetRecordResponse =
   | GetRecordAtomicResponse
   | GetRecordHybridResponse
-  | GetRecordSectionResponse;
+  | GetRecordSectionResponse
+  | GetRecordOversizeResponse;
 
 export interface RecordRow {
   node_id: string;
+  story_slug?: string | null;
   node_type: NodeType;
   file_path: string;
   body: string;
@@ -74,6 +111,11 @@ const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
 const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d{4}$/;
+
+const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
+  "storylet_batch_manifest",
+  "remediation_storylet_proposal_card"
+];
 
 const NODE_TYPE_TO_RECORD_KIND: Partial<Record<NodeType, ParsedRecord["record_kind"]>> = {
   canon_fact_record: "canon_fact",
@@ -92,10 +134,14 @@ const NODE_TYPE_TO_HYBRID_KIND: Partial<Record<NodeType, HybridRecordKind>> = {
 };
 
 function getRecordKind(nodeType: NodeType): ParsedRecord["record_kind"] | null {
+  if (isStoryBundleNodeType(nodeType)) {
+    return nodeType;
+  }
+
   return NODE_TYPE_TO_RECORD_KIND[nodeType] ?? null;
 }
 
-function getHybridKind(nodeType: NodeType): HybridRecordKind | null {
+export function getHybridKind(nodeType: NodeType): HybridRecordKind | null {
   return NODE_TYPE_TO_HYBRID_KIND[nodeType] ?? null;
 }
 
@@ -113,34 +159,61 @@ export function isMcpError(value: unknown): value is McpError {
 }
 
 export function validateRecordId(recordId: string): McpError | null {
-  if (ATOMIC_RECORD_ID_PATTERN.test(recordId) || HYBRID_RECORD_ID_PATTERN.test(recordId)) {
+  if (
+    ATOMIC_RECORD_ID_PATTERN.test(recordId) ||
+    HYBRID_RECORD_ID_PATTERN.test(recordId) ||
+    isStoryBundleRecordId(recordId)
+  ) {
     return null;
   }
 
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-NNNN, CH-NNNN, M-N, OQ-NNNN, ENT-NNNN, invariant category id, SEC-<class>-NNN) or hybrid (CHAR-NNNN, DA-NNNN, PA-NNNN)"
+      "atomic (CF-NNNN, CH-NNNN, M-N, OQ-NNNN, ENT-NNNN, invariant category id, SEC-<class>-NNN), hybrid (CHAR-NNNN, DA-NNNN, PA-NNNN), or story-bundle (PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STLOC/STOBJ/BR/CHC/SLT/SLB/SAU/SP/RSP-NNNN)"
   });
 }
 
-function findRecordRow(worldSlug: string, recordId: string): RecordRow | McpError | undefined {
+function findRecordRow(
+  worldSlug: string,
+  recordId: string,
+  storySlug?: string
+): RecordRow | McpError | undefined {
   const opened = openIndexDb(worldSlug);
   if (!("db" in opened)) {
     return opened;
   }
 
   try {
+    if (storySlug !== undefined && isStoryBundleRecordId(recordId)) {
+      return opened.db
+        .prepare(
+          `
+            SELECT node_id, story_slug, node_type, file_path, body, content_hash
+            FROM nodes
+            WHERE world_slug = ?
+              AND story_slug = ?
+              AND node_id = ?
+            LIMIT 1
+          `
+        )
+        .get(worldSlug, storySlug, toStoryScopedNodeId(recordId, storySlug)) as
+        | RecordRow
+        | undefined;
+    }
+
     return opened.db
       .prepare(
         `
-          SELECT node_id, node_type, file_path, body, content_hash
+          SELECT node_id, story_slug, node_type, file_path, body, content_hash
           FROM nodes
-          WHERE node_id = ?
+          WHERE world_slug = ?
+            AND node_id = ?
+            AND story_slug IS NULL
           LIMIT 1
         `
       )
-      .get(recordId) as RecordRow | undefined;
+      .get(worldSlug, recordId) as RecordRow | undefined;
   } finally {
     opened.db.close();
   }
@@ -149,13 +222,26 @@ function findRecordRow(worldSlug: string, recordId: string): RecordRow | McpErro
 export function resolveRecordRow(args: {
   record_id: string;
   world_slug?: string;
+  story_slug?: string;
 }): { worldSlug: string; row: RecordRow } | McpError {
+  if (isStoryBundleRecordId(args.record_id) && args.story_slug === undefined) {
+    return createMcpError(
+      "invalid_input",
+      `story_slug required for record_id=${args.record_id}; bundle-scoped IDs are not unique across bundles within a world.`,
+      {
+        field: "story_slug",
+        record_id: args.record_id
+      }
+    );
+  }
+
   if (args.world_slug !== undefined && args.world_slug.length > 0) {
-    const row = findRecordRow(args.world_slug, args.record_id);
+    const row = findRecordRow(args.world_slug, args.record_id, args.story_slug);
     if (row === undefined) {
       return createMcpError("record_not_found", `Record '${args.record_id}' does not exist.`, {
         record_id: args.record_id,
-        world_slug: args.world_slug
+        world_slug: args.world_slug,
+        ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
       });
     }
 
@@ -165,7 +251,7 @@ export function resolveRecordRow(args: {
   const matches: Array<{ worldSlug: string; row: RecordRow }> = [];
 
   for (const worldSlug of listIndexedWorldSlugs()) {
-    const row = findRecordRow(worldSlug, args.record_id);
+    const row = findRecordRow(worldSlug, args.record_id, args.story_slug);
     if (row === undefined || "code" in row) {
       continue;
     }
@@ -200,6 +286,17 @@ export function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
     });
   }
 
+  if (
+    isStoryBundleNodeType(row.node_type) &&
+    (STORY_MARKDOWN_NODE_TYPES as readonly string[]).includes(row.node_type)
+  ) {
+    return {
+      record_kind: row.node_type,
+      record_id: row.node_id,
+      body: row.body
+    };
+  }
+
   let parsed: unknown;
   try {
     parsed = YAML.parse(row.body);
@@ -224,12 +321,12 @@ export function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
   } as ParsedRecord;
 }
 
-interface HybridFileParts {
+export interface HybridFileParts {
   frontmatter: Record<string, unknown>;
   body_sections: Record<string, string>;
 }
 
-function parseHybridFile(
+export function parseHybridFile(
   recordId: string,
   fileBody: string
 ): HybridFileParts | McpError {
@@ -407,6 +504,53 @@ function enumerateValidPaths(parts: HybridFileParts): string[] {
   return paths;
 }
 
+function effectiveResponseCapChars(): number {
+  return Math.max(1, resolveHarnessCeilingChars() - ENVELOPE_OVERHEAD_RESERVE_CHARS);
+}
+
+function serializeResponse(value: unknown): string {
+  return JSON.stringify(value, null, 2);
+}
+
+function buildOversizeResponse(args: {
+  fullResponse: GetRecordHybridResponse;
+  worldSlug: string;
+  parts: HybridFileParts;
+  totalChars: number;
+  responseCapChars: number;
+}): GetRecordOversizeResponse {
+  const persistedOutputPath = persistToolResultJson(
+    `${args.worldSlug}-get_record-${args.fullResponse.record_id}`,
+    args.fullResponse
+  );
+  const allSuggestedSectionPaths = enumerateValidPaths(args.parts);
+  const fallbackAdvice = "Retry get_record with a suggested section_path, or read persisted_output_path JSON.";
+  const buildResponse = (suggestedSectionPaths: string[]): GetRecordOversizeResponse => {
+    const omittedCount = allSuggestedSectionPaths.length - suggestedSectionPaths.length;
+    return {
+      record_id: args.fullResponse.record_id,
+      record_kind: args.fullResponse.record_kind,
+      delivery_status: "oversize_with_projection_suggestions",
+      persisted_output_path: persistedOutputPath,
+      total_chars: args.totalChars,
+      response_cap_chars: args.responseCapChars,
+      suggested_section_paths: suggestedSectionPaths,
+      ...(omittedCount > 0 ? { suggested_section_paths_omitted_count: omittedCount } : {}),
+      fallback_advice: fallbackAdvice,
+      content_hash: args.fullResponse.content_hash,
+      file_path: args.fullResponse.file_path
+    };
+  };
+
+  const suggestedSectionPaths = [...allSuggestedSectionPaths];
+  let response = buildResponse(suggestedSectionPaths);
+  while (serializeResponse(response).length > args.responseCapChars && suggestedSectionPaths.length > 1) {
+    suggestedSectionPaths.pop();
+    response = buildResponse(suggestedSectionPaths);
+  }
+  return response;
+}
+
 async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | McpError> {
   const idError = validateRecordId(args.record_id);
   if (idError !== null) {
@@ -415,7 +559,9 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const isHybrid = HYBRID_RECORD_ID_PATTERN.test(args.record_id);
 
-  if (args.section_path !== undefined && !isHybrid) {
+  const isStoryBundleRecord = isStoryBundleRecordId(args.record_id);
+
+  if (args.section_path !== undefined && (!isHybrid || isStoryBundleRecord)) {
     return createMcpError(
       "invalid_input",
       `section_path is only valid for hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN); use get_record_field for atomic record projection.`,
@@ -425,8 +571,15 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const resolved = resolveRecordRow(
     args.world_slug !== undefined
-      ? { record_id: args.record_id, world_slug: args.world_slug }
-      : { record_id: args.record_id }
+      ? {
+          record_id: args.record_id,
+          world_slug: args.world_slug,
+          ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
+        }
+      : {
+          record_id: args.record_id,
+          ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
+        }
   );
   if ("code" in resolved) {
     return resolved;
@@ -466,7 +619,7 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
       };
     }
 
-    return {
+    const fullResponse: GetRecordHybridResponse = {
       record_id: resolved.row.node_id,
       record_kind: recordKind,
       frontmatter: parts.frontmatter,
@@ -474,6 +627,20 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
       content_hash: resolved.row.content_hash,
       file_path: resolved.row.file_path
     };
+
+    const serialized = serializeResponse(fullResponse);
+    const responseCapChars = effectiveResponseCapChars();
+    if (serialized.length > responseCapChars) {
+      return buildOversizeResponse({
+        fullResponse,
+        worldSlug: resolved.worldSlug,
+        parts,
+        totalChars: serialized.length,
+        responseCapChars
+      });
+    }
+
+    return fullResponse;
   }
 
   const record = parseRecordBody(resolved.row);

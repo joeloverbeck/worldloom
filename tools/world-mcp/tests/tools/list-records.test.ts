@@ -12,6 +12,70 @@ interface FullBodyTestRecord {
   body: Record<string, unknown>;
 }
 
+const CHAR_ONE_FILE_BODY = [
+  "---",
+  "character_id: CHAR-0001",
+  "slug: vespera-nightwhisper",
+  "name: Vespera Nightwhisper",
+  "world_consistency:",
+  "  invariants_respected:",
+  "    - ONT-1",
+  "  mystery_reserve_firewall:",
+  "    - M-1",
+  "  canon_facts_consulted:",
+  "    - CF-0001",
+  "---",
+  "# Vespera Nightwhisper",
+  "",
+  "## Material Reality",
+  "",
+  "She lives in the salt port and walks the harbor each dawn.",
+  ""
+].join("\n");
+
+const CHAR_TWO_FILE_BODY = [
+  "---",
+  "character_id: CHAR-0002",
+  "slug: alaric-brine",
+  "name: Alaric Brine",
+  "---",
+  "# Alaric Brine",
+  "",
+  "## Material Reality",
+  "",
+  "He keeps the lighthouse ledgers.",
+  ""
+].join("\n");
+
+const DA_FILE_BODY = [
+  "---",
+  "artifact_id: DA-0001",
+  "slug: harbor-letter",
+  "title: Harbor Letter",
+  "author: Anonymous Salt-Clerk",
+  "---",
+  "# Harbor Letter",
+  "",
+  "## Body",
+  "",
+  "Sirs, the salt has been counted.",
+  ""
+].join("\n");
+
+const PA_FILE_BODY = [
+  "---",
+  "pa_id: PA-0001",
+  "verdict: accept",
+  "summary: Brinewick fact accepted.",
+  "---",
+  "# PA-0001 - accept",
+  "",
+  "## Adjudication Notes",
+  "",
+  "The proposal was accepted on first pass.",
+  ""
+].join("\n");
+
 function buildSeededRecordWorld(root: string): void {
   seedWorld(root, {
     worldSlug: "seeded",
@@ -181,6 +245,34 @@ function buildSeededRecordWorld(root: string): void {
           "extensions: []",
           ""
         ].join("\n")
+      },
+      {
+        node_id: "CHAR-0002",
+        world_slug: "seeded",
+        file_path: "characters/alaric-brine.md",
+        node_type: "character_record",
+        body: CHAR_TWO_FILE_BODY
+      },
+      {
+        node_id: "CHAR-0001",
+        world_slug: "seeded",
+        file_path: "characters/vespera-nightwhisper.md",
+        node_type: "character_record",
+        body: CHAR_ONE_FILE_BODY
+      },
+      {
+        node_id: "DA-0001",
+        world_slug: "seeded",
+        file_path: "diegetic-artifacts/harbor-letter.md",
+        node_type: "diegetic_artifact_record",
+        body: DA_FILE_BODY
+      },
+      {
+        node_id: "PA-0001",
+        world_slug: "seeded",
+        file_path: "adjudications/PA-0001-accept.md",
+        node_type: "adjudication_record",
+        body: PA_FILE_BODY
       }
     ]
   });
@@ -304,6 +396,135 @@ test("listRecords include_full_body covers every supported atomic record type", 
       const record = result.records[0]! as FullBodyTestRecord;
       assert.ok("body" in record);
       assert.equal(record.body.record_kind, expectedKind);
+      assert.equal(typeof record.content_hash, "string");
+      assert.equal(typeof record.file_path, "string");
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords returns compact metadata for supported hybrid record types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({ world_slug: "seeded", record_type: "diegetic_artifact_record" })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    assert.equal(result.truncated, false);
+    assert.deepEqual(result.records[0], {
+      record_id: "DA-0001",
+      record_kind: "diegetic_artifact",
+      title: "Harbor Letter",
+      content_hash: result.records[0]!.content_hash,
+      file_path: "diegetic-artifacts/harbor-letter.md"
+    });
+    assert.equal(typeof result.records[0]!.content_hash, "string");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords returns hybrid records in id order and supports field projection", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["record_id", "file_path"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 2);
+    assert.deepEqual(result.records, [
+      {
+        record_id: "CHAR-0001",
+        file_path: "characters/vespera-nightwhisper.md"
+      },
+      {
+        record_id: "CHAR-0002",
+        file_path: "characters/alaric-brine.md"
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords include_full_body returns parsed hybrid frontmatter and body sections", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["file_path"],
+        include_full_body: true
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 2);
+    const record = result.records[0]! as FullBodyTestRecord;
+    assert.equal(record.record_id, "CHAR-0001");
+    assert.equal(record.file_path, "characters/vespera-nightwhisper.md");
+    assert.equal(typeof record.content_hash, "string");
+    assert.deepEqual(Object.keys(record).sort(), [
+      "body",
+      "content_hash",
+      "file_path",
+      "record_id"
+    ]);
+    assert.equal(record.body.record_kind, "character");
+    const frontmatter = record.body.frontmatter as Record<string, unknown>;
+    assert.equal(frontmatter.character_id, "CHAR-0001");
+    const bodySections = record.body.body_sections as Record<string, string>;
+    assert.ok(bodySections["Material Reality"]?.includes("salt port"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords include_full_body covers every supported hybrid record type", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const expectedKinds = new Map([
+      ["character_record", "character"],
+      ["diegetic_artifact_record", "diegetic_artifact"],
+      ["adjudication_record", "adjudication"]
+    ]);
+
+    for (const [recordType, expectedKind] of expectedKinds) {
+      const result = await withRepoRoot(root, () =>
+        listRecords({
+          world_slug: "seeded",
+          record_type: recordType as Parameters<typeof listRecords>[0]["record_type"],
+          include_full_body: true
+        })
+      );
+
+      assert.ok("records" in result);
+      assert.ok(result.total >= 1);
+      const record = result.records[0]! as FullBodyTestRecord;
+      assert.equal(record.body.record_kind, expectedKind);
+      assert.ok("frontmatter" in record.body);
+      assert.ok("body_sections" in record.body);
       assert.equal(typeof record.content_hash, "string");
       assert.equal(typeof record.file_path, "string");
     }

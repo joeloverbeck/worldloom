@@ -21,7 +21,7 @@ const CAPABILITIES: ToolCapability[] = [
   },
   {
     name: MCP_TOOL_NAMES.list_records,
-    description: "Return all records of a given atomic record type.",
+    description: "Return all records of a supported atomic or hybrid record type.",
     input_schema_enums: { record_type: SUPPORTED_LIST_RECORD_TYPES }
   },
   {
@@ -56,6 +56,21 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type, [
     ...SUPPORTED_LIST_RECORD_TYPES
   ]);
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("character_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("diegetic_artifact_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("adjudication_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("storylet_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("story_fact_record")
+  );
   assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
 });
 

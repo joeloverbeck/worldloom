@@ -2,7 +2,11 @@ import { existsSync } from "node:fs";
 import type Database from "better-sqlite3";
 
 import { insertValidationResults } from "../index/nodes";
-import { ATOMIC_LOGICAL_WORLD_FILES, parseAtomicSourceFile } from "../parse/atomic";
+import {
+  ATOMIC_LOGICAL_WORLD_FILES,
+  parseAtomicSourceFile,
+  parseStoryBundleSourceFile
+} from "../parse/atomic";
 import type { NodeRow, ValidationResultRow } from "../schema/types";
 import { openExistingWorldIndex, parseWorldFile, resolveWorldDirectory } from "./shared";
 
@@ -40,7 +44,9 @@ export function verify(worldRoot: string, worldSlug: string): number {
 
       const parsed = row.file_path.startsWith("_source/")
         ? parseAtomicSourceFile(worldRoot, worldSlug, row.file_path)
-        : parseWorldFile(worldRoot, worldSlug, row.file_path);
+        : row.file_path.startsWith("stories/")
+          ? parseStoryBundleSourceFile(worldRoot, worldSlug, row.file_path)
+          : parseWorldFile(worldRoot, worldSlug, row.file_path);
       const storedNodes = loadStoredFileNodes(opened, worldSlug, row.file_path);
       const storedById = new Map(storedNodes.map((node) => [node.node_id, node]));
       const parsedById = new Map(parsed.nodes.map((node) => [node.node_id, node]));

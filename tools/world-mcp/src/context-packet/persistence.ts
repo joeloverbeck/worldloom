@@ -26,13 +26,21 @@ export function isPersistedPacketPathAllowed(
 }
 
 export function persistContextPacket(packet: ContextPacket): string {
+  return persistToolResultJson(
+    `${packet.task_header.world_slug}-${packet.task_header.task_type}`,
+    packet
+  );
+}
+
+export function persistToolResultJson(nameParts: string, value: unknown): string {
   const root = resolvePersistedPacketRoot();
   mkdirSync(root, { recursive: true });
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const filename = `${timestamp}-${packet.task_header.world_slug}-${packet.task_header.task_type}-${randomUUID()}.json`;
+  const safeNameParts = nameParts.replace(/[^A-Za-z0-9_-]+/g, "-");
+  const filename = `${timestamp}-${safeNameParts}-${randomUUID()}.json`;
   const persistedPath = path.join(root, filename);
-  writeFileSync(persistedPath, `${JSON.stringify(packet, null, 2)}\n`, "utf8");
+  writeFileSync(persistedPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
   return persistedPath;
 }
 

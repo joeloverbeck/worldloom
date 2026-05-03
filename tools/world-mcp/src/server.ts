@@ -40,6 +40,7 @@ import {
   type ToolKey
 } from "./tool-names";
 import type { McpError } from "./errors";
+import { STORY_SLUG_PATTERN } from "./tools/_shared";
 
 function readPackageVersion(): string {
   const packageJsonPath = path.join(__dirname, "..", "..", "package.json");
@@ -81,6 +82,7 @@ const searchNodesInputSchema = z.object({
   filters: z
     .object({
       world_slug: z.string().min(1).optional(),
+      story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
       node_type: z.string().min(1).optional(),
       file_path: z.string().min(1).optional(),
       entity_name: z.string().min(1).optional()
@@ -98,18 +100,21 @@ const getNodeInputSchema = z.object({
 const getRecordInputSchema = z.object({
   record_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   section_path: z.string().min(1).optional()
 });
 
 const getRecordsInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
-  world_slug: z.string().min(1).optional()
+  world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
 });
 
 const getRecordsFieldInputSchema = z.object({
   record_ids: z.array(z.string().min(1)).min(1),
   field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
-  world_slug: z.string().min(1).optional()
+  world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
 });
 
 const getPersistedPacketSliceInputSchema = z.object({
@@ -120,6 +125,7 @@ const getPersistedPacketSliceInputSchema = z.object({
 const listRecordsInputSchema = z.object({
   world_slug: z.string().min(1),
   record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   fields: z.array(z.string().min(1)).optional(),
   include_full_body: z.boolean().optional()
 });
@@ -127,7 +133,8 @@ const listRecordsInputSchema = z.object({
 const getRecordFieldInputSchema = z.object({
   record_id: z.string().min(1),
   field_path: z.array(z.union([z.string(), z.number().int()])).min(1),
-  world_slug: z.string().min(1).optional()
+  world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
 });
 
 const getRecordSchemaInputSchema = z.object({
@@ -137,6 +144,7 @@ const getRecordSchemaInputSchema = z.object({
 const getNeighborsInputSchema = z.object({
   node_id: z.string().min(1),
   world_slug: z.string().min(1).optional(),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   edge_types: z.array(z.string().min(1)).optional(),
   depth: z.union([z.literal(1), z.literal(2)]).default(1)
 });
@@ -144,6 +152,7 @@ const getNeighborsInputSchema = z.object({
 const getContextPacketInputSchema = z.object({
   task_type: z.enum(TASK_TYPES),
   world_slug: z.string().min(1),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   seed_nodes: z.array(z.string().min(1)).min(1),
   token_budget: z.number().int().positive().optional(),
   delivery_mode: z.enum(DELIVERY_MODES).optional(),
@@ -152,7 +161,8 @@ const getContextPacketInputSchema = z.object({
 
 const findImpactedFragmentsInputSchema = z.object({
   world_slug: z.string().min(1),
-  node_ids: z.array(z.string().min(1))
+  node_ids: z.array(z.string().min(1)),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional()
 });
 
 const findSectionsTouchedByInputSchema = z.object({
@@ -163,6 +173,7 @@ const findSectionsTouchedByInputSchema = z.object({
 const findNamedEntitiesInputSchema = z.object({
   world_slug: z.string().min(1),
   names: z.array(z.string().min(1)),
+  story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   node_type_filter: z.array(z.enum(NODE_TYPES)).optional()
 });
 
@@ -303,7 +314,7 @@ export function createServer(): McpServer {
 
   registerToolWithCapability(
     "search_nodes",
-    "Search indexed world nodes with exact-match-first retrieval ordering.",
+    "Search indexed world nodes with exact-match-first retrieval ordering. Optional filters.story_slug scopes search to indexed story-bundle records.",
     searchNodesInputSchema,
     async (args) => searchNodes(args as unknown as Parameters<typeof searchNodes>[0])
   );
@@ -315,19 +326,19 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset: 'frontmatter' for full frontmatter, 'body' for all body sections, 'frontmatter.<key>' for one frontmatter field, or 'body.<section>' for one body section. Atomic records reject section_path.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-NNNN or SLT-NNNN. Optional section_path projects a hybrid record subset: 'frontmatter' for full frontmatter, 'body' for all body sections, 'frontmatter.<key>' for one frontmatter field, or 'body.<section>' for one body section. Atomic and story-bundle records reject section_path. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
   registerToolWithCapability(
     "get_records",
-    "get_records: Fetch multiple records by id in one call. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
+    "get_records: Fetch multiple records by id in one call. Optional story_slug scopes bundle-scoped story ids. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
     getRecordsInputSchema,
     async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
   );
   registerToolWithCapability(
     "get_records_field",
-    "get_records_field: Fetch one field from multiple parsed atomic records in one ordered response. Returns per-id field_value entries or per-id errors without aborting the batch.",
+    "get_records_field: Fetch one field from multiple parsed atomic or story-bundle records in one ordered response. Optional story_slug scopes bundle-scoped story ids. Returns per-id field_value entries or per-id errors without aborting the batch.",
     getRecordsFieldInputSchema,
     async (args) => getRecordsField(args as unknown as Parameters<typeof getRecordsField>[0])
   );
@@ -339,14 +350,14 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return all records of a given atomic record type, with optional field projection or include_full_body metadata/body records.",
+    "list_records: Return all indexed records of a supported atomic, hybrid, or story-bundle record type, with optional field projection or include_full_body metadata/body records. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }
   );
   registerToolWithCapability(
     "get_record_field",
-    "get_record_field: Fetch one field from an atomic record without returning the full parsed record.",
+    "get_record_field: Fetch one field from an atomic or story-bundle record without returning the full parsed record. Story-bundle ids require story_slug.",
     getRecordFieldInputSchema,
     async (args) => getRecordField(args as unknown as Parameters<typeof getRecordField>[0])
   );
@@ -359,20 +370,20 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_neighbors",
-    "Expand graph neighbors around a seed node across one or two hops.",
+    "Expand graph neighbors around a seed node across one or two hops. Story-bundle authored ids require story_slug.",
     getNeighborsInputSchema,
     async (args) => getNeighbors(args as unknown as Parameters<typeof getNeighbors>[0])
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug and return story_bundle_context populated from indexed story-bundle records plus STORY_KERNEL.md frontmatter; world-canon task types return story_bundle_context: null.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }
   );
   registerToolWithCapability(
     "find_impacted_fragments",
-    "Find downstream world fragments impacted by proposed node mutations.",
+    "Find downstream world fragments impacted by proposed node mutations. Story-bundle authored node ids require story_slug.",
     findImpactedFragmentsInputSchema,
     async (args) => findImpactedFragments(args as unknown as Parameters<typeof findImpactedFragments>[0])
   );
@@ -384,7 +395,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "find_named_entities",
-    "Resolve exact canonical and unresolved surface-name matches. Region/era descriptor hints include capped matching_record_ids for direct get_record lookup, with search_nodes(query=...) as the broad fallback.",
+    "Resolve exact canonical and unresolved surface-name matches. Optional story_slug adds story_local_matches from indexed story-bundle records alongside world-canon matches. Region/era descriptor hints include capped matching_record_ids for direct get_record lookup, with search_nodes(query=...) as the broad fallback.",
     findNamedEntitiesInputSchema,
     async (args) => findNamedEntities(args as unknown as Parameters<typeof findNamedEntities>[0]),
     { node_type_filter: NODE_TYPES }

@@ -343,6 +343,7 @@ function stageCScanMentionEvidence(
       for (const surfaceText of matches) {
         mentions.push({
           mention_id: mentionId,
+          story_slug: node.story_slug ?? null,
           node_id: node.node_id,
           surface_text: surfaceText,
           resolved_entity_id: entry.entityId,
@@ -353,6 +354,7 @@ function stageCScanMentionEvidence(
         exactMatchedForms.add(normalizeLookupKey(surfaceText));
         edges.push({
           edge_id: edgeId,
+          story_slug: node.story_slug ?? null,
           source_node_id: node.node_id,
           target_node_id: entry.entityId,
           target_unresolved_ref: null,
@@ -367,6 +369,7 @@ function stageCScanMentionEvidence(
       for (const surfaceText of matches) {
         mentions.push({
           mention_id: mentionId,
+          story_slug: node.story_slug ?? null,
           node_id: node.node_id,
           surface_text: surfaceText,
           resolved_entity_id: entry.entityId,
@@ -377,6 +380,7 @@ function stageCScanMentionEvidence(
         exactMatchedForms.add(normalizeLookupKey(surfaceText));
         edges.push({
           edge_id: edgeId,
+          story_slug: node.story_slug ?? null,
           source_node_id: node.node_id,
           target_node_id: entry.entityId,
           target_unresolved_ref: null,
@@ -397,6 +401,7 @@ function stageCScanMentionEvidence(
 
       mentions.push({
         mention_id: mentionId,
+        story_slug: node.story_slug ?? null,
         node_id: node.node_id,
         surface_text: candidate,
         resolved_entity_id: null,

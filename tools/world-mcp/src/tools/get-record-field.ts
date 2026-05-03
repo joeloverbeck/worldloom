@@ -12,6 +12,7 @@ export interface GetRecordFieldArgs {
   record_id: string;
   field_path: Array<string | number>;
   world_slug?: string;
+  story_slug?: string;
 }
 
 export interface GetRecordFieldResponse {

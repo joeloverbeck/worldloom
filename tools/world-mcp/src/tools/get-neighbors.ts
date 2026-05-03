@@ -4,17 +4,23 @@ import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 
-import { resolveNodeWorld } from "./_shared";
+import {
+  isStoryBundleRecordId,
+  resolveNodeWorld,
+  toStoryScopedNodeId
+} from "./_shared";
 
 export interface GetNeighborsArgs {
   node_id: string;
   world_slug?: string;
+  story_slug?: string;
   edge_types?: EdgeType[];
   depth: 1 | 2;
 }
 
 export interface NeighborNode {
   node_id: string;
+  story_slug?: string;
   node_type: NodeType;
   heading_path: string | null;
   via_node_id: string;
@@ -24,6 +30,7 @@ export interface NeighborNode {
 export interface NeighborGraph {
   seed: {
     node_id: string;
+    story_slug?: string;
     node_type: NodeType;
     heading_path: string | null;
   };
@@ -39,17 +46,31 @@ interface NeighborEdgeRow {
 function getSeedNode(
   db: import("better-sqlite3").Database,
   nodeId: string
-): { node_id: string; node_type: NodeType; heading_path: string | null } | undefined {
+): { node_id: string; story_slug: string | null; node_type: NodeType; heading_path: string | null } | undefined {
   return db
     .prepare(
       `
-        SELECT node_id, node_type, heading_path
+        SELECT node_id, story_slug, node_type, heading_path
         FROM nodes
         WHERE node_id = ?
         LIMIT 1
       `
     )
-    .get(nodeId) as { node_id: string; node_type: NodeType; heading_path: string | null } | undefined;
+    .get(nodeId) as
+    | { node_id: string; story_slug: string | null; node_type: NodeType; heading_path: string | null }
+    | undefined;
+}
+
+function displayNodeId(row: { node_id: string; story_slug?: string | null }): string {
+  if (
+    row.story_slug !== undefined &&
+    row.story_slug !== null &&
+    row.node_id.startsWith(`${row.story_slug}:`)
+  ) {
+    return row.node_id.slice(row.story_slug.length + 1);
+  }
+
+  return row.node_id;
 }
 
 function getDirectNeighborEdges(
@@ -108,26 +129,45 @@ function loadNeighborNodes(
   const rows = db
     .prepare(
       `
-        SELECT node_id, node_type, heading_path
+        SELECT node_id, story_slug, node_type, heading_path
         FROM nodes
         WHERE node_id IN (${placeholders})
       `
     )
-    .all(...nodeIds) as Array<{ node_id: string; node_type: NodeType; heading_path: string | null }>;
+    .all(...nodeIds) as Array<{
+    node_id: string;
+    story_slug: string | null;
+    node_type: NodeType;
+    heading_path: string | null;
+  }>;
 
   return rows
     .map((row) => ({
-      node_id: row.node_id,
+      node_id: displayNodeId(row),
+      ...(row.story_slug !== null ? { story_slug: row.story_slug } : {}),
       node_type: row.node_type,
       heading_path: row.heading_path,
-      via_node_id: viaNodeId,
+      via_node_id: displayNodeId({ node_id: viaNodeId, story_slug: row.story_slug }),
       edge_types: grouped.get(row.node_id) ?? []
     }))
     .sort((left, right) => left.node_id.localeCompare(right.node_id));
 }
 
 async function getNeighborsImpl(args: GetNeighborsArgs): Promise<NeighborGraph | McpError> {
-  const resolved = resolveNodeWorld(args.node_id, args.world_slug);
+  if (isStoryBundleRecordId(args.node_id) && args.story_slug === undefined) {
+    return createMcpError(
+      "invalid_input",
+      `story_slug required for node_id=${args.node_id}; bundle-scoped IDs are not unique across bundles within a world.`,
+      { field: "story_slug", node_id: args.node_id }
+    );
+  }
+
+  const internalNodeId =
+    args.story_slug !== undefined && isStoryBundleRecordId(args.node_id)
+      ? toStoryScopedNodeId(args.node_id, args.story_slug)
+      : args.node_id;
+
+  const resolved = resolveNodeWorld(internalNodeId, args.world_slug);
   if ("code" in resolved) {
     return resolved;
   }
@@ -138,36 +178,61 @@ async function getNeighborsImpl(args: GetNeighborsArgs): Promise<NeighborGraph |
   }
 
   try {
-    const seed = getSeedNode(opened.db, args.node_id);
+    const seedRow = getSeedNode(opened.db, internalNodeId);
+    const seed =
+      seedRow === undefined
+        ? undefined
+        : {
+            node_id: displayNodeId(seedRow),
+            ...(seedRow.story_slug !== null ? { story_slug: seedRow.story_slug } : {}),
+            node_type: seedRow.node_type,
+            heading_path: seedRow.heading_path
+          };
     if (seed === undefined) {
       return createMcpError("node_not_found", `Node '${args.node_id}' does not exist.`, {
         node_id: args.node_id,
-        world_slug: resolved.worldSlug
+        world_slug: resolved.worldSlug,
+        ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
       });
     }
 
     const edgeTypes = args.edge_types ?? [];
     const hop1 = loadNeighborNodes(
       opened.db,
-      args.node_id,
-      args.node_id,
-      getDirectNeighborEdges(opened.db, args.node_id, edgeTypes),
-      new Set([args.node_id])
+      internalNodeId,
+      internalNodeId,
+      getDirectNeighborEdges(opened.db, internalNodeId, edgeTypes),
+      new Set([internalNodeId])
     );
 
     if (args.depth === 1) {
       return { seed, hop1 };
     }
 
-    const seen = new Set<string>([args.node_id, ...hop1.map((neighbor) => neighbor.node_id)]);
+    const seen = new Set<string>([
+      internalNodeId,
+      ...hop1.map((neighbor) =>
+        neighbor.story_slug !== undefined
+          ? toStoryScopedNodeId(neighbor.node_id, neighbor.story_slug)
+          : neighbor.node_id
+      )
+    ]);
     const hop2Map = new Map<string, NeighborNode>();
 
     for (const neighbor of hop1) {
       const secondHop = loadNeighborNodes(
         opened.db,
-        args.node_id,
-        neighbor.node_id,
-        getDirectNeighborEdges(opened.db, neighbor.node_id, edgeTypes),
+        internalNodeId,
+        neighbor.story_slug !== undefined
+          ? toStoryScopedNodeId(neighbor.node_id, neighbor.story_slug)
+          : neighbor.node_id,
+        getDirectNeighborEdges(
+          opened.db,
+          neighbor.story_slug !== undefined
+            ? toStoryScopedNodeId(neighbor.node_id, neighbor.story_slug)
+            : neighbor.node_id,
+          edgeTypes
+        ),
         seen
       );
 

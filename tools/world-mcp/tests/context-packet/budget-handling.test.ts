@@ -102,6 +102,7 @@ test("default budget split preserves the v2 completeness-class percentages", () 
     exact_record_links: 0.15,
     scoped_local_context: 0.2,
     governing_world_context: 0.2,
+    story_bundle_context: 0,
     impact_surfaces: 0.1,
     overhead: 0.1
   });

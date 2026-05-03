@@ -7,6 +7,7 @@ import type { McpError } from "../errors";
 export interface FindNamedEntitiesArgs {
   world_slug: string;
   names: string[];
+  story_slug?: string;
   node_type_filter?: NodeType[];
 }
 
@@ -39,6 +40,15 @@ export interface SurfaceMatch {
   count: number;
 }
 
+export interface StoryLocalMatch {
+  query: string;
+  story_slug: string;
+  node_id: string;
+  node_type: NodeType;
+  matched_text: string;
+  match_kind: "canonical_entity" | "alias" | "surface_text";
+}
+
 export interface ScopedMatch {
   query: string;
   reference_id: string;
@@ -56,6 +66,7 @@ export interface FindNamedEntitiesResponse {
   canonical_matches: CanonicalMatch[];
   scoped_matches: ScopedMatch[];
   surface_matches: SurfaceMatch[];
+  story_local_matches?: StoryLocalMatch[];
   hints?: FindNamedEntityHint[];
 }
 
@@ -251,12 +262,92 @@ function loadMentionGroups(
         INNER JOIN nodes n ON n.node_id = em.node_id
         WHERE n.world_slug = ?
           AND em.resolved_entity_id = ?
+          AND n.story_slug IS NULL
           ${filterSql}
         GROUP BY n.node_type
         ORDER BY n.node_type
       `
     )
     .all(worldSlug, entityId, ...(filteredNodeTypes ?? [])) as MentionNodeTypeGroup[];
+}
+
+function displayStoryNodeId(nodeId: string, storySlug: string): string {
+  const prefix = `${storySlug}:`;
+  return nodeId.startsWith(prefix) ? nodeId.slice(prefix.length) : nodeId;
+}
+
+function loadStoryLocalMatches(
+  db: import("better-sqlite3").Database,
+  args: FindNamedEntitiesArgs,
+  query: string
+): StoryLocalMatch[] {
+  if (args.story_slug === undefined) {
+    return [];
+  }
+
+  const filteredNodeTypes =
+    args.node_type_filter === undefined ? undefined : unique(args.node_type_filter);
+
+  if (filteredNodeTypes?.length === 0) {
+    return [];
+  }
+
+  const filterSql =
+    filteredNodeTypes === undefined
+      ? ""
+      : `AND n.node_type IN (${filteredNodeTypes.map(() => "?").join(", ")})`;
+
+  const rows = db
+    .prepare(
+      `
+        SELECT DISTINCT
+          n.node_id,
+          n.node_type,
+          em.surface_text,
+          CASE
+            WHEN e.canonical_name = ? THEN 'canonical_entity'
+            WHEN ea.alias_text = ? THEN 'alias'
+            ELSE 'surface_text'
+          END AS match_kind
+        FROM entity_mentions em
+        INNER JOIN nodes n ON n.node_id = em.node_id
+        LEFT JOIN entities e ON e.entity_id = em.resolved_entity_id
+        LEFT JOIN entity_aliases ea ON ea.entity_id = em.resolved_entity_id
+        WHERE n.world_slug = ?
+          AND n.story_slug = ?
+          ${filterSql}
+          AND (
+            em.surface_text = ?
+            OR e.canonical_name = ?
+            OR ea.alias_text = ?
+          )
+        ORDER BY n.node_id, em.surface_text
+      `
+    )
+    .all(
+      query,
+      query,
+      args.world_slug,
+      args.story_slug,
+      ...(filteredNodeTypes ?? []),
+      query,
+      query,
+      query
+    ) as Array<{
+    node_id: string;
+    node_type: NodeType;
+    surface_text: string;
+    match_kind: StoryLocalMatch["match_kind"];
+  }>;
+
+  return rows.map((row) => ({
+    query,
+    story_slug: args.story_slug!,
+    node_id: displayStoryNodeId(row.node_id, args.story_slug!),
+    node_type: row.node_type,
+    matched_text: row.surface_text,
+    match_kind: row.match_kind
+  }));
 }
 
 async function findNamedEntitiesImpl(
@@ -276,10 +367,17 @@ async function findNamedEntitiesImpl(
     const canonicalMatches: CanonicalMatch[] = [];
     const scopedMatches: ScopedMatch[] = [];
     const surfaceMatches: SurfaceMatch[] = [];
+    const storyLocalMatches: StoryLocalMatch[] = [];
     const hints: FindNamedEntityHint[] = [];
 
     for (const name of names) {
       let queryHasMatches = false;
+      const localMatches = loadStoryLocalMatches(opened.db, args, name);
+      if (localMatches.length > 0) {
+        queryHasMatches = true;
+        storyLocalMatches.push(...localMatches);
+      }
+
       const canonicalNameRows = opened.db
         .prepare(
           `
@@ -445,6 +543,7 @@ async function findNamedEntitiesImpl(
             FROM entity_mentions em
             INNER JOIN nodes n ON n.node_id = em.node_id
             WHERE n.world_slug = ?
+              AND n.story_slug IS NULL
               AND em.surface_text = ?
               AND em.resolution_kind = 'unresolved'
             GROUP BY n.node_type
@@ -516,11 +615,27 @@ async function findNamedEntitiesImpl(
       return left.node_type.localeCompare(right.node_type);
     });
 
+    storyLocalMatches.sort((left, right) => {
+      if (left.query !== right.query) {
+        return left.query.localeCompare(right.query);
+      }
+
+      if (left.node_id !== right.node_id) {
+        return left.node_id.localeCompare(right.node_id);
+      }
+
+      return left.matched_text.localeCompare(right.matched_text);
+    });
+
     const response: FindNamedEntitiesResponse = {
       canonical_matches: canonicalMatches,
       scoped_matches: scopedMatches,
       surface_matches: surfaceMatches
     };
+
+    if (storyLocalMatches.length > 0) {
+      response.story_local_matches = storyLocalMatches;
+    }
 
     if (hints.length > 0) {
       response.hints = hints;

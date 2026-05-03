@@ -81,7 +81,12 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
 
     assert.deepEqual(result.verdicts, []);
     assert.ok(Array.isArray(result.executions) && result.executions.length > 0);
-    for (const execution of result.executions) {
+    const storyletExecution = result.executions.find(
+      (execution) => execution.name === "storylet_predicate_dsl_parsability"
+    );
+    assert.equal(storyletExecution?.status, "skipped");
+
+    for (const execution of result.executions.filter((row) => row !== storyletExecution)) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);
@@ -130,6 +135,77 @@ test("validatePatchPlan keeps the patch plan available for rule5", async () => {
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule5.required_update_not_patched"));
   });
 });
+
+test("validatePatchPlan skips storylet predicate parsing until story-bundle ops exist", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(cleanPlan() as unknown as PatchPlanEnvelope);
+    const execution = result.executions.find(
+      (row) => row.name === "storylet_predicate_dsl_parsability"
+    );
+
+    assert.equal(execution?.status, "skipped");
+    assert.equal(execution?.detail, "applies_to=false");
+  });
+});
+
+test("validatePatchPlan runs storylet predicate parsing for Shape B storylet ops", async () => {
+  await withTempRoot(async () => {
+    const plan = storyletPlan({
+      id: "SLT-0001",
+      story_id: "STORY-001",
+      hard_preconds: [{ pred: "unknown_predicate", op: "==", value: true }]
+    });
+
+    const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
+    const execution = result.executions.find(
+      (row) => row.name === "storylet_predicate_dsl_parsability"
+    );
+
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some((verdict) => verdict.code === "predicate.unknown_pred"));
+  });
+});
+
+test("validatePatchPlan applies story-bundle record schemas to Shape B story ops", async () => {
+  await withTempRoot(async () => {
+    const plan = storyletPlan({
+      id: "SLT-0001",
+      hard_preconds: []
+    });
+
+    const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "record_schema_compliance" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.code === "record_schema_compliance.required"
+    ));
+  });
+});
+
+function storyletPlan(record: Record<string, unknown>) {
+  return {
+    plan_id: "plan-story-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "storylet-pool-authoring",
+    expected_id_allocations: {
+      slt_ids: [String(record.id ?? "SLT-0001")]
+    },
+    patches: [
+      {
+        op: "create_slt_record" as const,
+        target_world: "seeded",
+        payload: {
+          story_slug: "marla-kern-seduction",
+          record
+        }
+      }
+    ]
+  };
+}
 
 function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {
   const dbPath = path.resolve(process.cwd(), "../../worlds/seeded/_index/world.db");

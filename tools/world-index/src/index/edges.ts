@@ -6,11 +6,13 @@ export function insertEdges(db: Database.Database, rows: EdgeRow[]): void {
   db.transaction((batch: EdgeRow[]) => {
     const statement = db.prepare(`
       INSERT INTO edges (
+        story_slug,
         source_node_id,
         target_node_id,
         target_unresolved_ref,
         edge_type
       ) VALUES (
+        @story_slug,
         @source_node_id,
         @target_node_id,
         @target_unresolved_ref,
@@ -19,7 +21,7 @@ export function insertEdges(db: Database.Database, rows: EdgeRow[]): void {
     `);
 
     for (const row of batch) {
-      statement.run(row);
+      statement.run({ story_slug: null, ...row });
     }
   })(dedupeEdges(rows));
 }
@@ -55,7 +57,7 @@ export function dedupeEdges(rows: EdgeRow[]): EdgeRow[] {
 
   for (const row of rows) {
     const targetKey = row.target_node_id ?? row.target_unresolved_ref ?? "__null__";
-    const key = [row.source_node_id, row.edge_type, targetKey].join("\u0000");
+    const key = [row.story_slug ?? "__world__", row.source_node_id, row.edge_type, targetKey].join("\u0000");
     const existing = deduped.get(key);
 
     if (!existing) {

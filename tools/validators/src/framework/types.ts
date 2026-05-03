@@ -69,6 +69,7 @@ export interface IndexedRecord {
   node_id: string;
   node_type: NodeType | string;
   world_slug: string;
+  story_slug?: string | null;
   file_path: string;
   parsed: IndexedRecordValue;
 }
@@ -77,12 +78,14 @@ export interface WorldIndexReadSurface {
   query(args: {
     record_type?: NodeType | string;
     world_slug: string;
+    story_slug?: string | null;
   }): Promise<IndexedRecord[]>;
 }
 
 export interface Context {
   run_mode: RunMode;
   world_slug: string;
+  story_slug?: string;
   index: WorldIndexReadSurface;
   touched_files: string[];
   patch_plan?: PatchPlanEnvelope;

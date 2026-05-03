@@ -23,6 +23,21 @@ export interface IdAllocations {
   pa_ids?: string[];
   char_ids?: string[];
   da_ids?: string[];
+  stent_ids?: string[];
+  sf_ids?: string[];
+  se_ids?: string[];
+  obl_ids?: string[];
+  cnsq_ids?: string[];
+  thr_ids?: string[];
+  srel_ids?: string[];
+  stint_ids?: string[];
+  stloc_ids?: string[];
+  stobj_ids?: string[];
+  br_ids?: string[];
+  pg_ids?: string[];
+  chc_ids?: string[];
+  slt_ids?: string[];
+  story_da_ids?: string[];
 }
 
 export interface PatchPlanEnvelope {
@@ -53,7 +68,22 @@ export const OPERATION_KINDS = [
   "append_modification_history_entry",
   "append_adjudication_record",
   "append_character_record",
-  "append_diegetic_artifact_record"
+  "append_diegetic_artifact_record",
+  "create_stent_record",
+  "create_sf_record",
+  "create_se_record",
+  "create_obl_record",
+  "create_cnsq_record",
+  "create_thr_record",
+  "create_srel_record",
+  "create_stint_record",
+  "create_stloc_record",
+  "create_stobj_record",
+  "create_br_record",
+  "create_pg_record",
+  "create_chc_record",
+  "create_slt_record",
+  "append_story_diegetic_artifact_record"
 ] as const;
 
 export type OperationKind = (typeof OPERATION_KINDS)[number];
@@ -118,6 +148,11 @@ export type EngineErrorCode =
   | "world_locked"
   | (string & {});
 
+export interface StoryRecordPayload<TRecord = Record<string, unknown>> {
+  story_slug: string;
+  record: TRecord;
+}
+
 export type PatchOperation =
   | OperationBase<"create_cf_record", { cf_record: CanonFactRecord }>
   | OperationBase<"create_ch_record", { ch_record: ChangeLogEntry }>
@@ -160,7 +195,22 @@ export type PatchOperation =
   | OperationBase<
       "append_diegetic_artifact_record",
       { da_record: DiegeticArtifactFrontmatter; body_markdown: string; filename: string }
-    >;
+    >
+  | OperationBase<"create_stent_record", StoryRecordPayload>
+  | OperationBase<"create_sf_record", StoryRecordPayload>
+  | OperationBase<"create_se_record", StoryRecordPayload>
+  | OperationBase<"create_obl_record", StoryRecordPayload>
+  | OperationBase<"create_cnsq_record", StoryRecordPayload>
+  | OperationBase<"create_thr_record", StoryRecordPayload>
+  | OperationBase<"create_srel_record", StoryRecordPayload>
+  | OperationBase<"create_stint_record", StoryRecordPayload>
+  | OperationBase<"create_stloc_record", StoryRecordPayload>
+  | OperationBase<"create_stobj_record", StoryRecordPayload>
+  | OperationBase<"create_br_record", StoryRecordPayload>
+  | OperationBase<"create_pg_record", StoryRecordPayload>
+  | OperationBase<"create_chc_record", StoryRecordPayload>
+  | OperationBase<"create_slt_record", StoryRecordPayload>
+  | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];
 

@@ -12,6 +12,7 @@ import { defaultRankingProfile } from "../ranking/profiles";
 
 export interface SearchNodeFilters {
   world_slug?: string;
+  story_slug?: string;
   node_type?: NodeType;
   file_path?: string;
   entity_name?: string;
@@ -31,6 +32,7 @@ export type SearchNodeMatchLocation = "body" | "heading_path" | "summary";
 export interface SearchNodeResult {
   id: string;
   world_slug: string;
+  story_slug?: string;
   node_type: NodeType;
   heading_path: string | null;
   summary: string | null;
@@ -51,6 +53,7 @@ export interface SearchNodesResponse {
 export interface SearchRow {
   node_id: string;
   world_slug: string;
+  story_slug?: string | null;
   node_type: NodeType;
   file_path: string;
   heading_path: string | null;
@@ -69,6 +72,69 @@ export interface QueryContext {
 
 export interface ResolvedNodeWorld {
   worldSlug: string;
+}
+
+export const STORY_SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+export const STORY_BUNDLE_NODE_TYPES = [
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "story_diegetic_artifact_record",
+  "audit_record_story",
+  "promotion_record",
+  "storylet_batch_manifest",
+  "remediation_storylet_proposal_card"
+] as const satisfies readonly NodeType[];
+
+export type StoryBundleNodeType = (typeof STORY_BUNDLE_NODE_TYPES)[number];
+
+export const STORY_BUNDLE_ID_PREFIXES = [
+  "PG",
+  "SE",
+  "SF",
+  "OBL",
+  "CNSQ",
+  "THR",
+  "SREL",
+  "STINT",
+  "STENT",
+  "STLOC",
+  "STOBJ",
+  "BR",
+  "CHC",
+  "SLT",
+  "SLB",
+  "SAU",
+  "SP",
+  "RSP"
+] as const;
+
+const STORY_BUNDLE_RECORD_ID_PATTERN = new RegExp(
+  `^(?:${STORY_BUNDLE_ID_PREFIXES.join("|")})-\\d{4}$`
+);
+
+export function isStoryBundleNodeType(nodeType: NodeType): nodeType is StoryBundleNodeType {
+  return (STORY_BUNDLE_NODE_TYPES as readonly string[]).includes(nodeType);
+}
+
+export function isStoryBundleRecordId(recordId: string): boolean {
+  return STORY_BUNDLE_RECORD_ID_PATTERN.test(recordId);
+}
+
+export function toStoryScopedNodeId(recordId: string, storySlug: string): string {
+  return `${storySlug}:${recordId}`;
 }
 
 function hasStructuredPrefix(nodeId: string): boolean {
@@ -174,6 +240,13 @@ export function applyFilters(
     params.push(filters.node_type);
   }
 
+  if (filters.story_slug !== undefined) {
+    clauses.push("n.story_slug = ?");
+    params.push(filters.story_slug);
+  } else {
+    clauses.push("n.story_slug IS NULL");
+  }
+
   if (filters.file_path !== undefined) {
     clauses.push("n.file_path = ?");
     params.push(filters.file_path);
@@ -188,6 +261,7 @@ export function applyFilters(
         LEFT JOIN entity_aliases ea ON ea.entity_id = em.resolved_entity_id
         WHERE em.node_id = n.node_id
           AND em.resolved_entity_id IS NOT NULL
+          AND e.world_slug = n.world_slug
           AND (e.canonical_name = ? OR ea.alias_text = ?)
       )
     `);

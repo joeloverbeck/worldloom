@@ -291,18 +291,24 @@ export function buildEmptyWorldFixture(root: string, worldSlug: string): void {
   mkdirSync(worldRoot, { recursive: true });
   writeFileSync(path.join(worldRoot, "index_version.txt"), `${CURRENT_INDEX_VERSION}\n`, "utf8");
 
-  const migrationPath = path.join(
+  const migrationsRoot = path.join(
     path.resolve(__dirname, "..", "..", "..", "..", ".."),
     "tools",
     "world-index",
     "src",
     "schema",
-    "migrations",
-    "001_initial.sql"
+    "migrations"
   );
   const db = new Database(path.join(worldRoot, "world.db"));
   try {
-    db.exec(readFileSync(migrationPath, "utf8"));
+    for (const migration of [
+      "001_initial.sql",
+      "002_scoped_references.sql",
+      "003_approval_tokens_consumed.sql",
+      "004_story_bundle_scope.sql"
+    ]) {
+      db.exec(readFileSync(path.join(migrationsRoot, migration), "utf8"));
+    }
   } finally {
     db.close();
   }

@@ -1,0 +1,65 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { getContextPacket } from "../../src/tools/get-context-packet";
+
+import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
+import {
+  buildStoryBundleWorld,
+  STORY_FIXTURE_SLUG,
+  STORY_FIXTURE_WORLD
+} from "./story-bundle-fixture";
+
+test("getContextPacket requires story_slug for story-pipeline task types", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    await assert.rejects(
+      () =>
+        withRepoRoot(root, () =>
+          getContextPacket({
+            task_type: "storylet_pool_authoring",
+            world_slug: STORY_FIXTURE_WORLD,
+            seed_nodes: ["entity:marla-kern"]
+          })
+        ),
+      /story_slug is required/
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket returns story_bundle_context for each story-pipeline task type", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    for (const taskType of [
+      "story_bootstrap",
+      "story_page_cycle",
+      "storylet_pool_authoring",
+      "branching_story_health_audit",
+      "story_fact_promotion_to_canon"
+    ] as const) {
+      const result = await withRepoRoot(root, () =>
+        getContextPacket({
+          task_type: taskType,
+          world_slug: STORY_FIXTURE_WORLD,
+          story_slug: STORY_FIXTURE_SLUG,
+          seed_nodes: ["entity:marla-kern"],
+          token_budget: 18000
+        })
+      );
+
+      assert.ok(!("code" in result), `${taskType} should return a packet`);
+      assert.equal(result.story_bundle_context?.story_slug, STORY_FIXTURE_SLUG);
+      assert.equal(result.story_bundle_context?.storylet_pool_summary.total, 1);
+    }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});

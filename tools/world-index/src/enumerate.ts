@@ -38,6 +38,23 @@ const ATOMIC_SOURCE_DIRECTORIES = new Set([
   "peoples-and-species",
   "timeline"
 ]);
+const STORY_SOURCE_DIRECTORIES = new Set([
+  "entities",
+  "facts",
+  "events",
+  "obligations",
+  "consequences",
+  "threads",
+  "relationships",
+  "intentions",
+  "locations",
+  "objects",
+  "branches",
+  "pages",
+  "choices",
+  "storylets",
+  "artifacts"
+]);
 
 /**
  * Enumerates disk-backed world files that the indexer may process directly.
@@ -129,6 +146,16 @@ function isIndexablePath(relativePath: string): boolean {
   ) {
     const sourceDirectory = segments[1];
     return sourceDirectory ? ATOMIC_SOURCE_DIRECTORIES.has(sourceDirectory) : false;
+  }
+
+  if (
+    segments.length === 5 &&
+    segments[0] === "stories" &&
+    segments[2] === "_source" &&
+    basename.endsWith(".yaml")
+  ) {
+    const sourceDirectory = segments[3];
+    return sourceDirectory ? STORY_SOURCE_DIRECTORIES.has(sourceDirectory) : false;
   }
 
   if (!basename.endsWith(".md")) {

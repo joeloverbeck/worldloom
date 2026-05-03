@@ -58,7 +58,7 @@ The eight named audit categories are: contradictions, scope drift, capability cr
 ### 4i — Diegetic Leakage
 
 - **Rule**: 7.
-- **Enumeration**: `find_named_entities` to list `characters/` and `diegetic-artifacts/` records; `get_record` per dossier/artifact frontmatter.
+- **Enumeration**: `list_records(record_type='character_record', include_full_body=true)` and `list_records(record_type='diegetic_artifact_record', include_full_body=true)` for dossiers/artifacts; use `get_record` for targeted follow-up slices when a sub-pass needs one record after projection.
 - **Judgment**: a character's `known_firsthand` or an artifact's body reveals a fact from MR `disallowed cheap answers`, OR a CF whose `scope.social` is `restricted_group` / `secret`, without diegetic justification. Operator decides whether the diegetic basis is plausible (e.g., a guild scribe who plausibly DID hear it) or implausible (a peasant narrator citing institutional secrets).
 
 ### 4j — Local/Global Drift
