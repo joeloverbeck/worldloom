@@ -1,14 +1,14 @@
 # MCPENH-022: Extend MCPENH-020's `persisted_with_summary` fallback documentation pattern to canon-addition's retrieval-tool-tree reference
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: None — documentation-only ticket; no code, no schema, no MCP tool surface change. Touched: `.claude/skills/canon-addition/references/retrieval-tool-tree.md` (add `get_persisted_packet_slice` enumeration + persisted-with-summary recovery section); optionally `.claude/skills/canon-addition/SKILL.md` §World-State Prerequisites (inline mention of the fallback path)
+**Engine Changes**: None — documentation-only ticket; no code, no schema, no MCP tool surface change. Touched: `.claude/skills/canon-addition/references/retrieval-tool-tree.md` (added `get_persisted_packet_slice` enumeration + persisted-with-summary recovery section) and `.claude/skills/canon-addition/SKILL.md` §World-State Prerequisites (inline mention of the fallback path).
 **Deps**: MCPENH-020 (which established the persisted-with-summary documentation pattern for Category 2 / 2b skills); `mcp__worldloom__get_persisted_packet_slice` already ships per MCPENH-020 and FOUNDATIONS.md §Tooling Recommendation
 
 ## Problem
 
-`mcp__worldloom__get_context_packet` returns a structured response whose `delivery_status` indicates whether the packet body is delivered inline or persisted to a `/tmp/worldloom-mcp-tool-results/<uuid>.json` file. When the packet's content exceeds the harness ceiling (60000 chars per the response's `harness_ceiling_chars`), the runtime returns `delivery_status: persisted_with_summary`:
+At intake, `mcp__worldloom__get_context_packet` returned a structured response whose `delivery_status` indicated whether the packet body was delivered inline or persisted to a `/tmp/worldloom-mcp-tool-results/<uuid>.json` file. When the packet's content exceeded the harness ceiling (60000 chars per the response's `harness_ceiling_chars`), the runtime returned `delivery_status: persisted_with_summary`:
 
 - All `nodes` arrays in `local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, and `impact_surfaces` are empty (`[]`).
 - The full packet body is persisted to a file referenced by `task_header.persisted_output_path`.
@@ -19,24 +19,24 @@ The packet response's `truncation_summary.fallback_advice` field already names t
 
 MCPENH-020 (`archive/tickets/MCPENH-020-document-persisted-with-summary-fallback-and-batch-retrieval.md`, completed 2026-05-03) extended skill-prose alignment with this runtime advice for Category 2 / 2b skills (`canon-facts-from-diegetic-artifacts`, `propose-new-canon-facts`, `propose-new-characters`, `continuity-audit`, `propose-new-worlds-from-preferences`, `branching-story-health-audit`, `story-fact-promotion-to-canon`). The MCPENH-020 ticket explicitly listed `canon-addition` among the Category 3 canon-mutating skills its scan touched but did NOT amend, on the grounds that canon-addition's existing references already documented `get_records` and the batch-retrieval pattern (verified at `.claude/skills/canon-addition/references/retrieval-tool-tree.md` lines 9, 14, 22-23, 35).
 
-What MCPENH-020 did NOT verify (because it was Category 2/2b-scoped) is that canon-addition's `references/retrieval-tool-tree.md` ALSO documents `get_persisted_packet_slice`. It does not. The `get_persisted_packet_slice` tool is absent from canon-addition's retrieval-tool guidance entirely (`grep -n "get_persisted_packet_slice" .claude/skills/canon-addition/` returns zero hits). Operators following canon-addition's documentation see `get_records` for batch retrieval and `get_record` for singular retrieval, but no documented path for the `persisted_with_summary` case where a slice extraction from the persisted file is the recovery shape.
+What MCPENH-020 did NOT verify (because it was Category 2/2b-scoped) was that canon-addition's `references/retrieval-tool-tree.md` ALSO documented `get_persisted_packet_slice`. Before this ticket, the `get_persisted_packet_slice` tool was absent from canon-addition's retrieval-tool guidance entirely (`grep -n "get_persisted_packet_slice" .claude/skills/canon-addition/` returned zero hits). Operators following canon-addition's documentation saw `get_records` for batch retrieval and `get_record` for singular retrieval, but no documented path for the `persisted_with_summary` case where a slice extraction from the persisted file is the recovery shape.
 
 Worked session evidence (2026-05-03): a `canon-addition` invocation for `worlds/erotica-world/proposals/PR-0002-centro-cultivated-purchased-discretion-grammar.md` (PA-0003 / CF-0004 / CH-0004) called `get_context_packet(world_slug='erotica-world', task_type='canon_addition', seed_nodes=[<11 ids: CF-0001 + CF-0003 + DIS-1 + CAU-2 + SOC-2 + AES-1 + M-1 + 4 SEC ids>], token_budget=12000)`. The response returned `delivery_status: persisted_with_summary`, `token_budget.allocated: 2477`, all `nodes` arrays empty, and `dropped_node_ids_by_class` listing the 11 seed records plus the full canonical neighborhood (50+ records total). The operator subsequently made ~11 individual `get_record` calls to retrieve the relevant CFs / invariants / mystery-reserve entries / sections rather than calling `get_persisted_packet_slice(task_header.persisted_output_path, slice_path='governing_world_context.nodes')` once to extract the persisted slice, or `get_records(record_ids=[...11 ids...], world_slug='erotica-world')` to batch-fetch. Tool-call round count: ~11 individual reads where a single batch or slice would have sufficed. The operator reported the friction in the canon-addition skill-audit (this session) and traced the gap to absent `get_persisted_packet_slice` documentation in the cited reference (`references/retrieval-tool-tree.md`).
 
-This ticket extends MCPENH-020's documentation pattern to canon-addition's `references/retrieval-tool-tree.md` so the persisted-with-summary recovery path is discoverable from the skill prose's enumerated retrieval-tool list. The MCP runtime tools and behavior are unchanged; only the documentation surface widens.
+This ticket extended MCPENH-020's documentation pattern to canon-addition's `references/retrieval-tool-tree.md` so the persisted-with-summary recovery path is discoverable from the skill prose's enumerated retrieval-tool list. The MCP runtime tools and behavior are unchanged; only the documentation surface widened.
 
 ## Assumption Reassessment (2026-05-03)
 
-1. **Current state of canon-addition retrieval-tool-tree.md verified by direct file read:** lines 9, 14, 22-23, 35 enumerate `mcp__worldloom__get_records` for batch retrieval; line 9 documents the `retry_with.token_budget` retry pattern; line 9 also documents the canon-addition default budget as 16000. `mcp__worldloom__get_persisted_packet_slice` is absent across the entire skill directory (verified via `grep -rn "get_persisted_packet_slice" .claude/skills/canon-addition/` — zero hits).
-2. **Current state of canon-addition SKILL.md §World-State Prerequisites verified by direct file read:** line 76 cites `docs/CONTEXT-PACKET-CONTRACT.md` (which does cover the `persisted_with_summary` case per MCPENH-020 §Assumption Reassessment item 9), names `mcp__worldloom__get_record` (singular) for individual record retrieval, references `references/retrieval-tool-tree.md` for the phase-by-phase decision tree, but does NOT inline-mention `get_persisted_packet_slice` or the persisted-with-summary case. The cited reference is currently incomplete on this point.
+1. **Intake state of canon-addition retrieval-tool-tree.md verified by direct file read:** lines 9, 14, 22-23, 35 enumerated `mcp__worldloom__get_records` for batch retrieval; line 9 documented the `retry_with.token_budget` retry pattern; line 9 also documented the canon-addition default budget as 16000. `mcp__worldloom__get_persisted_packet_slice` was absent across the entire skill directory at intake (verified via `grep -rn "get_persisted_packet_slice" .claude/skills/canon-addition/` — zero hits).
+2. **Intake state of canon-addition SKILL.md §World-State Prerequisites verified by direct file read:** line 76 cited `docs/CONTEXT-PACKET-CONTRACT.md` (which does cover the `persisted_with_summary` case per MCPENH-020 §Assumption Reassessment item 9), named `mcp__worldloom__get_record` (singular) for individual record retrieval, referenced `references/retrieval-tool-tree.md` for the phase-by-phase decision tree, but did NOT inline-mention `get_persisted_packet_slice` or the persisted-with-summary case. The cited reference was incomplete on this point before this ticket.
 3. **Cross-skill / cross-artifact boundary:** the shared boundary is the **retrieval-tool enumeration convention** in skill prose that documents the MCP packet pattern. MCPENH-020 established this convention for Category 2 / 2b skills (per `references/cross-skill-consistency.md` §Skill Category Classification); this ticket extends it to canon-addition (Category 3). Per MCPENH-020 §Assumption Reassessment item 1, the convention is: "skills using `get_context_packet` document `get_persisted_packet_slice` and `get_records` as the recovery paths for `persisted_with_summary` delivery." The convention is sibling-stable across MCPENH-020's targets; canon-addition is the asymmetric outlier.
 4. **FOUNDATIONS principle under audit (§Tooling Recommendation):** "LLM agents should always receive — directly or via the documented context-packet + targeted-retrieval pattern — current World Kernel, current Invariants, relevant canon fact records, affected domain files, unresolved contradictions list, mystery reserve entries touching the same domain." canon-addition's pattern honors this for the singular retrieval path; this ticket strengthens the same principle by documenting the persisted-slice fallback shape so operators can satisfy the recommendation efficiently when the packet exceeds inline budget.
 5. **No HARD-GATE / Mystery Reserve firewall surface touched:** documentation only; canon-mutation enforcement (Hook 3 engine-only `_source/` writes, the patch engine's append-only ledger discipline, MR firewall enforcement) is unaffected.
 6. **No schema extension:** no Canon Fact Record / Change Log Entry / proposal card / character dossier / diegetic artifact field changes.
-7. **Adjacent contradictions:** `references/retrieval-tool-tree.md` line 9 documents the `retry_with.token_budget` retry pattern but does not enumerate the `persisted_with_summary` case as a distinct delivery state requiring different recovery. The reference's mental model treats packet-incompleteness as a budget-too-small problem solvable by retry; the actual runtime behavior includes a budget-exceeds-harness-ceiling case where retry alone won't help (the persisted-with-summary path is the only complete recovery). Adding the `get_persisted_packet_slice` guidance also clarifies this distinction.
+7. **Adjacent contradiction corrected:** at intake, `references/retrieval-tool-tree.md` line 9 documented the `retry_with.token_budget` retry pattern but did not enumerate the `persisted_with_summary` case as a distinct delivery state requiring different recovery. The reference's mental model treated packet-incompleteness as a budget-too-small problem solvable by retry; the actual runtime behavior includes a budget-exceeds-harness-ceiling case where retry alone won't help. The landed edit now distinguishes `packet_incomplete_required_classes` retry from persisted-summary recovery.
 8. **MCPENH-020 scope decision audit:** MCPENH-020's §Assumption Reassessment item 1 explicitly named `.claude/skills/canon-addition/` among the scanned-but-not-amended surfaces. The justification was sibling-scoping (Category 2 / 2b only). The decision was correct under MCPENH-020's scope; this ticket does not reverse it but extends the same documentation pattern under a Category 3 scope. Confirmed via `git log --all -- archive/tickets/MCPENH-020-*.md` and direct read of MCPENH-020's text.
 9. **Verification command sanity check:** the only commands this ticket needs are documentation-completeness greps and a manual review of the new prose. No build, no test runner, no validator invocation. The verification surface mirrors MCPENH-020's documentation-only verification posture (per its §Verification Layers).
-10. **Optional in-scope addition:** SKILL.md §World-State Prerequisites (line 76) could surface the persisted-with-summary recovery inline (one-line mention) instead of relying on operators to load `references/retrieval-tool-tree.md`. This is a judgment call; the parsimonious version of this ticket touches only the reference (single file), but the SKILL.md inline mention would mirror MCPENH-020's same-seam pattern (it added inline mentions to several Category 2 skill SKILL.md files). Recommendation: include the SKILL.md inline mention as part of this ticket; it is a 1-2 sentence addition that closes the discoverability gap fully.
+10. **In-scope parent-skill addition landed:** SKILL.md §World-State Prerequisites (line 76 at intake) now surfaces the persisted-with-summary recovery inline instead of relying on operators to load `references/retrieval-tool-tree.md` first. This mirrors MCPENH-020's same-seam pattern and closes the discoverability gap fully without changing HARD-GATE or runtime behavior.
 
 ## Architecture Check
 
@@ -55,35 +55,33 @@ This ticket extends MCPENH-020's documentation pattern to canon-addition's `refe
 3. **Sibling alignment with MCPENH-020 preserved** → manual review: the new section's wording and structure parallel MCPENH-020's edits in `canon-facts-from-diegetic-artifacts/references/preflight-and-prerequisites.md` §"Persisted-with-summary delivery handling" (cited from MCPENH-020 §Landed Changes item 1) so canon-addition operators reading the prose see the same recovery shape Category 2/2b operators see.
 4. **No documentation drift introduced elsewhere** → codebase grep-proof: `grep -rn "persisted_with_summary" .claude/skills/canon-addition/` post-edit shows hits ONLY in the touched files; no orphaned references introduced.
 5. **FOUNDATIONS alignment preserved** → FOUNDATIONS alignment check: §Tooling Recommendation enumeration includes `get_records` and `get_persisted_packet_slice`; this ticket extends skill-prose alignment to that enumeration for the canon-addition surface.
-6. **Optional SKILL.md inline mention reads coherently** → manual review: if the SKILL.md §World-State Prerequisites inline mention is added per Assumption Reassessment item 10, the new sentence does not disrupt the section's flow and cites `references/retrieval-tool-tree.md` for the full recovery details.
+6. **SKILL.md inline mention reads coherently** → manual review: the SKILL.md §World-State Prerequisites inline mention added per Assumption Reassessment item 10 does not disrupt the section's flow and cites `references/retrieval-tool-tree.md` for the full recovery details.
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend canon-addition's retrieval-tool-tree.md
 
 In `.claude/skills/canon-addition/references/retrieval-tool-tree.md`:
 
-- Add `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` to the §Pre-flight retrieval-tool enumeration (currently lines 9-14 area; verify exact insertion point at implementation time).
-- Add a brief §"Persisted-with-summary delivery handling" sub-section near the §Pre-flight section that:
+- Added `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` to the §Pre-flight retrieval-tool enumeration and the Phase 0-2 targeted retrieval list.
+- Added a brief §"Persisted-with-summary delivery handling" sub-section near the §Pre-flight section that:
   - Names `delivery_status: persisted_with_summary` as the over-budget delivery state.
   - Notes the empty inline `nodes` arrays and the persisted file path location (`task_header.persisted_output_path`).
   - Names the two recovery paths: `get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` for ranked slice extraction, and `get_records(record_ids=[...], world_slug=<slug>)` for known id sets.
   - Cross-references `docs/CONTEXT-PACKET-CONTRACT.md` for the full contract.
-- Pattern-match MCPENH-020's wording in `.claude/skills/canon-facts-from-diegetic-artifacts/references/preflight-and-prerequisites.md` §"Persisted-with-summary delivery handling" so the prose is sibling-stable.
+- Pattern-matched MCPENH-020's wording in `.claude/skills/canon-facts-from-diegetic-artifacts/references/preflight-and-prerequisites.md` §"Persisted-with-summary delivery handling" so the prose is sibling-stable.
 
-### 2. Optional: surface in canon-addition SKILL.md §World-State Prerequisites
+### 2. Surfaced fallback in canon-addition SKILL.md §World-State Prerequisites
 
 In `.claude/skills/canon-addition/SKILL.md` (line 76 area, §World-State Prerequisites):
 
-- Add a 1-sentence inline mention of the persisted-with-summary recovery, citing `references/retrieval-tool-tree.md` for details. Example phrasing: "When the packet returns `delivery_status: persisted_with_summary` (over-budget delivery), use `mcp__worldloom__get_persisted_packet_slice` or `mcp__worldloom__get_records` per `references/retrieval-tool-tree.md` rather than falling back to per-record `get_record` calls."
-- Verify the addition does not disrupt the section's existing flow; the section currently lists `get_record`, `find_sections_touched_by`, `find_named_entities` for targeted retrieval — the new mention slots in as a fallback-state note.
-
-This addition is recommended (Assumption Reassessment item 10) but separable; if the operator implementing this ticket prefers the parsimonious version (reference-only), the SKILL.md edit can be deferred to a follow-up ticket.
+- Added a 1-sentence inline mention of the persisted-with-summary recovery, citing `references/retrieval-tool-tree.md` for details and directing operators to use `get_persisted_packet_slice` or `get_records` instead of repeated single-record calls.
+- Verified the addition slots into the existing retrieval-flow sentence without altering HARD-GATE behavior, patch-plan ordering, approval-token behavior, or canon-write semantics.
 
 ## Files to Touch
 
 - `.claude/skills/canon-addition/references/retrieval-tool-tree.md` (modify — primary edit)
-- `.claude/skills/canon-addition/SKILL.md` (modify — optional inline mention per Assumption Reassessment item 10)
+- `.claude/skills/canon-addition/SKILL.md` (modify — inline mention per Assumption Reassessment item 10)
 
 ## Out of Scope
 
@@ -120,3 +118,21 @@ This addition is recommended (Assumption Reassessment item 10) but separable; if
 2. `grep -n "persisted_with_summary" .claude/skills/canon-addition/references/retrieval-tool-tree.md` — targeted documentation grep.
 3. `grep -rn "persisted_with_summary\|get_persisted_packet_slice" .claude/skills/canon-addition/` — coverage-completeness grep.
 4. Manual side-by-side review of the new section against `.claude/skills/canon-facts-from-diegetic-artifacts/references/preflight-and-prerequisites.md` §"Persisted-with-summary delivery handling" to confirm sibling-stability of structure and wording.
+
+## Outcome
+
+Completed: 2026-05-03.
+
+Completed as a documentation-only alignment change. Canon-addition's retrieval-tool reference now names `get_persisted_packet_slice`, distinguishes `packet_incomplete_required_classes` retry from `persisted_with_summary` recovery, and documents both direct id-batch retrieval and persisted-slice extraction. The parent `SKILL.md` world-state prerequisite paragraph now points operators at the same fallback path. No MCP runtime, schema, HARD-GATE, approval-token, validator, or canon-write behavior changed.
+
+## Verification Result
+
+1. `grep -n "get_persisted_packet_slice" .claude/skills/canon-addition/references/retrieval-tool-tree.md` — passed; hits include the Pre-flight enumeration, persisted-slice recovery path, preference guidance, and Phase 0-2 targeted retrieval list.
+2. `grep -n "persisted_with_summary" .claude/skills/canon-addition/references/retrieval-tool-tree.md` — passed; hits include the new delivery-state section and targeted retrieval list.
+3. `grep -rn "persisted_with_summary\|get_persisted_packet_slice" .claude/skills/canon-addition/` — passed; hits are confined to the two touched files.
+4. Manual side-by-side review against `.claude/skills/canon-facts-from-diegetic-artifacts/references/preflight-and-prerequisites.md` §"Persisted-with-summary delivery handling" — passed; canon-addition now uses the same two-path recovery structure.
+5. `git diff --check` — passed with no whitespace errors.
+
+## Deviations
+
+- The optional SKILL.md inline mention was included as active scope because Assumption Reassessment item 10 recommended it and it is same-seam documentation fallout. It does not change canon-addition's HARD-GATE, patch-plan ordering, approval-token, validation, or submit semantics.
