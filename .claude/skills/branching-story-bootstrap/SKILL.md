@@ -84,8 +84,10 @@ Phase 1: Premise Normalization        (genre/tonal register, designing
       |
       v
 Phase 2: Cast Binding                 (mirror each CHAR into STENT-NNNN;
-                                       create initial STINT-0001-<char-slug>
-                                       per major; story-only entities)
+                                       create initial STINT-0001 per major
+                                       (bare-numeric id; character_id field
+                                       carries per-character semantics);
+                                       story-only entities)
       |
       v
 Phase 3: World-Fact Import            (import CFs touching cast/location/
@@ -178,7 +180,7 @@ worlds/<world-slug>/stories/<story-slug>/
 │   ├── consequences/         ← CNSQ-NNNN.yaml (initialized empty at PG-0001)
 │   ├── threads/              ← THR-NNNN.yaml
 │   ├── relationships/        ← SREL-NNNN.yaml
-│   ├── intentions/           ← STINT-NNNN-<char-slug>.yaml
+│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `character_id` field)
 │   ├── storylets/            ← SLT-NNNN.yaml (provenance.origin=bootstrap_seed)
 │   ├── locations/            ← STLOC-NNNN.yaml
 │   ├── objects/              ← STOBJ-NNNN.yaml
@@ -284,7 +286,7 @@ For each CHAR in `cast_bind_list`, mirror the world dossier into a story-local `
 
 **Story-only entities**: if the user names entities not in world canon (e.g., a new village invented for this story, or a peer companion named in a CHAR dossier brief but not promoted to a CHAR-NNNN of its own), create them as `STENT-NNNN` with `world_ent_id: null` and `story_only: true`. These are counterfactual / soft-canon-local-to-story unless promoted via `story-fact-promotion-to-canon`. Story-only STENTs MAY be listed in STORY_KERNEL.md `cast_bind_list` with `char_id: null` when they are load-bearing for the story bundle (named cast members, even if offstage at PG-0001 — they live in STINT.relationships and the runtime needs to resolve them by id). Story-only entities that exist purely as state-snapshot scenery (a town, a generic crowd) live in `_source/entities/` only and are not surfaced in `cast_bind_list`.
 
-**Initial intention snapshot per major character**: emit `STINT-0001-<char-slug>.yaml` with `goals`, `fears`, `secrets[SF-NNNN]`, `beliefs[SF-NNNN]`, `relationships{STENT-id: state}`, `emotional_state`, `current_pressure: 0..10`, `traits`, `values{axis: weight}`, `created_at_page: PG-0001`.
+**Initial intention snapshot per major character**: emit `STINT-NNNN.yaml` (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `character_id` field, not by id suffix) with `goals`, `fears`, `secrets[SF-NNNN]`, `beliefs[SF-NNNN]`, `relationships{STENT-id: state}`, `emotional_state`, `current_pressure: 0..10`, `traits`, `values{axis: weight}`, `created_at_page: PG-0001`.
 
 **Rule (halt condition)**: a character whose `role_in_story` is `protagonist` or `major` and whose STINT carries no goals AND no fears AND no beliefs cannot be driven by the runtime — halt the phase and request the user supply intention seeds.
 
@@ -466,7 +468,7 @@ Run all 12 gates. Each must record PASS with a one-line rationale into `STORY_KE
 | 3 | Content policy presence | content_policy block embedded verbatim in STORY_KERNEL.md AND in every assembled LLM prompt this run | Pre-flight |
 | 4 | ID uniqueness | Allocated IDs do not collide with any existing record in this story | Pre-flight |
 | 5 | Branch path consistency | `PG-0001.branch_path == [PG-0001]` AND `parent_page_id == null` AND `branch_id == BR-0001` | Phase 7 |
-| 6 | Cast intention coverage | Every protagonist + major has a non-empty `STINT-0001-<slug>` | Phase 2 |
+| 6 | Cast intention coverage | Every protagonist + major has a non-empty bare-numeric `STINT-NNNN` record linked by `character_id` | Phase 2 |
 | 7 | Obligation salience (Rule 5) | Every initial OBL declares salience, urgency, ≥2 payoff_modes | Phase 5 |
 | 8 | Epistemic class declared (Rule 1) | Every initial SF declares `epistemic_class` | Phase 3 |
 | 9 | Storylet diversity | Seed pool covers ≥5 distinct shapes from the Phase 6 coverage table | Phase 6 |

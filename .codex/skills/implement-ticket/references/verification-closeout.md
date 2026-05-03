@@ -62,6 +62,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
 - completed implementation tickets convert planned sections such as `What to Change` to landed facts; if preserving the section as the final implementation record, prefer renaming it to `Landed Changes`
+- completed implementation tickets must not leave unperformed optional plan items in active plan sections; delete them, historicalize them as not performed, or move them to `Out of Scope` / `## Deviations` with a clear boundary
 - re-read the entire ticket top-to-bottom so earlier authored sections such as `Problem`, `What to Change`, `Architecture Check`, `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, `Test Plan`, and `Invariants` do not still contain stale pre-reassessment wording
 - rewrite fixed current-state claims in `## Problem` as historical intake evidence (`At intake`, `Before this ticket`, or equivalent) so the completed record does not imply the defect still exists
 - when preserving original failure evidence, label it as historical intake evidence (`At intake`, `Observed before this ticket`, or equivalent) so the completed record does not still read as if the fixed failure is current

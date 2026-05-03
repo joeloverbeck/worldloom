@@ -34,7 +34,7 @@ export const ID_CLASS_FORMATS = {
   CNSQ: { width: 4, zeroPad: true, regex: /^CNSQ-(\d{4})$/ },
   THR: { width: 4, zeroPad: true, regex: /^THR-(\d{4})$/ },
   SREL: { width: 4, zeroPad: true, regex: /^SREL-(\d{4})$/ },
-  STINT: { width: 4, zeroPad: true, regex: /^STINT-(\d{4})(?:-.+)?$/ },
+  STINT: { width: 4, zeroPad: true, regex: /^STINT-(\d{4})$/ },
   SLT: { width: 4, zeroPad: true, regex: /^SLT-(\d{4})$/ },
   SLB: { width: 4, zeroPad: true, regex: /^SLB-(\d{4})$/ },
   STLOC: { width: 4, zeroPad: true, regex: /^STLOC-(\d{4})$/ },

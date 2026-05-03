@@ -28,6 +28,15 @@ Use this as the default path, then apply the detailed rules below when the ticke
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
 7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed.
 
+### Mandatory References By Phase
+
+Use this compact checklist so required references are not skipped:
+
+1. Intake: `references/ticket-classification.md` and `references/dirty-worktree-ledger.md`.
+2. Reassessment: `references/reassessment-checks.md` for non-trivial tickets, plus `references/mismatch-handling.md`.
+3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
+4. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
+
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.

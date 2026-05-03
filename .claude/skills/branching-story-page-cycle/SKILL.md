@@ -314,7 +314,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 | Story consequences | `consequences/CNSQ-NNNN.yaml` | One per `required_aftermath` item from Phase 2 (unless absorbed by a newly-opened OBL); one per `consequence_address` op |
 | Story threads | `threads/THR-NNNN.yaml` | One per thread state change (status / pressure delta) |
 | Story relationships | `relationships/SREL-NNNN.yaml` | One per relationship state change (axes deltas / public_status / private_status_by_actor) |
-| Story intentions | `intentions/STINT-NNNN-<char>.yaml` | One per major character whose pressure / emotional_state / beliefs shifted |
+| Story intentions | `intentions/STINT-NNNN.yaml` | One per major character whose pressure / emotional_state / beliefs shifted (per-character semantics carried via the record's `character_id` field; per-page supersession of a prior STINT for the same character via `logical_id` + `supersedes`; bare-numeric id per the patch engine's `^STINT-\d{4}$` contract) |
 | Storylet (JIT only) | `storylets/SLT-NNNN.yaml` | IF Phase 4 JIT expansion fired via `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped` |
 | Story location | `locations/STLOC-NNNN.yaml` | IF a new story-local location is introduced this turn |
 | Story object | `objects/STOBJ-NNNN.yaml` | IF a new story-local object is introduced or an existing object's state changed via supersession |
@@ -623,7 +623,7 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
     consequence_address:          move CNSQ-NNNN from pending to addressed; replace status via supersession
     thread_supersede:             replace THR-NNNN with superseder (status / pressure delta)
     relationship_supersede:       replace SREL-NNNN with superseder (axes / public_status / private_status_by_actor)
-    intention_refresh:            add new STINT-NNNN-<char> to intentions_current; replace prior STINT for that character
+    intention_refresh:            add new STINT-NNNN to intentions_current; replace prior STINT for that character via supersession (logical_id + supersedes link to the prior record)
     cast_change:                  update cast_present
     location_change:              update current_location and accessible_locations
     inventory_change:             update inventory_by_entity via STOBJ supersession
@@ -1008,13 +1008,24 @@ When the gate is hidden per `execution_mode`, the engine auto-commits to Phase 1
 
 Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
 
-1. Assemble and submit one `mcp__worldloom__submit_patch_plan` envelope for all emitted `_source` records:
-   - `create_pg_record` for `_source/pages/PG-NNNN.yaml` (the new page record with state_snapshot + state_hash + emitted_choices + narrative_health + governor_nudge_applied + canon_revision audit-trail field).
-   - `create_se_record` for `_source/events/SE-NNNN.yaml`.
-   - Per-class create ops for emitted SF / OBL / CNSQ / THR / SREL / STINT / CHC records.
-   - `create_slt_record` IF Phase 4 JIT expansion fired.
-   - `create_stloc_record`, `create_stobj_record`, and `append_story_diegetic_artifact_record` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
-   - `create_br_record` for a new fork BR, or a superseding BR create op when updating an existing branch's leaf/status.
+1. Assemble the envelope, dry-run validate, sign the approval token, and submit. Five sub-steps:
+   - **1a. Assemble** the `mcp__worldloom__submit_patch_plan` envelope with all emitted `_source` records. Per-op kinds:
+     - `create_pg_record` for `_source/pages/PG-NNNN.yaml` (the new page record with state_snapshot + state_hash + emitted_choices + narrative_health + governor_nudge_applied + canon_revision audit-trail field).
+     - `create_se_record` for `_source/events/SE-NNNN.yaml`.
+     - `create_sf_record` for each `_source/facts/SF-NNNN.yaml` (one per SF created or invalidated this turn).
+     - `create_obl_record` for each `_source/obligations/OBL-NNNN.yaml` (one per OBL opened / paid_off / complicated / transferred / abandoned_with_acknowledgment).
+     - `create_cnsq_record` for each `_source/consequences/CNSQ-NNNN.yaml` (one per `required_aftermath` item or `consequence_address` op).
+     - `create_thr_record` for each `_source/threads/THR-NNNN.yaml` (one per thread state change).
+     - `create_srel_record` for each `_source/relationships/SREL-NNNN.yaml` (one per relationship state change).
+     - `create_stint_record` for each `_source/intentions/STINT-NNNN.yaml` (one per character whose intentions shifted; bare-numeric id per the engine's `^STINT-\d{4}$` contract).
+     - `create_chc_record` for each `_source/choices/CHC-NNNN.yaml` (one per emitted choice).
+     - `create_slt_record` IF Phase 4 JIT expansion fired.
+     - `create_stloc_record`, `create_stobj_record`, and `append_story_diegetic_artifact_record` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
+     - `create_br_record` for a new fork BR, or a superseding BR create op when updating an existing branch's leaf/status.
+   - **1b. Persist** the envelope to `/tmp/<plan-id>.json` with `approval_token: "placeholder"` (the placeholder convention per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token` and `create-base-world/references/engine-envelope-shape.md §4` — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time).
+   - **1c. Dry-run validate** via `mcp__worldloom__validate_patch_plan(envelope)`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, Rules 1-7 + structural validators. Does NOT cover approval-token verification or id-allocation race (both submit-only); treat as a defensive pre-submit check, not a complete gate.
+   - **1d. Sign** via `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` (the canonical issuer per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token`; HMAC-bound to the envelope's exact bytes; never self-sign — Hook 3 blocks direct reads of `tools/world-mcp/.secret` precisely to prevent token forgery). Persist the signed token to `/tmp/<plan-id>.token` if the CLI submit path will be used.
+   - **1e. Submit**: embed the signed token back into the envelope (replacing the `"placeholder"` value) AND pass it as the separate `approval_token` parameter to `mcp__worldloom__submit_patch_plan(plan, approval_token)` — the MCP wrapper validates both surfaces. Submit-path selection by envelope size: ordinary turns (~40-50KB) fit MCP transport; large turns (multi-storylet JIT, large state snapshots) use `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` instead — same engine code, same failure-mode codes, bypasses MCP transport size constraints (per `docs/HARD-GATE-DISCIPLINE.md §Submitting the plan`).
 2. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
 3. `Edit worlds/<world-slug>/stories/<story-slug>/INDEX.md` LAST:
    - Update the branch's leaf entry (or add a new branch row if fork).
@@ -1092,7 +1103,7 @@ state_snapshot:
   consequences_addressed: [CNSQ-NNNN, ...]
   threads_active: [THR-NNNN, ...]
   relationships_current: [SREL-NNNN, ...]
-  intentions_current: [STINT-NNNN-<char>, ...]
+  intentions_current: [STINT-NNNN, ...]
   cast_present: [STENT-NNNN, ...]
   current_location: STLOC-NNNN
   accessible_locations: [STLOC-NNNN, ...]
@@ -1191,7 +1202,7 @@ The remaining classes (SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, DA-st
 - **CNSQ-NNNN** — append-only; supersession on `consequence_address` op; carries `kind`, `subjects`, `scope`, `urgency`, `salience`, `created_at_page`, branch-scoped visibility.
 - **THR-NNNN** — append-only; supersession on `status` or `current_pressure` change.
 - **SREL-NNNN** — append-only; supersession on `axes` / `public_status` / `private_status_by_actor` change.
-- **STINT-NNNN-<char>** — append-only; replaces prior STINT for that character on intention refresh.
+- **STINT-NNNN** — append-only; supersession on intention refresh; per-character semantics carried via the record's `character_id` field; per-page logical chain via `logical_id` / `supersedes`. The patch engine's `create_stint_record` op enforces strict `^STINT-\d{4}$` (the bare-numeric form). Pre-SPEC-13 records on disk using the legacy `STINT-NNNN-<char>` form remain readable as immutable history; new supersession chains link bare-numeric IDs to legacy IDs via `logical_id`.
 - **SLT-NNNN (JIT only)** — branch-scoped (`visibility.scope: branch_scoped`); carries `provenance.origin: runtime_jit` and `created_at_page: this_PG`; produced by `storylet-pool-authoring` `mode=jit` and written by this skill in Phase 11.
 - **STLOC-NNNN / STOBJ-NNNN** — append-only; introduced when a new story-local location/object enters scope.
 - **DA-NNNN (story-local)** — created when a diegetic artifact is authored in-story this turn; carries `story_id` (distinct from world-level DA).
