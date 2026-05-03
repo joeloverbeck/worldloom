@@ -7,13 +7,19 @@ The goal is to preserve the patch-engine write boundary, not to make canon write
 ## Decision Rules
 
 1. Prefer `mcp__worldloom__submit_patch_plan` whenever it is exposed.
-2. If the MCP submit tool is unavailable, inspect the local patch-engine package before writing:
+2. If the MCP submit tool is unavailable but the repo's world-mcp CLI path is available, prefer the documented CLI sequence over writing a temporary local driver:
+   - `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`
+   - present the validated plan and wait for explicit user approval
+   - `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>`
+   - `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`
+3. When using the world-mcp validate/submit surfaces, include `target_file` on every operation according to the MCP envelope schema, even for record-id operations whose patch-engine staging code can resolve the target file from the world index.
+4. If neither MCP submit nor the world-mcp CLI path is available, inspect the local patch-engine package before writing:
    - `tools/patch-engine/src/apply.ts`
    - `tools/patch-engine/src/envelope/schema.ts`
    - the op implementation for every operation in the plan
    - `tools/world-mcp/src/approval/token.ts` or the current approval-token implementation
-3. Never direct-edit `_source/*.yaml` as a fallback.
-4. Stop and escalate if the only available path would weaken a real hard gate, silently skip required approval semantics, or mutate canon without patch-engine staging.
+5. Never direct-edit `_source/*.yaml` as a fallback.
+6. Stop and escalate if the only available path would weaken a real hard gate, silently skip required approval semantics, or mutate canon without patch-engine staging.
 
 ## Operation Class
 
