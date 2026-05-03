@@ -489,7 +489,7 @@ This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_pac
 
 **Whole-class enumeration is a legitimate primary loading pattern.** For skills whose validation discipline tests a candidate against every record of a class — the `emergent-pressure-events` Phase 6 firewalls (every INV record at Phase 6a; every Mystery Reserve entry at Phase 6b) and the `continuity-audit` cross-checks — whole-class enumeration via `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)` is a recognized primary loading branch of the "directly or via context-packet" permission above. The "touching the same domain" mystery-reserve scoping in the bullet list applies to skills with domain-bounded firewall surfaces; whole-class scoping applies to skills whose firewall is class-bounded by their own Canon Safety Check commitments. The load shape is the skill's choice, named explicitly in its FOUNDATIONS Alignment table and governed by its Canon Safety Check discipline.
 
-Story-pipeline skills (Skill Category 2c) depend on this same MCP retrieval surface for world-canon reads; their story-bundle-local context layer is defined in §Story Bundles, with packet extension work deferred to MCPENH-027.
+Story-pipeline skills (Skill Category 2c) depend on this same MCP retrieval surface for world-canon reads. Indexed story-bundle records are also available through targeted retrieval when callers supply `story_slug`; the story-bundle-local context-packet layer is defined in §Story Bundles, with packet extension work deferred to MCPENH-027.
 
 ---
 
@@ -537,7 +537,7 @@ Story bundles are distinct from world canon. Story-bundle records are story-loca
 
 ### 3. Read Discipline
 
-Story-bundle records are read directly as files. Hook 2's world-canon match pattern is `worlds/<slug>/_source/...`; it does not match `worlds/<slug>/stories/<story-slug>/_source/...`, so direct reads of story-bundle source records are not redirected to MCP retrieval.
+Story-bundle records remain directly readable as files for current story-pipeline workflows. Hook 2's world-canon match pattern is `worlds/<slug>/_source/...`; it does not match `worlds/<slug>/stories/<story-slug>/_source/...`, so direct reads of story-bundle source records are not redirected to MCP retrieval. For indexed story-bundle records with known authored IDs, targeted retrieval tools such as `get_record`, `get_records`, `get_record_field`, `get_records_field`, `list_records`, `get_neighbors`, `search_nodes`, `find_named_entities`, and `find_impacted_fragments` can read the bundle-scoped records when supplied with `story_slug`; MCPENH-027 owns folding that retrieval into `get_context_packet` for story-pipeline task types.
 
 World canon read by story-pipeline skills still routes through `mcp__worldloom__get_record`, `mcp__worldloom__get_context_packet`, `mcp__worldloom__list_records`, and the other targeted retrieval tools named in §Tooling Recommendation.
 

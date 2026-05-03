@@ -19,11 +19,19 @@ import {
 } from "../context-packet/shared";
 import { createMcpError, type McpError } from "../errors";
 
-import { listIndexedWorldSlugs } from "./_shared";
+import {
+  STORY_BUNDLE_NODE_TYPES,
+  isStoryBundleNodeType,
+  isStoryBundleRecordId,
+  listIndexedWorldSlugs,
+  toStoryScopedNodeId,
+  type StoryBundleNodeType
+} from "./_shared";
 
 export interface GetRecordArgs {
   record_id: string;
   world_slug?: string;
+  story_slug?: string;
   section_path?: string;
 }
 
@@ -34,7 +42,15 @@ export type ParsedRecord =
   | ({ record_kind: "mystery_reserve" } & MysteryRecord)
   | ({ record_kind: "open_question" } & OpenQuestionRecord)
   | ({ record_kind: "named_entity" } & NamedEntityRecord)
-  | ({ record_kind: "section" } & SectionRecord);
+  | ({ record_kind: "section" } & SectionRecord)
+  | StoryParsedRecord;
+
+export type StoryRecordKind = StoryBundleNodeType;
+
+export type StoryParsedRecord = {
+  record_kind: StoryRecordKind;
+  [key: string]: unknown;
+};
 
 export type HybridRecordKind = "character" | "diegetic_artifact" | "adjudication";
 
@@ -84,6 +100,7 @@ export type GetRecordResponse =
 
 export interface RecordRow {
   node_id: string;
+  story_slug?: string | null;
   node_type: NodeType;
   file_path: string;
   body: string;
@@ -94,6 +111,11 @@ const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
 const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d{4}$/;
+
+const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
+  "storylet_batch_manifest",
+  "remediation_storylet_proposal_card"
+];
 
 const NODE_TYPE_TO_RECORD_KIND: Partial<Record<NodeType, ParsedRecord["record_kind"]>> = {
   canon_fact_record: "canon_fact",
@@ -112,6 +134,10 @@ const NODE_TYPE_TO_HYBRID_KIND: Partial<Record<NodeType, HybridRecordKind>> = {
 };
 
 function getRecordKind(nodeType: NodeType): ParsedRecord["record_kind"] | null {
+  if (isStoryBundleNodeType(nodeType)) {
+    return nodeType;
+  }
+
   return NODE_TYPE_TO_RECORD_KIND[nodeType] ?? null;
 }
 
@@ -133,34 +159,61 @@ export function isMcpError(value: unknown): value is McpError {
 }
 
 export function validateRecordId(recordId: string): McpError | null {
-  if (ATOMIC_RECORD_ID_PATTERN.test(recordId) || HYBRID_RECORD_ID_PATTERN.test(recordId)) {
+  if (
+    ATOMIC_RECORD_ID_PATTERN.test(recordId) ||
+    HYBRID_RECORD_ID_PATTERN.test(recordId) ||
+    isStoryBundleRecordId(recordId)
+  ) {
     return null;
   }
 
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-NNNN, CH-NNNN, M-N, OQ-NNNN, ENT-NNNN, invariant category id, SEC-<class>-NNN) or hybrid (CHAR-NNNN, DA-NNNN, PA-NNNN)"
+      "atomic (CF-NNNN, CH-NNNN, M-N, OQ-NNNN, ENT-NNNN, invariant category id, SEC-<class>-NNN), hybrid (CHAR-NNNN, DA-NNNN, PA-NNNN), or story-bundle (PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STLOC/STOBJ/BR/CHC/SLT/SLB/SAU/SP/RSP-NNNN)"
   });
 }
 
-function findRecordRow(worldSlug: string, recordId: string): RecordRow | McpError | undefined {
+function findRecordRow(
+  worldSlug: string,
+  recordId: string,
+  storySlug?: string
+): RecordRow | McpError | undefined {
   const opened = openIndexDb(worldSlug);
   if (!("db" in opened)) {
     return opened;
   }
 
   try {
+    if (storySlug !== undefined && isStoryBundleRecordId(recordId)) {
+      return opened.db
+        .prepare(
+          `
+            SELECT node_id, story_slug, node_type, file_path, body, content_hash
+            FROM nodes
+            WHERE world_slug = ?
+              AND story_slug = ?
+              AND node_id = ?
+            LIMIT 1
+          `
+        )
+        .get(worldSlug, storySlug, toStoryScopedNodeId(recordId, storySlug)) as
+        | RecordRow
+        | undefined;
+    }
+
     return opened.db
       .prepare(
         `
-          SELECT node_id, node_type, file_path, body, content_hash
+          SELECT node_id, story_slug, node_type, file_path, body, content_hash
           FROM nodes
-          WHERE node_id = ?
+          WHERE world_slug = ?
+            AND node_id = ?
+            AND story_slug IS NULL
           LIMIT 1
         `
       )
-      .get(recordId) as RecordRow | undefined;
+      .get(worldSlug, recordId) as RecordRow | undefined;
   } finally {
     opened.db.close();
   }
@@ -169,13 +222,26 @@ function findRecordRow(worldSlug: string, recordId: string): RecordRow | McpErro
 export function resolveRecordRow(args: {
   record_id: string;
   world_slug?: string;
+  story_slug?: string;
 }): { worldSlug: string; row: RecordRow } | McpError {
+  if (isStoryBundleRecordId(args.record_id) && args.story_slug === undefined) {
+    return createMcpError(
+      "invalid_input",
+      `story_slug required for record_id=${args.record_id}; bundle-scoped IDs are not unique across bundles within a world.`,
+      {
+        field: "story_slug",
+        record_id: args.record_id
+      }
+    );
+  }
+
   if (args.world_slug !== undefined && args.world_slug.length > 0) {
-    const row = findRecordRow(args.world_slug, args.record_id);
+    const row = findRecordRow(args.world_slug, args.record_id, args.story_slug);
     if (row === undefined) {
       return createMcpError("record_not_found", `Record '${args.record_id}' does not exist.`, {
         record_id: args.record_id,
-        world_slug: args.world_slug
+        world_slug: args.world_slug,
+        ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
       });
     }
 
@@ -185,7 +251,7 @@ export function resolveRecordRow(args: {
   const matches: Array<{ worldSlug: string; row: RecordRow }> = [];
 
   for (const worldSlug of listIndexedWorldSlugs()) {
-    const row = findRecordRow(worldSlug, args.record_id);
+    const row = findRecordRow(worldSlug, args.record_id, args.story_slug);
     if (row === undefined || "code" in row) {
       continue;
     }
@@ -218,6 +284,17 @@ export function parseRecordBody(row: RecordRow): ParsedRecord | McpError {
       record_id: row.node_id,
       node_type: row.node_type
     });
+  }
+
+  if (
+    isStoryBundleNodeType(row.node_type) &&
+    (STORY_MARKDOWN_NODE_TYPES as readonly string[]).includes(row.node_type)
+  ) {
+    return {
+      record_kind: row.node_type,
+      record_id: row.node_id,
+      body: row.body
+    };
   }
 
   let parsed: unknown;
@@ -482,7 +559,9 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const isHybrid = HYBRID_RECORD_ID_PATTERN.test(args.record_id);
 
-  if (args.section_path !== undefined && !isHybrid) {
+  const isStoryBundleRecord = isStoryBundleRecordId(args.record_id);
+
+  if (args.section_path !== undefined && (!isHybrid || isStoryBundleRecord)) {
     return createMcpError(
       "invalid_input",
       `section_path is only valid for hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN); use get_record_field for atomic record projection.`,
@@ -492,8 +571,15 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const resolved = resolveRecordRow(
     args.world_slug !== undefined
-      ? { record_id: args.record_id, world_slug: args.world_slug }
-      : { record_id: args.record_id }
+      ? {
+          record_id: args.record_id,
+          world_slug: args.world_slug,
+          ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
+        }
+      : {
+          record_id: args.record_id,
+          ...(args.story_slug !== undefined ? { story_slug: args.story_slug } : {})
+        }
   );
   if ("code" in resolved) {
     return resolved;

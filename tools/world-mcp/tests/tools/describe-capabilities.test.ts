@@ -65,6 +65,12 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   assert.ok(
     byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("adjudication_record")
   );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("storylet_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("story_fact_record")
+  );
   assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
 });
 

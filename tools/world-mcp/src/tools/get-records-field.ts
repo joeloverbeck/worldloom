@@ -10,6 +10,7 @@ export interface GetRecordsFieldArgs {
   record_ids: string[];
   field_path: Array<string | number>;
   world_slug?: string;
+  story_slug?: string;
 }
 
 export interface GetRecordsFieldSuccessEntry {
@@ -36,12 +37,22 @@ export interface GetRecordsFieldResponse {
 async function resolveOne(
   recordId: string,
   fieldPath: Array<string | number>,
-  worldSlug: string | undefined
+  worldSlug: string | undefined,
+  storySlug: string | undefined
 ): Promise<GetRecordsFieldEntry> {
   const result = await getRecordField(
     worldSlug === undefined
-      ? { record_id: recordId, field_path: fieldPath }
-      : { record_id: recordId, field_path: fieldPath, world_slug: worldSlug }
+      ? {
+          record_id: recordId,
+          field_path: fieldPath,
+          ...(storySlug !== undefined ? { story_slug: storySlug } : {})
+        }
+      : {
+          record_id: recordId,
+          field_path: fieldPath,
+          world_slug: worldSlug,
+          ...(storySlug !== undefined ? { story_slug: storySlug } : {})
+        }
   );
 
   if (isMcpError(result)) {
@@ -79,7 +90,9 @@ export async function getRecordsField(
   }
 
   const records = await Promise.all(
-    args.record_ids.map((recordId) => resolveOne(recordId, args.field_path, args.world_slug))
+    args.record_ids.map((recordId) =>
+      resolveOne(recordId, args.field_path, args.world_slug, args.story_slug)
+    )
   );
 
   return {

@@ -134,6 +134,7 @@ function toSearchNodeResult(
   return {
     id: row.node_id,
     world_slug: row.world_slug,
+    ...(row.story_slug !== undefined && row.story_slug !== null ? { story_slug: row.story_slug } : {}),
     node_type: row.node_type,
     heading_path: row.heading_path,
     summary: row.summary ?? null,
@@ -175,6 +176,7 @@ function loadFilteredRows(
           SELECT
             n.node_id,
             n.world_slug,
+            n.story_slug,
             n.node_type,
             n.file_path,
             n.heading_path,
@@ -231,6 +233,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
           SELECT
             n.node_id,
             n.world_slug,
+            n.story_slug,
             n.node_type,
             n.file_path,
             n.heading_path,
@@ -263,6 +266,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
                 SELECT
                   n.node_id,
                   n.world_slug,
+                  n.story_slug,
                   n.node_type,
                   n.file_path,
                   n.heading_path,
@@ -319,6 +323,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
           SELECT
             n.node_id,
             n.world_slug,
+            n.story_slug,
             n.node_type,
             n.file_path,
             n.heading_path,
@@ -358,6 +363,7 @@ function searchWorld(args: SearchNodesArgs, worldSlug: string): SearchRow[] | Mc
                 SELECT
                   n.node_id,
                   n.world_slug,
+                  n.story_slug,
                   n.node_type,
                   n.file_path,
                   n.heading_path,

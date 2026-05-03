@@ -926,6 +926,9 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type, [
       ...SUPPORTED_LIST_RECORD_TYPES
     ]);
+    assert.ok(
+      byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums?.record_type?.includes("storylet_record")
+    );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.describe_envelope_schema)?.input_schema_enums?.op_kind, [
       "create_cf_record",
       "create_ch_record",

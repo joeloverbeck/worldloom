@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-mcp/src/tools/get-context-packet.ts` and `tools/world-mcp/src/context-packet/*.ts` to assemble a `story_bundle_context` layer for story-pipeline task_types. Requires `story_slug` parameter when task_type is story-pipeline-scoped.
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, MCPENH-026
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, `archive/tickets/MCPENH-026.md`
 
 ## Problem
 
@@ -16,7 +16,7 @@ During the storylet-pool-authoring session (this conversation), this surfaced co
 - Story-bundle context (current pool / open OBLs / active THRs / longest-active-branch recent page metadata) had to be assembled separately via direct file reads (~33 reads for the marla-kern-seduction bundle).
 - The packet's `task_type='storylet_pool_authoring'` enum membership was load-bearing for surfacing the right world-canon layer (the governing-world-context picked CF-0004 because of the storylet-pool-authoring task-type weights), but it did not unlock any story-bundle context — that was a structural gap in the packet schema.
 
-The five story-pipeline skills' Pre-flight rules ALL describe the same shape: "load world canon via context_packet AND load story-bundle state via direct reads". This ticket converges those two loads into a single packet call, with the story-bundle layer assembled by the MCP server using the index landed in MCPENH-025 and the retrieval surface landed in MCPENH-026.
+The five story-pipeline skills' Pre-flight rules ALL describe the same shape: "load world canon via context_packet AND load story-bundle state via direct reads". This ticket converges those two loads into a single packet call, with the story-bundle layer assembled by the MCP server using the index landed in MCPENH-025 and the retrieval surface landed in `archive/tickets/MCPENH-026.md`.
 
 ## Assumption Reassessment (2026-05-03)
 
@@ -27,7 +27,7 @@ The five story-pipeline skills' Pre-flight rules ALL describe the same shape: "l
 5. **Token-budget arithmetic** — the packet enforces a token budget. Adding a story_bundle_context layer means the budget arithmetic must apportion across six layers (was five). Story-pipeline tasks should default to a higher token budget (24000 vs the current 18000 default) to accommodate story-bundle state without crowding out world-canon governing context — alternative: keep 18000 as default but document that callers can request higher for story-pipeline tasks.
 6. **No HARD-GATE semantics change** — read tool; no HARD-GATE.
 7. **No Mystery Reserve firewall weakening** — story_bundle_context layer must include the bundle's `mysteries_in_play[]` declarations from STORY_KERNEL.md (which cite the world-canon M records by ID with `status` + `future_resolution_safety` + `domain_overlap`); this preserves the firewall's Phase 4 gate 1 enforcement surface (storylet-pool-authoring's gate 1 reads M records via list_records; the packet's mysteries-in-play layer is a complementary cross-reference, not a replacement).
-8. **Adjacent contradictions** — `find_named_entities` (extended in MCPENH-026) returns story_local_matches; the packet's pre-call entity resolution should consult that surface when assembling story-bundle context. This is a coordination requirement, not a contradiction; this ticket cites MCPENH-026 as a hard dep.
+8. **Adjacent contradictions** — `find_named_entities` (extended in `archive/tickets/MCPENH-026.md`) returns story_local_matches; the packet's pre-call entity resolution should consult that surface when assembling story-bundle context. This is a coordination requirement, not a contradiction; this ticket cites the archived MCPENH-026 as a hard dep.
 9. **Packet-too-large fallback already documented** — `delivery_status='persisted_with_summary'` plus `governing_summary` plus `truncation_summary.dropped_layers` are all existing fallback mechanisms. The new layer participates in the same fallback system: if the story_bundle_context exceeds budget, it can be dropped to summary form (with `governing_summary` extended to include a story-bundle-context-summary sub-block).
 
 ## Architecture Check
@@ -168,4 +168,4 @@ Update `docs/CONTEXT-PACKET-CONTRACT.md` (the documented context-packet contract
 ### Commands
 
 1. `pnpm --filter world-mcp lint && pnpm --filter world-mcp typecheck && pnpm --filter world-mcp test` (targeted pipeline verification).
-2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js` running locally; invoke `mcp__worldloom__get_context_packet` with the marla-kern-seduction bundle as the integration check after `archive/tickets/MCPENH-025.md` and MCPENH-026 land and the index is rebuilt.
+2. `cd tools/world-mcp && pnpm build && node dist/cli/server.js` running locally; invoke `mcp__worldloom__get_context_packet` with the marla-kern-seduction bundle as the integration check after `archive/tickets/MCPENH-025.md` and `archive/tickets/MCPENH-026.md` land and the index is rebuilt.

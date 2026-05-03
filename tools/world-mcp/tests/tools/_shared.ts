@@ -11,6 +11,7 @@ const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
 interface SeedNodeInput {
   node_id: string;
   world_slug: string;
+  story_slug?: string | null;
   file_path: string;
   heading_path?: string | null;
   node_type: NodeType;
@@ -21,6 +22,7 @@ interface SeedNodeInput {
 }
 
 interface SeedEdgeInput {
+  story_slug?: string | null;
   source_node_id: string;
   target_node_id?: string | null;
   target_unresolved_ref?: string | null;
@@ -64,6 +66,7 @@ interface SeedScopedReferenceAliasInput {
 }
 
 interface SeedMentionInput {
+  story_slug?: string | null;
   node_id: string;
   surface_text: string;
   resolved_entity_id?: string | null;
@@ -152,6 +155,8 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
   try {
     db.exec(readFileSync(path.join(schemaRoot, "001_initial.sql"), "utf8"));
     db.exec(readFileSync(path.join(schemaRoot, "002_scoped_references.sql"), "utf8"));
+    db.exec(readFileSync(path.join(schemaRoot, "003_approval_tokens_consumed.sql"), "utf8"));
+    db.exec(readFileSync(path.join(schemaRoot, "004_story_bundle_scope.sql"), "utf8"));
 
     for (const node of input.nodes) {
       const absolutePath = path.join(worldRoot, node.file_path);
@@ -167,6 +172,7 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
           INSERT INTO nodes (
             node_id,
             world_slug,
+            story_slug,
             file_path,
             heading_path,
             byte_start,
@@ -179,11 +185,12 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
             anchor_checksum,
             summary,
             created_at_index_version
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `
       ).run(
         node.node_id,
         node.world_slug,
+        node.story_slug ?? null,
         node.file_path,
         node.heading_path ?? null,
         0,
@@ -203,13 +210,15 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
       db.prepare(
         `
           INSERT INTO edges (
+            story_slug,
             source_node_id,
             target_node_id,
             target_unresolved_ref,
             edge_type
-          ) VALUES (?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?)
         `
       ).run(
+        edge.story_slug ?? null,
         edge.source_node_id,
         edge.target_node_id ?? null,
         edge.target_unresolved_ref ?? null,
@@ -306,14 +315,16 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
       db.prepare(
         `
           INSERT INTO entity_mentions (
+            story_slug,
             node_id,
             surface_text,
             resolved_entity_id,
             resolution_kind,
             extraction_method
-          ) VALUES (?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?)
         `
       ).run(
+        mention.story_slug ?? null,
         mention.node_id,
         mention.surface_text,
         mention.resolved_entity_id ?? null,

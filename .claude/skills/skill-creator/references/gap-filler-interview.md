@@ -13,7 +13,7 @@ Gaps: [list of remaining unknowns]
 
 Target 95%. Announce the transition when reached: "I'm at 95% confidence. Moving to design."
 
-**Auto mode compression**: Under auto mode, routine gaps (slug, user-invocable flag, sibling interop names, INDEX semantics, examples yes/no, conventional argument naming, character-slug derivation rule, and similar operational-not-substantive choices) may be pre-filled as confirmable assumptions alongside a single substantive question — the user can override any assumption in the same reply. This honors "one substantive question per message" while respecting auto mode's "minimize interruptions" directive. Non-routine gaps (Validation Rules subset, HARD-GATE policy, output schema, Canon Safety Check shape, prerequisite-file list, world-scope declaration) stay strict single-question.
+**Auto mode compression**: Under auto mode, routine gaps (slug, user-invocable flag, sibling interop names, INDEX semantics, examples yes/no, conventional argument naming, character-slug derivation rule, and similar operational-not-substantive choices) may be pre-filled as confirmable assumptions alongside a single substantive question OR be bundled into the "Moving to design at 95%" transition announcement when no substantive question remains — the user can override any assumption in the same reply. This honors "one substantive question per message" while respecting auto mode's "minimize interruptions" directive. The transition-announcement bundle preserves the user's override window — any pre-fill can be corrected in the next reply before drafting begins. Padding the bundle with a contrived question to satisfy the literal one-question rule when no genuine substantive uncertainty remains is forbidden — the rule's purpose is genuine question-per-message discipline, not ceremonial question presence. Non-routine gaps (Validation Rules subset, HARD-GATE policy, output schema, Canon Safety Check shape, prerequisite-file list, world-scope declaration) stay strict single-question.
 
 ## Mandatory Gaps to Close
 
@@ -83,6 +83,8 @@ Items:
 - A single-sentence Final Rule stating the pipeline's discipline
 
 Each item — deduction OR bonus — is independently earned.
+
+**Bounded subjective adjustment** (optional): the rubric output may be adjusted by ±5% for proposal-shape signals not captured by the items list (e.g., a 1-page proposal vs. a 30-page proposal; a proposal that delegates extensively by reference vs. one that restates everything inline). Name the signal explicitly when applying ("−3% for proposal sparsity beyond the items list captures"); cap the adjustment at ±5% so the rubric remains the dominant signal. Skip this adjustment when the rubric output already reflects the proposal's shape adequately — most invocations should announce the rubric output unchanged.
 
 **Floor**: 50%. **Ceiling**: 90%. (95% is reached via gap-filler answers, never from the proposal alone.)
 
