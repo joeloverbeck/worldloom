@@ -79,6 +79,17 @@ const FULL_BODY_RULES_BY_TASK_TYPE: Record<TaskType, readonly FullBodyRule[]> = 
     { nodeType: "invariant" },
     { nodeType: "mystery_reserve_entry" }
   ],
+  branching_story_health_audit: [
+    { nodeType: "canon_fact_record" },
+    { nodeType: "invariant" },
+    { nodeType: "mystery_reserve_entry" }
+  ],
+  story_fact_promotion_to_canon: [
+    { nodeType: "canon_fact_record" },
+    { nodeType: "invariant" },
+    { nodeType: "mystery_reserve_entry" },
+    { nodeType: "open_question_entry" }
+  ],
   other: []
 };
 

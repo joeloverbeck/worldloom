@@ -375,6 +375,125 @@ test("storylet_pool_authoring reserves governing invariant and Mystery Reserve f
   }
 });
 
+test("branching_story_health_audit reserves governing invariant and Mystery Reserve full bodies", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: `id: CF-0001\nstatement: ${"Audit seed fact. ".repeat(600)}\n`
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: "id: ONT-1\nstatement: Embodiment remains required.\n"
+        },
+        {
+          node_id: "M-1",
+          world_slug: "seeded",
+          file_path: "_source/mystery-reserve/M-1.yaml",
+          node_type: "mystery_reserve_entry",
+          body: "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n"
+        }
+      ]
+    });
+
+    const packet = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "branching_story_health_audit",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 9000
+      })
+    );
+
+    assert.ok(!("code" in packet));
+    assert.deepEqual(
+      packet.task_header.governing_full_body_priority,
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.branching_story_health_audit
+    );
+
+    const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));
+    assert.equal(nodesById.get("ONT-1")?.full_body, "id: ONT-1\nstatement: Embodiment remains required.\n");
+    assert.equal(nodesById.get("M-1")?.full_body, "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("story_fact_promotion_to_canon reserves governing full bodies and delivers open questions", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "CF-0001",
+          world_slug: "seeded",
+          file_path: "_source/canon/CF-0001.yaml",
+          node_type: "canon_fact_record",
+          body: "id: CF-0001\nstatement: Candidate promotion fact.\n"
+        },
+        {
+          node_id: "ONT-1",
+          world_slug: "seeded",
+          file_path: "_source/invariants/ONT-1.yaml",
+          node_type: "invariant",
+          body: "id: ONT-1\nstatement: Embodiment remains required.\n"
+        },
+        {
+          node_id: "M-1",
+          world_slug: "seeded",
+          file_path: "_source/mystery-reserve/M-1.yaml",
+          node_type: "mystery_reserve_entry",
+          body: "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n"
+        },
+        {
+          node_id: "OQ-1",
+          world_slug: "seeded",
+          file_path: "_source/open-questions/OQ-1.yaml",
+          node_type: "open_question_entry",
+          body: "id: OQ-1\nquestion: Who first charted the brine shelf?\n"
+        }
+      ]
+    });
+
+    const packet = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_fact_promotion_to_canon",
+        world_slug: "seeded",
+        seed_nodes: ["CF-0001"],
+        token_budget: 12000
+      })
+    );
+
+    assert.ok(!("code" in packet));
+    assert.deepEqual(
+      packet.task_header.governing_full_body_priority,
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.story_fact_promotion_to_canon
+    );
+
+    const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));
+    assert.equal(nodesById.get("ONT-1")?.full_body, "id: ONT-1\nstatement: Embodiment remains required.\n");
+    assert.equal(nodesById.get("M-1")?.full_body, "id: M-1\ntitle: Drowned bell\nunknowns:\n  - Who rings it.\n");
+    assert.equal(
+      nodesById.get("OQ-1")?.full_body,
+      "id: OQ-1\nquestion: Who first charted the brine shelf?\n"
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("reserve-policy task types fail loudly when required governing full bodies cannot fit", async () => {
   const root = createTempRepoRoot();
 

@@ -76,6 +76,12 @@ Two distinct semantics apply, neither obvious from the typed interface:
 
 The directory portion is lowercase-kebab-case; the file class inside the SEC record is UPPER_SNAKE (e.g., `file_class: PEOPLES_AND_SPECIES` for files under `_source/peoples-and-species/`).
 
+### CH-record `affected_fact_ids` is required for any plan modifying an existing CF
+
+PATCHENG-003 unified the CH-record schema on `affected_fact_ids` as the single canonical CF-reference field. The retired `affected_cf_ids` alias is rejected by `tools/validators/src/schemas/change-log-entry.schema.json`.
+
+For any plan that modifies an existing CF — `append_modification_history_entry`, `append_extension` against an existing CF, `update_record_field` on an existing CF, or any other op that touches a pre-existing `_source/canon/CF-NNNN.yaml` — the CH-record's `affected_fact_ids` array MUST list every modified CF id alongside any newly-created CF ids. This matches the field read by `rule6_no_silent_retcons`, the genesis CH-0001 template in `create-base-world`, and the worked example at `examples/accept-with-required-updates.md`.
+
 ---
 
 ## 3. `expected_id_allocations` per-class format

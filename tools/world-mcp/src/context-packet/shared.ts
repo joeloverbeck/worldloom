@@ -146,6 +146,8 @@ export const GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE: Record<
   story_bootstrap: { invariants: "reserve", mystery_reserve: "reserve" },
   story_page_cycle: { invariants: "reserve", mystery_reserve: "reserve" },
   storylet_pool_authoring: { invariants: "reserve", mystery_reserve: "reserve" },
+  branching_story_health_audit: { invariants: "reserve", mystery_reserve: "reserve" },
+  story_fact_promotion_to_canon: { invariants: "reserve", mystery_reserve: "reserve" },
   other: OPPORTUNISTIC_GOVERNING_FULL_BODY_PRIORITY
 };
 

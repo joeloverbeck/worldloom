@@ -13,7 +13,7 @@ Design authority: `archive/specs/SPEC-03-patch-engine.md`, amended by `specs/SPE
 - `OPERATION_KINDS` as the runtime operation-kind manifest consumed by schema-introspection tools
 - `PatchReceipt`
 
-The operation vocabulary is the SPEC-03 post-SPEC-13 vocabulary: `create_*` record ops, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, and the three hybrid-file append ops for adjudications, characters, and diegetic artifacts. Per SPEC-14, adjudication frontmatter uses `pa_id` and the shared canonical verdict enum. Section-to-CF writes through `append_touched_by_cf` or section-target `append_extension` reject pointers whose target CF does not list the section `file_class` in `required_world_updates`.
+The operation vocabulary is the SPEC-03 post-SPEC-13 vocabulary: `create_*` record ops, `update_record_field`, the constrained `remove_ch_affected_cf_ids` migration op for the retired CH alias field, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, and the three hybrid-file append ops for adjudications, characters, and diegetic artifacts. Per SPEC-14, adjudication frontmatter uses `pa_id` and the shared canonical verdict enum. Section-to-CF writes through `append_touched_by_cf` or section-target `append_extension` reject pointers whose target CF does not list the section `file_class` in `required_world_updates`.
 
 ## Write Order
 

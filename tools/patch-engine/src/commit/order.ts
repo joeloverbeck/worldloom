@@ -12,6 +12,7 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
 
 const TIER_TWO = new Set<PatchOperation["op"]>([
   "update_record_field",
+  "remove_ch_affected_cf_ids",
   "append_extension",
   "append_touched_by_cf",
   "append_modification_history_entry"

@@ -16,6 +16,20 @@ Maintain a compact ledger with these categories:
 
 Refresh the ledger before final response using both `git status --short` and any package/world ignored-aware status needed for the ticket. Do not rely on `git diff --name-only` alone; untracked ticket files and generated ignored artifacts can be invisible there.
 
+## Final Response Template
+
+Use a compact ledger in the final response when the worktree was dirty or ignored artifacts matter:
+
+- `Pre-existing unrelated`: `<paths>`; left untouched.
+- `Pre-existing same-seam`: `<paths>`; ticket-owned hunks were `<summary>`.
+- `Pre-existing untracked same-seam`: `<paths>`; this run changed `<summary>`.
+- `Owned edits`: `<paths>`.
+- `New/untracked owned files`: `<paths>`.
+- `Externally appeared unrelated`: `<paths>`; left untouched.
+- `Expected ignored artifacts`: `<paths>`; produced or refreshed by `<command>`.
+
+Omit categories that are empty. For same-file or same-seam paths, describe ownership by hunk or topic rather than claiming the whole file.
+
 ## Initial Overlap Check
 
 If dirty paths overlap the active ticket seam, inspect their diffs before coding and classify them as:

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE,
+  branchingStoryHealthAuditRankingProfile,
   canonFactsFromDiegeticArtifactsRankingProfile,
   canonAdditionRankingProfile,
   characterGenerationRankingProfile,
@@ -13,6 +14,7 @@ import {
   proposeNewCharactersRankingProfile,
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
+  storyFactPromotionToCanonRankingProfile,
   storyPageCycleRankingProfile,
   storyletPoolAuthoringRankingProfile
 } from "../../src/ranking/profiles";
@@ -56,7 +58,9 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
     emergentPressureEventsRankingProfile,
     storyBootstrapRankingProfile,
     storyPageCycleRankingProfile,
-    storyletPoolAuthoringRankingProfile
+    storyletPoolAuthoringRankingProfile,
+    branchingStoryHealthAuditRankingProfile,
+    storyFactPromotionToCanonRankingProfile
   ];
 
   for (const profile of adjacentProfiles) {
@@ -116,6 +120,28 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
       (defaultRankingProfile.file_class_priority.mystery_reserve_entry ?? 0)
   );
   assert.ok((storyletPoolAuthoringRankingProfile.edge_type_boost?.firewall_for ?? 0) > 0);
+  assert.ok(
+    (branchingStoryHealthAuditRankingProfile.file_class_priority.canon_fact_record ?? 0) >
+      (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
+  );
+  assert.ok(
+    (branchingStoryHealthAuditRankingProfile.file_class_priority.change_log_entry ?? 0) >
+      (defaultRankingProfile.file_class_priority.change_log_entry ?? 0)
+  );
+  assert.ok(
+    branchingStoryHealthAuditRankingProfile.recency_of_modification_bonus >
+      defaultRankingProfile.recency_of_modification_bonus
+  );
+  assert.ok((branchingStoryHealthAuditRankingProfile.edge_type_boost?.firewall_for ?? 0) > 0);
+  assert.ok(
+    (storyFactPromotionToCanonRankingProfile.file_class_priority.canon_fact_record ?? 0) >
+      (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
+  );
+  assert.ok(
+    (storyFactPromotionToCanonRankingProfile.file_class_priority.open_question_entry ?? 0) >
+      (defaultRankingProfile.file_class_priority.open_question_entry ?? 0)
+  );
+  assert.ok((storyFactPromotionToCanonRankingProfile.edge_type_boost?.required_world_update ?? 0) > 0);
 });
 
 test("canon-pipeline-adjacent task types have task-specific default budgets", () => {
@@ -127,5 +153,7 @@ test("canon-pipeline-adjacent task types have task-specific default budgets", ()
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_bootstrap, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_page_cycle, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.storylet_pool_authoring, 18000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.branching_story_health_audit, 12000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_fact_promotion_to_canon, 8000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.other, 8000);
 });

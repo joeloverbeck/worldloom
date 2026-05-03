@@ -45,7 +45,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 
 - If a broad JS/TS `node --test <file>` lane fails opaquely, isolate the failing seam with a narrower reporter or `--test-name-pattern` before treating the full-file failure as ticket evidence.
 - If isolated subtests pass but the broad lane still fails opaquely, run the compiled test file directly from the same package root when that exposes clearer TAP output or assertion traces.
-- If `node --test dist/path/to/test.js` reports only a wrapper failure for a compiled test module that itself uses `node:test`, run `node dist/path/to/test.js` as a diagnostic command to expose nested TAP/subtest assertion details. Still rerun the accepted `node --test ...` proof before closeout if the ticket records that command.
+- If `node --test dist/path/to/test.js` reports only a wrapper result for a compiled test module that itself uses `node:test`, run `node dist/path/to/test.js` as a diagnostic command to expose nested TAP/subtest assertion details. This applies when the wrapper fails opaquely and when it passes but only proves the file wrapper instead of the meaningful subtests. Still rerun the accepted `node --test ...` proof before closeout if the ticket records that command; if the direct module run becomes the stronger accepted proof, update the ticket's `Acceptance Criteria`, `Test Plan`, and `## Verification Result` to that exact command.
 - If a compiled TS test imports runtime data or reads files from disk, check the emitted test's runtime location before assuming the implementation is wrong; `dist/tests/...` often changes the relative path contract.
 - If an MCP, stdio, or transport-client lane is noisy, first prove whether the instability is outside the owned seam; keep acceptance on the strongest truthful in-process or package-local surface unless a known-good end-to-end lane exists.
 - For `tools/world-mcp` tickets where direct `mcp__worldloom__...` invocation is unavailable in the Codex toolset, choose the proof surface that matches the claim: use a built-artifact in-memory MCP client/server smoke for registration, input-schema, or wrapped-tool behavior; use a direct compiled handler probe for pure handler behavior. Record which substitute was used so the closeout does not imply a direct external MCP invocation.
@@ -68,7 +68,10 @@ Before finishing, re-read the ticket and make it truthful:
 - if any explicit user-supplied reference spec/doc was used as the ticket's authority, grep that reference for corrected counts, enum members, command names, paths, default tables, proof commands, risk summaries, or other reassessed claims before final closeout; update same-seam stale reference lines or record why they are outside the active ticket boundary
 - when reassessment replaces a central proof surface, run a targeted grep over the active ticket and explicit reference specs/docs for a few old anchor phrases such as stale command names, fixture names, expected error codes, count claims, zero-fail or baseline claims, old command fragments, old tool boundaries, manual-smoke lines, and verification prose; truth any same-seam hits or record why they are intentionally outside the active ticket
 - when the proof command shape changes, treat old-command cleanup as a hard closeout stop: grep the active ticket for the previous command fragment and update every same-seam occurrence in `Verification Layers`, `Acceptance Criteria`, `Test Plan`, `## Verification Result`, and `## Deviations` before final response
+- old command strings may remain only as explicitly labelled historical reassessment or deviation evidence. For example, if `npm test -- allocate-next-id` was the drafted command but the live package requires `npm run build` plus `node --test dist/...`, remove the old command from active `Acceptance Criteria` and `Test Plan`; preserve it only under `Assumption Reassessment` or `## Deviations` as the stale drafted command that was corrected.
 - when adding, removing, or renaming enum/tuple/registry members, sweep same-seam tests, docs, ticket text, helper names, and test titles for stale member counts, old member lists, and old descriptive labels; update same-seam hits before final proof so passing assertions do not hide contradicted prose
+- when the active ticket completes a prerequisite for an active follow-up, dependency, or known-debt ticket, update that follow-up's direct dependency/status wording if it now describes completed work; do not edit the follow-up's owned implementation prose unless the active ticket truly owns that implementation
+- when dependency/follow-up stale-ref sweeps are likely to produce tracked prose edits, run them before the final broad proof when practical; if only ticket or prose closeout changes after a broad package proof, rerun `git diff --check` and any checked-contract proof that the prose change affects rather than reflexively rerunning the broad package lane
 - when an explicit reference spec/doc contains remaining stale same-seam claims that are intentionally outside the active ticket boundary, record the boundary explicitly in closeout rather than leaving the reference check implicit
 - re-read the ticket again after completed-ticket truth edits so the final record is internally consistent
 - draft alternatives such as `A or B`, `and/or`, or placeholder proof options have been collapsed to the exact landed file and command set
@@ -77,6 +80,16 @@ Before finishing, re-read the ticket and make it truthful:
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape
 - dirty-worktree state has been refreshed using `references/dirty-worktree-ledger.md`, including hunk-level classification for mid-run changes in files you also touched and likely sibling-ticket ownership for same-family edits
+
+For long tickets, use this expedited stale-anchor pass before final response:
+
+- `Status`: final state, not intended state.
+- `Problem`: fixed defects are labelled as intake or pre-ticket evidence.
+- `Files to Touch`: exact landed file set, including same-seam docs/tests discovered during reassessment.
+- `What to Change` / `Landed Changes`: no future-tense implementation plan unless explicitly labelled historical.
+- `Verification Layers`, `Acceptance Criteria`, and `Test Plan`: exact proof commands or manual review surfaces actually used.
+- `Outcome`, `Verification Result`, and `Deviations`: current closeout facts, with stale drafted commands and superseded assumptions labelled as historical evidence.
+- stale command fragments, old fixture names, placeholder alternatives, and old proof options have been grepped or manually scanned and resolved.
 
 ## Archival
 

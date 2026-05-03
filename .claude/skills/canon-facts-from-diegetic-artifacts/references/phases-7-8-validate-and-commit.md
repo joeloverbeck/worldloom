@@ -70,7 +70,7 @@ Same as sibling `propose-new-canon-facts`: surviving cards retain their original
 
 If after Phase 6 the survivor count is zero, OR the user drops all cards at the HARD-GATE, the batch manifest STILL writes with `card_ids: []` and a narrative explanation in the body (claim extraction trace, rejection tally, flagged-contradictions count). INDEX.md receives one line: `- BATCH-NNNN (empty — see manifest) — mined-from-<DA-NNNN>`. Durable evidence the artifact was examined; prevents redundant re-mining.
 
-Filling an empty batch by lowering score thresholds or weakening rejection triggers is forbidden — that would hide diagnostic information about the artifact's canon density.
+Filling an empty batch by lowering score thresholds or weakening rejection triggers is forbidden — that would hide diagnostic information about the artifact's canon density. The same discipline — never lower score thresholds or weaken rejection triggers to inflate card count — applies between empty-batch (zero survivors) and `max_cards` (cap). The cap is a ceiling, not a target; an artifact yielding 2 honest cards under a `max_cards: 5` parameter produces a 2-card batch, not a 5-card batch padded with sub-threshold candidates.
 
 ### Write Order (sequencing matters for partial-failure recovery)
 

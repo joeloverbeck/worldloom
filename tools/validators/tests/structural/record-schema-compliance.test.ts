@@ -52,6 +52,39 @@ test("record_schema_compliance rejects SEC id/file_class mismatches", async () =
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.pattern"));
 });
 
+test("record_schema_compliance accepts change logs with affected_fact_ids only", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("change_log_entry", "CH-0001", "_source/change-log/CH-0001.yaml", {
+        change_id: "CH-0001",
+        date: "2026-05-03",
+        change_type: "addition",
+        affected_fact_ids: ["CF-0001"]
+      })
+    ])
+  );
+
+  assert.equal(result.length, 0);
+});
+
+test("record_schema_compliance rejects removed affected_cf_ids alias on change logs", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("change_log_entry", "CH-0001", "_source/change-log/CH-0001.yaml", {
+        change_id: "CH-0001",
+        date: "2026-05-03",
+        change_type: "addition",
+        affected_cf_ids: ["CF-0001"]
+      })
+    ])
+  );
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.required"));
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.additionalProperties"));
+});
+
 test("record_schema_compliance validates adjudication frontmatter", async () => {
   const result = await recordSchemaCompliance.run(
     {

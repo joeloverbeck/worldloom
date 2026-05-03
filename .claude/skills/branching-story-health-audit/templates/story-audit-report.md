@@ -1,0 +1,136 @@
+<!--
+Story audit report — template
+Authored for branching-story-health-audit Phase 10 step 2.
+Hybrid YAML frontmatter + markdown body. Direct-`Write` is the correct mutation
+surface (audits/ lives outside _source/, so Hook 3 doesn't apply — parallels
+continuity-audit's audit-report.md template).
+Required sections are load-bearing — preserve verbatim so future audits' cross-
+audit grep continues to work, and so re-reading a SAU report produces a
+deterministic snapshot of the audit's findings at the moment it ran.
+-->
+---
+audit_id: SAU-NNNN
+story_slug: "<story-slug>"
+world_slug: "<world-slug>"
+date: "YYYY-MM-DD"
+audit_focus: all                     # or one of the audit_focus enum values
+severity_threshold: warning          # info | warning | error
+branches_audited:
+  count: 0
+  leaf_ids: []                       # list of PG-NNNN leaf ids
+pages_walked: 0
+finding_count_by_severity:
+  error: 0
+  warning: 0
+  info: 0
+flagged_pages: []                    # page-cycle narrative_health.flagged_for_audit inventory; items carry page_id, branch_leaf_id, flagged_at if known
+high_jit_rate_branches: []           # items carry branch_leaf_id, jit_page_count, window_page_count, rate
+rsp_card_ids: []                     # list of non-dropped RSP-NNNN ids written under audits/SAU-NNNN/remediation-storylet-proposals/
+dropped_finding_ids: []              # finding-IDs the user dropped at Phase 9 — still appear in body marked "(dropped by user at Phase 9)"
+dropped_card_ids: []                 # RSP-NNNN ids the user dropped at Phase 9 — never written; appear here and in Remediation Proposals Index marked "(dropped by user at Phase 9)"
+prior_sau_referenced: []             # SAU-NNNN ids cited by re-surfaced findings (prior-audit-delta cross-reference)
+cross_story_scope: false
+user_approved: true                  # always true on a written report — written only after Phase 9 ACCEPT
+---
+
+# Story Audit SAU-NNNN
+
+**Story**: `<story-slug>` in `<world-slug>`
+**Date**: YYYY-MM-DD
+**Audit focus**: <focus>
+**Severity threshold**: <threshold>
+**Branches audited**: <count> (paths: <leaf id list>)
+**Pages walked**: <count>
+**Cross-story scope**: <true | false>
+
+## Summary
+
+| Severity | Count |
+|---|---|
+| ERROR   | N |
+| WARNING | N |
+| INFO    | N |
+
+## Flagged Pages
+
+- PG-NNNN (branch <leaf-id>) — flagged at <YYYY-MM-DD or unknown>
+
+(empty section is recorded as "No flagged pages this bundle." — never silently omitted)
+
+## High JIT-Rate Branches
+
+- Branch leaf PG-NNNN: <count> of last 20 pages used runtime JIT expansion (<rate>%)
+
+(empty section is recorded as "No high-JIT-rate branches this bundle." — never silently omitted)
+
+## Out of Scope Due to Focus
+
+- Branch leaf PG-NNNN — no flagged page in branch_path
+
+(section appears only when `audit_focus=flagged_pages_priority`; otherwise record "N/A — audit_focus was <focus>.")
+
+## Findings
+
+### Errors
+
+#### F-01: <one-line title>
+
+- **Category**: <category>
+- **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
+- **Pages affected**: <list of PG-NNNN ids>
+- **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
+- **Description**: <one paragraph; cites the structural rule violated and the specific evidence>
+- **Proposed remediation**: <RSP-NNNN | manual-flag | none>
+- **Prior audit reference**: <SAU-NNNN if this finding re-surfaces from an earlier audit; absent otherwise>
+
+(repeat per error finding)
+
+#### F-NN: (dropped by user at Phase 9)
+
+- **Original category**: <category>
+- **Original severity**: error
+- **User reason**: <one-line if user supplied; else "no reason given">
+
+(dropped findings persist in the body — audits are epistemic artifacts; honesty about what was surfaced is load-bearing)
+
+### Warnings
+
+(same structure as Errors)
+
+### Info
+
+(same structure as Errors; only present when severity_threshold ≤ info)
+
+## Remediation Proposals Index
+
+| RSP id | Title | Shape | Intensity | Target branch | Addresses findings |
+|---|---|---|---|---|---|
+| RSP-0001 | <title> | <shape> | <intensity> | <branch_path or "all branches" or "global pool"> | F-NN, F-NN |
+
+(dropped RSP rows appear with "(dropped by user at Phase 9)" inline)
+
+Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-NNNN/remediation-storylet-proposals/` is directly consumable as `storylet-pool-authoring`'s `source_audit_path` input.
+
+## Manual Intervention Flags
+
+- F-NN: <description>; action required: <recommendation>
+
+(empty section is recorded as "No manual intervention flags this audit." — never silently omitted)
+
+## Prior-Audit Delta
+
+- F-NN re-surfaced from SAU-NNNN (originally dropped by user / not yet remediated / new evidence in current state)
+
+(empty section is recorded as "No prior-audit re-surfaced findings." when this is not the first audit on the bundle, OR "Initial audit on this bundle — no prior audits to compare against." when this IS the first audit)
+
+## Health Snapshot at audit time
+
+| Branch | Open OBL | High-salience unpaid | Avg OBL age | Tension (0..1) | Agency (0..1) |
+|---|---|---|---|---|---|
+| <leaf-id> | N | N | N pages | 0.00 | 0.00 |
+
+(one row per audited branch)
+
+## Notes
+
+<free-form rationale; what the audit revealed; recommended next moves; any audit-time anomalies the auditor encountered (e.g., "Phase 4 recursive walk hit an unexpected number of orphan SREL records — investigate as separate ticket"); any cross-story-scope observations when cross_story_scope: true>

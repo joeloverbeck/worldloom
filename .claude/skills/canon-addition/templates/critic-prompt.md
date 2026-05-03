@@ -36,6 +36,30 @@ You return ONLY a critique report. You do NOT write files. You do not modify the
 
 ## Phase 0–6 Outputs (main agent's work)
 
+<!--
+Recommended structure for {PHASE_0_6_OUTPUTS}: one short paragraph per phase
+covering the key outcome(s), so each critic receives consistent substrate
+across the six parallel dispatches and cross-critic comparison at Phase 6b
+synthesis is reliable. Suggested per-phase content:
+- Phase 0: fact type (with reclassification rationale if applicable per
+  references/proposal-normalization.md type taxonomy) + misrecognition probe
+  outcome (layer captured OR `NONE` with one-line rationale).
+- Phase 1: scope (geographic / temporal / social).
+- Phase 2: invariants tested with PASS/FAIL summary line per invariant
+  category, naming any that received operational specification.
+- Phase 3: Rule 11 action-space (trivial-PASS by fact-type / active with
+  named leverage forms).
+- Phase 4: prerequisites cited (CF / invariant / external-law floor chain).
+- Phase 5: diffusion / epistemic_profile populated summary (named
+  observers, exclusions, distortion vectors).
+- Phase 6: consequences with substantive domains_affected count + required
+  SEC extensions list (one per touched file class).
+The structure is recommended, not mandatory; deviation is acceptable when
+the proposal's shape calls for a different per-phase emphasis. The point is
+that each critic receives the same substrate shape so cross-critic
+comparison at Phase 6b synthesis is reliable.
+-->
+
 {PHASE_0_6_OUTPUTS}
 
 ## Your Specific Concern

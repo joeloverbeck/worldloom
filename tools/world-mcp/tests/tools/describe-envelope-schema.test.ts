@@ -64,6 +64,18 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   };
   assert.deepEqual(updatePayload.properties?.operation?.enum, ["set", "append_list", "append_text"]);
 
+  const removeAliasManifest = await describeEnvelopeSchema({ op_kind: "remove_ch_affected_cf_ids" });
+  const removeAliasProperties = removeAliasManifest.op_schemas.remove_ch_affected_cf_ids!.properties as Record<
+    string,
+    unknown
+  >;
+  const removeAliasPayload = removeAliasProperties.payload as {
+    required?: string[];
+    properties?: { target_ch_id?: { pattern?: string } };
+  };
+  assert.deepEqual(removeAliasPayload.required, ["target_ch_id"]);
+  assert.equal(removeAliasPayload.properties?.target_ch_id?.pattern, "^CH-[0-9]{4}$");
+
   const adjudicationManifest = await describeEnvelopeSchema({ op_kind: "append_adjudication_record" });
   const adjudicationProperties = adjudicationManifest.op_schemas.append_adjudication_record!.properties as Record<
     string,

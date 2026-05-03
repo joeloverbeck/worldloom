@@ -8,7 +8,7 @@ The audit is an enumerate-and-judge workflow: every category/check sub-pass enum
 
 - `mcp__worldloom__allocate_next_id(world_slug, 'AU')` once per run. Allocate `RP` lazily — only when a finding produces a retcon card. Allocation is per-class-directory and append-only; a dropped card's reserved id becomes a permanent gap.
 - `mcp__worldloom__get_canonical_vocabulary({class})` for `domain` (used to validate any retcon card's `domains_affected`), `verdict` (used when this audit's findings might be cited by a future canon-addition run), and `mystery_resolution_safety` (used in Phase 4h reasoning about Mystery Reserve corruption).
-- `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` to gather Kernel + Invariants + Mystery Reserve + recent CF/CH + named-entity neighbors. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if `body_preview` is not enough for a category sub-pass, follow up with `get_record` on the specific node.
+- `mcp__worldloom__get_context_packet(task_type='continuity_audit', seed_nodes=[<world-overview-seeds>], token_budget=20000)` to gather Kernel + Invariants + Mystery Reserve + recent CF/CH + named-entity neighbors. The audit packet is wider than canon-addition's because the categories are intrinsically cross-cutting; if `body_preview` is not enough for a category sub-pass, follow up with `get_record` for one node, `get_records` for a known id set, or `get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` when the packet returned `delivery_status='persisted_with_summary'` and the ranked persisted slice matters.
 
 ## Phase 0–1: Normalize Parameters and Scope
 

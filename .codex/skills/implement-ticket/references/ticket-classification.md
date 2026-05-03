@@ -62,6 +62,19 @@ Use when a ticket changes:
 
 Check whether downstream consumers need updates or whether the change is truly additive-only.
 
+## canon-mutating world-content cleanup
+
+Use when the ticket mutates live world canon through the patch engine without changing the engine, validator, or schema implementation. Examples include retcon cleanup, `_source/*.yaml` record reconciliation, canon-history repair, or schema-maintenance migration of world records using existing patch-engine operations.
+
+Check:
+
+- `docs/HARD-GATE-DISCIPLINE.md` has been read before plan preparation or submit
+- the exact `_source` records and ignored derived artifacts owned by the ticket
+- whether `mcp__worldloom__submit_patch_plan` is exposed; if not, load `references/patch-engine-codex-fallback.md`
+- whether `_index/world.db`, `world-index sync`, or `world-index verify` is part of proof; if so, load `references/world-index.md`
+- the semantic basis for any retcon, merge, deletion, or field reconciliation is explicit and not mechanically guessed
+- final proof reads the changed world files or derived artifact directly, because `worlds/<slug>/` content may be gitignored
+
 ## archive / rejection / no-op validation
 
 Use when reassessment shows the work already landed, the premise is false, or the ticket should be archived without new implementation.

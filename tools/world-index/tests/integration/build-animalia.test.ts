@@ -809,7 +809,7 @@ test("build preserves recovery-parsed animalia semantic edge totals", () => {
     const db = openBuiltDb(root);
     try {
       assert.deepEqual(loadSemanticEdgeCounts(db), {
-        affected_fact: 149,
+        affected_fact: 150,
         derived_from: 89,
         modified_by: 82,
         required_world_update: 313

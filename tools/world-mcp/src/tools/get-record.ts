@@ -323,11 +323,19 @@ function projectSectionPath(
   parts: HybridFileParts,
   sectionPath: string
 ): SectionPathProjection | McpError {
+  if (sectionPath === "frontmatter") {
+    return { value: parts.frontmatter };
+  }
+
+  if (sectionPath === "body") {
+    return { value: parts.body_sections };
+  }
+
   const firstDot = sectionPath.indexOf(".");
   if (firstDot <= 0) {
     return createMcpError(
       "invalid_input",
-      `section_path '${sectionPath}' must start with 'frontmatter.' or 'body.' followed by a key.`,
+      `section_path '${sectionPath}' must be 'frontmatter', 'body', or start with 'frontmatter.' or 'body.' followed by a key.`,
       { field: "section_path", section_path: sectionPath }
     );
   }
@@ -389,7 +397,7 @@ function projectSectionPath(
 }
 
 function enumerateValidPaths(parts: HybridFileParts): string[] {
-  const paths: string[] = [];
+  const paths: string[] = ["frontmatter", "body"];
   for (const key of Object.keys(parts.frontmatter)) {
     paths.push(`frontmatter.${key}`);
   }

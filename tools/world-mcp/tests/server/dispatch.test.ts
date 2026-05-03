@@ -202,6 +202,15 @@ function seedServerWorld(root: string): void {
   const storyletBatchesDirectory = path.join(storiesDirectory, "storylet-batches");
   mkdirSync(storyletBatchesDirectory, { recursive: true });
   writeFileSync(path.join(storyletBatchesDirectory, "SLB-0003.md"), "# SLB-0003\n", "utf8");
+  const auditsDirectory = path.join(storiesDirectory, "audits");
+  mkdirSync(auditsDirectory, { recursive: true });
+  writeFileSync(path.join(auditsDirectory, "SAU-0003-2026-05-03.md"), "# SAU-0003\n", "utf8");
+  const storyPromotionsDirectory = path.join(storiesDirectory, "story-promotions");
+  mkdirSync(storyPromotionsDirectory, { recursive: true });
+  writeFileSync(path.join(storyPromotionsDirectory, "SP-0003-proposal-package.yaml"), "promotion_id: SP-0003\n", "utf8");
+  const remediationDirectory = path.join(auditsDirectory, "SAU-0003", "remediation-storylet-proposals");
+  mkdirSync(remediationDirectory, { recursive: true });
+  writeFileSync(path.join(remediationDirectory, "RSP-0003-payoff.md"), "# RSP-0003\n", "utf8");
 
   const toolResultsDirectory = path.join(root, "tool-results");
   mkdirSync(toolResultsDirectory, { recursive: true });
@@ -368,6 +377,26 @@ test("registered tools dispatch with either a success payload or the documented 
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SLB", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "SAU", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "SP", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        args: {
+          world_slug: "seeded",
+          id_class: "RSP",
+          story_slug: "opening-bells",
+          audit_id: "SAU-0003"
+        },
         expectError: false
       },
       {
@@ -540,6 +569,50 @@ test("SLB id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("SAU id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "SAU", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "SAU-0004");
+  });
+});
+
+test("SP id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "SP", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "SP-0004");
+  });
+});
+
+test("RSP id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "opening-bells",
+        audit_id: "SAU-0003"
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "RSP-0004");
+  });
+});
+
 test("get_canonical_vocabulary accepts every registered vocabulary class through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     for (const vocabularyClass of VOCABULARY_CLASSES) {
@@ -681,6 +754,58 @@ test("story-scoped id classes require story_slug at the MCP handler boundary", a
   });
 });
 
+test("sub-audit-scoped id classes require audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "RSP", story_slug: "opening-bells" }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /requires audit_id/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("sub-audit-scoped id classes validate audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "RSP",
+        story_slug: "opening-bells",
+        audit_id: "SAU-99"
+      }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /SAU-NNNN/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
+test("non-sub-audit-scoped id classes reject audit_id at the MCP handler boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: {
+        world_slug: "seeded",
+        id_class: "SAU",
+        story_slug: "opening-bells",
+        audit_id: "SAU-0003"
+      }
+    });
+
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /does not accept audit_id/);
+    const structured = result.structuredContent as { code?: string };
+    assert.equal(structured.code, "invalid_input");
+  });
+});
+
 test("world-scoped id classes reject story_slug at the MCP handler boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({
@@ -738,6 +863,16 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
         .get(MCP_TOOL_NAMES.get_context_packet)
         ?.input_schema_enums?.task_type?.includes("storylet_pool_authoring")
     );
+    assert.ok(
+      byName
+        .get(MCP_TOOL_NAMES.get_context_packet)
+        ?.input_schema_enums?.task_type?.includes("branching_story_health_audit")
+    );
+    assert.ok(
+      byName
+        .get(MCP_TOOL_NAMES.get_context_packet)
+        ?.input_schema_enums?.task_type?.includes("story_fact_promotion_to_canon")
+    );
     assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_canonical_vocabulary)?.input_schema_enums?.class, [
       ...VOCABULARY_CLASSES
     ]);
@@ -756,6 +891,7 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
       "create_ent_record",
       "create_sec_record",
       "update_record_field",
+      "remove_ch_affected_cf_ids",
       "append_extension",
       "append_touched_by_cf",
       "append_modification_history_entry",

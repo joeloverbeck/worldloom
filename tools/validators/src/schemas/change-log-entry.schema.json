@@ -4,7 +4,7 @@
   "title": "ChangeLogEntry",
   "type": "object",
   "additionalProperties": false,
-  "required": ["change_id", "date", "change_type"],
+  "required": ["change_id", "date", "change_type", "affected_fact_ids"],
   "properties": {
     "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
     "date": { "type": "string", "format": "date" },
@@ -13,7 +13,6 @@
       "enum": ["addition", "addition_with_qualification", "scope_retcon", "cost_retcon", "perspective_retcon", "chronology_retcon", "ontology_retcon", "clarification", "de_canonization"]
     },
     "affected_fact_ids": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
-    "affected_cf_ids": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
     "summary": { "type": "string" },
     "change_summary": { "type": "string" },
     "reason": { "type": "array", "items": { "type": "string" } },
@@ -50,9 +49,5 @@
     "initiating_proposal": { "type": "string" },
     "proposed_by": { "type": "string" },
     "notes": { "type": "string" }
-  },
-  "anyOf": [
-    { "properties": { "affected_fact_ids": true }, "required": ["affected_fact_ids"] },
-    { "properties": { "affected_cf_ids": true }, "required": ["affected_cf_ids"] }
-  ]
+  }
 }

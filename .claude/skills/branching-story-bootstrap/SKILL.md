@@ -198,7 +198,7 @@ worlds/<world-slug>/stories/<story-slug>/
 
 ### No canon-file mutations
 
-This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted. If the user later wants to promote a story-local SF / STENT / DA to world canon, that is a separate `story-fact-promotion-to-canon` run (future skill — not this skill's responsibility).
+This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted. If the user later wants to promote a story-local SF / STENT / DA to world canon, that is a separate `story-fact-promotion-to-canon` run — not this skill's responsibility.
 
 ### Record schemas
 
@@ -274,7 +274,7 @@ Convert the user's premise into a precise design brief. Required extraction:
 
 For each CHAR in `cast_bind_list`, mirror the world dossier into a story-local `STENT-NNNN`. Required STENT fields: `id`, `story_id`, `world_ent_id` (the world-level ENT this mirrors), `character_id` (the world's CHAR id), `name`, `role_in_story` (`protagonist | major | supporting | antagonist | foil`), `present_at_start`, `intention_snapshot_id`, `created_at_page: PG-0001`, `notes`. Full schema in `templates/story-records.yaml`.
 
-**Story-only entities**: if the user names entities not in world canon (e.g., a new village invented for this story), create them as `STENT-NNNN` with `world_ent_id: null` and `story_only: true`. These are counterfactual / soft-canon-local-to-story unless promoted via `story-fact-promotion-to-canon` (future skill).
+**Story-only entities**: if the user names entities not in world canon (e.g., a new village invented for this story), create them as `STENT-NNNN` with `world_ent_id: null` and `story_only: true`. These are counterfactual / soft-canon-local-to-story unless promoted via `story-fact-promotion-to-canon`.
 
 **Initial intention snapshot per major character**: emit `STINT-0001-<char-slug>.yaml` with `goals`, `fears`, `secrets[SF-NNNN]`, `beliefs[SF-NNNN]`, `relationships{STENT-id: state}`, `emotional_state`, `current_pressure: 0..10`, `traits`, `values{axis: weight}`, `created_at_page: PG-0001`.
 
@@ -314,7 +314,7 @@ A false belief held by a character is recorded as a `belief`-class SF that contr
 
 - Declare it in `STORY_KERNEL.md`'s `mysteries_in_play[]` with the M's `status` and `future_resolution_safety`.
 - **Hard reject** (abort the bootstrap) if any premise element, imported SF, planned thread, or planned obligation resolves a `forbidden`-status M.
-- For `low | medium | high`-resolution-safety M entries: note that in-story resolution requires routing through `story-fact-promotion-to-canon` (future skill).
+- For `low | medium | high`-resolution-safety M entries: note that in-story resolution requires routing through `story-fact-promotion-to-canon`.
 
 **Invariant audit** (Rule 4 enforcement). Run premise + cast + initial-threads + initial-obligations against every INV record from the whole-class load:
 
@@ -562,7 +562,7 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 | Rule 3: No Specialness Inflation | N/A | Not applicable — canon-reading skill produces no new world-level capability, artifact, or species. The enforcement surface is `canon-addition` (CF stabilizers + Rule-3 audit). Story-local capability assertions inherit from the source CF's `costs_and_limits` (per Phase 3 import rules); they do not inflate world-level specialness. |
 | Rule 4: No Globalization by Accident | Phase 2 cast binding respects CHAR `current_location`; Phase 4 Invariant Audit (whole-class INV load); Phase 7 storylet selection respects distribution; Phase 9 gate 2 backstop. | INV `break_conditions` enforced against premise + cast + threads + obligations. |
 | Rule 5: No Consequence Evasion | Phase 5 OBL halt-rule: salience + urgency + ≥2 payoff_modes mandatory; consequences ledger initialized at PG-0001; Phase 9 gate 7 backstop. | An OBL with one payoff mode halts the bootstrap. |
-| Rule 6: No Silent Retcons | N/A | Not applicable — canon-reading skill emits no Change Log Entries because it does not mutate world canon. Story-local supersession (`SF.supersedes`) is a runtime-page-cycle concern, not a Rule-6 surface. The Rule 6 enforcement surface for any later promotion of story-local facts to world canon is `canon-addition` (via the future `story-fact-promotion-to-canon` skill). |
+| Rule 6: No Silent Retcons | N/A | Not applicable — canon-reading skill emits no Change Log Entries because it does not mutate world canon. Story-local supersession (`SF.supersedes`) is a runtime-page-cycle concern, not a Rule-6 surface. The Rule 6 enforcement surface for any later promotion of story-local facts to world canon is `canon-addition` (via `story-fact-promotion-to-canon`). |
 | Rule 7: Preserve Mystery Deliberately | Phase 4 mystery firewall (whole-class M load); Phase 6 delegates SLT validation to `storylet-pool-authoring` Phase 4 gates 1 and 2; Phase 7 storylet hard-filter; Phase 9 gate 1 backstop. | `forbidden`-status M resolutions hard-reject the bootstrap; author-pool seed storylets with `canon_candidate` authority are rejected by the delegated storylet-pool validation packet before bootstrap's Phase 10 HARD-GATE. |
 | Rule 11: No Spectator Castes by Accident | N/A | Not applicable — canon-reading skill introduces no exceptional capability that could create spectator castes. The enforcement surface is `canon-addition` Phase 5 + `propose-new-canon-facts` (CF leverage-enumeration). Story-local cast capabilities inherit from the source CF's distribution + costs. |
 | Rule 12: No Single-Trace Truths | N/A | Not applicable — same reasoning as Rule 2 / 3 / 11; the trace-multiplicity discipline applies to new world-level hard-canon truths, not to story-local imports. The enforcement surface is `canon-addition` + `propose-new-canon-facts`. |
@@ -581,8 +581,9 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
   - **Consumes (existing)**: `character-generation` outputs (CHAR-NNNN dossiers via `cast_bind_list`); `emergent-pressure-events` outputs (EPE cards via `epe_card_filter`).
   - **Consumes (existing)**: `branching-story-page-cycle` PG/SE/CHC production schema contract for root page, genesis event, and initial choice records.
   - **Consumes (existing)**: `storylet-pool-authoring` seed-mode storylet authority. Phase 6 uses it with `focus_area: bootstrap_mix` and `parent_skill_invocation: true`, returning approved seed SLTs in memory for bootstrap's Phase 11 write transaction.
-  - **Consumes (future, not yet shipping)**: `branching-story-health-audit`; `story-fact-promotion-to-canon`.
-  - **Produces inputs for**: `branching-story-page-cycle` and the future audit / promotion skills above.
+  - **Consumes (existing)**: `branching-story-health-audit` — once a bootstrapped bundle has accumulated pages via `branching-story-page-cycle`, the audit's report informs re-bootstrap considerations and surfaces structural issues (branch isolation, snapshot drift, mystery firewall) the bootstrap should be aware of for any future bundles in the same world.
+  - **Consumes (existing)**: `story-fact-promotion-to-canon` — when a user later promotes story-local SF / STENT / story-local DA records emitted by this skill to world canon, the promotion skill consumes those records as its source.
+  - **Produces inputs for**: `branching-story-page-cycle`, `branching-story-health-audit`, and `story-fact-promotion-to-canon`.
 - **Content policy is a contract, not a setting.** The NC-21 block embedded in `templates/content-policy.txt` is the skill's discipline floor. It is embedded verbatim in STORY_KERNEL.md AND prepended to every LLM prompt assembled by Phase 7. `content_intensity_baseline` (`tame` / `mature` / `explicit`) is a routing tag for tone consistency within branches — never a censor.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root.
 - **Do NOT commit to git.** Writes land in the working tree only; the user reviews the diff and commits.
