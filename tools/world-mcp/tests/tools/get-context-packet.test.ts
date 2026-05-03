@@ -233,7 +233,8 @@ test("getContextPacket accepts canon-pipeline-adjacent task types with specific 
       ["story_bootstrap", 18000],
       ["story_page_cycle", 18000],
       ["storylet_pool_authoring", 18000],
-      ["branching_story_health_audit", 12000]
+      ["branching_story_health_audit", 12000],
+      ["story_fact_promotion_to_canon", 8000]
     ] as const;
 
     for (const [taskType, defaultBudget] of cases) {
@@ -261,7 +262,11 @@ test("getContextPacket story audit task types include the latest change-log entr
   try {
     buildContextPacketWorld(root);
 
-    for (const taskType of ["story_page_cycle", "branching_story_health_audit"] as const) {
+    for (const taskType of [
+      "story_page_cycle",
+      "branching_story_health_audit",
+      "story_fact_promotion_to_canon"
+    ] as const) {
       const result = await withRepoRoot(root, () =>
         getContextPacket({
           task_type: taskType,

@@ -203,3 +203,28 @@ export const branchingStoryHealthAuditRankingProfile: RankingWeights = {
     pressures: 8
   }
 };
+
+export const storyFactPromotionToCanonRankingProfile: RankingWeights = {
+  ...defaultRankingProfile,
+  file_class_priority: {
+    ...defaultRankingProfile.file_class_priority,
+    canon_fact_record: 1.45,
+    invariant: 1.35,
+    mystery_reserve_entry: 1.35,
+    open_question_entry: 1.2,
+    named_entity: 1.25,
+    change_log_entry: 1.15,
+    section: 1.0,
+    domain_file: 0.95
+  },
+  recency_of_modification_bonus: 14,
+  edge_type_boost: {
+    mentions_entity: 14,
+    references_record: 12,
+    references_scoped_name: 9,
+    required_world_update: 10,
+    firewall_for: 14,
+    applies_to: 9,
+    pressures: 8
+  }
+};

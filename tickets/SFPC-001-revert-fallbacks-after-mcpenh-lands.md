@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None — skill-prose-only ticket. Touches `.claude/skills/story-fact-promotion-to-canon/SKILL.md` exclusively.
-**Deps**: `archive/tickets/MCPENH-018-add-sp-id-class-to-allocator.md` (completed — Pre-flight Step 6 fallback removal depends on `SP` id_class being live in `mcp__worldloom__allocate_next_id`); `tickets/MCPENH-019-register-story-fact-promotion-task-type.md` (must land first — Pre-flight Step 7 fallback removal depends on `story_fact_promotion_to_canon` being live in `TASK_TYPES`)
+**Deps**: `archive/tickets/MCPENH-018-add-sp-id-class-to-allocator.md` (completed — Pre-flight Step 6 fallback removal depends on `SP` id_class being live in `mcp__worldloom__allocate_next_id`); `archive/tickets/MCPENH-019-register-story-fact-promotion-task-type.md` (completed — Pre-flight Step 7 fallback removal depends on `story_fact_promotion_to_canon` being live in `TASK_TYPES`)
 
 ## Problem
 

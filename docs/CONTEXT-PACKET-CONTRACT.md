@@ -8,7 +8,7 @@ The packet is locality-first. It must secure seed-local authority and the govern
 
 ```yaml
 task_header:
-  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | story_bootstrap | story_page_cycle | storylet_pool_authoring | branching_story_health_audit | other
+  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_page_cycle | storylet_pool_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
   world_slug: animalia
   generated_at: "2026-04-24T00:00:00Z"
   token_budget:
@@ -202,6 +202,7 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `story_page_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `storylet_pool_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `branching_story_health_audit` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
+| `story_fact_promotion_to_canon` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
 
 The assembler first fits the normal preview/summary packet under the requested token budget and configured harness character ceiling. It then applies this per-task governing-context priority table before opportunistic full-body allocation:
@@ -214,6 +215,7 @@ The assembler first fits the normal preview/summary packet under the requested t
 | `story_page_cycle` | `reserve` | `reserve` |
 | `storylet_pool_authoring` | `reserve` | `reserve` |
 | `branching_story_health_audit` | `reserve` | `reserve` |
+| `story_fact_promotion_to_canon` | `reserve` | `reserve` |
 | all other task types | `opportunistic` | `opportunistic` |
 
 `reserve` means every matching governing-context node receives its `full_body` before any opportunistic layer spends full-body budget. If the packet can no longer fit after dropping `impact_surfaces`, `scoped_local_context`, and `exact_record_links`, the assembler returns `packet_incomplete_required_classes` with `missing_classes: ['governing_world_context.full_body']` rather than silently downgrading those governing full bodies. `opportunistic` means the existing one-node-at-a-time allocation applies: if a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.governing_full_body_priority` reports the active policy, and `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after allocation and layer enforcement.
@@ -235,6 +237,12 @@ The profile is world-canon read-only. Storylet-pool records remain direct-Read b
 `branching_story_health_audit` is the registered context-packet profile for `branching-story-health-audit` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids and recent page-history named entities. The profile uses a 12000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, ontology-grounding context, and the latest `change_log_entry` node in `governing_world_context` so Phase 4 can compare the bundle's `canon_revision` baseline against recent canon movement.
 
 The profile is world-canon read-only. Story-bundle records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='branching_story_health_audit', ...)` returns only world-canon/indexed context used to audit story-local health without promoting audit findings or remediation cards to world canon.
+
+### Story Fact Promotion To Canon Profile
+
+`story_fact_promotion_to_canon` is the registered context-packet profile for `story-fact-promotion-to-canon` Pre-flight. The skill derives `seed_nodes` from source-relevant CF, M, INV, OQ, and named-entity ids gathered while translating a story-local source into a canon-addition proposal package. The profile uses an 8000 default budget and prioritizes canon fact records, governing invariant and Mystery Reserve records, open questions, named-entity grounding, relevant section context, and recent change-log context for canon-baseline drift.
+
+The profile does not mutate world canon. It supports the story-promotion skill's proposal-package handoff to canon-addition, with reserve governing invariant and Mystery Reserve full bodies so downstream critics can audit scope inflation and mystery-firewall risk before any separate canon-addition invocation.
 
 ## Focused Retrieval Tools
 

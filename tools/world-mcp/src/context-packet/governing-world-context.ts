@@ -91,6 +91,17 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
+  story_fact_promotion_to_canon: [
+    "WORLD_KERNEL.md",
+    "ONTOLOGY.md",
+    "TIMELINE.md",
+    "GEOGRAPHY.md",
+    "PEOPLES_AND_SPECIES.md",
+    "INSTITUTIONS.md",
+    "MAGIC_OR_TECH_SYSTEMS.md",
+    "ECONOMY_AND_RESOURCES.md",
+    "EVERYDAY_LIFE.md"
+  ],
   other: ["WORLD_KERNEL.md", "INVARIANTS.md"]
 };
 
@@ -171,6 +182,14 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 5: consequence and obligation debt must remain visible",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
+  story_fact_promotion_to_canon: [
+    "Story fact promotion is a canon-addition handoff, not a direct world-canon write",
+    "Rule 1: promoted facts must cite story and world authority",
+    "Rule 4: story-local truth must not globalize by accident",
+    "Rule 6: promotion must preserve visible change lineage",
+    "Rule 7: preserve Mystery Reserve deliberately",
+    "Rule 12: hard-canon promotions need redundant support"
+  ],
   other: ["Rule 1: no floating facts", "Rule 7: preserve Mystery Reserve deliberately"]
 };
 
@@ -213,6 +232,11 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Story audit report",
     "Optional remediation-storylet-proposal cards",
     "Per-bundle audits INDEX.md"
+  ],
+  story_fact_promotion_to_canon: [
+    "Story promotion ledger",
+    "Canon-addition proposal package",
+    "Superseding story-local source record on accept"
   ],
   other: ["Task-specific output approved by workflow"]
 };
@@ -282,6 +306,12 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not treat audit findings or RSP cards as accepted world canon",
     "Do not read sibling-branch pages as continuity context"
   ],
+  story_fact_promotion_to_canon: [
+    "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records directly",
+    "Do not bypass the canon-addition handoff",
+    "Do not promote forbidden-status Mystery Reserve entries",
+    "Do not silently elevate story-local truth without promotion ledger, change log, and adjudication trail"
+  ],
   other: ["Do not silently mutate canon", "Do not weaken Mystery Reserve boundaries"]
 };
 
@@ -316,7 +346,8 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   story_bootstrap: ["invariant", "mystery_reserve_entry"],
   story_page_cycle: ["invariant", "mystery_reserve_entry"],
   storylet_pool_authoring: ["invariant", "mystery_reserve_entry"],
-  branching_story_health_audit: ["invariant", "mystery_reserve_entry"]
+  branching_story_health_audit: ["invariant", "mystery_reserve_entry"],
+  story_fact_promotion_to_canon: ["invariant", "mystery_reserve_entry", "open_question_entry"]
 };
 
 const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
@@ -693,7 +724,11 @@ export async function buildGoverningWorldContext(
     }
   }
 
-  if (taskType === "story_page_cycle" || taskType === "branching_story_health_audit") {
+  if (
+    taskType === "story_page_cycle" ||
+    taskType === "branching_story_health_audit" ||
+    taskType === "story_fact_promotion_to_canon"
+  ) {
     const latestChangeLogNodeId = findLatestChangeLogNodeId(db, worldSlug);
     if (latestChangeLogNodeId !== null) {
       addReason(
