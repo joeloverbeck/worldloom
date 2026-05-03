@@ -20,6 +20,7 @@ export interface CliValues {
   structural?: boolean;
   json?: boolean;
   file?: string;
+  story?: string;
   since?: string;
   help?: boolean;
   version?: boolean;
@@ -30,7 +31,17 @@ export interface ResolvedScope {
   explicitFiles: Array<{ path: string; content: string }>;
 }
 
-const RULE_FILTER_PATTERN = /^(?:1[12]|[124567])(?:,(?:1[12]|[124567]))*$/;
+const RULE_NUMBER_TO_PREFIX = new Map([
+  ["1", "rule1_"],
+  ["2", "rule2_"],
+  ["4", "rule4_"],
+  ["5", "rule5_"],
+  ["6", "rule6_"],
+  ["7", "rule7_"],
+  ["11", "rule11_"],
+  ["12", "rule12_"]
+]);
+const NAMED_RULE_SELECTORS = new Set(["storylet_predicate_dsl_parsability"]);
 
 export function packageVersion(): string {
   const packageJsonPath = path.resolve(__dirname, "../../../package.json");
@@ -44,9 +55,10 @@ export function printHelp(): void {
 Run the SPEC-04 validator framework against a world's atomic-source tree.
 
 Options:
-  --rules=<list>        Comma-separated rule numbers (1,2,4,5,6,7,11,12). Mutually exclusive with --structural.
+  --rules=<list>        Comma-separated rule numbers or validator names. Use all for every rule validator.
   --structural          Run structural validators only. Mutually exclusive with --rules.
   --json                Emit machine-readable JSON output.
+  --story <slug>        Narrow story-bundle validators to one indexed story bundle.
   --file <path>         Narrow scope to a single file within worlds/<slug>/.
   --since <commit>      Narrow scope to files changed since <commit> in the world's git repo.
   --help                Show this help text.
@@ -67,8 +79,14 @@ export function validateOptions(values: CliValues): string | null {
   if (values.file && values.since) {
     return "--file and --since are mutually exclusive";
   }
-  if (values.rules && !RULE_FILTER_PATTERN.test(values.rules)) {
-    return "--rules must be a comma-separated list of mechanized rule numbers 1,2,4,5,6,7,11,12";
+  if (values.rules && values.rules !== "all") {
+    const unsupported = values.rules
+      .split(",")
+      .map((part) => part.trim())
+      .filter((part) => part.length === 0 || (!RULE_NUMBER_TO_PREFIX.has(part) && !NAMED_RULE_SELECTORS.has(part)));
+    if (unsupported.length > 0) {
+      return "--rules must be a comma-separated list of mechanized rule numbers 1,2,4,5,6,7,11,12 or supported validator names";
+    }
   }
   return null;
 }
@@ -119,10 +137,32 @@ export function selectValidators(
   if (values.structural) {
     selected = structuralValidators;
   } else if (values.rules) {
-    const prefixes = new Set(values.rules.split(",").map((part) => `rule${part}_`));
-    selected = ruleValidators.filter((validator) =>
-      [...prefixes].some((prefix) => validator.name.startsWith(prefix))
-    );
+    if (values.rules === "all") {
+      selected = ruleValidators;
+    } else {
+      const selectors = values.rules.split(",").map((part) => part.trim()).filter(Boolean);
+      selected = ruleValidators.filter((validator) =>
+        selectors.some((selector) => {
+          const prefix = RULE_NUMBER_TO_PREFIX.get(selector);
+          return prefix ? validator.name.startsWith(prefix) : validator.name === selector;
+        })
+      );
+      const matchedSelectors = new Set<string>();
+      for (const selector of selectors) {
+        for (const validator of selected) {
+          const prefix = RULE_NUMBER_TO_PREFIX.get(selector);
+          if ((prefix && validator.name.startsWith(prefix)) || validator.name === selector) {
+            matchedSelectors.add(selector);
+          }
+        }
+      }
+      const unmatched = selectors.filter((selector) => !matchedSelectors.has(selector));
+      if (unmatched.length > 0) {
+        throw new Error(
+          `--rules includes unsupported mechanized rule selector(s): ${unmatched.join(", ")}`
+        );
+      }
+    }
   } else {
     selected = [...structuralValidators, ...ruleValidators];
   }
@@ -131,29 +171,36 @@ export function selectValidators(
     return [...selected];
   }
 
-  const incrementalContext: Context = {
-    ...contextForApplicability,
-    run_mode: "incremental"
-  };
+  const incrementalContext: Context = { ...contextForApplicability, run_mode: "incremental" };
   return selected.filter((validator) => validator.applies_to(incrementalContext));
 }
 
 export function buildReadSurface(db: Database.Database, worldSlug: string): WorldIndexReadSurface {
   return {
-    query: async ({ record_type, world_slug }) => {
+    query: async ({ record_type, world_slug, story_slug }) => {
       if (world_slug !== worldSlug) {
         return [];
       }
 
-      const rows = (record_type
-        ? db
-            .prepare(
-              `SELECT node_id, node_type, world_slug, file_path, body FROM nodes WHERE world_slug = ? AND node_type = ?`
-            )
-            .all(worldSlug, record_type)
-        : db
-            .prepare(`SELECT node_id, node_type, world_slug, file_path, body FROM nodes WHERE world_slug = ?`)
-            .all(worldSlug)) as NodeRow[];
+      const hasStorySlug = tableHasColumn(db, "nodes", "story_slug");
+      const selectedColumns = hasStorySlug
+        ? "node_id, node_type, world_slug, story_slug, file_path, body"
+        : "node_id, node_type, world_slug, NULL AS story_slug, file_path, body";
+      const predicates = ["world_slug = ?"];
+      const params: unknown[] = [worldSlug];
+
+      if (record_type) {
+        predicates.push("node_type = ?");
+        params.push(record_type);
+      }
+      if (hasStorySlug && story_slug) {
+        predicates.push("story_slug = ?");
+        params.push(story_slug);
+      }
+
+      const rows = db
+        .prepare(`SELECT ${selectedColumns} FROM nodes WHERE ${predicates.join(" AND ")}`)
+        .all(...params) as NodeRow[];
 
       return rows.map(rowToIndexedRecord);
     }
@@ -241,6 +288,7 @@ interface NodeRow {
   node_id: string;
   node_type: string;
   world_slug: string;
+  story_slug?: string | null;
   file_path: string;
   body: string;
 }
@@ -250,9 +298,15 @@ function rowToIndexedRecord(row: NodeRow): IndexedRecord {
     node_id: row.node_id,
     node_type: row.node_type,
     world_slug: row.world_slug,
+    story_slug: row.story_slug ?? null,
     file_path: normalizePosix(row.file_path),
     parsed: parsedBodyFor(row)
   };
+}
+
+function tableHasColumn(db: Database.Database, table: string, column: string): boolean {
+  const rows = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  return rows.some((row) => row.name === column);
 }
 
 function parsedBodyFor(row: NodeRow): Record<string, unknown> {

@@ -48,8 +48,8 @@ test("SPEC-04 capstone re-enumerates animalia source counts from the fixture cop
 
 test("SPEC-04 verification: Unit registry exposes the active mechanized validators", () => {
   assert.equal(structuralValidators.length, 6);
-  assert.equal(ruleValidators.length, 8);
-  assert.equal([...structuralValidators, ...ruleValidators].length, 14);
+  assert.equal(ruleValidators.length, 9);
+  assert.equal([...structuralValidators, ...ruleValidators].length, 15);
   assert.ok(!structuralValidators.some((validator) => validator.name === "adjudication_discovery_fields"));
 });
 
@@ -134,7 +134,8 @@ test("SPEC-04 verification: Phase 14a migration keeps Rule 3 skill-owned", () =>
     "rule4_no_globalization_by_accident",
     "rule5_no_consequence_evasion",
     "rule6_no_silent_retcons",
-    "rule7_mystery_reserve_preservation"
+    "rule7_mystery_reserve_preservation",
+    "storylet_predicate_dsl_parsability"
   ]);
   assert.ok(!ruleNames.includes("rule3_no_specialness_inflation"));
 });

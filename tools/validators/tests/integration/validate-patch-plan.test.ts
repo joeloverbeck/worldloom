@@ -81,7 +81,12 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
 
     assert.deepEqual(result.verdicts, []);
     assert.ok(Array.isArray(result.executions) && result.executions.length > 0);
-    for (const execution of result.executions) {
+    const storyletExecution = result.executions.find(
+      (execution) => execution.name === "storylet_predicate_dsl_parsability"
+    );
+    assert.equal(storyletExecution?.status, "skipped");
+
+    for (const execution of result.executions.filter((row) => row !== storyletExecution)) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);
@@ -128,6 +133,18 @@ test("validatePatchPlan keeps the patch plan available for rule5", async () => {
     const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
 
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule5.required_update_not_patched"));
+  });
+});
+
+test("validatePatchPlan skips storylet predicate parsing until story-bundle ops exist", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(cleanPlan() as unknown as PatchPlanEnvelope);
+    const execution = result.executions.find(
+      (row) => row.name === "storylet_predicate_dsl_parsability"
+    );
+
+    assert.equal(execution?.status, "skipped");
+    assert.equal(execution?.detail, "applies_to=false");
   });
 });
 

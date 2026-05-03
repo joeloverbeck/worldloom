@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { ruleValidators } from "../../src/public/registry.js";
 
-test("rule registry contains exactly the 8 active rule-derived validators", () => {
+test("rule registry contains the active rule-derived validators", () => {
   assert.deepEqual(
     ruleValidators.map((validator) => validator.name),
     [
@@ -13,6 +13,7 @@ test("rule registry contains exactly the 8 active rule-derived validators", () =
       "rule5_no_consequence_evasion",
       "rule6_no_silent_retcons",
       "rule7_mystery_reserve_preservation",
+      "storylet_predicate_dsl_parsability",
       "rule11_action_space",
       "rule12_redundancy"
     ]

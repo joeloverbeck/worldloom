@@ -31,6 +31,7 @@ async function main(): Promise<number> {
         structural: { type: "boolean" },
         json: { type: "boolean" },
         file: { type: "string" },
+        story: { type: "string" },
         since: { type: "string" },
         help: { type: "boolean" },
         version: { type: "boolean" }
@@ -87,6 +88,7 @@ async function main(): Promise<number> {
     const ctx: Context = {
       run_mode: "full-world",
       world_slug: worldSlug,
+      ...(values.story ? { story_slug: values.story } : {}),
       index: buildReadSurface(db, worldSlug),
       touched_files: scope.touchedFiles
     };

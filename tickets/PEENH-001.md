@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Large
 **Engine Changes**: Yes — adds patch-engine ops for every story-bundle record class; extends Hook 3's match pattern to cover `worlds/<slug>/stories/<slug>/_source/`; adds record-schema validators for each story-bundle class; migrates the five story-pipeline skills' write disciplines from Shape A (direct Write) to Shape B (engine-routed via `submit_patch_plan`).
-**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, VALENH-001 (record-schema validators per class)
+**Deps**: `archive/tickets/FOUNDATIONS-001.md`, `archive/tickets/MCPENH-025.md`, `archive/tickets/VALENH-001.md` (predicate-DSL parsability validator; record-schema validators per class remain owned here)
 
 ## Problem
 
@@ -33,7 +33,7 @@ The session evidence: during the storylet-pool-authoring run, I direct-Wrote 16 
 5. **CF Record schema unchanged** — story-bundle records have their own per-class schemas; CF Record schema in FOUNDATIONS unchanged.
 6. **No Mystery Reserve firewall weakening** — engine routing STRENGTHENS the Mystery Reserve firewall by making Phase 4 gate 1 (`forbidden`-status M-resolution rejection) structurally enforced as a pre-apply validator gate, not just a prose-side gate. Story-pipeline skills today rely on Phase 4 gate 1 running cleanly; engine routing makes it impossible to bypass. This is a strengthening, not a weakening.
 7. **HARD-GATE semantics preserved** — the five story-pipeline skills' HARD-GATE workflows are unchanged: HARD-GATE fires at user-approval time (after the skill's Phase 4 + 5 validation passes); engine routing happens at commit time. The HARD-GATE gates the skill workflow; the patch engine gates the actual write. They are sequential, not redundant.
-8. **Record-schema validators per class are required** — each story-bundle record class (STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, SLB, SAU, SP, RSP, plus story-local DA) needs a record-schema validator (in `tools/validators/src/schemas/` or `tools/validators/src/structural/` per current framework structure) so the engine's pre-apply gate can reject malformed records. VALENH-001 covers SLT predicate-DSL parsability; the record-schema validators are a separate concern. This ticket includes them; if their cumulative effort grows beyond Large, they can be split into per-class validator tickets (VALENH-002 through VALENH-N).
+8. **Record-schema validators per class are required** — each story-bundle record class (STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, SLB, SAU, SP, RSP, plus story-local DA) needs a record-schema validator (in `tools/validators/src/schemas/` or `tools/validators/src/structural/` per current framework structure) so the engine's pre-apply gate can reject malformed records. `archive/tickets/VALENH-001.md` covers SLT predicate-DSL parsability; the record-schema validators are a separate concern. This ticket includes them; if their cumulative effort grows beyond Large, they can be split into per-class validator tickets (VALENH-002 through VALENH-N).
 9. **Adjacent contradictions** — story-bundle INDEX.md writes (per-bundle index updates) are NOT atomic-YAML record writes; they are markdown-file writes. They should remain Shape A (direct Edit). Hook 3's extension must scope to `worlds/<slug>/stories/<slug>/_source/<class>/*.yaml` only — NOT to `worlds/<slug>/stories/<slug>/INDEX.md`, `STORY_KERNEL.md`, `pages-prose/*.md`, `audits/*.md`, `storylet-batches/*.md`, `story-promotions/*.md`, `audits/SAU-NNNN/remediation-storylet-proposals/*.md`. The hook3 match-pattern extension is precise: only the `_source/<class>/*.yaml` sub-tree.
 10. **Hybrid records under stories/<slug>/diegetic-artifacts/** — story-local DA records (when introduced via page-cycle's Phase 4) are hybrid YAML-frontmatter + markdown body files, parallel to world-level diegetic-artifacts. Engine routing for them is via an `append_story_diegetic_artifact_record` op parallel to the world-level `append_diegetic_artifact_record`. This is in scope.
 
@@ -42,7 +42,7 @@ The session evidence: during the storylet-pool-authoring run, I direct-Wrote 16 
 1. **Engine ops per record class is the cleanest extension** — the existing op vocabulary follows `create_<class>_record`, `update_record_field`, `append_extension`, etc. Adding `create_slt_record`, `create_obl_record`, etc. follows the same pattern. The op count grows with record classes but each op is small and isolated.
 2. **Hook 3 pattern extension is precise and scoped** — match pattern adds `worlds/<slug>/stories/<slug>/_source/<class>/*.yaml` (with `<class>` enumerated to match indexed types). Markdown files under the bundle (INDEX.md, pages-prose/, audits/, storylet-batches/, story-promotions/) remain Shape A.
 3. **No backwards-compatibility shims** — once engine routing lands, all five story-pipeline skills migrate atomically. There is no compatibility-mode where some skills route and others direct-Write; mixed-mode would produce inconsistent enforcement and is rejected by the Architectural Contract item 1 in `tickets/README.md`.
-4. **Validator-first ordering** — VALENH-001 (predicate DSL) and per-class record-schema validators MUST exist before engine routing lands. The engine's pre-apply gate calls validators; if validators don't exist, the gate is a no-op and routing provides no enforcement benefit. This ticket explicitly depends on VALENH-001 and includes per-class validators inline (or splits them into separate tickets if effort grows).
+4. **Validator-first ordering** — `archive/tickets/VALENH-001.md` (predicate DSL) exists before engine routing lands, and per-class record-schema validators MUST also exist before Shape B routing is enabled. The engine's pre-apply gate calls validators; if validators don't exist, the gate is a no-op and routing provides no enforcement benefit. This ticket explicitly depends on the archived VALENH-001 prerequisite and includes per-class validators inline (or splits them into separate tickets if effort grows).
 5. **Skill migration is atomic per skill** — when this ticket lands, each of the five story-pipeline skills updates its Phase 7 (or equivalent) write step from `Write` to `submit_patch_plan`. Skill prose updates (Guardrails, integration posture, etc.) come with the migration. The migration order respects the skill graph: bootstrap → page-cycle → storylet-pool-authoring → health-audit → promotion-to-canon (each later skill consumes the earlier ones' outputs).
 
 ## Verification Layers
@@ -126,7 +126,7 @@ Each skill's Phase 7 (or equivalent write phase) replaces direct `Write` calls w
 
 - Tooling for cross-bundle patches (a single patch plan touching multiple bundles in the same world) — out of scope by design; one bundle per plan preserves the per-bundle-isolation invariant.
 - Tooling for cross-world patches — explicitly out of scope per FOUNDATIONS §Multi-world directory discipline.
-- VALENH-001's predicate DSL parsability rule (separate ticket; this ticket depends on it).
+- `archive/tickets/VALENH-001.md`'s predicate DSL parsability rule (separate completed ticket; this ticket depends on it).
 - Story-bundle context layer in `get_context_packet` (covered by `archive/tickets/MCPENH-027.md`).
 
 ## Acceptance Criteria
@@ -165,5 +165,5 @@ Each skill's Phase 7 (or equivalent write phase) replaces direct `Write` calls w
 ### Commands
 
 1. `pnpm turbo lint && pnpm turbo typecheck && pnpm turbo test` (full pipeline; this ticket's scope spans patch-engine, hooks, validators packages).
-2. `cd tools/patch-engine && pnpm build && node dist/cli.js submit < fixture-storylet-pool-authoring-plan.json` (integration check after VALENH-001 + per-class validators land).
+2. `cd tools/patch-engine && pnpm build && node dist/cli.js submit < fixture-storylet-pool-authoring-plan.json` (integration check after archived VALENH-001 + per-class validators land).
 3. Try `Write` against a story-bundle YAML in the live `worlds/erotica-world/stories/marla-kern-seduction/_source/storylets/` and confirm Hook 3 fires.

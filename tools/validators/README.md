@@ -1,10 +1,10 @@
 # validators
 
-Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus structural invariant enforcement.
+Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predicate parsability and structural invariant enforcement.
 
 **Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 6 structural validators, the 8 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 6 structural validators, the 9 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
@@ -23,6 +23,7 @@ Rule-derived mechanized validators:
 - `rule5_no_consequence_evasion`
 - `rule6_no_silent_retcons`
 - `rule7_mystery_reserve_preservation`
+- `storylet_predicate_dsl_parsability`
 - `rule11_action_space`
 - `rule12_redundancy`
 
@@ -54,6 +55,8 @@ Skill-judgment rule:
 ```text
 world-validate <world-slug>
 world-validate <world-slug> --rules=1,2,6,11,12
+world-validate <world-slug> --story <story-slug> --rules=storylet_predicate_dsl_parsability
+world-validate <world-slug> --rules=all
 world-validate <world-slug> --structural
 world-validate <world-slug> --json
 world-validate <world-slug> --file <path>
@@ -66,7 +69,9 @@ The CLI reads `worlds/<slug>/_index/world.db`, runs the selected validators in
 `full-world` mode, writes per-verdict rows to `validation_results`, and exits
 `1` when any `fail` verdict is emitted. `--file` and `--since` narrow selector
 applicability and persistence cleanup to the touched files while preserving the
-runtime `full-world` run mode.
+runtime `full-world` run mode. `--story` narrows story-bundle validators to one
+indexed story bundle; when omitted, story-bundle validators scan all indexed
+story bundles for the world.
 
 ## Bootstrap Grandfathering
 

@@ -4,6 +4,8 @@ Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requir
 
 The DSL has two tiers: **core forms** (the original eleven `pred` types) and **documented extensions** (additional forms used by the bootstrap-seed pool and supported by the runtime page-cycle's Phase 4 selection). Both tiers are part of the DSL grammar; LLM proposers MAY use either, but they may NOT invent new `pred` types beyond what this document enumerates. Extending the DSL further is an authorial change to this document, not a runtime act.
 
+The closed surface is the structural grammar: supported `pred` forms, recursive combinators, required fields, operator sets, record-id shapes, and fixed small enums such as epistemic class and obligation status. The open surface is story/world-local typed vocabulary: narrative-time tags, event-kind strings, world-state scalar names, location kinds/classes, role matchers, and relationship-state properties where no bundle registry fixes the list. Open values must still use the documented typed-string mini-format or an existing bundle/state-schema source; they are not free-form prose.
+
 This file is inlined verbatim into Phase 3's LLM prompt and consulted by Phase 4 gate 7 (Predicate DSL parsability).
 
 ## Core Predicate Forms
