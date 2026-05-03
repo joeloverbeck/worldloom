@@ -24,6 +24,9 @@ cast_bind_list:
   - char_id: CHAR-NNNN
     stent_id: STENT-NNNN
     role_in_story: protagonist           # protagonist | major | supporting | antagonist | foil
+  - char_id: null                        # null for story-only STENTs (named cast not in world canon — see SKILL.md §Phase 2 §Story-only entities)
+    stent_id: STENT-NNNN
+    role_in_story: supporting
 
 mysteries_in_play:                       # populated by Phase 4 — Rule 7 firewall surface
   - id: M-N
