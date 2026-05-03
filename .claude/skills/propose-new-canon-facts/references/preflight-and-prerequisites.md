@@ -24,15 +24,28 @@ Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + inva
 - If `parameters_path` declares `enrichment_types` or `taboo_areas` that name specific named entities (places, institutions, species), resolve them via `mcp__worldloom__find_named_entities(names)` and pass the resulting `ENT-NNNN` ids.
 - If neither is specified (interview-driven), seed with a small set (3-5) of representative anchor nodes drawn from WORLD_KERNEL §Core Pressures — typically the institution / region / pressure-domain `ENT-NNNN` or `SEC-*` records named there.
 
+## Persisted-with-summary delivery handling
+
+Per `docs/CONTEXT-PACKET-CONTRACT.md` §Fast-Summary Inline Delivery, `get_context_packet` may return `task_header.delivery_status: persisted_with_summary` when the full packet exceeds the MCP inline transport ceiling. In that state, the inline response carries `governing_summary` id lists and `truncation_summary.fallback_advice`; the full packet body is persisted at `task_header.persisted_output_path`, and the `nodes` arrays in `local_authority`, `exact_record_links`, `scoped_local_context`, `governing_world_context`, and `impact_surfaces` are empty.
+
+Use one of two recovery paths:
+
+1. **Direct id-batch retrieval**: read `governing_summary.invariant_ids`, `governing_summary.seed_relevant_cf_ids`, and `governing_summary.dropped_node_ids_by_class`, then call `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for the CF / INV / M / SEC bodies this skill's diagnosis, redundancy, and Phase 7 checks need.
+2. **Persisted slice extraction**: call `mcp__worldloom__get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` when the packet's ranked neighborhood structure matters more than direct id retrieval, for example `governing_world_context.nodes` or an id-selected node slice.
+
+Either path is valid. Prefer `get_records` when the needed ids are already known; prefer `get_persisted_packet_slice` when the packet's ranking-profile context is the thing being inspected. Treat the persisted file as session-local.
+
 ## Targeted record retrieval (during diagnosis and reasoning)
 
 When a phase needs a record beyond what the packet returned:
 
 - `mcp__worldloom__get_record(record_id)` — single record by id (CF / CH / INV / M / OQ / ENT / SEC).
+- `mcp__worldloom__get_records(record_ids, world_slug?)` — known-id batch retrieval; prefer over N individual `get_record` calls when diagnosis, redundancy filtering, or Phase 7 checks need multiple CF / INV / M / SEC bodies.
 - `mcp__worldloom__search_nodes(node_type=..., filters=...)` — domain-filtered scans:
   - `node_type='section', filters={file_class: 'institutions'}` — Phase 1 thinness scan over institutional sections; analogously for `everyday-life`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline`.
   - `node_type='canon_fact', filters={domain: ...}` — Phase 5 redundancy filter; Phase 7c distribution discipline lookups.
 - `mcp__worldloom__get_firewall_content(world_slug)` — Phase 7b bulk firewall projection when a seed implicates an M entry not in the packet; use `get_record('M-NNNN')` only when full M-record context is needed beyond the projection.
+- `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` — structured slice extraction from a `persisted_with_summary` packet body. Use when Pre-flight returned only inline `governing_summary` id lists and the persisted packet's ranked layer context is needed.
 - `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species).
 - `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-NNNN` ids.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 1 needs to ground a CF against the section context where it was applied.

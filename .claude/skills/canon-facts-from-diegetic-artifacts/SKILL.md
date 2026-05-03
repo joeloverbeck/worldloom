@@ -16,7 +16,7 @@ arguments:
 
 # Canon Facts From Diegetic Artifacts
 
-Mines an existing diegetic artifact in a worldloom world for candidate canon facts. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='canon_facts_from_diegetic_artifacts', ...)` plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY / the source artifact; classification and laundering judgment pull atomic records on demand via `search_nodes` / `get_record` / `find_named_entities`; surviving cards are written direct-Edit on hybrid files (proposals are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each emitted card's path is directly consumable as `canon-addition`'s `proposal_path` for separate adjudication.
+Mines an existing diegetic artifact in a worldloom world for candidate canon facts. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='canon_facts_from_diegetic_artifacts', ...)` plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY / the source artifact; classification and laundering judgment pull atomic records on demand via `search_nodes` / `get_record` / `get_records` / `get_persisted_packet_slice` / `find_named_entities`; surviving cards are written direct-Edit on hybrid files (proposals are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each emitted card's path is directly consumable as `canon-addition`'s `proposal_path` for separate adjudication.
 
 <HARD-GATE>
 Do NOT write any file — proposal card, batch manifest, INDEX.md update — until: (a) pre-flight resolves `worlds/<world-slug>/`, verifies `artifact_path` resolves inside `worlds/<world-slug>/diegetic-artifacts/` and is readable, parses the source `DA-NNNN` id, allocates the next `BATCH-NNNN` via `mcp__worldloom__allocate_next_id`, and loads the context packet plus FOUNDATIONS / WORLD_KERNEL / ONTOLOGY / the source artifact; (b) Phase 6 Canon Safety Check passes for every surviving card with zero unrepaired violations across 6a invariant conformance, 6b Mystery Reserve firewall, 6c distribution discipline, 6d Diegetic-to-World laundering (evidence-breadth three-pathway + epistemic-horizon + MR positional sub-tests), and 6e batch-level check (joint-closure + mutual-contradiction + single-narrator concentration); (c) Phase 7 Validation Tests pass with zero failures at both per-card and batch levels; (d) the user has explicitly approved the Phase 8 deliverable summary (claim extraction trace, Phase 2 classification counts, Phase 5 rejection-trigger log, flagged-contradictions list routed to continuity-audit, every surviving card's full content + Canon Safety Check trace, any Phase 6f repairs that fired, any cards the user is dropping). The HARD-GATE also fires for empty batches (zero surviving cards) — the batch manifest still writes as a diagnostic record with `card_ids: []`, and user approval is still required before that write. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
@@ -37,7 +37,8 @@ Phase 1:    Load and Parse Artifact — claim extraction (prose PRIMARY,
             frontmatter tags HINTS only; independent-assertion granularity)
       |
       v
-Phases 2-5: Classify (search_nodes / get_record / find_named_entities to
+Phases 2-5: Classify (search_nodes / get_record / get_records /
+            get_persisted_packet_slice / find_named_entities to
             ground claims; grounded / partially_grounded discarded;
             contradicts / extends-soft routed to flagged-contradictions);
             map proposed_status (narrator-reliability); score (8 dimensions,

@@ -13,7 +13,7 @@ arguments:
 
 # Propose New Characters
 
-Generates a diversified batch of candidate character-proposal cards for an existing worldloom world. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='propose_new_characters', ...)` plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY and the Person Registry (existing dossiers + diegetic-artifact frontmatter + adjudicated figures); diagnosis, niche/voice construction, and Canon Safety Check pull atomic records on demand via `search_nodes` / `get_record` / `find_named_entities`; surviving cards are written direct-Edit on hybrid files (proposals are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each emitted card's path is directly consumable as `character-generation`'s `character_brief_path`.
+Generates a diversified batch of candidate character-proposal cards for an existing worldloom world. Pre-flight loads world state via `mcp__worldloom__get_context_packet(task_type='propose_new_characters', ...)` plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY and the Person Registry (existing dossiers + diegetic-artifact frontmatter + adjudicated figures); diagnosis, niche/voice construction, and Canon Safety Check pull atomic records on demand via `search_nodes` / `get_record` / `get_records` / `get_persisted_packet_slice` / `find_named_entities`; surviving cards are written direct-Edit on hybrid files (proposals are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each emitted card's path is directly consumable as `character-generation`'s `character_brief_path`.
 
 <HARD-GATE>
 Do NOT write any file — proposal card, batch manifest, INDEX.md update — until: (a) pre-flight resolves `worlds/<world-slug>/`, allocates the next `NCB-NNNN` via `mcp__worldloom__allocate_next_id`, and loads the context packet plus FOUNDATIONS / WORLD_KERNEL / ONTOLOGY plus the Person Registry; (b) Phase 10 Canon Safety Check passes for every surviving card with zero unrepaired violations across 10a invariant conformance, 10b Mystery Reserve firewall, 10c distribution discipline, and 10d batch-level registry-non-duplication + joint-closure; (c) Phase 15 Validation Tests pass with zero failures at both per-card and batch levels; (d) the user has explicitly approved the Phase 16 deliverable summary (registry diagnosis, constellation+mosaic audit, niche-occupancy map, every card's frontmatter + body, every card's Canon Safety Check trace, every card's `canon_assumption_flags` status, any Phase 10e repairs that fired, any cards the user is dropping). The user's approval may include a drop-list of card-IDs to exclude from the write; dropped cards are never written and are recorded in the batch manifest's `dropped_card_ids`. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
@@ -32,7 +32,8 @@ Phase 0:    Normalize Generation Parameters (parse OR interview)
       |
       v
 Phases 1-2: Build Person Registry + derive 7-layer essence profiles for
-            every entry (search_nodes / get_record on demand)
+            every entry (search_nodes / get_record / get_records /
+            get_persisted_packet_slice on demand)
       |
       v
 Phases 3-5: Constellation + Mosaic web; filled/crowded/open niches;

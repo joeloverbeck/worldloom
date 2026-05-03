@@ -94,11 +94,12 @@ For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, o
 5. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
 6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
 7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
-8. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-9. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-10. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-11. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
-12. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+8. If ticket prose names a bare `references/<file>.md` path and the local-relative lookup fails, search `.codex/skills/*/references/` and `.claude/skills/*/references/` before treating it as missing. Prefer the skill context implied by the cited rule or section name, and record the resolved authority in `Assumption Reassessment` when it affects scope, proof, or ownership.
+9. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+10. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+11. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 
 ### 2. Reassess assumptions before coding
 
@@ -188,6 +189,7 @@ For skill tickets, verify:
 - required reads and prerequisites are truthful
 - HARD-GATE behavior still matches repo policy
 - bundled references/templates/examples remain aligned with the behavior you are changing
+- when editing `.claude/skills/<skill>/references/*` or another skill-local reference for a command, tool, fallback, or contract shape, inspect the parent `.claude/skills/<skill>/SKILL.md` summary, process-flow, prerequisite, and pointer language before the first source edit. If those parent sections still state the old shape, add the parent `SKILL.md` to the active ticket's `Files to Touch` and proof surface during reassessment instead of waiting for closeout to discover the stale summary.
 
 ### 4. Implement with minimal, truthful edits
 

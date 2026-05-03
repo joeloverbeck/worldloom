@@ -28,7 +28,7 @@ The desired behavior: `section_path='frontmatter'` (no dot, no key) projects the
 5. **No Mystery Reserve / HARD-GATE / Canon Safety Check surface touched:** the change is to retrieval input validation; canon mutation surfaces (Hook 3 engine-only `_source/` writes, the patch engine's append-only ledger discipline, MR firewall enforcement) are unaffected.
 6. **Schema parity:** not applicable — no record schema change; only the `section_path` input parameter's validation rule.
 7. **Adjacent contradictions:** the FOUNDATIONS.md §Canonical Storage Layer block describes hybrid-record retrieval as supporting "frontmatter blocks (`frontmatter.world_consistency`, `frontmatter.author_profile`) and body sections (`body.Capabilities`) project as structured slices." The wording is consistent with `<key>`-required usage but does not explicitly forbid bare `frontmatter` / bare `body` — the FOUNDATIONS prose does not need to change; the runtime validation is the tighter contract.
-8. **Impact on persisted-packet retrieval:** `get_persisted_packet_slice` is a separate tool with its own `slice_spec` shape; this ticket does NOT touch that tool. Operators wanting the persisted packet's full record set should continue to use `get_persisted_packet_slice` or `get_records(record_ids: [...])` per MCPENH-020.
+8. **Impact on persisted-packet retrieval:** `get_persisted_packet_slice` is a separate tool with its own `slice_spec` shape; this ticket does NOT touch that tool. Operators wanting the persisted packet's full record set should continue to use `get_persisted_packet_slice` or `get_records(record_ids: [...])` per `archive/tickets/MCPENH-020-document-persisted-with-summary-fallback-and-batch-retrieval.md`.
 
 ## Architecture Check
 
