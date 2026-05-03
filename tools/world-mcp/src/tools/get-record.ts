@@ -12,6 +12,11 @@ import type {
 
 import { openIndexDb } from "../db";
 import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
+import { persistToolResultJson } from "../context-packet/persistence";
+import {
+  ENVELOPE_OVERHEAD_RESERVE_CHARS,
+  resolveHarnessCeilingChars
+} from "../context-packet/shared";
 import { createMcpError, type McpError } from "../errors";
 
 import { listIndexedWorldSlugs } from "./_shared";
@@ -57,10 +62,24 @@ export interface GetRecordSectionResponse {
   file_path: string;
 }
 
+export interface GetRecordOversizeResponse {
+  record_id: string;
+  record_kind: HybridRecordKind;
+  delivery_status: "oversize_with_projection_suggestions";
+  persisted_output_path: string;
+  total_chars: number;
+  response_cap_chars: number;
+  suggested_section_paths: string[];
+  fallback_advice: string;
+  content_hash: string;
+  file_path: string;
+}
+
 export type GetRecordResponse =
   | GetRecordAtomicResponse
   | GetRecordHybridResponse
-  | GetRecordSectionResponse;
+  | GetRecordSectionResponse
+  | GetRecordOversizeResponse;
 
 export interface RecordRow {
   node_id: string;
@@ -407,6 +426,41 @@ function enumerateValidPaths(parts: HybridFileParts): string[] {
   return paths;
 }
 
+function effectiveResponseCapChars(): number {
+  return Math.max(1, resolveHarnessCeilingChars() - ENVELOPE_OVERHEAD_RESERVE_CHARS);
+}
+
+function serializeResponse(value: unknown): string {
+  return JSON.stringify(value, null, 2);
+}
+
+function buildOversizeResponse(args: {
+  fullResponse: GetRecordHybridResponse;
+  worldSlug: string;
+  parts: HybridFileParts;
+  totalChars: number;
+  responseCapChars: number;
+}): GetRecordOversizeResponse {
+  const persistedOutputPath = persistToolResultJson(
+    `${args.worldSlug}-get_record-${args.fullResponse.record_id}`,
+    args.fullResponse
+  );
+
+  return {
+    record_id: args.fullResponse.record_id,
+    record_kind: args.fullResponse.record_kind,
+    delivery_status: "oversize_with_projection_suggestions",
+    persisted_output_path: persistedOutputPath,
+    total_chars: args.totalChars,
+    response_cap_chars: args.responseCapChars,
+    suggested_section_paths: enumerateValidPaths(args.parts),
+    fallback_advice:
+      "Re-call get_record with section_path set to one of suggested_section_paths to retrieve a structured slice. For full-content recovery, read the persisted_output_path JSON file directly.",
+    content_hash: args.fullResponse.content_hash,
+    file_path: args.fullResponse.file_path
+  };
+}
+
 async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | McpError> {
   const idError = validateRecordId(args.record_id);
   if (idError !== null) {
@@ -466,7 +520,7 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
       };
     }
 
-    return {
+    const fullResponse: GetRecordHybridResponse = {
       record_id: resolved.row.node_id,
       record_kind: recordKind,
       frontmatter: parts.frontmatter,
@@ -474,6 +528,20 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
       content_hash: resolved.row.content_hash,
       file_path: resolved.row.file_path
     };
+
+    const serialized = serializeResponse(fullResponse);
+    const responseCapChars = effectiveResponseCapChars();
+    if (serialized.length > responseCapChars) {
+      return buildOversizeResponse({
+        fullResponse,
+        worldSlug: resolved.worldSlug,
+        parts,
+        totalChars: serialized.length,
+        responseCapChars
+      });
+    }
+
+    return fullResponse;
   }
 
   const record = parseRecordBody(resolved.row);

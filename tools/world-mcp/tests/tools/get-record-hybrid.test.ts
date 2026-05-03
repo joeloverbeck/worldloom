@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import { getRecord } from "../../src/tools/get-record";
@@ -73,6 +75,32 @@ const PA_FILE_BODY = [
   "## Adjudication Notes",
   "",
   "The proposal was accepted on first pass.",
+  ""
+].join("\n");
+
+const OVERSIZE_DA_FILE_BODY = [
+  "---",
+  "artifact_id: DA-0002",
+  "slug: large-harbor-journal",
+  "title: Large Harbor Journal",
+  "author_profile:",
+  "  voice_register: ledger-heavy",
+  "claim_map:",
+  "  major_claims:",
+  "    - CF-0001",
+  "epistemic_horizon:",
+  "  knows_firsthand:",
+  "    - Harbor inventory",
+  "---",
+  "# Large Harbor Journal",
+  "",
+  "## 18 April",
+  "",
+  "Cargo tally. ".repeat(140),
+  "",
+  "## 19 April",
+  "",
+  "Harbor rumor. ".repeat(140),
   ""
 ].join("\n");
 
@@ -173,6 +201,80 @@ test("get-record-hybrid returns parsed shape for PA records", async () => {
     assert.equal(result.frontmatter.verdict, "accept");
     assert.ok(result.body_sections["Adjudication Notes"]?.includes("first pass"));
   } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("get-record-hybrid persists oversized hybrid responses with projection suggestions", async () => {
+  const root = createTempRepoRoot();
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+  process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "5000";
+  process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = path.join(root, "tool-results");
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "DA-0002",
+          world_slug: "seeded",
+          file_path: "diegetic-artifacts/large-harbor-journal.md",
+          node_type: "diegetic_artifact_record",
+          body: OVERSIZE_DA_FILE_BODY
+        }
+      ]
+    });
+
+    const result = await withRepoRoot(root, () =>
+      getRecord({ record_id: "DA-0002", world_slug: "seeded" })
+    );
+
+    assert.ok("delivery_status" in result, "expected oversize response shape");
+    assert.equal(result.delivery_status, "oversize_with_projection_suggestions");
+    assert.equal(result.record_kind, "diegetic_artifact");
+    assert.ok(result.total_chars > result.response_cap_chars);
+    assert.equal(result.response_cap_chars, 1000);
+    assert.match(
+      result.persisted_output_path,
+      /tool-results\/.*-seeded-get_record-DA-0002-[0-9a-f-]+\.json$/
+    );
+    assert.ok(existsSync(result.persisted_output_path));
+    assert.ok(result.suggested_section_paths.includes("frontmatter"));
+    assert.ok(result.suggested_section_paths.includes("frontmatter.author_profile"));
+    assert.ok(result.suggested_section_paths.includes("frontmatter.claim_map"));
+    assert.ok(result.suggested_section_paths.includes("frontmatter.epistemic_horizon"));
+    assert.ok(result.suggested_section_paths.includes("body.18 April"));
+    assert.ok(result.suggested_section_paths.includes("body.19 April"));
+
+    const persisted = JSON.parse(readFileSync(result.persisted_output_path, "utf8"));
+    assert.equal(persisted.record_id, "DA-0002");
+    assert.equal(persisted.record_kind, "diegetic_artifact");
+    assert.ok(persisted.body_sections["18 April"].includes("Cargo tally."));
+
+    const projected = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "DA-0002",
+        world_slug: "seeded",
+        section_path: "body.18 April"
+      })
+    );
+
+    assert.ok("section_path" in projected, "expected section response shape");
+    assert.equal(projected.section_path, "body.18 April");
+    assert.ok(typeof projected.value === "string");
+    assert.ok(projected.value.includes("Cargo tally."));
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+    if (originalResultsDir === undefined) {
+      delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+    } else {
+      process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
+    }
     destroyTempRepoRoot(root);
   }
 });
