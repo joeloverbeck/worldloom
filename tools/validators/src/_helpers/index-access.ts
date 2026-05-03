@@ -171,6 +171,17 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     return current.node_id;
   }
 
+  if (patch.op === "remove_ch_affected_cf_ids") {
+    const current = byId.get(patch.payload.target_ch_id);
+    if (!current) {
+      return null;
+    }
+    const parsed = cloneRecord(current.parsed);
+    delete parsed.affected_cf_ids;
+    byId.set(current.node_id, { ...current, parsed });
+    return current.node_id;
+  }
+
   if (patch.op === "append_touched_by_cf") {
     const current = byId.get(patch.payload.target_sec_id);
     if (!current) {

@@ -222,6 +222,15 @@ function operationSchema(kind: OperationKind): JsonObject {
           retcon_attestation: retconAttestationSchema()
         }
       });
+    case "remove_ch_affected_cf_ids":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["target_ch_id"],
+        properties: {
+          target_ch_id: stringSchema("^CH-[0-9]{4}$")
+        }
+      });
     case "append_extension":
       return baseOperationProperties(kind, {
         type: "object",

@@ -15,13 +15,22 @@ The goal is to preserve the patch-engine write boundary, not to make canon write
 3. Never direct-edit `_source/*.yaml` as a fallback.
 4. Stop and escalate if the only available path would weaken a real hard gate, silently skip required approval semantics, or mutate canon without patch-engine staging.
 
+## Operation Class
+
+Before writing a local driver, classify the plan:
+
+- `semantic canon mutation`: creates, changes, retires, or retcons canon facts, canon change history, modification history, or other meaning-bearing canon records.
+- `schema or maintenance migration`: rewrites existing records to satisfy a new machine schema, validator contract, or storage invariant without creating new canon facts or changing the world meaning.
+
+Both classes must preserve the patch-engine write boundary and run the live pre-apply validator. Do not add canon-history artifacts just because the fallback driver is local. CH creation, modification-history append, expected ID allocation, and retcon attestation are required only when the live operation or semantic canon change requires them. For maintenance migrations, include only the attestations and operation fields the live op schema demands, and record why the migration does not create new canon meaning.
+
 ## Minimum Local Driver Shape
 
 A local temporary driver may submit through `submitPatchPlan` only when it does all of the following:
 
 - builds a normal `PatchPlanEnvelope`
 - computes current record content hashes from the patch-engine/world-index canonical hash helper rather than ad hoc hashing
-- includes required retcon attestation, CH creation, modification-history append, expected id allocations, and any other live op requirements
+- includes the live op's required attestation, CH creation, modification-history append, expected id allocations, and other required fields for the classified operation class
 - signs a short-lived approval token with the repo's local MCP secret using the same payload shape the engine verifies
 - runs `validatePatchPlan` or the live pre-apply validator surface first and records the result
 - calls `submitPatchPlan` from the repo root or with an explicit `worldRoot`
@@ -44,7 +53,7 @@ Using an injected `preApplyValidator` callback is allowed only after that classi
 Before closeout, directly verify:
 
 - the intended `_source/*.yaml` files changed through the engine receipt and on disk
-- any created CH / modification-history / extension attribution is valid
+- any created or modified CH / modification-history / extension attribution is valid, when the operation class required those artifacts
 - the world index was rebuilt or synced
 - `world-validate <world>` reports the intended post-change state
 - ignored generated/world artifacts are classified in the dirty-worktree ledger

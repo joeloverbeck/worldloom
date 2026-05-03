@@ -123,6 +123,8 @@ Load `references/mismatch-handling.md` from this skill directory (`.codex/skills
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
+If the user asks you to reassess options against `docs/FOUNDATIONS.md`, pause implementation and rerun the option analysis against the exact FOUNDATIONS rule, schema, or workflow section that controls the boundary. State the recommendation you are changing or preserving, why each viable option does or does not satisfy FOUNDATIONS, and patch the active ticket before source edits when the accepted option changes scope, proof, or owned files.
+
 When reassessment cleanly narrows the owned delta before coding, patch the ticket's `Problem`, stale evidence-backed statements in `Assumption Reassessment`, `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
 
 If early probing shows that a drafted broad package/workspace proof lane is already failing for reasons outside the owned seam, remove it from the active acceptance surface before implementation and rewrite the ticket to the strongest truthful narrower proof boundary. Keep the broader lane only as contextual noise or follow-up evidence, not as an active acceptance gate.

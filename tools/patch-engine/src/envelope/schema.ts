@@ -47,6 +47,7 @@ export const OPERATION_KINDS = [
   "create_ent_record",
   "create_sec_record",
   "update_record_field",
+  "remove_ch_affected_cf_ids",
   "append_extension",
   "append_touched_by_cf",
   "append_modification_history_entry",
@@ -135,6 +136,7 @@ export type PatchOperation =
         retcon_attestation?: RetconAttestation;
       }
     >
+  | OperationBase<"remove_ch_affected_cf_ids", { target_ch_id: string }>
   | OperationBase<"append_extension", { target_record_id: string; extension: ExtensionPayload }>
   | OperationBase<"append_touched_by_cf", { target_sec_id: string; cf_id: string }>
   | OperationBase<

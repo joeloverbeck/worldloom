@@ -891,6 +891,7 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
       "create_ent_record",
       "create_sec_record",
       "update_record_field",
+      "remove_ch_affected_cf_ids",
       "append_extension",
       "append_touched_by_cf",
       "append_modification_history_entry",

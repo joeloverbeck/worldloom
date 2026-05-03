@@ -81,6 +81,16 @@ Before finishing, re-read the ticket and make it truthful:
 - `## Deviations` is present when reassessment or verification changed the intended shape
 - dirty-worktree state has been refreshed using `references/dirty-worktree-ledger.md`, including hunk-level classification for mid-run changes in files you also touched and likely sibling-ticket ownership for same-family edits
 
+For long tickets, use this expedited stale-anchor pass before final response:
+
+- `Status`: final state, not intended state.
+- `Problem`: fixed defects are labelled as intake or pre-ticket evidence.
+- `Files to Touch`: exact landed file set, including same-seam docs/tests discovered during reassessment.
+- `What to Change` / `Landed Changes`: no future-tense implementation plan unless explicitly labelled historical.
+- `Verification Layers`, `Acceptance Criteria`, and `Test Plan`: exact proof commands or manual review surfaces actually used.
+- `Outcome`, `Verification Result`, and `Deviations`: current closeout facts, with stale drafted commands and superseded assumptions labelled as historical evidence.
+- stale command fragments, old fixture names, placeholder alternatives, and old proof options have been grepped or manually scanned and resolved.
+
 ## Archival
 
 Archive only when the user asked for it.

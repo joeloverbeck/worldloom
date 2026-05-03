@@ -2,9 +2,8 @@ change_id: CH-0010
 date: 2026-04-19
 initiating_proposal: briefs/animalia-interspecies-conflicts.md
 change_type: addition_with_qualification
-affected_cf_ids:
-  - CF-0036
 affected_fact_ids:
+  - CF-0036
   - CF-0017
   - CF-0024
   - CF-0026

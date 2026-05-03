@@ -5,6 +5,7 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 ## Reassessment
 
 - Identify every live entrypoint that materializes the validated record shape: direct file-input validation, DB-row reconstruction helpers, CLI helpers, pre-apply overlays, registry/list surfaces, and package exports. Do not stop after the first parser call.
+- When adding or changing a patch-engine operation that affects validated record shape, update the pre-apply overlay/materialized read surface in the same seam as the operation. Confirm the validator sees the post-operation shape during `validate_patch_plan`, not only after `submit_patch_plan` writes files.
 - For hybrid frontmatter records, explicitly decide the behavior for missing frontmatter. If the record class is in scope and required fields should be enforced, missing frontmatter should produce a structured schema failure, not a silent skip. If skipping is intentional, record why the file is outside the validator's authority.
 - For JSON Schema tickets, inspect the package's existing schema compiler setup before accepting drafted compile probes. Match the live Ajv variant, draft version, strictness, formats, referenced-schema registration, and module-resolution root used by the package's validator/tests; for example, a schema declaring draft-2020-12 should be proved through the package's existing `Ajv2020` setup rather than a generic `new Ajv()` one-liner.
 - When renaming a schema, validator, code, message, enum value, registry name, or persisted verdict surface, search same-seam tests, fixtures, README/docs, specs, active sibling tickets, and grandfathering/waiver policy files for the old spelling before coding.
@@ -26,6 +27,7 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 - Run the package's build/test lane from the package root after cleaning stale compiled output if files were renamed or deleted.
 - If a live-corpus command is part of acceptance, capture the post-change summary and the key targeted counts, including retired-validator zero-count checks and renamed-code counts.
 - For shared producer vocabularies or schemas consumed through a local `file:` or symlinked package, rebuild the producer and verify the consumer-resolved artifact before trusting consumer proof.
+- For patch-engine operation/schema migrations, prove validate/submit parity with at least one focused plan that exercises the new or changed operation through the pre-apply validator and the submit/apply path. Include a rejection or legacy-shape proof when the ticket retires a field or shape.
 - For capstone surrogates, prove the production/default validator or pre-apply path stays fail-closed and name what the surrogate does not prove, especially when a skill-flow scenario is represented by a hand-authored envelope, fixture, or direct validator call.
 
 ## Closeout
