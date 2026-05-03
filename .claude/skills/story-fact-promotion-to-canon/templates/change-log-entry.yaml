@@ -1,0 +1,64 @@
+# Change Log Entry — CH template (referenced by story-fact-promotion-to-canon)
+#
+# Enforces FOUNDATIONS.md §"Change Control Policy" and Rule 6 (No Silent Retcons).
+# This skill does NOT emit CH records directly — canon-addition emits them via
+# create_ch_record patch op on accept. The promotion provenance flows from this
+# skill's proposal_package (Phase 6) into canon-addition's CH `reason` and
+# `notes` fields at canon-addition Phase 13a.
+#
+# This template is bundled here as a reference for what canon-addition will
+# produce on accept; the actual emission lives in canon-addition's Phase 13a
+# patch plan assembly.
+
+change_id: CH-<placeholder>                # canon-addition allocates the final id; monotonic
+date: ""                                   # ISO date, e.g. 2026-05-03
+
+change_type: addition                      # addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
+                                           # For promotion CHs: typically `addition` (a new CF entered the world);
+                                           # `scope_retcon` if the promotion narrows or widens an existing CF the source
+                                           #   superseded.
+
+affected_fact_ids: []                      # list of CF ids touched by this change
+  # - CF-<the new CF created by this promotion>
+  # - CF-<any existing CF whose modification_history was extended>
+
+summary: >
+  One-paragraph natural-language summary of what changed.
+  For promotion CHs: "Promoted <source_kind> <source ID> from story
+  <story_slug> branch <leaf> to world canon as CF-NNNN: <CF title>."
+
+reason:                                    # why the change is being made
+  - "Story-local outcome promoted to world canon by user authorial decision."
+  - "Promotion provenance: SP-NNNN (story-promotion ledger) at <path>."
+  - "Branch path: <promotion_branch_path>."
+  - "Supporting pages: <PG ids>."
+
+scope:
+  local_or_global: local                   # local | global — Phase 3 inflation check feeds this
+  changes_ordinary_life: false             # does this visibly alter daily life per FOUNDATIONS §Change Control Policy
+  creates_new_story_engines: false         # does the new CF unlock new types of plots in the world
+  mystery_reserve_effect: none             # none | narrows | expands
+                                           # `narrows` for source_kind=mystery_resolution where M was resolved
+
+downstream_updates: []                     # SEC file classes that must be updated as part of this change
+  # - everyday-life
+  # - institutions
+
+impact_on_existing_texts: []               # any diegetic artifacts now re-contextualized by the new CF
+  # - "travelogue DA-0014 now treated as regional overgeneralization in light of CF-NNNN promotion"
+
+severity_before_fix: 0                     # 0-5 (see continuity-audit §Contradiction Severity Levels)
+severity_after_fix: 0                      # for promotion CHs: typically 0 (additive, not retconning)
+
+retcon_policy_checks:                      # must all be true for acceptance (FOUNDATIONS Rule 6)
+  no_silent_edit: true
+  replacement_noted: true                  # if the promotion supersedes an existing CF, note what replaces it
+  no_stealth_diegetic_rewrite: true        # world-level truth is not being changed via diegetic text alone
+  net_contradictions_not_increased: true
+  world_identity_preserved: true
+
+notes: >
+  Optional free-form notes: promotion provenance summary, contradicting-branch
+  handling, cross-story scan results, future audit recommendations.
+  Cross-reference SP-NNNN.md (story-side ledger) + PA-NNNN-<verdict>.md
+  (canon-addition adjudication) for the full audit trail.

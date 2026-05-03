@@ -61,6 +61,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "SLT", subdir: "storylets", fileName: "SLT-0007.yaml", expected: "SLT-0008" },
   { idClass: "SLB", subdir: "storylet-batches", fileName: "SLB-0007.md", expected: "SLB-0008" },
   { idClass: "SAU", subdir: "audits", fileName: "SAU-0007-2026-05-03.md", expected: "SAU-0008" },
+  { idClass: "SP", subdir: "story-promotions", fileName: "SP-0007.md", expected: "SP-0008" },
   { idClass: "STLOC", subdir: "locations", fileName: "STLOC-0007.yaml", expected: "STLOC-0008" },
   { idClass: "STOBJ", subdir: "objects", fileName: "STOBJ-0007.yaml", expected: "STOBJ-0008" },
   { idClass: "BR", subdir: "branches", fileName: "BR-0007.yaml", expected: "BR-0008" },
@@ -101,7 +102,7 @@ function writeStoryKernel(root: string, storySlug: string, content: string): voi
 
 function writeStoryRecord(root: string, storySlug: string, subdir: string, fileName: string): void {
   const directory =
-    subdir === "storylet-batches" || subdir === "audits"
+    subdir === "storylet-batches" || subdir === "audits" || subdir === "story-promotions"
       ? path.join(root, "worlds", "seeded", "stories", storySlug, subdir)
       : path.join(root, "worlds", "seeded", "stories", storySlug, "_source", subdir);
   mkdirSync(directory, { recursive: true });
@@ -328,15 +329,55 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const sauResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SAU", story_slug: "empty-story" })
     );
+    const spResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "SP", story_slug: "empty-story" })
+    );
 
     assert.ok(!("code" in pageResult));
     assert.ok(!("code" in stintResult));
     assert.ok(!("code" in slbResult));
     assert.ok(!("code" in sauResult));
+    assert.ok(!("code" in spResult));
     assert.equal(pageResult.next_id, "PG-0001");
     assert.equal(stintResult.next_id, "STINT-0001");
     assert.equal(slbResult.next_id, "SLB-0001");
     assert.equal(sauResult.next_id, "SAU-0001");
+    assert.equal(spResult.next_id, "SP-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId counts SP ledger and proposal-package sidecar files together", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "wolf-tale"), { recursive: true });
+    writeStoryRecord(root, "wolf-tale", "story-promotions", "SP-0001.md");
+    writeStoryRecord(root, "wolf-tale", "story-promotions", "SP-0003-proposal-package.yaml");
+    writeStoryRecord(root, "wolf-tale", "story-promotions", "SP-9999-draft.yaml");
+    writeStoryRecord(root, "wolf-tale", "story-promotions", "not-an-sp.md");
+    writeStoryRecord(root, "other-story", "story-promotions", "SP-0099.md");
+
+    const result = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "SP", story_slug: "wolf-tale" })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.next_id, "SP-0004");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -477,6 +518,9 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const sauWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SAU" })
     );
+    const spWithoutStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "SP" })
+    );
     const rspWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "RSP", audit_id: "SAU-0001" })
     );
@@ -513,6 +557,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in sauWithPipelineSlug);
     assert.ok("code" in storyScopedWithoutStorySlug);
     assert.ok("code" in sauWithoutStorySlug);
+    assert.ok("code" in spWithoutStorySlug);
     assert.ok("code" in rspWithoutStorySlug);
     assert.ok("code" in rspWithoutAuditId);
     assert.ok("code" in rspWithMalformedAuditId);
@@ -526,6 +571,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(sauWithPipelineSlug.code, "invalid_input");
     assert.equal(storyScopedWithoutStorySlug.code, "invalid_input");
     assert.equal(sauWithoutStorySlug.code, "invalid_input");
+    assert.equal(spWithoutStorySlug.code, "invalid_input");
     assert.equal(rspWithoutStorySlug.code, "invalid_input");
     assert.equal(rspWithoutAuditId.code, "invalid_input");
     assert.equal(rspWithMalformedAuditId.code, "invalid_input");
@@ -537,6 +583,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);
     assert.match(storyScopedWithoutStorySlug.message, /requires story_slug/);
     assert.match(sauWithoutStorySlug.message, /requires story_slug/);
+    assert.match(spWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutAuditId.message, /requires audit_id/);
     assert.match(rspWithMalformedAuditId.message, /SAU-NNNN/);
@@ -547,7 +594,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 47 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 48 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -564,6 +611,7 @@ test("allocateNextId exposes all 47 id classes with existing formats preserved",
     "RP",
     "RSP",
     "SAU",
+    "SP",
     "EPE",
     "STORY",
     "PG",
@@ -597,7 +645,7 @@ test("allocateNextId exposes all 47 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 47);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 48);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
@@ -607,6 +655,7 @@ test("allocateNextId exposes all 47 id classes with existing formats preserved",
   assert.match("SLB-0008", ID_CLASS_FORMATS.SLB.regex);
   assert.match("RSP-0008-payoff", ID_CLASS_FORMATS.RSP.regex);
   assert.match("SAU-0008-2026-05-03", ID_CLASS_FORMATS.SAU.regex);
+  assert.match("SP-0008-proposal-package", ID_CLASS_FORMATS.SP.regex);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
   assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
   assert.match("OQ-0001", ID_CLASS_FORMATS.OQ.regex);

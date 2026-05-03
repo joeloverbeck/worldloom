@@ -24,6 +24,7 @@ export const ID_CLASS_FORMATS = {
   RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
   RSP: { width: 4, zeroPad: true, regex: /^RSP-(\d{4})(?:-.+)?$/ },
   SAU: { width: 4, zeroPad: true, regex: /^SAU-(\d{4})(?:-.+)?$/ },
+  SP: { width: 4, zeroPad: true, regex: /^SP-(\d{4})(?:-proposal-package)?$/ },
   EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
   STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
   PG: { width: 4, zeroPad: true, regex: /^PG-(\d{4})$/ },
@@ -87,6 +88,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   SLT: "storylets",
   SLB: "storylet-batches",
   SAU: "audits",
+  SP: "story-promotions",
   STLOC: "locations",
   STOBJ: "objects",
   BR: "branches",
@@ -301,11 +303,17 @@ function findHighestStoryScopedId(
   }
 
   const format = ID_CLASS_FORMATS[idClass];
+  const directStoryDirectoryClasses = new Set<StoryScopedIdClass>(["SLB", "SAU", "SP"]);
   const directory =
-    idClass === "SLB" || idClass === "SAU"
+    directStoryDirectoryClasses.has(idClass)
       ? path.join(storyDirectory, STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass])
       : path.join(storyDirectory, "_source", STORY_SCOPED_ID_CLASS_DIRECTORIES[idClass]);
-  const extension = idClass === "SLB" || idClass === "SAU" ? ".md" : ".yaml";
+  const extensions =
+    idClass === "SP"
+      ? [".md", ".yaml"]
+      : directStoryDirectoryClasses.has(idClass)
+        ? [".md"]
+        : [".yaml"];
   let maxValue = 0;
 
   let fileNames: string[];
@@ -316,7 +324,8 @@ function findHighestStoryScopedId(
   }
 
   for (const fileName of fileNames) {
-    if (!fileName.endsWith(extension)) {
+    const extension = extensions.find((candidate) => fileName.endsWith(candidate));
+    if (extension === undefined) {
       continue;
     }
 
