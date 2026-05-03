@@ -235,6 +235,10 @@ test("get-record-hybrid persists oversized hybrid responses with projection sugg
     assert.equal(result.record_kind, "diegetic_artifact");
     assert.ok(result.total_chars > result.response_cap_chars);
     assert.equal(result.response_cap_chars, 1000);
+    assert.ok(
+      JSON.stringify(result, null, 2).length <= result.response_cap_chars,
+      "oversize recovery response must fit the effective cap"
+    );
     assert.match(
       result.persisted_output_path,
       /tool-results\/.*-seeded-get_record-DA-0002-[0-9a-f-]+\.json$/

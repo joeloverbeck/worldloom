@@ -70,6 +70,7 @@ export interface GetRecordOversizeResponse {
   total_chars: number;
   response_cap_chars: number;
   suggested_section_paths: string[];
+  suggested_section_paths_omitted_count?: number;
   fallback_advice: string;
   content_hash: string;
   file_path: string;
@@ -445,20 +446,32 @@ function buildOversizeResponse(args: {
     `${args.worldSlug}-get_record-${args.fullResponse.record_id}`,
     args.fullResponse
   );
-
-  return {
-    record_id: args.fullResponse.record_id,
-    record_kind: args.fullResponse.record_kind,
-    delivery_status: "oversize_with_projection_suggestions",
-    persisted_output_path: persistedOutputPath,
-    total_chars: args.totalChars,
-    response_cap_chars: args.responseCapChars,
-    suggested_section_paths: enumerateValidPaths(args.parts),
-    fallback_advice:
-      "Re-call get_record with section_path set to one of suggested_section_paths to retrieve a structured slice. For full-content recovery, read the persisted_output_path JSON file directly.",
-    content_hash: args.fullResponse.content_hash,
-    file_path: args.fullResponse.file_path
+  const allSuggestedSectionPaths = enumerateValidPaths(args.parts);
+  const fallbackAdvice = "Retry get_record with a suggested section_path, or read persisted_output_path JSON.";
+  const buildResponse = (suggestedSectionPaths: string[]): GetRecordOversizeResponse => {
+    const omittedCount = allSuggestedSectionPaths.length - suggestedSectionPaths.length;
+    return {
+      record_id: args.fullResponse.record_id,
+      record_kind: args.fullResponse.record_kind,
+      delivery_status: "oversize_with_projection_suggestions",
+      persisted_output_path: persistedOutputPath,
+      total_chars: args.totalChars,
+      response_cap_chars: args.responseCapChars,
+      suggested_section_paths: suggestedSectionPaths,
+      ...(omittedCount > 0 ? { suggested_section_paths_omitted_count: omittedCount } : {}),
+      fallback_advice: fallbackAdvice,
+      content_hash: args.fullResponse.content_hash,
+      file_path: args.fullResponse.file_path
+    };
   };
+
+  const suggestedSectionPaths = [...allSuggestedSectionPaths];
+  let response = buildResponse(suggestedSectionPaths);
+  while (serializeResponse(response).length > args.responseCapChars && suggestedSectionPaths.length > 1) {
+    suggestedSectionPaths.pop();
+    response = buildResponse(suggestedSectionPaths);
+  }
+  return response;
 }
 
 async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | McpError> {

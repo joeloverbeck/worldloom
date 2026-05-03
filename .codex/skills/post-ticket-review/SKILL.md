@@ -12,7 +12,7 @@ arguments:
 
 Review a completed Worldloom ticket against the live repository, fix factual closeout drift, archive it when ready, and capture real follow-up work without importing unrelated cleanup.
 
-Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE.md`, the target ticket, and `docs/archival-workflow.md` before making changes. If the ticket touches canon-mutating workflows, approval gates, or Mystery Reserve / validation enforcement, also read `docs/HARD-GATE-DISCIPLINE.md`.
+Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, and `docs/archival-workflow.md` before making changes. If follow-up ticket creation or ticket-template compliance becomes plausible, read `tickets/README.md` and `tickets/_TEMPLATE.md` before drafting or updating follow-up tickets. If the ticket touches canon-mutating workflows, approval gates, or Mystery Reserve / validation enforcement, also read `docs/HARD-GATE-DISCIPLINE.md`.
 
 **Allowed actions**:
 - update the completed ticket's closeout fields when the edits are factual and unambiguous
@@ -66,7 +66,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, `tickets/README.md`, `tickets/_TEMPLATE
 6. If the ticket is already archived, validate the archived handoff content instead of reopening it.
 7. Treat this step as a provisional readiness check only. Do not move the ticket to `archive/tickets/` until after the review surface, FOUNDATIONS/contract audit, and follow-up/blocker decision are complete.
 
-If archival is blocked because same-seam implementation work remains in skills, tools, hooks, validators, or world content, stay inside review boundaries: report the blocker, record it in the ticket when doing so clarifies the handoff, and resume implementation only under `implement-ticket` or an explicit user instruction to continue implementation. Post-move reference sweeps may inspect those implementation surfaces, but any stale or actionable hit there is a blocker or handoff concern unless the user has explicitly authorized implementation-mode edits; do not treat the archive sweep as permission to modify forbidden surfaces.
+If archival is blocked because same-seam implementation work remains in skills, tools, hooks, validators, or world content, stay inside review boundaries: report the blocker, record it in the ticket when doing so clarifies the handoff, and restore the active ticket to `PENDING` or another truthful active status when its header currently claims completion. Resume implementation only under `implement-ticket` or an explicit user instruction to continue implementation. Post-move reference sweeps may inspect those implementation surfaces, but any stale or actionable hit there is a blocker or handoff concern unless the user has explicitly authorized implementation-mode edits; do not treat the archive sweep as permission to modify forbidden surfaces.
 
 ### 3. Establish the review surface
 

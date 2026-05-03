@@ -1,6 +1,6 @@
 # MCPENH-023: Hybrid-record oversize handling in `mcp__worldloom__get_record`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/world-mcp/` (`get_record` tool implementation), and the persisted-output path convention shared with `get_context_packet`.
@@ -21,7 +21,7 @@ Real-world intake evidence (this session, 2026-05-03): During `branching-story-b
 3. Cross-skill / cross-artifact: the persisted-output path convention is shared between `get_record` and `get_context_packet`. Live package code writes context-packet overflow JSON through `tools/world-mcp/src/context-packet/persistence.ts`, defaulting to `/tmp/worldloom-mcp-tool-results/` with `WORLDLOOM_MCP_TOOL_RESULTS_DIR` override. Pre-edit `get_record` had no internal oversize branch, so the observed `/home/joeloverbeck/.claude/projects/<session-id>/tool-results/<file>.txt` path was harness fallout from returning a too-large handler response. The landed shared boundary is package-owned persisted-output policy for MCP tools that can exceed the inline ceiling.
 4. FOUNDATIONS principle motivating this ticket: §Tooling Recommendation — *"LLM agents should never operate on prose alone. They should always receive — directly or via the documented context-packet + targeted-retrieval pattern — current World Kernel; current Invariants; relevant canon fact records; affected domain files; ..."* At intake, `get_record` oversize behavior broke the targeted-retrieval surface for hybrid records by emitting an unactionable harness path; agents were forced into raw-file reads that bypassed the documented pattern. The landed fix restores targeted-retrieval coverage.
 5. N/A (this ticket does not touch HARD-GATE / canon-write / Mystery Reserve firewall surfaces).
-6. Output schema extension: additive MCP response-shape extension only, not a world-record schema change. The no-`section_path` hybrid overflow branch now returns `delivery_status: "oversize_with_projection_suggestions"`, `persisted_output_path`, `total_chars`, `response_cap_chars`, `suggested_section_paths`, and `fallback_advice`. Existing atomic responses and successful hybrid projection responses remain unchanged.
+6. Output schema extension: additive MCP response-shape extension only, not a world-record schema change. The no-`section_path` hybrid overflow branch now returns `delivery_status: "oversize_with_projection_suggestions"`, `persisted_output_path`, `total_chars`, `response_cap_chars`, bounded `suggested_section_paths`, optional `suggested_section_paths_omitted_count`, and `fallback_advice`. Existing atomic responses and successful hybrid projection responses remain unchanged.
 7. Rename / removal: NONE — no symbols renamed or removed; existing `get_record` and `section_path` API surface preserved.
 8. Adjacent contradictions exposed: the persisted-output-path divergence between `get_record` (`~/.claude/projects/...`) and `get_context_packet` (`/tmp/worldloom-mcp-tool-results/...`) is itself an inconsistency. This ticket treats the divergence as a required consequence to fix (unify on `/tmp/worldloom-mcp-tool-results/`), not a separate ticket.
 9. Mismatch + correction: the drafted acceptance used direct `mcp__worldloom__get_record(...)` live-session calls and `world-validate`. The active Codex session does not expose live `mcp__worldloom__...` tools, and this ticket does not change validators or world source content. Acceptance is corrected to package-local `tools/world-mcp` build/tests plus direct handler proof against a temp-seeded oversize hybrid record. Direct live-MCP retry remains an operational smoke outside this session's mechanized proof.
@@ -63,11 +63,11 @@ When full-record hybrid retrieval (no `section_path` supplied) exceeds the effec
     "body.19 April",
     ...
   ],
-  "fallback_advice": "Re-call get_record with section_path=<one of suggested_section_paths> to retrieve a structured slice. For full-content recovery, read the persisted_output_path JSON file directly."
+  "fallback_advice": "Retry get_record with a suggested section_path, or read persisted_output_path JSON."
 }
 ```
 
-The `suggested_section_paths` field is populated from the same parsed hybrid frontmatter keys and body section names used by the existing projection handler. The operator can then immediately re-call `get_record('DA-0001', section_path='body.18 April')` to retrieve a single section without manual chunk-counting.
+The `suggested_section_paths` field is populated from the same parsed hybrid frontmatter keys and body section names used by the existing projection handler, then trimmed only when needed to keep the recovery response itself under the effective inline cap. When trimming is required, `suggested_section_paths_omitted_count` reports how many valid paths were omitted from the inline hint list. The operator can then immediately re-call `get_record('DA-0001', section_path='body.18 April')` to retrieve a single section without manual chunk-counting.
 
 ### 2. Persisted-output path migration
 
@@ -127,7 +127,9 @@ Updated `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, `tool
 
 ## Outcome
 
-Implemented handler-owned oversize recovery for unprojected hybrid `get_record` responses. Oversize hybrid responses now persist the full JSON response through the shared tool-results helper, return `delivery_status: "oversize_with_projection_suggestions"`, and enumerate valid `section_path` retries. Existing atomic retrieval and projected hybrid retrieval shapes remain unchanged.
+Completed 2026-05-03.
+
+Implemented handler-owned oversize recovery for unprojected hybrid `get_record` responses. Oversize hybrid responses now persist the full JSON response through the shared tool-results helper, return a bounded `delivery_status: "oversize_with_projection_suggestions"` recovery payload, and enumerate valid `section_path` retries with an omitted-count field when the inline hint list must be shortened. Existing atomic retrieval and projected hybrid retrieval shapes remain unchanged.
 
 Same-seam docs and capability metadata now describe the readable tool-results directory and recovery shape in `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, `tools/world-mcp/README.md`, and `tools/world-mcp/src/server.ts`.
 
@@ -141,10 +143,10 @@ Completed:
 
 The focused get-record test seeds an oversize hybrid `DA-0002`, lowers the effective cap through `WORLDLOOM_MCP_HARNESS_CEILING_CHARS`, asserts `oversize_with_projection_suggestions`, reads the persisted JSON under the configured tool-results root, and re-calls `get_record` with `section_path='body.18 April'`.
 
-Post-ticket review blocker (2026-05-03): a direct compiled handler probe using the same seeded `DA-0002` shape and `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=5000` returned `delivery_status: "oversize_with_projection_suggestions"` with serialized recovery payload length `1021` while `response_cap_chars` was `1000`. The recovery response is therefore not yet proven to stay below the effective cap before it reaches the external MCP harness. This is same-seam unfinished implementation work for the ticket's bounded recovery invariant.
+Post-ticket review blocker resolved (2026-05-03): the recovery payload now uses shorter fallback advice, trims inline projection suggestions only when needed, and reports `suggested_section_paths_omitted_count` when paths are omitted. The focused test now asserts `JSON.stringify(result, null, 2).length <= result.response_cap_chars` for the oversize recovery response. A direct compiled handler probe using the same seeded `DA-0002` shape and `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=5000` returned `delivery_status: "oversize_with_projection_suggestions"` with serialized recovery payload length `920`, `response_cap_chars: 1000`, and `suggested_section_paths_omitted_count: 0`.
 
 ## Deviations
 
 Direct live `mcp__worldloom__get_record('DA-0001', world_slug='erotica-world')` smoke was not run because the active Codex session does not expose live worldloom MCP tools and would need a rebuilt/restarted MCP server to prove the newly edited package artifact. The accepted proof is package-local compiled handler coverage plus the full `tools/world-mcp` suite. `world-validate` was removed from acceptance because this ticket does not mutate world content or validator behavior.
 
-Post-ticket review reopened the ticket because the focused cap-size probe found unfinished same-seam work; archival is blocked until the recovery response is bounded and the proof asserts that bound directly.
+Post-ticket review reopened the ticket because the focused cap-size probe found unfinished same-seam work. The reopened seam is now resolved: the recovery response is bounded before reaching the external MCP harness, and the direct cap assertion is part of the focused package proof.

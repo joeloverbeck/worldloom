@@ -315,7 +315,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset: 'frontmatter' for full frontmatter, 'body' for all body sections, 'frontmatter.<key>' for one frontmatter field, or 'body.<section>' for one body section. Atomic records reject section_path. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return delivery_status='oversize_with_projection_suggestions' plus suggested_section_paths.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, and hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections. Optional section_path projects a hybrid record subset: 'frontmatter' for full frontmatter, 'body' for all body sections, 'frontmatter.<key>' for one frontmatter field, or 'body.<section>' for one body section. Atomic records reject section_path. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
