@@ -23,6 +23,15 @@ finding_count_by_severity:
   error: 2
   warning: 4
   info: 1
+flagged_pages:
+  - page_id: PG-0023
+    branch_leaf_id: PG-0047
+    flagged_at: "2026-04-11"
+high_jit_rate_branches:
+  - branch_leaf_id: PG-0042
+    jit_page_count: 7
+    window_page_count: 20
+    rate: 0.35
 rsp_card_ids: [RSP-0001, RSP-0002]
 dropped_finding_ids: [F-04]
 dropped_card_ids: [RSP-0003]
@@ -48,6 +57,18 @@ user_approved: true
 | ERROR   | 2 |
 | WARNING | 4 |
 | INFO    | 1 |
+
+## Flagged Pages
+
+- PG-0023 (branch PG-0047) — flagged at 2026-04-11
+
+## High JIT-Rate Branches
+
+- Branch leaf PG-0042: 7 of last 20 pages used runtime JIT expansion (35%)
+
+## Out of Scope Due to Focus
+
+N/A — audit_focus was all.
 
 ## Findings
 

@@ -515,7 +515,7 @@ Options:
 4. Pick a different choice
 ```
 
-User picks. If "Accept anyway", the runtime proceeds with reduced consequence-capacity guarantees and flags the resulting page via `narrative_health.flagged_for_audit: true` for later review by `branching-story-health-audit` (see its `audit_focus=flagged_pages_priority` value, which BSPAG-002 wires to consume this signal).
+User picks. If "Accept anyway", the runtime proceeds with reduced consequence-capacity guarantees and flags the resulting page via `narrative_health.flagged_for_audit: true` for later review by `branching-story-health-audit` (see its `audit_focus=flagged_pages_priority` value).
 
 ## Phase 4: Storylet Selection
 
@@ -562,7 +562,7 @@ If no candidate scores above threshold (typically: top-K all score below `(media
 - `storylet-pool-authoring` runs its Phase 4 9-gate set over the candidate, including mystery firewall, resolution-authority declaration, predicate parsability, and branch-contamination. Its Phase 5 diversity audit is bypassed because a single runtime storylet has no batch diversity surface.
 - Selection then picks this JIT storylet. Phase 5 applies its effects, Phase 9 rechecks the full page-cycle validation gates, and Phase 11 writes the returned SLT-NNNN.yaml inside the same page-tick transaction as the new PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records.
 
-JIT generation is not free — it expands the engine prompt budget and may produce lower-quality storylets than the author pool. `branching-story-health-audit` consumes the `flagged_for_audit` and high-JIT-rate signals (consumption wiring per BSPAG-002).
+JIT generation is not free — it expands the engine prompt budget and may produce lower-quality storylets than the author pool. `branching-story-health-audit` consumes the `flagged_for_audit` and high-JIT-rate signals.
 
 ### Phase 4.5: Mystery Resolution Authority
 
@@ -1227,7 +1227,7 @@ No Canon Fact Record template; no Change Log Entry template — both N/A in the 
 - **Future siblings (named in proposal; not yet shipping)**:
   - **`story-fact-promotion-to-canon`** — the canon-mutation HARD-GATE handoff for Phase 4.5 `canon_candidate` resolutions. Until shipping, a `canon_candidate` resolution at runtime aborts the page-cycle with a clear "blocked on `story-fact-promotion-to-canon`" message — the skill does NOT silently degrade to `apparent` because that would erode the canon-mutation HARD-GATE invariant.
 - **Existing siblings (audit feedback consumers)**:
-  - **`branching-story-health-audit`** — consumes `narrative_health.flagged_for_audit` and high-JIT-rate signals to surface branches needing curation. The signal-consumption wiring (audit-side `audit_focus=flagged_pages_priority` plus high-JIT-rate surfacing in the deliverable summary) is BSPAG-002's scope; until BSPAG-002 lands, the flag is persisted by this skill and read by the audit but not yet branch-prioritized.
+  - **`branching-story-health-audit`** — consumes `narrative_health.flagged_for_audit` and high-JIT-rate signals to surface branches needing curation. Its `audit_focus=flagged_pages_priority` value prioritizes flagged branches, and its deliverable summary surfaces flagged-page and high-JIT-rate branch signals.
 - **Sibling interop (existing)**:
   - **Consumes**: `branching-story-bootstrap` outputs (the story bundle this skill operates over).
   - **Consumes**: `storylet-pool-authoring` `mode=jit` as the Phase 4 fallback storylet generator. Page-cycle calls it with `parent_skill_invocation: true`, receives one branch-scoped `runtime_jit` SLT plus validation packet, applies the SLT in Phase 5, rechecks in Phase 9, and writes it in Phase 11 if the page tick commits.

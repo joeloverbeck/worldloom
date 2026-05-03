@@ -23,6 +23,8 @@ finding_count_by_severity:
   error: 0
   warning: 0
   info: 0
+flagged_pages: []                    # page-cycle narrative_health.flagged_for_audit inventory; items carry page_id, branch_leaf_id, flagged_at if known
+high_jit_rate_branches: []           # items carry branch_leaf_id, jit_page_count, window_page_count, rate
 rsp_card_ids: []                     # list of non-dropped RSP-NNNN ids written under audits/SAU-NNNN/remediation-storylet-proposals/
 dropped_finding_ids: []              # finding-IDs the user dropped at Phase 9 — still appear in body marked "(dropped by user at Phase 9)"
 dropped_card_ids: []                 # RSP-NNNN ids the user dropped at Phase 9 — never written; appear here and in Remediation Proposals Index marked "(dropped by user at Phase 9)"
@@ -48,6 +50,24 @@ user_approved: true                  # always true on a written report — writt
 | ERROR   | N |
 | WARNING | N |
 | INFO    | N |
+
+## Flagged Pages
+
+- PG-NNNN (branch <leaf-id>) — flagged at <YYYY-MM-DD or unknown>
+
+(empty section is recorded as "No flagged pages this bundle." — never silently omitted)
+
+## High JIT-Rate Branches
+
+- Branch leaf PG-NNNN: <count> of last 20 pages used runtime JIT expansion (<rate>%)
+
+(empty section is recorded as "No high-JIT-rate branches this bundle." — never silently omitted)
+
+## Out of Scope Due to Focus
+
+- Branch leaf PG-NNNN — no flagged page in branch_path
+
+(section appears only when `audit_focus=flagged_pages_priority`; otherwise record "N/A — audit_focus was <focus>.")
 
 ## Findings
 

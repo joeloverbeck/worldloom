@@ -13,7 +13,7 @@ arguments:
     description: "Comma-separated leaf PG-NNNN ids identifying specific branches to audit. Optional. Default: every distinct leaf-bearing branch in the bundle."
     required: false
   - name: audit_focus
-    description: "One of: obligation_payoff_coverage | thread_coverage | character_motivation_coverage | mystery_firewall | branch_isolation_recursive | snapshot_integrity | consequence_coverage | relationship_continuity | storylet_scope_leakage | terminal_health | content_intensity_drift | canon_baseline_drift | repetition | debt_level | all. Default: all."
+    description: "One of: obligation_payoff_coverage | thread_coverage | character_motivation_coverage | mystery_firewall | branch_isolation_recursive | snapshot_integrity | consequence_coverage | relationship_continuity | storylet_scope_leakage | terminal_health | content_intensity_drift | canon_baseline_drift | repetition | debt_level | flagged_pages_priority | all. Default: all."
     required: false
   - name: severity_threshold
     description: "info | warning | error. Default: warning. Findings below threshold are suppressed in the report body but still counted in the severity summary; error-class findings are always reported regardless of threshold."
@@ -42,7 +42,8 @@ Pre-flight Check (load FOUNDATIONS; resolve worlds/<slug>/stories/<story-slug>/;
                   STORY_KERNEL.md; load whole-class M + INV records via
                   list_records; load `task_type='branching_story_health_audit'`
                   context packet for governing CFs; read prior
-                  audits/SAU-*.md for prior-audit-delta; resolve
+                  audits/SAU-*.md for prior-audit-delta; inventory
+                  flagged pages and JIT-storylet pages; resolve
                   branch_path_filter against actual leaves)
       |
       v
@@ -129,7 +130,7 @@ Phase 10: Atomic Write                  (cards-first → report → INDEX.md;
 
 ### Optional
 - `branch_path_filter` — comma-separated `PG-NNNN` leaf ids — restricts the audit to specified branches. Default: every distinct leaf-bearing branch.
-- `audit_focus` — enum `obligation_payoff_coverage | thread_coverage | character_motivation_coverage | mystery_firewall | branch_isolation_recursive | snapshot_integrity | consequence_coverage | relationship_continuity | storylet_scope_leakage | terminal_health | content_intensity_drift | canon_baseline_drift | repetition | debt_level | all` — default `all`. When narrowed, Phases 3-5 skip non-matching sub-checks; Phase 4's snapshot-integrity and recursive-reference-closure checks run regardless of focus when focus is `all` OR when focus matches.
+- `audit_focus` — enum `obligation_payoff_coverage | thread_coverage | character_motivation_coverage | mystery_firewall | branch_isolation_recursive | snapshot_integrity | consequence_coverage | relationship_continuity | storylet_scope_leakage | terminal_health | content_intensity_drift | canon_baseline_drift | repetition | debt_level | flagged_pages_priority | all` — default `all`. When narrowed to a diagnostic category, Phases 3-5 skip non-matching sub-checks; Phase 4's snapshot-integrity and recursive-reference-closure checks run regardless of focus when focus is `all` OR when focus matches. `flagged_pages_priority` is a branch-scope focus, not a diagnostic category: Phase 1 scopes to branches whose path contains a `narrative_health.flagged_for_audit: true` page, then runs the normal `all` diagnostic set on those scoped branches.
 - `severity_threshold` — `info | warning | error` — default `warning`. Findings below threshold are suppressed in the report body but still counted in `finding_count_by_severity`. Error-class findings (branch-isolation, snapshot drift, forbidden-M leakage, dead-end obligations, orphaned consequences) are ALWAYS reported regardless of threshold.
 - `emit_remediation_proposals` — boolean — default `true`. When `false`, Phase 8 produces no RSP cards; remediable findings carry an inline "manual remediation" hint instead.
 - `cross_story_scope` — boolean — default `false`. When `true`, Pre-flight enumerates sibling stories under `worlds/<world-slug>/stories/`; Phase 3 adds an inter-story-conflict sub-check (read-only enumeration of sibling `STORY_KERNEL.md` + any promotion-ledger references; never reads sibling-bundle `_source/`).
@@ -185,6 +186,9 @@ Run before Phase 1; abort if any precondition fails.
   - Collision abort: if the resulting filename `SAU-NNNN-<date>.md` would overwrite an existing file (concurrent invocation on the same date), abort with "SAU-NNNN-<date> already exists; concurrent audit detected — re-invoke."
 - Read `worlds/<world-slug>/WORLD_KERNEL.md`, `worlds/<world-slug>/ONTOLOGY.md`, and `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` directly.
 - Read every `worlds/<world-slug>/stories/<story-slug>/_source/pages/PG-*.yaml` for Phase 1 branch-tree assembly.
+- During the same page scan, build the audit-priority inventory:
+  - `flagged_pages[]`: every PG whose `narrative_health.flagged_for_audit == true`, with best-available timestamp from the page record or its realized SE record.
+  - `jit_pages[]`: every PG whose realized SLT record has `provenance.origin == runtime_jit`, or whose page/SE metadata explicitly records the realized storylet as a runtime-JIT expansion.
 - Read every prior `worlds/<world-slug>/stories/<story-slug>/audits/SAU-*.md` for prior-audit-delta lookup; skip if `audits/` is absent (this is the first audit on the bundle).
 - Resolve `branch_path_filter` (if provided) against the assembled leaf set; abort with the missing-leaves list if any specified leaf is not a real PG id.
 - Resolve premise-relevant entities to canonical `entity:<slug>` ids via `mcp__worldloom__find_named_entities(names)` BEFORE the context-packet call. Names sourced from `STORY_KERNEL.cast_bind_list` (each STENT's `world_ent_id`) and recent in-scope page-history named entities.
@@ -201,8 +205,8 @@ Determine which branches to audit.
 
 - Parse the `_source/pages/PG-*.yaml` records loaded at Pre-flight to build the branch tree (`parent_page_id` → children).
 - Identify all leaves (pages with no descendants).
-- If `branch_path_filter` was provided: use the Pre-flight-validated leaf set.
-- Otherwise: audit every distinct leaf-bearing branch.
+- Start from the Pre-flight-validated `branch_path_filter` leaf set when provided; otherwise start from every distinct leaf-bearing branch.
+- If `audit_focus=flagged_pages_priority`: filter that starting set to only branches whose `branch_path` contains at least one PG in `flagged_pages[]`. Record non-flagged-bearing branches from the starting set as "out of scope due to focus" in the deliverable summary; if no flagged pages exist, the scoped branch set is empty and the audit reports that the flagged-page priority focus found nothing to audit.
 - For each branch in scope, derive its full `branch_path` from `PG-0001` to leaf as the working state for Phase 2's walk.
 
 **Rule**: phase output is the scoped-branches structure feeding all subsequent phases. No findings emitted at this phase.
@@ -220,6 +224,8 @@ For each branch in scope, walk its `branch_path` from `PG-0001` to leaf, buildin
   - intentions' refresh history per character
   - storylet selections per page (which SLT realized at each PG)
   - JIT-expansion events per page
+  - flagged-page markers from `narrative_health.flagged_for_audit`
+  - high-JIT-rate branch summary over the most recent 20 pages: count pages whose realized SLT has `provenance.origin == runtime_jit`; mark the branch high-JIT-rate when the count is > 30%
 
 The timeline becomes the input to Phases 3-5.
 
@@ -273,7 +279,7 @@ Group findings by severity (`info` / `warning` / `error`). Per-finding fields re
 
 - `finding_id` (sequential within this audit, e.g., `F-01`, `F-02`, ...)
 - `severity` (with one-line rationale; bare severity is FAIL)
-- `category` (one of the `audit_focus` values)
+- `category` (one of the diagnostic `audit_focus` category values; never `flagged_pages_priority`, which is a branch-scope focus)
 - `branch` (or `all-branches` when shared)
 - `pages_affected` (list)
 - `records_affected` (list)
@@ -355,6 +361,20 @@ FINDINGS BY SEVERITY:
 - WARNING: <count>
 - INFO:    <count>
 
+FLAGGED PAGES (from page-cycle narrative_health.flagged_for_audit):
+- PG-NNNN (branch <leaf>) — flagged at <YYYY-MM-DD or unknown>
+- ...
+(empty state: No flagged pages this bundle.)
+
+HIGH JIT-RATE BRANCHES:
+- Branch leaf PG-NNNN: <count> of last 20 pages used runtime JIT expansion (<rate>%)
+- ...
+(empty state: No high-JIT-rate branches this bundle.)
+
+OUT OF SCOPE DUE TO FOCUS (only when audit_focus=flagged_pages_priority):
+- Branch leaf PG-NNNN — no flagged page in branch_path
+- ...
+
 ERRORS:
 - F-01 [<category>] <description>
 - ...
@@ -424,7 +444,7 @@ This skill is the in-bundle post-bootstrap enforcer of structural and narrative-
 
 This skill's outputs are an audit report and remediation-storylet-proposal cards. None are Canon Fact Records or Change Log Entries (meta-tooling — explicit N/A in the FOUNDATIONS Alignment table below).
 
-- **`SAU-NNNN-<date>.md`** (audit report, hybrid YAML frontmatter + markdown body) → `templates/story-audit-report.md`. Frontmatter: `audit_id`, `story_slug`, `world_slug`, `date`, `audit_focus`, `severity_threshold`, `branches_audited` (count + leaf id list), `pages_walked`, `finding_count_by_severity`, `rsp_card_ids[]`, `dropped_finding_ids[]`, `dropped_card_ids[]`, `prior_sau_referenced[]`, `cross_story_scope`, `user_approved: true`. Body sections: Summary table; Per-Severity Findings (Errors → Warnings → Info, each finding with `F-NN`, category, branch, pages affected, records affected, description, proposed remediation); Remediation Proposals Index (one row per non-dropped RSP plus `(dropped by user at Phase 9)` rows); Manual Intervention Flags; Prior-Audit Delta; Health Snapshot table (per-branch open OBL count / high-salience unpaid / avg OBL age / tension / agency); Notes.
+- **`SAU-NNNN-<date>.md`** (audit report, hybrid YAML frontmatter + markdown body) → `templates/story-audit-report.md`. Frontmatter: `audit_id`, `story_slug`, `world_slug`, `date`, `audit_focus`, `severity_threshold`, `branches_audited` (count + leaf id list), `pages_walked`, `finding_count_by_severity`, `flagged_pages[]`, `high_jit_rate_branches[]`, `rsp_card_ids[]`, `dropped_finding_ids[]`, `dropped_card_ids[]`, `prior_sau_referenced[]`, `cross_story_scope`, `user_approved: true`. Body sections: Summary table; Flagged Pages; High JIT-Rate Branches; Per-Severity Findings (Errors → Warnings → Info, each finding with `F-NN`, category, branch, pages affected, records affected, description, proposed remediation); Remediation Proposals Index (one row per non-dropped RSP plus `(dropped by user at Phase 9)` rows); Manual Intervention Flags; Prior-Audit Delta; Health Snapshot table (per-branch open OBL count / high-salience unpaid / avg OBL age / tension / agency); Notes.
 - **`RSP-NNNN-<slug>.md`** (remediation-storylet-proposal card, hybrid YAML frontmatter + markdown body) → `templates/remediation-storylet-proposal-card.md`. Frontmatter mirrors `storylet-pool-authoring`'s `source_audit_path` parse-time consumer schema byte-for-byte: `rsp_id`, `audit_id`, `story_id`, `finding_ids[]`, `target_obligation`, `target_thread`, `target_consequence`, `target_relationship`, `proposed_shape` (per the SLT shape enum), `proposed_intensity` (`tame | mature | explicit`), `target_branch` (branch_path | `"all branches"` | `"global pool"`), `proposed_visibility` (`scope` + `visible_branch_path_prefix`), `sketch` (`hard_preconds`, `fact_effects`, `pays_off_obligations`, `opens_obligations`, `addresses_consequences`, `choice_templates`), `rationale`. Body sections: Diagnosis / Proposed remediation / Routing.
 
 No Canon Fact Record template; no Change Log Entry template. The skill emits no world-level canon and no Change Log Entries — both are explicit N/A in §FOUNDATIONS Alignment.
@@ -461,12 +481,11 @@ No Canon Fact Record template; no Change Log Entry template. The skill emits no 
 - **Cross-story scope is opt-in and bounded.** `cross_story_scope: true` enables Phase 3's inter-story-conflict sub-check by reading sibling STORY_KERNEL files only; it never widens to deep sibling-bundle reads, never widens to writing under sibling bundles' `audits/`, and never produces RSP cards targeting sibling bundles.
 - **Empty findings are diagnostic, not silence.** A category audited and clean is named in Per-Category Findings as such ("no findings — audited and clean"); silently omitting a category whose `audit_focus` matched is a Phase 1 violation. A bundle whose audit produces zero findings overall is a legitimate clean audit, recorded as such with `finding_count_by_severity: {error: 0, warning: 0, info: 0}`.
 - **Sibling interop**:
-  - **Consumes (existing)**: `branching-story-bootstrap` outputs (story bundle structure including STORY_KERNEL.md, `_source/<class>/`, `pages-prose/`); `branching-story-page-cycle` outputs (PG / SE / CHC records and `narrative_health` flags including `flagged_for_audit`); `storylet-pool-authoring` outputs (SLT records — visibility scopes audited at Phase 3 Storylet-Scope Leakage).
+  - **Consumes (existing)**: `branching-story-bootstrap` outputs (story bundle structure including STORY_KERNEL.md, `_source/<class>/`, `pages-prose/`); `branching-story-page-cycle` outputs (PG / SE / CHC records and `narrative_health` flags including `flagged_for_audit`); `storylet-pool-authoring` outputs (SLT records — visibility scopes audited at Phase 3 Storylet-Scope Leakage, and `runtime_jit` provenance counted for high-JIT-rate branch summaries).
   - **Produces inputs for**: `storylet-pool-authoring` mode=audit (RSP cards directly consumable as `source_audit_path`).
   - **Future consumers (deferred)**: `story-fact-promotion-to-canon` — manual-intervention flags about unauthorized canon promotion route to it manually until that skill ships.
-- **Known integration debt** (deferred — see filed tickets):
-  - **BSPAG-002**: Wire `branching-story-page-cycle`'s `narrative_health.flagged_for_audit` and high-JIT-rate signals into this audit's branch-prioritization input AND replace page-cycle's "deferred sibling" / "Until shipping..." prose with factual references to this skill.
-  - **STPOOL-001**: Completed the `storylet-pool-authoring` audit-mode consumer. Audit-mode storylet generation now consumes `source_audit_path` and applies RSP-driven diagnosis, seed generation, visibility inheritance, and provenance propagation.
+- **Known integration debt**:
+  - No open audit-consumer debt remains for `branching-story-page-cycle` flagged-page or high-JIT-rate signals; `audit_focus=flagged_pages_priority`, the Phase 9 flagged-page summary, and the high-JIT-rate branch summary are the BSPAG-002 wiring.
 - **Worktree discipline.** All paths resolve from the worktree root if invoked inside a worktree.
 - **No git commit.** Writes land in the working tree only; the user reviews the diff and commits.
 
