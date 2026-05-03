@@ -127,7 +127,7 @@ Each skill's Phase 7 (or equivalent write phase) replaces direct `Write` calls w
 - Tooling for cross-bundle patches (a single patch plan touching multiple bundles in the same world) — out of scope by design; one bundle per plan preserves the per-bundle-isolation invariant.
 - Tooling for cross-world patches — explicitly out of scope per FOUNDATIONS §Multi-world directory discipline.
 - VALENH-001's predicate DSL parsability rule (separate ticket; this ticket depends on it).
-- Story-bundle context layer in `get_context_packet` (covered by MCPENH-027).
+- Story-bundle context layer in `get_context_packet` (covered by `archive/tickets/MCPENH-027.md`).
 
 ## Acceptance Criteria
 

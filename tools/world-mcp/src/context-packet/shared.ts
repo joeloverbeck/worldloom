@@ -11,6 +11,7 @@ export const DEFAULT_DELIVERY_MODE: DeliveryMode = "full";
 export interface ContextPacketArgs {
   task_type: TaskType;
   world_slug: string;
+  story_slug?: string;
   seed_nodes: string[];
   token_budget: number;
   delivery_mode?: DeliveryMode;
@@ -59,13 +60,84 @@ export interface ContextPacketGoverningSummary {
   open_risk_ids: string[];
   invariant_ids: string[];
   seed_relevant_cf_ids: string[];
+  story_bundle_context_summary?: ContextPacketStoryBundleContextSummary;
   dropped_node_ids_by_class: Record<string, string[]>;
+}
+
+export interface ContextPacketStoryBundleContextSummary {
+  story_slug: string;
+  storylet_total: number;
+  visibility_filtered_storylet_count: number;
+  open_obligation_ids: string[];
+  active_thread_ids: string[];
+  longest_active_branch_path: string[];
+  recent_page_ids: string[];
+  mystery_ids: string[];
+  cast_stent_ids: string[];
+  invariant_ids: string[];
+}
+
+export interface ContextPacketStoryBundleContext {
+  story_slug: string;
+  storylet_pool_summary: {
+    total: number;
+    visibility_filtered_count: number;
+    by_shape: Record<string, number>;
+    by_content_intensity: Record<string, number>;
+    visible_records: Array<{
+      id: string;
+      title: string;
+      shape: string;
+      content_intensity: string;
+      visibility_scope: string;
+    }>;
+  };
+  open_obligations: Array<{
+    id: string;
+    type: string;
+    owner: string | null;
+    subjects: string[];
+    salience: number;
+    urgency: number;
+    possible_payoff_modes: string[];
+    coverage_cache_compatible_storylets: string[];
+  }>;
+  active_threads: Array<{
+    id: string;
+    type: string;
+    status: string;
+    current_pressure: number;
+    desired_cadence: number;
+    obligations: string[];
+  }>;
+  longest_active_branch_path: string[];
+  recent_pages_along_longest_active_branch: Array<{
+    id: string;
+    storylet_realized: string;
+    chosen_choice_id: string | null;
+    content_intensity: string;
+    created_at: string;
+    summary?: string;
+  }>;
+  mysteries_in_play: Array<{
+    m_id: string;
+    status: string;
+    future_resolution_safety: string;
+    domain_overlap: string;
+  }>;
+  cast_bind_list: Array<{
+    char_id: string | null;
+    stent_id: string;
+    role_in_story: string;
+  }>;
+  invariants_acknowledged: string[];
 }
 
 export interface ContextPacket {
   task_header: {
     task_type: TaskType;
     world_slug: string;
+    story_slug: string | null;
     generated_at: string;
     token_budget: {
       requested: number;
@@ -102,6 +174,7 @@ export interface ContextPacket {
     nodes: ContextPacketNode[];
     why_included: string[];
   };
+  story_bundle_context: ContextPacketStoryBundleContext | null;
   impact_surfaces: {
     nodes: ContextPacketNode[];
     rationale: string[];
@@ -156,9 +229,22 @@ export const DEFAULT_BUDGET_SPLIT = {
   exact_record_links: 0.15,
   scoped_local_context: 0.2,
   governing_world_context: 0.2,
+  story_bundle_context: 0,
   impact_surfaces: 0.1,
   overhead: 0.1
 } as const;
+
+export const STORY_PIPELINE_TASK_TYPES = [
+  "story_bootstrap",
+  "story_page_cycle",
+  "storylet_pool_authoring",
+  "branching_story_health_audit",
+  "story_fact_promotion_to_canon"
+] as const satisfies readonly TaskType[];
+
+export function isStoryPipelineTaskType(taskType: TaskType): boolean {
+  return (STORY_PIPELINE_TASK_TYPES as readonly string[]).includes(taskType);
+}
 
 export interface PacketNodeRow {
   node_id: string;
@@ -295,6 +381,9 @@ export function estimatePacketTokens(packet: ContextPacket): number {
     (sum, reason) => sum + estimateTextTokens(reason),
     0
   );
+  if (packet.story_bundle_context !== null) {
+    total += estimateTextTokens(JSON.stringify(packet.story_bundle_context));
+  }
   total += packet.impact_surfaces.nodes.reduce(
     (sum, node) => sum + estimateNodeTokens(node),
     0

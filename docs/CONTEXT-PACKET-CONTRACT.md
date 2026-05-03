@@ -10,6 +10,7 @@ The packet is locality-first. It must secure seed-local authority and the govern
 task_header:
   task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_page_cycle | storylet_pool_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
   world_slug: animalia
+  story_slug: null
   generated_at: "2026-04-24T00:00:00Z"
   token_budget:
     requested: 12000
@@ -42,6 +43,7 @@ governing_world_context:
   open_risks: []
   nodes: [] # node objects may include optional parsed record projections for mandatory governing records
   why_included: []
+story_bundle_context: null # populated for story-pipeline task_types when story_slug is supplied
 impact_surfaces:
   nodes: []
   rationale: []
@@ -59,6 +61,7 @@ Describes the invocation context:
 
 - task type
 - world slug
+- story slug, when the packet is story-pipeline scoped
 - packet version
 - requested versus allocated budget
 - seed nodes
@@ -115,7 +118,21 @@ This layer carries:
 - Mystery Reserve firewall nodes when locality intersects protected unknowns
 - optional parsed `record` projections on mandatory governing nodes when a task requires structured audit semantics rather than a body-preview index
 
-### 6. Impact surfaces
+### 6. Story bundle context
+
+The indexed story-bundle state required by story-pipeline task types.
+
+This layer is `null` for world-canon task types. For `story_bootstrap`, `story_page_cycle`, `storylet_pool_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter.
+
+This layer carries:
+
+- storylet pool totals, shape/intensity counts, and capped visible storylet records
+- open obligations
+- active / pressured / critical / dormant threads
+- the longest active branch path and recent page metadata along that path
+- `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
+
+### 7. Impact surfaces
 
 Advisory downstream consequence surfaces.
 
@@ -126,7 +143,7 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 - Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
 - Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
 - Establish locality before governing background, and establish governing background before advisory impact surfaces.
-- If `local_authority` cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality. The other four content layers are droppable under budget pressure (see §Budget Enforcement) — completeness insufficiency now triggers only when even seed-local authority overflows the requested budget.
+- If `local_authority` cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality. The other content layers are droppable under budget pressure (see §Budget Enforcement) — completeness insufficiency now triggers only when even seed-local authority overflows the requested budget.
 - `packet_incomplete_required_classes` must report `missing_classes`, `requested_budget`, `minimum_required_budget`, `retained_classes`, and `truncation_summary` (listing every droppable layer that was emptied during the failed fit attempt).
 - `budget_exhausted_nucleus` is removed; completeness insufficiency is represented only through `packet_incomplete_required_classes`.
 - Retrieval should remain deterministic for the same world state, task type, seed set, and budget.
@@ -139,7 +156,7 @@ The packet response must satisfy two ceilings:
 - `harness_ceiling_chars`, the gross serialized MCP response character ceiling used to stay below Claude Code MCP inline-response limits. The default is `60000` characters and can be overridden for the server process with `WORLDLOOM_MCP_HARNESS_CEILING_CHARS=<positive integer>`.
 - `envelope_overhead_reserve_chars`, the fixed packet-body reserve for MCP response-envelope overhead. The default is `4000` characters.
 
-The effective inline packet-body ceiling is `harness_ceiling_chars - envelope_overhead_reserve_chars` (`56000` characters by default). The assembler builds all five content layers. If the fully assembled packet would exceed that effective ceiling, the server writes that full packet JSON to its package-local tool-results directory and returns a bounded inline summary with `task_header.delivery_status: persisted_with_summary` and `task_header.persisted_output_path`. The same tool-results directory policy is used by `get_record` when an unprojected hybrid record is too large: the full record JSON is persisted, and the bounded inline response carries `delivery_status: oversize_with_projection_suggestions` plus suggested `section_path` retries. If the suggestion list must be shortened to keep the recovery response under the effective ceiling, `suggested_section_paths_omitted_count` reports the number of valid paths omitted from the inline hint.
+The effective inline packet-body ceiling is `harness_ceiling_chars - envelope_overhead_reserve_chars` (`56000` characters by default). The assembler builds all packet content layers, including `story_bundle_context` for story-pipeline task types. If the fully assembled packet would exceed that effective ceiling, the server writes that full packet JSON to its package-local tool-results directory and returns a bounded inline summary with `task_header.delivery_status: persisted_with_summary` and `task_header.persisted_output_path`; story-pipeline summaries include `governing_summary.story_bundle_context_summary`. The same tool-results directory policy is used by `get_record` when an unprojected hybrid record is too large: the full record JSON is persisted, and the bounded inline response carries `delivery_status: oversize_with_projection_suggestions` plus suggested `section_path` retries. If the suggestion list must be shortened to keep the recovery response under the effective ceiling, `suggested_section_paths_omitted_count` reports the number of valid paths omitted from the inline hint.
 
 For token-budget pressure where the full packet still fits the effective serialized-response ceiling, the assembler drops layers in priority order (cheapest-to-drop first) until both `estimateStablePacketSize(packet) <= token_budget` and `JSON.stringify(packet).length <= harness_ceiling_chars - envelope_overhead_reserve_chars` hold:
 
@@ -183,7 +200,7 @@ Use `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` for
 
 ## Index + Follow-Up Retrieval Pattern
 
-The context packet's five content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation. For selected task-critical classes, nodes in `local_authority`, `governing_world_context`, and `exact_record_links` may also carry an additive `full_body` string. Skills that need the full body of one load-bearing node that was not delivered retrieve it via `mcp__worldloom__get_record(record_id)`; for large hybrid records, an oversize response returns `suggested_section_paths` so the skill can immediately retry with `section_path` rather than falling back to raw file reads. Skills that already have a known set of ids retrieve them via `mcp__worldloom__get_records(record_ids)` to preserve order and avoid N round trips. Skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. When a packet returns `delivery_status: persisted_with_summary`, skills retrieve structured slices from the persisted full packet via `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus a known-id batch. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; task-aware `full_body`, targeted retrieval, batched targeted retrieval, persisted-packet slice retrieval, and whole-class enumeration deliver the required content.
+The context packet's content layers (`local_authority` through `impact_surfaces`; `task_header` is metadata) deliver an INDEX of locality-relevant nodes plus body-preview snippets sufficient for ranking and citation. For story-pipeline task types, `story_bundle_context` additionally delivers the indexed bundle-local pool / obligation / thread / branch state for the supplied `story_slug`. For selected task-critical classes, nodes in `local_authority`, `governing_world_context`, and `exact_record_links` may also carry an additive `full_body` string. Skills that need the full body of one load-bearing node that was not delivered retrieve it via `mcp__worldloom__get_record(record_id)`; for large hybrid records, an oversize response returns `suggested_section_paths` so the skill can immediately retry with `section_path` rather than falling back to raw file reads. Skills that already have a known set of ids retrieve them via `mcp__worldloom__get_records(record_ids)` to preserve order and avoid N round trips. Skills that need a single field of a large record retrieve it via `mcp__worldloom__get_record_field(record_id, field_path)`. When a packet returns `delivery_status: persisted_with_summary`, skills retrieve structured slices from the persisted full packet via `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)`. Skills whose validation surface intentionally tests every record of a class, such as whole-class invariant or Mystery Reserve firewall passes, may use `mcp__worldloom__list_records(world_slug, record_type=<type>, include_full_body=true)` as the primary load instead of a seed-local packet plus a known-id batch. This pattern keeps packet sizes within model-context budgets while preserving FOUNDATIONS §Tooling Recommendation completeness guarantees: the packet identifies WHAT must be retrieved; task-aware `full_body`, story-bundle context, targeted retrieval, batched targeted retrieval, persisted-packet slice retrieval, and whole-class enumeration deliver the required content.
 
 ## Task-Aware Full-Body Delivery
 
@@ -224,25 +241,25 @@ The assembler first fits the normal preview/summary packet under the requested t
 
 `story_page_cycle` is the registered context-packet profile for `branching-story-page-cycle` Pre-flight. The skill derives `seed_nodes` from the parent page state: cast members' resolved world entity ids, current location, and active period. The profile uses an 18000 default budget and prioritizes seed-scoped canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and a latest `change_log_entry` node in `governing_world_context` so the page can persist `state_snapshot.canon_revision`.
 
-The profile is still world-canon read-only. Story-bundle records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='story_page_cycle', ...)` returns only world-canon/indexed context and the governing audit trail needed to interpret the story-local turn safely.
+The profile remains world-canon read-only for world-level records and now also requires `story_slug`. `get_context_packet(task_type='story_page_cycle', story_slug=...)` returns world-canon/indexed context, the governing audit trail needed to interpret the story-local turn safely, and `story_bundle_context` for the indexed bundle-local pool / obligation / thread / recent-page state.
 
 ### Storylet Pool Authoring Profile
 
 `storylet_pool_authoring` is the registered context-packet profile for `storylet-pool-authoring` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids, recent page-history named entities, and the active story period. The profile uses an 18000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and ontology-grounding context.
 
-The profile is world-canon read-only. Storylet-pool records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='storylet_pool_authoring', ...)` returns only world-canon/indexed context used to author story-local SLT records without promoting storylet claims to world canon.
+The profile remains world-canon read-only for world-level records and now also requires `story_slug`. `get_context_packet(task_type='storylet_pool_authoring', story_slug=...)` returns world-canon/indexed context plus `story_bundle_context` for current pool, open obligations, active threads, branch metadata, and `STORY_KERNEL.md` declarations used to author story-local SLT records without promoting storylet claims to world canon.
 
 ### Branching Story Health Audit Profile
 
 `branching_story_health_audit` is the registered context-packet profile for `branching-story-health-audit` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids and recent page-history named entities. The profile uses a 12000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, ontology-grounding context, and the latest `change_log_entry` node in `governing_world_context` so Phase 4 can compare the bundle's `canon_revision` baseline against recent canon movement.
 
-The profile is world-canon read-only. Story-bundle records remain direct-Read by the skill from `worlds/<world-slug>/stories/<story-slug>/_source/`; `get_context_packet(task_type='branching_story_health_audit', ...)` returns only world-canon/indexed context used to audit story-local health without promoting audit findings or remediation cards to world canon.
+The profile remains world-canon read-only for world-level records and now also requires `story_slug`. `get_context_packet(task_type='branching_story_health_audit', story_slug=...)` returns world-canon/indexed context plus `story_bundle_context` used to audit story-local health without promoting audit findings or remediation cards to world canon.
 
 ### Story Fact Promotion To Canon Profile
 
 `story_fact_promotion_to_canon` is the registered context-packet profile for `story-fact-promotion-to-canon` Pre-flight. The skill derives `seed_nodes` from source-relevant CF, M, INV, OQ, and named-entity ids gathered while translating a story-local source into a canon-addition proposal package. The profile uses an 8000 default budget and prioritizes canon fact records, governing invariant and Mystery Reserve records, open questions, named-entity grounding, relevant section context, and recent change-log context for canon-baseline drift.
 
-The profile does not mutate world canon. It supports the story-promotion skill's proposal-package handoff to canon-addition, with reserve governing invariant and Mystery Reserve full bodies so downstream critics can audit scope inflation and mystery-firewall risk before any separate canon-addition invocation.
+The profile does not mutate world canon and now requires `story_slug` so the source bundle's indexed context is available during promotion triage. It supports the story-promotion skill's proposal-package handoff to canon-addition, with reserve governing invariant and Mystery Reserve full bodies so downstream critics can audit scope inflation and mystery-firewall risk before any separate canon-addition invocation.
 
 ## Focused Retrieval Tools
 
@@ -283,7 +300,7 @@ Use `summary_only` when consumers only need an "index of what exists" — e.g. P
 
 ## Class Filtering
 
-`get_context_packet` accepts an optional `node_classes` parameter that restricts every layer's `nodes` array to the specified node-type set. Layer assembly, `why_included` arrays, `task_header` metadata, governing-context guardrails (`active_rules`, `protected_surfaces`, `required_output_schema`, `prohibited_moves`, `open_risks`), and the five-layer structure are unchanged — only per-layer `nodes` lists are filtered post-assembly, before budget enforcement.
+`get_context_packet` accepts an optional `node_classes` parameter that restricts every node-list layer's `nodes` array to the specified node-type set. Layer assembly, `why_included` arrays, `task_header` metadata, governing-context guardrails (`active_rules`, `protected_surfaces`, `required_output_schema`, `prohibited_moves`, `open_risks`), `story_bundle_context`, and the packet structure are unchanged — only per-layer `nodes` lists are filtered post-assembly, before budget enforcement.
 
 ### Parameter shape
 
@@ -310,7 +327,7 @@ When `node_classes` is absent, no filtering is applied — every layer's `nodes`
 ### Filter invariants
 
 - The filter applies per-layer post-assembly. Seed nodes are not filtered at the input level — `seed_nodes` may contain any `NodeType`, but a seed whose class is excluded by `node_classes` will be filtered out of `local_authority`.
-- The five-layer structure is preserved even when some layers' `nodes` arrays are empty post-filter.
+- The packet structure is preserved even when some layers' `nodes` arrays are empty post-filter.
 - Default (absent parameter) → current full-mix behavior.
 
 ### Worked example

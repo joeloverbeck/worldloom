@@ -24,6 +24,8 @@ For `tools/world-mcp` context-packet tickets that edit canonical docs examples s
 
 For `tools/world-mcp` `get_context_packet` task-type or profile changes, treat `docs/CONTEXT-PACKET-CONTRACT.md` as a reassessment surface before source edits. Inspect and truth task-type enum prose, full-body candidate tables, reserve-policy tables, profile sections, and any parsed examples alongside package README, `docs/MACHINE-FACING-LAYER.md`, registered metadata, and tests.
 
+For `tools/world-mcp` `get_context_packet` task-type or profile changes, pre-scan package tests for every affected `task_type` literal before source edits. Classify each hit as behavior-owned, a generic fixture that needs neutral request parameters, or intentionally unchanged. This catches tests that use a task type only to exercise generic budget, truncation, class-filter, delivery-mode, or layer-drop mechanics before the broad suite exposes stale request shapes.
+
 For `tools/world-mcp` tickets whose draft says a tool is absent or new, first verify the live split between source registration and the running MCP connector with `src/tool-names.ts`, `src/server.ts`, tests/docs, and `mcp__worldloom__describe_capabilities()` when available. If the tool already exists and only its response shape, enum, docs, or coverage is incomplete, rewrite the ticket to an existing-tool completion before coding. Preserve the live tool names and enum values unless the ticket explicitly owns a rename; do not add backwards-compatibility aliases just because the draft used older or friendlier names.
 
 - Inspect the package's `package.json`, `tsconfig.json`, and existing package-local docs/examples before trusting drafted command shapes, module formats, or emitted artifact paths.
@@ -107,6 +109,8 @@ If the ticket adds or changes a user-facing CLI, workflow command, machine-layer
 For each stale same-seam surface, either truth it in the active ticket or record why it belongs to a separate follow-up. When the stale package doc, entrypoint, script, or example is real but outside the active ticket, name the existing owner or create/recommend a bounded follow-up ticket unless the user requested implementation-only with no follow-up drafting; in that case, record the excluded drift in `Assumption Reassessment` or `## Deviations`. Do not leave known stale package docs/examples unmentioned after changing package-local behavior.
 
 For MCP tool changes, also sweep the registered tool descriptions and capability metadata that are surfaced through `describe_capabilities`. Search for old scope, response-shape, input-schema, enum, or recovery wording in `src/server.ts` and adjacent capability/description helpers, then either update it or record why the old wording is intentionally still true. This sweep is required even when tests pass, because stale descriptions can survive a behavior change and mislead downstream skills.
+
+For `tools/world-mcp` context-packet shape or layer-count changes, include layer-count and old-profile stale anchors in closeout sweeps. Useful literals include `five layers`, `five-layer`, `five content layers`, `local_authority through impact_surfaces`, `world-canon-only`, `returns only world-canon`, and old task-profile request fragments. Truth same-seam hits in docs, package README, registered metadata, test names, assertion messages, and ticket closeout before the final proof.
 
 ## Verification
 

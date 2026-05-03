@@ -1,3 +1,6 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+
 import { seedWorld } from "./_shared";
 
 export const STORY_FIXTURE_WORLD = "seeded";
@@ -92,7 +95,22 @@ export function buildStoryBundleWorld(root: string): void {
         story_slug: STORY_FIXTURE_SLUG,
         file_path: storyPath(STORY_FIXTURE_SLUG, "obligations", "OBL-0001.yaml"),
         node_type: "obligation_record",
-        body: "id: OBL-0001\nsummary: Pay off the loft setup.\n"
+        body: [
+          "id: OBL-0001",
+          "type: promise",
+          "status: open",
+          "owner: STENT-0002",
+          "subjects:",
+          "  - STENT-0002",
+          "salience: 7",
+          "urgency: 5",
+          "possible_payoff_modes:",
+          "  - reveal",
+          "coverage_cache_compatible_storylets:",
+          "  - SLT-0021",
+          "summary: Pay off the loft setup.",
+          ""
+        ].join("\n")
       },
       {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "THR-0001"),
@@ -100,7 +118,16 @@ export function buildStoryBundleWorld(root: string): void {
         story_slug: STORY_FIXTURE_SLUG,
         file_path: storyPath(STORY_FIXTURE_SLUG, "threads", "THR-0001.yaml"),
         node_type: "thread_record",
-        body: "id: THR-0001\nobligations:\n  - OBL-0001\n"
+        body: [
+          "id: THR-0001",
+          "type: seduction",
+          "status: pressured",
+          "current_pressure: 6",
+          "desired_cadence: 2",
+          "obligations:",
+          "  - OBL-0001",
+          ""
+        ].join("\n")
       },
       {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "PG-0001"),
@@ -108,7 +135,17 @@ export function buildStoryBundleWorld(root: string): void {
         story_slug: STORY_FIXTURE_SLUG,
         file_path: storyPath(STORY_FIXTURE_SLUG, "pages", "PG-0001.yaml"),
         node_type: "page_record",
-        body: "id: PG-0001\nsummary: Loft opening page.\n"
+        body: [
+          "id: PG-0001",
+          "branch_path:",
+          "  - PG-0001",
+          "storylet_realized: SLT-0021",
+          "chosen_choice_id: CHC-0001",
+          "content_intensity: quiet",
+          "created_at: '2026-05-03T10:00:00Z'",
+          "summary: Loft opening page.",
+          ""
+        ].join("\n")
       },
       {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "CHC-0001"),
@@ -127,6 +164,9 @@ export function buildStoryBundleWorld(root: string): void {
         body: [
           "id: SLT-0021",
           "title: Loft Choice",
+          "shape: choice",
+          "content_intensity: quiet",
+          "visibility_scope: global_author_pool",
           "summary: Marla Kern considers the loft window.",
           "provenance:",
           "  created_at_page: PG-0001",
@@ -210,4 +250,28 @@ export function buildStoryBundleWorld(root: string): void {
       }
     ]
   });
+
+  const storyRoot = path.join(root, "worlds", STORY_FIXTURE_WORLD, "stories", STORY_FIXTURE_SLUG);
+  mkdirSync(storyRoot, { recursive: true });
+  writeFileSync(
+    path.join(storyRoot, "STORY_KERNEL.md"),
+    [
+      "---",
+      "mysteries_in_play:",
+      "  - m_id: M-0001",
+      "    status: active",
+      "    future_resolution_safety: medium",
+      "    domain_overlap: loft",
+      "cast_bind_list:",
+      "  - char_id: CHAR-0001",
+      "    stent_id: STENT-0002",
+      "    role_in_story: protagonist",
+      "invariants_acknowledged:",
+      "  - INV-social-intimacy",
+      "---",
+      "# Opening Bells",
+      ""
+    ].join("\n"),
+    "utf8"
+  );
 }

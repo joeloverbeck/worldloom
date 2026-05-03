@@ -5,6 +5,7 @@ import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import {
   DEFAULT_DELIVERY_MODE,
   DELIVERY_MODES,
+  isStoryPipelineTaskType,
   type DeliveryMode
 } from "../context-packet/shared";
 import type { McpError } from "../errors";
@@ -13,10 +14,12 @@ import {
   TASK_TYPES,
   type TaskType
 } from "../ranking/profiles";
+import { STORY_SLUG_PATTERN } from "./_shared";
 
 export interface GetContextPacketArgs {
   task_type: TaskType;
   world_slug: string;
+  story_slug?: string;
   seed_nodes: string[];
   token_budget?: number;
   delivery_mode?: DeliveryMode;
@@ -34,6 +37,14 @@ function assertValidArgs(args: GetContextPacketArgs): void {
 
   if (args.seed_nodes.length === 0) {
     throw new Error("seed_nodes must be non-empty.");
+  }
+
+  if (isStoryPipelineTaskType(args.task_type) && args.story_slug === undefined) {
+    throw new Error(`story_slug is required for story-pipeline task_type '${args.task_type}'.`);
+  }
+
+  if (args.story_slug !== undefined && !STORY_SLUG_PATTERN.test(args.story_slug)) {
+    throw new Error("story_slug must be kebab-case [a-z0-9-]+.");
   }
 
   if (args.token_budget !== undefined && args.token_budget <= 0) {
@@ -61,6 +72,7 @@ async function getContextPacketImpl(
   return assembleContextPacket({
     task_type: args.task_type,
     world_slug: args.world_slug,
+    ...(args.story_slug === undefined ? {} : { story_slug: args.story_slug }),
     seed_nodes: args.seed_nodes,
     token_budget: args.token_budget ?? DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE[args.task_type],
     delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE,

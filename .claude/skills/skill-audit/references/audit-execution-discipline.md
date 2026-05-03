@@ -1,6 +1,6 @@
 # Audit Execution Discipline
 
-These rules govern how Step 1 (Read the target skill) is executed and how all auxiliary tool calls — across the entire audit and any follow-up implementation — must be announced and batched.
+These rules govern how Step 1 (Step 1a reads the target skill; Step 1b loads this reference) is executed and how all auxiliary tool calls — across the entire audit and any follow-up implementation — must be announced and batched.
 
 ## Read-satisfaction
 

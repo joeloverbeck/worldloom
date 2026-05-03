@@ -26,6 +26,7 @@ import {
   estimatePacketChars,
   estimateStablePacketChars,
   estimateStablePacketSize,
+  isStoryPipelineTaskType,
   resolveHarnessCeilingChars,
   uniqueStrings,
   type ContextPacket,
@@ -35,6 +36,10 @@ import {
   type DeliveryMode
 } from "./shared";
 import { persistContextPacket } from "./persistence";
+import {
+  buildStoryBundleContext,
+  summarizeStoryBundleContext
+} from "./story-bundle-context";
 
 export { DEFAULT_BUDGET_SPLIT, DEFAULT_PACKET_VERSION } from "./shared";
 export type { ContextPacket, ContextPacketArgs } from "./shared";
@@ -59,6 +64,7 @@ function makeEmptyTruncationSummary(): ContextPacketTruncationSummary {
 function makeEmptyPacket(args: {
   taskType: TaskType;
   worldSlug: string;
+  storySlug?: string;
   seedNodes: string[];
   tokenBudget: number;
   harnessCeilingChars: number;
@@ -67,6 +73,7 @@ function makeEmptyPacket(args: {
     task_header: {
       task_type: args.taskType,
       world_slug: args.worldSlug,
+      story_slug: args.storySlug ?? null,
       generated_at: new Date().toISOString(),
       token_budget: {
         requested: args.tokenBudget,
@@ -102,6 +109,7 @@ function makeEmptyPacket(args: {
       nodes: [],
       why_included: []
     },
+    story_bundle_context: null,
     impact_surfaces: {
       nodes: [],
       rationale: []
@@ -137,7 +145,7 @@ function groupNodeIdsByClass(nodes: readonly ContextPacketNode[]): Record<string
 
 function buildGoverningSummary(packet: ContextPacket): ContextPacketGoverningSummary {
   const nodes = allPacketNodes(packet);
-  return {
+  const summary: ContextPacketGoverningSummary = {
     active_rules: [...packet.governing_world_context.active_rules],
     protected_surfaces: [...packet.governing_world_context.protected_surfaces],
     prohibited_moves: [...packet.governing_world_context.prohibited_moves],
@@ -155,6 +163,11 @@ function buildGoverningSummary(packet: ContextPacket): ContextPacketGoverningSum
     ),
     dropped_node_ids_by_class: groupNodeIdsByClass(nodes)
   };
+  const storyBundleSummary = summarizeStoryBundleContext(packet.story_bundle_context);
+  if (storyBundleSummary !== undefined) {
+    summary.story_bundle_context_summary = storyBundleSummary;
+  }
+  return summary;
 }
 
 function buildFastSummaryPacket(packet: ContextPacket, persistedOutputPath: string): ContextPacket {
@@ -168,6 +181,7 @@ function buildFastSummaryPacket(packet: ContextPacket, persistedOutputPath: stri
   summary.exact_record_links.nodes = [];
   summary.scoped_local_context.nodes = [];
   summary.governing_world_context.nodes = [];
+  summary.story_bundle_context = null;
   summary.impact_surfaces.nodes = [];
 
   summary.truncation_summary = {
@@ -315,6 +329,7 @@ function minimumPacketWithGoverningContext(packet: ContextPacket): ContextPacket
 export async function assembleContextPacket(args: {
   task_type: TaskType;
   world_slug: string;
+  story_slug?: string;
   seed_nodes: string[];
   token_budget: number;
   delivery_mode?: DeliveryMode;
@@ -333,6 +348,7 @@ export async function assembleContextPacket(args: {
     const packet = makeEmptyPacket({
       taskType: args.task_type,
       worldSlug: args.world_slug,
+      ...(args.story_slug === undefined ? {} : { storySlug: args.story_slug }),
       seedNodes: args.seed_nodes,
       tokenBudget: args.token_budget,
       harnessCeilingChars
@@ -391,6 +407,10 @@ export async function assembleContextPacket(args: {
       deliveryMode,
       recordProjection
     );
+    packet.story_bundle_context =
+      isStoryPipelineTaskType(args.task_type) && args.story_slug !== undefined
+        ? buildStoryBundleContext(opened.db, args.world_slug, args.story_slug)
+        : null;
     packet.impact_surfaces = await buildImpactSurfaces(
       opened.db,
       args.world_slug,
