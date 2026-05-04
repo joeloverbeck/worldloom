@@ -22,7 +22,22 @@ export const SUPPORTED_RECORD_SCHEMA_NODE_TYPES = [
   "character_record",
   "diegetic_artifact_record",
   "adjudication_record",
-  "extension_entry"
+  "extension_entry",
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "story_diegetic_artifact_record"
 ] as const;
 
 export type SupportedRecordSchemaNodeType = (typeof SUPPORTED_RECORD_SCHEMA_NODE_TYPES)[number];
@@ -51,7 +66,22 @@ const NODE_TYPE_TO_SCHEMA_FILE: Record<SupportedRecordSchemaNodeType, string> = 
   character_record: "character-frontmatter.schema.json",
   diegetic_artifact_record: "diegetic-artifact-frontmatter.schema.json",
   adjudication_record: "adjudication-frontmatter.schema.json",
-  extension_entry: "_shared/extension-entry.schema.json"
+  extension_entry: "_shared/extension-entry.schema.json",
+  story_entity_record: "story-entity.schema.json",
+  story_fact_record: "story-fact.schema.json",
+  story_event_record: "story-event.schema.json",
+  obligation_record: "story-obligation.schema.json",
+  consequence_record: "story-consequence.schema.json",
+  thread_record: "story-thread.schema.json",
+  relationship_record_story: "story-relationship.schema.json",
+  intention_record: "story-intention.schema.json",
+  story_location_record: "story-location.schema.json",
+  story_object_record: "story-object.schema.json",
+  branch_record: "story-branch.schema.json",
+  page_record: "story-page.schema.json",
+  choice_record: "story-choice.schema.json",
+  storylet_record: "story-storylet.schema.json",
+  story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 };
 
 const schemaCache = new Map<string, JsonObject>();

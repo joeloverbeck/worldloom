@@ -43,6 +43,11 @@ type ParsedSignedToken =
   | ApprovalFailure;
 type ParsedPayload = { ok: true; value: ApprovalTokenPayload } | ApprovalFailure;
 
+const APPROVAL_TOKEN_RECOVERY_HINT =
+  " To obtain a valid signed token, run: " +
+  "node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>. " +
+  "See docs/HARD-GATE-DISCIPLINE.md section Issuing a token.";
+
 export function verifyApprovalToken(
   token: string,
   envelope: PatchPlanEnvelope,
@@ -119,18 +124,18 @@ function parseSignedToken(
 ): ParsedSignedToken {
   const decoded = decodeBase64Token(token);
   if (decoded === null) {
-    return { ok: false, code: "approval_malformed", detail: "token contains invalid base64" };
+    return approvalMalformed("token contains invalid base64.");
   }
 
   const separatorIndex = decoded.lastIndexOf(".");
   if (separatorIndex === -1) {
-    return { ok: false, code: "approval_malformed", detail: "token must contain a signature separator" };
+    return approvalMalformed("token must contain a signature separator.");
   }
 
   const payloadJson = decoded.slice(0, separatorIndex);
   const signatureHex = decoded.slice(separatorIndex + 1);
   if (!/^[A-Fa-f0-9]+$/.test(signatureHex) || signatureHex.length % 2 !== 0) {
-    return { ok: false, code: "approval_malformed", detail: "token signature must be hex" };
+    return approvalMalformed("token signature must be hex.");
   }
 
   const payloadBytes = Buffer.from(payloadJson, "utf8");
@@ -156,11 +161,11 @@ function parsePayload(payloadBytes: Buffer): ParsedPayload {
   try {
     parsed = JSON.parse(payloadBytes.toString("utf8"));
   } catch {
-    return { ok: false, code: "approval_malformed", detail: "payload is not valid JSON" };
+    return approvalMalformed("payload is not valid JSON.");
   }
 
   if (!isRecord(parsed)) {
-    return { ok: false, code: "approval_malformed", detail: "payload must be an object" };
+    return approvalMalformed("payload must be an object.");
   }
 
   if (
@@ -172,7 +177,7 @@ function parsePayload(payloadBytes: Buffer): ParsedPayload {
     !parsed.patch_hashes.every((value) => typeof value === "string") ||
     Number.isNaN(Date.parse(parsed.expires_at))
   ) {
-    return { ok: false, code: "approval_malformed", detail: "payload has invalid fields" };
+    return approvalMalformed("payload has invalid fields.");
   }
 
   return {
@@ -184,6 +189,14 @@ function parsePayload(payloadBytes: Buffer): ParsedPayload {
       issued_at: parsed.issued_at,
       expires_at: parsed.expires_at
     }
+  };
+}
+
+function approvalMalformed(detail: string): ApprovalFailure {
+  return {
+    ok: false,
+    code: "approval_malformed",
+    detail: detail + APPROVAL_TOKEN_RECOVERY_HINT
   };
 }
 

@@ -122,12 +122,20 @@ const getPersistedPacketSliceInputSchema = z.object({
   slice_path: z.string().min(1)
 });
 
+const listRecordFilterValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)
+]);
+
 const listRecordsInputSchema = z.object({
   world_slug: z.string().min(1),
   record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
   story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   fields: z.array(z.string().min(1)).optional(),
-  include_full_body: z.boolean().optional()
+  include_full_body: z.boolean().optional(),
+  filters: z.record(z.string().min(1), listRecordFilterValueSchema).optional()
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -332,7 +340,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_records",
-    "get_records: Fetch multiple records by id in one call. Optional story_slug scopes bundle-scoped story ids. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch.",
+    "get_records: Fetch multiple records by id in one call. Optional story_slug scopes bundle-scoped story ids. Returns one ordered entry per requested id, wrapping the same successful response shape as get_record or a per-id error without aborting the batch. Oversized batch responses persist full JSON under the tool-results directory and return delivery_status='persisted_with_summary' with summary metadata and slice paths such as records[0].record.record.",
     getRecordsInputSchema,
     async (args) => getRecords(args as unknown as Parameters<typeof getRecords>[0])
   );
@@ -344,13 +352,13 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_persisted_packet_slice",
-    "get_persisted_packet_slice: Read a structured dot-path slice from a package-persisted full context packet emitted by get_context_packet delivery_status='persisted_with_summary'.",
+    "get_persisted_packet_slice: Read a structured dot-path slice from package-persisted JSON emitted by get_context_packet, get_records, or describe_envelope_schema delivery_status='persisted_with_summary'. Supports object paths, array indexes such as records[0], and node id selectors such as local_authority.nodes[id=entity:donostia].",
     getPersistedPacketSliceInputSchema,
     async (args) => getPersistedPacketSlice(args as unknown as Parameters<typeof getPersistedPacketSlice>[0])
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return all indexed records of a supported atomic, hybrid, or story-bundle record type, with optional field projection or include_full_body metadata/body records. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
+    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Fields are validated against response-shape top-level keys and unknown fields return invalid_input; include_full_body returns full bodies and ignores fields. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }
@@ -447,7 +455,7 @@ export function createServer(): McpServer {
   const describeEnvelopeCapability: ToolCapability = {
     name: MCP_TOOL_NAMES.describe_envelope_schema,
     description:
-      "Return the patch-plan envelope schema and per-operation payload schemas for validate_patch_plan and submit_patch_plan.",
+      "Return the patch-plan envelope schema and per-operation payload schemas for validate_patch_plan and submit_patch_plan. Oversized unfiltered responses persist full JSON and return delivery_status='persisted_with_summary' with available_op_kinds for op_kind narrowing.",
     input_schema_enums: { op_kind: OPERATION_KINDS }
   };
   registerToolWithCapability(

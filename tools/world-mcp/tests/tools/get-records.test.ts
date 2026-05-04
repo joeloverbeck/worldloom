@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import { getRecord } from "../../src/tools/get-record";
@@ -145,6 +147,7 @@ test("getRecords returns ordered singular getRecord payloads for atomic and hybr
     );
 
     assert.ok(!("code" in result));
+    assert.equal(result.delivery_status, "inline");
     assert.deepEqual(result.records.map((entry) => entry.record_id), recordIds);
     assert.deepEqual(result.records.map((entry) => entry.found), [true, true, true, true, true]);
 
@@ -178,6 +181,7 @@ test("getRecords keeps partial failures in request order", async () => {
     );
 
     assert.ok(!("code" in result));
+    assert.equal(result.delivery_status, "inline");
     assert.deepEqual(result.records.map((entry) => entry.record_id), [
       "CF-0001",
       "CF-9999",
@@ -194,6 +198,54 @@ test("getRecords keeps partial failures in request order", async () => {
     assert.equal(invalid.found, false);
     assert.equal(invalid.error.code, "invalid_input");
   } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getRecords persists full batch JSON and returns a bounded summary when over ceiling", async () => {
+  const root = createTempRepoRoot();
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+  const resultsDir = path.join(root, "tool-results");
+
+  try {
+    buildSeededWorld(root);
+    mkdirSync(resultsDir, { recursive: true });
+    process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "5600";
+    process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = resultsDir;
+
+    const result = await withRepoRoot(root, () =>
+      getRecords({
+        record_ids: ["CF-0001", "SEC-GEO-001", "M-1", "CHAR-0001", "DA-0001"],
+        world_slug: "seeded"
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.delivery_status, "persisted_with_summary");
+    assert.match(result.persisted_output_path, /tool-results\/.*get_records-5-.*\.json$/);
+    assert.equal(result.summary.tool, "get_records");
+    assert.equal(result.summary.record_count, 5);
+    assert.deepEqual(result.summary.suggested_slice_paths[0], "records[0]");
+    assert.ok(result.summary.records.every((entry) => "record_id" in entry));
+
+    const persisted = JSON.parse(readFileSync(result.persisted_output_path, "utf8")) as {
+      delivery_status?: string;
+      records?: unknown[];
+    };
+    assert.equal(persisted.delivery_status, "inline");
+    assert.equal(persisted.records?.length, 5);
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+    if (originalResultsDir === undefined) {
+      delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+    } else {
+      process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
+    }
     destroyTempRepoRoot(root);
   }
 });

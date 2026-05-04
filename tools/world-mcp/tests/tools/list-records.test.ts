@@ -330,6 +330,174 @@ test("listRecords field projection always includes record_id and requested field
   }
 });
 
+test("listRecords rejects unknown atomic projection fields for non-empty record sets", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        fields: ["nonexistent_field"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["nonexistent_field"]);
+    assert.equal(result.details?.record_type, "invariant_record");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords preserves valid atomic projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        fields: ["title", "category"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 2);
+    assert.deepEqual(result.records[0], {
+      record_id: "ONT-1",
+      title: "Embodied sentience",
+      category: "ontological"
+    });
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords filters atomic records by scalar, array membership, and AND semantics", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const scalar = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        filters: { category: "ontological" },
+        fields: ["title", "category"]
+      })
+    );
+    assert.ok("records" in scalar);
+    assert.deepEqual(scalar.records.map((record) => record.record_id), ["ONT-1"]);
+    assert.equal((scalar.records[0] as Record<string, unknown>).category, "ontological");
+
+    const array = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        filters: { category: ["ontological", "social"] },
+        fields: ["category"]
+      })
+    );
+    assert.ok("records" in array);
+    assert.deepEqual(array.records.map((record) => record.record_id), ["ONT-1", "SOC-1"]);
+
+    const combined = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        filters: { category: ["ontological", "social"], revision_difficulty: "medium" },
+        fields: ["category", "revision_difficulty"]
+      })
+    );
+    assert.ok("records" in combined);
+    assert.deepEqual(combined.records.map((record) => record.record_id), ["SOC-1"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords filters against array-valued fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "open_question_record",
+        filters: { domains_touched: "law" },
+        fields: ["question", "domains_touched"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    assert.equal(result.records[0]?.record_id, "OQ-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords treats absent and empty filters as byte-identical", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const absent = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "mystery_record",
+        fields: ["title", "status"]
+      })
+    );
+    const empty = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "mystery_record",
+        fields: ["title", "status"],
+        filters: {}
+      })
+    );
+
+    assert.deepEqual(empty, absent);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords rejects unknown filter keys for non-empty record sets", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "invariant_record",
+        filters: { missing_field: "value" }
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "filters");
+    assert.deepEqual(result.details?.unknown_filter_keys, ["missing_field"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords include_full_body returns get_record-style metadata and parsed bodies", async () => {
   const root = createTempRepoRoot();
 
@@ -430,6 +598,111 @@ test("listRecords returns compact metadata for supported hybrid record types", a
   }
 });
 
+test("listRecords filters hybrid records by frontmatter fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        filters: { slug: "vespera-nightwhisper" },
+        fields: ["title", "file_path"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    assert.deepEqual(result.records, [
+      {
+        record_id: "CHAR-0001",
+        title: "Vespera Nightwhisper",
+        file_path: "characters/vespera-nightwhisper.md"
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords rejects unknown hybrid projection fields against metadata wrapper", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["frontmatter.character_id"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["frontmatter.character_id"]);
+    assert.equal(result.details?.record_type, "character_record");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords rejects partially invalid hybrid projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["title", "frontmatter.slug"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["frontmatter.slug"]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords preserves valid hybrid projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["title"]
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.deepEqual(result.records, [
+      {
+        record_id: "CHAR-0001",
+        title: "Vespera Nightwhisper"
+      },
+      {
+        record_id: "CHAR-0002",
+        title: "Alaric Brine"
+      }
+    ]);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords returns hybrid records in id order and supports field projection", async () => {
   const root = createTempRepoRoot();
 
@@ -493,6 +766,33 @@ test("listRecords include_full_body returns parsed hybrid frontmatter and body s
     assert.equal(frontmatter.character_id, "CHAR-0001");
     const bodySections = record.body.body_sections as Record<string, string>;
     assert.ok(bodySections["Material Reality"]?.includes("salt port"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords include_full_body ignores invalid projection fields", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "character_record",
+        fields: ["frontmatter.character_id"],
+        include_full_body: true
+      })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 2);
+    const record = result.records[0]! as FullBodyTestRecord;
+    assert.equal(record.record_id, "CHAR-0001");
+    assert.ok("body" in record);
+    const frontmatter = record.body.frontmatter as Record<string, unknown>;
+    assert.equal(frontmatter.character_id, "CHAR-0001");
   } finally {
     destroyTempRepoRoot(root);
   }

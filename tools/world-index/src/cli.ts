@@ -33,7 +33,7 @@ function renderHelp(): string {
     "Commands:",
     "  init <world-slug>     initialize an empty world index",
     "  build <world-slug>    full rebuild",
-    "  sync <world-slug>     incremental sync",
+    "  sync <world-slug>     incremental sync; use --quiet to suppress per-record skip warnings",
     "  inspect <node-id>     dump one node as JSON",
     "  render <world-slug>   render indexed records; use --story <story-slug> for story bundles",
     "  stats <world-slug>    print node counts and file freshness",
@@ -82,7 +82,8 @@ function main(argv: string[]): number {
     options: {
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
-      story: { type: "string" }
+      story: { type: "string" },
+      quiet: { type: "boolean" }
     },
     allowPositionals: true,
     strict: false
@@ -111,7 +112,7 @@ function main(argv: string[]): number {
       case "init":
         return typeof argument === "string" ? init(worldRoot, argument) : printUsage(1);
       case "sync":
-        return typeof argument === "string" ? sync(worldRoot, argument) : printUsage(1);
+        return typeof argument === "string" ? sync(worldRoot, argument, { quiet: parsed.values.quiet === true }) : printUsage(1);
       case "inspect":
         return typeof argument === "string" ? inspect(worldRoot, argument) : printUsage(1);
       case "render":

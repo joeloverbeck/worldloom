@@ -562,6 +562,36 @@ test("list_records accepts hybrid record types through the MCP boundary", async 
   });
 });
 
+test("list_records filters through the MCP validation and dispatch boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.list_records,
+      arguments: {
+        world_slug: "seeded",
+        record_type: "canon_fact",
+        filters: { status: "hard_canon", domains_affected: ["geography", "history"] },
+        fields: ["title", "status", "domains_affected"]
+      }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as {
+      total?: number;
+      records?: Array<{
+        record_id?: string;
+        title?: string;
+        status?: string;
+        domains_affected?: string[];
+      }>;
+    };
+    assert.equal(structured.total, 1);
+    assert.equal(structured.records?.[0]?.record_id, "CF-0001");
+    assert.equal(structured.records?.[0]?.title, "Brinewick Lighthouse");
+    assert.equal(structured.records?.[0]?.status, "hard_canon");
+    assert.deepEqual(structured.records?.[0]?.domains_affected, ["geography"]);
+  });
+});
+
 test("EPE id_class dispatches through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({

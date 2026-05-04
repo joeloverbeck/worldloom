@@ -18,6 +18,7 @@
     "contradiction_risk"
   ],
   "properties": {
+    "record_kind": { "type": "string", "const": "canon_fact" },
     "id": { "type": "string", "pattern": "^CF-[0-9]{4}$" },
     "title": { "type": "string", "minLength": 1 },
     "status": {

@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["id", "canonical_name", "entity_kind", "aliases", "originating_cf", "scope_notes"],
   "properties": {
+    "record_kind": { "type": "string", "const": "named_entity" },
     "id": { "type": "string", "pattern": "^ENT-[0-9]{4}$" },
     "canonical_name": { "type": "string", "minLength": 1 },
     "entity_kind": { "type": "string", "minLength": 1 },

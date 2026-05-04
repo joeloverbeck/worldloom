@@ -57,7 +57,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "CNSQ", subdir: "consequences", fileName: "CNSQ-0007.yaml", expected: "CNSQ-0008" },
   { idClass: "THR", subdir: "threads", fileName: "THR-0007.yaml", expected: "THR-0008" },
   { idClass: "SREL", subdir: "relationships", fileName: "SREL-0007.yaml", expected: "SREL-0008" },
-  { idClass: "STINT", subdir: "intentions", fileName: "STINT-0007-rill.yaml", expected: "STINT-0008" },
+  { idClass: "STINT", subdir: "intentions", fileName: "STINT-0007.yaml", expected: "STINT-0008" },
   { idClass: "SLT", subdir: "storylets", fileName: "SLT-0007.yaml", expected: "SLT-0008" },
   { idClass: "SLB", subdir: "storylet-batches", fileName: "SLB-0007.md", expected: "SLB-0008" },
   { idClass: "SAU", subdir: "audits", fileName: "SAU-0007-2026-05-03.md", expected: "SAU-0008" },
@@ -343,6 +343,83 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.equal(slbResult.next_id, "SLB-0001");
     assert.equal(sauResult.next_id, "SAU-0001");
     assert.equal(spResult.next_id, "SP-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId ignores legacy suffixed STINT records", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "legacy-intentions"), {
+      recursive: true
+    });
+    writeStoryRecord(root, "legacy-intentions", "intentions", "STINT-0001-iker.yaml");
+    writeStoryRecord(root, "legacy-intentions", "intentions", "STINT-0001-marla.yaml");
+
+    const result = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "STINT",
+        story_slug: "legacy-intentions"
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.next_id, "STINT-0001");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId counts only bare-numeric STINT records when legacy suffixes coexist", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+    mkdirSync(path.join(root, "worlds", "seeded", "stories", "mixed-intentions"), {
+      recursive: true
+    });
+    writeStoryRecord(root, "mixed-intentions", "intentions", "STINT-0001-iker.yaml");
+    writeStoryRecord(root, "mixed-intentions", "intentions", "STINT-0001-marla.yaml");
+    writeStoryRecord(root, "mixed-intentions", "intentions", "STINT-0001.yaml");
+
+    const result = await withRepoRoot(root, () =>
+      allocateNextId({
+        world_slug: "seeded",
+        id_class: "STINT",
+        story_slug: "mixed-intentions"
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.next_id, "STINT-0002");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -651,7 +728,8 @@ test("allocateNextId exposes all 48 id classes with existing formats preserved",
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, true);
   assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
-  assert.match("STINT-0008-rill", ID_CLASS_FORMATS.STINT.regex);
+  assert.match("STINT-0008", ID_CLASS_FORMATS.STINT.regex);
+  assert.doesNotMatch("STINT-0008-rill", ID_CLASS_FORMATS.STINT.regex);
   assert.match("SLB-0008", ID_CLASS_FORMATS.SLB.regex);
   assert.match("RSP-0008-payoff", ID_CLASS_FORMATS.RSP.regex);
   assert.match("SAU-0008-2026-05-03", ID_CLASS_FORMATS.SAU.regex);

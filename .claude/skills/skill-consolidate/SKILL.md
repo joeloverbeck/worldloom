@@ -142,9 +142,13 @@ For non-redundant instructions (those surviving Steps 2-5), tighten prose:
 
 Before writing, briefly summarize planned changes in the conversation so the user sees what will change before the file is overwritten. The pre-write summary is an abbreviated version of the Step 9 categories: one short bullet per category, optionally with sub-bullets when multiple distinct changes within the category warrant explicit listing. Match Step 9's zero-count convention — include any category with no findings as a brief one-line note so the reader sees the category was considered. Keep total pre-write summary under ~15 lines. Not the full diff summary.
 
+The summary is presentational, not approval-gating — proceed to writes immediately. The user can interrupt if they want changes (Auto Mode applies).
+
 Write the consolidated file in-place at the path resolved in Step 1 — `<skill-path>` directly when `<skill-path>` ends in `.md`, otherwise `<skill-path>/SKILL.md`.
 
 **Tool preference**: Use the Edit tool with targeted `old_string` / `new_string` pairs for surgical consolidations (the common case — most consolidations remove redundancies and restructure specific regions while leaving the bulk of the file unchanged). Reserve the Write tool for full rewrites where the file structure changes wholesale (uncommon — typically only when consolidation amounts to extraction-style restructuring parallel to skill-extract-references workflows). Edit calls preserve unaltered regions byte-for-byte and reduce the risk of accidentally dropping content that Step 8's sampled spot-check might miss; full Write rewrites require reconstructing every line from memory and concentrate that risk into a single tool call.
+
+**Major-rewrite preserve list**: For major rewrites (≥50 lines being restructured wholesale, e.g., entire ASCII diagrams, full sections collapsed), enumerate the distinctive terms / load-bearing phrases from the source block as an explicit preserve list BEFORE writing the new version. Step 8's spot-check grep then verifies each item; the pre-write enumeration prevents drops rather than detecting them.
 
 The rewritten file must:
 1. **Preserve frontmatter exactly** — do not modify name, description, arguments, or any YAML field
@@ -192,7 +196,7 @@ After writing, present a structured summary in the conversation:
 - "<before>" → "<after>" — reason (e.g., "Section 1 no longer exists in this file; target now lives in SKILL.md Step 1", or "added 'see Output § Diegetic artifact file' when removing duplicated canon-file list from Guardrails")
 
 ### Observations (if any)
-[Gaps noticed during consolidation that were not filled (per No Scope Expansion guardrail).]
+[Notable observations not captured elsewhere — gaps not filled (per No Scope Expansion guardrail), residual redundancies retained by judgment, structural trade-offs, candidates for a future consolidation pass.]
 ```
 
 **Cross-reference Hygiene counts**: This category counts both (a) repairs of broken or obsolete cross-references and (b) new cross-references added when factoring out a shared reference per Step 5 §Cross-reference hygiene. A factor-out edit that introduces a "see §X" pointer to replace inlined content counts as one Cross-reference Hygiene entry — it is the visible cost of the factor-out, not a free byproduct. Counting only repairs (omitting added forward-references) understates the diff surface and breaks audit-trail reconstructibility for future consolidation passes.

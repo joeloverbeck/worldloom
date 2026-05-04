@@ -28,7 +28,7 @@ This file is inlined verbatim into Phase 3's LLM prompt and consulted by Phase 4
 - pred: relationship
   from: STENT-NNNN | role:<role>
   to: STENT-NNNN | role:<role>
-  axis: trust | fear | desire | debt | intimacy | loyalty | resentment | power_imbalance
+  axis: trust | fear | desire | debt | intimacy | loyalty | resentment | power_imbalance | attention | familiarity | approval | respect | obligation | hostility
   op: == | != | > | < | >= | <=
   value: <number>
 
@@ -56,6 +56,16 @@ This file is inlined verbatim into Phase 3's LLM prompt and consulted by Phase 4
 - pred: any
   predicates: [...]
 ```
+
+## Predicate axis enum vs. `axes_delta` open vocab
+
+`pred: relationship` and `pred: relationship_state` validate `axis:` and `property:` differently — and the difference matters at authoring time.
+
+- `pred: relationship`'s `axis:` field is **closed runtime grammar**: only the values listed in §Core Predicate Forms (`trust | fear | desire | debt | intimacy | loyalty | resentment | power_imbalance | attention | familiarity | approval | respect | obligation | hostility`) are accepted. Phase 4 gate 7 (predicate DSL parsability) HARD-REJECTs any other value because the runtime page-cycle's deterministic eligibility evaluation depends on a fixed axis set the engine can route against `state_snapshot.relationships_current`.
+- `pred: relationship_state`'s `property:` field is **open vocab** (validated by `requireOpenLabel`). Authors may use `prior_meeting`, `prior_meeting_count`, or any kebab-case relationship-state property that the runtime can resolve against an SREL record's named field at evaluation time.
+- A storylet's `relationship_effects.axes_delta` keys are **open vocab** at the storylet schema level (the storylet record's effects field is not gated by the predicate-DSL validator) — they are SREL-record axis names that produce or update relationship state when the storylet is applied.
+
+The asymmetry's failure mode: an author can write `axes_delta: {<axis_name>: 2}` in `relationship_effects` (open vocab — storylet effects accept it) and then write `pred: relationship axis: <axis_name>` in `hard_preconds` or `soft_preconds` (closed enum — predicate DSL rejects it if `<axis_name>` is not in the enumerated list above). The skill's Phase 4 gate 7 catches this at engine-submit time with `axis must be one of <enumerated list>`. To avoid the late surface, when authoring a storylet that gates eligibility on a relationship axis, confirm the axis name is in the closed enum BEFORE writing the predicate. If the bootstrap pool or runtime SREL records use an axis name that is not in the enum, the predicate must use `pred: relationship_state` (open-vocab `property:`) instead of `pred: relationship` (closed-enum `axis:`), or the enum must be extended in lockstep across this file AND `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`'s `RELATIONSHIP_AXES` constant (followed by `npm run build` in `tools/validators/`).
 
 ## Documented Extensions
 
@@ -183,7 +193,7 @@ This section documents how each predicate is evaluated against the runtime page-
 | `time_of_day` / `time_of_week` / `time_in_story` | resolved against the page's narrative-time metadata (carried in `state_snapshot.narrative_time` per the page-cycle's Page Record schema). The runtime falls back to chronotope-derived defaults when narrative-time is unset. |
 | `time_since_event` | resolved by walking the page's branch backward to find the most recent SE record matching `event_kind` and computing the elapsed in-world time per the page records' `created_at` timestamps and the chronotope's time-resolution unit. |
 | `world_property` | resolved against `state_snapshot.world_properties` (a top-level dict carrying scalar world-state — e.g., `ambient_register: gold_hour` — the runtime sets at page-emission time). |
-| `obligation_state` | direct lookup of OBL by id in `state_snapshot.obligations_open` / `obligations_paid_off` / `obligations_complicated` / `obligations_abandoned`; the `property` field selects which sub-field of the matched OBL is compared. |
+| `obligation_state` | direct lookup of OBL by id in `state_snapshot.obligations_open` / `obligations_paid_off` / `obligations_complicated` / `obligations_abandoned`; the `property` field selects which sub-field of the matched OBL is compared. These four arrays are **cumulative-state subsets** of the obligation state space (not per-turn deltas) per `branching-story-page-cycle/references/phase-5-state-mutation.md` §State-subset-list Semantics — an obligation in `obligations_complicated` at PG-N stays there at PG-N+1 unless superseded to a different status. The predicate's lookup reflects current-page cumulative register, not the most-recent transition; storylets gating on `status: complicated` continue to fire on subsequent pages along the branch until the obligation is superseded out. |
 | `location_kind` / `location_id` / `location_class` | resolved against the current_location STLOC's `kind` / `id` / `class` fields (the STLOC record carries all three). The `op: in` form on `location_kind` and `location_class` enables list membership; `location_id` is exact-match-only. |
 | `not` / `all` / `any` | recursive evaluation: `not` inverts; `all` is logical AND over all nested predicates; `any` is logical OR. Empty `all` is true; empty `any` is false. |
 

@@ -1,0 +1,70 @@
+# Pre-flight and World-State Prerequisites
+
+Covers the original SKILL.md's §World-State Prerequisites and §Pre-flight Check. The World-State Prerequisites describe **what** must be loaded; Pre-flight is **how** to load it and the abort conditions when prerequisites are not met.
+
+## World-State Prerequisites
+
+Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation and §Canonical Storage Layer):
+
+- `docs/FOUNDATIONS.md` — read at Pre-flight; the rules that govern Phase 4's mystery firewall (Rule 7), invariant compatibility (Rule 4), consequence-capacity gate (Rule 5), and schema-completeness gate (Rule 1) all live there.
+- `worlds/<world-slug>/WORLD_KERNEL.md` — primary-authored; read directly per FOUNDATIONS §Canonical Storage Layer §Authored-primary surfaces. Provides genre/tonal/chronotope contract that grounds Phase 3 LLM prompt assembly.
+- `worlds/<world-slug>/ONTOLOGY.md` — primary-authored; read directly. Categories + Relation Types ground Phase 2 seed generation's "core dramatic transaction" framing and Phase 3 fact-effect / relationship-effect vocabulary.
+- `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` — direct Read (story-bundle root primary-authored surface; Hook 2's world-canon read redirection does not apply). Provides `designing_principle`, `content_intensity_baseline`, `mysteries_in_play[]`, `invariants_acknowledged[]`, cast bind list, and active threads — all load-bearing for Phases 1, 2, 3, and 4.
+- `worlds/<world-slug>/stories/<story-slug>/_source/obligations/OBL-*.yaml` — direct Read filtered to `status: open`. Drives Phase 1 coverage diagnosis (which OBLs lack a payoff route?) and Phase 5 OBL-engagement diversity check.
+- `worlds/<world-slug>/stories/<story-slug>/_source/threads/THR-*.yaml` — direct Read filtered to `status` ∈ {`active`, `pressured`, `critical`, `dormant`}. Drives Phase 1 (which threads lack escalation storylets?) and Phase 2 seed-target selection.
+- Recent page history — last ~10 `worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-NNNN.md` files **along the longest active branch_path only**, never sibling branches. Used as repetition-avoidance signal in Phase 1 / Phase 2. Cross-branch reads at authoring time would corrupt the recursive branch-isolation invariant that `branching-story-page-cycle` Phase 9 enforces.
+- **Premise-and-state-bounded world-canon retrieval** via `mcp__worldloom__get_context_packet(world_slug, task_type='storylet_pool_authoring', seed_nodes=[...], token_budget=18000)`. Seed nodes are resolved from `STORY_KERNEL.cast_bind_list` (each STENT's `world_ent_id`) + recent-history-named entities + the active period via `mcp__worldloom__find_named_entities(names)` BEFORE the packet call. The packet prioritizes premise-relevant CFs, governing invariants, mystery-edge M records, and ontology-grounding context.
+  - **Packet-too-large fallback**: if the packet returns `delivery_status='persisted_with_summary'` OR `packet_incomplete_required_classes` OR non-empty `truncation_summary.dropped_layers`, reduce `seed_nodes` and retry; use `governing_summary` inline; `get_records(record_ids=[...])` for known-id sets; `get_persisted_packet_slice` for structured persisted-packet recovery.
+- **Whole-class Mystery Reserve firewall load** via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` — every M record body is needed at Phase 4 to (a) hard-reject any seed whose `M_resolution_claims` resolves a `forbidden`-status M, and (b) validate every `M_resolution_claims[].resolution_safety_per_M[m_id]` against the M's actual `future_resolution_safety` field. Whole-class enumeration is authorized for skills "whose firewall is class-bounded" per FOUNDATIONS §Tooling Recommendation.
+- **Whole-class Invariant audit load** via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)` — every INV record body is needed at Phase 4 to audit each candidate SLT's `fact_effects` and `relationship_effects` against every INV's `break_conditions`.
+
+### Mandatory Current Storylet Pool — always loaded at Pre-flight
+
+A conceptual aggregate assembled by reading `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-*.yaml` filtered by the storylet's `visibility` block, scoped to what the new batch must see for dedup and coverage diagnosis:
+
+- All SLT records with `visibility.scope: global_author_pool` (always loaded — they apply to every branch).
+- All SLT records with `visibility.scope: branch_prefix_scoped` whose `visibility.visible_branch_path_prefix` is a prefix of the **longest active branch_path** (the same scoping rule the runtime page-cycle uses for selection).
+- All SLT records with `visibility.scope: branch_scoped` whose `provenance.created_at_page` is in the **longest active branch_path**.
+
+Sibling-branch SLT records are NOT loaded — cross-branch dedup would homogenize divergent branches at authoring time and silently corrupt branch isolation. The aggregate drives Phase 1 coverage diagnosis (over- and under-represented shapes), Phase 4 dedup (`hard_preconds + tone_tags + theme_tags + shape` similarity threshold), and Phase 5 diversity audit (current pool composition feeds the target-distribution arithmetic).
+
+If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first. If `worlds/<world-slug>/stories/<story-slug>/` is missing, abort and instruct the user to run `branching-story-bootstrap` first, except for the documented `parent_skill_invocation: true` + `mode=seed` + `focus_area=bootstrap_mix` path where bootstrap is currently constructing that bundle in memory. If `mode=audit`, require `source_audit_path` and validate every resolved RSP card before Phase 1. If `mode=jit` without `parent_skill_invocation: true` and a page-cycle caller context, abort with "jit mode is available only as a branching-story-page-cycle Phase 4 sub-routine."
+
+Direct `Read` of `worlds/<world-slug>/_source/<world-subdir>/` is redirected to MCP retrieval by Hook 2 — do not bulk-read world canon. Direct `Read` of `worlds/<world-slug>/stories/<story-slug>/_source/<story-subdir>/` is the correct surface (Hook 2's match pattern is `worlds/<slug>/_source/...` which does NOT match the nested story bundle).
+
+## Pre-flight Check
+
+Run before Phase 1; abort if any precondition fails.
+
+- Load `docs/FOUNDATIONS.md` into working context.
+- Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`); resolve `worlds/<world-slug>/`. Abort if missing — instruct the user to run `create-base-world` first.
+- Validate `story_slug` is kebab-case (`[a-z0-9-]+`); resolve `worlds/<world-slug>/stories/<story-slug>/`. Abort if missing — instruct the user to run `branching-story-bootstrap` first, except when `parent_skill_invocation: true`, `mode=seed`, and `focus_area=bootstrap_mix` are all present.
+- Resolve `mode`: explicit input override → inferred (`source_audit_path` → audit; `focus_area` → focus; otherwise → seed).
+- If `mode=audit`: require `source_audit_path`. Resolve it relative to the repo root unless absolute. It MUST be either:
+  - a single `worlds/<world-slug>/stories/<story-slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` file, or
+  - the containing `worlds/<world-slug>/stories/<story-slug>/audits/SAU-NNNN/remediation-storylet-proposals/` directory, in which case consume every `RSP-*.md` card in deterministic path order.
+- If `mode=audit` and `source_audit_path` is missing, nonexistent, outside the selected story bundle's `audits/SAU-NNNN/remediation-storylet-proposals/` tree, not an RSP file/directory, or resolves to zero RSP cards, abort with the specific path reason. Do not allocate `SLB` or `SLT` ids on those failures.
+- For each resolved RSP card, parse YAML frontmatter and validate the consumer schema mirrored by `branching-story-health-audit/templates/remediation-storylet-proposal-card.md`: `rsp_id`, `audit_id`, `story_id`, non-empty `finding_ids`, at least one non-null targeting field among `target_obligation | target_thread | target_consequence | target_relationship`, `proposed_shape`, `proposed_intensity`, `target_branch`, `proposed_visibility.scope`, `proposed_visibility.visible_branch_path_prefix`, `sketch.hard_preconds`, `sketch.fact_effects`, `sketch.pays_off_obligations`, `sketch.opens_obligations`, `sketch.addresses_consequences`, `sketch.choice_templates`, and `rationale`. Abort if any card is malformed.
+- Bind the validated RSP card context into the run as `audit_cards[]`. Phase 1 reads targeting fields, Phase 2 reads `sketch` and `rationale`, Phase 3 reads `proposed_visibility` and provenance ids, and Phase 5 checks RSP visibility-match.
+- If `mode=jit`: require `parent_skill_invocation: true`, `target_pool_size=1`, `created_at_page=PG-NNNN`, and `caller_state_snapshot`. The caller must be `branching-story-page-cycle` Phase 4 and must supply the page-tick context: the allocated/next SLT id, the current branch's state snapshot, open OBLs, pending CNSQs, active THRs, cast_present, recent branch prose context, whole-class M/INV loads, and loaded content_policy. This path is no-write and returns exactly one approved SLT plus validation verdicts to the parent; it does not create an SLB manifest or edit INDEX.md.
+- If `mode=focus` and `focus_area` is absent: abort and instruct the user to supply a `focus_area` from the documented enum.
+- If `parent_skill_invocation: true` and `mode=seed`: require `focus_area=bootstrap_mix`. The parent must provide bootstrap Phases 1-5 in-memory context: normalized premise/designing principle, bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and loaded content_policy. This path is no-write and returns approved SLTs to the parent; it does not create an SLB manifest or edit INDEX.md.
+- If `parent_skill_invocation: true` with any mode other than `seed` or `jit`, abort; no other sub-routine shapes are documented.
+- For direct invocation only, allocate `SLB-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLB', story_slug=<story_slug>)`.
+- For direct invocation only, reserve next `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class='SLT', story_slug=<story_slug>)` — this is the starting point; subsequent allocations within the run advance from this base sequentially as candidates pass Phase 4. The runtime page-cycle's JIT-generated SLT records share this namespace, so a re-scan at Phase 7 confirms no collision before write.
+- Read `worlds/<world-slug>/WORLD_KERNEL.md`, `worlds/<world-slug>/ONTOLOGY.md`, and `worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` directly.
+- Determine the **longest active branch_path** by scanning `_source/pages/PG-*.yaml` for the longest `branch_path` array among pages whose `branch_terminal: false`. Ties broken by most-recent `created_at`.
+- Assemble the Mandatory Current Storylet Pool aggregate (per §World-State Prerequisites scoping rule).
+- Direct Read of all `_source/obligations/OBL-*.yaml` filtered to `status: open`.
+- Direct Read of all `_source/threads/THR-*.yaml` filtered to `status` ∈ {`active`, `pressured`, `critical`, `dormant`}.
+- Direct Read of last ~10 `pages-prose/PG-NNNN.md` files along the longest active branch_path (in branch_path order; most-recent last).
+- Resolve premise-relevant entities to `entity:<slug>` ids via `mcp__worldloom__find_named_entities(names)` BEFORE the context-packet call. Names sourced from `STORY_KERNEL.cast_bind_list` (each STENT's `world_ent_id`), recent page-history entity mentions, and the active story period.
+- Load premise-bounded world-canon retrieval via `mcp__worldloom__get_context_packet(world_slug, task_type='storylet_pool_authoring', seed_nodes=[<resolved ids>], token_budget=18000)`. Apply the packet-too-large fallback per §World-State Prerequisites if the response signals overflow.
+- Load whole-class Mystery Reserve firewall: `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)`.
+- Load whole-class Invariant audit: `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`.
+- Confirm content_policy block (NC-21 verbatim text from `templates/content-policy.txt`) is loaded for downstream prompt assembly. Without it, Phase 3 cannot legitimately render storylet content. This is the FIRST condition of the HARD-GATE.
+
+For `parent_skill_invocation: true`, skip direct-invocation-only file-system steps that the parent already owns.
+
+- Bootstrap seed sub-routine: skip SLB allocation, current-pool load, longest-branch page-history load, and `STORY_KERNEL.md` read. Use the parent-supplied bootstrap context instead. Bootstrap owns SLT id assignment because this is a new story bundle; SLT records returned by this sub-routine must carry `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`.
+- Page-cycle JIT sub-routine: skip SLB allocation and batch-manifest setup, but use the parent-supplied page-cycle context for current pool, branch-local state, recent branch prose, whole-class M/INV loads, and content_policy. Page-cycle owns the Phase 11 write transaction; the returned SLT must carry `provenance.origin: runtime_jit`, `provenance.created_at_page: <created_at_page>`, and `visibility.scope: branch_scoped`.

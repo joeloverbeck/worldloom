@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["id", "file_class", "order", "heading", "heading_level", "body", "extensions", "touched_by_cf"],
   "properties": {
+    "record_kind": { "type": "string", "const": "section" },
     "id": {
       "type": "string",
       "pattern": "^SEC-(ELF|INS|MTS|GEO|ECR|PAS|TML)-[0-9]{3}$"

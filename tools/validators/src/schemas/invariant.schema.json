@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["id", "category", "title", "statement", "rationale", "examples", "non_examples", "break_conditions", "revision_difficulty", "extensions"],
   "properties": {
+    "record_kind": { "type": "string", "const": "invariant" },
     "id": { "type": "string", "pattern": "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$" },
     "category": { "type": "string", "enum": ["ontological", "causal", "distribution", "social", "aesthetic_thematic"] },
     "title": { "type": "string", "minLength": 1 },

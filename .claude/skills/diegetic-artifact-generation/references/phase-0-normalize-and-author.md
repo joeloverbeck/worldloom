@@ -71,7 +71,7 @@ If `character_path` NOT provided: generate each author field from brief + retrie
 
 **Rule (from proposal Phase 0)**: No omniscient artifact authors unless the artifact itself is a divine or impossible object and the world permits that. If the brief specifies an impossible-object artifact, verify permission against the relevant INV records and `WORLD_KERNEL.md` — if the world's genre contract forbids divine voice, abort with "world does not permit impossible-object authorship; revise the artifact_type or the author."
 
-**Slug derivation** (if not yet done at Pre-flight): kebab-case the artifact title. Re-run the collision check.
+**Slug derivation** (if not yet done at Pre-flight): kebab-case the artifact title (lowercase, punctuation-stripped). **Non-ASCII transliteration**: when the artifact title contains non-ASCII characters (ñ, é, ü, ç, ø, ß, à, ô, ï, ž, etc.), transliterate to ASCII equivalents (ñ→n, é→e, ü→u, ç→c, ø→o, ß→ss, à→a, ô→o, ï→i, ž→z) — this aligns with file-system convention (case-insensitive filesystems on macOS / Windows can mishandle composed Unicode) and with existing-artifact precedent in worlds whose titles use diacritics. The canonical algorithm is Unicode normalization NFKD followed by ASCII filtering (in JS: `title.normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^\x00-\x7F]/g, '')`); for ad-hoc one-character cases, per-glyph substitution is sufficient. Re-run the collision check.
 
 **FOUNDATIONS cross-ref**: Tooling Recommendation (Phase 0 is the binding step — every subsequent phase depends on author + artifact being bound to world state).
 

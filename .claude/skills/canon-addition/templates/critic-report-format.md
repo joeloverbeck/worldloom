@@ -26,9 +26,14 @@ Word budget: each report should fit under 600 words. Conciseness is a feature.
 
 ## Required Updates to Owned Files (required)
 
-<!-- Concrete prose changes the proposal forces in the file(s) this critic
-     owns. List per-file. The format used here is what the main agent will
-     translate into Phase 12a Required Update List entries and Phase 13a patches. -->
+<!-- Concrete prose changes the proposal forces in the file(s) or atomic-source
+     record(s) this critic owns. Post-SPEC-13, "Owned Files" includes both the
+     root-level primary-authored files (`WORLD_KERNEL.md`, `ONTOLOGY.md`) and
+     atomic-record classes under `_source/<subdir>/` (CF / CH / INV / M / OQ /
+     SEC-<PREFIX>-NNN). List per-file or per-atomic-record-class (e.g., "CF-0001",
+     "SEC-INS-NNN extension", "M-NNNN firewall annotation"). The format used here
+     is what the main agent will translate into Phase 12a Required Update List
+     entries and Phase 13a patches. -->
 
 ## Critical Risks (required)
 
@@ -100,8 +105,9 @@ should omit them. They capture the role's distinctive contribution.
 
 #### Per-Cluster Signatures
 
-<!-- One bullet per cluster present in EVERYDAY_LIFE.md. Note where the
-     signature is weak or absent and explain. -->
+<!-- One bullet per cluster present in `_source/everyday-life/SEC-ELF-NNN.yaml`
+     (the post-SPEC-13 atomic-source equivalent of the legacy `EVERYDAY_LIFE.md`
+     file). Note where the signature is weak or absent and explain. -->
 
 #### Hero-Drift Risk
 

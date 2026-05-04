@@ -123,6 +123,8 @@ Both validate paths route through the same `validate_patch_plan` handler and ret
 
 When using the submit CLI path, persist the envelope JSON to `/tmp/<plan-id>.json` and the signed token to `/tmp/<plan-id>.token` (single line, base64) before invoking the CLI. The validate CLI requires only the envelope JSON.
 
+Invoke both patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+
 ---
 
 ## 6. Common failure-mode response codes
@@ -156,6 +158,7 @@ The patch engine surfaces these failure modes; map each to the appropriate skill
 | `freshness_audit.pre_call_index_was_stale: true` (retrieval-time) | Retrieval detected a stale explicit world index, ran `world-index sync` in-process, retried once, and recovered transparently. `freshness_audit.drifted_files_synced[]` names the stale paths that triggered the sync. | Record the audit field if it matters for diagnostics; continue the retrieval flow. No manual retry is required. |
 | `stale_index` (retrieval-time persistent) | Returned by `mcp__worldloom__get_context_packet`, `get_record`, `find_named_entities`, and other retrieval tools only when auto-sync cannot run or one retry still leaves the world stale. `details.drifted_files[]` (or `divergent_files[]`) names the stale paths, and `details.recovery_attempted` / `details.recovery_outcome` may describe the failed recovery. | Treat as a diagnostic blocker: inspect the paths, run `node tools/world-index/dist/src/cli.js sync <world-slug>` manually if appropriate, and retry only after the underlying index issue is understood. Submit-time `index_stale` remains governed by the row above. |
 | `validator_failed` | A pre-apply validator (Rule 1-7 + structural) returned a failing verdict. `detail.verdicts[].location.file` names the offending file. | If the cited file is one of the genesis records this plan is creating (per `expected_id_allocations`), the schema violation is in this skill's output — fix and resubmit. **If the cited file is unrelated existing world state, pause and escalate to the user — this skill must not silently modify other canon-adjacent files.** |
+| `Index missing for world '<slug>'` | The validate/submit CLI was likely invoked from the wrong cwd. The CLI/engine path derives `worldRoot` from `process.cwd()` before opening `worlds/<slug>/_index/world.db`. | Re-invoke from the project root or active git worktree root. If it still fails from that cwd, rebuild or inspect the world index. |
 
 After any user-authorized direct-`Edit` to a hybrid-file frontmatter under `worlds/<slug>/characters/`, `diegetic-artifacts/`, or `adjudications/` (the surfaces under `record_schema_compliance` validator scope), run `node tools/world-index/dist/src/cli.js sync <world-slug>` before resubmitting — the validator runs against the indexed world state, not against on-disk content. INDEX.md edits do not require sync (not under validator scope).
 

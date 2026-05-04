@@ -6,6 +6,7 @@ import { TASK_TYPES } from "../../src/ranking/profiles";
 import { ID_CLASSES } from "../../src/server";
 import { MCP_TOOL_NAMES } from "../../src/tool-names";
 import { describeCapabilities, type ToolCapability } from "../../src/tools/describe-capabilities";
+import { SUPPORTED_RECORD_SCHEMA_NODE_TYPES } from "../../src/tools/get-record-schema";
 import { SUPPORTED_LIST_RECORD_TYPES } from "../../src/tools/list-records";
 
 const CAPABILITIES: ToolCapability[] = [
@@ -23,6 +24,11 @@ const CAPABILITIES: ToolCapability[] = [
     name: MCP_TOOL_NAMES.list_records,
     description: "Return all records of a supported atomic or hybrid record type.",
     input_schema_enums: { record_type: SUPPORTED_LIST_RECORD_TYPES }
+  },
+  {
+    name: MCP_TOOL_NAMES.get_record_schema,
+    description: "Return the validator JSON Schema and referenced schemas for a record node type.",
+    input_schema_enums: { node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }
   },
   {
     name: MCP_TOOL_NAMES.describe_capabilities,
@@ -70,6 +76,15 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   );
   assert.ok(
     byName.get(MCP_TOOL_NAMES.list_records)?.input_schema_enums.record_type?.includes("story_fact_record")
+  );
+  assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums.node_type, [
+    ...SUPPORTED_RECORD_SCHEMA_NODE_TYPES
+  ]);
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums.node_type?.includes("storylet_record")
+  );
+  assert.ok(
+    byName.get(MCP_TOOL_NAMES.get_record_schema)?.input_schema_enums.node_type?.includes("story_fact_record")
   );
   assert.ok(byName.has(MCP_TOOL_NAMES.describe_capabilities));
 });

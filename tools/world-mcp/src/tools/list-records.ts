@@ -41,7 +41,12 @@ export interface ListRecordsArgs {
   story_slug?: string;
   fields?: string[];
   include_full_body?: boolean;
+  filters?: ListRecordFilters;
 }
+
+export type ListRecordFilterScalar = string | number | boolean;
+export type ListRecordFilterValue = ListRecordFilterScalar | ListRecordFilterScalar[];
+export type ListRecordFilters = Record<string, ListRecordFilterValue>;
 
 export interface ListedRecord extends Record<string, unknown> {
   record_id: string;
@@ -73,6 +78,14 @@ export interface ListRecordsResponse {
   total: number;
   truncated: false;
 }
+
+const HYBRID_METADATA_FIELD_KEYS = [
+  "record_id",
+  "record_kind",
+  "title",
+  "content_hash",
+  "file_path"
+] as const;
 
 const RECORD_TYPE_TO_NODE_TYPE: Record<ListRecordType, NodeType> = {
   canon_fact: "canon_fact_record",
@@ -147,6 +160,111 @@ function projectRecord(record: ListedRecord, fields: string[] | undefined): List
   return projected;
 }
 
+function hasProjectionFields(fields: string[] | undefined): fields is string[] {
+  return fields !== undefined && fields.length > 0;
+}
+
+function unknownHybridProjectionKeys(fields: string[] | undefined): string[] {
+  if (!hasProjectionFields(fields)) {
+    return [];
+  }
+
+  return fields.filter(
+    (field) => !(HYBRID_METADATA_FIELD_KEYS as readonly string[]).includes(field)
+  );
+}
+
+function hasFilters(filters: ListRecordFilters | undefined): filters is ListRecordFilters {
+  return filters !== undefined && Object.keys(filters).length > 0;
+}
+
+function valueAtDottedPath(record: Record<string, unknown>, path: string): unknown {
+  let current: unknown = record;
+  for (const segment of path.split(".")) {
+    if (
+      current === null ||
+      typeof current !== "object" ||
+      !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return current;
+}
+
+function isFilterScalar(value: unknown): value is ListRecordFilterScalar {
+  return (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  );
+}
+
+function scalarMatchesFilterValue(
+  recordValue: ListRecordFilterScalar,
+  filterValue: ListRecordFilterValue
+): boolean {
+  const candidates = Array.isArray(filterValue) ? filterValue : [filterValue];
+  return candidates.includes(recordValue);
+}
+
+function matchesFilterValue(recordValue: unknown, filterValue: ListRecordFilterValue): boolean {
+  if (Array.isArray(recordValue)) {
+    return recordValue.some(
+      (item) => isFilterScalar(item) && scalarMatchesFilterValue(item, filterValue)
+    );
+  }
+
+  return isFilterScalar(recordValue) && scalarMatchesFilterValue(recordValue, filterValue);
+}
+
+function matchesFilters(record: Record<string, unknown>, filters: ListRecordFilters): boolean {
+  return Object.entries(filters).every(([path, filterValue]) =>
+    matchesFilterValue(valueAtDottedPath(record, path), filterValue)
+  );
+}
+
+function unknownFilterKeys(
+  parsedRecords: Array<Record<string, unknown>>,
+  filters: ListRecordFilters | undefined
+): string[] {
+  if (!hasFilters(filters) || parsedRecords.length === 0) {
+    return [];
+  }
+
+  return Object.keys(filters).filter((path) =>
+    parsedRecords.every((record) => valueAtDottedPath(record, path) === undefined)
+  );
+}
+
+function unknownProjectionKeys(
+  recordType: ListRecordType,
+  projectionSources: ListedRecord[],
+  fields: string[] | undefined,
+  includeFullBody: boolean | undefined
+): string[] {
+  if (includeFullBody === true || !hasProjectionFields(fields)) {
+    return [];
+  }
+
+  const nodeType = RECORD_TYPE_TO_NODE_TYPE[recordType];
+  if (getHybridKind(nodeType) !== null) {
+    return unknownHybridProjectionKeys(fields);
+  }
+
+  if (projectionSources.length === 0) {
+    return [];
+  }
+
+  return fields.filter((field) =>
+    projectionSources.every(
+      (record) => !Object.prototype.hasOwnProperty.call(record, field)
+    )
+  );
+}
+
 function withFullBody(row: RecordRow, record: ParsedRecord): ListedFullBodyRecord {
   return {
     record_id: displayRecordId(row),
@@ -195,6 +313,18 @@ function withHybridFullBody(
   };
 }
 
+function hybridFilterSource(
+  recordKind: HybridRecordKind,
+  parts: HybridFileParts
+): Record<string, unknown> {
+  return {
+    record_kind: recordKind,
+    ...parts.frontmatter,
+    frontmatter: parts.frontmatter,
+    body_sections: parts.body_sections
+  };
+}
+
 async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsResponse | McpError> {
   if (!isSupportedRecordType(args.record_type)) {
     return createMcpError("invalid_input", `record_type '${args.record_type}' is not supported.`, {
@@ -240,7 +370,11 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
       )
       .all(...params) as RecordRow[];
 
-    const records: Array<ListedRecord | ListedFullBodyRecord> = [];
+    const parsedRows: Array<{
+      filterSource: Record<string, unknown>;
+      projectionSource: ListedRecord;
+      output: ListedRecord | ListedFullBodyRecord;
+    }> = [];
     for (const row of rows) {
       const hybridKind = getHybridKind(row.node_type);
       if (hybridKind !== null) {
@@ -248,23 +382,72 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
         if (isMcpError(parsed)) {
           return parsed;
         }
-        records.push(
-          args.include_full_body === true
-            ? withHybridFullBody(row, hybridKind, parsed)
-            : projectRecord(withHybridRecord(row, hybridKind, parsed), args.fields)
-        );
+        const projectionSource = withHybridRecord(row, hybridKind, parsed);
+        parsedRows.push({
+          filterSource: hybridFilterSource(hybridKind, parsed),
+          projectionSource,
+          output:
+            args.include_full_body === true
+              ? withHybridFullBody(row, hybridKind, parsed)
+              : projectionSource
+        });
       } else {
         const parsed = parseRecordBody(row);
         if (isMcpError(parsed)) {
           return parsed;
         }
-        records.push(
-          args.include_full_body === true
-            ? withFullBody(row, parsed)
-            : projectRecord(withRecordId(row, parsed), args.fields)
-        );
+        const projectionSource = withRecordId(row, parsed);
+        parsedRows.push({
+          filterSource: parsed,
+          projectionSource,
+          output:
+            args.include_full_body === true
+              ? withFullBody(row, parsed)
+              : projectionSource
+        });
       }
     }
+
+    const unknownKeys = unknownFilterKeys(
+      parsedRows.map((entry) => entry.filterSource),
+      args.filters
+    );
+    if (unknownKeys.length > 0) {
+      return createMcpError("invalid_input", `Unknown list_records filter key '${unknownKeys[0]}'.`, {
+        field: "filters",
+        unknown_filter_keys: unknownKeys,
+        record_type: args.record_type
+      });
+    }
+
+    const unknownFieldKeys = unknownProjectionKeys(
+      args.record_type,
+      parsedRows.map((entry) => entry.projectionSource),
+      args.fields,
+      args.include_full_body
+    );
+    if (unknownFieldKeys.length > 0) {
+      return createMcpError("invalid_input", `Unknown list_records fields key '${unknownFieldKeys[0]}'.`, {
+        field: "fields",
+        unknown_projection_keys: unknownFieldKeys,
+        record_type: args.record_type
+      });
+    }
+
+    const filters = hasFilters(args.filters) ? args.filters : undefined;
+    const records = filters !== undefined
+      ? parsedRows
+          .filter((entry) => matchesFilters(entry.filterSource, filters))
+          .map((entry) =>
+            args.include_full_body === true
+              ? entry.output
+              : projectRecord(entry.output as ListedRecord, args.fields)
+          )
+      : parsedRows.map((entry) =>
+          args.include_full_body === true
+            ? entry.output
+            : projectRecord(entry.output as ListedRecord, args.fields)
+        );
 
     return {
       records,

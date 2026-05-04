@@ -34,7 +34,7 @@ This fallback covers the three cases the contract surfaces:
 
 - the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (expected for broad seeds in mature worlds, and recoverable through targeted retrieval);
 - the packet returns `packet_incomplete_required_classes` because even `local_authority` cannot fit, or because the governing-context full bodies reserved for Phase 7a/7b cannot fit under the token or effective harness ceiling;
-- the packet returns `task_header.delivery_status === 'persisted_with_summary'` because the full packet exceeded the MCP transport inline limit and was package-persisted (now rare at the default budget; it usually signals an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling).
+- the packet returns `task_header.delivery_status === 'persisted_with_summary'` because the full packet exceeded the MCP transport inline limit and was package-persisted (common at the default budget for moderately-broad seed sets in mature worlds — does not necessarily signal an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling; the fallback path of `governing_summary` + targeted `get_records` is the documented happy-path response when this fires, not an exceptional branch).
 
 In any case, do NOT silently proceed without world-state load. Apply this three-step fallback in order:
 
@@ -129,4 +129,4 @@ Enforced by Pre-flight (canonical abort messages live in the thin SKILL.md):
 - `character_path` provided but outside `worlds/<world-slug>/characters/` → cross-world author references are rejected.
 - `character_path` provided but target dossier does not exist → abort naming the path.
 - `worlds/<world-slug>/diegetic-artifacts/<da-slug>.md` already exists → slug collision; this skill never overwrites an artifact (the engine's `file_already_exists` check is the second backstop).
-- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; rebuild via `world-index build` before proceeding).
+- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; refresh via `world-index sync` before proceeding, or `world-index build` for a full rebuild if the index is corrupt rather than merely stale).

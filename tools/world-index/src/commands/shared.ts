@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { existsSync, readFileSync, readdirSync, unlinkSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, readdirSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import type { Root } from "mdast";
 
@@ -42,6 +42,7 @@ import {
   parseAtomicSourceFile,
   parseStoryBundleSourceFile
 } from "../parse/atomic";
+import type { AtomicSkippedRecord } from "../parse/atomic";
 import type { AnchorChecksumRow, EdgeRow, NodeRow, ValidationResultRow } from "../schema/types";
 
 export const ENTITY_SOURCE_NODE_TYPES = new Set([
@@ -86,6 +87,7 @@ export interface ParsedFileResult {
   nodes: NodeRow[];
   edges: EdgeRow[];
   validationResults: ValidationResultRow[];
+  skippedRecords: AtomicSkippedRecord[];
   yamlBlockCount: number;
   yamlFailureCount: number;
   tree: Root;
@@ -95,6 +97,12 @@ export interface BuildLikeResult {
   exitCode: number;
   changedNodeCount: number;
   totalNodeCount: number;
+  skippedRecordCount: number;
+  skippedRecordLogPath: string | null;
+}
+
+export interface IndexCommandOptions {
+  quiet?: boolean;
 }
 
 export function resolveWorldDirectory(worldRoot: string, worldSlug: string): string {
@@ -149,6 +157,7 @@ export function parseWorldFile(
     nodes: [...yamlNodes, ...proseNodes],
     edges,
     validationResults: [...yamlIssues, ...normalizedSemanticIssues],
+    skippedRecords: [],
     yamlBlockCount: yamlNodes.length,
     yamlFailureCount: yamlIssues.filter((issue) => issue.code === "yaml_syntax_error").length,
     tree
@@ -285,66 +294,78 @@ export function openExistingWorldIndex(
   }
 }
 
-export function buildWorldIndex(worldRoot: string, worldSlug: string): BuildLikeResult {
+export function buildWorldIndex(
+  worldRoot: string,
+  worldSlug: string,
+  options: IndexCommandOptions = {}
+): BuildLikeResult {
   if (!worldExists(worldRoot, worldSlug)) {
     console.error(`Unknown world slug '${worldSlug}'.`);
-    return { exitCode: 2, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(2);
   }
 
   const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
   if (!hasAtomicSourceRecords(worldDirectory)) {
     console.error(missingAtomicSourceMessage(worldSlug));
-    return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(3);
   }
   const missingMandatory = findMissingMandatoryFiles(worldDirectory);
   if (missingMandatory.length > 0) {
     console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
-    return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(3);
   }
 
   const dbPath = databasePathForWorld(worldRoot, worldSlug);
   if (existsSync(dbPath)) {
     deleteFile(dbPath);
   }
+  const skippedRecordLogPath = skippedRecordLogPathForWorld(worldRoot, worldSlug);
+  if (existsSync(skippedRecordLogPath)) {
+    deleteFile(skippedRecordLogPath);
+  }
 
   const db = openIndex(worldRoot, worldSlug);
 
   try {
-    return reindexAllFiles(db, worldRoot, worldSlug, true);
+    return reindexAllFiles(db, worldRoot, worldSlug, true, options);
   } finally {
     db.close();
   }
 }
 
-export function syncWorldIndex(worldRoot: string, worldSlug: string): BuildLikeResult {
+export function syncWorldIndex(
+  worldRoot: string,
+  worldSlug: string,
+  options: IndexCommandOptions = {}
+): BuildLikeResult {
   if (!worldExists(worldRoot, worldSlug)) {
     console.error(`Unknown world slug '${worldSlug}'.`);
-    return { exitCode: 2, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(2);
   }
 
   if (!hasIndex(worldRoot, worldSlug)) {
     console.error(`Index missing for '${worldSlug}'. Run 'world-index build ${worldSlug}' first.`);
-    return { exitCode: 1, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(1);
   }
 
   const opened = openExistingWorldIndex(worldRoot, worldSlug);
   if (opened instanceof SchemaVersionMismatchError) {
     console.error(opened.message);
-    return { exitCode: 1, changedNodeCount: 0, totalNodeCount: 0 };
+    return emptyBuildResult(1);
   }
 
   try {
     const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
     if (!hasAtomicSourceRecords(worldDirectory)) {
       console.error(missingAtomicSourceMessage(worldSlug));
-      return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+      return emptyBuildResult(3);
     }
     const missingMandatory = findMissingMandatoryFiles(worldDirectory);
     if (missingMandatory.length > 0) {
       console.error(`Missing mandatory world file '${missingMandatory[0]}'.`);
-      return { exitCode: 3, changedNodeCount: 0, totalNodeCount: 0 };
+      return emptyBuildResult(3);
     }
-    return reindexAllFiles(opened, worldRoot, worldSlug, false);
+    return reindexAllFiles(opened, worldRoot, worldSlug, false, options);
   } finally {
     opened.close();
   }
@@ -354,7 +375,8 @@ function reindexAllFiles(
   db: Database.Database,
   worldRoot: string,
   worldSlug: string,
-  fullBuild: boolean
+  fullBuild: boolean,
+  options: IndexCommandOptions
 ): BuildLikeResult {
   const worldDirectory = resolveWorldDirectory(worldRoot, worldSlug);
   const { indexable, unexpected } = enumerate(worldDirectory);
@@ -374,6 +396,8 @@ function reindexAllFiles(
   let changedNodeCount = 0;
   let yamlBlockCount = 0;
   let yamlFailureCount = 0;
+  let skippedRecordCount = 0;
+  const skippedRecordLogPath = skippedRecordLogPathForWorld(worldRoot, worldSlug);
 
   clearEntityState(db);
 
@@ -384,6 +408,7 @@ function reindexAllFiles(
 
     yamlBlockCount += parsed.yamlBlockCount;
     yamlFailureCount += parsed.yamlFailureCount;
+    skippedRecordCount += recordSkippedRecords(worldRoot, worldSlug, parsed.skippedRecords, options);
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
@@ -421,6 +446,7 @@ function reindexAllFiles(
 
     yamlBlockCount += parsed.yamlBlockCount;
     yamlFailureCount += parsed.yamlFailureCount;
+    skippedRecordCount += recordSkippedRecords(worldRoot, worldSlug, parsed.skippedRecords, options);
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
@@ -441,6 +467,7 @@ function reindexAllFiles(
 
     yamlBlockCount += parsed.yamlBlockCount;
     yamlFailureCount += parsed.yamlFailureCount;
+    skippedRecordCount += recordSkippedRecords(worldRoot, worldSlug, parsed.skippedRecords, options);
     indexedBefore.delete(relativeFilePath);
 
     if (!shouldProcess) {
@@ -499,10 +526,67 @@ function reindexAllFiles(
   }
 
   if (yamlBlockCount > 0 && yamlFailureCount / yamlBlockCount > 0.1) {
-    return { exitCode: 4, changedNodeCount, totalNodeCount };
+    return { exitCode: 4, changedNodeCount, totalNodeCount, skippedRecordCount, skippedRecordLogPath };
   }
 
-  return { exitCode: 0, changedNodeCount, totalNodeCount };
+  return { exitCode: 0, changedNodeCount, totalNodeCount, skippedRecordCount, skippedRecordLogPath };
+}
+
+function emptyBuildResult(exitCode: number): BuildLikeResult {
+  return {
+    exitCode,
+    changedNodeCount: 0,
+    totalNodeCount: 0,
+    skippedRecordCount: 0,
+    skippedRecordLogPath: null
+  };
+}
+
+function skippedRecordLogPathForWorld(worldRoot: string, worldSlug: string): string {
+  return path.join(resolveWorldDirectory(worldRoot, worldSlug), "_index", "world.db.skipped_records.log");
+}
+
+function recordSkippedRecords(
+  worldRoot: string,
+  worldSlug: string,
+  skippedRecords: AtomicSkippedRecord[],
+  options: IndexCommandOptions
+): number {
+  if (skippedRecords.length === 0) {
+    return 0;
+  }
+
+  const logPath = skippedRecordLogPathForWorld(worldRoot, worldSlug);
+  for (const skipped of skippedRecords) {
+    appendFileSync(logPath, `${formatSkippedRecordLogLine(skipped)}\n`, "utf8");
+    if (!options.quiet) {
+      process.stdout.write(`${formatSkippedRecordWarning(skipped, logPath)}\n`);
+    }
+  }
+  return skippedRecords.length;
+}
+
+function formatSkippedRecordLogLine(skipped: AtomicSkippedRecord): string {
+  return [
+    new Date().toISOString(),
+    skipped.relativeFilePath,
+    skipped.nodeType,
+    skipped.extractedId ?? "-",
+    skipped.reason,
+    skipped.expectedPattern
+  ].join("\t");
+}
+
+function formatSkippedRecordWarning(skipped: AtomicSkippedRecord, logPath: string): string {
+  const idLabel = skipped.extractedId === null ? "<missing>" : skipped.extractedId;
+  return [
+    `Warning: skipped schema-failed record ${skipped.relativeFilePath}`,
+    `node_type=${skipped.nodeType}`,
+    `id=${idLabel}`,
+    `expected=${skipped.expectedPattern}`,
+    `reason=${skipped.reason}`,
+    `log=${logPath}`
+  ].join(" ");
 }
 
 function buildAnchorRows(nodes: NodeRow[]): AnchorChecksumRow[] {

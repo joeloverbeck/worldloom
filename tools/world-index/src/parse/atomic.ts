@@ -42,41 +42,67 @@ const FILE_CLASS_TO_LOGICAL_FILE = new Map<string, AtomicLogicalWorldFile>([
   ["TIMELINE", "TIMELINE.md"]
 ]);
 
-const ATOMIC_DIRS = new Map<string, { nodeType: NodeType; idField: string }>([
-  ["canon", { nodeType: "canon_fact_record", idField: "id" }],
-  ["change-log", { nodeType: "change_log_entry", idField: "change_id" }],
-  ["invariants", { nodeType: "invariant", idField: "id" }],
-  ["mystery-reserve", { nodeType: "mystery_reserve_entry", idField: "id" }],
-  ["open-questions", { nodeType: "open_question_entry", idField: "id" }],
-  ["entities", { nodeType: "named_entity", idField: "id" }],
-  ["everyday-life", { nodeType: "section", idField: "id" }],
-  ["institutions", { nodeType: "section", idField: "id" }],
-  ["magic-or-tech-systems", { nodeType: "section", idField: "id" }],
-  ["geography", { nodeType: "section", idField: "id" }],
-  ["economy-and-resources", { nodeType: "section", idField: "id" }],
-  ["peoples-and-species", { nodeType: "section", idField: "id" }],
-  ["timeline", { nodeType: "section", idField: "id" }]
+type AtomicRecordSpec = {
+  nodeType: NodeType;
+  idField: string;
+  idPattern: RegExp;
+  idPatternSource: string;
+};
+
+const ATOMIC_DIRS = new Map<string, AtomicRecordSpec>([
+  ["canon", recordSpec("canon_fact_record", "id", "^CF-[0-9]{4}$")],
+  ["change-log", recordSpec("change_log_entry", "change_id", "^CH-[0-9]{4}$")],
+  ["invariants", recordSpec("invariant", "id", "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$")],
+  ["mystery-reserve", recordSpec("mystery_reserve_entry", "id", "^M-[0-9]+$")],
+  ["open-questions", recordSpec("open_question_entry", "id", "^OQ-[0-9]{4}$")],
+  ["entities", recordSpec("named_entity", "id", "^ENT-[0-9]{4}$")],
+  ["everyday-life", recordSpec("section", "id", "^SEC-ELF-[0-9]{3}$")],
+  ["institutions", recordSpec("section", "id", "^SEC-INS-[0-9]{3}$")],
+  ["magic-or-tech-systems", recordSpec("section", "id", "^SEC-MTS-[0-9]{3}$")],
+  ["geography", recordSpec("section", "id", "^SEC-GEO-[0-9]{3}$")],
+  ["economy-and-resources", recordSpec("section", "id", "^SEC-ECR-[0-9]{3}$")],
+  ["peoples-and-species", recordSpec("section", "id", "^SEC-PAS-[0-9]{3}$")],
+  ["timeline", recordSpec("section", "id", "^SEC-TML-[0-9]{3}$")]
 ]);
-const STORY_DIRS = new Map<string, { nodeType: NodeType; idField: string }>([
-  ["entities", { nodeType: "story_entity_record", idField: "id" }],
-  ["facts", { nodeType: "story_fact_record", idField: "id" }],
-  ["events", { nodeType: "story_event_record", idField: "id" }],
-  ["obligations", { nodeType: "obligation_record", idField: "id" }],
-  ["consequences", { nodeType: "consequence_record", idField: "id" }],
-  ["threads", { nodeType: "thread_record", idField: "id" }],
-  ["relationships", { nodeType: "relationship_record_story", idField: "id" }],
-  ["intentions", { nodeType: "intention_record", idField: "id" }],
-  ["locations", { nodeType: "story_location_record", idField: "id" }],
-  ["objects", { nodeType: "story_object_record", idField: "id" }],
-  ["branches", { nodeType: "branch_record", idField: "id" }],
-  ["pages", { nodeType: "page_record", idField: "id" }],
-  ["choices", { nodeType: "choice_record", idField: "id" }],
-  ["storylets", { nodeType: "storylet_record", idField: "id" }],
-  ["artifacts", { nodeType: "story_diegetic_artifact_record", idField: "id" }]
+const STORY_DIRS = new Map<string, AtomicRecordSpec>([
+  ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]{4}$")],
+  ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]{4}$")],
+  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]{4}$")],
+  ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]{4}$")],
+  ["consequences", recordSpec("consequence_record", "id", "^CNSQ-[0-9]{4}$")],
+  ["threads", recordSpec("thread_record", "id", "^THR-[0-9]{4}$")],
+  ["relationships", recordSpec("relationship_record_story", "id", "^SREL-[0-9]{4}$")],
+  ["intentions", recordSpec("intention_record", "id", "^STINT-[0-9]{4}$")],
+  ["locations", recordSpec("story_location_record", "id", "^STLOC-[0-9]{4}$")],
+  ["objects", recordSpec("story_object_record", "id", "^STOBJ-[0-9]{4}$")],
+  ["branches", recordSpec("branch_record", "id", "^BR-[0-9]{4}$")],
+  ["pages", recordSpec("page_record", "id", "^PG-[0-9]{4}$")],
+  ["choices", recordSpec("choice_record", "id", "^CHC-[0-9]{4}$")],
+  ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]{4}$")],
+  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]{4}$")]
 ]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
 const STORY_REF_REGEX = /\b(STENT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA)-[A-Za-z0-9-]+\b/g;
+
+export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
+
+export interface AtomicSkippedRecord {
+  relativeFilePath: string;
+  nodeType: NodeType;
+  extractedId: string | null;
+  expectedPattern: string;
+  reason: AtomicSkipReason;
+}
+
+function recordSpec(nodeType: NodeType, idField: string, idPatternSource: string): AtomicRecordSpec {
+  return {
+    nodeType,
+    idField,
+    idPattern: new RegExp(idPatternSource),
+    idPatternSource
+  };
+}
 
 export function hasAtomicSourceRecords(worldDirectory: string): boolean {
   return listAtomicSourceFiles(worldDirectory).length > 0;
@@ -174,7 +200,26 @@ export function parseAtomicSourceFile(
   }
 
   const record = isRecord(parsed) ? parsed : {};
-  const nodeId = stringField(record, spec.idField) ?? syntheticAtomicNodeId(worldSlug, relativeFilePath);
+  const extractedId = stringField(record, spec.idField);
+  const skip = skipForExtractedId(relativeFilePath, spec, extractedId);
+  if (skip) {
+    return {
+      relativeFilePath,
+      contentHash: contentHashForProse(source),
+      nodes: [],
+      edges: [],
+      validationResults,
+      skippedRecords: [skip],
+      yamlBlockCount: 1,
+      yamlFailureCount,
+      tree: emptyTree()
+    };
+  }
+  if (extractedId === null) {
+    throw new Error(`Atomic source parser failed to classify missing id for '${relativeFilePath}'.`);
+  }
+
+  const nodeId = extractedId;
   const node = createNodeRow({
     worldSlug,
     relativeFilePath,
@@ -196,6 +241,7 @@ export function parseAtomicSourceFile(
     nodes: [node],
     edges,
     validationResults,
+    skippedRecords: [],
     yamlBlockCount: 1,
     yamlFailureCount,
     tree: emptyTree()
@@ -238,6 +284,7 @@ export function parseStoryBundleSourceFile(
       nodes: [],
       edges: [],
       validationResults,
+      skippedRecords: [],
       yamlBlockCount: 1,
       yamlFailureCount,
       tree: emptyTree()
@@ -245,7 +292,25 @@ export function parseStoryBundleSourceFile(
   }
 
   const record = isRecord(parsed) ? parsed : {};
-  const authoredId = stringField(record, spec.idField) ?? syntheticAtomicNodeId(worldSlug, relativeFilePath);
+  const authoredId = stringField(record, spec.idField);
+  const skip = skipForExtractedId(relativeFilePath, spec, authoredId);
+  if (skip) {
+    return {
+      relativeFilePath,
+      contentHash: contentHashForProse(source),
+      nodes: [],
+      edges: [],
+      validationResults,
+      skippedRecords: [skip],
+      yamlBlockCount: 1,
+      yamlFailureCount,
+      tree: emptyTree()
+    };
+  }
+  if (authoredId === null) {
+    throw new Error(`Story source parser failed to classify missing id for '${relativeFilePath}'.`);
+  }
+
   const nodeId = storyNodeId(spec.storySlug, authoredId);
   const node = createNodeRow({
     worldSlug,
@@ -269,6 +334,7 @@ export function parseStoryBundleSourceFile(
     nodes: [node],
     edges,
     validationResults,
+    skippedRecords: [],
     yamlBlockCount: 1,
     yamlFailureCount,
     tree: emptyTree()
@@ -297,6 +363,7 @@ export function createAtomicLogicalFileResults(worldSlug: string): ParsedFileRes
       nodes: [node],
       edges: [],
       validationResults: [],
+      skippedRecords: [],
       yamlBlockCount: 0,
       yamlFailureCount: 0,
       tree: emptyTree()
@@ -359,7 +426,7 @@ export function loadAtomicEntityRegistry(worldDirectory: string): EntityRegistry
   };
 }
 
-function specForAtomicPath(relativeFilePath: string): { nodeType: NodeType; idField: string } {
+function specForAtomicPath(relativeFilePath: string): AtomicRecordSpec {
   const segments = relativeFilePath.split("/");
   const sourceDirectory = segments[1];
   const spec = sourceDirectory ? ATOMIC_DIRS.get(sourceDirectory) : undefined;
@@ -372,6 +439,8 @@ function specForAtomicPath(relativeFilePath: string): { nodeType: NodeType; idFi
 function specForStoryPath(relativeFilePath: string): {
   nodeType: NodeType;
   idField: string;
+  idPattern: RegExp;
+  idPatternSource: string;
   storySlug: string;
 } {
   const segments = relativeFilePath.split("/");
@@ -382,6 +451,34 @@ function specForStoryPath(relativeFilePath: string): {
     throw new Error(`Unsupported story-bundle source path '${relativeFilePath}'.`);
   }
   return { ...spec, storySlug };
+}
+
+function skipForExtractedId(
+  relativeFilePath: string,
+  spec: AtomicRecordSpec,
+  extractedId: string | null
+): AtomicSkippedRecord | null {
+  if (extractedId === null) {
+    return {
+      relativeFilePath,
+      nodeType: spec.nodeType,
+      extractedId: null,
+      expectedPattern: spec.idPatternSource,
+      reason: "missing_id_field"
+    };
+  }
+
+  if (!spec.idPattern.test(extractedId)) {
+    return {
+      relativeFilePath,
+      nodeType: spec.nodeType,
+      extractedId,
+      expectedPattern: spec.idPatternSource,
+      reason: "schema_pattern_mismatch"
+    };
+  }
+
+  return null;
 }
 
 function edgesForAtomicRecord(node: NodeRow, record: Record<string, unknown>, worldSlug: string): EdgeRow[] {

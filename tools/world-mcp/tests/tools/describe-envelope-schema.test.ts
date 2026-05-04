@@ -1,13 +1,32 @@
 import assert from "node:assert/strict";
+import { mkdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
+
+import { createTempRepoRoot, destroyTempRepoRoot } from "./_shared";
 
 import { OPERATION_KINDS } from "@worldloom/patch-engine";
 
 import { describeEnvelopeSchema } from "../../src/tools/describe-envelope-schema";
 
-test("describeEnvelopeSchema returns the full envelope and every operation schema", async () => {
-  const manifest = await describeEnvelopeSchema({});
+async function withHarnessCeiling<T>(ceiling: string, run: () => Promise<T>): Promise<T> {
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  try {
+    process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = ceiling;
+    return await run();
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+  }
+}
 
+test("describeEnvelopeSchema returns the full envelope and every operation schema when it fits inline", async () => {
+  const manifest = await withHarnessCeiling("1000000", () => describeEnvelopeSchema({}));
+
+  assert.equal(manifest.delivery_status, "inline");
   assert.equal(manifest.tool_names.validate_patch_plan, "mcp__worldloom__validate_patch_plan");
   assert.equal(manifest.tool_names.submit_patch_plan, "mcp__worldloom__submit_patch_plan");
   assert.ok(manifest.source_paths.includes("tools/world-mcp/src/tools/_shared.ts"));
@@ -31,6 +50,7 @@ test("describeEnvelopeSchema returns the full envelope and every operation schem
 test("describeEnvelopeSchema filters to one op kind and exposes CF payload schema", async () => {
   const manifest = await describeEnvelopeSchema({ op_kind: "create_cf_record" });
 
+  assert.equal(manifest.delivery_status, "inline");
   assert.deepEqual(Object.keys(manifest.op_schemas), ["create_cf_record"]);
 
   const schema = manifest.op_schemas.create_cf_record!;
@@ -58,6 +78,7 @@ test("describeEnvelopeSchema filters to one op kind and exposes CF payload schem
 
 test("describeEnvelopeSchema exposes update and hybrid operation payloads", async () => {
   const updateManifest = await describeEnvelopeSchema({ op_kind: "update_record_field" });
+  assert.equal(updateManifest.delivery_status, "inline");
   const updateProperties = updateManifest.op_schemas.update_record_field!.properties as Record<string, unknown>;
   const updatePayload = updateProperties.payload as {
     properties?: Record<string, { enum?: string[] }>;
@@ -65,6 +86,7 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   assert.deepEqual(updatePayload.properties?.operation?.enum, ["set", "append_list", "append_text"]);
 
   const removeAliasManifest = await describeEnvelopeSchema({ op_kind: "remove_ch_affected_cf_ids" });
+  assert.equal(removeAliasManifest.delivery_status, "inline");
   const removeAliasProperties = removeAliasManifest.op_schemas.remove_ch_affected_cf_ids!.properties as Record<
     string,
     unknown
@@ -77,6 +99,7 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   assert.equal(removeAliasPayload.properties?.target_ch_id?.pattern, "^CH-[0-9]{4}$");
 
   const adjudicationManifest = await describeEnvelopeSchema({ op_kind: "append_adjudication_record" });
+  assert.equal(adjudicationManifest.delivery_status, "inline");
   const adjudicationProperties = adjudicationManifest.op_schemas.append_adjudication_record!.properties as Record<
     string,
     unknown
@@ -90,4 +113,45 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
     adjudicationPayload.properties?.adjudication_frontmatter?.$ref,
     "https://worldloom.local/schemas/adjudication-frontmatter.schema.json"
   );
+});
+
+test("describeEnvelopeSchema persists the unfiltered manifest and returns op-kind summary when over ceiling", async () => {
+  const root = createTempRepoRoot();
+  const originalCeiling = process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+  const originalResultsDir = process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+  const resultsDir = path.join(root, "tool-results");
+
+  try {
+    mkdirSync(resultsDir, { recursive: true });
+    process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = "9000";
+    process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = resultsDir;
+
+    const manifest = await describeEnvelopeSchema({});
+
+    assert.equal(manifest.delivery_status, "persisted_with_summary");
+    assert.match(manifest.persisted_output_path, /tool-results\/.*describe_envelope_schema-all-.*\.json$/);
+    assert.equal(manifest.summary.tool, "describe_envelope_schema");
+    assert.equal(manifest.summary.op_kind_filter, null);
+    assert.deepEqual(manifest.summary.available_op_kinds, [...OPERATION_KINDS]);
+    assert.ok(manifest.summary.suggested_slice_paths.includes("op_schemas.create_cf_record"));
+
+    const persisted = JSON.parse(readFileSync(manifest.persisted_output_path, "utf8")) as {
+      delivery_status?: string;
+      op_schemas?: Record<string, unknown>;
+    };
+    assert.equal(persisted.delivery_status, "inline");
+    assert.deepEqual(Object.keys(persisted.op_schemas ?? {}).sort(), [...OPERATION_KINDS].sort());
+  } finally {
+    if (originalCeiling === undefined) {
+      delete process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS;
+    } else {
+      process.env.WORLDLOOM_MCP_HARNESS_CEILING_CHARS = originalCeiling;
+    }
+    if (originalResultsDir === undefined) {
+      delete process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR;
+    } else {
+      process.env.WORLDLOOM_MCP_TOOL_RESULTS_DIR = originalResultsDir;
+    }
+    destroyTempRepoRoot(root);
+  }
 });

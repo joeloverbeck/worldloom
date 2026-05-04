@@ -11,7 +11,7 @@ SQLite-backed structure-aware index over worldloom world sources. Parsed nodes, 
 ```
 world-index init <world-slug>            # initialize an empty schema-applied world.db
 world-index build <world-slug>           # full rebuild
-world-index sync <world-slug>            # incremental
+world-index sync <world-slug> [--quiet]  # incremental; --quiet suppresses per-record skip warnings
 world-index inspect <node-id>            # JSON dump of a single node
 world-index render <world-slug> --story <story-slug>
                                          # merged markdown view of indexed story-bundle records
@@ -39,3 +39,11 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 ## Output location per world
 
 `worlds/<slug>/_index/world.db` (gitignored; regenerable from root-level primary-authored markdown, `_source/*.yaml` atomic records, and story-bundle records under `stories/<story-slug>/_source/**/*.yaml`).
+
+When an atomic or story-bundle YAML record is present on disk but its extracted id does not match the registered schema pattern, `build` / `sync` skip the record instead of inserting an invalid node. Each skipped record is appended to `worlds/<slug>/_index/world.db.skipped_records.log` as tab-separated fields:
+
+```text
+<iso8601-timestamp> <file-path> <node-type> <extracted-id-or-> <skip-reason> <expected-pattern>
+```
+
+`world-index sync <world-slug>` prints per-record warnings and a summary naming the log path; `--quiet` suppresses the per-record warnings while keeping the summary and log. This is expected for legacy records whose ids no longer match the current schema, such as old `STINT-NNNN-<char>` intention records after the STINT contract tightened to bare numeric `STINT-NNNN`.

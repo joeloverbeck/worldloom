@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { test } from "node:test";
 
 import type { PatchOperation } from "../../src/envelope/schema.js";
@@ -35,7 +36,64 @@ test("verifyApprovalToken rejects expired, tampered, hash-mismatch, and malforme
   assert.equal(failureCode(verifyApprovalToken("not a token!", envelope, { db: world.db, hmac_secret: secret, now })), "approval_malformed");
 });
 
+test("verifyApprovalToken includes recovery hints for malformed approval-token families", (t) => {
+  const world = createTestWorld(t);
+  const secret = Buffer.from("unit-test-secret");
+  const envelope = baseEnvelope();
+  const now = new Date("2026-04-25T12:00:00.000Z");
+  const cases: Array<{ name: string; token: string; detail: string }> = [
+    {
+      name: "invalid base64",
+      token: "not a token!",
+      detail: "token contains invalid base64"
+    },
+    {
+      name: "missing separator",
+      token: encodedToken("placeholder"),
+      detail: "token must contain a signature separator"
+    },
+    {
+      name: "non-hex signature",
+      token: encodedToken("{}.zz"),
+      detail: "token signature must be hex"
+    },
+    {
+      name: "invalid payload JSON",
+      token: signedRawPayload("not-json", secret),
+      detail: "payload is not valid JSON"
+    },
+    {
+      name: "payload not object",
+      token: signedRawPayload("null", secret),
+      detail: "payload must be an object"
+    },
+    {
+      name: "payload invalid fields",
+      token: signedRawPayload("{}", secret),
+      detail: "payload has invalid fields"
+    }
+  ];
+
+  for (const testCase of cases) {
+    const verdict = verifyApprovalToken(testCase.token, envelope, { db: world.db, hmac_secret: secret, now });
+    assert.equal(verdict.ok, false, testCase.name);
+    assert.equal(verdict.code, "approval_malformed", testCase.name);
+    assert.ok(verdict.detail?.startsWith(testCase.detail), testCase.name);
+    assert.match(verdict.detail ?? "", /sign-approval-token/, testCase.name);
+    assert.match(verdict.detail ?? "", /HARD-GATE-DISCIPLINE/, testCase.name);
+  }
+});
+
 function failureCode(verdict: ReturnType<typeof verifyApprovalToken>): string {
   assert.equal(verdict.ok, false);
   return verdict.code;
+}
+
+function encodedToken(value: string): string {
+  return Buffer.from(value, "utf8").toString("base64url");
+}
+
+function signedRawPayload(payload: string, secret: Buffer): string {
+  const signature = createHmac("sha256", secret).update(Buffer.from(payload, "utf8")).digest("hex");
+  return encodedToken(`${payload}.${signature}`);
 }

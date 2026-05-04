@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+
 import {
   CANONICAL_DOMAINS,
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
@@ -24,6 +27,7 @@ export const VOCABULARY_CLASSES = [
   "entity_kind",
   "sec_file_class",
   "change_type",
+  "mystery_reserve_effect",
   "revision_difficulty",
   "cf_type"
 ] as const;
@@ -53,6 +57,57 @@ export interface GetCanonicalVocabularyResponse {
 
 function isVocabularyClass(value: string): value is VocabularyClass {
   return (VOCABULARY_CLASSES as readonly string[]).includes(value);
+}
+
+type JsonObject = { [key: string]: JsonValue };
+type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
+
+let mysteryReserveEffectValuesCache: string[] | undefined;
+
+function findRepoRoot(): string {
+  const starts = [process.cwd(), __dirname];
+
+  for (const start of starts) {
+    let current = path.resolve(start);
+
+    while (true) {
+      if (existsSync(path.join(current, "tools", "validators", "src", "schemas", "change-log-entry.schema.json"))) {
+        return current;
+      }
+
+      const parent = path.dirname(current);
+      if (parent === current) {
+        break;
+      }
+      current = parent;
+    }
+  }
+
+  return path.resolve(__dirname, "..", "..", "..", "..", "..");
+}
+
+function asObject(value: JsonValue | undefined): JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value : {};
+}
+
+function mysteryReserveEffectValues(): string[] {
+  if (mysteryReserveEffectValuesCache !== undefined) {
+    return [...mysteryReserveEffectValuesCache];
+  }
+
+  const schemaPath = path.join(findRepoRoot(), "tools", "validators", "src", "schemas", "change-log-entry.schema.json");
+  const schema = JSON.parse(readFileSync(schemaPath, "utf8")) as JsonObject;
+  const properties = asObject(schema.properties);
+  const scope = asObject(asObject(properties.scope).properties);
+  const mysteryReserveEffect = asObject(scope.mystery_reserve_effect);
+  const values = mysteryReserveEffect.enum;
+
+  if (!Array.isArray(values) || !values.every((value): value is string => typeof value === "string")) {
+    throw new Error("change-log-entry schema is missing scope.mystery_reserve_effect.enum");
+  }
+
+  mysteryReserveEffectValuesCache = [...values];
+  return [...mysteryReserveEffectValuesCache];
 }
 
 export async function getCanonicalVocabulary(
@@ -87,6 +142,8 @@ export async function getCanonicalVocabulary(
       return { canonical_values: [...SEC_FILE_CLASS_VALUES] };
     case "change_type":
       return { canonical_values: [...CHANGE_TYPE_VALUES] };
+    case "mystery_reserve_effect":
+      return { canonical_values: mysteryReserveEffectValues() };
     case "revision_difficulty":
       return { canonical_values: [...REVISION_DIFFICULTY_VALUES] };
     case "cf_type":

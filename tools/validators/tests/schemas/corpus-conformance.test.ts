@@ -40,6 +40,16 @@ const schemaForDir: Record<string, SchemaName> = {
   timeline: "section"
 };
 
+const recordKindForSchema: Record<SchemaName, string> = {
+  "canon-fact-record": "canon_fact",
+  "change-log-entry": "change_log",
+  invariant: "invariant",
+  "mystery-reserve": "mystery_reserve",
+  "open-question": "open_question",
+  entity: "named_entity",
+  section: "section"
+};
+
 function loadJson(path: string): AnySchema {
   return JSON.parse(readFileSync(path, "utf8")) as AnySchema;
 }
@@ -55,6 +65,13 @@ function makeAjv(): Ajv2020 {
 
 function loadYamlRecord(path: string): unknown {
   return yaml.load(readFileSync(path, "utf8"), { schema: yaml.JSON_SCHEMA });
+}
+
+function asRecord(value: unknown, label: string): Record<string, unknown> {
+  assert.equal(typeof value, "object", `${label} parses as object`);
+  assert.notEqual(value, null, `${label} parses as non-null object`);
+  assert.equal(Array.isArray(value), false, `${label} parses as plain object`);
+  return value as Record<string, unknown>;
 }
 
 test("animalia atomic source records conform to their JSON Schemas", () => {
@@ -73,6 +90,36 @@ test("animalia atomic source records conform to their JSON Schemas", () => {
         `${dir}/${file} failed ${schemaName}: ${JSON.stringify(validate.errors, null, 2)}`
       );
     }
+  }
+});
+
+test("atomic source schemas accept only their matching retrieval record_kind discriminator", () => {
+  const ajv = makeAjv();
+
+  for (const [dir, schemaName] of Object.entries(schemaForDir)) {
+    const validate = ajv.getSchema(`https://worldloom.local/schemas/${schemaName}.schema.json`);
+    assert.ok(validate, `schema compiled for ${schemaName}`);
+
+    const file = readdirSync(join(sourceRoot, dir)).find((name) => name.endsWith(".yaml"));
+    assert.ok(file, `${dir} has a YAML fixture`);
+
+    const recordPath = join(sourceRoot, dir, file);
+    const record = asRecord(loadYamlRecord(recordPath), `${dir}/${file}`);
+    assert.equal(Object.hasOwn(record, "record_kind"), false, `${dir}/${file} stays free of on-disk record_kind`);
+
+    const accepted = { ...record, record_kind: recordKindForSchema[schemaName] };
+    assert.equal(
+      validate(accepted),
+      true,
+      `${schemaName} accepts matching record_kind: ${JSON.stringify(validate.errors, null, 2)}`
+    );
+
+    const rejected = { ...record, record_kind: "wrong_record_kind" };
+    assert.equal(validate(rejected), false, `${schemaName} rejects mismatched record_kind`);
+    assert.ok(
+      validate.errors?.some((error) => error.instancePath === "/record_kind" && error.keyword === "const"),
+      `${schemaName} reports a const discriminator mismatch`
+    );
   }
 });
 

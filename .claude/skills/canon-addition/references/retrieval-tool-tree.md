@@ -5,7 +5,7 @@ Per-phase map of which MCP retrieval tool to invoke during `canon-addition`. The
 ## Pre-flight
 
 - `mcp__worldloom__allocate_next_id(world_slug, id_class)` for each needed id class. Allocate `PA` for every run, `CF` / `CH` for accept branches, and `M` / `OQ` only when repair work manufactures bounded unknowns or open questions.
-- `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, `revision_difficulty`, and `cf_type`. This catches enum drift before patch-plan validation and exposes CF-type conditional-block coupling before record assembly.
+- `mcp__worldloom__get_canonical_vocabulary({class})` for `domain`, `verdict`, `mystery_status`, `mystery_resolution_safety`, `invariant_category`, `entity_kind`, `sec_file_class`, `change_type`, `mystery_reserve_effect`, `revision_difficulty`, and `cf_type`. This catches enum drift before patch-plan validation and exposes CF-type conditional-block coupling before record assembly.
 - `mcp__worldloom__get_context_packet(task_type='canon_addition', seed_nodes=[<proposal_seed_nodes>])` to gather Kernel, Invariants, relevant CF / CH / M / OQ records, named-entity neighbors, and section context. The canon-addition default budget is 16000; if the packet returns `packet_incomplete_required_classes`, retry once with `retry_with.token_budget`. Treat packet `body_preview` fields as an index; follow up with `get_record` for one id, `get_records` for a known id set, `get_records_field` when the known id set only needs one shared field, or `get_persisted_packet_slice` when the packet body was persisted with a summary.
 - **Retrieval freshness audit**: retrieval tools auto-sync and retry once when they detect a stale explicit world index. When that recovery happens, successful responses include `freshness_audit.pre_call_index_was_stale: true` plus the synced drifted paths. Persistent retrieval staleness still surfaces `stale_index` for diagnosis. Submit-time `index_stale` handling remains under §Phase 15a.
 
@@ -19,6 +19,8 @@ Use one of two recovery paths:
 2. **Persisted slice extraction**: call `mcp__worldloom__get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` when the packet's ranked neighborhood structure matters more than direct id retrieval, for example `governing_world_context.nodes` or an id-selected node slice.
 
 Either path is valid. Prefer `get_records` when the needed ids are already known; prefer `get_persisted_packet_slice` when the packet's ranking-profile context is the thing being inspected. Treat the persisted file as session-local.
+
+`get_records` can also return a second-level `delivery_status: persisted_with_summary` response when the full batch would exceed the inline ceiling. In that case, use the returned `summary.records[]` metadata to identify the needed index and recover the full entry through `mcp__worldloom__get_persisted_packet_slice(persisted_path=<persisted_output_path>, slice_path='records[<N>]')`, or the parsed body directly with `slice_path='records[<N>].record.record'` for atomic records. Do not parse external harness error strings or manually `jq` a harness-saved file; the persisted path and slice grammar are MCP-side recovery contract.
 
 ## Phase 0-2: Normalize, Scope, Invariants
 
@@ -49,15 +51,16 @@ Either path is valid. Prefer `get_records` when the needed ids are already known
 
 ## Phase 13a: Patch-Plan Assembly
 
-- No new retrieval call is required by default. Assemble `PatchOperation[]` from the phase evidence above, including the bidirectional `required_world_updates` / `append_touched_by_cf` pair for every affected SEC.
+- No new retrieval call is required by default. Assemble `PatchOperation[]` from the phase evidence above, including the bidirectional `required_world_updates` / `append_touched_by_cf` + `append_extension` triple for every affected SEC. The `append_touched_by_cf` provides index-level discoverability (`find_sections_touched_by` reverse-lookup); the `append_extension` is REQUIRED to satisfy `rule5_no_consequence_evasion` — `append_touched_by_cf` alone does NOT credit the SEC-side patch. See `references/engine-envelope-shape.md` §8 for the validator-behavior rationale.
+- `mcp__worldloom__describe_envelope_schema(op_kind?)` should be narrowed with `op_kind` when the phase only needs one operation wrapper. If an unfiltered call returns `delivery_status: persisted_with_summary`, either re-query with the specific `op_kind` named in `summary.available_op_kinds` or recover the needed schema with `get_persisted_packet_slice(persisted_path, 'op_schemas.<op_kind>')`.
 
 ## Phase 14a: Validation
 
-- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. Treat any `fail` as a loop-back to the phase that produced the bad field or missing update; treat `skipped` as envelope-shape repair before signing or submit.
+- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. For envelopes >50KB, use the equivalent CLI path instead from the project root or active git worktree root: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. The CLI/engine path resolves world state from `process.cwd()`, so an invocation from another cwd can report `Index missing for world '<slug>'`. Treat any `fail` as a loop-back to the phase that produced the bad field or missing update; treat `skipped` as envelope-shape repair before signing or submit.
 
 ## Phase 15a: Submit After HARD-GATE
 
 - Persist the final envelope to `/tmp/<plan-id>.json`.
 - Issue the approval token with `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>`.
-- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`.
+- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval. For envelopes >50KB, use the equivalent CLI path instead from the project root or active git worktree root: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`.
 - On `approval_expired`, re-sign and resubmit. On `approval_replayed`, do not resubmit. On `index_stale`, run `node tools/world-index/dist/src/cli.js sync <world-slug>` and resubmit the unchanged patch plan with the same approval token if it has not expired. On `validator_failed`, inspect `detail.verdicts[].location.file`: fix and resubmit only when the cited file is one of the records or hybrid PA/adjudication targets this patch plan creates or extends; if it names unrelated existing world state, pause and escalate instead of editing another canon-adjacent file.

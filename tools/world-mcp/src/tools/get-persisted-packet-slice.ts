@@ -15,9 +15,10 @@ export interface GetPersistedPacketSliceResponse {
 interface SliceSegment {
   key: string;
   id?: string;
+  index?: number;
 }
 
-const SEGMENT_PATTERN = /^([^.[\]]+)(?:\[id=([^\]]+)\])?$/;
+const SEGMENT_PATTERN = /^([^.[\]]+)(?:\[(?:(id)=([^\]]+)|([0-9]+))\])?$/;
 
 function parseSlicePath(slicePath: string): SliceSegment[] | McpError {
   const rawSegments = slicePath.split(".");
@@ -34,13 +35,14 @@ function parseSlicePath(slicePath: string): SliceSegment[] | McpError {
       return createMcpError("invalid_input", `Unsupported slice_path segment '${rawSegment}'.`, {
         field: "slice_path",
         segment: rawSegment,
-        expected: "property or property[id=<node-id>]"
+        expected: "property, property[index], or property[id=<node-id>]"
       });
     }
 
     segments.push({
       key: match[1]!,
-      ...(match[2] === undefined ? {} : { id: match[2] })
+      ...(match[2] === undefined ? {} : { id: match[3] }),
+      ...(match[4] === undefined ? {} : { index: Number.parseInt(match[4], 10) })
     });
   }
 
@@ -59,6 +61,14 @@ function findById(value: unknown, id: string): unknown {
   return value.find((entry) => isRecord(entry) && entry.id === id);
 }
 
+function findByIndex(value: unknown, index: number): unknown {
+  if (!Array.isArray(value) || index < 0 || index >= value.length) {
+    return undefined;
+  }
+
+  return value[index];
+}
+
 function getSlice(root: unknown, segments: readonly SliceSegment[]): unknown {
   let current = root;
 
@@ -70,6 +80,12 @@ function getSlice(root: unknown, segments: readonly SliceSegment[]): unknown {
     current = current[segment.key];
     if (segment.id !== undefined) {
       current = findById(current, segment.id);
+      if (current === undefined) {
+        return undefined;
+      }
+    }
+    if (segment.index !== undefined) {
+      current = findByIndex(current, segment.index);
       if (current === undefined) {
         return undefined;
       }

@@ -63,7 +63,13 @@ export const RELATIONSHIP_AXES = [
   "intimacy",
   "loyalty",
   "resentment",
-  "power_imbalance"
+  "power_imbalance",
+  "attention",
+  "familiarity",
+  "approval",
+  "respect",
+  "obligation",
+  "hostility"
 ] as const;
 
 export const EPISTEMIC_CLASSES = [
