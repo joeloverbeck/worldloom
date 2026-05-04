@@ -423,7 +423,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "validate_patch_plan",
-    "Validate a patch plan envelope without mutating world content. Returns status: 'pass' | 'fail' | 'skipped' with verdicts and an optional skip reason.",
+    "Validate a patch plan envelope without mutating world content. Runs validators and id-allocation race checks, returning status: 'pass' | 'fail' | 'skipped' with verdicts and an optional skip reason.",
     validatePatchPlanInputSchema,
     async (args) => validatePatchPlan(args as unknown as Parameters<typeof validatePatchPlan>[0])
   );

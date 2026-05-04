@@ -153,6 +153,42 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on validator f
   }
 });
 
+test("cli-validate-patch-plan: CLI exits 1 and prints fail status on id allocation races", async () => {
+  const root = createTempRepoRoot();
+  const tmp = makeTmpDir();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = buildValidPatchPlan();
+    plan.expected_id_allocations = { cf_ids: ["CF-0002"] };
+    const planPath = writeJson(tmp, "plan.json", plan);
+
+    const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
+    const cliPayload = JSON.parse(cliResult.stderr);
+
+    assert.equal(cliResult.exitCode, 1);
+    assert.equal(cliResult.stdout, "");
+    assert.equal(cliPayload.status, "fail");
+    assert.ok(
+      cliPayload.validators_run.some(
+        (entry: { validator_name: string; status: string }) =>
+          entry.validator_name === "id_allocation_race" && entry.status === "fail"
+      )
+    );
+    assert.ok(
+      cliPayload.verdicts.some(
+        (verdict: { validator: string; code: string; message: string }) =>
+          verdict.validator === "id_allocation_race" &&
+          verdict.code === "id_allocation_race" &&
+          verdict.message.includes("cf_ids allocation race: expected CF-0002, current next id is CF-0001.")
+      )
+    );
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("cli-validate-patch-plan: CLI exits 1 and prints skipped status for malformed envelopes", async () => {
   const tmp = makeTmpDir();
 

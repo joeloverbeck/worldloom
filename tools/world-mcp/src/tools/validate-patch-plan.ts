@@ -1,5 +1,9 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+
 import { createMcpError, type McpError } from "../errors";
-import type { ValidatorRunReceipt } from "@worldloom/patch-engine";
+import { checkIdAllocationRace, type ValidatorRunReceipt } from "@worldloom/patch-engine";
+import { openExistingIndex } from "@worldloom/world-index/index/open";
 import { validatePatchPlan as runValidatePatchPlan } from "@worldloom/validators";
 import type { ValidatorExecution, Verdict } from "@worldloom/validators/public/types";
 
@@ -45,12 +49,20 @@ export async function validatePatchPlan(
   const result = await runValidatePatchPlan(
     args.patch_plan as unknown as Parameters<typeof runValidatePatchPlan>[0]
   );
-  const hasFailures = result.verdicts.some((verdict) => verdict.severity === "fail");
+  const allocationRace = runIdAllocationRaceCheck(args.patch_plan);
+  const verdicts = allocationRace.ok
+    ? result.verdicts
+    : [...result.verdicts, ...allocationRace.failures.map(allocationRaceFailureToVerdict)];
+  const validatorsRun = [
+    ...projectExecutionsToReceipt(result.executions),
+    allocationRace.execution
+  ];
+  const hasFailures = verdicts.some((verdict) => verdict.severity === "fail");
 
   return {
     status: hasFailures ? "fail" : "pass",
-    verdicts: result.verdicts,
-    validators_run: projectExecutionsToReceipt(result.executions)
+    verdicts,
+    validators_run: validatorsRun
   };
 }
 
@@ -66,4 +78,81 @@ function projectExecutionsToReceipt(executions: ValidatorExecution[]): Validator
     }
     return entry;
   });
+}
+
+function runIdAllocationRaceCheck(envelope: PatchPlanEnvelope): {
+  ok: boolean;
+  failures: Array<{
+    key: string;
+    expected: string;
+    current?: string;
+    story_slug?: string;
+    message: string;
+  }>;
+  execution: ValidatorRunReceipt;
+} {
+  const startedAt = Date.now();
+  const db = openExistingIndex(resolveRepoRootForWorld(envelope.target_world), envelope.target_world);
+  try {
+    const result = checkIdAllocationRace(
+      db,
+      envelope as unknown as Parameters<typeof checkIdAllocationRace>[1]
+    );
+    return {
+      ok: result.ok,
+      failures: result.ok ? [] : result.failures,
+      execution: {
+        validator_name: "id_allocation_race",
+        status: result.ok ? "pass" : "fail",
+        duration_ms: Date.now() - startedAt
+      }
+    };
+  } finally {
+    db.close();
+  }
+}
+
+function allocationRaceFailureToVerdict(failure: {
+  key: string;
+  expected: string;
+  current?: string;
+  story_slug?: string;
+  message: string;
+}): Verdict {
+  const details = [
+    `key=${failure.key}`,
+    `expected=${failure.expected}`,
+    failure.current === undefined ? undefined : `current=${failure.current}`,
+    failure.story_slug === undefined ? undefined : `story_slug=${failure.story_slug}`
+  ].filter((entry): entry is string => entry !== undefined);
+
+  return {
+    validator: "id_allocation_race",
+    severity: "fail",
+    code: "id_allocation_race",
+    message: `${failure.message} (${details.join(", ")})`,
+    location: {
+      file: "patch_plan.expected_id_allocations"
+    },
+    suggested_fix: "Re-run allocate_next_id for the offending id class, update the envelope, then re-validate and re-sign."
+  };
+}
+
+function resolveRepoRootForWorld(worldSlug: string): string {
+  for (let current = process.cwd(); ; current = path.dirname(current)) {
+    if (existsSync(path.join(current, "worlds", worldSlug, "_index", "world.db"))) {
+      return current;
+    }
+    if (path.dirname(current) === current) {
+      break;
+    }
+  }
+
+  const packageRoot = path.resolve(__dirname, "../../..");
+  const maybeRepoRoot = path.resolve(packageRoot, "../..");
+  if (existsSync(path.join(maybeRepoRoot, "worlds", worldSlug, "_index", "world.db"))) {
+    return maybeRepoRoot;
+  }
+
+  throw new Error(`index missing at worlds/${worldSlug}/_index/world.db; run 'world-index build ${worldSlug}' first`);
 }

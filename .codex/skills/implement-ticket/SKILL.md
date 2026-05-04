@@ -26,7 +26,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
 5. State the owned implementation slice to the user, then make minimal edits.
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
-7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed.
+7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. During closeout, explicitly re-check the active ticket's `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, and `Deviations` against the landed diff and commands.
 
 ### Mandatory References By Phase
 
@@ -48,6 +48,7 @@ Keep this top-level skill as the routing and hard-stop contract. When adding nar
 - Load `references/dirty-worktree-ledger.md` and keep the dirty-worktree ledger current throughout the run, including initial overlap, mid-run same-file changes, same-family sibling scope, and ignored artifacts.
 - When a pre-existing dirty file must also be edited for the active ticket, track ownership at hunk or topic level from the start. Do not wait until final response to decide which same-file changes are ticket-owned, pre-existing, externally appeared, or sibling-scope.
 - For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks. Keep new specialized package/tool guidance in that reference instead of expanding this top-level flow.
+- Before the first package command likely to create ignored artifacts, run a targeted ignored-aware status snapshot for the affected package directories. After package commands finish, refresh the same ignored-aware status and classify new or changed ignored artifacts in the dirty-worktree ledger.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - For world-content writes, keep the write surface explicit:
   - `worlds/<slug>/_source/*.yaml` atomic canon records are engine-only. Use `mcp__worldloom__submit_patch_plan` when it is exposed.
@@ -256,6 +257,8 @@ For tool/index/schema tickets, package-local readonly DB queries and inline `nod
 For `world-index` / index-backed proof, apply the focused checks in `references/world-index.md`.
 
 For compiled TS packages, opaque `node --test` lanes, and transport-client noise, apply the narrowing guidance in `references/verification-closeout.md` instead of expanding the acceptance boundary blindly.
+
+If acceptance names a CLI command but the implementation lands in a shared handler or library path, prove the CLI surface intentionally. Either add/run a focused CLI assertion for the new success or failure mode, or rewrite the ticket acceptance to state the truthful proof boundary: handler proof plus existing CLI-delegation coverage.
 
 When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
 
