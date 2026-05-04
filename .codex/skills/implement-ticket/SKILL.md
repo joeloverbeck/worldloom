@@ -143,6 +143,8 @@ If the user asks you to reassess options against `docs/FOUNDATIONS.md`, pause im
 
 When reassessment cleanly narrows the owned delta before coding, patch the ticket's `Problem`, stale evidence-backed statements in `Assumption Reassessment`, `What to Change`, `Files to Touch`, and acceptance/proof text before the first code edit rather than waiting until closeout.
 
+When a ticket presents implementation alternatives such as Option A / Option B / Option C, treat the option choice as reassessment when it changes the owned files, proof surface, or shared-contract boundary. Patch the active ticket to the chosen option before source edits, even if the code change itself is straightforward.
+
 If early probing shows that a drafted broad package/workspace proof lane is already failing for reasons outside the owned seam, remove it from the active acceptance surface before implementation and rewrite the ticket to the strongest truthful narrower proof boundary. Keep the broader lane only as contextual noise or follow-up evidence, not as an active acceptance gate.
 
 When a pre-apply validator emits failures during an engine-only patch reassessment, classify each failure before proceeding:

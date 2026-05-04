@@ -94,6 +94,27 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
   });
 });
 
+test("validatePatchPlan accepts matching retrieval record_kind and rejects mismatches", async () => {
+  await withTempRoot(async () => {
+    const accepted = await validatePatchPlan(
+      cleanPlan({ record_kind: "canon_fact" }) as unknown as PatchPlanEnvelope
+    );
+    assert.deepEqual(accepted.verdicts, []);
+
+    const rejected = await validatePatchPlan(
+      cleanPlan({ record_kind: "change_log" }) as unknown as PatchPlanEnvelope
+    );
+    assert.ok(
+      rejected.verdicts.some(
+        (verdict) =>
+          verdict.validator === "record_schema_compliance" &&
+          verdict.location.node_id === "CF-0001" &&
+          verdict.code === "record_schema_compliance.const"
+      )
+    );
+  });
+});
+
 test("validatePatchPlan applies current CF safety blocks only to changed pre-apply records", async () => {
   await withTempRoot(async () => {
     seedIndexedCf("CF-0002", { ...completeCf, id: "CF-0002", type: "capability" });

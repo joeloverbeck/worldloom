@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["id", "title", "status", "knowns", "unknowns", "common_interpretations", "disallowed_cheap_answers", "domains_touched", "future_resolution_safety", "extensions"],
   "properties": {
+    "record_kind": { "type": "string", "const": "mystery_reserve" },
     "id": { "type": "string", "pattern": "^M-[0-9]+$" },
     "title": { "type": "string", "minLength": 1 },
     "status": { "type": "string", "enum": ["active", "passive", "passive_depth", "forbidden"] },

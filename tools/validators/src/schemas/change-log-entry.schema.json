@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["change_id", "date", "change_type", "affected_fact_ids"],
   "properties": {
+    "record_kind": { "type": "string", "const": "change_log" },
     "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
     "date": { "type": "string", "format": "date" },
     "change_type": {

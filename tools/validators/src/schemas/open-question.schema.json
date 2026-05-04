@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["id", "topic", "body", "when_to_resolve", "extensions"],
   "properties": {
+    "record_kind": { "type": "string", "const": "open_question" },
     "id": { "type": "string", "pattern": "^OQ-[0-9]{4}$" },
     "topic": { "type": "string", "minLength": 1 },
     "body": { "type": "string", "minLength": 1 },
