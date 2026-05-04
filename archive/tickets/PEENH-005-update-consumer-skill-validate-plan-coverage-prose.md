@@ -1,6 +1,6 @@
 # PEENH-005: Update consumer skill `validate_patch_plan` coverage prose after id-allocation race validation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes - `.claude/skills/branching-story-page-cycle/SKILL.md` and `.claude/skills/storylet-pool-authoring/SKILL.md` prose only; no tool or validator code changes.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-PEENH-004 moved `id_allocation_race` into the read-only `validate_patch_plan` path, but some consumer skills still tell operators that validate-plan does not cover id-allocation race because it is submit-only. That wording is now stale and can cause operators to undervalue the pre-sign validation gate or misdiagnose validate-plan failures.
+PEENH-004 moved `id_allocation_race` into the read-only `validate_patch_plan` path, but at intake some consumer skills still told operators that validate-plan did not cover id-allocation race because it was submit-only. That wording was stale and could cause operators to undervalue the pre-sign validation gate or misdiagnose validate-plan failures.
 
 Post-PEENH-004 review evidence:
 
@@ -39,25 +39,25 @@ Post-PEENH-004 review evidence:
 2. Approval-token verification remains submit-only in skill prose -> manual review against `docs/HARD-GATE-DISCIPLINE.md` section "Validating and submitting the plan".
 3. Validate-plan coverage matches PEENH-004 docs -> manual review of `docs/HARD-GATE-DISCIPLINE.md`, `tools/world-mcp/README.md`, and updated skill snippets.
 
-## What to Change
+## Landed Changes
 
 ### 1. Correct page-cycle validate-plan coverage
 
-Update `.claude/skills/branching-story-page-cycle/SKILL.md` Phase 11 dry-run validate prose so it says validate-plan covers `id_allocation_race` for `expected_id_allocations`, while approval-token verification remains submit-only and submit keeps a race-window backstop.
+Updated `.claude/skills/branching-story-page-cycle/SKILL.md` Phase 11 dry-run validate prose so it says validate-plan covers `id_allocation_race` for `expected_id_allocations`, while approval-token verification remains submit-only and submit keeps a race-window backstop.
 
 ### 2. Correct storylet-pool validate-plan coverage
 
-Update both `.claude/skills/storylet-pool-authoring/SKILL.md` validate-plan coverage passages to remove the stale "id-allocation race is submit-only" claim and keep the approval-token caveat.
+Updated both `.claude/skills/storylet-pool-authoring/SKILL.md` validate-plan coverage passages to remove the stale "id-allocation race is submit-only" claim and keep the approval-token caveat.
 
 ### 3. Sweep sibling consumer skills
 
-Run a literal/regex sweep across patch-engine consumer skills named by PEENH-004 (`branching-story-page-cycle`, `branching-story-bootstrap`, `canon-addition`, `create-base-world`, `character-generation`, `diegetic-artifact-generation`, `storylet-pool-authoring`) for parallel stale validate-plan coverage wording. Update only passages that still contradict the PEENH-004 contract.
+Ran a literal/regex sweep across patch-engine consumer skills named by PEENH-004 (`branching-story-page-cycle`, `branching-story-bootstrap`, `canon-addition`, `create-base-world`, `character-generation`, `diegetic-artifact-generation`, `storylet-pool-authoring`) for parallel stale validate-plan coverage wording. The only stale submit-only validate-plan coverage claims found were the two owned skills' passages listed above.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-page-cycle/SKILL.md` (modify)
 - `.claude/skills/storylet-pool-authoring/SKILL.md` (modify)
-- Additional `.claude/skills/<consumer>/...` validate-plan prose only if the sweep finds the same stale submit-only allocation-race claim.
+- `tickets/PEENH-005-update-consumer-skill-validate-plan-coverage-prose.md` (modify — closeout)
 
 ## Out of Scope
 
@@ -89,4 +89,22 @@ Run a literal/regex sweep across patch-engine consumer skills named by PEENH-004
 
 1. `rg -n 'Does NOT cover approval-token verification or id-allocation race|does NOT cover approval-token verification or id-allocation race|id-allocation race \\(both submit-only\\)|both are submit-only\\).*id-allocation' .claude/skills --glob '!**/dist/**' --glob '!**/node_modules/**'`
 2. `rg -n 'id_allocation_race|id-allocation race|approval-token verification|approval token' .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/storylet-pool-authoring/SKILL.md docs/HARD-GATE-DISCIPLINE.md`
-3. `git diff --check -- .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/storylet-pool-authoring/SKILL.md`
+3. `git diff --check -- .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/storylet-pool-authoring/SKILL.md archive/tickets/PEENH-005-update-consumer-skill-validate-plan-coverage-prose.md`
+
+## Outcome
+
+Completion date: 2026-05-04.
+
+Implemented. The two consumer skills now describe `validate_patch_plan` as covering `id_allocation_race` for `expected_id_allocations`, while preserving the approval-token submit-only caveat and the submit-time race-window backstop.
+
+No tool, validator, patch-engine, or world-content files changed.
+
+## Verification Result
+
+1. `rg -n 'Does NOT cover approval-token verification or id-allocation race|does NOT cover approval-token verification or id-allocation race|id-allocation race \\(both submit-only\\)|both are submit-only\\).*id-allocation' .claude/skills --glob '!**/dist/**' --glob '!**/node_modules/**'` — PASS; no stale validate-plan coverage claims remain in `.claude/skills`.
+2. `rg -n 'id_allocation_race|id-allocation race|approval-token verification|approval token' .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/storylet-pool-authoring/SKILL.md docs/HARD-GATE-DISCIPLINE.md` — reviewed; the two updated skills name validate-time `id_allocation_race` coverage, keep approval-token verification submit-only, and match `docs/HARD-GATE-DISCIPLINE.md`.
+3. `git diff --check -- .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/storylet-pool-authoring/SKILL.md archive/tickets/PEENH-005-update-consumer-skill-validate-plan-coverage-prose.md` — PASS.
+
+## Deviations
+
+- No additional named consumer skill carried the same stale validate-plan submit-only allocation-race claim, so the landed file set stayed limited to the two drafted skill files plus this ticket closeout.
