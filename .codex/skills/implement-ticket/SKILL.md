@@ -20,7 +20,7 @@ Reassess first, then implement. Do not treat the ticket as mechanically executab
 
 Use this as the default path, then apply the detailed rules below when the ticket's shape needs them:
 
-1. Resolve the live ticket/spec paths and snapshot the worktree.
+1. Resolve the live ticket/spec paths inside the active repo/worktree and snapshot the worktree.
 2. Read the required repo contracts (`AGENTS.md`, `docs/FOUNDATIONS.md`, ticket template/readme, ticket, and explicit references).
 3. Classify the ticket and load only the focused reference docs needed for that class. For validator or JSON Schema tickets, load `references/validator-schema-migrations.md` before reassessment edits.
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
@@ -42,6 +42,8 @@ Keep this top-level skill as the routing and hard-stop contract. When adding nar
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.
+- The target ticket path must resolve inside the active repo/worktree. If it does not, stop before implementation: report the missing path, the active repo root, and any diagnostic same-name hits found elsewhere, then ask the user to correct the cwd/path or explicitly retarget the run. Do not edit a sibling repository under this skill just because a matching ticket exists there.
+- Searches outside the active repo/worktree are diagnostic only. Use them to identify likely cwd/path mistakes, not as authorization to switch repos. If the user explicitly supplies an absolute ticket path outside the current repo, re-root the run to that ticket's repository, reload that repo's `AGENTS.md` and applicable instructions, and use that repo's workflow rather than Worldloom-specific assumptions.
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
 - Load `references/dirty-worktree-ledger.md` and keep the dirty-worktree ledger current throughout the run, including initial overlap, mid-run same-file changes, same-family sibling scope, and ignored artifacts.
 - When a pre-existing dirty file must also be edited for the active ticket, track ownership at hunk or topic level from the start. Do not wait until final response to decide which same-file changes are ticket-owned, pre-existing, externally appeared, or sibling-scope.
@@ -107,13 +109,14 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 4. Read any explicit user-supplied reference paths from the invocation, even if the ticket itself does not name them.
 5. If an explicit user-supplied reference path uses a glob, shorthand, or near-match typo, resolve the first exact live path before trusting or reading it.
 6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
-7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path before doing anything else.
+7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path inside the active repo/worktree before doing anything else. If no target ticket resolves there, stop and ask for a corrected target instead of falling back to a sibling repo.
 8. If ticket prose names a bare `references/<file>.md` path and the local-relative lookup fails, search `.codex/skills/*/references/` and `.claude/skills/*/references/` before treating it as missing. Prefer the skill context implied by the cited rule or section name, and record the resolved authority in `Assumption Reassessment` when it affects scope, proof, or ownership.
 9. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
 10. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
 11. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+14. Before the first edit, state a repo identity checkpoint: active repo root, active ticket path, instruction source (`AGENTS.md` path), and whether any sibling-repo hits were found and excluded as diagnostic-only.
 
 If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.
 

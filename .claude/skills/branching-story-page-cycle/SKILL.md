@@ -45,7 +45,7 @@ Runs one tick of the runtime causal-promise engine: parses the user's choice (st
 <HARD-GATE>
 Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages-prose/`, and do NOT `Edit` the bundle's `INDEX.md`, until:
 
-(a) Pre-flight resolves the bundle, validates `parent_page_id` belongs to this story, validates exactly one of `{chosen_choice_id, manual_action_text}`, allocates `PG-NNNN` (and `BR-NNNN` on fork) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, resolves `execution_mode`, and confirms the content_policy block is loaded for downstream prompt assembly.
+(a) Pre-flight resolves the bundle, validates `parent_page_id` belongs to this story, validates exactly one of `{chosen_choice_id, manual_action_text}`, pre-allocates all per-class IDs the envelope will populate (`PG-NNNN` always; `BR-NNNN` on fork AND on continuation; plus one allocation per id-class — `SF` / `OBL` / `THR` / `SREL` / `STINT` / `SE` / `SLT` / `CHC` — that this turn will create records in) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, resolves `execution_mode`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4.5 mystery-resolution authority, Phase 5 state-mutation discipline, Phase 9 firewall/invariant gates, and the FOUNDATIONS §Default Reality + Rule 6 commitment that anchors the never-elided Phase 4.5 canon-promotion HARD-GATE all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly.
 (b) Phase 9 records PASS with a one-line rationale for every gate (12 gates — see Phase 9: mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence).
 (c) `execution_mode == authoring` (default): the user has explicitly approved the Phase 10 deliverable summary. `interactive_runtime`: Phase 10 hidden; auto-commits after Phase 9 PASS. `batch_generation`: hidden until validation failure or a configured checkpoint.
 
@@ -56,8 +56,10 @@ Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages
 
 ```
 Pre-flight     resolve story bundle; validate parent_page_id belongs to story;
-               allocate PG-NNNN (and BR-NNNN on fork via non-leaf-parent
-               detection) via allocate_next_id; validate exactly one of
+               pre-allocate all per-class IDs the envelope will populate
+               (PG-NNNN always; BR-NNNN on fork AND continuation; plus
+               SF/OBL/THR/SREL/STINT/SE/SLT/CHC per turn-applicable classes)
+               via allocate_next_id; validate exactly one of
                {chosen_choice_id, manual_action_text}; resolve execution_mode;
                load content_policy; assemble retrieval (context_packet +
                whole-class M + INV firewall loads); record canon_revision
@@ -233,7 +235,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
 ## Procedure
 
-1. **Pre-flight.** Validate args, allocate `PG-NNNN` (and `BR-NNNN` on fork-detection) via `mcp__worldloom__allocate_next_id`, resolve `execution_mode`, and assemble world-state retrieval (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.md, parent page + cited state-snapshot records, branch-path prose continuity, filtered storylet pool, premise-and-state-bounded `get_context_packet`, whole-class M + INV firewall loads, content_policy block). Load `references/pre-flight-and-prerequisites.md`.
+1. **Pre-flight.** Validate args, pre-allocate all per-class IDs the envelope will populate (`PG-NNNN` always; `BR-NNNN` on fork-detection AND on continuation; plus one allocation per id-class — `SF` / `OBL` / `THR` / `SREL` / `STINT` / `SE` / `SLT` / `CHC` — that this turn will create records in) via `mcp__worldloom__allocate_next_id`, resolve `execution_mode`, and assemble world-state retrieval (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.md, parent page + cited state-snapshot records, branch-path prose continuity, filtered storylet pool, premise-and-state-bounded `get_context_packet`, whole-class M + INV firewall loads, content_policy block). Load `references/pre-flight-and-prerequisites.md`.
 
 2. **Phase 1 — Choice resolution.** Path A (`chosen_choice_id` → `ProposedEvent` from CHC's structured fields) or Path B (`manual_action_text` → LLM parser → engine validation → four-way routing: REFUSE_ONLY_THROUGH_WORLD_LOGIC / TREAT_AS_ATTEMPT / ACCEPT_BUT_TRANSFORM / ACCEPT). Write-in inputs are NEVER silently rejected. Load `references/phase-1-choice-resolution.md`.
 
@@ -296,6 +298,11 @@ The branch-isolation invariant is structurally enforced by this field combined w
     ...
     N+1. (write your own)
 
+    PHASE 4.5 — CANON-PROMOTION HANDOFF:
+    - Triggered: <true | false>
+    - Per-claim routing: <count> apparent, <count> branch_local_counterfactual, <count> canon_candidate (handed off to story-fact-promotion-to-canon under separate HARD-GATE)
+    - Forbidden-status M preserved: <bool — Phase 9 gate 1 dependency>
+
     FIREWALL VERDICTS (Phase 9 gates 1-12):
     - Mystery firewall: PASS — <one-line rationale>
     - Invariant compatibility: PASS — <rationale>
@@ -345,16 +352,19 @@ The branch-isolation invariant is structurally enforced by this field combined w
          - `create_slt_record` IF Phase 4 JIT expansion fired.
          - `create_stloc_record`, `create_stobj_record`, and `append_story_diegetic_artifact_record` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
          - `create_br_record` for a new fork BR, or a superseding BR create op when updating an existing branch's leaf/status.
-       - **1b. Persist** the envelope to `/tmp/<plan-id>.json` with `approval_token: "placeholder"` (the placeholder convention per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token` and `create-base-world/references/engine-envelope-shape.md §4` — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time).
-       - **1c. Dry-run validate** via `mcp__worldloom__validate_patch_plan(envelope)`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, Rules 1-7 + structural validators. Does NOT cover approval-token verification or id-allocation race (both submit-only); treat as a defensive pre-submit check, not a complete gate.
+
+         Each op also carries `op`, `target_world`, `target_file`, and `payload` fields. For story-bundle ops, `target_file` follows the pattern `worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml`; the full file-class → directory mapping (pages/, events/, facts/, obligations/, consequences/, threads/, relationships/, intentions/, storylets/, branches/, choices/, locations/, objects/, artifacts/) is documented in `branching-story-bootstrap/references/engine-envelope-shape.md §2`. The envelope-shape validator requires a non-empty string; the engine derives the actual write path from the record id, but the shape check enforces the field.
+       - **1b. Persist** the envelope to `/tmp/<plan-id>.json` with `approval_token: "placeholder"` (the placeholder convention per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token` and `branching-story-bootstrap/references/engine-envelope-shape.md §4` — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time).
+       - **1c. Dry-run validate** via `mcp__worldloom__validate_patch_plan(envelope)` (envelope ≤50KB) OR `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` (envelope >50KB — same engine code, bypasses MCP transport size constraints). Check envelope size with `wc -c <plan-path>`; ordinary single-storylet-no-JIT page-ticks may fit MCP transport, but multi-record turns (≥10 records — common for fork turns and JIT-expansion turns) typically exceed 50KB and require the CLI path. The canonical write-up is at `branching-story-bootstrap/references/engine-envelope-shape.md §5`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, Rules 1-7 + structural validators. Does NOT cover approval-token verification or id-allocation race (both submit-only); treat as a defensive pre-submit check, not a complete gate.
        - **1d. Sign** via `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` (the canonical issuer per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token`; HMAC-bound to the envelope's exact bytes; never self-sign — Hook 3 blocks direct reads of `tools/world-mcp/.secret` precisely to prevent token forgery). Persist the signed token to `/tmp/<plan-id>.token` if the CLI submit path will be used.
-       - **1e. Submit**: embed the signed token back into the envelope (replacing the `"placeholder"` value) AND pass it as the separate `approval_token` parameter to `mcp__worldloom__submit_patch_plan(plan, approval_token)` — the MCP wrapper validates both surfaces. Submit-path selection by envelope size: ordinary turns (~40-50KB) fit MCP transport; large turns (multi-storylet JIT, large state snapshots) use `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` instead — same engine code, same failure-mode codes, bypasses MCP transport size constraints (per `docs/HARD-GATE-DISCIPLINE.md §Submitting the plan`).
+       - **1e. Submit**: pass the signed token as the separate `approval_token` parameter to `mcp__worldloom__submit_patch_plan(plan, approval_token)` while leaving the envelope's `approval_token: "placeholder"` field unchanged — the engine verifies the token's HMAC against the envelope bytes that were signed (the placeholder-bearing bytes), so modifying the envelope after signing would invalidate the binding (per `branching-story-bootstrap/references/engine-envelope-shape.md §4`). Submit-path selection by envelope size (`wc -c <plan-path>`): ordinary single-storylet-no-JIT turns may fit MCP transport (≤50KB); multi-record turns (≥10 records — common for fork turns and JIT-expansion turns) typically exceed 50KB and use `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` instead — same engine code, same failure-mode codes, bypasses MCP transport size constraints (per `docs/HARD-GATE-DISCIPLINE.md §Submitting the plan` and `branching-story-bootstrap/references/engine-envelope-shape.md §5` for the canonical size-threshold table). On successful submit, the engine returns a `PatchReceipt` containing `files_written[]` and `validators_run[]` (per `tools/patch-engine/src/envelope/schema.ts` `PatchReceipt` interface); report the receipt's `files_written` rather than re-listing directories. On `approval_replayed`, the prior submit already applied — inspect the receipt the prior submit returned rather than re-submitting.
     2. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
     3. `Edit worlds/<world-slug>/stories/<story-slug>/INDEX.md` LAST:
        - Update the branch's leaf entry (or add a new branch row if fork).
        - Update active-thread status changes.
        - Update the latest health snapshot.
        - If terminal: mark the branch's row terminal with the `terminal_reason`.
+       - For supersession entries, use the pattern `<new-id> (supersedes <old-id>)` for the active-thread row and `<old-id> (superseded by <new-id>)` for the branch row when the BR record itself was superseded.
        - `INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Edit`.
 
     Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. Page prose and `INDEX.md` remain direct markdown writes.
