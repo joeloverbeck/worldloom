@@ -80,6 +80,8 @@ Before approval, a patch plan can be validated through either the MCP tool or th
 node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
 ```
 
+Invoke the validate and submit patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+
 On `pass`, the CLI prints the validate status object, including `validators_run[]`, to stdout and exits 0. On `fail` or `skipped`, it prints the same status object to stderr and exits 1. `skipped` means the envelope could not be validated structurally; fix the `reason` before signing or submitting.
 
 **MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
@@ -90,7 +92,7 @@ On `pass`, the CLI prints the validate status object, including `validators_run[
 node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
 ```
 
-The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON and exits 1 (or 2 for argv errors).
+The CLI requires the plan to be persisted to a JSON file (skills already do this per §Issuing a token guidance — `/tmp/<plan-id>.json`) and the token to be persisted to a text file (single line, base64). Invoke it from the same project-root / active-worktree-root cwd described above. On success it prints the `PatchReceipt` to stdout as JSON and exits 0; on failure it prints the engine or MCP error object to stderr as JSON and exits 1 (or 2 for argv errors).
 
 **Submit equivalence guarantees**:
 

@@ -59,9 +59,11 @@ The CLI reads a JSON patch-plan envelope, computes `canonicalOpHash` for every `
 Large patch-plan envelopes can bypass MCP transport while still using the same handler code as the MCP tools:
 
 ```bash
-node dist/src/cli/validate-patch-plan.js <plan-path>
-node dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
+node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
 ```
+
+Invoke both patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
 
 `validate-patch-plan` prints the same status object as `mcp__worldloom__validate_patch_plan`, including `validators_run[]`: `pass` exits 0 on stdout; `fail` and `skipped` exit 1 on stderr. When a malformed envelope has multiple shape errors, `skipped.details.field` names the first offending path and `skipped.details.additional_errors[]` lists the remaining invalid-input errors. `submit-patch-plan` prints the same `PatchReceipt` / error family as `mcp__worldloom__submit_patch_plan`; it requires a signed approval token file.
 

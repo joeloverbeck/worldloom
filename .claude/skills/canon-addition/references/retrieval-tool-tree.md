@@ -56,11 +56,11 @@ Either path is valid. Prefer `get_records` when the needed ids are already known
 
 ## Phase 14a: Validation
 
-- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. Treat any `fail` as a loop-back to the phase that produced the bad field or missing update; treat `skipped` as envelope-shape repair before signing or submit.
+- `mcp__worldloom__validate_patch_plan(plan)` runs the validator stack against the assembled envelope. For envelopes >50KB, use the equivalent CLI path instead from the project root or active git worktree root: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>`. The CLI/engine path resolves world state from `process.cwd()`, so an invocation from another cwd can report `Index missing for world '<slug>'`. Treat any `fail` as a loop-back to the phase that produced the bad field or missing update; treat `skipped` as envelope-shape repair before signing or submit.
 
 ## Phase 15a: Submit After HARD-GATE
 
 - Persist the final envelope to `/tmp/<plan-id>.json`.
 - Issue the approval token with `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>`.
-- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval. For envelopes >50KB, use the equivalent CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`.
+- Call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and token after explicit user approval. For envelopes >50KB, use the equivalent CLI path instead from the project root or active git worktree root: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>`.
 - On `approval_expired`, re-sign and resubmit. On `approval_replayed`, do not resubmit. On `index_stale`, run `node tools/world-index/dist/src/cli.js sync <world-slug>` and resubmit the unchanged patch plan with the same approval token if it has not expired. On `validator_failed`, inspect `detail.verdicts[].location.file`: fix and resubmit only when the cited file is one of the records or hybrid PA/adjudication targets this patch plan creates or extends; if it names unrelated existing world state, pause and escalate instead of editing another canon-adjacent file.

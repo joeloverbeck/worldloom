@@ -143,6 +143,8 @@ Both validate paths route through the same `validate_patch_plan` handler and ret
 
 When using the CLI submit path, persist the envelope JSON to `/tmp/<plan-id>.json` and the signed token to `/tmp/<plan-id>.token` (single line, base64) before invoking the CLI. The validate CLI requires only the envelope JSON.
 
+Invoke both patch-plan CLIs from the project root or active git worktree root (the directory containing `worlds/`, `tools/`, and `docs/`). The CLI/engine path resolves world state from `process.cwd()` and opens the index at `worlds/<slug>/_index/world.db` via `tools/world-index/src/index/open.ts` `indexDirectoryForWorld`; running from another cwd can surface as `Index missing for world '<slug>'` even when the index exists under the repo root.
+
 ### Envelope-splitting fallback (when even the CLI submit hits limits)
 
 For exceptionally large bundles where even the CLI submit path's transport hits limits (rare; the CLI path is the established escape hatch for the MCP transport's smaller cap), the bootstrap may fall back to splitting the single envelope into multiple sequential envelopes. Atomicity is best preserved by the single-envelope-via-CLI path; envelope splitting trades structural atomicity for operator-managed sequential commits.
@@ -178,6 +180,7 @@ The patch engine and retrieval tools surface these failure modes; map each to th
 | `record_already_exists` | A `create_*_record` op's record-id already exists on disk. For bootstrap, this typically means the story bundle was partially committed by a prior failed run (per §5 envelope-splitting partial-failure). | Abort and investigate — the bundle is not in a fresh state. Clean up the partial `_source/` files before resubmitting. Do NOT blindly re-allocate. |
 | `id_allocation_race` | Verifier sees an allocation that does not match the engine's next-id calculation for that class. Either another plan landed concurrently or the allocation list is malformed. For bootstrap this is rare unless multiple bootstrap runs raced; for split envelopes it can fire if envelope N's allocations were computed before envelope N-1 committed. | Re-allocate IDs against current world state via `allocate_next_id` and rebuild the envelope. For split envelopes, re-sign each remaining envelope after fixing allocations. |
 | `missing_expected_id_allocation` | Per-op check found a `record.id` not listed in the corresponding allocation array. | Add the missing ID to the allocation list; re-validate. |
+| `Index missing for world '<slug>'` | The validate/submit CLI was likely invoked from the wrong cwd. The CLI/engine path derives `worldRoot` from `process.cwd()` before opening `worlds/<slug>/_index/world.db`. | Re-invoke from the project root or active git worktree root. If it still fails from that cwd, rebuild or inspect the world index. |
 
 ### Approval-token errors
 
