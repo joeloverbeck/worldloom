@@ -34,6 +34,8 @@ The `governor_nudge` from the previous turn's Phase 6 (or, on first turn, from t
 
 Pick K = 5. Weight each by score (softmax-style). Sample one. **NEVER always-take-top** — predictability becomes brittleness; weighted-pick lets the story breathe while still favoring relevance.
 
+Persist the top-K candidate ids + per-candidate scores + governor-nudge bias summary + jit-expansion-fired flag to the new page's `storylet_selection_audit_trail` field (per `references/record-schemas.md` §Page Record). This makes the weighted-pick discipline auditable retrospectively — `branching-story-health-audit` can verify the realized SLT was sampled from the distribution rather than always taken top, and reproduce the selection deterministically when a seed is recorded. Without this persistence, the discipline lives only in the operator's transient prose at Phase 10's deliverable summary; the persisted PG record loses the rejection-set evidence needed to confirm the pick was a sample rather than a deterministic top-1.
+
 ## JIT Expansion Trigger
 
 If no candidate scores above threshold (typically: top-K all score below `(median(score) + 1.0)`), AND the consequence-capacity check (Phase 3) passed only by JIT-generatable continuation, invoke `storylet-pool-authoring` as the **single-storylet JIT generator**:

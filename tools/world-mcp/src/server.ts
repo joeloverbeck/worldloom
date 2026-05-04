@@ -122,12 +122,20 @@ const getPersistedPacketSliceInputSchema = z.object({
   slice_path: z.string().min(1)
 });
 
+const listRecordFilterValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)
+]);
+
 const listRecordsInputSchema = z.object({
   world_slug: z.string().min(1),
   record_type: z.enum(SUPPORTED_LIST_RECORD_TYPES),
   story_slug: z.string().regex(STORY_SLUG_PATTERN).optional(),
   fields: z.array(z.string().min(1)).optional(),
-  include_full_body: z.boolean().optional()
+  include_full_body: z.boolean().optional(),
+  filters: z.record(z.string().min(1), listRecordFilterValueSchema).optional()
 });
 
 const getRecordFieldInputSchema = z.object({
@@ -350,7 +358,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return all indexed records of a supported atomic, hybrid, or story-bundle record type, with optional field projection or include_full_body metadata/body records. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
+    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }

@@ -48,6 +48,12 @@ this_page.state_snapshot = next_snapshot
 this_page.state_hash = hash(canonicalize(next_snapshot))
 ```
 
+## State-subset-list Semantics
+
+`obligations_open` / `obligations_paid_off` / `obligations_complicated` / `obligations_abandoned` are **cumulative-state subsets** of the obligation state space, not per-turn deltas. An obligation transitioned to complicated at PG-N stays in `obligations_complicated` of PG-N+1, PG-N+2, ... until either superseded again to a different status or abandoned; an obligation paid off at PG-N stays in `obligations_paid_off` of every subsequent page along the branch. The same cumulative-state interpretation applies to `consequences_pending` (CNSQ-NNNN records open until addressed or expired) and `consequences_addressed` (CNSQ-NNNN records remain visible in the addressed list across subsequent pages along the branch).
+
+Per-turn deltas live in the SE record's `ops` array (the supersession events themselves: `obligation_complicate` / `obligation_pay_off` / `obligation_abandon` / `consequence_address`). The state_snapshot fields are the post-replay register at this page — what state the branch IS in, not what changed THIS turn. This is what makes snapshot-replay equality (Phase 9 gate 4) computable: replaying the parent's snapshot through this turn's structured ops yields the new cumulative-state register, not a delta. Storylet-pool-authoring's `obligation_state` predicate (per `templates/predicate-dsl.md`) reads these subset arrays as cumulative state to determine whether a candidate storylet's hard_preconds are met against the current branch register.
+
 ## Consequence Persistence
 
 Each `required_aftermath` item from Phase 2 is instantiated as a `CNSQ-NNNN` record UNLESS it is already represented by a newly-opened OBL (when an aftermath is sufficiently structural that an obligation is the right primitive — e.g., "discover the body" is opened as an OBL while "guilt or justification" is a CNSQ).
