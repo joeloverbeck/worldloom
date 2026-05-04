@@ -4,6 +4,11 @@ import path from "node:path";
 import { OPERATION_KINDS, type OperationKind } from "@worldloom/patch-engine";
 
 import { MCP_TOOL_NAMES } from "../tool-names";
+import {
+  ceilingMetadata,
+  persistWithSummary,
+  type PersistedWithSummaryFields
+} from "./oversize-delivery";
 
 type JsonObject = { [key: string]: JsonValue };
 type JsonValue = JsonObject | JsonValue[] | string | number | boolean | null;
@@ -13,6 +18,7 @@ export interface DescribeEnvelopeSchemaArgs {
 }
 
 export interface DescribeEnvelopeSchemaResponse {
+  delivery_status: "inline";
   tool_names: {
     validate_patch_plan: string;
     submit_patch_plan: string;
@@ -22,6 +28,20 @@ export interface DescribeEnvelopeSchemaResponse {
   op_schemas: Record<string, JsonObject>;
   referenced_schemas: Record<string, JsonObject>;
 }
+
+export interface DescribeEnvelopeSchemaPersistedSummary {
+  tool: "describe_envelope_schema";
+  op_kind_filter: OperationKind | null;
+  op_schema_count: number;
+  available_op_kinds: OperationKind[];
+  source_paths: string[];
+  suggested_slice_paths: string[];
+  ceiling: ReturnType<typeof ceilingMetadata>;
+}
+
+export type DescribeEnvelopeSchemaResult =
+  | DescribeEnvelopeSchemaResponse
+  | PersistedWithSummaryFields<DescribeEnvelopeSchemaPersistedSummary>;
 
 const ID_ALLOCATION_KEYS = [
   "cf_ids",
@@ -428,13 +448,34 @@ function collectReferencedSchemas(opKinds: readonly OperationKind[]): Record<str
   return referenced;
 }
 
+function summarizeEnvelopeSchema(
+  args: DescribeEnvelopeSchemaArgs,
+  response: Omit<DescribeEnvelopeSchemaResponse, "delivery_status">
+): DescribeEnvelopeSchemaPersistedSummary {
+  const opKinds = Object.keys(response.op_schemas) as OperationKind[];
+  return {
+    tool: "describe_envelope_schema",
+    op_kind_filter: args.op_kind ?? null,
+    op_schema_count: opKinds.length,
+    available_op_kinds: [...OPERATION_KINDS],
+    source_paths: [...response.source_paths],
+    suggested_slice_paths: [
+      "envelope_schema",
+      "op_schemas",
+      ...opKinds.map((kind) => `op_schemas.${kind}`),
+      "referenced_schemas"
+    ],
+    ceiling: ceilingMetadata()
+  };
+}
+
 export async function describeEnvelopeSchema(
   args: DescribeEnvelopeSchemaArgs = {}
-): Promise<DescribeEnvelopeSchemaResponse> {
+): Promise<DescribeEnvelopeSchemaResult> {
   const opKinds = args.op_kind === undefined ? [...OPERATION_KINDS] : [args.op_kind];
   const opSchemas = Object.fromEntries(opKinds.map((kind) => [kind, operationSchema(kind)]));
 
-  return {
+  const response = {
     tool_names: {
       validate_patch_plan: MCP_TOOL_NAMES.validate_patch_plan,
       submit_patch_plan: MCP_TOOL_NAMES.submit_patch_plan
@@ -448,4 +489,10 @@ export async function describeEnvelopeSchema(
     op_schemas: opSchemas,
     referenced_schemas: collectReferencedSchemas(opKinds)
   };
+
+  return persistWithSummary(
+    `describe_envelope_schema-${args.op_kind ?? "all"}`,
+    response,
+    summarizeEnvelopeSchema(args, response)
+  );
 }

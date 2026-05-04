@@ -85,6 +85,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     assert.equal(field.value, "PG-0001");
 
     assert.ok(!("code" in records));
+    assert.equal(records.delivery_status, "inline");
     assert.deepEqual(records.records.map((entry) => entry.found), [true, true]);
 
     assert.ok(!("code" in fields));

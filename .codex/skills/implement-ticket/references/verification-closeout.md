@@ -39,6 +39,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - For atomic-source `world-index` tickets, confirm `world-index verify` understands synthetic logical rows before using it as acceptance proof. If it treats retired root markdown paths as disk paths or otherwise reports atomic-mode drift, use `build`, focused validators, and direct DB checks as the truthful proof surface, then record the verify limitation.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
 - If a broad package suite rebuilds successfully and the owned focused compiled tests pass, but the broad suite still exits non-zero, classify the failure before closeout instead of forcing the broad lane. Name the exact unrelated failing test files or subtests, the diagnostic command used to isolate them, and the focused owned proof command that remains the ticket's truthful acceptance surface in `## Deviations` / `## Verification Result`.
+- If a verification command passes but emits warnings, skipped-record diagnostics, deprecations, package-manager notices, or other visible non-fatal output, classify the output before closeout. Record relevant non-owned warnings in `## Verification Result` or `## Deviations` when omitting them would make the proof sound cleaner than the actual run.
 - After the final edit, rerun the narrowest affected proof.
 - Do not overclaim broad verification when only a narrower surface was honestly proved.
 
@@ -92,6 +93,7 @@ For long tickets, use this expedited stale-anchor pass before final response:
 - `Files to Touch`: exact landed file set, including same-seam docs/tests discovered during reassessment.
 - `What to Change` / `Landed Changes`: no future-tense implementation plan unless explicitly labelled historical.
 - `Verification Layers`, `Acceptance Criteria`, and `Test Plan`: exact proof commands or manual review surfaces actually used.
+- Stale-anchor proof commands recorded in the ticket have been rerun with shell-safe quoting; use single-quoted literals, escaped active characters, or split patterns for backticks, `$`, pipes, and parentheses.
 - `Outcome`, `Verification Result`, and `Deviations`: current closeout facts, with stale drafted commands and superseded assumptions labelled as historical evidence.
 - stale command fragments, old fixture names, placeholder alternatives, and old proof options have been grepped or manually scanned and resolved.
 

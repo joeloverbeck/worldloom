@@ -20,6 +20,8 @@ Use one of two recovery paths:
 
 Either path is valid. Prefer `get_records` when the needed ids are already known; prefer `get_persisted_packet_slice` when the packet's ranking-profile context is the thing being inspected. Treat the persisted file as session-local.
 
+`get_records` can also return a second-level `delivery_status: persisted_with_summary` response when the full batch would exceed the inline ceiling. In that case, use the returned `summary.records[]` metadata to identify the needed index and recover the full entry through `mcp__worldloom__get_persisted_packet_slice(persisted_path=<persisted_output_path>, slice_path='records[<N>]')`, or the parsed body directly with `slice_path='records[<N>].record.record'` for atomic records. Do not parse external harness error strings or manually `jq` a harness-saved file; the persisted path and slice grammar are MCP-side recovery contract.
+
 ## Phase 0-2: Normalize, Scope, Invariants
 
 - `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for known sets of CF / M / OQ / SEC ids the proposal cites directly or indirectly. Use singular `mcp__worldloom__get_record(record_id)` when exactly one record is needed or the next id depends on reading the prior result. Do not reason from context-packet previews alone when validating a proposal's claim about existing canon.
@@ -49,7 +51,8 @@ Either path is valid. Prefer `get_records` when the needed ids are already known
 
 ## Phase 13a: Patch-Plan Assembly
 
-- No new retrieval call is required by default. Assemble `PatchOperation[]` from the phase evidence above, including the bidirectional `required_world_updates` / `append_touched_by_cf` pair for every affected SEC.
+- No new retrieval call is required by default. Assemble `PatchOperation[]` from the phase evidence above, including the bidirectional `required_world_updates` / `append_touched_by_cf` + `append_extension` triple for every affected SEC. The `append_touched_by_cf` provides index-level discoverability (`find_sections_touched_by` reverse-lookup); the `append_extension` is REQUIRED to satisfy `rule5_no_consequence_evasion` — `append_touched_by_cf` alone does NOT credit the SEC-side patch. See `references/engine-envelope-shape.md` §8 for the validator-behavior rationale.
+- `mcp__worldloom__describe_envelope_schema(op_kind?)` should be narrowed with `op_kind` when the phase only needs one operation wrapper. If an unfiltered call returns `delivery_status: persisted_with_summary`, either re-query with the specific `op_kind` named in `summary.available_op_kinds` or recover the needed schema with `get_persisted_packet_slice(persisted_path, 'op_schemas.<op_kind>')`.
 
 ## Phase 14a: Validation
 
