@@ -37,6 +37,8 @@ Use this compact checklist so required references are not skipped:
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
 4. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 
+Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, or closeout guidance, prefer the focused reference files above instead of expanding `SKILL.md`.
+
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.
@@ -53,6 +55,7 @@ Use this compact checklist so required references are not skipped:
 - Read the current ticket contract from `tickets/_TEMPLATE.md` and `tickets/README.md`; do not rely on memory.
 - Open every explicit `Deps` path, evidence-ticket path, or archived-ticket path named by the ticket before coding. For completed or archived dependencies, inspect closeout sections such as `## Outcome`, `## Verification Result`, and `## Deviations` for same-seam fallout that may already partially implement, narrow, or contradict the active ticket. If a named dependency is intentionally not authoritative for this run, record why in `Assumption Reassessment`.
 - If a `Deps` entry is a symbolic ticket/spec id rather than a path, resolve it with `rg --files` or an equivalent exact-path search before treating it as missing.
+- When using `rg`, `grep`, or shell searches over markdown/code literals, quote shell-active patterns safely from the start. Prefer single-quoted literal patterns for backticks, `$`, pipes, and parentheses; for example: ``rg -n 'No `foo` entry' ticket.md``.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
 - For detailed package/tool command, fixture, workspace, dependency, and compile-gate checks, use `references/package-tooling.md` after classification instead of keeping those narrow rules in the top-level flow.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
@@ -224,31 +227,9 @@ Load `references/verification-closeout.md` from this skill directory (`.codex/sk
 
 Run the narrowest correct verification first, then broaden as needed.
 
-For end-to-end validation tickets, if the drafted acceptance story assumes the composed command already passes, the first narrow proof may be the real package-local command itself or a minimal direct probe of that command's failing seam.
+Use `references/verification-closeout.md` for detailed proof-narrowing rules, including failed broad lanes, stale fixtures, generated artifacts, shell-safe stale-anchor sweeps, and compiled-output probes.
 
-If the drafted narrow proof fails without enough detail to expose the real seam, capture a minimal reproducer or direct probe of the affected function before editing. Use that narrower evidence to confirm the actual bug boundary, then rerun the honest ticket proof after the fix.
-
-For shared package-export tickets, use this quick pre-proof checklist before trusting the consumer lane:
-
-1. producer exports are truthful in `package.json`
-2. producer build emits the runtime file and declaration file named by that export
-3. consumer proof runs from the real package root after refreshing any local sibling dependency link/install state
-4. the consumer's installed dependency artifact contains the new or changed symbols that the proof is meant to exercise
-5. existing public-surface tests with import-time IO or side-effect guards still pass, or are extended to cover the new export
-
-If an initial broad package/workspace lane fails and the failure is already clearly outside the owned seam, do not leave that lane in `Acceptance Criteria` or `Test Plan` while implementing. Rewrite the ticket immediately to the honest narrower proof boundary, then continue.
-
-If the symptom is already reproduced but multiple same-seam fixes remain plausible, run a narrow source-to-emission probe before editing so the patch stays minimal and the ticket does not overclaim a broader implementation shape.
-
-If a broader proof copies a live world tree or fixture and inherits generated state, clean or account for that copied state before treating the failure as ticket evidence. Record that harness correction in `Assumption Reassessment` or `## Deviations` when it materially changes the proof story.
-
-If a fixture-backed command or integration test fails after a contract shift, first decide whether the assertion itself is stale or whether the fixture no longer declares the authority source that the assertion expects. When the assertion still matches the live contract, prefer fixing the fixture input and record the ticket as fixture-proof alignment rather than test-harness logic change.
-
-If the drafted proof uses a CLI, confirm the command's working-directory contract before recording it in the ticket. If the CLI resolves paths from `process.cwd()` or another ambient root, either run it from the truthful root or switch to a narrower direct probe that exercises the same owned seam.
-
-If the ticket adds a runnable shell script or npm-script proof surface, apply the same package-root discipline inside the script itself: embedded `node`, `node -e`, or similar package-local probes must launch from the root where local dependencies actually resolve, even when the artifact under inspection lives elsewhere in the repo.
-
-If any ticket classification uses a compiled artifact under `dist/` or another generated output as proof, verify artifact freshness before trusting the result. Prefer running the package build first. If a rebuild is intentionally skipped, compare the exercised source/generated seam or record why the existing generated artifact is the intended proof surface, especially in a dirty worktree with same-package source edits.
+For package/tool proof details, use `references/package-tooling.md`: package roots, build/test scripts, local dependency freshness, public export checks, ignored artifact snapshots, same-package docs/examples, and direct-MCP substitution rules all live there.
 
 In Codex, if a package or CLI proof fails with sandbox-looking child-process errors such as `EPERM` from spawning the built CLI, `git`, `node`, or another subprocess, treat the first failure as a possible environment restriction rather than immediate code evidence. Rerun the same command with the required escalation, then record both the sandbox failure and the successful/failed escalated result in closeout so verification history is truthful.
 
@@ -287,35 +268,15 @@ Update the active ticket before finishing:
 - `## Outcome`
 - `## Verification Result`
 - optional `## Deviations`
-- compare the landed file set against `Files to Touch` and `Test Plan` / `New/Modified Tests`, using both `git diff --name-only` and `git status --short` so newly-created untracked files are not missed; then patch the ticket if any touched file or exercised proof surface is still missing. Do not rely on `git diff --stat` or `git diff --name-only` alone for file-set summaries when new files may still be untracked; `git status --short` is the authoritative added-file surface in that case.
-- when `git status --short` shows untracked owned files, re-read those files directly or use an explicit no-index diff before final response; normal `git diff`, `git diff --stat`, and path-specific `git diff -- <new-file>` do not show untracked content until the file is staged.
-- when owned files are untracked, run a no-index whitespace check or equivalent hygiene check for each untracked owned file, such as `git diff --check --no-index /dev/null <path>`. Treat exit code 1 with no output as the expected "files differ" signal for no-index checks, not as a whitespace failure.
-- if the ticket changed a shared contract or canonical authority surface, re-check same-seam proof scripts/fixtures referenced by the repo or adjacent tests and make their expectations truthful before finishing
-- if the ticket changed a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness sets, and neighboring same-seam assertions from the final post-fix artifact so the closeout does not preserve stale pre-fix evidence
-- compare the edited ticket against `tickets/_TEMPLATE.md` and fix any malformed structure exposed during reassessment or closeout (for example: non-sequential numbering, stale placeholder alternatives, or sections whose shape no longer matches the template contract)
-- if the ticket contains embedded code snippets, pseudocode, or literal algorithm sketches, compare them against the landed seam before finishing; update or remove any snippet that no longer matches the truthful final implementation boundary
-- if `What to Change`, `Architecture Check`, or another completed-ticket section contains illustrative code or scenario sketches, either update them to landed helper names and command shapes or replace them with prose; do not leave contradicted examples under a completed ticket
-- if the ticket touched `worlds/<slug>/` content, do not rely on git-tracked diff alone for the previous check; confirm the touched world files directly or with ignored-path-aware checks so closeout stays truthful even when world content is gitignored
-- if the ticket created or changed an ignored `worlds/<slug>/` artifact, verify the exact owned path directly, not just the ignored parent directory; use a direct read, parser probe, count check, or other path-specific assertion that proves the intended file exists and has the expected shape
-- if verification rebuilt a live-world index or other derived artifact, classify the resulting dirty state explicitly as expected derived dirt, cleaned state, or unexpected source fallout before finalizing
-- if package-manager, build, test, formatter, generator, or codegen commands created or changed ignored package/tool artifacts such as `node_modules/`, `dist/`, coverage output, caches, or compiled test output, classify that ignored state explicitly as expected generated ignored artifacts, cleaned state, or unexpected fallout before finalizing
-- if a local sibling package or `file:` dependency was refreshed for proof, record whether the consumer's installed dependency was a symlink or copied install and cite the consumer-resolved artifact check used to prove the consumer saw the changed producer surface
-- if package-manager commands emitted security, deprecation, or funding warnings that were not repaired because they were outside scope, mention them in `## Verification Result` or `## Deviations` so closeout does not imply a cleaner dependency state than was observed
-- after the final verification rerun, run the detailed completed-ticket truth pass and stale-anchor sweeps in `references/verification-closeout.md`; it carries the shell-safe grep, historical-evidence, dependency/follow-up, and final-proof timing rules
-- completed-ticket final hard stop: confirm `Status`, historicalized fixed defects in `Problem`, `Verification Layers`, `Acceptance Criteria`, `Test Plan`, `Files to Touch`, `## Outcome`, `## Verification Result`, and `## Deviations` all describe the landed files and commands actually run. Do not leave active proof text claiming direct MCP calls, broad validators, skill dry-runs, fixture paths, or command fragments that were not exercised.
-- when running closeout stale-anchor sweeps over markdown code spans, commands, backticks, `$`, pipes, or parentheses, use single-quoted literal patterns, escaped active characters, or split-safe literal searches. Do not use double-quoted patterns that let the shell execute code-span text.
-- when the active ticket completes a named dependency, deferred follow-up, or known-debt item, truth direct dependency/status wording in active same-family or direct follow-up tickets before final proof when practical; do not edit the follow-up's owned implementation prose unless the active ticket owns that implementation
-- after the final verification rerun, also re-read any edited non-generated docs or READMEs that the ticket touched so same-seam truthing is complete and partially corrected paths, statuses, or design references do not survive closeout
-- after changing an MCP tool's public behavior, enum surface, input schema, or scope, grep registered tool descriptions and `describe_capabilities`-visible metadata for stale same-seam wording before final response
-- after editing `.claude/skills/<skill>/references/*`, `.claude/skills/<skill>/templates/*`, or another skill-local reference for a changed command, tool, fallback, or contract shape, grep and re-read the parent `.claude/skills/<skill>/SKILL.md` for stale same-seam summary, gate, and pointer language before final response; truth it in the active ticket when the parent skill still prescribes the old behavior
-- for `tool or script implementation` tickets whose landed behavior changes a package-local contract, perform the package/tool closeout hard stop in `references/package-tooling.md`: inspect adjacent same-package user-facing docs and examples even if the ticket did not name them explicitly, then either truth them or record why they are outside the active seam
-- for tickets that add or change a user-facing CLI, workflow command, or machine-layer command surface, inspect repo-level quick-reference docs such as `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention that command surface; truth stale same-seam references or record why another ticket owns them
-- for shared-contract tickets, also inspect repo-level authoritative docs or examples outside the package when the live repo treats them as schema authority, generated input, or test-parsed contract fixtures
-- when a ticket belongs to an active spec family, check implementation-order or roadmap/status tables such as `specs/IMPLEMENTATION-ORDER.md` for same-seam pending/completed wording even when archival is not in scope
-- apply `references/dirty-worktree-ledger.md` before final response; explicitly distinguish owned edits, untracked owned files, pre-existing dirt, externally appeared changes, same-family sibling scope, and expected ignored artifacts in the final response or ticket closeout
-- for completed tickets, replace directory-level `Files to Touch`, `New/Modified Tests`, or proof placeholders with the concrete landed file paths unless the whole directory was genuinely owned; directory placeholders are acceptable in a plan but not as the final file-set record
-- run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, or skill files
-- when the ticket claims wholesale replacement, removal, or rename of an old implementation path, confirm the superseded files are actually deleted or moved before finishing; if the live seam was removal of an activation path rather than deletion of shared utilities, make the ticket truthfully say which utilities, fixtures, or low-level parsers remain and why
+
+Then run the closeout hard stops from the focused references:
+
+- Use `references/verification-closeout.md` for completed-ticket truthing, stale-anchor sweeps, historicalized problem text, exact proof-command wording, shell-safe grep patterns, and final-proof timing.
+- Use `references/package-tooling.md` for package/tool public-surface sweeps, package docs/examples, `describe_capabilities` metadata, local dependency refresh, and generated/ignored package artifacts.
+- Use `references/dirty-worktree-ledger.md` for final ownership classification, including untracked owned files, pre-existing dirt, externally appeared changes, sibling scope, and expected ignored artifacts.
+- If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
+- If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
+- Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, tickets, or skill files.
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 

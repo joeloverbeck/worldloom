@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import {
@@ -17,6 +19,35 @@ import {
 } from "@worldloom/world-index/public/canonical-vocabularies";
 
 import { getCanonicalVocabulary } from "../../src/tools/get-canonical-vocabulary";
+
+function changeLogMysteryReserveEffectEnum(): string[] {
+  const schemaPath = path.resolve(
+    process.cwd(),
+    "..",
+    "..",
+    "tools",
+    "validators",
+    "src",
+    "schemas",
+    "change-log-entry.schema.json"
+  );
+  const schema = JSON.parse(readFileSync(schemaPath, "utf8")) as {
+    properties?: {
+      scope?: {
+        properties?: {
+          mystery_reserve_effect?: {
+            enum?: unknown[];
+          };
+        };
+      };
+    };
+  };
+
+  const values = schema.properties?.scope?.properties?.mystery_reserve_effect?.enum;
+  assert.ok(Array.isArray(values));
+  assert.ok(values.every((value): value is string => typeof value === "string"));
+  return values;
+}
 
 test("getCanonicalVocabulary returns canonical domains from the shared module", async () => {
   const result = await getCanonicalVocabulary({ class: "domain" });
@@ -87,6 +118,19 @@ test("getCanonicalVocabulary returns change types from the live schema contract"
   assert.ok(result.canonical_values.includes("de_canonization"));
 });
 
+test("getCanonicalVocabulary returns mystery reserve effects from the change-log schema contract", async () => {
+  const result = await getCanonicalVocabulary({ class: "mystery_reserve_effect" });
+
+  assert.ok(!("code" in result));
+  assert.deepEqual(result.canonical_values, changeLogMysteryReserveEffectEnum());
+  assert.deepEqual(result.canonical_values, [
+    "unchanged",
+    "expands",
+    "narrows",
+    "narrows_via_firewalls_and_expands_via_new_entries"
+  ]);
+});
+
 test("getCanonicalVocabulary returns invariant revision difficulties", async () => {
   const result = await getCanonicalVocabulary({ class: "revision_difficulty" });
 
@@ -143,6 +187,7 @@ test("getCanonicalVocabulary rejects unsupported vocabulary classes", async () =
     "entity_kind",
     "sec_file_class",
     "change_type",
+    "mystery_reserve_effect",
     "revision_difficulty",
     "cf_type"
   ]);
