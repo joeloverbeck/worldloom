@@ -204,14 +204,18 @@ test("submitPatchPlan rejects unsigned, expired, tampered, and replayed approval
   const ids = nextCanonAdditionIds(world);
   const { envelope, token } = canonAdditionEnvelope(world, ids, secret);
 
-  assertEngineError(
-    await submitPatchPlan(envelope, "not a token!", {
-      worldRoot: world.worldRoot,
-      hmacSecretPath: secretPath,
-      preApplyValidator: OK_VALIDATOR
-    }),
-    "approval_malformed"
-  );
+  const malformed = await submitPatchPlan(envelope, "not a token!", {
+    worldRoot: world.worldRoot,
+    hmacSecretPath: secretPath,
+    preApplyValidator: OK_VALIDATOR
+  });
+  assertEngineError(malformed, "approval_malformed");
+  assert.equal(typeof malformed.detail, "string");
+  const malformedDetail = malformed.detail as string;
+  assert.match(malformedDetail, /token contains invalid base64/);
+  assert.match(malformedDetail, /sign-approval-token/);
+  assert.match(malformedDetail, /HARD-GATE-DISCIPLINE/);
+
   assertEngineError(
     await submitPatchPlan(envelope, signedToken({ envelope, secret, expiresAt: "2000-01-01T00:00:00.000Z" }), {
       worldRoot: world.worldRoot,
