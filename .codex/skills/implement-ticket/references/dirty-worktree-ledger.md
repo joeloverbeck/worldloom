@@ -16,6 +16,8 @@ Maintain a compact ledger with these categories:
 
 Refresh the ledger before final response using both `git status --short` and any package/world ignored-aware status needed for the ticket. Do not rely on `git diff --name-only` alone; untracked ticket files and generated ignored artifacts can be invisible there.
 
+When the worktree has unrelated dirt, use full `git status --short` for ownership discovery, then use path-scoped `git diff -- <owned paths>` and `git diff --stat -- <owned paths>` for the active ticket's change summary once owned paths are known. Keep unrelated dirty paths in the ledger, but do not let broad diff/stat output inflate the active ticket's file list.
+
 ## Final Response Template
 
 Use a compact ledger in the final response when the worktree was dirty or ignored artifacts matter:

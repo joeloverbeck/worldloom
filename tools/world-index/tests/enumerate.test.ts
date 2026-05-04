@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -74,6 +74,57 @@ test("unexpected markdown paths are reported while hidden files remain excluded"
     assert.equal(result.unexpected.includes("audits/AU-0001/notes.txt"), true);
     assert.equal(result.indexable.includes(".hidden.md"), false);
     assert.equal(result.unexpected.includes(".hidden.md"), false);
+  } finally {
+    cleanup(path.dirname(worldRoot));
+  }
+});
+
+test("story-bundle markdown paths are recognized as indexable closed inventory", () => {
+  const worldRoot = createFixtureWorldRoot();
+
+  try {
+    for (const relativeFilePath of [
+      "stories/foo/STORY_KERNEL.md",
+      "stories/foo/pages-prose/PG-0001.md",
+      "stories/foo/storylet-batches/SLB-0001.md",
+      "stories/foo/story-promotions/SP-0001.md",
+      "stories/foo/audits/SAU-0001-2026-05-04.md",
+      "stories/foo/audits/SAU-0001/remediation-storylet-proposals/RSP-0001-fix-thread-coverage.md",
+      "stories/foo/character-proposals/NCP-0001-sample.md",
+      "stories/foo/character-proposals/batches/NCB-0001.md",
+      "stories/foo/notes.md",
+      "stories/foo/scratch/draft.md",
+      "stories/foo/audits/SAU-0001/RSP-0001.md"
+    ]) {
+      const absoluteFilePath = path.join(worldRoot, relativeFilePath);
+      mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
+      writeFileSync(absoluteFilePath, "# Fixture\n", "utf8");
+    }
+
+    const result = enumerate(worldRoot);
+
+    for (const expected of [
+      "stories/foo/STORY_KERNEL.md",
+      "stories/foo/pages-prose/PG-0001.md",
+      "stories/foo/storylet-batches/SLB-0001.md",
+      "stories/foo/story-promotions/SP-0001.md",
+      "stories/foo/audits/SAU-0001-2026-05-04.md",
+      "stories/foo/audits/SAU-0001/remediation-storylet-proposals/RSP-0001-fix-thread-coverage.md",
+      "stories/foo/character-proposals/NCP-0001-sample.md",
+      "stories/foo/character-proposals/batches/NCB-0001.md"
+    ]) {
+      assert.equal(result.indexable.includes(expected), true);
+      assert.equal(result.unexpected.includes(expected), false);
+    }
+
+    for (const unexpected of [
+      "stories/foo/notes.md",
+      "stories/foo/scratch/draft.md",
+      "stories/foo/audits/SAU-0001/RSP-0001.md"
+    ]) {
+      assert.equal(result.unexpected.includes(unexpected), true);
+      assert.equal(result.indexable.includes(unexpected), false);
+    }
   } finally {
     cleanup(path.dirname(worldRoot));
   }

@@ -95,11 +95,9 @@ If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, valid
 
 For staged validator/schema/parser details, prefer `references/validator-schema-migrations.md` as the detailed authority and keep this top-level workflow as the routing checklist.
 
-If the ticket mutates world canon, retcons canon history, reconciles `_source/*.yaml` records, or performs canon-safe cleanup through existing patch-engine ops, classify it as `canon-mutating world-content cleanup`. Read `docs/HARD-GATE-DISCIPLINE.md` before preparing or submitting a plan. If `mcp__worldloom__submit_patch_plan` is unavailable, load `references/patch-engine-codex-fallback.md`. If the proof uses `_index/world.db`, `world-index sync`, or `world-index verify`, also load `references/world-index.md`. Verify ignored `worlds/<slug>/` source and derived artifacts directly because git status is not exhaustive for world content.
+If the ticket mutates world canon, retcons canon history, reconciles `_source/*.yaml` records, or performs canon-safe cleanup through existing patch-engine ops, classify it as `canon-mutating world-content cleanup`. Read `docs/HARD-GATE-DISCIPLINE.md` before preparing or submitting a plan. If `mcp__worldloom__submit_patch_plan` is unavailable, load `references/patch-engine-codex-fallback.md`. If the proof uses `_index/world.db`, `world-index sync`, or `world-index verify`, also load `references/world-index.md`.
 
-When the ticket changes a user-facing tool inventory, command surface, package entrypoint, or registration list, inspect adjacent same-package README/example inventory during reassessment before the first code edit, not only during closeout.
-
-For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, or validator capstone tickets, apply the focused live-corpus, disposition-policy, fail-closed, and mechanized-vs-manual scenario guidance in `references/validator-schema-migrations.md`.
+For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and world-index proof details, use the focused reference files rather than expanding this top-level router.
 
 ### 1. Load the ticket context
 
@@ -116,6 +114,8 @@ For validator, audit, live-corpus baseline, grandfathering, waiver, allowlist, o
 11. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+
+If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.
 
 ### 2. Reassess assumptions before coding
 

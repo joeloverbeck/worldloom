@@ -55,6 +55,15 @@ const STORY_SOURCE_DIRECTORIES = new Set([
   "storylets",
   "artifacts"
 ]);
+const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
+const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
+  "pages-prose",
+  "storylet-batches",
+  "story-promotions",
+  "audits",
+  "character-proposals"
+]);
+const STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES = new Set(["batches"]);
 
 /**
  * Enumerates disk-backed world files that the indexer may process directly.
@@ -190,6 +199,40 @@ function isIndexablePath(relativePath: string): boolean {
     segments.length === 4 &&
     segments[0] === "audits" &&
     segments[2] === "retcon-proposals"
+  ) {
+    return true;
+  }
+
+  if (
+    segments.length === 3 &&
+    segments[0] === "stories"
+  ) {
+    return STORY_PRIMARY_AUTHORED_FILES.has(basename);
+  }
+
+  if (
+    segments.length === 4 &&
+    segments[0] === "stories"
+  ) {
+    const bundleDirectory = segments[2];
+    return bundleDirectory ? STORY_BUNDLE_MARKDOWN_DIRECTORIES.has(bundleDirectory) : false;
+  }
+
+  if (
+    segments.length === 5 &&
+    segments[0] === "stories" &&
+    segments[2] === "character-proposals"
+  ) {
+    const subdirectory = segments[3];
+    return subdirectory ? STORY_BUNDLE_CHARACTER_PROPOSAL_SUBDIRECTORIES.has(subdirectory) : false;
+  }
+
+  if (
+    segments.length === 6 &&
+    segments[0] === "stories" &&
+    segments[2] === "audits" &&
+    /^SAU-\d+$/.test(segments[3] ?? "") &&
+    segments[4] === "remediation-storylet-proposals"
   ) {
     return true;
   }
