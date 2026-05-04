@@ -79,6 +79,14 @@ export interface ListRecordsResponse {
   truncated: false;
 }
 
+const HYBRID_METADATA_FIELD_KEYS = [
+  "record_id",
+  "record_kind",
+  "title",
+  "content_hash",
+  "file_path"
+] as const;
+
 const RECORD_TYPE_TO_NODE_TYPE: Record<ListRecordType, NodeType> = {
   canon_fact: "canon_fact_record",
   change_log_entry: "change_log_entry",
@@ -152,6 +160,20 @@ function projectRecord(record: ListedRecord, fields: string[] | undefined): List
   return projected;
 }
 
+function hasProjectionFields(fields: string[] | undefined): fields is string[] {
+  return fields !== undefined && fields.length > 0;
+}
+
+function unknownHybridProjectionKeys(fields: string[] | undefined): string[] {
+  if (!hasProjectionFields(fields)) {
+    return [];
+  }
+
+  return fields.filter(
+    (field) => !(HYBRID_METADATA_FIELD_KEYS as readonly string[]).includes(field)
+  );
+}
+
 function hasFilters(filters: ListRecordFilters | undefined): filters is ListRecordFilters {
   return filters !== undefined && Object.keys(filters).length > 0;
 }
@@ -214,6 +236,32 @@ function unknownFilterKeys(
 
   return Object.keys(filters).filter((path) =>
     parsedRecords.every((record) => valueAtDottedPath(record, path) === undefined)
+  );
+}
+
+function unknownProjectionKeys(
+  recordType: ListRecordType,
+  projectionSources: ListedRecord[],
+  fields: string[] | undefined,
+  includeFullBody: boolean | undefined
+): string[] {
+  if (includeFullBody === true || !hasProjectionFields(fields)) {
+    return [];
+  }
+
+  const nodeType = RECORD_TYPE_TO_NODE_TYPE[recordType];
+  if (getHybridKind(nodeType) !== null) {
+    return unknownHybridProjectionKeys(fields);
+  }
+
+  if (projectionSources.length === 0) {
+    return [];
+  }
+
+  return fields.filter((field) =>
+    projectionSources.every(
+      (record) => !Object.prototype.hasOwnProperty.call(record, field)
+    )
   );
 }
 
@@ -324,6 +372,7 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
 
     const parsedRows: Array<{
       filterSource: Record<string, unknown>;
+      projectionSource: ListedRecord;
       output: ListedRecord | ListedFullBodyRecord;
     }> = [];
     for (const row of rows) {
@@ -333,24 +382,28 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
         if (isMcpError(parsed)) {
           return parsed;
         }
+        const projectionSource = withHybridRecord(row, hybridKind, parsed);
         parsedRows.push({
           filterSource: hybridFilterSource(hybridKind, parsed),
+          projectionSource,
           output:
             args.include_full_body === true
               ? withHybridFullBody(row, hybridKind, parsed)
-              : projectRecord(withHybridRecord(row, hybridKind, parsed), args.fields)
+              : projectionSource
         });
       } else {
         const parsed = parseRecordBody(row);
         if (isMcpError(parsed)) {
           return parsed;
         }
+        const projectionSource = withRecordId(row, parsed);
         parsedRows.push({
           filterSource: parsed,
+          projectionSource,
           output:
             args.include_full_body === true
               ? withFullBody(row, parsed)
-              : projectRecord(withRecordId(row, parsed), args.fields)
+              : projectionSource
         });
       }
     }
@@ -367,12 +420,34 @@ async function listRecordsImpl(args: ListRecordsArgs): Promise<ListRecordsRespon
       });
     }
 
+    const unknownFieldKeys = unknownProjectionKeys(
+      args.record_type,
+      parsedRows.map((entry) => entry.projectionSource),
+      args.fields,
+      args.include_full_body
+    );
+    if (unknownFieldKeys.length > 0) {
+      return createMcpError("invalid_input", `Unknown list_records fields key '${unknownFieldKeys[0]}'.`, {
+        field: "fields",
+        unknown_projection_keys: unknownFieldKeys,
+        record_type: args.record_type
+      });
+    }
+
     const filters = hasFilters(args.filters) ? args.filters : undefined;
     const records = filters !== undefined
       ? parsedRows
           .filter((entry) => matchesFilters(entry.filterSource, filters))
-          .map((entry) => entry.output)
-      : parsedRows.map((entry) => entry.output);
+          .map((entry) =>
+            args.include_full_body === true
+              ? entry.output
+              : projectRecord(entry.output as ListedRecord, args.fields)
+          )
+      : parsedRows.map((entry) =>
+          args.include_full_body === true
+            ? entry.output
+            : projectRecord(entry.output as ListedRecord, args.fields)
+        );
 
     return {
       records,

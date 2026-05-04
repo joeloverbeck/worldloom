@@ -32,7 +32,7 @@ This fallback covers the three cases the call shape surfaces:
 
 - the packet returns `packet_incomplete_required_classes` because even `local_authority` cannot fit, or because the governing-context full bodies reserved for Phase 7a/7b cannot fit under the token or effective harness ceiling;
 - the packet returns successfully but `truncation_summary.dropped_layers` is non-empty (expected for broad seeds in mature worlds, and recoverable through targeted retrieval);
-- the packet returns `task_header.delivery_status === 'persisted_with_summary'` because the full packet exceeded the MCP transport inline limit and was package-persisted (now rare at the default budget; it usually signals an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling).
+- the packet returns `task_header.delivery_status === 'persisted_with_summary'` because the full packet exceeded the MCP transport inline limit and was package-persisted (common at the default budget for moderately-broad seed sets in mature worlds — does not necessarily signal an unusually broad seed set, an unusually rich authority record, or an overridden/lower harness ceiling; the fallback path of `governing_summary` + targeted `get_records` is the documented happy-path response when this fires, not an exceptional branch).
 
 In any case, do NOT silently proceed without world-state load. Apply this two-step fallback in order:
 
@@ -82,7 +82,7 @@ These remain primary-authored at the world root and are read directly:
 
 For continuity-preservation reads at Pre-flight:
 
-- `worlds/<world-slug>/characters/<existing-slug>.md` — retrieve any existing dossier whose contents constrain the new character via `mcp__worldloom__get_record('CHAR-NNNN')` (returns parsed frontmatter + body sections); use `get_record('CHAR-NNNN', section_path='frontmatter.notes')` or `section_path='body.Canon Safety Check Trace'` for narrow projection. Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable; established protagonist-tier dossiers commonly cross the Read tool's token limit (the Read tool caps file content at ~25,000 tokens; protagonist-tier dossiers like Marla Kern in `erotica-world` run 80KB+ and refuse to load via direct `Read`), which `get_record` projection avoids.
+- `worlds/<world-slug>/characters/<existing-slug>.md` — retrieve any existing dossier whose contents constrain the new character via `mcp__worldloom__get_record('CHAR-NNNN')` (returns parsed frontmatter + body sections); use `get_record('CHAR-NNNN', section_path='frontmatter.notes')` or `section_path='body.Canon Safety Check Trace'` for narrow projection. **The CHAR-NNNN id must be obtained first** via the slug-to-CHAR-id resolution recipe in `SKILL.md` §Pre-flight (Continuity-preservation read) — `find_named_entities` returns `entity:<slug>` ids only, not CHAR-NNNN ids, so a separate `list_records(world_slug, record_type='character_record', include_full_body=true)` enumeration or per-dossier `Read worlds/<slug>/characters/<existing-slug>.md` with `limit=10` for the `character_id:` frontmatter line is needed to bridge the slug→CHAR-id gap; do NOT guess from alphabetical INDEX.md ordering (IDs are by allocation order, not slug order). Fallback: direct `Read` of the dossier file for pre-CORRIDOR-004 worlds where hybrid-record retrieval is unavailable; established protagonist-tier dossiers commonly cross the Read tool's token limit (the Read tool caps file content at ~25,000 tokens; protagonist-tier dossiers like Marla Kern in `erotica-world` run 80KB+ and refuse to load via direct `Read`), which `get_record` projection avoids.
 - `worlds/<world-slug>/characters/INDEX.md` — direct Read; quick scan for slug references when resolving "are any existing characters mentioned in this brief?"
 
 ## Phase-to-record mapping
@@ -116,4 +116,4 @@ Enforced by Pre-flight (canonical abort messages live in the thin SKILL.md):
 
 - `worlds/<world-slug>/` missing
 - `worlds/<world-slug>/characters/<char-slug>.md` already exists (slug collision; this skill never overwrites a dossier — the engine's `file_already_exists` check is the second backstop)
-- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; rebuild via `world-index build` before proceeding)
+- `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; refresh via `world-index sync` before proceeding, or `world-index build` for a full rebuild if the index is corrupt rather than merely stale)

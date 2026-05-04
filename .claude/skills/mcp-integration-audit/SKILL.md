@@ -130,7 +130,7 @@ Before this skill acts, it MUST read (per FOUNDATIONS.md §Tooling Recommendatio
 - `tools/hooks/**/*` and `.claude/settings.json` for hook coverage gaps
 - `tools/patch-engine/src/**/*.ts` for patch-engine op gaps
 - `docs/FOUNDATIONS.md` (re-read targeted sections only) for FOUNDATIONS contract gaps
-- `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/HARD-GATE-DISCIPLINE.md` for docs-drift findings
+- `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/HARD-GATE-DISCIPLINE.md`, and the per-package README at `tools/<package>/README.md` (e.g., `tools/world-mcp/README.md`, `tools/world-index/README.md`, `tools/patch-engine/README.md`, `tools/validators/README.md`) for docs-drift findings — per-package READMEs document the same MCP / world-index / patch-engine / validator API surfaces parallel to the `docs/*.md` files and are read by skill operators consulting tool behavior
 
 These reads use `Grep`/`Glob`/`Read` directly — no MCP retrieval involved at any audit phase.
 
@@ -180,7 +180,7 @@ Map each candidate finding to its namespace per the category-to-namespace table:
 
 | Category | Namespace | Notes |
 |---|---|---|
-| MCP retrieval gap | `MCPENH` | Index-schema gaps that pair with retrieval gaps also route here (the index and retrieval surface co-evolve; MCPENH-025/026 precedent). |
+| MCP retrieval gap | `MCPENH` | Index-schema gaps that pair with retrieval gaps also route here (the index and retrieval surface co-evolve; MCPENH-025/026 precedent). CHARGENMCP is the archived character-generation-specific early namespace; MCPENH is the live successor. |
 | World-index schema gap (no MCP coupling) | `MCPENH` | Same namespace; index-only changes are rare without paired MCP work. |
 | Validator coverage gap | `VALENH` |  |
 | Hook coverage gap | `HOOK` |  |
@@ -215,7 +215,7 @@ For every surviving finding, grep current state at HEAD to confirm the claimed m
 - HOOK findings → `tools/hooks/**/*` and `.claude/settings.json`.
 - PEENH findings → `tools/patch-engine/src/**/*.ts`.
 - FOUNDATIONS findings → targeted re-read of `docs/FOUNDATIONS.md` sections cited by the finding.
-- Docs-drift sub-category findings → the relevant docs file (`docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/HARD-GATE-DISCIPLINE.md`).
+- Docs-drift sub-category findings → the relevant docs file (`docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/HARD-GATE-DISCIPLINE.md`) AND the per-package README at `tools/<package>/README.md` (e.g., `tools/world-mcp/README.md`, `tools/world-index/README.md`, `tools/patch-engine/README.md`, `tools/validators/README.md`) when the docs-drift concerns the same package's API documentation.
 
 For each finding, record: (i) the exact greps run; (ii) the result (zero matches → gap confirmed absent; non-zero matches that contradict the gap claim → reclassify as false-positive). Findings reclassified as false-positives are dropped from the surviving set with a one-line rationale shown in the Phase 6 table.
 
