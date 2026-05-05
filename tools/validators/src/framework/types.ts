@@ -27,6 +27,7 @@ export interface Verdict {
     line_range?: [number, number];
     node_id?: string;
   };
+  detail?: unknown;
   suggested_fix?: string;
 }
 

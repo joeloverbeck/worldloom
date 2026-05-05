@@ -29,6 +29,7 @@ Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, and `docs/archival-w
 
 - Resolve the exact live ticket path before trusting ticket wording.
 - Snapshot the worktree with `git status --short` and note unrelated dirty paths before review.
+- Make an explicit yes/no decision on `docs/HARD-GATE-DISCIPLINE.md` before the review surface audit. Read it when the reviewed ticket touches canon-mutating workflows, approval gates, Mystery Reserve enforcement, validators, Canon Safety Check phases, `validate_patch_plan`, `submit_patch_plan`, approval-token behavior, pre-apply validation, or any other machine-facing validation signal used by HARD-GATE flows. Record the reason when the extra read is not needed.
 - If `git status --short` shows renames, staged entries, or mixed staged/unstaged paths, also inspect `git diff --name-status --cached` and `git diff --name-status` so review-created edits are not confused with pre-existing staged work.
 - When a `git mv` archive step creates a staged rename and later closeout edits modify the archived ticket unstaged, report those as separate states: the staged tracked rename, plus unstaged archived-ticket content edits.
 - For tool or package tickets that ran builds or installs, also inspect `git status --short --ignored` when ignored generated artifacts may affect the handoff; classify ignored artifacts separately from tracked review state.
@@ -162,6 +163,8 @@ Create high-confidence tickets directly. If scope or dependency ordering is genu
 ### 7. Verify review edits
 
 When the reviewed ticket's narrow proof is cheap and local, rerun it after implementation-affecting review edits or closeout edits that change claimed verification. Pure archival moves, dependency-reference repairs, or follow-up ticket creation do not require rerunning the implementation proof when they cannot affect the reviewed code path; if you skip the rerun for that reason, state it in the report. If rerunning is expensive, flaky, destructive, or outside the review boundary, skip it and state why in the report.
+
+Before final report, run patch/whitespace hygiene on review-created edits. Use `git diff --check` for tracked review edits. If the reviewed archive file, follow-up tickets, or other owned review-created files are untracked, remember that plain `git diff --check` will not inspect them; run a real equivalent such as `git diff --check --no-index /dev/null <owned-untracked-file>` for each new file, or another explicit untracked-file hygiene check, and record which method covered the untracked files.
 
 ### 8. Present the report
 

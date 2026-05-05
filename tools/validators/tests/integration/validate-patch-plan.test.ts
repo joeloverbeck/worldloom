@@ -88,8 +88,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
+    const snapshotReplayExecution = result.executions.find(
+      (execution) => execution.name === "snapshot_replay_equality"
+    );
+    assert.equal(snapshotReplayExecution?.status, "skipped");
 
-    for (const execution of result.executions.filter((row) => row !== storyletExecution)) {
+    for (const execution of result.executions.filter(
+      (row) => row !== storyletExecution && row !== snapshotReplayExecution
+    )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);

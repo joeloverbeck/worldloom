@@ -237,7 +237,7 @@ Use `references/verification-closeout.md` for detailed proof-narrowing rules, in
 
 For package/tool proof details, use `references/package-tooling.md`: package roots, build/test scripts, local dependency freshness, public export checks, ignored artifact snapshots, same-package docs/examples, and direct-MCP substitution rules all live there.
 
-In Codex, if a package or CLI proof fails with sandbox-looking child-process errors such as `EPERM` from spawning the built CLI, `git`, `node`, or another subprocess, treat the first failure as a possible environment restriction rather than immediate code evidence. Rerun the same command with the required escalation, then record both the sandbox failure and the successful/failed escalated result in closeout so verification history is truthful.
+In Codex, if a package or CLI proof fails with sandbox-looking child-process errors such as `EPERM` from spawning the built CLI, `git`, `node`, or another subprocess, treat the first failure as a possible environment restriction rather than immediate code evidence. If the failing command is only a wrapper/probe that spawns the actual CLI, first consider decomposing the proof into setup plus direct CLI invocation from the correct temp or package root when that preserves the same public proof boundary. If the direct invocation still hits sandbox restrictions, rerun the same command with the required escalation. Record the original sandbox failure and the successful/failed substitute or escalated result in closeout so verification history is truthful.
 
 For precondition failure, unsupported-mode, or rejection-path tickets, prove not only the exit code/message but also that the command fails before creating or mutating derived artifacts, indexes, caches, or other side-effect surfaces unless the ticket explicitly owns that mutation.
 
@@ -284,7 +284,7 @@ Then run the closeout hard stops from the focused references:
 - Use `references/dirty-worktree-ledger.md` for final ownership classification, including untracked owned files, pre-existing dirt, externally appeared changes, sibling scope, and expected ignored artifacts.
 - If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
-- Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited tracked code, docs, tickets, or skill files.
+- Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited code, docs, tickets, or skill files. If owned edited files are still untracked, remember that plain `git diff --check` will not inspect them; run a real equivalent such as `git add -N <owned-untracked-paths>` followed by `git diff --check -- <owned-paths>`, or another explicit untracked-file whitespace check, and record which method covered the untracked files.
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 
