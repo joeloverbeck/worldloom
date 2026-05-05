@@ -41,7 +41,18 @@ invariants_acknowledged:                 # populated by Phase 4 — Rule 4 ancho
 central_dramatic_question: ""            # optional — leave empty if not all stories have a single Q
 themes:
   - <tag>
-language_register: <register hints>      # optional
+language_register: <register hints>      # optional — describe the SUBSTRATE the
+                                          # character's vocabulary draws from
+                                          # (profession, class, formative reading,
+                                          # regional speech), NOT a checklist of
+                                          # idiom-types or metaphor categories to
+                                          # deploy each page. Per-page voice should
+                                          # vary WITHIN the substrate; listing
+                                          # categories ("X-idiom, Y-metaphors,
+                                          # Z-vocabulary") produces tic-language
+                                          # across pages. See branching-story-
+                                          # page-cycle/references/prose-craft-
+                                          # contract.md rule 7.
 
 validation_trace:                        # populated by Phase 9 — every gate one-line PASS rationale
   gate_01_mystery_firewall: "PASS — <one-line rationale>"

@@ -122,12 +122,19 @@ Phase 6.5      Closure readiness — state-derived signal (no required-closure
    |
    v
 Phase 7        Page render — LLM prompt assembly with content_policy verbatim
-               FIRST + story kernel + selected storylet + scene context + recent
-               prose continuity along branch_path only + governor_nudge; LLM
-               produces prose; post-render extraction classifies load-bearing
-               claims (already-ledgered / incidental-color / needs-ledger-record
-               / contradiction / mystery-risk); up to 3 re-prompts on fail-fast;
-               mention-vs-depiction distinction is load-bearing
+               FIRST + story kernel + prose craft contract verbatim + selected
+               storylet + scene context + recent prose continuity along
+               branch_path only (continuity for narrative/world only — NOT
+               echo phrasings) + governor_nudge; LLM produces prose; post-
+               render prose critic checks 7 axes against the contract (filter-
+               word saturation, recurring-metaphor across pages, identical-
+               anchor recurrence, self-narrating-self, bracket-paraphrasing-
+               dialogue, ledger-jargon-leakage, abstract-noun-saturation);
+               post-render extraction classifies load-bearing claims (already-
+               ledgered / incidental-color / needs-ledger-record / contradiction
+               / mystery-risk); up to 3 re-prompts on fail-fast (shared budget
+               across critic + cross-check); mention-vs-depiction distinction
+               is load-bearing
    |
    v
 Phase 8        Choice generation (Amendment B pipeline) — affordance-space
@@ -241,13 +248,13 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
 3. **Phases 2-3 — Impact analysis + continuation feasibility.** Compute facts_created/invalidated, obligations affected, intentions/threads deltas, storylet eligibility shifts, transferable_functions, and required_aftermath. Then check that ≥1 storylet remains satisfied, all required_aftermath items are addressable, all `forbidden`-status M are preserved, and INVs hold. Surface ACCEPT-ANYWAY / TRANSFORM / ATTEMPT / DIFFERENT-CHOICE on infeasibility, or honor a coherent terminal branch. Load `references/phase-2-3-impact-and-feasibility.md`.
 
-4. **Phases 4 + 4.5 — Storylet selection + mystery resolution authority.** Hard-filter the storylet pool, salience-score, weighted-pick from top-K (NEVER always-take-top). JIT-expand via `storylet-pool-authoring mode=jit` only when no candidate scores above threshold and consequence-capacity required JIT. **Phase 4.5 `canon_candidate` route is a separate, never-elided HARD-GATE handoff to `story-fact-promotion-to-canon` regardless of `execution_mode`.** Load `references/phase-4-storylet-and-mystery-authority.md`.
+4. **Phases 4 + 4.5 — Storylet selection + mystery resolution authority.** Hard-filter the storylet pool, salience-score, weighted-pick from top-K (NEVER always-take-top). JIT-expand via `storylet-pool-authoring mode=jit` only when no candidate scores above threshold and consequence-capacity required JIT. **Inline-authoring of a JIT SLT in this skill's patch envelope is structurally invalid — delegation to `storylet-pool-authoring mode=jit` is required, not optional**: (i) `storylet-pool-authoring`'s Phase 3 inlines the closed predicate DSL grammar from `storylet-pool-authoring/templates/predicate-dsl.md` verbatim into the LLM prompt, the operator's safety net against invented predicates that the runtime `storylet_predicate_dsl_parsability` validator would otherwise reject at Phase 11 submit time; (ii) `storylet-pool-authoring`'s Phase 4 9-gate set (mystery firewall, resolution-authority declaration, predicate parsability, branch-contamination, etc.) runs over the candidate, and re-running these gates inline duplicates validator logic and risks divergence; (iii) `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped` are set authoritatively by `storylet-pool-authoring` at JIT-emission time, not negotiated by the caller. An operator who shortcuts to inline authoring (because spawning a sub-routine feels heavier than authoring a single SLT) will hit the validator at Phase 11 with `unknown pred '<invented-name>'` errors and force a re-validate cycle; the delegation cost is the safety net's price. **Phase 4.5 `canon_candidate` route is a separate, never-elided HARD-GATE handoff to `story-fact-promotion-to-canon` regardless of `execution_mode`.** Load `references/phase-4-storylet-and-mystery-authority.md`.
 
 5. **Phase 5 — State mutation.** Apply structured ops via append-only supersession (`logical_id` + `supersedes`); compute `next_snapshot` per the closed `op_type` enum; persist each `required_aftermath` item as a CNSQ-NNNN unless absorbed by a newly-opened OBL; verify the branch-isolation invariant (`created_at_page == this_PG` on every emergent record). Load `references/phase-5-state-mutation.md`.
 
 6. **Phases 6 + 6.5 — Narrative governor recompute + closure readiness.** Recompute narrative_health (open_obligation_count, high_salience_unpaid_count, contradiction_risk, causal_connectivity, motivation_coverage, threat_pressure, consequence_density, reflection_density, novelty, tension, agency_score, flagged_for_audit). Generate `governor_nudge` (homeostat, never act-spine). Detect state-derived closure readiness; widen — never force — Phase 8's choice set when ready. Load `references/phase-6-governor-and-closure.md`.
 
-7. **Phase 7 — Page render.** Assemble the LLM prompt with content_policy verbatim FIRST, story kernel, selected storylet, scene context, recent prose continuity ALONG `branch_path` ONLY, and `governor_nudge`. Render to a working buffer (NOT disk yet). Run post-render claim classification (already-ledgered / incidental-color / needs-ledger-record / contradiction / mystery-risk) and the fail-fast checks (intensity band, storylet fact_effects, choice contract `forbidden_outcomes`); up to 3 re-prompts before escalating to the user. Load `references/phase-7-page-render.md`.
+7. **Phase 7 — Page render.** Assemble the LLM prompt with content_policy verbatim FIRST, story kernel, **prose craft contract verbatim** (`references/prose-craft-contract.md`), selected storylet, scene context, recent prose continuity ALONG `branch_path` ONLY (continuity for narrative/world only — instruction explicitly forbids echoing prior phrasings / recurring metaphors / identical anchors verbatim), and `governor_nudge`. Render to a working buffer (NOT disk yet). Run the post-render prose critic against the 7 contract-derived axes (per-mode behavior in `references/phase-7-page-render.md` §Post-Render Prose Critic), then post-render claim classification (already-ledgered / incidental-color / needs-ledger-record / contradiction / mystery-risk) and the fail-fast checks (intensity band, storylet fact_effects, choice contract `forbidden_outcomes`); critic + cross-check + fail-fast share the same 3-re-prompt budget before escalating to the user. Load `references/phase-7-page-render.md`.
 
 8. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries a populated `choice_contract` block. Load `references/phase-8-choice-generation.md`.
 

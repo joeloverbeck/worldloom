@@ -122,9 +122,11 @@ Phase 6: Storylet Pool Seed           (delegated to storylet-pool-authoring
 Phase 7: Root Page Render             (select PG-0001 storylet;
                                        assemble LLM prompt with content_policy
                                        verbatim + world context + story
-                                       kernel + selected storylet + cast +
-                                       state context; render prose;
-                                       cross-check; up to 3 re-prompts)
+                                       kernel + prose craft contract verbatim +
+                                       selected storylet + cast + state context;
+                                       render prose; post-render prose critic
+                                       (7 axes against the contract) + cross-
+                                       check; up to 3 re-prompts shared budget)
       |
       v
 Phase 8: Initial Choice Generation    (4-6 CHC-NNNN — main thread engagement,
@@ -231,6 +233,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - **Whole-class Mystery Reserve firewall load** via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` — every M record body is needed at Phase 4 to declare `mysteries_in_play[]` with each M's `status` and `future_resolution_safety` and to hard-reject any premise element resolving a `forbidden`-status M. Whole-class enumeration is authorized for skills "whose firewall is class-bounded" per FOUNDATIONS §Tooling Recommendation. `mcp__worldloom__get_firewall_content(world_slug)` is the M-only projection shortcut if full bodies are not needed; this skill needs full bodies (for `forbidden_answers` + `future_resolution_safety` fields).
 - **Whole-class Invariant audit load** via `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)` — every INV record body is needed at Phase 4 to audit the premise + cast + initial threads + initial obligations against every INV's `break_conditions` and `revision_difficulty`.
 - **`storylet-pool-authoring` SKILL.md** — Phase 6 delegates seed-storylet authoring to this sibling skill in-memory; without its Phase 2 §Bootstrap-mix shape weighting + Phase 4 §9 per-storylet gates + Phase 5 §Diversity audit in context, Phase 6 cannot honor the delegation contract. Read `.claude/skills/storylet-pool-authoring/SKILL.md` directly (skill-meta read; no MCP path applies). The file may exceed the Read tool's per-call token limit (~32k+ tokens currently); chunk via `offset` + `limit` parameters when a single full read fails. The load-bearing sections for the bootstrap delegation contract are §Phase 2 §Bootstrap-mix shape weighting and §Phase 4 (per-storylet gates) — read these first if a single full read isn't possible. The schema authority for SLT records remains `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` (already enumerated under §Record schemas above).
+- **Prose Craft Contract** — `Read .claude/skills/branching-story-page-cycle/references/prose-craft-contract.md` directly (skill-meta read; no MCP path applies). Phase 7 root-page render embeds it verbatim into the LLM prompt between the story kernel and the selected storylet (so it binds the model before storylet tone tags arrive). The contract is the canonical authority shared with `branching-story-page-cycle` Phase 7's post-render prose critic.
 
 If `worlds/<world-slug>/` is missing, abort and instruct the user to run `create-base-world` first. If `cast_bind_list` references a `CHAR-NNNN` that does not exist in `characters/INDEX.md`, abort and list the missing ids. If `epe_card_filter` references a missing EPE, abort.
 
@@ -260,6 +263,7 @@ Run before Phase 1; abort if any precondition fails.
 - Load whole-class Invariant audit: `mcp__worldloom__list_records(world_slug, record_type='invariant_record', include_full_body=true)`.
 - Resolve world's current canon_revision for BR-0001 + PG-0001.state_snapshot binding: `mcp__worldloom__list_records(world_slug, record_type='change_log_entry', fields=['id'])` and pick the highest-numbered `CH-NNNN`. This becomes `BR-0001.canon_revision` and `PG-0001.state_snapshot.canon_revision` at Phase 11. If the world has no CH records yet (genesis world without first canonization), set `canon_revision: null`.
 - Load `.claude/skills/storylet-pool-authoring/SKILL.md` directly (Phase 6 delegation contract — see §World-State Prerequisites).
+- Load `.claude/skills/branching-story-page-cycle/references/prose-craft-contract.md` directly (Phase 7 prompt-assembly authority — see §World-State Prerequisites).
 - Confirm content_policy block (NC-21 verbatim text from `templates/content-policy.txt`) is loaded for downstream prompt assembly. This is the FIRST condition of the HARD-GATE — without it Phase 7 cannot legitimately render prose.
 
 ## Phase 1: Premise Normalization
@@ -394,6 +398,8 @@ Returned seed storylets must carry `provenance.origin: bootstrap_seed`, `provena
 [world context — WORLD_KERNEL summary + relevant CFs + ONTOLOGY entries]
 [story kernel — premise + designing_principle + tone + content_intensity
                + POV + central dramatic question]
+[PROSE CRAFT CONTRACT — verbatim from
+                        .claude/skills/branching-story-page-cycle/references/prose-craft-contract.md]
 [selected storylet — hard_preconds, fact_effects, opens_obligations,
                      choice_templates, tone_tags]
 [cast bound — for each STENT, name + role + STINT summary]
@@ -405,6 +411,11 @@ Do not resolve any mystery declared in mysteries_in_play[].
 Length target: <target_page_length>.
 End at a moment where 4-6 distinct choices for what happens next would be
 natural.
+
+Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
+filter-word saturation, recurring-metaphor recurrence (against any prior pages
+once the runtime page-cycle takes over), identical-anchor reuse, self-
+narrating-self patterns, ledger-jargon leakage, and bracket-paraphrasing.
 ```
 
 LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 inside the atomic transaction).
