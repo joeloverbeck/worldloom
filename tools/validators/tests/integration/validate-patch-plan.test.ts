@@ -92,9 +92,13 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "snapshot_replay_equality"
     );
     assert.equal(snapshotReplayExecution?.status, "skipped");
+    const recursiveClosureExecution = result.executions.find(
+      (execution) => execution.name === "recursive_reference_closure"
+    );
+    assert.equal(recursiveClosureExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
-      (row) => row !== storyletExecution && row !== snapshotReplayExecution
+      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
@@ -239,6 +243,21 @@ test("validatePatchPlan rejects Shape B storylet ops missing schema-required fie
   });
 });
 
+test("validatePatchPlan runs recursive reference closure for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(pagePlanWithBranchLeak() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "recursive_reference_closure");
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "recursive_reference_closure" &&
+        verdict.code === "recursive_reference_closure.branch_leak" &&
+        verdict.message.includes("SE-0009")
+    ));
+  });
+});
+
 function storyletPlan(record: Record<string, unknown>) {
   return {
     plan_id: "plan-story-001",
@@ -259,6 +278,49 @@ function storyletPlan(record: Record<string, unknown>) {
         }
       }
     ]
+  };
+}
+
+function pagePlanWithBranchLeak() {
+  return {
+    plan_id: "plan-page-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0001", "PG-0002"],
+        state_snapshot: { objective_facts: ["SF-0001"] }
+      }),
+      storyPatch("create_sf_record", "facts", {
+        id: "SF-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        evidence: [{ event_id: "SE-0009" }]
+      }),
+      storyPatch("create_se_record", "events", {
+        id: "SE-0009",
+        story_id: "STORY-001",
+        created_at_page: "PG-0099",
+        ops: []
+      })
+    ]
+  };
+}
+
+function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {
+  return {
+    op,
+    target_world: "seeded",
+    target_file: `stories/marla-kern-seduction/_source/${sourceDir}/${record.id}.yaml`,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record
+    }
   };
 }
 

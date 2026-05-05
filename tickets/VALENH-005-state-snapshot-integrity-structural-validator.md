@@ -58,7 +58,7 @@ Add tests for a complete snapshot, missing required fields, dangling IDs in list
 ## Out of Scope
 
 - Snapshot replay equality; landed in `archive/tickets/VALENH-003-snapshot-replay-equality-structural-validator.md`.
-- Recursive branch-isolation graph closure; tracked separately by `tickets/VALENH-004-recursive-reference-closure-structural-validator.md`.
+- Recursive branch-isolation graph closure; completed separately by `archive/tickets/VALENH-004-recursive-reference-closure-structural-validator.md`.
 - Semantic choice consequence-capacity; Phase 9 gate 9 remains a separate concern.
 - Changing page-cycle skill prose unless reassessment proves a factual handoff correction is required.
 
