@@ -1,6 +1,6 @@
 # MCPENH-038: Document schema-by-example pattern in engine-envelope-shape.md
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — three parallel reference docs at `.claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md`, `.claude/skills/canon-addition/references/engine-envelope-shape.md`, `.claude/skills/create-base-world/references/engine-envelope-shape.md`. No code changes.
@@ -8,18 +8,19 @@
 
 ## Problem
 
-Each of the three engine-routing skills (`branching-story-bootstrap`, `canon-addition`, `create-base-world`) carries a parallel `references/engine-envelope-shape.md` file. Each file's §1 enumerates only two patterns for envelope-construction schema discovery:
+At intake, each of the three engine-routing skills (`branching-story-bootstrap`, `canon-addition`, `create-base-world`) carried a parallel `references/engine-envelope-shape.md` file whose opening schema-discovery prose enumerated only two patterns for envelope construction:
 
 1. **Live retrieval**: `mcp__worldloom__get_record_schema` and `mcp__worldloom__describe_envelope_schema` MCP tools.
 2. **Offline / debugging fallback**: direct `Read` of schema files at `tools/validators/src/schemas/` and `tools/patch-engine/src/envelope/schema.ts`.
 
-The doc does not name a third pattern that operators routinely use during envelope construction: **schema-by-example via direct Read of an existing world record under `_source/<class>/<ID>.yaml`**. This pattern provides both schema AND realistic field-population in one read, which is more useful during envelope construction than a bare JSON schema — a representative existing record carries every operationally-required field (including the soft-required ones the JSON schema marks as optional but operator-discipline expects), and is single-file lightweight versus the persisted overflow path the schema-discovery MCP tools sometimes return on big enums. The doc-omission leaves operators improvising in unfamiliar territory and risks one operator using `get_record_schema` + reinventing field-population while another uses schema-by-example without any documented endorsement.
+The docs did not name a third pattern that operators routinely use during envelope construction: **schema-by-example via direct Read of an existing world or story-bundle record under `_source/<class>/<ID>.yaml`**. This pattern provides both schema and realistic field-population in one read, which is more useful during envelope construction than a bare JSON schema when a representative record exists.
 
 ## Assumption Reassessment (2026-05-05)
 
-1. **Codebase reassessment** — `grep -niE 'schema.by.example|schema-by-example|existing record.*template|existing record.*as.*reference' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md docs/MACHINE-FACING-LAYER.md docs/CONTEXT-PACKET-CONTRACT.md tools/world-mcp/README.md tools/patch-engine/README.md` returns zero matches across all five surfaces. Phase 5 verification confirms the pattern is genuinely undocumented at HEAD. The two existing patterns are documented at `.claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md:5` (the §1 prose explicitly framing the binary primary/fallback choice).
-2. **Doc reassessment** — the §1 prose at `engine-envelope-shape.md:5` reads: *"operationally use the MCP `get_record_schema` and `describe_envelope_schema` tools for live retrieval — direct `Read` of the schema files is a fallback for offline / debugging contexts only."* The phrasing implies a binary primary/fallback choice; it does not acknowledge a third operationally-useful pattern. The cross-skill reference at `engine-envelope-shape.md:5` confirms the doc is parallel across three skills (*"The parallel references for sibling engine-routing skills are `.claude/skills/canon-addition/references/engine-envelope-shape.md` and `.claude/skills/create-base-world/references/engine-envelope-shape.md`"*). The change must apply to all three to keep the parallel surfaces aligned.
-3. **Cross-skill / shared-boundary identification** — the shared boundary under audit is the parallel `engine-envelope-shape.md` reference doc surface across the three engine-routing skills (`branching-story-bootstrap`, `canon-addition`, `create-base-world`). Each is the canonical envelope-construction reference for its skill; their §1 sections cover the same schema-discovery primary/fallback contract verbatim by intent. The change must land on all three simultaneously to preserve the cross-skill parity. Adjacent skills like `branching-story-page-cycle` consume the bootstrap reference by pointer (per `branching-story-page-cycle/SKILL.md` Phase 11 §1a citation) — they pick up the change transitively without needing their own edits.
+1. **Codebase reassessment** — the intake grep `grep -niE 'schema.by.example|schema-by-example|existing record.*template|existing record.*as.*reference' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md docs/MACHINE-FACING-LAYER.md docs/CONTEXT-PACKET-CONTRACT.md tools/world-mcp/README.md tools/patch-engine/README.md` returned zero matches across all five surfaces. That confirmed the pattern was genuinely undocumented before this ticket's edit. The two existing patterns were documented in the opening prose of `.claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md`, `.claude/skills/canon-addition/references/engine-envelope-shape.md`, and `.claude/skills/create-base-world/references/engine-envelope-shape.md`.
+2. **Doc reassessment** — the opening prose in the target files framed schema discovery around live MCP retrieval and direct schema-file reads. The phrasing implied a binary primary/fallback choice and did not acknowledge a third operationally useful pattern. The change had to apply to all three target reference docs to keep the parallel surfaces aligned.
+3. **Cross-skill / shared-boundary identification** — the shared boundary under audit is the parallel `engine-envelope-shape.md` reference doc surface across the three engine-routing skills (`branching-story-bootstrap`, `canon-addition`, `create-base-world`). Each is the canonical envelope-construction reference for its skill; their §1 sections cover the same schema-discovery primary/fallback contract by intent. The change landed on all three simultaneously to preserve cross-skill parity. Adjacent skills like `branching-story-page-cycle` consume the bootstrap reference by pointer (per `branching-story-page-cycle/SKILL.md` Phase 11 §1a citation), so they pick up the change transitively without needing their own edits.
+4. **HARD-GATE discipline reassessment** — `docs/HARD-GATE-DISCIPLINE.md` keeps live MCP schema retrieval and patch-plan validate/submit as the formal machine-facing validation paths. This ticket does not weaken approval-token handling, validate/submit behavior, pre-apply validation, or canon-write ordering; it only documents a read-only operator aid for field-population when a representative committed record already exists.
 
 ## Architecture Check
 
@@ -27,7 +28,7 @@ The doc does not name a third pattern that operators routinely use during envelo
    - **Doc enumeration of three patterns (chosen)**: explicitly acknowledge the operational reality — operators have three valid paths and should pick by ergonomic fit. Schema-by-example via existing records is the right tool when envelope construction needs realistic field-population alongside schema; live MCP retrieval is the right tool when the operator wants the formal JSON schema; direct schema-file Read is the right tool when the MCP server is unavailable or debugging the schema itself.
    - **Add a new MCP tool returning field-populated examples (rejected, separate concern)**: this would be an MCP feature ticket (separate MCPENH), not a docs ticket. The existing `get_record` MCP tool already returns field-populated records when given an existing id; pointing operators at it is the cheap intervention.
    - **Deprecate schema-by-example (rejected)**: the pattern is operationally useful and harmless — Hook 2 does not block single-file Reads of `_source/<class>/<ID>.yaml`, so existing-record reads are first-class operations. Deprecating would push operators back to reinventing field-population from a bare schema, which is strictly worse.
-   - **Leave the doc silent (current state)**: encourages operators to reinvent the pattern without documented endorsement; surfaced in this audit's session evidence.
+   - **Leave the doc silent (intake state)**: would have encouraged operators to reinvent the pattern without documented endorsement; surfaced in this audit's session evidence.
 2. **No backwards-compat shims**: pure documentation clarification. No code paths, schemas, or operator workflows change beyond the doc reading.
 
 ## Verification Layers
@@ -36,23 +37,19 @@ The doc does not name a third pattern that operators routinely use during envelo
 2. **Cross-skill parity preserved** → grep-proof: `grep -niE 'schema.by.example|schema-by-example' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md .claude/skills/canon-addition/references/engine-envelope-shape.md .claude/skills/create-base-world/references/engine-envelope-shape.md` returns at least one match per file.
 3. **Single-layer documentation ticket** — additional verification layer mapping is not applicable; the change is doc-only and verifiable by manual prose review.
 
-## What to Change
+## Landed Changes
 
 ### 1. Add the schema-by-example pattern to bootstrap's engine-envelope-shape.md §1
 
-`.claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md` (modify §1). After the existing prose enumerating live MCP retrieval and offline schema-file Read fallback, add a sentence (or short paragraph) that:
-
-- Names the third pattern: schema-by-example via direct Read of an existing record under `_source/<class>/<ID>.yaml`.
-- Names the rationale: schema + realistic field-population in one read; preferred when envelope construction needs both the structural shape and a working example of all soft-required-by-discipline fields populated.
-- Names the constraint: requires a representative existing record of the target class to exist in the world / story bundle (always true for skills extending an existing world; may fail at genesis bootstrap when no record of the target class yet exists, in which case live MCP retrieval or schema-file Read is the right path).
+`.claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md` now names schema-by-example via direct `Read` of a representative story-bundle record under `worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml`, states the schema + realistic-field-population rationale, and notes that a committed target-class record or close same-world example must exist.
 
 ### 2. Apply the same edit to canon-addition's parallel reference
 
-`.claude/skills/canon-addition/references/engine-envelope-shape.md` (modify §1). Identical addition.
+`.claude/skills/canon-addition/references/engine-envelope-shape.md` now names schema-by-example via direct `Read` of a representative world `_source` record or indexed hybrid record that the plan will mirror, with the same rationale and existing-record constraint.
 
 ### 3. Apply the same edit to create-base-world's parallel reference
 
-`.claude/skills/create-base-world/references/engine-envelope-shape.md` (modify §1). Identical addition. Note that the constraint clause ("requires a representative existing record of the target class to exist") binds harder for create-base-world (genesis bootstrap), so the prose should make the constraint explicit rather than implicit.
+`.claude/skills/create-base-world/references/engine-envelope-shape.md` now names schema-by-example via direct `Read` of a representative record from another world and makes the genesis caveat explicit: the new target world usually has no same-class record yet, so live MCP schema retrieval or schema-file fallback remains the path when no representative example exists.
 
 ## Files to Touch
 
@@ -69,7 +66,7 @@ The doc does not name a third pattern that operators routinely use during envelo
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
 1. `grep -cE 'schema.by.example|schema-by-example' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md` returns at least 1 match.
 2. `grep -cE 'schema.by.example|schema-by-example' .claude/skills/canon-addition/references/engine-envelope-shape.md` returns at least 1 match.
@@ -91,3 +88,16 @@ The doc does not name a third pattern that operators routinely use during envelo
 
 1. `grep -niE 'schema.by.example|schema-by-example' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md .claude/skills/canon-addition/references/engine-envelope-shape.md .claude/skills/create-base-world/references/engine-envelope-shape.md` — confirm the new pattern is enumerated in all three docs (3+ matches expected).
 2. `git diff -- .claude/skills/*/references/engine-envelope-shape.md` — manual review confirms cross-skill parity (the same paragraph addition lands in each of the three docs with appropriate per-skill framing for create-base-world's genesis-bootstrap caveat).
+
+## Outcome
+
+Completed on 2026-05-05. The three parallel engine-envelope-shape reference docs now document schema-by-example as a third valid operator pattern alongside live MCP schema retrieval and offline schema-file reads. Each doc states the rationale, keeps live MCP/schema files as formal authorities, and names the existing-record constraint with skill-appropriate framing.
+
+## Verification Result
+
+1. `grep -niE 'schema.by.example|schema-by-example' .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md .claude/skills/canon-addition/references/engine-envelope-shape.md .claude/skills/create-base-world/references/engine-envelope-shape.md` returned one match in each target file.
+2. `git diff -- .claude/skills/branching-story-bootstrap/references/engine-envelope-shape.md .claude/skills/canon-addition/references/engine-envelope-shape.md .claude/skills/create-base-world/references/engine-envelope-shape.md` was manually reviewed and confirmed that only the intended reference-doc paragraphs changed.
+
+## Deviations
+
+None.
