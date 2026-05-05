@@ -119,7 +119,7 @@ choice_templates:
     target_role: ""                        # cast-role bound to a STENT at render time
     uses_fact_role: ""                     # optional fact-role anchor
     likely_effects: []                     # likely fact_effects + relationship_effects
-    choice_mode: ""                        # public_confrontation | private_negotiation | covert_action | reveal | concealment | bargain | sacrifice | refuse | flee | intimate_advance | violence | discovery | other
+    choice_mode: ""                        # recommended values: self_protective | emotional | observational | strategic | reflective | risky | discovery | intimate_advance | bargain | sacrifice | refuse | flee | reveal | concealment | violence | other (or any kebab-case label appropriate to the storylet's transaction; the validator is permissive — see templates/tone-theme-tag-dictionary.md for the recommended-but-non-binding vocabulary discipline)
     poetic_effect: ""                      # relaxed | obvious | dilemma | risky_truth | sacrifice | tragic_irony | seduction | desperation | revelation | flight
 
 # Provenance — load-bearing for branch isolation + audit trail

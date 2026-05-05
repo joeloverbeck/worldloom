@@ -1,0 +1,95 @@
+{
+  "plan_id": "valenh-002-complete-slt",
+  "target_world": "erotica-world",
+  "approval_token": "placeholder",
+  "verdict": "ACCEPT",
+  "originating_skill": "storylet-pool-authoring",
+  "expected_id_allocations": {
+    "slt_ids": ["SLT-0049"]
+  },
+  "patches": [
+    {
+      "op": "create_slt_record",
+      "target_world": "erotica-world",
+      "target_file": "stories/red-bunny/_source/storylets/SLT-0049.yaml",
+      "payload": {
+        "story_slug": "red-bunny",
+        "record": {
+          "id": "SLT-0049",
+          "story_id": "STORY-0001",
+          "title": "Complete fixture storylet",
+          "shape": "relational_dynamics",
+          "content_intensity": "mature",
+          "hard_preconds": [],
+          "soft_preconds": [],
+          "cast_requirements": [],
+          "location_requirements": [],
+          "opens_obligations": [],
+          "pays_off_obligations": [],
+          "complicates_obligations": [],
+          "transfers_obligations": [],
+          "fact_effects": [],
+          "relationship_effects": [],
+          "tone_tags": [],
+          "theme_tags": [],
+          "tension_delta": 0,
+          "aftermath_weight": 0,
+          "mystery_safety": {
+            "forbidden_M_resolved": false,
+            "M_touched": [],
+            "M_progressed": [],
+            "M_resolution_claims": [],
+            "resolution_safety_per_M": {}
+          },
+          "choice_templates": [
+            {
+              "operation": "observe",
+              "target_role": "protagonist",
+              "uses_fact_role": "",
+              "likely_effects": [],
+              "choice_mode": "observational",
+              "poetic_effect": "relaxed"
+            },
+            {
+              "operation": "confront",
+              "target_role": "antagonist",
+              "uses_fact_role": "",
+              "likely_effects": [],
+              "choice_mode": "risky",
+              "poetic_effect": "dilemma"
+            },
+            {
+              "operation": "bargain",
+              "target_role": "ally",
+              "uses_fact_role": "",
+              "likely_effects": [],
+              "choice_mode": "bargain",
+              "poetic_effect": "sacrifice"
+            },
+            {
+              "operation": "withdraw",
+              "target_role": "protagonist",
+              "uses_fact_role": "",
+              "likely_effects": [],
+              "choice_mode": "flee",
+              "poetic_effect": "flight"
+            }
+          ],
+          "provenance": {
+            "origin": "focus_authoring",
+            "source_audit": null,
+            "source_rsp": null,
+            "created_at_page": null
+          },
+          "visibility": {
+            "scope": "global_author_pool",
+            "visible_from_page": null,
+            "visible_branch_path_prefix": null,
+            "allowed_branch_ids": null
+          },
+          "notes": "Complete structural fixture for record_schema_compliance."
+        }
+      }
+    }
+  ]
+}

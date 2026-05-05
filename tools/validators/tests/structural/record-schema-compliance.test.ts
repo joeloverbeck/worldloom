@@ -266,6 +266,100 @@ test("record_schema_compliance rejects diegetic-artifact scoped_references entri
   assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.required"));
 });
 
+test("record_schema_compliance accepts complete storylet records", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([storyletRecord(completeStorylet())])
+  );
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects storylets missing required structural fields", async () => {
+  for (const field of ["mystery_safety", "provenance", "visibility"] as const) {
+    const parsed = completeStorylet();
+    delete parsed[field];
+
+    const result = await recordSchemaCompliance.run(
+      {},
+      context([storyletRecord(parsed)])
+    );
+
+    assert.ok(result.some((verdict) => (
+      verdict.code === "record_schema_compliance.required" &&
+      verdict.message.includes(`must have required property '${field}'`)
+    )));
+  }
+});
+
+test("record_schema_compliance rejects storylet nested required-field omissions", async () => {
+  const provenanceMissingOrigin = completeStorylet();
+  delete (provenanceMissingOrigin.provenance as Record<string, unknown>).origin;
+
+  const visibilityMissingScope = completeStorylet();
+  delete (visibilityMissingScope.visibility as Record<string, unknown>).scope;
+
+  const choiceMissingOperation = completeStorylet();
+  delete ((choiceMissingOperation.choice_templates as Record<string, unknown>[])[0]!).operation;
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(provenanceMissingOrigin, "SLT-0002"),
+      storyletRecord(visibilityMissingScope, "SLT-0003"),
+      storyletRecord(choiceMissingOperation, "SLT-0004")
+    ])
+  );
+
+  assert.ok(result.some((verdict) => verdict.message.includes("/provenance")));
+  assert.ok(result.some((verdict) => verdict.message.includes("/visibility")));
+  assert.ok(result.some((verdict) => verdict.message.includes("/choice_templates/0")));
+});
+
+test("record_schema_compliance enforces storylet choice-template bounds and closed enums", async () => {
+  const tooFewChoices = completeStorylet();
+  tooFewChoices.choice_templates = (tooFewChoices.choice_templates as unknown[]).slice(0, 3);
+
+  const tooManyChoices = completeStorylet();
+  tooManyChoices.choice_templates = [
+    ...(tooManyChoices.choice_templates as unknown[]),
+    choiceTemplate("reveal"),
+    choiceTemplate("flee"),
+    choiceTemplate("refuse")
+  ];
+
+  const invalidShape = completeStorylet();
+  invalidShape.shape = "invalid_shape";
+
+  const invalidIntensity = completeStorylet();
+  invalidIntensity.content_intensity = "extreme";
+
+  const invalidOrigin = completeStorylet();
+  (invalidOrigin.provenance as Record<string, unknown>).origin = "weird_origin";
+
+  const invalidPoeticEffect = completeStorylet();
+  ((invalidPoeticEffect.choice_templates as Record<string, unknown>[])[0]!).poetic_effect = "weird_effect";
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(tooFewChoices, "SLT-0005"),
+      storyletRecord(tooManyChoices, "SLT-0006"),
+      storyletRecord(invalidShape, "SLT-0007"),
+      storyletRecord(invalidIntensity, "SLT-0008"),
+      storyletRecord(invalidOrigin, "SLT-0009"),
+      storyletRecord(invalidPoeticEffect, "SLT-0010")
+    ])
+  );
+
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.code === "record_schema_compliance.minItems"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0006" && verdict.code === "record_schema_compliance.maxItems"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0007" && verdict.message.includes("/shape")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0008" && verdict.message.includes("/content_intensity")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0009" && verdict.message.includes("/provenance/origin")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/choice_templates/0/poetic_effect")));
+});
+
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {
   const result = await recordSchemaCompliance.run(
     {},
@@ -355,4 +449,26 @@ function fixtureCf(filename: string) {
 
 function readFixture(filename: string): string {
   return readFileSync(path.resolve(process.cwd(), "tests", "fixtures", filename), "utf8");
+}
+
+function completeStorylet(): Record<string, unknown> {
+  return yaml.load(readFixture("story-storylet-complete.yaml"), { schema: yaml.JSON_SCHEMA }) as Record<string, unknown>;
+}
+
+function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "SLT-0001")) {
+  return record("storylet_record", id, `stories/red-bunny/_source/storylets/${id}.yaml`, {
+    ...parsed,
+    id
+  });
+}
+
+function choiceTemplate(operation: string): Record<string, unknown> {
+  return {
+    operation,
+    target_role: "protagonist",
+    uses_fact_role: "",
+    likely_effects: [],
+    choice_mode: "strategic",
+    poetic_effect: "obvious"
+  };
 }

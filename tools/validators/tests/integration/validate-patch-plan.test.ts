@@ -5,11 +5,14 @@ import path from "node:path";
 import test from "node:test";
 
 import Database from "better-sqlite3";
+import yaml from "js-yaml";
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import { validatePatchPlan } from "../../src/public/index.js";
 import { completeCf } from "../rules/helpers.js";
 import { validSection } from "../structural/helpers.js";
+
+const FIXTURE_ROOT = path.resolve(process.cwd(), "tests", "fixtures");
 
 function createTempRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "worldloom-validators-"));
@@ -205,6 +208,31 @@ test("validatePatchPlan applies story-bundle record schemas to Shape B story ops
   });
 });
 
+test("validatePatchPlan accepts complete storylet records in Shape B story ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(storyletPlan(completeStoryletRecord()) as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.executions.some((row) => row.name === "record_schema_compliance" && row.status === "pass"));
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "record_schema_compliance"));
+  });
+});
+
+test("validatePatchPlan rejects Shape B storylet ops missing schema-required fields", async () => {
+  await withTempRoot(async () => {
+    const missingMysterySafety = completeStoryletRecord();
+    delete missingMysterySafety.mystery_safety;
+
+    const result = await validatePatchPlan(storyletPlan(missingMysterySafety) as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "record_schema_compliance" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.message.includes("mystery_safety")
+    ));
+  });
+});
+
 function storyletPlan(record: Record<string, unknown>) {
   return {
     plan_id: "plan-story-001",
@@ -226,6 +254,13 @@ function storyletPlan(record: Record<string, unknown>) {
       }
     ]
   };
+}
+
+function completeStoryletRecord(): Record<string, unknown> {
+  return yaml.load(
+    readFileSync(path.join(FIXTURE_ROOT, "story-storylet-complete.yaml"), "utf8"),
+    { schema: yaml.JSON_SCHEMA }
+  ) as Record<string, unknown>;
 }
 
 function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {

@@ -168,7 +168,31 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   const storyletProperties = storylet.schema.properties as Record<string, { pattern?: string }>;
   assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");
-  assert.deepEqual(storylet.required_fields, ["id", "story_id"]);
+  assert.deepEqual(storylet.required_fields, [
+    "id",
+    "story_id",
+    "title",
+    "shape",
+    "content_intensity",
+    "hard_preconds",
+    "soft_preconds",
+    "cast_requirements",
+    "location_requirements",
+    "opens_obligations",
+    "pays_off_obligations",
+    "complicates_obligations",
+    "transfers_obligations",
+    "fact_effects",
+    "relationship_effects",
+    "tone_tags",
+    "theme_tags",
+    "tension_delta",
+    "aftermath_weight",
+    "mystery_safety",
+    "choice_templates",
+    "provenance",
+    "visibility"
+  ]);
   assert.deepEqual(storylet.conditional_blocks, {});
 
   assert.equal(storyFact.schema.$id, "https://worldloom.local/schemas/story-fact.schema.json");

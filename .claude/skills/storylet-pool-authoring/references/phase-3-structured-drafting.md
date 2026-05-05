@@ -61,7 +61,7 @@ mode-and-source-driven rule below.
 
 **Engine wraps the LLM output**:
 
-- Validates schema against `templates/storylet-record.yaml`: every required field present, types correct, `id` matches the next reserved SLT in the run's allocation range.
+- Validates schema against `templates/storylet-record.yaml`: every required field present, types correct. The candidate is held under its candidate-index label (`Cn`) in the run's allocation buffer; the LLM's structured proposal is held against the next reserved SLT range without committing to a specific `SLT-NNNN` id until Phase 5 cull selects survivors. This avoids the manual-renumber failure mode when Phase 5 cull drops candidates between draft time and write time.
 - Validates predicate syntax against the Predicate DSL (in `templates/predicate-dsl.md`); free-form prose predicates fail here and route back to LLM with the DSL grammar inlined as the failure message.
 - Generates the `obligation_template` / `fact_template` / `cast_role` machinery from the LLM's structured proposal, normalizing role-vs-STENT references.
 - Records the LLM's `choice_templates` verbatim — they are runtime-overridable scaffolds, not prescriptions.
