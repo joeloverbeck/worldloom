@@ -96,9 +96,13 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "recursive_reference_closure"
     );
     assert.equal(recursiveClosureExecution?.status, "skipped");
+    const snapshotIntegrityExecution = result.executions.find(
+      (execution) => execution.name === "state_snapshot_integrity"
+    );
+    assert.equal(snapshotIntegrityExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
-      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution
+      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution && row !== snapshotIntegrityExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
@@ -258,6 +262,21 @@ test("validatePatchPlan runs recursive reference closure for Shape B page ops", 
   });
 });
 
+test("validatePatchPlan runs state snapshot integrity for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(pagePlanWithDanglingSnapshotReference() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "state_snapshot_integrity");
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "state_snapshot_integrity" &&
+        verdict.code === "state_snapshot_integrity.dangling_reference" &&
+        verdict.message.includes("SF-9999")
+    ));
+  });
+});
+
 function storyletPlan(record: Record<string, unknown>) {
   return {
     plan_id: "plan-story-001",
@@ -312,6 +331,28 @@ function pagePlanWithBranchLeak() {
   };
 }
 
+function pagePlanWithDanglingSnapshotReference() {
+  return {
+    plan_id: "plan-page-integrity-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0001", "PG-0002"],
+        state_snapshot: {
+          ...completeStateSnapshot(),
+          objective_facts: ["SF-9999"]
+        }
+      })
+    ]
+  };
+}
+
 function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {
   return {
     op,
@@ -329,6 +370,33 @@ function completeStoryletRecord(): Record<string, unknown> {
     readFileSync(path.join(FIXTURE_ROOT, "story-storylet-complete.yaml"), "utf8"),
     { schema: yaml.JSON_SCHEMA }
   ) as Record<string, unknown>;
+}
+
+function completeStateSnapshot(): Record<string, unknown> {
+  return {
+    canon_revision: "CH-0001",
+    objective_facts: [],
+    apparent_facts: [],
+    disputed_facts: [],
+    reader_known_facts: [],
+    belief_state_by_actor: {},
+    rumor_state: [],
+    obligations_open: [],
+    obligations_paid_off: [],
+    obligations_complicated: [],
+    obligations_abandoned: [],
+    consequences_pending: [],
+    consequences_addressed: [],
+    threads_active: [],
+    relationships_current: [],
+    intentions_current: [],
+    cast_present: [],
+    current_location: "STLOC-0001",
+    accessible_locations: [],
+    objects_in_scope: [],
+    inventory_by_entity: {},
+    entity_status: {}
+  };
 }
 
 function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {
