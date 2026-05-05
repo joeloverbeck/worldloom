@@ -23,7 +23,7 @@
 
 id: STENT-0001
 story_id: STORY-0001
-world_ent_id: ENT-0042                   # null when story_only: true
+world_ent_id: ENT-0042                   # null for character mirrors AND for story-only entities; populated only when the STENT mirrors a world-level ENT-NNNN named-entity record from worlds/<slug>/_source/entities/. Genesis ENT registries cover places / polities / geography / peoples clusters — CHARs are hybrid character records, NOT atomic ENTs, so STENTs whose character_id is set ALWAYS take world_ent_id: null.
 character_id: CHAR-0007                  # null for non-CHAR entities
 name: ""
 role_in_story: protagonist               # protagonist | major | supporting | antagonist | foil
@@ -305,7 +305,7 @@ state_snapshot:
   consequences_addressed: []             # [] at bootstrap
   threads_active: []                     # THR ids
   relationships_current: []              # SREL ids
-  intentions_current: []                 # STINT ids
+  intentions_current: []                 # STINT ids — include EVERY bound cast member's STINT (including offstage characters whose intentions persist across pages while they are not in cast_present); the runtime page-cycle filters to physically-present cast at evaluation time when computing character_motivation_coverage. Bootstrap-time PG-0001 lists every STINT created in Phase 2.
   cast_present: []                       # STENT ids physically present
   current_location: STLOC-0001
   accessible_locations: []               # STLOC ids
@@ -318,7 +318,7 @@ emitted_choices: []                      # CHC ids — populated at Phase 8
 
 narrative_health:
   open_obligation_count: 0
-  high_salience_unpaid_count: 0
+  high_salience_unpaid_count: 0          # count of OBLs with status == open AND salience >= 7 (threshold per Phase 8 coverage rule — see references/phase-8-choice-generation.md §Required CHC diversification)
   average_obligation_age: 0
   contradiction_risk: 0.0
   causal_connectivity: 1.0

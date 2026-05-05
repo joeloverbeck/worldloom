@@ -55,6 +55,8 @@ Measure baseline with `wc -lc <target-file>` (or equivalent) and record the exac
 
 The "before" baseline for Step 9 metrics is the file content as read in this step, regardless of git state.
 
+**Recommended at consolidate start.** When the target skill ships a `references/` or `templates/` subdirectory, list the directory contents alongside reading SKILL.md. This surfaces content that may already live in a template (informing factor-out moves to template references rather than tightening duplicated inline content) and lets you verify cited paths actually resolve. Skip this recommendation only when the target is structurally a single SKILL.md with no subdirectories.
+
 ---
 
 ### Step 2: Redundancy Detection
@@ -73,6 +75,7 @@ Common redundancy patterns to watch for:
 - The same corrective action described in multiple workflow phases
 - "Do not X" warnings scattered across unrelated sections
 - File/field lists repeated in multiple contexts (e.g., "update Files to Touch, Verification Layers, Test Plan" appearing 3+ times)
+- Table rows duplicated across multiple summary tables (e.g., a "Validation Rules This Skill Upholds" table and a broader "FOUNDATIONS Alignment" table both mapping the same Rule X to the same Phase Y mechanism — the per-rule/per-principle decomposition causes overlap that's easily missed in a sequential read but detectable by row-key scan)
 
 When the same technique or surface list appears at multiple workflow phases with genuinely different purposes (check vs. include in scope vs. implement), define the shared content once at its most natural location and replace other instances with cross-references. This is not pure redundancy removal — it is factoring out a shared reference.
 
@@ -188,9 +191,8 @@ After writing, present a structured summary in the conversation:
 ### Decision Paths Clarified (<count>)
 - "<topic>" — unified from <N> mentions into <structure type>
 
-### Wording Tightened
-- <N> instructions shortened for conciseness (no semantic changes)
-- Examples: 2-3 representative samples — literal "<before>" → "<after>" when the change is a single-string substitution, or descriptive ("<phrase> — <what changed and why>") when the change is a multi-sentence restructure.
+### Wording Tightened (<count>)
+- Examples: 2-3 representative samples (no semantic changes) — literal "<before>" → "<after>" when the change is a single-string substitution, or descriptive ("<phrase> — <what changed and why>") when the change is a multi-sentence restructure.
 
 ### Cross-reference Hygiene (<count>)
 - "<before>" → "<after>" — reason (e.g., "Section 1 no longer exists in this file; target now lives in SKILL.md Step 1", or "added 'see Output § Diegetic artifact file' when removing duplicated canon-file list from Guardrails")
