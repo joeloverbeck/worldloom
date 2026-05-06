@@ -28,7 +28,7 @@ export const recursiveReferenceClosure: Validator = {
       const orderedBranchPath = stringArray(parsed.branch_path);
       const branchPath = new Set(orderedBranchPath);
       const maps = recordMapForStory(records, page.story_slug ?? null);
-      const roots = storyLocalReferences(asPlainRecord(parsed.state_snapshot), "state_snapshot");
+      const roots = pageClosureRoots(parsed);
       const visited = new Set<string>();
       const stack = roots.map((reference) => ({ ...reference, via: reference.path }));
 
@@ -123,6 +123,15 @@ function storyLocalReferences(value: unknown, basePath: string): StoryReference[
   const references: StoryReference[] = [];
   collectStoryLocalReferences(value, basePath, references);
   return references;
+}
+
+function pageClosureRoots(page: Record<string, unknown>): StoryReference[] {
+  return [
+    ...storyLocalReferences(asPlainRecord(page.state_snapshot), "state_snapshot"),
+    ...storyLocalReferences(page.storylet_realized, "storylet_realized"),
+    ...storyLocalReferences(page.applied_event_ops, "applied_event_ops"),
+    ...storyLocalReferences(page.emitted_choices, "emitted_choices")
+  ];
 }
 
 function collectStoryLocalReferences(value: unknown, path: string, references: StoryReference[]): void {

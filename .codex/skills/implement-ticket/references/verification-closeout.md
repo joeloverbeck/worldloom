@@ -70,11 +70,13 @@ Before finishing, re-read the ticket and make it truthful:
 - `Assumption Reassessment` captures the final boundary
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
+- Every `Verification Layers` row is represented in `## Verification Result` by a matching command or manual-review entry, or is explicitly marked not exercised in `## Deviations` with the reason. Do not let a layer remain only in the plan after closeout.
 - completed implementation tickets convert planned sections such as `What to Change` to landed facts; if preserving the section as the final implementation record, prefer renaming it to `Landed Changes`
 - completed implementation tickets must not leave unperformed optional plan items in active plan sections; delete them, historicalize them as not performed, or move them to `Out of Scope` / `## Deviations` with a clear boundary
 - re-read the entire ticket top-to-bottom so earlier authored sections such as `Problem`, `What to Change`, `Architecture Check`, `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, `Test Plan`, and `Invariants` do not still contain stale pre-reassessment wording
 - rewrite fixed current-state claims in `## Problem` as historical intake evidence (`At intake`, `Before this ticket`, or equivalent) so the completed record does not imply the defect still exists
 - when preserving original failure evidence, label it as historical intake evidence (`At intake`, `Observed before this ticket`, or equivalent) so the completed record does not still read as if the fixed failure is current
+- After historicalizing `## Problem`, remaining old-defect phrases are allowed only when explicitly scoped by `At intake`, `Before this ticket`, `Observed before this ticket`, or equivalent wording. Otherwise rewrite them as landed/current facts or remove them.
 - convert planned work in `What to Change`, `Acceptance Criteria`, and `Test Plan` to landed facts, or explicitly label those sections as the historical plan if preserving the original plan is necessary
 - grep or scan for draft/future-tense planning markers such as `After this ticket lands`, `should be updated`, `verify exact`, `or current`, `if applicable`, `or extend existing`, and similar placeholder phrases; rewrite same-seam hits to landed facts or remove them before final response
 - if any explicit user-supplied reference spec/doc was used as the ticket's authority, grep that reference for corrected counts, enum members, command names, paths, default tables, proof commands, risk summaries, or other reassessed claims before final closeout; update same-seam stale reference lines or record why they are outside the active ticket boundary

@@ -319,6 +319,116 @@ test("recursive_reference_closure skips envelopes without PG creates", () => {
   })), false);
 });
 
+test("recursive_reference_closure fails for sibling storylet_realized page peers", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      storylet_realized: "SLT-0099"
+    },
+    extra: [
+      storyRecord("storylet_record", "SLT-0099", "storylets", {
+        id: "SLT-0099",
+        story_id: "STORY-001",
+        provenance: { origin: "runtime_jit", created_at_page: "PG-0099" },
+        visibility: { scope: "branch_scoped" }
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
+  assert.ok(leak);
+  assert.deepEqual(leak.detail, {
+    reference_id: "SLT-0099",
+    reference_path: "storylet_realized",
+    referenced_file: "stories/test-story/_source/storylets/SLT-0099.yaml",
+    referenced_node_id: "test-story:SLT-0099",
+    created_at_page: "PG-0099"
+  });
+});
+
+test("recursive_reference_closure fails for sibling applied_event_ops page peers", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      applied_event_ops: ["SE-0099"]
+    },
+    extra: [
+      storyRecord("story_event_record", "SE-0099", "events", {
+        id: "SE-0099",
+        story_id: "STORY-001",
+        created_at_page: "PG-0099",
+        ops: []
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
+  assert.ok(leak);
+  assert.deepEqual(leak.detail, {
+    reference_id: "SE-0099",
+    reference_path: "applied_event_ops[0]",
+    referenced_file: "stories/test-story/_source/events/SE-0099.yaml",
+    referenced_node_id: "test-story:SE-0099",
+    created_at_page: "PG-0099"
+  });
+});
+
+test("recursive_reference_closure fails for missing emitted_choices page peers", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-9999"]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.missing_record");
+  assert.ok(missing);
+  assert.deepEqual(missing.detail, {
+    reference_id: "CHC-9999",
+    reference_path: "emitted_choices[0]"
+  });
+});
+
+test("recursive_reference_closure follows emitted choice effect graphs from page peers", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-0001"]
+    },
+    extra: [
+      storyRecord("choice_record", "CHC-0001", "choices", {
+        id: "CHC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        uses_fact: "SF-0099"
+      }),
+      storyRecord("story_fact_record", "SF-0099", "facts", {
+        id: "SF-0099",
+        story_id: "STORY-001",
+        created_at_page: "PG-0099"
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
+  assert.ok(leak);
+  assert.deepEqual(leak.detail, {
+    reference_id: "SF-0099",
+    reference_path: "emitted_choices[0].uses_fact",
+    referenced_file: "stories/test-story/_source/facts/SF-0099.yaml",
+    referenced_node_id: "test-story:SF-0099",
+    created_at_page: "PG-0099"
+  });
+});
+
 function records(options: {
   pageOverrides?: Record<string, unknown>;
   factOverrides?: Record<string, unknown>;
