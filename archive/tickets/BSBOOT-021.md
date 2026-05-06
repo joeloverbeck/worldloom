@@ -78,7 +78,7 @@ Before this ticket, the gap was forward-looking but real: runtime page-cycle tur
 - `.claude/skills/branching-story-health-audit/templates/remediation-storylet-proposal-card.md` (modify)
 - `.claude/skills/branching-story-health-audit/examples/sau-mixed-severity.md` (modify)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
-- `tickets/BSBOOT-021.md` (closeout)
+- `archive/tickets/BSBOOT-021.md` (closeout and archival handoff)
 
 ## Out of Scope
 
@@ -122,8 +122,11 @@ Before this ticket, the gap was forward-looking but real: runtime page-cycle tur
 ## Outcome
 
 Completion date: 2026-05-06.
+Outcome amended: 2026-05-06.
 
 Completed. The downstream story-skill contract now carries `reader_visibility_basis` discipline through page-cycle runtime SF creation, storylet fact-template authoring, health-audit prose grounding and RSP examples, and story-fact promotion provenance. The change remains prose/template-only; no JSON schema, validator, patch-engine code, bootstrap template, or existing story bundle was changed.
+
+Post-ticket review archived this ticket to `archive/tickets/BSBOOT-021.md` after rechecking the grep/manual-review proof surface and archival references.
 
 ## Verification Result
 
@@ -136,4 +139,4 @@ Completed. The downstream story-skill contract now carries `reader_visibility_ba
 
 ## Deviations
 
-Reassessment absorbed two same-seam health-audit files not listed in the initial ticket draft: `templates/remediation-storylet-proposal-card.md` and `examples/sau-mixed-severity.md`. Both were reader-visibility consumer/producer contract prose. No archival was performed because this run was an implementation-only request.
+Reassessment absorbed two same-seam health-audit files not listed in the initial ticket draft: `templates/remediation-storylet-proposal-card.md` and `examples/sau-mixed-severity.md`. Both were reader-visibility consumer/producer contract prose. Archival was intentionally deferred during implementation and completed during post-ticket review.
