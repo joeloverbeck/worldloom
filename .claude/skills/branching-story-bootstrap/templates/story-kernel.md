@@ -37,6 +37,17 @@ invariants_acknowledged:                 # populated by Phase 4 — Rule 4 ancho
   - INV-id
   - INV-id
 
+audited_thread_obligation_sketch:        # required for new bootstraps — Phase 4 Rule 4 anchor used by Phase 9 gate 2
+  - id: THR-NNNN                         # provisional ids allowed until Phase 5 emits final THR/OBL records
+    type: <thread-type>
+    salience: <0..10>
+    urgency: <0..10>
+    payoff_modes_sketch:
+      - <mode>
+      - <mode>
+    INV_branches_audited:
+      - INV-id
+
 central_dramatic_question: ""            # optional — leave empty if not all stories have a single Q
 themes:
   - <tag>

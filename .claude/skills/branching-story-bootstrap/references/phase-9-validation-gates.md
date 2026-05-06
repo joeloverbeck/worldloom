@@ -7,7 +7,7 @@ Reference for `branching-story-bootstrap` Phase 9 — the 12-gate canon-safety a
 | # | Gate | Check | Routes to on FAIL |
 |---|---|---|---|
 | 1 | Mystery firewall (Rule 7) | No `forbidden`-status M-NNNN resolved by any storylet, fact, obligation, or page | Phase 4 |
-| 2 | Invariant compatibility (Rule 4) | All `applied_event_ops` respect every world INV's `break_conditions` | Phase 4 |
+| 2 | Invariant compatibility (Rule 4) | Every initial SF, THR, OBL, SLT precondition, PG-0001 `state_snapshot` field, and CHC `likely_effects` is compatible with every loaded INV's `break_conditions`; the Phase 5 emitted records (THR + OBL) match the Phase 4 audited sketch (`audited_thread_obligation_sketch`) | Phase 4 |
 | 3 | Content policy presence | content_policy block embedded verbatim in STORY_KERNEL.md AND in every assembled LLM prompt this run | Pre-flight |
 | 4 | ID uniqueness | Allocated IDs do not collide with any existing record in this story | Pre-flight |
 | 5 | Branch path consistency | `PG-0001.branch_path == [PG-0001]` AND `parent_page_id == null` AND `branch_id == BR-0001` | Phase 7 |
@@ -21,4 +21,4 @@ Reference for `branching-story-bootstrap` Phase 9 — the 12-gate canon-safety a
 
 ---
 
-**Whole-class loads from Pre-flight power gates 1, 2, and 9**: M-record full bodies for gate 1's `forbidden`-status check + `M_resolution_claims` interrogation; INV-record full bodies for gate 2's `break_conditions` audit. Without those whole-class loads, Phase 4 and Phase 9 cannot honor their canon-safety contract.
+**Whole-class loads from Pre-flight power gates 1, 2, and 9**: M-record full bodies for gate 1's `forbidden`-status check + `M_resolution_claims` interrogation; INV-record full bodies for gate 2's `break_conditions` audit across the initial SF / THR / OBL / SLT-precondition / state_snapshot / CHC-likely-effects surface. Without those whole-class loads, Phase 4 and Phase 9 cannot honor their canon-safety contract.

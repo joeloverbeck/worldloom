@@ -18,13 +18,15 @@ For each `M-NNNN` in the whole-class load whose domain overlaps the premise OR w
 
 ## Invariant audit (Rule 4 enforcement)
 
-Run premise + cast + initial-threads + initial-obligations against every INV record from the whole-class load:
+Run premise + cast + imported initial SFs + sketched initial threads/obligations against every INV record from the whole-class load:
 
-> **Phase ordering note**: Threads + obligations are not yet emitted at Phase 4; sketch their intended shape during the audit so the audit can reason against them, then formalize in Phase 5. If Phase 5 produces threads/obligations that diverge materially from the Phase 4 sketch (e.g., a thread that introduces a distribution claim the sketch did not anticipate), re-run the relevant INV audit branches before proceeding to Phase 6.
+> **Phase ordering note**: Threads + obligations are not yet emitted at Phase 4; sketch their intended shape during the audit so the audit can reason against them, then formalize in Phase 5. If Phase 5 produces threads/obligations that diverge materially from the Phase 4 sketch (e.g., a thread that introduces a distribution claim the sketch did not anticipate), re-run the relevant INV audit branches before proceeding to Phase 6. Phase 9 gate 2 finalizes the same Rule 4 surface after later bootstrap artifacts exist by checking SLT preconditions, PG-0001 `state_snapshot`, and CHC `likely_effects` against the same loaded INV `break_conditions`.
 
 - Flag tensions: does the premise assume a capability that violates an INV's `break_conditions`? Does an obligation imply a distribution change that breaks Rule 4?
 - **Hard reject** (or revise premise with user) if any tension is unresolvable.
 
+**Output to STORY_KERNEL.md (Rule 4 anchor)**: populate `audited_thread_obligation_sketch` on the kernel frontmatter for every new bootstrap — a structured snapshot of the threads + obligations the audit reasoned against (each entry: `id` (provisional), `type`, `salience`, `urgency`, `payoff_modes_sketch`, `INV_branches_audited[]`). Phase 9 gate 2 compares the Phase 5 emitted records against this sketch; if a Phase 5 thread or obligation diverges materially (different INV branches engaged, different distribution claims), re-run the relevant audit branches before proceeding to Phase 6.
+
 ---
 
-**Output to STORY_KERNEL.md**: `mysteries_in_play[]` populated; `invariants_acknowledged[]` populated (cite the INV ids the story will respect — anchors later validation).
+**Output to STORY_KERNEL.md**: `mysteries_in_play[]` populated; `invariants_acknowledged[]` populated (cite the INV ids the story will respect — anchors later validation); `audited_thread_obligation_sketch` populated for the required Phase 5-vs-Phase 4 divergence check on new bootstrap runs.
