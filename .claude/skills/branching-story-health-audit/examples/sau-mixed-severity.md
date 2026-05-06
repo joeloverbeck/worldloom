@@ -101,7 +101,7 @@ N/A — audit_focus was all.
 - **Branch**: PG-0047 (branch B' leaf)
 - **Pages affected**: PG-0038
 - **Records affected**: PG-0038 (`state_snapshot.cast_present: [STENT-0001, STENT-0003]`)
-- **Description**: Phase 3's prose-ledger consistency check found the prose excerpt "the Reeve stepped from behind the grain screen and took the wet writ from her hand" while `state_snapshot.cast_present` contains only STENT-0001 and STENT-0003. This is physical staging outside `cast_present`, not a grounded offstage reference. A separate sentence on the same page, "the Reeve's seal waited on the letter," is clean because the DA record for the letter is in `reader_known_facts` and does not stage the Reeve as present.
+- **Description**: Phase 3's prose-ledger consistency check found the prose excerpt "the Reeve stepped from behind the grain screen and took the wet writ from her hand" while `state_snapshot.cast_present` contains only STENT-0001 and STENT-0003. This is physical staging outside `cast_present`, not a grounded offstage reference. A separate sentence on the same page, "the Reeve's seal waited on the letter," is clean because the cited DA content is in scope and does not stage the Reeve as present; if the sentence instead relied on a reader-known SF, that SF would need to be in `reader_known_facts` with `visible_to_reader: true` and a positive `reader_visibility_basis`.
 - **Proposed remediation**: manual-flag (recommended action: page-cycle re-render PG-0038 or regenerate the page state so the Reeve is actually added to `cast_present` before prose stages him).
 - **Prior audit reference**: none.
 

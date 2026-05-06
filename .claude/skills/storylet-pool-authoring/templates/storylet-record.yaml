@@ -83,7 +83,12 @@ transfers_obligations: []                  # {from_owner, to_owner_pattern, obli
 # Fact + relationship effects (structured ops; free-form prose is gate-9 rejected)
 
 fact_effects:                              # one entry per fact created or invalidated
-  - {op: create, fact_template: {...}}     # fact_template includes epistemic_class
+  # fact_template includes epistemic_class, visible_to_reader, and
+  # reader_visibility_basis. Default new SFs to visible_to_reader: false with
+  # reader_visibility_basis: unrevealed_objective_truth. If visible_to_reader is
+  # true, reader_visibility_basis must be one of shown_in_pg0001, known_to_pov,
+  # dramatic_irony, or diegetic_artifact_visible.
+  - {op: create, fact_template: {...}}
   # - {op: invalidate, fact_id_matcher: {...}}
 
 relationship_effects:                      # produce superseding SREL records, not loose deltas

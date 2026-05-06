@@ -28,7 +28,7 @@ Given `parent_page.state_snapshot` and the structured ops applied this turn:
 ```
 next_snapshot = parent_snapshot.clone()
 for op in applied_event_ops (each op is structured per the SE schema's op_type enum):
-    fact_create:                  add SF-NNNN to objective/apparent/disputed/reader/belief facets per epistemic_class
+    fact_create:                  add SF-NNNN to objective/apparent/disputed/belief facets per epistemic_class; add it to reader_known_facts only when visible_to_reader == true AND reader_visibility_basis is one of shown_in_pg0001, known_to_pov, dramatic_irony, diegetic_artifact_visible
     fact_invalidate:              replace SF-NNNN entry with superseder
     obligation_open:              add OBL-NNNN to obligations_open
     obligation_pay_off:           move OBL-NNNN from obligations_open to obligations_paid_off; replace ID with superseder
@@ -47,6 +47,12 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
 this_page.state_snapshot = next_snapshot
 this_page.state_hash = hash(canonicalize(next_snapshot))
 ```
+
+For `fact_create`, `unrevealed_objective_truth` is valid only with
+`visible_to_reader: false`. A new SF whose `visible_to_reader: true` is missing
+`reader_visibility_basis`, uses `unrevealed_objective_truth`, or is omitted from
+`reader_known_facts` when page prose relies on reader-facing knowledge is a state
+mutation error, not a prose-only issue.
 
 ## State-subset-list Semantics
 

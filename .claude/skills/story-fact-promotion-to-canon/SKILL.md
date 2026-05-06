@@ -225,7 +225,7 @@ If any step fails, the skill aborts before Phase 1 and emits no SP ledger entry 
 Load the source record and its provenance per `source_kind`. The content_policy block (NC-21 verbatim) is loaded into the prompt-assembly context — propagates to Phase 7 critics and to the proposal_package handed to canon-addition.
 
 ### `source_kind == story_fact`
-- Load `SF-<id>.yaml`: `subject`, `predicate`, `object`, `epistemic_class`, `truth_value`, `certainty`, `known_by`, `believed_by`, `derived_from_cf`, `canon_relation`, `evidence`.
+- Load `SF-<id>.yaml`: `subject`, `predicate`, `object`, `epistemic_class`, `truth_value`, `certainty`, `known_by`, `believed_by`, `visible_to_reader`, `reader_visibility_basis`, `derived_from_cf`, `canon_relation`, `evidence`.
 - Walk the SF's branch_path via `created_at_page` → `parent_page_id` chain (cross-checked against `promotion_branch_path` argument; mismatch → abort with "source SF was not introduced on the cited promotion branch — supersession history may have moved it; re-confirm").
 - Capture supporting prose excerpts from `worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-*.md` along the branch — the LLM-rendered moments where this fact was established / corroborated / acted upon.
 
@@ -270,6 +270,7 @@ FOUNDATIONS Rule 4: No Globalization by Accident. A story-local outcome must not
 - If the source SF was branch-local (`canon_relation: not_applicable` AND `known_by` ≤ 2 STENTs), the proposed CF MUST NOT carry `scope.geographic: global` unless the user explicitly elevates AND the elevation cites additional world-state evidence in the proposal.
 - If the source involved cast members from a single faction / region / period, the proposed CF must reflect that scoping.
 - If the source SF's `known_by` was small (≤ 2 cast), the CF's `truth_scope.diegetic_status` should be `believed` or `disputed`, not `objective` — unless evidence in the story established broader awareness.
+- `reader_visibility_basis` is story-reader provenance, not diegetic spread. A reader-only reveal (`dramatic_irony`, `diegetic_artifact_visible`, etc.) never substitutes for `known_by`, evidence, supporting prose, or branch-local event records when deciding whether the promoted CF is believed, disputed, or objective at world scope.
 - For `character_arc_outcome`: the CF's scope MUST reflect the cast member's actual social/geographic reach, not the dramatic weight of the arc.
 
 ### Auto-Adjustment
@@ -333,6 +334,7 @@ Assemble the package canon-addition will receive at Phase 9 handoff. See `templa
 - `promotion_id`, `source_kind`, `source_record`, `promotion_branch_path`
 - `cf_candidate` — full CF candidate from Phase 2 (matches `templates/canon-fact-record.yaml` + FOUNDATIONS schema)
 - `provenance` — story id, story_slug, world_slug, branch_path, supporting_pages, supporting_prose_excerpts
+- `provenance.source_reader_visibility` — for `source_kind: story_fact`, copy the source SF's `visible_to_reader` and `reader_visibility_basis` so reviewers can distinguish deliberate reader-facing dramatic irony from in-world knowledge; this field is provenance only and does not alter the CF candidate's diegetic status.
 - `scope_inflation_check` — proposed_scope, source_scope, inflation_detected, user_justification_for_widening
 - `mystery_firewall` — is_mystery_resolution, M_resolved, M_resolution_safety, M_disallowed_cheap_answers_check
 - `downstream_impact` — full Phase 5 summary (this_story + cross_story)

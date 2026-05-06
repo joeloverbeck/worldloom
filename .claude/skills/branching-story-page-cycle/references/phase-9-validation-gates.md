@@ -13,8 +13,8 @@ Defense-in-depth checks before Phase 11 write. Each gate must record PASS with a
 | 7 | Prose ledger consistency | Phase 7 cross-checks all passed; post-render extraction emitted any `needs-ledger-record` entries; no `mystery-risk` classification survived | Phase 7 |
 | 8 | Choice contract integrity | Every emitted CHC has a populated `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) | Phase 8 |
 | 9 | Choice consequence-capacity | Every emitted CHC has at least one continuation path (storylet-or-JIT) | Phase 8 |
-| 10 | State_snapshot integrity | All cited records exist on disk; no dangling references; epistemic-faceted lists populated; entity_status, current_location, relationships_current, intentions_current populated | Phase 5 |
-| 11 | Epistemic class declared (Rule 1) | Every newly-created SF declares `epistemic_class` | Phase 5 |
+| 10 | State_snapshot integrity | All cited records exist on disk; no dangling references; epistemic-faceted lists populated; every `reader_known_facts` entry cites an SF with `visible_to_reader: true` and a positive `reader_visibility_basis` (`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or `diegetic_artifact_visible`); entity_status, current_location, relationships_current, intentions_current populated | Phase 5 |
+| 11 | Epistemic class declared (Rule 1) | Every newly-created SF declares `epistemic_class`, `visible_to_reader`, and `reader_visibility_basis`; `unrevealed_objective_truth` is allowed only when `visible_to_reader: false` | Phase 5 |
 | 12 | Consequence persistence | Every Phase 2 `required_aftermath` item produced either a CNSQ record or a newly-opened OBL record this turn (none silently dropped) | Phase 2 |
 
 Some failures are auto-correctable (re-render prose, re-generate choices); some require user intervention (firewall breach, INV violation, recursive reference closure breach). The FAIL routing column names the responsible phase; auto-correction loops back to that phase with the failure context inlined.

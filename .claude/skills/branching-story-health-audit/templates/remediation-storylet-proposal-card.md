@@ -43,7 +43,7 @@ proposed_visibility:
 # Sketch of the storylet storylet-pool-authoring (mode=audit) will draft.
 sketch:
   hard_preconds: []                  # predicate forms per storylet-pool-authoring's Predicate DSL
-  fact_effects: []                   # fact_template entries with epistemic_class
+  fact_effects: []                   # fact_template entries with epistemic_class, visible_to_reader, and reader_visibility_basis; default hidden SFs to visible_to_reader: false + reader_visibility_basis: unrevealed_objective_truth, and require a positive basis for reader-facing reveals
   pays_off_obligations: []           # OBL-NNNN ids matched by the OBL matcher
   opens_obligations: []              # new OBL templates the storylet would emit
   addresses_consequences: []         # CNSQ kind matchers

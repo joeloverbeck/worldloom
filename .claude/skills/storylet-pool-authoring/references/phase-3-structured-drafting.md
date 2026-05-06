@@ -30,9 +30,15 @@ INSTRUCTION:
 Produce a structured storylet record matching the SLT schema. Define hard_preconds
 and soft_preconds as predicates from the supplied DSL — free-form prose predicates
 will be hard-rejected at Phase 4. Define fact_effects and relationship_effects as
-structured ops (op + template + epistemic_class). Provide 4-6 choice_templates that
-the runtime LLM proposer can use as anchors — each carries operation + target_role
-+ likely_effects + choice_mode + poetic_effect.
+structured ops (op + template + epistemic_class). Every created fact_template
+also carries `visible_to_reader` and `reader_visibility_basis`; default to
+`visible_to_reader: false` and
+`reader_visibility_basis: unrevealed_objective_truth` unless the storylet
+deliberately creates a reader-facing reveal, in which case use a positive basis
+(`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or
+`diegetic_artifact_visible`). Provide 4-6 choice_templates that the runtime LLM
+proposer can use as anchors — each carries operation + target_role +
+likely_effects + choice_mode + poetic_effect.
 
 Mystery safety: do NOT touch any forbidden-status M-NNNN. If you brush a low /
 medium / high M without resolving it, declare it in mystery_safety.M_touched (or
@@ -64,7 +70,7 @@ mode-and-source-driven rule below.
 
 - Validates schema against `templates/storylet-record.yaml`: every required field present, types correct. The candidate is held under its candidate-index label (`Cn`) in the run's allocation buffer; the LLM's structured proposal is held against the next reserved SLT range without committing to a specific `SLT-NNNN` id until Phase 5 cull selects survivors. This avoids the manual-renumber failure mode when Phase 5 cull drops candidates between draft time and write time.
 - Validates predicate syntax against the Predicate DSL (in `templates/predicate-dsl.md`); free-form prose predicates fail here and route back to LLM with the DSL grammar inlined as the failure message.
-- Generates the `obligation_template` / `fact_template` / `cast_role` machinery from the LLM's structured proposal, normalizing role-vs-STENT references.
+- Generates the `obligation_template` / `fact_template` / `cast_role` machinery from the LLM's structured proposal, normalizing role-vs-STENT references. For created SF templates, fills missing reader-visibility fields with `visible_to_reader: false` and `reader_visibility_basis: unrevealed_objective_truth`; rejects or re-prompts any `visible_to_reader: true` template whose basis is missing or `unrevealed_objective_truth`.
 - Records the LLM's `choice_templates` verbatim — they are runtime-overridable scaffolds, not prescriptions.
 
 **Failure handling**: if the LLM produces malformed output (non-YAML, missing required fields, wrong types), engine re-prompts with the specific failure inlined. Up to 2 retries per seed before the seed is dropped from the batch and replaced with a fresh seed drawn from Phase 1's next-priority gap.

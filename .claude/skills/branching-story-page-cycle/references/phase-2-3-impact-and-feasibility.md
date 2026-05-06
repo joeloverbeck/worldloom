@@ -27,6 +27,14 @@ required_aftermath:                       # consequences that MUST be addressabl
      scope, urgency}
 ```
 
+Every `SF-template` in `facts_created` carries `visible_to_reader` and
+`reader_visibility_basis`. The safe default is `visible_to_reader: false` with
+`reader_visibility_basis: unrevealed_objective_truth`. Use
+`visible_to_reader: true` only when the turn deliberately creates reader-facing
+knowledge, and then use a positive basis:
+`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or
+`diegetic_artifact_visible`.
+
 The destructive-choice case is the canonical example: when the protagonist shoots the mentor, the engine identifies `mentor_dead`, invalidates `mentor_available`, transfers the secret-holder function to `mentor_journal`, transfers the moral-judgment function to `rival`, and emits `body_discovery`, `protagonist_guilt_or_justification`, and `faction_reaction` as required_aftermath items.
 
 **Rule**: `required_aftermath` is NOT a temporary analysis artifact — it is persisted as `CNSQ-NNNN` records in Phase 5. Storylet selection on subsequent turns reads `state_snapshot.consequences_pending` and prefers storylets whose effects address those consequences (Phase 4 salience scoring). Without persistence, the engine identifies "body discovery" once and then forgets — turning the promise/consequence engine into a goldfish. Phase 9 gate 12 (consequence persistence) is the structural backstop.
