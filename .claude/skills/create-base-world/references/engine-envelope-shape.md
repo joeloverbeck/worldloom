@@ -2,7 +2,11 @@
 
 Reference for `create-base-world` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention, the `expected_id_allocations` format, the `approval_token` placeholder convention, submit-path selection by envelope size, and common failure-mode response codes.
 
-Query `mcp__worldloom__describe_envelope_schema(op_kind?)` for the deployed envelope schema and per-op payload wrappers before assembling or debugging a genesis patch plan. The canonical schema source-of-truth remains `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records under `tools/validators/src/schemas/`. This file documents the operationally-relevant subset and the discovered workarounds.
+Query `mcp__worldloom__describe_envelope_schema(op_kind?)` for the deployed envelope schema and per-op payload wrappers before assembling or debugging a genesis patch plan. The canonical schema source-of-truth remains `tools/world-mcp/src/tools/_shared.ts` (`PatchOperationEnvelope` and `PatchPlanEnvelope` interfaces), `tools/patch-engine/src/envelope/schema.ts` (operation payload types), and validator JSON schemas for authored records under `tools/validators/src/schemas/`.
+
+A third valid pattern is schema-by-example: direct `Read` of a representative existing record under another world's `worlds/<world-slug>/_source/<class>/<ID>.yaml`. Use this when genesis envelope construction needs both the structural shape and realistic field population in one lightweight read, especially for soft-required-by-discipline fields that the JSON schemas do not require. This pattern is usually unavailable inside the new target world because genesis creates the first records of each class; when no representative same-class record exists, use live MCP schema retrieval or the offline schema-file fallback instead.
+
+This file documents the operationally-relevant subset and the discovered workarounds.
 
 ---
 

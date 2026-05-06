@@ -80,6 +80,11 @@ test("validatePatchPlan returns pass when validators run without failures", asyn
     assert.deepEqual(result.verdicts, []);
     assertValidatorRunEntries(result.validators_run);
     assert.ok(result.validators_run.some((entry) => entry.status === "pass"));
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -99,6 +104,35 @@ test("validatePatchPlan returns fail and surfaces rule verdicts from the validat
     assert.ok(result.verdicts.some((verdict) => verdict.code === "rule4.missing_why_not_universal"));
     assertValidatorRunEntries(result.validators_run);
     assert.ok(result.validators_run.some((entry) => entry.status === "fail"));
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("validatePatchPlan returns fail and surfaces id allocation races before signing", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = buildValidPatchPlan();
+    plan.expected_id_allocations = { cf_ids: ["CF-0002"] };
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("verdicts" in result);
+    assert.equal(result.status, "fail");
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "fail"
+      )
+    );
+    assert.ok(
+      result.verdicts.some(
+        (verdict) =>
+          verdict.validator === "id_allocation_race" &&
+          verdict.code === "id_allocation_race" &&
+          verdict.message.includes("cf_ids allocation race: expected CF-0002, current next id is CF-0001.")
+      )
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

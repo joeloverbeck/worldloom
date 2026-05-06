@@ -214,6 +214,39 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "  created_at_page: null",
     "notes: Duplicate bare storylet ids are legal across stories."
   ]);
+  writeStoryMarkdown(world, "harborwatch", "STORY_KERNEL.md", [
+    "---",
+    "story_id: STORY-0001",
+    "story_slug: harborwatch",
+    "---",
+    "# Harborwatch"
+  ]);
+  writeStoryMarkdown(world, "harborwatch", "pages-prose/PG-0001.md", [
+    "# Page PG-0001",
+    "",
+    "Brinewick watches the salt gate."
+  ]);
+  writeStoryMarkdown(world, "harborwatch", "storylet-batches/SLB-0001.md", [
+    "# Storylet Batch SLB-0001"
+  ]);
+  writeStoryMarkdown(world, "harborwatch", "story-promotions/SP-0001.md", [
+    "# Story Promotion SP-0001"
+  ]);
+  writeStoryMarkdown(world, "harborwatch", "audits/SAU-0001-2026-05-04.md", [
+    "# Story Audit SAU-0001"
+  ]);
+  writeStoryMarkdown(
+    world,
+    "harborwatch",
+    "audits/SAU-0001/remediation-storylet-proposals/RSP-0001-fix-thread-coverage.md",
+    ["# Remediation Proposal RSP-0001"]
+  );
+  writeStoryMarkdown(world, "harborwatch", "character-proposals/NCP-0001-sample.md", [
+    "# Character Proposal NCP-0001"
+  ]);
+  writeStoryMarkdown(world, "harborwatch", "character-proposals/batches/NCB-0001.md", [
+    "# Character Proposal Batch NCB-0001"
+  ]);
 
   return root;
 }
@@ -248,4 +281,15 @@ function writeStory(
   const targetDirectory = path.join(world, "stories", storySlug, "_source", directory);
   mkdirSync(targetDirectory, { recursive: true });
   writeFileSync(path.join(targetDirectory, fileName), `${lines.join("\n")}\n`, "utf8");
+}
+
+function writeStoryMarkdown(
+  world: string,
+  storySlug: string,
+  relativeFilePath: string,
+  lines: string[]
+): void {
+  const targetPath = path.join(world, "stories", storySlug, relativeFilePath);
+  mkdirSync(path.dirname(targetPath), { recursive: true });
+  writeFileSync(targetPath, `${lines.join("\n")}\n`, "utf8");
 }

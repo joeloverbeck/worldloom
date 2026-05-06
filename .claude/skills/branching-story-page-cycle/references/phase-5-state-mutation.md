@@ -28,7 +28,7 @@ Given `parent_page.state_snapshot` and the structured ops applied this turn:
 ```
 next_snapshot = parent_snapshot.clone()
 for op in applied_event_ops (each op is structured per the SE schema's op_type enum):
-    fact_create:                  add SF-NNNN to objective/apparent/disputed/reader/belief facets per epistemic_class
+    fact_create:                  add SF-NNNN to objective/apparent/disputed/belief facets per epistemic_class; add it to reader_known_facts only when visible_to_reader == true AND reader_visibility_basis is one of shown_in_pg0001, known_to_pov, dramatic_irony, diegetic_artifact_visible
     fact_invalidate:              replace SF-NNNN entry with superseder
     obligation_open:              add OBL-NNNN to obligations_open
     obligation_pay_off:           move OBL-NNNN from obligations_open to obligations_paid_off; replace ID with superseder
@@ -39,7 +39,7 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
     consequence_address:          move CNSQ-NNNN from pending to addressed; replace status via supersession
     thread_supersede:             replace THR-NNNN with superseder (status / pressure delta)
     relationship_supersede:       replace SREL-NNNN with superseder (axes / public_status / private_status_by_actor)
-    intention_refresh:            add new STINT-NNNN to intentions_current; replace prior STINT for that character via supersession (logical_id + supersedes link to the prior record)
+    intention_refresh:            add new STINT-NNNN to intentions_current; replace the prior STINT for that story entity / `stent_id` via supersession (logical_id + supersedes link to the prior record)
     cast_change:                  update cast_present
     location_change:              update current_location and accessible_locations
     inventory_change:             update inventory_by_entity via STOBJ supersession
@@ -47,6 +47,12 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
 this_page.state_snapshot = next_snapshot
 this_page.state_hash = hash(canonicalize(next_snapshot))
 ```
+
+For `fact_create`, `unrevealed_objective_truth` is valid only with
+`visible_to_reader: false`. A new SF whose `visible_to_reader: true` is missing
+`reader_visibility_basis`, uses `unrevealed_objective_truth`, or is omitted from
+`reader_known_facts` when page prose relies on reader-facing knowledge is a state
+mutation error, not a prose-only issue.
 
 ## State-subset-list Semantics
 
@@ -62,4 +68,4 @@ CNSQ records are branch-scoped. They carry `created_at_page: this_PG` and visibi
 
 ## Branch-Isolation Invariant Enforced Here
 
-Every new story-local record (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / PG) carries `created_at_page: this_PG`. The engine verifies before write — and Phase 9 gate 3 verifies recursively — that no story-local ID cited at any depth inside any record reachable from `state_snapshot` references a page outside `this_page.branch_path`. World canon (CF / M / INV / ENT) propagates freely; story-local engine state is branch-isolated.
+Every new non-PG story-local record (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC) carries `created_at_page: this_PG`. A PG record is the page itself; its own `id` is the branch anchor and must be included in `this_page.branch_path`. The engine verifies before write — and Phase 9 gate 3 verifies recursively — that no story-local ID cited at any depth inside any record reachable from `state_snapshot` references a page outside `this_page.branch_path`. World canon (CF / M / INV / ENT) propagates freely; story-local engine state is branch-isolated.

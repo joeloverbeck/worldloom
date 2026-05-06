@@ -2,7 +2,11 @@
 
 Reference for `branching-story-bootstrap` Phase 11 patch-plan assembly and submission. Covers the JSON envelope shape the patch engine accepts, the per-op payload convention for the bootstrap op mix, the `expected_id_allocations` format for story-bundle classes, the `approval_token` placeholder convention, validate / submit path selection by envelope size (a typical bootstrap envelope is 75+ records and routinely exceeds the MCP transport's inline limit), envelope-splitting fallback when even the CLI submit hits limits, and common failure-mode response codes.
 
-Query `mcp__worldloom__describe_envelope_schema(op_kind?)` for the deployed envelope schema and per-op payload wrappers before assembling or debugging a patch plan. Prefer passing `op_kind` when the phase needs one operation wrapper. If an unfiltered response returns `delivery_status: "persisted_with_summary"`, use `summary.available_op_kinds` to narrow the next call or recover a persisted schema slice with `mcp__worldloom__get_persisted_packet_slice(persisted_path, "op_schemas.<op_kind>")`. The canonical schema source-of-truth remains `tools/patch-engine/src/envelope/schema.ts` (operation payload types) and the JSON schemas under `tools/validators/src/schemas/` (story-bundle-record schemas: `story-entity.schema.json`, `story-fact.schema.json`, `story-event.schema.json`, `story-obligation.schema.json`, `story-thread.schema.json`, `story-relationship.schema.json`, `story-intention.schema.json`, `story-location.schema.json`, `story-object.schema.json`, `story-branch.schema.json`, `story-page.schema.json`, `story-choice.schema.json`, `story-storylet.schema.json`, `story-diegetic-artifact.schema.json`). This file documents the operationally-relevant subset and the discovered workarounds. The parallel references for sibling engine-routing skills are `.claude/skills/canon-addition/references/engine-envelope-shape.md` and `.claude/skills/create-base-world/references/engine-envelope-shape.md`; the bootstrap op mix and verdict differ from canon-addition's, so the per-op shapes documented below take precedence here.
+Query `mcp__worldloom__describe_envelope_schema(op_kind?)` for the deployed envelope schema and per-op payload wrappers before assembling or debugging a patch plan. Prefer passing `op_kind` when the phase needs one operation wrapper. If an unfiltered response returns `delivery_status: "persisted_with_summary"`, use `summary.available_op_kinds` to narrow the next call or recover a persisted schema slice with `mcp__worldloom__get_persisted_packet_slice(persisted_path, "op_schemas.<op_kind>")`. For per-record-class JSON-schema discovery (e.g., to verify the validator schema for a `storylet_record` / `page_record` / `choice_record` / `story_entity_record` / `story_fact_record` / `story_event_record` / `obligation_record` / `consequence_record` / `thread_record` / `relationship_record_story` / `intention_record` / `story_location_record` / `story_object_record` / `branch_record` / `story_diegetic_artifact_record`), query `mcp__worldloom__get_record_schema(node_type=<X>)` — `SUPPORTED_RECORD_SCHEMA_NODE_TYPES` at `tools/world-mcp/src/tools/get-record-schema.ts:226-251` enumerates every supported `node_type` including all 14 story-bundle record types. The canonical schema source-of-truth remains `tools/patch-engine/src/envelope/schema.ts` (operation payload types) and the JSON schemas under `tools/validators/src/schemas/` (story-bundle-record schemas: `story-entity.schema.json`, `story-fact.schema.json`, `story-event.schema.json`, `story-obligation.schema.json`, `story-thread.schema.json`, `story-relationship.schema.json`, `story-intention.schema.json`, `story-location.schema.json`, `story-object.schema.json`, `story-branch.schema.json`, `story-page.schema.json`, `story-choice.schema.json`, `story-storylet.schema.json`, `story-diegetic-artifact.schema.json`); operationally use the MCP `get_record_schema` and `describe_envelope_schema` tools for live retrieval — direct `Read` of the schema files is a fallback for offline / debugging contexts only.
+
+A third valid pattern is schema-by-example: direct `Read` of a representative existing record under `worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml`. Use this when envelope construction needs both the structural shape and realistic field population in one lightweight read, especially for soft-required-by-discipline fields that the permissive JSON schemas do not require. This requires a committed record of the target class in the target story bundle or a close same-world example; if no representative record exists yet, use live MCP schema retrieval or the offline schema-file fallback instead.
+
+This file documents the operationally-relevant subset and the discovered workarounds. The parallel references for sibling engine-routing skills are `.claude/skills/canon-addition/references/engine-envelope-shape.md` and `.claude/skills/create-base-world/references/engine-envelope-shape.md`; the bootstrap op mix and verdict differ from canon-addition's, so the per-op shapes documented below take precedence here.
 
 ---
 
@@ -67,10 +71,10 @@ Every story-bundle op's payload carries `story_slug` alongside `record`. This is
 | `create_cnsq_record` | `_source/consequences/CNSQ-NNNN.yaml` (rare at bootstrap; runtime page-cycle JIT-creates) |
 | `create_thr_record` | `_source/threads/THR-NNNN.yaml` |
 | `create_srel_record` | `_source/relationships/SREL-NNNN.yaml` |
-| `create_stint_record` | `_source/intentions/STINT-NNNN.yaml` (bare-numeric id per the engine's `^STINT-\d{4}$` regex; per-character semantics carried via `record.character_id`, not via id suffix) |
+| `create_stint_record` | `_source/intentions/STINT-NNNN.yaml` (bare-numeric id per the engine's `^STINT-\d{4}$` regex; per-character semantics carried via `record.stent_id`, with `record.world_character_id` as the optional world CHAR anchor, not via id suffix) |
 | `create_stloc_record` | `_source/locations/STLOC-NNNN.yaml` |
 | `create_stobj_record` | `_source/objects/STOBJ-NNNN.yaml` |
-| `append_story_diegetic_artifact_record` | `_source/artifacts/DA-NNNN.yaml` |
+| `append_story_diegetic_artifact_record` | `_source/artifacts/DA-NNNN.yaml` (rare at bootstrap; premise-driven story-local artifacts only) |
 | `create_br_record` | `_source/branches/BR-NNNN.yaml` |
 | `create_pg_record` | `_source/pages/PG-NNNN.yaml` |
 | `create_chc_record` | `_source/choices/CHC-NNNN.yaml` |
@@ -84,7 +88,7 @@ The story-bundle record schemas at `tools/validators/src/schemas/story-*.schema.
 
 ## 3. `expected_id_allocations` per-class format
 
-The engine's pre-apply check verifies that `expected_id_allocations` matches the engine's next-id calculation per story-bundle class. Bootstrap envelopes typically populate the following allocation classes:
+The engine's pre-apply check verifies that `expected_id_allocations` matches the engine's next-id calculation per story-bundle class. Allocation keys are added only when the corresponding ops appear in the envelope. Bootstrap envelopes typically omit `cnsq_ids` and `da_ids` because CNSQ and story-local DA records are conditional, premise-driven records at bootstrap, not defaults. Bootstrap envelopes typically populate the following allocation classes:
 
 ```json
 {
@@ -152,7 +156,7 @@ For exceptionally large bundles where even the CLI submit path's transport hits 
 Recommended split order if forced:
 
 1. **Envelope A — Cast architecture**: `create_stent_record`, `create_stint_record`, `create_stloc_record`, `create_stobj_record`, `create_srel_record` ops (story-local entities + intentions + locations + objects + relationships).
-2. **Envelope B — Story state**: `create_sf_record`, `create_se_record`, `create_thr_record`, `create_obl_record`, `create_cnsq_record`, `append_story_diegetic_artifact_record` ops (facts + genesis event + threads + obligations + consequences + story-local diegetic artifacts).
+2. **Envelope B — Story state**: `create_sf_record`, `create_se_record`, `create_thr_record`, `create_obl_record` ops, plus `create_cnsq_record` and `append_story_diegetic_artifact_record` only when the premise actually emits CNSQ / story-local DA records at PG-0001 (facts + genesis event + threads + obligations + optional consequences + optional story-local diegetic artifacts).
 3. **Envelope C — Storylets**: `create_slt_record` ops (the seed pool — the largest single class, ~20 records each routinely 3-5KB).
 4. **Envelope D — Page architecture**: `create_br_record`, `create_pg_record`, `create_chc_record` ops (root branch + root page + emitted choices). PG-0001's `state_snapshot` references every prior class, so this envelope must land last.
 

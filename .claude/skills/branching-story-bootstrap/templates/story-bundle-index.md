@@ -39,7 +39,7 @@ storylet pool shape distribution.
 
 Total: <count> author-pool storylets.
 
-Shape distribution: opening: N | escalation: N | relational: N | routine: N | aftermath: N | reflection: N | other: N
+Shape distribution: entry_pressure: N | cast_introduction: N | threat_escalation: N | relational_dynamics: N | routine_disruption: N | aftermath_sequel: N | reflection_dilemma: N
 
 ## Pages rendered
 

@@ -54,7 +54,7 @@ The lawful, traceable, append-only bridge by which a story-local fact, mystery r
 <HARD-GATE>
 Do NOT write `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN.md`, do NOT write any superseding story-local source record (SF / STENT / story-local DA), do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` or `worlds/<world-slug>/stories/INDEX.md`, and do NOT invoke `canon-addition` (which would itself fire its own HARD-GATE for world-canon mutation) until ALL of:
 
-(a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the source ID exists in this story's `_source/` per `source_kind` (story_fact → `_source/facts/SF-<id>.yaml`; mystery_resolution → world `_source/mystery-reserve/M-<id>.yaml` exists AND a resolving `SE-NNNN` at `resolving_page_id` whose storylet declared `M_resolution_claims.resolution_authority: canon_candidate` for this M; character_arc_outcome → `_source/entities/STENT-<id>.yaml` exists AND `source_branch_leaf_page` exists; artifact_canonization → `_source/artifacts/DA-<id>.yaml` exists), validates `promotion_branch_path` is a real chain ending at a real page, allocates the next `SP-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`, and confirms the content_policy block is loaded for downstream prompt assembly;
+(a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the source ID exists in this story's `_source/` per `source_kind` (story_fact → `_source/facts/SF-<id>.yaml`; mystery_resolution → world `_source/mystery-reserve/M-<id>.yaml` exists AND a resolving `SE-NNNN` at `resolving_page_id` whose storylet declared `M_resolution_claims.resolution_authority: canon_candidate` for this M; character_arc_outcome → `_source/entities/STENT-<id>.yaml` exists AND `source_branch_leaf_page` exists; artifact_canonization → `_source/artifacts/DA-<id>.yaml` exists), validates `promotion_branch_path` is a real chain ending at a real page, allocates the next `SP-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`, loads `docs/FOUNDATIONS.md` into working context (the CF Record Schema that governs Phase 2 translation, Rule 4 that governs Phase 3 scope-inflation, Rule 7 that governs Phase 4 mystery firewall, Rule 6 that governs Phase 9 CH lineage handoff, Rule 12 that governs Phase 7 two-trace critic, and the §Default Reality + Rule 6 clause that anchors the HARD-GATE absoluteness across `execution_mode`s all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly;
 
 (b) Phase 4 Mystery Firewall hard-rejects any source whose target M is `status: forbidden` AND any `mystery_resolution` source whose resolving storylet's `resolution_authority` is NOT `canon_candidate` (a defense-in-depth re-check; storylet-pool-authoring Phase 4 gate 2 + branching-story-page-cycle Phase 4.5 are the upstream gates) — the rejection produces an SP-NNNN ledger entry with `outcome: REJECT (firewall)` and halts;
 
@@ -225,7 +225,7 @@ If any step fails, the skill aborts before Phase 1 and emits no SP ledger entry 
 Load the source record and its provenance per `source_kind`. The content_policy block (NC-21 verbatim) is loaded into the prompt-assembly context — propagates to Phase 7 critics and to the proposal_package handed to canon-addition.
 
 ### `source_kind == story_fact`
-- Load `SF-<id>.yaml`: `subject`, `predicate`, `object`, `epistemic_class`, `truth_value`, `certainty`, `known_by`, `believed_by`, `derived_from_cf`, `canon_relation`, `evidence`.
+- Load `SF-<id>.yaml`: `subject`, `predicate`, `object`, `epistemic_class`, `truth_value`, `certainty`, `known_by`, `believed_by`, `visible_to_reader`, `reader_visibility_basis`, `derived_from_cf`, `canon_relation`, `evidence`.
 - Walk the SF's branch_path via `created_at_page` → `parent_page_id` chain (cross-checked against `promotion_branch_path` argument; mismatch → abort with "source SF was not introduced on the cited promotion branch — supersession history may have moved it; re-confirm").
 - Capture supporting prose excerpts from `worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-*.md` along the branch — the LLM-rendered moments where this fact was established / corroborated / acted upon.
 
@@ -235,7 +235,7 @@ Load the source record and its provenance per `source_kind`. The content_policy 
 - Capture the resolution event details + supporting prose excerpts from the resolving page and the page that emitted the choice.
 
 ### `source_kind == character_arc_outcome`
-- Load `STENT-<id>.yaml` (story-local entity record) and its full `STINT` history along `promotion_branch_path` (one STINT per PG where the character's intentions/beliefs/relationships shifted — load via `mcp__worldloom__get_record` per STINT id).
+- Load `STENT-<id>.yaml` (story-local entity record) and its full `STINT` history along `promotion_branch_path`. Select STINT history by matching `STINT.stent_id == source_stent_id`; `world_character_id` / `STENT.character_id` are world `CHAR-NNNN` anchors, not the story-local ownership key. Load one matching STINT per PG where that STENT's intentions/beliefs/relationships shifted via `mcp__worldloom__get_record` per STINT id.
 - Identify the load-bearing transformation (what changed from STINT-0001 to STINT-leaf): goals shifted, secrets exposed, relationships inverted, social position changed, etc.
 - Capture the events along the branch that drove the change.
 - The world-level `CHAR-NNNN` dossier remains the durable world record; the STENT is what evolved. The `arc_outcome_summary` argument carries the user's natural-language framing.
@@ -270,6 +270,7 @@ FOUNDATIONS Rule 4: No Globalization by Accident. A story-local outcome must not
 - If the source SF was branch-local (`canon_relation: not_applicable` AND `known_by` ≤ 2 STENTs), the proposed CF MUST NOT carry `scope.geographic: global` unless the user explicitly elevates AND the elevation cites additional world-state evidence in the proposal.
 - If the source involved cast members from a single faction / region / period, the proposed CF must reflect that scoping.
 - If the source SF's `known_by` was small (≤ 2 cast), the CF's `truth_scope.diegetic_status` should be `believed` or `disputed`, not `objective` — unless evidence in the story established broader awareness.
+- `reader_visibility_basis` is story-reader provenance, not diegetic spread. A reader-only reveal (`dramatic_irony`, `diegetic_artifact_visible`, etc.) never substitutes for `known_by`, evidence, supporting prose, or branch-local event records when deciding whether the promoted CF is believed, disputed, or objective at world scope.
 - For `character_arc_outcome`: the CF's scope MUST reflect the cast member's actual social/geographic reach, not the dramatic weight of the arc.
 
 ### Auto-Adjustment
@@ -333,6 +334,7 @@ Assemble the package canon-addition will receive at Phase 9 handoff. See `templa
 - `promotion_id`, `source_kind`, `source_record`, `promotion_branch_path`
 - `cf_candidate` — full CF candidate from Phase 2 (matches `templates/canon-fact-record.yaml` + FOUNDATIONS schema)
 - `provenance` — story id, story_slug, world_slug, branch_path, supporting_pages, supporting_prose_excerpts
+- `provenance.source_reader_visibility` — for `source_kind: story_fact`, copy the source SF's `visible_to_reader` and `reader_visibility_basis` so reviewers can distinguish deliberate reader-facing dramatic irony from in-world knowledge; this field is provenance only and does not alter the CF candidate's diegetic status.
 - `scope_inflation_check` — proposed_scope, source_scope, inflation_detected, user_justification_for_widening
 - `mystery_firewall` — is_mystery_resolution, M_resolved, M_resolution_safety, M_disallowed_cheap_answers_check
 - `downstream_impact` — full Phase 5 summary (this_story + cross_story)

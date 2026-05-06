@@ -30,9 +30,6 @@ arguments:
   - name: pace_hint
     description: "One of: action | sequel | reflection | aftermath. Biases narrative governor weighting (Phase 6) for this turn."
     required: false
-  - name: length_target
-    description: "Words for the rendered prose (default inherited from STORY_KERNEL.target_page_length)."
-    required: false
   - name: execution_mode
     description: "One of: authoring | interactive_runtime | batch_generation. Overrides the story bundle's execution_mode_default. Per-mode behavior governs Phase 10 HARD-GATE visibility, mandatory-critic policy, and auto-write — but NEVER lifts the Phase 4.5 canon-promotion HARD-GATE handoff to story-fact-promotion-to-canon."
     required: false
@@ -40,12 +37,12 @@ arguments:
 
 # Branching Story Page Cycle
 
-Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next storylet (with JIT expansion if the pool is thin), renders the next page's prose, generates 4-6 structured choices + a write-in slot, validates against firewalls and the recursive branch-isolation invariant, and atomically writes the new records — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
+Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next storylet (with JIT expansion if the pool is thin), renders the next page's prose, generates 4-6 structured choices + a write-in slot, validates against firewalls and the recursive branch-isolation invariant, and commits the new records plus markdown surfaces through Phase 11's staged write path — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
 
 <HARD-GATE>
 Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages-prose/`, and do NOT `Edit` the bundle's `INDEX.md`, until:
 
-(a) Pre-flight resolves the bundle, validates `parent_page_id` belongs to this story, validates exactly one of `{chosen_choice_id, manual_action_text}`, allocates `PG-NNNN` (and `BR-NNNN` on fork) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, resolves `execution_mode`, and confirms the content_policy block is loaded for downstream prompt assembly.
+(a) Pre-flight resolves the bundle, validates `parent_page_id` belongs to this story, validates exactly one of `{chosen_choice_id, manual_action_text}`, pre-allocates all per-class IDs the envelope will populate (`PG-NNNN` always; `BR-NNNN` on fork AND on continuation; plus one allocation per id-class — `SF` / `OBL` / `CNSQ` / `THR` / `SREL` / `STINT` / `SE` / `SLT` / `STLOC` / `STOBJ` / `DA` / `CHC` — that this turn will create records in) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`, resolves `execution_mode`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4.5 mystery-resolution authority, Phase 5 state-mutation discipline, Phase 9 firewall/invariant gates, and the FOUNDATIONS §Default Reality + Rule 6 commitment that anchors the never-elided Phase 4.5 canon-promotion HARD-GATE all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load; verifiable per `references/pre-flight-and-prerequisites.md §Pre-flight Check`'s **Verify FOUNDATIONS-in-context before proceeding** bullet, which makes the load mandate self-checkable rather than purely cultural), and confirms the content_policy block is loaded for downstream prompt assembly.
 (b) Phase 9 records PASS with a one-line rationale for every gate (12 gates — see Phase 9: mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence).
 (c) `execution_mode == authoring` (default): the user has explicitly approved the Phase 10 deliverable summary. `interactive_runtime`: Phase 10 hidden; auto-commits after Phase 9 PASS. `batch_generation`: hidden until validation failure or a configured checkpoint.
 
@@ -56,8 +53,10 @@ Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages
 
 ```
 Pre-flight     resolve story bundle; validate parent_page_id belongs to story;
-               allocate PG-NNNN (and BR-NNNN on fork via non-leaf-parent
-               detection) via allocate_next_id; validate exactly one of
+               pre-allocate all per-class IDs the envelope will populate
+               (PG-NNNN always; BR-NNNN on fork AND continuation; plus
+               SF/OBL/THR/SREL/STINT/SE/SLT/CHC per turn-applicable classes)
+               via allocate_next_id; validate exactly one of
                {chosen_choice_id, manual_action_text}; resolve execution_mode;
                load content_policy; assemble retrieval (context_packet +
                whole-class M + INV firewall loads); record canon_revision
@@ -85,9 +84,10 @@ Phase 3        Continuation feasibility — ≥1 storylet satisfied? required_af
    |
    v
 Phase 4        Storylet selection — hard filters → salience scoring →
-               weighted-pick from top-K (NEVER always-take-top); governor_nudge
-               biases weighting; JIT expansion only when no candidate scores
-               above threshold AND consequence-capacity required JIT
+               weighted-pick from top-K (weighted, not mechanical top-1);
+               governor_nudge biases weighting; JIT expansion only when no
+               candidate scores above threshold AND consequence-capacity
+               required JIT
    |
    v
 Phase 4.5      Mystery resolution authority — per-claim routing per
@@ -102,7 +102,8 @@ Phase 5        State mutation — apply structured ops; append-only supersession
                (logical_id + supersedes); compute next_snapshot per closed
                op_type enum; persist required_aftermath as CNSQ unless absorbed
                by newly-opened OBL; verify branch-isolation invariant
-               (created_at_page == this_PG on every emergent record)
+               (created_at_page == this_PG on every non-PG emergent
+               record; PG id is the page's branch anchor)
    |
    v
 Phase 6        Narrative governor recompute + nudge — narrative_health metrics
@@ -120,20 +121,39 @@ Phase 6.5      Closure readiness — state-derived signal (no required-closure
    |
    v
 Phase 7        Page render — LLM prompt assembly with content_policy verbatim
-               FIRST + story kernel + selected storylet + scene context + recent
-               prose continuity along branch_path only + governor_nudge; LLM
-               produces prose; post-render extraction classifies load-bearing
-               claims (already-ledgered / incidental-color / needs-ledger-record
-               / contradiction / mystery-risk); up to 3 re-prompts on fail-fast;
-               mention-vs-depiction distinction is load-bearing
+               FIRST + story kernel + prose craft contract verbatim + selected
+               storylet + scene context + recent prose continuity along
+               branch_path only (continuity for narrative/world only — NOT
+               echo phrasings) + governor_nudge; LLM produces prose; post-
+               render prose critic checks 7 axes against the contract (filter-
+               word saturation, recurring-metaphor across pages, identical-
+               anchor recurrence, self-narrating-self, bracket-paraphrasing-
+               dialogue, ledger-jargon-leakage, abstract-noun-saturation);
+               post-render extraction classifies load-bearing claims (already-
+               ledgered / incidental-color / needs-ledger-record / contradiction
+               / mystery-risk); up to 3 re-prompts on fail-fast (shared budget
+               across critic + cross-check); mention-vs-depiction distinction
+               is load-bearing
+   |
+   v
+Phase 7.5      Visible affordance extraction — parse the rendered page prose
+               working buffer for prose-emphasized actors, objects, locations,
+               exits, visible tensions, and implied questions; map each to
+               state ids or newly-created records from Phase 5 / Phase 7 claim
+               classification; route ungrounded actors/objects/locations/exits
+               back to Phase 7 re-prompt or the existing claim-record path;
+               feed grounded affordances to Phase 8 as memory-only anchors
    |
    v
 Phase 8        Choice generation (Amendment B pipeline) — affordance-space
-               collection → salient-affordance shortlist + LLM proposer of 6-10
-               structured CHCs → engine validation → diversification + scoring
-               (≥3 distinct choice_modes, ≥3 distinct poetic_effects, ≥60% of
-               open high-salience OBLs) → surface-label rendering by LLM →
-               write-in slot N+1; every emitted CHC carries choice_contract block
+               collection from state_snapshot + Visible Affordance Map →
+               salient-affordance shortlist + LLM proposer of 6-10 structured
+               CHCs → engine validation → diversification + pair-distance
+               scoring (≥3 distinct choice_modes, ≥3 distinct poetic_effects,
+               ≥60% of open high-salience OBLs, and every CHC pair differs on
+               ≥2 axes with ≥1 structural-axis difference) → surface-label
+               rendering by LLM → write-in slot N+1; every emitted CHC carries
+               choice_contract and continuation_capacity blocks
    |
    v
 Phase 9        Validation gates — 12 gates (see HARD-GATE); each PASS with
@@ -154,11 +174,12 @@ Phase 10       HARD-GATE approval — deliverable summary (page header + parent
  accept (or auto-pass per execution_mode)
    |
    v
-Phase 11       Atomic write — single transaction: PG → SE → per-class
+Phase 11       Staged commit — engine YAML transaction: PG → SE → per-class
                SF/OBL/CNSQ/THR/SREL/STINT/CHC → JIT SLT (if any) →
                STLOC/STOBJ/DA (if any) → BR (new on fork or superseder on
-               continuation) → pages-prose/PG-NNNN.md → INDEX.md LAST so
-               partial-failure leaves index unmutated; NO git commit
+               continuation), then sequenced markdown writes:
+               pages-prose/PG-NNNN.md → INDEX.md LAST so partial-failure
+               leaves index unmutated; NO git commit
 ```
 
 ## Inputs
@@ -182,7 +203,6 @@ Pre-flight aborts if neither or both are provided.
 - `content_intensity_override` — `tame | mature | explicit`; overrides storylet intensity ±1 band filter.
 - `pov_override` — temporarily switch POV character (must be in `cast_present`).
 - `pace_hint` — `action | sequel | reflection | aftermath`; biases Phase 6 governor weighting.
-- `length_target` — words for the rendered prose (default inherited from `STORY_KERNEL.target_page_length`).
 - `execution_mode` — `authoring | interactive_runtime | batch_generation`; overrides bundle's `execution_mode_default`. Per-mode behavior governs Phase 10 HARD-GATE visibility, mandatory-critic policy, and auto-write — but NEVER lifts the Phase 4.5 canon-promotion HARD-GATE handoff.
 
 ### Reads
@@ -191,7 +211,7 @@ The full reads list (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.
 
 ## Output
 
-### Files written (single transaction at Phase 11)
+### Files written (staged commit at Phase 11)
 
 All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_source/`:
 
@@ -204,7 +224,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 | Story consequences | `consequences/CNSQ-NNNN.yaml` | One per `required_aftermath` item from Phase 2 (unless absorbed by a newly-opened OBL); one per `consequence_address` op |
 | Story threads | `threads/THR-NNNN.yaml` | One per thread state change (status / pressure delta) |
 | Story relationships | `relationships/SREL-NNNN.yaml` | One per relationship state change (axes deltas / public_status / private_status_by_actor) |
-| Story intentions | `intentions/STINT-NNNN.yaml` | One per major character whose pressure / emotional_state / beliefs shifted (per-character semantics carried via the record's `character_id` field; per-page supersession of a prior STINT for the same character via `logical_id` + `supersedes`; bare-numeric id per the patch engine's `^STINT-\d{4}$` contract) |
+| Story intentions | `intentions/STINT-NNNN.yaml` | One per major character whose pressure / emotional_state / beliefs shifted (`stent_id` points to the story entity this snapshot drives, with `world_character_id` as the optional world CHAR anchor; per-page supersession of a prior STINT for the same character via `logical_id` + `supersedes`; bare-numeric id per the patch engine's `^STINT-\d{4}$` contract) |
 | Storylet (JIT only) | `storylets/SLT-NNNN.yaml` | IF Phase 4 JIT expansion fired via `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped` |
 | Story location | `locations/STLOC-NNNN.yaml` | IF a new story-local location is introduced this turn |
 | Story object | `objects/STOBJ-NNNN.yaml` | IF a new story-local object is introduced or an existing object's state changed via supersession |
@@ -219,6 +239,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 - New leaf entry per branch (or new branch entry if fork).
 - Thread status changes.
 - Latest health snapshot.
+- If Phase 4 JIT created an `SLT-NNNN`: update the `## Storylet pool` total and per-shape distribution using canonical SLT `shape` values from the storylet records; do not use abbreviated bootstrap labels.
 - If fork: new branch row in branches table.
 
 ### No canon-file mutations
@@ -227,31 +248,33 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 
 ### ID Conventions — branch-isolation invariant
 
-All emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / PG / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. Author-pool storylets are the one exception: they retain `created_at_page: null` and are globally visible (set by storylet-pool-authoring at authoring time in seed/focus modes).
+All non-PG emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. PG records are the page, so the PG record's own `id` is its branch anchor and must appear in `branch_path`. Author-pool storylets are the other exception: they retain `created_at_page: null` and are globally visible (set by storylet-pool-authoring at authoring time in seed/focus modes).
 
 The branch-isolation invariant is structurally enforced by this field combined with Phase 9's recursive reference closure validation gate.
 
 ## Procedure
 
-1. **Pre-flight.** Validate args, allocate `PG-NNNN` (and `BR-NNNN` on fork-detection) via `mcp__worldloom__allocate_next_id`, resolve `execution_mode`, and assemble world-state retrieval (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.md, parent page + cited state-snapshot records, branch-path prose continuity, filtered storylet pool, premise-and-state-bounded `get_context_packet`, whole-class M + INV firewall loads, content_policy block). Load `references/pre-flight-and-prerequisites.md`.
+1. **Pre-flight.** Validate args, pre-allocate all per-class IDs the envelope will populate (`PG-NNNN` always; `BR-NNNN` on fork-detection AND on continuation; plus one allocation per id-class — `SF` / `OBL` / `CNSQ` / `THR` / `SREL` / `STINT` / `SE` / `SLT` / `STLOC` / `STOBJ` / `DA` / `CHC` — that this turn will create records in) via `mcp__worldloom__allocate_next_id`, resolve `execution_mode`, and assemble world-state retrieval (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.md, parent page + cited state-snapshot records, branch-path prose continuity, filtered storylet pool, premise-and-state-bounded `get_context_packet`, whole-class M + INV firewall loads, content_policy block). Load `references/pre-flight-and-prerequisites.md`.
 
 2. **Phase 1 — Choice resolution.** Path A (`chosen_choice_id` → `ProposedEvent` from CHC's structured fields) or Path B (`manual_action_text` → LLM parser → engine validation → four-way routing: REFUSE_ONLY_THROUGH_WORLD_LOGIC / TREAT_AS_ATTEMPT / ACCEPT_BUT_TRANSFORM / ACCEPT). Write-in inputs are NEVER silently rejected. Load `references/phase-1-choice-resolution.md`.
 
 3. **Phases 2-3 — Impact analysis + continuation feasibility.** Compute facts_created/invalidated, obligations affected, intentions/threads deltas, storylet eligibility shifts, transferable_functions, and required_aftermath. Then check that ≥1 storylet remains satisfied, all required_aftermath items are addressable, all `forbidden`-status M are preserved, and INVs hold. Surface ACCEPT-ANYWAY / TRANSFORM / ATTEMPT / DIFFERENT-CHOICE on infeasibility, or honor a coherent terminal branch. Load `references/phase-2-3-impact-and-feasibility.md`.
 
-4. **Phases 4 + 4.5 — Storylet selection + mystery resolution authority.** Hard-filter the storylet pool, salience-score, weighted-pick from top-K (NEVER always-take-top). JIT-expand via `storylet-pool-authoring mode=jit` only when no candidate scores above threshold and consequence-capacity required JIT. **Phase 4.5 `canon_candidate` route is a separate, never-elided HARD-GATE handoff to `story-fact-promotion-to-canon` regardless of `execution_mode`.** Load `references/phase-4-storylet-and-mystery-authority.md`.
+4. **Phases 4 + 4.5 — Storylet selection + mystery resolution authority.** Hard-filter the storylet pool, salience-score, weighted-pick from top-K (avoid mechanical top-1 selection when scores are within ~1 point — introduce variation via judgment when alternatives are close). JIT-expand via `storylet-pool-authoring mode=jit` only when no candidate scores above threshold and consequence-capacity required JIT. **Inline-authoring of a JIT SLT in this skill's patch envelope is operationally riskier than delegation to `storylet-pool-authoring mode=jit` and should be reserved for cases where mid-execution sub-skill delegation is not feasible. Inline authoring places the responsibility for predicate-DSL conformance, gate-set equivalence, and provenance-field correctness on the operator rather than on the delegated skill's prompt-shape; the Phase 11 validators (`record_schema_compliance`, `storylet_predicate_dsl_parsability`, `recursive_reference_closure`) catch the result either way, but the failure mode is a re-validate cycle rather than the safety-net catch storylet-pool-authoring's prompt-shape provides upstream**: (i) `storylet-pool-authoring`'s Phase 3 inlines the closed predicate DSL grammar from `storylet-pool-authoring/templates/predicate-dsl.md` verbatim into the LLM prompt, the operator's safety net against invented predicates that the runtime `storylet_predicate_dsl_parsability` validator would otherwise reject at Phase 11 submit time; (ii) `storylet-pool-authoring`'s Phase 4 9-gate set (mystery firewall, resolution-authority declaration, predicate parsability, branch-contamination, etc.) runs over the candidate, and re-running these gates inline duplicates validator logic and risks divergence; (iii) `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped` are set authoritatively by `storylet-pool-authoring` at JIT-emission time, not negotiated by the caller. An operator who shortcuts to inline authoring (because spawning a sub-routine feels heavier than authoring a single SLT) will hit the validator at Phase 11 with `unknown pred '<invented-name>'` errors and force a re-validate cycle; the delegation cost is the safety net's price. **Phase 4.5 `canon_candidate` route is a separate, never-elided HARD-GATE handoff to `story-fact-promotion-to-canon` regardless of `execution_mode`.** Load `references/phase-4-storylet-and-mystery-authority.md`.
 
-5. **Phase 5 — State mutation.** Apply structured ops via append-only supersession (`logical_id` + `supersedes`); compute `next_snapshot` per the closed `op_type` enum; persist each `required_aftermath` item as a CNSQ-NNNN unless absorbed by a newly-opened OBL; verify the branch-isolation invariant (`created_at_page == this_PG` on every emergent record). Load `references/phase-5-state-mutation.md`.
+5. **Phase 5 — State mutation.** Apply structured ops via append-only supersession (`logical_id` + `supersedes`); compute `next_snapshot` per the closed `op_type` enum; persist each `required_aftermath` item as a CNSQ-NNNN unless absorbed by a newly-opened OBL; verify the branch-isolation invariant (`created_at_page == this_PG` on every non-PG emergent record; PG records are authorized by their own id in `branch_path`). Load `references/phase-5-state-mutation.md`.
 
 6. **Phases 6 + 6.5 — Narrative governor recompute + closure readiness.** Recompute narrative_health (open_obligation_count, high_salience_unpaid_count, contradiction_risk, causal_connectivity, motivation_coverage, threat_pressure, consequence_density, reflection_density, novelty, tension, agency_score, flagged_for_audit). Generate `governor_nudge` (homeostat, never act-spine). Detect state-derived closure readiness; widen — never force — Phase 8's choice set when ready. Load `references/phase-6-governor-and-closure.md`.
 
-7. **Phase 7 — Page render.** Assemble the LLM prompt with content_policy verbatim FIRST, story kernel, selected storylet, scene context, recent prose continuity ALONG `branch_path` ONLY, and `governor_nudge`. Render to a working buffer (NOT disk yet). Run post-render claim classification (already-ledgered / incidental-color / needs-ledger-record / contradiction / mystery-risk) and the fail-fast checks (intensity band, storylet fact_effects, choice contract `forbidden_outcomes`); up to 3 re-prompts before escalating to the user. Load `references/phase-7-page-render.md`.
+7. **Phase 7 — Page render.** Assemble the LLM prompt with content_policy verbatim FIRST, story kernel, **prose craft contract verbatim** (`references/prose-craft-contract.md`), selected storylet, scene context, recent prose continuity ALONG `branch_path` ONLY (continuity for narrative/world only — instruction explicitly forbids echoing prior phrasings / recurring metaphors / identical anchors verbatim), and `governor_nudge`. Render to a working buffer (NOT disk yet). Run the post-render prose critic against the 7 contract-derived axes (per-mode behavior in `references/phase-7-page-render.md` §Post-Render Prose Critic), then post-render claim classification (already-ledgered / incidental-color / needs-ledger-record / contradiction / mystery-risk) and the fail-fast checks (intensity band, storylet fact_effects, choice contract `forbidden_outcomes`); critic + cross-check + fail-fast share the same 3-re-prompt budget before escalating to the user. Load `references/phase-7-page-render.md`.
 
-8. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries a populated `choice_contract` block. Load `references/phase-8-choice-generation.md`.
+8. **Phase 7.5 — Visible Affordance Extraction.** Parse the Phase 7 prose working buffer for visible affordances; map each to existing state ids or newly-created records from Phase 5 / Phase 7 claim classification; route ungrounded actors, objects, locations, or exits back to Phase 7 re-prompt or the existing claim-record path; feed the memory-only Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
 
-9. **Phase 9 — Validation gates.** Run all 12 gates (mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence). Each PASS requires a one-line rationale on the new page's `validation_trace` field; a bare PASS is treated as FAIL. FAIL routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+9. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection from `state_snapshot` plus the Visible Affordance Map → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + pair-distance scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered, grounded visible affordances considered as anchors, and every CHC pair differs on ≥2 axes with ≥1 difference from structural axes 1-6) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries populated `choice_contract` and `continuation_capacity` blocks, with the latter proving a post-choice seed-storylet or runtime-JIT continuation path. Load `references/phase-8-choice-generation.md`.
 
-10. **Phase 10 — HARD-GATE approval.** Per `execution_mode`:
+10. **Phase 9 — Validation gates.** Run all 12 gates (mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence). Each PASS requires a one-line rationale on the new page's `validation_trace` field; a bare PASS is treated as FAIL. FAIL routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+
+11. **Phase 10 — HARD-GATE approval.** Per `execution_mode`:
 
     | Mode | Phase 10 visibility |
     |---|---|
@@ -296,6 +319,11 @@ The branch-isolation invariant is structurally enforced by this field combined w
     ...
     N+1. (write your own)
 
+    PHASE 4.5 — CANON-PROMOTION HANDOFF:
+    - Triggered: <true | false>
+    - Per-claim routing: <count> apparent, <count> branch_local_counterfactual, <count> canon_candidate (handed off to story-fact-promotion-to-canon under separate HARD-GATE)
+    - Forbidden-status M preserved: <bool — Phase 9 gate 1 dependency>
+
     FIREWALL VERDICTS (Phase 9 gates 1-12):
     - Mystery firewall: PASS — <one-line rationale>
     - Invariant compatibility: PASS — <rationale>
@@ -329,7 +357,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
     When the gate is hidden per `execution_mode`, the engine auto-commits to Phase 11 after Phase 9 records all 12 PASSes. On Phase 9 FAIL the engine surfaces the failure and routes per the responsible-phase column — **the auto-commit posture does NOT mask validation failures**. The Phase 9 gates run in every mode; only the Phase 10 user-approval pause is conditionally lifted.
 
-11. **Phase 11 — Engine submit + markdown writes.** Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
+12. **Phase 11 — Engine submit + markdown writes.** Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
 
     1. Assemble the envelope, dry-run validate, sign the approval token, and submit. Five sub-steps:
        - **1a. Assemble** the `mcp__worldloom__submit_patch_plan` envelope with all emitted `_source` records. Per-op kinds:
@@ -345,21 +373,26 @@ The branch-isolation invariant is structurally enforced by this field combined w
          - `create_slt_record` IF Phase 4 JIT expansion fired.
          - `create_stloc_record`, `create_stobj_record`, and `append_story_diegetic_artifact_record` IF this turn introduces a story-local location, object, or in-story diegetic artifact.
          - `create_br_record` for a new fork BR, or a superseding BR create op when updating an existing branch's leaf/status.
-       - **1b. Persist** the envelope to `/tmp/<plan-id>.json` with `approval_token: "placeholder"` (the placeholder convention per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token` and `create-base-world/references/engine-envelope-shape.md §4` — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time).
-       - **1c. Dry-run validate** via `mcp__worldloom__validate_patch_plan(envelope)`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, Rules 1-7 + structural validators. Does NOT cover approval-token verification or id-allocation race (both submit-only); treat as a defensive pre-submit check, not a complete gate.
-       - **1d. Sign** via `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` (the canonical issuer per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token`; HMAC-bound to the envelope's exact bytes; never self-sign — Hook 3 blocks direct reads of `tools/world-mcp/.secret` precisely to prevent token forgery). Persist the signed token to `/tmp/<plan-id>.token` if the CLI submit path will be used.
-       - **1e. Submit**: embed the signed token back into the envelope (replacing the `"placeholder"` value) AND pass it as the separate `approval_token` parameter to `mcp__worldloom__submit_patch_plan(plan, approval_token)` — the MCP wrapper validates both surfaces. Submit-path selection by envelope size: ordinary turns (~40-50KB) fit MCP transport; large turns (multi-storylet JIT, large state snapshots) use `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` instead — same engine code, same failure-mode codes, bypasses MCP transport size constraints (per `docs/HARD-GATE-DISCIPLINE.md §Submitting the plan`).
+
+         Each op also carries `op`, `target_world`, `target_file`, and `payload` fields. For story-bundle ops, `target_file` follows the pattern `worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml`; the full file-class → directory mapping (pages/, events/, facts/, obligations/, consequences/, threads/, relationships/, intentions/, storylets/, branches/, choices/, locations/, objects/, artifacts/) is documented in `branching-story-bootstrap/references/engine-envelope-shape.md §2`. The envelope-shape validator requires a non-empty string; the engine derives the actual write path from the record id, but the shape check enforces the field.
+       - **1b. Persist** the envelope to `/tmp/<plan-id>.json` with `approval_token: "placeholder"` (the placeholder convention per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token` and `branching-story-bootstrap/references/engine-envelope-shape.md §4` — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time). **Always create the envelope from zero.** Before writing, if `/tmp/<plan-id>.json` (or its `.token` sibling) already exists from a prior run, delete it first via `rm -f /tmp/<plan-id>.json /tmp/<plan-id>.token`. NEVER read or edit a pre-existing file at this path; the plan-id naming is conflict-prone (a different story-bundle, a re-tried run, or another world may have produced a same-page-id plan in a prior session) and incrementally editing a stale envelope is the dominant source of envelope-shape drift, byte-mismatch token-binding failures, and silently-carried-over op residues. The envelope must be the single-shot output of this run's Phase 11 step 1a, not a patched survivor of an earlier run.
+       - **1c. Dry-run validate** via `mcp__worldloom__validate_patch_plan(envelope)` (envelope ≤50KB) OR `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` (envelope >50KB — same engine code, bypasses MCP transport size constraints). Check envelope size with `wc -c <plan-path>`; ordinary single-storylet-no-JIT page-ticks may fit MCP transport, but multi-record turns (≥10 records — common for fork turns and JIT-expansion turns) typically exceed 50KB and require the CLI path. The canonical write-up is at `branching-story-bootstrap/references/engine-envelope-shape.md §5`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, `id_allocation_race` for `expected_id_allocations`, Rules 1-7 + structural validators. Approval-token verification remains submit-only, and submit keeps the `id_allocation_race` defense-in-depth backstop for the validate-to-submit race window; treat validate as a defensive pre-submit check, not a complete gate.
+       - **1d. Sign** via `node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` (the canonical issuer per `docs/HARD-GATE-DISCIPLINE.md §Issuing a token`; HMAC-bound to the envelope's exact bytes; never self-sign — Hook 3 blocks direct reads of `tools/world-mcp/.secret` precisely to prevent token forgery). Persist the signed token to `/tmp/<plan-id>.token` if the CLI submit path will be used. **Always write the token file from zero** — if a prior `/tmp/<plan-id>.token` exists at this path, the step 1b precondition already deleted it; do not append, do not edit, do not splice. A stale token bound to different envelope bytes will be rejected by the engine as `approval_signature_invalid` and is a non-recoverable state once the new envelope is signed.
+       - **1e. Submit**: pass the signed token as the separate `approval_token` parameter to `mcp__worldloom__submit_patch_plan(plan, approval_token)` while leaving the envelope's `approval_token: "placeholder"` field unchanged — the engine verifies the token's HMAC against the envelope bytes that were signed (the placeholder-bearing bytes), so modifying the envelope after signing would invalidate the binding (per `branching-story-bootstrap/references/engine-envelope-shape.md §4`). Submit-path selection by envelope size (`wc -c <plan-path>`): ordinary single-storylet-no-JIT turns may fit MCP transport (≤50KB); multi-record turns (≥10 records — common for fork turns and JIT-expansion turns) typically exceed 50KB and use `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` instead — same engine code, same failure-mode codes, bypasses MCP transport size constraints (per `docs/HARD-GATE-DISCIPLINE.md §Submitting the plan` and `branching-story-bootstrap/references/engine-envelope-shape.md §5` for the canonical size-threshold table). On successful submit, the engine returns a `PatchReceipt` containing `files_written[]` and `validators_run[]` (per `tools/patch-engine/src/envelope/schema.ts` `PatchReceipt` interface); report the receipt's `files_written` rather than re-listing directories. On `approval_replayed`, the prior submit already applied — inspect the receipt the prior submit returned rather than re-submitting.
     2. `Write pages-prose/PG-NNNN.md` (the rendered prose from Phase 7's working buffer).
     3. `Edit worlds/<world-slug>/stories/<story-slug>/INDEX.md` LAST:
        - Update the branch's leaf entry (or add a new branch row if fork).
        - Update active-thread status changes.
        - Update the latest health snapshot.
+       - If `create_slt_record` fired for a JIT SLT: increment the storylet-pool total and update the per-shape distribution line/table with the JIT storylet's canonical `shape` value. Preserve existing shapes not touched this turn.
        - If terminal: mark the branch's row terminal with the `terminal_reason`.
+       - For supersession entries, use the pattern `<new-id> (supersedes <old-id>)` for the active-thread row and `<old-id> (superseded by <new-id>)` for the branch row when the BR record itself was superseded.
        - `INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Edit`.
+    4. **Cleanup temp files.** ONLY after step 3 has succeeded, delete the run's temp envelope and token: `rm -f /tmp/<plan-id>.json /tmp/<plan-id>.token`. This step exists because (i) those files are run-scoped and have served their purpose once `_source/` records, the prose page, and `INDEX.md` are all on disk; (ii) leaving them on disk is the conflict source step 1b spends prose preventing — a future page-cycle run with the same plan-id pattern would otherwise start by collision-detecting and deleting them, which adds a fragile dependency. Cleanup is **conditional on full success**: if Phase 11 step 1c (validate), 1e (submit), 2 (prose write), or 3 (INDEX edit) failed, DO NOT delete the temp files — they are the triage surface for the failure, and the operator inspects them while diagnosing. The temp files are also intentionally preserved on Phase 9 FAIL or Phase 10 REVISE/REJECT, since those routes do not enter Phase 11 at all and step 1b's pre-existence guard handles cleanup on the next attempt.
 
     Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. Page prose and `INDEX.md` remain direct markdown writes.
 
-    **Partial-failure recovery**: if patch-engine submission fails, no `_source` YAML should land; report the engine error and do not write page prose or `INDEX.md`. If a later markdown write fails, report the specific path and leave the accepted YAML records as the authoritative state. The `INDEX.md` write at step 3 is intentionally LAST so a partial state never appears in the bundle index.
+    **Partial-failure recovery**: if patch-engine submission fails, no `_source` YAML should land; report the engine error and do not write page prose or `INDEX.md`; do not run step 4's temp-file cleanup. If a later markdown write fails, report the specific path and leave the accepted YAML records as the authoritative state; do not run step 4's temp-file cleanup. The `INDEX.md` write at step 3 is intentionally LAST so a partial state never appears in the bundle index, and step 4's cleanup gates on step 3 success precisely so the temp envelope/token survive every partial-failure mode for triage.
 
     Report all written paths. **Do NOT commit to git.** The user reviews the diff and commits.
 
@@ -370,6 +403,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 - **Never read sibling-branch pages.** Pre-flight reads only pages along `parent_page.branch_path`; Phase 9 gate 3 (recursive reference closure) is the structural enforcement.
 - **Records are append-only via supersession.** A new page that "updates" an existing OBL writes a NEW record citing `supersedes: OBL-NNNN`; the original record is never edited. The branch-replay contract depends on this.
 - **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3. Use `mcp__worldloom__submit_patch_plan` with story-bundle create ops. Page prose and `INDEX.md` remain direct markdown surfaces.
+- **Temp envelope files are run-scoped, never run-cumulative.** Phase 11's `/tmp/<plan-id>.json` and `/tmp/<plan-id>.token` are always written from zero per Phase 11 §1b — never read or edit a pre-existing file at the same path; delete it via `rm -f` first if it exists. Editing a leftover envelope from a prior run (a different story-bundle, a re-tried run, or another world that produced a same-page-id plan) is the dominant source of envelope-shape drift and byte-mismatch token-binding failure. After successful Phase 11 completion (engine submit + page prose write + INDEX.md edit), Phase 11 §4 deletes both files. On any Phase 11 failure, preserve the temp files for triage — the operator inspects them while diagnosing.
 - **Worktree discipline**: if invoked inside a worktree, all paths resolve from the worktree root. **Do NOT commit to git.**
 
 For full Mandatory LLM Roles, Validation Rules, FOUNDATIONS Alignment, and Guardrails (including sibling interop, content-policy contract, and the LLM-is-never-the-continuity-database rule), load `references/governance-and-foundations.md`. For per-record schemas (PG, SE, CHC, plus per-turn emission rules for SF/OBL/CNSQ/THR/SREL/STINT/SLT/STLOC/STOBJ/DA/BR), load `references/record-schemas.md`.

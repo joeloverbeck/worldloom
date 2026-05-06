@@ -25,6 +25,7 @@ state_snapshot:
   apparent_facts: [SF-NNNN, ...]
   disputed_facts: [SF-NNNN, ...]
   reader_known_facts: [SF-NNNN, ...]                  # SFs with visible_to_reader: true
+  # reader_known_facts entries carry a positive reader_visibility_basis: shown_in_pg0001, known_to_pov, dramatic_irony, or diegetic_artifact_visible.
   belief_state_by_actor:
     STENT-NNNN: [SF-NNNN, ...]
   rumor_state: [SF-NNNN, ...]
@@ -76,6 +77,8 @@ validation_trace:                                    # Phase 9 gates 1-12 with o
   consequence_persistence: PASS — <rationale>
 created_at: <iso8601>
 ```
+
+Page records do not carry `created_at_page`. The page record's own PG id is its branch anchor, and recursive reference closure authorizes PG references by checking that the referenced PG id appears in `branch_path`.
 
 ## Story Event Record (SE-NNNN)
 
@@ -130,7 +133,7 @@ The `op_type` enum is closed; LLM proposers may not invent new op types. The `de
 
 ## Choice Record (CHC-NNNN)
 
-Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change). The contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks).
+Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) and the `continuation_capacity` block (`post_choice_delta`, `valid_seed_storylets`, `jit_shape_spec`, `validation_basis`). The choice contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks). The continuation-capacity block is enforced at this turn's Phase 8 / Phase 9 gate 9 so persisted runtime CHCs carry the same post-choice seed/JIT viability evidence as bootstrap CHCs.
 
 ## Other story-bundle records
 
@@ -141,7 +144,7 @@ The remaining classes (SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, DA-st
 - **CNSQ-NNNN** — append-only; supersession on `consequence_address` op; carries `kind`, `subjects`, `scope`, `urgency`, `salience`, `created_at_page`, branch-scoped visibility.
 - **THR-NNNN** — append-only; supersession on `status` or `current_pressure` change.
 - **SREL-NNNN** — append-only; supersession on `axes` / `public_status` / `private_status_by_actor` change.
-- **STINT-NNNN** — append-only; supersession on intention refresh; per-character semantics carried via the record's `character_id` field; per-page logical chain via `logical_id` / `supersedes`. The patch engine's `create_stint_record` op enforces strict `^STINT-\d{4}$` (the bare-numeric form). Pre-SPEC-13 records on disk using the legacy `STINT-NNNN-<char>` form remain on disk as immutable history. The MCP retrieval surface (`get_record`, `list_records`, `get_records`) enforces the strict `^STINT-\d{4}$` pattern and rejects legacy ids with `invalid_input` — fall back to direct file Read at `_source/intentions/STINT-NNNN-<char>.yaml` for state-snapshot-cited legacy records. The world.db indexer logs `schema_pattern_mismatch` warnings on every patch-plan submit while legacy files remain — these are informational (pre-existing files, not the current write); the warning surface in the engine output is expected and not a blocker. The `mcp__worldloom__allocate_next_id(id_class='STINT')` allocator likewise counts only conforming bare-numeric ids; legacy suffixed ids do not shift the counter, so the next allocated STINT id is the next-after-the-highest-bare-numeric-on-disk regardless of legacy ids present. New supersession chains link bare-numeric IDs to legacy IDs via `logical_id`; once every legacy id has been superseded by a bare-numeric one, the warnings cease.
+- **STINT-NNNN** — append-only; supersession on intention refresh; `stent_id` points to the story entity this snapshot drives, with `world_character_id` as the optional world CHAR anchor; per-page logical chain via `logical_id` / `supersedes`. The patch engine's `create_stint_record` op enforces strict `^STINT-\d{4}$` (the bare-numeric form). Pre-SPEC-13 records on disk using the legacy `STINT-NNNN-<char>` form remain on disk as immutable history. The MCP retrieval surface (`get_record`, `list_records`, `get_records`) enforces the strict `^STINT-\d{4}$` pattern and rejects legacy ids with `invalid_input` — fall back to direct file Read at `_source/intentions/STINT-NNNN-<char>.yaml` for state-snapshot-cited legacy records. The world.db indexer logs `schema_pattern_mismatch` warnings on every patch-plan submit while legacy files remain — these are informational (pre-existing files, not the current write); the warning surface in the engine output is expected and not a blocker. The `mcp__worldloom__allocate_next_id(id_class='STINT')` allocator likewise counts only conforming bare-numeric ids; legacy suffixed ids do not shift the counter, so the next allocated STINT id is the next-after-the-highest-bare-numeric-on-disk regardless of legacy ids present. New supersession chains link bare-numeric IDs to legacy IDs via `logical_id`; once every legacy id has been superseded by a bare-numeric one, the warnings cease.
 - **SLT-NNNN (JIT only)** — branch-scoped (`visibility.scope: branch_scoped`); carries `provenance.origin: runtime_jit` and `created_at_page: this_PG`; produced by `storylet-pool-authoring` `mode=jit` and written by this skill in Phase 11.
 - **STLOC-NNNN / STOBJ-NNNN** — append-only; introduced when a new story-local location/object enters scope.
 - **DA-NNNN (story-local)** — created when a diegetic artifact is authored in-story this turn; carries `story_id` (distinct from world-level DA).

@@ -2,10 +2,154 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-storylet.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": [
+    "id",
+    "story_id",
+    "title",
+    "shape",
+    "content_intensity",
+    "hard_preconds",
+    "soft_preconds",
+    "cast_requirements",
+    "location_requirements",
+    "opens_obligations",
+    "pays_off_obligations",
+    "complicates_obligations",
+    "transfers_obligations",
+    "fact_effects",
+    "relationship_effects",
+    "tone_tags",
+    "theme_tags",
+    "tension_delta",
+    "aftermath_weight",
+    "mystery_safety",
+    "choice_templates",
+    "provenance",
+    "visibility"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^SLT-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "shape": {
+      "type": "string",
+      "enum": [
+        "entry_pressure",
+        "cast_introduction",
+        "threat_escalation",
+        "relational_dynamics",
+        "routine_disruption",
+        "aftermath_sequel",
+        "reflection_dilemma",
+        "mystery_edge_brush",
+        "fork_recovery",
+        "thread_resolution",
+        "aftermath_residue",
+        "intimacy",
+        "confrontation",
+        "other"
+      ]
+    },
+    "content_intensity": { "type": "string", "enum": ["tame", "mature", "explicit"] },
+    "hard_preconds": { "type": "array" },
+    "soft_preconds": { "type": "array" },
+    "cast_requirements": { "type": "array" },
+    "location_requirements": { "type": "array" },
+    "opens_obligations": { "type": "array" },
+    "pays_off_obligations": { "type": "array" },
+    "complicates_obligations": { "type": "array" },
+    "transfers_obligations": { "type": "array" },
+    "fact_effects": { "type": "array" },
+    "relationship_effects": { "type": "array" },
+    "tone_tags": { "type": "array" },
+    "theme_tags": { "type": "array" },
+    "tension_delta": { "type": "integer", "minimum": -2, "maximum": 2 },
+    "aftermath_weight": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "mystery_safety": {
+      "type": "object",
+      "required": [
+        "forbidden_M_resolved",
+        "M_touched",
+        "M_progressed",
+        "M_resolution_claims",
+        "resolution_safety_per_M"
+      ],
+      "properties": {
+        "forbidden_M_resolved": { "type": "boolean" },
+        "M_touched": { "type": "array" },
+        "M_progressed": { "type": "array" },
+        "M_resolution_claims": { "type": "array" },
+        "resolution_safety_per_M": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "choice_templates": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "operation",
+          "target_role",
+          "uses_fact_role",
+          "likely_effects",
+          "choice_mode",
+          "poetic_effect"
+        ],
+        "properties": {
+          "operation": { "type": "string" },
+          "target_role": { "type": "string" },
+          "uses_fact_role": { "type": "string" },
+          "likely_effects": { "type": "array" },
+          "choice_mode": { "type": "string" },
+          "poetic_effect": {
+            "type": "string",
+            "enum": [
+              "relaxed",
+              "obvious",
+              "dilemma",
+              "risky_truth",
+              "sacrifice",
+              "tragic_irony",
+              "seduction",
+              "desperation",
+              "revelation",
+              "flight"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["origin", "source_audit", "source_rsp", "created_at_page"],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": ["bootstrap_seed", "focus_authoring", "audit_remediation", "runtime_jit"]
+        },
+        "source_audit": { "type": ["string", "null"] },
+        "source_rsp": { "type": ["string", "null"] },
+        "created_at_page": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "visibility": {
+      "type": "object",
+      "required": ["scope", "visible_from_page", "visible_branch_path_prefix", "allowed_branch_ids"],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": ["global_author_pool", "branch_prefix_scoped", "branch_scoped"]
+        },
+        "visible_from_page": { "type": ["string", "null"] },
+        "visible_branch_path_prefix": { "type": ["array", "null"] },
+        "allowed_branch_ids": { "type": ["array", "null"] }
+      },
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

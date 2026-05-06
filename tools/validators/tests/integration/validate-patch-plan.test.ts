@@ -5,11 +5,14 @@ import path from "node:path";
 import test from "node:test";
 
 import Database from "better-sqlite3";
+import yaml from "js-yaml";
 import type { PatchPlanEnvelope } from "@worldloom/patch-engine";
 
 import { validatePatchPlan } from "../../src/public/index.js";
 import { completeCf } from "../rules/helpers.js";
 import { validSection } from "../structural/helpers.js";
+
+const FIXTURE_ROOT = path.resolve(process.cwd(), "tests", "fixtures");
 
 function createTempRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), "worldloom-validators-"));
@@ -85,8 +88,22 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
+    const snapshotReplayExecution = result.executions.find(
+      (execution) => execution.name === "snapshot_replay_equality"
+    );
+    assert.equal(snapshotReplayExecution?.status, "skipped");
+    const recursiveClosureExecution = result.executions.find(
+      (execution) => execution.name === "recursive_reference_closure"
+    );
+    assert.equal(recursiveClosureExecution?.status, "skipped");
+    const snapshotIntegrityExecution = result.executions.find(
+      (execution) => execution.name === "state_snapshot_integrity"
+    );
+    assert.equal(snapshotIntegrityExecution?.status, "skipped");
 
-    for (const execution of result.executions.filter((row) => row !== storyletExecution)) {
+    for (const execution of result.executions.filter(
+      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution && row !== snapshotIntegrityExecution
+    )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
       assert.ok(execution.duration_ms >= 0);
@@ -205,6 +222,61 @@ test("validatePatchPlan applies story-bundle record schemas to Shape B story ops
   });
 });
 
+test("validatePatchPlan accepts complete storylet records in Shape B story ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(storyletPlan(completeStoryletRecord()) as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.executions.some((row) => row.name === "record_schema_compliance" && row.status === "pass"));
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "record_schema_compliance"));
+  });
+});
+
+test("validatePatchPlan rejects Shape B storylet ops missing schema-required fields", async () => {
+  await withTempRoot(async () => {
+    const missingMysterySafety = completeStoryletRecord();
+    delete missingMysterySafety.mystery_safety;
+
+    const result = await validatePatchPlan(storyletPlan(missingMysterySafety) as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "record_schema_compliance" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.message.includes("mystery_safety")
+    ));
+  });
+});
+
+test("validatePatchPlan runs recursive reference closure for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(pagePlanWithBranchLeak() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "recursive_reference_closure");
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "recursive_reference_closure" &&
+        verdict.code === "recursive_reference_closure.branch_leak" &&
+        verdict.message.includes("SE-0009")
+    ));
+  });
+});
+
+test("validatePatchPlan runs state snapshot integrity for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(pagePlanWithDanglingSnapshotReference() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "state_snapshot_integrity");
+    assert.equal(execution?.status, "fail");
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "state_snapshot_integrity" &&
+        verdict.code === "state_snapshot_integrity.dangling_reference" &&
+        verdict.message.includes("SF-9999")
+    ));
+  });
+});
+
 function storyletPlan(record: Record<string, unknown>) {
   return {
     plan_id: "plan-story-001",
@@ -225,6 +297,105 @@ function storyletPlan(record: Record<string, unknown>) {
         }
       }
     ]
+  };
+}
+
+function pagePlanWithBranchLeak() {
+  return {
+    plan_id: "plan-page-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0001", "PG-0002"],
+        state_snapshot: { objective_facts: ["SF-0001"] }
+      }),
+      storyPatch("create_sf_record", "facts", {
+        id: "SF-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        evidence: [{ event_id: "SE-0009" }]
+      }),
+      storyPatch("create_se_record", "events", {
+        id: "SE-0009",
+        story_id: "STORY-001",
+        created_at_page: "PG-0099",
+        ops: []
+      })
+    ]
+  };
+}
+
+function pagePlanWithDanglingSnapshotReference() {
+  return {
+    plan_id: "plan-page-integrity-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0001", "PG-0002"],
+        state_snapshot: {
+          ...completeStateSnapshot(),
+          objective_facts: ["SF-9999"]
+        }
+      })
+    ]
+  };
+}
+
+function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {
+  return {
+    op,
+    target_world: "seeded",
+    target_file: `stories/marla-kern-seduction/_source/${sourceDir}/${record.id}.yaml`,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record
+    }
+  };
+}
+
+function completeStoryletRecord(): Record<string, unknown> {
+  return yaml.load(
+    readFileSync(path.join(FIXTURE_ROOT, "story-storylet-complete.yaml"), "utf8"),
+    { schema: yaml.JSON_SCHEMA }
+  ) as Record<string, unknown>;
+}
+
+function completeStateSnapshot(): Record<string, unknown> {
+  return {
+    canon_revision: "CH-0001",
+    objective_facts: [],
+    apparent_facts: [],
+    disputed_facts: [],
+    reader_known_facts: [],
+    belief_state_by_actor: {},
+    rumor_state: [],
+    obligations_open: [],
+    obligations_paid_off: [],
+    obligations_complicated: [],
+    obligations_abandoned: [],
+    consequences_pending: [],
+    consequences_addressed: [],
+    threads_active: [],
+    relationships_current: [],
+    intentions_current: [],
+    cast_present: [],
+    current_location: "STLOC-0001",
+    accessible_locations: [],
+    objects_in_scope: [],
+    inventory_by_entity: {},
+    entity_status: {}
   };
 }
 

@@ -7,9 +7,11 @@
 # Conventions:
 #   - All ids are story-scoped (e.g. STENT-0001 in story A and story B do not collide).
 #   - All record schemas declare `story_id` so a record can be traced to its bundle.
-#   - All emergent records carry `created_at_page` (a PG-id at which the record
-#     entered branch state). Author-pool storylets are the lone exception:
-#     `created_at_page: null` marks them globally legal across all branches.
+#   - All non-PG branch-scoped emergent records carry `created_at_page` (a PG-id
+#     at which the record entered branch state). PG records are pages; their own
+#     `id` is the branch anchor and must appear in `branch_path`. Author-pool
+#     storylets are the other exception: `created_at_page: null` marks them
+#     globally legal across all branches.
 #   - All `*_id` lists are bare ids (e.g. `[STENT-0001, STENT-0003]`) — no
 #     prose mixed in.
 #
@@ -23,23 +25,24 @@
 
 id: STENT-0001
 story_id: STORY-0001
-world_ent_id: ENT-0042                   # null when story_only: true
+world_ent_id: null                       # null for character mirrors AND for story-only entities; populated only when the STENT mirrors a world-level ENT-NNNN named-entity record from worlds/<slug>/_source/entities/. Genesis ENT registries cover places / polities / geography / peoples clusters — CHARs are hybrid character records, NOT atomic ENTs, so STENTs whose character_id is set ALWAYS take world_ent_id: null.
 character_id: CHAR-0007                  # null for non-CHAR entities
 name: ""
 role_in_story: protagonist               # protagonist | major | supporting | antagonist | foil
 present_at_start: true
-intention_snapshot_id: STINT-0001   # null for non-driving entities; bare-numeric per engine `^STINT-\d{4}$`; per-character STINTs are distinguished by the STINT record's character_id field, not by id suffix
+intention_snapshot_id: STINT-0001   # null for non-driving entities; bare-numeric per engine `^STINT-\d{4}$`; per-character STINTs are distinguished by the STINT record's stent_id field (the story entity it drives), not by id suffix
 story_only: false                        # true if invented for this story; promotion is story-fact-promotion-to-canon's job
 created_at_page: PG-0001
 notes: >
   Free-form notes carrying material reality, institutional embedding, and
   voice-and-perception summaries lifted from the world dossier.
 ---
-# STINT-NNNN — Character Intention Snapshot (bare-numeric id; character_id field carries per-character semantics)
+# STINT-NNNN — Character Intention Snapshot (bare-numeric id; stent_id points to the story entity this snapshot drives; world_character_id is the world CHAR anchor or null for story-only cast)
 
 id: STINT-0001
 story_id: STORY-0001
-character_id: STENT-0001
+stent_id: STENT-0001
+world_character_id: CHAR-0007            # null for story-only cast
 goals: []                                # what this character is actively trying to do
 fears: []                                # what they actively avoid
 secrets: []                              # SF-NNNN ids — facts they alone know (or know in a small circle)
@@ -54,6 +57,11 @@ notes: >
   ...
 ---
 # SF-NNNN — Story-Local Fact
+#
+# Reader visibility defaults to false. Set `visible_to_reader: true` only with
+# a positive `reader_visibility_basis` (one of: shown_in_pg0001, known_to_pov,
+# dramatic_irony, diegetic_artifact_visible). Use
+# `unrevealed_objective_truth` when `visible_to_reader: false`.
 
 id: SF-0001
 story_id: STORY-0001
@@ -72,7 +80,8 @@ certainty: 1.0                           # 0.0..1.0
 known_by: []                             # STENT ids
 believed_by: []                          # for belief / apparent class
 disbelieved_by: []
-visible_to_reader: true
+visible_to_reader: false
+reader_visibility_basis: unrevealed_objective_truth   # shown_in_pg0001 | known_to_pov | dramatic_irony | diegetic_artifact_visible | unrevealed_objective_truth
 
 derived_from_cf: CF-0042                 # null for premise-specific facts
 canon_relation: canon_consistent         # canon_consistent | canon_divergent | canon_unknown | not_applicable
@@ -143,7 +152,7 @@ status: open                             # open | paid_off | abandoned | failed
 notes: >
   ...
 ---
-# CNSQ-NNNN — Persisted Consequence (initialized empty at bootstrap; runtime populates)
+# CNSQ-NNNN — Persisted Consequence (conditional at bootstrap; runtime usually populates)
 
 id: CNSQ-0001
 story_id: STORY-0001
@@ -193,8 +202,9 @@ notes: >
 ---
 # SLT-NNNN — Storylet records are produced by storylet-pool-authoring (delegated from
 # Phase 6) and conform to .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml.
-# Bootstrap's Phase 11 atomic transaction writes the delegated batch's SLT files into
-# _source/storylets/. The storylet-pool-authoring template is the single source of truth.
+# Bootstrap's Phase 11 staged commit writes the delegated batch's SLT files into
+# _source/storylets/ through the engine YAML transaction subset. The storylet-pool-authoring
+# template is the single source of truth.
 ---
 # STLOC-NNNN — Story-Local Location
 
@@ -263,7 +273,7 @@ forked_from_write_in_hash: null
 
 branch_path: [PG-0001]
 status: active                           # active | terminal | archived | corrupt | contradicted_by_promoted_canon
-canon_revision: ""                       # CH-id visible at branch root; null if world has no CH yet
+canon_revision: null                     # CH-id visible at branch root; null if world has no CH yet
 
 created_at_page: PG-0001
 created_at: <iso8601>
@@ -290,7 +300,7 @@ branch_terminal: false
 terminal_reason: null
 
 state_snapshot:
-  canon_revision: ""                     # CH-id; null if world has no CH yet
+  canon_revision: null                   # CH-id; null if world has no CH yet
   objective_facts: []                    # SF ids with epistemic_class: objective
   apparent_facts: []                     # SF ids with epistemic_class: apparent
   disputed_facts: []                     # SF ids with epistemic_class: disputed
@@ -305,7 +315,7 @@ state_snapshot:
   consequences_addressed: []             # [] at bootstrap
   threads_active: []                     # THR ids
   relationships_current: []              # SREL ids
-  intentions_current: []                 # STINT ids
+  intentions_current: []                 # STINT ids — include EVERY bound cast member's STINT (including offstage characters whose intentions persist across pages while they are not in cast_present); the runtime page-cycle filters to physically-present cast at evaluation time when computing character_motivation_coverage. Bootstrap-time PG-0001 lists every STINT created in Phase 2.
   cast_present: []                       # STENT ids physically present
   current_location: STLOC-0001
   accessible_locations: []               # STLOC ids
@@ -318,7 +328,7 @@ emitted_choices: []                      # CHC ids — populated at Phase 8
 
 narrative_health:
   open_obligation_count: 0
-  high_salience_unpaid_count: 0
+  high_salience_unpaid_count: 0          # count of OBLs with status == open AND salience >= 7 (threshold per Phase 8 coverage rule — see references/phase-8-choice-generation.md §Required CHC diversification)
   average_obligation_age: 0
   contradiction_risk: 0.0
   causal_connectivity: 1.0
@@ -376,6 +386,16 @@ choice_contract:
     - fact                              # fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
 
 likely_effects: []                       # structured effect sketches; runtime validates before commit
+continuation_capacity:
+  post_choice_delta:
+    facts_added_or_changed: []           # SF-NNNN ids changed by minimum_state_change / likely_effects
+    obligations_changed: []              # OBL-NNNN ids whose status or salience would shift
+    location_changed: null               # null if no move; STLOC-NNNN id if current_location changes
+    cast_present_changed: []             # STENT-NNNN ids entering or leaving cast_present
+    mystery_resolution_risk: []          # M-NNNN ids whose safety status the post-choice state tests
+  valid_seed_storylets: []               # SLT-NNNN ids whose hard_preconds/cast/location/mystery checks pass under the post-choice delta
+  jit_shape_spec: null                   # one-line JIT continuation sketch when no seed SLT matches
+  validation_basis: ""                   # one-line rationale for the accepted seed or JIT continuation path
 choice_mode: thread_engagement           # e.g. moral | strategic | emotional | investigative | risky | self_protective
 poetic_effect: obvious                   # e.g. relaxed | obvious | dilemma | risky_truth | sacrifice | seduction | desperation | revelation
 content_intensity_implied: mature        # tame | mature | explicit

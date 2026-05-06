@@ -83,7 +83,12 @@ transfers_obligations: []                  # {from_owner, to_owner_pattern, obli
 # Fact + relationship effects (structured ops; free-form prose is gate-9 rejected)
 
 fact_effects:                              # one entry per fact created or invalidated
-  - {op: create, fact_template: {...}}     # fact_template includes epistemic_class
+  # fact_template includes epistemic_class, visible_to_reader, and
+  # reader_visibility_basis. Default new SFs to visible_to_reader: false with
+  # reader_visibility_basis: unrevealed_objective_truth. If visible_to_reader is
+  # true, reader_visibility_basis must be one of shown_in_pg0001, known_to_pov,
+  # dramatic_irony, or diegetic_artifact_visible.
+  - {op: create, fact_template: {...}}
   # - {op: invalidate, fact_id_matcher: {...}}
 
 relationship_effects:                      # produce superseding SREL records, not loose deltas
@@ -119,7 +124,7 @@ choice_templates:
     target_role: ""                        # cast-role bound to a STENT at render time
     uses_fact_role: ""                     # optional fact-role anchor
     likely_effects: []                     # likely fact_effects + relationship_effects
-    choice_mode: ""                        # public_confrontation | private_negotiation | covert_action | reveal | concealment | bargain | sacrifice | refuse | flee | intimate_advance | violence | discovery | other
+    choice_mode: ""                        # recommended values: self_protective | emotional | observational | strategic | reflective | risky | discovery | intimate_advance | bargain | sacrifice | refuse | flee | reveal | concealment | violence | other (or any kebab-case label appropriate to the storylet's transaction; the validator is permissive — see templates/tone-theme-tag-dictionary.md for the recommended-but-non-binding vocabulary discipline)
     poetic_effect: ""                      # relaxed | obvious | dilemma | risky_truth | sacrifice | tragic_irony | seduction | desperation | revelation | flight
 
 # Provenance — load-bearing for branch isolation + audit trail

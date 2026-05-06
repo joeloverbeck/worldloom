@@ -2,7 +2,9 @@
 
 Scan the current pool and the open-state for thinness. Emit a structured diagnosis matrix that drives Phase 2 seed generation.
 
-For `parent_skill_invocation: true` from `branching-story-bootstrap`, the "current pool" is empty because the story bundle is not on disk yet. Diagnose against the parent-supplied bootstrap state instead: initial THRs/OBLs, cast-bound STENT/STINT records, imported SFs, premise tone/themes, `mysteries_in_play[]`, and the loaded whole-class M/INV context. The bootstrap-mix weighting in Phase 2 supplies the shape-distribution target.
+For `parent_skill_invocation: true` from `branching-story-bootstrap`, the "current pool" is empty because the story bundle is not on disk yet. Diagnose against the parent-supplied bootstrap state instead: initial THRs/OBLs, any premise-driven PG-0001 CNSQs or story-local DAs emitted by bootstrap, the Phase 4 `audited_thread_obligation_sketch`, cast-bound STENT/STINT records, imported SFs, premise tone/themes, `mysteries_in_play[]`, and the loaded whole-class M/INV context. The bootstrap-mix weighting in Phase 2 supplies the shape-distribution target.
+
+For bootstrap seed mode (`parent_skill_invocation: true`, `mode=seed`, `focus_area=bootstrap_mix`), every OBL/THR diagnosis row must be checked against `audited_thread_obligation_sketch`: the row's target id, type, salience/urgency pressure, payoff/escalation mode, and INV branches audited must remain compatible with the sketch. If a needed seed would materially widen the initial THR/OBL branch beyond the sketch, route that divergence back to `branching-story-bootstrap` Phase 4 before Phase 2 seed generation rather than silently authoring a global author-pool storylet against an unaudited Rule 4 premise.
 
 For `mode=audit`, the validated RSP card frontmatter IS the primary diagnosis. Emit one diagnosis-matrix row per RSP card:
 
@@ -36,4 +38,44 @@ Use `caller_state_snapshot.current_storylet_eligibility_failure_reason` when pre
 - **Mystery-edge gaps**: which `mysteries_in_play[]` entries declared in `STORY_KERNEL.md` have NO storylet whose `mystery_safety.M_touched` or `M_progressed` cites them? Each gap is a candidate seed (subject to mystery firewall — `forbidden`-status M entries are NEVER seeded for resolution).
 - **Recent-history repetition signal**: scan the last ~10 pages along the longest active branch_path; if any `shape` was used in 3 consecutive pages, mark it for Phase 2 deprioritization (avoid pool homogenization at the recently-active branch tip).
 
-**Output**: a diagnosis matrix with rows {gap_kind, target_record_id, priority_weight, source_rsp?, source_audit?, finding_ids?} feeding Phase 2 seed selection.
+**Seed/focus-mode worked example** (paralleling the audit-mode example block above):
+
+```yaml
+- gap_kind: obl_payoff_coverage
+  target_record_id: OBL-0010
+  priority_weight: high
+  source_obligation: OBL-0010
+  rationale: "All 4 payoff modes covered structurally by SLT-0023/0024/0025/0026; gap is in real-time-discipline-load registers under post-PG-0003 conditions"
+- gap_kind: obl_payoff_coverage
+  target_record_id: OBL-0011
+  priority_weight: high
+  source_obligation: OBL-0011
+  rationale: "All 4 permitted payoff modes covered; gap is in renunciation-without-touch + framing-test-against-specific-person registers"
+- gap_kind: thr_coverage
+  target_record_id: THR-0006
+  priority_weight: medium
+  source_thread: null
+  rationale: "Pressured at 8; storylets must sustain or raise pressure unless paying off"
+- gap_kind: content_intensity_distribution
+  target_record_id: null
+  priority_weight: medium
+  rationale: "Match 20/30/50 explicit-baseline target; new batch ≈ 5 tame / 7 mature / 11 explicit for target_pool_size=23"
+- gap_kind: shape_distribution_avoid_overflow
+  target_record_id: null
+  priority_weight: low
+  rationale: "Existing pool already 8/45 reflection_dilemma (18%); cap new batch at ≤4 reflection_dilemma; bias toward intimacy / confrontation / fork_recovery / threat_escalation"
+- gap_kind: mystery_firewall
+  target_record_id: M-3
+  priority_weight: hard
+  rationale: "Forbidden-status saturation source; never theorize (firewall absolute)"
+- gap_kind: mystery_firewall
+  target_record_id: M-4
+  priority_weight: hard
+  rationale: "Forbidden-status intersex variant; never theorize (firewall absolute)"
+```
+
+**Source-threads variant of the seed/focus-mode example** — when `source_threads=THR-NNNN[,THR-NNNN]` is supplied instead of (or alongside) `source_obligations`, each thread's `obligations[]` array is unpacked at Phase 1: each constituent OBL becomes its own `obl_payoff_coverage` diagnosis row driven from the thread's salience (priority_weight derived from the thread's `current_pressure`), AND the thread itself becomes a `thr_coverage` row capturing the thread-level escalation pressure. Worked unpacking: `source_threads=THR-0006,THR-0007,THR-0008` against a bundle where `THR-0006.obligations=[OBL-0009,OBL-0002]`, `THR-0007.obligations=[OBL-0003,OBL-0004]`, `THR-0008.obligations=[OBL-0010]` produces five `obl_payoff_coverage` rows (one per OBL drawn from the thread set, each weighted by the thread's `current_pressure`) plus three `thr_coverage` rows (one per thread, capturing the thread-level escalation discipline). When `source_obligations` is also supplied, its OBLs merge with the thread-unpacked OBLs into a single de-duplicated `obl_payoff_coverage` row set; when only `source_threads` is supplied, the thread-unpacked OBLs are the sole `obl_payoff_coverage` row source. The thread→OBL unpacking is functionally equivalent to a direct `source_obligations` shape with the same OBL ids — Phase 5's OBL-engagement check (per `references/phase-4-5-canon-safety-checks.md` §OBL-engagement check) treats both inputs symmetrically.
+
+In seed/focus mode the matrix rows are emitted in priority-weight-descending order (`hard` firewall rows first; then `high` OBL/THR coverage rows; then `medium` distribution-shape rows; then `low` deprioritization rows). The `priority_weight` enum is `hard | high | medium | low`. Optional fields (`source_obligation` / `source_thread` / `rationale`) appear when the operator's diagnosis has narrative detail worth preserving for cross-batch reproducibility; minimal-form rows carrying only `gap_kind` + `target_record_id` + `priority_weight` are also acceptable when the diagnosis is purely structural. The audit-mode and jit-mode shapes above remain authoritative for those modes; this seed/focus-mode shape is the diagnosis-row contract for the most-common direct-invocation path.
+
+**Output**: a diagnosis matrix with rows {gap_kind, target_record_id, priority_weight, source_rsp?, source_audit?, finding_ids?, source_obligation?, source_thread?, rationale?} feeding Phase 2 seed selection.

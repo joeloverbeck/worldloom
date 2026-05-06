@@ -2,6 +2,9 @@ import { crossFileReference } from "../structural/cross-file-reference.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
+import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
+import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
+import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
 import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-by-accident.js";
@@ -20,6 +23,9 @@ export const structuralValidators: readonly Validator[] = [
   idUniqueness,
   crossFileReference,
   recordSchemaCompliance,
+  snapshotReplayEquality,
+  recursiveReferenceClosure,
+  stateSnapshotIntegrity,
   touchedByCfCompleteness,
   modificationHistoryRetrofit
 ];

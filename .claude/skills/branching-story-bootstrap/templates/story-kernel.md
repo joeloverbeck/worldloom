@@ -18,7 +18,6 @@ intended_scale: one_shot                 # one_shot | chapter | arc | open_ended
 pov_mode: single                         # single | rotating | omniscient
 content_intensity_baseline: mature       # tame | mature | explicit
 execution_mode_default: authoring        # authoring | interactive_runtime | batch_generation
-target_page_length: "600-1200 words"
 
 cast_bind_list:
   - char_id: CHAR-NNNN
@@ -38,10 +37,32 @@ invariants_acknowledged:                 # populated by Phase 4 — Rule 4 ancho
   - INV-id
   - INV-id
 
+audited_thread_obligation_sketch:        # required for new bootstraps — Phase 4 Rule 4 anchor used by Phase 9 gate 2
+  - id: THR-NNNN                         # provisional ids allowed until Phase 5 emits final THR/OBL records
+    type: <thread-type>
+    salience: <0..10>
+    urgency: <0..10>
+    payoff_modes_sketch:
+      - <mode>
+      - <mode>
+    INV_branches_audited:
+      - INV-id
+
 central_dramatic_question: ""            # optional — leave empty if not all stories have a single Q
 themes:
   - <tag>
-language_register: <register hints>      # optional
+language_register: <register hints>      # optional — describe the SUBSTRATE the
+                                          # character's vocabulary draws from
+                                          # (profession, class, formative reading,
+                                          # regional speech), NOT a checklist of
+                                          # idiom-types or metaphor categories to
+                                          # deploy each page. Per-page voice should
+                                          # vary WITHIN the substrate; listing
+                                          # categories ("X-idiom, Y-metaphors,
+                                          # Z-vocabulary") produces tic-language
+                                          # across pages. See branching-story-
+                                          # page-cycle/references/prose-craft-
+                                          # contract.md rule 7.
 
 validation_trace:                        # populated by Phase 9 — every gate one-line PASS rationale
   gate_01_mystery_firewall: "PASS — <one-line rationale>"
@@ -57,7 +78,20 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_11_choice_consequence_capacity: "PASS — <one-line rationale>"
   gate_12_state_snapshot_completeness: "PASS — <one-line rationale>"
 
+discipline_validation_trace:             # populated by Phase 9.5 — every discipline check one-line PASS rationale
+  discipline_check_01_choice_contract_completeness: "PASS — <one-line rationale>"
+  discipline_check_02_stent_role_in_story_enum: "PASS — <one-line rationale>"
+  discipline_check_03_stint_structural_completeness: "PASS — <one-line rationale>"
+  discipline_check_04_thr_type_enum: "PASS — <one-line rationale>"
+  discipline_check_05_srel_relation_type_populated: "PASS — <one-line rationale>"
+  discipline_check_06_sf_reader_visibility_basis: "PASS — <one-line rationale>"
+  discipline_check_07_br0001_root_invariants: "PASS — <one-line rationale>"
+  discipline_check_08_obl_coverage_cache_schema: "PASS — <one-line rationale>"
+  discipline_check_09_se0001_genesis_discipline: "PASS — <one-line rationale>"
+  discipline_check_10_pg0001_state_snapshot_field_keys: "PASS — <one-line rationale>"
+
 storylet_pool_summary:                   # populated by Phase 6
+  # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
   total: 20
   shape_distribution:
     entry_pressure: 4
@@ -161,3 +195,12 @@ NO RESTRICTIONS: ...
 2. **Invariant compatibility (gate 2)**: PASS — <rationale>
 3. ...
 12. **State_snapshot completeness (gate 12)**: PASS — <rationale>
+
+## Discipline Validation Trace
+
+<Same content as frontmatter `discipline_validation_trace`, restated for human readers as a numbered list of Phase 9.5 discipline-check names + PASS rationales.>
+
+1. **Choice contract completeness (discipline check 1)**: PASS — <rationale>
+2. **STENT role_in_story enum (discipline check 2)**: PASS — <rationale>
+3. ...
+10. **PG-0001 state_snapshot field-key completeness (discipline check 10)**: PASS — <rationale>

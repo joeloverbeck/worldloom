@@ -19,6 +19,8 @@ branches_audited:
   count: 0
   leaf_ids: []                       # list of PG-NNNN leaf ids
 pages_walked: 0
+story_kernel_sketch_status: unchecked   # unchecked | present | missing_legacy | missing_new_bundle | malformed | drift
+story_kernel_discipline_status: unchecked # unchecked | present | missing_legacy | missing_new_bundle | incomplete | bare_pass | malformed
 finding_count_by_severity:
   error: 0
   warning: 0
@@ -41,6 +43,8 @@ user_approved: true                  # always true on a written report — writt
 **Severity threshold**: <threshold>
 **Branches audited**: <count> (paths: <leaf id list>)
 **Pages walked**: <count>
+**Story kernel sketch status**: <unchecked | present | missing_legacy | missing_new_bundle | malformed | drift>
+**Story kernel discipline status**: <unchecked | present | missing_legacy | missing_new_bundle | incomplete | bare_pass | malformed>
 **Cross-story scope**: <true | false>
 
 ## Summary
@@ -75,13 +79,21 @@ user_approved: true                  # always true on a written report — writt
 
 #### F-01: <one-line title>
 
-- **Category**: <category>
+- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, bootstrap_discipline_trace_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, choice_continuation_capacity, choice_pair_distance, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
 - **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
 - **Pages affected**: <list of PG-NNNN ids>
 - **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
 - **Description**: <one paragraph; cites the structural rule violated and the specific evidence>
 - **Proposed remediation**: <RSP-NNNN | manual-flag | none>
 - **Prior audit reference**: <SAU-NNNN if this finding re-surfaces from an earlier audit; absent otherwise>
+
+For `prose_ledger_consistency` findings, include page id, short prose excerpt, missing or violated state anchor (`cast_present`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible world context), and recommended remediation (`manual-flag` or page-cycle re-render). When the missing or violated state anchor is `reader_known_facts`, cite the SF id and the missing/invalid `visible_to_reader` / `reader_visibility_basis` value; clean reader-known grounding requires the cited SF to be in `reader_known_facts`, carry `visible_to_reader: true`, and use a positive basis (`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or `diegetic_artifact_visible`). Grounded offstage references are not findings. Mystery-risk prose remains `mystery_firewall`, not `prose_ledger_consistency`.
+
+For `bootstrap_rule4_sketch_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_sketch_status`, compared THR/OBL ids, whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/malformed/drift issue or an info-only pre-`BSBOOT-007` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
+
+For `bootstrap_discipline_trace_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_discipline_status`, the missing/malformed `discipline_validation_trace` check key(s), whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/incomplete/bare-PASS/malformed issue or an info-only pre-`BSBOOT-015` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
+
+For `choice_pair_distance` findings, include page id, both CHC ids, the same/different axis summary for `operation`, `actor`, `target`, `uses_fact`, `choice_contract.minimum_state_change`, `choice_contract.success_policy`, `choice_mode`, and `poetic_effect`, whether at least one structural axis 1-6 differs, severity rationale, and recommended remediation (`branching-story-page-cycle` re-render / re-derive or manual intervention). Do not propose direct CHC mutation, CHC overwrite, or hand-edited persisted choice repair from the audit.
 
 (repeat per error finding)
 

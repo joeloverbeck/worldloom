@@ -9,6 +9,7 @@ Use when the ticket mainly corrects specs, docs, ticket text, references, or wor
 Check:
 
 - exact path and section references
+- whether ticket prose names a section label but the live document places the owned paragraph before that heading, under a different heading, or in opening prose; if so, patch the ticket to the live section or paragraph boundary before source edits or during closeout
 - whether the claimed contract already matches live behavior
 - whether acceptance criteria should be grep/manual-review based rather than runtime/tool based
 - if acceptance relies on negative grep removal, run the exact grep before edits and record all hit locations as owned hits or explicitly excluded hits
@@ -24,6 +25,7 @@ Check:
 - HARD-GATE semantics, if present
 - references/templates/examples used by the skill
 - sibling-skill interop named in docs or specs
+- if acceptance relies on negative grep or stale-anchor removal, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 ## tool or script implementation
 
@@ -46,6 +48,7 @@ Check:
 - consumers
 - doc references
 - whether the change is additive-only or breaking
+- if acceptance relies on negative grep or stale-anchor removal across consumers, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 Map each invariant to its own verification layer in the ticket.
 

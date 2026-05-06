@@ -25,6 +25,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 - For `world-mcp` or package tests that read a live world's gitignored `_index/`, treat `index_version_mismatch` as likely derived-state drift until proven otherwise. Check the live `index_version.txt` against the current `world-index` schema version, rebuild the live derived index only through the package CLI when the proof legitimately depends on it, and record the rebuild as ignored derived artifact refresh.
 - For sync or `file_versions` tests, confirm the mutation changes the exact tracked content hash. Avoid whitespace-only touches when parser or hash normalization may erase them; for semantic-neutral atomic YAML edits, a YAML comment touch can prove the reparse without changing record data.
 - When a command is expected to reject a world before build/sync, assert the rejection does not create or mutate `_index/world.db`, WAL/SHM files, or other derived artifacts unless the ticket explicitly owns that side effect.
+- When a live-world regression is optional but useful, keep it separate from portable acceptance: run the package-local or fixture proof first, then run the live-world build/sync, query the exact owned invariant from that rebuilt artifact, classify skipped-record or validator warnings, inspect ignored/private world status, and record any refreshed `_index` state as expected derived dirt when it is not source fallout.
 
 ## Closeout
 

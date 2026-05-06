@@ -37,6 +37,31 @@ function unresolvedAttributionRows(root: string): Array<{
   }
 }
 
+function unexpectedStoryPathRows(root: string): Array<{
+  code: string;
+  file_path: string | null;
+}> {
+  const dbPath = path.join(root, "worlds", "atomic-world", "_index", "world.db");
+  const db = new Database(dbPath, { readonly: true });
+  try {
+    return db
+      .prepare(
+        `
+          SELECT code, file_path
+          FROM validation_results
+          WHERE world_slug = 'atomic-world'
+            AND validator_name = 'enumeration'
+            AND code = 'unexpected_path'
+            AND file_path LIKE 'stories/%'
+          ORDER BY file_path
+        `
+      )
+      .all() as Array<{ code: string; file_path: string | null }>;
+  } finally {
+    db.close();
+  }
+}
+
 function withCapturedOutput<T>(run: () => T): { result: T; stdout: string; stderr: string } {
   const stdoutChunks: string[] = [];
   const stderrChunks: string[] = [];
@@ -71,6 +96,7 @@ test("build, inspect, stats, sync, and verify work against an atomic fixture wor
     const buildExit = build(root, "atomic-world");
     assert.equal(buildExit, 0);
     assert.deepEqual(unresolvedAttributionRows(root), []);
+    assert.deepEqual(unexpectedStoryPathRows(root), []);
 
     const dbPath = path.join(root, "worlds", "atomic-world", "_index", "world.db");
     const db = new Database(dbPath, { readonly: true });
