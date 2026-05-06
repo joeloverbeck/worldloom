@@ -1,19 +1,19 @@
 # BSBOOT-020: Align downstream consumers with bootstrap Rule 4 sketch
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: None - story-pipeline skill prose only.
+**Engine Changes**: None - story-pipeline skill and report-template prose only.
 **Deps**: `archive/tickets/BSBOOT-007.md`
 
 ## Problem
 
 `BSBOOT-007` made `STORY_KERNEL.audited_thread_obligation_sketch` required for new bootstrap runs and made Phase 9 gate 2 compare Phase 5 THR/OBL records against that Phase 4 Rule 4 sketch.
 
-Two downstream story-pipeline consumers still omit the new field:
+At intake, two downstream story-pipeline consumers still omitted the new field:
 
-- `storylet-pool-authoring` bootstrap seed mode accepts parent-supplied bootstrap context, but that context does not include `audited_thread_obligation_sketch`. Seed storylets can therefore be authored without seeing the exact THR/OBL branches that bootstrap gate 2 later treats as the Rule 4 anchor.
-- `branching-story-health-audit` reads `STORY_KERNEL.md`, but does not audit `audited_thread_obligation_sketch`. A new bootstrap bundle missing or drifting from the required sketch can pass health-audit pre-flight/coverage text silently.
+- `storylet-pool-authoring` bootstrap seed mode accepted parent-supplied bootstrap context, but that context did not include `audited_thread_obligation_sketch`. Seed storylets could therefore be authored without seeing the exact THR/OBL branches that bootstrap gate 2 later treats as the Rule 4 anchor.
+- `branching-story-health-audit` read `STORY_KERNEL.md`, but did not audit `audited_thread_obligation_sketch`. A new bootstrap bundle missing or drifting from the required sketch could pass health-audit pre-flight/coverage text silently.
 
 `branching-story-page-cycle` and `story-fact-promotion-to-canon` were reviewed as named downstream consumers and do not need source changes for this ticket: page-cycle consumes runtime page state and `applied_event_ops`, while promotion consumes branch provenance and leaf `state_snapshot`/source records. Neither skill owns bootstrap-time Phase 4 sketch enforcement.
 
@@ -30,6 +30,7 @@ Two downstream story-pipeline consumers still omit the new field:
 9. `.claude/skills/branching-story-page-cycle/references/pre-flight-and-prerequisites.md` consumes parent pages and records reachable from `parent_page.state_snapshot`; its Phase 9 gate 2 remains the runtime per-page `applied_event_ops` invariant audit. No bootstrap-sketch change is warranted there.
 10. `.claude/skills/story-fact-promotion-to-canon/SKILL.md` consumes branch promotion provenance and source records for canon promotion; it does not own bootstrap-time THR/OBL sketch enforcement. No direct change is warranted there.
 11. Adjacent contradiction classification: the stale `storylet-pool-authoring` and `branching-story-health-audit` omissions are required consequences of `BSBOOT-007` and are in scope here. Page-cycle/promotion are reviewed non-consumers and are out of scope unless implementation discovers text that incorrectly claims they consume every `STORY_KERNEL` field.
+12. `docs/HARD-GATE-DISCIPLINE.md` was read during implementation because the patch touches story-pipeline HARD-GATE / Canon Safety Check prose. The landed health-audit change strengthens read-only pre-flight and finding classification; it does not weaken approval, write ordering, Mystery Reserve, or patch-plan semantics.
 
 ## Architecture Check
 
@@ -44,24 +45,24 @@ Two downstream story-pipeline consumers still omit the new field:
 4. Page-cycle and promotion remain reviewed non-consumers, with no accidental bootstrap-sketch requirement added to their runtime/promotion flows -> manual review.
 5. FOUNDATIONS Rule 4 alignment preserved -> FOUNDATIONS alignment check.
 
-## What to Change
+## Landed Changes
 
 ### 1. `storylet-pool-authoring` bootstrap seed context
 
-Add `audited_thread_obligation_sketch` to the bootstrap seed parent-supplied context and Phase 1 diagnosis inputs. Phase 4/5 safety checks should require bootstrap-seed SLT preconditions, obligation targeting, and thread targeting to remain compatible with the audited sketch when `parent_skill_invocation: true`, `mode=seed`, and `focus_area=bootstrap_mix`.
+Added `audited_thread_obligation_sketch` to the bootstrap seed parent-supplied context and Phase 1 diagnosis inputs. Phase 4/5 safety checks now require bootstrap-seed SLT preconditions, obligation targeting, thread targeting, and global-author-pool batch checks to remain compatible with the audited sketch when `parent_skill_invocation: true`, `mode=seed`, and `focus_area=bootstrap_mix`.
 
 ### 2. `branching-story-health-audit` sketch audit
 
-Teach health audit to read `STORY_KERNEL.audited_thread_obligation_sketch` and report:
+Health audit now reads `STORY_KERNEL.audited_thread_obligation_sketch` and reports through a dedicated `bootstrap_rule4_sketch_integrity` finding category:
 
 - `error` or `warning` for new bundles where the field is missing, empty, malformed, or materially mismatched against initial THR/OBL records.
 - `info` or explicit legacy notation for historical bundles that predate `BSBOOT-007` and lack the field.
 
-The audit must not mutate `STORY_KERNEL.md`; it only reports the issue or emits remediation guidance consistent with its read-only story-state contract.
+The audit still does not mutate `STORY_KERNEL.md`; it only reports the issue or emits manual/bootstrap-review guidance consistent with its read-only story-state contract. The report template now carries `story_kernel_sketch_status` so written SAU reports preserve the audit-time classification.
 
 ### 3. Reviewed non-consumers
 
-Do not add bootstrap-sketch requirements to `branching-story-page-cycle` or `story-fact-promotion-to-canon` unless implementation finds stale prose that wrongly claims those skills consume the full bootstrap Rule 4 sketch.
+No bootstrap-sketch requirements were added to `branching-story-page-cycle` or `story-fact-promotion-to-canon`.
 
 ## Files to Touch
 
@@ -69,7 +70,7 @@ Do not add bootstrap-sketch requirements to `branching-story-page-cycle` or `sto
 - `.claude/skills/storylet-pool-authoring/references/phase-1-coverage-diagnosis.md` (modify)
 - `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `.claude/skills/branching-story-health-audit/templates/story-audit-report.md` (modify if the finding/report schema needs an explicit category)
+- `.claude/skills/branching-story-health-audit/templates/story-audit-report.md` (modify)
 
 ## Out of Scope
 
@@ -85,8 +86,10 @@ Do not add bootstrap-sketch requirements to `branching-story-page-cycle` or `sto
 
 1. `grep -nE 'audited_thread_obligation_sketch' .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/phase-1-coverage-diagnosis.md .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` returns matches showing the bootstrap seed path consumes and checks the sketch.
 2. `grep -nE 'audited_thread_obligation_sketch|legacy|BSBOOT-007' .claude/skills/branching-story-health-audit/SKILL.md` returns matches showing health audit reads the field and handles old bundles without false migration requirements.
-3. Manual review confirms no new bootstrap-sketch requirement was added to `branching-story-page-cycle` or `story-fact-promotion-to-canon`.
-4. `git diff --check` passes.
+3. `grep -nE 'bootstrap_rule4_sketch_integrity|story_kernel_sketch_status' .claude/skills/branching-story-health-audit/templates/story-audit-report.md .claude/skills/branching-story-health-audit/SKILL.md` returns matches showing the explicit health-audit finding/report surface.
+4. Manual review confirms no new bootstrap-sketch requirement was added to `branching-story-page-cycle` or `story-fact-promotion-to-canon`.
+5. FOUNDATIONS Rule 4 story-scope alignment is rechecked.
+6. `git diff --check` passes.
 
 ### Invariants
 
@@ -104,5 +107,28 @@ Do not add bootstrap-sketch requirements to `branching-story-page-cycle` or `sto
 
 1. `grep -nE 'audited_thread_obligation_sketch' .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/phase-1-coverage-diagnosis.md .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md`
 2. `grep -nE 'audited_thread_obligation_sketch|legacy|BSBOOT-007' .claude/skills/branching-story-health-audit/SKILL.md`
-3. `rg -n 'audited_thread_obligation_sketch' .claude/skills/branching-story-page-cycle .claude/skills/story-fact-promotion-to-canon`
-4. `git diff --check`
+3. `grep -nE 'bootstrap_rule4_sketch_integrity|story_kernel_sketch_status' .claude/skills/branching-story-health-audit/templates/story-audit-report.md .claude/skills/branching-story-health-audit/SKILL.md`
+4. `rg -n 'audited_thread_obligation_sketch' .claude/skills/branching-story-page-cycle .claude/skills/story-fact-promotion-to-canon`
+5. `grep -nE 'Rule 4: No Globalization by Accident|story-scope branch isolation|Global author-pool storylets' docs/FOUNDATIONS.md`
+6. `git diff --check`
+
+## Outcome
+
+Completed: 2026-05-06.
+
+`storylet-pool-authoring` bootstrap seed mode now consumes the Phase 4 `audited_thread_obligation_sketch` and treats it as the Rule 4 boundary for diagnosis, candidate preconditions, OBL/THR targeting, and bootstrap-seed batch checks. `branching-story-health-audit` now reads the same field, classifies missing/malformed/drifted sketch state through `bootstrap_rule4_sketch_integrity`, records `story_kernel_sketch_status` in the audit report template, and keeps legacy pre-`BSBOOT-007` bundles as info-only/non-migration cases. `branching-story-page-cycle` and `story-fact-promotion-to-canon` remain non-consumers.
+
+## Verification Result
+
+Completed:
+
+1. `grep -nE 'audited_thread_obligation_sketch' .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/phase-1-coverage-diagnosis.md .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` — pass; matches in all three storylet references.
+2. `grep -nE 'audited_thread_obligation_sketch|legacy|BSBOOT-007' .claude/skills/branching-story-health-audit/SKILL.md` — pass; health audit reads the field and distinguishes explicit pre-`BSBOOT-007` legacy bundles.
+3. `grep -nE 'bootstrap_rule4_sketch_integrity|story_kernel_sketch_status' .claude/skills/branching-story-health-audit/templates/story-audit-report.md .claude/skills/branching-story-health-audit/SKILL.md` — pass; health audit and the SAU template expose the explicit finding/report surface.
+4. `rg -n 'audited_thread_obligation_sketch' .claude/skills/branching-story-page-cycle .claude/skills/story-fact-promotion-to-canon` — pass; no matches, confirming no new bootstrap-sketch requirement was added to the reviewed non-consumers.
+5. `grep -nE 'Rule 4: No Globalization by Accident|story-scope branch isolation|Global author-pool storylets' docs/FOUNDATIONS.md` — pass; FOUNDATIONS Rule 4 story-scope basis rechecked.
+6. `git diff --check` — pass.
+
+## Deviations
+
+The ticket's optional report-template edit became required because `branching-story-health-audit` needed an explicit `bootstrap_rule4_sketch_integrity` category and `story_kernel_sketch_status` report field to preserve the new read-only audit classification. `docs/HARD-GATE-DISCIPLINE.md` was read during implementation because the landed prose touches HARD-GATE / Canon Safety Check surfaces, but no patch-plan, approval-token, submit, write-order, or Mystery Reserve behavior changed.

@@ -19,6 +19,7 @@ branches_audited:
   count: 0
   leaf_ids: []                       # list of PG-NNNN leaf ids
 pages_walked: 0
+story_kernel_sketch_status: unchecked   # unchecked | present | missing_legacy | missing_new_bundle | malformed | drift
 finding_count_by_severity:
   error: 0
   warning: 0
@@ -41,6 +42,7 @@ user_approved: true                  # always true on a written report — writt
 **Severity threshold**: <threshold>
 **Branches audited**: <count> (paths: <leaf id list>)
 **Pages walked**: <count>
+**Story kernel sketch status**: <unchecked | present | missing_legacy | missing_new_bundle | malformed | drift>
 **Cross-story scope**: <true | false>
 
 ## Summary
@@ -75,7 +77,7 @@ user_approved: true                  # always true on a written report — writt
 
 #### F-01: <one-line title>
 
-- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, branch_isolation_recursive, snapshot_integrity, consequence_coverage, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
+- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
 - **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
 - **Pages affected**: <list of PG-NNNN ids>
 - **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
@@ -84,6 +86,8 @@ user_approved: true                  # always true on a written report — writt
 - **Prior audit reference**: <SAU-NNNN if this finding re-surfaces from an earlier audit; absent otherwise>
 
 For `prose_ledger_consistency` findings, include page id, short prose excerpt, missing or violated state anchor (`cast_present`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible world context), and recommended remediation (`manual-flag` or page-cycle re-render). Grounded offstage references are not findings. Mystery-risk prose remains `mystery_firewall`, not `prose_ledger_consistency`.
+
+For `bootstrap_rule4_sketch_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_sketch_status`, compared THR/OBL ids, whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/malformed/drift issue or an info-only pre-`BSBOOT-007` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
 
 (repeat per error finding)
 
