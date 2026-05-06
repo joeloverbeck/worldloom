@@ -211,7 +211,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 | Story consequences | `consequences/CNSQ-NNNN.yaml` | One per `required_aftermath` item from Phase 2 (unless absorbed by a newly-opened OBL); one per `consequence_address` op |
 | Story threads | `threads/THR-NNNN.yaml` | One per thread state change (status / pressure delta) |
 | Story relationships | `relationships/SREL-NNNN.yaml` | One per relationship state change (axes deltas / public_status / private_status_by_actor) |
-| Story intentions | `intentions/STINT-NNNN.yaml` | One per major character whose pressure / emotional_state / beliefs shifted (per-character semantics carried via the record's `character_id` field; per-page supersession of a prior STINT for the same character via `logical_id` + `supersedes`; bare-numeric id per the patch engine's `^STINT-\d{4}$` contract) |
+| Story intentions | `intentions/STINT-NNNN.yaml` | One per major character whose pressure / emotional_state / beliefs shifted (`stent_id` points to the story entity this snapshot drives, with `world_character_id` as the optional world CHAR anchor; per-page supersession of a prior STINT for the same character via `logical_id` + `supersedes`; bare-numeric id per the patch engine's `^STINT-\d{4}$` contract) |
 | Storylet (JIT only) | `storylets/SLT-NNNN.yaml` | IF Phase 4 JIT expansion fired via `storylet-pool-authoring` `mode=jit`; carries `provenance.origin: runtime_jit`, `created_at_page: this_PG`, and `visibility.scope: branch_scoped` |
 | Story location | `locations/STLOC-NNNN.yaml` | IF a new story-local location is introduced this turn |
 | Story object | `objects/STOBJ-NNNN.yaml` | IF a new story-local object is introduced or an existing object's state changed via supersession |

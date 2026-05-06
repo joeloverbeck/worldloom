@@ -11,7 +11,7 @@ Reference for `branching-story-bootstrap` Phase 9 — the 12-gate canon-safety a
 | 3 | Content policy presence | content_policy block embedded verbatim in STORY_KERNEL.md AND in every assembled LLM prompt this run | Pre-flight |
 | 4 | ID uniqueness | Allocated IDs do not collide with any existing record in this story | Pre-flight |
 | 5 | Branch path consistency | `PG-0001.branch_path == [PG-0001]` AND `parent_page_id == null` AND `branch_id == BR-0001` | Phase 7 |
-| 6 | Cast intention coverage | Every protagonist + major has a non-empty bare-numeric `STINT-NNNN` record linked by `character_id` | Phase 2 |
+| 6 | Cast intention coverage | Every protagonist + major has a non-empty bare-numeric `STINT-NNNN` record whose `stent_id` points to its STENT | Phase 2 |
 | 7 | Obligation salience (Rule 5) | Every initial OBL declares salience, urgency, ≥2 payoff_modes | Phase 5 |
 | 8 | Epistemic class declared (Rule 1) | Every initial SF declares `epistemic_class` | Phase 3 |
 | 9 | Storylet diversity | Seed pool covers ≥5 distinct shapes from the Phase 6 coverage table | Phase 6 |

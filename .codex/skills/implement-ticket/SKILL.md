@@ -116,7 +116,7 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 11. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-14. Before the first edit, state a repo identity checkpoint: active repo root, active ticket path, instruction source (`AGENTS.md` path), and whether any sibling-repo hits were found and excluded as diagnostic-only.
+14. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
 
 If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.
 
@@ -183,14 +183,14 @@ If the discovered fallout crosses into high-trust world canon or other canon-mut
 
 ### 3. Extract the real implementation slice
 
-Before editing code or docs, name the actual owned delta:
+Before editing code or docs, name the actual owned delta. This may be part of the single pre-edit checkpoint from §1 when the same update covers both repo identity and implementation boundary:
 
 - what changed in the live repo
 - what still needs to change
 - what the ticket no longer owns
 - what follow-up ticket or spec owns adjacent remaining work, if any
 
-Before the first file edit, give the user a concise checkpoint naming:
+Before the first file edit, if the single pre-edit checkpoint has not already covered these points, give the user a concise checkpoint naming:
 
 - the ticket classification / discrepancy class
 - the authoritative boundary you are treating as the ticket's owner

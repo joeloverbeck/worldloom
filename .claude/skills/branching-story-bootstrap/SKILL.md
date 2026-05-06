@@ -82,8 +82,10 @@ Phase 1: Premise Normalization        (genre/tonal register, designing
       v
 Phase 2: Cast Binding                 (mirror each CHAR into STENT-NNNN;
                                        create initial STINT-0001 per major
-                                       (bare-numeric id; character_id field
-                                       carries per-character semantics);
+                                       (bare-numeric id; stent_id points to
+                                       the story entity this snapshot drives;
+                                       world_character_id is the world CHAR
+                                       anchor or null for story-only cast);
                                        story-only entities)
       |
       v
@@ -179,7 +181,7 @@ worlds/<world-slug>/stories/<story-slug>/
 │   ├── consequences/         ← CNSQ-NNNN.yaml (initialized empty at PG-0001)
 │   ├── threads/              ← THR-NNNN.yaml
 │   ├── relationships/        ← SREL-NNNN.yaml
-│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `character_id` field; legacy bundles may contain suffixed-id files like `STINT-0001-iker.yaml` predating this convention — those remain valid only for those bundles, new bundles MUST use bare-numeric ids per the engine regex)
+│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `stent_id` field, with `world_character_id` as the optional world CHAR anchor; legacy bundles may contain suffixed-id files like `STINT-0001-iker.yaml` predating this convention — those remain valid only for those bundles, new bundles MUST use bare-numeric ids per the engine regex)
 │   ├── storylets/            ← SLT-NNNN.yaml (provenance.origin=bootstrap_seed)
 │   ├── locations/            ← STLOC-NNNN.yaml
 │   ├── objects/              ← STOBJ-NNNN.yaml

@@ -71,7 +71,7 @@ Every story-bundle op's payload carries `story_slug` alongside `record`. This is
 | `create_cnsq_record` | `_source/consequences/CNSQ-NNNN.yaml` (rare at bootstrap; runtime page-cycle JIT-creates) |
 | `create_thr_record` | `_source/threads/THR-NNNN.yaml` |
 | `create_srel_record` | `_source/relationships/SREL-NNNN.yaml` |
-| `create_stint_record` | `_source/intentions/STINT-NNNN.yaml` (bare-numeric id per the engine's `^STINT-\d{4}$` regex; per-character semantics carried via `record.character_id`, not via id suffix) |
+| `create_stint_record` | `_source/intentions/STINT-NNNN.yaml` (bare-numeric id per the engine's `^STINT-\d{4}$` regex; per-character semantics carried via `record.stent_id`, with `record.world_character_id` as the optional world CHAR anchor, not via id suffix) |
 | `create_stloc_record` | `_source/locations/STLOC-NNNN.yaml` |
 | `create_stobj_record` | `_source/objects/STOBJ-NNNN.yaml` |
 | `append_story_diegetic_artifact_record` | `_source/artifacts/DA-NNNN.yaml` |
