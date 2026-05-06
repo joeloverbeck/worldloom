@@ -226,6 +226,7 @@ All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_sourc
 - New leaf entry per branch (or new branch entry if fork).
 - Thread status changes.
 - Latest health snapshot.
+- If Phase 4 JIT created an `SLT-NNNN`: update the `## Storylet pool` total and per-shape distribution using canonical SLT `shape` values from the storylet records; do not use abbreviated bootstrap labels.
 - If fork: new branch row in branches table.
 
 ### No canon-file mutations
@@ -368,6 +369,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
        - Update the branch's leaf entry (or add a new branch row if fork).
        - Update active-thread status changes.
        - Update the latest health snapshot.
+       - If `create_slt_record` fired for a JIT SLT: increment the storylet-pool total and update the per-shape distribution line/table with the JIT storylet's canonical `shape` value. Preserve existing shapes not touched this turn.
        - If terminal: mark the branch's row terminal with the `terminal_reason`.
        - For supersession entries, use the pattern `<new-id> (supersedes <old-id>)` for the active-thread row and `<old-id> (superseded by <new-id>)` for the branch row when the BR record itself was superseded.
        - `INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Edit`.
