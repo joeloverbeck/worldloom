@@ -71,7 +71,7 @@ LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — d
 
 ## Cross-check (deterministic, post-LLM)
 
-- Does the prose mention any character not in `cast_present`? → re-prompt with explicit constraint.
+- Does the prose stage any entity as physically present, acting, speaking, being perceived directly, or available for immediate interaction unless in `cast_present`? → re-prompt with explicit constraint. Mere mention, memory, rumor, inscription, or offstage reference is allowed if grounded in `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible state.
 - Does the prose imply any fact not in state context? → flag for review.
 - Does the prose resolve any M-NNNN in `mysteries_in_play[]`? → hard reject, re-prompt.
 

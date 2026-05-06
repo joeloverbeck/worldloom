@@ -15,7 +15,7 @@ Each finding was verified against the current skill's `SKILL.md`, all 10 files u
 | `archive/tickets/BSBOOT-003.md` | STENT/STINT `character_id` semantic collision (rename STINT field; fix STENT example) | report #3 |
 | `archive/tickets/BSBOOT-004.md` | STORY_KERNEL vs INDEX bootstrap-mix shape-label disagreement (use canonical bootstrap-mix labels in the initial INDEX template) | report #18 |
 | `archive/tickets/BSBOOT-005.md` | `canon_revision: ""` should be `null` in BR + PG examples | report #17 |
-| `tickets/BSBOOT-006.md` | Phase 7 prose cross-check stricter than Phase 9 gate 10 (relax to physical-staging only) | report #6 |
+| `archive/tickets/BSBOOT-006.md` | Phase 7 prose cross-check stricter than Phase 9 gate 10 (relax to physical-staging only) | report #6 |
 
 ### Tier 2 — design gaps
 
