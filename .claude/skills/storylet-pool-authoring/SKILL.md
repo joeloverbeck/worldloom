@@ -18,6 +18,9 @@ arguments:
   - name: target_pool_size
     description: "Number of approved storylets to emit. Direct seed mode defaults to the local seed/top-up rules in Inputs §target_pool_size; bootstrap parent invocation requires the caller-supplied computed target_pool_size; focus mode defaults to 10-15."
     required: false
+  - name: target_slt_ids
+    description: "List of pre-allocated SLT-NNNN ids in deterministic order. Required when parent_skill_invocation=true and mode=seed for the bootstrap-seed sub-routine path; ignored otherwise."
+    required: false
   - name: source_obligations
     description: "Comma-separated OBL-NNNN ids the new storylets should engage with (pay off / complicate / transfer). Optional in seed mode; recommended in focus mode."
     required: false
@@ -198,6 +201,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
 - `source_audit_path` — path to an `RSP-NNNN-<slug>.md` remediation-storylet-proposal card produced by `branching-story-health-audit` (or its containing `audits/SAU-NNNN/remediation-storylet-proposals/` directory). Required when `mode=audit`; directory input consumes every `RSP-*.md` card in deterministic path order.
 - `created_at_page` — `PG-NNNN`. Required when `mode=jit`; ignored otherwise. Used for `provenance.created_at_page` and branch-scoped visibility.
 - `caller_state_snapshot` — inline page-cycle `state_snapshot`. Required when `mode=jit` and `parent_skill_invocation=true`; ignored otherwise. Supplies the current branch state and continuation-failure reason for reduced diagnosis and seed generation.
+- `target_slt_ids` — list of pre-allocated `SLT-NNNN` ids in deterministic order. Required when `parent_skill_invocation: true` AND `mode=seed` (the bootstrap-seed sub-routine path). The sub-routine consumes ids from the head of the list as it produces records; survivors after Phase 4 rejections and Phase 5 culling are emitted with the consumed ids. Unused tail ids are returned to the caller in the response packet so the caller can verify the full range against the consumed prefix.
 - `tone_override` — free-form tone hint per batch.
 - `content_intensity_override` — `tame | mature | explicit`; ±1 band override.
 - `parent_skill_invocation` — boolean, default `false`. When `true`, this skill runs as a no-write sub-routine for a parent skill. Documented shapes: `branching-story-bootstrap` Phase 6 uses `mode=seed`, `focus_area=bootstrap_mix`, and bootstrap-supplied in-memory Phases 1-5 context for a story bundle that may not exist on disk yet; `branching-story-page-cycle` Phase 4 uses `mode=jit`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, and `caller_state_snapshot=<this_state_snapshot>`.
@@ -208,7 +212,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
 - `worlds/<world-slug>/stories/<story-slug>/storylet-batches/SLB-NNNN.md` — batch manifest summarizing the run (mode, focus area, source obligations/threads, approved storylets table, diversity summary, rejected-candidates breakdown). Schema in `templates/storylet-batch-manifest.md`.
 - `worlds/<world-slug>/stories/<story-slug>/INDEX.md` — updated in place; storylet-pool section receives new total count + per-shape distribution + per-content_intensity distribution.
 
-When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` assigns final SLT ids and writes seed records during its Phase 11 transaction. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick transaction.
+When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` pre-allocates the SLT range in Phase 6 before delegation, supplies `target_slt_ids[]`, and writes the final-id seed records during its Phase 11 transaction. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick transaction.
 
 ### No canon-file mutations
 
@@ -218,7 +222,7 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 
 Direct invocation allocates `SLT-NNNN` (per-story append-only, shared with runtime JIT-generated storylets — Phase 4 of `branching-story-page-cycle` may write the next-numbered SLT between batches) and `SLB-NNNN` (per-story append-only batch manifests) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
 
-For `parent_skill_invocation: true` bootstrap seed generation, this skill does not allocate `SLB` and does not reserve the SLT range itself. `branching-story-bootstrap` owns final SLT id assignment because it is constructing a new story bundle and writes the returned storylets inside its Phase 11 transaction.
+For `parent_skill_invocation: true` bootstrap seed generation, this skill does not allocate `SLB` and does not reserve the SLT range itself. `branching-story-bootstrap` pre-allocates the SLT range and supplies it via `target_slt_ids[]`. This skill consumes ids from the head of the supplied list in deterministic order; the bootstrap writes the returned storylets with their final ids inside its Phase 11 transaction. Unused tail ids are returned in the internal validation packet and are not written or reused.
 
 For `parent_skill_invocation: true` page-cycle JIT generation, this skill does not allocate `SLB`. `branching-story-page-cycle` allocates or reserves the next SLT id as part of its page-tick write set and passes that id in the caller context; the returned SLT must carry `provenance.origin: runtime_jit`, `provenance.created_at_page: <created_at_page>`, and `visibility.scope: branch_scoped`.
 
@@ -317,6 +321,7 @@ User options:
 When `parent_skill_invocation: true`, do not present a user-facing HARD-GATE and do not request direct user approval inside this skill. Return an internal validation packet to the caller containing:
 
 - approved SLT records (without writing them)
+- consumed `target_slt_ids[]` and unused tail ids, when invoked by bootstrap seed mode
 - Phase 4 per-storylet 9-gate verdicts with one-line rationales
 - Phase 5 diversity and branch-contamination verdicts
 - rejected-candidate counts

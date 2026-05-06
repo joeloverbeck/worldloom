@@ -1,6 +1,6 @@
 # Phase 6: Storylet Pool Seed
 
-Reference for `branching-story-bootstrap` Phase 6 — the delegated content-generation phase that produces the seed storylet pool. Bootstrap invokes `storylet-pool-authoring` as an in-memory sub-routine; the sub-routine produces and validates SLT records but does NOT write them. Bootstrap assigns final SLT ids and writes the records inside its Phase 11 single transaction.
+Reference for `branching-story-bootstrap` Phase 6 — the delegated content-generation phase that produces the seed storylet pool. Bootstrap invokes `storylet-pool-authoring` as an in-memory sub-routine; the sub-routine produces and validates SLT records with caller-supplied final ids but does NOT write them. Bootstrap writes the final-id records inside its Phase 11 transaction.
 
 ---
 
@@ -34,12 +34,17 @@ If the formula yields fewer than the minimum coverage floor for gate 9 (≥5 dis
 
 ## Delegation contract
 
+- **Pre-allocate the SLT id range for the seed pool before delegation.** Compute the upper-bound candidate count: `target_pool_size + ceil(target_pool_size * 0.30)`. Call `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story-slug>)` once per candidate id and collect the returned ids into `target_slt_ids[]`. Pass this bound id range to `storylet-pool-authoring`, which consumes the ids in deterministic order. If fewer records survive Phase 4 rejections and Phase 5 culls than the pre-allocated count, discard the unused tail ids; append-only allocation tolerates skipped ranges.
+
 - `mode: seed`
 - `focus_area: bootstrap_mix`
 - `target_pool_size: <computed target_pool_size, or explicit storylet_pool_seed_size override>`
+- `target_slt_ids: <list pre-allocated in Phase 6 before delegation; length = target_pool_size + ceil(target_pool_size * 0.30)>`
 - `source_audit_path: null`
 - `parent_skill_invocation: true`
 - caller context: normalized premise, cast-bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and content_policy already loaded by bootstrap Phases 1-5
+
+Bootstrap pre-allocates the SLT id range in Phase 6 before invoking `storylet-pool-authoring`. The sub-routine consumes the supplied ids in deterministic order. SLT records returned to bootstrap carry final ids; there is no Phase 11 remap pass.
 
 `storylet-pool-authoring` Phase 2 §Bootstrap-mix shape weighting is the coverage contract: entry_pressure 3-5, cast_introduction 1 per non-protagonist major, threat_escalation 2-4, relational_dynamics 3-5, routine_disruption 2-3, aftermath_sequel 2-3, reflection_dilemma 2-3. The bootstrap-supplied `target_pool_size` (computed above) sets the upper bound; the storylet-pool-authoring sub-routine then produces `target_pool_size + ceil(target_pool_size * 0.30)` candidate seeds (per `storylet-pool-authoring/references/phase-2-generation-seeds.md:3`'s +30% replacement buffer rule).
 
@@ -47,6 +52,6 @@ If the formula yields fewer than the minimum coverage floor for gate 9 (≥5 dis
 
 ## In-memory return contract
 
-The delegated sub-routine applies storylet-pool-authoring Phase 4's 9 per-storylet gates and Phase 5's diversity audit, then returns the approved SLT records and validation summaries in memory. It does not allocate or write an SLB manifest, does not edit the story bundle INDEX, and does not require `worlds/<world-slug>/stories/<story-slug>/` to exist yet. Bootstrap assigns the new bundle's `SLT-NNNN` ids and writes the returned records in Phase 11's single transaction.
+The delegated sub-routine applies storylet-pool-authoring Phase 4's 9 per-storylet gates and Phase 5's diversity audit, then returns the approved SLT records and validation summaries in memory. It does not allocate or write an SLB manifest, does not edit the story bundle INDEX, and does not require `worlds/<world-slug>/stories/<story-slug>/` to exist yet. Returned SLT records have the pre-allocated ids already populated; bootstrap writes them as-is in Phase 11.
 
 Returned seed storylets must carry `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`. They use the schema authority at `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`; this skill's `templates/story-records.yaml` only cross-references that authority for SLT records.

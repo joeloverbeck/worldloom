@@ -114,8 +114,10 @@ Phase 5: Initial Threads +            (2-5 THR-NNNN — main + relationship +
 Phase 6: Storylet Pool Seed           (delegated to storylet-pool-authoring
                                        seed mode with focus_area:
                                        bootstrap_mix and
-                                       parent_skill_invocation: true;
-                                       returns approved SLTs in memory)
+                                       parent_skill_invocation: true and
+                                       pre-allocated target_slt_ids[];
+                                       returns approved SLTs with final ids
+                                       in memory)
       |
       v
 Phase 7: Root Page Render             (select PG-0001 storylet;
@@ -222,7 +224,7 @@ Inlined in this skill's templates and backed by story-bundle patch-engine ops / 
 2. **Phases 1-3: Premise Normalization, Cast Binding, World-Fact Import.** Convert the premise into a design brief, mirror the cast into STENT/STINT records, and import relevant world CFs as story-local SFs with declared `epistemic_class`. Load `references/phases-1-3-premise-cast-facts.md`.
 3. **Phase 4: Mystery Firewall + Invariant Audit.** Hard-reject any `forbidden`-status M resolution; audit premise + cast + sketched threads/obligations against every INV's `break_conditions`. Load `references/phase-4-firewall-and-invariant-audit.md`.
 4. **Phase 5: Initial Threads + Obligations.** Emit 2-5 THR records, initial OBL records per thread (Rule 5 halt: salience + urgency + ≥2 payoff_modes mandatory), and initialize the consequences ledger. Load `references/phase-5-threads-and-obligations.md`.
-5. **Phase 6: Storylet Pool Seed.** Delegate to `storylet-pool-authoring` (`mode: seed`, `focus_area: bootstrap_mix`, `parent_skill_invocation: true`); the sub-routine returns approved SLT records in memory for Phase 11 to write. Load `references/phase-6-storylet-pool-seed.md`.
+5. **Phase 6: Storylet Pool Seed.** Compute `target_pool_size`, pre-allocate `target_slt_ids[]`, then delegate to `storylet-pool-authoring` (`mode: seed`, `focus_area: bootstrap_mix`, `parent_skill_invocation: true`, `target_slt_ids[]`); the sub-routine returns approved SLT records with final ids in memory for Phase 11 to write. Load `references/phase-6-storylet-pool-seed.md`.
 6. **Phase 7: Root Page Render.** Select the PG-0001 storylet, assemble the content_policy-first LLM prompt with the Prose Craft Contract embedded, render the opening prose, run the deterministic post-LLM cross-check, and emit page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer. Load `references/phase-7-root-page-render.md`.
 7. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline); emit 4-6 CHC records satisfying the diversification + consequence-capacity contract; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
 8. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 12 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.

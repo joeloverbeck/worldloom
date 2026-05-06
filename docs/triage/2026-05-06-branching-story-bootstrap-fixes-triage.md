@@ -26,7 +26,7 @@ Each finding was verified against the current skill's `SKILL.md`, all 10 files u
 | `archive/tickets/BSBOOT-009.md` | CNSQ ledger doc inconsistencies (make CNSQ creation conditional; allocations conditional) | report #2 |
 | `archive/tickets/BSBOOT-010.md` | SF `visible_to_reader: true` default leaks secrets (default false; add `reader_visibility_basis`) | report #7 |
 | `archive/tickets/BSBOOT-011.md` | Storylet pool sizing not scale-aware (intended_scale unused by Phase 6) | report #8 |
-| `tickets/BSBOOT-012.md` | SLT id-assignment timing risk (pre-allocate ids before delegation) | report #19 |
+| `archive/tickets/BSBOOT-012.md` | SLT id-assignment timing risk (pre-allocate ids before delegation) | report #19 |
 
 ### Tier 3 — real improvements
 
@@ -57,5 +57,5 @@ Tier 4 dismissals do not preclude future revisitation if the runtime page-cycle 
 ## Out of scope for this triage
 
 - Modifying `docs/FOUNDATIONS.md`. None of the accepted findings change a Foundations principle; they tighten a canon-reading skill's discipline to better honor existing principles (Rules 1, 4, 7).
-- Modifying `branching-story-page-cycle` or `storylet-pool-authoring`. BSBOOT-012 changes the bootstrap-side delegation contract only; no upstream contract change in storylet-pool-authoring is required (its existing `parent_skill_invocation: true` path already accepts caller-supplied state).
+- Modifying `branching-story-page-cycle`. BSBOOT-012 leaves page-cycle's JIT path unchanged. BSBOOT-012 does update `storylet-pool-authoring`'s bootstrap seed sub-routine contract so it requires and consumes caller-supplied `target_slt_ids[]`; no engine or schema change is required.
 - World-bundle migration. All accepted changes are forward-only for new bootstrap runs; existing bundles retain their current shape.
