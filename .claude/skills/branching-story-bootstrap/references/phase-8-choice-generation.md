@@ -33,6 +33,40 @@ Emit 4-6 `CHC-NNNN` records into `_source/choices/`. Required diversification:
 
 Affordance-anchored CHCs still satisfy the diversification and consequence-capacity gates; they are not exempt from any Phase 8 or Phase 9 check.
 
+## Pair-distance discipline
+
+In addition to the diversification list above, every pair of emitted CHCs must differ on at least 2 of the following 8 axes, with at least 1 difference from structural axes 1-6:
+
+1. `operation` (the canonical verb from Phase 8 affordance vocabulary)
+2. `actor` (the STENT performing the action)
+3. `target` (the STENT / STOBJ / STLOC / abstract being acted upon)
+4. `uses_fact` (the SF the choice leverages, if any)
+5. `choice_contract.minimum_state_change` set (compare the contained `{fact, obligation, consequence, relationship, intention, thread, location, cast, terminality}` sub-types; two CHCs that both change `fact` and `obligation` are equivalent on this axis, while different sub-types are distinct)
+6. `choice_contract.success_policy` (`guaranteed | attempted | uncertain | opposed`)
+7. `choice_mode` (the modal label)
+8. `poetic_effect` (the affective register)
+
+Two CHCs that differ only in `choice_mode` and `poetic_effect` are operational cosmetic variants even though they differ on 2 total axes. Fail Phase 8, halt, and re-derive the more cosmetically similar of the pair. The check is mechanical: read the in-memory CHC records, compute pairwise axis differences, and reject any pair that has fewer than 2 total differences or has no structural-axis difference.
+
+### Why pair-distance and not set-diversification
+
+The diversification list above ensures the set covers thread / relationship / OBL / less-obvious / mode / poetic axes. The pair-distance rule ensures no two members of the set are cosmetic variants of each other - the set's coverage is real, not lip service.
+
+### Worked counterexample
+
+"Question the guard about the magistrate's whereabouts" vs "Press the guard about who he saw last night":
+
+- operation: `investigate` / `investigate` (same)
+- actor: `STENT-0001` / `STENT-0001` (same)
+- target: `STENT-0007` / `STENT-0007` (same)
+- uses_fact: `null` / `null` (same)
+- minimum_state_change: `{fact}` / `{fact}` (same)
+- success_policy: `attempted` / `attempted` (same)
+- choice_mode: `investigative` / `pressure_management` (different)
+- poetic_effect: `obvious` / `dilemma` (different)
+
+This differs on 2 of 8 axes, but both differences are label axes and neither is a structural-axis difference. It fails Phase 8 as a framing variant of the same operational choice. Re-deriving one CHC with a different `actor` (for example, the ally confronts the guard instead of the protagonist), `target` (a different witness), or `minimum_state_change` (for example, adding a `relationship` change alongside a `fact` change) lifts the pair into clear operational distinction.
+
 The write-in slot is N+1 (handled by the runtime, not stored as CHC at bootstrap).
 
 ---
