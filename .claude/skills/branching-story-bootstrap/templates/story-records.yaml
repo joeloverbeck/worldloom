@@ -385,6 +385,16 @@ choice_contract:
     - fact                              # fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
 
 likely_effects: []                       # structured effect sketches; runtime validates before commit
+continuation_capacity:
+  post_choice_delta:
+    facts_added_or_changed: []           # SF-NNNN ids changed by minimum_state_change / likely_effects
+    obligations_changed: []              # OBL-NNNN ids whose status or salience would shift
+    location_changed: null               # null if no move; STLOC-NNNN id if current_location changes
+    cast_present_changed: []             # STENT-NNNN ids entering or leaving cast_present
+    mystery_resolution_risk: []          # M-NNNN ids whose safety status the post-choice state tests
+  valid_seed_storylets: []               # SLT-NNNN ids whose hard_preconds/cast/location/mystery checks pass under the post-choice delta
+  jit_shape_spec: null                   # one-line JIT continuation sketch when no seed SLT matches
+  validation_basis: ""                   # one-line rationale for the accepted seed or JIT continuation path
 choice_mode: thread_engagement           # e.g. moral | strategic | emotional | investigative | risky | self_protective
 poetic_effect: obvious                   # e.g. relaxed | obvious | dilemma | risky_truth | sacrifice | seduction | desperation | revelation
 content_intensity_implied: mature        # tame | mature | explicit

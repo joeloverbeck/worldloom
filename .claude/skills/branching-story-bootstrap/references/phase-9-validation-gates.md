@@ -16,7 +16,7 @@ Reference for `branching-story-bootstrap` Phase 9 — the 12-gate canon-safety a
 | 8 | Epistemic class declared (Rule 1) | Every initial SF declares `epistemic_class` | Phase 3 |
 | 9 | Storylet diversity | Seed pool covers ≥5 distinct shapes from the Phase 6 coverage table | Phase 6 |
 | 10 | Prose ledger consistency | PG-0001 prose introduces no entity as physically present unless in `cast_present`; load-bearing factual claims are state-snapshot-grounded; resolves no mystery | Phase 7 |
-| 11 | Choice consequence-capacity | Every emitted CHC has at least one continuation storylet (in seed pool or `jit_generatable`) | Phase 8 |
+| 11 | Choice consequence-capacity | Every emitted CHC's `continuation_capacity` block is populated and either `valid_seed_storylets` is non-empty (each named SLT's `hard_preconds`, `cast_requirements`, `location_requirements`, and `mystery_safety` pass under the post-choice delta) or `jit_shape_spec` is non-empty with a one-line shape sketch | Phase 8 |
 | 12 | State_snapshot completeness + recursive reference closure | `current_location`, `entity_status`, `relationships_current`, and the epistemic-faceted fact lists populated on `state_snapshot`; closure traversal roots at PG-0001 itself, expanding through `state_snapshot`, `storylet_realized`, `applied_event_ops`, and `emitted_choices`, then through every CHC's `likely_effects`, `uses_fact`, `target`, and `actor`; every non-PG story-local ID encountered either has `created_at_page == null` (globally legal — author-pool storylets only) or `created_at_page == PG-0001`; every PG reference is allowed when that PG id is in the root `branch_path` (`[PG-0001]`) because the page record's own id is its branch anchor | Phase 7 |
 
 ---

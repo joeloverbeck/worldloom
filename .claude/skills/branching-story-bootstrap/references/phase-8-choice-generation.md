@@ -40,8 +40,20 @@ Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story
 
 ---
 
-## Consequence-capacity check
+## Consequence-capacity check (gate 11 backstop)
 
-Every emitted CHC must have at least one continuation storylet (in the seed pool or marked as `jit_generatable: true` with a one-line shape spec). A CHC with no continuation is dead-end at runtime — halt and re-derive.
+Every emitted CHC must populate `continuation_capacity`:
+
+1. Compute `post_choice_delta` from the CHC's `choice_contract.minimum_state_change` plus `likely_effects`:
+   - `facts_added_or_changed`: SFs whose value or `epistemic_class` would change.
+   - `obligations_changed`: OBLs whose status (`open`, `paid_off`, `abandoned`, `failed`) or salience would shift.
+   - `location_changed`: the new `current_location` if the CHC moves the actor; otherwise `null`.
+   - `cast_present_changed`: STENTs that enter or leave `cast_present`.
+   - `mystery_resolution_risk`: M-NNNN ids whose safety the post-choice prose would test.
+2. For each candidate seed-pool SLT, check whether its `hard_preconds`, `cast_requirements`, `location_requirements`, and `mystery_safety` all pass under the post-choice delta. The candidate enters `valid_seed_storylets` only when all four checks pass.
+3. If `valid_seed_storylets` is empty, populate `jit_shape_spec` with a one-line sketch of the storylet shape the runtime would need to JIT-author through the page-cycle's `storylet-pool-authoring mode=jit` path.
+4. Record `validation_basis` as a one-line rationale, for example: `hard_preconds satisfied after simulated minimum_state_change with cast_present, location, and mystery_safety updates`.
+
+A CHC where `valid_seed_storylets` is empty and `jit_shape_spec` is null is a dead-end - halt and re-derive the choice.
 
 Populate `PG-0001.emitted_choices` with the 4-6 CHC ids.
