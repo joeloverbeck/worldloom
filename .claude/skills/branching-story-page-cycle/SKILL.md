@@ -37,7 +37,7 @@ arguments:
 
 # Branching Story Page Cycle
 
-Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next storylet (with JIT expansion if the pool is thin), renders the next page's prose, generates 4-6 structured choices + a write-in slot, validates against firewalls and the recursive branch-isolation invariant, and atomically writes the new records — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
+Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next storylet (with JIT expansion if the pool is thin), renders the next page's prose, generates 4-6 structured choices + a write-in slot, validates against firewalls and the recursive branch-isolation invariant, and commits the new records plus markdown surfaces through Phase 11's staged write path — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
 
 <HARD-GATE>
 Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages-prose/`, and do NOT `Edit` the bundle's `INDEX.md`, until:
@@ -174,11 +174,12 @@ Phase 10       HARD-GATE approval — deliverable summary (page header + parent
  accept (or auto-pass per execution_mode)
    |
    v
-Phase 11       Atomic write — single transaction: PG → SE → per-class
+Phase 11       Staged commit — engine YAML transaction: PG → SE → per-class
                SF/OBL/CNSQ/THR/SREL/STINT/CHC → JIT SLT (if any) →
                STLOC/STOBJ/DA (if any) → BR (new on fork or superseder on
-               continuation) → pages-prose/PG-NNNN.md → INDEX.md LAST so
-               partial-failure leaves index unmutated; NO git commit
+               continuation), then sequenced markdown writes:
+               pages-prose/PG-NNNN.md → INDEX.md LAST so partial-failure
+               leaves index unmutated; NO git commit
 ```
 
 ## Inputs
@@ -210,7 +211,7 @@ The full reads list (FOUNDATIONS.md, WORLD_KERNEL.md, ONTOLOGY.md, STORY_KERNEL.
 
 ## Output
 
-### Files written (single transaction at Phase 11)
+### Files written (staged commit at Phase 11)
 
 All emergent records live under `worlds/<world-slug>/stories/<story-slug>/_source/`:
 

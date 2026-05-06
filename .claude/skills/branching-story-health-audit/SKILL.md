@@ -444,9 +444,9 @@ User options:
 
 **HARD-GATE fires here**: no file is written until the user explicitly ACCEPTs (with or without droplist). Auto Mode does not override.
 
-## Phase 10: Atomic Write
+## Phase 10: Sequenced Direct Writes
 
-Single transaction. Write order matters — RSP cards first → audit report → INDEX.md last so partial failure leaves the per-bundle audit index unmutated:
+The write path uses sequenced direct writes. Write order matters — RSP cards first → audit report → INDEX.md last so partial failure leaves the per-bundle audit index unmutated:
 
 1. **RSP cards first** (non-dropped only): create `worlds/<world-slug>/stories/<story-slug>/audits/SAU-NNNN/` and `audits/SAU-NNNN/remediation-storylet-proposals/` if absent. `Write` each `RSP-NNNN-<slug>.md` per `templates/remediation-storylet-proposal-card.md`. Lazy-allocated RSP-NNNN ids honored verbatim — dropped intermediate ids are NEVER renumbered (append-only ID discipline).
 2. **Audit report second**: `Write` `worlds/<world-slug>/stories/<story-slug>/audits/SAU-NNNN-<YYYY-MM-DD>.md` per `templates/story-audit-report.md`. Frontmatter carries `audit_id`, `story_slug`, `world_slug`, `date`, `audit_focus`, `severity_threshold`, `branches_audited`, `pages_walked`, `story_kernel_sketch_status`, `story_kernel_discipline_status`, `finding_count_by_severity`, `rsp_card_ids`, `dropped_finding_ids`, `dropped_card_ids`, `prior_sau_referenced`, `cross_story_scope`, `user_approved: true`. Body matches the Phase 9 deliverable summary structure plus a Health Snapshot table per branch (open OBL count / high-salience unpaid / avg OBL age / tension / agency).

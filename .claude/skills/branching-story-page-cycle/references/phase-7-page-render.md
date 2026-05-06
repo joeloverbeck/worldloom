@@ -63,7 +63,7 @@ identical-anchor reuse, self-narrating-self patterns, ledger-jargon leakage,
 bracket-paraphrasing, and padding-or-truncation.
 ```
 
-LLM produces prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 inside the atomic transaction).
+LLM produces prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 as a sequenced markdown write after the engine YAML transaction).
 
 ## Post-Render Prose Critic
 

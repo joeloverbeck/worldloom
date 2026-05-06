@@ -180,7 +180,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
                                  LAST so partial failure leaves index
                                  unmutated; parent_skill_invocation
                                  returns before write; page-cycle writes
-                                 JIT SLTs in its Phase 11 transaction;
+                                 JIT SLTs during its Phase 11 staged commit;
                                  NO git commit)
 ```
 
@@ -212,7 +212,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
 - `worlds/<world-slug>/stories/<story-slug>/storylet-batches/SLB-NNNN.md` — batch manifest summarizing the run (mode, focus area, source obligations/threads, approved storylets table, diversity summary, rejected-candidates breakdown). Schema in `templates/storylet-batch-manifest.md`.
 - `worlds/<world-slug>/stories/<story-slug>/INDEX.md` — updated in place; storylet-pool section receives new total count + per-shape distribution + per-content_intensity distribution.
 
-When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` pre-allocates the SLT range in Phase 6 before delegation, supplies `target_slt_ids[]`, and writes the final-id seed records during its Phase 11 transaction. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick transaction.
+When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` pre-allocates the SLT range in Phase 6 before delegation, supplies `target_slt_ids[]`, and writes the final-id seed records during its Phase 11 staged commit. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick staged commit.
 
 ### No canon-file mutations
 
@@ -222,7 +222,7 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 
 Direct invocation allocates `SLT-NNNN` (per-story append-only, shared with runtime JIT-generated storylets — Phase 4 of `branching-story-page-cycle` may write the next-numbered SLT between batches) and `SLB-NNNN` (per-story append-only batch manifests) via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
 
-For `parent_skill_invocation: true` bootstrap seed generation, this skill does not allocate `SLB` and does not reserve the SLT range itself. `branching-story-bootstrap` pre-allocates the SLT range and supplies it via `target_slt_ids[]`. This skill consumes ids from the head of the supplied list in deterministic order; the bootstrap writes the returned storylets with their final ids inside its Phase 11 transaction. Unused tail ids are returned in the internal validation packet and are not written or reused.
+For `parent_skill_invocation: true` bootstrap seed generation, this skill does not allocate `SLB` and does not reserve the SLT range itself. `branching-story-bootstrap` pre-allocates the SLT range and supplies it via `target_slt_ids[]`. This skill consumes ids from the head of the supplied list in deterministic order; the bootstrap writes the returned storylets with their final ids during its Phase 11 staged commit. Unused tail ids are returned in the internal validation packet and are not written or reused.
 
 For `parent_skill_invocation: true` page-cycle JIT generation, this skill does not allocate `SLB`. `branching-story-page-cycle` allocates or reserves the next SLT id as part of its page-tick write set and passes that id in the caller context; the returned SLT must carry `provenance.origin: runtime_jit`, `provenance.created_at_page: <created_at_page>`, and `visibility.scope: branch_scoped`.
 
@@ -333,7 +333,7 @@ For the JIT path, the caller is `branching-story-page-cycle` Phase 4. Page-cycle
 
 ## Phase 7: Engine Submit + Markdown Writes
 
-Skip this phase entirely when `parent_skill_invocation: true`; this skill has already returned the approved SLTs to the caller and must perform no writes. For JIT mode, `branching-story-page-cycle` Phase 11 writes the returned `SLT-NNNN.yaml` and updates `INDEX.md` inside the page tick's single transaction.
+Skip this phase entirely when `parent_skill_invocation: true`; this skill has already returned the approved SLTs to the caller and must perform no writes. For JIT mode, `branching-story-page-cycle` Phase 11 writes the returned `SLT-NNNN.yaml` during the page tick's engine YAML transaction and updates `INDEX.md` as a later sequenced markdown write.
 
 Single transaction for `_source/storylets/*.yaml`, followed by markdown writes. The storylet YAML records route through `mcp__worldloom__submit_patch_plan` with `create_slt_record` ops; `INDEX.md` is the LAST direct markdown write so partial failure leaves the per-bundle index unmutated.
 
