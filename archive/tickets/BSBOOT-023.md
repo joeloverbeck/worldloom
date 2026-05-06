@@ -1,6 +1,6 @@
 # BSBOOT-023: Teach health audit to inspect bootstrap Phase 9.5 discipline trace
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — `branching-story-health-audit` skill/report-template prose only. No runtime page-cycle, storylet-pool, promotion, validator, schema, patch-engine, or world-content change.
@@ -8,9 +8,9 @@
 
 ## Problem
 
-`BSBOOT-015` added bootstrap Phase 9.5 as a required pre-Phase-10 discipline validator and added `STORY_KERNEL.md.discipline_validation_trace` as the audit trail for its 10 checks.
+At intake, `BSBOOT-015` had added bootstrap Phase 9.5 as a required pre-Phase-10 discipline validator and added `STORY_KERNEL.md.discipline_validation_trace` as the audit trail for its 10 checks.
 
-`branching-story-health-audit` is the downstream skill that audits existing story bundles and reads `STORY_KERNEL.md`, but it currently only names bootstrap Rule 4 sketch integrity as a bootstrap-origin STORY_KERNEL audit surface. It does not inspect `discipline_validation_trace`, so a new-format bundle with a missing, incomplete, or bare-PASS Phase 9.5 trace could be audited without surfacing that bootstrap acceptance-trace gap.
+At intake, `branching-story-health-audit` was the downstream skill that audited existing story bundles and read `STORY_KERNEL.md`, but it only named bootstrap Rule 4 sketch integrity as a bootstrap-origin STORY_KERNEL audit surface. It did not inspect `discipline_validation_trace`, so a new-format bundle with a missing, incomplete, or bare-PASS Phase 9.5 trace could be audited without surfacing that bootstrap acceptance-trace gap.
 
 The other reviewed downstream skills do not need direct changes:
 
@@ -21,7 +21,7 @@ The other reviewed downstream skills do not need direct changes:
 ## Assumption Reassessment (2026-05-06)
 
 1. `archive/tickets/BSBOOT-015.md` completed Phase 9.5 and states that `STORY_KERNEL.md.discipline_validation_trace` is a sibling block to `validation_trace`, with one PASS-with-rationale entry for each of 10 discipline checks.
-2. `.claude/skills/branching-story-health-audit/SKILL.md` reads `STORY_KERNEL.md` and audits `STORY_KERNEL.audited_thread_obligation_sketch`, but it has no `discipline_validation_trace` / Phase 9.5 references.
+2. At intake, `.claude/skills/branching-story-health-audit/SKILL.md` read `STORY_KERNEL.md` and audited `STORY_KERNEL.audited_thread_obligation_sketch`, but had no `discipline_validation_trace` / Phase 9.5 references. This ticket adds those read, diagnostic, self-check, and report-schema references.
 3. Cross-skill / cross-artifact boundary: `branching-story-bootstrap` produces `STORY_KERNEL.discipline_validation_trace`; `branching-story-health-audit` consumes existing story-bundle `STORY_KERNEL.md` for post-run audit and is the correct read-only consumer for missing/malformed bootstrap acceptance traces.
 4. FOUNDATIONS principle under audit: story-scope validation rules require story bundles to preserve Rule 1 / Rule 4 / Rule 5 / Rule 7 evidence. Phase 9.5 is not a new FOUNDATIONS rule, but it is now a required bootstrap acceptance trace that supports the same hard-gate discipline: every validation/rejection check records PASS with a one-line rationale before approval.
 5. `archive/tickets/BSBOOT-020.md` already established the pattern for health-audit bootstrap-consumer alignment: add a focused audit category/status for a new bootstrap `STORY_KERNEL.md` field, classify explicit legacy bundles without requiring migration, and keep health audit read-only against story state.
@@ -33,31 +33,32 @@ The other reviewed downstream skills do not need direct changes:
 ## Architecture Check
 
 1. The clean end state keeps Phase 9.5 as bootstrap-owned producer discipline and teaches only the bundle-audit consumer to inspect the resulting trace. Runtime page ticks, storylet authoring, and canon promotion keep their own validation contracts instead of inheriting bootstrap-only gates.
-2. No backwards-compatibility aliasing or shims are introduced. Historical bundles that predate `BSBOOT-015` should be classified as legacy/info rather than migrated or treated as corrupt by default.
+2. No backwards-compatibility aliasing or shims are introduced. Historical bundles that predate `BSBOOT-015` are classified as legacy/info rather than migrated or treated as corrupt by default.
 
 ## Verification Layers
 
 1. Health audit reads/names `discipline_validation_trace` in `STORY_KERNEL.md` prerequisites and diagnostics -> codebase grep-proof.
-2. A dedicated finding category or clearly extended bootstrap integrity category classifies missing, incomplete, bare-PASS, or malformed Phase 9.5 trace entries -> manual review + codebase grep-proof.
+2. A dedicated `bootstrap_discipline_trace_integrity` finding category classifies missing, incomplete, bare-PASS, or malformed Phase 9.5 trace entries -> manual review + codebase grep-proof.
 3. Health-audit report template can report the trace status -> codebase grep-proof.
 4. Page-cycle, storylet-pool-authoring, and story-fact-promotion remain reviewed non-consumers -> manual review; no source edits required.
 5. FOUNDATIONS/HARD-GATE discipline preserved -> manual review that the audit remains read-only and does not weaken approval, write ordering, Mystery Reserve, or canon-mutation gates.
 
-## What to Change
+## Landed Changes
 
 ### 1. `.claude/skills/branching-story-health-audit/SKILL.md`
 
-- Add `discipline_validation_trace` to the `STORY_KERNEL.md` fields read at Pre-flight.
-- Add a health-audit diagnostic for bootstrap Phase 9.5 trace integrity. Either add a new `audit_focus` value such as `bootstrap_discipline_trace_integrity`, or explicitly extend the existing bootstrap integrity family if that keeps the category list cleaner.
-- Classify missing/malformed trace for new/uncertain post-BSBOOT-015 bundles as `warning` or `error` depending on whether the missing trace undermines the bootstrap acceptance audit trail.
-- Classify explicit pre-BSBOOT-015 bundles as `info` legacy, not migration targets.
-- Treat bare `"PASS"` without a one-line rationale as malformed, matching HARD-GATE discipline.
-- Keep remediation as manual/bootstrap review only; health audit must not mutate `STORY_KERNEL.md`.
+- Added `discipline_validation_trace` to the `STORY_KERNEL.md` fields read at Pre-flight.
+- Added a dedicated `bootstrap_discipline_trace_integrity` audit focus/category for bootstrap Phase 9.5 trace integrity.
+- Classified missing, incomplete, bare-PASS, or malformed trace data for new/uncertain post-`BSBOOT-015` bundles as `warning` or `error` depending on acceptance-trace impact.
+- Classified explicit pre-`BSBOOT-015` bundles as `info` legacy, not migration targets.
+- Treated bare `"PASS"` without a one-line rationale as malformed, matching HARD-GATE discipline.
+- Kept remediation as manual/bootstrap review only; health audit remains read-only against `STORY_KERNEL.md`.
 
 ### 2. `.claude/skills/branching-story-health-audit/templates/story-audit-report.md`
 
-- Add frontmatter/body guidance for recording Phase 9.5 trace status, or extend the existing bootstrap status wording if a new field is unnecessary.
-- Ensure findings for this category cite `STORY_KERNEL.md`, the missing/malformed discipline-check key(s), and whether the bundle is new/uncertain or explicit legacy.
+- Added `story_kernel_discipline_status` to SAU frontmatter and body summary.
+- Added `bootstrap_discipline_trace_integrity` to the report finding category list.
+- Added finding guidance requiring `STORY_KERNEL.md`, `story_kernel_discipline_status`, missing/malformed `discipline_validation_trace` key(s), and new/uncertain vs explicit legacy classification.
 
 ## Files to Touch
 
@@ -98,4 +99,29 @@ The other reviewed downstream skills do not need direct changes:
 
 1. `rg -n "discipline_validation_trace|Phase 9\\.5|bootstrap_discipline" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md`
 2. `rg -n "pre-BSBOOT-015|BSBOOT-015|legacy" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md`
-3. `rg -n "discipline_validation_trace|Phase 9\\.5" .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring .claude/skills/story-fact-promotion-to-canon` — expected no required source edits for this ticket; any hits should be manually classified as unrelated or already-owned runtime/page/storylet/promotion validation prose.
+3. `! rg -n "discipline_validation_trace|Phase 9\\.5" .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring .claude/skills/story-fact-promotion-to-canon` — proves no required source edits for this ticket; any hit would require manual classification as unrelated or already-owned runtime/page/storylet/promotion validation prose.
+4. `git diff --check`
+
+## Outcome
+
+Completed: 2026-05-06.
+
+`branching-story-health-audit` now reads and audits `STORY_KERNEL.discipline_validation_trace` through a dedicated `bootstrap_discipline_trace_integrity` category. New/uncertain bundles with missing, incomplete, bare-PASS, or malformed Phase 9.5 trace data are reportable as warning/error findings; explicit pre-`BSBOOT-015` bundles remain info-only legacy cases. The SAU report template now records `story_kernel_discipline_status` and gives finding authors the required citation/classification fields.
+
+No page-cycle, storylet-pool-authoring, story-fact-promotion, bootstrap producer, validator, patch-engine, or world-content changes were made.
+
+## Verification Result
+
+Completed:
+
+1. `rg -n "discipline_validation_trace|Phase 9\\.5|bootstrap_discipline" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md` — pass; matched the health-audit read/report surfaces, Phase 9.5 diagnostic prose, and `bootstrap_discipline_trace_integrity` category.
+2. `rg -n "pre-BSBOOT-015|BSBOOT-015|legacy" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md` — pass; matched explicit pre-`BSBOOT-015` legacy classification guidance in both the skill and report template.
+3. `! rg -n "discipline_validation_trace|Phase 9\\.5" .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring .claude/skills/story-fact-promotion-to-canon` — pass; no matches, confirming no source edits were required for the reviewed non-consumers.
+4. Manual review — pass; the health audit remains read-only against `STORY_KERNEL.md` and only reports/flags missing or malformed Phase 9.5 trace data.
+5. Manual review — pass; `branching-story-page-cycle`, `storylet-pool-authoring`, and `story-fact-promotion-to-canon` remain non-consumers for bootstrap Phase 9.5.
+6. `git diff --check` — pass.
+
+## Deviations
+
+- The ticket chose the explicit `bootstrap_discipline_trace_integrity` category and `story_kernel_discipline_status` report field instead of extending the existing Rule 4 sketch category, because the Phase 9.5 acceptance trace is a distinct bootstrap audit trail from the Rule 4 THR/OBL sketch.
+- `docs/HARD-GATE-DISCIPLINE.md` was read during reassessment because the ticket touches skill HARD-GATE / PASS-with-rationale audit prose. The landed change is read-only retrieval and diagnostic reporting only; it does not alter patch-plan validation, submit behavior, approval-token handling, write ordering, Mystery Reserve gates, or canon-mutation behavior.
