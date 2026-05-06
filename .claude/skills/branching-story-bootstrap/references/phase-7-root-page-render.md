@@ -65,7 +65,7 @@ narrating-self patterns, ledger-jargon leakage, bracket-paraphrasing, and
 padding-or-truncation.
 ```
 
-LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 inside the atomic transaction).
+LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11's staged commit: the engine YAML transaction writes `_source/<class>/*.yaml` records, and sequenced markdown writes handle `STORY_KERNEL.md`, `pages-prose/PG-0001.md`, and `INDEX.md`).
 
 ---
 

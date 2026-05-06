@@ -202,8 +202,9 @@ notes: >
 ---
 # SLT-NNNN — Storylet records are produced by storylet-pool-authoring (delegated from
 # Phase 6) and conform to .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml.
-# Bootstrap's Phase 11 atomic transaction writes the delegated batch's SLT files into
-# _source/storylets/. The storylet-pool-authoring template is the single source of truth.
+# Bootstrap's Phase 11 staged commit writes the delegated batch's SLT files into
+# _source/storylets/ through the engine YAML transaction subset. The storylet-pool-authoring
+# template is the single source of truth.
 ---
 # STLOC-NNNN — Story-Local Location
 

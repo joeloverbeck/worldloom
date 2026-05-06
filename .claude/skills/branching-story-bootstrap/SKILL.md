@@ -185,7 +185,7 @@ Phase 11: Commit / Engine Submit      (create
 
 ## Output
 
-### Story bundle structure (single transaction)
+### Story bundle structure (staged commit - engine YAML transaction + sequenced markdown writes)
 
 ```
 worlds/<world-slug>/stories/<story-slug>/
@@ -300,7 +300,7 @@ User options:
 
 ## Phase 11: Commit / Engine Submit
 
-Directory setup plus a patch-engine transaction for atomic YAML records, followed by direct markdown writes. File order matters — the per-world INDEX.md is the LAST direct write so partial failure leaves the per-world index unmutated:
+Directory setup plus a patch-engine transaction for atomic YAML records, followed by direct markdown writes. The phase is a staged commit, not a single all-or-nothing transaction: the engine envelope is atomic for `_source/<class>/*.yaml` records, but the surrounding markdown writes (`STORY_KERNEL.md`, `pages-prose/PG-0001.md`, per-bundle `INDEX.md`, per-world `INDEX.md`) are sequential and recoverable per the partial-failure note below. File order matters — the per-world INDEX.md is the LAST direct write so partial failure leaves the per-world index unmutated:
 
 1. `mkdir -p worlds/<world-slug>/stories/<story-slug>/_source/{entities,facts,events,obligations,consequences,threads,relationships,intentions,storylets,locations,objects,artifacts,branches,pages,choices}` and `worlds/<world-slug>/stories/<story-slug>/pages-prose`. Touch a `.gitkeep` in any `_source/<class>/` subdirectory that does NOT receive a record at this bootstrap (typically `consequences/`, `objects/`, `artifacts/` — runtime page-cycle JIT-creates records here). The `.gitkeep` files preserve the directory tree under `git add` so the runtime page-cycle can JIT-write into the structurally-expected paths without first having to recreate the subdirectories.
 2. `Write worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` (premise + content_policy preamble verbatim + designing principle + cast bind list + themes + content_intensity baseline + POV mode + central dramatic question + `mysteries_in_play[]` + `invariants_acknowledged[]` + `execution_mode_default` + `validation_trace` + STORY-NNN frontmatter; template at `templates/story-kernel.md`).

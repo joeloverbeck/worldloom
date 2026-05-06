@@ -1,6 +1,6 @@
 # Phase 6: Storylet Pool Seed
 
-Reference for `branching-story-bootstrap` Phase 6 — the delegated content-generation phase that produces the seed storylet pool. Bootstrap invokes `storylet-pool-authoring` as an in-memory sub-routine; the sub-routine produces and validates SLT records with caller-supplied final ids but does NOT write them. Bootstrap writes the final-id records inside its Phase 11 transaction.
+Reference for `branching-story-bootstrap` Phase 6 — the delegated content-generation phase that produces the seed storylet pool. Bootstrap invokes `storylet-pool-authoring` as an in-memory sub-routine; the sub-routine produces and validates SLT records with caller-supplied final ids but does NOT write them. Bootstrap writes the final-id records inside Phase 11's staged commit: the engine envelope holds all `_source/storylets/SLT-*.yaml` writes atomically, while markdown writes are sequenced separately.
 
 ---
 
@@ -44,7 +44,7 @@ If the formula yields fewer than the minimum coverage floor for gate 9 (≥5 dis
 - `parent_skill_invocation: true`
 - caller context: normalized premise, cast-bound STENT/STINT records, imported SFs, initial THRs/OBLs, whole-class M/INV loads, and content_policy already loaded by bootstrap Phases 1-5
 
-Bootstrap pre-allocates the SLT id range in Phase 6 before invoking `storylet-pool-authoring`. The sub-routine consumes the supplied ids in deterministic order. SLT records returned to bootstrap carry final ids; there is no Phase 11 remap pass.
+Bootstrap pre-allocates the SLT id range in Phase 6 before invoking `storylet-pool-authoring`. The sub-routine consumes the supplied ids in deterministic order. SLT records returned to bootstrap carry final ids; there is no Phase 11 remap pass, and bootstrap writes the returned records in Phase 11's staged commit (engine YAML transaction subset).
 
 `storylet-pool-authoring` Phase 2 §Bootstrap-mix shape weighting is the coverage contract: entry_pressure 3-5, cast_introduction 1 per non-protagonist major, threat_escalation 2-4, relational_dynamics 3-5, routine_disruption 2-3, aftermath_sequel 2-3, reflection_dilemma 2-3. The bootstrap-supplied `target_pool_size` (computed above) sets the upper bound; the storylet-pool-authoring sub-routine then produces `target_pool_size + ceil(target_pool_size * 0.30)` candidate seeds (per `storylet-pool-authoring/references/phase-2-generation-seeds.md:3`'s +30% replacement buffer rule).
 
