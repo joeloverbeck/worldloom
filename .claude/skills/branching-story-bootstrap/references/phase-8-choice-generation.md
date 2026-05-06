@@ -1,10 +1,10 @@
 # Phase 8: Initial Choice Generation
 
-Reference for `branching-story-bootstrap` Phase 8 — the delegated choice-production phase that runs `branching-story-page-cycle`'s Phase 8 (Amendment B Pipeline) against the genesis state produced by Phases 2, 3, 5, 6, and 7. Emits 4-6 CHC-NNNN records under the diversification + consequence-capacity contract; populates `PG-0001.emitted_choices` for Phase 11.
+Reference for `branching-story-bootstrap` Phase 8 — the delegated choice-production phase that runs `branching-story-page-cycle`'s Phase 8 (Amendment B Pipeline) against the genesis state produced by Phases 2, 3, 5, 6, 7, and 7.5. Emits 4-6 CHC-NNNN records under the diversification + consequence-capacity contract; populates `PG-0001.emitted_choices` for Phase 11.
 
 ---
 
-Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline), applying the same production CHC contract to the genesis state produced by Phases 2, 3, 5, 6, and 7. Bootstrap supplies `PG-0001.state_snapshot` as the current state, the selected root storylet's `choice_templates` as anchors, and uses `governor_nudge: "bootstrap root; favor premise-aligned entry pressure and initial agency spread"`.
+Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline), applying the same production CHC contract to the genesis state produced by Phases 2, 3, 5, 6, 7, and 7.5. Bootstrap supplies `PG-0001.state_snapshot` as the current state, the selected root storylet's `choice_templates` as anchors, and the Phase 7.5 Visible Affordance Map as additional anchors. Diversification and consequence-capacity must consider all three input sources. Bootstrap uses `governor_nudge: "bootstrap root; favor premise-aligned entry pressure and initial agency spread"`.
 
 Run the six page-cycle Phase 8 steps in order:
 
@@ -26,9 +26,12 @@ Emit 4-6 `CHC-NNNN` records into `_source/choices/`. Required diversification:
 - one choice that addresses a specific **OBL** (typically a high-urgency one)
 - one choice that explores a **less-obvious path** (low-obvious-payoff but high agency)
 - one or two **diversification** slots
+- if the Visible Affordance Map contains a grounded affordance that none of the existing 4-6 CHCs engage, prefer a CHC anchored on that affordance over a fully storylet-template-driven choice
 - at least 3 distinct `choice_mode` values
 - at least 3 distinct `poetic_effect` values
 - across the set, engage at least 60% of currently open high-salience OBLs (salience ≥ 7) when at least 2 such OBLs exist; when only 1 high-salience OBL exists it must be engaged by ≥1 CHC; when 0 high-salience OBLs exist this requirement is vacuous
+
+Affordance-anchored CHCs still satisfy the diversification and consequence-capacity gates; they are not exempt from any Phase 8 or Phase 9 check.
 
 The write-in slot is N+1 (handled by the runtime, not stored as CHC at bootstrap).
 

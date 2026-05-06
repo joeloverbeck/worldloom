@@ -130,6 +130,14 @@ Phase 7: Root Page Render             (select PG-0001 storylet;
                                        check; up to 3 re-prompts shared budget)
       |
       v
+Phase 7.5: Visible Affordance         (parse rendered PG-0001 prose for
+           Extraction                  visible objects/actors/locations/
+                                       tensions; map each to state id;
+                                       ungrounded → re-prompt Phase 7;
+                                       grounded → feed to Phase 8 as
+                                       additional anchors)
+      |
+      v
 Phase 8: Initial Choice Generation    (4-6 CHC-NNNN — main thread engagement,
                                        relationship engagement, OBL
                                        engagement, less-obvious path,
@@ -226,10 +234,11 @@ Inlined in this skill's templates and backed by story-bundle patch-engine ops / 
 4. **Phase 5: Initial Threads + Obligations.** Emit 2-5 THR records, initial OBL records per thread (Rule 5 halt: salience + urgency + ≥2 payoff_modes mandatory), and initialize the consequences ledger. Load `references/phase-5-threads-and-obligations.md`.
 5. **Phase 6: Storylet Pool Seed.** Compute `target_pool_size`, pre-allocate `target_slt_ids[]`, then delegate to `storylet-pool-authoring` (`mode: seed`, `focus_area: bootstrap_mix`, `parent_skill_invocation: true`, `target_slt_ids[]`); the sub-routine returns approved SLT records with final ids in memory for Phase 11 to write. Load `references/phase-6-storylet-pool-seed.md`.
 6. **Phase 7: Root Page Render.** Select the PG-0001 storylet, assemble the content_policy-first LLM prompt with the Prose Craft Contract embedded, render the opening prose, run the deterministic post-LLM cross-check, and emit page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer. Load `references/phase-7-root-page-render.md`.
-7. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline); emit 4-6 CHC records satisfying the diversification + consequence-capacity contract; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
-8. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 12 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
-9. **Phase 10: HARD-GATE Approval.** Inline below.
-10. **Phase 11: Commit / Engine Submit.** Inline below.
+7. **Phase 7.5: Visible Affordance Extraction.** Parse the Phase 7 prose buffer for visible affordances; map each to a state id; route ungrounded affordances back to Phase 7 as re-prompt triggers; feed the Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
+8. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline) with `PG-0001.state_snapshot`, the selected root storylet's `choice_templates`, and the Phase 7.5 Visible Affordance Map as anchors; emit 4-6 CHC records satisfying the diversification + consequence-capacity contract; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
+9. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 12 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+10. **Phase 10: HARD-GATE Approval.** Inline below.
+11. **Phase 11: Commit / Engine Submit.** Inline below.
 
 ## Phase 10: HARD-GATE Approval
 
