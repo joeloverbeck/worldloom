@@ -74,7 +74,7 @@ Every story-bundle op's payload carries `story_slug` alongside `record`. This is
 | `create_stint_record` | `_source/intentions/STINT-NNNN.yaml` (bare-numeric id per the engine's `^STINT-\d{4}$` regex; per-character semantics carried via `record.stent_id`, with `record.world_character_id` as the optional world CHAR anchor, not via id suffix) |
 | `create_stloc_record` | `_source/locations/STLOC-NNNN.yaml` |
 | `create_stobj_record` | `_source/objects/STOBJ-NNNN.yaml` |
-| `append_story_diegetic_artifact_record` | `_source/artifacts/DA-NNNN.yaml` |
+| `append_story_diegetic_artifact_record` | `_source/artifacts/DA-NNNN.yaml` (rare at bootstrap; premise-driven story-local artifacts only) |
 | `create_br_record` | `_source/branches/BR-NNNN.yaml` |
 | `create_pg_record` | `_source/pages/PG-NNNN.yaml` |
 | `create_chc_record` | `_source/choices/CHC-NNNN.yaml` |
@@ -88,7 +88,7 @@ The story-bundle record schemas at `tools/validators/src/schemas/story-*.schema.
 
 ## 3. `expected_id_allocations` per-class format
 
-The engine's pre-apply check verifies that `expected_id_allocations` matches the engine's next-id calculation per story-bundle class. Bootstrap envelopes typically populate the following allocation classes:
+The engine's pre-apply check verifies that `expected_id_allocations` matches the engine's next-id calculation per story-bundle class. Allocation keys are added only when the corresponding ops appear in the envelope. Bootstrap envelopes typically omit `cnsq_ids` and `da_ids` because CNSQ and story-local DA records are conditional, premise-driven records at bootstrap, not defaults. Bootstrap envelopes typically populate the following allocation classes:
 
 ```json
 {
@@ -156,7 +156,7 @@ For exceptionally large bundles where even the CLI submit path's transport hits 
 Recommended split order if forced:
 
 1. **Envelope A — Cast architecture**: `create_stent_record`, `create_stint_record`, `create_stloc_record`, `create_stobj_record`, `create_srel_record` ops (story-local entities + intentions + locations + objects + relationships).
-2. **Envelope B — Story state**: `create_sf_record`, `create_se_record`, `create_thr_record`, `create_obl_record`, `create_cnsq_record`, `append_story_diegetic_artifact_record` ops (facts + genesis event + threads + obligations + consequences + story-local diegetic artifacts).
+2. **Envelope B — Story state**: `create_sf_record`, `create_se_record`, `create_thr_record`, `create_obl_record` ops, plus `create_cnsq_record` and `append_story_diegetic_artifact_record` only when the premise actually emits CNSQ / story-local DA records at PG-0001 (facts + genesis event + threads + obligations + optional consequences + optional story-local diegetic artifacts).
 3. **Envelope C — Storylets**: `create_slt_record` ops (the seed pool — the largest single class, ~20 records each routinely 3-5KB).
 4. **Envelope D — Page architecture**: `create_br_record`, `create_pg_record`, `create_chc_record` ops (root branch + root page + emitted choices). PG-0001's `state_snapshot` references every prior class, so this envelope must land last.
 

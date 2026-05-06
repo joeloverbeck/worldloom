@@ -146,7 +146,7 @@ status: open                             # open | paid_off | abandoned | failed
 notes: >
   ...
 ---
-# CNSQ-NNNN — Persisted Consequence (initialized empty at bootstrap; runtime populates)
+# CNSQ-NNNN — Persisted Consequence (conditional at bootstrap; runtime usually populates)
 
 id: CNSQ-0001
 story_id: STORY-0001

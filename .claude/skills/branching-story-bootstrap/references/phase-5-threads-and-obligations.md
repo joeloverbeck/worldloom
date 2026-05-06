@@ -28,4 +28,4 @@ For each thread, generate initial `OBL-NNNN`. OBL fields include `type`, `introd
 
 ## Consequences ledger initialization
 
-**Initialize consequences ledger**: emit `_source/consequences/` as an empty directory at this phase; `consequences_pending: []` and `consequences_addressed: []` populated on PG-0001's `state_snapshot` at Phase 7.
+**Initialize consequences ledger**: emit `_source/consequences/` as an empty directory at this phase; `consequences_pending: []` and `consequences_addressed: []` populated on PG-0001's `state_snapshot` at Phase 7. CNSQ records are emitted at this phase only when the premise explicitly starts after a pre-existing consequence has already landed (for example, "the story opens with the protagonist's brother already buried" — emit the body-discovery CNSQ at PG-0001). Otherwise the directory holds only `.gitkeep`.
