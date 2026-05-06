@@ -39,7 +39,7 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
     consequence_address:          move CNSQ-NNNN from pending to addressed; replace status via supersession
     thread_supersede:             replace THR-NNNN with superseder (status / pressure delta)
     relationship_supersede:       replace SREL-NNNN with superseder (axes / public_status / private_status_by_actor)
-    intention_refresh:            add new STINT-NNNN to intentions_current; replace prior STINT for that character via supersession (logical_id + supersedes link to the prior record)
+    intention_refresh:            add new STINT-NNNN to intentions_current; replace the prior STINT for that story entity / `stent_id` via supersession (logical_id + supersedes link to the prior record)
     cast_change:                  update cast_present
     location_change:              update current_location and accessible_locations
     inventory_change:             update inventory_by_entity via STOBJ supersession

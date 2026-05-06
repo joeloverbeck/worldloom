@@ -25,6 +25,7 @@ Check:
 - HARD-GATE semantics, if present
 - references/templates/examples used by the skill
 - sibling-skill interop named in docs or specs
+- if acceptance relies on negative grep or stale-anchor removal, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 ## tool or script implementation
 
@@ -47,6 +48,7 @@ Check:
 - consumers
 - doc references
 - whether the change is additive-only or breaking
+- if acceptance relies on negative grep or stale-anchor removal across consumers, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 Map each invariant to its own verification layer in the ticket.
 

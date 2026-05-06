@@ -235,7 +235,7 @@ Load the source record and its provenance per `source_kind`. The content_policy 
 - Capture the resolution event details + supporting prose excerpts from the resolving page and the page that emitted the choice.
 
 ### `source_kind == character_arc_outcome`
-- Load `STENT-<id>.yaml` (story-local entity record) and its full `STINT` history along `promotion_branch_path` (one STINT per PG where the character's intentions/beliefs/relationships shifted — load via `mcp__worldloom__get_record` per STINT id).
+- Load `STENT-<id>.yaml` (story-local entity record) and its full `STINT` history along `promotion_branch_path`. Select STINT history by matching `STINT.stent_id == source_stent_id`; `world_character_id` / `STENT.character_id` are world `CHAR-NNNN` anchors, not the story-local ownership key. Load one matching STINT per PG where that STENT's intentions/beliefs/relationships shifted via `mcp__worldloom__get_record` per STINT id.
 - Identify the load-bearing transformation (what changed from STINT-0001 to STINT-leaf): goals shifted, secrets exposed, relationships inverted, social position changed, etc.
 - Capture the events along the branch that drove the change.
 - The world-level `CHAR-NNNN` dossier remains the durable world record; the STENT is what evolved. The `arc_outcome_summary` argument carries the user's natural-language framing.

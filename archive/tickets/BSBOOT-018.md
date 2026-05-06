@@ -1,6 +1,6 @@
 # BSBOOT-018: Propagate STENT character-anchor semantics to downstream story skills
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — downstream branching-story skill prose only. No engine, validator, schema, hook, or world-content change.
@@ -15,17 +15,18 @@ BSBOOT-003 clarified the story-identity contract:
 - `STINT.stent_id` points to the story-local `STENT-NNNN` that the intention snapshot drives.
 - `STINT.world_character_id` is the optional world `CHAR-NNNN` anchor.
 
-Several downstream story skills still phrase world-canon retrieval or intention-history lookup as if cast-bound STENTs always expose a usable `world_ent_id`, or as if STINT history can be associated to a character without naming `stent_id`. That leaves operators with two competing anchor paths and can cause character mirrors to be dropped from context-packet seed resolution because their `world_ent_id` is intentionally `null`.
+At intake, several downstream story skills still phrased world-canon retrieval or intention-history lookup as if cast-bound STENTs always exposed a usable `world_ent_id`, or as if STINT history could be associated to a character without naming `stent_id`. That left operators with two competing anchor paths and could cause character mirrors to be dropped from context-packet seed resolution because their `world_ent_id` is intentionally `null`.
 
 ## Assumption Reassessment (2026-05-06)
 
 1. `archive/tickets/BSBOOT-003.md` completed the forward-looking STINT rename and STENT example correction: STINT records now use `stent_id` + `world_character_id`; STENT character mirrors keep `character_id: CHAR-NNNN` and `world_ent_id: null`.
 2. `docs/FOUNDATIONS.md` §Tooling Recommendation requires story-pipeline skills to receive relevant current world context through context packets or targeted retrieval. Seed-node guidance must therefore preserve character mirrors instead of silently dropping them when `world_ent_id` is null.
 3. Cross-skill boundary: downstream branching-story skills consume bootstrap story-bundle identity records. The shared contract under audit is how STENT/STINT records map story-local cast to world-canon retrieval anchors and intention histories.
-4. `branching-story-health-audit/SKILL.md` still says context-packet seed nodes are resolved from cast-bound STENTs' `world_ent_id` (`World-State Prerequisites` + Pre-flight). That is false for character mirrors after BSBOOT-003.
-5. `branching-story-page-cycle/references/pre-flight-and-prerequisites.md` still says `cast_present` STENTs are followed through `world_ent_id`; `phase-5-state-mutation.md` says intention refresh replaces prior STINT "for that character" rather than "for that STENT / stent_id".
-6. `storylet-pool-authoring/references/pre-flight-and-prerequisites.md` still says seed nodes are resolved from `STORY_KERNEL.cast_bind_list` / each STENT's `world_ent_id`; bootstrap parent invocations pass cast-bound STENT/STINT records where character mirrors have `world_ent_id: null`.
-7. `story-fact-promotion-to-canon/SKILL.md` already treats `source_stent_id` as the story-local evolved entity, but character-arc promotion says to load STINT history along the branch without specifying that matching is by `STINT.stent_id == source_stent_id`.
+4. At intake, `branching-story-health-audit/SKILL.md` said context-packet seed nodes were resolved from cast-bound STENTs' `world_ent_id` (`World-State Prerequisites` + Pre-flight). That was false for character mirrors after BSBOOT-003.
+5. At intake, `branching-story-page-cycle/references/pre-flight-and-prerequisites.md` said `cast_present` STENTs were followed through `world_ent_id`; `phase-5-state-mutation.md` said intention refresh replaced prior STINT "for that character" rather than "for that STENT / stent_id".
+6. At intake, `storylet-pool-authoring/references/pre-flight-and-prerequisites.md` said seed nodes were resolved from `STORY_KERNEL.cast_bind_list` / each STENT's `world_ent_id`; bootstrap parent invocations pass cast-bound STENT/STINT records where character mirrors have `world_ent_id: null`.
+7. At intake, `story-fact-promotion-to-canon/SKILL.md` already treated `source_stent_id` as the story-local evolved entity, but character-arc promotion said to load STINT history along the branch without specifying that matching is by `STINT.stent_id == source_stent_id`.
+8. Verification-command correction: the drafted stale-anchor grep included the broad literal `STENT.world_ent_id`, but the landed resolver rule must still mention `STENT.world_ent_id` for non-CHAR world mirrors. The accepted stale-anchor proof is narrowed to the old unconditional phrases `cast-bound STENTs' world_ent_id` and `each STENT's world_ent_id`; positive `world_ent_id` hits are manually classified by the first grep.
 
 ## Architecture Check
 
@@ -39,27 +40,27 @@ Several downstream story skills still phrase world-canon retrieval or intention-
 3. Storylet-pool-authoring parent/bootstrap seed resolution names the same resolver rule -> codebase grep-proof + manual review.
 4. Story-fact-promotion-to-canon character-arc STINT history lookup explicitly matches `STINT.stent_id == source_stent_id` -> codebase grep-proof.
 
-## What to Change
+## Landed Changes
 
 ### 1. `branching-story-health-audit`
 
-- In `SKILL.md` `World-State Prerequisites` and Pre-flight, replace "cast-bound STENTs' `world_ent_id`" seed-node guidance with a resolver rule:
+- In `SKILL.md` `World-State Prerequisites` and Pre-flight, replaced "cast-bound STENTs' `world_ent_id`" seed-node guidance with a resolver rule:
   - for character mirrors, resolve through `STENT.character_id` to the CHAR dossier / character name;
   - for non-CHAR world mirrors, resolve through `STENT.world_ent_id`;
   - for `story_only: true` STENTs with no world anchor, do not use them as world-canon seed nodes unless another explicit world anchor exists.
 
 ### 2. `branching-story-page-cycle`
 
-- In `references/pre-flight-and-prerequisites.md`, update `cast_present` context-packet seed-node prose to use the same resolver rule.
-- In `references/phase-5-state-mutation.md`, change intention refresh language from "for that character" to "for that STENT / `stent_id`".
+- In `references/pre-flight-and-prerequisites.md`, updated `cast_present` context-packet seed-node prose to use the same resolver rule.
+- In `references/phase-5-state-mutation.md`, changed intention refresh language from "for that character" to "for that story entity / `stent_id`".
 
 ### 3. `storylet-pool-authoring`
 
-- In `references/pre-flight-and-prerequisites.md`, update parent/bootstrap and top-up seed-node prose to use the same resolver rule for `STORY_KERNEL.cast_bind_list` / parent-supplied STENT records.
+- In `references/pre-flight-and-prerequisites.md`, updated parent/bootstrap and top-up seed-node prose to use the same resolver rule for `STORY_KERNEL.cast_bind_list` / parent-supplied STENT records.
 
 ### 4. `story-fact-promotion-to-canon`
 
-- In `SKILL.md` `source_kind == character_arc_outcome`, specify that the STINT history along `promotion_branch_path` is selected by `STINT.stent_id == source_stent_id`; `world_character_id` / `STENT.character_id` are world CHAR anchors, not the story-local ownership key.
+- In `SKILL.md` `source_kind == character_arc_outcome`, specified that the STINT history along `promotion_branch_path` is selected by `STINT.stent_id == source_stent_id`; `world_character_id` / `STENT.character_id` are world CHAR anchors, not the story-local ownership key.
 
 ## Files to Touch
 
@@ -82,7 +83,7 @@ Several downstream story skills still phrase world-canon retrieval or intention-
 
 1. `grep -rn "world_ent_id" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-page-cycle/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md` shows only prose that distinguishes `character_id`-backed character mirrors from `world_ent_id`-backed non-CHAR ENT mirrors.
 2. `grep -rn "STINT.*stent_id\\|stent_id.*STINT" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md .claude/skills/story-fact-promotion-to-canon/SKILL.md` shows intention refresh / character-arc history keyed by `stent_id`.
-3. `grep -rn "STENTs' world_ent_id\\|each STENT's world_ent_id\\|STENT.world_ent_id" .claude/skills/branching-story-health-audit .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring` returns no stale unconditional cast-seed guidance.
+3. `grep -rn "cast-bound STENTs' world_ent_id\\|each STENT's world_ent_id" .claude/skills/branching-story-health-audit .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring` returns no stale unconditional cast-seed guidance.
 
 ### Invariants
 
@@ -101,4 +102,20 @@ Several downstream story skills still phrase world-canon retrieval or intention-
 
 1. `grep -rn "world_ent_id" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-page-cycle/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md`
 2. `grep -rn "STINT.*stent_id\\|stent_id.*STINT" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md .claude/skills/story-fact-promotion-to-canon/SKILL.md`
-3. `grep -rn "STENTs' world_ent_id\\|each STENT's world_ent_id\\|STENT.world_ent_id" .claude/skills/branching-story-health-audit .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring`
+3. `grep -rn "cast-bound STENTs' world_ent_id\\|each STENT's world_ent_id" .claude/skills/branching-story-health-audit .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring`
+
+## Outcome
+
+Completed: 2026-05-06.
+
+Downstream story skills now share the BSBOOT-003 identity resolver: character mirror STENTs resolve world context through `STENT.character_id` / the CHAR dossier, non-CHAR mirrors use `STENT.world_ent_id`, and story-only STENTs without explicit world anchors are not guessed into world-canon seed nodes. Page-cycle intention refresh and story-fact-promotion character-arc lookup now name `stent_id` as the STINT ownership key.
+
+## Verification Result
+
+1. `grep -rn "world_ent_id" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-page-cycle/references/pre-flight-and-prerequisites.md .claude/skills/storylet-pool-authoring/references/pre-flight-and-prerequisites.md` — completed. Remaining hits distinguish character mirrors from non-CHAR `world_ent_id` mirrors and preserve the `world_ent_id: null` character-mirror rule.
+2. `grep -rn "STINT.*stent_id\\|stent_id.*STINT" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md .claude/skills/story-fact-promotion-to-canon/SKILL.md` — completed. Hits show page-cycle intention refresh and character-arc promotion history keyed by `stent_id`.
+3. `grep -rn "cast-bound STENTs' world_ent_id\\|each STENT's world_ent_id" .claude/skills/branching-story-health-audit .claude/skills/branching-story-page-cycle .claude/skills/storylet-pool-authoring` — completed. No stale unconditional cast-seed phrases remain.
+
+## Deviations
+
+- The drafted stale-anchor command was narrowed because the broad `STENT.world_ent_id` literal is still valid when the prose is distinguishing non-CHAR world mirrors from CHAR-backed character mirrors.
