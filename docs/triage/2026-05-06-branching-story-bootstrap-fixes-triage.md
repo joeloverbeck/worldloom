@@ -22,7 +22,7 @@ Each finding was verified against the current skill's `SKILL.md`, all 10 files u
 | Ticket | Finding | Path |
 |---|---|---|
 | `archive/tickets/BSBOOT-007.md` | Phase 9 gate 2 audit scope too narrow (broaden beyond `applied_event_ops`) | report #4 |
-| `tickets/BSBOOT-008.md` | Phase 9 gate 12 closure root too narrow (root from PG-0001, not just `state_snapshot`) | report #5 |
+| `archive/tickets/BSBOOT-008.md` | Phase 9 gate 12 closure root too narrow (root from PG-0001, not just `state_snapshot`) | report #5 |
 | `tickets/BSBOOT-009.md` | CNSQ ledger doc inconsistencies (make CNSQ creation conditional; allocations conditional) | report #2 |
 | `tickets/BSBOOT-010.md` | SF `visible_to_reader: true` default leaks secrets (default false; add `reader_visibility_basis`) | report #7 |
 | `tickets/BSBOOT-011.md` | Storylet pool sizing not scale-aware (intended_scale unused by Phase 6) | report #8 |

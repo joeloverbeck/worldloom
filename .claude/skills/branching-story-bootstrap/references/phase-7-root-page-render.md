@@ -106,7 +106,7 @@ Phase 9's 12 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (boo
 - `epistemic_class_declared` ↔ gate 8
 - `prose_ledger_consistency` ↔ gate 10
 - `choice_consequence_capacity` ↔ gate 11
-- `recursive_reference_closure` + `state_snapshot_integrity` together ↔ gate 12
+- `recursive_reference_closure` + `state_snapshot_integrity` together ↔ gate 12. `state_snapshot_integrity` records the field-population subset (`current_location`, `entity_status`, `relationships_current`, epistemic-faceted fact lists); `recursive_reference_closure` records the broader PG-0001 graph closure rooted at the page record itself (`state_snapshot`, `storylet_realized`, `applied_event_ops`, `emitted_choices`, and each emitted CHC's effect graph).
 
 **Page-cycle-only keys (3)** record PASS by-construction at bootstrap:
 - `snapshot_replay_equality` (e.g., `"PASS — bootstrap genesis state has no replay precedent; PG-0002 will be the first replay-checked transition"`)

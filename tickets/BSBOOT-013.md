@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — `branching-story-bootstrap/references/phase-8-choice-generation.md` and `references/phase-9-validation-gates.md` only. The `continuation_capacity` block is a CHC-record metadata addition; story-bundle JSON schemas are permissive (`tools/validators/src/schemas/story-choice.schema.json`).
-**Deps**: BSBOOT-008 (gate 12 broadens to PG-0001 closure root, which the new `continuation_capacity` field extends).
+**Deps**: `archive/tickets/BSBOOT-008.md` (gate 12 broadens to PG-0001 closure root, which the new `continuation_capacity` field extends).
 
 ## Problem
 
