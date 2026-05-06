@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — new pre-Phase-10 step + new reference file. The validator is operator-discipline running over in-memory records before Phase 10's HARD-GATE; it does not require new validator code. (A future ticket may upgrade this to a code-level validator under `tools/validators/src/bootstrap-discipline/`; that's out of scope here.)
-**Deps**: archive/tickets/BSBOOT-003.md (relies on the renamed STINT field for the `stent_id` discipline check), archive/tickets/BSBOOT-009.md (relies on the conditional CNSQ discipline so the validator does not require unused records), BSBOOT-010 (relies on the new SF visibility default + basis enum), BSBOOT-013 (relies on the new CHC `continuation_capacity` block).
+**Deps**: archive/tickets/BSBOOT-003.md (relies on the renamed STINT field for the `stent_id` discipline check), archive/tickets/BSBOOT-009.md (relies on the conditional CNSQ discipline so the validator does not require unused records), archive/tickets/BSBOOT-010.md (relies on the new SF visibility default + basis enum), BSBOOT-013 (relies on the new CHC `continuation_capacity` block).
 
 ## Problem
 

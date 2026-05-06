@@ -25,6 +25,7 @@ state_snapshot:
   apparent_facts: [SF-NNNN, ...]
   disputed_facts: [SF-NNNN, ...]
   reader_known_facts: [SF-NNNN, ...]                  # SFs with visible_to_reader: true
+  # reader_known_facts entries carry a positive reader_visibility_basis: shown_in_pg0001, known_to_pov, dramatic_irony, or diegetic_artifact_visible.
   belief_state_by_actor:
     STENT-NNNN: [SF-NNNN, ...]
   rumor_state: [SF-NNNN, ...]

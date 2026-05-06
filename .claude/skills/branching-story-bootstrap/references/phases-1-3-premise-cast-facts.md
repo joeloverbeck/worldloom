@@ -43,6 +43,7 @@ Query world canon for CFs touching cast / location / period (premise-bounded ret
 **Import rules**:
 - Each imported SF carries `derived_from_cf: CF-NNNN`, `canon_relation: canon_consistent`, `epistemic_class` (typically `objective`), `certainty: 1.0`, and `known_by` populated only from cast members whose dossiers indicate they would know.
 - A CF that is canonical-but-secret (e.g., a buried truth) does NOT auto-populate `known_by` — the storyteller must explicitly assign knowledge.
+- Each imported SF defaults `visible_to_reader: false` and `reader_visibility_basis: unrevealed_objective_truth`. Set `visible_to_reader: true` and override the basis (`shown_in_pg0001` | `known_to_pov` | `dramatic_irony` | `diegetic_artifact_visible`) only when the opening prose, POV horizon, or a deliberate dramatic-irony anchor justifies it. Defaulting to false prevents an objective-but-secret fact from accidentally surfacing in `reader_known_facts` at PG-0001.
 
 **What NOT to import**:
 - CFs not relevant to cast / location / period.

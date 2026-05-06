@@ -57,6 +57,11 @@ notes: >
   ...
 ---
 # SF-NNNN — Story-Local Fact
+#
+# Reader visibility defaults to false. Set `visible_to_reader: true` only with
+# a positive `reader_visibility_basis` (one of: shown_in_pg0001, known_to_pov,
+# dramatic_irony, diegetic_artifact_visible). Use
+# `unrevealed_objective_truth` when `visible_to_reader: false`.
 
 id: SF-0001
 story_id: STORY-0001
@@ -75,7 +80,8 @@ certainty: 1.0                           # 0.0..1.0
 known_by: []                             # STENT ids
 believed_by: []                          # for belief / apparent class
 disbelieved_by: []
-visible_to_reader: true
+visible_to_reader: false
+reader_visibility_basis: unrevealed_objective_truth   # shown_in_pg0001 | known_to_pov | dramatic_irony | diegetic_artifact_visible | unrevealed_objective_truth
 
 derived_from_cf: CF-0042                 # null for premise-specific facts
 canon_relation: canon_consistent         # canon_consistent | canon_divergent | canon_unknown | not_applicable
