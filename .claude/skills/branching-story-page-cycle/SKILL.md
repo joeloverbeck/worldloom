@@ -136,12 +136,23 @@ Phase 7        Page render — LLM prompt assembly with content_policy verbatim
                is load-bearing
    |
    v
+Phase 7.5      Visible affordance extraction — parse the rendered page prose
+               working buffer for prose-emphasized actors, objects, locations,
+               exits, visible tensions, and implied questions; map each to
+               state ids or newly-created records from Phase 5 / Phase 7 claim
+               classification; route ungrounded actors/objects/locations/exits
+               back to Phase 7 re-prompt or the existing claim-record path;
+               feed grounded affordances to Phase 8 as memory-only anchors
+   |
+   v
 Phase 8        Choice generation (Amendment B pipeline) — affordance-space
-               collection → salient-affordance shortlist + LLM proposer of 6-10
-               structured CHCs → engine validation → diversification + scoring
+               collection from state_snapshot + Visible Affordance Map →
+               salient-affordance shortlist + LLM proposer of 6-10 structured
+               CHCs → engine validation → diversification + scoring
                (≥3 distinct choice_modes, ≥3 distinct poetic_effects, ≥60% of
                open high-salience OBLs) → surface-label rendering by LLM →
-               write-in slot N+1; every emitted CHC carries choice_contract block
+               write-in slot N+1; every emitted CHC carries choice_contract and
+               continuation_capacity blocks
    |
    v
 Phase 9        Validation gates — 12 gates (see HARD-GATE); each PASS with
@@ -255,11 +266,13 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
 7. **Phase 7 — Page render.** Assemble the LLM prompt with content_policy verbatim FIRST, story kernel, **prose craft contract verbatim** (`references/prose-craft-contract.md`), selected storylet, scene context, recent prose continuity ALONG `branch_path` ONLY (continuity for narrative/world only — instruction explicitly forbids echoing prior phrasings / recurring metaphors / identical anchors verbatim), and `governor_nudge`. Render to a working buffer (NOT disk yet). Run the post-render prose critic against the 7 contract-derived axes (per-mode behavior in `references/phase-7-page-render.md` §Post-Render Prose Critic), then post-render claim classification (already-ledgered / incidental-color / needs-ledger-record / contradiction / mystery-risk) and the fail-fast checks (intensity band, storylet fact_effects, choice contract `forbidden_outcomes`); critic + cross-check + fail-fast share the same 3-re-prompt budget before escalating to the user. Load `references/phase-7-page-render.md`.
 
-8. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries populated `choice_contract` and `continuation_capacity` blocks, with the latter proving a post-choice seed-storylet or runtime-JIT continuation path. Load `references/phase-8-choice-generation.md`.
+8. **Phase 7.5 — Visible Affordance Extraction.** Parse the Phase 7 prose working buffer for visible affordances; map each to existing state ids or newly-created records from Phase 5 / Phase 7 claim classification; route ungrounded actors, objects, locations, or exits back to Phase 7 re-prompt or the existing claim-record path; feed the memory-only Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
 
-9. **Phase 9 — Validation gates.** Run all 12 gates (mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence). Each PASS requires a one-line rationale on the new page's `validation_trace` field; a bare PASS is treated as FAIL. FAIL routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+9. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection from `state_snapshot` plus the Visible Affordance Map → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered, and grounded visible affordances considered as anchors) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries populated `choice_contract` and `continuation_capacity` blocks, with the latter proving a post-choice seed-storylet or runtime-JIT continuation path. Load `references/phase-8-choice-generation.md`.
 
-10. **Phase 10 — HARD-GATE approval.** Per `execution_mode`:
+10. **Phase 9 — Validation gates.** Run all 12 gates (mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence). Each PASS requires a one-line rationale on the new page's `validation_trace` field; a bare PASS is treated as FAIL. FAIL routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+
+11. **Phase 10 — HARD-GATE approval.** Per `execution_mode`:
 
     | Mode | Phase 10 visibility |
     |---|---|
@@ -342,7 +355,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
     When the gate is hidden per `execution_mode`, the engine auto-commits to Phase 11 after Phase 9 records all 12 PASSes. On Phase 9 FAIL the engine surfaces the failure and routes per the responsible-phase column — **the auto-commit posture does NOT mask validation failures**. The Phase 9 gates run in every mode; only the Phase 10 user-approval pause is conditionally lifted.
 
-11. **Phase 11 — Engine submit + markdown writes.** Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
+12. **Phase 11 — Engine submit + markdown writes.** Single patch-engine transaction for story-bundle `_source/*.yaml`, followed by direct markdown writes. File order matters because partial-failure recovery depends on dependency ordering — `INDEX.md` is the LAST direct write so a partial state never appears in the per-bundle index:
 
     1. Assemble the envelope, dry-run validate, sign the approval token, and submit. Five sub-steps:
        - **1a. Assemble** the `mcp__worldloom__submit_patch_plan` envelope with all emitted `_source` records. Per-op kinds:

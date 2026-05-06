@@ -7,6 +7,8 @@ Enumerate `(verb, target, instrument)` tuples from `state_snapshot`:
 - targets: cast_present + objects in scope + locations in scope + secrets known + open OBLs visible to POV.
 - instruments: objects in inventory + secrets known by POV + facts known by POV.
 
+Merge in the Phase 7.5 Visible Affordance Map as an additional anchor source. Each grounded map entry contributes the mapped state id or planned record id plus its prose-emphasis rationale. Rejected or ungrounded map entries never become Phase 8 anchors; they route back to Phase 7 or the existing load-bearing claim-record path before this step proceeds.
+
 Hard filter: drop any tuple that violates a hard precondition (dead char can't speak; lost object can't be used; unknown secret can't be confessed).
 
 Output: candidate affordance set (typically dozens to low hundreds).
@@ -27,6 +29,7 @@ Take top-K (K = 15) affordances. Pass to LLM proposer with prompt:
 [scene context — same as Phase 7]
 [storylet realized this turn — its choice_templates as anchors]
 [governor_nudge]
+[Phase 7.5 Visible Affordance Map — grounded prose-emphasized affordances only]
 [top-K affordances with score rationales]
 
 INSTRUCTION:
@@ -34,7 +37,9 @@ Propose 6-10 candidate choices as STRUCTURED CHC records (operation, actor, targ
 uses_fact, likely_effects, continuation_capacity, choice_mode, poetic_effect). Cover
 a mix of choice_modes and poetic_effects (relaxed / obvious / dilemma / risky_truth /
 sacrifice / seduction / desperation / revelation). Engage at least one open OBL per
-choice when possible. Do not write the user-facing label yet — that happens in step 5.
+choice when possible. Include at least one valid candidate anchored on a grounded
+visible affordance when the rendered prose made one salient and the state permits it.
+Do not write the user-facing label yet — that happens in step 5.
 ```
 
 LLM produces 6-10 candidate structured CHCs.
@@ -63,6 +68,7 @@ Apply diversification to surviving choices:
 - Cover at least 3 distinct `choice_mode` values.
 - Cover at least 3 distinct `poetic_effect` values.
 - Engage at least 60% of currently-open high-salience OBLs across the choice set.
+- If a grounded Visible Affordance Map entry is not engaged by any surviving CHC, prefer a valid CHC anchored on that affordance over a purely storylet-template-driven option, without weakening hard preconditions, `choice_contract`, or `continuation_capacity`.
 
 Final ranked list of 4-6 surviving structured choices.
 
