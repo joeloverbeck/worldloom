@@ -79,7 +79,7 @@ user_approved: true                  # always true on a written report — writt
 
 #### F-01: <one-line title>
 
-- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, bootstrap_discipline_trace_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, choice_continuation_capacity, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
+- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, bootstrap_discipline_trace_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, choice_continuation_capacity, choice_pair_distance, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
 - **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
 - **Pages affected**: <list of PG-NNNN ids>
 - **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
@@ -92,6 +92,8 @@ For `prose_ledger_consistency` findings, include page id, short prose excerpt, m
 For `bootstrap_rule4_sketch_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_sketch_status`, compared THR/OBL ids, whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/malformed/drift issue or an info-only pre-`BSBOOT-007` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
 
 For `bootstrap_discipline_trace_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_discipline_status`, the missing/malformed `discipline_validation_trace` check key(s), whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/incomplete/bare-PASS/malformed issue or an info-only pre-`BSBOOT-015` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
+
+For `choice_pair_distance` findings, include page id, both CHC ids, the same/different axis summary for `operation`, `actor`, `target`, `uses_fact`, `choice_contract.minimum_state_change`, `choice_contract.success_policy`, `choice_mode`, and `poetic_effect`, whether at least one structural axis 1-6 differs, severity rationale, and recommended remediation (`branching-story-page-cycle` re-render / re-derive or manual intervention). Do not propose direct CHC mutation, CHC overwrite, or hand-edited persisted choice repair from the audit.
 
 (repeat per error finding)
 
