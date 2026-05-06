@@ -19,7 +19,7 @@ arguments:
     description: "Comma-separated list of CHAR-NNNN ids drawn from worlds/<world-slug>/characters/INDEX.md. Pre-flight verifies every id exists. At least one CHAR is required; the protagonist must be among them."
     required: true
   - name: intended_scale
-    description: "One of: one_shot | chapter | arc | open_ended. Recorded in STORY_KERNEL.md and used by Phase 6 storylet-pool sizing and Phase 7 prose-length defaults."
+    description: "One of: one_shot | chapter | arc | open_ended. Recorded in STORY_KERNEL.md and used by Phase 6 storylet-pool sizing."
     required: true
   - name: tone_constraints
     description: "Free-form prose hints. Optional."
@@ -35,9 +35,6 @@ arguments:
     required: false
   - name: language_register
     description: "Register hints (formal / colloquial / mixed). Optional."
-    required: false
-  - name: target_page_length
-    description: "Words per rendered page. Default: 600-1200. Optional override."
     required: false
   - name: seed_threads
     description: "User-named active narrative threads to install at bootstrap. Optional — Phase 5 derives threads from premise if absent."

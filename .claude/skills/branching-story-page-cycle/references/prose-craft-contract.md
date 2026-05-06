@@ -46,11 +46,20 @@ A metaphor stock used identically across consecutive pages is a tic, not a motif
 
 **Hard rule: no metaphor token, no specific concrete anchor, and no characteristic phrasing from the prior 1–2 pages may be reused verbatim or near-verbatim.** Voice persists across pages; phrasings rotate. If "the bench wood was grey" appeared last page, find a different sensory anchor this page — the splinter at the edge, the cold of the slat through the trousers, the mark where someone carved initials. If the prior page used "the simulator did not converge" as a metaphor for indecision, this page uses something else, or names the indecision plainly.
 
-## 7. Voice from substrate, not from checklist
+## 7. Voice and modality from substrate, not from checklist
 
 A character's profession, class, formative reading, and regional speech shape *what vocabulary is available* to them. They do NOT dictate which idiom-types must appear each page. A programmer-protagonist may go an entire page without a programming metaphor and still sound like himself — he sounds like himself in word-choice, sentence rhythm, and what he attends to.
 
 **Do not deploy `STORY_KERNEL.language_register` hints as a per-page checklist.** If the kernel says the character draws on programmer-idiom, weightlifting metaphors, and pornographic vocabulary, that is a substrate to draw from selectively — not a list to deploy each page. Deploying all three each page produces tic-language across the bundle.
+
+**The same principle applies to rendering modality.** Action, dialogue, interiority, and sensory anchor are the modalities available to a page; they are NOT a four-item checklist to deploy each page. The selected storylet's beat and the scene's natural shape determine which modalities show up and in what mix:
+
+- A confession or interrogation may be almost entirely dialogue.
+- A perimeter check, a chase, or an extraction may be almost entirely action.
+- A vigil, a wait, or a moment of decision may be almost entirely interiority and sensory anchor with no dialogue at all.
+- A page may legitimately be one modality, two, three, or four — the storylet's beat decides, not a render-time directive.
+
+Forcing all four modalities onto every page produces four-modality boilerplate — the modality-equivalent of language-register tic-deployment. The page renders what the beat requires; what the beat does not require is not added for completeness.
 
 ## 8. Trust the reader; cut the paraphrase
 
@@ -78,6 +87,25 @@ Long compound chains followed by short choppy declaratives is a default cadence.
 
 These constructions are useful sparingly for emphasis. As default cadence they flatten everything into the same beat.
 
+## 11. Length follows content
+
+Page length is not a target. The page is exactly as long as the storylet's beat, the cast's reactions, and the natural end-where-choices-emerge require — no longer, no shorter. There is no words-per-page range to hit, no minimum to clear, no maximum to honor; the prose stops when the beat is complete and the next decision point is naturally available, and not a sentence sooner or later.
+
+Real prose does not pad to fill space and does not truncate to fit a budget. A scene that resolves in two hundred words resolves in two hundred words; a scene that needs a thousand to land its turn lands in a thousand. The author goes in with a plan for what must be present — surroundings, character reactions, the storylet's load-bearing transaction, the moment that opens the next decision — and writes until those elements are realized. Word count does not enter the consideration.
+
+**Anti-patterns to flag as `padding_or_truncation`:**
+
+- Filler sentences with no new information — restated emotional beats, repeated environmental description, summary recapitulation of what just happened on the page.
+- Content-summarizing closers ("she would think about this later", "the night's weight settled in") that exist only to bring the page to a length-appropriate stopping point rather than to a content-appropriate one.
+- Premature exit before the storylet's beat completes or before the next decision point is naturally available — the page ends because it is "long enough" rather than because the moment has arrived.
+- Stretched-out moments — a single gesture or thought elaborated across multiple paragraphs without new information per paragraph — to extend a short page toward a target.
+
+- *Bad (padded close):* "She walked away. The corridor was long and dim, and her footsteps echoed in the silence. She would have time, she knew, to think about all of it later." (The first sentence is the page's actual ending; the rest is filler to reach length.)
+- *Better:* "She walked away."
+
+- *Bad (premature exit):* page ends at a moment that does NOT naturally generate 4–6 distinct choices, because the prose has hit "long enough."
+- *Better:* page continues until the next decision point is naturally available, even if the page is short.
+
 ---
 
 ## Diagnostic Vocabulary
@@ -93,3 +121,4 @@ The post-render prose critic checks for these named pathologies. Each maps to on
 | `bracket_paraphrasing_dialogue` | Italicized or non-italicized analytical paragraph immediately following a dialogue turn or gesture that paraphrases its subtext | 8 |
 | `ledger_jargon_leakage` | Engine vocabulary tokens (`CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `OBL-NNNN`, etc.) appearing in narration, dialogue, or interiority — including hyphenated compounds like "the CAU-2 register" | 9 |
 | `abstract_noun_saturation` | Ratio of nominalizations (`-tion / -ment / -ance / -ness`-suffix nouns) to vigorous action-verbs is high; `was/were/had + noun` constructions cluster | 4, 5 |
+| `padding_or_truncation` | Filler sentences with no new information; content-summarizing closers ("she would think about this later") that exist to hit a length rather than to land a beat; premature exit before the storylet's beat completes or before the next decision point is naturally available; stretched-out moments without new information per paragraph | 11 |

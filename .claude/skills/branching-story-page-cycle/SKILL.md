@@ -30,9 +30,6 @@ arguments:
   - name: pace_hint
     description: "One of: action | sequel | reflection | aftermath. Biases narrative governor weighting (Phase 6) for this turn."
     required: false
-  - name: length_target
-    description: "Words for the rendered prose (default inherited from STORY_KERNEL.target_page_length)."
-    required: false
   - name: execution_mode
     description: "One of: authoring | interactive_runtime | batch_generation. Overrides the story bundle's execution_mode_default. Per-mode behavior governs Phase 10 HARD-GATE visibility, mandatory-critic policy, and auto-write — but NEVER lifts the Phase 4.5 canon-promotion HARD-GATE handoff to story-fact-promotion-to-canon."
     required: false
@@ -193,7 +190,6 @@ Pre-flight aborts if neither or both are provided.
 - `content_intensity_override` — `tame | mature | explicit`; overrides storylet intensity ±1 band filter.
 - `pov_override` — temporarily switch POV character (must be in `cast_present`).
 - `pace_hint` — `action | sequel | reflection | aftermath`; biases Phase 6 governor weighting.
-- `length_target` — words for the rendered prose (default inherited from `STORY_KERNEL.target_page_length`).
 - `execution_mode` — `authoring | interactive_runtime | batch_generation`; overrides bundle's `execution_mode_default`. Per-mode behavior governs Phase 10 HARD-GATE visibility, mandatory-critic policy, and auto-write — but NEVER lifts the Phase 4.5 canon-promotion HARD-GATE handoff.
 
 ### Reads

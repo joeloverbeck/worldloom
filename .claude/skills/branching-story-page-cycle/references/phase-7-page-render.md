@@ -27,19 +27,40 @@ Order matters; content_policy is FIRST so it binds the model before any other in
 [governor_nudge — what kind of beat the story needs now]
 
 INSTRUCTION:
-Render the next page in <length_target> words. Show through action, dialogue, and
-sensory detail. Respect content_intensity. Do not invent facts beyond those in
-state context. Do not resolve any mystery declared in mysteries_in_play[] unless
-the selected storylet explicitly authorizes resolution.
+Render the next page. Length follows content: the page is as long as the
+storylet's beat, the cast's reactions, and the natural end-where-choices-emerge
+require — no padding, no truncation. There is no target word count. Stop when
+the beat is complete and the next decision point is naturally available; do not
+add filler to extend the page, do not truncate to keep it short. (Prose Craft
+Contract Rule 11.)
+
+Render through what happens — what characters do, say, perceive, and attend to.
+Avoid narrating meaning, summarizing reactions, labeling subtext, or naming the
+significance of the moment. Action, dialogue, interiority, and sensory anchor
+are modalities available to the page; the storylet's beat and the scene's
+natural shape decide which appear and in what mix. A page that is mostly one
+modality is legitimate when the beat calls for it; do not deploy all four
+modalities for completeness. (Prose Craft Contract Rule 7.)
+
+Respect content_intensity. Do not invent facts beyond those in state context.
+Do not resolve any mystery declared in mysteries_in_play[] unless the selected
+storylet explicitly authorizes resolution.
 
 End the page at a moment where 4-6 distinct choices for what happens next would
-be natural. The applied event from the user's prior choice is:
-<event summary>. Make this consequence visible.
+be natural. If the selected storylet's beat completes before such a moment is
+naturally available, this is a storylet-shape problem to surface — flag it
+rather than padding the prose to reach an artificial choice point.
+
+The applied event from the user's prior choice is: <event summary>. The page
+occurs in a world where this has happened: characters' actions, words,
+attention, and the situation they now face reflect it. Do not narrate the
+consequence as such; do not name it as a consequence; do not summarize what
+the prior choice has caused. Show how the world is now.
 
 Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
 filter-word saturation, recurring-metaphor recurrence across pages,
 identical-anchor reuse, self-narrating-self patterns, ledger-jargon leakage,
-and bracket-paraphrasing.
+bracket-paraphrasing, and padding-or-truncation.
 ```
 
 LLM produces prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 inside the atomic transaction).
@@ -65,6 +86,7 @@ prose_critic_verdict:
   bracket_paraphrasing_dialogue: clean | found                # cite paragraphs
   ledger_jargon_leakage: clean | found                        # cite tokens
   abstract_noun_saturation: clean | minor | moderate | severe
+  padding_or_truncation: clean | minor | moderate | severe    # cite up to 5 instances
   overall_verdict: PASS | SOFT_FAIL | HARD_FAIL
 ```
 
@@ -80,11 +102,11 @@ prose_critic_verdict:
 
 | Mode | Critic axes run |
 |---|---|
-| `authoring` (default) | All 7 axes |
-| `interactive_runtime` | `ledger_jargon_leakage` (HARD-FAIL surface) + `recurring_metaphor_across_pages` + `identical_anchor_recurrence` only |
-| `batch_generation` | All 7 axes at configured checkpoints only; default off |
+| `authoring` (default) | All 8 axes |
+| `interactive_runtime` | `ledger_jargon_leakage` (HARD-FAIL surface) + `recurring_metaphor_across_pages` + `identical_anchor_recurrence` only (the new `padding_or_truncation` axis is excluded from runtime mode for cost discipline; runtime trusts the rendering prompt's Rule 11 instruction without an extra critic pass) |
+| `batch_generation` | All 8 axes at configured checkpoints only; default off |
 
-The critic shares the existing 3-re-prompt budget with the canon-safety cross-check and the fail-fast checks below — it does NOT introduce a new budget. The contract's rule numbering (1-10) is the citation index used in re-prompts and verdicts.
+The critic shares the existing 3-re-prompt budget with the canon-safety cross-check and the fail-fast checks below — it does NOT introduce a new budget. The contract's rule numbering (1-11) is the citation index used in re-prompts and verdicts.
 
 ## Cross-Check (engine + post-render claim classification)
 

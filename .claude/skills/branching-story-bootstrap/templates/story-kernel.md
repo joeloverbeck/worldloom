@@ -18,7 +18,6 @@ intended_scale: one_shot                 # one_shot | chapter | arc | open_ended
 pov_mode: single                         # single | rotating | omniscient
 content_intensity_baseline: mature       # tame | mature | explicit
 execution_mode_default: authoring        # authoring | interactive_runtime | batch_generation
-target_page_length: "600-1200 words"
 
 cast_bind_list:
   - char_id: CHAR-NNNN

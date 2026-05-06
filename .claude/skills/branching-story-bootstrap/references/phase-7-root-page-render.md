@@ -35,17 +35,34 @@ The order matters; content_policy is FIRST so it binds the model before any othe
 [cast bound — for each STENT, name + role + STINT summary]
 [state context — facts visible to POV at story start, open obligations]
 INSTRUCTION:
-Render the opening page. Show through action, dialogue, and sensory detail.
+Render the opening page. Length follows content: the page is as long as the
+selected storylet's beat, the cast's reactions, and the natural
+end-where-choices-emerge require — no padding, no truncation. There is no
+target word count. Stop when the beat is complete and the next decision point
+is naturally available; do not add filler to extend the page, do not truncate
+to keep it short. (Prose Craft Contract Rule 11.)
+
+Render through what happens — what characters do, say, perceive, and attend
+to. Avoid narrating meaning, summarizing reactions, labeling subtext, or
+naming the significance of the moment. Action, dialogue, interiority, and
+sensory anchor are modalities available to the page; the storylet's beat and
+the scene's natural shape decide which appear and in what mix. A page that is
+mostly one modality is legitimate when the beat calls for it; do not deploy
+all four modalities for completeness. (Prose Craft Contract Rule 7.)
+
 Respect content_intensity_baseline. Do not invent facts beyond state context.
 Do not resolve any mystery declared in mysteries_in_play[].
-Length target: <target_page_length>.
+
 End at a moment where 4-6 distinct choices for what happens next would be
-natural.
+natural. If the selected storylet's beat completes before such a moment is
+naturally available, this is a storylet-shape problem to surface — flag it
+rather than padding the prose to reach an artificial choice point.
 
 Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
 filter-word saturation, recurring-metaphor recurrence (against any prior pages
 once the runtime page-cycle takes over), identical-anchor reuse, self-
-narrating-self patterns, ledger-jargon leakage, and bracket-paraphrasing.
+narrating-self patterns, ledger-jargon leakage, bracket-paraphrasing, and
+padding-or-truncation.
 ```
 
 LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11 inside the atomic transaction).

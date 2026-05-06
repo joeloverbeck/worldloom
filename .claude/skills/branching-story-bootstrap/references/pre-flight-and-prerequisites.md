@@ -35,7 +35,6 @@ Run before Phase 1; abort if any precondition fails.
 
 - Load `docs/FOUNDATIONS.md` into working context.
 - Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`); resolve `worlds/<world-slug>/`. Abort if missing — instruct user to run `create-base-world` first.
-- Resolve `target_page_length` for Phase 7 prose render: use the optional `--target_page_length` CLI argument (per the skill's frontmatter arguments doc — default `600-1200 words` if not supplied); a premise-stated length contract may also override at Phase 1 normalization. Recorded in STORY_KERNEL.md frontmatter at Phase 11 step 2.
 - Allocate next `STORY-NNN`:
   - **Primary path**: `mcp__worldloom__allocate_next_id(world_slug, 'STORY')`.
   - Defensive recovery: if the allocator returns `Unsupported id_class 'STORY'` from an older MCP server, fall back to scanning `worlds/<world-slug>/stories/*/STORY_KERNEL.md` for the highest existing `story_id` and incrementing.
