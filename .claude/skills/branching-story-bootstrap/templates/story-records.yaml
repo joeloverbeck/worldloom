@@ -266,7 +266,7 @@ forked_from_write_in_hash: null
 
 branch_path: [PG-0001]
 status: active                           # active | terminal | archived | corrupt | contradicted_by_promoted_canon
-canon_revision: ""                       # CH-id visible at branch root; null if world has no CH yet
+canon_revision: null                     # CH-id visible at branch root; null if world has no CH yet
 
 created_at_page: PG-0001
 created_at: <iso8601>
@@ -293,7 +293,7 @@ branch_terminal: false
 terminal_reason: null
 
 state_snapshot:
-  canon_revision: ""                     # CH-id; null if world has no CH yet
+  canon_revision: null                   # CH-id; null if world has no CH yet
   objective_facts: []                    # SF ids with epistemic_class: objective
   apparent_facts: []                     # SF ids with epistemic_class: apparent
   disputed_facts: []                     # SF ids with epistemic_class: disputed
