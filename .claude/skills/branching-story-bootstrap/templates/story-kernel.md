@@ -78,6 +78,18 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_11_choice_consequence_capacity: "PASS — <one-line rationale>"
   gate_12_state_snapshot_completeness: "PASS — <one-line rationale>"
 
+discipline_validation_trace:             # populated by Phase 9.5 — every discipline check one-line PASS rationale
+  discipline_check_01_choice_contract_completeness: "PASS — <one-line rationale>"
+  discipline_check_02_stent_role_in_story_enum: "PASS — <one-line rationale>"
+  discipline_check_03_stint_structural_completeness: "PASS — <one-line rationale>"
+  discipline_check_04_thr_type_enum: "PASS — <one-line rationale>"
+  discipline_check_05_srel_relation_type_populated: "PASS — <one-line rationale>"
+  discipline_check_06_sf_reader_visibility_basis: "PASS — <one-line rationale>"
+  discipline_check_07_br0001_root_invariants: "PASS — <one-line rationale>"
+  discipline_check_08_obl_coverage_cache_schema: "PASS — <one-line rationale>"
+  discipline_check_09_se0001_genesis_discipline: "PASS — <one-line rationale>"
+  discipline_check_10_pg0001_state_snapshot_field_keys: "PASS — <one-line rationale>"
+
 storylet_pool_summary:                   # populated by Phase 6
   # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
   total: 20
@@ -183,3 +195,12 @@ NO RESTRICTIONS: ...
 2. **Invariant compatibility (gate 2)**: PASS — <rationale>
 3. ...
 12. **State_snapshot completeness (gate 12)**: PASS — <rationale>
+
+## Discipline Validation Trace
+
+<Same content as frontmatter `discipline_validation_trace`, restated for human readers as a numbered list of Phase 9.5 discipline-check names + PASS rationales.>
+
+1. **Choice contract completeness (discipline check 1)**: PASS — <rationale>
+2. **STENT role_in_story enum (discipline check 2)**: PASS — <rationale>
+3. ...
+10. **PG-0001 state_snapshot field-key completeness (discipline check 10)**: PASS — <rationale>

@@ -34,7 +34,7 @@ Each finding was verified against the current skill's `SKILL.md`, all 10 files u
 |---|---|---|
 | `archive/tickets/BSBOOT-013.md` | Strengthen gate 11 with simulated post-choice continuation validation | report #13 |
 | `archive/tickets/BSBOOT-014.md` | Phase 7.5 visible-affordance extraction (parse rendered prose, feed to Phase 8) | report #15 |
-| `tickets/BSBOOT-015.md` | Bootstrap-specific strict validator (catch missing soft-required fields) | report #16 |
+| `archive/tickets/BSBOOT-015.md` | Bootstrap-specific strict validator (catch missing soft-required fields) | report #16 |
 | `tickets/BSBOOT-016.md` | CHC semantic-distance gate (each pair differs on ≥2 axes) | report #14 |
 | `tickets/BSBOOT-017.md` | Tighten Phase 11 atomicity wording ("staged commit", not "single transaction") | report #1 |
 

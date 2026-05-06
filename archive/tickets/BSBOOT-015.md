@@ -1,6 +1,6 @@
 # BSBOOT-015: Bootstrap-specific strict validator (pre-Phase-10 schema discipline)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — new pre-Phase-10 step + new reference file. The validator is operator-discipline running over in-memory records before Phase 10's HARD-GATE; it does not require new validator code. (A future ticket may upgrade this to a code-level validator under `tools/validators/src/bootstrap-discipline/`; that's out of scope here.)
@@ -43,6 +43,8 @@ Each of these failing in production means a runtime page-cycle that loads a corr
 6. Schema-extension classification: this is a new bootstrap-time validation step (Phase 9.5). Records and schemas are unchanged; only the workflow gets a new check.
 7. Naming: "Phase 9.5" is consistent with BSBOOT-014's "Phase 7.5" precedent (insert between an existing pair without renumbering).
 8. Worked check: a bootstrap that produces a CHC with empty `forbidden_outcomes` would currently pass Phase 9 (no gate names this field) but fail at runtime when the page-cycle tries to validate the choice's outcome band. Phase 9.5 catches it pre-Phase-10.
+9. Sibling-scope check: `tickets/BSBOOT-016.md` names Phase 9.5 as a possible future code-level enforcement site for CHC pair-distance, but it owns a Phase 8 diversification rule and remains active. BSBOOT-015 does not absorb that rule; Phase 9.5 here covers the 10 soft-required-field checks listed below.
+10. Same-seam correction: because Phase 9.5 must pass before Phase 10 approval, the Phase 10 deliverable summary should surface the Phase 9.5 verdict alongside the existing firewall verdicts. This stays inside `SKILL.md` and does not add a new file.
 
 ## Architecture Check
 
@@ -58,70 +60,19 @@ Each of these failing in production means a runtime page-cycle that loads a corr
 4. The HARD-GATE block at SKILL.md top references Phase 9.5 in addition to Phase 9 → codebase grep-proof.
 5. Each soft-required check in the validator routes failures to the correct upstream phase → manual review of the route table.
 
-## What to Change
+## Landed Changes
 
 ### 1. NEW: `.claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md`
 
-Create with the following content:
-
-```
-# Phase 9.5: Bootstrap Discipline Validator
-
-Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the FOUNDATIONS-anchored gate set. Phase 9 gates 1-12 are FOUNDATIONS rules; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
-
-Each check records PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. A bare "PASS" is treated as FAIL per the FOUNDATIONS skill discipline. Any FAIL halts the bootstrap and routes to the responsible upstream phase.
-
----
-
-## Discipline checks
-
-| # | Check | Surface | Routes to on FAIL |
-|---|---|---|---|
-| 1 | CHC.choice_contract completeness | Every CHC has non-empty `user_intent`, `guaranteed_action`, `success_policy ∈ {guaranteed, attempted, uncertain, opposed}`, `allowed_outcome_band` non-empty, `forbidden_outcomes` non-empty, `minimum_state_change` non-empty | Phase 8 |
-| 2 | STENT.role_in_story enum | Every STENT carries `role_in_story ∈ {protagonist, major, supporting, antagonist, foil}` | Phase 2 |
-| 3 | STINT structural completeness (post-BSBOOT-003) | Every STINT carries `stent_id` (story entity it drives), `world_character_id` (or null for story-only). Protagonists + majors carry at least one of `goals`, `fears`, `beliefs` non-empty (Phase 2 halt rule restated) | Phase 2 |
-| 4 | THR.type enum | Every THR carries `type ∈ {mystery, relationship, threat, quest, theme, survival}` | Phase 5 |
-| 5 | SREL.relation_type populated | Every SREL carries non-empty `relation_type` | Phase 5 (or Phase 2 if relation pre-exists in cast tensions) |
-| 6 | SF.reader_visibility_basis (post-BSBOOT-010) | Every SF with `visible_to_reader: true` carries `reader_visibility_basis ∈ {shown_in_pg0001, known_to_pov, dramatic_irony, diegetic_artifact_visible}` (NOT `unrevealed_objective_truth`, which pairs with `visible_to_reader: false`) | Phase 3 |
-| 7 | BR-0001 root invariants | `id == 'BR-0001'`, `root_page_id == 'PG-0001'`, `current_leaf_page_id == 'PG-0001'`, `parent_page_id == null` (on PG-0001), `branch_path == ['PG-0001']`, every `forked_from_*` field is null | Phase 7 |
-| 8 | OBL.coverage_cache schema (advisory but populated) | Every OBL carries a `coverage_cache` block with `compatible_storylets[]`, `checked_at_page`, `checked_at_storylet_pool_hash` — values may be empty/null at bootstrap, but the keys MUST exist | Phase 5 |
-| 9 | SE-0001 genesis discipline | `id == 'SE-0001'`, `actor: system`, `action: bootstrap`, `ops: []`, `state_hash_before: null`, `state_hash_after == PG-0001.state_hash` | Phase 7 |
-| 10 | PG-0001 state_snapshot field-key completeness | All keys named in `templates/story-records.yaml:294-316` are present on `PG-0001.state_snapshot` (values may be empty arrays / empty maps; the keys MUST exist for the runtime page-cycle's snapshot-replay equality check on PG-0002) | Phase 7 |
-
----
-
-## Workflow
-
-Phase 9.5 runs after every Phase 9 gate has recorded PASS and BEFORE Phase 10's deliverable summary. If any check FAILs, halt the bootstrap, surface the failing check + the routed phase, and let the operator re-derive. Up to 1 re-derive cycle per check; a second failure escalates to user with the specific record(s) failing.
-
-`STORY_KERNEL.md.discipline_validation_trace` is a sibling block to `validation_trace` (Phase 9). Each entry: `discipline_check_<NN>_<name>: PASS — <rationale>`.
-
----
-
-## Composition with Phase 9
-
-Phase 9.5 does NOT duplicate Phase 9 work. The 12 Phase 9 gates are FOUNDATIONS-anchored (Rules 1, 4, 5, 7); Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
-```
+Created the Phase 9.5 reference. It defines 10 discipline checks, each route-to-fix phase, PASS-with-rationale semantics, the post-Phase-9 / pre-Phase-10 ordering, and the `STORY_KERNEL.md.discipline_validation_trace` output surface.
 
 ### 2. `.claude/skills/branching-story-bootstrap/SKILL.md`
 
-- Process Flow diagram (lines 64-165): insert Phase 9.5 between Phase 9 and Phase 10:
-
-  ```
-  Phase 9.5: Bootstrap Discipline       (10 soft-required-field checks
-            Validator                    outside the FOUNDATIONS-anchored
-                                         12-gate set; PASS-with-rationale
-                                         into discipline_validation_trace;
-                                         FAIL routes to responsible phase)
-  ```
-
-- Procedure list: insert a new step after Phase 9, "9.5. **Phase 9.5: Bootstrap Discipline Validator.** Run all 10 discipline checks; each must record PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. Any FAIL halts and routes to the responsible upstream phase. Load `references/phase-9-5-bootstrap-discipline-validator.md`."
-
-- HARD-GATE block at top of SKILL.md: extend condition (c) — currently lists "Phase 9 Validation Gates record PASS … for every gate"; add ", AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale".
+Added Phase 9.5 to the HARD-GATE condition, process-flow diagram, procedure list, and Phase 10 deliverable summary. Phase 10 approval now surfaces the Phase 9.5 bootstrap-discipline verdict alongside the existing firewall verdicts.
 
 ### 3. `.claude/skills/branching-story-bootstrap/templates/story-kernel.md`
 
-- Add a new frontmatter block `discipline_validation_trace` after `validation_trace` (line 56-69), with one entry per check (e.g., `discipline_check_01_choice_contract_completeness: "PASS — <rationale>"`, …).
+Added a new `discipline_validation_trace` frontmatter block after `validation_trace`, with one key per Phase 9.5 check, plus a matching body section for the human-readable PASS rationales.
 
 ## Files to Touch
 
@@ -159,6 +110,31 @@ Phase 9.5 does NOT duplicate Phase 9 work. The 12 Phase 9 gates are FOUNDATIONS-
 
 ### Commands
 
-1. `grep -nE "Phase 9\.5" .claude/skills/branching-story-bootstrap/` — surfaces every reference.
-2. `grep -nE "discipline_check_" .claude/skills/branching-story-bootstrap/templates/story-kernel.md` — confirms the new frontmatter keys.
-3. (Manual) walk through a hypothetical bootstrap with a CHC missing `forbidden_outcomes` and verify Phase 9.5 check 1 fires the Phase 8 re-derive.
+1. `test -f .claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md`
+2. `grep -nE "Phase 9\\.5|discipline_validation_trace|Bootstrap Discipline" .claude/skills/branching-story-bootstrap/SKILL.md`
+3. `grep -nE "discipline_validation_trace" .claude/skills/branching-story-bootstrap/templates/story-kernel.md`
+4. `grep -nE "discipline_check_" .claude/skills/branching-story-bootstrap/templates/story-kernel.md`
+5. `grep -nE "Routes to on FAIL|Phase 8|Phase 2|Phase 5|Phase 3|Phase 7" .claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md`
+6. (Manual) walk through a hypothetical bootstrap with a CHC missing `forbidden_outcomes` and verify Phase 9.5 check 1 fires the Phase 8 re-derive.
+
+## Outcome
+
+Completed: 2026-05-06.
+
+Phase 9.5 now exists as bootstrap-only operator discipline. The bootstrap skill requires the 10 discipline checks before Phase 10 approval, the Phase 10 summary exposes the verdict, and the story kernel template records the checks in a trace distinct from the FOUNDATIONS-anchored Phase 9 `validation_trace`.
+
+## Verification Result
+
+1. `test -f .claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md` — passed; the new reference file exists.
+2. `grep -nE "Phase 9\\.5|discipline_validation_trace|Bootstrap Discipline" .claude/skills/branching-story-bootstrap/SKILL.md` — passed; matched the HARD-GATE condition, process-flow entry, procedure-list step, and Phase 10 deliverable-summary verdict.
+3. `grep -nE "discipline_validation_trace" .claude/skills/branching-story-bootstrap/templates/story-kernel.md` — passed; matched the new frontmatter block and body-section reference.
+4. `grep -nE "discipline_check_" .claude/skills/branching-story-bootstrap/templates/story-kernel.md` — passed; returned all 10 discipline-check frontmatter keys.
+5. `grep -nE "^\\| [0-9]+ \\|" .claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md` — passed; returned the 10 discipline-check table rows.
+6. `grep -nE "Routes to on FAIL|Phase 8|Phase 2|Phase 5|Phase 3|Phase 7" .claude/skills/branching-story-bootstrap/references/phase-9-5-bootstrap-discipline-validator.md` — passed; every row has a routed-to upstream phase.
+7. Manual walkthrough — passed. A CHC with empty `forbidden_outcomes` fails discipline check 1 and routes back to Phase 8 before Phase 10 approval.
+
+## Deviations
+
+- Reassessment added a same-seam SKILL.md update to the Phase 10 deliverable summary so the newly required Phase 9.5 verdict is visible at the approval checkpoint.
+- The new Phase 9.5 reference avoids a brittle line-number citation for the PG-0001 `state_snapshot` fields and instead points to the live `templates/story-records.yaml` PG-0001 `state_snapshot` block.
+- `tickets/BSBOOT-016.md` remains active and unabsorbed. Its CHC pair-distance rule is Phase 8 diversification work, not part of BSBOOT-015's 10 discipline checks.

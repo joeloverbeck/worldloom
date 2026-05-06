@@ -58,7 +58,7 @@ arguments:
 Bootstraps a new branching story bundle inside an existing worldloom world from a user premise + a selected cast + tone and content constraints, producing a fully initialized story directory with causal-engine ledgers, a rendered root page (PG-0001), 4-6 initial choices, and a scale-aware seed storylet pool.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for every gate (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, storylet diversity, prose ledger consistency, choice consequence-capacity, state_snapshot completeness, recursive reference closure); (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
+Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for every gate (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, storylet diversity, prose ledger consistency, choice consequence-capacity, state_snapshot completeness, recursive reference closure), AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale; (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
 </HARD-GATE>
 
 ## Process Flow
@@ -150,6 +150,13 @@ Phase 9: Validation Gates             (12 gates — see HARD-GATE; each PASS
                                        to responsible phase)
       |
       v
+Phase 9.5: Bootstrap Discipline       (10 soft-required-field checks
+           Validator                    outside the FOUNDATIONS-anchored
+                                        12-gate set; PASS-with-rationale
+                                        into discipline_validation_trace;
+                                        FAIL routes to responsible phase)
+      |
+      v
 Phase 10: HARD-GATE Approval          (deliverable summary: designing
                                        principle + cast/threads/
                                        mysteries-in-play + opening prose
@@ -237,6 +244,7 @@ Inlined in this skill's templates and backed by story-bundle patch-engine ops / 
 7. **Phase 7.5: Visible Affordance Extraction.** Parse the Phase 7 prose buffer for visible affordances; map each to a state id; route ungrounded affordances back to Phase 7 as re-prompt triggers; feed the Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
 8. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline) with `PG-0001.state_snapshot`, the selected root storylet's `choice_templates`, and the Phase 7.5 Visible Affordance Map as anchors; emit 4-6 CHC records satisfying the diversification + consequence-capacity contract; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
 9. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 12 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+9.5. **Phase 9.5: Bootstrap Discipline Validator.** Run all 10 discipline checks; each must record PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. Any FAIL halts and routes to the responsible upstream phase. Load `references/phase-9-5-bootstrap-discipline-validator.md`.
 10. **Phase 10: HARD-GATE Approval.** Inline below.
 11. **Phase 11: Commit / Engine Submit.** Inline below.
 
@@ -268,6 +276,7 @@ FIREWALL VERDICTS:
 - Mystery firewall (gate 1): PASS — <rationale>
 - Invariant compatibility (gate 2): PASS — <rationale>
 - Content policy (gate 3): embedded
+- Bootstrap discipline (Phase 9.5): PASS — <rationale>
 - Branch isolation (gate 12): structural
 
 TARGET WRITE PATHS:

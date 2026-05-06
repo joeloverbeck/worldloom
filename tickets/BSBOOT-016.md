@@ -94,7 +94,7 @@ The diversification rule should require each pair of CHCs to differ on **structu
 ## Out of Scope
 
 - Editing `branching-story-page-cycle` Phase 8. The runtime page-cycle's diversification discipline is its own concern; if the rule should propagate, that's a separate ticket.
-- Code-level validator. The pair-distance computation is mechanical but does not require code; operator-discipline at Phase 8 is sufficient. A future Phase 9.5 (BSBOOT-015) check could enforce it programmatically.
+- Code-level validator. The pair-distance computation is mechanical but does not require code; operator-discipline at Phase 8 is sufficient. BSBOOT-015 completed Phase 9.5 as a 10-check bootstrap-discipline validator and did not absorb this pair-distance rule; a future code-level enforcement ticket would need to own that separately.
 - Adjusting Phase 9 gate 9. Gate 9 governs storylet shape diversity; CHC operational diversity is a Phase 8 internal concern that, when violated, surfaces at Phase 8's halt-and-re-derive point — not at Phase 9.
 
 ## Acceptance Criteria
