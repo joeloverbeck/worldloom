@@ -104,7 +104,8 @@ Phase 5        State mutation — apply structured ops; append-only supersession
                (logical_id + supersedes); compute next_snapshot per closed
                op_type enum; persist required_aftermath as CNSQ unless absorbed
                by newly-opened OBL; verify branch-isolation invariant
-               (created_at_page == this_PG on every emergent record)
+               (created_at_page == this_PG on every non-PG emergent
+               record; PG id is the page's branch anchor)
    |
    v
 Phase 6        Narrative governor recompute + nudge — narrative_health metrics
@@ -236,7 +237,7 @@ This skill never writes `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-
 
 ### ID Conventions — branch-isolation invariant
 
-All emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / PG / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. Author-pool storylets are the one exception: they retain `created_at_page: null` and are globally visible (set by storylet-pool-authoring at authoring time in seed/focus modes).
+All non-PG emergent story-local records (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC / BR-on-fork) carry `created_at_page: PG-NNNN` — the new page produced this turn. PG records are the page, so the PG record's own `id` is its branch anchor and must appear in `branch_path`. Author-pool storylets are the other exception: they retain `created_at_page: null` and are globally visible (set by storylet-pool-authoring at authoring time in seed/focus modes).
 
 The branch-isolation invariant is structurally enforced by this field combined with Phase 9's recursive reference closure validation gate.
 
@@ -250,7 +251,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
 4. **Phases 4 + 4.5 — Storylet selection + mystery resolution authority.** Hard-filter the storylet pool, salience-score, weighted-pick from top-K (NEVER always-take-top). JIT-expand via `storylet-pool-authoring mode=jit` only when no candidate scores above threshold and consequence-capacity required JIT. **Inline-authoring of a JIT SLT in this skill's patch envelope is structurally invalid — delegation to `storylet-pool-authoring mode=jit` is required, not optional**: (i) `storylet-pool-authoring`'s Phase 3 inlines the closed predicate DSL grammar from `storylet-pool-authoring/templates/predicate-dsl.md` verbatim into the LLM prompt, the operator's safety net against invented predicates that the runtime `storylet_predicate_dsl_parsability` validator would otherwise reject at Phase 11 submit time; (ii) `storylet-pool-authoring`'s Phase 4 9-gate set (mystery firewall, resolution-authority declaration, predicate parsability, branch-contamination, etc.) runs over the candidate, and re-running these gates inline duplicates validator logic and risks divergence; (iii) `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped` are set authoritatively by `storylet-pool-authoring` at JIT-emission time, not negotiated by the caller. An operator who shortcuts to inline authoring (because spawning a sub-routine feels heavier than authoring a single SLT) will hit the validator at Phase 11 with `unknown pred '<invented-name>'` errors and force a re-validate cycle; the delegation cost is the safety net's price. **Phase 4.5 `canon_candidate` route is a separate, never-elided HARD-GATE handoff to `story-fact-promotion-to-canon` regardless of `execution_mode`.** Load `references/phase-4-storylet-and-mystery-authority.md`.
 
-5. **Phase 5 — State mutation.** Apply structured ops via append-only supersession (`logical_id` + `supersedes`); compute `next_snapshot` per the closed `op_type` enum; persist each `required_aftermath` item as a CNSQ-NNNN unless absorbed by a newly-opened OBL; verify the branch-isolation invariant (`created_at_page == this_PG` on every emergent record). Load `references/phase-5-state-mutation.md`.
+5. **Phase 5 — State mutation.** Apply structured ops via append-only supersession (`logical_id` + `supersedes`); compute `next_snapshot` per the closed `op_type` enum; persist each `required_aftermath` item as a CNSQ-NNNN unless absorbed by a newly-opened OBL; verify the branch-isolation invariant (`created_at_page == this_PG` on every non-PG emergent record; PG records are authorized by their own id in `branch_path`). Load `references/phase-5-state-mutation.md`.
 
 6. **Phases 6 + 6.5 — Narrative governor recompute + closure readiness.** Recompute narrative_health (open_obligation_count, high_salience_unpaid_count, contradiction_risk, causal_connectivity, motivation_coverage, threat_pressure, consequence_density, reflection_density, novelty, tension, agency_score, flagged_for_audit). Generate `governor_nudge` (homeostat, never act-spine). Detect state-derived closure readiness; widen — never force — Phase 8's choice set when ready. Load `references/phase-6-governor-and-closure.md`.
 

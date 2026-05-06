@@ -77,6 +77,8 @@ validation_trace:                                    # Phase 9 gates 1-12 with o
 created_at: <iso8601>
 ```
 
+Page records do not carry `created_at_page`. The page record's own PG id is its branch anchor, and recursive reference closure authorizes PG references by checking that the referenced PG id appears in `branch_path`.
+
 ## Story Event Record (SE-NNNN)
 
 The skill's replay-equality contract is `parent.snapshot + applied_event_ops == this_page.snapshot`. For replay to be computable and auditable, applied_event_ops must be **structured**, not opaque payloads. The page record cites the event by ID; the event owns the structured ops.

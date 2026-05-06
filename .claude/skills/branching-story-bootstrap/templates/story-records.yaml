@@ -7,9 +7,11 @@
 # Conventions:
 #   - All ids are story-scoped (e.g. STENT-0001 in story A and story B do not collide).
 #   - All record schemas declare `story_id` so a record can be traced to its bundle.
-#   - All emergent records carry `created_at_page` (a PG-id at which the record
-#     entered branch state). Author-pool storylets are the lone exception:
-#     `created_at_page: null` marks them globally legal across all branches.
+#   - All non-PG branch-scoped emergent records carry `created_at_page` (a PG-id
+#     at which the record entered branch state). PG records are pages; their own
+#     `id` is the branch anchor and must appear in `branch_path`. Author-pool
+#     storylets are the other exception: `created_at_page: null` marks them
+#     globally legal across all branches.
 #   - All `*_id` lists are bare ids (e.g. `[STENT-0001, STENT-0003]`) — no
 #     prose mixed in.
 #
