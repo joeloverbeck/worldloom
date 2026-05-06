@@ -237,30 +237,7 @@ Use `references/verification-closeout.md` for detailed proof-narrowing rules, in
 
 For package/tool proof details, use `references/package-tooling.md`: package roots, build/test scripts, local dependency freshness, public export checks, ignored artifact snapshots, same-package docs/examples, and direct-MCP substitution rules all live there.
 
-In Codex, if a package or CLI proof fails with sandbox-looking child-process errors such as `EPERM` from spawning the built CLI, `git`, `node`, or another subprocess, treat the first failure as a possible environment restriction rather than immediate code evidence. If the failing command is only a wrapper/probe that spawns the actual CLI, first consider decomposing the proof into setup plus direct CLI invocation from the correct temp or package root when that preserves the same public proof boundary. If the direct invocation still hits sandbox restrictions, rerun the same command with the required escalation. Record the original sandbox failure and the successful/failed substitute or escalated result in closeout so verification history is truthful.
-
-For precondition failure, unsupported-mode, or rejection-path tickets, prove not only the exit code/message but also that the command fails before creating or mutating derived artifacts, indexes, caches, or other side-effect surfaces unless the ticket explicitly owns that mutation.
-
-Worldloom verification surfaces usually include:
-
-- codebase grep-proof
-- schema validation
-- skill dry-run
-- targeted tool command
-- manual review of generated output
-- FOUNDATIONS alignment check
-
-Pick the surface that actually proves the owned invariant. A command that merely touches the area does not count as proof.
-
-For tool/index/schema tickets, package-local readonly DB queries and inline `node -e` probes count as `targeted tool command` proof when they directly assert the owned invariant against the real artifact or a truthful temp-copy rebuild.
-
-For `world-index` / index-backed proof, apply the focused checks in `references/world-index.md`.
-
-For compiled TS packages, opaque `node --test` lanes, and transport-client noise, apply the narrowing guidance in `references/verification-closeout.md` instead of expanding the acceptance boundary blindly.
-
-If acceptance names a CLI command but the implementation lands in a shared handler or library path, prove the CLI surface intentionally. Either add/run a focused CLI assertion for the new success or failure mode, or rewrite the ticket acceptance to state the truthful proof boundary: handler proof plus existing CLI-delegation coverage.
-
-When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
+Use the proof surface that actually proves the owned invariant. A command that merely touches the area does not count as proof, and any proof-discovered same-seam fallout must be reassessed and patched into the active ticket before the next source edit.
 
 ### 6. Close out the ticket honestly
 

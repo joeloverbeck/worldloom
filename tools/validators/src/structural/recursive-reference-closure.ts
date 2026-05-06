@@ -47,7 +47,7 @@ export const recursiveReferenceClosure: Validator = {
         }
 
         const parsedTarget = asPlainRecord(target.parsed);
-        const createdAtPage = createdAtPageFor(parsedTarget);
+        const createdAtPage = referenceBranchPageFor(target, parsedTarget);
         if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath)) {
           verdicts.push(branchLeak(page, current, target, createdAtPage));
         }
@@ -165,12 +165,27 @@ function createdAtPageFor(record: Record<string, unknown>): string | null | unde
   return undefined;
 }
 
+function referenceBranchPageFor(target: IndexedRecord, record: Record<string, unknown>): string | null | undefined {
+  const createdAtPage = createdAtPageFor(record);
+  if (createdAtPage !== undefined) {
+    return createdAtPage;
+  }
+  if (target.node_type === "obligation_record") {
+    return stringValue(record.introduced_at_page);
+  }
+  return undefined;
+}
+
 function isAllowedReference(
   target: IndexedRecord,
   parsed: Record<string, unknown>,
   createdAtPage: string | null | undefined,
   branchPath: ReadonlySet<string>
 ): boolean {
+  if (target.node_type === "page_record") {
+    const pageIdValue = stringValue(parsed.id);
+    return pageIdValue !== undefined && branchPath.has(pageIdValue);
+  }
   if (createdAtPage === null) {
     return target.node_type === "storylet_record" && asPlainRecord(parsed.visibility).scope === "global_author_pool";
   }
@@ -198,20 +213,27 @@ function branchLeak(
   target: IndexedRecord,
   createdAtPage: string | null | undefined
 ): Verdict {
+  const isPageTarget = target.node_type === "page_record";
+  const reportedCreatedAtPage = isPageTarget
+    ? (stringValue(asPlainRecord(target.parsed).id) ?? createdAtPage)
+    : createdAtPage;
+
   return {
     validator: "recursive_reference_closure",
     severity: "fail",
     code: "recursive_reference_closure.branch_leak",
-    message: `${pageId(page)} reaches ${reference.id} via ${reference.path} whose created_at_page ${formatCreatedAtPage(createdAtPage)} is outside this page's branch_path`,
+    message: `${pageId(page)} reaches ${reference.id} via ${reference.path} whose created_at_page ${formatCreatedAtPage(reportedCreatedAtPage)} is outside this page's branch_path`,
     location: locationFor(page),
     detail: {
       reference_id: reference.id,
       reference_path: reference.path,
       referenced_file: target.file_path,
       referenced_node_id: target.node_id,
-      created_at_page: createdAtPage ?? null
+      created_at_page: reportedCreatedAtPage ?? null
     },
-    suggested_fix: `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, or scope the storylet as a valid global author-pool record.`
+    suggested_fix: isPageTarget
+      ? `Replace ${reference.id} with a page in this branch's branch_path.`
+      : `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, or scope the storylet as a valid global author-pool record.`
   };
 }
 
