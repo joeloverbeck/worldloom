@@ -25,7 +25,8 @@ export const recursiveReferenceClosure: Validator = {
         continue;
       }
 
-      const branchPath = new Set(stringArray(parsed.branch_path));
+      const orderedBranchPath = stringArray(parsed.branch_path);
+      const branchPath = new Set(orderedBranchPath);
       const maps = recordMapForStory(records, page.story_slug ?? null);
       const roots = storyLocalReferences(asPlainRecord(parsed.state_snapshot), "state_snapshot");
       const visited = new Set<string>();
@@ -48,7 +49,7 @@ export const recursiveReferenceClosure: Validator = {
 
         const parsedTarget = asPlainRecord(target.parsed);
         const createdAtPage = referenceBranchPageFor(target, parsedTarget);
-        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath)) {
+        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath, orderedBranchPath)) {
           verdicts.push(branchLeak(page, current, target, createdAtPage));
         }
 
@@ -180,16 +181,36 @@ function isAllowedReference(
   target: IndexedRecord,
   parsed: Record<string, unknown>,
   createdAtPage: string | null | undefined,
-  branchPath: ReadonlySet<string>
+  branchPath: ReadonlySet<string>,
+  orderedBranchPath: readonly string[]
 ): boolean {
   if (target.node_type === "page_record") {
     const pageIdValue = stringValue(parsed.id);
     return pageIdValue !== undefined && branchPath.has(pageIdValue);
   }
   if (createdAtPage === null) {
-    return target.node_type === "storylet_record" && asPlainRecord(parsed.visibility).scope === "global_author_pool";
+    if (target.node_type !== "storylet_record") {
+      return false;
+    }
+    const visibility = asPlainRecord(parsed.visibility);
+    const scope = stringValue(visibility.scope);
+    if (scope === "global_author_pool") {
+      return true;
+    }
+    if (scope === "branch_prefix_scoped") {
+      return isOrderedPrefix(visibility.visible_branch_path_prefix, orderedBranchPath);
+    }
+    return false;
   }
   return createdAtPage !== undefined && branchPath.has(createdAtPage);
+}
+
+function isOrderedPrefix(prefix: unknown, branchPath: readonly string[]): boolean {
+  const prefixValues = stringArray(prefix);
+  if (prefixValues.length === 0 || prefixValues.length > branchPath.length) {
+    return false;
+  }
+  return prefixValues.every((value, index) => value === branchPath[index]);
 }
 
 function missingReference(page: IndexedRecord, reference: StoryReference): Verdict {
@@ -233,7 +254,7 @@ function branchLeak(
     },
     suggested_fix: isPageTarget
       ? `Replace ${reference.id} with a page in this branch's branch_path.`
-      : `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, or scope the storylet as a valid global author-pool record.`
+      : `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, scope the storylet as a valid global author-pool record, or scope it as branch_prefix_scoped with a visible_branch_path_prefix that is an ordered prefix of this page's branch_path.`
   };
 }
 

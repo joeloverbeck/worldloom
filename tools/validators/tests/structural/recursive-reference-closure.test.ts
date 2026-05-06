@@ -116,6 +116,87 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
   assert.deepEqual(verdicts, []);
 });
 
+test("recursive_reference_closure allows branch-prefix-scoped storylets visible from this branch", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      branch_path: ["PG-0001", "PG-0002", "PG-0003"]
+    },
+    obligationOverrides: {
+      coverage_cache: { compatible_storylets: ["SLT-0002"] }
+    },
+    extra: [
+      storyRecord("page_record", "PG-0001", "pages", {
+        id: "PG-0001",
+        story_id: "STORY-001",
+        branch_path: ["PG-0001"],
+        state_snapshot: {}
+      }),
+      branchPrefixStorylet("SLT-0002", ["PG-0001", "PG-0002"])
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("recursive_reference_closure rejects branch-prefix-scoped storylets on sibling branches", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    obligationOverrides: {
+      coverage_cache: { compatible_storylets: ["SLT-0003"] }
+    },
+    extra: [
+      branchPrefixStorylet("SLT-0003", ["PG-0001", "PG-0099"])
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
+  assert.ok(leak);
+  assert.deepEqual(leak.detail, {
+    reference_id: "SLT-0003",
+    reference_path: "state_snapshot.obligations_open[0].coverage_cache.compatible_storylets[0]",
+    referenced_file: "stories/test-story/_source/storylets/SLT-0003.yaml",
+    referenced_node_id: "test-story:SLT-0003",
+    created_at_page: null
+  });
+});
+
+test("recursive_reference_closure rejects branch-prefix-scoped storylets with null prefix", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    obligationOverrides: {
+      coverage_cache: { compatible_storylets: ["SLT-0004"] }
+    },
+    extra: [
+      branchPrefixStorylet("SLT-0004", null)
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "recursive_reference_closure.branch_leak"));
+});
+
+test("recursive_reference_closure rejects branch-prefix-scoped storylets with malformed prefix", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    obligationOverrides: {
+      coverage_cache: { compatible_storylets: ["SLT-0005"] }
+    },
+    extra: [
+      branchPrefixStorylet("SLT-0005", "PG-0001")
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "recursive_reference_closure.branch_leak"));
+});
+
 test("recursive_reference_closure passes for same-branch PG references", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
@@ -295,6 +376,18 @@ function storyRecord(
     ...record(nodeType, `test-story:${id}`, `stories/test-story/_source/${sourceDir}/${id}.yaml`, parsed),
     story_slug: "test-story"
   };
+}
+
+function branchPrefixStorylet(id: string, visibleBranchPathPrefix: unknown) {
+  return storyRecord("storylet_record", id, "storylets", {
+    id,
+    story_id: "STORY-001",
+    provenance: { origin: "focus_authoring", created_at_page: null },
+    visibility: {
+      scope: "branch_prefix_scoped",
+      visible_branch_path_prefix: visibleBranchPathPrefix
+    }
+  });
 }
 
 function patchPlan() {

@@ -37,7 +37,7 @@ Use this compact checklist so required references are not skipped:
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
 4. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 
-Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, or closeout guidance, prefer the focused reference files above instead of expanding `SKILL.md`.
+Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples or package-specific edge cases here unless they are required to choose the correct reference.
 
 ## Always First
 
@@ -47,7 +47,7 @@ Keep this top-level skill as the routing and hard-stop contract. When adding nar
 - Snapshot the worktree with `git status --short` and classify unrelated dirty paths before coding.
 - Load `references/dirty-worktree-ledger.md` and keep the dirty-worktree ledger current throughout the run, including initial overlap, mid-run same-file changes, same-family sibling scope, and ignored artifacts.
 - When a pre-existing dirty file must also be edited for the active ticket, track ownership at hunk or topic level from the start. Do not wait until final response to decide which same-file changes are ticket-owned, pre-existing, externally appeared, or sibling-scope.
-- For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks. Keep new specialized package/tool guidance in that reference instead of expanding this top-level flow.
+- For package/tool tickets, use `references/package-tooling.md` for detailed package command, dependency, fixture, generated-artifact, and public-surface checks.
 - Before the first package command likely to create ignored artifacts, run a targeted ignored-aware status snapshot for the affected package directories. After package commands finish, refresh the same ignored-aware status and classify new or changed ignored artifacts in the dirty-worktree ledger.
 - In Worldloom, remember that many `worlds/<slug>/` artifacts are gitignored. If the ticket touches world content, do not treat `git status`, `git diff`, or tracked-only checks as exhaustive proof of what changed.
 - For world-content writes, keep the write surface explicit:
@@ -60,7 +60,6 @@ Keep this top-level skill as the routing and hard-stop contract. When adding nar
 - If a `Deps` entry is a symbolic ticket/spec id rather than a path, resolve it with `rg --files` or an equivalent exact-path search before treating it as missing.
 - When using `rg`, `grep`, or shell searches over markdown/code literals, quote shell-active patterns safely from the start. Prefer single-quoted literal patterns for backticks, `$`, pipes, and parentheses; for example: ``rg -n 'No `foo` entry' ticket.md``.
 - If the ticket names a CLI or package command, verify its `cwd` / repo-root assumptions before trusting it as a proof surface.
-- For detailed package/tool command, fixture, workspace, dependency, and compile-gate checks, use `references/package-tooling.md` after classification instead of keeping those narrow rules in the top-level flow.
 - Never run a producer command and its dependent proof command in parallel; treat build-then-test, generate-then-verify, and similar lanes as strictly sequential.
 - If a verification command depends on a build, generated artifact, or other producer step, run the producer first and the dependent proof second; do not treat those lanes as parallel-safe.
 - In Codex, do not use `multi_tool_use.parallel` for build-then-test, generate-then-verify, or similar producer/consumer lanes; wait for the producer command to finish before launching dependent commands.
