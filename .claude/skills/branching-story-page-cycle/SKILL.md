@@ -148,11 +148,12 @@ Phase 7.5      Visible affordance extraction — parse the rendered page prose
 Phase 8        Choice generation (Amendment B pipeline) — affordance-space
                collection from state_snapshot + Visible Affordance Map →
                salient-affordance shortlist + LLM proposer of 6-10 structured
-               CHCs → engine validation → diversification + scoring
-               (≥3 distinct choice_modes, ≥3 distinct poetic_effects, ≥60% of
-               open high-salience OBLs) → surface-label rendering by LLM →
-               write-in slot N+1; every emitted CHC carries choice_contract and
-               continuation_capacity blocks
+               CHCs → engine validation → diversification + pair-distance
+               scoring (≥3 distinct choice_modes, ≥3 distinct poetic_effects,
+               ≥60% of open high-salience OBLs, and every CHC pair differs on
+               ≥2 axes with ≥1 structural-axis difference) → surface-label
+               rendering by LLM → write-in slot N+1; every emitted CHC carries
+               choice_contract and continuation_capacity blocks
    |
    v
 Phase 9        Validation gates — 12 gates (see HARD-GATE); each PASS with
@@ -268,7 +269,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
 
 8. **Phase 7.5 — Visible Affordance Extraction.** Parse the Phase 7 prose working buffer for visible affordances; map each to existing state ids or newly-created records from Phase 5 / Phase 7 claim classification; route ungrounded actors, objects, locations, or exits back to Phase 7 re-prompt or the existing claim-record path; feed the memory-only Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
 
-9. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection from `state_snapshot` plus the Visible Affordance Map → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered, and grounded visible affordances considered as anchors) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries populated `choice_contract` and `continuation_capacity` blocks, with the latter proving a post-choice seed-storylet or runtime-JIT continuation path. Load `references/phase-8-choice-generation.md`.
+9. **Phase 8 — Choice generation (Amendment B pipeline).** Affordance-space collection from `state_snapshot` plus the Visible Affordance Map → salient shortlist → LLM proposer of 6-10 structured CHCs → engine validation pass → diversification + pair-distance scoring (≥3 distinct `choice_mode` values, ≥3 distinct `poetic_effect` values, ≥60% open high-salience OBLs covered, grounded visible affordances considered as anchors, and every CHC pair differs on ≥2 axes with ≥1 difference from structural axes 1-6) → LLM surface-label rendering → write-in slot N+1. Every emitted CHC carries populated `choice_contract` and `continuation_capacity` blocks, with the latter proving a post-choice seed-storylet or runtime-JIT continuation path. Load `references/phase-8-choice-generation.md`.
 
 10. **Phase 9 — Validation gates.** Run all 12 gates (mystery firewall, invariant compatibility, recursive reference closure, snapshot-replay equality, ID uniqueness, content policy presence, prose ledger consistency, choice contract integrity, choice consequence-capacity, state_snapshot integrity, epistemic class declared, consequence persistence). Each PASS requires a one-line rationale on the new page's `validation_trace` field; a bare PASS is treated as FAIL. FAIL routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
 

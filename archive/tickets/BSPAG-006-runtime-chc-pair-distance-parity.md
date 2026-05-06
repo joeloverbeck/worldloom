@@ -1,6 +1,6 @@
 # BSPAG-006: Propagate CHC pair-distance discipline to runtime page-cycle
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — downstream `branching-story-page-cycle` skill contract prose only.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-BSBOOT-016 added bootstrap Phase 8 pair-distance discipline so no pair of emitted root CHCs can pass by differing only on `choice_mode` and `poetic_effect`. Runtime `branching-story-page-cycle` is the other CHC producer, and its Phase 8 diversification/scoring surface still only says:
+At intake, BSBOOT-016 had added bootstrap Phase 8 pair-distance discipline so no pair of emitted root CHCs could pass by differing only on `choice_mode` and `poetic_effect`. Runtime `branching-story-page-cycle` was the other CHC producer, and its Phase 8 diversification/scoring surface still only said:
 
 - avoid 6 versions of a single `(verb, target)` pair,
 - mix moral / strategic / emotional / investigative / risky / self-protective axes,
@@ -17,12 +17,12 @@ BSBOOT-016 added bootstrap Phase 8 pair-distance discipline so no pair of emitte
 - cover high-salience OBLs,
 - prefer grounded Visible Affordance Map anchors when valid.
 
-That leaves the same cosmetic-variant risk on later pages that BSBOOT-016 fixed for PG-0001: two runtime CHCs can share operation, actor, target, `uses_fact`, `choice_contract.minimum_state_change`, and `choice_contract.success_policy` while differing only in modal labels.
+That left the same cosmetic-variant risk on later pages that BSBOOT-016 fixed for PG-0001: two runtime CHCs could share operation, actor, target, `uses_fact`, `choice_contract.minimum_state_change`, and `choice_contract.success_policy` while differing only in modal labels.
 
 ## Assumption Reassessment (2026-05-06)
 
 1. `archive/tickets/BSBOOT-016.md` — verified bootstrap now requires every CHC pair to differ on at least 2 of 8 axes, with at least 1 difference from structural axes 1-6.
-2. `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — verified runtime Phase 8 Step 4 still has set-level diversification only and no pair-distance rule.
+2. `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — at intake, verified runtime Phase 8 Step 4 still had set-level diversification only and no pair-distance rule.
 3. Cross-skill / cross-artifact boundary: `branching-story-bootstrap` and `branching-story-page-cycle` both emit persisted CHC records; the shared contract is CHC operational distinctness during Phase 8 choice generation.
 4. FOUNDATIONS / hard-gate principle: this strengthens Phase 8 halt-and-rederive discipline without changing Phase 9 gate wording, Mystery Reserve behavior, approval-token behavior, `validate_patch_plan`, or `submit_patch_plan`.
 5. Schema-extension classification: no schema change. The rule operates over existing CHC fields: `operation`, `actor`, `target`, `uses_fact`, `choice_contract.minimum_state_change`, `choice_contract.success_policy`, `choice_mode`, and `poetic_effect`.
@@ -40,11 +40,11 @@ That leaves the same cosmetic-variant risk on later pages that BSBOOT-016 fixed 
 3. Phase 9 gate wording remains unchanged and the rule is enforced at Phase 8 halt-time -> manual review.
 4. Non-owner skills remain unchanged -> manual review; no health-audit, bootstrap, storylet-pool-authoring, story-fact-promotion-to-canon, package, validator, or world-content change.
 
-## What to Change
+## Landed Changes
 
 ### 1. `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`
 
-Add a §Pair-distance discipline subsection under Step 4 mirroring the BSBOOT-016 semantics:
+Added a §Pair-distance discipline subsection under Step 4 mirroring the BSBOOT-016 semantics:
 
 - every pair of emitted CHCs differs on at least 2 of the 8 axes;
 - at least 1 difference must be from structural axes 1-6;
@@ -53,12 +53,12 @@ Add a §Pair-distance discipline subsection under Step 4 mirroring the BSBOOT-01
 
 ### 2. `.claude/skills/branching-story-page-cycle/SKILL.md`
 
-Inspect the parent Phase 8 summary. If it still overstates the old set-only diversification contract after the reference edit, update it to name pair-distance discipline at summary level.
+Updated the parent Phase 8 process-flow and procedure summaries so they name diversification plus pair-distance scoring instead of set-level diversification alone.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` (modify)
-- `.claude/skills/branching-story-page-cycle/SKILL.md` (modify if parent summary is stale)
+- `.claude/skills/branching-story-page-cycle/SKILL.md` (modify)
 
 ## Out of Scope
 
@@ -93,3 +93,18 @@ Inspect the parent Phase 8 summary. If it still overstates the old set-only dive
 1. `grep -nE "Pair-distance|at least 2.*axes|minimum_state_change.*set|structural axes 1-6" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`
 2. `rg -n "Pair-distance|structural axes 1-6|choice_mode.*poetic_effect" .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`
 3. Manual cross-read against `archive/tickets/BSBOOT-016.md` and `docs/HARD-GATE-DISCIPLINE.md`.
+
+## Outcome
+
+Completed on 2026-05-06. Runtime `branching-story-page-cycle` Phase 8 now applies the same CHC pair-distance discipline as bootstrap: every emitted CHC pair must differ on at least 2 of 8 existing axes, with at least 1 difference from structural axes 1-6. Pairs that differ only in `choice_mode` and `poetic_effect` fail Phase 8 and route to halt-and-rederive. The parent skill summary now reflects the new pair-distance scoring requirement.
+
+## Verification Result
+
+1. `grep -nE "Pair-distance|at least 2.*axes|minimum_state_change.*set|structural axes 1-6" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — PASS; returned the pair-distance heading, total-axis rule, structural-axis requirement, and `minimum_state_change` set axis.
+2. `rg -n "Pair-distance|structural axes 1-6|choice_mode.*poetic_effect" .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — PASS; returned the runtime reference rule, the mode/effect-only rejection, and the parent skill's Phase 8 summary/procedure references.
+3. Manual review against `archive/tickets/BSBOOT-016.md` — PASS; runtime page-cycle now uses the same 8 axes and structural-axis requirement as bootstrap.
+4. Manual HARD-GATE alignment review against `docs/HARD-GATE-DISCIPLINE.md` — PASS; the edit preserves Phase 9 gate wording and approval-token / patch-plan flow, and keeps enforcement at Phase 8 halt-and-rederive.
+
+## Deviations
+
+None. The ticket remained a skill-contract prose change only; no package, validator, schema, world-content, Phase 9 gate, or archival work was added.

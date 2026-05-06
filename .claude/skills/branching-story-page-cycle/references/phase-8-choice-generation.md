@@ -70,6 +70,23 @@ Apply diversification to surviving choices:
 - Engage at least 60% of currently-open high-salience OBLs across the choice set.
 - If a grounded Visible Affordance Map entry is not engaged by any surviving CHC, prefer a valid CHC anchored on that affordance over a purely storylet-template-driven option, without weakening hard preconditions, `choice_contract`, or `continuation_capacity`.
 
+### Pair-distance discipline
+
+In addition to the diversification list above, every pair of emitted CHCs must differ on at least 2 of the following 8 axes, with at least 1 difference from structural axes 1-6:
+
+1. `operation` (the canonical verb from Phase 8 affordance vocabulary)
+2. `actor` (the STENT performing the action)
+3. `target` (the STENT / STOBJ / STLOC / abstract being acted upon)
+4. `uses_fact` (the SF the choice leverages, if any)
+5. `choice_contract.minimum_state_change` set (compare the contained `{fact, obligation, consequence, relationship, intention, thread, location, cast, terminality}` sub-types; two CHCs that both change `fact` and `obligation` are equivalent on this axis, while different sub-types are distinct)
+6. `choice_contract.success_policy` (`guaranteed | attempted | uncertain | opposed`)
+7. `choice_mode` (the modal label)
+8. `poetic_effect` (the affective register)
+
+Two CHCs that differ only in `choice_mode` and `poetic_effect` are operational cosmetic variants even though they differ on 2 total axes. Fail Phase 8, halt, and re-derive the more cosmetically similar of the pair. The check is mechanical: read the in-memory CHC records, compute pairwise axis differences, and reject any pair that has fewer than 2 total differences or has no structural-axis difference.
+
+Example failing pair: "Question the guard about the magistrate's whereabouts" and "Press the guard about who he saw last night" both use `operation: investigate`, the same actor, the same target, `uses_fact: null`, the same `{fact}` minimum state-change set, and `success_policy: attempted`; the only differences are `choice_mode` and `poetic_effect`. Re-derive one CHC so it differs structurally, such as by changing actor, target, `uses_fact`, minimum state-change set, or success policy.
+
 Final ranked list of 4-6 surviving structured choices.
 
 ## Step 5: Surface Label Rendering (LLM)

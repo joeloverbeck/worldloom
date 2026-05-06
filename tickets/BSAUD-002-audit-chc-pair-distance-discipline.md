@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — `branching-story-health-audit` skill contract prose and report template only.
-**Deps**: archive/tickets/BSBOOT-016.md; tickets/BSPAG-006-runtime-chc-pair-distance-parity.md
+**Deps**: archive/tickets/BSBOOT-016.md; archive/tickets/BSPAG-006-runtime-chc-pair-distance-parity.md
 
 ## Problem
 
-BSBOOT-016 added bootstrap Phase 8 pair-distance discipline for emitted CHC sets: every pair must differ on at least 2 of 8 existing CHC axes, with at least 1 difference from structural axes 1-6. BSPAG-006 now owns propagating the same producer-side rule to runtime `branching-story-page-cycle`.
+BSBOOT-016 added bootstrap Phase 8 pair-distance discipline for emitted CHC sets: every pair must differ on at least 2 of 8 existing CHC axes, with at least 1 difference from structural axes 1-6. BSPAG-006 completed propagation of the same producer-side rule to runtime `branching-story-page-cycle`.
 
 `branching-story-health-audit` is the read-only downstream consumer that audits persisted page records and CHC records after a story exists. It already consumes `PG.emitted_choices`, CHC actor/target/effect references, and CHC `continuation_capacity`, but it does not currently have an audit focus, finding category, or report-template language for CHC pair-distance violations. That means a persisted page can offer operational cosmetic variants and the audit will not identify the fake-agency / choice-distinctness defect.
 
@@ -20,7 +20,7 @@ BSBOOT-016 added bootstrap Phase 8 pair-distance discipline for emitted CHC sets
 4. FOUNDATIONS / hard-gate principle: this is a read-only audit strengthening. It does not weaken Mystery Reserve behavior, canon-write gates, approval-token behavior, `validate_patch_plan`, or `submit_patch_plan`.
 5. Schema-extension classification: no persisted story schema change. The audit computes pairwise distance from existing CHC fields: `operation`, `actor`, `target`, `uses_fact`, `choice_contract.minimum_state_change`, `choice_contract.success_policy`, `choice_mode`, and `poetic_effect`.
 6. Downstream-consumer scan:
-   - `branching-story-page-cycle` producer parity is already tracked by `tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`.
+   - `branching-story-page-cycle` producer parity is completed in `archive/tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`.
    - `storylet-pool-authoring` owns SLT `choice_templates` scaffolds and explicitly records them as runtime-overridable; it does not emit persisted CHC sets.
    - `story-fact-promotion-to-canon` promotes story-local facts, mystery resolutions, character outcomes, or artifacts to world canon; it does not consume or validate offered-choice sets.
    - `branching-story-health-audit` is the only named read-only consumer that should inspect persisted CHC set health.
@@ -59,7 +59,7 @@ BSBOOT-016 added bootstrap Phase 8 pair-distance discipline for emitted CHC sets
 
 ## Out of Scope
 
-- Editing `branching-story-page-cycle`; producer-side runtime parity is owned by `tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`.
+- Editing `branching-story-page-cycle`; producer-side runtime parity is completed in `archive/tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`.
 - Editing `branching-story-bootstrap`; BSBOOT-016 already landed the bootstrap producer rule.
 - Editing `storylet-pool-authoring`; SLT `choice_templates` are scaffolds, not emitted CHC records.
 - Editing `story-fact-promotion-to-canon`; canon promotion does not validate offered-choice-set diversity.
@@ -90,4 +90,4 @@ BSBOOT-016 added bootstrap Phase 8 pair-distance discipline for emitted CHC sets
 
 1. `rg -n "choice_pair_distance|choice_distinctness|pair-distance|structural axes 1-6" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md`
 2. `rg -n "direct CHC mutation|mutate CHC|overwrite CHC" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/branching-story-health-audit/templates/story-audit-report.md` — inspect any hits and confirm no direct-mutation remediation is introduced.
-3. Manual cross-read against `archive/tickets/BSBOOT-016.md`, `tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`, and `docs/FOUNDATIONS.md`.
+3. Manual cross-read against `archive/tickets/BSBOOT-016.md`, `archive/tickets/BSPAG-006-runtime-chc-pair-distance-parity.md`, and `docs/FOUNDATIONS.md`.
