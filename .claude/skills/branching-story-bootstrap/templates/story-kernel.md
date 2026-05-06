@@ -79,6 +79,7 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_12_state_snapshot_completeness: "PASS — <one-line rationale>"
 
 storylet_pool_summary:                   # populated by Phase 6
+  # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
   total: 20
   shape_distribution:
     entry_pressure: 4

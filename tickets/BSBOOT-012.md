@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Cross-skill prose change (`branching-story-bootstrap` Phases 1/6/11 + `storylet-pool-authoring` `parent_skill_invocation: true` contract). No engine, validator, or schema code change.
-**Deps**: BSBOOT-011 (the pre-allocation count depends on the scale-aware `target_pool_size` formula; if BSBOOT-011 lands first, this ticket consumes its formula; if not, this ticket explicitly references the legacy ~20 default).
+**Deps**: archive/tickets/BSBOOT-011.md (the pre-allocation count depends on the completed scale-aware `target_pool_size` formula).
 
 ## Problem
 
@@ -54,7 +54,7 @@ If Phase 6 returns SLT records without final ids, then Phases 7-8 either (a) ref
 
 - After the existing "Allocate next `STORY-NNN`" step (around line 38-40), add a new step:
 
-  > - **Pre-allocate the SLT id range for the seed pool.** Compute the upper-bound count: `target_pool_size + ceil(target_pool_size × 0.30)` where `target_pool_size` is the value from BSBOOT-011's `references/phase-6-storylet-pool-seed.md` §Computing target_pool_size (or the explicit `storylet_pool_seed_size` argument when supplied). Call `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story-slug>)` once per id; collect the returned ids into `target_slt_ids[]`. The list is passed to Phase 6 as the bound id range; the storylet-pool-authoring sub-routine consumes them in deterministic order. Unused tail ids (when the sub-routine returns fewer than `len(target_slt_ids)` records after Phase 4 rejections + Phase 5 culls) are discarded; append-only id allocation tolerates skipped ranges.
+  > - **Pre-allocate the SLT id range for the seed pool.** Compute the upper-bound count: `target_pool_size + ceil(target_pool_size × 0.30)` where `target_pool_size` is the value from `branching-story-bootstrap/references/phase-6-storylet-pool-seed.md` §Computing target_pool_size (landed by `archive/tickets/BSBOOT-011.md`), or the explicit `storylet_pool_seed_size` argument when supplied. Call `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story-slug>)` once per id; collect the returned ids into `target_slt_ids[]`. The list is passed to Phase 6 as the bound id range; the storylet-pool-authoring sub-routine consumes them in deterministic order. Unused tail ids (when the sub-routine returns fewer than `len(target_slt_ids)` records after Phase 4 rejections + Phase 5 culls) are discarded; append-only id allocation tolerates skipped ranges.
 
 ### 2. `.claude/skills/branching-story-bootstrap/references/phase-6-storylet-pool-seed.md`
 
