@@ -133,7 +133,7 @@ The `op_type` enum is closed; LLM proposers may not invent new op types. The `de
 
 ## Choice Record (CHC-NNNN)
 
-Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change). The contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks).
+Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) and the `continuation_capacity` block (`post_choice_delta`, `valid_seed_storylets`, `jit_shape_spec`, `validation_basis`). The choice contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks). The continuation-capacity block is enforced at this turn's Phase 8 / Phase 9 gate 9 so persisted runtime CHCs carry the same post-choice seed/JIT viability evidence as bootstrap CHCs.
 
 ## Other story-bundle records
 

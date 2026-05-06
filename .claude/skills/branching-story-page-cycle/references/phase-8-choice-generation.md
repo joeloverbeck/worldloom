@@ -31,10 +31,10 @@ Take top-K (K = 15) affordances. Pass to LLM proposer with prompt:
 
 INSTRUCTION:
 Propose 6-10 candidate choices as STRUCTURED CHC records (operation, actor, target,
-uses_fact, likely_effects, choice_mode, poetic_effect). Cover a mix of choice_modes
-and poetic_effects (relaxed / obvious / dilemma / risky_truth / sacrifice / seduction /
-desperation / revelation). Engage at least one open OBL per choice when possible.
-Do not write the user-facing label yet — that happens in step 5.
+uses_fact, likely_effects, continuation_capacity, choice_mode, poetic_effect). Cover
+a mix of choice_modes and poetic_effects (relaxed / obvious / dilemma / risky_truth /
+sacrifice / seduction / desperation / revelation). Engage at least one open OBL per
+choice when possible. Do not write the user-facing label yet — that happens in step 5.
 ```
 
 LLM produces 6-10 candidate structured CHCs.
@@ -47,9 +47,11 @@ For each LLM-proposed CHC:
 |---|---|
 | Hard preconditions satisfied at current state | Drop |
 | Impact analysis runs cleanly (Phase 2 logic on this proposed choice) | Drop |
-| Consequence-capacity: at least one storylet (existing or JIT-probable) continues from the post-state | Drop or transform |
+| Consequence-capacity: `continuation_capacity` is populated with a simulated `post_choice_delta`, and either at least one `valid_seed_storylets[]` entry remains legal under that delta OR `jit_shape_spec` is non-empty | Drop or transform |
 | `poetic_effect` is realistic for the operation + state | Re-tag |
 | Mystery safety preserved | Drop |
+
+For the consequence-capacity check, compute the post-choice delta implied by `choice_contract.minimum_state_change` and `likely_effects`, then test seed-pool SLTs against that delta: `hard_preconds`, `cast_requirements`, `location_requirements`, and `mystery_safety` must still pass. If no seed storylet matches but a runtime JIT continuation is viable, populate `jit_shape_spec` with the one-line shape of the needed continuation. Both `valid_seed_storylets` empty and `jit_shape_spec` empty is a dead-end and the CHC is not emitted. `validation_basis` records the one-line rationale for the accepted seed/JIT continuation path.
 
 Drop choices that fail hard checks. Flag near-misses for transformation.
 
@@ -111,11 +113,23 @@ choice_contract:
     - fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
 
 likely_effects: [...]
+continuation_capacity:
+  post_choice_delta:
+    facts_added_or_changed: []        # SF-NNNN ids changed by minimum_state_change / likely_effects
+    obligations_changed: []           # OBL-NNNN ids whose status or salience would shift
+    location_changed: null            # null if no move; STLOC-NNNN id if current_location changes
+    cast_present_changed: []          # STENT-NNNN ids entering or leaving cast_present
+    mystery_resolution_risk: []       # M-NNNN ids whose safety status the post-choice state tests
+  valid_seed_storylets: []            # SLT-NNNN ids whose hard_preconds/cast/location/mystery checks pass under the post-choice delta
+  jit_shape_spec: null                # one-line JIT continuation sketch when no seed SLT matches
+  validation_basis: ""                # one-line rationale for the accepted seed or JIT continuation path
 choice_mode: <enum>
 poetic_effect: <enum>
 content_intensity_implied: tame | mature | explicit
 label: <user-facing text>
 ```
+
+Either `continuation_capacity.valid_seed_storylets` is non-empty OR `continuation_capacity.jit_shape_spec` is populated. Both empty is a Phase 9 gate-9 fail.
 
 A selected CHC may NOT be transformed outside its `choice_contract.allowed_outcome_band` without explicit user confirmation. If the next turn's Phase 4 storylet selection or Phase 7 prose render would produce an outcome outside the band, the engine routes via Phase 1 B.3's `ACCEPT_BUT_TRANSFORM` (asking the user to confirm) rather than silently delivering an outcome that betrays the label. This protects user agency: "Confess the secret" cannot become "almost confess but get interrupted" without the user explicitly accepting the reframing.
 
