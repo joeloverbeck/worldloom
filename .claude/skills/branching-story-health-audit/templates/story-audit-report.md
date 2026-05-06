@@ -75,13 +75,15 @@ user_approved: true                  # always true on a written report — writt
 
 #### F-01: <one-line title>
 
-- **Category**: <category>
+- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, branch_isolation_recursive, snapshot_integrity, consequence_coverage, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
 - **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
 - **Pages affected**: <list of PG-NNNN ids>
 - **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
 - **Description**: <one paragraph; cites the structural rule violated and the specific evidence>
 - **Proposed remediation**: <RSP-NNNN | manual-flag | none>
 - **Prior audit reference**: <SAU-NNNN if this finding re-surfaces from an earlier audit; absent otherwise>
+
+For `prose_ledger_consistency` findings, include page id, short prose excerpt, missing or violated state anchor (`cast_present`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible world context), and recommended remediation (`manual-flag` or page-cycle re-render). Grounded offstage references are not findings. Mystery-risk prose remains `mystery_firewall`, not `prose_ledger_consistency`.
 
 (repeat per error finding)
 

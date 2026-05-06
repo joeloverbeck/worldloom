@@ -1,7 +1,8 @@
 <!--
 Worked example: a SAU-0003 audit on a hypothetical 47-page bundle with mixed
-severities including one branch-isolation error, two coverage warnings, two
-remediation cards, and one manual-intervention flag.
+severities including one branch-isolation error, one prose-ledger consistency
+error, two coverage warnings, two remediation cards, and manual-intervention
+flags.
 
 Illustrates: severity floors (branch-isolation = error), drop-list discipline
 (F-04 dropped by user with reason marker preserved), prior-audit-delta
@@ -20,7 +21,7 @@ branches_audited:
   leaf_ids: [PG-0042, PG-0047, PG-0031]
 pages_walked: 47
 finding_count_by_severity:
-  error: 2
+  error: 3
   warning: 4
   info: 1
 flagged_pages:
@@ -54,7 +55,7 @@ user_approved: true
 
 | Severity | Count |
 |---|---|
-| ERROR   | 2 |
+| ERROR   | 3 |
 | WARNING | 4 |
 | INFO    | 1 |
 
@@ -92,6 +93,16 @@ N/A — audit_focus was all.
 - **Records affected**: OBL-0042 (`type: protect-the-confidant`, `subjects: [STENT-0003]`)
 - **Description**: Phase 3's obligation-payoff coverage check found zero compatible storylets in the current 38-storylet pool whose `pays_off_obligations` matcher matches OBL-0042's `type` + `subjects` constraints. JIT-probable check returned zero (the open OBL's predicate set requires a confidant-cast member who is currently 17 pages distant on this branch). With salience 9 + age 24 pages, this is a dead-end obligation: the branch cannot honor the promise the bootstrap installed.
 - **Proposed remediation**: RSP-0001.
+- **Prior audit reference**: none.
+
+#### F-09: PG-0038 stages the absent reeve as physically present outside `cast_present`
+
+- **Category**: prose_ledger_consistency
+- **Branch**: PG-0047 (branch B' leaf)
+- **Pages affected**: PG-0038
+- **Records affected**: PG-0038 (`state_snapshot.cast_present: [STENT-0001, STENT-0003]`)
+- **Description**: Phase 3's prose-ledger consistency check found the prose excerpt "the Reeve stepped from behind the grain screen and took the wet writ from her hand" while `state_snapshot.cast_present` contains only STENT-0001 and STENT-0003. This is physical staging outside `cast_present`, not a grounded offstage reference. A separate sentence on the same page, "the Reeve's seal waited on the letter," is clean because the DA record for the letter is in `reader_known_facts` and does not stage the Reeve as present.
+- **Proposed remediation**: manual-flag (recommended action: page-cycle re-render PG-0038 or regenerate the page state so the Reeve is actually added to `cast_present` before prose stages him).
 - **Prior audit reference**: none.
 
 ### Warnings
@@ -168,6 +179,7 @@ Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-0003/remedia
 
 - F-01: Branch-isolation breach via SF-0089.evidence[2] referencing SE-0044 on sibling branch. Action required: investigate engine bug; do NOT continue branch B until resolved. Likely cause: a recent `branching-story-page-cycle` run on branch B' wrote SE-0044 with output_records that this branch's SF-0089 was already citing — engine should have allocated a fresh SE for branch B's evidence chain. Recommend filing as engine ticket against `branching-story-page-cycle`.
 - F-07: THR-0004 has no closure path. Action required: author one `thread_resolution`-shape storylet via `storylet-pool-authoring world_slug=fenmoor story_slug=the-marsh-vow mode=focus focus_area=thread_resolution_options source_threads=THR-0004`.
+- F-09: PG-0038 physically stages the Reeve outside `cast_present`. Action required: page-cycle re-render PG-0038 or regenerate state so the Reeve is explicitly present before the prose stages him.
 
 ## Prior-Audit Delta
 
