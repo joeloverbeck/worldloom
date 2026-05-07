@@ -52,6 +52,25 @@ The `TREAT_AS_ATTEMPT` framing is **causal, not authorial**: the question is whe
 
 Multiple plausible outcomes (e.g., shoot → miss / wound / kill): the engine either asks the user to pick or selects per a state-coherence weighting (the LLM proposes per-outcome rationales; the engine weights). Configurable per story.
 
-### B.4 Rule
+### B.4 Write-In Commitment-Class Classification
+
+After the four-way routing decision, an additional commitment-class classification
+step runs for write-ins that proceed past impossible-state refusal:
+
+1. The LLM parser reads the user's free-form `manual_action_text`, the routing
+   verdict, and the arc-eligible `commitment_class` enum loaded via
+   `mcp__worldloom__get_canonical_vocabulary({class: 'commitment_class'})`.
+2. It classifies the manual action's intended commitment into exactly one entry of
+   the closed `commitment_class` enum.
+3. If classification fails because the action does not fit any commitment class,
+   route via `REFUSE_ONLY_THROUGH_WORLD_LOGIC` even if the four-way routing
+   initially returned `ACCEPT`.
+
+The classified `commitment_class` is handed to Phase 4 as an arc-selection filter.
+See `phase-4-storylet-and-mystery-authority.md` §Hard Filters for the consumer-side
+filter that matches `arc.arc_contract.commitment_class` against the chosen CHC's
+commitment class or this write-in classifier output.
+
+### B.5 Rule
 
 A write-in input is NEVER silently rejected. The four-way routing is the contract. The user always gets a coherent in-world response, even if their intended action is impossible.
