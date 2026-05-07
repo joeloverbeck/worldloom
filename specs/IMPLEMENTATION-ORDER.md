@@ -16,7 +16,7 @@ This document records the read order (for reviewers) and implementation order (f
 
 This order builds conceptual understanding for the scene-commitment-arc pivot:
 
-1. **SPEC-19** establishes the data-model contract (SLT v2, CHC v2, ARC_TRACE, stop-predicate DSL extension, canonical-vocabulary enums). Every other spec consumes these schemas.
+1. **SPEC-19** establishes the data-model contract (SLT v2, CHC v2, ARC_TRACE, stop-predicate DSL extension, canonical-vocabulary enums). Every other spec consumes these schemas. SPEC-19 is completed and archived at `archive/specs/SPEC-19-scene-commitment-arc-schema.md`.
 2. **SPEC-22** is read second because it lands the engine surface (patch-engine op, validators, indexer/MCP retrieval, canonical-vocabularies implementation, sibling-skill alignment, test-story discard) that the runtime and authoring skills both depend on.
 3. **SPEC-20** rewrites the runtime page-cycle (Phase 4 arc selection, Phase 4b effect-variant selection, Phase 7 multi-beat render, Phase 7.6 ARC_TRACE extraction, Phase 8 choice-surface gate). It depends on SPEC-19 + SPEC-22.
 4. **SPEC-21** rewrites the authoring skill (storylet-pool-authoring) for arc semantics. It also depends on SPEC-19 + SPEC-22 but is independent of SPEC-20 — they can land in parallel after the foundation is in place.
@@ -33,7 +33,7 @@ This order builds conceptual understanding for the scene-commitment-arc pivot:
 
 ### Tier 1 — Foundation (sequential)
 
-**SPEC-19 — Schemas + canonical vocabularies + stop-predicate DSL** (no dependencies):
+**SPEC-19 — Schemas + canonical vocabularies + stop-predicate DSL** (completed; archived at `archive/specs/SPEC-19-scene-commitment-arc-schema.md`):
 
 - Update `templates/storylet-record.yaml` to v2 schema.
 - Update `branching-story-page-cycle/references/record-schemas.md` for CHC v2 + ARC_TRACE.

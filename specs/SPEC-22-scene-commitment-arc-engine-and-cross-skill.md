@@ -4,7 +4,7 @@
 
 **Status**: PROPOSED (2026-05-07)
 **Phase**: machine-facing layer + cross-skill alignment + migration tier of the scene-commitment-arc pivot
-**Depends on**: SPEC-19 (schemas + canonical vocabularies)
+**Depends on**: archived SPEC-19 (schemas + canonical vocabularies)
 **Blocks**: SPEC-20 (runtime pipeline cannot submit arc-record patches without engine ops + validators), SPEC-21 (authoring cannot validate v2 records without validators + canonical vocabularies wired in)
 **Source**: `reports/scene-arc-storylet-research-brief.md`; `reports/scene-commitment-arc.md` §10 Validation Strategy, §6 Runtime Pipeline; current engine surface at `tools/patch-engine/`, `tools/validators/`, `tools/world-mcp/`, `tools/world-index/`; cross-checked against `docs/FOUNDATIONS.md` §Machine-Facing Layer, §Story Bundles, archived SPEC-13 (atomic-source migration) and archived SPEC-14 (PA contract reconciliation).
 
@@ -378,7 +378,7 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
 
 ## Out of Scope
 
-- **Schema definitions** — owned by SPEC-19.
+- **Schema definitions** — owned by archived SPEC-19.
 - **Runtime pipeline behavior** — owned by SPEC-20.
 - **Authoring-skill rewrite** — owned by SPEC-21.
 - **JIT arc promotion to author-pool** — deferred follow-on (a runtime JIT arc that validates and is approved may be promoted to author-pool by a future skill or manual workflow; the `provenance.origin: jit_promoted_to_authoring` value is reserved but not driven by v1).

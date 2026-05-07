@@ -1,6 +1,6 @@
 # SPEC19SCECOM-004: Truth stop-predicate ownership comments in SLT v2 schema
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — updates `storylet-pool-authoring` schema-template comments only. No runtime, validator, or canonical-vocabulary implementation changes.
@@ -8,17 +8,17 @@
 
 ## Problem
 
-Post-ticket review of `archive/tickets/SPEC19SCECOM-003.md` found one stale same-family handoff comment in `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`:
+At intake, post-ticket review of `archive/tickets/SPEC19SCECOM-003.md` found one stale same-family handoff comment in `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`:
 
 ```yaml
 predicate: <stop_predicate enum>     # closed enum — see SPEC-21 predicate-DSL extension
 ```
 
-That ownership pointer is now misleading. SPEC-19 / `archive/tickets/SPEC19SCECOM-003.md` owns the schema-text grammar in `templates/predicate-dsl.md`; SPEC-22 owns `stop_predicate` canonical-vocabulary implementation and `stop_policy_parsability`; SPEC-21 owns the authoring-skill operational rewrite. The SLT v2 schema template should point readers to those actual owners instead of implying SPEC-21 owns the predicate DSL extension itself.
+That ownership pointer was misleading. SPEC-19 / `archive/tickets/SPEC19SCECOM-003.md` owns the schema-text grammar in `templates/predicate-dsl.md`; SPEC-22 owns `stop_predicate` canonical-vocabulary implementation and `stop_policy_parsability`; SPEC-21 owns the authoring-skill operational rewrite. The SLT v2 schema template now points readers to those actual owners instead of implying SPEC-21 owns the predicate DSL extension itself.
 
 ## Assumption Reassessment (2026-05-07)
 
-1. Live template evidence: `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` still says `predicate: <stop_predicate enum>     # closed enum — see SPEC-21 predicate-DSL extension` in the `stop_policy.normal_exits[]` skeleton.
+1. At reassessment, live template evidence showed `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` still said `predicate: <stop_predicate enum>     # closed enum — see SPEC-21 predicate-DSL extension` in the `stop_policy.normal_exits[]` skeleton.
 2. Current grammar authority: `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` now contains `## Stop Predicates (third tier — v2 SLT arc.stop_policy)` with 11 normal-exit predicates, 8 interrupt-before predicates, and safety-valve thresholds, landed by `archive/tickets/SPEC19SCECOM-003.md`.
 3. Cross-artifact boundary under audit: `storylet-record.yaml` names the `stop_predicate` schema field; `predicate-dsl.md` documents allowed predicate forms; `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` owns `stop_policy_parsability` and canonical-vocabulary implementation; `specs/SPEC-21-scene-commitment-arc-authoring.md` owns authoring behavior, not the grammar-text owner.
 4. FOUNDATIONS principle under audit: Story Bundles Rule 1 and Rule 7 rely on deterministic schema/grammar handoffs. A stale ownership pointer does not weaken enforcement by itself, but it can send implementers to the wrong spec when wiring the closed stop-predicate grammar and Mystery Reserve firewall.
@@ -35,16 +35,16 @@ That ownership pointer is now misleading. SPEC-19 / `archive/tickets/SPEC19SCECO
 2. Correct grammar owner named -> codebase grep-proof that the comment points to `templates/predicate-dsl.md` or `SPEC-19`.
 3. Downstream implementation owner remains deferred -> manual review that the comment still names SPEC-22 for enum/validator implementation and does not claim runtime enforcement has landed.
 
-## What to Change
+## Landed Changes
 
 ### 1. Update the stop_policy predicate comment
 
-In `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`, replace the stale `SPEC-21 predicate-DSL extension` comment with wording that names:
+In `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`, replaced the stale `SPEC-21 predicate-DSL extension` comment with wording that names:
 
 - `templates/predicate-dsl.md` / SPEC-19 as the grammar-text authority.
 - SPEC-22 as the owner of the `stop_predicate` enum and `stop_policy_parsability` validator implementation.
 
-Keep the YAML skeleton shape unchanged.
+The YAML skeleton shape is unchanged.
 
 ## Files to Touch
 
@@ -59,11 +59,11 @@ Keep the YAML skeleton shape unchanged.
 
 ## Acceptance Criteria
 
-### Tests That Must Pass
+### Tests That Passed
 
-1. `! grep -n "SPEC-21 predicate-DSL extension" .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`
+1. `if grep -n 'SPEC-21 predicate-DSL extension' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml; then exit 1; fi`
 2. `grep -n "templates/predicate-dsl.md\\|SPEC-19\\|SPEC-22" .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`
-3. Manual review confirms only comments changed and the `stop_policy` YAML skeleton remains structurally identical.
+3. Manual review confirmed only comments changed and the `stop_policy` YAML skeleton remains structurally identical.
 
 ### Invariants
 
@@ -78,6 +78,25 @@ Keep the YAML skeleton shape unchanged.
 
 ### Commands
 
-1. `! grep -n "SPEC-21 predicate-DSL extension" .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`
+1. `if grep -n 'SPEC-21 predicate-DSL extension' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml; then exit 1; fi`
 2. `grep -n "templates/predicate-dsl.md\\|SPEC-19\\|SPEC-22" .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`
-3. `git diff --check -- .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml tickets/SPEC19SCECOM-004.md`
+3. `git diff --check -- .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml archive/tickets/SPEC19SCECOM-004.md`
+
+## Outcome
+
+Completed 2026-05-07. `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` now points `stop_policy.normal_exits[].predicate` readers to `templates/predicate-dsl.md` / SPEC-19 for grammar text and SPEC-22 for enum / validator implementation.
+
+The schema template shape is unchanged; only the ownership comment changed.
+
+## Verification Result
+
+Ran 2026-05-07:
+
+1. `if grep -n 'SPEC-21 predicate-DSL extension' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml; then exit 1; fi` -> passed with no matches.
+2. `grep -n "templates/predicate-dsl.md\\|SPEC-19\\|SPEC-22" .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` -> matched the updated comment plus existing SPEC-19 / SPEC-22 / `templates/predicate-dsl.md` references.
+3. Manual review of `git diff -- .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` confirmed the only source change is the single `stop_policy.normal_exits[].predicate` comment; the YAML skeleton remains structurally identical.
+4. `git diff --check -- .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml archive/tickets/SPEC19SCECOM-004.md` -> passed after archival.
+
+## Deviations
+
+None.

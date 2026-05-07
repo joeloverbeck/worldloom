@@ -2,8 +2,8 @@
 
 # SPEC-19: Scene-Commitment Arc Schema & Vocabulary
 
-**Status**: PROPOSED (2026-05-07)
-**Phase**: foundation tier of the scene-commitment-arc pivot
+**Status**: COMPLETED
+**Phase**: completed foundation tier of the scene-commitment-arc pivot
 **Depends on**: archived SPEC-13 (atomic-source migration — establishes the per-record-per-file `_source/<class>/<ID>.yaml` pattern for world canon); PEENH-001 (extends the same pattern to story-bundle records — the surface this spec extends with `arc-traces/`, per `docs/FOUNDATIONS.md` §Story Bundles §4)
 **Blocks**: SPEC-20 (runtime pipeline cannot bind to arc-shape until the schema is in place), SPEC-21 (authoring cannot generate v2 records without the schema), SPEC-22 (engine ops + validators consume the schema)
 **Source**: `reports/scene-arc-storylet-research-brief.md` (research brief authored 2026-05-06; pacing-pathology evidence + design direction); `reports/scene-commitment-arc.md` (ChatGPT-Pro deep-research proposal, 2026-05-06); cross-checked against `docs/FOUNDATIONS.md` §Story Bundles, §Canonical Storage Layer, §Validation Rules, and `docs/CONTEXT-PACKET-CONTRACT.md`.
@@ -402,3 +402,21 @@ The validators and runtime-state checks below are **owned by downstream specs**;
 - **Beat-function open vocab**: `beat_plan.beats[].function` is open-vocab (kebab-case), not enum-bound. This mirrors `tone_tags` / `theme_tags` discipline. A future spec may close the grammar if a stable beat-function vocabulary emerges.
 - **Stop-predicate args open-vocab**: the `args:` block of each stop predicate is type-checked per-predicate (each predicate has a fixed args schema), but several args use kebab-case open-vocab strings (e.g., `commitment_satisfied.args.commitment_class` is enum-bound; `commitment_blocked.args.reason_class` is open-vocab). The closed-vs-open distinction is documented per-predicate in the extended `predicate-dsl.md`.
 - **CLAUDE.md `ARCTRACE-NNNN` ID-class docs gap**: this spec introduces a new story-bundle-scoped record class but does not extend `CLAUDE.md` §ID Allocation Conventions. The docs update is routed through SPEC-22 §Track 3 (canonical-vocabularies + indexer + MCP retrieval) as a docs-update side-deliverable, alongside the `mcp__worldloom__allocate_next_id(world_slug, 'ARCTRACE', story_slug=...)` registration in SPEC-22 §Track 1. Failing to land the docs update would leave the new ID class undiscoverable from `CLAUDE.md` — a Rule-6 (No Silent Retcons) risk at the pipeline-conventions level.
+
+## Outcome
+
+Completed 2026-05-07. SPEC-19's schema-text foundation landed through the archived SPEC19SCECOM ticket batch:
+
+1. `archive/tickets/SPEC19SCECOM-001.md` landed the SLT v2 template in `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`, including `record_version: 2`, `shape: scene_commitment_arc`, the seven scene-commitment-arc structural blocks, `choice_templates` retirement, and a minimal parent-skill transition disclosure.
+2. `archive/tickets/SPEC19SCECOM-002.md` landed CHC v2 field documentation and the ARC_TRACE record class prose anchor in `.claude/skills/branching-story-page-cycle/references/record-schemas.md`, plus a minimal parent-skill transition disclosure.
+3. `archive/tickets/SPEC19SCECOM-003.md` landed the stop-predicate third tier in `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md`, including normal-exit predicates, interrupt-before predicates, safety-valve thresholds, closed-vs-open args discipline, and Mystery Reserve firewall semantics.
+4. `archive/tickets/SPEC19SCECOM-004.md` corrected the final SLT v2 stop-predicate ownership comment so grammar text points to `templates/predicate-dsl.md` / SPEC-19 and enum / validator implementation remains owned by SPEC-22.
+
+Deviations from the original proposed spec remain intentional boundaries, not unfinished SPEC-19 work: runtime behavior stays owned by SPEC-20, authoring-skill operational rewrite by SPEC-21, and validator / TypeScript / canonical-vocabulary / patch-engine / indexer implementation by SPEC-22.
+
+Verification completed 2026-05-07 by the archived ticket proofs and final archival checks:
+
+1. SLT v2 schema text contains the seven required blocks named in SPEC-19 §A.
+2. CHC v2 and ARC_TRACE schema text are documented in the page-cycle record-schema reference.
+3. The predicate DSL template contains the stop-predicate third tier and SPEC-22 validator deferral.
+4. The stale SPEC-21-only stop-predicate ownership comment was removed from the SLT v2 template.

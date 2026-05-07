@@ -4,7 +4,7 @@
 
 **Status**: PROPOSED (2026-05-07)
 **Phase**: authoring tier of the scene-commitment-arc pivot
-**Depends on**: SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
+**Depends on**: archived SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
 **Blocks**: none — SPEC-20 (runtime) and SPEC-21 (authoring) are independent given SPEC-19 + SPEC-22
 **Source**: `reports/scene-arc-storylet-research-brief.md`; `reports/scene-commitment-arc.md` §11 Pool-Thin Runtime Generation, §17 Highest-Leverage Decisions; current authoring skill at `.claude/skills/storylet-pool-authoring/SKILL.md`; cross-checked against `docs/FOUNDATIONS.md` §Story Bundles, Rule 11 (No Spectator Castes).
 
@@ -370,7 +370,7 @@ Each archetype entry is ~30-50 lines of structured prose + YAML sketches. Initia
 
 ## Out of Scope
 
-- **Schema definitions** — owned by SPEC-19.
+- **Schema definitions** — owned by archived SPEC-19.
 - **Runtime pipeline behavior** — owned by SPEC-20.
 - **Engine ops + validators + canonical-vocabularies + sibling-skill alignment** — owned by SPEC-22.
 - **JIT arc promotion to author-pool** — deferred follow-on (a runtime JIT arc that validates and is approved may be promoted to a permanent author-pool record by a future skill or manual workflow; not in v1).

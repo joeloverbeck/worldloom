@@ -48,7 +48,7 @@ Surfaced post-initial-write by user query and folded back into the spec set:
 
 | Spec | Path | One-line rationale |
 |---|---|---|
-| SPEC-19 | `specs/SPEC-19-scene-commitment-arc-schema.md` | Foundation tier — SLT v2, CHC v2, ARC_TRACE record class, stop-predicate DSL extension, canonical-vocabulary enums. Every other spec consumes this. |
+| SPEC-19 | `archive/specs/SPEC-19-scene-commitment-arc-schema.md` | Completed foundation tier — SLT v2, CHC v2, ARC_TRACE record class, stop-predicate DSL extension, canonical-vocabulary enums. Every other spec consumes this. |
 | SPEC-20 | `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` | Runtime tier — page-cycle rewrite for arc selection + effect-variant-before-render + multi-beat render + ARC_TRACE extraction + choice-surface gate. |
 | SPEC-21 | `specs/SPEC-21-scene-commitment-arc-authoring.md` | Authoring tier — storylet-pool-authoring rewrite for arc semantics + arc archetype library (14-20 archetypes) + Rule 11 leverage gate. |
 | SPEC-22 | `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` | Machine-layer + sibling-skill + migration tier — patch-engine op + 7 validators + canonical-vocabularies + indexer + MCP retrieval + branching-story-bootstrap/health-audit/promotion alignment + test-story discard. |

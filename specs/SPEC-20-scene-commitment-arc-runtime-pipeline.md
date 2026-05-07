@@ -4,7 +4,7 @@
 
 **Status**: PROPOSED (2026-05-07)
 **Phase**: runtime tier of the scene-commitment-arc pivot
-**Depends on**: SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
+**Depends on**: archived SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
 **Blocks**: none — SPEC-21 (authoring) and SPEC-20 (runtime) are independent given SPEC-19 + SPEC-22
 **Source**: `reports/scene-arc-storylet-research-brief.md`; `reports/scene-commitment-arc.md`; current pipeline at `.claude/skills/branching-story-page-cycle/SKILL.md` and `references/`; cross-checked against `docs/FOUNDATIONS.md` §Story Bundles, `docs/HARD-GATE-DISCIPLINE.md`.
 
@@ -314,7 +314,7 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 
 ## Out of Scope
 
-- **Schema definitions** — owned by SPEC-19.
+- **Schema definitions** — owned by archived SPEC-19.
 - **Authoring-skill rewrite** — owned by SPEC-21.
 - **Patch-engine ops + validators + canonical-vocabularies + sibling-skill alignment** — owned by SPEC-22.
 - **Migration of existing test story bundle** — owned by SPEC-22 §Migration.
