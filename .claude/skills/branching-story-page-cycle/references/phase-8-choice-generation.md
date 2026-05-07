@@ -242,14 +242,16 @@ For each surviving structured choice, the LLM writes the user-facing label:
 ```
 [content_policy block]
 [scene context summary]
-[structured choice - operation, actor, target, uses_fact, likely_effects,
- choice_mode, poetic_effect]
+[structured choice - choice_kind, commitment_class, strategy_cluster,
+ choice_worthiness, choice_contract, likely_effects, continuation_capacity]
 
 INSTRUCTION:
-Write the user-facing label for this choice. Faithful to the underlying operation -
-do not embellish in ways that lie about what the choice does. Match the prose tone.
-Length: 5-15 words. Prefer active voice. Do not preview the outcome explicitly;
-the player should make the choice without knowing exactly what will happen.
+Write the user-facing label for this choice. Faithful to the validated CHC v2
+record - especially `commitment_class`, `choice_worthiness`, `choice_contract`,
+and `likely_effects`. Do not embellish in ways that lie about what the choice
+does. Match the prose tone. Length: 5-15 words. Prefer active voice. Do not
+preview the outcome explicitly; the player should make the choice without knowing
+exactly what will happen.
 ```
 
 Labels are surface text only. They must remain faithful to the validated CHC v2

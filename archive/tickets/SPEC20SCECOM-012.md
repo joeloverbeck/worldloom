@@ -1,6 +1,6 @@
 # SPEC20SCECOM-012: Phase 8 — Label Prompt CHC v2 Field Alignment
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` Step 5 label-rendering prompt updated to consume CHC v2 fields instead of stale v1 `choice_mode` / `poetic_effect` prompt fields.
@@ -8,16 +8,16 @@
 
 ## Problem
 
-Post-ticket review of `archive/tickets/SPEC20SCECOM-005.md` found that the new Phase 8 reference correctly rewrote the gate around CHC v2, but Step 5's preserved label-rendering prompt still lists `choice_mode` and `poetic_effect` in the structured-choice input block. The live CHC v2 contract in `record-schemas.md` centers `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, `choice_contract`, `likely_effects`, and `continuation_capacity`. Leaving Step 5's prompt on stale v1 fields weakens the handoff from choice-worthiness validation to label rendering.
+At intake, post-ticket review of `archive/tickets/SPEC20SCECOM-005.md` found that the new Phase 8 reference correctly rewrote the gate around CHC v2, but Step 5's preserved label-rendering prompt still listed `choice_mode` and `poetic_effect` in the structured-choice input block. The live CHC v2 contract in `record-schemas.md` centers `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, `choice_contract`, `likely_effects`, and `continuation_capacity`. This ticket aligned Step 5's prompt with those v2 fields so the handoff from choice-worthiness validation to label rendering no longer names stale v1 prompt fields.
 
 ## Assumption Reassessment (2026-05-07)
 
-1. Verified `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` Step 5 currently includes `[structured choice - operation, actor, target, uses_fact, likely_effects, choice_mode, poetic_effect]`.
+1. At intake, verified `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` Step 5 included `[structured choice - operation, actor, target, uses_fact, likely_effects, choice_mode, poetic_effect]`.
 2. Verified `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` Step 2 assembles CHC v2 candidates with `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, `choice_contract`, `likely_effects`, `continuation_capacity`, `content_intensity_implied`, and `label`.
 3. Verified `.claude/skills/branching-story-page-cycle/references/record-schemas.md` documents CHC v2 fields as `record_version`, `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, preserved `choice_contract`, mandatory non-empty `likely_effects`, and `continuation_capacity`.
 4. Cross-artifact boundary: the Step 5 label-rendering prompt consumes the validated CHC v2 working record produced by Phase 8 Steps 2-4. Its input list must match the CHC v2 field vocabulary closely enough that labels remain faithful to `choice_contract` and `choice_worthiness`.
 5. FOUNDATIONS Rule 1 (No Floating Facts) at story scope: the label renderer must not route around the populated choice-worthiness fields that make a CHC non-floating. Labels are surface text, but their prompt inputs should preserve the validated structural rationale.
-6. Mismatch correction: replace the stale v1 prompt field list with CHC v2 fields and add a narrow stale-anchor proof that `choice_mode` / `poetic_effect` no longer appear in the Phase 8 reference.
+6. Mismatch correction landed: the stale v1 prompt field list was replaced with CHC v2 fields. Narrow stale-anchor proof confirms `choice_mode` / `poetic_effect` no longer appear in the Phase 8 reference.
 
 ## Architecture Check
 
@@ -30,15 +30,15 @@ Post-ticket review of `archive/tickets/SPEC20SCECOM-005.md` found that the new P
 2. Stale v1 label prompt fields removed from Phase 8 reference → negative codebase grep-proof for `choice_mode` and `poetic_effect` in that file.
 3. CHC v2 schema remains the authority → manual review against `record-schemas.md` CHC v2 section.
 
-## What to Change
+## Landed Changes
 
 ### 1. Phase 8 Step 5 prompt input list
 
-In `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`, update the Step 5 structured-choice prompt block to name CHC v2 fields such as `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, `choice_contract`, `likely_effects`, and `continuation_capacity`.
+In `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`, updated the Step 5 structured-choice prompt block to name CHC v2 fields: `choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`, `choice_contract`, `likely_effects`, and `continuation_capacity`.
 
 ### 2. Step 5 label-fidelity note
 
-Keep the existing label discipline: 5-15 words, faithful to the validated operation/commitment, no outcome preview, and no promises absent from `choice_contract`. Add or preserve a note that labels are surface text only and must remain faithful to the validated CHC v2 record.
+Preserved the existing label discipline: 5-15 words, faithful to the validated operation/commitment, no outcome preview, and no promises absent from `choice_contract`. The prompt now tells the label renderer to stay faithful to the validated CHC v2 record, especially `commitment_class`, `choice_worthiness`, `choice_contract`, and `likely_effects`.
 
 ## Files to Touch
 
@@ -75,3 +75,17 @@ Keep the existing label discipline: 5-15 words, faithful to the validated operat
 1. `grep -nE "commitment_class|choice_worthiness|choice_contract|likely_effects|continuation_capacity" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — confirms CHC v2 fields are present in the Phase 8 reference.
 2. `! grep -nE "choice_mode|poetic_effect" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` — confirms stale v1 label prompt fields are removed.
 3. Manual review against `.claude/skills/branching-story-page-cycle/references/record-schemas.md` CHC v2 section.
+
+## Outcome
+
+Completed: 2026-05-07. `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` Step 5 now feeds the label renderer the CHC v2 working-record fields validated by Phase 8 Steps 2-4. The stale v1 `choice_mode` / `poetic_effect` prompt inputs were removed from the Phase 8 reference.
+
+## Verification Result
+
+1. PASS — `grep -nE "commitment_class|choice_worthiness|choice_contract|likely_effects|continuation_capacity" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` shows the CHC v2 fields in the Phase 8 reference, including the Step 5 prompt block.
+2. PASS — `grep -nE "choice_mode|poetic_effect" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` returned no matches, which is the intended stale-anchor proof.
+3. PASS — manual review against `.claude/skills/branching-story-page-cycle/references/record-schemas.md` CHC v2 section confirmed the Step 5 prompt now names the v2 field vocabulary that carries `choice_contract`, mandatory non-empty `likely_effects`, and `continuation_capacity`.
+
+## Deviations
+
+1. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` still contains v1 Phase 8 summary prose with `choice_mode` / `poetic_effect`; this remains outside this ticket's file boundary and is owned by `tickets/SPEC20SCECOM-009.md` per this ticket's original scope.

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md` Path A standard-choice prose updated to consume CHC v2 fields, including `commitment_class`, instead of stale v1 `choice_mode` / `poetic_effect` framing.
-**Deps**: `archive/tickets/SPEC20SCECOM-006.md` (Path B write-in classifier now supplies the write-in side of the Phase 4 commitment-class handoff); `archive/tickets/SPEC20SCECOM-005.md` and `tickets/SPEC20SCECOM-012.md` (Phase 8 emits and label-renders CHC v2 records)
+**Deps**: `archive/tickets/SPEC20SCECOM-006.md` (Path B write-in classifier now supplies the write-in side of the Phase 4 commitment-class handoff); `archive/tickets/SPEC20SCECOM-005.md` and `archive/tickets/SPEC20SCECOM-012.md` (Phase 8 emits and label-renders CHC v2 records)
 
 ## Problem
 
@@ -45,7 +45,7 @@ Add one sentence stating that the selected CHC's `commitment_class` is carried f
 ## Out of Scope
 
 - Path B write-in classifier (completed by `archive/tickets/SPEC20SCECOM-006.md`).
-- Phase 8 label-prompt field cleanup (owned by `tickets/SPEC20SCECOM-012.md`).
+- Phase 8 label-prompt field cleanup (landed in `archive/tickets/SPEC20SCECOM-012.md`).
 - Parent `branching-story-page-cycle/SKILL.md` process-flow integration (owned by `tickets/SPEC20SCECOM-009.md`).
 - Runtime validators and capstone fixture proof (SPEC-22 and `tickets/SPEC20SCECOM-011.md`).
 
