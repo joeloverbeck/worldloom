@@ -6,7 +6,15 @@ Two paths converge into a single validated `ProposedEvent`.
 
 - `chosen_choice_id ∈ parent_page.emitted_choices` (verified at Pre-flight).
 - Load `_source/choices/<chosen_choice_id>.yaml`.
-- `ProposedEvent` populated directly from CHC's structured fields: `operation`, `actor`, `target`, `instrument` (if present), `uses_fact`, `likely_effects`, `choice_mode`, `poetic_effect`, `choice_contract` (carries `allowed_outcome_band` and `forbidden_outcomes` — Phase 7 / Phase 8 / Phase 9 honor this contract).
+- `ProposedEvent` is populated from the selected CHC v2 record's structured
+  fields: `choice_kind`, `commitment_class`, `strategy_cluster`,
+  `choice_worthiness`, `choice_contract`, `likely_effects`, and
+  `continuation_capacity`, plus any deterministic operation/actor/target
+  payload fields carried by the choice's `choice_contract`.
+- Carry the selected CHC's `commitment_class` forward to Phase 4; the arc
+  selection hard filter admits only arcs whose `arc.arc_contract.commitment_class`
+  matches that value. Phase 7 / Phase 8 / Phase 9 continue to honor
+  `choice_contract` and `continuation_capacity`.
 
 ## Path B — Write-In (LLM acts as parser)
 
