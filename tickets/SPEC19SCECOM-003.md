@@ -135,7 +135,7 @@ Update the file's introductory framing (the "the DSL is finite — extending it 
 - Predicate args schema enforcement at parse time (owned by SPEC-22 Track 2 — per-predicate args validation)
 - Migration of existing v1 SLT records (owned by SPEC-22 Track 5)
 - Integration with `arc.stop_policy` block on v2 SLT records (the v2 SLT schema itself was completed by `archive/tickets/SPEC19SCECOM-001.md`; this ticket documents only the predicate grammar consumed by `arc.stop_policy.*.predicate` fields)
-- ARC_TRACE `stop_condition_hit` field (owned by ticket SPEC19SCECOM-002 in this batch — the field references stop-policy entries by id, but the predicate grammar lives here)
+- ARC_TRACE `stop_condition_hit` field (completed by `archive/tickets/SPEC19SCECOM-002.md` — the field references stop-policy entries by id, but the predicate grammar lives here)
 
 ## Acceptance Criteria
 

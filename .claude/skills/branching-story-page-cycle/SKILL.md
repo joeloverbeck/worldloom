@@ -39,6 +39,8 @@ arguments:
 
 Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next storylet (with JIT expansion if the pool is thin), renders the next page's prose, generates 4-6 structured choices + a write-in slot, validates against firewalls and the recursive branch-isolation invariant, and commits the new records plus markdown surfaces through Phase 11's staged write path — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
 
+**Schema transition note (SPEC-19 Tier 1):** `references/record-schemas.md` now documents the forward v2 CHC fields and ARC_TRACE record class from SPEC-19. The full runtime rewrite that emits/consumes scene-commitment arcs, applies effect variants, extracts ARC_TRACE, and replaces the v1 beat-oriented Phase 8 choice surface remains SPEC-20 scope; current operational phase prose below is not the completed v2 runtime.
+
 <HARD-GATE>
 Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages-prose/`, and do NOT `Edit` the bundle's `INDEX.md`, until:
 
