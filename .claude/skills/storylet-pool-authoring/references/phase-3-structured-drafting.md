@@ -1,6 +1,6 @@
 # Phase 3: Structured Drafting
 
-For each seed, generate the full SLT record per the schema in `templates/storylet-record.yaml`. The LLM proposes the structured content; the engine wraps the LLM output with the schema scaffolding, validates field types, and records `choice_templates` verbatim as runtime scaffolds.
+For each seed, generate the full SLT record per the schema in `templates/storylet-record.yaml`. During the SPEC-19/SPEC-21 transition, the template is the forward v2 schema authority; legacy operational references to `choice_templates` below describe the pre-SPEC-21 workflow and remain pending the full authoring rewrite. The LLM proposes the structured content; the engine wraps the LLM output with the schema scaffolding, validates field types, and records the runtime scaffolds required by the active schema version.
 
 **LLM Prompt Assembly** (the order matters; content_policy is FIRST so it binds the model before any other instruction):
 
@@ -19,7 +19,9 @@ For each seed, generate the full SLT record per the schema in `templates/storyle
                  (each STENT's role + intention summary)]
 
 [predicate DSL grammar — verbatim from templates/predicate-dsl.md so the LLM
-                          generates parsable preconds, not free-form prose]
+                          generates parsable eligibility preconds and, under
+                          v2, parsable stop_policy predicates rather than
+                          free-form prose]
 
 [tone/theme tag dictionary — verbatim from templates/tone-theme-tag-dictionary.md
                               as recommended-but-non-binding vocabulary so tone_tags
@@ -29,7 +31,11 @@ For each seed, generate the full SLT record per the schema in `templates/storyle
 INSTRUCTION:
 Produce a structured storylet record matching the SLT schema. Define hard_preconds
 and soft_preconds as predicates from the supplied DSL — free-form prose predicates
-will be hard-rejected at Phase 4. Define fact_effects and relationship_effects as
+will be hard-rejected at Phase 4. Under the v2 scene-commitment-arc schema, define
+`arc.stop_policy.normal_exits[].predicate` and
+`arc.stop_policy.interrupt_before[].predicate` using the stop-predicate third tier
+from the same DSL; free-form stop predicates are rejected by downstream
+`stop_policy_parsability`. Define fact_effects and relationship_effects as
 structured ops (op + template + epistemic_class). Every created fact_template
 also carries `visible_to_reader` and `reader_visibility_basis`; default to
 `visible_to_reader: false` and
@@ -69,7 +75,7 @@ mode-and-source-driven rule below.
 **Engine wraps the LLM output**:
 
 - Validates schema against `templates/storylet-record.yaml`: every required field present, types correct. The candidate is held under its candidate-index label (`Cn`) in the run's allocation buffer; the LLM's structured proposal is held against the next reserved SLT range without committing to a specific `SLT-NNNN` id until Phase 5 cull selects survivors. This avoids the manual-renumber failure mode when Phase 5 cull drops candidates between draft time and write time.
-- Validates predicate syntax against the Predicate DSL (in `templates/predicate-dsl.md`); free-form prose predicates fail here and route back to LLM with the DSL grammar inlined as the failure message.
+- Validates predicate syntax against the Predicate DSL (in `templates/predicate-dsl.md`); free-form prose predicates fail here and route back to LLM with the DSL grammar inlined as the failure message. Under v2, stop-policy predicates use the same documented grammar surface, with `stop_policy_parsability` enforcement owned by SPEC-22.
 - Generates the `obligation_template` / `fact_template` / `cast_role` machinery from the LLM's structured proposal, normalizing role-vs-STENT references. For created SF templates, fills missing reader-visibility fields with `visible_to_reader: false` and `reader_visibility_basis: unrevealed_objective_truth`; rejects or re-prompts any `visible_to_reader: true` template whose basis is missing or `unrevealed_objective_truth`.
 - Records the LLM's `choice_templates` verbatim — they are runtime-overridable scaffolds, not prescriptions.
 

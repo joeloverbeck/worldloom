@@ -104,7 +104,7 @@ execution_envelope:                          # what governs prose render under t
 stop_policy:
   normal_exits:                              # any of these closes the arc cleanly
     - id: <kebab-case stop id>
-      predicate: <stop_predicate enum>       # closed enum — see SPEC-21 predicate-DSL extension
+      predicate: <stop_predicate enum>       # closed enum — grammar in §D; enum implementation in SPEC-22
       args: {...}                            # predicate-specific args
   interrupt_before:                          # any of these interrupts the arc before completion
     - id: <kebab-case interrupt id>
