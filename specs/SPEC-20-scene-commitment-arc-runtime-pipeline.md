@@ -5,12 +5,12 @@
 **Status**: PROPOSED (2026-05-07)
 **Phase**: runtime tier of the scene-commitment-arc pivot
 **Depends on**: archived SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
-**Blocks**: none — SPEC-21 (authoring) and SPEC-20 (runtime) are independent given SPEC-19 + SPEC-22
+**Blocks**: none — SPEC-21 (authoring) is independent given SPEC-19 + SPEC-22; this spec is the runtime tier
 **Source**: `reports/scene-arc-storylet-research-brief.md`; `reports/scene-commitment-arc.md`; current pipeline at `.claude/skills/branching-story-page-cycle/SKILL.md` and `references/`; cross-checked against `docs/FOUNDATIONS.md` §Story Bundles, `docs/HARD-GATE-DISCIPLINE.md`.
 
 ## Problem Statement
 
-The current `branching-story-page-cycle` is structurally beat-paced. Phase 4 selects one beat-granular SLT, Phase 7 renders one beat as ~500-1500 words of prose, Phase 8 always emits 4-6 structured choices, and the user is asked to commit to one before another beat-render can fire. This produces:
+The current `branching-story-page-cycle` is structurally beat-paced. Phase 4 selects one beat-granular SLT, Phase 7 renders one beat per cycle (length per Prose Craft Contract Rule 11), Phase 8 always emits 4-6 structured choices, and the user is asked to commit to one before another beat-render can fire. This produces:
 
 - **Beat-cadence agency theater**: 30 emitted choices over 8 pages, with `likely_effects` empty in 30/30 records (test-story evidence).
 - **Late-page collapse**: by page 4 of the test story, choices have collapsed from "what kind of scene are we playing?" to postural/verbal-register variants ("Hold the silence," "Take a half-step back," "Give his name back," "Ask two words").
@@ -91,7 +91,7 @@ Phase 5's structured-op application is preserved but the source-of-truth shifts.
 
 ### D. Phase 7 — Multi-Beat Arc Render
 
-Phase 7's render produces ~1500-2200 words of prose covering all beats of the arc in ONE LLM call. The prompt structure is:
+Phase 7's render produces continuous prose covering all beats of the arc in ONE LLM call (length per Prose Craft Contract Rule 11 — the prose is as long as the beats, the cast's reactions, and the natural close-where-the-next-commitment-becomes-available require, with no target word count and no minimum-or-maximum word range). The prompt structure is:
 
 ```
 [content_policy verbatim]
@@ -111,15 +111,16 @@ INSTRUCTION:
 Render the arc as continuous prose, NOT as a beat-headered enumeration. The beat plan
 is the structural sketch — the prose should embody the beats as scene movement, not
 list them. The arc closes when one of stop_policy.normal_exits[] fires; arrange the
-prose to drive toward exactly one exit. Do not exceed max_words. Do not violate any
-prohibited_actions. Do not resolve any forbidden mystery.
+prose to drive toward exactly one exit. Honor Prose Craft Contract Rule 11: length
+follows content; do not pad to fill space and do not truncate to fit a budget. Do
+not violate any prohibited_actions. Do not resolve any forbidden mystery.
 ```
 
-**Post-render fail-fast checks** (existing 7-axis prose critic preserved): filter-word saturation, recurring-metaphor across pages, identical-anchor recurrence, self-narrating-self, bracket-paraphrasing-dialogue, ledger-jargon-leakage, abstract-noun-saturation. Critic budget: up to 3 re-prompts (shared with Phase 7.6's three-layer validation).
+**Post-render fail-fast checks** (existing 8-axis prose critic preserved per `prose-craft-contract.md`): filter-word saturation, recurring-metaphor across pages, identical-anchor recurrence, self-narrating-self, bracket-paraphrasing-dialogue, ledger-jargon-leakage, abstract-noun-saturation, padding-or-truncation. Critic budget: up to 3 re-prompts (shared with Phase 7.6's three-layer validation).
 
 **Beat-header policy**: the LLM MUST NOT emit beat headers in the rendered prose. Beat plans live in the prompt; the prose is continuous. Validator: a markdown-header-detection pass on the rendered prose; presence of headers → re-prompt.
 
-**Word-count target**: arc render targets `arc.beat_plan.min_beats * 300` to `arc.beat_plan.max_beats * 350` words by default. `arc.stop_policy.safety_valves.max_words` is the hard cap; over-budget renders are re-prompted with constraint.
+**Length per Prose Craft Contract Rule 11**: arc render length follows content — the prose is as long as the beats, the cast's reactions, and the natural close-where-the-next-commitment-becomes-available require. There is no target word count, no minimum to clear, and no maximum to honor at the LLM-facing surface. The engine-side `arc.stop_policy.safety_valves.max_words` is a runaway-defense termination trigger only (engine sees it; LLM does not); it is never surfaced in the rendering prompt and is not used as a re-prompt constraint. Pacing — how multi-beat the prose feels, how often the user is asked to commit — is expressed structurally through `arc.beat_plan.min_beats` / `max_beats` and the `cadence_policy` arc-unit fields in §H, not through any word-count budget.
 
 ### E. Phase 7.6 — ARC_TRACE Extraction + Three-Layer Validation
 
@@ -129,7 +130,7 @@ Three layers of validation, in order. Each layer can fail back to Phase 7 with c
 
 **Layer 1 — Deterministic Structural Validation** (engine-only, no LLM):
 - Markdown-header absence in prose.
-- Word count within `[min_beats * 300, safety_valves.max_words]`.
+- Beat-count fidelity: the ARC_TRACE's `realized_beats[]` count is in `[arc.beat_plan.min_beats, arc.beat_plan.max_beats]` (the prose realized the structural skeleton without truncation or runaway). The engine-side `safety_valves.max_words` is enforced as an absolute runaway-cutoff only — exceeding it is HARD-FAIL (re-prompt with a runaway-defense surfacing); coming in under any word count is NOT a fail at this layer per Prose Craft Contract Rule 11.
 - All `forbidden_resolutions[]` M ids absent from any extracted claim's `canon_status: forbidden_risk`.
 - Branch-scope legality (no sibling-branch references).
 - Effect-variant legality (the chosen variant exists in the arc's `effect_model.variants[]`).
@@ -159,6 +160,8 @@ Per-mode budget for Layer 3:
 
 **ARC_TRACE persistence**: an ARC_TRACE record is created per page (`create_arc_trace_record` op; SPEC-22). The record is non-authoritative for replay; deletion or omission does not break replay-equality. In `interactive_runtime` mode under low-budget configurations, the trace may be omitted (the page's `state_snapshot` records this as `arc_trace_emitted: false`).
 
+**Phase 9 gate `arc_envelope_conformance`** (deterministic; consumes the ARC_TRACE produced above): for pages whose ARC_TRACE was emitted, validates that no `possible_violations[]` entry of `severity: high` slipped past Phase 7.6 Layers 1-3 unaddressed; that every `possible_violations[].envelope_item` references a real entry in `arc.execution_envelope.{invariants, required_functions, prohibited_actions}`; and that the trace's `effect_evidence[]` realized-status is consistent with the chosen variant's `required_effects[]`. This gate is the structural counterpart to Layer 3's LLM critic — Layer 3 produces the verdict, `arc_envelope_conformance` deterministically checks the verdict's evidence-shape at canonical-record-time. The validator implementation is owned by SPEC-22 §Track 2 (currently lists 7 validators; this gate is an 8th — surfaced via the cross-spec Risks entry below). Pages with `arc_trace_emitted: false` auto-PASS this gate with rationale `"ARC_TRACE not emitted under low-budget interactive_runtime configuration"`.
+
 ### F. Phase 8 — Choice-Surface Gate
 
 Phase 8 stops being an agency-generator and becomes a choice-surface validator. The 5-step Amendment B pipeline (affordance-space collection → salient shortlist → LLM proposer → engine validation → diversification) is REPLACED by:
@@ -171,7 +174,7 @@ The engine deterministically classifies the current narrative point into one of 
 | `CONTINUE_ARC` | The chosen arc has not yet hit any of its `stop_policy.normal_exits[]` or `interrupt_before[]` predicates. (This case never reaches Phase 8 in the current pipeline because Phase 7 renders the full arc to close — but it's reachable via Phase 7.6's `revise_prose` route or for arcs whose multi-page rendering is split. In v1, this class is emitted only when the Phase 7.6 verdict is `revise_prose` and the operator chooses NOT to revise; the runtime auto-chains another arc tick.) |
 | `NATURAL_COMMITMENT_HINGE` | The arc closed at one of its `stop_policy.normal_exits[]`. The default case for a clean arc render. |
 | `INTERRUPT_HINGE` | The arc closed via `stop_policy.interrupt_before[]`, OR Phase 7.6 emitted `promote_interrupt`. A menu IS REQUIRED. |
-| `CONTINUE_ONLY_PAUSE` | The arc closed at a `safety_valves.max_words_reached` or `safety_valves.max_internal_beats_reached` AND only one plausible next commitment exists in the exit_portfolio. Emit a "Continue" affordance only. |
+| `CONTINUE_ONLY_PAUSE` | An engine-only runaway-defense fired — `safety_valves.max_words_reached` (absolute prose-length ceiling, never surfaced to the LLM as a soft target) or `safety_valves.max_internal_beats_reached` — AND only one plausible next commitment exists in the exit_portfolio. Both predicates are runaway-defenses, not pacing targets; pacing is governed by `arc.beat_plan` and §H's arc-unit `cadence_policy`. Emit a "Continue" affordance only. |
 | `TERMINAL_OR_CHAPTER_CLOSE` | The branch is terminal (existing terminal-branch logic preserved). No menu. |
 
 Engine-deterministic classification is the default; if the engine cannot decide (e.g., ambiguous stop_condition_hit), an LLM classifier provides a verdict subject to engine validation.
@@ -238,10 +241,8 @@ Add two optional blocks to `STORY_KERNEL.md` (the per-bundle root config). When 
 
 ```yaml
 cadence_policy:
-  default_min_words_between_menus: 1200
-  preferred_words_per_arc: [700, 2000]
   max_arcs_without_menu_soft: 2
-  max_words_without_player_commitment_soft: 3500
+  max_arcs_without_player_commitment_soft: 4
   allow_continue_only_pages: true
   force_menu_only_on_interrupt_hinge: false
 
@@ -254,6 +255,8 @@ menu_policy:
 ```
 
 Defaults (when blocks are absent): the values shown above. The blocks live on STORY_KERNEL.md, not on individual arcs, because they describe per-bundle authorial taste, not per-arc structure.
+
+**No word-count fields in `cadence_policy`**: pacing is deliberately expressed in arc-units (`max_arcs_without_menu_soft`, `max_arcs_without_player_commitment_soft`) rather than word-units (no `default_min_words_between_menus`, no `preferred_words_per_arc`, no `max_words_without_player_commitment_soft`). This honors Prose Craft Contract Rule 11 — length follows content, not a per-bundle word budget — and prevents the padding pathology that drove commit `b28aead` (2026-05-06) to remove word-per-page guidelines from the rendering instructions in `phase-7-page-render.md` and `phase-7-root-page-render.md`. The engine-side `arc.stop_policy.safety_valves.max_words` (defined in archived SPEC-19 §A) remains as a runaway-defense termination trigger only; it is engine-internal and never surfaces to the LLM or to per-bundle config.
 
 ### I. Phase 11 + Pre-flight Extensions for ARC_TRACE Persistence
 
@@ -286,8 +289,9 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 | `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` | Rewrite as Phase 8: Choice-Surface Gate; replace Steps 1-4 with the 6-step gate above |
 | `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` | Add gates: `arc_envelope_conformance`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`, `choice_worthiness_completeness` (5 new gates; total Phase 9 gates: 17) |
 | `.claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md` | Add §Write-In Commitment-Class Classification |
-| `.claude/skills/branching-story-bootstrap/SKILL.md` (STORY_KERNEL template) | Add `cadence_policy` and `menu_policy` blocks to the STORY_KERNEL.md template |
+| `.claude/skills/branching-story-bootstrap/SKILL.md` (STORY_KERNEL template) | Add `cadence_policy` and `menu_policy` blocks to the STORY_KERNEL.md template (arc-unit fields only — see §H) |
 | `.claude/skills/branching-story-bootstrap/references/phase-X-story-kernel.md` (or equivalent) | Document the new STORY_KERNEL blocks |
+| `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` | Edit the SLT v2 schema comment at line 232 — drop the "(multi-beat target about 1500-2000 words)" framing from `safety_valves.max_words` and replace with engine-only runaway-defense semantics per Prose Craft Contract Rule 11 (the schema field stays; only the comment's "target" framing changes) |
 
 ## FOUNDATIONS Alignment
 
@@ -331,3 +335,5 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 - **Write-in commitment-class classification accuracy**: the LLM classifier may misclassify edge cases. The `REFUSE_ONLY_THROUGH_WORLD_LOGIC` fallback when classification fails is a safe default; user-facing UI should make the classification transparent ("Treating your action as a 'bounded_question' commitment — proceed?").
 - **STORY_KERNEL block backwards-compat**: existing v1 STORY_KERNEL.md files lack the `cadence_policy` / `menu_policy` blocks. The runtime applies defaults when absent. New stories bootstrapped after the cutover include the blocks (with defaults inlined, allowing per-bundle customization).
 - **Pre-empted ARC_TRACE in low-cost runtime modes**: when `arc_trace_emitted: false` (interactive_runtime low-budget configurations), debugging an arc-level pathology requires re-running the page in `authoring` mode to populate the trace. This is acceptable since `authoring` is the canonical authoring surface; `interactive_runtime` is for player-facing reading where trace is unnecessary.
+- **`ARCTRACE-NNNN` ID class CLAUDE.md docs gap**: SPEC-20 references `ARCTRACE-NNNN` heavily (§E, §I) but `CLAUDE.md` §ID Allocation Conventions does not yet list it. Archived SPEC-19's Risks already flagged this, and SPEC-22 §Track 3 (canonical-vocabularies + indexer + MCP retrieval) owns the docs update. Reassessment 2026-05-07 reverified that `CLAUDE.md` still does not list ARCTRACE — a Rule-6 (No Silent Retcons) risk at the pipeline-conventions level until SPEC-22 lands.
+- **`arc_envelope_conformance` validator implementation owned by SPEC-22 §Track 2 (cross-spec dependency)**: §E and the Phase 9 deliverables row name `arc_envelope_conformance` as one of the 5 new gates (total 17). At reassessment 2026-05-07, SPEC-22 §Track 2's validator list defines 7 validators (`arc_schema_compliance`, `choice_worthiness_completeness`, `stop_policy_parsability`, `effect_model_legality`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`) — `arc_envelope_conformance` is absent from SPEC-22's surface as the 8th validator. SPEC-22's own §Risks carries a cross-spec note pointing back at this gap so the post-SPEC-21 SPEC-22 reassessment can close it. Implementing SPEC-20's tickets without the SPEC-22 reassessment would surface this gap as an unassigned validator at ticket-decomposition time.
