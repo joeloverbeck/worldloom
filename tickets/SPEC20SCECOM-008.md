@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/pre-flight-and-prerequisites.md` ID pre-allocation list extended with `ARCTRACE-NNNN` per execution_mode budget; `.claude/skills/branching-story-page-cycle/SKILL.md` Phase 11 §1a envelope op-enumeration extended with `create_arc_trace_record`.
-**Deps**: SPEC20SCECOM-004 (ARC_TRACE record class consumed; Phase 7.6 produces the record at runtime); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 1 implements `create_arc_trace_record` patch-engine op + extends `expected_id_allocations.arc_trace_ids` envelope; SPEC-22 §Track 4 owns the PG `state_snapshot.arc_trace_id` / `arc_trace_emitted` schema fields)
+**Deps**: `archive/tickets/SPEC20SCECOM-004.md` (ARC_TRACE record class consumed; Phase 7.6 produces the record at runtime); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 1 implements `create_arc_trace_record` patch-engine op + extends `expected_id_allocations.arc_trace_ids` envelope; SPEC-22 §Track 4 owns the PG `state_snapshot.arc_trace_id` / `arc_trace_emitted` schema fields)
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` rewritten from 5-step Amendment B Pipeline to 6-step Choice-Surface Gate (narrative-point classification, hybrid exit portfolio, choice-worthiness validation, strong-axis pair distance, LLM surface label, write-in slot); CONTINUE_ONLY_PAUSE handling added; auto-chaining in interactive_runtime added; Bootstrap PG-0001 special-case mode documented.
-**Deps**: SPEC20SCECOM-004 (Phase 7.6 produces the ARC_TRACE that drives narrative-point classification); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements `choice_worthiness_completeness` validator + extends `choice_pair_distance` for v2 strong-axis collective difference; §Track 3 implements `commitment_class` and `strong_axis` enums)
+**Deps**: `archive/tickets/SPEC20SCECOM-004.md` (Phase 7.6 produces the ARC_TRACE that drives narrative-point classification); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements `choice_worthiness_completeness` validator + extends `choice_pair_distance` for v2 strong-axis collective difference; §Track 3 implements `commitment_class` and `strong_axis` enums)
 
 ## Problem
 

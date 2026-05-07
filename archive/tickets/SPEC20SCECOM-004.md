@@ -1,6 +1,6 @@
 # SPEC20SCECOM-004: Phase 7.6 (NEW) — ARC_TRACE Extraction + Three-Layer Validation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — NEW reference file `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`; ARC_TRACE record class consumed (record class itself defined in archived SPEC-19 §C); `arc_envelope_conformance` Phase 9 gate clarification documented at end of file.
@@ -8,16 +8,17 @@
 
 ## Problem
 
-The scene-commitment-arc pivot introduces ARC_TRACE — a derived per-page validation/debugging artifact that records what beats were realized, what envelope items the prose touched, what stop condition fired, and how the chosen variant's required_effects manifest in the prose. ARC_TRACE is non-authoritative for replay (replay is governed by `state_snapshot.applied_effect_variant` per SPEC20SCECOM-001); it exists for debugging arc-level pathologies and for the Phase 7.6 three-layer validation that protects render quality. SPEC-20 §E specifies the new Phase 7.6 (between Phase 7 and Phase 8) with three layers: deterministic structural (engine-only), post-render trace extraction (LLM critic), and semantic conformance critic (LLM critic). This ticket creates the reference file and documents the per-execution-mode budget that bounds Layer 3's token cost.
+At intake, the scene-commitment-arc pivot needed a dedicated Phase 7.6 reference for ARC_TRACE — a derived per-page validation/debugging artifact that records what beats were realized, what envelope items the prose touched, what stop condition fired, and how the chosen variant's required_effects manifest in the prose. ARC_TRACE is non-authoritative for replay (replay is governed by `state_snapshot.applied_effect_variant` per SPEC20SCECOM-001); it exists for debugging arc-level pathologies and for the Phase 7.6 three-layer validation that protects render quality. SPEC-20 §E specifies the new Phase 7.6 (between Phase 7 and Phase 8) with three layers: deterministic structural (engine-only), post-render trace extraction (LLM critic), and semantic conformance critic (LLM critic). This ticket created the reference file and documents the per-execution-mode budget that bounds Layer 3's token cost.
 
 ## Assumption Reassessment (2026-05-07)
 
-1. Verified the target path `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` does NOT yet exist (this ticket creates it); parent directory `.claude/skills/branching-story-page-cycle/references/` confirmed present and writable.
+1. At intake, verified the target path `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` did not exist and parent directory `.claude/skills/branching-story-page-cycle/references/` was present and writable. This ticket created the file.
 2. Verified archived SPEC-19 §C (`archive/specs/SPEC-19-scene-commitment-arc-schema.md`) defines the ARC_TRACE record class with all required blocks: `id`, `story_id`, `created_at_page`, `arc_realized`, `effect_variant_applied`, `realized_beats[]`, `observed_actions[]`, `observed_claims[]`, `possible_violations[]`, `stop_condition_hit`, `effect_evidence[]`, `semantic_critic_verdict`, `notes`. SPEC-22 §Track 1 owns the `create_arc_trace_record` patch-engine op; SPEC-22 §Track 2 owns the `arc_trace_evidence_alignment` validator.
 3. Cross-skill boundary: this ticket consumes (a) the rendered prose from SPEC20SCECOM-003 (Phase 7); (b) the chosen variant from SPEC20SCECOM-001 (Phase 4b); (c) the arc record's `beat_plan`, `execution_envelope`, `stop_policy` blocks. It produces an ARC_TRACE record consumed by Phase 8 (SPEC20SCECOM-005) for narrative-point classification AND by SPEC-22's `arc_trace_evidence_alignment` validator at Phase 9.
 4. FOUNDATIONS Rule 7 (Preserve Mystery Deliberately) — renumbered from template item 4: Layer 1's deterministic check that all `forbidden_resolutions[]` M ids are absent from any extracted claim's `canon_status: forbidden_risk` is the load-bearing Mystery-Reserve firewall at the page-cycle runtime. Documented as a HARD-FAIL surface — re-prompt budget exhaustion escalates to user with the constraint failures inlined.
 5. HARD-GATE / Mystery Reserve firewall semantics — renumbered from template item 5: Phase 7.6 does NOT modify Phase 4.5's canon-promotion HARD-GATE handoff to `story-fact-promotion-to-canon` (preserved as never-elided in every execution_mode). Layer 3's `reject_arc` verdict triggers a Phase 4 re-run with the current arc excluded — this is a structural recovery, not a Mystery Reserve firewall weakening.
 6. Schema extension (renumbered from template item 6): consumes ARC_TRACE record class (defined in archived SPEC-19 §C; landed via SPEC19SCECOM-002 in `record-schemas.md` prose anchor); does not extend the schema itself. Additive consumer-side documentation.
+7. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 validators, patch-engine op, canonical vocabularies, and capstone fixture lane remain pending. This ticket's truthful proof is the documentation surface: the new reference file, grep proofs for required anchors, and manual review against SPEC-20 §E, SPEC-22 Track 1/2/3, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md`.
 
 ## Architecture Check
 
@@ -35,11 +36,11 @@ The scene-commitment-arc pivot introduces ARC_TRACE — a derived per-page valid
 5. Per-execution-mode budget for Layer 3 → codebase grep-proof for the per-mode budget table.
 6. `arc_envelope_conformance` Phase 9 gate clarification → codebase grep-proof for the gate's check description (envelope-conformance against ARC_TRACE `possible_violations[]` evidence).
 
-## What to Change
+## Landed Changes
 
 ### 1. NEW file: `phase-7-6-arc-trace-extraction.md`
 
-Create `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` with the following structure:
+Created `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` with the following structure:
 
 - **Phase placement**: between Phase 7 (render) and Phase 8 (choice-surface gate).
 - **Layer 1 — Deterministic Structural Validation** (engine-only, no LLM):
@@ -75,9 +76,11 @@ Create `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace
 
 ### Tests That Must Pass
 
-1. Skill dry-run: `branching-story-page-cycle` advances one tick on a v2 fixture story; Phase 7 produces prose; Phase 7.6 Layer 1 passes (no markdown headers, beat-count in range, no forbidden-M risk); Layer 2 produces a valid ARC_TRACE record; Layer 3 verdict is `pass`.
-2. Layer 1 fail-fast: a fixture render with a markdown header `## Beat 1` triggers re-prompt; budget is consumed; after 3 re-prompts the user is escalated.
-3. Per-mode budget: `interactive_runtime` mode with no Layer 1/2 violation skips Layer 3 (cost-discipline); `authoring` mode always runs Layer 3.
+1. Documentation proof: `phase-7-6-arc-trace-extraction.md` exists and documents Phase 7.6 between Phase 7 and Phase 8.
+2. Documentation proof: Layer 1 lists the five deterministic checks and names forbidden-M preservation as a HARD-FAIL surface.
+3. Documentation proof: Layer 2 documents ARC_TRACE extraction and the `arc_trace_evidence_alignment` validator boundary.
+4. Documentation proof: Layer 3 documents the verdict enum `{pass, revise_prose, reject_arc, promote_interrupt}` and the per-execution-mode budget.
+5. Documentation proof: `arc_envelope_conformance` is documented as a Phase 9 deterministic gate with the `arc_trace_emitted: false` auto-PASS rationale.
 
 ### Invariants
 
@@ -98,3 +101,23 @@ Create `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace
 3. `grep -nE "authoring|interactive_runtime|batch_generation" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` — confirms per-execution-mode budget documented.
 4. `grep -n "arc_envelope_conformance" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` — confirms Phase 9 gate clarification lands.
 5. `grep -nE "pass|revise_prose|reject_arc|promote_interrupt" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` — confirms Layer 3 verdict enum lands.
+
+## Outcome
+
+Completed: 2026-05-07. `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` now documents Phase 7.6 as the post-render ARC_TRACE extraction and validation phase between Phase 7 and Phase 8.
+
+The new reference covers Layer 1 deterministic structural validation, Layer 2 post-render ARC_TRACE extraction, Layer 3 semantic conformance criticism, the per-execution-mode Layer 3 budget, ARC_TRACE persistence through `create_arc_trace_record`, and the Phase 9 `arc_envelope_conformance` gate. It preserves the Phase 4.5 canon-promotion HARD-GATE and records that `arc_trace_emitted: false` auto-PASSes `arc_envelope_conformance` only under low-budget `interactive_runtime` trace omission.
+
+## Verification Result
+
+1. PASS — `test -f .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
+2. PASS — `grep -nE "Layer 1|Layer 2|Layer 3" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
+3. PASS — `grep -nE "authoring|interactive_runtime|batch_generation" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
+4. PASS — `grep -n "arc_envelope_conformance" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
+5. PASS — `grep -nE "pass|revise_prose|reject_arc|promote_interrupt" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
+6. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §E, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 1/2/3 and §Risks, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §C, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the reference preserves story-bundle write discipline, forbidden-Mystery preservation, and the never-elided canon-promotion HARD-GATE.
+
+## Deviations
+
+1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators, `create_arc_trace_record` implementation, and SPEC20SCECOM-011 capstone fixture surface. This ticket's accepted proof is documentation-surface grep plus manual contract review.
+2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` and `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` still need cross-cutting updates by design. Active follow-up `tickets/SPEC20SCECOM-009.md` owns the Process Flow, HARD-GATE summary, and Phase 9 gate-list integration after phase references land.
