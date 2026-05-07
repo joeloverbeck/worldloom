@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — NEW reference file `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`; ARC_TRACE record class consumed (record class itself defined in archived SPEC-19 §C); `arc_envelope_conformance` Phase 9 gate clarification documented at end of file.
-**Deps**: SPEC20SCECOM-003 (Phase 7 produces the prose that Phase 7.6 traces); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 1 implements the `create_arc_trace_record` patch-engine op; §Track 2 implements `arc_trace_evidence_alignment` validator; §Track 3 implements `narrative_point` enum in canonical-vocabularies)
+**Deps**: `archive/tickets/SPEC20SCECOM-003.md` (Phase 7 produces the prose that Phase 7.6 traces); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 1 implements the `create_arc_trace_record` patch-engine op; §Track 2 implements `arc_trace_evidence_alignment` validator; §Track 3 implements `narrative_point` enum in canonical-vocabularies)
 
 ## Problem
 

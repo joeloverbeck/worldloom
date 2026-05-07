@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/SKILL.md` Process Flow diagram extended (Phase 4b + Phase 7.6 added); HARD-GATE block updated; Phase descriptions updated for 4, 4b (NEW), 5, 7, 7.6 (NEW), 8; `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` extended with 5 new gates (total 17).
-**Deps**: `archive/tickets/SPEC20SCECOM-001.md`, `archive/tickets/SPEC20SCECOM-002.md`, SPEC20SCECOM-003, SPEC20SCECOM-004, SPEC20SCECOM-005, SPEC20SCECOM-006, SPEC20SCECOM-008 (all phase reference files must land before SKILL.md cites them coherently); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements 4 of the 5 new validators; the 5th — `arc_envelope_conformance` — is documented in SPEC-22's §Risks as a cross-spec gap to close at the post-SPEC-21 SPEC-22 reassessment)
+**Deps**: `archive/tickets/SPEC20SCECOM-001.md`, `archive/tickets/SPEC20SCECOM-002.md`, `archive/tickets/SPEC20SCECOM-003.md`, SPEC20SCECOM-004, SPEC20SCECOM-005, SPEC20SCECOM-006, SPEC20SCECOM-008 (all phase reference files must land before SKILL.md cites them coherently); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements 4 of the 5 new validators; the 5th — `arc_envelope_conformance` — is documented in SPEC-22's §Risks as a cross-spec gap to close at the post-SPEC-21 SPEC-22 reassessment)
 
 ## Problem
 
