@@ -38,15 +38,16 @@ Output: the Visible Affordance Map, a list of `(affordance_text, affordance_type
 
 ## Phase 8 Contract
 
-The map is an anchor source, not a prescription. Phase 8 still enforces hard preconditions, diversification, `choice_contract`, `continuation_capacity`, and all Phase 9 validation gates.
+The map is an anchor source, not a prescription. Phase 8 still enforces hard preconditions, CHC v2 choice-worthiness, strong-axis collective difference, `choice_contract`, `likely_effects`, `continuation_capacity`, and all Phase 9 validation gates.
 
 If a grounded visible affordance is ignored by every surviving CHC, prefer a valid CHC anchored on that affordance over a purely storylet-template-driven option when doing so preserves:
 
 - the CHC's hard preconditions;
-- at least 3 distinct `choice_mode` values;
-- at least 3 distinct `poetic_effect` values;
+- populated `choice_worthiness`, including at least one `strong_axes` entry for ordinary scene-commitment CHCs;
+- a menu that collectively differs across at least two distinct `strong_axes`;
 - high-salience OBL coverage;
 - populated `choice_contract`;
+- non-empty `likely_effects`;
 - populated `continuation_capacity` with seed-storylet or JIT evidence.
 
 ## Memory-Only Boundary
