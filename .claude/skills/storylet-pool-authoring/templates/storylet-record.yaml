@@ -1,34 +1,38 @@
-# Storylet Record — template (SLT-NNNN)
+# Storylet Record — template (SLT-NNNN) — SPEC-19 SLT v2
 #
-# Matches the Storylet Schema in brainstorming/storylet-pool-authoring.md
-# (now archived under archive/brainstorming/) and the runtime contract in
-# .claude/skills/branching-story-page-cycle (Phase 4 selection reads
+# Matches SPEC-19 §A: Storylet Record (SLT) v2. A v2 storylet is a
+# scene-commitment arc, not a single beat. The required discriminants are
+# record_version: 2 and shape: scene_commitment_arc.
+#
+# DOWNSTREAM CONSUMER PARITY: v2 preserves the v1 field names read by
+# .claude/skills/branching-story-page-cycle Phase 4 selection:
 # visibility, hard_preconds, soft_preconds, mystery_safety,
-# M_resolution_claims, cast_required, content_intensity).
+# M_resolution_claims, provenance, and content_intensity. SPEC-20 adds
+# arc-aware Phase 4 logic for the seven v2 structural blocks below.
 #
-# DOWNSTREAM CONSUMER PARITY: this template's structural fields
-# (visibility, hard_preconds, soft_preconds, mystery_safety,
-# M_resolution_claims, provenance, choice_templates, content_intensity)
-# are byte-compatible with branching-story-page-cycle's Phase 4 reader.
-# Schema evolution must preserve that parity or land in lockstep with
-# the page-cycle skill.
-#
-# Required structural fields (Phase 4 gate 9 schema-completeness check):
-#   id, story_id, title, shape, content_intensity,
+# Required structural fields for v2:
+#   id, story_id, title, record_version, shape, content_intensity,
 #   hard_preconds, soft_preconds, cast_requirements, location_requirements,
 #   opens_obligations, pays_off_obligations, complicates_obligations,
 #   transfers_obligations, fact_effects, relationship_effects,
 #   tone_tags, theme_tags, tension_delta, aftermath_weight,
-#   mystery_safety (with all sub-fields), choice_templates (4-6 entries),
-#   provenance (with all sub-fields), visibility (with scope + scoping fields).
+#   mystery_safety (with all sub-fields),
+#   provenance (with all sub-fields), visibility (with scope + scoping fields),
+#   arc_contract, dramatic_unit, beat_plan, execution_envelope, stop_policy,
+#   effect_model, exit_portfolio.
+#
+# choice_templates is REMOVED under v2. Its presence on a v2 SLT is
+# HARD-REJECTed by SPEC-22's arc_schema_compliance validator; runtime choice
+# proposal scaffolding moves to exit_portfolio.native_seeds.
 #
 # A record missing any of those violates Rule 1 (No Floating Facts) and is
 # HARD-REJECTed at Phase 4 gate 9.
 
+record_version: 2                          # v2 schema per SPEC-19 §A; legacy v1 retired
 id: SLT-0019                               # per-story append-only; allocated via allocate_next_id(world_slug, 'SLT', story_slug=...)
 story_id: STORY-0001                       # the parent story bundle's STORY-NNN
 title: ""                                  # short human label
-shape: relational_dynamics                 # entry_pressure | cast_introduction | threat_escalation | relational_dynamics | routine_disruption | aftermath_sequel | reflection_dilemma | mystery_edge_brush | fork_recovery | thread_resolution | aftermath_residue | intimacy | confrontation | other
+shape: scene_commitment_arc                # only legal value under v2 (see SPEC-19 §A); legacy enum retired
 content_intensity: mature                  # tame | mature | explicit (must be within STORY_KERNEL.content_intensity_baseline ± 1 band; gate 6)
 
 # Engine-facing structural fields — predicates per templates/predicate-dsl.md.
@@ -80,7 +84,10 @@ transfers_obligations: []                  # {from_owner, to_owner_pattern, obli
                                            # Worked example:
                                            # - {from_owner: role:antagonist, to_owner_pattern: role:cuadrilla_member, obligation_matcher: {type: secret, status: open}}
 
-# Fact + relationship effects (structured ops; free-form prose is gate-9 rejected)
+# Fact + relationship effects (structured ops; free-form prose is gate-9 rejected).
+# Under v2, fact_effects and relationship_effects are default per-arc effect
+# packages; authors may inline-promote them into a single-variant effect_model
+# if the arc has no outcome non-determinism.
 
 fact_effects:                              # one entry per fact created or invalidated
   # fact_template includes epistemic_class, visible_to_reader, and
@@ -117,15 +124,9 @@ mystery_safety:
     #   requires_canon_promotion: false    # MUST be true iff resolution_authority == canon_candidate (gate 2)
   resolution_safety_per_M: {}              # M-NNNN -> forbidden | low | medium | high — must match the M record's actual future_resolution_safety (gate 2)
 
-# Choice templates — scaffolds the runtime LLM proposer uses as anchors (4-6 entries)
-
-choice_templates:
-  - operation: ""                          # e.g., "confront" | "investigate" | "flee" | "intimacy_advance"
-    target_role: ""                        # cast-role bound to a STENT at render time
-    uses_fact_role: ""                     # optional fact-role anchor
-    likely_effects: []                     # likely fact_effects + relationship_effects
-    choice_mode: ""                        # recommended values: self_protective | emotional | observational | strategic | reflective | risky | discovery | intimate_advance | bargain | sacrifice | refuse | flee | reveal | concealment | violence | other (or any kebab-case label appropriate to the storylet's transaction; the validator is permissive — see templates/tone-theme-tag-dictionary.md for the recommended-but-non-binding vocabulary discipline)
-    poetic_effect: ""                      # relaxed | obvious | dilemma | risky_truth | sacrifice | tragic_irony | seduction | desperation | revelation | flight
+# choice_templates — REMOVED under v2. The runtime LLM proposer no longer reads choice scaffolds
+# from SLT records; that role moves to exit_portfolio.native_seeds (see arc_contract below).
+# Presence of choice_templates on a v2 record is HARD-REJECTed by SPEC-22's arc_schema_compliance.
 
 # Provenance — load-bearing for branch isolation + audit trail
 
@@ -142,6 +143,124 @@ visibility:
   visible_from_page: null                  # PG-NNNN — required when scope == branch_prefix_scoped
   visible_branch_path_prefix: null         # [PG-NNNN, ...] — required when scope == branch_prefix_scoped
   allowed_branch_ids: null                 # [BR-NNNN, ...] — optional explicit allowlist
+
+arc_contract:                              # what the user committed to; mirrors selected CHC
+  commitment_class: <commitment_class enum> # closed enum — see canonical-vocabularies
+  arc_archetype: <arc_archetype enum>      # closed enum
+  actor: STENT-NNNN                        # STENT-NNNN | role:<role>
+  target: null                             # STENT-NNNN | role:<role> | null
+  user_intent: >                           # user-side commitment encoded by this arc
+    Free-form prose; reused verbatim if the arc is the chosen commitment from
+    a CHC whose choice_contract.user_intent matches.
+  strategic_question_answered: >           # what the arc answers, in scene-question form
+    Free-form prose.
+  commitment_scope: scene                  # scene | sequence; default: scene
+  success_policy: contested                # uncontested | contested | costly | uncertain
+  allowed_outcome_band:                    # closed enum — see canonical-vocabularies §strong_outcome
+    - <strong_outcome enum value>
+
+dramatic_unit:                             # why this arc is a scene-level unit
+  scene_question: >                        # yes/no or alternative dramatic question
+    Free-form prose.
+  entry_pressure:
+    thread: null                           # THR-NNNN | null
+    description: >                         # what is unstable on entry
+      Free-form prose.
+  value_delta_target:                      # what changes when the arc closes successfully
+    relationship:                          # optional
+      axis: <relationship axis enum>
+      direction: increase_small            # increase_small | decrease_small | increase_large | decrease_large | stabilize
+    thread_pressure:                       # optional
+      id: THR-NNNN
+      direction: increase                  # increase | decrease | stabilize
+    obligation:                            # optional
+      delta: complicated                   # created | accepted | deferred | refused | discharged | complicated
+    information_posture:                   # optional
+      delta: revealed                      # revealed | concealed | investigated | misdirected | confessed | tested
+  natural_close_definition: >
+    Prose description of the conditions under which the arc has played out
+    and the next commitment hinge is exposed.
+
+beat_plan:
+  mode: ordered_soft                       # only supported value in v1; future modes may add branchy_dag
+  min_beats: <int 2..6>
+  max_beats: <int 3..8>
+  beats:                                   # 3-8 entries
+    - id: B1
+      function: <beat_function string>     # open-vocab kebab-case; see references/beat-functions.md
+      required: true
+      state_significance: none             # none | <strong_axis enum>
+    - id: B2
+      function: <beat_function string>
+      required: true
+      state_significance: <strong_axis enum>
+    - id: B3
+      function: <beat_function string>
+      required: false
+      state_significance: none
+
+execution_envelope:                        # what governs prose render under this commitment
+  invariants:                              # MUST be true throughout every beat
+    - <invariant_directive kebab-case string>
+  required_functions:                      # MUST occur at least once across the arc
+    - <required_function kebab-case string>
+  allowed_tactics:                         # MAY occur; style/blocking flexibility
+    - <tactic kebab-case string>
+  prohibited_actions:                      # MUST NOT occur in any beat
+    - <prohibited_action kebab-case string>
+  style_directives:                        # prose-craft hints; non-validator-bound
+    - <style_directive kebab-case string>
+  mystery_preservation:
+    forbidden_resolutions:                 # M-NNNN ids whose forbidden-status must be preserved
+      - M-NNNN
+    allowed_claims:                        # legal resolution_authority values in this arc
+      - apparent
+      - branch_local_counterfactual
+      - canon_candidate
+
+stop_policy:
+  normal_exits:                            # any of these closes the arc cleanly
+    - id: <kebab-case stop id>
+      predicate: <stop_predicate enum>     # closed enum — see SPEC-21 predicate-DSL extension
+      args: {}
+  interrupt_before:                        # any of these interrupts the arc before completion
+    - id: <kebab-case interrupt id>
+      predicate: <interrupt_predicate enum>
+      args: {}
+  safety_valves:
+    max_internal_beats: 6                  # default: 6; matches max_beats safety-valve
+    max_words: 2200                        # default: 2200; multi-beat target about 1500-2000 words
+
+effect_model:
+  selected_before_render: true             # MUST be true for v2; replay-equality contract
+  variants:                                # 1..N rows; runtime selects ONE at Phase 4b before render
+    - id: <kebab-case variant id>
+      maps_to_outcome: <strong_outcome enum> # entry from arc_contract.allowed_outcome_band
+      probability_weight: <float 0..1>     # used by Phase 4b weighted pick when multi-variant
+      required_effects:                    # arc-level effects applied at Phase 5 state mutation
+        - type: relationship_axis_shift    # relationship_axis_shift | thread_pressure_delta | obligation_status_change | fact_create | fact_invalidate | consequence_open | consequence_address | cast_change | location_change | mystery_progress
+          args: {}                         # type-specific args mirroring SE.deterministic_payload
+      forbidden_effects:                   # MUST NOT happen under this variant
+        - type: <effect type as above>
+          args: {}
+
+exit_portfolio:
+  native_seeds:                            # arc-author-declared next-commitment options
+    - id: <kebab-case seed id>
+      commitment_class: <commitment_class enum>
+      strategy_cluster: <kebab-case open-vocab tag>
+      expected_state_delta: {}             # per-strong-axis projection
+      continuation_arc_selector:
+        include_tags: []                   # open-vocab arc tags
+        require_arc_archetype: null        # <arc_archetype enum> | null
+  engine_discovered_exit_budget:
+    min: 0
+    max: 2                                 # default; STORY_KERNEL.cadence_policy may override
+    allowed_sources:
+      - urgent_obligation
+      - high_salience_thread
+      - unresolved_consequence
+      - user_write_in
 
 notes: >
   Free-form authorial notes — design rationale, mystery-edge sensitivity, tone

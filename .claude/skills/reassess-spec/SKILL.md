@@ -81,6 +81,8 @@ This skill uses four reference files, each loaded with the Read tool at a specif
 
 Plan-mode invocations also load `references/plan-mode.md` at entry (see §Plan Mode Awareness). Steps 1, 2, and 8 use no reference file — their procedure is self-contained in this SKILL.md.
 
+**Parallel-batched reads.** When two or more reference files are loaded in the same parallel tool-call batch (whether batched with each other or with verification Bash/grep calls), emit a single combined acknowledgment in the assistant turn that follows the batch — naming each file individually with its content-tied opening (e.g., `Loaded foundations-alignment.md — opens with "4.0 Internal Contradictions". Loaded findings-and-questions.md — opens with "Step 5: Classify Findings".`). A combined acknowledgment satisfies the per-Read rule for each file individually as long as every file in the batch is named with its content-tied opening; a bare combined acknowledgment ("Loaded foundations-alignment.md and findings-and-questions.md.") is treated as N skipped loads, parallel to how a bare per-Read acknowledgment is treated as a skipped load. Combined acknowledgment is acceptable specifically because the parallel batch produces all results in the same tool-result turn — there is no syntactic place for per-file acknowledgments between the Reads.
+
 ## Inputs
 
 **Required:**
@@ -174,7 +176,7 @@ Build a validation checklist. For specs with >15 references, consider `TaskCreat
 
 Prioritize references most likely to have drifted: import paths, function signatures, types the spec extends, sibling-spec Dependency paths. Stable references (FOUNDATIONS.md principle names, Canon Fact Record field names) can be spot-checked.
 
-**Reference-count checkpoint**: Before starting Step 3, emit the extracted reference count as a one-line user-facing note naming the threshold-decision explicitly — e.g., `Reference count: 28 — TaskCreate recommended per Step 2 threshold` or `Reference count: 9 — mental tracking sufficient`. The note makes the >15 threshold-decision auditable and prompts actual TaskCreate invocation when warranted; auditors who skip the note tend to default to mental tracking regardless of count.
+**Reference-count checkpoint**: Before starting Step 3, emit the extracted reference count as a one-line user-facing note naming the threshold-decision explicitly — e.g., `Reference count: 28 — TaskCreate recommended per Step 2 threshold` or `Reference count: 9 — mental tracking sufficient`. The note makes the >15 threshold-decision auditable and prompts actual TaskCreate invocation when warranted; auditors who skip the note tend to default to mental tracking regardless of count. Use the exact integer count (e.g., `28`, `9`); do not use ranges (`30+`) or approximations (`~30`) — the threshold-decision is reproducible only when a future reviewer can compare the extracted count against the >15 threshold directly.
 
 ## Step 3: Codebase Validation
 

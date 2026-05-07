@@ -213,6 +213,7 @@ For skill tickets, verify:
 - HARD-GATE behavior still matches repo policy
 - bundled references/templates/examples remain aligned with the behavior you are changing
 - when editing `.claude/skills/<skill>/references/*`, `.claude/skills/<skill>/templates/*`, or another skill-local reference for a command, tool, fallback, or contract shape, inspect the parent `.claude/skills/<skill>/SKILL.md` summary, process-flow, prerequisite, gate, and pointer language before the first source edit. If those parent sections still state the old shape, add the parent `SKILL.md` to the active ticket's `Files to Touch` and proof surface during reassessment instead of waiting for closeout to discover the stale summary.
+- if a template or reference ticket lands a forward schema/contract before the full operational skill rewrite, do not silently leave the parent skill implying the old and new shapes are both current. Either add the minimal transition/disclosure note to the parent `SKILL.md` and name the follow-up owner for the full rewrite, or escalate if the transition note would weaken a HARD-GATE, canon-write, or validation-signal contract.
 
 ### 4. Implement with minimal, truthful edits
 
