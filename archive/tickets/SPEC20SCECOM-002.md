@@ -1,6 +1,6 @@
 # SPEC20SCECOM-002: Phase 5 — Arc-Level State Mutation at Arc-Close
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` extended with §Arc-Level Effect Application; existing Phase 2-derived op-generation prose retained only for legacy v1 records (which do not exist post-cutover).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-Current Phase 5 applies state mutations at beat granularity — consuming Phase 2's `facts_created/invalidated`, `obligations_*`, `intentions/threads pressure deltas`, and `required_aftermath` per beat-render. Under the scene-commitment-arc pivot, the unit of state transition is the arc, not the beat. Phase 5 must rebind: instead of consuming Phase 2's per-beat structured outputs, it applies the chosen variant's `required_effects[]` as ONE batch at arc-close. SPEC-20 §C specifies the op-generation mapping (effect-type → SE.op_type) and the Branch-isolation invariant that ARC_TRACE records must respect.
+At intake, Phase 5 applied state mutations at beat granularity — consuming Phase 2's `facts_created/invalidated`, `obligations_*`, `intentions/threads pressure deltas`, and `required_aftermath` per beat-render. Under the scene-commitment-arc pivot, the unit of state transition is the arc, not the beat. Phase 5 now documents that it applies the chosen variant's `required_effects[]` as ONE batch at arc-close. SPEC-20 §C specifies the op-generation mapping (effect-type → SE.op_type) and the Branch-isolation invariant that ARC_TRACE records must respect.
 
 ## Assumption Reassessment (2026-05-07)
 
@@ -16,6 +16,9 @@ Current Phase 5 applies state mutations at beat granularity — consuming Phase 
 2. Verified archived SPEC-19 §A (`archive/specs/SPEC-19-scene-commitment-arc-schema.md`) defines `effect_model.variants[].required_effects[].type` as a closed enum (`relationship_axis_shift | thread_pressure_delta | obligation_status_change | fact_create | fact_invalidate | consequence_open | consequence_address | cast_change | location_change | mystery_progress`); SPEC-22 §Track 2 owns the `effect_model_legality` validator that enforces this enum at Phase 9.
 3. Cross-skill boundary: this ticket consumes the chosen variant from SPEC20SCECOM-001 (Phase 4b) and produces SE.ops entries that the patch-engine applies at Phase 11. SE.op_type vocabulary is owned by archived SPEC-03 (patch-engine) — no SE.op_type extensions are introduced by this ticket; the mapping is from closed `required_effects.type` enum to existing SE.op_type values.
 4. FOUNDATIONS Rule 5 (No Consequence Evasion) — renumbered from template item 4: arc-level effects MUST be applied at arc-close; the runtime cannot silently elide an arc's `required_effects` without failing `effect_model_replay_safety`. Documented in this ticket's §Branch-isolation invariant + SE.op_type mapping table.
+5. HARD-GATE discipline checked because this ticket changes page-cycle skill-reference semantics for story-bundle `_source` record generation. The change does not weaken Phase 4.5 canon-promotion or Phase 10 approval; it documents the Phase 5 source-of-truth for the future patch plan that Phase 11 submits.
+6. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` still contains v1 Phase 5 summary prose. That stale summary is explicitly owned by active follow-up `tickets/SPEC20SCECOM-009.md`, so this ticket leaves it untouched and updates only the Phase 5 reference file.
+7. Dirty worktree ledger: initial dirty path `.claude/skills/spec-to-tickets/SKILL.md` is unrelated to SPEC-20 page-cycle Phase 5 and was left untouched.
 
 ## Architecture Check
 
@@ -29,11 +32,11 @@ Current Phase 5 applies state mutations at beat granularity — consuming Phase 
 3. STINT updates after variant ops apply → codebase grep-proof for the section preserving the existing STINT-refresh logic.
 4. Replay-equality at arc cadence → schema validation via SPEC-22's `effect_model_replay_safety` validator (cross-spec dependency); this ticket's surface is documentation; full validation owned by SPEC20SCECOM-011 capstone.
 
-## What to Change
+## Landed Changes
 
-### 1. §Arc-Level Effect Application (NEW section)
+### 1. §Arc-Level Effect Application
 
-In `.claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`, add a new top-level section §Arc-Level Effect Application immediately above the existing Phase 2-derived prose. Body:
+In `.claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`, added a new top-level section §Arc-Level Effect Application immediately above the existing Phase 2-derived prose. Body documents:
 
 - Phase 5 applies the chosen variant's `required_effects[]` (per SPEC20SCECOM-001 §Phase 4b) as one batch at arc-close.
 - Op generation: each entry in `variants[<chosen>].required_effects[]` maps to one or more `SE.ops` entries per the table below (closed `op_type` enum preserved).
@@ -53,15 +56,15 @@ In `.claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.
 
 ### 2. STINT updates preserved
 
-Document that per-character intention refresh runs after the variant ops apply (existing Phase 5 logic preserved) — STINT updates are NOT part of `required_effects` and remain a deterministic engine-side step.
+Documented that per-character intention refresh runs after the variant ops apply (existing Phase 5 logic preserved) — STINT updates are NOT part of `required_effects` and remain a deterministic engine-side step.
 
 ### 3. Branch-isolation invariant
 
-Add prose stating: every non-PG emergent record carries `created_at_page == this_PG`. ARC_TRACE records (Phase 7.6 — SPEC20SCECOM-004) also carry `created_at_page`. The recursive reference closure validator (Phase 9 gate 3, extended in SPEC20SCECOM-009) enforces.
+Added prose stating: every non-PG emergent record carries `created_at_page == this_PG`. ARC_TRACE records (Phase 7.6 — SPEC20SCECOM-004) also carry `created_at_page`. The recursive reference closure validator (Phase 9 gate 3, extended in SPEC20SCECOM-009) enforces.
 
 ### 4. Deprecation of Phase 2-derived per-beat op-generation
 
-The existing Phase 2-derived prose remains in the reference file as a deprecation comment naming the legacy path; mark it with a clear "post-cutover: no v1 records exist; this path is documentation-only and never executes" note.
+The existing Phase 2-derived prose remains in the reference file after a deprecation comment naming the legacy path; it is marked as post-cutover documentation-only because no v1 story records execute after the cutover.
 
 ## Files to Touch
 
@@ -80,9 +83,9 @@ The existing Phase 2-derived prose remains in the reference file as a deprecatio
 
 ### Tests That Must Pass
 
-1. Skill dry-run: `branching-story-page-cycle` advances one tick on a v2 fixture story; Phase 5 applies the chosen variant's `required_effects[]` as one batch; SE record's ops list matches the effect-type → SE.op_type mapping; STINT updates fire after the batch.
-2. Branch-isolation: every emergent SF/OBL/CNSQ/THR/SREL/STINT record produced this turn carries `created_at_page == this_PG`; the recursive_reference_closure validator (Phase 9 gate 3) passes.
-3. Variant-id consistency: SE record's `state_hash_after` is reachable by replaying SE.ops from `state_hash_before` against the parent state — full validation owned by SPEC20SCECOM-011.
+1. Documentation proof: `phase-5-state-mutation.md` documents Phase 5 applying the chosen variant's `required_effects[]` as one arc-close batch.
+2. Documentation proof: `phase-5-state-mutation.md` documents every closed effect-type value and maps it to existing `SE.op_type` vocabulary, with the intended `mystery_progress` no-op asymmetry.
+3. Documentation proof: `phase-5-state-mutation.md` documents branch isolation for non-PG emergent records and ARC_TRACE `created_at_page`.
 
 ### Invariants
 
@@ -100,3 +103,21 @@ The existing Phase 2-derived prose remains in the reference file as a deprecatio
 1. `grep -n "Arc-Level Effect Application" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` — confirms NEW section anchor lands.
 2. `grep -nE "relationship_axis_shift|thread_pressure_delta|obligation_status_change|fact_create|fact_invalidate|consequence_open|consequence_address|cast_change|location_change|mystery_progress" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` — confirms all 10 closed effect-type values are documented.
 3. `grep -n "created_at_page == this_PG" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` — confirms branch-isolation invariant text lands.
+4. `grep -n "STINT Refresh After Variant Ops" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` — confirms STINT refresh ordering lands.
+
+## Outcome
+
+Completed: 2026-05-07. `.claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md` now documents Phase 5 as arc-close state mutation from the chosen variant's `required_effects[]`, includes the closed effect-type to `SE.op_type` mapping table, preserves STINT refresh as deterministic engine-side follow-through after the variant ops, labels the old beat-derived input path as documentation-only after cutover, and extends branch-isolation prose to ARC_TRACE `created_at_page`.
+
+## Verification Result
+
+1. PASS — `grep -n "Arc-Level Effect Application" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
+2. PASS — `grep -nE "relationship_axis_shift|thread_pressure_delta|obligation_status_change|fact_create|fact_invalidate|consequence_open|consequence_address|cast_change|location_change|mystery_progress" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
+3. PASS — `grep -n "created_at_page == this_PG" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
+4. PASS — `grep -n "STINT Refresh After Variant Ops" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
+5. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §C, archived `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §A/§C, and `docs/FOUNDATIONS.md` §Story Bundles §5 confirmed the landed Phase 5 prose matches the arc-level effect, replay-safety, and branch-isolation contracts.
+
+## Deviations
+
+1. The drafted skill dry-run / fixture replay proof was not executed because SPEC-22's v2 validators and schema implementation remain pending. This ticket's accepted proof is the documentation-surface contract; empirical fixture validation remains SPEC20SCECOM-011 capstone scope.
+2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` still has v1 Phase 5 summary prose by design. Active follow-up `tickets/SPEC20SCECOM-009.md` owns the cross-cutting SKILL.md process-flow and Phase 9 gate-list update after all phase reference files land.

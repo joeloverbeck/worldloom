@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/references/phase-7-page-render.md` rewritten for continuous multi-beat prose; LLM-prompt block updated; 8-axis prose critic preserved per `prose-craft-contract.md`; engine-only `safety_valves.max_words` runaway-defense (NOT visible to LLM); Length per Prose Craft Contract Rule 11 (no word target/floor at LLM-facing surface).
-**Deps**: `archive/tickets/SPEC20SCECOM-001.md` (Phase 4b chooses variant fed into prompt), SPEC20SCECOM-002 (state-mutation discipline established before render)
+**Deps**: `archive/tickets/SPEC20SCECOM-001.md` (Phase 4b chooses variant fed into prompt); `archive/tickets/SPEC20SCECOM-002.md` (state-mutation discipline established before render)
 
 ## Problem
 

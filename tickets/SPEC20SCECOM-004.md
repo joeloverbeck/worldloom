@@ -81,7 +81,7 @@ Create `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace
 
 ### Invariants
 
-1. ARC_TRACE record's `created_at_page` matches the page being rendered (branch-isolation invariant per SPEC20SCECOM-002).
+1. ARC_TRACE record's `created_at_page` matches the page being rendered (branch-isolation invariant per `archive/tickets/SPEC20SCECOM-002.md`).
 2. Layer 3 verdict is one of `{pass, revise_prose, reject_arc, promote_interrupt}` — no other values legal.
 3. `arc_envelope_conformance` gate auto-PASSes when `arc_trace_emitted: false`.
 
