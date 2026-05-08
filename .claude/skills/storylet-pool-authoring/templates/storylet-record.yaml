@@ -265,3 +265,153 @@ exit_portfolio:
 notes: >
   Free-form authorial notes — design rationale, mystery-edge sensitivity, tone
   intent, alternate-realization considerations.
+
+# Example — fragile_offer archetype:
+# arc_contract:
+#   commitment_class: offer_practical_help
+#   arc_archetype: fragile_offer
+#   actor: role:protagonist
+#   target: role:recipient
+#   user_intent: >
+#     Offer concrete help while preserving the recipient's right to refuse.
+#   strategic_question_answered: >
+#     Will the help be accepted, refused, or deflected without coercion?
+#   commitment_scope: scene
+#   success_policy: contested
+#   allowed_outcome_band: [accepted_with_limits, refused_without_break, partially_deflected]
+# dramatic_unit:
+#   scene_question: Will the offer be accepted, refused, or deflected?
+#   entry_pressure: {thread: THR-NNNN, description: "A need is visible, but accepting aid would create debt or risk."}
+#   value_delta_target: {relationship: {axis: trust, direction: increase_small}, obligation: {delta: accepted}}
+# beat_plan:
+#   mode: ordered_soft
+#   min_beats: 3
+#   max_beats: 4
+#   beats:
+#     - {id: B1, function: pressure-setup, required: true, state_significance: obligation_state}
+#     - {id: B2, function: offer-extended, required: true, state_significance: relationship_trajectory}
+#     - {id: B3, function: response-received, required: true, state_significance: obligation_state}
+#     - {id: B4, function: aftermath-marked, required: false, state_significance: none}
+# execution_envelope:
+#   invariants: [offer-must-remain-refusable, respect-refusal-without-pressure]
+#   required_functions: [name-the-need, preserve-recipient-agency]
+#   prohibited_actions: [coerce-acceptance, erase-existing-debt]
+#   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
+# stop_policy:
+#   normal_exits:
+#     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {outcome: accepted_with_limits}}
+#     - {id: commitment-blocked, predicate: commitment_blocked, args: {reason: refusal}}
+#     - {id: participant-exits, predicate: participant_exits, args: {role: recipient}}
+#   safety_valves: {max_internal_beats: 6, max_words: 2200}
+# effect_model:
+#   selected_before_render: true
+#   variants:
+#     - {id: accepted-help, maps_to_outcome: accepted_with_limits, probability_weight: 0.45, required_effects: [{type: obligation_status_change, args: {delta: accepted}}], forbidden_effects: [{type: relationship_axis_shift, args: {axis: trust, direction: decrease_large}}]}
+#     - {id: refused-with-grace, maps_to_outcome: refused_without_break, probability_weight: 0.35, required_effects: [{type: relationship_axis_shift, args: {axis: respect, direction: increase_small}}], forbidden_effects: [{type: obligation_status_change, args: {delta: discharged}}]}
+#     - {id: deflected-by-third-party, maps_to_outcome: partially_deflected, probability_weight: 0.20, required_effects: [{type: consequence_open, args: {kind: third_party_complication}}], forbidden_effects: [{type: fact_create, args: {truth_scope: world_level}}]}
+# exit_portfolio:
+#   native_seeds:
+#     - {id: accepted-help-followup, commitment_class: accept_offered_help, strategy_cluster: practical-followthrough, expected_state_delta: {obligation_state: accepted}, continuation_arc_selector: {include_tags: [aid-followup], require_arc_archetype: practical_aid_attempt}}
+#     - {id: refused-with-grace-followup, commitment_class: stay_available_without_pressure, strategy_cluster: aftercare, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: refusal_and_aftercare}}
+#     - {id: deflected-by-third-party-followup, commitment_class: seek_third_party, strategy_cluster: intervention, expected_state_delta: {route_or_scene_type: tested}, continuation_arc_selector: {include_tags: [third-party], require_arc_archetype: third_party_intervention}}
+#
+# Example — bounded_question archetype:
+# arc_contract:
+#   commitment_class: ask_one_bounded_question
+#   arc_archetype: bounded_question
+#   actor: role:protagonist
+#   target: role:witness
+#   user_intent: >
+#     Ask one specific question without forcing a full confession or omniscient reveal.
+#   strategic_question_answered: >
+#     What can be responsibly learned from one bounded disclosure attempt?
+#   commitment_scope: scene
+#   success_policy: uncertain
+#   allowed_outcome_band: [succeeds, partially_deflected, refused_without_break]
+# dramatic_unit:
+#   scene_question: Will the question produce an answer, a refusal, or a useful deflection?
+#   entry_pressure: {thread: THR-NNNN, description: "One missing fact blocks the next responsible move."}
+#   value_delta_target: {information_posture: {delta: investigated}, thread_pressure: {id: THR-NNNN, direction: stabilize}}
+# beat_plan:
+#   mode: ordered_soft
+#   min_beats: 3
+#   max_beats: 4
+#   beats:
+#     - {id: B1, function: question-framed, required: true, state_significance: information_posture}
+#     - {id: B2, function: boundary-named, required: true, state_significance: character_intention}
+#     - {id: B3, function: answer-or-deflection, required: true, state_significance: information_posture}
+#     - {id: B4, function: consequence-marked, required: false, state_significance: thread_pressure}
+# execution_envelope:
+#   invariants: [one-question-only, answer-may-be-partial]
+#   required_functions: [identify-information-gap, respect-refusal-channel]
+#   prohibited_actions: [omniscient-extraction, unearned-confession]
+#   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent, branch_local_counterfactual]}
+# stop_policy:
+#   normal_exits:
+#     - {id: question-answered, predicate: commitment_satisfied, args: {information_posture: investigated}}
+#     - {id: question-refused, predicate: commitment_blocked, args: {reason: refusal}}
+#     - {id: question-redirected, predicate: commitment_satisfied, args: {outcome: partially_deflected}}
+#   safety_valves: {max_internal_beats: 5, max_words: 1800}
+# effect_model:
+#   selected_before_render: true
+#   variants:
+#     - {id: partial-answer, maps_to_outcome: succeeds, probability_weight: 0.40, required_effects: [{type: mystery_progress, args: {m_id: M-NNNN, claim_strength: clue}}], forbidden_effects: [{type: fact_create, args: {truth_scope: world_level}}]}
+#     - {id: clean-refusal, maps_to_outcome: refused_without_break, probability_weight: 0.30, required_effects: [{type: relationship_axis_shift, args: {axis: respect, direction: increase_small}}], forbidden_effects: [{type: mystery_progress, args: {claim_strength: proof}}]}
+#     - {id: useful-deflection, maps_to_outcome: partially_deflected, probability_weight: 0.30, required_effects: [{type: thread_pressure_delta, args: {delta: increase}}], forbidden_effects: [{type: fact_invalidate, args: {scope: world_level}}]}
+# exit_portfolio:
+#   native_seeds:
+#     - {id: follow-the-answer, commitment_class: ask_one_bounded_question, strategy_cluster: followup-question, expected_state_delta: {information_posture: investigated}, continuation_arc_selector: {include_tags: [investigation], require_arc_archetype: investigation_followup}}
+#     - {id: honor-the-refusal, commitment_class: stay_available_without_pressure, strategy_cluster: trust-preservation, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: silent_witness}}
+#     - {id: test-the-deflection, commitment_class: force_disclosure, strategy_cluster: pressure-test, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [disclosure-pressure], require_arc_archetype: forced_disclosure}}
+#
+# Example — escalation_to_confrontation archetype:
+# arc_contract:
+#   commitment_class: escalate_to_confrontation
+#   arc_archetype: escalation_to_confrontation
+#   actor: role:protagonist
+#   target: role:opponent
+#   user_intent: >
+#     Stop avoiding the pressure point and force a position to be taken.
+#   strategic_question_answered: >
+#     What changes when the conflict is named directly and cannot stay latent?
+#   commitment_scope: scene
+#   success_policy: costly
+#   allowed_outcome_band: [partially_succeeds, fails_with_consequence, backfires]
+# dramatic_unit:
+#   scene_question: Will the confrontation force a position, expose a cost, or backfire?
+#   entry_pressure: {thread: THR-NNNN, description: "Delay now protects the wrong person or institution."}
+#   value_delta_target: {thread_pressure: {id: THR-NNNN, direction: increase}, relationship: {axis: trust, direction: decrease_small}}
+# beat_plan:
+#   mode: ordered_soft
+#   min_beats: 3
+#   max_beats: 5
+#   beats:
+#     - {id: B1, function: line-crossed, required: true, state_significance: irreversibility}
+#     - {id: B2, function: accusation-or-demand, required: true, state_significance: thread_pressure}
+#     - {id: B3, function: counterpressure, required: true, state_significance: risk_cost_exposure}
+#     - {id: B4, function: outcome-locked, required: true, state_significance: relationship_trajectory}
+#     - {id: B5, function: fallout-glimpsed, required: false, state_significance: none}
+# execution_envelope:
+#   invariants: [stakes-are-explicit, confrontation-has-cost]
+#   required_functions: [name-the-line, force-a-position]
+#   prohibited_actions: [empty-bluster, consequence-free-threat]
+#   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
+# stop_policy:
+#   normal_exits:
+#     - {id: position-forced, predicate: commitment_satisfied, args: {thread_pressure: increased}}
+#     - {id: confrontation-interrupted, predicate: participant_exits, args: {role: opponent}}
+#     - {id: cost-accepted, predicate: commitment_satisfied, args: {outcome: fails_with_consequence}}
+#   interrupt_before:
+#     - {id: safety-limit, predicate: safety_valve_triggered, args: {kind: escalation_limit}}
+#   safety_valves: {max_internal_beats: 6, max_words: 2200}
+# effect_model:
+#   selected_before_render: true
+#   variants:
+#     - {id: truth-exposed, maps_to_outcome: partially_succeeds, probability_weight: 0.35, required_effects: [{type: thread_pressure_delta, args: {delta: increase}}], forbidden_effects: [{type: fact_create, args: {truth_scope: world_level}}]}
+#     - {id: alliance-damaged, maps_to_outcome: fails_with_consequence, probability_weight: 0.35, required_effects: [{type: relationship_axis_shift, args: {axis: trust, direction: decrease_small}}], forbidden_effects: [{type: consequence_address, args: {mode: erase_cost}}]}
+#     - {id: adversary-commits, maps_to_outcome: backfires, probability_weight: 0.30, required_effects: [{type: consequence_open, args: {kind: adversary_countermove}}], forbidden_effects: [{type: thread_pressure_delta, args: {delta: decrease}}]}
+# exit_portfolio:
+#   native_seeds:
+#     - {id: deal-with-fallout, commitment_class: release_pressure, strategy_cluster: aftermath, expected_state_delta: {thread_pressure: decrease}, continuation_arc_selector: {include_tags: [aftermath], require_arc_archetype: aftermath_processing}}
+#     - {id: pursue-the-new-line, commitment_class: tighten_pressure, strategy_cluster: pressure-followup, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [confrontation], require_arc_archetype: escalation_to_confrontation}}
+#     - {id: retreat-and-regroup, commitment_class: withdraw_without_abandoning, strategy_cluster: tactical-withdrawal, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [withdrawal], require_arc_archetype: withdrawal_without_abandonment}}
