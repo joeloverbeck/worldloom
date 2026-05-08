@@ -2,7 +2,7 @@
 
 # SPEC-21: Scene-Commitment Arc Authoring (Storylet-Pool-Authoring Rewrite)
 
-**Status**: PROPOSED (2026-05-07)
+**Status**: COMPLETED (2026-05-08)
 **Phase**: authoring tier of the scene-commitment-arc pivot
 **Depends on**: archived SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
 **Blocks**: none — SPEC-20 (runtime) and SPEC-21 (authoring) are independent given SPEC-19 + SPEC-22
@@ -389,3 +389,35 @@ Each archetype entry is ~30-50 lines of structured prose + YAML sketches. Initia
 - **Audit mode RSP card schema migration**: existing RSP cards predating SPEC-21 lack `target_commitment_class` / `target_arc_archetype`. Migration: SPEC-22 §Sibling-skill alignment Track 4 adds these fields to `branching-story-health-audit/templates/remediation-storylet-proposal-card.md` with defaults inferable from the RSP body. SPEC-22 Track 4's RSP card schema extension MUST land before SPEC-21 audit mode is exercised on new audits; older audits (pre-cutover) are not regenerated.
 
 - **Phase 4 Gate 10 `arc_envelope_conformance` validator gap (SPEC-22 8th-validator routing)**: §D Phase 4 Gate 10 ("Arc envelope conformance") expects an engine-side validator at canonical-record-time, but SPEC-22 Track 2's validator inventory lists only 7 validators and does not include `arc_envelope_conformance`. SPEC-22's own §Risks "Post-SPEC-21 reassessment required" entry #2 acknowledges this as a known "8th validator" gap and routes the addition to the post-SPEC-21 SPEC-22 reassessment cycle. The implementation site for `tools/validators/src/rules/arc_envelope_conformance.ts` (envelope-conformance against ARC_TRACE `possible_violations[]` evidence) is owned by SPEC-22; SPEC-21 surfaces the gap here so ticket decomposition does not generate an unassigned implementation ticket against SPEC-21.
+
+## Outcome
+
+Completed 2026-05-08. SPEC-21 landed as the `storylet-pool-authoring` authoring-tier rewrite through archived tickets:
+
+- `archive/tickets/SPEC21SCECOM-001.md` — arc archetype library template.
+- `archive/tickets/SPEC21SCECOM-002.md` — comment-only SLT v2 usage examples per archetype.
+- `archive/tickets/SPEC21SCECOM-003.md` — Phase 1 coverage diagnosis matrix rewrite.
+- `archive/tickets/SPEC21SCECOM-004.md` — Phase 2 arc seed format rewrite.
+- `archive/tickets/SPEC21SCECOM-005.md` — Phase 3 structured drafting rewrite.
+- `archive/tickets/SPEC21SCECOM-006.md` — Phase 4-5 14-gate and diversity-axis rewrite plus governance update.
+- `archive/tickets/SPEC21SCECOM-007.md` — parent `SKILL.md` and SLB manifest cross-cutting alignment.
+
+What actually changed:
+
+- Added `.claude/skills/storylet-pool-authoring/templates/arc-archetypes.md` with 20 SPEC-22-aligned archetype headings and a 20-row `commitment_class -> recommended arc_archetype` mapping table.
+- Added comment-only v2 examples to `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`.
+- Rewrote `.claude/skills/storylet-pool-authoring/references/phase-1-coverage-diagnosis.md`, `phase-2-generation-seeds.md`, `phase-3-structured-drafting.md`, and `phase-4-5-canon-safety-checks.md` around scene-commitment-arc semantics.
+- Updated `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` for dual-field Mystery Reserve discipline and the non-default story-scope Rule 11 leverage gate.
+- Updated `.claude/skills/storylet-pool-authoring/SKILL.md` and `.claude/skills/storylet-pool-authoring/templates/storylet-batch-manifest.md` so the top-level workflow, HARD-GATE, JIT mode, Phase 5b wording, Phase 6 summary, and batch manifest match the landed v2 authoring contract.
+
+Deviations from the original plan:
+
+- Verification stayed at the documentation/skill-reference boundary. The live repo has no executable `storylet-pool-authoring` runner, and SPEC-22 still owns the machine-facing validator/package proof surfaces.
+- The parent `SKILL.md` Phase 5b validator list was preserved, but stale v1 `choice_templates` backstop prose was corrected to the v2 structural contract (`exit_portfolio.native_seeds[]` and the seven v2 blocks) as same-seam fallout.
+- SPEC-22 remains the owner for engine ops, validators, canonical vocabularies, sibling-skill alignment, audit-card schema support, and pilot/runtime proof.
+
+Verification results:
+
+- SPEC21SCECOM-001 through SPEC21SCECOM-007 each record their focused grep/manual-review proof in `archive/tickets/`.
+- Final cross-cutting proof confirmed the parent skill has 14-gate wording, v2 Phase 5 axes, JIT template-cascade language, preserved `canon_candidate` author-pool firewall prose, v2 manifest fields, and no active-surface stale anchors for `all 9 Phase 4`, `9 gates`, `shape <=40`, `Shape distribution`, or `choice_templates`.
+- `git diff --check` passed after the implementation and archival handoff edits.

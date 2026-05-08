@@ -49,12 +49,12 @@ arguments:
 
 # Storylet Pool Authoring
 
-Authors or expands the structured-content reservoir for an existing branching story bundle by generating per-mode batches (seed, focus, or audit) of `SLT-NNNN` storylets, or a single runtime JIT storylet when invoked by `branching-story-page-cycle`. Every produced storylet satisfies the Predicate DSL and the per-storylet validation gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate parsability, branch-contamination, schema completeness). Direct seed/focus batches satisfy the batch-level diversity audit (shape, tone, content_intensity, OBL-engagement, theme, cast usage); direct audit batches satisfy the audit-mode Phase 5 branch-contamination and RSP visibility-match checks. Direct batches then route approved storylet YAML records through `mcp__worldloom__submit_patch_plan`, write the markdown batch manifest directly, and update the per-bundle index after explicit user approval at the HARD-GATE. When `branching-story-bootstrap` invokes this skill as a `parent_skill_invocation: true` seed sub-routine, or `branching-story-page-cycle` invokes it as a `parent_skill_invocation: true` JIT sub-routine, this skill returns approved SLT records in memory and performs no writes; the parent skill's HARD-GATE/write transaction governs the resulting bundle.
+Authors or expands the structured-content reservoir for an existing branching story bundle by generating per-mode batches (seed, focus, or audit) of scene-commitment-arc `SLT-NNNN` storylets, or a single runtime JIT arc when invoked by `branching-story-page-cycle`. Every produced arc satisfies the Predicate DSL and all 14 Phase 4 validation gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate parsability, branch-contamination, schema completeness, arc envelope conformance, stop-policy parsability, effect-model legality, exit-portfolio completeness, Rule 11 spectator-caste leverage). Direct seed/focus batches satisfy the batch-level diversity audit over commitment_class, arc_archetype, tone, theme, content_intensity, OBL-engagement, cast usage, and dramatic-unit-coverage; direct audit batches satisfy the audit-mode Phase 5 branch-contamination and RSP visibility-match checks. Direct batches then route approved storylet YAML records through `mcp__worldloom__submit_patch_plan`, write the markdown batch manifest directly, and update the per-bundle index after explicit user approval at the HARD-GATE. When `branching-story-bootstrap` invokes this skill as a `parent_skill_invocation: true` seed sub-routine, or `branching-story-page-cycle` invokes it as a `parent_skill_invocation: true` JIT sub-routine, this skill returns approved SLT records in memory and performs no writes; the parent skill's HARD-GATE/write transaction governs the resulting bundle.
 
-**Schema transition note:** `templates/storylet-record.yaml` is the SPEC-19 SLT v2 scene-commitment-arc template (`record_version: 2`, `shape: scene_commitment_arc`), and `templates/predicate-dsl.md` includes the SPEC-19 third predicate tier for `arc.stop_policy.*.predicate` stop policies. The operational authoring phases below still describe the pre-SPEC-21 v1 beat-storylet workflow where they mention shape distribution, `choice_templates`, v1 diversity gates, or predicate DSL use only for eligibility preconditions. SPEC-21 owns the full operational rewrite; until that lands, treat the templates as the forward schema/grammar authorities and this note as the boundary disclosure.
+**Schema transition note:** `templates/storylet-record.yaml` is the SPEC-19 SLT v2 scene-commitment-arc template (`record_version: 2`, `shape: scene_commitment_arc`), and `templates/predicate-dsl.md` includes the SPEC-19 third predicate tier for `arc.stop_policy.*.predicate` stop policies. SPEC21SCECOM-001 through SPEC21SCECOM-006 landed the operational phase references for the SPEC-21 arc-authoring rewrite; this parent skill now treats the templates and those phase references as the current schema/grammar authorities.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/_source/storylets/`, do NOT create any file under `worlds/<world-slug>/stories/<story-slug>/storylet-batches/`, and do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the parent story bundle exists with a readable `STORY_KERNEL.md`, validates and binds every RSP card named by `source_audit_path` when `mode=audit`, refuses direct `mode=jit` invocation unless `parent_skill_invocation=true` from `branching-story-page-cycle`, allocates the next `SLB-NNNN` and the next available `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)` for direct batches, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 gates 1, 3, 4, and 9 — Rules 7, 4, 5, and 1 — and §Story Bundles §5 Validation Rules at Story Scope all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), loads the current storylet pool + open OBLs + active THRs + recent page history along the longest active branch_path, loads world canon (whole-class M + INV records and a `task_type='storylet_pool_authoring'` context packet for governing CFs — packet call elidable under §Top-up-mode elision conditions per `references/pre-flight-and-prerequisites.md`), and confirms the content_policy block (NC-21 verbatim) is loaded for downstream LLM prompt assembly; (b) every surviving candidate SLT in the batch records PASS with a one-line rationale across all nine Phase 4 per-storylet gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate DSL parsability, branch-contamination, schema completeness) AND every direct seed/focus batch records PASS with a one-line rationale across all six Phase 5 diversity-audit checks (shape distribution, tone distribution, content_intensity distribution, OBL-engagement distribution, theme distribution, cast usage) plus the Phase 5 batch-level branch-contamination audit, while every direct audit batch records PASS for Phase 5 batch-level branch-contamination and RSP visibility-match checks; (c) the user has explicitly approved the Phase 6 batch manifest deliverable summary (per-storylet titles + shape + intensity + OBL/THR/RSP engagement + mystery_safety verdict, plus the diversity or audit-mode validation summary, the rejected-candidates count, and the target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable. `parent_skill_invocation: true` is a documented no-write sub-routine path: for bootstrap seed generation and page-cycle JIT generation, this skill may return an internal validation packet and approved SLT records to the caller, but it must not write storylet files, create SLB manifests, or edit indexes; the parent skill's own HARD-GATE/write transaction is then the user-facing approval surface. The Phase 4 mystery-firewall hard-reject of any storylet whose `M_resolution_claims` carry `canon_candidate` authority is a separate, never-elided refusal that fires before the user-facing HARD-GATE — author-pool storylets MAY NOT carry `canon_candidate` authority because they are globally visible across branches and would launder a runtime canon-promotion handoff into authoring time. Runtime JIT storylets MAY carry `canon_candidate` authority only when `visibility.scope: branch_scoped` and `requires_canon_promotion: true`, and the runtime page-cycle's `story-fact-promotion-to-canon` handoff remains the sole legitimate canon-promotion path; this skill never makes that handoff.
+Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/_source/storylets/`, do NOT create any file under `worlds/<world-slug>/stories/<story-slug>/storylet-batches/`, and do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the parent story bundle exists with a readable `STORY_KERNEL.md`, validates and binds every RSP card named by `source_audit_path` when `mode=audit`, refuses direct `mode=jit` invocation unless `parent_skill_invocation=true` from `branching-story-page-cycle`, allocates the next `SLB-NNNN` and the next available `SLT-NNNN` range via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)` for direct batches, loads `docs/FOUNDATIONS.md` into working context (Phase 4 gates 1, 3, 4, and 9 preserve Rules 7, 4, 5, and 1; gate 14 is the skill-level Rule 11 exceptional-capability leverage check; §Story Bundles §5 Validation Rules at Story Scope also applies; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), loads the current storylet pool + open OBLs + active THRs + recent page history along the longest active branch_path, loads world canon (whole-class M + INV records and a `task_type='storylet_pool_authoring'` context packet for governing CFs — packet call elidable under §Top-up-mode elision conditions per `references/pre-flight-and-prerequisites.md`), and confirms the content_policy block (NC-21 verbatim) is loaded for downstream LLM prompt assembly; (b) every surviving candidate SLT in the batch records PASS with a one-line rationale across all 14 Phase 4 per-storylet gates (mystery firewall, resolution-authority declaration, invariant compatibility, consequence capacity, dedup, content-intensity coherence, predicate DSL parsability, branch-contamination, schema completeness, arc envelope conformance, stop-policy parsability, effect-model legality, exit-portfolio completeness, Rule 11 spectator-caste leverage) AND every direct seed/focus batch records PASS with a one-line rationale across all Phase 5 diversity-axis checks (commitment_class distribution, arc_archetype distribution, tone distribution, theme distribution, content_intensity distribution, OBL-engagement distribution, cast usage, dramatic-unit-coverage from `beat_plan.beats[].state_significance`) plus the Phase 5 batch-level branch-contamination audit, while every direct audit batch records PASS for Phase 5 batch-level branch-contamination and RSP visibility-match checks; (c) the user has explicitly approved the Phase 6 batch manifest deliverable summary (per-storylet titles + commitment_class + arc_archetype + value_delta_target axes + intensity + OBL/THR/RSP engagement + mystery_safety verdict, plus the diversity or audit-mode validation summary, the rejected-candidates count, and the target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable. `parent_skill_invocation: true` is a documented no-write sub-routine path: for bootstrap seed generation and page-cycle JIT generation, this skill may return an internal validation packet and approved SLT records to the caller, but it must not write storylet files, create SLB manifests, or edit indexes; the parent skill's own HARD-GATE/write transaction is then the user-facing approval surface. The Phase 4 mystery-firewall hard-reject of any storylet whose `M_resolution_claims` carry `canon_candidate` authority is a separate, never-elided refusal that fires before the user-facing HARD-GATE — author-pool storylets MAY NOT carry `canon_candidate` authority because they are globally visible across branches and would launder a runtime canon-promotion handoff into authoring time. Runtime JIT storylets MAY carry `canon_candidate` authority only when `visibility.scope: branch_scoped` and `requires_canon_promotion: true`, and the runtime page-cycle's `story-fact-promotion-to-canon` handoff remains the sole legitimate canon-promotion path; this skill never makes that handoff.
 </HARD-GATE>
 
 ## Process Flow
@@ -79,27 +79,29 @@ Pre-flight (resolve worlds/<world-slug>/stories/<story-slug>/;
       v
 Phase 1: Coverage Diagnosis     (scan current pool + open-state for
                                  thinness: open OBLs without compatible
-                                 storylet; active THRs without escalation
-                                 storylet; under-represented content_intensity
-                                 bands relative to story baseline; over- or
-                                 under-represented shape distribution;
-                                 mysteries_in_play[] entries with no
-                                 touching storylet; recent-history
-                                 repetition signal; emit diagnosis matrix
-                                 driving Phase 2; audit mode uses RSP
-                                 targeting fields as diagnosis rows;
-                                 jit mode reduces to
-                                 one continuation-failure row from the
-                                 caller_state_snapshot)
+                                 commitment_class arcs; active THRs without
+                                 escalation commitment_class arcs; under-
+                                 represented content_intensity bands relative
+                                 to story baseline; under-represented
+                                 commitment_class and arc_archetype
+                                 distributions; mysteries_in_play[] entries
+                                 with no touching arc; recent-history
+                                 commitment_class repetition signal; emit
+                                 diagnosis matrix driving Phase 2; audit mode
+                                 uses RSP arc-targeting fields as diagnosis
+                                 rows; jit mode reduces to one continuation-
+                                 failure row from the caller_state_snapshot)
       |
       v
-Phase 2: Generation Seeds       (produce target_pool_size + ~30% seeds —
-                                 each names: target OBL/THR engaged, shape,
+Phase 2: Generation Seeds       (produce target_pool_size + ~30% arc seeds —
+                                 each names: commitment_class, arc_archetype,
+                                 nullable target OBL/THR, entry_pressure,
+                                 scene_question, value_delta_target_axes,
                                  tone register, content_intensity band,
-                                 implied state preconditions, core
-                                 dramatic transaction; seeds are proposals,
-                                 not yet structured records; audit mode
-                                 seeds from RSP sketch/rationale; jit mode
+                                 implied state preconditions, core dramatic
+                                 transaction; seeds are proposals, not yet
+                                 structured records; audit mode seeds from
+                                 RSP arc-targeting sketch/rationale; jit mode
                                  produces exactly one seed from the
                                  continuation-failure context)
       |
@@ -107,38 +109,47 @@ Phase 2: Generation Seeds       (produce target_pool_size + ~30% seeds —
 Phase 3: Structured Drafting    (per seed: assemble LLM prompt with
                                  content_policy verbatim FIRST + story
                                  kernel + seed brief + state context +
-                                 predicate DSL grammar; LLM produces
-                                 structured SLT proposal; engine wraps
+                                 predicate DSL grammar + arc archetype
+                                 excerpt + SLT v2 scaffold; LLM produces
+                                 structured arc proposal; engine wraps
                                  with schema scaffolding, validates field
-                                 types, generates obligation_template /
-                                 fact_template / cast_role machinery;
-                                 records LLM's choice_templates verbatim
-                                 as scaffolds)
+                                 types, generates or normalizes obligation /
+                                 fact / cast-role machinery, and records
+                                 exit_portfolio.native_seeds[] as runtime
+                                 continuation scaffolds)
       |
       v
-Phase 4: Per-Storylet           (each candidate SLT runs all 9 gates
+Phase 4: Per-Storylet           (each candidate SLT runs all 14 gates
          Validation Gates       — mystery firewall, resolution-authority
          (Canon Safety Check    declaration, invariant compatibility,
           phase, per-storylet)  consequence capacity, dedup,
                                  content-intensity coherence, predicate
                                  DSL parsability, branch-contamination,
-                                 schema completeness; HARD-REJECT removes
-                                 from pool + replaces with under-represented
-                                 seed; revise re-prompts up to 2 retries)
+                                 schema completeness, arc envelope
+                                 conformance, stop-policy parsability,
+                                 effect-model legality, exit-portfolio
+                                 completeness, Rule 11 spectator-caste
+                                 leverage; HARD-REJECT removes from pool +
+                                 replaces with under-represented seed;
+                                 revise re-prompts up to 2 retries)
       |
       v
-Phase 5: Diversity Audit        (across surviving SLTs: shape
-         (Canon Safety Check    distribution ≤40% per shape; tone
-          phase, batch-level)   ≤40%; content_intensity matches baseline;
-                                 OBL-engagement ≥60% in seed mode or
-                                 source_obligations hit in focus mode;
-                                 theme ≤50%; no major cast member with
-                                 zero engagement; PLUS batch-level
-                                 branch-contamination audit verifying
-                                 no global_author_pool storylet leaks
-                                 branch-local IDs; up to 2 diversity-
-                                 correction iterations before escalating;
-                                 jit mode bypasses batch diversity)
+Phase 5: Diversity Audit        (across surviving SLTs: commitment_class
+         (Canon Safety Check    distribution ≤30% per class, with documented
+          phase, batch-level)   small-batch relaxation when applicable;
+                                 arc_archetype distribution ≤25%; tone ≤40%;
+                                 theme ≤50%; content_intensity matches
+                                 baseline; OBL-engagement ≥60% in seed mode
+                                 or source_obligations hit in focus mode; no
+                                 major cast member with zero engagement;
+                                 dramatic-unit-coverage from
+                                 beat_plan.beats[].state_significance covers
+                                 each strong_axis on ≥30% of arcs; PLUS batch-
+                                 level branch-contamination audit verifying no
+                                 global_author_pool storylet leaks branch-
+                                 local IDs; up to 2 diversity-correction
+                                 iterations before escalating; jit mode
+                                 bypasses batch diversity)
       |
       v
 Phase 5b: Engine Pre-Validation (direct invocation only: assemble draft
@@ -160,7 +171,8 @@ Phase 5b: Engine Pre-Validation (direct invocation only: assemble draft
 Phase 6: Approval / Return      (direct invocation: HARD-GATE summary
                                  with SLB header +
                                  mode/focus_area + per-storylet line
-                                 (title, shape, intensity, OBL/THR
+                                 (title, commitment_class, arc_archetype,
+                                 value_delta_target axes, intensity, OBL/THR
                                  engagement, mystery_safety verdict) +
                                  diversity or audit-mode validation summary + rejected-candidates
                                  count + target write paths;
@@ -202,7 +214,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
 - `source_threads` — comma-separated `THR-NNNN` ids.
 - `source_audit_path` — path to an `RSP-NNNN-<slug>.md` remediation-storylet-proposal card produced by `branching-story-health-audit` (or its containing `audits/SAU-NNNN/remediation-storylet-proposals/` directory). Required when `mode=audit`; directory input consumes every `RSP-*.md` card in deterministic path order.
 - `created_at_page` — `PG-NNNN`. Required when `mode=jit`; ignored otherwise. Used for `provenance.created_at_page` and branch-scoped visibility.
-- `caller_state_snapshot` — inline page-cycle `state_snapshot`. Required when `mode=jit` and `parent_skill_invocation=true`; ignored otherwise. Supplies the current branch state and continuation-failure reason for reduced diagnosis and seed generation.
+- `caller_state_snapshot` — inline page-cycle `state_snapshot`. Required when `mode=jit` and `parent_skill_invocation=true`; ignored otherwise. Supplies the current branch state and continuation-failure reason for the JIT template cascade: classify the selected commitment, select the mapped arc archetype, fill minimum viable runtime fields, validate, render through the caller, mark provenance, cache the branch-scoped draft, and defer any later promotion.
 - `target_slt_ids` — list of pre-allocated `SLT-NNNN` ids in deterministic order. Required when `parent_skill_invocation: true` AND `mode=seed` (the bootstrap-seed sub-routine path). The sub-routine consumes ids from the head of the list as it produces records; survivors after Phase 4 rejections and Phase 5 culling are emitted with the consumed ids. Unused tail ids are returned to the caller in the response packet so the caller can verify the full range against the consumed prefix.
 - `tone_override` — free-form tone hint per batch.
 - `content_intensity_override` — `tame | mature | explicit`; ±1 band override.
@@ -212,7 +224,7 @@ Phase 7: Engine Submit          (direct invocation only: submit a patch plan
 
 - `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-NNNN.yaml` — one per approved storylet (count = surviving candidates after Phases 4-5, capped by `target_pool_size`). Schema in `templates/storylet-record.yaml`.
 - `worlds/<world-slug>/stories/<story-slug>/storylet-batches/SLB-NNNN.md` — batch manifest summarizing the run (mode, focus area, source obligations/threads, approved storylets table, diversity summary, rejected-candidates breakdown). Schema in `templates/storylet-batch-manifest.md`.
-- `worlds/<world-slug>/stories/<story-slug>/INDEX.md` — updated in place; storylet-pool section receives new total count + per-shape distribution + per-content_intensity distribution.
+- `worlds/<world-slug>/stories/<story-slug>/INDEX.md` — updated in place; storylet-pool section receives new total count + per-commitment_class distribution + per-arc_archetype distribution + per-content_intensity distribution.
 
 When `parent_skill_invocation: true`, no files are written by this skill. The output is an in-memory return packet containing approved SLT records, rejected-candidate counts, Phase 4 validation verdicts, and any applicable Phase 5 diversity summaries. `branching-story-bootstrap` pre-allocates the SLT range in Phase 6 before delegation, supplies `target_slt_ids[]`, and writes the final-id seed records during its Phase 11 staged commit. `branching-story-page-cycle` receives one `runtime_jit` SLT and writes it during its Phase 11 page-tick staged commit.
 
@@ -233,11 +245,11 @@ For `parent_skill_invocation: true` page-cycle JIT generation, this skill does n
 The procedure below collapses the original Pre-flight + Phases 1-7 into a phase-router orchestration spine. Reference docs preserve the original phase numbers in their headings for traceability.
 
 1. **Pre-flight & World-State Prerequisites** — load `references/pre-flight-and-prerequisites.md` and execute every step before Phase 1; abort if any precondition fails. Hook 2 redirects bulk world-canon reads to MCP retrieval; story-bundle reads remain direct.
-2. **Phase 1: Coverage Diagnosis** — load `references/phase-1-coverage-diagnosis.md`. Emit the structured diagnosis matrix that drives Phase 2 seed selection (audit mode rows from RSP cards; jit mode reduces to one continuation-failure row).
+2. **Phase 1: Coverage Diagnosis** — load `references/phase-1-coverage-diagnosis.md`. Emit the structured commitment_class / arc_archetype diagnosis matrix that drives Phase 2 seed selection (audit mode rows from RSP cards; jit mode reduces to one continuation-failure row).
 3. **Phase 2: Generation Seeds** — load `references/phase-2-generation-seeds.md`. Produce `target_pool_size + ceil(target_pool_size × 0.30)` seeds for seed/focus batches (the buffer is structural — it absorbs Phase 4 rejections without forcing a stop-and-redraft cycle, so produce all N+30% upfront rather than lazy-deferring alternates until needed); mode-specific sizing for jit/audit.
-4. **Phase 3: Structured Drafting** — load `references/phase-3-structured-drafting.md` and the three Phase 3 templates it consumes: `templates/content-policy.txt` (NC-21 verbatim — MUST be loaded; first in the prompt assembly so it binds before any drafting instruction), `templates/predicate-dsl.md` (closed grammar for `hard_preconds` / `soft_preconds` / `cast_requirements` / `location_requirements`, plus the SPEC-19 stop-predicate third tier for v2 `arc.stop_policy.*.predicate` — MUST be loaded; Phase 4 gate 7 and downstream `stop_policy_parsability` hard-reject free-form predicates), and `templates/tone-theme-tag-dictionary.md` (recommended tag vocabulary — load for tag-convergence across the pool's lifetime; novel tags are allowed but should be deliberate rather than ad-hoc, since fragmentary tags undermine the lifetime-convergence promise the dictionary exists to deliver). For each seed, assemble the LLM prompt (content_policy FIRST), produce a structured SLT proposal, and let the engine wrap with schema scaffolding + DSL parsability + visibility-scope assignment.
-5. **Phases 4-5: Canon Safety Checks** — load `references/phase-4-5-canon-safety-checks.md`. Run all 9 Phase 4 per-storylet gates against every candidate (HARD-REJECT or revise per gate); then run Phase 5's six diversity-axis checks + batch-level branch-contamination audit + audit-mode RSP visibility-match for direct seed/focus batches and the audit-mode subset for direct audit batches; bypass diversity for jit/audit per the rules in the reference.
-6. **Phase 5b: Engine Pre-Validation** — execute the inline §Phase 5b block below for direct invocation only. Assemble the draft patch plan with `approval_token: "placeholder"` and call `mcp__worldloom__validate_patch_plan(envelope)`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, `touched_by_cf_completeness`, `id_allocation_race` for `expected_id_allocations`, Rules 1-7, `storylet_predicate_dsl_parsability`, `rule11_action_space`, `rule12_redundancy`. For storylet records, `record_schema_compliance` is the VALENH-002 engine-side backstop for Phase 4 gate 9: it requires the template's load-bearing structural fields, including `mystery_safety`, `provenance`, `visibility`, and 4-6 `choice_templates`. Treat as a defensive pre-submit check, not a complete gate: approval-token verification remains submit-only, and submit keeps the `id_allocation_race` defense-in-depth backstop for the validate-to-submit race window. Fold the validators' verdict into the Phase 6 HARD-GATE summary's VALIDATION VERDICTS block. Skip when `parent_skill_invocation: true`; the parent skill's own pre-write validation surface governs.
+4. **Phase 3: Structured Drafting** — load `references/phase-3-structured-drafting.md` and the four Phase 3 templates it consumes: `templates/content-policy.txt` (NC-21 verbatim — MUST be loaded; first in the prompt assembly so it binds before any drafting instruction), `templates/predicate-dsl.md` (closed grammar for `hard_preconds` / `soft_preconds` / `cast_requirements` / `location_requirements`, plus the SPEC-19 stop-predicate third tier for v2 `arc.stop_policy.*.predicate` — MUST be loaded; Phase 4 gate 7 and downstream `stop_policy_parsability` hard-reject free-form predicates), `templates/arc-archetypes.md` (arc archetype library — excerpt the selected archetype table row and condensed sketch), and `templates/tone-theme-tag-dictionary.md` (recommended tag vocabulary — load for tag-convergence across the pool's lifetime; novel tags are allowed but should be deliberate rather than ad-hoc, since fragmentary tags undermine the lifetime-convergence promise the dictionary exists to deliver). For each seed, assemble the LLM prompt (content_policy FIRST), produce a structured SLT v2 arc proposal, and let the engine wrap with schema scaffolding + DSL parsability + visibility-scope assignment.
+5. **Phases 4-5: Canon Safety Checks** — load `references/phase-4-5-canon-safety-checks.md`. Run all 14 Phase 4 per-storylet gates against every candidate (HARD-REJECT or revise per gate); then run Phase 5's mode-appropriate diversity-axis checks + batch-level branch-contamination audit + audit-mode RSP visibility-match for direct seed/focus batches and the audit-mode subset for direct audit batches; bypass diversity for jit/audit per the rules in the reference.
+6. **Phase 5b: Engine Pre-Validation** — execute the inline §Phase 5b block below for direct invocation only. Assemble the draft patch plan with `approval_token: "placeholder"` and call `mcp__worldloom__validate_patch_plan(envelope)`. Coverage: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, `touched_by_cf_completeness`, `id_allocation_race` for `expected_id_allocations`, Rules 1-7, `storylet_predicate_dsl_parsability`, `rule11_action_space`, `rule12_redundancy`. For storylet records, `record_schema_compliance` is the VALENH-002 engine-side backstop for Phase 4 gate 9: it requires the template's load-bearing structural fields, including `mystery_safety`, `provenance`, `visibility`, the seven v2 structural blocks, and `exit_portfolio.native_seeds[]`. Treat as a defensive pre-submit check, not a complete gate: approval-token verification remains submit-only, and submit keeps the `id_allocation_race` defense-in-depth backstop for the validate-to-submit race window. Fold the validators' verdict into the Phase 6 HARD-GATE summary's VALIDATION VERDICTS block. Skip when `parent_skill_invocation: true`; the parent skill's own pre-write validation surface governs.
 7. **Phase 6: Approval / Return** — execute the inline §Phase 6 block below (direct-invocation HARD-GATE) or the inline §Sub-routine invocation block (no-write packet return). The HARD-GATE fires here for direct invocation; the parent skill's own HARD-GATE governs `parent_skill_invocation: true`.
 8. **Phase 7: Engine Submit + Markdown Writes** — execute the inline §Phase 7 block below for direct invocation only. Storylet YAML records route through the patch engine; SLB manifest and INDEX.md are direct markdown writes; INDEX.md is the LAST write so partial failure leaves the index unmutated.
 
@@ -249,7 +261,7 @@ For direct user invocation only, after Phases 4-5 produce the surviving SLT reco
 
 1. **Assemble the draft envelope**: Before constructing the envelope, call `mcp__worldloom__describe_envelope_schema(op_kind='create_slt_record')` to confirm the deployed per-op payload shape — story-bundle ops use `payload.story_slug` + `payload.record` rather than the world-canon `payload.cf_record` shape documented in `create-base-world/references/engine-envelope-shape.md` §2; the introspection result is the live source-of-truth for envelope construction. Then build the same patch-plan envelope shape Phase 7 will submit — `plan_id`, `target_world`, `originating_skill: "storylet-pool-authoring"`, `verdict: "accept"`, `expected_id_allocations.slt_ids`, and one `create_slt_record` op per surviving SLT. Set `approval_token: "placeholder"` per the placeholder convention (per `branching-story-bootstrap/references/engine-envelope-shape.md` §4 — the envelope-shape validator rejects an empty `approval_token` field, so a placeholder string is required at construction time; the validator does NOT verify the placeholder, only that the field is non-empty).
 2. **Call `mcp__worldloom__validate_patch_plan(envelope)`** (envelope ≤50KB) OR `node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>` (envelope >50KB — same engine code, bypasses MCP transport size constraints, per `branching-story-bootstrap/references/engine-envelope-shape.md` §5). Check envelope size with `wc -c <plan-file>` before validate; storylet-pool-authoring batches with 12+ ops carrying rich `notes` / `fact_effects` / `relationship_effects` typically exceed 50KB. The validator runs without mutating world state.
-3. **Coverage**: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, `touched_by_cf_completeness`, `modification_history_retrofit`, `id_allocation_race` for `expected_id_allocations`, Rules 1-7 (`rule1_no_floating_facts`, `rule2_no_pure_cosmetics`, `rule4_no_globalization_by_accident`, `rule5_no_consequence_evasion`, `rule6_no_silent_retcons`, `rule7_mystery_reserve_preservation`), `storylet_predicate_dsl_parsability`, `rule11_action_space`, `rule12_redundancy`. For storylet records, `record_schema_compliance` is the VALENH-002 engine-side backstop for Phase 4 gate 9: it requires the template's load-bearing structural fields, including `mystery_safety`, `provenance`, `visibility`, and 4-6 `choice_templates`. Treat as a defensive pre-submit check, not a complete gate: approval-token verification remains submit-only, and submit keeps the `id_allocation_race` defense-in-depth backstop for the validate-to-submit race window.
+3. **Coverage**: `yaml_parse_integrity`, `id_uniqueness`, `cross_file_reference`, `record_schema_compliance`, `touched_by_cf_completeness`, `modification_history_retrofit`, `id_allocation_race` for `expected_id_allocations`, Rules 1-7 (`rule1_no_floating_facts`, `rule2_no_pure_cosmetics`, `rule4_no_globalization_by_accident`, `rule5_no_consequence_evasion`, `rule6_no_silent_retcons`, `rule7_mystery_reserve_preservation`), `storylet_predicate_dsl_parsability`, `rule11_action_space`, `rule12_redundancy`. For storylet records, `record_schema_compliance` is the VALENH-002 engine-side backstop for Phase 4 gate 9: it requires the template's load-bearing structural fields, including `mystery_safety`, `provenance`, `visibility`, the seven v2 structural blocks, and `exit_portfolio.native_seeds[]`. Treat as a defensive pre-submit check, not a complete gate: approval-token verification remains submit-only, and submit keeps the `id_allocation_race` defense-in-depth backstop for the validate-to-submit race window.
 4. **Fold the verdict into Phase 6's VALIDATION VERDICTS block**: append a row `Phase 5b engine pre-validation: PASS` (or `FAIL — <validator name>: <error message>`) so the user's HARD-GATE decision is informed by full validator outcome rather than only the operator's mental Phase 4 / Phase 5 gate verdicts. On FAIL, route back to Phase 3 (re-prompt the LLM with the validator's exact error inlined) or Phase 4 (force-reject the candidate that triggered the failure) per the failure mode; do NOT proceed to Phase 6 with a FAIL verdict.
 
 The Phase 5b dry-run mirrors the convention `branching-story-page-cycle/SKILL.md` Phase 11 step 1c documents for runtime page-tick patches; both Category 2c skills now use `validate_patch_plan` as the defensive pre-submit check before the user-facing HARD-GATE / write transaction.
@@ -266,12 +278,12 @@ Source obligations: [OBL-NNNN, ...]      Source threads: [THR-NNNN, ...]
 Source audit/RSPs: <SAU-NNNN: RSP-NNNN, RSP-NNNN | n/a>
 
 Total approved: N storylets
-Shape distribution:        entry_pressure: A | cast_introduction: B |
-                           threat_escalation: C | relational_dynamics: D |
-                           routine_disruption: E | aftermath_sequel: F |
-                           reflection_dilemma: G | mystery_edge_brush: H |
-                           thread_resolution: I | aftermath_residue: J |
-                           other: K
+Commitment class distribution:
+                           stay_available_without_pressure: A |
+                           offer_practical_help: B | ask_one_bounded_question: C | ...
+Arc archetype distribution:
+                           fragile_offer: A | bounded_question: B |
+                           confession_received: C | ...
 Content intensity:         tame: X | mature: Y | explicit: Z
 OBL coverage:              <count of currently-open OBLs engaged> / <total open>
 Mystery safety:            pass (X storylets touch M; Y declare M_resolution_claims
@@ -281,7 +293,7 @@ Visibility breakdown:      global_author_pool: P | branch_prefix_scoped: Q |
                            branch_scoped: R
 
 PER-STORYLET SUMMARY:
-- SLT-NNNN: <title> [<shape>, <intensity>] — engages <OBL-X opens, OBL-Y complicates>;
+- SLT-NNNN: <title> [<commitment_class>, <arc_archetype>, axes: <value_delta_target.axes>, <intensity>] — engages <OBL-X opens, OBL-Y complicates>;
             mystery: <M-N touched | none>; visibility: <scope>
 - ...
 
@@ -297,8 +309,8 @@ REJECTED CANDIDATES (info):
 - <count> schema-completeness drops (after 2 revise retries)
 
 VALIDATION VERDICTS:
-- Phase 4 per-storylet (9 gates × N storylets): PASS — <one-line rationale>
-- Phase 5 diversity (6 axes): PASS or BYPASSED for audit/JIT — <one-line rationale>
+- Phase 4 per-storylet (14 gates × N storylets): PASS — <one-line rationale>
+- Phase 5 diversity (mode-appropriate axes): PASS or BYPASSED for audit/JIT — <one-line rationale>
 - Phase 5 batch-level branch-contamination: PASS — <one-line rationale>
 - Phase 5 audit-mode RSP visibility-match: PASS or N/A — <one-line rationale>
 
@@ -324,10 +336,10 @@ When `parent_skill_invocation: true`, do not present a user-facing HARD-GATE and
 
 - approved SLT records (without writing them)
 - consumed `target_slt_ids[]` and unused tail ids, when invoked by bootstrap seed mode
-- Phase 4 per-storylet 9-gate verdicts with one-line rationales
+- Phase 4 per-storylet 14-gate verdicts with one-line rationales
 - Phase 5 diversity and branch-contamination verdicts
 - rejected-candidate counts
-- shape/content/OBL/cast coverage summaries
+- commitment_class / arc_archetype / content / OBL / cast coverage summaries
 
 For the bootstrap path, the caller is `branching-story-bootstrap` Phase 6. Bootstrap includes this validation packet in its own Phase 10 deliverable summary and writes the returned SLTs in Phase 11 only after the user approves the complete bootstrap bundle.
 
@@ -344,7 +356,7 @@ Single transaction for `_source/storylets/*.yaml`, followed by markdown writes. 
 1. `mkdir -p worlds/<world-slug>/stories/<story-slug>/storylet-batches/` if not present (the directory is created on first invocation per bundle; subsequent invocations no-op).
 2. Assemble and submit one patch-plan envelope with one `create_slt_record` op per approved `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-NNNN.yaml`, in deterministic id-ascending order — per the envelope shape documented at `branching-story-bootstrap/references/engine-envelope-shape.md` §1-§3. Sign the envelope via the §4 CLI to produce the HMAC-bound `approval_token`; submit via `mcp__worldloom__submit_patch_plan(plan, approval_token)` (or the §5 CLI submit path for oversize envelopes, both paths run identical engine code). Each record carries the `dropped_at_hardgate` id-skip pattern when ACCEPT WITH SELECTIONS dropped intermediate ids — Phase 7 honors the gap (no renumbering).
 3. `Write` `worlds/<world-slug>/stories/<story-slug>/storylet-batches/SLB-NNNN.md` (template at `templates/storylet-batch-manifest.md`). Manifest records mode, focus area, source obligations/threads, approved-storylets table, diversity summary, rejected-candidates breakdown, dropped-at-hardgate ids, and the validation verdicts inlined from Phase 6.
-4. `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` storylet-pool section: update total count, per-shape distribution table, per-content_intensity distribution. The INDEX.md edit is the LAST write — `INDEX.md` is NOT under `_source/`, so direct `Edit` is the correct surface (Hook 3's match pattern doesn't cover it).
+4. `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` storylet-pool section: update total count, per-commitment_class distribution table, per-arc_archetype distribution table, and per-content_intensity distribution. The INDEX.md edit is the LAST write — `INDEX.md` is NOT under `_source/`, so direct `Edit` is the correct surface (Hook 3's match pattern doesn't cover it).
 
 Direct `Write` is forbidden for story-bundle `_source/storylets/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; storylet YAML writes must route through `create_slt_record`. `SLB-NNNN.md` and `INDEX.md` remain direct markdown writes because they are not atomic `_source/*.yaml` records.
 
