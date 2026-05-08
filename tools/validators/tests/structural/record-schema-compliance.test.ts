@@ -299,34 +299,26 @@ test("record_schema_compliance rejects storylet nested required-field omissions"
   const visibilityMissingScope = completeStorylet();
   delete (visibilityMissingScope.visibility as Record<string, unknown>).scope;
 
-  const choiceMissingOperation = completeStorylet();
-  delete ((choiceMissingOperation.choice_templates as Record<string, unknown>[])[0]!).operation;
+  const beatMissingTarget = completeStorylet();
+  delete (((beatMissingTarget.beat_plan as Record<string, unknown>).beats as Record<string, unknown>[])[0]!).realization_target;
 
   const result = await recordSchemaCompliance.run(
     {},
     context([
       storyletRecord(provenanceMissingOrigin, "SLT-0002"),
       storyletRecord(visibilityMissingScope, "SLT-0003"),
-      storyletRecord(choiceMissingOperation, "SLT-0004")
+      storyletRecord(beatMissingTarget, "SLT-0004")
     ])
   );
 
   assert.ok(result.some((verdict) => verdict.message.includes("/provenance")));
   assert.ok(result.some((verdict) => verdict.message.includes("/visibility")));
-  assert.ok(result.some((verdict) => verdict.message.includes("/choice_templates/0")));
+  assert.ok(result.some((verdict) => verdict.message.includes("/beat_plan/beats/0")));
 });
 
-test("record_schema_compliance enforces storylet choice-template bounds and closed enums", async () => {
-  const tooFewChoices = completeStorylet();
-  tooFewChoices.choice_templates = (tooFewChoices.choice_templates as unknown[]).slice(0, 3);
-
-  const tooManyChoices = completeStorylet();
-  tooManyChoices.choice_templates = [
-    ...(tooManyChoices.choice_templates as unknown[]),
-    choiceTemplate("reveal"),
-    choiceTemplate("flee"),
-    choiceTemplate("refuse")
-  ];
+test("record_schema_compliance enforces v2 storylet shape and retired choice templates", async () => {
+  const retiredChoiceTemplate = completeStorylet();
+  retiredChoiceTemplate.choice_templates = [choiceTemplate("observe")];
 
   const invalidShape = completeStorylet();
   invalidShape.shape = "invalid_shape";
@@ -337,27 +329,26 @@ test("record_schema_compliance enforces storylet choice-template bounds and clos
   const invalidOrigin = completeStorylet();
   (invalidOrigin.provenance as Record<string, unknown>).origin = "weird_origin";
 
-  const invalidPoeticEffect = completeStorylet();
-  ((invalidPoeticEffect.choice_templates as Record<string, unknown>[])[0]!).poetic_effect = "weird_effect";
+  const invalidEffectType = completeStorylet();
+  ((((invalidEffectType.effect_model as Record<string, unknown>).variants as Record<string, unknown>[])[0]!)
+    .required_effects as Record<string, unknown>[])[0]!.type = "weird_effect";
 
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(tooFewChoices, "SLT-0005"),
-      storyletRecord(tooManyChoices, "SLT-0006"),
+      storyletRecord(retiredChoiceTemplate, "SLT-0005"),
       storyletRecord(invalidShape, "SLT-0007"),
       storyletRecord(invalidIntensity, "SLT-0008"),
       storyletRecord(invalidOrigin, "SLT-0009"),
-      storyletRecord(invalidPoeticEffect, "SLT-0010")
+      storyletRecord(invalidEffectType, "SLT-0010")
     ])
   );
 
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.code === "record_schema_compliance.minItems"));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0006" && verdict.code === "record_schema_compliance.maxItems"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.message.includes("/choice_templates")));
   assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0007" && verdict.message.includes("/shape")));
   assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0008" && verdict.message.includes("/content_intensity")));
   assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0009" && verdict.message.includes("/provenance/origin")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/choice_templates/0/poetic_effect")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/effect_model/variants/0/required_effects/0/type")));
 });
 
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {

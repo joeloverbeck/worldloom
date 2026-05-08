@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 3 new validator files under `tools/validators/src/rules/`. Validators auto-register via `tools/validators/src/public/registry.ts`.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC22SCECOM-002.md
 
 ## Problem
 
@@ -17,7 +17,7 @@ SPEC-22 §Track 2 closes the v2 validator inventory with three trace-and-classif
 3. **SPEC-22 §Risks** (post-2026-05-08-reassessment) explicitly resolved the arc_envelope_conformance gap: this validator was added as the 8th entry in §Track 2 to close the cross-spec dependency on archived SPEC-20 §E's 5 Phase 9 gates. The arc_envelope_conformance check is the deterministic counterpart to the Layer 3 LLM `semantic_critic_verdict`; it operates on already-extracted ARC_TRACE.possible_violations[] evidence rather than re-running an LLM critic.
 4. **FOUNDATIONS Rule 7 (Preserve Mystery Deliberately)** restated: a high-severity envelope violation could touch `mystery_preservation.forbidden_resolutions[]` — silently committing such a violation would weaken the Mystery Reserve firewall. `arc_envelope_conformance` HARD-REJECTs high-severity entries at canonical-record-time, preserving the firewall.
 5. **HARD-GATE / canon-write ordering**: N/A at validator-framework level — validators run inside the patch-engine pre-apply gate (existing surface) and inside `world-validate` CLI; they don't themselves write records.
-6. **Schema extension**: validators consume v2 schemas added in 002, including the new `story-arc-trace.schema.json`. The `narrative_point` enum is added to canonical-vocabularies in 006 (soft dep — validator can ship with inline enum first).
+6. **Schema extension**: validators consume v2 schemas added in archive/tickets/SPEC22SCECOM-002.md, including the new `story-arc-trace.schema.json`. The `narrative_point` enum is added to canonical-vocabularies in 006 (soft dep — validator can ship with inline enum first).
 7. (Rename/removal): None — pure addition.
 
 ## Architecture Check
@@ -82,7 +82,7 @@ Add the three new validator imports + entries to `ruleValidators` array.
 
 - Effect-model validators (in 004)
 - Schema-shape + DSL validators (in 003)
-- Schema infrastructure (in 002)
+- Schema infrastructure (in archive/tickets/SPEC22SCECOM-002.md)
 - Layer 3 LLM `semantic_critic_verdict` extraction logic — owned by archived SPEC-20 (runtime page-cycle); this validator only consumes already-emitted ARC_TRACE.possible_violations[]
 - Same downstream Out of Scope as 001/002
 

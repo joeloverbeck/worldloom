@@ -1,9 +1,9 @@
 # SPEC22SCECOM-002: Schema infrastructure: extend `record_schema_compliance` + JSON schemas for SLT v2 / CHC v2 / ARC_TRACE
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — extends `tools/validators/src/structural/record-schema-compliance.ts`, `tools/validators/src/structural/utils.ts` (`RECORD_TYPE_TO_SCHEMA` map), and `tools/validators/src/schemas/` (2 modified + 1 new JSON schema). No impact on existing record-type validation paths besides v1 SLT/CHC v1 path removal in lockstep with 014.
+**Engine Changes**: Yes — extends `tools/validators/src/structural/utils.ts` (`STRUCTURAL_NODE_TYPES`, `RECORD_TYPE_TO_SCHEMA`, structural authority filtering) and `tools/validators/src/schemas/` (2 modified + 1 new JSON schema). `record-schema-compliance.ts` was verified unchanged after live dispatch reassessment. No impact on existing record-type validation paths besides v1 SLT/CHC schema retirement.
 **Deps**: None
 
 ## Problem
@@ -19,6 +19,9 @@ SPEC-22 introduces v2 SLT (`shape: scene_commitment_arc`) and v2 CHC (`choice_ki
 5. (HARD-GATE / canon-write ordering): N/A — validator framework is meta-tooling; no canon writes.
 6. **Schema extension is additive within v2**: storylet schema gains 7 new top-level structural blocks (additive); choice schema gains 2 new top-level blocks (`likely_effects` + `choice_worthiness` — additive); ARC_TRACE schema is wholly new. v1 SLT/CHC records would fail v2 validation, but per SPEC-22 Track 5 the only v1 bundle (red-bunny) is discarded in 014; new bundles (animalia + future) are v2-native. Per SPEC-22 §Risks: "full cutover, no partial coexistence" — the v1 SLT/CHC schema paths are removed in lockstep with the test-bundle discard.
 7. **Rename/removal blast radius**: removing v1 SLT/CHC paths in `record-schema-compliance.ts` is bounded to this validator + its test fixtures. Other consumers of these schemas (e.g., the ajv compile-time path in `tools/validators/src/structural/`) read the schema files lazily and will pick up the v2 shape on next invocation.
+8. Live dispatch correction: `record_schema_compliance.ts` already compiles every schema named by `RECORD_TYPE_TO_SCHEMA` and does not need a source edit. The live enumeration gates are in `tools/validators/src/structural/utils.ts`: `STRUCTURAL_NODE_TYPES` must include `arc_trace_record`, and `isStructuralAuthorityRecord` must accept `stories/<story-slug>/_source/arc-traces/ARCTRACE-NNNN.yaml`.
+9. Consumer boundary: Track 3 tickets 007/008 own world-index ingestion and MCP retrieval/schema-discovery surfaces such as `get_record_schema(record_type='arc_trace_record')`. This ticket provides the validator JSON schema and structural registration that those later surfaces can consume; it does not change `tools/world-mcp/`.
+10. ARC_TRACE schema correction: archived SPEC-19 §C is the schema authority for ARC_TRACE. The landed schema therefore includes `story_id`, `observed_claims[]`, and `semantic_critic_verdict.status` values `pass | revise_prose | reject_arc | promote_interrupt`; the drafted `warn / reject_envelope` status pair was stale Track 2 prose, not the record-schema authority.
 
 ## Architecture Check
 
@@ -34,7 +37,7 @@ SPEC-22 introduces v2 SLT (`shape: scene_commitment_arc`) and v2 CHC (`choice_ki
 5. `RECORD_TYPE_TO_SCHEMA` map registers `arc_trace_record` → `grep -n "arc_trace_record" tools/validators/src/structural/utils.ts`.
 6. FOUNDATIONS Rule 1 alignment: schema enforces presence of every v2 structural field — manual review of each schema's `required` array against SPEC-19 §A / §B / §C.
 
-## What to Change
+## Landed Changes
 
 ### 1. Extend `tools/validators/src/schemas/story-storylet.schema.json`
 
@@ -48,7 +51,7 @@ Add JSON-Schema definitions for the seven v2 structural blocks per SPEC-19 §A:
 - `effect_model`: object with `variants[].{id, maps_to_outcome, required_effects[].{type, ...}, forbidden_effects[]}`.
 - `exit_portfolio`: object with hybrid native + cross-arc seed eligibility.
 
-Mark all seven as required when `shape == "scene_commitment_arc"` (use `oneOf` discriminator on `shape`).
+Require all seven blocks for the forward-only `shape: scene_commitment_arc` v2 schema.
 
 ### 2. Extend `tools/validators/src/schemas/story-choice.schema.json`
 
@@ -67,8 +70,8 @@ NEW JSON Schema for ARC_TRACE record shape per SPEC-19 §C:
 - `created_at_page`: string matching `/^PG-\d{4}$/`
 - `arc_realized`: string matching `/^SLT-\d{4}$/`
 - `effect_variant_applied`: string (variant id from arc.effect_model.variants[].id)
-- `semantic_critic_verdict`: object with `status` (enum: pass / warn / reject_arc / reject_envelope) + reasoning
-- `realized_beats[]`: array of `{beat_id, realized: boolean, evidence_span?: {start, end}}`
+- `semantic_critic_verdict`: object with `status` (enum: pass / revise_prose / reject_arc / promote_interrupt) + reasons / required revision constraints
+- `realized_beats[]`: array of `{beat_id, realized: true | partially | not, evidence_span: {start, end}}`
 - `possible_violations[]`: array of `{envelope_item, severity, evidence_span}`
 - `stop_condition_hit`: object with `id`, `category` (enum: normal_exit / interrupt_before / safety_valve), `evidence_span`
 - `effect_evidence[]`: array of `{effect_ref: integer, evidence_span: {start: integer, end: integer}}`
@@ -78,9 +81,9 @@ NEW JSON Schema for ARC_TRACE record shape per SPEC-19 §C:
 
 Add `arc_trace_record: "story-arc-trace"` to the `RECORD_TYPE_TO_SCHEMA` map.
 
-### 5. Extend `tools/validators/src/structural/record-schema-compliance.ts`
+### 5. Verify `tools/validators/src/structural/record-schema-compliance.ts` dispatch
 
-Confirm the validator's dispatch loop (`queryStructuralRecords(ctx)` enumeration) picks up the new map entry without explicit code change. If the dispatch enumerates only known types, add `arc_trace_record` to the explicit handler. Remove v1 SLT/CHC validation paths in lockstep with 014's red-bunny discard — per SPEC-22 §Risks, no parallel-format coexistence.
+Confirm the validator's schema compiler picks up the new map entry without an explicit `record-schema-compliance.ts` change. The live dispatch enumeration lives in `utils.ts`; add `arc_trace_record` to `STRUCTURAL_NODE_TYPES` and the structural-authority path filter. Remove v1 SLT/CHC schema acceptance in lockstep with SPEC-22's forward-only cutover — no parallel-format coexistence.
 
 ## Files to Touch
 
@@ -88,8 +91,11 @@ Confirm the validator's dispatch loop (`queryStructuralRecords(ctx)` enumeration
 - `tools/validators/src/schemas/story-choice.schema.json` (modify — replace placeholder with full v2 schema)
 - `tools/validators/src/schemas/story-arc-trace.schema.json` (new)
 - `tools/validators/src/structural/utils.ts` (modify — `RECORD_TYPE_TO_SCHEMA` extension)
-- `tools/validators/src/structural/record-schema-compliance.ts` (modify if dispatch needs explicit ARC_TRACE handling; remove v1 SLT/CHC paths in lockstep with 014)
+- `tools/validators/src/structural/record-schema-compliance.ts` (verify only — no source edit needed after live dispatch reassessment)
 - `tools/validators/tests/structural/record-schema-compliance-arc.test.ts` (new — covers SLT v2 + CHC v2 + ARC_TRACE)
+- `tools/validators/tests/structural/record-schema-compliance.test.ts` (modify — retire v1 SLT fixture assertions in favor of v2 structural assertions)
+- `tools/validators/tests/fixtures/story-storylet-complete.yaml` (modify — v2 SLT structural fixture)
+- `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (modify — truth Track 2 status for landed `record_schema_compliance` work)
 
 ## Out of Scope
 
@@ -107,22 +113,44 @@ Confirm the validator's dispatch loop (`queryStructuralRecords(ctx)` enumeration
 2. `record_schema_compliance` rejects a v2 SLT record missing any of the 7 blocks — one rejection test per missing block.
 3. `record_schema_compliance` accepts a well-formed v2 CHC record with full `choice_worthiness` block; rejects one with `likely_effects: []`.
 4. `record_schema_compliance` accepts a well-formed ARC_TRACE record; rejects with malformed `evidence_span` (`{start: -1, end: 100}`).
-5. `RECORD_TYPE_TO_SCHEMA` map exposes `arc_trace_record → "story-arc-trace"` when imported.
+5. `RECORD_TYPE_TO_SCHEMA` map exposes `arc_trace_record → "story-arc-trace"` when imported, and `STRUCTURAL_NODE_TYPES` / authority filtering make ARC_TRACE records reachable by `queryStructuralRecords`.
 
 ### Invariants
 
 1. v2 SLT records have all 7 structural blocks populated.
 2. v2 CHC records with `choice_kind: scene_commitment` have non-empty `likely_effects` and populated `choice_worthiness` block.
-3. ARC_TRACE records have valid `evidence_span: {start, end}` byte offsets (start ≥ 0, end > start) and structurally-valid `semantic_critic_verdict.status` (one of the closed enum values).
+3. ARC_TRACE records have structurally valid `evidence_span: {start, end}` offsets (`start >= 0`, positive `end`) and structurally-valid `semantic_critic_verdict.status` (one of the closed enum values). Cross-field byte-range alignment such as `end > start` and prose-length bounds remains rule-level validation owned by 005.
 
 ## Test Plan
 
 ### New/Modified Tests
 
 1. `tools/validators/tests/structural/record-schema-compliance-arc.test.ts` (new) — covers SLT v2, CHC v2, ARC_TRACE schema acceptance / rejection scenarios.
-2. `tools/validators/tests/fixtures/story-bundle/v2/` (new) — representative v2 SLT, v2 CHC, ARC_TRACE YAML fixtures.
+2. `tools/validators/tests/fixtures/story-storylet-complete.yaml` (modified) — representative v2 SLT fixture.
 
 ### Commands
 
 1. `cd tools/validators && npm run build`
 2. `cd tools/validators && npm run test`
+
+## Outcome
+
+Completed: 2026-05-08.
+
+Implemented the `record_schema_compliance` structural infrastructure for the scene-commitment arc cutover. The storylet JSON schema is now v2-only (`record_version: 2`, `shape: scene_commitment_arc`) and requires the seven arc structural blocks. The choice schema now enforces the v2 scene-commitment surface, including non-empty `likely_effects` and populated `choice_worthiness` for `choice_kind: scene_commitment`. Added the new ARC_TRACE JSON schema and registered `arc_trace_record` through the structural schema map, structural node enumeration, and authority-file filter.
+
+The existing v1 storylet structural fixture/tests were retired in favor of v2 fixtures. SPEC-22 Track 2 prose now records that `record_schema_compliance` has landed while the remaining rule-level validators are still active follow-up work.
+
+## Verification Result
+
+1. `cd tools/validators && npm run build` — passed.
+2. `cd tools/validators && node --test dist/tests/structural/record-schema-compliance.test.js dist/tests/structural/record-schema-compliance-arc.test.js` — passed, 27 focused structural tests.
+3. `cd tools/validators && npm test` — passed, 145 tests.
+4. Manual FOUNDATIONS alignment check: preserves §Story Bundles §5 Rule 1 by enforcing v2 story-bundle structural fields at the schema layer while leaving richer semantic validation to tickets 003/004/005.
+5. Codebase grep-proof: `arc_trace_record` appears in `tools/validators/src/structural/utils.ts` in `STRUCTURAL_NODE_TYPES`, `RECORD_TYPE_TO_SCHEMA`, and the structural-authority path filter.
+
+## Deviations
+
+- `tools/validators/src/structural/record-schema-compliance.ts` did not need a source edit after reassessment. The live dispatch work was in `tools/validators/src/structural/utils.ts`.
+- Track 3 MCP/index schema-discovery consumers remain out of scope for this ticket and are still owned by 007/008.
+- ARC_TRACE status values follow archived SPEC-19 §C (`pass | revise_prose | reject_arc | promote_interrupt`), correcting the stale drafted `warn / reject_envelope` wording.

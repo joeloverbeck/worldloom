@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 3 new validator files under `tools/validators/src/rules/` and extends `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`. Validators auto-register via `tools/validators/src/public/registry.ts`.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC22SCECOM-002.md
 
 ## Problem
 
@@ -17,7 +17,7 @@ SPEC-22 §Track 2 names 8 new validators that enforce v2 record semantics beyond
 3. **Cross-skill boundary under audit**: `_shared/predicate-dsl-grammar.ts` is shared between `storylet_predicate_dsl_parsability` (existing) and `stop_policy_parsability` (new). The grammar extension adds 19 stop-predicate forms (11 normal_exits + 8 interrupt_before per SPEC-22 §Track 3). Both validators consume the extended grammar; no version split.
 4. **FOUNDATIONS Rule 1 (No Floating Facts)** restated: a v2 SLT must declare scope (arc_contract.commitment_scope) / prerequisites (existing storylet preconditions) / limits (execution_envelope) / consequences (effect_model). Each of the 7 structural blocks corresponds to one or more of these dimensions; absence is HARD-REJECT.
 5. (HARD-GATE / canon-write ordering): N/A — validator framework is meta-tooling.
-6. **Schema extension**: validators consume v2 schemas added in 002. Without 002, the validators have nothing to dispatch against for record_schema_compliance shape verification — but the rule-level checks operate on parsed YAML records directly and do not require record_schema_compliance to have run first. 002 is a soft dep (not strict).
+6. **Schema extension**: validators consume v2 schemas added in archive/tickets/SPEC22SCECOM-002.md. Without that archived schema-infrastructure owner, the validators have nothing to dispatch against for record_schema_compliance shape verification — but the rule-level checks operate on parsed YAML records directly and do not require record_schema_compliance to have run first. The archived ticket is a soft dep (not strict).
 7. (Rename/removal blast radius): grammar file extension is additive (new predicate forms appended to existing token list). The existing `storylet_predicate_dsl_parsability` continues to work unchanged on storylet preconditions.
 
 ## Architecture Check
@@ -88,7 +88,7 @@ Add the three new validator imports + entries to `ruleValidators` array.
 
 - Effect-model validators (in 004)
 - Trace + envelope-conformance validators (in 005)
-- Schema infrastructure (in 002 — record_schema_compliance + JSON schemas)
+- Schema infrastructure (in archive/tickets/SPEC22SCECOM-002.md — record_schema_compliance + JSON schemas)
 - Grammar extension for non-stop predicates (existing `storylet_predicate_dsl_parsability` covers these)
 - v1 SLT/CHC backward-compatibility paths (forward-only per SPEC-22 §Track 5)
 - Same downstream Out of Scope as 001/002 (JIT promotion, render-packet caching, etc.)

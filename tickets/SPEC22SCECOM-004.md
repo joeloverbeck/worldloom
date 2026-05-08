@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — adds 2 new validator files under `tools/validators/src/rules/`. Validators auto-register via `tools/validators/src/public/registry.ts`.
-**Deps**: 002
+**Deps**: archive/tickets/SPEC22SCECOM-002.md
 
 ## Problem
 
@@ -17,7 +17,7 @@ SPEC-22 §Track 2 requires deterministic enforcement of effect-model legality (e
 3. **SPEC-19 §A** (archived) defines `effect_model.variants[].required_effects[].type` as a closed enum: `relationship_axis_shift`, `thread_pressure_delta`, `obligation_status_change`, `fact_create`, `fact_invalidate`, `consequence_open`, `consequence_address`, `cast_change`, `location_change`, `mystery_progress`. The `forbidden_effects[]` list uses the same enum. `arc_contract.allowed_outcome_band` is per-arc-instance (not a global enum).
 4. **FOUNDATIONS Rule 1 (No Floating Facts)** restated: every effect a variant claims to produce must be typed, scoped, and derivable. `effect_model_legality` enforces typing + outcome-band conformance; `effect_model_replay_safety` enforces derivability from the SE record's ops.
 5. (HARD-GATE / canon-write ordering): N/A — validator framework is meta-tooling.
-6. **Schema extension**: validators consume v2 schemas added in 002. The `effect_model.variants[].required_effects[].type` enum is documented in canonical-vocabularies (added in 006 — soft dep). Without 006, the closed-enum check uses an inline list duplicated in this validator's source. Soft dep on 006 means this ticket can ship before 006; the validator can land with the inline enum and update to import from canonical-vocabularies later.
+6. **Schema extension**: validators consume v2 schemas added in archive/tickets/SPEC22SCECOM-002.md. The `effect_model.variants[].required_effects[].type` enum is documented in canonical-vocabularies (added in 006 — soft dep). Without 006, the closed-enum check uses an inline list duplicated in this validator's source. Soft dep on 006 means this ticket can ship before 006; the validator can land with the inline enum and update to import from canonical-vocabularies later.
 7. (Rename/removal): None — pure addition.
 
 ## Architecture Check
@@ -68,7 +68,7 @@ Add the two new validator imports + entries to `ruleValidators` array.
 
 - Trace + envelope-conformance validators (in 005)
 - Schema-shape validators (in 003)
-- Schema infrastructure (in 002)
+- Schema infrastructure (in archive/tickets/SPEC22SCECOM-002.md)
 - Effect-type enum implementation in canonical-vocabularies (in 006 — this validator may import from there in a follow-up; ships with inline enum first)
 - Same downstream Out of Scope as 001/002
 

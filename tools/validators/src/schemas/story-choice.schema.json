@@ -2,10 +2,64 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-choice.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": ["id", "story_id", "record_version", "choice_kind"],
   "properties": {
     "id": { "type": "string", "pattern": "^CHC-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "record_version": { "const": 2 },
+    "choice_kind": { "type": "string", "enum": ["scene_commitment", "tactical_beat"] },
+    "commitment_class": { "type": "string", "minLength": 1 },
+    "strategy_cluster": { "type": "string", "minLength": 1 },
+    "choice_contract": { "type": "object" },
+    "likely_effects": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "continuation_capacity": { "type": "object" },
+    "choice_worthiness": {
+      "type": "object",
+      "required": [
+        "strategic_question_answered",
+        "strong_axes",
+        "expected_state_delta",
+        "why_not_microbeat",
+        "foreseeable_difference"
+      ],
+      "properties": {
+        "strategic_question_answered": { "type": "string", "minLength": 1 },
+        "strong_axes": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "expected_state_delta": { "type": "object", "minProperties": 1 },
+        "why_not_microbeat": { "type": "string", "minLength": 1 },
+        "foreseeable_difference": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "choice_kind": { "const": "scene_commitment" } },
+        "required": ["choice_kind"]
+      },
+      "then": {
+        "required": [
+          "commitment_class",
+          "strategy_cluster",
+          "choice_contract",
+          "likely_effects",
+          "continuation_capacity",
+          "choice_worthiness"
+        ],
+        "properties": {
+          "commitment_class": { "type": "string", "minLength": 1 },
+          "strategy_cluster": { "type": "string", "minLength": 1 },
+          "choice_contract": { "type": "object" },
+          "likely_effects": { "type": "array", "minItems": 1 },
+          "continuation_capacity": { "type": "object" },
+          "choice_worthiness": { "type": "object" }
+        }
+      }
+    }
+  ],
   "additionalProperties": true
 }

@@ -6,6 +6,7 @@
     "id",
     "story_id",
     "title",
+    "record_version",
     "shape",
     "content_intensity",
     "hard_preconds",
@@ -23,33 +24,22 @@
     "tension_delta",
     "aftermath_weight",
     "mystery_safety",
-    "choice_templates",
     "provenance",
-    "visibility"
+    "visibility",
+    "arc_contract",
+    "dramatic_unit",
+    "beat_plan",
+    "execution_envelope",
+    "stop_policy",
+    "effect_model",
+    "exit_portfolio"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^SLT-[0-9]{4}$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
     "title": { "type": "string", "minLength": 1 },
-    "shape": {
-      "type": "string",
-      "enum": [
-        "entry_pressure",
-        "cast_introduction",
-        "threat_escalation",
-        "relational_dynamics",
-        "routine_disruption",
-        "aftermath_sequel",
-        "reflection_dilemma",
-        "mystery_edge_brush",
-        "fork_recovery",
-        "thread_resolution",
-        "aftermath_residue",
-        "intimacy",
-        "confrontation",
-        "other"
-      ]
-    },
+    "record_version": { "const": 2 },
+    "shape": { "const": "scene_commitment_arc" },
     "content_intensity": { "type": "string", "enum": ["tame", "mature", "explicit"] },
     "hard_preconds": { "type": "array" },
     "soft_preconds": { "type": "array" },
@@ -83,44 +73,197 @@
       },
       "additionalProperties": true
     },
-    "choice_templates": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 6,
-      "items": {
-        "type": "object",
-        "required": [
-          "operation",
-          "target_role",
-          "uses_fact_role",
-          "likely_effects",
-          "choice_mode",
-          "poetic_effect"
-        ],
-        "properties": {
-          "operation": { "type": "string" },
-          "target_role": { "type": "string" },
-          "uses_fact_role": { "type": "string" },
-          "likely_effects": { "type": "array" },
-          "choice_mode": { "type": "string" },
-          "poetic_effect": {
-            "type": "string",
-            "enum": [
-              "relaxed",
-              "obvious",
-              "dilemma",
-              "risky_truth",
-              "sacrifice",
-              "tragic_irony",
-              "seduction",
-              "desperation",
-              "revelation",
-              "flight"
-            ]
+    "choice_templates": false,
+    "arc_contract": {
+      "type": "object",
+      "required": [
+        "commitment_class",
+        "arc_archetype",
+        "actor",
+        "target",
+        "user_intent",
+        "strategic_question_answered",
+        "commitment_scope",
+        "success_policy",
+        "allowed_outcome_band"
+      ],
+      "properties": {
+        "commitment_class": { "type": "string", "minLength": 1 },
+        "arc_archetype": { "type": "string", "minLength": 1 },
+        "actor": { "type": "string", "minLength": 1 },
+        "target": { "type": ["string", "null"] },
+        "user_intent": { "type": "string", "minLength": 1 },
+        "strategic_question_answered": { "type": "string", "minLength": 1 },
+        "commitment_scope": { "type": "string", "enum": ["scene", "sequence"] },
+        "success_policy": { "type": "string", "enum": ["uncontested", "contested", "costly", "uncertain"] },
+        "allowed_outcome_band": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    },
+    "dramatic_unit": {
+      "type": "object",
+      "required": ["scene_question", "entry_pressure", "value_delta_target", "natural_close_definition"],
+      "properties": {
+        "scene_question": { "type": "string", "minLength": 1 },
+        "entry_pressure": {
+          "type": "object",
+          "required": ["thread", "description"],
+          "properties": {
+            "thread": { "type": ["string", "null"] },
+            "description": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "value_delta_target": { "type": "object" },
+        "natural_close_definition": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "beat_plan": {
+      "type": "object",
+      "required": ["mode", "min_beats", "max_beats", "beats"],
+      "properties": {
+        "mode": { "const": "ordered_soft" },
+        "min_beats": { "type": "integer", "minimum": 2, "maximum": 6 },
+        "max_beats": { "type": "integer", "minimum": 3, "maximum": 8 },
+        "beats": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": ["id", "function", "required", "state_significance", "realization_target"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "function": { "type": "string", "minLength": 1 },
+              "required": { "type": "boolean" },
+              "state_significance": { "type": "string", "minLength": 1 },
+              "realization_target": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "execution_envelope": {
+      "type": "object",
+      "required": [
+        "invariants",
+        "required_functions",
+        "allowed_tactics",
+        "prohibited_actions",
+        "style_directives",
+        "mystery_preservation"
+      ],
+      "properties": {
+        "invariants": { "type": "array" },
+        "required_functions": { "type": "array" },
+        "allowed_tactics": { "type": "array" },
+        "prohibited_actions": { "type": "array" },
+        "style_directives": { "type": "array" },
+        "mystery_preservation": {
+          "type": "object",
+          "required": ["forbidden_resolutions", "allowed_claims"],
+          "properties": {
+            "forbidden_resolutions": { "type": "array", "items": { "type": "string", "pattern": "^M-[0-9]{4}$" } },
+            "allowed_claims": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "stop_policy": {
+      "type": "object",
+      "required": ["normal_exits", "interrupt_before", "safety_valves"],
+      "properties": {
+        "normal_exits": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stopCondition" }
+        },
+        "interrupt_before": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stopCondition" }
+        },
+        "safety_valves": {
+          "type": "object",
+          "required": ["max_internal_beats", "max_words"],
+          "properties": {
+            "max_internal_beats": { "type": "integer", "minimum": 1 },
+            "max_words": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "effect_model": {
+      "type": "object",
+      "required": ["selected_before_render", "variants"],
+      "properties": {
+        "selected_before_render": { "const": true },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "maps_to_outcome", "probability_weight", "required_effects", "forbidden_effects"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "maps_to_outcome": { "type": "string", "minLength": 1 },
+              "probability_weight": { "type": "number", "minimum": 0, "maximum": 1 },
+              "required_effects": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/effect" }
+              },
+              "forbidden_effects": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/effect" }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "exit_portfolio": {
+      "type": "object",
+      "required": ["native_seeds", "engine_discovered_exit_budget"],
+      "properties": {
+        "native_seeds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "commitment_class", "strategy_cluster", "expected_state_delta", "continuation_arc_selector"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "commitment_class": { "type": "string", "minLength": 1 },
+              "strategy_cluster": { "type": "string", "minLength": 1 },
+              "expected_state_delta": { "type": "object" },
+              "continuation_arc_selector": { "type": "object" }
+            },
+            "additionalProperties": true
           }
         },
-        "additionalProperties": true
-      }
+        "engine_discovered_exit_budget": {
+          "type": "object",
+          "required": ["min", "max", "allowed_sources"],
+          "properties": {
+            "min": { "type": "integer", "minimum": 0 },
+            "max": { "type": "integer", "minimum": 0 },
+            "allowed_sources": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
     },
     "provenance": {
       "type": "object",
@@ -147,6 +290,40 @@
         "visible_from_page": { "type": ["string", "null"] },
         "visible_branch_path_prefix": { "type": ["array", "null"] },
         "allowed_branch_ids": { "type": ["array", "null"] }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "stopCondition": {
+      "type": "object",
+      "required": ["id", "predicate", "args"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "predicate": { "type": "string", "minLength": 1 },
+        "args": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "effect": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "relationship_axis_shift",
+            "thread_pressure_delta",
+            "obligation_status_change",
+            "fact_create",
+            "fact_invalidate",
+            "consequence_open",
+            "consequence_address",
+            "cast_change",
+            "location_change",
+            "mystery_progress"
+          ]
+        }
       },
       "additionalProperties": true
     }

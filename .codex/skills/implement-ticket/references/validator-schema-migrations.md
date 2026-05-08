@@ -41,6 +41,7 @@ Use this reference for tickets that change validators, JSON Schemas, hybrid fron
 
 - Update the active ticket's `Files to Touch`, `Acceptance Criteria`, `Test Plan`, `Outcome`, and `Verification Result` to match any changed baseline, registry count, validator count, or intentional non-zero command exit.
 - Label old failure evidence as historical intake evidence when the validator no longer emits the old code or message.
+- Truth the fixture plan against the landed proof surface. If the draft expected a new fixture directory but the implementation used inline fixtures, temp fixtures, or an existing fixture repurposed for the new schema, update `Files to Touch`, `New/Modified Tests`, `Test Plan`, and `Verification Result` to name the actual fixture surface rather than preserving the drafted directory.
 - Record exact grandfathering/waiver matcher changes separately from content cleanup so the ticket does not imply canon/source normalization happened when only the matcher surface changed.
 - Name any remaining visible live-corpus failures and the ticket or spec that owns them.
 - For verification-matrix closeout, update same-seam spec/status docs when scenario ownership changes from full skill-flow proof to mechanized proof, surrogate proof, or manual/organic verification. Do not leave the spec implying an end-to-end skill run happened when only package-local validator coverage was executed.

@@ -108,7 +108,7 @@ NEW parser module:
 
 ### 3. Extend `tools/world-index/src/schema/types.ts`
 
-Add `arc_trace_node` to the node-type enum / discriminated union; add corresponding TypeScript record-shape interface (mirroring the JSON Schema added in 002).
+Add `arc_trace_node` to the node-type enum / discriminated union; add corresponding TypeScript record-shape interface (mirroring the JSON Schema added in archive/tickets/SPEC22SCECOM-002.md).
 
 ### 4. Extend `tools/world-index/src/public/types.ts`
 
