@@ -1,14 +1,14 @@
 # SPEC20SCECOM-009: Cross-Cutting Docs — branching-story-page-cycle SKILL.md Process Flow + Phase Descriptions + Phase 9 Gates
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/SKILL.md` Process Flow diagram extended (Phase 4b + Phase 7.6 added); HARD-GATE block updated; Phase descriptions updated for 4, 4b (NEW), 5, 7, 7.6 (NEW), 8; `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` extended with 5 new gates (total 17).
-**Deps**: `archive/tickets/SPEC20SCECOM-001.md`, `archive/tickets/SPEC20SCECOM-002.md`, `archive/tickets/SPEC20SCECOM-003.md`, `archive/tickets/SPEC20SCECOM-004.md`, `archive/tickets/SPEC20SCECOM-005.md`, `archive/tickets/SPEC20SCECOM-006.md`, `archive/tickets/SPEC20SCECOM-008.md`, `archive/tickets/SPEC20SCECOM-012.md`, `archive/tickets/SPEC20SCECOM-013.md`, `archive/tickets/SPEC20SCECOM-014.md` (all phase reference files and the Phase 8 / Phase 7.5 CHC v2 vocabulary cleanups must land before SKILL.md cites them coherently); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements 4 of the 5 new validators; the 5th — `arc_envelope_conformance` — is documented in SPEC-22's §Risks as a cross-spec gap to close at the post-SPEC-21 SPEC-22 reassessment)
+**Engine Changes**: Yes — `.claude/skills/branching-story-page-cycle/SKILL.md` Process Flow diagram extended (Phase 4b + Phase 7.6 added); HARD-GATE block updated; Phase descriptions updated for 4, 4b (NEW), 5, 7, 7.6 (NEW), 8; parent pre-flight summary aligned with conditional `ARCTRACE` allocation; `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` extended with 5 new gates (total 17).
+**Deps**: `archive/tickets/SPEC20SCECOM-001.md`, `archive/tickets/SPEC20SCECOM-002.md`, `archive/tickets/SPEC20SCECOM-003.md`, `archive/tickets/SPEC20SCECOM-004.md`, `archive/tickets/SPEC20SCECOM-005.md`, `archive/tickets/SPEC20SCECOM-006.md`, `archive/tickets/SPEC20SCECOM-008.md`, `archive/tickets/SPEC20SCECOM-012.md`, `archive/tickets/SPEC20SCECOM-013.md`, `archive/tickets/SPEC20SCECOM-014.md` (all phase reference files and the Phase 8 / Phase 7.5 CHC v2 vocabulary cleanups landed before this parent SKILL.md integration); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22 §Track 2 implements 4 of the 5 new validators; the 5th — `arc_envelope_conformance` — is documented in SPEC-22's §Risks as a cross-spec gap to close at the post-SPEC-21 SPEC-22 reassessment)
 
 ## Problem
 
-`branching-story-page-cycle/SKILL.md` carries the canonical Process Flow diagram, HARD-GATE block, and per-Phase summary descriptions. After SPEC20SCECOM-001 through 008, SPEC20SCECOM-012, SPEC20SCECOM-013, and SPEC20SCECOM-014 land their per-phase reference files and CHC v2 vocabulary cleanups, the SKILL.md surface needs coherent updates: the Process Flow must show the new Phase 4b + Phase 7.6 nodes, the HARD-GATE must reflect the no-additional-HARD-GATE discipline (Phase 4.5 + Phase 10 preserved), and the per-Phase descriptions must point at the rewritten reference files. Additionally, `phase-9-validation-gates.md` lists Phase 9's deterministic gates; SPEC-20 §E + Deliverables row 7 add 5 new gates (total 17). Per §Cross-Cutting Docs Ticket Shape, this ticket lands the docs surface atomically once all upstream implementation tickets have shipped.
+At intake, `branching-story-page-cycle/SKILL.md` carried the canonical Process Flow diagram, HARD-GATE block, and per-Phase summary descriptions, but those parent summaries still reflected the v1 beat-oriented runtime after SPEC20SCECOM-001 through 008, SPEC20SCECOM-012, SPEC20SCECOM-013, and SPEC20SCECOM-014 had landed their per-phase references and CHC v2 vocabulary cleanups. This ticket updated the SKILL.md surface coherently: the Process Flow now shows Phase 4b + Phase 7.6, the HARD-GATE reflects the no-additional-HARD-GATE discipline (Phase 4.5 + Phase 10 preserved), and the per-Phase descriptions point at the rewritten reference files. `phase-9-validation-gates.md` now lists the 5 new gates from SPEC-20 §E + Deliverables row 7 (total 17).
 
 ## Assumption Reassessment (2026-05-07)
 
@@ -22,10 +22,11 @@
 3. Cross-skill boundary: this ticket consumes the 6 phase-reference rewrites produced by SPEC20SCECOM-001..-006 (and the partial SKILL.md edit from SPEC20SCECOM-008); produces an integrated SKILL.md surface that the page-cycle's HARD-GATE block + Process Flow diagram cover end-to-end. The contract under audit is per-Phase summary fidelity (SKILL.md description matches reference-file content) and the Phase 9 gate count (12 → 17 reflects the 5 new gates).
 4. FOUNDATIONS Rule 1 (No Floating Facts) — renumbered from template item 4: the 5 new Phase 9 gates each enforce arc-level invariants (envelope-conformance, replay-safety, trace-alignment, narrative-point-classification, choice-worthiness completeness). Documenting them in `phase-9-validation-gates.md` is the discipline that closes the floating-fact loop — Phase 9 records each gate's PASS/FAIL with rationale per existing skill discipline.
 5. HARD-GATE / Mystery Reserve firewall semantics — renumbered from template item 5: this ticket updates the HARD-GATE block to reflect (a) Phase 4.5 canon-promotion HARD-GATE preserved (never-elided in every execution_mode); (b) Phase 10 user-approval HARD-GATE fires once per arc-page in `authoring` mode (not once per beat-render — ~5x reduction); (c) no new HARD-GATE introduced by ARC_TRACE persistence (SPEC20SCECOM-008 §No HARD-GATE Change discipline cited).
+6. Implementation reassessment (2026-05-08): parent `SKILL.md` pre-flight prose also needed the conditional `ARCTRACE` allocation summary already landed in `archive/tickets/SPEC20SCECOM-008.md`'s reference/Phase 11 surfaces. This is same-parent-summary fallout, not a new runtime behavior. The Phase 9 count proof was corrected from the drafted brittle `grep -c "Gate"` shape to a row-count proof over the gate table because the live reference represents gates as table rows, not repeated "Gate N" headings.
 
 ## Architecture Check
 
-1. Cross-cutting docs ticket per §Cross-Cutting Docs Ticket Shape — all upstream phase tickets must land first; this ticket integrates them atomically. Splitting into per-phase SKILL.md edits would create a stale-window pattern where Process Flow shows Phase 4b but Phase 4 summary doesn't yet describe arc-selection.
+1. Cross-cutting docs ticket per §Cross-Cutting Docs Ticket Shape — all upstream phase tickets landed first; this ticket integrated them atomically. Splitting into per-phase SKILL.md edits would have created a stale-window pattern where Process Flow showed Phase 4b but Phase 4 summary did not yet describe arc-selection.
 2. Phase 9 gate count (12 → 17) is part of this ticket because it depends on the 5 new gates being defined upstream — adding gates before the validator surface is documented in references creates the same stale window.
 3. No backwards-compatibility aliasing/shims: the v1 Process Flow + per-Phase descriptions are retired; the v2 surface is the only path post-cutover.
 
@@ -37,32 +38,33 @@
 4. Phase 9 gate list includes 5 new gates (total 17) → codebase grep-proof in `phase-9-validation-gates.md` for each gate name and the count.
 5. `arc_envelope_conformance` gate clarification points to SPEC-22 §Track 2 ownership → codebase grep-proof for the cross-spec attribution.
 
-## What to Change
+## Landed Changes
 
 ### 1. Process Flow diagram (SKILL.md)
 
-Update the existing Process Flow diagram to insert Phase 4b (between Phase 4 and Phase 4.5) and Phase 7.6 (between Phase 7 and Phase 8). Preserve all other phases verbatim.
+Updated the existing Process Flow diagram to insert Phase 4b (between Phase 4 and Phase 4.5) and Phase 7.6 (between Phase 7.5 and Phase 8), and aligned the parent pre-flight allocation summary with conditional `ARCTRACE` allocation.
 
 ### 2. HARD-GATE block (SKILL.md)
 
-Update the HARD-GATE block to:
+Updated the HARD-GATE block to:
 - Preserve Phase 4.5 canon-promotion HARD-GATE handoff to `story-fact-promotion-to-canon` (never-elided in every execution_mode).
-- Document that Phase 10 user-approval HARD-GATE fires once per arc-page in `authoring` mode (not once per beat-render).
-- Add a clause: "ARC_TRACE persistence (Phase 7.6) does not change the Phase 10 user-approval contract or the Phase 4.5 canon-promotion handoff" (cite SPEC20SCECOM-008 §No HARD-GATE Change).
+- Document that Phase 10 user-approval HARD-GATE fires once per arc-page in `authoring` mode.
+- Add the no-HARD-GATE-change clause for ARC_TRACE persistence: "ARC_TRACE persistence (Phase 7.6) does not change the Phase 10 user-approval contract or the Phase 4.5 canon-promotion handoff."
+- Changed the gate count from 12 to 17.
 
 ### 3. Per-Phase summary descriptions (SKILL.md)
 
-Update Phase 4, 4b (NEW), 5, 7, 7.6 (NEW), 8 summary descriptions to:
-- Phase 4: "Arc selection (was: storylet selection at beat granularity); see `references/phase-4-storylet-and-mystery-authority.md`."
-- Phase 4b (NEW): "Effect-variant selection before render; deterministic pick by `weighted_pick_seed`; see `references/phase-4-storylet-and-mystery-authority.md` §Phase 4b."
-- Phase 5: "State mutation at arc-close (extended to apply variant.required_effects); see `references/phase-5-state-mutation.md`."
-- Phase 7: "Multi-beat arc render (was: single-beat render); length per Prose Craft Contract Rule 11; see `references/phase-7-page-render.md`."
-- Phase 7.6 (NEW): "ARC_TRACE extraction + three-layer validation; per-execution-mode budget for Layer 3; see `references/phase-7-6-arc-trace-extraction.md`."
-- Phase 8: "Choice-surface gate (was: habitual menu emission); 6-step gate; see `references/phase-8-choice-generation.md`."
+Updated Phase 4, 4b, 5, 7, 7.6, and 8 summary descriptions in the Process Flow and Procedure so the parent skill now describes:
+- Phase 4 arc selection with `references/phase-4-storylet-and-mystery-authority.md`.
+- Phase 4b effect-variant selection before render, using `weighted_pick_seed` advanced by one tick.
+- Phase 5 arc-close state mutation from `variant.required_effects[]`.
+- Phase 7 multi-beat continuous arc render with Prose Craft Contract Rule 11 length discipline and the 8-axis critic.
+- Phase 7.6 ARC_TRACE extraction + three-layer validation.
+- Phase 8 choice-surface gate, not habitual menu emission.
 
 ### 4. Phase 9 gate list extension (`phase-9-validation-gates.md`)
 
-In `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md`, add 5 new gates to the existing 12-gate list (total 17):
+In `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md`, added 5 new gates to the existing 12-gate list (total 17):
 
 - **Gate 13 — `arc_envelope_conformance`**: deterministic gate consuming ARC_TRACE evidence (per `references/phase-7-6-arc-trace-extraction.md`); validates no `possible_violations[]` entry of `severity: high` slipped past Phase 7.6 Layers 1-3 unaddressed; every `possible_violations[].envelope_item` references a real entry in `arc.execution_envelope.{invariants, required_functions, prohibited_actions}`; trace's `effect_evidence[]` realized-status consistent with chosen variant's `required_effects[]`. Validator implementation owned by SPEC-22 §Track 2 — currently lists 7 validators; this gate is an 8th and is documented in SPEC-22 §Risks as a cross-spec gap to close at the post-SPEC-21 SPEC-22 reassessment. Pages with `arc_trace_emitted: false` auto-PASS this gate with rationale `"ARC_TRACE not emitted under low-budget interactive_runtime configuration"`.
 - **Gate 14 — `effect_model_replay_safety`**: deterministic gate; PG `state_snapshot.applied_effect_variant` is a valid `variants[].id` of realized arc's `effect_model`; SE record's ops are derivable from chosen variant's `required_effects[]`. Owned by SPEC-22 §Track 2.
@@ -70,12 +72,13 @@ In `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gate
 - **Gate 16 — `narrative_point_classification`**: deterministic gate; PG `state_snapshot.narrative_point_classification` is in the closed enum AND consistent with ARC_TRACE.stop_condition_hit.category. Owned by SPEC-22 §Track 2.
 - **Gate 17 — `choice_worthiness_completeness`**: deterministic gate; every `choice_kind: scene_commitment` CHC has non-empty `likely_effects` + populated `choice_worthiness` block. Owned by SPEC-22 §Track 2.
 
-Update the gate count in the reference file's intro from "12 gates" to "17 gates".
+Updated the gate count in the reference file's intro to "17 gates" and added a SPEC-22 ownership note for gates 13-17.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-page-cycle/SKILL.md` (modify — Process Flow + HARD-GATE + Phase descriptions sections; partial edit, does NOT touch Phase 11 §1a section — that's SPEC20SCECOM-008)
 - `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` (modify — add 5 gates, update count 12 → 17)
+- `tickets/SPEC20SCECOM-009.md` (modify — closeout truthing)
 
 ## Out of Scope
 
@@ -93,7 +96,7 @@ Update the gate count in the reference file's intro from "12 gates" to "17 gates
 
 1. Process Flow diagram parses (visual review): the new Phase 4b + Phase 7.6 nodes appear in the correct positions; no stale phase numbers.
 2. Per-Phase summary cross-references resolve: every reference-file path cited in SKILL.md per-Phase descriptions corresponds to an existing file (post-SPEC20SCECOM-001..-008 landing).
-3. Phase 9 gate count: `grep -c "Gate" phase-9-validation-gates.md` returns 17 (or the equivalent count by section anchor).
+3. Phase 9 gate count: `grep -cE '^\| (1[0-7]|[1-9]) \|' .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` returns 17.
 
 ### Invariants
 
@@ -114,3 +117,29 @@ Update the gate count in the reference file's intro from "12 gates" to "17 gates
 3. `grep -nE "arc_envelope_conformance|effect_model_replay_safety|arc_trace_evidence_alignment|narrative_point_classification|choice_worthiness_completeness" .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` — confirms all 5 new gates land.
 4. `grep -nE "12 gates|17 gates" .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` — confirms count updated to 17.
 5. `grep -n "ARC_TRACE persistence.*does not change" .claude/skills/branching-story-page-cycle/SKILL.md` — confirms no-HARD-GATE-change discipline lands.
+6. `grep -cE '^\| (1[0-7]|[1-9]) \|' .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` — confirms the gate table has exactly 17 numbered rows.
+
+## Outcome
+
+Completed: 2026-05-08. `.claude/skills/branching-story-page-cycle/SKILL.md` now presents the scene-commitment arc runtime as the current parent skill summary: the opening summary describes scene-commitment arc selection, pre-render effect-variant selection, continuous arc-page render, ARC_TRACE extraction/validation, and the Phase 8 choice-surface gate. Phase 4b and Phase 7.6 appear in the Process Flow, Phase 4/4b/5/7/7.6/8 summaries cite the live reference files, the HARD-GATE block records 17 Phase 9 gates, Phase 10 user approval remains once per arc-page in `authoring`, and ARC_TRACE persistence is explicitly no-HARD-GATE-change. The parent pre-flight summary now also names conditional `ARCTRACE` allocation so it matches the earlier SPEC20SCECOM-008 surfaces.
+
+`.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` now declares 17 gates and adds gates 13-17: `arc_envelope_conformance`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`, and `choice_worthiness_completeness`.
+
+## Verification Result
+
+1. PASS — `grep -nE "Phase 4b|Phase 7\\.6" .claude/skills/branching-story-page-cycle/SKILL.md`.
+2. PASS — `grep -nE "Phase 4\\.5|Phase 10" .claude/skills/branching-story-page-cycle/SKILL.md`.
+3. PASS — `grep -nE "arc_envelope_conformance|effect_model_replay_safety|arc_trace_evidence_alignment|narrative_point_classification|choice_worthiness_completeness" .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md`.
+4. PASS — `grep -nE "12 gates|17 gates" .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` returned only the 17-gate intro.
+5. PASS — `grep -n "ARC_TRACE persistence.*does not change" .claude/skills/branching-story-page-cycle/SKILL.md`.
+6. PASS — `grep -cE '^\\| (1[0-7]|[1-9]) \\|' .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` returned `17`.
+7. PASS — direct `test -f` check confirmed each parent-skill phase-reference path cited by the landed Phase 4/5/7/7.6/8/9 summaries exists.
+8. PASS — `! rg -n "generates 4-6 structured choices|selects the next storylet" .claude/skills/branching-story-page-cycle/SKILL.md`.
+9. PASS — `git diff --check -- .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md tickets/SPEC20SCECOM-009.md`.
+10. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` §Risks, upstream archived SPEC20SCECOM tickets, `docs/FOUNDATIONS.md`, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the landed parent skill/gate-reference prose preserves Rule 1, Rule 7, append-only story-bundle write discipline, and the never-elided Phase 4.5 canon-promotion HARD-GATE.
+
+## Deviations
+
+1. The drafted `grep -c "Gate"` count proof was replaced with a table-row count because the live gate reference uses numbered markdown table rows rather than repeated "Gate N" headings. The accepted invariant remains exactly 17 Phase 9 gates.
+2. No executable runtime validator or capstone fixture was run; SPEC-22 and SPEC20SCECOM-011 still own runtime implementation/capstone proof. This ticket's accepted proof is the documentation and parent-skill contract surface.
+3. Post-ticket review (2026-05-08) found one same-seam parent-summary blocker in `.claude/skills/branching-story-page-cycle/SKILL.md`: the introductory "Runs one tick..." paragraph still described v1 habitual choice generation. This implementation pass corrected that paragraph before archival.

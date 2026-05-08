@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — fixture-based test exercise of SPEC-20 §Verification matrix (no production code changes; introduces test fixtures and dry-run scripts in skill testing surfaces). No new skill, tool, hook, or validator is introduced; the ticket exercises the pipeline composed by SPEC20SCECOM-001..-010.
-**Deps**: SPEC20SCECOM-009 (transitive head — composes all earlier phase tickets via SKILL.md Process Flow + Phase descriptions); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22's validator implementations are required for the empirical verification of choice-worthiness, replay-safety, evidence-alignment, narrative-point classification gates)
+**Deps**: `archive/tickets/SPEC20SCECOM-009.md` (transitive head — composes all earlier phase tickets via SKILL.md Process Flow + Phase descriptions); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (SPEC-22's validator implementations are required for the empirical verification of choice-worthiness, replay-safety, evidence-alignment, narrative-point classification gates)
 
 ## Problem
 
@@ -23,7 +23,7 @@ SPEC-20 §Verification names six empirical bullets that exercise the v2 page-cyc
 1. Per §Spec-Integration Ticket Shape, this ticket introduces NO new production code; it exercises the pipeline composed by earlier tickets. A fixture-world copy strategy (using `fs.cpSync` to a temp root, or the equivalent worldloom-side fixture mechanism) keeps the real `worlds/<slug>/` tree untouched so the test never mutates canon.
 2. Re-enumerated expected counts (not hardcoded) keep the test valid as canon grows. For example, the choice-worthiness assertion ("0 CHCs with empty `likely_effects` across a 50-page test run") is computed at test start: enumerate the fixture's CHC count; assert that 0 of them have empty `likely_effects` post-Phase-8.
 3. Per the §Spec-Integration Ticket Shape, leave the spec's aspirational performance target (token-cost reduction; ~4 LLM calls per arc vs. ~5 per beat × N beats per scene per v1) as a dev-loop expectation rather than a CI gate — performance characterization happens during Tier 4 pilot per IMPLEMENTATION-ORDER.md, not as a hard gate in this capstone.
-4. `Deps` = SPEC20SCECOM-009 (transitive head) — the DAG already records the full chain through 009's own `Deps` (which lists 001-008). Per §Spec-Integration Ticket Shape, transitive-head dependency is preferred over enumerating every upstream ticket.
+4. `Deps` = `archive/tickets/SPEC20SCECOM-009.md` (transitive head) — the DAG already records the full chain through 009's own `Deps` (which lists 001-008). Per §Spec-Integration Ticket Shape, transitive-head dependency is preferred over enumerating every upstream ticket.
 5. No backwards-compatibility aliasing/shims: capstone exercises the v2 pipeline only; v1 test bundle (`worlds/erotica-world/stories/red-bunny/`) is discarded at SPEC-22 §Track 5 before this ticket's test surface lands.
 
 ## Verification Layers
