@@ -1,82 +1,316 @@
 # Phase 3: Structured Drafting
 
-For each seed, generate the full SLT record per the schema in `templates/storylet-record.yaml`. During the SPEC-19/SPEC-21 transition, the template is the forward v2 schema authority; legacy operational references to `choice_templates` below describe the pre-SPEC-21 workflow and remain pending the full authoring rewrite. The LLM proposes the structured content; the engine wraps the LLM output with the schema scaffolding, validates field types, and records the runtime scaffolds required by the active schema version.
+Phase 3 turns each Phase 2 arc seed into a v2 `SLT-NNNN` storylet record.
+The LLM produces a structured arc proposal; the engine wraps that proposal with
+schema scaffolding, validates field types and Predicate DSL parsability,
+generates obligation/fact/cast-role templates from the structured proposal, and
+assigns visibility/provenance fields according to mode.
 
-**LLM Prompt Assembly** (the order matters; content_policy is FIRST so it binds the model before any other instruction):
+The unit of authoring is a scene-commitment arc. Do not draft a single-beat v1
+storylet, and do not preserve retired v1 shape buckets as aliases.
 
-```
-[content_policy block — verbatim from templates/content-policy.txt, NC-21]
+## Inputs Consumed
 
-[story kernel — designing_principle + tone_constraints + content_intensity_baseline
-                + invariants_acknowledged + mysteries_in_play (with each M's status
-                + future_resolution_safety from the whole-class M load)]
+For each candidate seed, Phase 3 consumes:
 
-[seed brief — shape, tone, content_intensity, target OBL/THR/CNSQ/SREL id + body,
-              source RSP/audit ids when mode=audit, core dramatic transaction]
+- The 11-field `arc_seed` from `references/phase-2-generation-seeds.md`.
+- The story kernel, including tone constraints, content-intensity baseline,
+  cadence/menu policy when present, known invariants, and mysteries in play.
+- State context: open OBLs, active THRs, mysteries in play, cast roster,
+  current location, and relevant recent branch state.
+- `templates/content-policy.txt`, loaded verbatim first.
+- `templates/predicate-dsl.md`, including the stop-predicate third tier.
+- `templates/tone-theme-tag-dictionary.md`, as recommended tag vocabulary.
+- `templates/arc-archetypes.md`, excerpted by the strategy below.
+- `templates/storylet-record.yaml`, used as the v2 SLT scaffold target.
 
-[state context — currently open OBLs (id + type + salience + urgency + payoff_modes),
-                 active THRs (id + type + status + current_pressure), cast bind list
-                 (each STENT's role + intention summary)]
+Phase 3 must not guess missing ids. If a seed's nullable `target_obligation` or
+`target_thread` is `null`, keep it null unless the state context contains a real
+record that Phase 1/2 made available for this seed.
 
-[predicate DSL grammar — verbatim from templates/predicate-dsl.md so the LLM
-                          generates parsable eligibility preconds and, under
-                          v2, parsable stop_policy predicates rather than
-                          free-form prose]
+## LLM Prompt Assembly
 
-[tone/theme tag dictionary — verbatim from templates/tone-theme-tag-dictionary.md
-                              as recommended-but-non-binding vocabulary so tone_tags
-                              and theme_tags converge across the pool's lifetime
-                              rather than fragmenting per-batch]
+The prompt assembly order is load-bearing. `content_policy` is FIRST so the
+content contract binds before any world, state, or drafting instruction.
+
+```text
+[content_policy verbatim]
+[story kernel]
+[seed brief]
+[state context - open OBLs, active THRs, mysteries_in_play, cast roster, current_location]
+[predicate DSL - including stop predicates]
+[arc archetype excerpt for this seed's arc_archetype]
+[arc template scaffold - SLT v2 with TODO markers]
 
 INSTRUCTION:
-Produce a structured storylet record matching the SLT schema. Define hard_preconds
-and soft_preconds as predicates from the supplied DSL — free-form prose predicates
-will be hard-rejected at Phase 4. Under the v2 scene-commitment-arc schema, define
-`arc.stop_policy.normal_exits[].predicate` and
-`arc.stop_policy.interrupt_before[].predicate` using the stop-predicate third tier
-from the same DSL; free-form stop predicates are rejected by downstream
-`stop_policy_parsability`. Define fact_effects and relationship_effects as
-structured ops (op + template + epistemic_class). Every created fact_template
-also carries `visible_to_reader` and `reader_visibility_basis`; default to
-`visible_to_reader: false` and
-`reader_visibility_basis: unrevealed_objective_truth` unless the storylet
-deliberately creates a reader-facing reveal, in which case use a positive basis
-(`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or
-`diegetic_artifact_visible`). Provide 4-6 choice_templates that the runtime LLM
-proposer can use as anchors — each carries operation + target_role +
-likely_effects + choice_mode + poetic_effect.
+Fill the SLT v2 template for this arc seed. Required:
+- arc_contract (commitment_class, arc_archetype, actor, target, user_intent,
+  strategic_question_answered, commitment_scope, success_policy, allowed_outcome_band)
+- dramatic_unit (scene_question, entry_pressure, value_delta_target, natural_close_definition)
+- beat_plan (mode: ordered_soft, min_beats, max_beats, 3-8 beats with function/required/state_significance)
+- execution_envelope (invariants, required_functions, allowed_tactics, prohibited_actions,
+  style_directives, mystery_preservation)
+- stop_policy (normal_exits using stop predicates, interrupt_before, safety_valves)
+- effect_model.variants (1..N rows; each maps to one allowed_outcome_band entry; required_effects
+  use closed effect-type enum; forbidden_effects enumerate what MUST NOT happen)
+- exit_portfolio.native_seeds (3-5 entries; each commitment_class + strategy_cluster +
+  expected_state_delta + continuation_arc_selector)
+- legacy fields (hard_preconds, soft_preconds, cast_requirements, location_requirements,
+  tone_tags, theme_tags, tension_delta, aftermath_weight, mystery_safety, provenance, visibility)
 
-Mystery safety: do NOT touch any forbidden-status M-NNNN. If you brush a low /
-medium / high M without resolving it, declare it in mystery_safety.M_touched (or
-M_progressed if a clue or partial reveal advances it). If your effects propose to
-RESOLVE any M, declare an M_resolution_claims entry naming the M, the
-resolution_authority (apparent | branch_local_counterfactual | canon_candidate),
-and claim_strength. Author-pool storylets MAY NOT use canon_candidate authority
-— that route is reserved for runtime page-cycle's story-fact-promotion-to-canon
-handoff. Use apparent or branch_local_counterfactual to let branches explore
-mystery resolutions without canonizing them.
-
-Content intensity: <band>. Match the band consistently — do not write a tame
-storylet whose hidden effects only land at explicit content.
-
-Visibility: <global_author_pool | branch_prefix_scoped | branch_scoped> per the
-mode-and-source-driven rule below.
+Do NOT use beat headers in any prose-bearing field. Beat plans are structural; prose flows continuously.
 ```
 
-**Visibility scope assignment** (per the proposal's Visibility Scope Semantics):
+The seed brief maps directly into the scaffold:
 
-- `mode=seed` or `mode=focus`: `visibility.scope: global_author_pool`, `provenance.created_at_page: null` — these batches are author-pool storylets visible across every branch.
-- `mode=jit`: `visibility.scope: branch_scoped`, `provenance.created_at_page: <created_at_page>`, `provenance.origin: runtime_jit` — runtime JIT storylets are visible only on the branch containing the calling page and are never added to the global author pool.
-- `mode=audit`: visibility inherits from the source RSP card's `proposed_visibility` block. `global_author_pool` requires `visible_branch_path_prefix: null` and `provenance.created_at_page: null`. `branch_prefix_scoped` requires a non-empty `visible_branch_path_prefix` copied from the RSP card and `provenance.created_at_page: null`. `branch_scoped` requires a non-empty `visible_branch_path_prefix`; set `provenance.created_at_page` to the leaf `PG-NNNN` in that prefix unless the RSP card names a more specific leaf page in `target_branch`. The older `target_branch` string is advisory prose; `proposed_visibility.scope` is the structural authority.
-- **Fourth case — `mode=seed` or `mode=focus` with `source_obligations` / `source_threads` engaging non-bootstrap-created records (gate-8-forced `branch_prefix_scoped`)**: when at least one supplied source record has `created_at_page` non-null AND `supersedes: null` (no bootstrap precursor for supersession-resolution via the SLB-0001/SLB-0002 logical-id pattern), the default `global_author_pool` (case 1) is gate-8-forbidden because storylets directly referencing the post-bootstrap source record would violate Phase 4 gate 8's branch-contamination rule. Fallback per gate 8's "On fail" recovery: `visibility.scope: branch_prefix_scoped`; `visibility.visible_from_page: <source-record's created_at_page>`; `visibility.visible_branch_path_prefix: [PG-0001, ..., <source-record's created_at_page>]` (the active branch_path prefix from the bundle root to the source record's creation page — derive by reading the longest active branch's `branch_path` array and truncating at the source record's creation page); `visibility.allowed_branch_ids: null`; `provenance.created_at_page: null` (per the audit-mode pattern: forced `branch_prefix_scoped` from gate-8 is NOT a runtime JIT, so `created_at_page` stays null — this distinguishes the gate-8-forced case from `mode=jit`'s `branch_scoped` which sets `created_at_page: <created_at_page>`). The forced `branch_prefix_scoped` storylets become eligible at any future page whose `branch_path` begins with the `visible_branch_path_prefix`; future forks from earlier pages will not see them, which is the correct branch-isolation outcome (the source record they reference doesn't exist on those branches). When ALL supplied source records are either bootstrap-created (`created_at_page == PG-0001`) OR have a bootstrap-precursor reachable via supersession chain, case 1's `global_author_pool` default applies and gate 8 passes via supersession-resolution. Worked precedent: SLB-0003 (red-bunny) — `--source_obligations OBL-0020` (created at PG-0005, `supersedes: null`) produced 24 storylets with `visibility.scope: branch_prefix_scoped`, `visible_from_page: PG-0005`, `visible_branch_path_prefix: [PG-0001, PG-0002, PG-0003, PG-0004, PG-0005]`, `allowed_branch_ids: null`, `provenance.created_at_page: null`. SLB-0001/SLB-0002 (red-bunny) by contrast targeted bootstrap-created OBLs (OBL-0001/0008 etc., each `created_at_page: PG-0001`) and case 1's `global_author_pool` default applied without gate-8 conflict.
-- `provenance.origin`: `bootstrap_seed` when invoked by `branching-story-bootstrap` Phase 6 (detected by `parent_skill_invocation: true` + `mode=seed` + `focus_area=bootstrap_mix` against a fresh story bundle being constructed in memory); `runtime_jit` when invoked by `branching-story-page-cycle` Phase 4 with `mode=jit`; `focus_authoring` for ALL direct-user authoring outside bootstrap/jit/audit contexts — covering both `mode=focus` (focused-area expansion against a named `focus_area`) AND direct-user `mode=seed` top-up (against an existing pool of N>0 storylets, governed by Pre-flight Inputs §`target_pool_size`'s top-up arithmetic); `audit_remediation` for `mode=audit`. The `focus_authoring` value covers user-driven authoring more broadly than just `mode=focus` — the storylet schema is open at `provenance.origin` (the validator does not enforce a closed enum), and the SLB-NNNN.md batch manifest's `Mode:` field carries the seed-vs-focus distinction in the audit trail, so a separate `seed_topup` enum value would be redundant. The `bootstrap_seed` value is reserved exclusively for the parent-skill-invoked bootstrap path; direct-user `mode=seed` top-up against an existing pool MUST use `focus_authoring` rather than `bootstrap_seed` to preserve the audit-trail distinction between bundle-creation seeding and post-bundle authoring.
-- For `mode=audit`, every generated SLT also carries `provenance.source_audit: <RSP.audit_id>` and `provenance.source_rsp: <RSP.rsp_id>`. Non-audit modes keep both fields null.
+- `arc_seed.commitment_class` -> `arc_contract.commitment_class`
+- `arc_seed.arc_archetype` -> `arc_contract.arc_archetype`
+- `arc_seed.entry_pressure_description` -> `dramatic_unit.entry_pressure.description`
+- `arc_seed.scene_question` -> `dramatic_unit.scene_question`
+- `arc_seed.value_delta_target_axes[]` -> `dramatic_unit.value_delta_target` and
+  `beat_plan.beats[].state_significance`
+- `arc_seed.implied_preconditions[]` -> formalized Predicate DSL entries in
+  `hard_preconds`, `soft_preconds`, cast requirements, or location requirements
+- `arc_seed.dramatic_transaction_summary` -> `effect_model.variants[]` and
+  `exit_portfolio.native_seeds[]`
 
-**Engine wraps the LLM output**:
+## Archetype Excerpt Strategy
 
-- Validates schema against `templates/storylet-record.yaml`: every required field present, types correct. The candidate is held under its candidate-index label (`Cn`) in the run's allocation buffer; the LLM's structured proposal is held against the next reserved SLT range without committing to a specific `SLT-NNNN` id until Phase 5 cull selects survivors. This avoids the manual-renumber failure mode when Phase 5 cull drops candidates between draft time and write time.
-- Validates predicate syntax against the Predicate DSL (in `templates/predicate-dsl.md`); free-form prose predicates fail here and route back to LLM with the DSL grammar inlined as the failure message. Under v2, stop-policy predicates use the same documented grammar surface, with `stop_policy_parsability` enforcement owned by SPEC-22.
-- Generates the `obligation_template` / `fact_template` / `cast_role` machinery from the LLM's structured proposal, normalizing role-vs-STENT references. For created SF templates, fills missing reader-visibility fields with `visible_to_reader: false` and `reader_visibility_basis: unrevealed_objective_truth`; rejects or re-prompts any `visible_to_reader: true` template whose basis is missing or `unrevealed_objective_truth`.
-- Records the LLM's `choice_templates` verbatim — they are runtime-overridable scaffolds, not prescriptions.
+The archetype excerpt is library-table-only, not the full archetype prose. Full
+archetype entries in `templates/arc-archetypes.md` are intentionally rich; putting
+one complete entry into every Phase 3 prompt can make complex bundle prompts
+exceed the intended size budget.
 
-**Failure handling**: if the LLM produces malformed output (non-YAML, missing required fields, wrong types), engine re-prompts with the specific failure inlined. Up to 2 retries per seed before the seed is dropped from the batch and replaced with a fresh seed drawn from Phase 1's next-priority gap.
+For the selected `arc_seed.arc_archetype`, excerpt only:
+
+- the matching `commitment_class -> recommended arc_archetype` mapping-table row
+  when present,
+- the archetype heading and typical commitment classes,
+- a condensed structural sketch of entry pressure, beat_plan shape,
+  execution-envelope emphasis, stop-policy shape, effect-model pattern, and
+  exit-portfolio direction.
+
+Do not paste the full 30-50 line archetype detail by default. If the LLM cannot
+complete the scaffold from the table-only excerpt plus condensed sketch, it may
+request expanded archetype detail as a follow-up retrieval; that expansion is
+out of scope for the v1 authoring pass.
+
+## Structured Arc Proposal
+
+The LLM output is a structured proposal, not the persistence authority. It must
+fill every required v2 storylet block:
+
+### `arc_contract`
+
+Populate the commitment contract that this arc tests or satisfies:
+
+- `commitment_class` and `arc_archetype` from the seed and closed vocabularies.
+- `actor` and `target` as STENT ids or role matchers from the cast context.
+- `user_intent` as the user-side commitment encoded by the arc.
+- `strategic_question_answered` as the scene-level question the arc helps answer.
+- `commitment_scope`, normally `scene` unless the seed requires `sequence`.
+- `success_policy`.
+- `allowed_outcome_band`, using closed `strong_outcome` values.
+
+### `dramatic_unit`
+
+Populate the scene-level unit:
+
+- `scene_question` from the seed, sharpened to a bounded dramatic question.
+- `entry_pressure.thread` when a real THR is targeted, else `null`.
+- `entry_pressure.description` from the seed and current state.
+- `value_delta_target` fields matching the seed's strong axes.
+- `natural_close_definition`, describing the conditions under which the arc has
+  played out and a next commitment hinge is exposed.
+
+### `beat_plan`
+
+Use `mode: ordered_soft`. Produce 3-8 beats with `min_beats` and `max_beats`
+consistent with the list. Beat entries are structural, not prose headings. Each
+beat names:
+
+- `id`
+- `function`
+- `required`
+- `state_significance`, either `none` or one of the closed `strong_axis` values
+
+At least one beat should carry a state-significance value aligned with the seed's
+`value_delta_target_axes[]` unless the seed is intentionally low-motion and the
+reason is recorded in the proposal notes.
+
+### `execution_envelope`
+
+Populate the prose-render contract:
+
+- `invariants`
+- `required_functions`
+- `allowed_tactics`
+- `prohibited_actions`
+- `style_directives`
+- `mystery_preservation.forbidden_resolutions[]`
+- `mystery_preservation.allowed_claims[]`
+
+`mystery_preservation.forbidden_resolutions[]` must include any forbidden-status
+M ids from the whole-class Mystery Reserve load that the arc could otherwise
+brush, imply, or risk resolving. The envelope controls page-cycle rendering; it
+does not replace `mystery_safety`, which remains the storylet-level declaration.
+
+### `stop_policy`
+
+Populate `normal_exits`, `interrupt_before`, and `safety_valves`.
+
+Every `normal_exits[].predicate` and `interrupt_before[].predicate` must use the
+stop-predicate tier from `templates/predicate-dsl.md`. Do not invent free-form
+stop predicates. Safety valves are thresholds, not DSL predicates.
+
+### `effect_model`
+
+Populate `selected_before_render: true` and at least one variant. Each variant:
+
+- has an `id`,
+- maps to one value from `arc_contract.allowed_outcome_band`,
+- has a `probability_weight`,
+- contains at least one `required_effects[]` entry using the closed effect-type
+  enum,
+- names `forbidden_effects[]` entries for outcomes that must not happen under
+  that variant.
+
+Closed effect types are:
+
+- `relationship_axis_shift`
+- `thread_pressure_delta`
+- `obligation_status_change`
+- `fact_create`
+- `fact_invalidate`
+- `consequence_open`
+- `consequence_address`
+- `cast_change`
+- `location_change`
+- `mystery_progress`
+
+The LLM may propose semantic args, but the engine normalizes them into
+structured effect records or re-prompts on malformed shapes.
+
+### `exit_portfolio`
+
+Populate 3-5 `native_seeds[]` entries unless `mode=jit` explicitly requests a
+smaller runtime arc. Each native seed has:
+
+- `id`
+- `commitment_class`
+- `strategy_cluster`
+- `expected_state_delta`
+- `continuation_arc_selector`
+
+Runtime choice proposal scaffolding lives here under v2. It does not live in
+v1 `choice_templates`.
+
+### Legacy Fields Preserved Under v2
+
+Populate these existing fields in the v2 record:
+
+- `hard_preconds`
+- `soft_preconds`
+- `cast_requirements`
+- `location_requirements`
+- `opens_obligations`
+- `pays_off_obligations`
+- `complicates_obligations`
+- `transfers_obligations`
+- `fact_effects`
+- `relationship_effects`
+- `tone_tags`
+- `theme_tags`
+- `tension_delta`
+- `aftermath_weight`
+- `mystery_safety`
+- `provenance`
+- `visibility`
+
+Predicate-bearing legacy fields must use the Predicate DSL core or documented
+extension forms. The stop-predicate tier is only for `stop_policy`.
+
+## Engine Wrapping
+
+The engine wraps the LLM output before anything is accepted as an SLT record:
+
+1. Applies `templates/storylet-record.yaml` scaffolding and verifies every
+   required v2 field is present with the correct shape.
+2. Validates field types, closed-enum values, and record-id or role-matcher
+   shapes.
+3. Validates Predicate DSL syntax for `hard_preconds`, `soft_preconds`,
+   `cast_requirements`, `location_requirements`, and stop-policy predicates.
+4. Generates or normalizes obligation templates, fact templates, relationship
+   effects, and cast-role machinery from the LLM's structured proposal.
+5. Fills reader-visibility defaults for created story facts:
+   `visible_to_reader: false` and
+   `reader_visibility_basis: unrevealed_objective_truth`, unless the arc
+   deliberately creates a reader-facing reveal with a positive basis.
+6. Assigns `provenance` and `visibility` from mode and source context.
+7. Records the LLM's `exit_portfolio.native_seeds[]` verbatim; these become
+   Phase 8 exit candidates at runtime.
+
+The LLM never operates as the continuity database. Engine wrapping and Phase 4
+validation preserve the FOUNDATIONS tooling discipline that structured records
+and validators carry continuity.
+
+## Visibility Scope Assignment
+
+- `mode=seed` or `mode=focus`: default to `visibility.scope:
+  global_author_pool`, `provenance.origin: focus_authoring`,
+  `provenance.created_at_page: null`.
+- Bootstrap seed sub-routine (`parent_skill_invocation: true`, `mode=seed`,
+  `focus_area=bootstrap_mix`): records are returned in memory with
+  `provenance.origin: bootstrap_seed`; the parent bootstrap skill owns writes.
+- `mode=jit`: require `parent_skill_invocation: true`, set
+  `visibility.scope: branch_scoped`, `provenance.origin: runtime_jit`, and
+  `provenance.created_at_page: <created_at_page>`.
+- `mode=audit`: set `provenance.origin: audit_remediation`,
+  `provenance.source_audit`, and `provenance.source_rsp`; visibility inherits
+  from the source RSP card's `proposed_visibility` block.
+
+When a direct seed/focus run targets source obligations or threads whose records
+were created after bootstrap (`created_at_page` non-null and no superseding
+bootstrap precursor), `global_author_pool` is not safe. Use
+`branch_prefix_scoped` visibility derived from the source record's branch-path
+prefix, with `provenance.created_at_page: null`, so the storylet is visible only
+on branches where those source records exist.
+
+## Choice Template Retirement
+
+`choice_templates` removed under v2. `templates/storylet-record.yaml` states
+that presence of `choice_templates` on a v2 SLT is HARD-REJECTed by SPEC-22's
+`arc_schema_compliance` validator.
+
+Do not instruct the LLM to fill `choice_templates`. Runtime choice proposal
+scaffolding moves to `exit_portfolio.native_seeds[]`, and the page-cycle choice
+surface consumes those native seeds alongside engine-discovered exits.
+
+## Failure Handling
+
+If the LLM produces malformed output, missing fields, wrong types, free-form
+predicates, free-form stop predicates, unknown enum values, or a v1-shaped
+record, the engine re-prompts with the exact failure inlined. Retry up to 2
+times for the same seed. After two failed retries, drop the seed and replace it
+with the next under-represented seed from Phase 1's diagnosis matrix.
+
+If a failure reveals a Phase 2 seed defect, return to Phase 2 for that candidate
+instead of patching the Phase 3 output by guesswork.
+
+## Cross-References
+
+- `references/phase-2-generation-seeds.md` is the upstream producer of the
+  11-field arc seed.
+- `references/phase-4-5-canon-safety-checks.md` is the downstream gate surface
+  for schema completeness, Predicate DSL parsability, mystery safety, branch
+  contamination, and batch diversity.
+- `templates/content-policy.txt` is loaded verbatim first in the prompt.
+- `templates/predicate-dsl.md` supplies eligibility predicates and the
+  stop-predicate tier.
+- `templates/tone-theme-tag-dictionary.md` supplies recommended tag vocabulary.
+- `templates/arc-archetypes.md` supplies mapping-table rows and condensed
+  archetype sketches.
+- `templates/storylet-record.yaml` is the v2 SLT scaffold target.
+- SPEC-21 §C defines this Phase 3 arc-schema-fill contract.
+- SPEC-22 Track 2 owns the executable `arc_schema_compliance`,
+  `stop_policy_parsability`, and `effect_model_legality` validator extensions.

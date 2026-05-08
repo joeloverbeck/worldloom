@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium-Large
 **Engine Changes**: Yes — full rewrite of `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` + targeted update to `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md`
-**Deps**: `archive/tickets/SPEC21SCECOM-001.md` (archetype names referenced in gate 14 leverage check); SPEC21SCECOM-005 (Phase 3 produces v2 records consumed by Phase 4 gates 9-13); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (validators `arc_schema_compliance`, `stop_policy_parsability`, `effect_model_legality` backstop Phase 4 gates via Phase 5b)
+**Deps**: `archive/tickets/SPEC21SCECOM-001.md` (archetype names referenced in gate 14 leverage check); `archive/tickets/SPEC21SCECOM-005.md` (Phase 3 produces v2 records consumed by Phase 4 gates 9-13); `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (validators `arc_schema_compliance`, `stop_policy_parsability`, `effect_model_legality` backstop Phase 4 gates via Phase 5b)
 
 ## Problem
 
