@@ -7,6 +7,8 @@ import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.j
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { arcSchemaCompliance } from "../rules/arc_schema_compliance.js";
 import { choiceWorthinessCompleteness } from "../rules/choice_worthiness_completeness.js";
+import { effectModelLegality } from "../rules/effect_model_legality.js";
+import { effectModelReplaySafety } from "../rules/effect_model_replay_safety.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
 import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-by-accident.js";
@@ -42,6 +44,8 @@ export const ruleValidators: readonly Validator[] = [
   rule7MysteryReservePreservation,
   arcSchemaCompliance,
   choiceWorthinessCompleteness,
+  effectModelLegality,
+  effectModelReplaySafety,
   stopPolicyParsability,
   storyletPredicateDslParsability,
   rule11ActionSpace,

@@ -100,6 +100,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "stop_policy_parsability"
     );
     assert.equal(stopPolicyExecution?.status, "skipped");
+    const effectModelLegalityExecution = result.executions.find(
+      (execution) => execution.name === "effect_model_legality"
+    );
+    assert.equal(effectModelLegalityExecution?.status, "skipped");
+    const effectModelReplaySafetyExecution = result.executions.find(
+      (execution) => execution.name === "effect_model_replay_safety"
+    );
+    assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
     );
@@ -119,6 +127,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== arcSchemaExecution &&
         row !== choiceWorthinessExecution &&
         row !== stopPolicyExecution &&
+        row !== effectModelLegalityExecution &&
+        row !== effectModelReplaySafetyExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution
@@ -246,7 +256,19 @@ test("validatePatchPlan accepts complete storylet records in Shape B story ops",
     const result = await validatePatchPlan(storyletPlan(completeStoryletRecord()) as unknown as PatchPlanEnvelope);
 
     assert.ok(result.executions.some((row) => row.name === "record_schema_compliance" && row.status === "pass"));
+    assert.ok(result.executions.some((row) => row.name === "effect_model_legality" && row.status === "pass"));
     assert.ok(!result.verdicts.some((verdict) => verdict.validator === "record_schema_compliance"));
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_legality"));
+  });
+});
+
+test("validatePatchPlan runs effect-model replay safety for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(replaySafePagePlan() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "effect_model_replay_safety");
+    assert.equal(execution?.status, "pass");
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_replay_safety"));
   });
 });
 
@@ -366,6 +388,52 @@ function pagePlanWithDanglingSnapshotReference() {
         state_snapshot: {
           ...completeStateSnapshot(),
           objective_facts: ["SF-9999"]
+        }
+      })
+    ]
+  };
+}
+
+function replaySafePagePlan() {
+  return {
+    plan_id: "plan-replay-safe-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_stloc_record", "locations", {
+        id: "STLOC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002"
+      }),
+      storyPatch("create_slt_record", "storylets", completeStoryletRecord()),
+      storyPatch("create_se_record", "events", {
+        id: "SE-0002",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        ops: [
+          {
+            op_id: "OP-0001",
+            op_type: "relationship_supersede",
+            input_records: [],
+            output_records: [],
+            deterministic_payload: {}
+          }
+        ]
+      }),
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0002"],
+        storylet_realized: "SLT-0001",
+        applied_event_ops: ["SE-0002"],
+        state_snapshot: {
+          ...completeStateSnapshot(),
+          canon_revision: null,
+          current_location: "STLOC-0001",
+          applied_effect_variant: "partial-repair"
         }
       })
     ]

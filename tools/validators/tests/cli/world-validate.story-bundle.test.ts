@@ -45,7 +45,7 @@ test("world-validate runs scene-commitment validators against an indexed v2 stor
       "--story",
       "alpha",
       "--rules",
-      "arc_schema_compliance,choice_worthiness_completeness,stop_policy_parsability",
+      "arc_schema_compliance,choice_worthiness_completeness,effect_model_legality,effect_model_replay_safety,stop_policy_parsability",
       "--json"
     ],
     { cwd: repo, encoding: "utf8" }
@@ -56,6 +56,8 @@ test("world-validate runs scene-commitment validators against an indexed v2 stor
   assert.deepEqual(run.summary.validators_run, [
     "arc_schema_compliance",
     "choice_worthiness_completeness",
+    "effect_model_legality",
+    "effect_model_replay_safety",
     "stop_policy_parsability"
   ]);
   assert.equal(run.summary.fail_count, 0);
@@ -140,10 +142,41 @@ function createIndexedV2StoryWorld(): string {
   const choice = completeChoice();
   insert.run("alpha:SLT-0001", "alpha", "stories/alpha/_source/storylets/SLT-0001.yaml", "storylet_record", yaml.dump(storylet));
   insert.run("alpha:CHC-0001", "alpha", "stories/alpha/_source/choices/CHC-0001.yaml", "choice_record", yaml.dump(choice));
+  insert.run("alpha:PG-0002", "alpha", "stories/alpha/_source/pages/PG-0002.yaml", "page_record", yaml.dump(completePage()));
+  insert.run("alpha:SE-0002", "alpha", "stories/alpha/_source/events/SE-0002.yaml", "story_event_record", yaml.dump(completeEvent()));
   db.close();
 
   writeFileSync(path.join(world, ".keep"), "", "utf8");
   return repo;
+}
+
+function completePage(): Record<string, unknown> {
+  return {
+    id: "PG-0002",
+    story_id: "STORY-001",
+    storylet_realized: "SLT-0001",
+    applied_event_ops: ["SE-0002"],
+    state_snapshot: {
+      applied_effect_variant: "partial-repair"
+    }
+  };
+}
+
+function completeEvent(): Record<string, unknown> {
+  return {
+    id: "SE-0002",
+    story_id: "STORY-001",
+    created_at_page: "PG-0002",
+    ops: [
+      {
+        op_id: "OP-0001",
+        op_type: "relationship_supersede",
+        input_records: [],
+        output_records: ["SREL-0001"],
+        deterministic_payload: {}
+      }
+    ]
+  };
 }
 
 function insertStoryRecords(
