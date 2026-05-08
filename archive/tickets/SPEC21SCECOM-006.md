@@ -1,6 +1,6 @@
 # SPEC21SCECOM-006: Phase 4-5 — 14 gates, diversity axes refactor, governance Rule 11 update
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium-Large
 **Engine Changes**: Yes — full rewrite of `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` + targeted update to `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md`
@@ -8,12 +8,12 @@
 
 ## Problem
 
-The current Phase 4 reference enforces 9 per-storylet gates (mystery firewall, resolution-authority, invariant compatibility, consequence capacity, dedup, content-intensity, predicate DSL parsability, branch-contamination, schema completeness). Per SPEC-21 §D, v2 extends to 14 gates by adding gate 10 (Arc envelope conformance), gate 11 (Stop-policy parsability), gate 12 (Effect-model legality), gate 13 (Exit-portfolio completeness), and gate 14 (Rule 11 spectator-caste leverage). Gate 1 (mystery firewall) extends with dual-field discipline (v1 `mystery_safety` storylet-level + v2 `execution_envelope.mystery_preservation` envelope-level). Phase 5 diversity axes refactor: shape ≤40% retired (degenerate under v2); commitment_class ≤30%, arc_archetype ≤25%, dramatic-unit-coverage ≥30% per `strong_axis` enum value (8 axes) added; tone ≤40%, theme ≤50%, OBL-engagement ≥60%, cast usage preserved. The governance reference's FOUNDATIONS Alignment table Rule 11 row needs update to acknowledge story-scope extension. Without this rewrite, Phase 4 admits v2 records that fail SPEC-22's downstream validators and Phase 5 produces meaningless distribution data.
+At intake, the Phase 4 reference enforced 9 per-storylet gates (mystery firewall, resolution-authority, invariant compatibility, consequence capacity, dedup, content-intensity, predicate DSL parsability, branch-contamination, schema completeness). Per SPEC-21 §D, v2 extends to 14 gates by adding gate 10 (Arc envelope conformance), gate 11 (Stop-policy parsability), gate 12 (Effect-model legality), gate 13 (Exit-portfolio completeness), and gate 14 (Rule 11 spectator-caste leverage). Gate 1 (mystery firewall) extends with dual-field discipline (v1 `mystery_safety` storylet-level + v2 `execution_envelope.mystery_preservation` envelope-level). Phase 5 diversity axes refactor: shape ≤40% retired (degenerate under v2); commitment_class ≤30%, arc_archetype ≤25%, dramatic-unit-coverage ≥30% per `strong_axis` enum value (8 axes) added; tone ≤40%, theme ≤50%, OBL-engagement ≥60%, cast usage preserved. This ticket rewrote the Phase 4-5 reference and updated the governance reference's FOUNDATIONS Alignment table Rule 11 row to acknowledge the deliberate story-scope extension.
 
 ## Assumption Reassessment (2026-05-08)
 
-1. The current Phase 4-5 reference at `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` describes 9 v1 gates + 6-axis v1 diversity audit (verified during SPEC-21 reassessment 2026-05-08). The rewrite adds gates 10-14 + extends gate 1's dual-field discipline + replaces v1 axes with v2 axes per SPEC-21 §D.
-2. The governance reference at `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` has a FOUNDATIONS Alignment table whose Rule 11 row needs update per SPEC-21's reassessment 2026-05-08: explicit acknowledgment that gate 14 extends Rule 11 to story scope as a deliberate non-default extension (FOUNDATIONS §Story Bundles §5: "Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces ... not story-scope record validators by default"). The update to governance-and-foundations.md is a targeted edit (one row modification + rationale append), not a full rewrite.
+1. At intake, the Phase 4-5 reference at `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` described 9 v1 gates + 6-axis v1 diversity audit (verified during SPEC-21 reassessment 2026-05-08). The landed rewrite adds gates 10-14, extends gate 1's dual-field discipline, and replaces v1 axes with v2 axes per SPEC-21 §D.
+2. At intake, the governance reference at `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` had a FOUNDATIONS Alignment table whose Rule 11 row needed update per SPEC-21's reassessment 2026-05-08: explicit acknowledgment that gate 14 extends Rule 11 to story scope as a deliberate non-default extension (FOUNDATIONS §Story Bundles §5: "Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces ... not story-scope record validators by default"). The landed update to governance-and-foundations.md is a targeted edit (Rule 11 row modification plus Rule 7 dual-field disclosure), not a full rewrite.
 3. Cross-skill boundary under audit: Phase 4-5 gates feed Phase 5b's `validate_patch_plan` engine pre-validation (per current `SKILL.md` Phase 5b inline block at lines 246-255, which lists `record_schema_compliance`, `storylet_predicate_dsl_parsability`, `rule11_action_space`, `rule12_redundancy` among coverage). SPEC-22 Track 2 extends `record_schema_compliance` to handle SLT v2 + extends the predicate-DSL grammar to include stop-policy predicates — these extensions transitively backstop Phase 4 gates 9, 11. Gate 10 (`arc_envelope_conformance`) has no SPEC-22 validator implementation in Track 2's listed inventory (per SPEC-22 §Risks "Post-SPEC-21 reassessment required" entry #2: "8th validator gap"); this ticket implements gate 10 as a skill-Phase-4-only deterministic check until SPEC-22's reassessment cycle adds the validator. Gate 14 (Rule 11 leverage) is also skill-internal-only — the existing `rule11_action_space` engine validator's `applies_to: appliesToCanonFacts` only runs over CF records, not SLTs (verified during SPEC-21 reassessment 2026-05-08 against `tools/validators/src/rules/rule11-action-space.ts:28`).
 4. FOUNDATIONS Rule 7 (Preserve Mystery Deliberately) is the principle motivating gate 1's dual-field discipline: the v1 `mystery_safety` field declares storylet-level mystery interactions; the v2 `execution_envelope.mystery_preservation` field declares per-beat enforcement during render. The two fields are not redundant — gate 1 validates BOTH and HARD-REJECTs inconsistencies between them (e.g., `mystery_safety.forbidden_M_resolved: false` but `execution_envelope.mystery_preservation.forbidden_resolutions[]` is empty AND the world has `forbidden`-status M ids — the envelope cannot enforce what the meta-declaration claims is safe). FOUNDATIONS Rule 11 (No Spectator Castes by Accident) motivates gate 14: when `effect_model.required_effects` includes a `fact_create` op with `args.truth_scope.world_level == true` AND `args.exception_governance` populated, arc.notes MUST carry a `leverage:`-prefixed line enumerating ≥3 ordinary-actor leverage forms from the canonical permissible-enum.
 5. HARD-GATE / Canon Safety Check surface under audit: Phase 4 gate 1 mystery-firewall hard-reject of `canon_candidate`-on-author-pool storylets is a separate, structurally-prior refusal that fires before the user-facing HARD-GATE (per current SKILL.md HARD-GATE block). Adding gates 10-14 does NOT weaken this firewall — gates 10-14 add new HARD-REJECT failure modes; the canon_candidate-on-author-pool refusal stays untouched.
@@ -34,11 +34,11 @@ The current Phase 4 reference enforces 9 per-storylet gates (mystery firewall, r
 4. Gate 14 trigger narrowness invariant → skill dry-run: an arc whose `effect_model.required_effects` includes ONLY non-fact_create entries (e.g., `mystery_progress` on a low-safety mystery, `relationship_axis_shift`, `thread_pressure_delta`) does NOT trigger gate 14; an arc whose `effect_model.required_effects` includes a `fact_create` with `args.truth_scope.world_level == true` AND `args.exception_governance` populated DOES trigger gate 14, and HARD-REJECTs if arc.notes lacks a `leverage:` line with ≥3 forms.
 5. FOUNDATIONS Rule 11 story-scope extension alignment check (per reassessment 2026-05-08): governance-and-foundations.md Rule 11 row's Rationale field explicitly cites FOUNDATIONS §Story Bundles §5 as the "non-default extension" basis.
 
-## What to Change
+## Landed Changes
 
-### 1. Rewrite `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md`
+### 1. Rewrote `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md`
 
-Replace the file's body with the 14-gate enumeration + Phase 5 v2 diversity axes per SPEC-21 §D. Required sections:
+Replaced the file's body with the 14-gate enumeration + Phase 5 v2 diversity axes per SPEC-21 §D. Landed sections:
 
 - **Phase 4 — Per-Storylet Validation Gates (14 gates)**: tabular enumeration with Failure mode = HARD-REJECT for each. Gates 1-9 preserve v1 semantics with extensions: gate 1 dual-field discipline (storylet-level `mystery_safety` + envelope-level `execution_envelope.mystery_preservation` per SPEC-21 §D); gate 5 dedup now per-`(commitment_class, arc_archetype, target_obligation)`; gate 7 predicate DSL parsability extends to include stop_policy predicates; gate 9 schema completeness extends to v2 (all seven new structural blocks populated). Gates 10-14: gate 10 (Arc envelope conformance — skill-internal-only per SPEC-21 §Risks routing the validator implementation back to SPEC-22 reassessment; check envelope.invariants and required_functions are kebab-case strings, no free-form prose, reference open-vocab); gate 11 (Stop-policy parsability — every entry parses against extended DSL, args match per-predicate args schema; backstopped by SPEC-22's `stop_policy_parsability` validator at Phase 5b); gate 12 (Effect-model legality — every variant.required_effects has ≥1 entry from closed effect-type enum; ≥1 variant; backstopped by SPEC-22's `effect_model_legality` validator at Phase 5b); gate 13 (Exit-portfolio completeness — ≥1 native_seed; engine_discovered_exit_budget block present with min/max/allowed_sources; sub-field minimums enforced by SPEC-22's `arc_schema_compliance` validator); gate 14 (Rule 11 spectator-caste leverage — skill-internal-only; trigger: `effect_model.required_effects` includes a `fact_create` op with `args.truth_scope.world_level == true` AND `args.exception_governance` populated; check: arc.notes has `leverage:`-prefixed line with ≥3 ordinary-actor leverage forms from the canonical permissible-enum).
 - **Gate 1 dual-field discipline section** (per SPEC-21 §D): explicit enumeration of v1 `mystery_safety` storylet-level checks (`forbidden_M_resolved == false`; `resolution_safety_per_M{}` consistent with each cited M's actual `future_resolution_safety`; `M_resolution_claims[].requires_canon_promotion == true` IFF `resolution_authority == canon_candidate`) AND v2 `execution_envelope.mystery_preservation` envelope-level checks (`forbidden_resolutions[]` includes every `forbidden`-status M id from the world's whole-class M load; `allowed_claims[]` is a non-empty subset of `{apparent, branch_local_counterfactual, canon_candidate}` consistent with the storylet's `mystery_safety.M_resolution_claims[].resolution_authority` values).
@@ -48,17 +48,17 @@ Replace the file's body with the 14-gate enumeration + Phase 5 v2 diversity axes
 - **JIT mode bypasses Phase 5** (one storylet has no diversity profile); audit mode bypasses Phase 5 except for batch-level branch-contamination + RSP visibility-match (preserved).
 - **Cross-references**: cite SPEC-22's validators (Track 2: `arc_schema_compliance`, `stop_policy_parsability`, `effect_model_legality`) as Phase 5b backstops; cite SPEC-21 §Risks routing for gate 10's deferred validator; cite `templates/storylet-record.yaml` for v2 SLT structural fields; cite `templates/predicate-dsl.md` for stop-predicate grammar.
 
-### 2. Update `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md`
+### 2. Updated `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md`
 
 Targeted update to the FOUNDATIONS Alignment table's Rule 11 row (per SPEC-21 reassessment 2026-05-08):
 
 - Change the Rule 11 row's Rationale from a generic "aligned" statement to a specific acknowledgment: "NEW gate 14 — when `arc.effect_model.required_effects` includes a `fact_create` op with world-level scope AND exception_governance populated, `arc.notes` must carry a `leverage:`-prefixed line enumerating ≥3 ordinary-actor leverage forms (mirrors create-base-world Phase 9's genesis spectator-caste check from SPEC-18). Note: extends Rule 11 to story scope as a deliberate non-default extension per FOUNDATIONS §Story Bundles §5 ('Rules 2 / 3 / 6 / 11 / 12 ... are not story-scope record validators by default'); rationale — arcs whose `required_effects` implicate world-level capabilities need leverage discipline parallel to canon-addition's CF-level Rule 11 enforcement."
-- Optionally add a sub-section discussing the dual-field mystery-firewall discipline (Rule 7) under v2 — referencing SPEC-21 §D's gate 1 expansion.
+- Also updated Rule 7 wording in the validation-rules table and FOUNDATIONS Alignment table to name the v2 dual-field mystery-firewall discipline.
 
 ## Files to Touch
 
 - `.claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (modify — full rewrite)
-- `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` (modify — Rule 11 row update + optional Rule 7 dual-field note)
+- `.claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` (modify — Rule 11 row update + Rule 7 dual-field note)
 
 ## Out of Scope
 
@@ -94,8 +94,30 @@ Targeted update to the FOUNDATIONS Alignment table's Rule 11 row (per SPEC-21 re
 
 ### Commands
 
-1. `grep -cE "^\| [0-9]+\." .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (expect 14 — one row per gate in the markdown table)
-2. `grep -nE "(dual-field|mystery_safety.*execution_envelope)" .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (expect ≥1 — gate 1 dual-field discipline section present)
-3. `grep -nE "(beat_plan\.beats|state_significance)" .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (expect ≥1 — Phase 5 dramatic-unit-coverage axis source)
-4. `grep -n "requiresExceptionGovernance" .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (expect 0 matches — taxonomy reference retired)
-5. `grep -nE "(non-default extension|story scope.*Rule 11|Rule 11.*story scope)" .claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` (expect ≥1 — Rule 11 row updated)
+1. `grep -cE '^\| [0-9]+\.' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (returned 14 — one row per gate in the markdown table)
+2. `grep -nE '(dual-field|mystery_safety.*execution_envelope|execution_envelope.*mystery_safety)' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (returned matches — gate 1 dual-field discipline section present)
+3. `grep -nE 'fact_create.*truth_scope.world_level|truth_scope\.world_level.*fact_create' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (returned the canonical gate 14 trigger)
+4. `grep -nE '(beat_plan\.beats|state_significance|strong_axis)' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (returned matches — Phase 5 dramatic-unit-coverage axis source)
+5. `grep -nE 'value_delta_target|requiresExceptionGovernance' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` (returned 0 matches — retired taxonomy and old dramatic-unit axis literal absent from the reference)
+6. `grep -nE '(non-default extension|story scope.*Rule 11|Rule 11.*story scope)' .claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` (returned matches — Rule 11 row updated)
+
+## Outcome
+
+Completed 2026-05-08. Rewrote the Phase 4-5 canon-safety reference around the SPEC-21 v2 scene-commitment-arc contract: all 14 Phase 4 gates are enumerated, gate 1 now uses dual-field mystery discipline, gates 10-14 are added as v2 hard-reject surfaces, Phase 5 now measures commitment_class, arc_archetype, tone, theme, content-intensity, OBL engagement, cast usage, and dramatic-unit coverage from `beat_plan.beats[].state_significance`, and JIT/audit/bootstrap guardrails from the prior reference remain represented where still applicable.
+
+Updated `governance-and-foundations.md` so Rule 7 names the dual-field mystery discipline and Rule 11 is no longer marked fully N/A: gate 14 is documented as a deliberate non-default story-scope extension that only triggers on exceptional world-level `fact_create` effects with `exception_governance`.
+
+## Verification Result
+
+1. `grep -cE '^\| [0-9]+\.' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` -> 14.
+2. `grep -nE '(dual-field|mystery_safety.*execution_envelope|execution_envelope.*mystery_safety)' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` -> matched gate 1 and the dedicated dual-field section.
+3. `grep -nE 'fact_create.*truth_scope.world_level|truth_scope\.world_level.*fact_create' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` -> matched gate 14's canonical trigger.
+4. `grep -nE 'value_delta_target|requiresExceptionGovernance' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` -> 0 matches.
+5. `grep -nE '(beat_plan\.beats|state_significance|strong_axis)' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` -> matched the dramatic-unit-coverage row.
+6. `grep -nE '(non-default extension|story scope.*Rule 11|Rule 11.*story scope)' .claude/skills/storylet-pool-authoring/references/governance-and-foundations.md` -> matched the updated Rule 11 row.
+7. Manual review: `docs/FOUNDATIONS.md` §Story Bundles §5 says Rules 2 / 3 / 6 / 11 / 12 are not story-scope record validators by default; the governance update preserves that default and labels gate 14 as a deliberate non-default extension.
+
+## Deviations
+
+- No executable `storylet-pool-authoring` dry-run or SPEC-22 validator proof was run. The live repo still lacks the landed SPEC-22 Track 2 validator stack and end-to-end runner for this phase; this ticket remained documentation/skill-reference bounded and was verified by grep/manual review.
+- Parent `SKILL.md` and `templates/storylet-batch-manifest.md` still contain v1/top-level cross-cutting references by design; active sibling `tickets/SPEC21SCECOM-007.md` owns that follow-up.

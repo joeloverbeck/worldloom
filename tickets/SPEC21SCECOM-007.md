@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — coordinated updates to `.claude/skills/storylet-pool-authoring/SKILL.md` (Process Flow ASCII diagram, HARD-GATE block, phase descriptions, mode discipline) and `.claude/skills/storylet-pool-authoring/templates/storylet-batch-manifest.md` (per-arc summary line for arc semantics)
-**Deps**: `archive/tickets/SPEC21SCECOM-001.md`, `archive/tickets/SPEC21SCECOM-002.md`, `archive/tickets/SPEC21SCECOM-003.md`, `archive/tickets/SPEC21SCECOM-004.md`, `archive/tickets/SPEC21SCECOM-005.md`, SPEC21SCECOM-006 (all upstream Phase rewrites + new template + governance update — SKILL.md must reflect ALL Phase rewrites; manifest must reflect arc semantics from Phase 4-5)
+**Deps**: `archive/tickets/SPEC21SCECOM-001.md`, `archive/tickets/SPEC21SCECOM-002.md`, `archive/tickets/SPEC21SCECOM-003.md`, `archive/tickets/SPEC21SCECOM-004.md`, `archive/tickets/SPEC21SCECOM-005.md`, `archive/tickets/SPEC21SCECOM-006.md` (all upstream Phase rewrites + new template + governance update — SKILL.md must reflect ALL Phase rewrites; manifest must reflect arc semantics from Phase 4-5)
 
 ## Problem
 
