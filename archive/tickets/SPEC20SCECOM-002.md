@@ -30,7 +30,7 @@ At intake, Phase 5 applied state mutations at beat granularity — consuming Pha
 1. SE.op_type mapping table (effect-type → SE.op_type) → codebase grep-proof in `phase-5-state-mutation.md` for the table; cross-check that every closed effect-type enum value maps to ≥1 existing SE.op_type.
 2. Branch-isolation invariant (every non-PG emergent record carries `created_at_page == this_PG`; ARC_TRACE records also carry `created_at_page`) → codebase grep-proof in the same reference file for the invariant text; validator surface is `recursive_reference_closure` (existing Phase 9 gate, extended for ARC_TRACE references in SPEC20SCECOM-004).
 3. STINT updates after variant ops apply → codebase grep-proof for the section preserving the existing STINT-refresh logic.
-4. Replay-equality at arc cadence → schema validation via SPEC-22's `effect_model_replay_safety` validator (cross-spec dependency); this ticket's surface is documentation; full validation owned by SPEC20SCECOM-011 capstone.
+4. Replay-equality at arc cadence → schema validation via SPEC-22's `effect_model_replay_safety` validator (cross-spec dependency); this ticket's surface is documentation. `archive/tickets/SPEC20SCECOM-011.md` later rejected a separate non-production capstone.
 
 ## Landed Changes
 
@@ -96,7 +96,7 @@ The existing Phase 2-derived prose remains in the reference file after a depreca
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -115,9 +115,9 @@ Completed: 2026-05-07. `.claude/skills/branching-story-page-cycle/references/pha
 2. PASS — `grep -nE "relationship_axis_shift|thread_pressure_delta|obligation_status_change|fact_create|fact_invalidate|consequence_open|consequence_address|cast_change|location_change|mystery_progress" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
 3. PASS — `grep -n "created_at_page == this_PG" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
 4. PASS — `grep -n "STINT Refresh After Variant Ops" .claude/skills/branching-story-page-cycle/references/phase-5-state-mutation.md`.
-5. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §C, archived `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §A/§C, and `docs/FOUNDATIONS.md` §Story Bundles §5 confirmed the landed Phase 5 prose matches the arc-level effect, replay-safety, and branch-isolation contracts.
+5. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §C, archived `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §A/§C, and `docs/FOUNDATIONS.md` §Story Bundles §5 confirmed the landed Phase 5 prose matches the arc-level effect, replay-safety, and branch-isolation contracts.
 
 ## Deviations
 
-1. The drafted skill dry-run / fixture replay proof was not executed because SPEC-22's v2 validators and schema implementation remain pending. This ticket's accepted proof is the documentation-surface contract; empirical fixture validation remains SPEC20SCECOM-011 capstone scope.
+1. The drafted skill dry-run / fixture replay proof was not executed because SPEC-22's v2 validators and schema implementation remain pending. This ticket's accepted proof is the documentation-surface contract; non-production empirical fixture validation was later rejected by `archive/tickets/SPEC20SCECOM-011.md` in favor of SPEC-22 deterministic validator/package proof plus manual contract review.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` still has v1 Phase 5 summary prose by design. Active follow-up `tickets/SPEC20SCECOM-009.md` owns the cross-cutting SKILL.md process-flow and Phase 9 gate-list update after all phase reference files land.

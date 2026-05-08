@@ -55,7 +55,7 @@ Made clear that the Visible Affordance Map is an anchor source for Phase 8's Cho
 - Phase 8 label prompt cleanup already landed in `archive/tickets/SPEC20SCECOM-012.md`.
 - Phase 1 Path A handoff already landed in `archive/tickets/SPEC20SCECOM-013.md`.
 - Parent `branching-story-page-cycle/SKILL.md` integration remains `tickets/SPEC20SCECOM-009.md`.
-- Runtime validators and capstone fixture proof remain SPEC-22 and `tickets/SPEC20SCECOM-011.md`.
+- Runtime validators and deterministic package proof remain SPEC-22; non-production capstone fixture proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ## Acceptance Criteria
 

@@ -48,7 +48,7 @@ Preserved the existing label discipline: 5-15 words, faithful to the validated o
 
 - Phase 8 gate semantics from `archive/tickets/SPEC20SCECOM-005.md`.
 - Parent `.claude/skills/branching-story-page-cycle/SKILL.md` integration (SPEC20SCECOM-009).
-- Runtime validators and capstone fixture proof (SPEC-22 and SPEC20SCECOM-011).
+- Runtime validators and deterministic package proof (SPEC-22); non-production capstone fixture proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 - `branching-story-bootstrap` sibling-skill delegation rewrite (SPEC-22 Track 4).
 
 ## Acceptance Criteria

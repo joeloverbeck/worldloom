@@ -19,7 +19,7 @@ The scene-commitment-arc pivot needs per-bundle authorial controls for menu cade
 3. Cross-skill boundary: STORY_KERNEL.md is consumed by `branching-story-page-cycle` Phase 4 (JIT expansion threshold), Phase 8 (menu_policy validation), Phase 11 (commit). The blocks are bundle-config — additive only, with hardcoded defaults for backwards-compat with v1 STORY_KERNEL.md files.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) — renumbered from template item 4: this ticket preserves the b28aead Rule 11 contract (commit `b28aead` 2026-05-06 removed word-per-page guidelines) by structurally preventing word-count fields from re-entering `cadence_policy`. Explicit attribution in the rejection paragraph names the commit and the pathology.
 5. Schema extension (renumbered from template item 6): adds 2 new optional blocks to STORY_KERNEL.md template. Consumers: `branching-story-page-cycle` (multiple phases). Additive-only — when blocks are absent, hardcoded defaults apply (no consumer-side breakage).
-6. Same-seam spec truthing: `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` still described the bootstrap deliverable as `SKILL.md` housing the STORY_KERNEL template; the live repo uses `templates/story-kernel.md`, so the SPEC-20 deliverables table was updated to the live template, `SKILL.md`, and reference-file split.
+6. Same-seam spec truthing: `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` still described the bootstrap deliverable as `SKILL.md` housing the STORY_KERNEL template; the live repo uses `templates/story-kernel.md`, so the SPEC-20 deliverables table was updated to the live template, `SKILL.md`, and reference-file split.
 
 ## Architecture Check
 
@@ -78,7 +78,7 @@ Updated SPEC-20's deliverables table so the implementation target is the live `t
 - `.claude/skills/branching-story-bootstrap/templates/story-kernel.md` (modify — STORY_KERNEL.md template blocks)
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — template/default contract + rejection paragraph)
 - `.claude/skills/branching-story-bootstrap/references/phases-1-3-premise-cast-facts.md` (modify — reference doc)
-- `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` (modify — deliverables-table path truthing for the live template file)
+- `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` (modify — deliverables-table path truthing for the live template file)
 
 ## Out of Scope
 
@@ -104,7 +104,7 @@ Updated SPEC-20's deliverables table so the implementation target is the live `t
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 

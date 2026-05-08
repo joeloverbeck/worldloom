@@ -2,7 +2,7 @@
 
 # SPEC-20: Scene-Commitment Arc Runtime Pipeline (Page-Cycle Rewrite)
 
-**Status**: PROPOSED (2026-05-07)
+**Status**: COMPLETED (2026-05-08)
 **Phase**: runtime tier of the scene-commitment-arc pivot
 **Depends on**: archived SPEC-19 (schemas + canonical vocabularies), SPEC-22 (engine ops + validators)
 **Blocks**: none — SPEC-21 (authoring) is independent given SPEC-19 + SPEC-22; this spec is the runtime tier
@@ -310,13 +310,15 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 
 ## Verification
 
-- **Snapshot-replay equality**: replay the chain of chosen choices from genesis on a representative arc-cadence story; the resulting state is equal to the on-disk state at every PG record's `state_snapshot`. Beat-internal state need not match (it is non-authoritative). Validator: `effect_model_replay_safety` (SPEC-22).
-- **Token-cost reduction**: empirically measure LLM call count per scene (4-5 beats × ~5 calls = ~20 calls per scene under v1; ~4 calls per scene under v2). Per the research brief's design target.
-- **Choice-surface gate correctness**: under `interactive_runtime` mode, CONTINUE_ARC and CONTINUE_ONLY_PAUSE pages auto-chain without Phase 10 pause; NATURAL/INTERRUPT/TERMINAL pages fire Phase 10 in `authoring` mode. Manual test: a scene whose arcs span 3-4 beats produces 1 user-facing menu in `interactive_runtime`, 1 menu + 1 implicit Continue in `authoring`.
-- **Choice-worthiness enforcement**: every CHC v2 emitted by Phase 8 has non-empty likely_effects and a populated choice_worthiness block. Validator: `choice_worthiness_completeness` (SPEC-22). Empirical: 0 CHCs with empty likely_effects across a 50-page test run.
-- **Strong-axis collective difference**: every emitted menu (≥2 CHCs) covers ≥2 distinct `strong_axes`. Validator: extension to existing pair-distance check (SPEC-22).
+These checks are verification contracts, not a mandate to spend LLM tokens on non-production Claude skill dry runs. Deterministic validators and package tests prove mechanized invariants; manual review proves workflow/HARD-GATE prose; live token-cost and user-pause counts are production-pilot telemetry once a real runtime exists.
+
+- **Snapshot-replay equality**: replay-safety is mechanized by SPEC-22's `effect_model_replay_safety` validator. Beat-internal state need not match (it is non-authoritative); only arc-level `required_effects` and PG `state_snapshot` equality are authoritative.
+- **Token-cost reduction**: production-pilot telemetry should compare v1 beat-cadence calls against v2 arc-cadence calls once the runtime is used for real authoring. This is not a CI gate or non-production ticket gate.
+- **Choice-surface gate correctness**: manual contract review verifies the mode semantics: under `interactive_runtime`, CONTINUE_ARC and CONTINUE_ONLY_PAUSE pages auto-chain without Phase 10 pause; NATURAL/INTERRUPT/TERMINAL pages fire Phase 10 in `authoring` mode. Do not run the Claude page-cycle skill just to prove this prose contract.
+- **Choice-worthiness enforcement**: every CHC v2 emitted by Phase 8 has non-empty likely_effects and a populated choice_worthiness block. Validator: `choice_worthiness_completeness` (SPEC-22).
+- **Strong-axis collective difference**: every emitted menu (>=2 CHCs) covers >=2 distinct `strong_axes`. Validator: extension to existing pair-distance check (SPEC-22).
 - **ARC_TRACE evidence alignment**: every ARC_TRACE has all evidence_spans within prose byte-range; every effect_evidence references a real required_effects index. Validator: `arc_trace_evidence_alignment` (SPEC-22).
-- **HARD-GATE preservation**: `authoring` mode fires Phase 10 user-approval per page; Phase 4.5 canon-promotion handoff fires per `canon_candidate` route regardless of mode. Test by running a story-fact promotion through a v2 page-cycle.
+- **HARD-GATE preservation**: manual FOUNDATIONS/HARD-GATE review verifies that Phase 10 user approval is preserved for authoring-mode menu pages and that Phase 4.5 canon-promotion handoff fires per `canon_candidate` route regardless of mode. Do not run a story-fact promotion through the Claude page-cycle skill as non-production verification.
 
 ## Out of Scope
 
@@ -339,3 +341,11 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 - **Pre-empted ARC_TRACE in low-cost runtime modes**: when `arc_trace_emitted: false` (interactive_runtime low-budget configurations), debugging an arc-level pathology requires re-running the page in `authoring` mode to populate the trace. This is acceptable since `authoring` is the canonical authoring surface; `interactive_runtime` is for player-facing reading where trace is unnecessary.
 - **`ARCTRACE-NNNN` ID class CLAUDE.md docs gap**: SPEC-20 references `ARCTRACE-NNNN` heavily (§E, §I) but `CLAUDE.md` §ID Allocation Conventions does not yet list it. Archived SPEC-19's Risks already flagged this, and SPEC-22 §Track 3 (canonical-vocabularies + indexer + MCP retrieval) owns the docs update. Reassessment 2026-05-07 reverified that `CLAUDE.md` still does not list ARCTRACE — a Rule-6 (No Silent Retcons) risk at the pipeline-conventions level until SPEC-22 lands.
 - **`arc_envelope_conformance` validator implementation owned by SPEC-22 §Track 2 (cross-spec dependency)**: §E and the Phase 9 deliverables row name `arc_envelope_conformance` as one of the 5 new gates (total 17). At reassessment 2026-05-07, SPEC-22 §Track 2's validator list defines 7 validators (`arc_schema_compliance`, `choice_worthiness_completeness`, `stop_policy_parsability`, `effect_model_legality`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`) — `arc_envelope_conformance` is absent from SPEC-22's surface as the 8th validator. SPEC-22's own §Risks carries a cross-spec note pointing back at this gap so the post-SPEC-21 SPEC-22 reassessment can close it. Implementing SPEC-20's tickets without the SPEC-22 reassessment would surface this gap as an unassigned validator at ticket-decomposition time.
+
+## Outcome
+
+Completed: 2026-05-08. The runtime-pipeline spec is finished as the authoritative SPEC-20 design record for the scene-commitment arc page-cycle rewrite. Its implementation tickets have landed and archived the phase-reference changes, parent page-cycle integration, bootstrap policy/template updates, CHC v2 cleanup, and the verification-contract correction that rejects non-production Claude skill-run capstones.
+
+Deviations from original plan: SPEC-20's verification surface was narrowed from an empirical fixture/capstone run to deterministic SPEC-22 validator/package proof, manual FOUNDATIONS/HARD-GATE review, and production-pilot telemetry. SPEC-22 remains the owner for engine ops, validators, canonical vocabularies, indexer/MCP retrieval, and the explicitly documented `arc_envelope_conformance` validator gap.
+
+Verification results: SPEC-20 §Verification now preserves all seven verification bullets without requiring non-production Claude skill execution; `archive/tickets/SPEC20SCECOM-011.md` records the final verification-contract audit and proof commands. Post-completion archival moved this spec to `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`.

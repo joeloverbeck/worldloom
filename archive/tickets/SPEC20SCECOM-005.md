@@ -17,7 +17,7 @@ At intake, Phase 8 emitted 4-6 structured choices every page via the v1 Amendmen
 3. Cross-skill boundary: this ticket consumes (a) the ARC_TRACE produced by SPEC20SCECOM-004 (for narrative-point classification when ambiguous); (b) the closed `commitment_class` and `strong_axis` enums from SPEC-22 §Track 3; (c) the realized arc's `exit_portfolio.native_seeds[]` and the storylet pool for hybrid exit portfolio composition. It produces CHC v2 records consumed by `branching-story-bootstrap` Phase 8 in PG-0001 special-case mode (per SPEC-22 §Track 4 sibling-skill alignment).
 4. FOUNDATIONS Rule 1 (No Floating Facts) — renumbered from template item 4: Step 3 (Choice-Worthiness Validation) HARD-REJECTs CHCs with empty `likely_effects` or missing `choice_worthiness` fields. The 0/30 pathology from the test bundle is structurally impossible under v2.
 5. Schema extension (renumbered from template item 6): this ticket references CHC v2 schema (already landed via SPEC19SCECOM-002 in `record-schemas.md`); does NOT extend the schema itself. Additive consumer-side discipline.
-6. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 validators and SPEC20SCECOM-011 capstone fixture lane remain pending. This ticket's truthful proof is documentation-surface grep plus manual contract review against SPEC-20 §F, SPEC-22 Track 2/3/4, archived SPEC-19 §B/E, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md`.
+6. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 validators remain pending. This ticket's truthful proof is documentation-surface grep plus manual contract review against SPEC-20 §F, SPEC-22 Track 2/3/4, archived SPEC-19 §B/E, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md`. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production capstone fixture proof.
 
 ## Architecture Check
 
@@ -29,7 +29,7 @@ At intake, Phase 8 emitted 4-6 structured choices every page via the v1 Amendmen
 ## Verification Layers
 
 1. 6-step gate structure (narrative-point classification → hybrid exit portfolio → choice-worthiness validation → strong-axis pair distance → LLM surface label → write-in slot) → codebase grep-proof in `phase-8-choice-generation.md` for each step anchor.
-2. Choice-worthiness validation HARD-REJECT failures → schema validation via SPEC-22's `choice_worthiness_completeness` validator (cross-spec); this ticket documents the discipline; full validation owned by SPEC20SCECOM-011.
+2. Choice-worthiness validation HARD-REJECT failures → schema validation via SPEC-22's `choice_worthiness_completeness` validator (cross-spec); this ticket documents the discipline. `archive/tickets/SPEC20SCECOM-011.md` later rejected a separate non-production capstone.
 3. Strong-axis pair distance (≥2 distinct `strong_axes` across menu) → schema validation via SPEC-22's extension to existing `choice_pair_distance` validator.
 4. CONTINUE_ONLY_PAUSE single-CHC carve-out → codebase grep-proof for the `commitment_class: continue_arc_continuation` exemption.
 5. Bootstrap PG-0001 special-case → codebase grep-proof for the dedicated sub-paragraph.
@@ -98,7 +98,7 @@ Documented the PG-0001 special-case mode that `branching-story-bootstrap` Phase 
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification remains owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -120,9 +120,9 @@ The reference covers narrative-point classification, deterministic hybrid exit p
 3. PASS — `grep -n "Bootstrap PG-0001 special case" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`.
 4. PASS — `grep -n "continue_arc_continuation" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md`.
 5. PASS — `rg -n "Amendment B|Affordance Space Collection|Salient-Affordance|Diversification|Pair-distance discipline|5-step" .claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` returned no stale v1 Phase 8 anchors.
-6. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §F, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 2/3/4, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §B/E, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the reference preserves Rule 1 story-scope completeness, story-bundle write discipline, Phase 4.5 canon-promotion HARD-GATE preservation, and the PG-0001 root-page exception boundary.
+6. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §F, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 2/3/4, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §B/E, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the reference preserves Rule 1 story-scope completeness, story-bundle write discipline, Phase 4.5 canon-promotion HARD-GATE preservation, and the PG-0001 root-page exception boundary.
 
 ## Deviations
 
-1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators and SPEC20SCECOM-011 capstone fixture surface. This ticket's accepted proof is documentation-surface grep plus manual contract review.
+1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators. This ticket's accepted proof is documentation-surface grep plus manual contract review; non-production capstone fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md`, `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md`, and `branching-story-bootstrap` Phase 8 delegation remain out of scope. Active follow-up `tickets/SPEC20SCECOM-009.md` owns parent page-cycle integration; SPEC-22 Track 4 owns sibling-skill alignment.

@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` line 232 comment and `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` safety-valve note for `max_words_reached` were rewritten to drop target-framing and replace it with engine-only runaway-defense semantics per Prose Craft Contract Rule 11. `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` deliverables were truthed to name the absorbed predicate DSL side edit.
+**Engine Changes**: Yes — `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` line 232 comment and `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` safety-valve note for `max_words_reached` were rewritten to drop target-framing and replace it with engine-only runaway-defense semantics per Prose Craft Contract Rule 11. `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` deliverables were truthed to name the absorbed predicate DSL side edit.
 **Deps**: None (template comment/prose fidelity edit; independent of phase-cycle chain)
 
 ## Problem
@@ -54,13 +54,13 @@ In `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md`, the stal
 
 ### 3. Truth SPEC-20 deliverable table
 
-In `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`, the Deliverables table now names the predicate DSL safety-valve note edit alongside the original storylet-record comment edit.
+In `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`, the Deliverables table now names the predicate DSL safety-valve note edit alongside the original storylet-record comment edit.
 
 ## Files to Touch
 
 - `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` (modify — single comment edit on line 232)
 - `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` (modify — safety-valve note for `max_words_reached`)
-- `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` (modify — deliverables table truthing for absorbed same-seam predicate DSL side edit)
+- `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` (modify — deliverables table truthing for absorbed same-seam predicate DSL side edit)
 
 ## Out of Scope
 

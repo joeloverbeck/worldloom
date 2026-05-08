@@ -16,7 +16,7 @@ At intake, Phase 7 rendered one beat as continuous prose per `phase-7-page-rende
 2. Verified `prose-craft-contract.md` Rule 11 ("Length follows content") is the active runtime contract that the rewritten Phase 7 prompt must honor — *"Page length is not a target. … There is no words-per-page range to hit, no minimum to clear, no maximum to honor."* This ticket's rewrite preserves the contract by NOT introducing word-count targets or floors at the LLM-facing surface; the engine-only `arc.stop_policy.safety_valves.max_words` (defined in archived SPEC-19 §A) remains a runaway-defense termination trigger only.
 3. Cross-skill boundary: `branching-story-page-cycle/references/phase-7-…` consumes (a) the arc record and chosen variant produced by SPEC20SCECOM-001 (Phase 4 + 4b), (b) the prose-craft-contract from `prose-craft-contract.md` (verbatim in prompt), (c) the content_policy block from `templates/content-policy.txt` (verbatim). The contract under audit is the LLM-prompt block ordering (content_policy FIRST) and the Length-per-Rule-11 discipline that the prompt must NOT contradict.
 4. FOUNDATIONS Rule 6 (No Silent Retcons) — renumbered from template item 4: this ticket preserves the b28aead Rule 11 contract by structurally preventing word-count target/floor reintroduction; the explicit attribution to commit `b28aead` is documented inline so future readers see why the discipline exists.
-5. Verification-boundary correction: the drafted skill dry-run / fixture render proof is not executable yet because the live repo does not have SPEC-22's v2 validators/schema implementation or the SPEC20SCECOM-011 capstone fixture surface. This ticket's truthful proof is documentation-surface grep plus manual review against SPEC-20 §D, `prose-craft-contract.md` Rule 11, and FOUNDATIONS Mystery Reserve / no-silent-retcon discipline.
+5. Verification-boundary correction: the drafted skill dry-run / fixture render proof is not executable yet because the live repo does not have SPEC-22's v2 validators/schema implementation. This ticket's truthful proof is documentation-surface grep plus manual review against SPEC-20 §D, `prose-craft-contract.md` Rule 11, and FOUNDATIONS Mystery Reserve / no-silent-retcon discipline. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production capstone fixture proof.
 
 ## Architecture Check
 
@@ -109,7 +109,7 @@ Removed the v1 implication that Phase 7 ends by preparing 4-6 choices. The refer
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification, including a real arc-shape fixture render and safety-valve behavior, is owned by SPEC20SCECOM-011 capstone after SPEC-22 lands.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -129,9 +129,9 @@ The reference now records Length-per-Rule-11 discipline, keeps `arc.stop_policy.
 2. PASS — `grep -nE "target.*words|preferred_words|min_words" .claude/skills/branching-story-page-cycle/references/phase-7-page-render.md | grep -v "Rule 11\|safety_valves\|engine-only\|runaway-defense"` returned zero non-exempt matches.
 3. PASS — `grep -n "8-axis prose critic" .claude/skills/branching-story-page-cycle/references/phase-7-page-render.md`.
 4. PASS — `grep -nE "markdown-header|Beat-Header Policy|Phase 7.6|padding_or_truncation|ledger_jargon_leakage" .claude/skills/branching-story-page-cycle/references/phase-7-page-render.md`.
-5. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §D, `prose-craft-contract.md` Rule 11 / diagnostic vocabulary, and `docs/FOUNDATIONS.md` confirmed the landed Phase 7 reference preserves no-silent-retcon and forbidden-mystery discipline while moving render cadence from beat to arc.
+5. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §D, `prose-craft-contract.md` Rule 11 / diagnostic vocabulary, and `docs/FOUNDATIONS.md` confirmed the landed Phase 7 reference preserves no-silent-retcon and forbidden-mystery discipline while moving render cadence from beat to arc.
 
 ## Deviations
 
-1. The drafted skill dry-run / fixture render proof was not executed because SPEC-22's v2 validators and schema implementation remain pending, and the full empirical fixture proof is owned by SPEC20SCECOM-011. This ticket's accepted proof is the documentation-surface contract.
+1. The drafted skill dry-run / fixture render proof was not executed because SPEC-22's v2 validators and schema implementation remain pending. This ticket's accepted proof is the documentation-surface contract; non-production empirical fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md` in favor of SPEC-22 deterministic validator/package proof plus manual contract review.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` still has v1 Phase 7 summary prose by design. Active follow-up `tickets/SPEC20SCECOM-009.md` owns the cross-cutting SKILL.md process-flow and phase-summary update after the phase reference files land.

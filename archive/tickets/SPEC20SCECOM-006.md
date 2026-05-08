@@ -16,7 +16,7 @@ At intake, Phase 1 Path B (write-in handling) routed free-form `manual_action_te
 2. Verified archived SPEC-19 §E defines `commitment_class` as a closed 20-value enum (`stay_available_without_pressure`, `offer_practical_help`, `ask_one_bounded_question`, …, `intimacy_advance`); SPEC-22 §Track 3 owns the TypeScript enum implementation and the `mcp__worldloom__get_canonical_vocabulary({class: 'commitment_class'})` retrieval surface.
 3. Cross-skill boundary: this ticket consumes the closed `commitment_class` enum via SPEC-22's `get_canonical_vocabulary` MCP tool; produces a classified commitment-class value handed to SPEC20SCECOM-001 Phase 4 hard filter 6. The contract is the enum exhaustiveness — if the LLM classifier's output is not in the enum, the engine routes via `REFUSE_ONLY_THROUGH_WORLD_LOGIC` even if Step 1 said `ACCEPT`.
 4. Parent `branching-story-page-cycle/SKILL.md` process-flow integration remains SPEC20SCECOM-009 scope. This ticket owns only the Phase 1 reference subsection; SPEC20SCECOM-009 already tracks the parent Process Flow and phase-description update after all phase reference files land.
-5. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 runtime validators and SPEC20SCECOM-011 capstone fixture lane remain pending. This ticket's truthful proof is documentation-surface grep plus manual contract review against SPEC-20 §G, SPEC-22 Track 3, archived SPEC-19 §E, and the existing Phase 4 consumer hard filter in `phase-4-storylet-and-mystery-authority.md`.
+5. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 runtime validators remain pending. This ticket's truthful proof is documentation-surface grep plus manual contract review against SPEC-20 §G, SPEC-22 Track 3, archived SPEC-19 §E, and the existing Phase 4 consumer hard filter in `phase-4-storylet-and-mystery-authority.md`. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production capstone fixture proof.
 
 ## Architecture Check
 
@@ -26,7 +26,7 @@ At intake, Phase 1 Path B (write-in handling) routed free-form `manual_action_te
 ## Verification Layers
 
 1. §Write-In Commitment-Class Classification subsection exists in `phase-1-choice-resolution.md` → codebase grep-proof for the new subsection anchor.
-2. Classifier output is enum-bound → documentation grep-proof plus manual contract review against SPEC-22 Track 3 and archived SPEC-19 §E; runtime schema validation remains SPEC20SCECOM-011 capstone scope.
+2. Classifier output is enum-bound → documentation grep-proof plus manual contract review against SPEC-22 Track 3 and archived SPEC-19 §E; runtime schema validation remains SPEC-22 scope. `archive/tickets/SPEC20SCECOM-011.md` later rejected a separate non-production capstone.
 3. REFUSE_ONLY_THROUGH_WORLD_LOGIC fallback → codebase grep-proof in the same file for the fallback rule.
 
 ## Landed Changes
@@ -77,7 +77,7 @@ Added a cross-reference pointer at the end of the new subsection to `phase-4-sto
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and manual contract review. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and manual contract review. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -97,9 +97,9 @@ The new subsection states that the parser consumes `manual_action_text`, the rou
 2. PASS — `grep -n "REFUSE_ONLY_THROUGH_WORLD_LOGIC" .claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md`.
 3. PASS — `grep -n "phase-4-storylet-and-mystery-authority.md" .claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md`.
 4. PASS — `grep -n "mcp__worldloom__get_canonical_vocabulary({class: 'commitment_class'})" .claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md`.
-5. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §G, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 3, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §E, and `phase-4-storylet-and-mystery-authority.md` §Hard Filters confirmed the reference matches the closed-enum and Phase 4 consumer contract.
+5. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §G, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 3, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §E, and `phase-4-storylet-and-mystery-authority.md` §Hard Filters confirmed the reference matches the closed-enum and Phase 4 consumer contract.
 
 ## Deviations
 
-1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators and SPEC20SCECOM-011 capstone fixture surface. This ticket's accepted proof is documentation-surface grep plus manual contract review.
+1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators. This ticket's accepted proof is documentation-surface grep plus manual contract review; non-production capstone fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` process-flow and phase-description integration remains SPEC20SCECOM-009 scope; this ticket intentionally touched only the Phase 1 reference.

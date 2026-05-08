@@ -47,7 +47,7 @@ Added a handoff sentence stating that the selected CHC's `commitment_class` is c
 - Path B write-in classifier (completed by `archive/tickets/SPEC20SCECOM-006.md`).
 - Phase 8 label-prompt field cleanup (landed in `archive/tickets/SPEC20SCECOM-012.md`).
 - Parent `branching-story-page-cycle/SKILL.md` process-flow integration (owned by `tickets/SPEC20SCECOM-009.md`).
-- Runtime validators and capstone fixture proof (SPEC-22 and `tickets/SPEC20SCECOM-011.md`).
+- Runtime validators and deterministic package proof (SPEC-22); non-production capstone fixture proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ## Acceptance Criteria
 
@@ -86,7 +86,7 @@ The landed prose removes `choice_mode` / `poetic_effect` from the Path A standar
 2. PASS — `! sed -n '5,16p' .claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md | grep -E "choice_mode|poetic_effect"`.
 3. PASS — `grep -n "arc.arc_contract.commitment_class" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md`.
 4. PASS — `grep -nE "record_version|choice_kind|commitment_class|strategy_cluster|choice_worthiness|choice_contract|likely_effects|continuation_capacity" .claude/skills/branching-story-page-cycle/references/record-schemas.md`.
-5. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §A / §F / §G, `record-schemas.md` CHC v2 section, and `phase-4-storylet-and-mystery-authority.md` §Hard Filters confirmed Path A now matches the selected-CHC commitment-class consumer contract.
+5. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §A / §F / §G, `record-schemas.md` CHC v2 section, and `phase-4-storylet-and-mystery-authority.md` §Hard Filters confirmed Path A now matches the selected-CHC commitment-class consumer contract.
 
 ## Deviations
 

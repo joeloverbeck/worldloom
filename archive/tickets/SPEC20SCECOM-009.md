@@ -108,7 +108,7 @@ Updated the gate count in the reference file's intro to "17 gates" and added a S
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -136,10 +136,10 @@ Completed: 2026-05-08. `.claude/skills/branching-story-page-cycle/SKILL.md` now 
 7. PASS — direct `test -f` check confirmed each parent-skill phase-reference path cited by the landed Phase 4/5/7/7.6/8/9 summaries exists.
 8. PASS — `! rg -n "generates 4-6 structured choices|selects the next storylet" .claude/skills/branching-story-page-cycle/SKILL.md`.
 9. PASS — `git diff --check -- .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md tickets/SPEC20SCECOM-009.md`.
-10. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` §Risks, upstream archived SPEC20SCECOM tickets, `docs/FOUNDATIONS.md`, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the landed parent skill/gate-reference prose preserves Rule 1, Rule 7, append-only story-bundle write discipline, and the never-elided Phase 4.5 canon-promotion HARD-GATE.
+10. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md`, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` §Risks, upstream archived SPEC20SCECOM tickets, `docs/FOUNDATIONS.md`, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the landed parent skill/gate-reference prose preserves Rule 1, Rule 7, append-only story-bundle write discipline, and the never-elided Phase 4.5 canon-promotion HARD-GATE.
 
 ## Deviations
 
 1. The drafted `grep -c "Gate"` count proof was replaced with a table-row count because the live gate reference uses numbered markdown table rows rather than repeated "Gate N" headings. The accepted invariant remains exactly 17 Phase 9 gates.
-2. No executable runtime validator or capstone fixture was run; SPEC-22 and SPEC20SCECOM-011 still own runtime implementation/capstone proof. This ticket's accepted proof is the documentation and parent-skill contract surface.
+2. No executable runtime validator was run; SPEC-22 owns runtime implementation and deterministic validator/package proof, while non-production capstone fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md`. This ticket's accepted proof is the documentation and parent-skill contract surface.
 3. Post-ticket review (2026-05-08) found one same-seam parent-summary blocker in `.claude/skills/branching-story-page-cycle/SKILL.md`: the introductory "Runs one tick..." paragraph still described v1 habitual choice generation. This implementation pass corrected that paragraph before archival.

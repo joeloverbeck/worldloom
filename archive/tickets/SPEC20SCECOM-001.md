@@ -16,7 +16,7 @@ At intake, Phase 4 selected beat-granular SLTs via storylet-shape filtering (`sh
 2. Verified archived SPEC-19 §A (`archive/specs/SPEC-19-scene-commitment-arc-schema.md`) defines the v2 SLT schema with `arc_contract`, `effect_model.variants[]`, `exit_portfolio.native_seeds[]` fields that this ticket consumes; storylet template at `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` confirmed already updated to v2 per the SPEC19SCECOM-001 implementation commit.
 3. Cross-skill boundary: `branching-story-page-cycle/references/phase-4-…` consumes the SLT v2 schema produced by `storylet-pool-authoring`. The contract under audit is `arc.arc_contract.commitment_class`, `arc.exit_portfolio.native_seeds[].count`, and the deterministic `weighted_pick_seed` advancement for Phase 4b. SPEC-22 §Track 3 owns the `commitment_class` enum implementation in `tools/world-index/src/public/canonical-vocabularies.ts`; SPEC-22 §Track 4 owns the PG `state_snapshot.applied_effect_variant` field — this ticket consumes both surfaces.
 4. Schema extension (renumbered from template item 6): this ticket references the PG record's `state_snapshot.applied_effect_variant` field (NEW per SPEC-20 §B); the field is owned by SPEC-22 §Track 4. This ticket documents the consumer-side write semantics (Phase 4b records the chosen variant id) but does not define the schema. Additive-only extension; root-page exception (PG-0001 carries `applied_effect_variant: null` per SPEC-20 §F Bootstrap special case).
-5. Verification-boundary correction: the drafted skill dry-run and replay proof are not currently executable because SPEC-22's validator/schema implementation remains pending. This ticket's truthful proof is documentation-surface grep/manual review over the edited Phase 4/4b reference; end-to-end replay validation remains SPEC20SCECOM-011 capstone scope.
+5. Verification-boundary correction: the drafted skill dry-run and replay proof are not currently executable because SPEC-22's validator/schema implementation remains pending. This ticket's truthful proof is documentation-surface grep/manual review over the edited Phase 4/4b reference; deterministic runtime replay validation remains SPEC-22 scope. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production empirical capstone proof.
 
 ## Architecture Check
 
@@ -28,7 +28,7 @@ At intake, Phase 4 selected beat-granular SLTs via storylet-shape filtering (`sh
 1. Phase 4 hard filter 6 (commitment_class match) → codebase grep-proof in `phase-4-storylet-and-mystery-authority.md` for the new filter.
 2. Phase 4b deterministic variant selection → codebase grep-proof and manual review in `phase-4-storylet-and-mystery-authority.md` for variant filtering, seed advancement, and `state_snapshot.applied_effect_variant` persistence.
 3. Salience scoring extensions (`commitment_class_continuity`, `exit_portfolio_richness`) → codebase grep-proof in the same reference file for both new term names.
-4. Replay-equality at arc cadence → documentation proof in this ticket; schema validation is deferred to SPEC-22 §Track 2's `effect_model_replay_safety` validator and the full-pipeline SPEC20SCECOM-011 capstone.
+4. Replay-equality at arc cadence → documentation proof in this ticket; schema validation is deferred to SPEC-22 §Track 2's `effect_model_replay_safety` validator. `archive/tickets/SPEC20SCECOM-011.md` later rejected a separate non-production full-pipeline capstone.
 
 ## Landed Changes
 
@@ -100,13 +100,13 @@ The page record's `storylet_selection_audit_trail` block (existing field) is reu
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Empirical fixture-based verification remains owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
 1. `grep -nE "Phase 4b|commitment_class_continuity|exit_portfolio_richness|applied_effect_variant" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md` — confirms all new section anchors and salience-term names landed.
 2. `grep -n "shape: scene_commitment_arc" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md` — confirms arc-shape filter is documented.
-3. Full-pipeline verification owned by SPEC20SCECOM-011 once SPEC-22 §Track 2/3/4 has landed; this ticket's verification stops at documentation-prose surface.
+3. Deterministic runtime proof is owned by SPEC-22 once §Track 2/3/4 has landed; this ticket's verification stops at documentation-prose surface.
 
 ## Outcome
 
@@ -116,10 +116,10 @@ Completed: 2026-05-07. `.claude/skills/branching-story-page-cycle/references/pha
 
 1. PASS — `grep -nE "Phase 4b|commitment_class_continuity|exit_portfolio_richness|applied_effect_variant" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md`.
 2. PASS — `grep -n "shape: scene_commitment_arc" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md`.
-3. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §A/§B and archived SPEC-19 §A confirmed the landed Phase 4/4b prose matches the authoritative arc-selection, salience-extension, variant-pick, and replay-equality contracts.
+3. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §A/§B and archived SPEC-19 §A confirmed the landed Phase 4/4b prose matches the authoritative arc-selection, salience-extension, variant-pick, and replay-equality contracts.
 4. PASS — `git diff --check -- .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md`; the untracked archived ticket was covered with `git diff --check --no-index /dev/null archive/tickets/SPEC20SCECOM-001.md` and produced no whitespace diagnostics.
 
 ## Deviations
 
-1. The drafted skill dry-run and replay-equality fixture proof were not executed because the live repo does not yet have SPEC-22's v2 validators/schema implementation. This ticket's accepted proof is the documentation-surface contract; empirical fixture validation remains SPEC20SCECOM-011 scope.
+1. The drafted skill dry-run and replay-equality fixture proof were not executed because the live repo does not yet have SPEC-22's v2 validators/schema implementation. This ticket's accepted proof is the documentation-surface contract; non-production empirical fixture validation was later rejected by `archive/tickets/SPEC20SCECOM-011.md` in favor of SPEC-22 deterministic validator/package proof plus manual contract review.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` process-flow wording still describes the broader v1 runtime until the planned SPEC20SCECOM-009 summary/update ticket lands. This ticket intentionally changed only the Phase 4/4b reference.

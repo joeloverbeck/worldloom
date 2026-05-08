@@ -17,7 +17,7 @@ At intake, the page-cycle's structural Phase 11 staged commit pre-allocated IDs 
 3. Cross-skill boundary: `mcp__worldloom__allocate_next_id(world_slug, 'ARCTRACE', story_slug=...)` is owned by SPEC-22 §Track 1 (id-allocation-race extension). The patch-engine envelope's `expected_id_allocations.arc_trace_ids` field is owned by SPEC-22 §Track 1. This ticket consumes both surfaces; the documentation discipline (when to pre-allocate per execution_mode) is the page-cycle skill's contract.
 4. HARD-GATE / Mystery Reserve firewall semantics — renumbered from template item 5: ARC_TRACE persistence is a derived per-page artifact (non-authoritative for replay per archived SPEC-19 §C); its emission does NOT change the Phase 10 user-approval contract (preserved per arc-page in `authoring` mode) or the Phase 4.5 canon-promotion HARD-GATE handoff. Documented inline so a future reader sees the no-HARD-GATE-change discipline alongside the new op-enumeration.
 5. Schema extension (renumbered from template item 6): consumes the PG `state_snapshot.arc_trace_id` and `arc_trace_emitted` fields (NEW per SPEC-20 §I); these fields are owned by SPEC-22 §Track 4. Additive consumer-side documentation — this ticket records when to populate them, not how to define them.
-6. Verification-boundary correction (2026-05-08): the drafted skill dry-run assertions are not executable yet because SPEC-22's `create_arc_trace_record` op, `expected_id_allocations.arc_trace_ids` envelope field, v2 validators, and SPEC20SCECOM-011 capstone fixture lane remain pending. This ticket's truthful proof is documentation-surface grep plus manual review against SPEC-20 §I, SPEC-22 Track 1/4, archived SPEC-19 §C, and `docs/HARD-GATE-DISCIPLINE.md`.
+6. Verification-boundary correction (2026-05-08): the drafted skill dry-run assertions are not executable yet because SPEC-22's `create_arc_trace_record` op, `expected_id_allocations.arc_trace_ids` envelope field, and v2 validators remain pending. This ticket's truthful proof is documentation-surface grep plus manual review against SPEC-20 §I, SPEC-22 Track 1/4, archived SPEC-19 §C, and `docs/HARD-GATE-DISCIPLINE.md`. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production capstone fixture proof.
 
 ## Architecture Check
 
@@ -95,7 +95,7 @@ Phase 11 prose now includes the inline no-HARD-GATE-change note:
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -122,5 +122,5 @@ Completed: 2026-05-08. `.claude/skills/branching-story-page-cycle/references/pre
 
 ## Deviations
 
-1. The drafted skill dry-run / patch-engine success assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime op, envelope field, validators, and SPEC20SCECOM-011 capstone fixture lane. This ticket's accepted proof is documentation-surface grep plus manual contract review.
+1. The drafted skill dry-run / patch-engine success assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime op, envelope field, and validators. This ticket's accepted proof is documentation-surface grep plus manual contract review; non-production capstone fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 2. Parent `SKILL.md` Process Flow, HARD-GATE summary, phase descriptions, and Phase 9 gate-count integration remain intentionally out of scope for this ticket and are owned by active follow-up `tickets/SPEC20SCECOM-009.md`.

@@ -18,7 +18,7 @@ At intake, the scene-commitment-arc pivot needed a dedicated Phase 7.6 reference
 4. FOUNDATIONS Rule 7 (Preserve Mystery Deliberately) — renumbered from template item 4: Layer 1's deterministic check that all `forbidden_resolutions[]` M ids are absent from any extracted claim's `canon_status: forbidden_risk` is the load-bearing Mystery-Reserve firewall at the page-cycle runtime. Documented as a HARD-FAIL surface — re-prompt budget exhaustion escalates to user with the constraint failures inlined.
 5. HARD-GATE / Mystery Reserve firewall semantics — renumbered from template item 5: Phase 7.6 does NOT modify Phase 4.5's canon-promotion HARD-GATE handoff to `story-fact-promotion-to-canon` (preserved as never-elided in every execution_mode). Layer 3's `reject_arc` verdict triggers a Phase 4 re-run with the current arc excluded — this is a structural recovery, not a Mystery Reserve firewall weakening.
 6. Schema extension (renumbered from template item 6): consumes ARC_TRACE record class (defined in archived SPEC-19 §C; landed via SPEC19SCECOM-002 in `record-schemas.md` prose anchor); does not extend the schema itself. Additive consumer-side documentation.
-7. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 validators, patch-engine op, canonical vocabularies, and capstone fixture lane remain pending. This ticket's truthful proof is the documentation surface: the new reference file, grep proofs for required anchors, and manual review against SPEC-20 §E, SPEC-22 Track 1/2/3, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md`.
+7. Verification-boundary correction: the drafted skill dry-run / fixture assertions are not executable yet because SPEC-22's v2 validators, patch-engine op, and canonical vocabularies remain pending. This ticket's truthful proof is the documentation surface: the new reference file, grep proofs for required anchors, and manual review against SPEC-20 §E, SPEC-22 Track 1/2/3, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md`. `archive/tickets/SPEC20SCECOM-011.md` later rejected non-production capstone fixture proof.
 
 ## Architecture Check
 
@@ -92,7 +92,7 @@ Created `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trac
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket creating a NEW reference file; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Full-pipeline empirical verification owned by SPEC20SCECOM-011 capstone.
+1. None — documentation-only ticket creating a NEW reference file; verification is command-based and existing pipeline coverage is named in Assumption Reassessment. Runtime validator/package proof remains owned by SPEC-22; non-production empirical capstone proof was rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 
 ### Commands
 
@@ -115,9 +115,9 @@ The new reference covers Layer 1 deterministic structural validation, Layer 2 po
 3. PASS — `grep -nE "authoring|interactive_runtime|batch_generation" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
 4. PASS — `grep -n "arc_envelope_conformance" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
 5. PASS — `grep -nE "pass|revise_prose|reject_arc|promote_interrupt" .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`.
-6. PASS — manual review against `specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §E, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 1/2/3 and §Risks, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §C, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the reference preserves story-bundle write discipline, forbidden-Mystery preservation, and the never-elided canon-promotion HARD-GATE.
+6. PASS — manual review against `archive/specs/SPEC-20-scene-commitment-arc-runtime-pipeline.md` §E, `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` Track 1/2/3 and §Risks, `archive/specs/SPEC-19-scene-commitment-arc-schema.md` §C, `docs/FOUNDATIONS.md` §Story Bundles, and `docs/HARD-GATE-DISCIPLINE.md` confirmed the reference preserves story-bundle write discipline, forbidden-Mystery preservation, and the never-elided canon-promotion HARD-GATE.
 
 ## Deviations
 
-1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators, `create_arc_trace_record` implementation, and SPEC20SCECOM-011 capstone fixture surface. This ticket's accepted proof is documentation-surface grep plus manual contract review.
+1. The drafted skill dry-run / fixture assertions were not executed because the live repo still lacks the SPEC-22 v2 runtime validators and `create_arc_trace_record` implementation. This ticket's accepted proof is documentation-surface grep plus manual contract review; non-production capstone fixture proof was later rejected by `archive/tickets/SPEC20SCECOM-011.md`.
 2. Parent `.claude/skills/branching-story-page-cycle/SKILL.md` and `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` still need cross-cutting updates by design. Active follow-up `tickets/SPEC20SCECOM-009.md` owns the Process Flow, HARD-GATE summary, and Phase 9 gate-list integration after phase references land.
