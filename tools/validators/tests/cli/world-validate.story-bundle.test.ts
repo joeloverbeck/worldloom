@@ -45,7 +45,7 @@ test("world-validate runs scene-commitment validators against an indexed v2 stor
       "--story",
       "alpha",
       "--rules",
-      "arc_schema_compliance,choice_worthiness_completeness,effect_model_legality,effect_model_replay_safety,stop_policy_parsability",
+      "arc_schema_compliance,choice_worthiness_completeness,effect_model_legality,effect_model_replay_safety,arc_trace_evidence_alignment,narrative_point_classification,arc_envelope_conformance,stop_policy_parsability",
       "--json"
     ],
     { cwd: repo, encoding: "utf8" }
@@ -58,6 +58,9 @@ test("world-validate runs scene-commitment validators against an indexed v2 stor
     "choice_worthiness_completeness",
     "effect_model_legality",
     "effect_model_replay_safety",
+    "arc_trace_evidence_alignment",
+    "narrative_point_classification",
+    "arc_envelope_conformance",
     "stop_policy_parsability"
   ]);
   assert.equal(run.summary.fail_count, 0);
@@ -144,8 +147,15 @@ function createIndexedV2StoryWorld(): string {
   insert.run("alpha:CHC-0001", "alpha", "stories/alpha/_source/choices/CHC-0001.yaml", "choice_record", yaml.dump(choice));
   insert.run("alpha:PG-0002", "alpha", "stories/alpha/_source/pages/PG-0002.yaml", "page_record", yaml.dump(completePage()));
   insert.run("alpha:SE-0002", "alpha", "stories/alpha/_source/events/SE-0002.yaml", "story_event_record", yaml.dump(completeEvent()));
+  insert.run("alpha:ARCTRACE-0001", "alpha", "stories/alpha/_source/arc-traces/ARCTRACE-0001.yaml", "arc_trace_record", yaml.dump(completeArcTrace()));
   db.close();
 
+  mkdirSync(path.join(world, "stories", "alpha", "pages-prose"), { recursive: true });
+  writeFileSync(
+    path.join(world, "stories", "alpha", "pages-prose", "PG-0002.md"),
+    "Mara offers repair help and Mara accepts.",
+    "utf8"
+  );
   writeFileSync(path.join(world, ".keep"), "", "utf8");
   return repo;
 }
@@ -157,7 +167,54 @@ function completePage(): Record<string, unknown> {
     storylet_realized: "SLT-0001",
     applied_event_ops: ["SE-0002"],
     state_snapshot: {
-      applied_effect_variant: "partial-repair"
+      applied_effect_variant: "partial-repair",
+      narrative_point_classification: "NATURAL_COMMITMENT_HINGE",
+      arc_trace_id: "ARCTRACE-0001"
+    }
+  };
+}
+
+function completeArcTrace(): Record<string, unknown> {
+  return {
+    id: "ARCTRACE-0001",
+    story_id: "STORY-001",
+    created_at_page: "PG-0002",
+    arc_realized: "SLT-0001",
+    effect_variant_applied: "partial-repair",
+    realized_beats: [
+      {
+        beat_id: "B1",
+        function: "offer-help",
+        realized: "true",
+        evidence_span: { start: 0, end: 14 }
+      }
+    ],
+    observed_actions: [
+      {
+        actor: "STENT-0001",
+        action: "offers repair help",
+        target: "STENT-0002",
+        evidence_span: { start: 0, end: 14 }
+      }
+    ],
+    observed_claims: [],
+    possible_violations: [],
+    stop_condition_hit: {
+      id: "help-accepted",
+      category: "normal_exit",
+      evidence_span: { start: 21, end: 31 }
+    },
+    effect_evidence: [
+      {
+        effect_ref: 0,
+        realized: "true",
+        evidence_span: { start: 21, end: 31 }
+      }
+    ],
+    semantic_critic_verdict: {
+      status: "pass",
+      reasons: [],
+      required_revision_constraints: []
     }
   };
 }

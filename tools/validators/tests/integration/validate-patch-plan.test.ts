@@ -108,6 +108,18 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "effect_model_replay_safety"
     );
     assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
+    const arcTraceEvidenceExecution = result.executions.find(
+      (execution) => execution.name === "arc_trace_evidence_alignment"
+    );
+    assert.equal(arcTraceEvidenceExecution?.status, "skipped");
+    const narrativePointExecution = result.executions.find(
+      (execution) => execution.name === "narrative_point_classification"
+    );
+    assert.equal(narrativePointExecution?.status, "skipped");
+    const arcEnvelopeExecution = result.executions.find(
+      (execution) => execution.name === "arc_envelope_conformance"
+    );
+    assert.equal(arcEnvelopeExecution?.status, "skipped");
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
     );
@@ -129,6 +141,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== stopPolicyExecution &&
         row !== effectModelLegalityExecution &&
         row !== effectModelReplaySafetyExecution &&
+        row !== arcTraceEvidenceExecution &&
+        row !== narrativePointExecution &&
+        row !== arcEnvelopeExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution
@@ -269,6 +284,26 @@ test("validatePatchPlan runs effect-model replay safety for Shape B page ops", a
     const execution = result.executions.find((row) => row.name === "effect_model_replay_safety");
     assert.equal(execution?.status, "pass");
     assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_replay_safety"));
+  });
+});
+
+test("validatePatchPlan materializes ARC_TRACE records for pre-apply trace validators", async () => {
+  await withTempRoot(async () => {
+    const proseDir = path.resolve(process.cwd(), "../../worlds/seeded/stories/marla-kern-seduction/pages-prose");
+    mkdirSync(proseDir, { recursive: true });
+    writeFileSync(path.join(proseDir, "PG-0002.md"), "Mara offers repair help and Mara accepts.", "utf8");
+
+    const result = await validatePatchPlan(arcTracePlan() as unknown as PatchPlanEnvelope);
+
+    for (const name of [
+      "arc_trace_evidence_alignment",
+      "narrative_point_classification",
+      "arc_envelope_conformance"
+    ]) {
+      const execution = result.executions.find((row) => row.name === name);
+      assert.equal(execution?.status, "pass", name);
+      assert.ok(!result.verdicts.some((verdict) => verdict.validator === name), name);
+    }
   });
 });
 
@@ -433,7 +468,64 @@ function replaySafePagePlan() {
           ...completeStateSnapshot(),
           canon_revision: null,
           current_location: "STLOC-0001",
-          applied_effect_variant: "partial-repair"
+          applied_effect_variant: "partial-repair",
+          narrative_point_classification: "CONTINUE_ARC"
+        }
+      })
+    ]
+  };
+}
+
+function arcTracePlan() {
+  return {
+    plan_id: "plan-arc-trace-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      ...replaySafePagePlan().patches,
+      storyPatch("create_arc_trace_record", "arc-traces", {
+        id: "ARCTRACE-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        arc_realized: "SLT-0001",
+        effect_variant_applied: "partial-repair",
+        realized_beats: [
+          {
+            beat_id: "B1",
+            function: "offer-help",
+            realized: "true",
+            evidence_span: { start: 0, end: 14 }
+          }
+        ],
+        observed_actions: [
+          {
+            actor: "STENT-0001",
+            action: "offers repair help",
+            target: "STENT-0002",
+            evidence_span: { start: 0, end: 14 }
+          }
+        ],
+        observed_claims: [],
+        possible_violations: [],
+        stop_condition_hit: {
+          id: "help-accepted",
+          category: "normal_exit",
+          evidence_span: { start: 21, end: 31 }
+        },
+        effect_evidence: [
+          {
+            effect_ref: 0,
+            realized: "true",
+            evidence_span: { start: 21, end: 31 }
+          }
+        ],
+        semantic_critic_verdict: {
+          status: "pass",
+          reasons: [],
+          required_revision_constraints: []
         }
       })
     ]

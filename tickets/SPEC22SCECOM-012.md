@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (and any reference files it ships with). No code changes.
-**Deps**: archive/tickets/SPEC22SCECOM-001.md, 005, 006, 008
+**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-005.md, 006, 008
 
 ## Problem
 

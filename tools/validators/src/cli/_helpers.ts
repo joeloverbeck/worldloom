@@ -46,6 +46,9 @@ const NAMED_RULE_SELECTORS = new Set([
   "choice_worthiness_completeness",
   "effect_model_legality",
   "effect_model_replay_safety",
+  "arc_trace_evidence_alignment",
+  "narrative_point_classification",
+  "arc_envelope_conformance",
   "stop_policy_parsability",
   "storylet_predicate_dsl_parsability"
 ]);

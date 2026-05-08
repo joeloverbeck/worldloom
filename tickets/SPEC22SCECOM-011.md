@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md` and templates. No code changes.
-**Deps**: 005, 006, 008
+**Deps**: archive/tickets/SPEC22SCECOM-005.md, 006, 008
 
 ## Problem
 

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-page-cycle/references/record-schemas.md`. Documentation-only.
-**Deps**: 005
+**Deps**: archive/tickets/SPEC22SCECOM-005.md
 
 ## Problem
 
