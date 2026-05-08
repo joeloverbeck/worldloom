@@ -39,6 +39,41 @@ test("create_slt_record writes story-bundle YAML under the story _source tree", 
   assertYamlEquals(staged, op.payload.record);
 });
 
+test("create_arc_trace_record writes ARC_TRACE YAML under the story _source tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ arc_trace_ids: ["ARCTRACE-0001"] });
+  const op = {
+    op: "create_arc_trace_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "ARCTRACE-0001",
+        created_at_page: "PG-0002",
+        arc_realized: "SLT-0001",
+        effect_variant_applied: "variant-a"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_arc_trace_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "arc-traces",
+      "ARCTRACE-0001.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
 test("create_slt_record rejects missing story-scoped id allocation", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope();

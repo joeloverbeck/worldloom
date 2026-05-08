@@ -119,6 +119,7 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
+    case "create_arc_trace_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -217,6 +218,7 @@ function stageOne(
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
+    case "create_arc_trace_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
   }

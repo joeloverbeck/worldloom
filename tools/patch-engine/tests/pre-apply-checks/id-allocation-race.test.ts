@@ -73,6 +73,35 @@ test("checkIdAllocationRace reports a story-bundle off-by-one with the submit-ti
   }
 });
 
+test("checkIdAllocationRace rejects duplicate ARCTRACE allocations in one story-bundle plan", (t) => {
+  const world = createIndexedTestWorld(t);
+  const envelope = {
+    ...baseEnvelope({ arc_trace_ids: ["ARCTRACE-0001", "ARCTRACE-0001"] }),
+    target_world: world.worldSlug,
+    patches: [
+      createArcTracePatch(world.worldSlug, "red-bunny", "ARCTRACE-0001"),
+      createArcTracePatch(world.worldSlug, "red-bunny", "ARCTRACE-0001")
+    ]
+  };
+
+  const result = checkIdAllocationRace(world.db, envelope);
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.code, "id_allocation_race");
+    assert.deepEqual(result.failures, [
+      {
+        key: "arc_trace_ids",
+        expected: "ARCTRACE-0001",
+        current: "ARCTRACE-0002",
+        story_slug: "red-bunny",
+        message:
+          "arc_trace_ids allocation race for story 'red-bunny': expected ARCTRACE-0001, current next id is ARCTRACE-0002."
+      }
+    ]);
+  }
+});
+
 test("checkIdAllocationRace returns every mismatch while preserving the first message", (t) => {
   const world = createIndexedTestWorld(t);
   seedStoryRecord(world, "red-bunny", "OBL-0012");
@@ -119,6 +148,27 @@ function createObligationPatch(
       }
     }
   } satisfies Extract<PatchOperation, { op: "create_obl_record" }>);
+}
+
+function createArcTracePatch(
+  worldSlug: string,
+  storySlug: string,
+  id: string
+): Extract<PatchOperation, { op: "create_arc_trace_record" }> {
+  return createOp({
+    op: "create_arc_trace_record",
+    target_world: worldSlug,
+    target_file: `stories/${storySlug}/_source/arc-traces/${id}.yaml`,
+    payload: {
+      story_slug: storySlug,
+      record: {
+        id,
+        created_at_page: "PG-0002",
+        arc_realized: "SLT-0001",
+        effect_variant_applied: "variant-a"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_arc_trace_record" }>);
 }
 
 function seedStoryRecord(
