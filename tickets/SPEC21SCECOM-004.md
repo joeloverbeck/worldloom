@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — full rewrite of `.claude/skills/storylet-pool-authoring/references/phase-2-generation-seeds.md`
-**Deps**: `archive/tickets/SPEC21SCECOM-001.md` (archetype names referenced in seed brief generation); SPEC21SCECOM-003 (Phase 1 diagnosis matrix consumed by Phase 2 seed selection)
+**Deps**: `archive/tickets/SPEC21SCECOM-001.md` (archetype names referenced in seed brief generation); `archive/tickets/SPEC21SCECOM-003.md` (Phase 1 diagnosis matrix consumed by Phase 2 seed selection)
 
 ## Problem
 
