@@ -293,6 +293,7 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 | `.claude/skills/branching-story-bootstrap/SKILL.md` | Name the STORY_KERNEL policy/default contract in the Phase 11 write step |
 | `.claude/skills/branching-story-bootstrap/references/phases-1-3-premise-cast-facts.md` | Document the new STORY_KERNEL blocks |
 | `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` | Edit the SLT v2 schema comment at line 232 — drop the "(multi-beat target about 1500-2000 words)" framing from `safety_valves.max_words` and replace with engine-only runaway-defense semantics per Prose Craft Contract Rule 11 (the schema field stays; only the comment's "target" framing changes) |
+| `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` | Edit the `max_words_reached` safety-valve note — drop the "multi-beat target is roughly 1500-2000 words" framing and replace with engine-only runaway-defense semantics per Prose Craft Contract Rule 11 (predicate name/semantics stay unchanged) |
 
 ## FOUNDATIONS Alignment
 

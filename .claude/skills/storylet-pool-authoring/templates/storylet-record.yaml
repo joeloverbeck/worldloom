@@ -229,7 +229,7 @@ stop_policy:
       args: {}
   safety_valves:
     max_internal_beats: 6                  # default: 6; matches max_beats safety-valve
-    max_words: 2200                        # default: 2200; multi-beat target about 1500-2000 words
+    max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11)
 
 effect_model:
   selected_before_render: true             # MUST be true for v2; replay-equality contract

@@ -240,7 +240,7 @@ Semantic glosses:
 Safety valves are inline thresholds, not DSL predicates. They are documented here for stop-policy completeness but are evaluated by the runtime stop-condition evaluator without parsing through the predicate-DSL grammar.
 
 - `max_internal_beats_reached` — fires when the prose render's beat count exceeds `arc.beat_plan.max_beats`. Default upper bound: 6 per SPEC-19 §A.
-- `max_words_reached` — fires when the prose render exceeds `arc.stop_policy.safety_valves.max_words`. Default: 2200 per SPEC-19 §A; multi-beat target is roughly 1500-2000 words.
+- `max_words_reached` — fires when the prose render exceeds `arc.stop_policy.safety_valves.max_words`. Default: 2200 per SPEC-19 §A; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11).
 - `no_valid_continuation_after_effect` — fires when applying the selected `effect_variant` leaves no eligible continuation arc and no valid JIT spec. Phase 3 continuation feasibility is owned by SPEC-20.
 - `validation_confidence_low` — fires when the SPEC-20 Phase 7.6 Layer 3 semantic critic returns confidence below a per-execution-mode threshold.
 
