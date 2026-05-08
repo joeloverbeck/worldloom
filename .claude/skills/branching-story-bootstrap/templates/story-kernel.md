@@ -19,6 +19,19 @@ pov_mode: single                         # single | rotating | omniscient
 content_intensity_baseline: mature       # tame | mature | explicit
 execution_mode_default: authoring        # authoring | interactive_runtime | batch_generation
 
+cadence_policy:                          # optional per-bundle defaults; omit block to use these values
+  max_arcs_without_menu_soft: 2           # arc-units only; not a word-count budget
+  max_arcs_without_player_commitment_soft: 4
+  allow_continue_only_pages: true
+  force_menu_only_on_interrupt_hinge: false
+
+menu_policy:                             # optional per-bundle defaults; omit block to use these values
+  min_distinct_commitments: 2
+  max_displayed_choices: 4
+  require_likely_effects: true
+  require_strong_axis_difference: true
+  require_choice_worthiness: true
+
 cast_bind_list:
   - char_id: CHAR-NNNN
     stent_id: STENT-NNNN
@@ -140,6 +153,13 @@ NO RESTRICTIONS: ...
 ## Central Dramatic Question
 
 <Optional. Not all branching stories have a single Q. Leave blank or write "N/A — emergent" if intentional.>
+
+## Cadence And Menu Policy
+
+Defaults are the frontmatter values shown in `cadence_policy` and `menu_policy`.
+These blocks live on STORY_KERNEL.md, not on individual arcs, because they
+describe per-bundle authorial taste rather than per-arc structure. Pacing is
+expressed in arc-units only; do not add word-count fields to `cadence_policy`.
 
 ## Cast
 

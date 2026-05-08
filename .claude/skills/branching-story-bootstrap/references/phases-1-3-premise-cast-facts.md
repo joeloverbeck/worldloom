@@ -22,6 +22,47 @@ Convert the user's premise into a precise design brief. Required extraction:
 
 **Failure mode**: if the premise reads as "events in order" or "chronology with vibes," the designing principle is missing. Auto-propose 3 candidate designing principles, each grounded in a different aspect of the premise (a recurring artifact, a structural correction, an institutional contradiction). Ask the user to choose, edit, or reject all three and supply their own. Halting outright is bad UX; concrete starting points let the user redirect efficiently.
 
+## STORY_KERNEL Cadence And Menu Policy
+
+Phase 1 populates STORY_KERNEL.md with two optional per-bundle policy blocks.
+If a bundle omits either block, downstream runtime phases use the defaults
+shown here and in `templates/story-kernel.md`.
+
+```yaml
+cadence_policy:
+  max_arcs_without_menu_soft: 2
+  max_arcs_without_player_commitment_soft: 4
+  allow_continue_only_pages: true
+  force_menu_only_on_interrupt_hinge: false
+
+menu_policy:
+  min_distinct_commitments: 2
+  max_displayed_choices: 4
+  require_likely_effects: true
+  require_strong_axis_difference: true
+  require_choice_worthiness: true
+```
+
+`cadence_policy` controls arc-cadence pressure: how many arc-pages may pass
+before the runtime should surface a menu, whether continue-only pages are
+allowed, and whether interrupt hinges always force a menu. `menu_policy`
+controls choice-surface discipline: minimum distinct commitments, displayed
+choice cap, and whether likely effects, strong-axis difference, and
+choice-worthiness blocks are mandatory.
+
+The blocks live on STORY_KERNEL.md, not on individual arcs, because they
+describe per-bundle authorial taste rather than per-arc structure.
+
+**No word-count fields in `cadence_policy`**: pacing is deliberately expressed
+in arc-units (`max_arcs_without_menu_soft`,
+`max_arcs_without_player_commitment_soft`) rather than word-units. This honors
+Prose Craft Contract Rule 11 — length follows content, not a per-bundle word
+budget — and prevents the padding pathology that drove commit `b28aead`
+(2026-05-06) to remove word-per-page guidelines from the rendering
+instructions. The engine-side `arc.stop_policy.safety_valves.max_words`
+remains a runaway-defense termination trigger only; it is engine-internal and
+never surfaces to the LLM or to per-bundle config.
+
 ---
 
 ## Phase 2: Cast Binding

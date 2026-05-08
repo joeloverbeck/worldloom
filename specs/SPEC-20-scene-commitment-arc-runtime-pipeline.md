@@ -289,8 +289,9 @@ The op IS NOT emitted when `arc_trace_emitted: false` (the PG record's marker fo
 | `.claude/skills/branching-story-page-cycle/references/phase-8-choice-generation.md` | Rewrite as Phase 8: Choice-Surface Gate; replace Steps 1-4 with the 6-step gate above |
 | `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` | Add gates: `arc_envelope_conformance`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`, `choice_worthiness_completeness` (5 new gates; total Phase 9 gates: 17) |
 | `.claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md` | Add §Write-In Commitment-Class Classification |
-| `.claude/skills/branching-story-bootstrap/SKILL.md` (STORY_KERNEL template) | Add `cadence_policy` and `menu_policy` blocks to the STORY_KERNEL.md template (arc-unit fields only — see §H) |
-| `.claude/skills/branching-story-bootstrap/references/phase-X-story-kernel.md` (or equivalent) | Document the new STORY_KERNEL blocks |
+| `.claude/skills/branching-story-bootstrap/templates/story-kernel.md` | Add `cadence_policy` and `menu_policy` blocks to the STORY_KERNEL.md template (arc-unit fields only — see §H) |
+| `.claude/skills/branching-story-bootstrap/SKILL.md` | Name the STORY_KERNEL policy/default contract in the Phase 11 write step |
+| `.claude/skills/branching-story-bootstrap/references/phases-1-3-premise-cast-facts.md` | Document the new STORY_KERNEL blocks |
 | `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` | Edit the SLT v2 schema comment at line 232 — drop the "(multi-beat target about 1500-2000 words)" framing from `safety_valves.max_words` and replace with engine-only runaway-defense semantics per Prose Craft Contract Rule 11 (the schema field stays; only the comment's "target" framing changes) |
 
 ## FOUNDATIONS Alignment

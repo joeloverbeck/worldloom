@@ -55,7 +55,7 @@ The schema field itself (`max_words: 2200`) is preserved verbatim; only the comm
 
 - `safety_valves.max_words` schema field semantics change (none — engine-side hard cap preserved).
 - Phase 7 rendering surface (SPEC20SCECOM-003).
-- STORY_KERNEL.md `cadence_policy` extension (SPEC20SCECOM-007).
+- STORY_KERNEL.md `cadence_policy` extension (completed in `archive/tickets/SPEC20SCECOM-007.md`).
 - `phase-7-page-render.md` Length-per-Rule-11 paragraph (SPEC20SCECOM-003).
 - Other template comment edits (none required by SPEC-20).
 
