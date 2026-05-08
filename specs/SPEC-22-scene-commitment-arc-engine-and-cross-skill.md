@@ -13,7 +13,7 @@
 SPEC-19 defines the v2 schemas (SLT, CHC, ARC_TRACE) and the canonical-vocabulary enums; SPEC-20 defines the runtime pipeline behavior; SPEC-21 defines the authoring-skill behavior. None of those specs land without the corresponding **engine surface**:
 
 - **Patch-engine ops**: `create_arc_trace_record` has landed via `archive/tickets/SPEC22SCECOM-001.md`. Remaining tracks consume that completed patch-engine surface for ARC_TRACE persistence.
-- **Validators**: `record_schema_compliance` now knows the v2 SLT, CHC, and ARC_TRACE structural envelopes via `archive/tickets/SPEC22SCECOM-002.md`. The remaining rule-level validators still need to enforce choice_worthiness, stop-policy parsability, effect-model legality, ARC_TRACE evidence alignment, and narrative-point classification.
+- **Validators**: `record_schema_compliance` now knows the v2 SLT, CHC, and ARC_TRACE structural envelopes via `archive/tickets/SPEC22SCECOM-002.md`. The first three rule-level validators (`arc_schema_compliance`, `choice_worthiness_completeness`, `stop_policy_parsability`) landed via `archive/tickets/SPEC22SCECOM-003.md`. The remaining rule-level validators still need to enforce effect-model legality, replay safety, ARC_TRACE evidence alignment, narrative-point classification, and arc-envelope conformance.
 - **Canonical-vocabularies**: the new closed enums (`commitment_class`, `arc_archetype`, `narrative_point`, `strong_axis`, `strong_outcome`, `stop_predicate`) need TypeScript implementations and exposure via `mcp__worldloom__get_canonical_vocabulary`.
 - **Indexer**: `world-index` does not parse ARC_TRACE records or surface arc-level fields for retrieval.
 - **MCP retrieval**: `get_record`, `list_records`, `get_records` need extension to handle the `arc_trace_record` type.
@@ -70,6 +70,8 @@ Validator implementations land in:
 - `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` extended with stop-predicate forms
 
 The CLI surface `world-validate` (existing) gains coverage of the new validators automatically (no new CLI command; validators register through the existing rule-registry pattern at `tools/validators/src/public/registry.ts`).
+
+Track 2 status note (2026-05-08): `arc_schema_compliance`, `choice_worthiness_completeness`, and `stop_policy_parsability` are implemented and registered by `archive/tickets/SPEC22SCECOM-003.md`; `record_schema_compliance` was completed earlier by `archive/tickets/SPEC22SCECOM-002.md`. The five later rule validators in this table remain open.
 
 ### Track 3 — Canonical-Vocabularies + Indexer + MCP Retrieval
 
@@ -317,9 +319,9 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
 | `tools/patch-engine/src/ops/shared.ts` | 1 | (if needed) shared helpers |
 | `tools/patch-engine/src/envelope/schema.ts` | 1 | extend `IdAllocations` (`expected_id_allocations.arc_trace_ids`) and the `PatchOperation` discriminated union for the new story-record op-kind |
 | `tools/patch-engine/src/pre-apply-checks/id-allocation-race.ts` | 1 | extend to cover ARCTRACE ids |
-| `tools/validators/src/rules/arc_schema_compliance.ts` | 2 | NEW |
-| `tools/validators/src/rules/choice_worthiness_completeness.ts` | 2 | NEW |
-| `tools/validators/src/rules/stop_policy_parsability.ts` | 2 | NEW |
+| `tools/validators/src/rules/arc_schema_compliance.ts` | 2 | completed by `archive/tickets/SPEC22SCECOM-003.md` |
+| `tools/validators/src/rules/choice_worthiness_completeness.ts` | 2 | completed by `archive/tickets/SPEC22SCECOM-003.md` |
+| `tools/validators/src/rules/stop_policy_parsability.ts` | 2 | completed by `archive/tickets/SPEC22SCECOM-003.md` |
 | `tools/validators/src/rules/effect_model_legality.ts` | 2 | NEW |
 | `tools/validators/src/rules/effect_model_replay_safety.ts` | 2 | NEW |
 | `tools/validators/src/rules/arc_trace_evidence_alignment.ts` | 2 | NEW |

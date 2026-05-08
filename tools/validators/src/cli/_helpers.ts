@@ -41,7 +41,12 @@ const RULE_NUMBER_TO_PREFIX = new Map([
   ["11", "rule11_"],
   ["12", "rule12_"]
 ]);
-const NAMED_RULE_SELECTORS = new Set(["storylet_predicate_dsl_parsability"]);
+const NAMED_RULE_SELECTORS = new Set([
+  "arc_schema_compliance",
+  "choice_worthiness_completeness",
+  "stop_policy_parsability",
+  "storylet_predicate_dsl_parsability"
+]);
 
 export function packageVersion(): string {
   const packageJsonPath = path.resolve(__dirname, "../../../package.json");

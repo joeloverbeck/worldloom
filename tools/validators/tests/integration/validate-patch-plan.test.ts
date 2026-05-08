@@ -88,6 +88,18 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
+    const arcSchemaExecution = result.executions.find(
+      (execution) => execution.name === "arc_schema_compliance"
+    );
+    assert.equal(arcSchemaExecution?.status, "skipped");
+    const choiceWorthinessExecution = result.executions.find(
+      (execution) => execution.name === "choice_worthiness_completeness"
+    );
+    assert.equal(choiceWorthinessExecution?.status, "skipped");
+    const stopPolicyExecution = result.executions.find(
+      (execution) => execution.name === "stop_policy_parsability"
+    );
+    assert.equal(stopPolicyExecution?.status, "skipped");
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
     );
@@ -102,7 +114,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     assert.equal(snapshotIntegrityExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
-      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution && row !== snapshotIntegrityExecution
+      (row) =>
+        row !== storyletExecution &&
+        row !== arcSchemaExecution &&
+        row !== choiceWorthinessExecution &&
+        row !== stopPolicyExecution &&
+        row !== snapshotReplayExecution &&
+        row !== recursiveClosureExecution &&
+        row !== snapshotIntegrityExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

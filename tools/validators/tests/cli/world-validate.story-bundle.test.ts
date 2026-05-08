@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -14,8 +14,8 @@ test("world-validate --story scopes storylet predicate validation to one bundle"
   const repo = createIndexedStoryWorld();
 
   const scoped = spawnSync(
-    cliPath,
-    ["clean", "--story", "alpha", "--rules", "storylet_predicate_dsl_parsability", "--json"],
+    process.execPath,
+    [cliPath, "clean", "--story", "alpha", "--rules", "storylet_predicate_dsl_parsability", "--json"],
     { cwd: repo, encoding: "utf8" }
   );
   assert.equal(scoped.status, 0, scoped.stderr + scoped.stdout);
@@ -24,14 +24,41 @@ test("world-validate --story scopes storylet predicate validation to one bundle"
   assert.equal(scopedRun.summary.fail_count, 0);
 
   const unscoped = spawnSync(
-    cliPath,
-    ["clean", "--rules", "storylet_predicate_dsl_parsability", "--json"],
+    process.execPath,
+    [cliPath, "clean", "--rules", "storylet_predicate_dsl_parsability", "--json"],
     { cwd: repo, encoding: "utf8" }
   );
   assert.equal(unscoped.status, 1, unscoped.stderr + unscoped.stdout);
   const unscopedRun = JSON.parse(unscoped.stdout) as { verdicts: Array<{ code: string; message: string }> };
   assert.equal(unscopedRun.verdicts[0]?.code, "predicate.unknown_pred");
   assert.match(unscopedRun.verdicts[0]?.message ?? "", /SLT-0002/);
+});
+
+test("world-validate runs scene-commitment validators against an indexed v2 story bundle", () => {
+  const repo = createIndexedV2StoryWorld();
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      cliPath,
+      "clean",
+      "--story",
+      "alpha",
+      "--rules",
+      "arc_schema_compliance,choice_worthiness_completeness,stop_policy_parsability",
+      "--json"
+    ],
+    { cwd: repo, encoding: "utf8" }
+  );
+
+  assert.equal(result.status, 0, result.stderr + result.stdout);
+  const run = JSON.parse(result.stdout) as { summary: { validators_run: string[]; fail_count: number } };
+  assert.deepEqual(run.summary.validators_run, [
+    "arc_schema_compliance",
+    "choice_worthiness_completeness",
+    "stop_policy_parsability"
+  ]);
+  assert.equal(run.summary.fail_count, 0);
 });
 
 function createIndexedStoryWorld(): string {
@@ -74,6 +101,51 @@ function createIndexedStoryWorld(): string {
   return repo;
 }
 
+function createIndexedV2StoryWorld(): string {
+  const repo = mkdtempSync(path.join(tmpdir(), "worldloom-validators-v2-story-"));
+  const world = path.join(repo, "worlds", "clean");
+  mkdirSync(path.join(world, "_index"), { recursive: true });
+
+  const db = new Database(path.join(world, "_index", "world.db"));
+  db.exec(`
+    CREATE TABLE nodes (
+      node_id TEXT PRIMARY KEY,
+      world_slug TEXT NOT NULL,
+      story_slug TEXT,
+      file_path TEXT NOT NULL,
+      node_type TEXT NOT NULL,
+      body TEXT NOT NULL
+    );
+    CREATE TABLE validation_results (
+      result_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      world_slug TEXT NOT NULL,
+      validator_name TEXT NOT NULL,
+      severity TEXT NOT NULL,
+      code TEXT NOT NULL,
+      message TEXT NOT NULL,
+      node_id TEXT,
+      file_path TEXT,
+      line_range_start INTEGER,
+      line_range_end INTEGER,
+      created_at TEXT NOT NULL
+    );
+  `);
+  const insert = db.prepare(
+    "INSERT INTO nodes (node_id, world_slug, story_slug, file_path, node_type, body) VALUES (?, 'clean', ?, ?, ?, ?)"
+  );
+  const storylet = yaml.load(
+    readFileSync(path.resolve(process.cwd(), "tests", "fixtures", "story-storylet-complete.yaml"), "utf8"),
+    { schema: yaml.JSON_SCHEMA }
+  ) as Record<string, unknown>;
+  const choice = completeChoice();
+  insert.run("alpha:SLT-0001", "alpha", "stories/alpha/_source/storylets/SLT-0001.yaml", "storylet_record", yaml.dump(storylet));
+  insert.run("alpha:CHC-0001", "alpha", "stories/alpha/_source/choices/CHC-0001.yaml", "choice_record", yaml.dump(choice));
+  db.close();
+
+  writeFileSync(path.join(world, ".keep"), "", "utf8");
+  return repo;
+}
+
 function insertStoryRecords(
   insert: Database.Statement,
   storySlug: string,
@@ -87,4 +159,44 @@ function insertStoryRecords(
   ] as const) {
     insert.run(`${storySlug}:${id}`, storySlug, `${basePath}/${subdir}/${id}.yaml`, nodeType, yaml.dump(parsed));
   }
+}
+
+function completeChoice(): Record<string, unknown> {
+  return {
+    id: "CHC-0001",
+    story_id: "STORY-001",
+    record_version: 2,
+    choice_kind: "scene_commitment",
+    commitment_class: "offer_practical_help",
+    strategy_cluster: "careful-help",
+    choice_contract: {
+      user_intent: "Offer practical help.",
+      guaranteed_action: "The offer is made.",
+      success_policy: "contested",
+      allowed_outcome_band: ["partially_succeeds"],
+      forbidden_outcomes: [],
+      minimum_state_change: ["relationship_trajectory"]
+    },
+    likely_effects: [
+      {
+        type: "relationship_axis_shift",
+        axis: "trust",
+        direction: "increase_small"
+      }
+    ],
+    continuation_capacity: {
+      post_choice_delta: {},
+      valid_seed_storylets: ["SLT-0001"],
+      jit_shape_spec: null
+    },
+    choice_worthiness: {
+      strategic_question_answered: "Can help be offered without pressure?",
+      strong_axes: ["relationship_trajectory"],
+      expected_state_delta: {
+        relationship: { possible: ["trust increases"], magnitude: "small" }
+      },
+      why_not_microbeat: "The choice changes the relationship's pressure state.",
+      foreseeable_difference: "Accepting help creates a distinct next arc."
+    }
+  };
 }

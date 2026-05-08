@@ -4,7 +4,19 @@ import test from "node:test";
 import { validateOptions } from "../../src/cli/_helpers.js";
 
 test("RULE_FILTER_PATTERN accepts mechanized rule 11 and 12 combinations", () => {
-  for (const rules of ["11", "12", "11,12", "1,11", "1,2,11,12", "7,12,1", "all", "storylet_predicate_dsl_parsability"]) {
+  for (const rules of [
+    "11",
+    "12",
+    "11,12",
+    "1,11",
+    "1,2,11,12",
+    "7,12,1",
+    "all",
+    "arc_schema_compliance",
+    "choice_worthiness_completeness",
+    "stop_policy_parsability",
+    "storylet_predicate_dsl_parsability"
+  ]) {
     assert.equal(validateOptions({ rules }), null, rules);
   }
 });

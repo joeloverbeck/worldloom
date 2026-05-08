@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md` plus 5 reference files and 2 templates. No code changes.
-**Deps**: 003, 004, 005, 006
+**Deps**: archive/tickets/SPEC22SCECOM-003.md, 004, 005, 006
 
 ## Problem
 
