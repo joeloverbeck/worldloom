@@ -30,7 +30,7 @@
 
 record_version: 2                          # v2 schema per SPEC-19 §A; legacy v1 retired
 id: SLT-0019                               # per-story append-only; allocated via allocate_next_id(world_slug, 'SLT', story_slug=...)
-story_id: STORY-0001                       # the parent story bundle's STORY-NNN
+story_id: STORY-0001                       # the parent story bundle's STORY-NNNN
 title: ""                                  # short human label
 shape: scene_commitment_arc                # only legal value under v2 (see SPEC-19 §A); legacy enum retired
 content_intensity: mature                  # tame | mature | explicit (must be within STORY_KERNEL.content_intensity_baseline ± 1 band; gate 6)
@@ -128,7 +128,7 @@ mystery_safety:
 # from SLT records; that role moves to exit_portfolio.native_seeds (see arc_contract below).
 # Presence of choice_templates on a v2 record is HARD-REJECTed by SPEC-22's arc_schema_compliance.
 
-# Provenance — load-bearing for branch isolation + audit trail
+# Provenance — load-bearing for branch-isolation + audit trail
 
 provenance:
   origin: focus_authoring                  # bootstrap_seed | focus_authoring | audit_remediation | runtime_jit
@@ -136,7 +136,7 @@ provenance:
   source_rsp: null                         # RSP-NNNN if origin == audit_remediation, else null
   created_at_page: null                    # null for global_author_pool storylets; PG-NNNN for branch-scoped runtime-JIT storylets
 
-# Visibility — load-bearing for branch isolation (Phase 4 gate 8 + Phase 5 batch-level)
+# Visibility — load-bearing for branch-isolation (Phase 4 gate 8 + Phase 5 batch-level)
 
 visibility:
   scope: global_author_pool                # global_author_pool | branch_prefix_scoped | branch_scoped
@@ -221,7 +221,7 @@ execution_envelope:                        # what governs prose render under thi
 stop_policy:
   normal_exits:                            # any of these closes the arc cleanly
     - id: <kebab-case stop id>
-      predicate: <stop_predicate enum>     # closed enum — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
+      predicate: <stop_predicate enum>     # closed-enum predicate selector (args below are open kebab-case vocabulary) — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
       args: {}
   interrupt_before:                        # any of these interrupts the arc before completion
     - id: <kebab-case interrupt id>

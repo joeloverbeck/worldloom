@@ -12,7 +12,7 @@ storylet pool commitment_class distribution.
 
 # Story <story_slug>
 
-**STORY-NNN**: STORY-NNNN
+**Story ID**: STORY-NNNN
 **World**: <world-slug>
 **Created**: <iso8601>
 **Designing principle**: <one sentence — same string as STORY_KERNEL.md §Designing Principle>

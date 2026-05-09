@@ -16,7 +16,7 @@ consumes this card through `source_audit_path`).
 ---
 rsp_id: RSP-NNNN
 audit_id: SAU-NNNN
-story_id: STORY-NNN
+story_id: STORY-NNNN
 
 # Findings this RSP card addresses (one or more F-NN ids from the SAU report's consolidated findings list).
 finding_ids: []

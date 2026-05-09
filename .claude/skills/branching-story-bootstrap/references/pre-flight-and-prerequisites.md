@@ -34,8 +34,9 @@ Direct `Read` of `worlds/<world-slug>/_source/<subdir>/` is redirected to MCP re
 Run before Phase 1; abort if any precondition fails.
 
 - Load `docs/FOUNDATIONS.md` into working context.
+- **Verify FOUNDATIONS-in-context before proceeding**: confirm that `docs/FOUNDATIONS.md`'s content is loaded in this session's context — via direct Read in this session, or via system-reminder injection that reproduces the document verbatim (CLAUDE.md system-reminder content does NOT satisfy this criterion unless it reproduces FOUNDATIONS.md verbatim, since references to FOUNDATIONS principles in CLAUDE.md are operator-summary, not the document itself). If FOUNDATIONS is not in context, halt Pre-flight, Read it, and resume — CLAUDE.md §Non-Negotiables forbids skipping this load: *"If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding."* Bare reliance on prose-discipline is insufficient; this verification is the structural surface that makes HARD-GATE condition (a)'s FOUNDATIONS-load mandate self-checkable rather than purely cultural.
 - Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`); resolve `worlds/<world-slug>/`. Abort if missing — instruct user to run `create-base-world` first.
-- Allocate next `STORY-NNN`:
+- Allocate next `STORY-NNNN`:
   - **Primary path**: `mcp__worldloom__allocate_next_id(world_slug, 'STORY')`.
   - Defensive recovery: if the allocator returns `Unsupported id_class 'STORY'` from an older MCP server, fall back to scanning `worlds/<world-slug>/stories/*/STORY_KERNEL.md` for the highest existing `story_id` and incrementing.
 - Validate `story_slug` is kebab-case (`[a-z0-9-]+`); verify `worlds/<world-slug>/stories/<story-slug>/` does not exist. Abort with "Story-bundle slug collision — supply a different story_slug. This skill never overwrites an existing bundle." if present.

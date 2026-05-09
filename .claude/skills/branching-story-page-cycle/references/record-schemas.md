@@ -6,7 +6,7 @@ This skill's outputs are story-bundle records. None are Canon Fact Records or Ch
 
 ```yaml
 id: PG-0042
-story_id: STORY-001
+story_id: STORY-0001
 branch_id: BR-0007                                    # the branch this page belongs to
 parent_page_id: PG-0017
 branch_path: [PG-0001, PG-0005, PG-0017, PG-0042]
@@ -66,7 +66,7 @@ storylet_selection_audit_trail:                      # Phase 4 weighted-pick dis
   jit_expansion_fired: false                          # true if the JIT generator was delegated; top_k_considered then includes the JIT-trigger condition
   weighted_pick_seed: <optional engine-internal seed for replay reproducibility>
 content_intensity: tame | mature | explicit
-validation_trace:                                    # Phase 9 gates 1-12 with one-line PASS rationales
+validation_trace:                                    # Phase 9 gates 1-17 with one-line PASS rationales
   mystery_firewall: PASS — <rationale>
   invariant_compatibility: PASS — <rationale>
   recursive_reference_closure: PASS — <rationale>
@@ -79,6 +79,11 @@ validation_trace:                                    # Phase 9 gates 1-12 with o
   state_snapshot_integrity: PASS — <rationale>
   epistemic_class_declared: PASS — <rationale>
   consequence_persistence: PASS — <rationale>
+  arc_envelope_conformance: PASS — <rationale>
+  effect_model_replay_safety: PASS — <rationale>
+  arc_trace_evidence_alignment: PASS — <rationale>
+  narrative_point_classification: PASS — <rationale>
+  choice_worthiness_completeness: PASS — <rationale>
 created_at: <iso8601>
 ```
 
@@ -98,7 +103,7 @@ The skill's replay-equality contract is `parent.snapshot + applied_event_ops == 
 
 ```yaml
 id: SE-0042
-story_id: STORY-001
+story_id: STORY-0001
 branch_id: BR-0007
 created_at_page: PG-0042
 
@@ -199,7 +204,7 @@ Allocate ids through `mcp__worldloom__allocate_next_id(world_slug, 'ARCTRACE', s
 
 ```yaml
 id: ARCTRACE-NNNN
-story_id: STORY-NNN
+story_id: STORY-NNNN
 created_at_page: PG-NNNN                       # page whose render this trace describes
 arc_realized: SLT-NNNN                         # arc selected at SPEC-20 Phase 4
 effect_variant_applied: <variant id>           # from arc.effect_model.variants[]
@@ -252,7 +257,7 @@ Every claim in `observed_actions[]`, `observed_claims[]`, `possible_violations[]
 
 The remaining classes (SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, DA-story-local, BR) are emitted by this skill but their schemas are owned by `branching-story-bootstrap/templates/story-records.yaml` — the bootstrap skill is the schema authority for shared classes; this skill is the runtime authority for PG/SE/CHC. Per-turn emission rules:
 
-- **SF-NNNN** — append-only; supersession on certainty change; declares `epistemic_class`, `truth_value`, `certainty`, `known_by`, `subject/predicate/object`, `derived_from_cf | canon_relation`, `created_at_page`.
+- **SF-NNNN** — append-only; supersession on certainty change; declares `epistemic_class`, `truth_value`, `certainty`, `known_by`, `subject/predicate/object`, `derived_from_cf | canon_relation`, `visible_to_reader`, `reader_visibility_basis`, `created_at_page`.
 - **OBL-NNNN** — append-only; supersession on status change (open → paid_off / complicated / transferred / abandoned_with_acknowledgment); declares `salience`, `urgency`, ≥2 `possible_payoff_modes`.
 - **CNSQ-NNNN** — append-only; supersession on `consequence_address` op; carries `kind`, `subjects`, `scope`, `urgency`, `salience`, `created_at_page`, branch-scoped visibility.
 - **THR-NNNN** — append-only; supersession on `status` or `current_pressure` change.

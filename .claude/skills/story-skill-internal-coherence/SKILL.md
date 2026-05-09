@@ -17,7 +17,7 @@ Do NOT Edit / Write any file under `.claude/skills/<family-member>/{SKILL.md, re
 
 (a) Pre-flight has loaded `docs/FOUNDATIONS.md`, resolved the `target_skill_path` to one of the five family members, and read every family member's SKILL.md + references/*.md + templates/* into working context. If the target path does not resolve to a recognized family member the skill aborts before Phase 1.
 
-(b) Phases 1-7 have completed: Phases 1-6 detect findings and select source-of-truth per category (C1 shared-schema drift, C2 contradictory instructions, C3 dangling cross-references, C4 numerical-citation drift, C5 vocabulary drift, C6 phase-numbering drift); Phase 7 consolidates findings, finalizes severity classification, and populates each finding's record fields (`finding_id`, `severity` with one-line rationale [bare severity is FAIL], `category`, `affected_files`, `source_of_truth` selection [the sibling/file the skill treats as canonical], and `proposed_correction` [file path + before/after diff] OR a `manual_resolution` flag when no auto-edit is safe — Section 6 §Phase 7 details when `manual_resolution` fires).
+(b) Phases 1-7 have completed: Phases 1-6 detect findings and select source-of-truth per category (C1 shared-schema drift, C2 contradictory instructions, C3 dangling cross-references, C4 numerical-citation drift, C5 vocabulary drift, C6 phase-numbering drift); Phase 7 consolidates findings, finalizes severity classification, and populates each finding's record fields (`finding_id`, `severity` with one-line rationale [bare severity is FAIL], `category`, `affected_files`, `source_of_truth` selection [the sibling/file the skill treats as canonical], and `proposed_correction` [structured: `summary` (the human-facing one-line description surfaced in Phase 8's triage table) + `diff` (the verbatim `old_string` / `new_string` byte sequences flowing to Phase 9)] OR a `manual_resolution` flag when no auto-edit is safe — §Phase 7's per-finding self-check and the §Source-of-Truth Selection rules at §Phase 3 and §Phase 6 detail when `manual_resolution` fires).
 
 (c) Phase 7 self-check passes for every finding: severity carries a one-line rationale; every correction cites at least one source-of-truth; manual-resolution findings cite both candidate sources without selecting one; shared-schema-drift findings whose canonical source is ambiguous default to manual-resolution rather than auto-edit; cross-skill corrections record every file the edit touches.
 
@@ -185,6 +185,28 @@ Run before Phase 1; abort if any precondition fails.
 
 If any precondition fails, abort before Phase 1 with a clear message.
 
+## Strategic Delegation
+
+The Pre-flight reads can produce a substantial cumulative context burden — the family corpus exceeds 400KB at audit time (`branching-story-health-audit/SKILL.md` ≈ 88KB; `story-fact-promotion-to-canon/SKILL.md` ≈ 73KB; both already require chunked reads per Pre-flight Step 4 §Oversize-file fallback). When the cumulative load threatens the audit's own context budget, sub-agent delegation is a valid strategy for the Phase 1 inventory + Phase 2-6 finding detection work, parallel to the `parent_skill_invocation` no-write sub-routine pattern in `branching-story-bootstrap` Phase 6.
+
+**What may be delegated** (no-write sub-routines that return structured findings to the operator):
+
+- Phase 1 §Shared-Surface Inventory — agents read assigned subsets of the family corpus and report shared surfaces with `file:line` anchors.
+- Phase 2 (C3 + C6 — Reference Resolution) — agents resolve cross-references and emit dangling-reference candidates.
+- Phase 3 (C1 — Shared-Schema Drift) — agents compare schema declarations across siblings and emit drift candidates.
+- Phase 4 (C5 — Vocabulary Normalization) — agents identify variant phrasings and emit drift candidates.
+- Phase 5 (C4 — Numerical-Citation Drift) — agents re-tally cited counts against source enumerations.
+- Phase 6 (C2 — Contradictory Instructions) — agents flag prose contradictions.
+
+**What stays operator-owned** (never delegated):
+
+- Phase 3 / Phase 6 §Source-of-Truth Selection — the producer-vs-consumer rule, schema-anchor-bearing-skill rule, and manual-resolution defaulting are operator judgments; a delegated agent's source-of-truth pick risks systematic bias against the family's actual canonical convention.
+- Phase 7 §Findings Consolidation — severity classification (with structural severity floors), self-check, and source-of-truth verification.
+- Phase 8 user-facing HARD-GATE — triage table emission, per-finding disposition collection, manual-resolution-to-filed conversion (`F-NN` → `F-NNb`).
+- Phase 9 atomic correction writes and the final-summary chat output.
+
+**Delegated-agent reporting contract**: every finding an agent emits MUST cite at least one `file:line` anchor (per Phase 7 self-check test 2); the operator spot-checks the highest-severity findings before triage to catch agent-side mis-citations. The delegation is a context-budget optimization, not a discipline relaxation — the HARD-GATE, source-of-truth selection, and severity classification all remain operator-owned per the boundary above.
+
 ## Phase 1: Shared-Surface Inventory
 
 Build a working inventory of every surface declared by two or more family members. The inventory is the consume-set for Phases 2-6.
@@ -303,7 +325,7 @@ For every finding, populate the field set:
 - `affected_files` (list of `file:line` anchors)
 - `description` (one paragraph)
 - `source_of_truth` (the canonical sibling/file the skill treats as authoritative — populated at Phase 3 / Phase 6 selection rule, OR the literal string `manual-resolution` when no canonical source can be selected)
-- `proposed_correction` (file path + before/after diff snippet) OR `manual_resolution` (cite both candidate sources without selecting; user picks at Phase 8)
+- `proposed_correction` (structured: `file_path` + `summary` (the human-facing one-line description surfaced in Phase 8's triage table) + `diff` (the verbatim `old_string` / `new_string` byte sequences flowing to Phase 9 §Step 1; never re-derived later — see §Verbatim diff handoff Guardrail)) OR `manual_resolution` (cite both candidate sources without selecting; user picks at Phase 8)
 
 **Per-Finding Self-Check** (each test records PASS with one-line rationale OR FAIL with the responsible loop-back phase; bare PASS is FAIL):
 
@@ -331,6 +353,8 @@ Emit a numbered triage summary table in chat:
 | 2 | F-02 | C3 | MEDIUM | `health-audit/SKILL.md` | dangling `references/phase-9-validation-gates.md` | (no auto-edit; reference target absent) | manual-resolution |
 | 3 | F-03 | C4 | HIGH | `bootstrap/SKILL.md` HARD-GATE | "8 gates" cited; Phase 9 table has 10 rows | re-write "8" → "10" in HARD-GATE clause | candidate |
 
+**Triage-table column note**: the "Proposed Correction" column carries each finding's `proposed_correction.summary` — the human-facing one-line description suitable for at-a-glance review. The underlying `proposed_correction.diff` (verbatim `old_string` / `new_string` byte sequences) is preserved internally and flows verbatim to Phase 9 §Step 1 per the §Verbatim diff handoff Guardrail; surfacing the diff in the triage column would inflate the table beyond at-a-glance scannability, but the user's Phase 8 disposition (`file` / `defer` / `reject`) implicitly approves the underlying diff that Phase 9 will write.
+
 For each `candidate` row, obtain an explicit disposition:
 
 - **file** — apply the proposed edit at Phase 9.
@@ -356,7 +380,7 @@ The HARD-GATE has fired; every disposition is in hand. Apply every correction ta
 For each correction tagged `file` from Phase 8:
 
 - Resolve the target file path (one of `.claude/skills/<family-member>/SKILL.md`, `.claude/skills/<family-member>/references/<file>.md`, or `.claude/skills/<family-member>/templates/<file>`).
-- Compose the precise `old_string` (the exact byte sequence to match) and `new_string` (the replacement). The strings come verbatim from the Phase 7 `proposed_correction` field — re-deriving them here would introduce drift between the user-approved diff and the applied edit.
+- Compose the precise `old_string` (the exact byte sequence to match) and `new_string` (the replacement). The strings come verbatim from the Phase 7 `proposed_correction.diff` sub-field — re-deriving them here would introduce drift between the user-approved diff and the applied edit. (The triage table at Phase 8 surfaces `proposed_correction.summary`; Phase 9 reads `proposed_correction.diff` directly per §Verbatim diff handoff Guardrail.)
 - When a single finding requires edits to two or more files (e.g., a C1 shared-schema drift fix updates one canonical file's comment AND every consumer's cross-reference to it), record each per-file edit in a shared correction-group keyed by `finding_id`. The whole group either applies or — on any per-file failure — every file in the group is reverted (atomicity discipline below).
 
 **Tool preference**: `Edit` for surgical changes (the common case); `Write` only when the proposed correction is a full-file rewrite (rare for this skill — most coherence findings are localized and `Edit` with targeted `old_string` / `new_string` pairs is the right shape).
@@ -365,7 +389,7 @@ For each correction tagged `file` from Phase 8:
 
 Emit all `Edit` (and any rare `Write`) tool calls for a single batched parallel-tool-use message when corrections are independent.
 
-**Per-finding atomicity for cross-file corrections**: When a finding's correction-group spans multiple files, batch every file-edit in that group into a single message and verify all returned successfully BEFORE moving to the next group. If any per-file edit in the group failed (path typo, permission error, `old_string` no longer unique because an earlier batch already mutated the file), rollback every successful per-file edit in the group via a compensating `Edit` (re-apply the `new_string` → `old_string` direction) and surface the failure to the user in the final summary as `finding F-NN: rollback-on-failure — original group did not apply`.
+**Per-finding atomicity for cross-file corrections**: When a finding's correction-group spans multiple files, batch every file-edit in that group into a single message and verify all returned successfully BEFORE moving to the next group. Distinguish two failure-mode classes when an Edit response is non-success: **(a) transient operator errors** — file-not-read precondition (the Edit tool's `File has not been read yet` validator; recover by Reading the file then retrying the same Edit), transport timeout, or any in-place-recoverable condition where the failure is unrelated to the correction-group's structural integrity. Retry without rollback: the correction-group's atomicity is not at risk because no successful sibling edits depend on the failed Edit, and the file's content is unchanged from the perspective of remaining group edits. **(b) structural conflicts** — path typo, permission error, `old_string` no longer unique because an earlier batch already mutated the file, schema-related mismatch where the correction-group's content is wrong relative to the file's current state. Rollback every successful per-file edit in the group via a compensating `Edit` (re-apply the `new_string` → `old_string` direction) and surface the failure to the user in the final summary as `finding F-NN: rollback-on-failure — original group did not apply`. The atomicity discipline applies to (b), not (a); a transient failure caught and retried in-place leaves the correction-group whole and warrants no rollback.
 
 Independent (single-file) corrections do not need rollback discipline — each is its own atomic edit.
 
@@ -405,6 +429,14 @@ For each manual-resolution finding:
     obviously canonical; both are recent, both are referenced">
   - **Suggested resolution path**: <one-line guidance>
 
+### Filed but no edit applied (Phase-9-composition-time discovery)
+
+For each finding the user dispositioned as `file` at Phase 8 but where Phase-9 close inspection during diff composition revealed no actionable edit was warranted (e.g., apparent drift turns out to be appropriate per-skill specialization on closer reading; the audit's source-of-truth selection was correct but the Phase 9 implementer determined the "fix" would impose false symmetry on legitimate per-skill differences):
+
+- **F-NN [Severity]** [<Category>] <one-line description>
+  - **Why no edit**: <one-line — the discovery that revealed no actionable drift exists, e.g., "per-skill recovery patterns are appropriately specialized to each skill's MCP load profile; no real cross-skill drift">
+  - **Audit-trail note**: the user's Phase 8 disposition was honored; the absence of an edit is itself an audit outcome distinct from manual-resolution (user-decides) and rejected-as-false-positive (audit-decides at Phase 8).
+
 ### Deferred (per `defer-with-rationale`)
 
 For each deferred finding:
@@ -427,11 +459,12 @@ For each dropped finding:
 
 - Total findings: <N>
 - Filed: <K> (mutated <M> files)
+- Filed but no edit applied: <filed_no_edit>
 - Manual-resolution: <Q>
 - Deferred: <R>
 - Rejected: <S>
 - Dropped: <T>
-- Sum check: K + Q + R + S + T = N (audit trail consistency)
+- Sum check: K + (filed_no_edit) + Q + R + S + T = N (audit trail consistency)
 
 The git diff after this run is the durable audit trail. Review with
 `git diff` before committing. Do NOT commit from inside this skill.
@@ -487,7 +520,7 @@ The skill does not reference `templates/canon-fact-record.yaml` or `templates/ch
 - **Manual-resolution is non-negotiable for cross-skill schema drift on ambiguous canonical**: when a C1 cross-skill schema-drift finding cannot resolve to a single canonical sibling via the producer-vs-consumer or schema-anchor-bearing-skill rule, the finding MUST be tagged `manual-resolution` — never auto-applied, never silently selecting one sibling. A wrong canonical pick corrupts every consuming family member at once; the user's explicit choice is the only safe path.
 - **HARD-GATE absolute under Auto Mode**: invoking the skill is not approval of the correction batch. Auto Mode auto-approval at Phase 8 fires only when every surviving candidate is severity LOW AND no manual-resolution flag is set AND no cross-skill schema-drift findings remain. CRITICAL/HIGH findings, manual-resolution items, or cross-skill schema-drift always require explicit user approval even under Auto Mode.
 - **Per-finding atomicity for cross-file corrections**: a finding whose correction-group spans multiple files applies as a unit or rolls back. Partial-state failure at the meta-tooling layer leaves the family in a worse state than before the audit (one sibling updated, others not) — the rollback discipline at Phase 9 §Step 2 is load-bearing.
-- **Verbatim diff handoff from Phase 7 to Phase 9**: `old_string` / `new_string` come from the Phase 7 `proposed_correction` field, NOT re-derived at Phase 9. Re-derivation would introduce drift between what the user approved at Phase 8 and what the skill writes — a Rule 6 silent-retcon analog.
+- **Verbatim diff handoff from Phase 7 to Phase 9**: `old_string` / `new_string` come verbatim from the Phase 7 `proposed_correction.diff` sub-field, NOT re-derived at Phase 9. Phase 8's triage table surfaces `proposed_correction.summary` for at-a-glance review; the underlying `diff` sub-field is the data store Phase 9 reads. Re-derivation would introduce drift between what the user approved at Phase 8 and what the skill writes — a Rule 6 silent-retcon analog.
 - **Worktree discipline**: if invoked inside a git worktree, all paths — reads, writes, globs, greps — resolve from the worktree root, not the main repo root.
 - **Do not `git commit` from inside this skill**: Phase 9 explicitly states no commit. The user reviews via `git diff` and commits when ready. Committing inside the skill defeats the user's review window and violates the project-wide rule (CLAUDE.md §Non-Negotiables).
 

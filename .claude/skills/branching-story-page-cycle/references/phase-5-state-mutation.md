@@ -38,7 +38,7 @@ Records are append-only. Mutations to facts (certainty change), obligations (sta
 ```yaml
 # Example: an OBL goes from open → paid_off
 id: OBL-0091
-story_id: STORY-001
+story_id: STORY-0001
 logical_id: OBL-0007                  # the original logical obligation
 supersedes: OBL-0007
 created_at_page: PG-0042

@@ -62,8 +62,8 @@ prose to reach an artificial choice point.
 Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
 filter-word saturation, recurring-metaphor recurrence (against any prior pages
 once the runtime page-cycle takes over), identical-anchor reuse, self-
-narrating-self patterns, ledger-jargon leakage, bracket-paraphrasing, and
-padding-or-truncation.
+narrating-self patterns, ledger-jargon leakage, bracket-paraphrasing, abstract-
+noun saturation, and padding-or-truncation.
 ```
 
 LLM produces the prose. Engine writes to a working buffer (NOT to disk yet — disk write happens at Phase 11's staged commit: the engine YAML transaction writes `_source/<class>/*.yaml` records, and sequenced markdown writes handle `STORY_KERNEL.md`, `pages-prose/PG-0001.md`, and `INDEX.md`).
@@ -91,7 +91,7 @@ Page-cycle-compatible schema; `branching-story-page-cycle` §Record Schemas §Pa
 - **Prose path**: `prose_path: pages-prose/PG-0001.md`.
 - **state_snapshot**: `canon_revision`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, `rumor_state`, `obligations_open`, `obligations_paid_off: []`, `obligations_complicated: []`, `obligations_abandoned: []`, `consequences_pending`, `consequences_addressed: []`, `threads_active`, `relationships_current`, `intentions_current`, `cast_present`, `current_location`, `accessible_locations`, `objects_in_scope`, `inventory_by_entity`, `entity_status`, `applied_effect_variant: null`, `narrative_point_classification: NATURAL_COMMITMENT_HINGE`, `arc_trace_id: null`, `arc_trace_emitted: false`.
 - **narrative_health**: `open_obligation_count`, `high_salience_unpaid_count`, `average_obligation_age: 0`, `contradiction_risk: 0.0`, `causal_connectivity: 1.0`, `character_motivation_coverage`, `unresolved_threat_pressure`, `recent_consequence_density: 0.0`, `recent_reflection_density: 0.0`, `novelty: 1.0`, `tension`, `agency_score: 1.0`.
-- **Governor / content / trace / timestamps**: `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (the page-cycle's 12 PG-record keys — see §Phase 9 dual-validation-trace mapping below), `created_at`.
+- **Governor / content / trace / timestamps**: `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (17 PG-record keys total — 12 non-scene-commitment plus 5 scene-commitment validator keys; see §Phase 9 dual-validation-trace mapping below), `created_at`.
 
 ---
 
@@ -139,4 +139,4 @@ Phase 9's 17 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (boo
 
 Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story-page-cycle` §Record Schemas §Story Event Record is the runtime authority.
 
-`id: SE-0001`, `story_id`, `branch_id: BR-0001`, `created_at_page: PG-0001`, `source.parent_page_id: null`, `source.chosen_choice_id: null`, `source.write_in_text_hash: null`, `source.storylet_realized: null`, `actor: system`, `action: bootstrap`, `target: null`, `instrument: null`, `preconditions_checked: []`, `ops: []`, `state_hash_before: null`, `state_hash_after: <PG-0001.state_hash>` (the same `bootstrap-pg0001-state-<story-slug>-v1` placeholder per the PG-0001 emit step above), `notes: "Genesis event for STORY-NNN — bootstrap scene-setter emission, no preceding state and no realized arc."`.
+`id: SE-0001`, `story_id`, `branch_id: BR-0001`, `created_at_page: PG-0001`, `source.parent_page_id: null`, `source.chosen_choice_id: null`, `source.write_in_text_hash: null`, `source.storylet_realized: null`, `actor: system`, `action: bootstrap`, `target: null`, `instrument: null`, `preconditions_checked: []`, `ops: []`, `state_hash_before: null`, `state_hash_after: <PG-0001.state_hash>` (the same `bootstrap-pg0001-state-<story-slug>-v1` placeholder per the PG-0001 emit step above), `notes: "Genesis event for STORY-NNNN — bootstrap scene-setter emission, no preceding state and no realized arc."`.
