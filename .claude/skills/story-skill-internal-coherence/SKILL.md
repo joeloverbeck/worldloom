@@ -13,7 +13,7 @@ arguments:
 Audit the five story-skill family members for internal incoherences spanning six categories — shared-schema drift, contradictory instructions, dangling cross-references, numerical-citation drift, vocabulary drift, and phase-numbering drift — and apply user-approved corrections in place after a HARD-GATE review of every proposed edit.
 
 <HARD-GATE>
-Do NOT Edit / Write any file under `.claude/skills/<family-member>/{SKILL.md, references/*, templates/*}` for any of the five family members until ALL of the following hold:
+Do NOT Edit / Write any file under `.claude/skills/<family-member>/{SKILL.md, references/*, templates/*}` for any of the five family members until ALL 5 of the following hold:
 
 (a) Pre-flight has loaded `docs/FOUNDATIONS.md`, resolved the `target_skill_path` to one of the five family members, and read every family member's SKILL.md + references/*.md + templates/* into working context (when §Strategic Delegation is exercised, "into working context" is satisfied by the delegated agent's corpus-loading combined with the operator's spot-checks of the highest-severity findings per §Strategic Delegation §"Delegated-agent reporting contract" — the operator's working context need not hold the full corpus directly). If the target path does not resolve to a recognized family member the skill aborts before Phase 1.
 
@@ -208,6 +208,24 @@ The Pre-flight reads can produce a substantial cumulative context burden — the
 
 **Delegated-agent reporting contract**: every finding an agent emits MUST cite at least one `file:line` anchor (per Phase 7 self-check test 2); the operator spot-checks the highest-severity findings before triage to catch agent-side mis-citations. The delegation is a context-budget optimization, not a discipline relaxation — the HARD-GATE, source-of-truth selection, and severity classification all remain operator-owned per the boundary above.
 
+**F-NN namespace discipline**: the F-NN identifier namespace is reserved for actionable findings — items the operator must filter, file, defer, or mark manual-resolution at Phase 7 / Phase 8. "Investigated-but-clean" verifications (spot-checks confirming a candidate concern is already addressed correctly, false alarms after closer reading, cross-references that resolve correctly) MUST NOT receive F-NN identifiers — they belong in a separate `## Spot-check confirmations (no findings)` section of the agent's report. The agent's `Total findings: <N>` header MUST equal the F-NN count emitted, with no off-by-N divergence between the header tally and the F-NN namespace.
+
+**Recommended per-finding template**: every finding the delegated agent emits should follow the template below. The template instantiates the §"Delegated-agent reporting contract" (`file:line` anchors required) and previews the Phase 7 field set the operator will populate during consolidation:
+
+    ## F-NN: <one-line title>
+
+    - **Category**: C1 / C2 / C3 / C4 / C5 / C6
+    - **Suggested severity**: CRITICAL/HIGH/MEDIUM/LOW — <one-line rationale>
+    - **Affected files** (file:line anchors): <bullet list — every finding MUST anchor>
+    - **Description**: <one paragraph>
+    - **Evidence** (verbatim excerpts): <one excerpt per affected file:line>
+    - **Candidate sources of truth** (for C1/C2 cross-skill findings — list all candidates without selecting; operator picks at Phase 7 source-of-truth selection)
+    - **Suggested correction direction** (prose sketch, NOT an Edit diff): <one-line>
+
+Severity is agent-suggested, not finalized: the operator applies the structural severity floors at Phase 7 and finalizes. Source-of-truth selection is similarly operator-owned (per §"What stays operator-owned" above). The agent's prose-sketch correction direction at the bottom is the seed Phase 7 expands into the verbatim `proposed_correction.diff` byte sequence — the agent does NOT compose Edit-ready `old_string` / `new_string` pairs.
+
+**Canonical findings-payload location**: the delegated agent SHOULD write its findings report directly to `/tmp/story-skill-coherence-findings.md` (or `/tmp/story-skill-coherence-findings-<ISO-date>.md` when multiple invocations land in the same session). The canonical name supports audit-trail reproducibility — a future reader inspecting the post-Phase-9 git diff can locate the agent's evidence file by name. The direct-write path is preferred over emitting findings into the JSONL agent transcript and post-extracting; §"Oversize delegated-agent payload fallback" below remains the recovery surface when an oversized JSONL transcript blocks direct-write delivery.
+
 **Oversize delegated-agent payload fallback**: when the delegated agent's persisted output exceeds the Read tool's per-call token limit (currently ~25K tokens), the operator must extract and chunk-read the agent's findings before consolidation. Pattern: (a) extract the agent's text payload to a temporary file (e.g., `jq -r '.[0].text' <persisted-output-path> > /tmp/findings.md`); (b) chunk Read with `offset` / `limit` per Pre-flight Step 4 §"Oversize-file fallback" (the structurally-parallel pattern for source files); (c) treat the cumulative chunked reads as satisfying the §"Delegated-agent reporting contract" once the full body is in context. The detection agent's "expect 15-50 candidate findings" guidance above tends toward the upper end in practice (the family corpus's shared-surface density produces dense per-finding evidence with file:line anchors and verbatim excerpts), so payload oversize is a foreseeable case rather than an edge.
 
 ## Phase 1: Shared-Surface Inventory
@@ -330,7 +348,7 @@ For every finding, populate the field set:
 - `source_of_truth` (the canonical sibling/file the skill treats as authoritative — populated at Phase 3 / Phase 6 selection rule, OR the literal string `manual-resolution` when no canonical source can be selected)
 - `proposed_correction` (structured: `file_path` + `summary` (the human-facing one-line description surfaced in Phase 8's triage table) + `diff` (the verbatim `old_string` / `new_string` byte sequences flowing to Phase 9 §Step 1; never re-derived later — see §Verbatim diff handoff Guardrail)) OR `manual_resolution` (cite both candidate sources without selecting; user picks at Phase 8)
 
-**Per-Finding Self-Check** (each test records PASS with one-line rationale OR FAIL with the responsible loop-back phase; bare PASS is FAIL):
+**Per-Finding Self-Check** (9 tests; each records PASS with one-line rationale OR FAIL with the responsible loop-back phase; bare PASS is FAIL):
 
 1. Severity carries a one-line rationale; bare severity fails. (Loop → Phase 7 classification)
 2. Every finding cites at least one `file:line` or section anchor. (Loop → originating detection phase)
@@ -370,7 +388,7 @@ For each `manual-resolution` row, no disposition is solicited at this phase — 
 
 **User-supplied resolution converts manual-resolution to filed**: When the user explicitly directs a course of action on a manual-resolution finding (mid-Phase-8 directive, or response to the Phase 9 final summary's manual-resolution surfacing — e.g., `"drop both fields"`, `"keep with v1-vestige comment"`, `"merge into the v2 schema"`), the finding converts to a filed candidate retaining its original `finding_id` with a `b` suffix appended (e.g., `F-06` → `F-06b`). The auto-edit derived from the user-supplied resolution honors the source-of-truth attribution rules at Phase 9 (the user's resolution IS the source-of-truth selection). The original `F-06` id appears in the final summary as `(converted to F-06b at Phase 8 per user-supplied resolution: <resolution-summary>)` so the audit trail records the manual-resolution → filed transition. This is consistent with HARD-GATE clause (e)'s rule "manual-resolution findings are NEVER auto-applied regardless of disposition" — that rule fires while a finding is classified as manual-resolution; explicit user resolution converts the classification BEFORE the auto-apply step, so clause (e) still holds.
 
-**Inclusive-phrasing dispositions** (synonyms for "file every surviving candidate"): `proceed`, `file all`, `approve`, `implement all`, and any similar inclusive phrasing the user supplies in response to the disposition request — phrasing that does not name specific finding numbers AND does not use one of the three explicit dispositions above — are synonymous with filing every surviving candidate. Per-finding overrides (e.g., `file 1, defer 2, reject 3`) take precedence when the user names them explicitly. The auto-mode auto-approval condition below still gates whether the audit auto-passes WITHOUT a prompt; the inclusive-phrasing rule here governs how to interpret the user's explicit answer when the gate IS shown — HIGH/CRITICAL findings under inclusive phrasing still file (the auto-approval rule and the inclusive-phrasing rule are independent surfaces). Session-level meta-instructions ("work without stopping for clarifying questions", "auto-mode") that are present BEFORE Phase 8 triage emission act as inclusive-phrasing for the candidates surfaced at triage, provided the triage table is still emitted (the user's review window is preserved by the triage emission, even if no per-finding answer is solicited).
+**Inclusive-phrasing dispositions** (synonyms for "file every surviving candidate"): `proceed`, `file all`, `approve`, `implement all`, and any similar inclusive phrasing the user supplies in response to the disposition request — phrasing that does not name specific finding numbers AND does not use one of the three explicit dispositions above — are synonymous with filing every surviving candidate. Per-finding overrides (e.g., `file 1, defer 2, reject 3`) take precedence when the user names them explicitly. The auto-mode auto-approval condition below still gates whether the audit auto-passes WITHOUT a prompt; the inclusive-phrasing rule here governs how to interpret the user's explicit answer when the gate IS shown — HIGH/CRITICAL findings under inclusive phrasing still file, AND C1 cross-skill schema-drift findings under inclusive phrasing also file (the auto-approval rule and the inclusive-phrasing rule are independent surfaces — auto-approval's C1 carve-out is auto-mode-specific because auto-mode operates without any user signal, so its carve-out exists to require an explicit signal; inclusive phrasing IS that explicit signal, satisfying the carve-out's "explicit human approval" requirement). Session-level meta-instructions ("work without stopping for clarifying questions", "auto-mode") that are present BEFORE Phase 8 triage emission act as inclusive-phrasing for the candidates surfaced at triage, provided the triage table is still emitted (the user's review window is preserved by the triage emission, even if no per-finding answer is solicited).
 
 **Auto-mode auto-approval condition** (per HARD-GATE condition (d)): when auto mode is active AND every surviving candidate is severity LOW AND no manual-resolution flag is set AND no cross-skill schema-drift findings remain (C1 cross-skill findings always require explicit human approval), auto-approve all candidates as `file` and proceed to Phase 9. Otherwise wait for explicit per-finding disposition.
 
@@ -470,7 +488,7 @@ For each dropped finding:
 - Rejected: <S>
 - Dropped: <T>
 - Filtered at consolidation: <U> (Phase 7 operator filtering — PASSes / documented-as-intentional / false-positives that never reached Phase 8 triage; see §Phase 7 §"Operator filtering at consolidation")
-- Sum check: K + (filed_no_edit) + Q + R + S + T + U = N (audit trail consistency)
+- Sum check: Filed + Filed-but-no-edit + Manual-resolution + Deferred + Rejected + Dropped + Filtered-at-consolidation = Total findings (audit trail consistency)
 
 The git diff after this run is the durable audit trail. Review with
 `git diff` before committing. Do NOT commit from inside this skill.

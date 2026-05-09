@@ -155,7 +155,7 @@ arc_contract:                              # what the user committed to; mirrors
   strategic_question_answered: >           # what the arc answers, in scene-question form
     Free-form prose.
   commitment_scope: scene                  # scene | sequence; default: scene
-  success_policy: contested                # uncontested | contested | costly | uncertain
+  success_policy: contested                # uncontested | contested | costly | uncertain — arc-level commitment success; distinct from CHC.choice_contract.success_policy (transaction-level: guaranteed | attempted | uncertain | opposed)
   allowed_outcome_band:                    # closed enum — see canonical-vocabularies §strong_outcome
     - <strong_outcome enum value>
 

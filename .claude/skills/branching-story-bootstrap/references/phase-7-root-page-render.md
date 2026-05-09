@@ -99,7 +99,7 @@ Page-cycle-compatible schema; `branching-story-page-cycle` §Record Schemas §Pa
 
 Phase 9's 17 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (bootstrap-time record). PG-0001's `validation_trace` uses the page-cycle's PG-record keys so PG-0001 conforms to runtime-page schema for `branching-story-page-cycle` consumption.
 
-**Direct overlap (8 keys)**:
+**Direct overlap (8 mappings, covering 9 PG-record keys; gate 12 jointly maps to recursive_reference_closure + state_snapshot_integrity)**:
 - `mystery_firewall` ↔ gate 1
 - `invariant_compatibility` ↔ gate 2
 - `content_policy_presence` ↔ gate 3

@@ -13,7 +13,7 @@ branch_path: [PG-0001, PG-0005, PG-0017, PG-0042]
 chosen_choice_id: CHC-0098                            # null at root only
 write_in_used: false                                  # true if Path B was the route
 write_in_routing: null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
-storylet_realized: SLT-0019
+storylet_realized: SLT-0019                          # null only at PG-0001 root special case (bootstrap genesis); non-null on every non-root page
 applied_event_ops: [SE-0042]                          # event records own the structured ops
 state_hash: <hash>
 parent_state_hash: <hash>

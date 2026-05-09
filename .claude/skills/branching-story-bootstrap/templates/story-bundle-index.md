@@ -45,7 +45,7 @@ Commitment class distribution: ask_one_bounded_question: N | offer_practical_hel
 
 | PG | Branch | Storylet | Choices emitted | Content intensity |
 |---|---|---|---|---|
-| PG-0001 | BR-0001 | SLT-NNNN | <count> | <intensity> |
+| PG-0001 | BR-0001 | — | <count> | <intensity> |
 
 ## Cast
 

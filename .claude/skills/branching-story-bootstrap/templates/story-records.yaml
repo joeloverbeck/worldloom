@@ -105,7 +105,7 @@ source:
   parent_page_id: null                   # null at genesis
   chosen_choice_id: null                 # no prior choice
   write_in_text_hash: null
-  storylet_realized: SLT-0001
+  storylet_realized: null                # null at PG-0001 root only (bootstrap genesis SE; PG-0001 has no SLT realized)
 
 actor: system                            # STENT-NNNN | system | environment
 action: bootstrap                        # canonical verb
@@ -290,7 +290,7 @@ chosen_choice_id: null                   # null for root page
 write_in_used: false                     # true if Path B was the route
 write_in_routing: null                   # null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
 
-storylet_realized: SLT-0001
+storylet_realized: null                  # null at PG-0001 root only — bootstrap genesis is a scene-setter without an SLT realized; non-root pages set this to the SLT id realized this turn (per references/phase-7-root-page-render.md §Emit PG-0001 record)
 applied_event_ops: [SE-0001]
 
 state_hash: ""
@@ -383,7 +383,7 @@ choice_contract:
     What the player is signaling they want to accomplish.
   guaranteed_action: >
     What WILL definitely be attempted or performed if this choice is selected.
-  success_policy: guaranteed             # guaranteed | attempted | uncertain | opposed
+  success_policy: guaranteed             # guaranteed | attempted | uncertain | opposed — choice-level transaction success; distinct from SLT.arc_contract.success_policy (commitment-level: uncontested | contested | costly | uncertain)
   allowed_outcome_band:
     - succeeds
     - partially_succeeds
