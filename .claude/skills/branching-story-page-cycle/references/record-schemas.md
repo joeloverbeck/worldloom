@@ -51,6 +51,10 @@ state_snapshot:
       present: true
       mobile: true
       restrained: false
+  applied_effect_variant: <variant id> | null         # Phase 4b chosen arc.effect_model variant; null only at PG-0001 root
+  narrative_point_classification: CONTINUE_ARC | NATURAL_COMMITMENT_HINGE | INTERRUPT_HINGE | CONTINUE_ONLY_PAUSE | TERMINAL_OR_CHAPTER_CLOSE
+  arc_trace_id: ARCTRACE-NNNN | null                  # populated only when Phase 7.6 emits an ARC_TRACE
+  arc_trace_emitted: true | false                     # false when low-budget interactive_runtime omits derived ARC_TRACE persistence
 prose_path: pages-prose/PG-0042.md
 emitted_choices: [CHC-NNNN, ...]
 narrative_health: {...}                              # see Phase 6
@@ -79,6 +83,14 @@ created_at: <iso8601>
 ```
 
 Page records do not carry `created_at_page`. The page record's own PG id is its branch anchor, and recursive reference closure authorizes PG references by checking that the referenced PG id appears in `branch_path`.
+
+`state_snapshot.applied_effect_variant` records the selected `arc.effect_model.variants[].id` chosen by Phase 4b and consumed by Phase 5 replay. It is required for non-root pages that realize an arc; PG-0001 uses `null` because the bootstrap root page is a scene-setter and no arc has closed yet.
+
+`state_snapshot.narrative_point_classification` records the Phase 8 narrative point for the page. The closed enum is `CONTINUE_ARC`, `NATURAL_COMMITMENT_HINGE`, `INTERRUPT_HINGE`, `CONTINUE_ONLY_PAUSE`, and `TERMINAL_OR_CHAPTER_CLOSE`; validators compare menu-emitting classifications against ARC_TRACE stop-condition categories when a trace is present.
+
+`state_snapshot.arc_trace_id` points to the derived `ARCTRACE-NNNN` record emitted for this page. It is `null` when `arc_trace_emitted: false` or at PG-0001's no-arc root.
+
+`state_snapshot.arc_trace_emitted` records whether Phase 7.6 persisted an ARC_TRACE for this page. Standard authoring/runtime paths set it to `true` when the trace is emitted; low-budget `interactive_runtime` may set it to `false` only under the Phase 7.6 omission discipline, with `arc_trace_id: null`.
 
 ## Story Event Record (SE-NNNN)
 
