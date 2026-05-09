@@ -1,14 +1,14 @@
 # SPEC22SCECOM-012: `story-fact-promotion-to-canon` source_kind: `arc_effect_promotion` full specification
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (and any reference files it ships with). No code changes.
-**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-005.md, archive/tickets/SPEC22SCECOM-006.md, 008
+**Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, its proposal/ledger templates, and same-seam SPEC-22 status prose. No package code changes.
+**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-005.md, archive/tickets/SPEC22SCECOM-006.md, archive/tickets/SPEC22SCECOM-008.md
 
 ## Problem
 
-SPEC-22 §Track 4's story-fact-promotion-to-canon deliverable adds a fifth `source_kind` enum value, `arc_effect_promotion`, with full specification: new required arguments (`source_arc_id`, `source_page_id`, `applied_variant_id`, `effect_index`); Pre-flight validation branch; Phase 1 source extraction (load arc record + page record + ARC_TRACE evidence); Phase 2 CF candidate translation per effect-type; Phase 4 mystery-firewall handling against `execution_envelope.mystery_preservation.forbidden_resolutions[]`; Phase 10 superseding-record shape (SF/SREL/STENT superseder with `promoted_to_cf` annotation + per-record provenance fields); proposal_package extension fields. The HARD-GATE handoff to canon-addition is preserved — `arc_effect_promotion` is the only new lawful story→world promotion route under v2.
+At intake, SPEC-22 §Track 4's story-fact-promotion-to-canon deliverable still lacked the fifth `source_kind` enum value, `arc_effect_promotion`, and its full specification: new required arguments (`source_arc_id`, `source_page_id`, `applied_variant_id`, `effect_index`); Pre-flight validation branch; Phase 1 source extraction (load arc record + page record + ARC_TRACE evidence); Phase 2 CF candidate translation per effect-type; Phase 4 mystery-firewall handling against `execution_envelope.mystery_preservation.forbidden_resolutions[]`; Phase 10 superseding-record shape (SF/SREL/STENT superseder with `promoted_to_cf` annotation + per-record provenance fields); proposal_package extension fields. This ticket lands that contract while preserving the HARD-GATE handoff to canon-addition.
 
 ## Assumption Reassessment (2026-05-08)
 
@@ -20,6 +20,8 @@ SPEC-22 §Track 4's story-fact-promotion-to-canon deliverable adds a fifth `sour
 6. **FOUNDATIONS Rule 7 (Preserve Mystery Deliberately)** restated: Phase 4 mystery-firewall handling for `arc_effect_promotion` checks the arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against the world's whole-class M load. If the arc's envelope omits a `forbidden`-status M id that the proposed CF could touch, HARD-REJECT. For arc effects whose CF candidate would resolve a non-forbidden M, route via `source_kind: mystery_resolution` instead (Pre-flight HARD-REJECT for mystery_progress effects).
 7. **HARD-GATE / canon-write ordering preserved**: this skill writes only story-side records (SP ledger, superseding SF/SREL/STENT records via patch-engine ops) and hands off the proposal package to canon-addition; canon-addition's HARD-GATE governs the actual CF/CH/PA write.
 8. **Schema extension is additive** — new `source_kind` value; existing 4 values preserved. Proposal_package schema gains 5 new fields when `source_kind: arc_effect_promotion`; existing schema for the 4 prior source_kinds is unchanged.
+9. Reassessment correction: the drafted Files to Touch listed only `SKILL.md`, but the live skill ships `templates/proposal-package.yaml` and `templates/story-promotion-ledger.md` as the actual emitted surfaces. The proposal package and ledger templates are same-seam required fallout for the new source kind because otherwise the skill would describe fields the bundled templates cannot emit.
+10. Same-seam spec/status truthing is in scope: `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` and `specs/IMPLEMENTATION-ORDER.md` both describe Track 4 current state and must stop presenting the promotion source-kind extension as unlanded after this ticket completes.
 
 ## Architecture Check
 
@@ -38,30 +40,28 @@ SPEC-22 §Track 4's story-fact-promotion-to-canon deliverable adds a fifth `sour
 7. Proposal_package extension fields documented (5 new fields when `source_kind: arc_effect_promotion`) → manual review.
 8. FOUNDATIONS Rule 6 + Rule 7 alignment: HARD-GATE handoff preserved; mystery-firewall enforced.
 
-## What to Change
+## Landed Changes
 
-### 1. Extend `source_kind` enum
+### 1. Extended `source_kind` enum
 
-In SKILL.md frontmatter `arguments` block for `source_kind`: add `arc_effect_promotion` to the closed enum.
+In SKILL.md frontmatter `arguments` block for `source_kind`, added `arc_effect_promotion` to the closed enum and added the new conditional arguments.
 
-### 2. New required arguments (Pre-flight)
+### 2. Added required arguments and Pre-flight branch
 
-In SKILL.md Pre-flight section: when `source_kind == arc_effect_promotion`, require:
+In SKILL.md Pre-flight section, when `source_kind == arc_effect_promotion`, the skill now requires:
 
 - `source_arc_id`: SLT-NNNN whose `effect_model.variants[]` contains the variant being promoted. Arc must be present in the bundle's storylet pool.
 - `source_page_id`: PG-NNNN whose `state_snapshot.applied_effect_variant` refers to the variant; page's `storylet_realized` must match `source_arc_id`.
 - `applied_variant_id`: variant id from `arc.effect_model.variants[]`; must equal page's `state_snapshot.applied_effect_variant`.
 - `effect_index`: 0-based index identifying which `required_effects[N]` is the promotion target. Required when variants have multiple effects; defaults to 0 when only one entry.
 
-### 3. Pre-flight validation branch
+The Pre-flight validation branch now validates arc YAML existence, `record_version: 2`, `shape: scene_commitment_arc`, page existence, `storylet_realized == source_arc_id`, `state_snapshot.applied_effect_variant == applied_variant_id`, variant existence, and in-range `effect_index`. `mystery_progress` effects hard-reject with reroute guidance to `source_kind=mystery_resolution`.
 
-For `source_kind: arc_effect_promotion`: validate arc YAML exists, has `record_version: 2` and `shape: scene_commitment_arc`; validate page YAML exists, `storylet_realized == source_arc_id`, `state_snapshot.applied_effect_variant == applied_variant_id`; validate `applied_variant_id` exists in arc's `effect_model.variants[].id`; validate `effect_index` is in-range.
-
-### 4. Phase 1 source extraction (`arc_effect_promotion` branch)
+### 3. Added Phase 1 source extraction branch
 
 Load: arc record (including `arc_contract`, `dramatic_unit`, `effect_model.variants[<applied_variant_id>]`, specific `required_effects[<effect_index>]`); page record (state_snapshot for post-application story state, applied_event_ops SE record); rendered prose `pages-prose/PG-<source_page_id>.md` (supporting prose excerpt for proposal_package); ARC_TRACE record if present (per `state_snapshot.arc_trace_id`) — capture `effect_evidence[<effect_index>]` for the proposal_package's evidence_span citation. Walk arc preconditions + `dramatic_unit.entry_pressure` along branch_path.
 
-### 5. Phase 2 CF candidate translation (`arc_effect_promotion` branch)
+### 4. Added Phase 2 CF candidate translation branch
 
 Per-effect-type translation logic:
 
@@ -76,11 +76,11 @@ Per-effect-type translation logic:
 
 Translation respects the same Phase 2 laundering firewall as existing source_kinds — `source_basis.derived_from` carries CF parent ids only; promotion provenance flows through SP+CH+PA.
 
-### 6. Phase 4 mystery-firewall (`arc_effect_promotion` branch)
+### 5. Added Phase 4 mystery-firewall branch
 
 Check arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against world's whole-class M load. If arc envelope omits a `forbidden`-status M id that the proposed CF could touch, HARD-REJECT with: "arc envelope does not include forbidden M-NNNN; arc-effect promotion cannot proceed without explicit envelope coverage."
 
-### 7. Phase 10 superseding-record shape (`arc_effect_promotion` branch)
+### 6. Added Phase 10 superseding-record shape
 
 Supersession unit is the arc-effect-derived SF (or SREL for relationship_axis_shift, STENT for cast_change) record:
 
@@ -99,7 +99,7 @@ promoted_via_effect_index: <effect_index>
 
 For non-SF source effects (relationship_axis_shift / cast_change), the supersession is the corresponding record class; `promoted_to_cf` / `promoted_via_*` fields are added uniformly across record classes.
 
-### 8. Proposal_package extension fields
+### 7. Extended proposal_package and ledger templates
 
 Add 5 new fields to the proposal_package schema (when `source_kind == arc_effect_promotion`):
 
@@ -109,11 +109,19 @@ Add 5 new fields to the proposal_package schema (when `source_kind == arc_effect
 - `arc_trace_id`: ARCTRACE-NNNN if trace was emitted; null otherwise
 - `arc_trace_evidence_span`: when arc_trace_id non-null, the `effect_evidence[<effect_index>].evidence_span` `{start, end}` byte offsets
 
-`provenance.supporting_pages` carries `[source_page_id]` (one page); `provenance.supporting_prose_excerpts` carries the rendered arc page's prose; `provenance.source_record` carries `{source_arc_id, applied_variant_id, effect_index}` instead of a single record id.
+`provenance.supporting_pages` carries `[source_page_id]` (one page); `provenance.supporting_prose_excerpts` carries the rendered arc page's prose; `provenance.source_record` carries `{source_arc_id, source_page_id, applied_variant_id, effect_index, produced_story_record_id, applied_event_ops, arc_trace_id, arc_trace_evidence_span}`. The SP ledger template now records the same arc-effect provenance and the `promoted_via_*` supersession fields.
+
+### 8. Truthed SPEC-22 status prose
+
+SPEC-22 and implementation-order prose now mark the promotion source-kind extension as landed by this ticket and leave only page-cycle record-schemas as the remaining Track 4 item.
 
 ## Files to Touch
 
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify — frontmatter source_kind enum + Pre-flight argument list + Pre-flight validation branch + Phase 1/2/4/10 prose + proposal_package extension)
+- `.claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml` (modify — arc-effect source fields + provenance shape)
+- `.claude/skills/story-fact-promotion-to-canon/templates/story-promotion-ledger.md` (modify — arc-effect provenance + supersession attribution)
+- `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` (modify — Track 4 current-state/status truthing)
+- `specs/IMPLEMENTATION-ORDER.md` (modify — Track 4 current-state/status truthing)
 
 ## Out of Scope
 
@@ -158,6 +166,37 @@ Add 5 new fields to the proposal_package schema (when `source_kind == arc_effect
 ### Commands
 
 1. `grep -nE 'arc_effect_promotion' .claude/skills/story-fact-promotion-to-canon/SKILL.md`
-2. `grep -nE 'source_arc_id|applied_variant_id|effect_index|arc_trace_evidence_span' .claude/skills/story-fact-promotion-to-canon/SKILL.md`
-3. `grep -nE 'promoted_via_arc|promoted_via_variant|promoted_via_effect_index' .claude/skills/story-fact-promotion-to-canon/SKILL.md`
-4. Manual review of Phase 1/2/4/10 branches against SPEC-22 §Track 4 prose.
+2. `grep -nE 'source_arc_id|source_page_id|applied_variant_id|effect_index|arc_trace_evidence_span' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml .claude/skills/story-fact-promotion-to-canon/templates/story-promotion-ledger.md`
+3. `grep -nE 'promoted_via_arc|promoted_via_variant|promoted_via_effect_index' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml .claude/skills/story-fact-promotion-to-canon/templates/story-promotion-ledger.md`
+4. `grep -nE 'forbidden_resolutions|mystery_progress|arc envelope does not include forbidden' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml`
+5. `grep -nE 'source_kind: story_fact|arc_effect_promotion|proposal_package|story-fact-promotion-to-canon.*completed|archive/tickets/SPEC22SCECOM-012.md' specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md specs/IMPLEMENTATION-ORDER.md`
+6. Manual review of Phase 1/2/4/10 branches and bundled templates against SPEC-22 §Track 4 prose.
+
+## Outcome
+
+Completed: 2026-05-09.
+
+Implemented the `arc_effect_promotion` contract in `story-fact-promotion-to-canon`: the source-kind enum and arguments now include the arc-effect route; Pre-flight validates the source arc, source page, applied variant, effect index, and mystery-progress reroute; Phase 1 loads arc/page/SE/prose/ARC_TRACE evidence; Phase 2 documents per-effect-type CF candidate translation; Phase 4 checks the arc envelope's `mystery_preservation.forbidden_resolutions[]` against whole-class M; Phase 10 supersedes the produced story-local record rather than the reusable SLT arc and records `promoted_via_arc`, `promoted_via_variant`, and `promoted_via_effect_index`.
+
+Also updated the bundled proposal-package and story-promotion-ledger templates so the emitted artifacts carry the new arc-effect provenance fields, and truthed SPEC-22 / implementation-order prose to mark this Track 4 sub-slice as landed.
+
+## Verification Result
+
+Passed:
+
+1. `grep -nE 'arc_effect_promotion' .claude/skills/story-fact-promotion-to-canon/SKILL.md`
+2. `grep -nE 'source_arc_id|source_page_id|applied_variant_id|effect_index|arc_trace_evidence_span' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml .claude/skills/story-fact-promotion-to-canon/templates/story-promotion-ledger.md`
+3. `grep -nE 'promoted_via_arc|promoted_via_variant|promoted_via_effect_index' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml .claude/skills/story-fact-promotion-to-canon/templates/story-promotion-ledger.md`
+4. `grep -nE 'forbidden_resolutions|mystery_progress|arc envelope does not include forbidden' .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml`
+5. `grep -nE 'source_kind: story_fact|arc_effect_promotion|proposal_package|story-fact-promotion-to-canon.*completed|archive/tickets/SPEC22SCECOM-012.md' specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md specs/IMPLEMENTATION-ORDER.md`
+
+Manual review:
+
+1. Phase 1/2/4/10 branches match SPEC-22 §Track 4's `arc_effect_promotion` requirements.
+2. The HARD-GATE handoff to canon-addition remains intact; no new world-canon write path was introduced.
+3. Proposal-package and SP ledger templates now carry the new arc-effect provenance and supersession attribution fields.
+
+## Deviations
+
+- The drafted file set named only `SKILL.md`, but bundled templates were same-seam required fallout because they are the emitted proposal-package and ledger surfaces.
+- No executable skill runner exists for this prose workflow in the live repo, so verification is grep-proof plus manual contract review rather than an end-to-end skill dry-run.

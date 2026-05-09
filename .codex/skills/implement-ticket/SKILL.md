@@ -222,6 +222,8 @@ For shared schemas, templates, or cross-skill contracts, inspect consumers befor
 
 For skill tickets, verify:
 
+- If this check adds templates, examples, references, a parent `SKILL.md`, or same-seam docs/specs to the owned file set, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
+- Before editing, run a compact skill-local file inventory such as `rg --files <skill-dir>` and inspect any `templates/`, `references/`, and `examples/` whose emitted fields, phase names, source-kind enums, prompt labels, command fragments, or handoff artifacts overlap the ticket.
 - `SKILL.md` trigger text still matches the skill's real purpose
 - required reads and prerequisites are truthful
 - HARD-GATE behavior still matches repo policy

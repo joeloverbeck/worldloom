@@ -1,6 +1,6 @@
 ---
 name: story-fact-promotion-to-canon
-description: "Use when promoting a story-local fact (SF-NNNN), mystery resolution (M-NNNN with `canon_candidate`-authority resolving event), character-arc outcome (STENT-NNNN), or in-story diegetic artifact (story-local DA-NNNN) into world-level canon — the ONLY lawful path by which a branching story may mutate world canon. Produces: SP-NNNN.md promotion-ledger entry under worlds/<world-slug>/stories/<story-slug>/story-promotions/ + a structured proposal package handed to canon-addition (which assembles the actual CF/CH/PA patch plan); on accept-flavored adjudication, also submits superseding story-local source records adding `promoted_to_cf: CF-NNNN`. Mutates: worlds/<world-slug>/stories/<story-slug>/ directly for markdown promotion ledgers/indexes and through story-bundle patch-engine ops for superseding source records, plus, transitively via canon-addition, worlds/<world-slug>/_source/canon/CF-NNNN.yaml + worlds/<world-slug>/_source/change-log/CH-NNNN.yaml + extension/touched_by_cf appends to affected M/OQ/SEC/CF records + worlds/<world-slug>/adjudications/PA-NNNN-*.md (and, for source_kind=artifact_canonization on accept, a new world-level worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md routed via append_diegetic_artifact_record); world-canon mutations via canon-addition's mcp__worldloom__submit_patch_plan."
+description: "Use when promoting a story-local fact (SF-NNNN), mystery resolution (M-NNNN with `canon_candidate`-authority resolving event), character-arc outcome (STENT-NNNN), in-story diegetic artifact (story-local DA-NNNN), or v2 scene-commitment arc effect (`arc_effect_promotion`) into world-level canon — the ONLY lawful path by which a branching story may mutate world canon. Produces: SP-NNNN.md promotion-ledger entry under worlds/<world-slug>/stories/<story-slug>/story-promotions/ + a structured proposal package handed to canon-addition (which assembles the actual CF/CH/PA patch plan); on accept-flavored adjudication, also submits superseding story-local source records adding `promoted_to_cf: CF-NNNN`. Mutates: worlds/<world-slug>/stories/<story-slug>/ directly for markdown promotion ledgers/indexes and through story-bundle patch-engine ops for superseding source records, plus, transitively via canon-addition, worlds/<world-slug>/_source/canon/CF-NNNN.yaml + worlds/<world-slug>/_source/change-log/CH-NNNN.yaml + extension/touched_by_cf appends to affected M/OQ/SEC/CF records + worlds/<world-slug>/adjudications/PA-NNNN-*.md (and, for source_kind=artifact_canonization on accept, a new world-level worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md routed via append_diegetic_artifact_record); world-canon mutations via canon-addition's mcp__worldloom__submit_patch_plan."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Directory slug of an existing story bundle under worlds/<world-slug>/stories/<story-slug>/. Pre-flight aborts if the bundle is missing."
     required: true
   - name: source_kind
-    description: "One of: story_fact | mystery_resolution | character_arc_outcome | artifact_canonization. Selects the source-loading branch in Phase 1 and the source-record-update shape in Phase 10."
+    description: "One of: story_fact | mystery_resolution | character_arc_outcome | artifact_canonization | arc_effect_promotion. Selects the source-loading branch in Phase 1 and the source-record-update shape in Phase 10."
     required: true
   - name: promotion_branch_path
     description: "The canonical branch from which this is being promoted, expressed as the page chain (e.g., [PG-0001, PG-0007, PG-0042]). Provenance is mandatory — the SP ledger and the proposal_package's source_basis trail both cite it."
@@ -36,6 +36,18 @@ arguments:
   - name: source_diegetic_artifact_id
     description: "Required when source_kind=artifact_canonization. The story-local DA-NNNN under worlds/<world-slug>/stories/<story-slug>/_source/artifacts/."
     required: false
+  - name: source_arc_id
+    description: "Required when source_kind=arc_effect_promotion. The SLT-NNNN v2 scene-commitment arc whose effect_model.variants[] contains the promoted variant."
+    required: false
+  - name: source_page_id
+    description: "Required when source_kind=arc_effect_promotion. The PG-NNNN whose storylet_realized matches source_arc_id and whose state_snapshot.applied_effect_variant matches applied_variant_id."
+    required: false
+  - name: applied_variant_id
+    description: "Required when source_kind=arc_effect_promotion. The variant id from arc.effect_model.variants[] whose required_effects[] entry is being promoted."
+    required: false
+  - name: effect_index
+    description: "Required when source_kind=arc_effect_promotion and the chosen variant has multiple required_effects[] entries; otherwise defaults to 0. Identifies the promoted required_effects[N]."
+    required: false
   - name: contradiction_handling_preference
     description: "One of: flag_contradicting_branches (default) | leave_branches_alone | archive_contradicting_branches. Governs Phase 10's handling of other branches whose state would contradict the new CF after promotion."
     required: false
@@ -49,12 +61,12 @@ arguments:
 
 # Story Fact Promotion to Canon
 
-The lawful, traceable, append-only bridge by which a story-local fact, mystery resolution, character-arc outcome, or in-story diegetic artifact becomes world-level canon — assembling a structured proposal package whose laundering firewall, scope-inflation check, mystery firewall, and downstream-impact analysis are all preconditions, and routing the package to `canon-addition` for the actual CF/CH adjudication and patch plan.
+The lawful, traceable, append-only bridge by which a story-local fact, mystery resolution, character-arc outcome, in-story diegetic artifact, or v2 scene-commitment arc effect becomes world-level canon — assembling a structured proposal package whose laundering firewall, scope-inflation check, mystery firewall, and downstream-impact analysis are all preconditions, and routing the package to `canon-addition` for the actual CF/CH adjudication and patch plan.
 
 <HARD-GATE>
-Do NOT write `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN.md`, do NOT write any superseding story-local source record (SF / STENT / story-local DA), do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` or `worlds/<world-slug>/stories/INDEX.md`, and do NOT invoke `canon-addition` (which would itself fire its own HARD-GATE for world-canon mutation) until ALL of:
+Do NOT write `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN.md`, do NOT write any superseding story-local source record (SF / STENT / SREL / story-local DA / arc-effect-produced record), do NOT `Edit` `worlds/<world-slug>/stories/<story-slug>/INDEX.md` or `worlds/<world-slug>/stories/INDEX.md`, and do NOT invoke `canon-addition` (which would itself fire its own HARD-GATE for world-canon mutation) until ALL of:
 
-(a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the source ID exists in this story's `_source/` per `source_kind` (story_fact → `_source/facts/SF-<id>.yaml`; mystery_resolution → world `_source/mystery-reserve/M-<id>.yaml` exists AND a resolving `SE-NNNN` at `resolving_page_id` whose storylet declared `M_resolution_claims.resolution_authority: canon_candidate` for this M; character_arc_outcome → `_source/entities/STENT-<id>.yaml` exists AND `source_branch_leaf_page` exists; artifact_canonization → `_source/artifacts/DA-<id>.yaml` exists), validates `promotion_branch_path` is a real chain ending at a real page, allocates the next `SP-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`, loads `docs/FOUNDATIONS.md` into working context (the CF Record Schema that governs Phase 2 translation, Rule 4 that governs Phase 3 scope-inflation, Rule 7 that governs Phase 4 mystery firewall, Rule 6 that governs Phase 9 CH lineage handoff, Rule 12 that governs Phase 7 two-trace critic, and the §Default Reality + Rule 6 clause that anchors the HARD-GATE absoluteness across `execution_mode`s all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly;
+(a) Pre-flight resolves `worlds/<world-slug>/stories/<story-slug>/`, validates the source ID exists in this story's `_source/` per `source_kind` (story_fact → `_source/facts/SF-<id>.yaml`; mystery_resolution → world `_source/mystery-reserve/M-<id>.yaml` exists AND a resolving `SE-NNNN` at `resolving_page_id` whose storylet declared `M_resolution_claims.resolution_authority: canon_candidate` for this M; character_arc_outcome → `_source/entities/STENT-<id>.yaml` exists AND `source_branch_leaf_page` exists; artifact_canonization → `_source/artifacts/DA-<id>.yaml` exists; arc_effect_promotion → `_source/storylets/SLT-<source_arc_id>.yaml` exists with `record_version: 2` and `shape: scene_commitment_arc`, `_source/pages/PG-<source_page_id>.yaml` exists and realizes that arc, `applied_variant_id` exists on the arc, and `effect_index` selects an in-range `required_effects[]` entry), validates `promotion_branch_path` is a real chain ending at a real page, allocates the next `SP-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`, loads `docs/FOUNDATIONS.md` into working context (the CF Record Schema that governs Phase 2 translation, Rule 4 that governs Phase 3 scope-inflation, Rule 7 that governs Phase 4 mystery firewall, Rule 6 that governs Phase 9 CH lineage handoff, Rule 12 that governs Phase 7 two-trace critic, and the §Default Reality + Rule 6 clause that anchors the HARD-GATE absoluteness across `execution_mode`s all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly;
 
 (b) Phase 4 Mystery Firewall hard-rejects any source whose target M is `status: forbidden` AND any `mystery_resolution` source whose resolving storylet's `resolution_authority` is NOT `canon_candidate` (a defense-in-depth re-check; storylet-pool-authoring Phase 4 gate 2 + branching-story-page-cycle Phase 4.5 are the upstream gates) — the rejection produces an SP-NNNN ledger entry with `outcome: REJECT (firewall)` and halts;
 
@@ -82,6 +94,8 @@ Phase 1: Source Extraction
                               storylet's resolution_authority: canon_candidate)
          (character_arc_outcome: load STENT + STINT history along branch_path)
          (artifact_canonization: load story-local DA + creation/modification events)
+         (arc_effect_promotion: load SLT arc + source PG + applied variant +
+                                selected required_effect + optional ARC_TRACE evidence)
       |
       v
 Phase 2: CF Candidate Translation (laundering firewall)
@@ -101,6 +115,8 @@ Phase 4: Mystery Firewall Check (Rule 7, defense-in-depth)
            resolution_authority != canon_candidate
          — verify resolution doesn't contradict M.disallowed_cheap_answers
          — reject prose that resolves an M-NNNN unintentionally
+         — for arc_effect_promotion, verify the source arc's forbidden_resolutions
+           envelope covers every forbidden M the proposed CF could touch
       |
       v
 Phase 5: Downstream-Impact Analysis
@@ -172,8 +188,9 @@ See frontmatter `arguments`. Per-source-kind required-set enforced at Pre-flight
 |---|---|---|
 | `SP-NNNN.md` (promotion ledger) | `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN.md` | Always — every Phase 8 outcome (accept / revise / reject / firewall-reject) writes a ledger entry. The ledger is the load-bearing audit trail. |
 | `SP-NNNN-proposal-package.yaml` (canon-addition input) | `worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN-proposal-package.yaml` | IF Phase 8 user-accept fires (the user separately invokes `canon-addition` with this path). |
-| Superseding `SF-NNNN.yaml` | `worlds/<world-slug>/stories/<story-slug>/_source/facts/SF-NNNN.yaml` | IF source_kind == `story_fact` AND canon-addition returns an accept-flavored verdict (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). The superseder cites `supersedes: <original SF id>`, `promoted_to_cf: CF-NNNN`. |
+| Superseding `SF-NNNN.yaml` | `worlds/<world-slug>/stories/<story-slug>/_source/facts/SF-NNNN.yaml` | IF source_kind == `story_fact` OR an `arc_effect_promotion` effect produced an SF AND canon-addition returns an accept-flavored verdict (ACCEPT / ACCEPT_WITH_REQUIRED_UPDATES / ACCEPT_AS_LOCAL_EXCEPTION / ACCEPT_AS_CONTESTED_BELIEF). The superseder cites `supersedes: <original SF id>`, `promoted_to_cf: CF-NNNN`; arc-effect superseders also carry `promoted_via_arc`, `promoted_via_variant`, and `promoted_via_effect_index`. |
 | Superseding `STENT-NNNN.yaml` | `worlds/<world-slug>/stories/<story-slug>/_source/entities/STENT-NNNN.yaml` | IF source_kind == `character_arc_outcome` AND canon-addition returns accept-flavored. |
+| Superseding `SREL-NNNN.yaml` / `STENT-NNNN.yaml` | `worlds/<world-slug>/stories/<story-slug>/_source/relationships/` or `_source/entities/` | IF source_kind == `arc_effect_promotion` and the promoted effect produced a non-SF story-local record such as `relationship_axis_shift` or `cast_change`; superseder carries `promoted_to_cf` plus `promoted_via_arc`, `promoted_via_variant`, and `promoted_via_effect_index`. |
 | Superseding story-local `DA-NNNN.yaml` | `worlds/<world-slug>/stories/<story-slug>/_source/artifacts/DA-NNNN.yaml` | IF source_kind == `artifact_canonization` AND canon-addition returns accept-flavored. The superseder carries `canon_status: promoted` + `promoted_to_world_da: DA-NNNN`. |
 | World-level `DA-NNNN.md` | `worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md` | IF source_kind == `artifact_canonization` AND canon-addition returns accept-flavored. Routed through canon-addition's `append_diegetic_artifact_record` patch op — NOT written directly by this skill. |
 | Updated `worlds/<world-slug>/stories/<story-slug>/INDEX.md` | (existing file) | Always (per audit-trail integrity — even rejected SP entries appear in the Promotions section). New "Promotions" section + per-promotion entry; on accept, contradicting-branch entries flagged per `contradiction_handling_preference`. |
@@ -193,6 +210,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
   - `worlds/<world-slug>/stories/<story-slug>/_source/entities/STENT-<id>.yaml` (character_arc_outcome)
   - `worlds/<world-slug>/stories/<story-slug>/_source/artifacts/DA-<id>.yaml` (artifact_canonization)
   - `worlds/<world-slug>/stories/<story-slug>/_source/events/SE-<resolving>.yaml` + the resolving page's selected `SLT-NNNN.yaml` (mystery_resolution — to verify `M_resolution_claims.resolution_authority: canon_candidate`)
+  - `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-<source_arc_id>.yaml` + `_source/pages/PG-<source_page_id>.yaml` + the page's cited `SE-NNNN.yaml`, with optional `ARCTRACE-NNNN` from `state_snapshot.arc_trace_id` (arc_effect_promotion)
 - World canon retrieval via `mcp__worldloom__get_context_packet(task_type='story_fact_promotion_to_canon', world_slug=<slug>, seed_nodes=[<source-relevant CFs+Ms+INVs+OQs>], token_budget=8000)` — the registered profile delivers reserve-priority full bodies for invariants and mystery_reserve (mystery firewall is a hard-reject gate; partial reads cannot meet that bar). If the packet returns `delivery_status='persisted_with_summary'`, use `governing_summary` inline, `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for known CF / INV / M / OQ id sets, and `mcp__worldloom__get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` when the persisted packet's ranked layer context is needed.
 - Whole-class M load via `mcp__worldloom__list_records(world_slug, record_type='mystery_record', include_full_body=true)` at Phase 4 — Mystery Firewall is class-bounded by this skill's Canon Safety Check commitments (per FOUNDATIONS §Tooling Recommendation §Whole-class enumeration is a legitimate primary loading pattern); every `forbidden`-status M must be tested against the source whether or not the source mentions it.
 - Page-prose retrieval along `promotion_branch_path` via direct `Read` of `worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-*.md` — Phase 1 gathers supporting prose excerpts that the proposal_package surfaces as evidence (the page-prose surface is not under any `_source/` and not under context-packet retrieval; direct read is the established pattern from `branching-story-page-cycle` Phase 1).
@@ -212,6 +230,7 @@ Before any pipeline phase:
    - `mystery_resolution` → require `source_m_id` AND `resolving_page_id`; `worlds/<world-slug>/_source/mystery-reserve/M-<id>.yaml` exists in world canon AND a resolving `SE-NNNN` at `resolving_page_id` exists AND its selected storylet declared `M_resolution_claims` with `resolution_authority: canon_candidate` for this M (verified by loading the page's `selected_storylet_id` → `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-<id>.yaml`).
    - `character_arc_outcome` → require `source_stent_id` AND `source_branch_leaf_page` AND `arc_outcome_summary`; `worlds/<world-slug>/stories/<story-slug>/_source/entities/STENT-<id>.yaml` exists; the leaf PG exists.
    - `artifact_canonization` → require `source_diegetic_artifact_id` AND `source_branch_leaf_page`; `worlds/<world-slug>/stories/<story-slug>/_source/artifacts/DA-<id>.yaml` exists; the leaf PG exists.
+   - `arc_effect_promotion` → require `source_arc_id`, `source_page_id`, and `applied_variant_id`; require `effect_index` when the chosen variant has multiple `required_effects[]` entries, otherwise default it to `0`. Load `worlds/<world-slug>/stories/<story-slug>/_source/storylets/SLT-<source_arc_id>.yaml` and require `record_version: 2`, `shape: scene_commitment_arc`, and an `effect_model.variants[]` entry whose `id == applied_variant_id`. Load `worlds/<world-slug>/stories/<story-slug>/_source/pages/PG-<source_page_id>.yaml`; require `storylet_realized == source_arc_id` and `state_snapshot.applied_effect_variant == applied_variant_id`. Require `effect_index` to be in range for `effect_model.variants[<applied_variant_id>].required_effects[]`. If the selected effect's `type == mystery_progress`, HARD-REJECT with "use source_kind=mystery_resolution for mystery progression promotions; arc_effect_promotion is for non-mystery effects."
 5. Validate `promotion_branch_path` is a real chain — every `PG-NNNN` exists; the chain is parent-traversable; the terminal page exists (leaf or specified non-leaf).
 6. Allocate `SP-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
 7. Load world canon via `mcp__worldloom__get_context_packet(task_type='story_fact_promotion_to_canon', world_slug=<slug>, seed_nodes=[<source-relevant CFs+Ms+INVs+OQs>], token_budget=8000)`. If it returns `delivery_status='persisted_with_summary'`, recover through `governing_summary`, `get_records(record_ids=[...])`, and `get_persisted_packet_slice(persisted_path=task_header.persisted_output_path, slice_path='<dot-path>')` instead of reading the raw persisted JSON into the main context.
@@ -246,6 +265,14 @@ Load the source record and its provenance per `source_kind`. The content_policy 
 - Capture the events that created or modified it.
 - On accept (Phase 10): a new world-level `worlds/<world-slug>/diegetic-artifacts/DA-NNNN.md` is created via canon-addition's `append_diegetic_artifact_record` patch op; the story-local DA gets a superseding record with `canon_status: promoted` and `promoted_to_world_da: <new world-DA id>`.
 
+### `source_kind == arc_effect_promotion`
+- Load the v2 scene-commitment arc `SLT-<source_arc_id>.yaml`, including `arc_contract`, `dramatic_unit`, `execution_envelope`, `effect_model.variants[<applied_variant_id>]`, and the selected `required_effects[<effect_index>]` entry.
+- Load `PG-<source_page_id>.yaml`, including `storylet_realized`, `state_snapshot.applied_effect_variant`, `state_snapshot.arc_trace_id`, `state_snapshot.arc_trace_emitted`, and the cited `applied_event_ops` SE record. The page MUST realize `source_arc_id`, and the applied variant MUST match `applied_variant_id`.
+- Load `pages-prose/PG-<source_page_id>.md`; this prose is the proposal_package's supporting excerpt.
+- If `state_snapshot.arc_trace_id` is non-null, load `ARCTRACE-NNNN` via `mcp__worldloom__get_record(record_id=<arc_trace_id>, world_slug=<slug>, story_slug=<story_slug>)`. Capture `effect_evidence[<effect_index>]` and its `evidence_span` as proposal-package evidence. If `arc_trace_emitted: false` or `arc_trace_id: null`, record `arc_trace_id: null` and `arc_trace_evidence_span: null` in the proposal_package; the absence is visible evidence context, not a silent pass.
+- Load the page's applied `SE-NNNN` and identify the story-local record(s) produced by the selected required effect (for example `fact_create` -> SF, `relationship_axis_shift` -> SREL, `cast_change` -> STENT). Phase 10 supersedes that produced record, not the reusable SLT arc template.
+- Walk the arc preconditions and `dramatic_unit.entry_pressure` along `promotion_branch_path` to preserve the framing context that made this effect lawful on this branch.
+
 ## Phase 2: CF Candidate Translation (Laundering Firewall)
 
 The branch is **EVIDENCE**, not **AUTHORITY**. The fact happened in a particular branch of a particular story. World canon may now want to incorporate it because the user (the world's author) has decided this branch's outcome reflects the world's truth. The translation must explicitly carry that framing without inflating the source record into world authority.
@@ -261,6 +288,19 @@ Convert the source into a CF candidate matching `templates/canon-fact-record.yam
 Rule 6 (No Silent Retcons) is satisfied through the SP+CH+PA triad — losing any one breaks Rule 6 enforcement; the triad is structurally redundant. The CF `notes` field carries the structured promotion paragraph as a human-readable cross-reference; the structured trail lives in SP+CH+PA.
 
 See `templates/canon-fact-record.yaml` for the full CF candidate schema and field conventions.
+
+### `arc_effect_promotion` CF candidate translation
+
+When `source_kind == arc_effect_promotion`, the selected `required_effects[<effect_index>]` entry is one of the closed SPEC-19 effect types. Translate it as follows:
+
+- `fact_create` -> derive the CF candidate statement from the effect's subject / predicate / object form; set `type` from the fact category; infer geographic / temporal / social scope from `known_by` plus the arc's `commitment_scope`; set `truth_scope.diegetic_status` from the effect's `epistemic_class`; enumerate `domains_affected` during Phase 2.
+- `relationship_axis_shift` -> usually produce `type: belief` or `type: institution`, framing the relationship-axis state only at the world-canon scope the evidence supports.
+- `thread_pressure_delta`, `obligation_status_change`, `consequence_open`, and `consequence_address` -> normally not directly promotable because they are story-local pressure / obligation / consequence state. Emit a structured warning recommending `character_arc_outcome` or `story_fact` unless the user supplies additional world-canon framing evidence.
+- `cast_change` and `location_change` -> promotable only when the change has world-canon implications; produce a CF candidate with explicit scope and downstream consequences.
+- `mystery_progress` -> never translate here. Pre-flight HARD-REJECTs with "use source_kind=mystery_resolution for mystery progression promotions; arc_effect_promotion is for non-mystery effects."
+- `fact_invalidate` -> promotable when the invalidation has world-canon scope; frame the CF candidate as the invalidation itself and cite the prior belief / fact being invalidated.
+
+The same laundering firewall applies as for the other source kinds: the branch is evidence, not authority; `source_basis.derived_from` carries CF parent ids only; promotion provenance flows through the SP ledger, CH reason/notes, and PA body.
 
 ## Phase 3: Distribution / Scope Inflation Check (Rule 4)
 
@@ -289,6 +329,11 @@ For `source_kind == mystery_resolution`:
 
 For other `source_kind` values, scan the source for accidental M-NNNN touch (using the whole-class M load from Pre-flight):
 - If the source SF or character arc or artifact is described in a way that resolves an M-NNNN unintentionally → HARD-REJECT with "the source implies resolution of M-NNNN unintentionally; remove the implication OR explicitly route as `mystery_resolution`" (writes SP-NNNN with `outcome: REJECT (firewall — accidental M touch)` and halts).
+
+For `source_kind == arc_effect_promotion`:
+- Check the arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against the whole-class M load from Pre-flight.
+- If the proposed CF could touch a `forbidden`-status M and the arc envelope omits that M id, HARD-REJECT with "arc envelope does not include forbidden M-NNNN; arc-effect promotion cannot proceed without explicit envelope coverage."
+- If the selected effect or CF candidate would resolve a non-forbidden M, HARD-REJECT from this source kind and route the user to `source_kind: mystery_resolution` instead. This keeps mystery-resolution authority in the dedicated branch.
 
 ### Branch-Local Resolutions Stay Local
 
@@ -332,6 +377,7 @@ For every other story under `worlds/<world-slug>/stories/`:
 Assemble the package canon-addition will receive at Phase 9 handoff. See `templates/proposal-package.yaml` for the full schema; required sections:
 
 - `promotion_id`, `source_kind`, `source_record`, `promotion_branch_path`
+- For `source_kind: arc_effect_promotion`: `source_arc_id`, `applied_variant_id`, `effect_index`, `arc_trace_id`, `arc_trace_evidence_span`; `source_record` carries the produced story-local record id when known, while `provenance.source_record` carries `{source_arc_id, applied_variant_id, effect_index}`.
 - `cf_candidate` — full CF candidate from Phase 2 (matches `templates/canon-fact-record.yaml` + FOUNDATIONS schema)
 - `provenance` — story id, story_slug, world_slug, branch_path, supporting_pages, supporting_prose_excerpts
 - `provenance.source_reader_visibility` — for `source_kind: story_fact`, copy the source SF's `visible_to_reader` and `reader_visibility_basis` so reviewers can distinguish deliberate reader-facing dramatic irony from in-world knowledge; this field is provenance only and does not alter the CF candidate's diegetic status.
@@ -374,6 +420,12 @@ Under `execution_mode: authoring` (default), present the full summary:
 PROMOTION PROPOSAL: SP-NNNN
 
 Source: <source_kind> — <source ID>
+Arc effect source (if source_kind=arc_effect_promotion):
+- Arc: <source_arc_id>
+- Page: <source_page_id>
+- Variant: <applied_variant_id>
+- Effect index: <effect_index>
+- ARC_TRACE evidence: <arc_trace_id + evidence_span | n/a>
 Branch: <promotion_branch_path> (leaf: <PG-NNNN>)
 Story: <story_slug> in <world_slug>
 
@@ -529,6 +581,24 @@ promoted_to_world_da: <new world-DA id from canon-addition's append_diegetic_art
 
 **mystery_resolution**: NO superseding M record (M-NNNN is world-level, not story-local — canon-addition's CF/CH already extends the M's `extensions[]` via `append_extension` op). The promotion link is preserved in the SP ledger + the new CF's `notes` + the PA adjudication.
 
+**arc_effect_promotion**: the SLT arc is NOT superseded; arcs are reusable templates. Supersede the story-local record produced by applying the selected required effect at `source_page_id`:
+
+- `fact_create` or `fact_invalidate` -> submit `create_sf_record` for a superseding SF.
+- `relationship_axis_shift` -> submit the corresponding SREL superseder.
+- `cast_change` -> submit the corresponding STENT superseder.
+- `thread_pressure_delta`, `obligation_status_change`, `consequence_open`, and `consequence_address` are normally not directly promotable; if the user supplied sufficient world-canon framing and canon-addition accepted, supersede the concrete story-local record produced by the applied SE op.
+
+All arc-effect superseders add the same promotion attribution:
+
+```yaml
+promoted_to_cf: CF-NNNN
+promoted_via_arc: SLT-<source_arc_id>
+promoted_via_variant: <applied_variant_id>
+promoted_via_effect_index: <effect_index>
+```
+
+The SP ledger records the source page, applied SE op, optional `arc_trace_id`, and optional `arc_trace_evidence_span` so the provenance chain remains reconstructable.
+
 ### Step 3: Contradiction Handling (on accept-flavored verdicts only)
 
 If accepted AND `contradiction_handling_preference != leave_branches_alone`:
@@ -571,7 +641,7 @@ Do NOT `git commit`.
 - **Rule 1: No Floating Facts** — enforced at Phase 2 — the CF candidate template requires every structural field (`statement`, `scope`, `truth_scope`, `domains_affected`, `prerequisites`, `distribution`, `costs_and_limits`, `visible_consequences`, `required_world_updates`, `source_basis`); a candidate missing any of these is rejected before Phase 7. Re-enforced downstream by canon-addition's Phase 14a Test 2 (`rule1_no_floating_facts` validator).
 - **Rule 4: No Globalization by Accident** — enforced at Phase 3 (Distribution / Scope Inflation Check) — branch-local sources cannot silently elevate to `scope.geographic: global` without user-cited additional evidence; the Scope-Inflation Critic at Phase 7 re-verifies. Re-enforced downstream by canon-addition's Phase 1 Scope Detection + Phase 14a Test 3.
 - **Rule 6: No Silent Retcons** — enforced at Phase 9 + Phase 10 — every promotion flows through canon-addition's CH Change Log Entry (canon-addition's accept branch emits `create_ch_record`); the SP-NNNN ledger is a parallel story-side audit trail; the PA adjudication record carries the full proposal_package as evidence. The promotion provenance triad (SP + CH + PA) makes silent retcon structurally impossible — no story-local fact reaches world canon without three independent audit surfaces. Re-enforced downstream by canon-addition's Phase 14a Test 5 (`rule6_no_silent_retcons` + `modification_history_retrofit`).
-- **Rule 7: Preserve Mystery Deliberately** — enforced at Phase 4 (Mystery Firewall Check) AND Phase 7 (Mystery-Firewall Critic) — `forbidden`-status M is HARD-REJECT (writes SP ledger with firewall-reject outcome and halts); non-`canon_candidate` resolution authority is HARD-REJECT; `disallowed_cheap_answers` semantic check fires twice (Phase 4 structural, Phase 7 semantic). Whole-class M load at Pre-flight powers per-claim cross-checks. Re-enforced downstream by canon-addition's Phase 14a Test 6 (`rule7_mystery_reserve_preservation` validator).
+- **Rule 7: Preserve Mystery Deliberately** — enforced at Phase 4 (Mystery Firewall Check) AND Phase 7 (Mystery-Firewall Critic) — `forbidden`-status M is HARD-REJECT (writes SP ledger with firewall-reject outcome and halts); non-`canon_candidate` resolution authority is HARD-REJECT; `arc_effect_promotion` additionally checks the arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against whole-class M and rejects missing forbidden-M coverage; `disallowed_cheap_answers` semantic check fires twice (Phase 4 structural, Phase 7 semantic). Whole-class M load at Pre-flight powers per-claim cross-checks. Re-enforced downstream by canon-addition's Phase 14a Test 6 (`rule7_mystery_reserve_preservation` validator).
 - **Rule 12: No Single-Trace Truths** — enforced at Phase 7 (Rule 12 Two-Trace Critic, conditional on `proposed_status: hard_canon`) — at least two distinct register traces required from the permissible enum (law / ritual / architecture / slang / ledgers / funerary / landscape / scars / songs / maps / educational / bureaucratic), structurally distinct (not "law" + "decree"). Re-enforced downstream by canon-addition's Phase 14a Test 12 (`rule12_redundancy` validator).
 
 ## Record Schemas
@@ -594,7 +664,7 @@ Do NOT `git commit`.
 | Rule 4: No Globalization by Accident | Phase 3 + Phase 7 (Scope-Inflation Critic) | Phase 3 structural check + Phase 7 semantic critic. canon-addition's Phase 1 Scope Detection + Phase 14a Test 3 re-check. |
 | Rule 5: No Consequence Evasion | Phase 2 + Phase 5 | CF candidate's `visible_consequences` field is required (first-order); Phase 5 Downstream-Impact Analysis enumerates second-order effects across branches. canon-addition's Phase 6 Consequence Propagation across 13 exposition domains is the load-bearing downstream world-scope enforcement. |
 | Rule 6: No Silent Retcons | Phase 9 + Phase 10 + (downstream) canon-addition Phase 13a | Triple-redundant audit: SP-NNNN ledger (Phase 10) + CH-NNNN Change Log (canon-addition) + PA-NNNN adjudication (canon-addition). The story-local source record's superseding entry adds `promoted_to_cf: CF-NNNN` (Phase 10 Step 2) — the link is recorded, not erased. Story-local truth and world-level truth are tracked separately even after promotion. |
-| Rule 7: Preserve Mystery Deliberately | Phase 4 + Phase 7 (Mystery-Firewall Critic) | Phase 4 hard-rejects `forbidden`-status M and non-`canon_candidate` resolution authority. Phase 7 Mystery-Firewall Critic semantically checks `disallowed_cheap_answers` overlap. Whole-class M load at Pre-flight (per FOUNDATIONS §Whole-class enumeration). canon-addition's `rule7_mystery_reserve_preservation` validator re-checks downstream. |
+| Rule 7: Preserve Mystery Deliberately | Phase 4 + Phase 7 (Mystery-Firewall Critic) | Phase 4 hard-rejects `forbidden`-status M and non-`canon_candidate` resolution authority; `arc_effect_promotion` also checks the source arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against whole-class M and rejects missing forbidden-M coverage. Phase 7 Mystery-Firewall Critic semantically checks `disallowed_cheap_answers` overlap. Whole-class M load at Pre-flight (per FOUNDATIONS §Whole-class enumeration). canon-addition's `rule7_mystery_reserve_preservation` validator re-checks downstream. |
 | Rule 11: No Spectator Castes by Accident | (downstream) canon-addition Phase 14a Test 11 | This skill does not enforce Rule 11 directly — the CF candidate carries `distribution.who_can_do_it` / `who_cannot_easily_do_it` / `why_not_universal` (which Rule 11 evaluates), but the per-CF leverage-form audit lives in canon-addition's `rule11_action_space` validator (mechanical) + judgment layer. |
 | Rule 12: No Single-Trace Truths | Phase 7 (Rule 12 Two-Trace Critic) | Conditional on `proposed_status: hard_canon`; ≥ 2 distinct registers required, structurally distinct. canon-addition's `rule12_redundancy` validator re-checks at Phase 14a Test 12. |
 | Change Control Policy | Phase 9 (handoff) + Phase 10 (ledger) + (downstream) canon-addition CH emission | Per FOUNDATIONS §Change Control Policy, "every approved change must get a record." This skill emits the SP-NNNN ledger (always); canon-addition emits the CH-NNNN Change Log Entry (on accept) carrying `affected_fact_ids`, `change_type`, `summary`, `reason`, `scope`, `downstream_updates`, `retcon_policy_checks`. The promotion provenance flows from this skill's proposal_package into canon-addition's CH `reason` field. |
@@ -604,9 +674,9 @@ Do NOT `git commit`.
 ## Guardrails
 
 - **HARD-GATE absolute under Auto Mode + every `execution_mode`.** The Phase 8 gate is the only canon-mutation handoff this skill controls; Auto Mode + `interactive_runtime` + `batch_generation` do not relax it. World-canon mutation is always an explicit user act per FOUNDATIONS §Default Reality + Rule 6.
-- **The ONLY lawful path from story-local fact to world canon.** No other skill may promote SF / STENT / story-local DA to world-level canon. `branching-story-page-cycle` Phase 4.5 hands `canon_candidate` resolutions HERE; `branching-story-health-audit`'s "Mystery resolved without canon promotion" warnings recommend invoking THIS skill (manually); no skill silently elevates story-local truth.
+- **The ONLY lawful path from story-local fact to world canon.** No other skill may promote SF / STENT / story-local DA / arc-effect-derived story state to world-level canon. `branching-story-page-cycle` Phase 4.5 hands `canon_candidate` resolutions HERE; `branching-story-health-audit`'s "Mystery resolved without canon promotion" warnings recommend invoking THIS skill (manually); no skill silently elevates story-local truth.
 - **Non-chaining handoff to canon-addition.** This skill writes the proposal_package YAML at Phase 9 and tells the user to invoke `canon-addition` separately. It does NOT call canon-addition itself — worldloom skills are non-chaining (matches `branching-story-health-audit` and `storylet-pool-authoring` precedent). The user's separate invocation is what makes canon-addition's downstream HARD-GATE individually accountable.
-- **Story-local source records are NEVER deleted.** Phase 10 Step 2 writes a SUPERSEDING record adding `promoted_to_cf: CF-NNNN`; the original SF / STENT / story-local DA remains in `_source/` per the story-bundle append-only discipline. Story-local truth and world-level truth are tracked separately even after promotion.
+- **Story-local source records are NEVER deleted.** Phase 10 Step 2 writes a SUPERSEDING record adding `promoted_to_cf: CF-NNNN`; the original SF / STENT / SREL / story-local DA remains in `_source/` per the story-bundle append-only discipline. For `arc_effect_promotion`, the reusable SLT arc template is not superseded; the produced story-local record is. Story-local truth and world-level truth are tracked separately even after promotion.
 - **Branch-isolation invariant preserved.** Promotion does not mutate any existing page's `state_snapshot` in place; promotion does not add a `canon_sync` op to any branch retroactively. World canon propagates freely to every branch's *next* page-cycle tick via `branching-story-page-cycle` Pre-flight retrieval — that IS the design (per FOUNDATIONS §Default Reality clause). Contradicting branches surface via `contradiction_handling_preference`, not via silent retroactive mutation.
 - **Cross-story scan is opt-in.** `cross_story_impact_scan` defaults to `false`. When `true`, the scan is bounded to `worlds/<world-slug>/stories/*/` (never crosses world boundaries), and recommended_handling is always `flag` for cross-story contradictions — never auto-archive across stories (the user explicitly handles cross-story interactions per the source proposal's invariant).
 - **Defense-in-depth mystery firewall.** Phase 4's hard-reject of `forbidden`-status M and non-`canon_candidate` resolution authority is structurally redundant with `storylet-pool-authoring` Phase 4 gate 2 + `branching-story-page-cycle` Phase 4.5 — the redundancy is intentional. If an upstream gate is bypassed (skill not yet shipping; user direct-invokes this skill with arbitrary M id), Phase 4 still rejects.
@@ -616,4 +686,4 @@ Do NOT `git commit`.
 
 ## Final Rule
 
-A story-local fact does not become canon by accident. It becomes canon only when the user explicitly decides this branch's outcome is the world's truth, the proposal carries provenance (which branch, which leaf, which source), scope inflation is detected and addressed (or justified), the mystery firewall is intact (no `forbidden`-M promotion, no non-`canon_candidate` resolution), contradicting branches are enumerated and handled by user choice, the five mandatory critics PASS with rationale, AND canon-addition's full pipeline adjudicates and accepts. The branch is evidence. The world is authority. This skill is the lawful, traceable, append-only bridge between them.
+A story-local fact, arc outcome, artifact, or v2 arc effect does not become canon by accident. It becomes canon only when the user explicitly decides this branch's outcome is the world's truth, the proposal carries provenance (which branch, which source, and for arc effects which arc / page / variant / effect index), scope inflation is detected and addressed (or justified), the mystery firewall is intact (no `forbidden`-M promotion, no non-`canon_candidate` resolution, no arc-effect promotion without required forbidden-M envelope coverage), contradicting branches are enumerated and handled by user choice, the five mandatory critics PASS with rationale, AND canon-addition's full pipeline adjudicates and accepts. The branch is evidence. The world is authority. This skill is the lawful, traceable, append-only bridge between them.
