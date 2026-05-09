@@ -81,7 +81,7 @@ Archive note: SPEC-21's implementation tickets landed and archived the authoring
 
 1. Bootstrap a fresh story bundle on `worlds/animalia/` (or another v2-native world) using the new `branching-story-bootstrap` (target_pool_size: 10 arcs).
 2. Run 5-10 page-cycle ticks across 2-3 branches.
-3. Measure: token cost per arc-page (target: ~4 LLM calls per arc vs ~5 per beat × N beats); choice cadence (target: mean words per arc-page in [700, 2000]; menu-emission ratio: pages with menus ÷ total pages); choice-worthiness (target: 0/N CHCs with empty likely_effects).
+3. Measure: token cost per arc-page (target: ~4 LLM calls per arc vs ~5 per beat × N beats); choice cadence in arc-units only (mean arcs between menus, menu-emitting page ratio, and CONTINUE_ARC / CONTINUE_ONLY_PAUSE / INTERRUPT_HINGE counts); choice-worthiness (target: 0/N CHCs with empty likely_effects).
 4. Iterate on the arc archetype library, the cadence_policy thresholds, and the validator gates based on pilot findings.
 
 **Completion gate**: pilot bundle has 5+ arc-pages with PASS validation; token-cost reduction is empirically measured; the cadence_policy defaults are validated or adjusted.
