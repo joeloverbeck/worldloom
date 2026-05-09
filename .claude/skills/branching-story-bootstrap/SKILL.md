@@ -283,7 +283,7 @@ FIREWALL VERDICTS:
 TARGET WRITE PATHS:
 - worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md
 - worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml
-  (<count> records across 14 subdirectories)
+  (<count> records across 15 subdirectories)
 - worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-0001.md
 - worlds/<world-slug>/stories/<story-slug>/INDEX.md
 - worlds/<world-slug>/stories/INDEX.md (per-world; create or append)

@@ -15,7 +15,7 @@ Audit the five story-skill family members for internal incoherences spanning six
 <HARD-GATE>
 Do NOT Edit / Write any file under `.claude/skills/<family-member>/{SKILL.md, references/*, templates/*}` for any of the five family members until ALL of the following hold:
 
-(a) Pre-flight has loaded `docs/FOUNDATIONS.md`, resolved the `target_skill_path` to one of the five family members, and read every family member's SKILL.md + references/*.md + templates/* into working context. If the target path does not resolve to a recognized family member the skill aborts before Phase 1.
+(a) Pre-flight has loaded `docs/FOUNDATIONS.md`, resolved the `target_skill_path` to one of the five family members, and read every family member's SKILL.md + references/*.md + templates/* into working context (when §Strategic Delegation is exercised, "into working context" is satisfied by the delegated agent's corpus-loading combined with the operator's spot-checks of the highest-severity findings per §Strategic Delegation §"Delegated-agent reporting contract" — the operator's working context need not hold the full corpus directly). If the target path does not resolve to a recognized family member the skill aborts before Phase 1.
 
 (b) Phases 1-7 have completed: Phases 1-6 detect findings and select source-of-truth per category (C1 shared-schema drift, C2 contradictory instructions, C3 dangling cross-references, C4 numerical-citation drift, C5 vocabulary drift, C6 phase-numbering drift); Phase 7 consolidates findings, finalizes severity classification, and populates each finding's record fields (`finding_id`, `severity` with one-line rationale [bare severity is FAIL], `category`, `affected_files`, `source_of_truth` selection [the sibling/file the skill treats as canonical], and `proposed_correction` [structured: `summary` (the human-facing one-line description surfaced in Phase 8's triage table) + `diff` (the verbatim `old_string` / `new_string` byte sequences flowing to Phase 9)] OR a `manual_resolution` flag when no auto-edit is safe — §Phase 7's per-finding self-check and the §Source-of-Truth Selection rules at §Phase 3 and §Phase 6 detail when `manual_resolution` fires).
 
@@ -177,6 +177,7 @@ A logical aggregate (not an on-disk file) is built at Phase 1 from the prerequis
 
 Run before Phase 1; abort if any precondition fails.
 
+0. List family directory contents and tally cumulative byte size before reads begin (e.g., `ls -la <family-paths>` + `find <family-paths> -type f | xargs wc -c | sort -n`). The cumulative-size figure informs the §Strategic Delegation decision: heuristic threshold ≥400KB total OR any single file ≥50KB triggers delegation as the default; below threshold, read the corpus directly. Parallel to `skill-audit/references/audit-execution-discipline.md` §"Recommended at audit start".
 1. Load `docs/FOUNDATIONS.md` into working context (light read; Validation Rule 6 governs Phase 9 correction attribution). Skip per the load-mechanism-naming rule in §World-State Prerequisites if already in context.
 2. Validate `target_skill_path` resolves to one of: `.claude/skills/branching-story-bootstrap`, `.claude/skills/branching-story-page-cycle`, `.claude/skills/storylet-pool-authoring`, `.claude/skills/branching-story-health-audit`, `.claude/skills/story-fact-promotion-to-canon`. Trailing slash, leading `./`, and absolute-path forms are all normalized. Abort with `"target_skill_path does not resolve to a story-skill family member; expected one of: <list>"` on no match.
 3. Verify each family-member directory exists and contains `SKILL.md`; abort on any missing member with a list of the absent paths.
@@ -206,6 +207,8 @@ The Pre-flight reads can produce a substantial cumulative context burden — the
 - Phase 9 atomic correction writes and the final-summary chat output.
 
 **Delegated-agent reporting contract**: every finding an agent emits MUST cite at least one `file:line` anchor (per Phase 7 self-check test 2); the operator spot-checks the highest-severity findings before triage to catch agent-side mis-citations. The delegation is a context-budget optimization, not a discipline relaxation — the HARD-GATE, source-of-truth selection, and severity classification all remain operator-owned per the boundary above.
+
+**Oversize delegated-agent payload fallback**: when the delegated agent's persisted output exceeds the Read tool's per-call token limit (currently ~25K tokens), the operator must extract and chunk-read the agent's findings before consolidation. Pattern: (a) extract the agent's text payload to a temporary file (e.g., `jq -r '.[0].text' <persisted-output-path> > /tmp/findings.md`); (b) chunk Read with `offset` / `limit` per Pre-flight Step 4 §"Oversize-file fallback" (the structurally-parallel pattern for source files); (c) treat the cumulative chunked reads as satisfying the §"Delegated-agent reporting contract" once the full body is in context. The detection agent's "expect 15-50 candidate findings" guidance above tends toward the upper end in practice (the family corpus's shared-surface density produces dense per-finding evidence with file:line anchors and verbatim excerpts), so payload oversize is a foreseeable case rather than an edge.
 
 ## Phase 1: Shared-Surface Inventory
 
@@ -343,6 +346,8 @@ Any FAIL routes to the responsible loop-back phase; the audit re-runs that phase
 
 **Self-check trace surfacing**: The 9 self-check tests run internally during Phase 7 consolidation; PASS-with-rationale entries are not surfaced in chat output (no Phase 9 final-summary sub-section is allocated for the trace). The act of progressing to Phase 8 with all findings populated and validated IS the audit-trail evidence that the self-check tests passed. Only on FAIL does the trace surface in chat: the failing test number, finding_id, and routed loop-back phase appear as the diagnostic message before the audit re-runs the responsible phase. The implicit-PASS / explicit-FAIL surfacing pattern keeps the chat output proportional to the audit's signal — clean audits are terse, problematic audits show their work where the work is needed.
 
+**Operator filtering at consolidation**: delegated detection (per §Strategic Delegation) typically produces raw findings that include PASSes, documented-as-intentional cases, and false-positives — the §"Delegated-agent reporting contract" guidance "better to over-report than miss issues" makes over-emission the expected shape. The operator filters these at consolidation BEFORE Phase 8 triage rather than carrying them through as Phase 8 reject candidates. Discipline: (a) record a one-line filter rationale per filtered finding (e.g., `"PASS — content-policy block byte-for-byte identical across 3 skills"`, `"documented-as-intentional per <skill>'s description line"`, `"false-positive — agent's analysis itself shows no actual drift"`); (b) the §Phase 9 §"Audit trail" Sum check carries a separate `filtered_at_consolidation` line tallying these; (c) the final-summary §Rejected section is RESERVED for Phase 8 user-driven rejections (`reject-as-false-positive` disposition), NOT for Phase 7 operator filtering — the two surfaces have distinct audit-trail meanings (operator-decided at consolidation vs user-decided at triage) and conflating them obscures which findings the user saw.
+
 ## Phase 8: HARD-GATE Triage and Per-Finding Disposition
 
 Emit a numbered triage summary table in chat:
@@ -365,7 +370,7 @@ For each `manual-resolution` row, no disposition is solicited at this phase — 
 
 **User-supplied resolution converts manual-resolution to filed**: When the user explicitly directs a course of action on a manual-resolution finding (mid-Phase-8 directive, or response to the Phase 9 final summary's manual-resolution surfacing — e.g., `"drop both fields"`, `"keep with v1-vestige comment"`, `"merge into the v2 schema"`), the finding converts to a filed candidate retaining its original `finding_id` with a `b` suffix appended (e.g., `F-06` → `F-06b`). The auto-edit derived from the user-supplied resolution honors the source-of-truth attribution rules at Phase 9 (the user's resolution IS the source-of-truth selection). The original `F-06` id appears in the final summary as `(converted to F-06b at Phase 8 per user-supplied resolution: <resolution-summary>)` so the audit trail records the manual-resolution → filed transition. This is consistent with HARD-GATE clause (e)'s rule "manual-resolution findings are NEVER auto-applied regardless of disposition" — that rule fires while a finding is classified as manual-resolution; explicit user resolution converts the classification BEFORE the auto-apply step, so clause (e) still holds.
 
-**Inclusive-phrasing dispositions** (synonyms for "file every surviving candidate"): `proceed`, `file all`, `approve`, `implement all`, and any similar inclusive phrasing the user supplies — phrasing that does not name specific finding numbers AND does not use one of the three explicit dispositions — are synonymous with filing every surviving candidate. Per-finding overrides (e.g., `file 1, defer 2, reject 3`) take precedence when named explicitly.
+**Inclusive-phrasing dispositions** (synonyms for "file every surviving candidate"): `proceed`, `file all`, `approve`, `implement all`, and any similar inclusive phrasing the user supplies in response to the disposition request — phrasing that does not name specific finding numbers AND does not use one of the three explicit dispositions above — are synonymous with filing every surviving candidate. Per-finding overrides (e.g., `file 1, defer 2, reject 3`) take precedence when the user names them explicitly. The auto-mode auto-approval condition below still gates whether the audit auto-passes WITHOUT a prompt; the inclusive-phrasing rule here governs how to interpret the user's explicit answer when the gate IS shown — HIGH/CRITICAL findings under inclusive phrasing still file (the auto-approval rule and the inclusive-phrasing rule are independent surfaces). Session-level meta-instructions ("work without stopping for clarifying questions", "auto-mode") that are present BEFORE Phase 8 triage emission act as inclusive-phrasing for the candidates surfaced at triage, provided the triage table is still emitted (the user's review window is preserved by the triage emission, even if no per-finding answer is solicited).
 
 **Auto-mode auto-approval condition** (per HARD-GATE condition (d)): when auto mode is active AND every surviving candidate is severity LOW AND no manual-resolution flag is set AND no cross-skill schema-drift findings remain (C1 cross-skill findings always require explicit human approval), auto-approve all candidates as `file` and proceed to Phase 9. Otherwise wait for explicit per-finding disposition.
 
@@ -457,14 +462,15 @@ For each dropped finding:
 
 ### Audit trail
 
-- Total findings: <N>
+- Total findings: <N> (raw detection count, including findings filtered at Phase 7 consolidation)
 - Filed: <K> (mutated <M> files)
 - Filed but no edit applied: <filed_no_edit>
 - Manual-resolution: <Q>
 - Deferred: <R>
 - Rejected: <S>
 - Dropped: <T>
-- Sum check: K + (filed_no_edit) + Q + R + S + T = N (audit trail consistency)
+- Filtered at consolidation: <U> (Phase 7 operator filtering — PASSes / documented-as-intentional / false-positives that never reached Phase 8 triage; see §Phase 7 §"Operator filtering at consolidation")
+- Sum check: K + (filed_no_edit) + Q + R + S + T + U = N (audit trail consistency)
 
 The git diff after this run is the durable audit trail. Review with
 `git diff` before committing. Do NOT commit from inside this skill.

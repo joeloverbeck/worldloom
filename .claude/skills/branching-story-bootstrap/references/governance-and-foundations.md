@@ -26,7 +26,7 @@ Cross-cutting reference for `branching-story-bootstrap`. Combines the FOUNDATION
 
 ## Guardrails
 
-- **HARD-GATE is absolute** (see top of file). No file is written until Phase 9 records 12 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
+- **HARD-GATE is absolute** (see top of file). No file is written until Phase 9 records 17 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
 - **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted by this skill.
 - **Never overwrite an existing story bundle.** Pre-flight slug-collision aborts when `worlds/<world-slug>/stories/<story-slug>/` exists. To re-run with corrected inputs, the user must either supply a different `story_slug` OR manually delete the existing bundle.
 - **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3. Use `mcp__worldloom__submit_patch_plan` with story-bundle create ops after HARD-GATE approval. Story-bundle IDs still use `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
