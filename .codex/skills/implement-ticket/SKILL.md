@@ -12,7 +12,7 @@ arguments:
 
 Implement a worldloom ticket against the live repository, not against stale assumptions.
 
-Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, `tickets/_TEMPLATE.md`, and `tickets/README.md` before editing. Read `docs/archival-workflow.md` when archival is actually in scope for the active run: before archiving, when the user explicitly asked for full ticket completion or archival, or when the remaining owned work includes archive/update steps rather than incidental archival references in the ticket/spec prose. If the ticket will submit a patch plan or mutate engine-only source under `worlds/<slug>/_source/` or `worlds/<slug>/stories/<story-slug>/_source/`, read `docs/HARD-GATE-DISCIPLINE.md` before preparing or submitting the plan. If the ticket changes skill HARD-GATE semantics, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, or other machine-facing validation signals used by HARD-GATE flows, also read `docs/HARD-GATE-DISCIPLINE.md` before finalizing reassessment. This includes docs-only edits to `engine-envelope-shape.md` or similar envelope-construction references when they change schema-discovery guidance, patch-plan assembly guidance, approval-token guidance, validate/submit behavior, or pre-apply validation expectations. It also includes edits to content-generating skills' Phase 9 validation-gate rows, `validation_trace` semantics, or operator PASS/FAIL criteria, even when no validator code changes. A pure command substitution inside an unchanged gated sequence, such as replacing one bootstrap command with another while preserving order, approval, failure handling, and validation signals, does not require the extra read by itself. Read-only introspection of envelope, approval-token, pre-apply, `validate_patch_plan`, or `submit_patch_plan` contracts still counts as a machine-facing validation-signal change for reassessment; read-only retrieval or visibility work that merely surfaces Mystery Reserve constraints does not require that extra read by default. Retrieval-time error recovery or diagnostic audit fields also do not require the extra HARD-GATE read by themselves unless they alter `validate_patch_plan`, `submit_patch_plan`, approval-token behavior, pre-apply validation, or a canon-mutation gate.
+Read `AGENTS.md`, `docs/FOUNDATIONS.md`, the target ticket, `tickets/_TEMPLATE.md`, and `tickets/README.md` before editing. Read `docs/archival-workflow.md` when archival is actually in scope for the active run: before archiving, when the user explicitly asked for full ticket completion or archival, or when the remaining owned work includes archive/update steps rather than incidental archival references in the ticket/spec prose. If the ticket will submit a patch plan or mutate engine-only source under `worlds/<slug>/_source/` or `worlds/<slug>/stories/<story-slug>/_source/`, read `docs/HARD-GATE-DISCIPLINE.md` before preparing or submitting the plan. Test-only, temp-fixture, or package-local integration calls to `submit_patch_plan` / `submitPatchPlan` count for this read requirement even when they do not mutate a live world. If the ticket changes skill HARD-GATE semantics, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill pre-flight input validation, parse-time consumer schema checks, handoff-artifact required-field validation, or other machine-facing validation signals used by HARD-GATE flows, also read `docs/HARD-GATE-DISCIPLINE.md` before finalizing reassessment. This includes docs-only edits to `engine-envelope-shape.md` or similar envelope-construction references when they change schema-discovery guidance, patch-plan assembly guidance, approval-token guidance, validate/submit behavior, or pre-apply validation expectations. It also includes edits to content-generating skills' Phase 9 validation-gate rows, `validation_trace` semantics, operator PASS/FAIL criteria, or required-field checks for handoff artifacts such as remediation storylet proposal cards and `source_audit_path`, even when no validator code changes. A pure command substitution inside an unchanged gated sequence, such as replacing one bootstrap command with another while preserving order, approval, failure handling, and validation signals, does not require the extra read by itself. Read-only introspection of envelope, approval-token, pre-apply, `validate_patch_plan`, or `submit_patch_plan` contracts still counts as a machine-facing validation-signal change for reassessment; read-only retrieval or visibility work that merely surfaces Mystery Reserve constraints does not require that extra read by default. Retrieval-time error recovery or diagnostic audit fields also do not require the extra HARD-GATE read by themselves unless they alter `validate_patch_plan`, `submit_patch_plan`, approval-token behavior, pre-apply validation, or a canon-mutation gate.
 
 Reassess first, then implement. Do not treat the ticket as mechanically executable until its assumptions match the current repo.
 
@@ -22,7 +22,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 
 1. Resolve the live ticket/spec paths inside the active repo/worktree and snapshot the worktree.
 2. Read the required repo contracts (`AGENTS.md`, `docs/FOUNDATIONS.md`, ticket template/readme, ticket, and explicit references).
-3. Classify the ticket and load only the focused reference docs needed for that class. For validator or JSON Schema tickets, load `references/validator-schema-migrations.md` before reassessment edits.
+3. Classify the ticket and load only the focused reference docs needed for that class. For validator, JSON Schema, or schema-discovery tickets that project schema metadata, resolve `$ref` chains, or expose schema-derived fields through package tools, load `references/validator-schema-migrations.md` before reassessment edits.
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
 5. State the owned implementation slice to the user, then make minimal edits.
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
@@ -35,7 +35,8 @@ Use this compact checklist so required references are not skipped:
 1. Intake: `references/ticket-classification.md` and `references/dirty-worktree-ledger.md`.
 2. Reassessment: `references/reassessment-checks.md` for non-trivial tickets, plus `references/mismatch-handling.md`.
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
-4. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
+4. HARD-GATE / validation-signal changes: `docs/HARD-GATE-DISCIPLINE.md` when the ticket changes skill HARD-GATE wording, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill validation-gate rows, content-generating pre-flight input validation, parse-time consumer schema checks, handoff-artifact required-field validation, `validation_trace` semantics, or operator PASS/FAIL criteria.
+5. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 
 Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples or package-specific edge cases here unless they are required to choose the correct reference.
 
@@ -93,7 +94,7 @@ If the primary class is `tool or script implementation`, or the ticket changes a
 
 For package/tool tickets, do the compact package checkpoint in `references/package-tooling.md` before coding.
 
-If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
+If the ticket changes a validator, JSON Schema, schema-discovery consumer, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks. Schema-discovery consumers include package tools that expose schema metadata, traverse JSON Schema `$ref`s, or project required fields and referenced schemas even when the ticket does not edit a JSON Schema file directly. A capstone that only reads current validator registry/count/matrix state as one witness does not need this reference unless it changes that validator/schema contract or uses validator-matrix classification as an acceptance owner.
 
 For staged validator/schema/parser details, prefer `references/validator-schema-migrations.md` as the detailed authority and keep this top-level workflow as the routing checklist.
 
@@ -117,6 +118,19 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 14. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
+
+Compact checkpoint shape:
+
+```text
+Pre-edit checkpoint:
+- Repo: <active repo root>
+- Ticket: <resolved ticket path>
+- Instructions: <AGENTS.md path>
+- Sibling hits: <none | diagnostic-only paths excluded>
+- Classification: <primary class + discrepancy class if any>
+- Owner boundary: <authoritative implementation seam>
+- Sibling scope: <absorbed | excluded | left untouched>
+```
 
 If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.
 
@@ -208,11 +222,15 @@ For shared schemas, templates, or cross-skill contracts, inspect consumers befor
 
 For skill tickets, verify:
 
+- If this check adds templates, examples, references, a parent `SKILL.md`, or same-seam docs/specs to the owned file set, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
+- Before editing, run a compact skill-local file inventory such as `rg --files <skill-dir>` and inspect any `templates/`, `references/`, and `examples/` whose emitted fields, phase names, source-kind enums, prompt labels, command fragments, or handoff artifacts overlap the ticket.
 - `SKILL.md` trigger text still matches the skill's real purpose
 - required reads and prerequisites are truthful
 - HARD-GATE behavior still matches repo policy
 - bundled references/templates/examples remain aligned with the behavior you are changing
+- when a skill phase, gate, template contract, prompt structure, or handoff semantics changes, run an early whole-skill stale-anchor sweep before source edits. Search the target skill directory for old phase names, old proof counts, retired template fields, old prompt-block labels, old command fragments, and other literals that define the replaced contract. Classify hits as same-seam required fallout, legitimate historical/audit wording, or out-of-scope sibling prose before editing.
 - when editing `.claude/skills/<skill>/references/*`, `.claude/skills/<skill>/templates/*`, or another skill-local reference for a command, tool, fallback, or contract shape, inspect the parent `.claude/skills/<skill>/SKILL.md` summary, process-flow, prerequisite, gate, and pointer language before the first source edit. If those parent sections still state the old shape, add the parent `SKILL.md` to the active ticket's `Files to Touch` and proof surface during reassessment instead of waiting for closeout to discover the stale summary.
+- if a template or reference ticket lands a forward schema/contract before the full operational skill rewrite, do not silently leave the parent skill implying the old and new shapes are both current. Either add the minimal transition/disclosure note to the parent `SKILL.md` and name the follow-up owner for the full rewrite, or escalate if the transition note would weaken a HARD-GATE, canon-write, or validation-signal contract.
 
 ### 4. Implement with minimal, truthful edits
 
@@ -236,6 +254,8 @@ Use `references/verification-closeout.md` for detailed proof-narrowing rules, in
 
 For package/tool proof details, use `references/package-tooling.md`: package roots, build/test scripts, local dependency freshness, public export checks, ignored artifact snapshots, same-package docs/examples, and direct-MCP substitution rules all live there.
 
+For `tools/world-mcp` or other package suites that may read gitignored live worlds or `_index/` artifacts, check the focused package guidance before treating a broad suite failure as owned. Prefer focused package proofs when they cover the invariant, and record local live-index failures as deviations unless the ticket owns that live-world/index state.
+
 Use the proof surface that actually proves the owned invariant. A command that merely touches the area does not count as proof, and any proof-discovered same-seam fallout must be reassessed and patched into the active ticket before the next source edit.
 
 ### 6. Close out the ticket honestly
@@ -258,6 +278,7 @@ Then run the closeout hard stops from the focused references:
 - Use `references/verification-closeout.md` for completed-ticket truthing, stale-anchor sweeps, historicalized problem text, exact proof-command wording, shell-safe grep patterns, and final-proof timing.
 - Use `references/package-tooling.md` for package/tool public-surface sweeps, package docs/examples, `describe_capabilities` metadata, local dependency refresh, and generated/ignored package artifacts.
 - Use `references/dirty-worktree-ledger.md` for final ownership classification, including untracked owned files, pre-existing dirt, externally appeared changes, sibling scope, and expected ignored artifacts.
+- If a package/tool ticket changes a user-facing CLI command, flag, help text, or workflow command, explicitly sweep the package README/examples and `docs/WORKFLOWS.md` before final proof or record why each surface is outside scope.
 - If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
 - Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited code, docs, tickets, or skill files. If owned edited files are still untracked, remember that plain `git diff --check` will not inspect them; run a real equivalent such as `git add -N <owned-untracked-paths>` followed by `git diff --check -- <owned-paths>`, or another explicit untracked-file whitespace check, and record which method covered the untracked files. If you used `git add -N` only for hygiene coverage, clear those intent-to-add entries with `git reset -- <owned-untracked-paths>` after the check and refresh `git status --short`.

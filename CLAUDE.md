@@ -79,7 +79,7 @@ Skills divide into three categories, and these distinctions are load-bearing.
 
 The three skill categories remain load-bearing, but the machine-facing retrieval and mutation contract sits beside the human-facing skill prose. Post-SPEC-13, canonical storage is atomic YAML under `_source/`; the machine layer reads and writes atomic records directly.
 
-- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation for world-scoped, story-bundle-scoped, sub-audit-scoped, and pipeline-scoped classes (including CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP, SAU, SP, and RSP); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
+- **Pre-flight**: `mcp__worldloom__allocate_next_id` replaces manual grep-and-scan allocation for world-scoped, story-bundle-scoped, sub-audit-scoped, and pipeline-scoped classes (including CF, CH, INV per-category, M, OQ, ENT, SEC per-file-class, PA, CHAR, DA, PR, BATCH, AU, RP, SAU, SP, ARCTRACE, and RSP); `mcp__worldloom__get_context_packet` replaces eager multi-file loading.
 - **Localization**: `mcp__worldloom__search_nodes`, `get_record`, `get_neighbors`, `find_named_entities`, `find_impacted_fragments`, `find_sections_touched_by` localize relevant world state via per-record retrieval, with scoped-reference middle tier between canonical entity retrieval and lexical evidence fallback for source-local names.
 - **Mutations**: `mcp__worldloom__submit_patch_plan` is the Phase 2 write path. Ops are record-ID-addressed: `create_cf_record`, `create_ch_record`, `create_inv_record`, `create_m_record`, `create_oq_record`, `create_ent_record`, `create_sec_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, plus hybrid-file ops (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`).
 - **Validation**: `tools/validators/` turns Rules 1 through 7 and structural checks (including `record_schema_compliance` and `touched_by_cf_completeness`) into executable gates; `world-validate` is the CLI surface.
@@ -110,6 +110,7 @@ IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight 
 - `RP-NNNN` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
 - `SAU-NNNN` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN-<date>.md`; allocate with `story_slug`)
 - `SP-NNNN` — story promotion ledgers and proposal-package sidecars (`worlds/<slug>/stories/<story-slug>/story-promotions/SP-NNNN.md` and `SP-NNNN-proposal-package.yaml`; allocate with `story_slug`)
+- `ARCTRACE-NNNN` — ARC_TRACE records (`worlds/<slug>/stories/<story-slug>/_source/arc-traces/ARCTRACE-NNNN.yaml`; allocate with `story_slug`)
 - `RSP-NNNN` — remediation-storylet proposal cards (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md`; allocate with `story_slug` and `audit_id: SAU-NNNN`)
 
 ## Common Workflows

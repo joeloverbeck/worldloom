@@ -2,7 +2,7 @@
 
 **Story**: <story_slug> in <world_slug>
 **Date**: <iso8601>
-**Source kind**: <story_fact | mystery_resolution | character_arc_outcome | artifact_canonization>
+**Source kind**: <story_fact | mystery_resolution | character_arc_outcome | artifact_canonization | arc_effect_promotion>
 **Source record**: <source ID>
 **Branch promoted from**: <promotion_branch_path>
 **Execution mode**: <authoring | interactive_runtime | batch_generation>
@@ -21,6 +21,7 @@
 - Story: STORY-NNNN
 - Branch: <promotion_branch_path>
 - Supporting pages: [PG-NNNN, PG-NNNN, ...]
+- Arc effect source (if source_kind=arc_effect_promotion): source_arc_id=<SLT-NNNN>, source_page_id=<PG-NNNN>, applied_variant_id=<variant>, effect_index=<N>, arc_trace_id=<ARCTRACE-NNNN | null>, arc_trace_evidence_span=<byte span | null>
 - Supporting prose excerpts:
   - <quoted snippet 1, with PG-NNNN cite>
   - <quoted snippet 2, with PG-NNNN cite>
@@ -46,7 +47,7 @@
 The original <source ID> remains in this story's `_source/`.
 
 <On accept-flavored verdict:>
-A superseding record was written: <new SF/STENT/DA id> at `_source/<class>/<new-id>.yaml` adding `promoted_to_cf: CF-NNNN`. Story-local truth and world-level truth are tracked separately even after promotion; the link is recorded, not erased.
+A superseding record was written: <new SF/STENT/SREL/DA id> at `_source/<class>/<new-id>.yaml` adding `promoted_to_cf: CF-NNNN`. For `arc_effect_promotion`, the superseder also adds `promoted_via_arc`, `promoted_via_variant`, and `promoted_via_effect_index`; the reusable SLT arc template is not superseded. Story-local truth and world-level truth are tracked separately even after promotion; the link is recorded, not erased.
 
 <On non-accept (REVISE_AND_RESUBMIT, REJECT, firewall-reject, user-reject):>
 No superseding record was written. The story-local source remains unchanged.

@@ -29,7 +29,8 @@ export type {
   NamedEntityRecord,
   SectionRecord,
   CharacterDossier,
-  DiegeticArtifactFrontmatter
+  DiegeticArtifactFrontmatter,
+  ArcTraceNodeRow
 } from "../schema/types.js";
 
 export {

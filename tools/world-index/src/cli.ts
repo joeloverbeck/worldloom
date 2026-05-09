@@ -36,6 +36,7 @@ function renderHelp(): string {
     "  sync <world-slug>     incremental sync; use --quiet to suppress per-record skip warnings",
     "  inspect <node-id>     dump one node as JSON",
     "  render <world-slug>   render indexed records; use --story <story-slug> for story bundles",
+    "                        add --arc-traces to include ARC_TRACE records in story renders",
     "  stats <world-slug>    print node counts and file freshness",
     "  verify <world-slug>   re-parse disk-backed indexed files and flag content-hash drift",
     "",
@@ -83,7 +84,8 @@ function main(argv: string[]): number {
       help: { type: "boolean", short: "h" },
       version: { type: "boolean", short: "v" },
       story: { type: "string" },
-      quiet: { type: "boolean" }
+      quiet: { type: "boolean" },
+      "arc-traces": { type: "boolean" }
     },
     allowPositionals: true,
     strict: false
@@ -120,7 +122,10 @@ function main(argv: string[]): number {
           return printUsage(1);
         }
         return typeof parsed.values.story === "string"
-          ? render(worldRoot, argument, { storySlug: parsed.values.story })
+          ? render(worldRoot, argument, {
+              storySlug: parsed.values.story,
+              arcTraces: parsed.values["arc-traces"] === true
+            })
           : render(worldRoot, argument, {});
       case "stats":
         return typeof argument === "string" ? stats(worldRoot, argument) : printUsage(1);

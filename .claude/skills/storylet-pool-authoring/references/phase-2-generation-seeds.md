@@ -1,32 +1,220 @@
 # Phase 2: Generation Seeds
 
-Produce N seeds where N = `target_pool_size + ceil(target_pool_size * 0.30)` for seed/focus batches (the +30% buffer absorbs Phase 4 rejections). JIT and audit mode use their mode-specific seed sizing below.
+Phase 2 turns the Phase 1 diagnosis matrix into arc seeds. An arc seed is a
+proposal, not a structured SLT record: it names a candidate
+scene-commitment-arc shape that Phase 3 will fill into the v2 SLT scaffold.
 
-Each seed names:
+Phase 2 is the bridge between pool diagnosis and structured drafting. It must
+carry enough information for Phase 3 to choose the right v2 blocks
+(`arc_contract`, `dramatic_unit`, `beat_plan`, `execution_envelope`,
+`stop_policy`, `effect_model`, and `exit_portfolio`) without pretending the
+seed itself is already a validated record.
 
-- **target OBL or THR engaged** (drawn from Phase 1's diagnosis matrix; `source_obligations`/`source_threads`, when supplied, override Phase 1 priority — those OBLs/THRs become mandatory targets).
-- **shape** — one of the SLT shape enum (entry_pressure / cast_introduction / threat_escalation / relational_dynamics / routine_disruption / aftermath_sequel / reflection_dilemma / mystery_edge_brush / fork_recovery / thread_resolution / aftermath_residue / intimacy / confrontation / other), biased toward Phase 1's under-represented shapes.
-- **tone register** — drawn from `STORY_KERNEL.tone_constraints` + Phase 1's tone-distribution gaps; `tone_override`, when supplied, biases the batch by ±1 register.
-- **content_intensity band** — drawn from Phase 1's content_intensity gap analysis.
-- **state preconditions** — implied predicates that must hold for the storylet to be eligible (Phase 3 will formalize them into the Predicate DSL).
-- **core dramatic transaction** — what changes between the entry-state and exit-state of a page that realizes this storylet (one sentence).
+## Arc Seed Format
 
-Seeds are proposals, not yet structured records. They live only in the in-memory batch context until Phase 3 turns each into an SLT record.
+Emit each seed in this shape:
 
-**Bootstrap-mix shape weighting** (when `mode=seed` or `focus_area=bootstrap_mix`): apply the weighting from the proposal's bootstrap mix table — entry_pressure 3-5, cast_introduction 1 per non-protagonist major, threat_escalation 2-4, relational_dynamics 3-5, routine_disruption 2-3, aftermath_sequel 2-3, reflection_dilemma 2-3.
+```yaml
+arc_seed:
+  commitment_class: <commitment_class enum>
+  arc_archetype: <arc_archetype enum>
+  target_obligation: OBL-NNNN | null
+  target_thread: THR-NNNN | null
+  entry_pressure_description: >
+    What is unstable on entry.
+  scene_question: >
+    The dramatic-unit question this arc tests.
+  value_delta_target_axes:
+    - <strong_axis enum>
+  tone_register: <kebab-case>
+  content_intensity_band: tame | mature | explicit
+  implied_preconditions:
+    - <kebab-case description>
+  dramatic_transaction_summary: >
+    One-line summary of what changes between the arc's entry state and exit
+    state.
+```
 
-**Precedence when both source-OBL/THR targeting and bootstrap-mix shape weighting apply** (typical seed-mode top-up shape — user supplied `source_obligations` or `source_threads` AND `mode=seed` triggers bootstrap-mix weighting). Mandatory targeting takes precedence: every seed must engage at least one of the supplied source ids via `pays_off_obligations`, `complicates_obligations`, `transfers_obligations`, `opens_obligations`, or (for source_threads) `fact_effects` / `relationship_effects` that raise the thread's `current_pressure`. Bootstrap-mix shape proportions become advisory rather than required — if mandatory targeting forces a shape skew (e.g., source-OBL targeting a `secret`-type OBL pulls toward `relational_dynamics` / `intimacy` / `confrontation` shapes and away from `entry_pressure` / `cast_introduction`), Phase 5 §Shape distribution checks the batch alone (≤40% per shape) rather than the bootstrap-mix targets. The bootstrap-mix proportions remain authoritative ONLY for fresh-bundle seed mode (the `parent_skill_invocation: true` bootstrap sub-routine path) where no source-OBL/THR targeting is supplied.
+`commitment_class` values come from SPEC-22 Track 3 `COMMITMENT_CLASSES`.
+`arc_archetype` values come from SPEC-22 Track 3 `ARC_ARCHETYPES` and the local
+`templates/arc-archetypes.md` library. `value_delta_target_axes` entries come
+from SPEC-22 Track 3 `STRONG_AXES`:
 
-**Focus-mode shape weighting** (when `mode=focus` and `focus_area` is a non-bootstrap_mix value): all seeds match the requested `focus_area`'s implied shape, with a 20% off-shape allowance for diversity (e.g., `focus_area=threat_escalation` → ~80% threat_escalation seeds + ~20% adjacent shapes per Phase 1's gap analysis).
+- `relationship_trajectory`
+- `obligation_state`
+- `information_posture`
+- `risk_cost_exposure`
+- `route_or_scene_type`
+- `thread_pressure`
+- `irreversibility`
+- `character_intention`
 
-**JIT-mode single seed** (when `mode=jit` and `parent_skill_invocation: true`): produce exactly ONE seed sized to the caller's continuation-failure context. `target_pool_size` must be 1. Shape distribution and +30% replacement buffering are bypassed because this is not a batch; the seed should address the failed eligibility / pending-consequence / required-aftermath condition that made page-cycle Phase 3 pass only by JIT-generatable continuation.
+Do not preserve v1 `shape` buckets as aliases. Under SPEC-21, the authoring
+unit is the scene-commitment arc; every seed must be keyed by
+`commitment_class` and `arc_archetype`.
 
-**Audit-mode RSP seeds** (when `mode=audit`): default `target_pool_size` to the number of validated RSP cards (one seed per card). If the user supplies a larger `target_pool_size`, distribute extra seeds across the RSP cards in deterministic card order so wide gaps can receive multiple variants without merging unrelated RSPs into one storylet. Each seed carries:
+## Required And Nullable Fields
 
-- `source_rsp` and `source_audit` from the RSP card.
-- `shape` from `RSP.proposed_shape`.
-- `content_intensity` from `RSP.proposed_intensity`, still constrained by Phase 4 gate 6 against the story baseline.
-- target fields copied from the RSP card's non-null `target_obligation`, `target_thread`, `target_consequence`, and `target_relationship`.
-- state preconditions seeded from `RSP.sketch.hard_preconds`; Phase 3 may elaborate but must preserve the RSP's intended conditions.
-- fact/obligation/consequence/choice scaffolds seeded from `RSP.sketch.fact_effects`, `pays_off_obligations`, `opens_obligations`, `addresses_consequences`, and `choice_templates`.
-- core dramatic transaction synthesized from `RSP.rationale` plus the `sketch` block, grounded in `STORY_KERNEL.tone_constraints`.
+The arc seed has 11 fields.
+
+Mandatory fields:
+
+- `commitment_class`
+- `arc_archetype`
+- `entry_pressure_description`
+- `scene_question`
+- `value_delta_target_axes`
+- `tone_register`
+- `content_intensity_band`
+- `implied_preconditions`
+- `dramatic_transaction_summary`
+
+Nullable fields:
+
+- `target_obligation`
+- `target_thread`
+
+Nullable fields must still be explicit. Use `null` when the arc does not engage
+an OBL or THR. Arcs that engage neither an obligation nor a thread are valid
+when Phase 1 identifies another story-state pressure, such as mystery coverage,
+recent-history repetition relief, route pressure, or cast-state repair.
+
+`target_obligation` and `target_thread` may hold real ids only when Phase 1's
+diagnosis matrix made those records available. Do not guess ids and do not
+invent placeholders.
+
+## Seed Count Target
+
+For seed/focus batches, produce:
+
+```text
+target_pool_size + ceil(target_pool_size * 0.30)
+```
+
+The +30% buffer is structural. Produce all buffered seeds up front so Phase 4
+can drop or revise rejected candidates without forcing a stop-and-redraft cycle.
+The buffer applies to the candidate seed count, not to the final approved SLT
+count.
+
+For `mode=jit`, produce exactly one seed.
+
+For `mode=audit`, produce one seed per validated RSP card unless the caller
+supplies a larger `target_pool_size`; when larger, distribute extra seeds across
+the RSP cards in deterministic card order.
+
+## Direct Seed And Focus Mode
+
+For direct `seed` or `focus` invocation, read Phase 1's diagnosis matrix and
+prioritize seeds from these pressures:
+
+- OBL rows with commitment_class gaps.
+- THR rows with escalation commitment_class gaps.
+- Low-count `arc_archetype_distribution` entries that fit the current story
+  pressure.
+- Low-count `commitment_class_distribution` entries that fit current OBL, THR,
+  mystery, route, or cast-state needs.
+- `mysteries_in_play_by_arc` entries with `gap: true`, limited to safe touching
+  or progressing rather than resolution.
+- `recent_history_repetition_signal.over_represented` entries, which suppress
+  repeated commitment_classes unless a supplied source OBL/THR requires them.
+- `content_intensity_distribution` gaps, constrained by
+  `STORY_KERNEL.content_intensity_baseline`, `content_intensity_override`, and
+  the NC-21 content policy.
+
+When `source_obligations` or `source_threads` is supplied, those source records
+remain mandatory targets. Every seed must either engage one supplied source id
+or state why its nullable target is still justified by the Phase 1 diagnosis
+matrix. Mandatory source targeting takes precedence over archetype or
+commitment-class balancing; Phase 5 will audit the resulting batch distribution.
+
+Focus mode keeps the requested `focus_area` as a pressure lens, not as a v1
+shape enum. For example, `focus_area=thread_resolution_options` should bias
+toward commitment_classes and archetypes that can lower, redirect, or close
+thread pressure; it must not emit a retired `thread_resolution` shape.
+
+## Audit Mode
+
+For audit mode (`mode=audit`), validated RSP cards drive seed creation. Each RSP produces an
+arc seed whose targeting fields come from the card: `commitment_class` from
+`RSP.target_commitment_class`, `arc_archetype` from
+`RSP.target_arc_archetype`, nullable `target_obligation` and `target_thread`
+from the RSP's corresponding target fields, `entry_pressure_description` and
+`scene_question` from `RSP.sketch_dramatic_unit`, and
+`dramatic_transaction_summary` from the RSP rationale plus the current
+story-state pressure named by the finding.
+
+The RSP schema extension is owned by SPEC-22 Track 4. This reference consumes
+these RSP fields without defining or migrating them:
+
+- `target_commitment_class`
+- `target_arc_archetype`
+- `sketch_arc_contract`
+- `sketch_dramatic_unit`
+
+If a historical RSP card still has only v1 `proposed_shape` data and lacks the
+arc-targeting fields, stop and report that the card is pre-SPEC-21. Do not map a
+retired shape to a commitment_class by guesswork.
+
+## JIT mode
+
+For JIT mode (`mode=jit`) with `parent_skill_invocation: true`, produce exactly
+one seed from the continuation-failure context in `caller_state_snapshot`.
+
+The seed's `commitment_class` must match the chosen CHC's
+`commitment_class`. Select `arc_archetype` from `templates/arc-archetypes.md`
+using the deterministic `commitment_class -> recommended arc_archetype` mapping
+unless the caller state proves a more specific archetype is required.
+
+The JIT seed should be just large enough for Phase 3's template cascade to
+produce one runtime `branch_scoped` arc:
+
+- `target_obligation` / `target_thread` cite the failed or pending source id
+  when one exists; otherwise they are explicit `null`.
+- `entry_pressure_description` names the eligibility failure, pending
+  consequence, required aftermath, route blockage, or commitment pressure that
+  made JIT necessary.
+- `scene_question` frames the smallest dramatic question that can move the
+  caller forward.
+- `value_delta_target_axes` names only the strong axes the runtime arc is meant
+  to move.
+
+Direct user invocation of JIT remains invalid; JIT is a no-write sub-routine for
+`branching-story-page-cycle`.
+
+## Field Guidance
+
+`commitment_class` should answer: what kind of commitment does this arc test,
+offer, defer, tighten, or transform?
+
+`arc_archetype` should answer: what dramatic structure from
+`templates/arc-archetypes.md` best carries that commitment_class in this story
+state?
+
+`entry_pressure_description` should be concrete and story-state grounded. It is
+the pressure on entry, not a plot synopsis.
+
+`scene_question` should be answerable by the arc's beats. Use a bounded
+dramatic question, not a theme statement.
+
+`value_delta_target_axes` should name the strong axes the arc intends to move.
+Phase 3 turns this target into concrete `dramatic_unit.value_delta_target`
+content and beat-level `state_significance` values.
+
+`implied_preconditions` are informal in Phase 2. Phase 3 formalizes them through
+the Predicate DSL.
+
+`dramatic_transaction_summary` is the one-line core change. It should be
+specific enough that Phase 3 can build an effect model, but it should not name
+unapproved canon facts or resolve Mystery Reserve entries.
+
+## Cross-References
+
+- `references/phase-1-coverage-diagnosis.md` is the upstream producer of the
+  diagnosis matrix that drives seed selection.
+- `references/phase-3-structured-drafting.md` is the downstream consumer that
+  turns each arc seed into a v2 SLT record.
+- `templates/arc-archetypes.md` is the local archetype vocabulary and JIT
+  mapping table.
+- SPEC-22 Track 3 is the closed-vocabulary source for `COMMITMENT_CLASSES`,
+  `ARC_ARCHETYPES`, and `STRONG_AXES`.
+- SPEC-22 Track 4 owns the RSP card schema fields consumed by audit mode.

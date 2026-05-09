@@ -88,6 +88,38 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
+    const arcSchemaExecution = result.executions.find(
+      (execution) => execution.name === "arc_schema_compliance"
+    );
+    assert.equal(arcSchemaExecution?.status, "skipped");
+    const choiceWorthinessExecution = result.executions.find(
+      (execution) => execution.name === "choice_worthiness_completeness"
+    );
+    assert.equal(choiceWorthinessExecution?.status, "skipped");
+    const stopPolicyExecution = result.executions.find(
+      (execution) => execution.name === "stop_policy_parsability"
+    );
+    assert.equal(stopPolicyExecution?.status, "skipped");
+    const effectModelLegalityExecution = result.executions.find(
+      (execution) => execution.name === "effect_model_legality"
+    );
+    assert.equal(effectModelLegalityExecution?.status, "skipped");
+    const effectModelReplaySafetyExecution = result.executions.find(
+      (execution) => execution.name === "effect_model_replay_safety"
+    );
+    assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
+    const arcTraceEvidenceExecution = result.executions.find(
+      (execution) => execution.name === "arc_trace_evidence_alignment"
+    );
+    assert.equal(arcTraceEvidenceExecution?.status, "skipped");
+    const narrativePointExecution = result.executions.find(
+      (execution) => execution.name === "narrative_point_classification"
+    );
+    assert.equal(narrativePointExecution?.status, "skipped");
+    const arcEnvelopeExecution = result.executions.find(
+      (execution) => execution.name === "arc_envelope_conformance"
+    );
+    assert.equal(arcEnvelopeExecution?.status, "skipped");
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
     );
@@ -102,7 +134,19 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     assert.equal(snapshotIntegrityExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
-      (row) => row !== storyletExecution && row !== snapshotReplayExecution && row !== recursiveClosureExecution && row !== snapshotIntegrityExecution
+      (row) =>
+        row !== storyletExecution &&
+        row !== arcSchemaExecution &&
+        row !== choiceWorthinessExecution &&
+        row !== stopPolicyExecution &&
+        row !== effectModelLegalityExecution &&
+        row !== effectModelReplaySafetyExecution &&
+        row !== arcTraceEvidenceExecution &&
+        row !== narrativePointExecution &&
+        row !== arcEnvelopeExecution &&
+        row !== snapshotReplayExecution &&
+        row !== recursiveClosureExecution &&
+        row !== snapshotIntegrityExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
@@ -227,7 +271,39 @@ test("validatePatchPlan accepts complete storylet records in Shape B story ops",
     const result = await validatePatchPlan(storyletPlan(completeStoryletRecord()) as unknown as PatchPlanEnvelope);
 
     assert.ok(result.executions.some((row) => row.name === "record_schema_compliance" && row.status === "pass"));
+    assert.ok(result.executions.some((row) => row.name === "effect_model_legality" && row.status === "pass"));
     assert.ok(!result.verdicts.some((verdict) => verdict.validator === "record_schema_compliance"));
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_legality"));
+  });
+});
+
+test("validatePatchPlan runs effect-model replay safety for Shape B page ops", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(replaySafePagePlan() as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find((row) => row.name === "effect_model_replay_safety");
+    assert.equal(execution?.status, "pass");
+    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_replay_safety"));
+  });
+});
+
+test("validatePatchPlan materializes ARC_TRACE records for pre-apply trace validators", async () => {
+  await withTempRoot(async () => {
+    const proseDir = path.resolve(process.cwd(), "../../worlds/seeded/stories/marla-kern-seduction/pages-prose");
+    mkdirSync(proseDir, { recursive: true });
+    writeFileSync(path.join(proseDir, "PG-0002.md"), "Mara offers repair help and Mara accepts.", "utf8");
+
+    const result = await validatePatchPlan(arcTracePlan() as unknown as PatchPlanEnvelope);
+
+    for (const name of [
+      "arc_trace_evidence_alignment",
+      "narrative_point_classification",
+      "arc_envelope_conformance"
+    ]) {
+      const execution = result.executions.find((row) => row.name === name);
+      assert.equal(execution?.status, "pass", name);
+      assert.ok(!result.verdicts.some((verdict) => verdict.validator === name), name);
+    }
   });
 });
 
@@ -347,6 +423,109 @@ function pagePlanWithDanglingSnapshotReference() {
         state_snapshot: {
           ...completeStateSnapshot(),
           objective_facts: ["SF-9999"]
+        }
+      })
+    ]
+  };
+}
+
+function replaySafePagePlan() {
+  return {
+    plan_id: "plan-replay-safe-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      storyPatch("create_stloc_record", "locations", {
+        id: "STLOC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002"
+      }),
+      storyPatch("create_slt_record", "storylets", completeStoryletRecord()),
+      storyPatch("create_se_record", "events", {
+        id: "SE-0002",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        ops: [
+          {
+            op_id: "OP-0001",
+            op_type: "relationship_supersede",
+            input_records: [],
+            output_records: [],
+            deterministic_payload: {}
+          }
+        ]
+      }),
+      storyPatch("create_pg_record", "pages", {
+        id: "PG-0002",
+        story_id: "STORY-001",
+        branch_path: ["PG-0002"],
+        storylet_realized: "SLT-0001",
+        applied_event_ops: ["SE-0002"],
+        state_snapshot: {
+          ...completeStateSnapshot(),
+          canon_revision: null,
+          current_location: "STLOC-0001",
+          applied_effect_variant: "partial-repair",
+          narrative_point_classification: "CONTINUE_ARC"
+        }
+      })
+    ]
+  };
+}
+
+function arcTracePlan() {
+  return {
+    plan_id: "plan-arc-trace-001",
+    target_world: "seeded",
+    approval_token: "token-from-gate",
+    verdict: "ACCEPT",
+    originating_skill: "branching-story-page-cycle",
+    expected_id_allocations: {},
+    patches: [
+      ...replaySafePagePlan().patches,
+      storyPatch("create_arc_trace_record", "arc-traces", {
+        id: "ARCTRACE-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        arc_realized: "SLT-0001",
+        effect_variant_applied: "partial-repair",
+        realized_beats: [
+          {
+            beat_id: "B1",
+            function: "offer-help",
+            realized: "true",
+            evidence_span: { start: 0, end: 14 }
+          }
+        ],
+        observed_actions: [
+          {
+            actor: "STENT-0001",
+            action: "offers repair help",
+            target: "STENT-0002",
+            evidence_span: { start: 0, end: 14 }
+          }
+        ],
+        observed_claims: [],
+        possible_violations: [],
+        stop_condition_hit: {
+          id: "help-accepted",
+          category: "normal_exit",
+          evidence_span: { start: 21, end: 31 }
+        },
+        effect_evidence: [
+          {
+            effect_ref: 0,
+            realized: "true",
+            evidence_span: { start: 21, end: 31 }
+          }
+        ],
+        semantic_critic_verdict: {
+          status: "pass",
+          reasons: [],
+          required_revision_constraints: []
         }
       })
     ]

@@ -35,6 +35,7 @@ test("searchNodes scopes lexical search to the requested story bundle", async ()
     assert.deepEqual(
       current.nodes.map((node) => [node.id, node.node_type, node.story_slug]),
       [
+        ["opening-bells:ARCTRACE-0001", "arc_trace_node", STORY_FIXTURE_SLUG],
         ["opening-bells:OBL-0001", "obligation_record", STORY_FIXTURE_SLUG],
         ["opening-bells:PG-0001", "page_record", STORY_FIXTURE_SLUG],
         ["opening-bells:SE-0001", "story_event_record", STORY_FIXTURE_SLUG],

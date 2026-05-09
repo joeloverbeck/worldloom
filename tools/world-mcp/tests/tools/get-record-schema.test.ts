@@ -35,6 +35,7 @@ const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   page_record: "https://worldloom.local/schemas/story-page.schema.json",
   choice_record: "https://worldloom.local/schemas/story-choice.schema.json",
   storylet_record: "https://worldloom.local/schemas/story-storylet.schema.json",
+  arc_trace_node: "https://worldloom.local/schemas/story-arc-trace.schema.json",
   story_diegetic_artifact_record: "https://worldloom.local/schemas/story-diegetic-artifact.schema.json"
 };
 
@@ -64,6 +65,7 @@ const EXPECTED_SOURCE_PATHS: Record<SupportedRecordSchemaNodeType, string> = {
   page_record: "tools/validators/src/schemas/story-page.schema.json",
   choice_record: "tools/validators/src/schemas/story-choice.schema.json",
   storylet_record: "tools/validators/src/schemas/story-storylet.schema.json",
+  arc_trace_node: "tools/validators/src/schemas/story-arc-trace.schema.json",
   story_diegetic_artifact_record: "tools/validators/src/schemas/story-diegetic-artifact.schema.json"
 };
 
@@ -157,46 +159,41 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   const storylet = await getRecordSchema({ node_type: "storylet_record" });
   const storyFact = await getRecordSchema({ node_type: "story_fact_record" });
   const page = await getRecordSchema({ node_type: "page_record" });
+  const arcTrace = await getRecordSchema({ node_type: "arc_trace_node" });
   const branch = await getRecordSchema({ node_type: "branch_record" });
 
   assert.ok(!("code" in storylet));
   assert.ok(!("code" in storyFact));
   assert.ok(!("code" in page));
+  assert.ok(!("code" in arcTrace));
   assert.ok(!("code" in branch));
 
   assert.equal(storylet.schema.additionalProperties, true);
   const storyletProperties = storylet.schema.properties as Record<string, { pattern?: string }>;
   assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");
-  assert.deepEqual(storylet.required_fields, [
-    "id",
-    "story_id",
-    "title",
-    "shape",
-    "content_intensity",
-    "hard_preconds",
-    "soft_preconds",
-    "cast_requirements",
-    "location_requirements",
-    "opens_obligations",
-    "pays_off_obligations",
-    "complicates_obligations",
-    "transfers_obligations",
-    "fact_effects",
-    "relationship_effects",
-    "tone_tags",
-    "theme_tags",
-    "tension_delta",
-    "aftermath_weight",
-    "mystery_safety",
-    "choice_templates",
-    "provenance",
-    "visibility"
-  ]);
+  assert.deepEqual(storylet.required_fields, readSourceSchema("storylet_record").required);
+  assert.ok(storylet.required_fields.includes("arc_contract"));
   assert.deepEqual(storylet.conditional_blocks, {});
 
   assert.equal(storyFact.schema.$id, "https://worldloom.local/schemas/story-fact.schema.json");
   assert.equal(page.schema.$id, "https://worldloom.local/schemas/story-page.schema.json");
+  assert.equal(arcTrace.schema.$id, "https://worldloom.local/schemas/story-arc-trace.schema.json");
+  assert.equal(arcTrace.source_path, "tools/validators/src/schemas/story-arc-trace.schema.json");
+  assert.deepEqual(arcTrace.required_fields, [
+    "id",
+    "story_id",
+    "created_at_page",
+    "arc_realized",
+    "effect_variant_applied",
+    "realized_beats",
+    "observed_actions",
+    "observed_claims",
+    "possible_violations",
+    "stop_condition_hit",
+    "effect_evidence",
+    "semantic_critic_verdict"
+  ]);
   assert.equal(branch.schema.$id, "https://worldloom.local/schemas/story-branch.schema.json");
 });
 

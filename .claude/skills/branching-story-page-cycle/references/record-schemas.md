@@ -51,6 +51,10 @@ state_snapshot:
       present: true
       mobile: true
       restrained: false
+  applied_effect_variant: <variant id> | null         # Phase 4b chosen arc.effect_model variant; null only at PG-0001 root
+  narrative_point_classification: CONTINUE_ARC | NATURAL_COMMITMENT_HINGE | INTERRUPT_HINGE | CONTINUE_ONLY_PAUSE | TERMINAL_OR_CHAPTER_CLOSE
+  arc_trace_id: ARCTRACE-NNNN | null                  # populated only when Phase 7.6 emits an ARC_TRACE
+  arc_trace_emitted: true | false                     # false when low-budget interactive_runtime omits derived ARC_TRACE persistence
 prose_path: pages-prose/PG-0042.md
 emitted_choices: [CHC-NNNN, ...]
 narrative_health: {...}                              # see Phase 6
@@ -79,6 +83,14 @@ created_at: <iso8601>
 ```
 
 Page records do not carry `created_at_page`. The page record's own PG id is its branch anchor, and recursive reference closure authorizes PG references by checking that the referenced PG id appears in `branch_path`.
+
+`state_snapshot.applied_effect_variant` records the selected `arc.effect_model.variants[].id` chosen by Phase 4b and consumed by Phase 5 replay. It is required for non-root pages that realize an arc; PG-0001 uses `null` because the bootstrap root page is a scene-setter and no arc has closed yet.
+
+`state_snapshot.narrative_point_classification` records the Phase 8 narrative point for the page. The closed enum is `CONTINUE_ARC`, `NATURAL_COMMITMENT_HINGE`, `INTERRUPT_HINGE`, `CONTINUE_ONLY_PAUSE`, and `TERMINAL_OR_CHAPTER_CLOSE`; validators compare menu-emitting classifications against ARC_TRACE stop-condition categories when a trace is present.
+
+`state_snapshot.arc_trace_id` points to the derived `ARCTRACE-NNNN` record emitted for this page. It is `null` when `arc_trace_emitted: false` or at PG-0001's no-arc root.
+
+`state_snapshot.arc_trace_emitted` records whether Phase 7.6 persisted an ARC_TRACE for this page. Standard authoring/runtime paths set it to `true` when the trace is emitted; low-budget `interactive_runtime` may set it to `false` only under the Phase 7.6 omission discipline, with `arc_trace_id: null`.
 
 ## Story Event Record (SE-NNNN)
 
@@ -134,6 +146,107 @@ The `op_type` enum is closed; LLM proposers may not invent new op types. The `de
 ## Choice Record (CHC-NNNN)
 
 Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) and the `continuation_capacity` block (`post_choice_delta`, `valid_seed_storylets`, `jit_shape_spec`, `validation_basis`). The choice contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks). The continuation-capacity block is enforced at this turn's Phase 8 / Phase 9 gate 9 so persisted runtime CHCs carry the same post-choice seed/JIT viability evidence as bootstrap CHCs.
+
+### CHC v2 fields (record_version: 2)
+
+SPEC-19 extends CHC records for the scene-commitment-arc pivot. The v2 extension is additive on top of the preserved v1 `choice_contract` and `continuation_capacity` blocks; no dual-version runtime logic is introduced by this reference text.
+
+```yaml
+record_version: 2
+choice_kind: scene_commitment | tactical_beat   # scene_commitment is the v2 standard;
+                                                # tactical_beat is reserved for narrow cases
+commitment_class: <commitment_class enum>       # required when choice_kind == scene_commitment
+strategy_cluster: <kebab-case open-vocab tag>   # required when choice_kind == scene_commitment
+choice_worthiness:
+  strategic_question_answered: >                # one-line scene question
+  strong_axes:                                  # >=1 entry from the strong_axis enum
+    - relationship_trajectory | obligation_state | information_posture |
+      risk_cost_exposure | route_or_scene_type | thread_pressure |
+      irreversibility | character_intention
+  expected_state_delta:                         # per-axis projection; non-empty
+    relationship: { possible: [...], magnitude: small | medium | large } | null
+    obligation:   { possible: [...], magnitude: small | medium | large } | null
+    thread:       { possible: [...], magnitude: small | medium | large } | null
+    information:  { possible: [...] } | null
+    risk:         { possible: [...] } | null
+    route:        { possible: [...] } | null
+    irreversibility: true | false | null
+    intention:    { possible: [...] } | null
+  why_not_microbeat: >                          # why this is not merely a gesture
+  foreseeable_difference: >                     # what sibling choices will foreseeably change
+
+# v1 blocks preserved:
+choice_contract: {...}
+likely_effects: [...]                           # MANDATORY non-empty under v2 scene_commitment
+continuation_capacity: {...}
+```
+
+Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthiness` block and a non-empty `likely_effects` array. SPEC-22's `choice_worthiness_completeness` validator HARD-REJECTs empty or missing v2 fields. This closes the SPEC-19 empirical gap: 40/40 v1 CHC records in the red-bunny test bundle had `likely_effects: []` at reassessment on 2026-05-07.
+
+`scene_commitment` is the default for v2 LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
+
+## ARC_TRACE Record (story-bundle-scoped)
+
+ARC_TRACE is a derived post-render trace extracted by SPEC-20 Phase 7.6. It is non-authoritative for replay: replay equality is preserved by `effect_model.variants[]` determinism on the parent SLT record plus the chosen variant id recorded in `PG.state_snapshot.applied_effect_variant`. ARC_TRACE records may be deleted, regenerated, or omitted in low-cost runtime modes without breaking replay.
+
+Storage path:
+
+```text
+worlds/<slug>/stories/<story-slug>/_source/arc-traces/ARCTRACE-NNNN.yaml
+```
+
+Allocate ids through `mcp__worldloom__allocate_next_id(world_slug, 'ARCTRACE', story_slug=...)`. The patch-engine op `create_arc_trace_record` is owned by SPEC-22 Track 1; validators `arc_trace_evidence_alignment` and `effect_model_replay_safety` are owned by SPEC-22 Track 2; indexer and MCP retrieval support for `list_records('arc_trace_record', story_slug)` is owned by SPEC-22 Track 3.
+
+```yaml
+id: ARCTRACE-NNNN
+story_id: STORY-NNN
+created_at_page: PG-NNNN                       # page whose render this trace describes
+arc_realized: SLT-NNNN                         # arc selected at SPEC-20 Phase 4
+effect_variant_applied: <variant id>           # from arc.effect_model.variants[]
+
+realized_beats:
+  - beat_id: B1
+    function: <beat_function string>
+    evidence_span: { start: <char offset>, end: <char offset> }
+    realized: true | partially | not
+
+observed_actions:
+  - actor: STENT-NNNN
+    action: <canonical verb>
+    target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract | null
+    evidence_span: { start: <char offset>, end: <char offset> }
+
+observed_claims:
+  - claim: >                                   # structured-form claim extracted from prose
+    source: narrator | character | inference
+    canon_status: story_local | apparent | forbidden_risk
+    evidence_span: { start: <char offset>, end: <char offset> }
+
+possible_violations:
+  - envelope_item: invariant_directive | required_function | prohibited_action
+    severity: low | medium | high
+    evidence_span: { start: <char offset>, end: <char offset> }
+
+stop_condition_hit:
+  id: <kebab-case stop id from arc.stop_policy>
+  category: normal_exit | interrupt_before | safety_valve
+  evidence_span: { start: <char offset>, end: <char offset> }
+
+effect_evidence:
+  - effect_ref: <variants[].required_effects[N]>
+    realized: true | partially | not
+    evidence_span: { start: <char offset>, end: <char offset> }
+
+semantic_critic_verdict:
+  status: pass | revise_prose | reject_arc | promote_interrupt
+  reasons: [...]
+  required_revision_constraints: [...]
+
+notes: >
+  Free-form authorial or debugger notes.
+```
+
+Every claim in `observed_actions[]`, `observed_claims[]`, `possible_violations[]`, `stop_condition_hit`, and `effect_evidence[]` carries an `evidence_span` with byte offsets into the rendered prose. `observed_claims[].canon_status` uses the story-local Mystery Reserve safety taxonomy `story_local | apparent | forbidden_risk`; `forbidden_risk` is a protective annotation for claims that may resolve a forbidden mystery and routes to SPEC-20 Phase 7.6 `revise_prose` or `reject_arc`.
 
 ## Other story-bundle records
 

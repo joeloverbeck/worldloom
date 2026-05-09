@@ -26,6 +26,8 @@ target_obligation: null              # OBL-NNNN | null
 target_thread: null                  # THR-NNNN | null
 target_consequence: null             # CNSQ-NNNN | null
 target_relationship: null            # SREL-NNNN | null
+target_commitment_class: null        # commitment_class enum | null
+target_arc_archetype: null           # arc_archetype enum | null
 
 # Per the SLT shape enum (storylet-pool-authoring templates/storylet-record.yaml).
 proposed_shape: entry_pressure       # entry_pressure | cast_introduction | threat_escalation | relational_dynamics | routine_disruption | aftermath_sequel | reflection_dilemma | mystery_edge_brush | fork_recovery | thread_resolution | aftermath_residue | intimacy | confrontation | other
@@ -48,6 +50,8 @@ sketch:
   opens_obligations: []              # new OBL templates the storylet would emit
   addresses_consequences: []         # CNSQ kind matchers
   choice_templates: []               # 4-6 entries; each with operation + target_role + likely_effects + choice_mode + poetic_effect
+  sketch_arc_contract: null          # required when this RSP remediates an arc-conformance, choice-cadence, commitment-class-coverage, or v2 CHC continuation finding
+  sketch_dramatic_unit: null         # required when sketch_arc_contract is non-null; summarizes entry_pressure, turn, and exit pressure
 
 rationale: >
   One short paragraph stating why this storylet would close the finding(s)

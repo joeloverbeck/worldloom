@@ -50,6 +50,12 @@ const STORY_CLASS_CASES: Array<{
   fileName: string;
   expected: string;
 }> = [
+  {
+    idClass: "ARCTRACE",
+    subdir: "arc-traces",
+    fileName: "ARCTRACE-0007.yaml",
+    expected: "ARCTRACE-0008"
+  },
   { idClass: "PG", subdir: "pages", fileName: "PG-0007.yaml", expected: "PG-0008" },
   { idClass: "SE", subdir: "events", fileName: "SE-0007.yaml", expected: "SE-0008" },
   { idClass: "SF", subdir: "facts", fileName: "SF-0007.yaml", expected: "SF-0008" },
@@ -332,17 +338,22 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const spResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SP", story_slug: "empty-story" })
     );
+    const arcTraceResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "ARCTRACE", story_slug: "empty-story" })
+    );
 
     assert.ok(!("code" in pageResult));
     assert.ok(!("code" in stintResult));
     assert.ok(!("code" in slbResult));
     assert.ok(!("code" in sauResult));
     assert.ok(!("code" in spResult));
+    assert.ok(!("code" in arcTraceResult));
     assert.equal(pageResult.next_id, "PG-0001");
     assert.equal(stintResult.next_id, "STINT-0001");
     assert.equal(slbResult.next_id, "SLB-0001");
     assert.equal(sauResult.next_id, "SAU-0001");
     assert.equal(spResult.next_id, "SP-0001");
+    assert.equal(arcTraceResult.next_id, "ARCTRACE-0001");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -592,6 +603,9 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const storyScopedWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "PG" })
     );
+    const arcTraceWithoutStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "ARCTRACE" })
+    );
     const sauWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SAU" })
     );
@@ -633,6 +647,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in storyWithPipelineSlug);
     assert.ok("code" in sauWithPipelineSlug);
     assert.ok("code" in storyScopedWithoutStorySlug);
+    assert.ok("code" in arcTraceWithoutStorySlug);
     assert.ok("code" in sauWithoutStorySlug);
     assert.ok("code" in spWithoutStorySlug);
     assert.ok("code" in rspWithoutStorySlug);
@@ -647,6 +662,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(storyWithPipelineSlug.code, "invalid_input");
     assert.equal(sauWithPipelineSlug.code, "invalid_input");
     assert.equal(storyScopedWithoutStorySlug.code, "invalid_input");
+    assert.equal(arcTraceWithoutStorySlug.code, "invalid_input");
     assert.equal(sauWithoutStorySlug.code, "invalid_input");
     assert.equal(spWithoutStorySlug.code, "invalid_input");
     assert.equal(rspWithoutStorySlug.code, "invalid_input");
@@ -659,6 +675,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);
     assert.match(storyScopedWithoutStorySlug.message, /requires story_slug/);
+    assert.match(arcTraceWithoutStorySlug.message, /requires story_slug/);
     assert.match(sauWithoutStorySlug.message, /requires story_slug/);
     assert.match(spWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutStorySlug.message, /requires story_slug/);
@@ -671,7 +688,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 48 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 49 id classes with existing formats preserved", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -691,6 +708,7 @@ test("allocateNextId exposes all 48 id classes with existing formats preserved",
     "SP",
     "EPE",
     "STORY",
+    "ARCTRACE",
     "PG",
     "SE",
     "SF",
@@ -722,10 +740,12 @@ test("allocateNextId exposes all 48 id classes with existing formats preserved",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 48);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 49);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
+  assert.equal(ID_CLASS_FORMATS.ARCTRACE.zeroPad, true);
+  assert.match("ARCTRACE-0008", ID_CLASS_FORMATS.ARCTRACE.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, true);
   assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-0008", ID_CLASS_FORMATS.STINT.regex);

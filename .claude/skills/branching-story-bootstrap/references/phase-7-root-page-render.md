@@ -1,21 +1,21 @@
 # Phase 7: Root Page Render
 
-Reference for `branching-story-bootstrap` Phase 7 — the LLM prose-production phase that selects the genesis storylet, renders PG-0001's opening prose against the Prose Craft Contract, runs the deterministic post-LLM cross-check, and emits the page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer for Phase 11's atomic write.
+Reference for `branching-story-bootstrap` Phase 7 — the LLM prose-production phase that renders PG-0001 as a scene-setter against the Prose Craft Contract, runs the deterministic post-LLM cross-check, and emits the page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer for Phase 11's atomic write.
 
 ---
 
-## Storylet selection for PG-0001
+## Scene-setter mode for PG-0001
 
-Score each seed SLT on:
+PG-0001 is rendered without an SLT selection. There is no "PG-0001 storylet" to score and select, because no scene-commitment arc closes at the root page. The user picks the first commitment from PG-0001's menu, and the first true arc render happens at PG-0002 through `branching-story-page-cycle`.
 
-- `salience(entry_pressure_signal)` — favor `shape: entry_pressure`.
-- `premise_alignment` — match between SLT's `tone_tags`/themes and STORY_KERNEL declarations.
-- `cast_present` — must include the protagonist; ideally one or two more bound cast.
+Phase 7 instead builds an entry pressure framing from:
 
-**Hard filters**:
+- STORY_KERNEL `central_dramatic_question` when present.
+- Phase 5 initial obligations and threads.
+- Phase 4 `mysteries_in_play[]` and invariant constraints.
+- Phase 6 seed-pool eligibility, summarized by available `arc_contract.commitment_class` values, not by selecting one seed.
 
-- SLT's `mystery_safety.forbidden_M_resolved` must be `false`.
-- SLT must NOT carry `M_resolution_claims` with `resolution_authority: canon_candidate` (bootstrap doesn't promote).
+The scene-setter establishes the opening pressure and exposes 4-6 plausible commitment-class next moves for Phase 8. It must not resolve an arc, apply an arc effect variant, or emit an ARC_TRACE.
 
 ---
 
@@ -30,17 +30,18 @@ The order matters; content_policy is FIRST so it binds the model before any othe
                + POV + central dramatic question]
 [PROSE CRAFT CONTRACT — verbatim from
                         .claude/skills/branching-story-page-cycle/references/prose-craft-contract.md]
-[selected storylet — hard_preconds, fact_effects, opens_obligations,
-                     choice_templates, tone_tags]
 [cast bound — for each STENT, name + role + STINT summary]
 [state context — facts visible to POV at story start, open obligations]
+[entry pressure framing — central dramatic question; Phase 5 obligations and
+                          threads; mysteries in play; seed-pool commitment_class
+                          affordances summarized without selecting an SLT]
 INSTRUCTION:
-Render the opening page. Length follows content: the page is as long as the
-selected storylet's beat, the cast's reactions, and the natural
+Render the PG-0001 scene-setter. Length follows content: the page is as long as
+the entry pressure, the cast's reactions, and the natural
 end-where-choices-emerge require — no padding, no truncation. There is no
-target word count. Stop when the beat is complete and the next decision point
-is naturally available; do not add filler to extend the page, do not truncate
-to keep it short. (Prose Craft Contract Rule 11.)
+target word count. Stop when the opening pressure is established and the first
+commitment surface is naturally available; do not add filler to extend the page,
+do not truncate to keep it short. (Prose Craft Contract Rule 11.)
 
 Render through what happens — what characters do, say, perceive, and attend
 to. Avoid narrating meaning, summarizing reactions, labeling subtext, or
@@ -53,10 +54,10 @@ all four modalities for completeness. (Prose Craft Contract Rule 7.)
 Respect content_intensity_baseline. Do not invent facts beyond state context.
 Do not resolve any mystery declared in mysteries_in_play[].
 
-End at a moment where 4-6 distinct choices for what happens next would be
-natural. If the selected storylet's beat completes before such a moment is
-naturally available, this is a storylet-shape problem to surface — flag it
-rather than padding the prose to reach an artificial choice point.
+End at a moment where 4-6 distinct commitment-class choices for what happens
+next would be natural. If the entry pressure does not yet support such a moment,
+this is a bootstrap-state problem to surface — flag it rather than padding the
+prose to reach an artificial choice point.
 
 Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
 filter-word saturation, recurring-metaphor recurrence (against any prior pages
@@ -84,11 +85,11 @@ Up to 3 re-prompts before escalating to user with the constraint failures inline
 Page-cycle-compatible schema; `branching-story-page-cycle` §Record Schemas §Page Record is the runtime authority.
 
 - **Identity / branch wiring**: `id: PG-0001`, `story_id`, `branch_id: BR-0001`, `parent_page_id: null`, `branch_path: [PG-0001]`, `chosen_choice_id: null`, `write_in_used: false`, `write_in_routing: null`.
-- **Genesis event linkage**: `storylet_realized`, `applied_event_ops: [SE-0001]`.
+- **Genesis event linkage**: `storylet_realized: null`, `applied_event_ops: [SE-0001]`.
 - **State hash**: `state_hash: bootstrap-pg0001-state-<story-slug>-v1` (deterministic placeholder convention; the page-cycle's normal state_hash discipline begins at PG-0002), `parent_state_hash: null`.
 - **Terminality**: `branch_terminal: false`, `terminal_reason: null`.
 - **Prose path**: `prose_path: pages-prose/PG-0001.md`.
-- **state_snapshot**: `canon_revision`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, `rumor_state`, `obligations_open`, `obligations_paid_off: []`, `obligations_complicated: []`, `obligations_abandoned: []`, `consequences_pending`, `consequences_addressed: []`, `threads_active`, `relationships_current`, `intentions_current`, `cast_present`, `current_location`, `accessible_locations`, `objects_in_scope`, `inventory_by_entity`, `entity_status`.
+- **state_snapshot**: `canon_revision`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, `rumor_state`, `obligations_open`, `obligations_paid_off: []`, `obligations_complicated: []`, `obligations_abandoned: []`, `consequences_pending`, `consequences_addressed: []`, `threads_active`, `relationships_current`, `intentions_current`, `cast_present`, `current_location`, `accessible_locations`, `objects_in_scope`, `inventory_by_entity`, `entity_status`, `applied_effect_variant: null`, `narrative_point_classification: NATURAL_COMMITMENT_HINGE`, `arc_trace_id: null`, `arc_trace_emitted: false`.
 - **narrative_health**: `open_obligation_count`, `high_salience_unpaid_count`, `average_obligation_age: 0`, `contradiction_risk: 0.0`, `causal_connectivity: 1.0`, `character_motivation_coverage`, `unresolved_threat_pressure`, `recent_consequence_density: 0.0`, `recent_reflection_density: 0.0`, `novelty: 1.0`, `tension`, `agency_score: 1.0`.
 - **Governor / content / trace / timestamps**: `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (the page-cycle's 12 PG-record keys — see §Phase 9 dual-validation-trace mapping below), `created_at`.
 
@@ -96,7 +97,7 @@ Page-cycle-compatible schema; `branching-story-page-cycle` §Record Schemas §Pa
 
 ## Phase 9 dual-validation-trace mapping
 
-Phase 9's 12 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (bootstrap-time record). PG-0001's `validation_trace` uses the page-cycle's 12 PG-record keys so PG-0001 conforms to runtime-page schema for `branching-story-page-cycle` consumption.
+Phase 9's 17 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (bootstrap-time record). PG-0001's `validation_trace` uses the page-cycle's PG-record keys so PG-0001 conforms to runtime-page schema for `branching-story-page-cycle` consumption.
 
 **Direct overlap (8 keys)**:
 - `mystery_firewall` ↔ gate 1
@@ -119,6 +120,13 @@ Phase 9's 12 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (boo
 - `obligation_salience`
 - `storylet_diversity`
 
+**PG-0001 scene-commitment validator gates (5)** record PASS with PG-0001 root-case rationales:
+- `arc_envelope_conformance`: PASS — PG-0001 root special case, no arc selected.
+- `effect_model_replay_safety`: PASS — PG-0001 root special case, `applied_effect_variant: null`.
+- `arc_trace_evidence_alignment`: PASS — PG-0001 root special case, no ARC_TRACE emitted.
+- `narrative_point_classification`: PASS — PG-0001 defaults to `NATURAL_COMMITMENT_HINGE`.
+- `choice_worthiness_completeness`: PASS — every emitted PG-0001 CHC passes Phase 8 choice-worthiness validation.
+
 ---
 
 ## Emit BR-0001 record
@@ -131,4 +139,4 @@ Phase 9's 12 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (boo
 
 Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story-page-cycle` §Record Schemas §Story Event Record is the runtime authority.
 
-`id: SE-0001`, `story_id`, `branch_id: BR-0001`, `created_at_page: PG-0001`, `source.parent_page_id: null`, `source.chosen_choice_id: null`, `source.write_in_text_hash: null`, `source.storylet_realized: <selected SLT id>`, `actor: system`, `action: bootstrap`, `target: null`, `instrument: null`, `preconditions_checked: []`, `ops: []`, `state_hash_before: null`, `state_hash_after: <PG-0001.state_hash>` (the same `bootstrap-pg0001-state-<story-slug>-v1` placeholder per the PG-0001 emit step above), `notes: "Genesis event for STORY-NNN — bootstrap emission, no preceding state."`.
+`id: SE-0001`, `story_id`, `branch_id: BR-0001`, `created_at_page: PG-0001`, `source.parent_page_id: null`, `source.chosen_choice_id: null`, `source.write_in_text_hash: null`, `source.storylet_realized: null`, `actor: system`, `action: bootstrap`, `target: null`, `instrument: null`, `preconditions_checked: []`, `ops: []`, `state_hash_before: null`, `state_hash_after: <PG-0001.state_hash>` (the same `bootstrap-pg0001-state-<story-slug>-v1` placeholder per the PG-0001 emit step above), `notes: "Genesis event for STORY-NNN — bootstrap scene-setter emission, no preceding state and no realized arc."`.

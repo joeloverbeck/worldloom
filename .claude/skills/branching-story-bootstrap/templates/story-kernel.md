@@ -19,6 +19,19 @@ pov_mode: single                         # single | rotating | omniscient
 content_intensity_baseline: mature       # tame | mature | explicit
 execution_mode_default: authoring        # authoring | interactive_runtime | batch_generation
 
+cadence_policy:                          # optional per-bundle defaults; omit block to use these values
+  max_arcs_without_menu_soft: 2           # arc-units only; not a word-count budget
+  max_arcs_without_player_commitment_soft: 4
+  allow_continue_only_pages: true
+  force_menu_only_on_interrupt_hinge: false
+
+menu_policy:                             # optional per-bundle defaults; omit block to use these values
+  min_distinct_commitments: 2
+  max_displayed_choices: 4
+  require_likely_effects: true
+  require_strong_axis_difference: true
+  require_choice_worthiness: true
+
 cast_bind_list:
   - char_id: CHAR-NNNN
     stent_id: STENT-NNNN
@@ -73,10 +86,15 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_06_cast_intention_coverage: "PASS — <one-line rationale>"
   gate_07_obligation_salience: "PASS — <one-line rationale>"
   gate_08_epistemic_class_declared: "PASS — <one-line rationale>"
-  gate_09_storylet_diversity: "PASS — <one-line rationale>"
+  gate_09_storylet_commitment_class_diversity: "PASS — <one-line rationale>"
   gate_10_prose_ledger_consistency: "PASS — <one-line rationale>"
   gate_11_choice_consequence_capacity: "PASS — <one-line rationale>"
   gate_12_state_snapshot_completeness: "PASS — <one-line rationale>"
+  gate_13_arc_envelope_conformance: "PASS — PG-0001 root special case; no arc selected"
+  gate_14_effect_model_replay_safety: "PASS — PG-0001 root special case; applied_effect_variant is null"
+  gate_15_arc_trace_evidence_alignment: "PASS — PG-0001 root special case; no ARC_TRACE emitted"
+  gate_16_narrative_point_classification: "PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE"
+  gate_17_choice_worthiness_completeness: "PASS — <one-line rationale>"
 
 discipline_validation_trace:             # populated by Phase 9.5 — every discipline check one-line PASS rationale
   discipline_check_01_choice_contract_completeness: "PASS — <one-line rationale>"
@@ -92,15 +110,13 @@ discipline_validation_trace:             # populated by Phase 9.5 — every disc
 
 storylet_pool_summary:                   # populated by Phase 6
   # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
-  total: 20
-  shape_distribution:
-    entry_pressure: 4
-    cast_introduction: 2
-    threat_escalation: 3
-    relational_dynamics: 4
-    routine_disruption: 3
-    aftermath_sequel: 2
-    reflection_dilemma: 2
+  total: 10
+  commitment_class_distribution:
+    ask_one_bounded_question: 2
+    offer_practical_help: 2
+    stay_available_without_pressure: 2
+    withdraw_without_abandoning: 2
+    tighten_pressure: 2
 ---
 
 # STORY-NNNN — <Story Title (free-form derived from premise)>
@@ -141,6 +157,13 @@ NO RESTRICTIONS: ...
 
 <Optional. Not all branching stories have a single Q. Leave blank or write "N/A — emergent" if intentional.>
 
+## Cadence And Menu Policy
+
+Defaults are the frontmatter values shown in `cadence_policy` and `menu_policy`.
+These blocks live on STORY_KERNEL.md, not on individual arcs, because they
+describe per-bundle authorial taste rather than per-arc structure. Pacing is
+expressed in arc-units only; do not add word-count fields to `cadence_policy`.
+
 ## Cast
 
 <For each STENT in cast_bind_list, one bullet:>
@@ -175,17 +198,15 @@ NO RESTRICTIONS: ...
 
 ## Storylet Pool Summary
 
-<Compact summary mirrored from frontmatter `storylet_pool_summary`. Phase 9 gate 9 enforces ≥5 distinct shapes covered.>
+<Compact summary mirrored from frontmatter `storylet_pool_summary`. Phase 9 gate 9 enforces commitment_class diversity. Every seed SLT is `shape: scene_commitment_arc`; shape distribution is not a diversity axis.>
 
-| Shape | Count |
+| Commitment class | Count |
 |---|---|
-| entry_pressure | <count> |
-| cast_introduction | <count> |
-| threat_escalation | <count> |
-| relational_dynamics | <count> |
-| routine_disruption | <count> |
-| aftermath_sequel | <count> |
-| reflection_dilemma | <count> |
+| ask_one_bounded_question | <count> |
+| offer_practical_help | <count> |
+| stay_available_without_pressure | <count> |
+| withdraw_without_abandoning | <count> |
+| tighten_pressure | <count> |
 
 ## Validation Trace
 
@@ -195,6 +216,11 @@ NO RESTRICTIONS: ...
 2. **Invariant compatibility (gate 2)**: PASS — <rationale>
 3. ...
 12. **State_snapshot completeness (gate 12)**: PASS — <rationale>
+13. **Arc envelope conformance (gate 13)**: PASS — PG-0001 root special case; no arc selected
+14. **Effect model replay safety (gate 14)**: PASS — PG-0001 root special case; applied_effect_variant is null
+15. **Arc trace evidence alignment (gate 15)**: PASS — PG-0001 root special case; no ARC_TRACE emitted
+16. **Narrative point classification (gate 16)**: PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE
+17. **Choice worthiness completeness (gate 17)**: PASS — <rationale>
 
 ## Discipline Validation Trace
 

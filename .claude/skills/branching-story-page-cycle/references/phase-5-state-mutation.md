@@ -1,6 +1,35 @@
 # Phase 5: State Mutation
 
-Apply the structured ops from Phase 1's `ProposedEvent` and Phase 4's selected storylet's `fact_effects` / `relationship_effects` / `opens_obligations` / `pays_off_obligations` / `complicates_obligations` / `transfers_obligations`.
+Under the scene-commitment-arc runtime, Phase 5 applies the chosen arc variant's `required_effects[]` as one state-transition batch at arc-close. Phase 4b selects the variant before render and records the variant id in the pending PG transaction; Phase 5 converts that selected variant's effects into the deterministic `SE.ops` entries that Phase 11 submits.
+
+## Arc-Level Effect Application
+
+Phase 5 consumes `arc.effect_model.variants[<chosen>].required_effects[]`, not beat-internal prose interpretation. The render must realize the selected variant, but the prose does not decide which state changes are authoritative. Replay equality is computed at arc cadence: replay reads the PG's recorded `state_snapshot.applied_effect_variant`, re-derives the same `SE.ops` batch from the realized arc's `effect_model`, and compares the resulting snapshot/hash to disk.
+
+Each `required_effects[]` entry maps to one or more `SE.ops` entries using the closed `op_type` vocabulary:
+
+| `required_effects.type` | `SE.op_type` |
+|---|---|
+| `relationship_axis_shift` | `relationship_supersede` |
+| `thread_pressure_delta` | `thread_supersede` |
+| `obligation_status_change` | `obligation_pay_off` / `obligation_complicate` / `obligation_supersede` per status target |
+| `fact_create` | `fact_create` |
+| `fact_invalidate` | `fact_invalidate` |
+| `consequence_open` | `consequence_open` |
+| `consequence_address` | `consequence_address` |
+| `cast_change` | `cast_change` |
+| `location_change` | `location_change` |
+| `mystery_progress` | no direct `SE.op`; record through `mystery_safety.M_progressed[]` on a new SF or the page's `state_snapshot` |
+
+`effect_model_replay_safety` fails if the PG's `applied_effect_variant` does not name a real variant on the realized arc, or if the SE record's ops are not derivable from that variant's `required_effects[]`.
+
+## STINT Refresh After Variant Ops
+
+Per-character intention refresh still runs after the variant ops apply. STINT updates are deterministic engine-side follow-through, not entries in `required_effects[]`; they may produce `intention_refresh` ops after the arc-level effect batch has established the new post-arc state.
+
+## Legacy v1 Beat-Derived Inputs
+
+Post-cutover there are no v1 story records to execute. The old beat-derived input path is retained below only as a documentation note for readers comparing the v1 and v2 contracts: Phase 1's `ProposedEvent`, `required_aftermath`, and the selected storylet's `fact_effects` / `relationship_effects` / obligation effect fields are no longer the active Phase 5 source of truth. Equivalent state changes must be represented in the selected arc variant's `required_effects[]` before Phase 7 render.
 
 ## Append-Only Discipline
 
@@ -68,4 +97,4 @@ CNSQ records are branch-scoped. They carry `created_at_page: this_PG` and visibi
 
 ## Branch-Isolation Invariant Enforced Here
 
-Every new non-PG story-local record (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC) carries `created_at_page: this_PG`. A PG record is the page itself; its own `id` is the branch anchor and must be included in `this_page.branch_path`. The engine verifies before write — and Phase 9 gate 3 verifies recursively — that no story-local ID cited at any depth inside any record reachable from `state_snapshot` references a page outside `this_page.branch_path`. World canon (CF / M / INV / ENT) propagates freely; story-local engine state is branch-isolated.
+Every new non-PG story-local record (SF / SE / OBL / CNSQ / THR / SREL / STINT / SLT-JIT / STLOC / STOBJ / DA / CHC) carries `created_at_page: this_PG` (`created_at_page == this_PG`). ARC_TRACE records also carry `created_at_page: this_PG`; they are derived validation/debugging artifacts, not replay-authoritative state, but their branch anchor must match the page whose render they describe. A PG record is the page itself; its own `id` is the branch anchor and must be included in `this_page.branch_path`. The engine verifies before write — and Phase 9 gate 3 verifies recursively — that no story-local ID cited at any depth inside any record reachable from `state_snapshot` or ARC_TRACE references points at a page outside `this_page.branch_path`. World canon (CF / M / INV / ENT) propagates freely; story-local engine state is branch-isolated.

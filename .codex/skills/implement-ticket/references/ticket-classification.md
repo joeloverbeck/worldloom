@@ -12,6 +12,7 @@ Check:
 - whether ticket prose names a section label but the live document places the owned paragraph before that heading, under a different heading, or in opening prose; if so, patch the ticket to the live section or paragraph boundary before source edits or during closeout
 - whether the claimed contract already matches live behavior
 - whether acceptance criteria should be grep/manual-review based rather than runtime/tool based
+- if acceptance relies on positive grep-count proof commands, dry-run or manually validate the exact command shape before source edits; confirm the command can count every intended term, not only the easiest literal subset
 - if acceptance relies on negative grep removal, run the exact grep before edits and record all hit locations as owned hits or explicitly excluded hits
 
 ## skill rewrite or skill-local behavior
@@ -25,6 +26,7 @@ Check:
 - HARD-GATE semantics, if present
 - references/templates/examples used by the skill
 - sibling-skill interop named in docs or specs
+- if acceptance relies on positive grep-count proof commands over the skill or templates, dry-run or manually validate the exact command shape before source edits; patch stale counts, alternation, anchoring, or aggregation before implementation
 - if acceptance relies on negative grep or stale-anchor removal, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 ## tool or script implementation
@@ -48,6 +50,7 @@ Check:
 - consumers
 - doc references
 - whether the change is additive-only or breaking
+- if acceptance relies on positive grep-count proof commands across the shared surface, dry-run or manually validate the exact command shape before source edits; confirm the count proves the intended producer/consumer invariant rather than a coincidental subset
 - if acceptance relies on negative grep or stale-anchor removal across consumers, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
 Map each invariant to its own verification layer in the ticket.
@@ -64,6 +67,8 @@ Use when a ticket changes:
 - ticket/spec template fields
 
 Check whether downstream consumers need updates or whether the change is truly additive-only.
+
+If acceptance relies on positive grep-count proof commands for schema/template fields, dry-run or manually validate the exact command shape before source edits. Pay special attention to grouped alternations with suffixes or anchors; a colon, word boundary, or line anchor outside the intended group can make the command count only part of the claimed field set.
 
 ## canon-mutating world-content cleanup
 

@@ -17,9 +17,16 @@
 # Path: worlds/<world-slug>/stories/<story-slug>/story-promotions/SP-NNNN-proposal-package.yaml
 
 promotion_id: SP-<allocated>
-source_kind: story_fact                    # story_fact | mystery_resolution | character_arc_outcome | artifact_canonization
-source_record: <SF-NNNN | M-NNNN | STENT-NNNN | DA-NNNN>
+source_kind: story_fact                    # story_fact | mystery_resolution | character_arc_outcome | artifact_canonization | arc_effect_promotion
+source_record: <SF-NNNN | M-NNNN | STENT-NNNN | DA-NNNN | story-local record produced by arc effect>
 promotion_branch_path: [PG-0001, PG-0007, PG-0042]   # the canonical branch from which this is being promoted
+
+# Required only when source_kind == arc_effect_promotion.
+source_arc_id: null                        # SLT-NNNN
+applied_variant_id: null                   # variant id from arc.effect_model.variants[]
+effect_index: null                         # integer index into variants[<applied>].required_effects[]
+arc_trace_id: null                         # ARCTRACE-NNNN | null when no trace emitted
+arc_trace_evidence_span: null              # {start: <byte>, end: <byte>} | null
 
 # CF candidate — full schema per templates/canon-fact-record.yaml + FOUNDATIONS §CF Schema.
 # canon-addition's Phase 0 parses THIS block directly; preserve CF-schema field
@@ -78,6 +85,18 @@ provenance:
       excerpt: >
         <quoted snippet from the leaf page where the source reached its
          promoted state>
+  # For source_kind == arc_effect_promotion, source_record is structured so
+  # canon-addition can reconstruct the arc-effect provenance without treating
+  # the reusable SLT arc template as the superseded source.
+  source_record:
+    source_arc_id: null                    # SLT-NNNN
+    source_page_id: null                   # PG-NNNN
+    applied_variant_id: null
+    effect_index: null
+    produced_story_record_id: null         # SF-NNNN | SREL-NNNN | STENT-NNNN | null
+    applied_event_ops: null                # SE-NNNN | null
+    arc_trace_id: null                     # ARCTRACE-NNNN | null
+    arc_trace_evidence_span: null          # {start: <byte>, end: <byte>} | null
 
 # Scope inflation analysis from Phase 3.
 scope_inflation_check:
@@ -99,6 +118,7 @@ mystery_firewall:
   M_resolution_safety: null                # low | medium | high | null (forbidden is HARD-REJECT before this step)
   M_disallowed_cheap_answers_check: pass   # pass | fail (Phase 7 critic re-verifies semantically)
   accidental_M_touch_scan: pass            # pass | fail (whole-class M load powers this scan)
+  arc_envelope_forbidden_resolutions_check: n_a  # pass | fail | n_a; source_kind=arc_effect_promotion only
 
 # Downstream impact summary from Phase 5.
 downstream_impact:

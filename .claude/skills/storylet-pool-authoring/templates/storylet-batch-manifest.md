@@ -11,18 +11,20 @@
 
 ## Approved storylets
 
-| SLT | Title | Shape | Intensity | Engages | Mystery | Visibility |
-|---|---|---|---|---|---|---|
-| SLT-NNNN | `<title>` | `<shape>` | `<intensity>` | OBL-NNNN (opens), OBL-NNNN (complicates) | M-NNNN (touched) \| none | `<scope>` |
+| SLT | Title | Commitment class | Arc archetype | Value delta axes | Intensity | Engages | Mystery | Visibility |
+|---|---|---|---|---|---|---|---|---|
+| SLT-NNNN | `<title>` | `<commitment_class>` | `<arc_archetype>` | `<value_delta_target.axes[]>` | `<intensity>` | OBL-NNNN (opens), OBL-NNNN (complicates) | M-NNNN (touched) \| none | `<scope>` |
 
 ## Diversity summary
 
-- **Shape distribution**: `<shape>: <count>; ...` (max axis: <X>%; rule ≤40% — PASS)
+- **Commitment class distribution**: `<commitment_class>: <count>; ...` (max axis: <X>%; rule ≤30% for established/top-up batches; documented small-batch relaxation allowed — PASS)
+- **Arc archetype distribution**: `<arc_archetype>: <count>; ...` (max axis: <X>%; rule ≤25% — PASS)
 - **Tone distribution**: `<tone>: <count>; ...` (max axis: <X>%; rule ≤40% — PASS)
 - **Content intensity distribution**: `tame: X | mature: Y | explicit: Z` (matches `<baseline>` baseline target distribution — PASS)
 - **OBL coverage**: `<engaged>/<total open>` open OBLs engaged (rule ≥60% in seed mode; or every `source_obligations` id hit in focus mode — PASS)
 - **Theme distribution**: `<theme>: <count>; ...` (max axis: <X>%; rule ≤50% — PASS)
 - **Cast usage**: every protagonist/major engaged at least once — PASS
+- **Dramatic-unit coverage**: `<strong_axis>: <arc-count>; ...` (source: `beat_plan.beats[].state_significance`; each axis appears on ≥30% of arcs — PASS)
 - **Batch-level branch-contamination audit**: no `global_author_pool` storylet references branch-local record ids — PASS
 
 ## Rejected candidates
@@ -36,6 +38,11 @@
 - `<count>` predicate-DSL rejects
 - `<count>` branch-contamination rejects
 - `<count>` schema-completeness drops (after 2 revise retries)
+- `<count>` arc-envelope-conformance rejects
+- `<count>` stop-policy-parsability rejects
+- `<count>` effect-model-legality rejects
+- `<count>` exit-portfolio-completeness rejects
+- `<count>` Rule 11 spectator-caste leverage rejects
 
 ## Dropped at HARD-GATE
 
@@ -47,8 +54,8 @@
 
 ## Validation verdicts
 
-- **Phase 4 per-storylet (9 gates × N storylets)**: PASS — `<one-line rationale>`
-- **Phase 5 diversity audit (6 axes)**: PASS — `<one-line rationale>`
+- **Phase 4 per-storylet (14 gates × N storylets)**: PASS — `<one-line rationale>`
+- **Phase 5 diversity audit (mode-appropriate axes)**: PASS — `<one-line rationale>`
 - **Phase 5 batch-level branch-contamination**: PASS — `<one-line rationale>`
 
 ## Notes

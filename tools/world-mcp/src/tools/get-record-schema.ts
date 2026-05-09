@@ -37,6 +37,7 @@ export const SUPPORTED_RECORD_SCHEMA_NODE_TYPES = [
   "page_record",
   "choice_record",
   "storylet_record",
+  "arc_trace_node",
   "story_diegetic_artifact_record"
 ] as const;
 
@@ -81,6 +82,7 @@ const NODE_TYPE_TO_SCHEMA_FILE: Record<SupportedRecordSchemaNodeType, string> = 
   page_record: "story-page.schema.json",
   choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
+  arc_trace_node: "story-arc-trace.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 };
 
@@ -150,6 +152,10 @@ function collectRefs(value: JsonValue, refs: Set<string>): void {
 }
 
 function resolveSchemaRef(schemaRoot: string, ref: string): string | null {
+  if (ref.startsWith("#")) {
+    return null;
+  }
+
   const filename = path.basename(new URL(ref).pathname);
   const candidates = [
     path.join(schemaRoot, filename),

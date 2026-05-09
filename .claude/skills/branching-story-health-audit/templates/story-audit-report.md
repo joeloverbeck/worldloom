@@ -27,6 +27,9 @@ finding_count_by_severity:
   info: 0
 flagged_pages: []                    # page-cycle narrative_health.flagged_for_audit inventory; items carry page_id, branch_leaf_id, flagged_at if known
 high_jit_rate_branches: []           # items carry branch_leaf_id, jit_page_count, window_page_count, rate
+choice_cadence_summary: []            # per-branch arc-unit cadence metrics; no word-count metrics
+arc_conformance_summary: []           # per-branch ARC_TRACE semantic critic, envelope, and realized-beat metrics
+commitment_class_coverage_summary: [] # per-branch and bundle commitment_class distribution metrics
 rsp_card_ids: []                     # list of non-dropped RSP-NNNN ids written under audits/SAU-NNNN/remediation-storylet-proposals/
 dropped_finding_ids: []              # finding-IDs the user dropped at Phase 9 — still appear in body marked "(dropped by user at Phase 9)"
 dropped_card_ids: []                 # RSP-NNNN ids the user dropped at Phase 9 — never written; appear here and in Remediation Proposals Index marked "(dropped by user at Phase 9)"
@@ -79,7 +82,7 @@ user_approved: true                  # always true on a written report — writt
 
 #### F-01: <one-line title>
 
-- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, bootstrap_discipline_trace_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, choice_continuation_capacity, choice_pair_distance, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
+- **Category**: <category; valid values include obligation_payoff_coverage, thread_coverage, character_motivation_coverage, mystery_firewall, prose_ledger_consistency, bootstrap_rule4_sketch_integrity, bootstrap_discipline_trace_integrity, branch_isolation_recursive, snapshot_integrity, consequence_coverage, choice_continuation_capacity, choice_pair_distance, choice_cadence, arc_conformance, commitment_class_coverage, relationship_continuity, storylet_scope_leakage, terminal_health, content_intensity_drift, canon_baseline_drift, repetition, debt_level>
 - **Branch**: <branch_path leaf id> (or `all-branches` when shared across audited branches)
 - **Pages affected**: <list of PG-NNNN ids>
 - **Records affected**: <list of record ids — OBL-NNNN, THR-NNNN, M-NNNN, etc.>
@@ -94,6 +97,12 @@ For `bootstrap_rule4_sketch_integrity` findings, include `STORY_KERNEL.md`, `sto
 For `bootstrap_discipline_trace_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_discipline_status`, the missing/malformed `discipline_validation_trace` check key(s), whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/incomplete/bare-PASS/malformed issue or an info-only pre-`BSBOOT-015` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
 
 For `choice_pair_distance` findings, include page id, both CHC ids, the same/different axis summary for `operation`, `actor`, `target`, `uses_fact`, `choice_contract.minimum_state_change`, `choice_contract.success_policy`, `choice_mode`, and `poetic_effect`, whether at least one structural axis 1-6 differs, severity rationale, and recommended remediation (`branching-story-page-cycle` re-render / re-derive or manual intervention). Do not propose direct CHC mutation, CHC overwrite, or hand-edited persisted choice repair from the audit.
+
+For `choice_cadence` findings, include branch leaf id, mean arcs between menus, counts of CONTINUE_ARC / CONTINUE_ONLY_PAUSE / INTERRUPT_HINGE pages, menu-emitting page ratio, cited `STORY_KERNEL.cadence_policy.max_arcs_without_menu_soft`, and severity rationale. Do not include word-count metrics.
+
+For `arc_conformance` findings, include page id, ARCTRACE id, `semantic_critic_verdict.status`, offending `possible_violations[].envelope_item`, evidence_span, severity, and realized-beat evidence when relevant. High-severity envelope violations are always errors.
+
+For `commitment_class_coverage` findings, include branch leaf id, realized-arc count, commitment_class distribution, missing commitment classes, over-represented class if any, and severity rationale.
 
 (repeat per error finding)
 
@@ -134,6 +143,28 @@ Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-NNNN/remedia
 - F-NN re-surfaced from SAU-NNNN (originally dropped by user / not yet remediated / new evidence in current state)
 
 (empty section is recorded as "No prior-audit re-surfaced findings." when this is not the first audit on the bundle, OR "Initial audit on this bundle — no prior audits to compare against." when this IS the first audit)
+
+## Choice Cadence
+
+| Branch | Mean arcs between menus | Menu-emitting page ratio | CONTINUE_ARC | CONTINUE_ONLY_PAUSE | INTERRUPT_HINGE |
+|---|---:|---:|---:|---:|---:|
+| <leaf-id> | 0.00 | 0% | N | N | N |
+
+(arc-unit metrics only; word-count metrics are not recorded)
+
+## Arc Conformance
+
+| Branch | ARC_TRACE count | Critic pass rate | Realized-beat rate | High envelope violations | Medium envelope violations | Low envelope violations |
+|---|---:|---:|---:|---:|---:|---:|
+| <leaf-id> | N | 0% | 0% | N | N | N |
+
+(empty section is recorded as "No ARC_TRACE records available for audited branches." only for explicit legacy or no-trace bundles)
+
+## Commitment-Class Coverage
+
+| Scope | Realized arcs | Top commitment class | Missing commitment classes | Over-represented classes |
+|---|---:|---|---|---|
+| <leaf-id or bundle> | N | <commitment_class> (N) | <count or none> | <class list or none> |
 
 ## Health Snapshot at audit time
 

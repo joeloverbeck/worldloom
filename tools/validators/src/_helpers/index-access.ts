@@ -179,6 +179,7 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
   create_pg_record: { nodeType: "page_record", sourceDir: "pages" },
   create_chc_record: { nodeType: "choice_record", sourceDir: "choices" },
   create_slt_record: { nodeType: "storylet_record", sourceDir: "storylets" },
+  create_arc_trace_record: { nodeType: "arc_trace_record", sourceDir: "arc-traces" },
   append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
 };
 

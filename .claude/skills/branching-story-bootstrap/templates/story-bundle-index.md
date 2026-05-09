@@ -7,7 +7,7 @@ bundles in the world).
 
 The runtime page-cycle and branching-story-health-audit both consume this
 file to summarize branch status, active threads, mysteries in play, and
-storylet pool shape distribution.
+storylet pool commitment_class distribution.
 -->
 
 # Story <story_slug>
@@ -37,9 +37,9 @@ storylet pool shape distribution.
 
 ## Storylet pool
 
-Total: <count> author-pool storylets.
+Total: <count> seed scene-commitment arcs covering <commitment_classes>.
 
-Shape distribution: entry_pressure: N | cast_introduction: N | threat_escalation: N | relational_dynamics: N | routine_disruption: N | aftermath_sequel: N | reflection_dilemma: N
+Commitment class distribution: ask_one_bounded_question: N | offer_practical_help: N | stay_available_without_pressure: N | withdraw_without_abandoning: N | tighten_pressure: N
 
 ## Pages rendered
 

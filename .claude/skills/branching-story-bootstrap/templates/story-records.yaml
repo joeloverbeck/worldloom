@@ -328,7 +328,7 @@ emitted_choices: []                      # CHC ids — populated at Phase 8
 
 narrative_health:
   open_obligation_count: 0
-  high_salience_unpaid_count: 0          # count of OBLs with status == open AND salience >= 7 (threshold per Phase 8 coverage rule — see references/phase-8-choice-generation.md §Required CHC diversification)
+  high_salience_unpaid_count: 0          # count of OBLs with status == open AND salience >= 7; Phase 8 choice-surface composition treats high-salience obligations as candidate exit sources
   average_obligation_age: 0
   contradiction_risk: 0.0
   causal_connectivity: 1.0

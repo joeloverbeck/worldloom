@@ -4,7 +4,6 @@ import { withIndexFreshnessGuard } from "../context-packet/freshness-guard";
 import { openIndexDb } from "../db";
 import { createMcpError, type McpError } from "../errors";
 import {
-  STORY_BUNDLE_NODE_TYPES,
   isStoryBundleNodeType
 } from "./_shared";
 
@@ -30,7 +29,26 @@ export const SUPPORTED_LIST_RECORD_TYPES = [
   "character_record",
   "diegetic_artifact_record",
   "adjudication_record",
-  ...STORY_BUNDLE_NODE_TYPES
+  "story_entity_record",
+  "story_fact_record",
+  "story_event_record",
+  "obligation_record",
+  "consequence_record",
+  "thread_record",
+  "relationship_record_story",
+  "intention_record",
+  "story_location_record",
+  "story_object_record",
+  "branch_record",
+  "page_record",
+  "choice_record",
+  "storylet_record",
+  "arc_trace_record",
+  "story_diegetic_artifact_record",
+  "audit_record_story",
+  "promotion_record",
+  "storylet_batch_manifest",
+  "remediation_storylet_proposal_card"
 ] as const;
 
 export type ListRecordType = (typeof SUPPORTED_LIST_RECORD_TYPES)[number];
@@ -112,6 +130,7 @@ const RECORD_TYPE_TO_NODE_TYPE: Record<ListRecordType, NodeType> = {
   page_record: "page_record",
   choice_record: "choice_record",
   storylet_record: "storylet_record",
+  arc_trace_record: "arc_trace_node",
   story_diegetic_artifact_record: "story_diegetic_artifact_record",
   audit_record_story: "audit_record_story",
   promotion_record: "promotion_record",

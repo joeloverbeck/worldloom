@@ -119,6 +119,116 @@ export const REVISION_DIFFICULTY_VALUES = ["low", "medium", "high"] as const;
 
 export type RevisionDifficultyValue = (typeof REVISION_DIFFICULTY_VALUES)[number];
 
+export const COMMITMENT_CLASSES = [
+  "stay_available_without_pressure",
+  "offer_practical_help",
+  "ask_one_bounded_question",
+  "withdraw_without_abandoning",
+  "confess_one_thing",
+  "accept_offered_help",
+  "refuse_with_grace",
+  "escalate_to_confrontation",
+  "conceal_under_pressure",
+  "seek_third_party",
+  "change_venue",
+  "make_public_commitment",
+  "private_betrayal",
+  "bear_witness",
+  "release_pressure",
+  "tighten_pressure",
+  "defer_decision",
+  "force_disclosure",
+  "mirror_acknowledgment",
+  "intimacy_advance"
+] as const;
+
+export type CommitmentClass = (typeof COMMITMENT_CLASSES)[number];
+
+export const ARC_ARCHETYPES = [
+  "fragile_offer",
+  "bounded_question",
+  "confession_received",
+  "refusal_and_aftercare",
+  "practical_aid_attempt",
+  "withdrawal_without_abandonment",
+  "escalation_to_confrontation",
+  "concealment_under_pressure",
+  "third_party_intervention",
+  "investigation_followup",
+  "aftermath_processing",
+  "route_change",
+  "public_commitment",
+  "private_betrayal",
+  "intimacy_negotiation",
+  "boundary_setting",
+  "restitution_offered",
+  "silent_witness",
+  "forced_disclosure",
+  "pressure_release"
+] as const;
+
+export type ArcArchetype = (typeof ARC_ARCHETYPES)[number];
+
+export const NARRATIVE_POINTS = [
+  "CONTINUE_ARC",
+  "NATURAL_COMMITMENT_HINGE",
+  "INTERRUPT_HINGE",
+  "CONTINUE_ONLY_PAUSE",
+  "TERMINAL_OR_CHAPTER_CLOSE"
+] as const;
+
+export type NarrativePoint = (typeof NARRATIVE_POINTS)[number];
+
+export const STRONG_AXES = [
+  "relationship_trajectory",
+  "obligation_state",
+  "information_posture",
+  "risk_cost_exposure",
+  "route_or_scene_type",
+  "thread_pressure",
+  "irreversibility",
+  "character_intention"
+] as const;
+
+export type StrongAxis = (typeof STRONG_AXES)[number];
+
+export const STRONG_OUTCOMES = [
+  "succeeds",
+  "partially_succeeds",
+  "fails_with_consequence",
+  "backfires",
+  "accepted_with_limits",
+  "refused_without_break",
+  "partially_deflected",
+  "interrupted_before_resolution"
+] as const;
+
+export type StrongOutcome = (typeof STRONG_OUTCOMES)[number];
+
+export const STOP_PREDICATES = [
+  "commitment_satisfied",
+  "commitment_blocked",
+  "commitment_overturned",
+  "npc_makes_demand",
+  "npc_makes_disclosure",
+  "participant_exits",
+  "scene_goal_resolves",
+  "scene_goal_changes",
+  "new_obligation_created",
+  "open_thread_reprioritized",
+  "time_or_location_changes",
+  "irreversible_cost_imminent",
+  "consent_boundary_imminent",
+  "violence_or_harm_imminent",
+  "forbidden_mystery_resolution_risk",
+  "protagonist_goal_change_required",
+  "selected_commitment_would_be_violated",
+  "user_write_in_conflicts_with_envelope",
+  "only_next_action_would_create_major_state_change"
+] as const;
+
+export type StopPredicate = (typeof STOP_PREDICATES)[number];
+
 export const CF_TYPE_COMMON_VALUES = [
   "capability",
   "artifact",

@@ -33,6 +33,7 @@ export type StoryRecordOperationKind =
   | "create_pg_record"
   | "create_chc_record"
   | "create_slt_record"
+  | "create_arc_trace_record"
   | "append_story_diegetic_artifact_record";
 
 type StoryRecordOperation = Extract<PatchOperation, { op: StoryRecordOperationKind }> & {
@@ -54,6 +55,7 @@ const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
+  "create_arc_trace_record",
   "append_story_diegetic_artifact_record"
 ];
 
@@ -157,6 +159,13 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "storylet_record",
     prefix: "SLT",
     sourceDir: "storylets"
+  },
+  create_arc_trace_record: {
+    allocationKey: "arc_trace_ids",
+    idPattern: /^ARCTRACE-\d{4}$/,
+    nodeType: "arc_trace_record",
+    prefix: "ARCTRACE",
+    sourceDir: "arc-traces"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",

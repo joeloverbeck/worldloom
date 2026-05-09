@@ -37,6 +37,7 @@ export interface IdAllocations {
   pg_ids?: string[];
   chc_ids?: string[];
   slt_ids?: string[];
+  arc_trace_ids?: string[];
   story_da_ids?: string[];
 }
 
@@ -83,6 +84,7 @@ export const OPERATION_KINDS = [
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
+  "create_arc_trace_record",
   "append_story_diegetic_artifact_record"
 ] as const;
 
@@ -210,6 +212,7 @@ export type PatchOperation =
   | OperationBase<"create_pg_record", StoryRecordPayload>
   | OperationBase<"create_chc_record", StoryRecordPayload>
   | OperationBase<"create_slt_record", StoryRecordPayload>
+  | OperationBase<"create_arc_trace_record", StoryRecordPayload>
   | OperationBase<"append_story_diegetic_artifact_record", StoryRecordPayload>;
 
 export type OperationPayload = PatchOperation["payload"];

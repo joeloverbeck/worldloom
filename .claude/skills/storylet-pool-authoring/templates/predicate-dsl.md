@@ -1,8 +1,14 @@
 # Predicate DSL — Storylet Pool Authoring
 
-Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, and choice-template preconditions all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, and invariant-compatibility checks consume these predicates. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
+Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, choice-template preconditions, and v2 `arc.stop_policy.*.predicate` entries all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, invariant-compatibility, and SPEC-20 Phase 7.6 stop-condition checks consume these predicates. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
 
-The DSL has two tiers: **core forms** (the original eleven `pred` types) and **documented extensions** (additional forms used by the bootstrap-seed pool and supported by the runtime page-cycle's Phase 4 selection). Both tiers are part of the DSL grammar; LLM proposers MAY use either, but they may NOT invent new `pred` types beyond what this document enumerates. Extending the DSL further is an authorial change to this document, not a runtime act.
+The DSL has three tiers:
+
+1. **Core forms** — the original eleven `pred` types used for storylet eligibility.
+2. **Documented extensions** — additional eligibility forms used by the bootstrap-seed pool and supported by the runtime page-cycle's Phase 4 selection.
+3. **Stop predicates** — SPEC-19 v2 `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate` forms evaluated by the SPEC-20 Phase 7.6 stop-condition evaluator.
+
+All tiers are part of the documented DSL grammar; LLM proposers MAY use the tier appropriate to the field they are filling, but they may NOT invent new `pred` types beyond what this document enumerates. Extending the DSL further is an authorial change to this document, not a runtime act.
 
 The closed surface is the structural grammar: supported `pred` forms, recursive combinators, required fields, operator sets, record-id shapes, and fixed small enums such as epistemic class and obligation status. The open surface is story/world-local typed vocabulary: narrative-time tags, event-kind strings, world-state scalar names, location kinds/classes, role matchers, and relationship-state properties where no bundle registry fixes the list. Open values must still use the documented typed-string mini-format or an existing bundle/state-schema source; they are not free-form prose.
 
@@ -121,9 +127,126 @@ These forms are part of the operational DSL — supported by the runtime page-cy
   value: centro_wealth_register | gros_working_class_register | irun_border_register | <other location-class label>
 ```
 
+## Stop Predicates (third tier — v2 SLT arc.stop_policy)
+
+Stop predicates are used only at these v2 SLT sites:
+
+- `arc.stop_policy.normal_exits[].predicate`
+- `arc.stop_policy.interrupt_before[].predicate`
+- the runtime page-cycle's SPEC-20 Phase 7.6 stop-condition evaluator
+
+They do not replace or broaden eligibility predicates in `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, or choice-template preconditions. Stop predicates evaluate against story state, the selected commitment, the arc-local trace, mystery safety, the effect model, and participant/location changes. Those surfaces are not consulted by the eligibility-tier predicates above.
+
+The stop-policy grammar is finite. LLM-side invention is HARD-REJECTed by SPEC-22's `stop_policy_parsability` validator, which inherits the grammar-loading discipline from the existing `storylet_predicate_dsl_parsability` validator. Validator implementation and per-predicate args enforcement are owned by SPEC-22 Track 2; this file is the schema-text authority for the grammar.
+
+Closed-vs-open args discipline:
+
+- `<commitment_class enum>` and `<strong_axis enum>` are closed values from canonical vocabularies.
+- Kebab-case class labels such as `reason_class`, `demand_class`, `disclosure_class`, `goal`, `cost_class`, `boundary_class`, `violation_kind`, and `envelope_item` are open typed vocabulary unless a bundle registry closes them later.
+- Record ids (`STENT-NNNN`, `THR-NNNN`, `M-NNNN`) and `role:<role>` matchers retain their documented id/matcher shapes.
+
+### Normal-exit predicates (`stop_policy.normal_exits[].predicate`)
+
+```yaml
+- pred: commitment_satisfied
+  args: {commitment_class: <commitment_class enum>}        # closed enum
+
+- pred: commitment_blocked
+  args: {commitment_class: <commitment_class enum>, reason_class: <kebab-case open-vocab>}
+
+- pred: commitment_overturned
+  args: {by_actor: STENT-NNNN | role:<role>, new_commitment_class: <commitment_class enum>}
+
+- pred: npc_makes_demand
+  args: {npc: STENT-NNNN | role:<role>, demand_class: <kebab-case open-vocab>}
+
+- pred: npc_makes_disclosure
+  args: {npc: STENT-NNNN | role:<role>, disclosure_class: <kebab-case open-vocab>}
+
+- pred: participant_exits
+  args: {participant: STENT-NNNN | role:<role>}
+
+- pred: scene_goal_resolves
+  args: {goal: <kebab-case open-vocab>}
+
+- pred: scene_goal_changes
+  args: {from: <kebab-case open-vocab>, to: <kebab-case open-vocab>}
+
+- pred: new_obligation_created
+  args: {salience_min: <int 0..10>}
+
+- pred: open_thread_reprioritized
+  args: {thread: THR-NNNN, direction: increase | decrease}
+
+- pred: time_or_location_changes
+  args: {axis: time | location}
+```
+
+Semantic glosses:
+
+- `commitment_satisfied`: closes when the selected commitment has achieved its intended class of outcome.
+- `commitment_blocked`: closes when the selected commitment cannot proceed for a named open-vocab reason class.
+- `commitment_overturned`: closes when an actor changes the commitment into a new closed commitment class.
+- `npc_makes_demand`: closes when the named NPC/role creates a demand that exposes the next commitment hinge.
+- `npc_makes_disclosure`: closes when the named NPC/role discloses information that changes the scene's strategic posture.
+- `participant_exits`: closes when a participant leaves the scene or active exchange.
+- `scene_goal_resolves`: closes when the open-vocab scene goal has been answered or exhausted.
+- `scene_goal_changes`: closes when the scene's open-vocab goal shifts from one target to another.
+- `new_obligation_created`: closes when the arc creates a new obligation at or above the required salience.
+- `open_thread_reprioritized`: closes when the named thread's pressure is raised or lowered enough to expose a new hinge.
+- `time_or_location_changes`: closes when the arc changes the time or location axis.
+
+### Interrupt-before predicates (`stop_policy.interrupt_before[].predicate`)
+
+```yaml
+- pred: irreversible_cost_imminent
+  args: {cost_class: <kebab-case open-vocab>}
+
+- pred: consent_boundary_imminent
+  args: {boundary_class: <kebab-case open-vocab>}
+
+- pred: violence_or_harm_imminent
+  args: {target: STENT-NNNN | role:<role>}
+
+- pred: forbidden_mystery_resolution_risk
+  args: {mystery: M-NNNN}
+
+- pred: protagonist_goal_change_required
+  args: {from: <kebab-case open-vocab>, to: <kebab-case open-vocab>}
+
+- pred: selected_commitment_would_be_violated
+  args: {violation_kind: <kebab-case open-vocab>}
+
+- pred: user_write_in_conflicts_with_envelope
+  args: {envelope_item: <kebab-case open-vocab>}
+
+- pred: only_next_action_would_create_major_state_change
+  args: {axis: <strong_axis enum>}           # closed enum
+```
+
+Semantic glosses:
+
+- `irreversible_cost_imminent`: interrupts before the next beat would impose an irreversible cost of the named class.
+- `consent_boundary_imminent`: interrupts before the next beat would cross a consent boundary.
+- `violence_or_harm_imminent`: interrupts before the next beat would bring violence or harm to the target.
+- `forbidden_mystery_resolution_risk`: interrupts before the render risks resolving the named `M-NNNN`. This is a structural Mystery Reserve firewall mechanism per FOUNDATIONS Story Bundles Rule 7; Phase 7.6 routes the page-cycle to `revise_prose` or `reject_arc` rather than letting an MR-forbidden answer leak into prose.
+- `protagonist_goal_change_required`: interrupts when continuing would require changing the protagonist's goal from one open-vocab class to another.
+- `selected_commitment_would_be_violated`: interrupts when the only continuation would violate the selected commitment.
+- `user_write_in_conflicts_with_envelope`: interrupts when a user write-in conflicts with a named execution-envelope item.
+- `only_next_action_would_create_major_state_change`: interrupts when the only valid next action would create a major state change on the named strong-axis enum.
+
+### Safety-valve thresholds (`stop_policy.safety_valves`)
+
+Safety valves are inline thresholds, not DSL predicates. They are documented here for stop-policy completeness but are evaluated by the runtime stop-condition evaluator without parsing through the predicate-DSL grammar.
+
+- `max_internal_beats_reached` — fires when the prose render's beat count exceeds `arc.beat_plan.max_beats`. Default upper bound: 6 per SPEC-19 §A.
+- `max_words_reached` — fires when the prose render exceeds `arc.stop_policy.safety_valves.max_words`. Default: 2200 per SPEC-19 §A; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11).
+- `no_valid_continuation_after_effect` — fires when applying the selected `effect_variant` leaves no eligible continuation arc and no valid JIT spec. Phase 3 continuation feasibility is owned by SPEC-20.
+- `validation_confidence_low` — fires when the SPEC-20 Phase 7.6 Layer 3 semantic critic returns confidence below a per-execution-mode threshold.
+
 ## Validation Rules
 
-- Every predicate MUST be one of the core forms or documented-extension forms above. Unknown `pred` values are HARD-REJECTed at Phase 4 gate 7. The DSL is finite — extending it requires a documented edit to this file, not LLM-side invention.
+- Every predicate MUST be one of the documented forms for its usage site: core or documented-extension forms for eligibility predicates; stop predicates for `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate`. Unknown `pred` values are HARD-REJECTed by the relevant parser gate (`storylet_predicate_dsl_parsability` for eligibility predicates; SPEC-22's `stop_policy_parsability` for stop-policy predicates). The DSL is finite — extending it requires a documented edit to this file, not LLM-side invention.
 - Every `subject` / `entity` / `from` / `to` value MUST be either a `STENT-NNNN` id (declared in this story bundle's `_source/entities/`) OR a `role:<name>` matcher (resolved at runtime by the page-cycle to a STENT bound to that role).
 - Every `fact` value MUST be an `SF-NNNN` id (declared in this story bundle's `_source/facts/`) OR a `fact_template` shape consumed by the engine at apply time.
 - `op` values are restricted to the six relational operators listed (`==`, `!=`, `>`, `<`, `>=`, `<=`) plus `in` for the time-of and location-kind extensions; arithmetic operators (`+`, `-`, etc.) are NOT permitted.

@@ -1,81 +1,272 @@
 # Phase 1: Coverage Diagnosis
 
-Scan the current pool and the open-state for thinness. Emit a structured diagnosis matrix that drives Phase 2 seed generation.
+Phase 1 scans the current storylet pool and the open story state, then emits the
+diagnosis matrix that Phase 2 uses for seed selection. SPEC-21 rebinds this
+phase from v1 per-shape thinness to v2 scene-commitment-arc thinness:
+coverage is measured by `commitment_class` and `arc_archetype`.
 
-For `parent_skill_invocation: true` from `branching-story-bootstrap`, the "current pool" is empty because the story bundle is not on disk yet. Diagnose against the parent-supplied bootstrap state instead: initial THRs/OBLs, any premise-driven PG-0001 CNSQs or story-local DAs emitted by bootstrap, the Phase 4 `audited_thread_obligation_sketch`, cast-bound STENT/STINT records, imported SFs, premise tone/themes, `mysteries_in_play[]`, and the loaded whole-class M/INV context. The bootstrap-mix weighting in Phase 2 supplies the shape-distribution target.
+The matrix is a planning artifact, not a canon mutation. It must surface the
+missing routes by which the pool can pay off obligations, advance active
+threads, touch mysteries safely, and avoid recent commitment-class repetition.
+That keeps Phase 2 grounded in FOUNDATIONS Rule 1: every proposed arc must have
+a story-state reason to exist rather than floating free as decoration.
 
-For bootstrap seed mode (`parent_skill_invocation: true`, `mode=seed`, `focus_area=bootstrap_mix`), every OBL/THR diagnosis row must be checked against `audited_thread_obligation_sketch`: the row's target id, type, salience/urgency pressure, payoff/escalation mode, and INV branches audited must remain compatible with the sketch. If a needed seed would materially widen the initial THR/OBL branch beyond the sketch, route that divergence back to `branching-story-bootstrap` Phase 4 before Phase 2 seed generation rather than silently authoring a global author-pool storylet against an unaudited Rule 4 premise.
+## Direct Invocation Matrix
 
-For `mode=audit`, the validated RSP card frontmatter IS the primary diagnosis. Emit one diagnosis-matrix row per RSP card:
-
-```yaml
-gap_kind: <obl_payoff_coverage | thr_coverage | cnsq_coverage | srel_continuity>
-target_record_id: <RSP.target_obligation | RSP.target_thread | RSP.target_consequence | RSP.target_relationship>
-priority_weight: max
-source_rsp: <RSP.rsp_id>
-source_audit: <RSP.audit_id>
-finding_ids: <RSP.finding_ids>
-```
-
-Derive `gap_kind` from the first non-null target field in this priority order: `target_obligation` -> `obl_payoff_coverage`, `target_thread` -> `thr_coverage`, `target_consequence` -> `cnsq_coverage`, `target_relationship` -> `srel_continuity`. If multiple target fields are non-null, keep them all in the row as secondary targets, but use the first target for `target_record_id` and the row's primary `gap_kind`.
-
-For `parent_skill_invocation: true` from `branching-story-page-cycle` with `mode=jit`, diagnosis is reduced to the single continuation failure that triggered JIT. Emit one row:
+For direct `seed` or `focus` invocation, emit one `diagnosis_matrix` with these
+top-level keys:
 
 ```yaml
-gap_kind: continuation_failure
-target_record_id: <caller_state_snapshot.current_storylet_eligibility_failure_reason.record_id | null>
-priority_weight: max
+diagnosis_matrix:
+  open_obligations_by_commitment_class:
+    OBL-NNNN:
+      eligible_commitment_classes: [<commitment_class>, ...]
+      pool_arcs_by_class:
+        <commitment_class>: [SLT-NNNN, ...]
+      gaps: [<commitment_class>, ...]
+      rationale: >
+        Why these commitment_classes could plausibly pay off, complicate,
+        transfer, or otherwise engage this obligation.
+
+  active_threads_by_commitment_class:
+    THR-NNNN:
+      escalation_commitment_classes: [<commitment_class>, ...]
+      pool_arcs_by_class:
+        <commitment_class>: [SLT-NNNN, ...]
+      gaps: [<commitment_class>, ...]
+      rationale: >
+        Why these commitment_classes could plausibly raise, sustain, redirect,
+        or close this thread's pressure.
+
+  arc_archetype_distribution:
+    fragile_offer: 0
+    bounded_question: 0
+    confession_received: 0
+    refusal_and_aftercare: 0
+    practical_aid_attempt: 0
+    withdrawal_without_abandonment: 0
+    escalation_to_confrontation: 0
+    concealment_under_pressure: 0
+    third_party_intervention: 0
+    investigation_followup: 0
+    aftermath_processing: 0
+    route_change: 0
+    public_commitment: 0
+    private_betrayal: 0
+    intimacy_negotiation: 0
+    boundary_setting: 0
+    restitution_offered: 0
+    silent_witness: 0
+    forced_disclosure: 0
+    pressure_release: 0
+
+  commitment_class_distribution:
+    stay_available_without_pressure: 0
+    offer_practical_help: 0
+    ask_one_bounded_question: 0
+    withdraw_without_abandoning: 0
+    confess_one_thing: 0
+    accept_offered_help: 0
+    refuse_with_grace: 0
+    escalate_to_confrontation: 0
+    conceal_under_pressure: 0
+    seek_third_party: 0
+    change_venue: 0
+    make_public_commitment: 0
+    private_betrayal: 0
+    bear_witness: 0
+    release_pressure: 0
+    tighten_pressure: 0
+    defer_decision: 0
+    force_disclosure: 0
+    mirror_acknowledgment: 0
+    intimacy_advance: 0
+
+  content_intensity_distribution:
+    tame: 0
+    mature: 0
+    explicit: 0
+
+  mysteries_in_play_by_arc:
+    M-NNNN:
+      touching_arcs: [SLT-NNNN, ...]
+      progressing_arcs: [SLT-NNNN, ...]
+      gap: true
+
+  recent_history_repetition_signal:
+    last_5_pages_classes: [<commitment_class>, ...]
+    over_represented: [<commitment_class>, ...]
 ```
 
-Use `caller_state_snapshot.current_storylet_eligibility_failure_reason` when present; otherwise derive the row from page-cycle's Phase 3 consequence-capacity result and the failed Phase 4 eligibility/scoring context. Do not run a full pool-health scan or longest-branch recent-history scan inside this sub-routine; page-cycle has already assembled the relevant branch-local state.
+`arc_archetype_distribution` keys must come from SPEC-22 Track 3
+`ARC_ARCHETYPES` and the local `templates/arc-archetypes.md` library.
+`commitment_class_distribution` keys must come from SPEC-22 Track 3
+`COMMITMENT_CLASSES`. Do not invent local values or preserve v1 shape buckets
+as aliases.
 
-**Diagnose**:
+## Obligation And Thread Classification
 
-- **OBL coverage gaps**: which open OBLs have NO compatible storylet (no SLT in the current pool whose `pays_off_obligations`, `complicates_obligations`, or `transfers_obligations` matches the OBL by `type` + `subjects` + `constraints`)? Each uncovered OBL becomes a Phase 2 seed target.
-- **THR escalation gaps**: which active THRs (status ∈ {`active`, `pressured`, `critical`}) have NO escalation storylet (no SLT whose `fact_effects` or `relationship_effects` raise this thread's `current_pressure`)? Each uncovered THR becomes a seed target.
-- **Content_intensity gaps**: which `content_intensity` bands are under-represented relative to the story's `content_intensity_baseline`? Targets per baseline: `tame` baseline → 60% tame / 30% mature / 10% explicit; `mature` baseline → 30% / 50% / 20%; `explicit` baseline → 20% / 30% / 50%. `content_intensity_override`, when supplied, shifts the target distribution ±1 band.
-- **Shape distribution**: which shapes are over-represented (>40% of pool)? Under-represented (<5%)? Over-represented shapes are deprioritized in Phase 2; under-represented shapes are prioritized.
-- **Mystery-edge gaps**: which `mysteries_in_play[]` entries declared in `STORY_KERNEL.md` have NO storylet whose `mystery_safety.M_touched` or `M_progressed` cites them? Each gap is a candidate seed (subject to mystery firewall — `forbidden`-status M entries are NEVER seeded for resolution).
-- **Recent-history repetition signal**: scan the last ~10 pages along the longest active branch_path; if any `shape` was used in 3 consecutive pages, mark it for Phase 2 deprioritization (avoid pool homogenization at the recently-active branch tip).
+For every open OBL, enumerate `eligible_commitment_classes` by reading the OBL's
+type, subjects, constraints, salience, and current branch context. This is an
+LLM-driven heuristic judgment, not a closed lookup table. Prompt the LLM to name
+which commitment_classes could plausibly engage the obligation and why.
 
-**Seed/focus-mode worked example** (paralleling the audit-mode example block above):
+Then scan the current pool for existing arcs whose `arc_contract.commitment_class`
+matches one of those eligible classes and whose effects, preconditions, and
+scope can actually engage the OBL. Record those SLT ids under
+`pool_arcs_by_class`; any eligible class with no usable matching arc becomes a
+`gaps` entry.
+
+For every active THR, enumerate `escalation_commitment_classes` by reading the
+thread's current pressure, branch-local state, involved actors, and available
+story routes. As with OBL classification, this is heuristic and context-bound.
+Classes that could escalate, sustain, redirect, or close the thread are
+eligible. Existing arcs are counted only when their `commitment_class` and
+effect model can plausibly move that THR.
+
+If `source_obligations` or `source_threads` is supplied, those records remain
+mandatory targets for Phase 2. When `source_threads` is supplied, unpack each
+thread's `obligations[]` into the OBL classification pass and also retain the
+thread-level row. De-duplicate OBL rows when a source OBL appears both directly
+and through a source thread.
+
+## Distribution Scans
+
+`arc_archetype_distribution` counts current pool occurrences by
+`arc_contract.arc_archetype`. Phase 2 uses low-count archetypes to diversify
+seed generation, subject to the story's actual obligation and thread pressure.
+
+`commitment_class_distribution` counts current pool occurrences by
+`arc_contract.commitment_class`. Phase 2 uses low-count classes as positive
+pressure and `recent_history_repetition_signal.over_represented` as suppression
+pressure.
+
+`content_intensity_distribution` preserves the v1 intensity axis. Compare the
+pool against `STORY_KERNEL.content_intensity_baseline`:
+
+- `tame` baseline: aim for roughly 60 percent tame, 30 percent mature, and
+  10 percent explicit.
+- `mature` baseline: aim for roughly 30 percent tame, 50 percent mature, and
+  20 percent explicit.
+- `explicit` baseline: aim for roughly 20 percent tame, 30 percent mature, and
+  50 percent explicit.
+
+`content_intensity_override`, when supplied, shifts the target one band in the
+requested direction without lifting the NC-21 content policy.
+
+## Mystery Coverage
+
+For each `mysteries_in_play[]` entry in `STORY_KERNEL.md`, scan the pool for
+arcs whose storylet-level `mystery_safety.M_touched` or `M_progressed` cites the
+mystery. Record touching and progressing arcs separately.
+
+Set `gap: true` when no current arc touches the mystery. A gap may become a
+Phase 2 seed pressure, but it is not permission to resolve the mystery.
+Forbidden-status mysteries may be brushed or preserved only within the skill's
+Mystery Reserve firewall; they must never be seeded for resolution.
+
+## Recent History Repetition
+
+For direct seed/focus mode, scan the last five pages along the longest active
+`branch_path`. Record their realized `commitment_class` values in
+`last_5_pages_classes`.
+
+Any commitment_class appearing at least three times in those five pages is
+`over_represented`. Phase 2 should suppress that class unless a supplied source
+OBL/THR makes it necessary.
+
+Do not scan sibling branches for this signal. The purpose is to prevent a local
+branch tip from homogenizing, not to flatten the whole story.
+
+## Bootstrap Sub-Routine
+
+When `parent_skill_invocation: true` from `branching-story-bootstrap`, the
+story bundle may not exist on disk yet. Treat the current pool as empty and
+diagnose against the parent-supplied bootstrap state: initial OBLs and THRs,
+premise-driven PG-0001 CNSQs or story-local DAs, Phase 4
+`audited_thread_obligation_sketch`, cast-bound STENT/STINT records, imported
+SFs, premise tone and themes, `mysteries_in_play[]`, and the loaded whole-class
+M/INV context.
+
+Every bootstrap OBL/THR row must remain compatible with the
+`audited_thread_obligation_sketch`. If a needed seed would materially widen the
+initial THR/OBL branch beyond that sketch, route the divergence back to
+`branching-story-bootstrap` Phase 4 instead of silently authoring a global
+author-pool arc against an unaudited Rule 4 premise.
+
+## Audit Mode
+
+For `mode=audit`, validated RSP cards are the primary diagnosis source. Emit one
+matrix row per card and copy the card's arc-targeting fields directly:
 
 ```yaml
-- gap_kind: obl_payoff_coverage
-  target_record_id: OBL-0010
-  priority_weight: high
-  source_obligation: OBL-0010
-  rationale: "All 4 payoff modes covered structurally by SLT-0023/0024/0025/0026; gap is in real-time-discipline-load registers under post-PG-0003 conditions"
-- gap_kind: obl_payoff_coverage
-  target_record_id: OBL-0011
-  priority_weight: high
-  source_obligation: OBL-0011
-  rationale: "All 4 permitted payoff modes covered; gap is in renunciation-without-touch + framing-test-against-specific-person registers"
-- gap_kind: thr_coverage
-  target_record_id: THR-0006
-  priority_weight: medium
-  source_thread: null
-  rationale: "Pressured at 8; storylets must sustain or raise pressure unless paying off"
-- gap_kind: content_intensity_distribution
-  target_record_id: null
-  priority_weight: medium
-  rationale: "Match 20/30/50 explicit-baseline target; new batch ≈ 5 tame / 7 mature / 11 explicit for target_pool_size=23"
-- gap_kind: shape_distribution_avoid_overflow
-  target_record_id: null
-  priority_weight: low
-  rationale: "Existing pool already 8/45 reflection_dilemma (18%); cap new batch at ≤4 reflection_dilemma; bias toward intimacy / confrontation / fork_recovery / threat_escalation"
-- gap_kind: mystery_firewall
-  target_record_id: M-3
-  priority_weight: hard
-  rationale: "Forbidden-status saturation source; never theorize (firewall absolute)"
-- gap_kind: mystery_firewall
-  target_record_id: M-4
-  priority_weight: hard
-  rationale: "Forbidden-status intersex variant; never theorize (firewall absolute)"
+diagnosis_matrix:
+  audit_rsp_rows:
+    RSP-NNNN:
+      source_rsp: RSP-NNNN
+      source_audit: SAU-NNNN
+      finding_ids: [F-NN, ...]
+      target_commitment_class: <commitment_class>
+      target_arc_archetype: <arc_archetype>
+      sketch_arc_contract: >
+        Card-provided arc-contract sketch, when present.
+      sketch_dramatic_unit: >
+        Card-provided dramatic-unit sketch, when present.
+      priority_weight: max
 ```
 
-**Source-threads variant of the seed/focus-mode example** — when `source_threads=THR-NNNN[,THR-NNNN]` is supplied instead of (or alongside) `source_obligations`, each thread's `obligations[]` array is unpacked at Phase 1: each constituent OBL becomes its own `obl_payoff_coverage` diagnosis row driven from the thread's salience (priority_weight derived from the thread's `current_pressure`), AND the thread itself becomes a `thr_coverage` row capturing the thread-level escalation pressure. Worked unpacking: `source_threads=THR-0006,THR-0007,THR-0008` against a bundle where `THR-0006.obligations=[OBL-0009,OBL-0002]`, `THR-0007.obligations=[OBL-0003,OBL-0004]`, `THR-0008.obligations=[OBL-0010]` produces five `obl_payoff_coverage` rows (one per OBL drawn from the thread set, each weighted by the thread's `current_pressure`) plus three `thr_coverage` rows (one per thread, capturing the thread-level escalation discipline). When `source_obligations` is also supplied, its OBLs merge with the thread-unpacked OBLs into a single de-duplicated `obl_payoff_coverage` row set; when only `source_threads` is supplied, the thread-unpacked OBLs are the sole `obl_payoff_coverage` row source. The thread→OBL unpacking is functionally equivalent to a direct `source_obligations` shape with the same OBL ids — Phase 5's OBL-engagement check (per `references/phase-4-5-canon-safety-checks.md` §OBL-engagement check) treats both inputs symmetrically.
+`target_commitment_class` and `target_arc_archetype` are owned by the
+`branching-story-health-audit` RSP card schema extension in SPEC-22 Track 4.
+This Phase 1 reference consumes those fields; it does not define or migrate the
+RSP card schema. If an older historical RSP card lacks those fields, treat that
+as a pre-cutover audit artifact and stop for operator routing rather than
+guessing silently.
 
-In seed/focus mode the matrix rows are emitted in priority-weight-descending order (`hard` firewall rows first; then `high` OBL/THR coverage rows; then `medium` distribution-shape rows; then `low` deprioritization rows). The `priority_weight` enum is `hard | high | medium | low`. Optional fields (`source_obligation` / `source_thread` / `rationale`) appear when the operator's diagnosis has narrative detail worth preserving for cross-batch reproducibility; minimal-form rows carrying only `gap_kind` + `target_record_id` + `priority_weight` are also acceptable when the diagnosis is purely structural. The audit-mode and jit-mode shapes above remain authoritative for those modes; this seed/focus-mode shape is the diagnosis-row contract for the most-common direct-invocation path.
+Audit mode bypasses a full pool-health diagnosis unless the operator explicitly
+requests contextual review. RSP targeting already names the remediable gap; the
+matrix's job is to preserve that targeting for Phase 2.
 
-**Output**: a diagnosis matrix with rows {gap_kind, target_record_id, priority_weight, source_rsp?, source_audit?, finding_ids?, source_obligation?, source_thread?, rationale?} feeding Phase 2 seed selection.
+## JIT Mode
+
+For `parent_skill_invocation: true` from `branching-story-page-cycle` with
+`mode=jit`, reduce the diagnosis matrix to the single continuation failure that
+triggered JIT:
+
+```yaml
+diagnosis_matrix:
+  jit_continuation_failure:
+    gap_kind: continuation_failure
+    target_record_id: <caller_state_snapshot.current_storylet_eligibility_failure_reason.record_id | null>
+    caller_commitment_class: <caller_state_snapshot.selected_chc.commitment_class>
+    caller_state_snapshot_ref: inline
+    priority_weight: max
+```
+
+Use `caller_state_snapshot.current_storylet_eligibility_failure_reason` when it
+is present. Otherwise derive the row from page-cycle's Phase 3
+consequence-capacity result and the failed Phase 4 eligibility/scoring context.
+
+Do not run a full pool-health scan, distribution scan, or longest-branch recent
+history scan inside the JIT sub-routine. Page-cycle has already assembled the
+branch-local state. The resulting JIT seed is one arc whose `commitment_class`
+matches the chosen CHC's `commitment_class`; `templates/arc-archetypes.md`
+provides the recommended archetype mapping.
+
+## Cross-References
+
+- `templates/arc-archetypes.md` — authoring vocabulary and JIT
+  `commitment_class -> recommended arc_archetype` mapping.
+- `references/phase-2-generation-seeds.md` — downstream consumer of this
+  diagnosis matrix. Its SPEC-21 arc-seed rewrite is owned by
+  `SPEC21SCECOM-004`.
+- `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` — Track 3
+  owns `COMMITMENT_CLASSES` and `ARC_ARCHETYPES`; Track 4 owns RSP card
+  targeting fields.
+
+## Output
+
+The output is the structured `diagnosis_matrix`. It feeds Phase 2 seed
+selection and should be retained in the operator's working notes or batch
+manifest rationale when it explains why a seed target was chosen. It does not
+write story records, mutate world canon, allocate ids, or authorize a HARD-GATE
+write.

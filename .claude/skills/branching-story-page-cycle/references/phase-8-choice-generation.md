@@ -1,160 +1,261 @@
-# Phase 8: Choice Generation (Amendment B Pipeline)
+# Phase 8: Choice-Surface Gate
 
-## Step 1: Affordance Space Collection (engine, deterministic)
+Phase 8 stops being an agency generator. It validates whether the current narrative
+point deserves a user-facing choice surface, and when it does, it emits only CHC v2
+records whose commitments are structurally choice-worthy.
 
-Enumerate `(verb, target, instrument)` tuples from `state_snapshot`:
-- verbs: from a canonical verb vocabulary (talk / attack / flee / investigate / conceal / confess / bargain / use_object / test_theory / follow_clue / change_relationship / intimacy_advance / refuse / reveal / etc.).
-- targets: cast_present + objects in scope + locations in scope + secrets known + open OBLs visible to POV.
-- instruments: objects in inventory + secrets known by POV + facts known by POV.
+Inputs:
 
-Merge in the Phase 7.5 Visible Affordance Map as an additional anchor source. Each grounded map entry contributes the mapped state id or planned record id plus its prose-emphasis rationale. Rejected or ungrounded map entries never become Phase 8 anchors; they route back to Phase 7 or the existing load-bearing claim-record path before this step proceeds.
+- Current page working record after Phase 7.6 validation.
+- ARC_TRACE narrative-point evidence when `arc_trace_emitted: true`.
+- The realized scene-commitment arc, including `exit_portfolio.native_seeds[]`.
+- Current `state_snapshot`, open obligations, active threads, and storylet pool.
+- Phase 7.5 Visible Affordance Map as an anchor source, not as a menu generator.
+- `STORY_KERNEL.menu_policy`, using defaults when absent.
+- Execution mode: `authoring`, `interactive_runtime`, or `batch_generation`.
 
-Hard filter: drop any tuple that violates a hard precondition (dead char can't speak; lost object can't be used; unknown secret can't be confessed).
+Outputs:
 
-Output: candidate affordance set (typically dozens to low hundreds).
+- Zero CHCs for terminal or chapter-close points.
+- One auto-chain CHC for `CONTINUE_ARC` / `CONTINUE_ONLY_PAUSE` when applicable.
+- A validated menu of scene-commitment CHCs plus the write-in slot for natural or
+  interrupt hinges.
 
-## Step 2: Salient-Affordance Shortlist + LLM Proposer
+## Step 1: Narrative-Point Classification (engine deterministic with LLM fallback)
 
-Engine pre-scores affordances by:
-- `obligation_relevance` (does this affordance pay off / complicate an open OBL?)
-- `character_goal_relevance` (does this advance a STINT-current goal?)
-- `reader_knowledge_relevance` (does this exploit dramatic irony?)
-- `thread_pressure` (which THR needs attention?)
-- `governor_nudge_alignment` (does this match Phase 6's recommendation?)
+The engine classifies the current narrative point into one of the closed
+`narrative_point` enum values:
 
-Take top-K (K = 15) affordances. Pass to LLM proposer with prompt:
+| Class | Trigger | Menu behavior |
+|---|---|---|
+| `CONTINUE_ARC` | The arc has not yet hit a normal exit or interrupt predicate, or Phase 7.6 leaves an explicitly allowed split/unresolved arc flow. | No user menu in `interactive_runtime`; auto-chain. |
+| `NATURAL_COMMITMENT_HINGE` | The arc closed at one of `arc.stop_policy.normal_exits[]`. | Build and validate a menu. |
+| `INTERRUPT_HINGE` | The arc closed via `arc.stop_policy.interrupt_before[]`, or Phase 7.6 returned `promote_interrupt`. | Build and validate a menu; menu is required. |
+| `CONTINUE_ONLY_PAUSE` | A runaway-defense safety valve fired (`safety_valves.max_words_reached` or `safety_valves.max_internal_beats_reached`) and only one plausible next commitment exists. | Emit only the exact Continue carve-out CHC. |
+| `TERMINAL_OR_CHAPTER_CLOSE` | Existing terminal-branch or chapter-close logic applies. | Emit no CHCs. |
 
+Deterministic classification is preferred. If ARC_TRACE evidence is emitted, the
+engine uses `stop_condition_hit.category`, Phase 7.6's Layer 3 verdict, and terminal
+branch state:
+
+- `normal_exit` maps to `NATURAL_COMMITMENT_HINGE`.
+- `interrupt_before` maps to `INTERRUPT_HINGE`.
+- `safety_valve` maps to `CONTINUE_ONLY_PAUSE` only when the single-commitment
+  predicate also holds.
+- Layer 3 verdict `promote_interrupt` maps to `INTERRUPT_HINGE`.
+
+If the engine cannot decide because the stop evidence is ambiguous, an LLM
+classifier may propose a class. The engine then validates the proposed class against
+the closed enum and available trace/state evidence. Unknown enum values or unsupported
+classes HARD-REJECT.
+
+`CONTINUE_ARC` and `CONTINUE_ONLY_PAUSE` are not pacing targets. They are structural
+or safety-valve states; ordinary dramatic pacing is expressed through arc structure
+and `STORY_KERNEL.cadence_policy`, not through word-count prompts.
+
+## Step 2: Hybrid Exit Portfolio Composition (deterministic engine)
+
+For `NATURAL_COMMITMENT_HINGE` and `INTERRUPT_HINGE`, compose a candidate exit set
+before CHCs are surfaced.
+
+### Candidate sources
+
+1. **Native seeds**: include every `arc.exit_portfolio.native_seeds[]` entry whose
+   `continuation_arc_selector` matches at least one eligible arc in the storylet
+   pool. Eligibility uses the same deterministic checks as Phase 4: `hard_preconds`,
+   `cast_requirements`, `location_requirements`, visibility, mystery safety, and
+   `commitment_class`.
+2. **Engine-discovered exits**: add exits from
+   `arc.exit_portfolio.engine_discovered_exit_budget.allowed_sources[]`, capped at
+   `arc.exit_portfolio.engine_discovered_exit_budget.max`. Legal sources include
+   `urgent_obligation`, `high_salience_thread`, `unresolved_consequence`, and
+   `user_write_in`. Each discovered exit derives a `commitment_class` from the
+   source's structural semantics.
+3. **JIT synthesis**: if the candidate set remains below
+   `STORY_KERNEL.menu_policy.min_distinct_commitments` (default `2`), invoke
+   `storylet-pool-authoring mode=jit` to synthesize a missing arc archetype.
+
+The Phase 7.5 Visible Affordance Map may prioritize or ground an exit, but it must
+not bypass eligibility, mystery safety, continuation capacity, or choice-worthiness.
+
+### Candidate CHC shape
+
+Every candidate intended for menu emission is assembled as a CHC v2 working record:
+
+```yaml
+record_version: 2
+choice_kind: scene_commitment
+commitment_class: <commitment_class enum>
+strategy_cluster: <kebab-case open-vocab tag>
+choice_worthiness:
+  strategic_question_answered: >
+  strong_axes:
+    - <strong_axis enum>
+  expected_state_delta: {...}
+  why_not_microbeat: >
+  foreseeable_difference: >
+choice_contract: {...}
+likely_effects: [...]
+continuation_capacity: {...}
+content_intensity_implied: tame | mature | explicit
+label: null
 ```
-[content_policy block]
-[scene context — same as Phase 7]
-[storylet realized this turn — its choice_templates as anchors]
-[governor_nudge]
-[Phase 7.5 Visible Affordance Map — grounded prose-emphasized affordances only]
-[top-K affordances with score rationales]
 
-INSTRUCTION:
-Propose 6-10 candidate choices as STRUCTURED CHC records (operation, actor, target,
-uses_fact, likely_effects, continuation_capacity, choice_mode, poetic_effect). Cover
-a mix of choice_modes and poetic_effects (relaxed / obvious / dilemma / risky_truth /
-sacrifice / seduction / desperation / revelation). Engage at least one open OBL per
-choice when possible. Include at least one valid candidate anchored on a grounded
-visible affordance when the rendered prose made one salient and the state permits it.
-Do not write the user-facing label yet — that happens in step 5.
-```
+`choice_contract` and `continuation_capacity` remain load-bearing. A candidate with
+no legal seed continuation and no valid JIT continuation is not emitted.
 
-LLM produces 6-10 candidate structured CHCs.
+## Step 3: Choice-Worthiness Validation (engine; HARD-REJECT failures)
 
-## Step 3: Engine Validation Pass
+For every candidate CHC except the exact `CONTINUE_ONLY_PAUSE` carve-out below,
+validate:
 
-For each LLM-proposed CHC:
-
-| Check | Action on fail |
+| Check | Requirement |
 |---|---|
-| Hard preconditions satisfied at current state | Drop |
-| Impact analysis runs cleanly (Phase 2 logic on this proposed choice) | Drop |
-| Consequence-capacity: `continuation_capacity` is populated with a simulated `post_choice_delta`, and either at least one `valid_seed_storylets[]` entry remains legal under that delta OR `jit_shape_spec` is non-empty | Drop or transform |
-| `poetic_effect` is realistic for the operation + state | Re-tag |
-| Mystery safety preserved | Drop |
+| `likely_effects` | Non-empty. |
+| `choice_worthiness.strategic_question_answered` | Populated with the scene-level question this commitment answers. |
+| `choice_worthiness.strong_axes[]` | At least one entry from the closed `strong_axis` enum. |
+| `choice_worthiness.expected_state_delta` | Non-empty; names the expected state difference by strong axis. |
+| `choice_worthiness.why_not_microbeat` | Populated; explains why this is not a gesture-level beat. |
+| `choice_worthiness.foreseeable_difference` | Populated; tells what the user can foresee will differ from sibling choices. |
+| Pair commitment difference | The candidate's `commitment_class` differs from at least one other surviving candidate. |
+| Continuation capacity | Either `continuation_capacity.valid_seed_storylets[]` is non-empty or `continuation_capacity.jit_shape_spec` is populated, with `validation_basis` explaining the accepted path. |
 
-For the consequence-capacity check, compute the post-choice delta implied by `choice_contract.minimum_state_change` and `likely_effects`, then test seed-pool SLTs against that delta: `hard_preconds`, `cast_requirements`, `location_requirements`, and `mystery_safety` must still pass. If no seed storylet matches but a runtime JIT continuation is viable, populate `jit_shape_spec` with the one-line shape of the needed continuation. Both `valid_seed_storylets` empty and `jit_shape_spec` empty is a dead-end and the CHC is not emitted. `validation_basis` records the one-line rationale for the accepted seed/JIT continuation path.
+Failures HARD-REJECT the candidate. If the menu falls below
+`STORY_KERNEL.menu_policy.min_distinct_commitments`, return to Step 2 for JIT synthesis
+or fail Phase 8 with a structured reason.
 
-Drop choices that fail hard checks. Flag near-misses for transformation.
+This is the Rule 1 (No Floating Facts) enforcement surface for CHC v2: a choice
+cannot be emitted as mere posture, label, or mood. It must carry non-empty likely
+effects and a populated choice-worthiness argument.
 
-## Step 4: Diversification + Scoring
+## Step 4: Strong-Axis Pair Distance (engine; HARD-REJECT failures)
 
-Apply diversification to surviving choices:
-- Avoid 6 versions of "ask about X" — at most 1 of any single (verb, target) pair.
-- Mix moral / strategic / emotional / investigative / risky / self-protective axes.
-- Cover at least 3 distinct `choice_mode` values.
-- Cover at least 3 distinct `poetic_effect` values.
-- Engage at least 60% of currently-open high-salience OBLs across the choice set.
-- If a grounded Visible Affordance Map entry is not engaged by any surviving CHC, prefer a valid CHC anchored on that affordance over a purely storylet-template-driven option, without weakening hard preconditions, `choice_contract`, or `continuation_capacity`.
+For menus with two or more surviving CHCs, compute the union of all
+`choice_worthiness.strong_axes[]` values across the displayed menu. The menu must
+cover at least two distinct `strong_axis` values.
 
-### Pair-distance discipline
+Two choices that both engage only `relationship_trajectory`, for example, share the
+same axis profile even if their labels differ. Re-derive or drop the weaker candidate
+until the menu's strong-axis union has size at least `2`.
 
-In addition to the diversification list above, every pair of emitted CHCs must differ on at least 2 of the following 8 axes, with at least 1 difference from structural axes 1-6:
+The strong-axis check complements, but replaces, the v1 8-axis pair-distance rule.
+The v1 rule prevented cosmetic `(operation, actor, target)` variants; the v2 rule
+protects commitment-level difference. The menu must not ask the user to choose among
+labels that all produce the same strong-axis future.
 
-1. `operation` (the canonical verb from Phase 8 affordance vocabulary)
-2. `actor` (the STENT performing the action)
-3. `target` (the STENT / STOBJ / STLOC / abstract being acted upon)
-4. `uses_fact` (the SF the choice leverages, if any)
-5. `choice_contract.minimum_state_change` set (compare the contained `{fact, obligation, consequence, relationship, intention, thread, location, cast, terminality}` sub-types; two CHCs that both change `fact` and `obligation` are equivalent on this axis, while different sub-types are distinct)
-6. `choice_contract.success_policy` (`guaranteed | attempted | uncertain | opposed`)
-7. `choice_mode` (the modal label)
-8. `poetic_effect` (the affective register)
+## CONTINUE_ONLY_PAUSE Carve-Out
 
-Two CHCs that differ only in `choice_mode` and `poetic_effect` are operational cosmetic variants even though they differ on 2 total axes. Fail Phase 8, halt, and re-derive the more cosmetically similar of the pair. The check is mechanical: read the in-memory CHC records, compute pairwise axis differences, and reject any pair that has fewer than 2 total differences or has no structural-axis difference.
+When Step 1 classifies `CONTINUE_ONLY_PAUSE`, emit exactly one CHC:
 
-Example failing pair: "Question the guard about the magistrate's whereabouts" and "Press the guard about who he saw last night" both use `operation: investigate`, the same actor, the same target, `uses_fact: null`, the same `{fact}` minimum state-change set, and `success_policy: attempted`; the only differences are `choice_mode` and `poetic_effect`. Re-derive one CHC so it differs structurally, such as by changing actor, target, `uses_fact`, minimum state-change set, or success policy.
+```yaml
+record_version: 2
+choice_kind: tactical_beat
+commitment_class: continue_arc_continuation
+strategy_cluster: continue-only
+choice_worthiness:
+  strategic_question_answered: "Continue the current arc safely."
+  strong_axes: []
+  expected_state_delta:
+    continuation: "No alternative commitment is currently plausible; continue the arc."
+  why_not_microbeat: "CONTINUE_ONLY_PAUSE - only one plausible next commitment"
+  foreseeable_difference: "The current arc continues without opening a new commitment surface."
+choice_contract:
+  user_intent: "Continue."
+  guaranteed_action: "Continue the current arc without selecting a new commitment."
+  success_policy: guaranteed
+  allowed_outcome_band: [succeeds]
+  forbidden_outcomes: []
+  minimum_state_change: []
+likely_effects:
+  - "The current arc continues from this page."
+continuation_capacity:
+  post_choice_delta: {}
+  valid_seed_storylets: []
+  jit_shape_spec: null
+  validation_basis: "CONTINUE_ONLY_PAUSE auto-chain continuation."
+label: "Continue."
+```
 
-Final ranked list of 4-6 surviving structured choices.
+Step 3's `strong_axes[] >= 1` and pair commitment-difference checks are bypassed
+only for this exact `commitment_class: continue_arc_continuation` carve-out. No other
+commitment class may bypass choice-worthiness validation.
 
-## Step 5: Surface Label Rendering (LLM)
+## Auto-Chaining in `interactive_runtime`
+
+When the narrative point is `CONTINUE_ARC` or `CONTINUE_ONLY_PAUSE`,
+`interactive_runtime` auto-chains:
+
+1. Phase 11 commits the current page normally.
+2. The runtime immediately re-invokes page-cycle with
+   `parent_page_id = this_PG`.
+3. `chosen_choice_id` is the auto-chain CHC for the continuation.
+4. The user sees one continuous reading flow without an intermediate Phase 10 pause.
+
+`authoring` mode never auto-chains past the user. Phase 10 HARD-GATE fires for every
+arc-page in `authoring`, and the Phase 4.5 canon-promotion handoff to
+`story-fact-promotion-to-canon` remains never-elided in every execution mode.
+
+## Bootstrap PG-0001 special case
+
+`branching-story-bootstrap` delegates PG-0001 initial choice generation to this Phase
+8 in special-case mode. PG-0001 has no parent arc and no ARC_TRACE because bootstrap
+renders a scene-setter; the first true arc render happens on the next page after the
+user picks a commitment.
+
+Special-case behavior:
+
+- **Step 1 - Narrative-Point Classification**: skipped. PG-0001 defaults to
+  `NATURAL_COMMITMENT_HINGE` because the bootstrap root is the first commitment
+  surface.
+- **Step 2 - Hybrid Exit Portfolio Composition**: composed without native seeds from
+  a closed arc. Candidate sources are:
+  - initial obligations from bootstrap Phase 5 that are salient or urgent enough to
+    engage immediately;
+  - active threads from bootstrap Phase 5 carrying entry pressure;
+  - seed-pool arc eligibility, where every v2 SLT whose `hard_preconds` pass against
+    PG-0001's `state_snapshot` contributes its `arc_contract.commitment_class` as a
+    candidate;
+  - optional JIT synthesis when the candidate set is below
+    `STORY_KERNEL.menu_policy.min_distinct_commitments`.
+- **Steps 3, 4, and 5**: apply normally. Every stored PG-0001 CHC has non-empty
+  `likely_effects`, populated `choice_worthiness`, at least one `strong_axes` entry,
+  and the menu collectively covers at least two distinct strong axes.
+- **Step 6 - Write-In Slot**: not stored as a CHC at bootstrap. The slot is presented
+  at runtime when the user reads PG-0001.
+
+PG-0001's `state_snapshot` records:
+
+```yaml
+applied_effect_variant: null
+narrative_point_classification: NATURAL_COMMITMENT_HINGE
+arc_trace_id: null
+arc_trace_emitted: false
+```
+
+SPEC-22 validators accept these null/default values only for the `id == PG-0001`
+root-page exception.
+
+## Step 5: LLM Surface Label Rendering
 
 For each surviving structured choice, the LLM writes the user-facing label:
 
 ```
 [content_policy block]
 [scene context summary]
-[structured choice — operation, actor, target, uses_fact, likely_effects,
- choice_mode, poetic_effect]
+[structured choice - choice_kind, commitment_class, strategy_cluster,
+ choice_worthiness, choice_contract, likely_effects, continuation_capacity]
 
 INSTRUCTION:
-Write the user-facing label for this choice. Faithful to the underlying operation —
-do not embellish in ways that lie about what the choice does. Match the prose tone.
-Length: 5-15 words. Prefer active voice. Do not preview the outcome explicitly;
-the player should make the choice without knowing exactly what will happen.
+Write the user-facing label for this choice. Faithful to the validated CHC v2
+record - especially `commitment_class`, `choice_worthiness`, `choice_contract`,
+and `likely_effects`. Do not embellish in ways that lie about what the choice
+does. Match the prose tone. Length: 5-15 words. Prefer active voice. Do not
+preview the outcome explicitly; the player should make the choice without knowing
+exactly what will happen.
 ```
 
-Each emitted CHC-NNNN record stores:
-
-```yaml
-id: CHC-NNNN
-story_id: STORY-001
-emitted_at_page: PG-NNNN
-created_at_page: PG-NNNN
-
-operation: <verb>
-actor: STENT-NNNN
-target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract
-uses_fact: SF-NNNN | null
-
-choice_contract:
-  user_intent: >
-    What the player is signaling they want to accomplish.
-  guaranteed_action: >
-    What WILL definitely be attempted or performed if this choice is selected.
-  success_policy: guaranteed | attempted | uncertain | opposed
-  allowed_outcome_band:
-    - succeeds
-    - partially_succeeds
-    - fails_with_consequence
-    - backfires
-  forbidden_outcomes:
-    - <outcome that would betray the label>
-  minimum_state_change:
-    - fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
-
-likely_effects: [...]
-continuation_capacity:
-  post_choice_delta:
-    facts_added_or_changed: []        # SF-NNNN ids changed by minimum_state_change / likely_effects
-    obligations_changed: []           # OBL-NNNN ids whose status or salience would shift
-    location_changed: null            # null if no move; STLOC-NNNN id if current_location changes
-    cast_present_changed: []          # STENT-NNNN ids entering or leaving cast_present
-    mystery_resolution_risk: []       # M-NNNN ids whose safety status the post-choice state tests
-  valid_seed_storylets: []            # SLT-NNNN ids whose hard_preconds/cast/location/mystery checks pass under the post-choice delta
-  jit_shape_spec: null                # one-line JIT continuation sketch when no seed SLT matches
-  validation_basis: ""                # one-line rationale for the accepted seed or JIT continuation path
-choice_mode: <enum>
-poetic_effect: <enum>
-content_intensity_implied: tame | mature | explicit
-label: <user-facing text>
-```
-
-Either `continuation_capacity.valid_seed_storylets` is non-empty OR `continuation_capacity.jit_shape_spec` is populated. Both empty is a Phase 9 gate-9 fail.
-
-A selected CHC may NOT be transformed outside its `choice_contract.allowed_outcome_band` without explicit user confirmation. If the next turn's Phase 4 storylet selection or Phase 7 prose render would produce an outcome outside the band, the engine routes via Phase 1 B.3's `ACCEPT_BUT_TRANSFORM` (asking the user to confirm) rather than silently delivering an outcome that betrays the label. This protects user agency: "Confess the secret" cannot become "almost confess but get interrupted" without the user explicitly accepting the reframing.
+Labels are surface text only. They must remain faithful to the validated CHC v2
+record and must not introduce outcome promises absent from `choice_contract`.
 
 ## Step 6: Write-In Slot
 
