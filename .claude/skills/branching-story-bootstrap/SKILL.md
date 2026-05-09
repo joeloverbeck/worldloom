@@ -153,7 +153,7 @@ Phase 9: Validation Gates             (17 gates — see HARD-GATE; each PASS
       v
 Phase 9.5: Bootstrap Discipline       (10 soft-required-field checks
            Validator                    outside the FOUNDATIONS-anchored
-                                        12-gate set; PASS-with-rationale
+                                        17-gate set; PASS-with-rationale
                                         into discipline_validation_trace;
                                         FAIL routes to responsible phase)
       |

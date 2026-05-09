@@ -150,7 +150,7 @@ When Step 1 classifies `CONTINUE_ONLY_PAUSE`, emit exactly one CHC:
 ```yaml
 record_version: 2
 choice_kind: tactical_beat
-commitment_class: continue_arc_continuation  # tactical_beat-only special-case value; NOT in storylet-pool-authoring's scene_commitment_arc COMMITMENT_CLASSES enum (per references/phase-1-coverage-diagnosis.md §commitment_class_distribution); auto-PASSes Phase 9 gate 9 per references/phase-9-validation-gates.md gate 9 carve-out
+commitment_class: continue_arc_continuation  # tactical_beat-only special-case value; NOT in storylet-pool-authoring's scene_commitment_arc COMMITMENT_CLASSES enum (per references/phase-1-coverage-diagnosis.md §Distribution Scans); auto-PASSes Phase 9 gate 9 per references/phase-9-validation-gates.md gate 9 carve-out
 strategy_cluster: continue-only
 choice_worthiness:
   strategic_question_answered: "Continue the current arc safely."

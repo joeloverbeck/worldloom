@@ -364,7 +364,7 @@ Any FAIL routes to the responsible loop-back phase; the audit re-runs that phase
 
 **Self-check trace surfacing**: The 9 self-check tests run internally during Phase 7 consolidation; PASS-with-rationale entries are not surfaced in chat output (no Phase 9 final-summary sub-section is allocated for the trace). The act of progressing to Phase 8 with all findings populated and validated IS the audit-trail evidence that the self-check tests passed. Only on FAIL does the trace surface in chat: the failing test number, finding_id, and routed loop-back phase appear as the diagnostic message before the audit re-runs the responsible phase. The implicit-PASS / explicit-FAIL surfacing pattern keeps the chat output proportional to the audit's signal — clean audits are terse, problematic audits show their work where the work is needed.
 
-**Operator filtering at consolidation**: delegated detection (per §Strategic Delegation) typically produces raw findings that include PASSes, documented-as-intentional cases, and false-positives — the §"Delegated-agent reporting contract" guidance "better to over-report than miss issues" makes over-emission the expected shape. The operator filters these at consolidation BEFORE Phase 8 triage rather than carrying them through as Phase 8 reject candidates. Discipline: (a) record a one-line filter rationale per filtered finding (e.g., `"PASS — content-policy block byte-for-byte identical across 3 skills"`, `"documented-as-intentional per <skill>'s description line"`, `"false-positive — agent's analysis itself shows no actual drift"`); (b) the §Phase 9 §"Audit trail" Sum check carries a separate `filtered_at_consolidation` line tallying these; (c) the final-summary §Rejected section is RESERVED for Phase 8 user-driven rejections (`reject-as-false-positive` disposition), NOT for Phase 7 operator filtering — the two surfaces have distinct audit-trail meanings (operator-decided at consolidation vs user-decided at triage) and conflating them obscures which findings the user saw.
+**Operator filtering at consolidation**: delegated detection (per §Strategic Delegation) typically produces raw findings that include PASSes, documented-as-intentional cases, false-positives, and sub-components subsumed by other findings — the §"Delegated-agent reporting contract" guidance "better to over-report than miss issues" makes over-emission the expected shape. The operator filters these at consolidation BEFORE Phase 8 triage rather than carrying them through as Phase 8 reject candidates. Discipline: (a) record a one-line filter rationale per filtered finding (e.g., `"PASS — content-policy block byte-for-byte identical across 3 skills"`, `"documented-as-intentional per <skill>'s description line"`, `"false-positive — agent's analysis itself shows no actual drift"`, `"subsumed by F-NN — finding is real but is a sub-component of F-NN; resolving F-NN absorbs it"`); the four rationale classes are structurally distinct and have different audit-trail meanings — PASS = the finding's premise is false; documented-as-intentional = the finding's premise is true but the divergence is deliberate; false-positive = the agent's analysis itself was wrong; subsumed-by-other = the finding's premise is true but redundantly so (resolving the parent finding resolves it); (b) the §Phase 9 §"Audit trail" Sum check carries a separate `filtered_at_consolidation` line tallying these; (c) the final-summary §Rejected section is RESERVED for Phase 8 user-driven rejections (`reject-as-false-positive` disposition), NOT for Phase 7 operator filtering — the two surfaces have distinct audit-trail meanings (operator-decided at consolidation vs user-decided at triage) and conflating them obscures which findings the user saw.
 
 ## Phase 8: HARD-GATE Triage and Per-Finding Disposition
 
@@ -451,6 +451,11 @@ For each manual-resolution finding:
   - **Why no auto-edit**: <one-line — typically "neither sibling is
     obviously canonical; both are recent, both are referenced">
   - **Suggested resolution path**: <one-line guidance>
+  - **Joined with** (optional, emit only when coupling exists): F-NN
+    [+ F-NN ...] — <one-line naming what couples the findings (e.g.,
+    same architectural decision drives both; same source-of-truth
+    ambiguity applies; one finding's resolution determines the other's)
+    and why resolving together is preferable to resolving in isolation>
 
 ### Filed but no edit applied (Phase-9-composition-time discovery)
 
@@ -487,7 +492,7 @@ For each dropped finding:
 - Deferred: <R>
 - Rejected: <S>
 - Dropped: <T>
-- Filtered at consolidation: <U> (Phase 7 operator filtering — PASSes / documented-as-intentional / false-positives that never reached Phase 8 triage; see §Phase 7 §"Operator filtering at consolidation")
+- Filtered at consolidation: <U> (Phase 7 operator filtering — PASSes / documented-as-intentional / false-positives / sub-components subsumed by other findings that never reached Phase 8 triage; see §Phase 7 §"Operator filtering at consolidation")
 - Sum check: Filed + Filed-but-no-edit + Manual-resolution + Deferred + Rejected + Dropped + Filtered-at-consolidation = Total findings (audit trail consistency)
 
 The git diff after this run is the durable audit trail. Review with
