@@ -99,6 +99,39 @@ test("listRecords requires story_slug for story-bundle record types", async () =
   }
 });
 
+test("listRecords returns ARC_TRACE records through arc_trace_record", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const listed = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "arc_trace_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        include_full_body: true
+      })
+    );
+    const missingStorySlug = await withRepoRoot(root, () =>
+      listRecords({ world_slug: "seeded", record_type: "arc_trace_record" })
+    );
+
+    assert.ok(!("code" in listed));
+    assert.equal(listed.total, 1);
+    assert.deepEqual(listed.records.map((record) => record.record_id), ["ARCTRACE-0001"]);
+    const record = listed.records[0] as { body?: Record<string, unknown> };
+    assert.equal(record.body?.record_kind, "arc_trace_node");
+    assert.equal(record.body?.id, "ARCTRACE-0001");
+
+    assert.ok("code" in missingStorySlug);
+    assert.equal(missingStorySlug.code, "invalid_input");
+    assert.equal(missingStorySlug.details?.field, "story_slug");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords isolates duplicate authored story ids across bundles", async () => {
   const root = createTempRepoRoot();
 

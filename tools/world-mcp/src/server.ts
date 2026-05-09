@@ -334,7 +334,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-NNNN or SLT-NNNN. Optional section_path projects a hybrid record subset: 'frontmatter' for full frontmatter, 'body' for all body sections, 'frontmatter.<key>' for one frontmatter field, or 'body.<section>' for one body section. Atomic and story-bundle records reject section_path. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-NNNN, SLT-NNNN, or ARCTRACE-NNNN. Optional section_path projects parsed atomic/story records with dotted paths such as 'effect_evidence' or 'semantic_critic_verdict.status'; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
@@ -371,7 +371,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record_schema",
-    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type.",
+    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type, including schema-backed story-bundle node types such as arc_trace_node.",
     getRecordSchemaInputSchema,
     async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0]),
     { node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }

@@ -71,7 +71,7 @@ export interface GetRecordHybridResponse {
 
 export interface GetRecordSectionResponse {
   record_id: string;
-  record_kind: HybridRecordKind;
+  record_kind: ParsedRecord["record_kind"] | HybridRecordKind;
   section_path: string;
   value: unknown;
   content_hash: string;
@@ -493,6 +493,66 @@ function projectSectionPath(
   );
 }
 
+function parseAtomicSectionPath(sectionPath: string): Array<string | number> | McpError {
+  if (sectionPath.length === 0) {
+    return createMcpError("invalid_input", "section_path must not be empty.", {
+      field: "section_path",
+      section_path: sectionPath
+    });
+  }
+
+  const segments = sectionPath.split(".");
+  if (segments.some((segment) => segment.length === 0)) {
+    return createMcpError(
+      "invalid_input",
+      `section_path '${sectionPath}' contains an empty path segment.`,
+      { field: "section_path", section_path: sectionPath }
+    );
+  }
+
+  return segments.map((segment) => (/^\d+$/.test(segment) ? Number(segment) : segment));
+}
+
+function projectParsedRecordPath(
+  recordId: string,
+  record: ParsedRecord,
+  sectionPath: string
+): SectionPathProjection | McpError {
+  const segments = parseAtomicSectionPath(sectionPath);
+  if (isMcpError(segments)) {
+    return segments;
+  }
+
+  let current: unknown = record;
+  for (let index = 0; index < segments.length; index += 1) {
+    const segment = segments[index]!;
+    let next: unknown;
+    if (Array.isArray(current)) {
+      next = typeof segment === "number" && Number.isInteger(segment) ? current[segment] : undefined;
+    } else if (isRecord(current)) {
+      next = current[String(segment)];
+    }
+
+    if (next === undefined) {
+      return createMcpError(
+        "section_not_found",
+        `section_path '${sectionPath}' does not resolve in record '${recordId}'.`,
+        {
+          field: "section_path",
+          section_path: sectionPath,
+          record_id: recordId,
+          missing_segment: segment,
+          missing_segment_index: index
+        }
+      );
+    }
+
+    current = next;
+  }
+
+  return { value: current };
+}
+
 function enumerateValidPaths(parts: HybridFileParts): string[] {
   const paths: string[] = ["frontmatter", "body"];
   for (const key of Object.keys(parts.frontmatter)) {
@@ -561,10 +621,10 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
 
   const isStoryBundleRecord = isStoryBundleRecordId(args.record_id);
 
-  if (args.section_path !== undefined && (!isHybrid || isStoryBundleRecord)) {
+  if (args.section_path !== undefined && isHybrid && isStoryBundleRecord) {
     return createMcpError(
       "invalid_input",
-      `section_path is only valid for hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN); use get_record_field for atomic record projection.`,
+      `section_path is not valid for story-bundle records with hybrid ids.`,
       { field: "section_path", record_id: args.record_id }
     );
   }
@@ -646,6 +706,21 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
   const record = parseRecordBody(resolved.row);
   if (isMcpError(record)) {
     return record;
+  }
+
+  if (args.section_path !== undefined) {
+    const projection = projectParsedRecordPath(resolved.row.node_id, record, args.section_path);
+    if (isMcpError(projection)) {
+      return projection;
+    }
+    return {
+      record_id: resolved.row.node_id,
+      record_kind: record.record_kind,
+      section_path: args.section_path,
+      value: projection.value,
+      content_hash: resolved.row.content_hash,
+      file_path: resolved.row.file_path
+    };
   }
 
   return {

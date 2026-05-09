@@ -251,7 +251,7 @@ test("get-record-section-path returns section_not_found for missing nested front
   }
 });
 
-test("get-record-section-path rejects section_path on atomic record ids", async () => {
+test("get-record-section-path projects parsed atomic record fields", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -288,15 +288,27 @@ test("get-record-section-path rejects section_path on atomic record ids", async 
       ]
     });
 
-    for (const sectionPath of ["frontmatter", "body", "frontmatter.x"]) {
-      const result = await withRepoRoot(root, () =>
-        getRecord({ record_id: "CF-0001", world_slug: "seeded", section_path: sectionPath })
-      );
+    const title = await withRepoRoot(root, () =>
+      getRecord({ record_id: "CF-0001", world_slug: "seeded", section_path: "title" })
+    );
+    const nested = await withRepoRoot(root, () =>
+      getRecord({
+        record_id: "CF-0001",
+        world_slug: "seeded",
+        section_path: "scope.geographic"
+      })
+    );
+    const missing = await withRepoRoot(root, () =>
+      getRecord({ record_id: "CF-0001", world_slug: "seeded", section_path: "frontmatter.x" })
+    );
 
-      assert.ok("code" in result, `expected error for section_path '${sectionPath}'`);
-      assert.equal(result.code, "invalid_input");
-      assert.equal(result.details?.field, "section_path");
-    }
+    assert.ok("value" in title);
+    assert.equal(title.value, "A Fact");
+    assert.ok("value" in nested);
+    assert.equal(nested.value, "regional");
+    assert.ok("code" in missing);
+    assert.equal(missing.code, "section_not_found");
+    assert.equal(missing.details?.field, "section_path");
   } finally {
     destroyTempRepoRoot(root);
   }

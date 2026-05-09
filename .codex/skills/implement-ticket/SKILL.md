@@ -22,7 +22,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 
 1. Resolve the live ticket/spec paths inside the active repo/worktree and snapshot the worktree.
 2. Read the required repo contracts (`AGENTS.md`, `docs/FOUNDATIONS.md`, ticket template/readme, ticket, and explicit references).
-3. Classify the ticket and load only the focused reference docs needed for that class. For validator or JSON Schema tickets, load `references/validator-schema-migrations.md` before reassessment edits.
+3. Classify the ticket and load only the focused reference docs needed for that class. For validator, JSON Schema, or schema-discovery tickets that project schema metadata, resolve `$ref` chains, or expose schema-derived fields through package tools, load `references/validator-schema-migrations.md` before reassessment edits.
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
 5. State the owned implementation slice to the user, then make minimal edits.
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
@@ -93,7 +93,7 @@ If the primary class is `tool or script implementation`, or the ticket changes a
 
 For package/tool tickets, do the compact package checkpoint in `references/package-tooling.md` before coding.
 
-If the ticket changes a validator, JSON Schema, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
+If the ticket changes a validator, JSON Schema, schema-discovery consumer, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks. Schema-discovery consumers include package tools that expose schema metadata, traverse JSON Schema `$ref`s, or project required fields and referenced schemas even when the ticket does not edit a JSON Schema file directly.
 
 For staged validator/schema/parser details, prefer `references/validator-schema-migrations.md` as the detailed authority and keep this top-level workflow as the routing checklist.
 

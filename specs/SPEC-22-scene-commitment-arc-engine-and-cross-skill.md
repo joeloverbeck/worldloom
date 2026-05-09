@@ -16,7 +16,7 @@ SPEC-19 defines the v2 schemas (SLT, CHC, ARC_TRACE) and the canonical-vocabular
 - **Validators**: `record_schema_compliance` now knows the v2 SLT, CHC, and ARC_TRACE structural envelopes via `archive/tickets/SPEC22SCECOM-002.md`. The first three rule-level validators (`arc_schema_compliance`, `choice_worthiness_completeness`, `stop_policy_parsability`) landed via `archive/tickets/SPEC22SCECOM-003.md`; `effect_model_legality` and `effect_model_replay_safety` landed via `archive/tickets/SPEC22SCECOM-004.md`; `arc_trace_evidence_alignment`, `narrative_point_classification`, and `arc_envelope_conformance` landed via `archive/tickets/SPEC22SCECOM-005.md`, including UTF-8 byte-offset regression coverage for trace evidence. Track 2 rule-validator inventory is complete.
 - **Canonical-vocabularies**: the new closed enums (`commitment_class`, `arc_archetype`, `narrative_point`, `strong_axis`, `strong_outcome`, `stop_predicate`) are implemented in TypeScript and exposed via `mcp__worldloom__get_canonical_vocabulary` by `archive/tickets/SPEC22SCECOM-006.md`.
 - **Indexer**: `world-index` parses ARC_TRACE records and surfaces arc-level rows, edges, and opt-in render output via `archive/tickets/SPEC22SCECOM-007.md`.
-- **MCP retrieval**: `get_record`, `list_records`, `get_records` need extension to handle the `arc_trace_record` type.
+- **MCP retrieval**: `get_record`, `list_records`, `get_records`, `get_records_field`, and `get_record_schema` handle ARC_TRACE records (`ARCTRACE-NNNN`, `record_type='arc_trace_record'`, schema `node_type='arc_trace_node'`) via `archive/tickets/SPEC22SCECOM-008.md`.
 - **Sibling skills**: `branching-story-bootstrap` Phase 6 (storylet pool seed) generates beat-granular SLTs by default; Phase 7 (root page render) selects a beat-granular PG-0001 storylet and renders one beat; Phase 8 (initial choice generation) delegates to page-cycle Phase 8's Amendment B Pipeline (the v1 Phase 8 — beat-granular CHC emission, no choice-surface gate, no choice-worthiness validation, no commitment-class semantics). `branching-story-health-audit` SAU report measures beat-cadence metrics. `story-fact-promotion-to-canon` sources promotion candidates from per-beat SF claims.
 - **Migration**: the existing test bundle at `worlds/erotica-world/stories/red-bunny/` carries v1 records that have no v2 form. The bundle is discarded per the user's "we have one test story we will discard."
 
@@ -170,7 +170,7 @@ The existing `world-index render` CLI gains optional `--arc-traces` flag to incl
 - `get_record(record_id)` accepts `ARCTRACE-NNNN` ids; returns the parsed YAML record with optional `section_path` projection (e.g., `effect_evidence` to project just the effect-evidence block).
 - `list_records(record_type='arc_trace_record', story_slug)` returns ARC_TRACE records for a story bundle.
 - `get_records_field(record_ids, field_path)` supports field-projection on ARC_TRACE records (e.g., `field_path: 'semantic_critic_verdict.status'`).
-- `get_record_schema(record_type='arc_trace_record')` returns the v2 schema metadata.
+- `get_record_schema(node_type='arc_trace_node')` returns the v2 schema metadata from `tools/validators/src/schemas/story-arc-trace.schema.json`.
 
 The retrieval surface preserves the existing `story_slug`-required discipline for story-bundle records.
 
@@ -343,9 +343,9 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
 | `tools/world-index/src/parse/atomic.ts` | 3 | completed by `archive/tickets/SPEC22SCECOM-007.md` — parse story-bundle `_source/arc-traces/ARCTRACE-NNNN.yaml` records into the index |
 | `tools/world-index/src/schema/migrations/005_arc_trace_nodes.sql` | 3 | completed by `archive/tickets/SPEC22SCECOM-007.md` — add `arc_trace_node` table + edge tables (`arc_trace_describes_page`, `arc_trace_realizes_arc`, `arc_trace_observes_action_by`) |
 | `tools/world-mcp/src/tools/allocate-next-id.ts` | 3 | register `ARCTRACE` in `ID_CLASS_FORMATS` (`width: 4, zeroPad: true, regex: /^ARCTRACE-(\d{4})$/`) and `STORY_SCOPED_ID_CLASS_DIRECTORIES` (`ARCTRACE: "arc-traces"`) |
-| `tools/world-mcp/src/tools/get_record.ts` | 3 | accept ARCTRACE ids; section_path projection |
-| `tools/world-mcp/src/tools/list_records.ts` | 3 | accept `record_type='arc_trace_record'` |
-| `tools/world-mcp/src/tools/get_record_schema.ts` | 3 | return v2 schema metadata |
+| `tools/world-mcp/src/tools/get-record.ts` | 3 | accept ARCTRACE ids; section_path projection |
+| `tools/world-mcp/src/tools/list-records.ts` | 3 | accept `record_type='arc_trace_record'` |
+| `tools/world-mcp/src/tools/get-record-schema.ts` | 3 | return v2 schema metadata for `node_type='arc_trace_node'` |
 | `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` | 3 | surface new enum classes |
 | `CLAUDE.md` | 3 | add `ARCTRACE-NNNN` to §ID Allocation Conventions (story-bundle-scoped; allocate with `story_slug`); pipeline-level convention update |
 | `.claude/skills/branching-story-bootstrap/SKILL.md` | 4 | Phase 6 target_pool_size arithmetic; STORY_KERNEL template (arc-units only); Phase 7 scene-setter mode; Phase 8 PG-0001 special-case delegation; Phase 9 gate count 12 → 17 |

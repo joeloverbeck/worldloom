@@ -157,6 +157,7 @@ export function seedWorld(root: string, input: SeedWorldInput): void {
     db.exec(readFileSync(path.join(schemaRoot, "002_scoped_references.sql"), "utf8"));
     db.exec(readFileSync(path.join(schemaRoot, "003_approval_tokens_consumed.sql"), "utf8"));
     db.exec(readFileSync(path.join(schemaRoot, "004_story_bundle_scope.sql"), "utf8"));
+    db.exec(readFileSync(path.join(schemaRoot, "005_arc_trace_nodes.sql"), "utf8"));
 
     for (const node of input.nodes) {
       const absolutePath = path.join(worldRoot, node.file_path);
