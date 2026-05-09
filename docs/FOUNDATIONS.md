@@ -576,3 +576,20 @@ FOUNDATIONS alignment applies per the story-scope validation rules above. Siblin
 Story bundles are not canonical world state in the sense of world canon. They are derivative narrative-content layers attached to a world. Multiple story bundles can coexist under one world at `worlds/<slug>/stories/`, one per story slug, and each bundle is independent.
 
 Story-bundle deletion is permitted at the bundle level. Within a retained bundle, atomic YAML records remain append-only at the filesystem level, following the same record-append-only discipline that governs `_source/<world-subdir>/*.yaml`.
+
+### 9. Prose Length Discipline At Story Scope
+
+Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, ceilings, ranges, or budgets on rendered prose. Pacing is expressed structurally — beat counts (`arc.beat_plan.min_beats`, `max_beats`), arc-unit cadence (`STORY_KERNEL.cadence_policy.max_arcs_without_menu_soft`, `max_arcs_without_player_commitment_soft`), and the storylet's beat plan — never as a per-page or per-arc word quota. Length follows content: the prose is as long as the beats, the cast's reactions, and the natural close-where-the-next-commitment-becomes-available require, and not a sentence sooner or later.
+
+**Why**: word-count quotas at the LLM-facing surface produced empirically observed prose-padding (the LLM extending scenes to reach the floor) and prose-truncation (the LLM compressing scenes to fit the ceiling) pathologies. Commit `b28aead` (2026-05-06) removed the word-per-page guidelines from the page-render instructions on that basis; the archived SPEC-20 §H reassessment (2026-05-07) dropped `default_min_words_between_menus`, `preferred_words_per_arc`, and `max_words_without_player_commitment_soft` from `cadence_policy` for the same reason.
+
+**Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-page-cycle`, `storylet-pool-authoring`, `branching-story-health-audit`, and `story-fact-promotion-to-canon`. Prose Craft Contract Rule 11 (`.claude/skills/branching-story-page-cycle/references/prose-craft-contract.md`) is the per-skill expression of this principle.
+
+**Engine-side runaway-defense exception**: an engine-only `arc.stop_policy.safety_valves.max_words` ceiling IS permitted on storylet `stop_policy` as runaway-defense, with a strict shape:
+
+- Engine-only — never surfaced in the LLM rendering prompt and never used as a re-prompt soft target.
+- Invisible to per-bundle config — `STORY_KERNEL.cadence_policy` must contain no word-count fields.
+- Failure mode is HARD-FAIL re-prompt (Phase 7 re-prompts the LLM with runaway-defense framing) or graceful `CONTINUE_ONLY_PAUSE` (Phase 8 emits a single "Continue" affordance) — NEVER content truncation.
+- Default ceiling sits well above realistic multi-beat prose so the safety valve fires only on genuine runaway, not on legitimate long scenes.
+
+**Out of scope**: choice-button text length budgets (e.g., "5-15 words" for individual CHC text), INDEX preview excerpts (`first ~300 words of PG-NNNN.md` for display), prose-quality-density metrics (e.g., `filter_word_saturation per 100 words` as a filter-verb-ratio quality axis), and unrelated word-choice / vocabulary guidance are not word-quota mechanisms and remain outside this discipline.
