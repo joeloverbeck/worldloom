@@ -10,7 +10,7 @@ This phase runs after Phase 7's prose render and post-LLM cross-check and before
 
 - The Phase 7 prose buffer: PG-0001.md as rendered, not yet written to disk.
 - `PG-0001.state_snapshot`: `cast_present`, `current_location`, `accessible_locations`, `objects_in_scope`, `intentions_current`, `threads_active`, `obligations_open`, and `reader_known_facts`.
-- The selected root storylet's `choice_templates`: the upstream choice anchors.
+- The Phase 7 entry-pressure framing and seed-pool `commitment_class` affordances: the upstream commitment anchors.
 
 ## Process
 
@@ -29,10 +29,10 @@ Output: the Visible Affordance Map, a list of `(affordance_text, mapped_state_id
 
 ## Routing
 
-- All affordances grounded: Phase 8 receives the Visible Affordance Map as an additional input alongside `state_snapshot` and the storylet's `choice_templates`. Phase 8's diversification and consequence-capacity contract may now produce a CHC anchored on a prose-emphasized affordance that the storylet template did not enumerate.
+- All affordances grounded: Phase 8 receives the Visible Affordance Map as an additional input alongside `state_snapshot` and the entry-pressure framing. Phase 8's choice-surface gate may now produce a CHC anchored on a prose-emphasized affordance when it also satisfies choice-worthiness and continuation capacity.
 - Any affordance ungrounded: re-prompt Phase 7 with the explicit constraint: `the prose introduced an ungrounded <object/actor/location>; either ground it in state by adding the corresponding STOBJ/STENT/STLOC at Phase 5 retroactively, or re-render without it`. Up to 3 Phase-7-cycle re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped affordances inlined.
 - Atmospheric prose with no specific affordance: no entry in the map; Phase 8 falls back to its standard state and storylet inputs.
 
 ## Failure Mode
 
-If the prose is purely atmospheric, with no object, exit, actor address, or question, and the selected storylet's beat is naturally complete, Phase 7.5 emits an empty Visible Affordance Map. Phase 8 proceeds as today. This is the tone-only opening case, rare but legitimate; no re-prompt fires.
+If the prose is purely atmospheric, with no object, exit, actor address, or question, and the entry pressure is still naturally established, Phase 7.5 emits an empty Visible Affordance Map. Phase 8 proceeds from `state_snapshot`, obligations, threads, and seed-pool commitment affordances. This is the tone-only opening case, rare but legitimate; no re-prompt fires.

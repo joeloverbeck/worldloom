@@ -53,6 +53,21 @@ choice-worthiness blocks are mandatory.
 The blocks live on STORY_KERNEL.md, not on individual arcs, because they
 describe per-bundle authorial taste rather than per-arc structure.
 
+Phase 1 may derive arc-unit overrides from premise tone signals:
+
+- Slow-paced literary, intimate, investigative, or high-interiority premises
+  may lower `max_arcs_without_menu_soft` and
+  `max_arcs_without_player_commitment_soft` so the player is asked to commit
+  more often in lived reading time.
+- Action-oriented, chase, survival, or high-momentum premises may raise those
+  values so the runtime can carry momentum across more arc-pages before
+  surfacing a menu.
+- Ambiguous premises use the defaults above.
+
+These derivations are recommendations, not hidden engine law. Surface any
+derived override in the Phase 10 HARD-GATE summary so the user can accept,
+revise, or later edit the STORY_KERNEL block.
+
 **No word-count fields in `cadence_policy`**: pacing is deliberately expressed
 in arc-units (`max_arcs_without_menu_soft`,
 `max_arcs_without_player_commitment_soft`) rather than word-units. This honors

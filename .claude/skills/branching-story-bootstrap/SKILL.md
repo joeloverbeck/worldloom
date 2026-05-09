@@ -58,7 +58,7 @@ arguments:
 Bootstraps a new branching story bundle inside an existing worldloom world from a user premise + a selected cast + tone and content constraints, producing a fully initialized story directory with causal-engine ledgers, a rendered root page (PG-0001), 4-6 initial choices, and a scale-aware seed storylet pool.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for every gate (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, storylet diversity, prose ledger consistency, choice consequence-capacity, state_snapshot completeness, recursive reference closure), AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale; (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
+Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for all 17 gates (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, commitment_class storylet diversity, prose ledger consistency, choice consequence-capacity, state_snapshot completeness, recursive reference closure, arc_envelope_conformance, effect_model_replay_safety, arc_trace_evidence_alignment, narrative_point_classification, choice_worthiness_completeness), AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale; (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
 </HARD-GATE>
 
 ## Process Flow
@@ -120,11 +120,12 @@ Phase 6: Storylet Pool Seed           (delegated to storylet-pool-authoring
                                        in memory)
       |
       v
-Phase 7: Root Page Render             (select PG-0001 storylet;
+Phase 7: Root Page Render             (render PG-0001 scene-setter;
                                        assemble LLM prompt with content_policy
                                        verbatim + world context + story
                                        kernel + prose craft contract verbatim +
-                                       selected storylet + cast + state context;
+                                       cast + state context + entry pressure
+                                       framing;
                                        render prose; post-render prose critic
                                        (7 axes against the contract) + cross-
                                        check; up to 3 re-prompts shared budget)
@@ -138,14 +139,14 @@ Phase 7.5: Visible Affordance         (parse rendered PG-0001 prose for
                                        additional anchors)
       |
       v
-Phase 8: Initial Choice Generation    (4-6 CHC-NNNN — main thread engagement,
-                                       relationship engagement, OBL
-                                       engagement, less-obvious path,
-                                       diversification; consequence-capacity
-                                       check)
+Phase 8: Initial Choice Generation    (delegate to page-cycle Phase 8
+                                       choice-surface gate in PG-0001
+                                       special-case mode; emit 4-6
+                                       scene-commitment CHCs with
+                                       choice-worthiness + consequence-capacity)
       |
       v
-Phase 9: Validation Gates             (12 gates — see HARD-GATE; each PASS
+Phase 9: Validation Gates             (17 gates — see HARD-GATE; each PASS
          (Canon Safety Check phase)    with one-line rationale; FAIL routes
                                        to responsible phase)
       |
@@ -240,10 +241,10 @@ Inlined in this skill's templates and backed by story-bundle patch-engine ops / 
 3. **Phase 4: Mystery Firewall + Invariant Audit.** Hard-reject any `forbidden`-status M resolution; audit premise + cast + sketched threads/obligations against every INV's `break_conditions`. Load `references/phase-4-firewall-and-invariant-audit.md`.
 4. **Phase 5: Initial Threads + Obligations.** Emit 2-5 THR records, initial OBL records per thread (Rule 5 halt: salience + urgency + ≥2 payoff_modes mandatory), and initialize the consequences ledger. Load `references/phase-5-threads-and-obligations.md`.
 5. **Phase 6: Storylet Pool Seed.** Compute `target_pool_size`, pre-allocate `target_slt_ids[]`, then delegate to `storylet-pool-authoring` (`mode: seed`, `focus_area: bootstrap_mix`, `parent_skill_invocation: true`, `target_slt_ids[]`); the sub-routine returns approved SLT records with final ids in memory for Phase 11 to write. Load `references/phase-6-storylet-pool-seed.md`.
-6. **Phase 7: Root Page Render.** Select the PG-0001 storylet, assemble the content_policy-first LLM prompt with the Prose Craft Contract embedded, render the opening prose, run the deterministic post-LLM cross-check, and emit page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer. Load `references/phase-7-root-page-render.md`.
+6. **Phase 7: Root Page Render.** Render PG-0001 in scene-setter mode without selecting an SLT, assemble the content_policy-first LLM prompt with the Prose Craft Contract embedded, render the opening prose, run the deterministic post-LLM cross-check, and emit page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer with the PG-0001 root special-case fields. Load `references/phase-7-root-page-render.md`.
 7. **Phase 7.5: Visible Affordance Extraction.** Parse the Phase 7 prose buffer for visible affordances; map each to a state id; route ungrounded affordances back to Phase 7 as re-prompt triggers; feed the Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
-8. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 (Amendment B Pipeline) with `PG-0001.state_snapshot`, the selected root storylet's `choice_templates`, and the Phase 7.5 Visible Affordance Map as anchors; emit 4-6 CHC records satisfying the diversification + consequence-capacity contract; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
-9. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 12 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
+8. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 choice-surface gate in PG-0001 special-case mode with `PG-0001.state_snapshot`, the Phase 7.5 Visible Affordance Map as anchors, and the bootstrap governor nudge; emit 4-6 v2 scene-commitment CHC records satisfying choice-worthiness, strong-axis collective difference, and consequence-capacity; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
+9. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 17 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`. Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
 9.5. **Phase 9.5: Bootstrap Discipline Validator.** Run all 10 discipline checks; each must record PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. Any FAIL halts and routes to the responsible upstream phase. Load `references/phase-9-5-bootstrap-discipline-validator.md`.
 10. **Phase 10: HARD-GATE Approval.** Inline below.
 11. **Phase 11: Commit / Engine Submit.** Inline below.
@@ -261,7 +262,7 @@ Cast: <list of STENT with role_in_story>
 Mysteries in play: <list of M-NNNN with status + future_resolution_safety>
 Threads: <list of THR with type + status + current_pressure>
 Initial obligations: <count by salience tier>
-Storylet pool: <count> seed storylets covering <shapes>
+Storylet pool: <count> seed scene-commitment arcs covering <commitment_classes>
 
 OPENING PROSE PREVIEW:
 <first ~300 words of PG-0001.md from the working buffer>
@@ -308,7 +309,7 @@ Directory setup plus a patch-engine transaction for atomic YAML records, followe
 **No word-count fields in `cadence_policy`**: pacing is deliberately expressed in arc-units (`max_arcs_without_menu_soft`, `max_arcs_without_player_commitment_soft`) rather than word-units. This honors Prose Craft Contract Rule 11 — length follows content, not a per-bundle word budget — and prevents the padding pathology that drove commit `b28aead` (2026-05-06) to remove word-per-page guidelines from the rendering instructions in `branching-story-page-cycle/references/phase-7-page-render.md` and `branching-story-bootstrap/references/phase-7-root-page-render.md`. The engine-side `arc.stop_policy.safety_valves.max_words` remains a runaway-defense termination trigger only; it is engine-internal and never surfaces to the LLM or to per-bundle config.
 3. Submit one patch-plan envelope containing `create_stent_record`, `create_sf_record`, `create_se_record`, `create_obl_record`, `create_thr_record`, `create_srel_record`, `create_stint_record`, `create_stloc_record`, `create_stobj_record`, `create_br_record`, `create_pg_record`, `create_chc_record`, and `create_slt_record` ops for each default `_source/<class>/<ID>.yaml` record. CNSQ records (`create_cnsq_record`) and story-local diegetic artifact records (`append_story_diegetic_artifact_record`) are emitted ONLY when the premise establishes a pre-PG-0001 consequence or a story-local diegetic artifact present at bootstrap; otherwise omit both those ops and their `expected_id_allocations` keys. Schemas at `templates/story-records.yaml` and the storylet template. **Submit-path convention** — see [`references/engine-envelope-shape.md`](references/engine-envelope-shape.md) for the canonical envelope shape (§1-§3), the `approval_token` signing CLI (§4), validate / submit path selection by envelope size (§5), and failure-mode response codes (§6). Bootstrap envelopes are typically ~75 ops / 100KB-200KB JSON — large enough that the CLI submit path (`node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` after `sign-approval-token.js`) is the default rather than `mcp__worldloom__submit_patch_plan`'s inline path. Use `mcp__worldloom__validate_patch_plan` (or the CLI equivalent) before signing — the validator catches schema and rule errors without mutating state, shortening the diagnose-and-fix loop. **Schema-exemplar tip**: if the world has an existing story bundle under `worlds/<world-slug>/stories/`, reading one record per class from that bundle (e.g., `worlds/<slug>/stories/<existing-bundle>/_source/entities/STENT-0001.yaml`, `.../facts/SF-0001.yaml`, `.../pages/PG-0001.yaml`, etc.) provides complete worked schema examples that complement the abstract `templates/story-records.yaml` reference. Bundle-scoped IDs are independent across bundles, so reading one bundle's record at id N does not conflict with allocating the same id N in the new bundle.
 4. `Write worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-0001.md` (the rendered opening prose from Phase 7's working buffer).
-5. `Write worlds/<world-slug>/stories/<story-slug>/INDEX.md` (per-bundle index — branches / leaves / threads / mysteries / storylet-shape distribution; template at `templates/story-bundle-index.md`).
+5. `Write worlds/<world-slug>/stories/<story-slug>/INDEX.md` (per-bundle index — branches / leaves / threads / mysteries / commitment_class distribution; template at `templates/story-bundle-index.md`).
 6. **Per-world index** at `worlds/<world-slug>/stories/INDEX.md`:
    - If file does not exist: create with header `# Stories — <World-Slug-TitleCased>` followed by one blank line, then the story line.
    - If file exists: read; append the new story's line in the format `- [STORY-NNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-N, M-N | execution_mode: <mode> | created: <iso8601>`; re-sort alphabetically by `STORY-NNN`; write back via direct `Edit`.
@@ -328,7 +329,7 @@ See Output §Record schemas above for the full mapping. This skill emits no Cano
 
 Full per-Rule mapping and the complete Guardrails list live in `references/governance-and-foundations.md`. Load that reference for any audit-trail inspection. Load-bearing guardrails kept inline:
 
-- **HARD-GATE is absolute** (top of file). No file is written until Phase 9 records 12 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
+- **HARD-GATE is absolute** (top of file). No file is written until Phase 9 records 17 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
 - **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter.
 - **Never overwrite an existing story bundle.** Pre-flight slug-collision aborts when `worlds/<world-slug>/stories/<story-slug>/` exists.
 - **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3 — use `mcp__worldloom__submit_patch_plan` with story-bundle create ops after HARD-GATE approval.
@@ -337,4 +338,4 @@ Full per-Rule mapping and the complete Guardrails list live in `references/gover
 
 ## Final Rule
 
-A story bundle is not bootstrapped because PG-0001's prose is rendered. It is bootstrapped only when the causal-engine ledgers are populated (entities, facts with declared epistemic class, events, obligations with ≥2 payoff modes, consequences ledger initialized, threads, relationships, intentions, storylets with shape diversity, locations, objects, branches, pages, choices), the cast has intentions, the storylet pool has shape diversity, the choices have continuation paths, the firewall is intact, the root branch (BR-0001) record exists, the recursive-reference-closure rule is satisfied at PG-0001, and the user has explicitly approved the Phase 10 deliverable. The runtime page-cycle inherits this state — if any of the above is missing, the runtime cannot honor wild user choices coherently, and that is the entire reason this pipeline exists.
+A story bundle is not bootstrapped because PG-0001's prose is rendered. It is bootstrapped only when the causal-engine ledgers are populated (entities, facts with declared epistemic class, events, obligations with ≥2 payoff modes, consequences ledger initialized, threads, relationships, intentions, scene-commitment arcs with commitment_class diversity, locations, objects, branches, pages, choices), the cast has intentions, the storylet pool has commitment_class diversity, the choices have continuation paths and choice-worthiness, the firewall is intact, the root branch (BR-0001) record exists, the recursive-reference-closure rule is satisfied at PG-0001, and the user has explicitly approved the Phase 10 deliverable. The runtime page-cycle inherits this state — if any of the above is missing, the runtime cannot honor wild user choices coherently, and that is the entire reason this pipeline exists.

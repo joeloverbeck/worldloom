@@ -35,7 +35,8 @@ Use this compact checklist so required references are not skipped:
 1. Intake: `references/ticket-classification.md` and `references/dirty-worktree-ledger.md`.
 2. Reassessment: `references/reassessment-checks.md` for non-trivial tickets, plus `references/mismatch-handling.md`.
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
-4. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
+4. HARD-GATE / validation-signal changes: `docs/HARD-GATE-DISCIPLINE.md` when the ticket changes skill HARD-GATE wording, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill validation-gate rows, `validation_trace` semantics, or operator PASS/FAIL criteria.
+5. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 
 Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples or package-specific edge cases here unless they are required to choose the correct reference.
 
@@ -117,6 +118,19 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
 14. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
+
+Compact checkpoint shape:
+
+```text
+Pre-edit checkpoint:
+- Repo: <active repo root>
+- Ticket: <resolved ticket path>
+- Instructions: <AGENTS.md path>
+- Sibling hits: <none | diagnostic-only paths excluded>
+- Classification: <primary class + discrepancy class if any>
+- Owner boundary: <authoritative implementation seam>
+- Sibling scope: <absorbed | excluded | left untouched>
+```
 
 If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.
 
@@ -212,6 +226,7 @@ For skill tickets, verify:
 - required reads and prerequisites are truthful
 - HARD-GATE behavior still matches repo policy
 - bundled references/templates/examples remain aligned with the behavior you are changing
+- when a skill phase, gate, template contract, prompt structure, or handoff semantics changes, run an early whole-skill stale-anchor sweep before source edits. Search the target skill directory for old phase names, old proof counts, retired template fields, old prompt-block labels, old command fragments, and other literals that define the replaced contract. Classify hits as same-seam required fallout, legitimate historical/audit wording, or out-of-scope sibling prose before editing.
 - when editing `.claude/skills/<skill>/references/*`, `.claude/skills/<skill>/templates/*`, or another skill-local reference for a command, tool, fallback, or contract shape, inspect the parent `.claude/skills/<skill>/SKILL.md` summary, process-flow, prerequisite, gate, and pointer language before the first source edit. If those parent sections still state the old shape, add the parent `SKILL.md` to the active ticket's `Files to Touch` and proof surface during reassessment instead of waiting for closeout to discover the stale summary.
 - if a template or reference ticket lands a forward schema/contract before the full operational skill rewrite, do not silently leave the parent skill implying the old and new shapes are both current. Either add the minimal transition/disclosure note to the parent `SKILL.md` and name the follow-up owner for the full rewrite, or escalate if the transition note would weaken a HARD-GATE, canon-write, or validation-signal contract.
 
