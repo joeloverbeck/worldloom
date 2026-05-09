@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — verification capstone; introduces no new production code. Adds integration tests under `tools/world-mcp/tests/integration/` (or `tools/validators/tests/integration/`) that exercise the assembled v2 pipeline.
-**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-010.md, archive/tickets/SPEC22SCECOM-011.md, archive/tickets/SPEC22SCECOM-012.md, archive/tickets/SPEC22SCECOM-013.md, tickets/SPEC22SCECOM-014.md
+**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-010.md, archive/tickets/SPEC22SCECOM-011.md, archive/tickets/SPEC22SCECOM-012.md, archive/tickets/SPEC22SCECOM-013.md, archive/tickets/SPEC22SCECOM-014.md
 
 ## Problem
 
@@ -25,7 +25,7 @@ SPEC-22 §Verification names 7 end-to-end behavioral checks the assembled v2 pip
 
 1. The capstone ticket follows the established `§Spec-Integration Ticket Shape` pattern: trailing capstone whose Acceptance Criteria enumerate the spec's §Verification bullets as test sub-cases.
 2. Fixture-world copy strategy keeps the real worlds tree untouched; re-enumerated counts stay valid as canon grows.
-3. Transitive-head dependency convention: `Deps: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-010.md, archive/tickets/SPEC22SCECOM-011.md, archive/tickets/SPEC22SCECOM-012.md, archive/tickets/SPEC22SCECOM-013.md, tickets/SPEC22SCECOM-014.md` — most upstream tickets are transitively covered (e.g., 010's chain covers 002-009; 011 covers 005, archive/tickets/SPEC22SCECOM-006.md, and 008; 012 covers archive/tickets/SPEC22SCECOM-001.md, 005, archive/tickets/SPEC22SCECOM-006.md, and 008). The capstone's deps list is the minimal set whose transitive closure covers all 14 prior tickets.
+3. Transitive-head dependency convention: `Deps: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-010.md, archive/tickets/SPEC22SCECOM-011.md, archive/tickets/SPEC22SCECOM-012.md, archive/tickets/SPEC22SCECOM-013.md, archive/tickets/SPEC22SCECOM-014.md` — most upstream tickets are transitively covered (e.g., 010's chain covers 002-009; 011 covers 005, archive/tickets/SPEC22SCECOM-006.md, and 008; 012 covers archive/tickets/SPEC22SCECOM-001.md, 005, archive/tickets/SPEC22SCECOM-006.md, and 008). The capstone's deps list is the minimal set whose transitive closure covers all 14 prior tickets.
 
 ## Verification Layers
 

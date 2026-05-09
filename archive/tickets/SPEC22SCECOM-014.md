@@ -1,6 +1,6 @@
 # SPEC22SCECOM-014: Track 5 migration: discard `worlds/erotica-world/stories/red-bunny/` test bundle + INDEX.md edit
 
-**Status**: PENDING
+**Status**: COMPLETED (2026-05-09)
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None — file deletion + 1 markdown edit. No code, no skill, no tool changes.
@@ -10,15 +10,16 @@
 
 SPEC-22 §Track 5 directs the user to discard the existing `worlds/erotica-world/stories/red-bunny/` test bundle, which carries v1 SLT/CHC records that have no v2 form. Per the spec's "We have one test story we will discard. The redesign is forward-only" direction, the bundle is removed wholesale (no v1-to-v2 record migration). After the bundle deletion, `worlds/erotica-world/stories/INDEX.md` must be edited to remove the red-bunny entry; if red-bunny was the only entry, the file is reduced to an empty stories index. The deletion is recorded in SPEC-22 itself (the spec is the audit trail; no CH-NNNN is allocated because no world-canon mutation occurred — story-bundle deletion is a story-bundle-level operation per archived SPEC-13's §Story Bundles §8 rule).
 
-## Assumption Reassessment (2026-05-08)
+## Assumption Reassessment (2026-05-09)
 
-1. `worlds/erotica-world/stories/red-bunny/` exists (verified at SPEC-22 reassessment via `ls -d` of the path). It is the only story bundle under `worlds/erotica-world/stories/` (verified via `ls`).
-2. `worlds/erotica-world/stories/INDEX.md` exists and references red-bunny. After red-bunny deletion, the INDEX must be edited to remove the entry.
+1. `worlds/erotica-world/stories/red-bunny/` existed before implementation and contained 305 files. It was the only story bundle under `worlds/erotica-world/stories/` (`find worlds/erotica-world/stories -mindepth 1 -maxdepth 1 -print` showed only `red-bunny` plus `INDEX.md`).
+2. `worlds/erotica-world/stories/INDEX.md` existed and referenced red-bunny before implementation. After deletion, the INDEX was reduced to an explicit empty-index placeholder: `No active story bundles.`
 3. **FOUNDATIONS §Story Bundles §8 (Story Bundle As Derived Per-World Layer)** restated: "Story-bundle deletion is permitted at the bundle level. Within a retained bundle, atomic YAML records remain append-only at the filesystem level." Bundle-level deletion is lawful; the discard is not a Rule 6 retcon.
 4. **FOUNDATIONS Rule 6 (No Silent Retcons)** restated: the deletion is recorded in SPEC-22 itself (the spec is the audit trail). No CH-NNNN is allocated because no world-canon mutation occurred. The §Risks block of SPEC-22 documents the discard rationale and the resolved post-SPEC-21 reassessment items.
 5. (HARD-GATE / canon-write ordering): N/A — no world-canon mutation; story-bundle deletion is below the canon-write surface.
 6. **Forward-only discipline**: there is no v1-to-v2 record migration. Worlds with existing v1 SLT/CHC records (only `worlds/erotica-world/stories/red-bunny/` at SPEC-22 intake) discard the bundle wholesale. Future worlds (`worlds/animalia/` post-cutover, plus future worlds) bootstrap v2-native through `branching-story-bootstrap` (010).
 7. **Hook 3 surface**: `worlds/<slug>/stories/<slug>/_source/...` block pattern continues to apply to any future bundle re-creation; no hook config change needed (verified at SPEC-22 reassessment).
+8. Command drift corrected: the drafted optional index command used a path argument (`build worlds/erotica-world`), but the live `world-index` CLI expects a world slug. The verified command is `node tools/world-index/dist/src/cli.js build erotica-world`.
 
 ## Architecture Check
 
@@ -58,6 +59,7 @@ No additional documentation is required — SPEC-22 §Track 5 + §Risks already 
 
 - `worlds/erotica-world/stories/red-bunny/` (DELETE — entire directory tree)
 - `worlds/erotica-world/stories/INDEX.md` (modify — remove red-bunny entry)
+- `tickets/SPEC22SCECOM-014.md` (modify — closeout)
 
 ## Out of Scope
 
@@ -95,4 +97,25 @@ No additional documentation is required — SPEC-22 §Track 5 + §Risks already 
 
 1. `ls -d worlds/erotica-world/stories/red-bunny/ 2>&1` — should report no-such-file post-discard.
 2. `grep -n "red-bunny" worlds/erotica-world/stories/INDEX.md` — should return 0 matches post-edit.
-3. (Optional) `cd tools/world-index && node dist/src/cli.js build worlds/erotica-world` — confirms indexer rebuilds without red-bunny references.
+3. (Optional) `node tools/world-index/dist/src/cli.js build erotica-world` — confirms indexer rebuilds without red-bunny references.
+
+## Outcome
+
+Completed. The `worlds/erotica-world/stories/red-bunny/` story bundle was deleted wholesale, preserving SPEC-22's forward-only migration rule and avoiding any v1-to-v2 record migration. `worlds/erotica-world/stories/INDEX.md` now contains only an empty-index placeholder.
+
+No CH-NNNN was allocated. The deletion stays at the story-bundle derived-layer boundary described by FOUNDATIONS §Story Bundles §8 and SPEC-22 Track 5.
+
+## Verification Result
+
+Passed on 2026-05-09:
+
+1. `ls -d worlds/erotica-world/stories/red-bunny` returned `No such file or directory`.
+2. `grep -nE 'red-bunny' worlds/erotica-world/stories/INDEX.md` returned 0 matches.
+3. `find worlds/erotica-world/stories -mindepth 1 -maxdepth 2 -print` returned only `worlds/erotica-world/stories/INDEX.md`.
+4. `node tools/world-index/dist/src/cli.js build erotica-world` exited 0 and rebuilt the derived index.
+5. `node tools/world-index/dist/src/cli.js render erotica-world --story red-bunny` returned `No indexed story-bundle records found for 'erotica-world/red-bunny'.`
+
+## Deviations
+
+- The drafted optional index command used `build worlds/erotica-world`, but the live CLI expects `build erotica-world`; the ticket's command was corrected.
+- The index rebuild emitted a pre-existing skipped-record warning for `worlds/erotica-world/_source/change-log/CH-0006.yaml` (`missing_id_field`). This warning is outside the Track 5 deletion seam; the rebuild still exited 0 and proved the deleted story bundle no longer appears in the rebuilt index.
