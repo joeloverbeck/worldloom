@@ -39,7 +39,7 @@ arguments:
 
 Runs one tick of the runtime causal-promise engine: parses the user's choice (structured CHC or free-form write-in), runs impact analysis, checks continuation feasibility, mutates story-bundle ledgers via append-only supersession, recomputes narrative health, selects the next scene-commitment arc (with JIT expansion if the pool is thin), chooses the arc's effect variant before render, renders the next arc-page as continuous prose, extracts and validates ARC_TRACE evidence when configured, runs the Phase 8 choice-surface gate at the resulting narrative point, validates against firewalls and the recursive branch-isolation invariant, and commits the new records plus markdown surfaces through Phase 11's staged write path — fork and replay are structurally identical to continuation (point `parent_page_id` at any page, leaf or non-leaf).
 
-**Scene-commitment arc transition note (SPEC-20):** The operational phase prose below is now the v2 scene-commitment arc runtime summary. The detailed per-phase contracts live in the referenced files; SPEC-22 still owns the runtime validator/op implementations named by those references.
+**Scene-commitment arc runtime (SPEC-20):** The operational phase prose below is the scene-commitment arc runtime summary. The detailed per-phase contracts live in the referenced files; SPEC-22 owns the runtime validator/op implementations named by those references.
 
 <HARD-GATE>
 Do NOT write under `worlds/<world-slug>/stories/<story-slug>/_source/` or `pages-prose/`, and do NOT `Edit` the bundle's `INDEX.md`, until:

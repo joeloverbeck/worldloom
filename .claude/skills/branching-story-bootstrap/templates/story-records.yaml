@@ -346,7 +346,7 @@ narrative_health:
 
 governor_nudge_applied: "bootstrap root; no prior-page governor"
 content_intensity: mature                # tame | mature | explicit
-validation_trace:                        # PG-0001 records the page-cycle 12 PG-record keys (per phase-7-root-page-render.md §Phase 9 dual-validation-trace mapping) plus the 5 v2 scene-commitment validator gates below
+validation_trace:                        # PG-0001 records the page-cycle 12 PG-record keys (per phase-7-root-page-render.md §Phase 9 dual-validation-trace mapping) plus the 5 scene-commitment validator gates below
   mystery_firewall: PASS - <rationale>
   invariant_compatibility: PASS - <rationale>
   recursive_reference_closure: PASS - <rationale>

@@ -1,7 +1,7 @@
 # Phase 8: Choice-Surface Gate
 
 Phase 8 stops being an agency generator. It validates whether the current narrative
-point deserves a user-facing choice surface, and when it does, it emits only CHC v2
+point deserves a user-facing choice surface, and when it does, it emits only CHC
 records whose commitments are structurally choice-worthy.
 
 Inputs:
@@ -80,7 +80,7 @@ not bypass eligibility, mystery safety, continuation capacity, or choice-worthin
 
 ### Candidate CHC shape
 
-Every candidate intended for menu emission is assembled as a CHC v2 working record:
+Every candidate intended for menu emission is assembled as a CHC working record:
 
 ```yaml
 record_version: 2
@@ -124,7 +124,7 @@ Failures HARD-REJECT the candidate. If the menu falls below
 `STORY_KERNEL.menu_policy.min_distinct_commitments`, return to Step 2 for JIT synthesis
 or fail Phase 8 with a structured reason.
 
-This is the Rule 1 (No Floating Facts) enforcement surface for CHC v2: a choice
+This is the Rule 1 (No Floating Facts) enforcement surface for CHC records: a choice
 cannot be emitted as mere posture, label, or mood. It must carry non-empty likely
 effects and a populated choice-worthiness argument.
 
@@ -138,10 +138,11 @@ Two choices that both engage only `relationship_trajectory`, for example, share 
 same axis profile even if their labels differ. Re-derive or drop the weaker candidate
 until the menu's strong-axis union has size at least `2`.
 
-The strong-axis check complements, but replaces, the v1 8-axis pair-distance rule.
-The v1 rule prevented cosmetic `(operation, actor, target)` variants; the v2 rule
-protects commitment-level difference. The menu must not ask the user to choose among
-labels that all produce the same strong-axis future.
+The strong-axis check protects commitment-level difference: the menu must not ask
+the user to choose among labels that all produce the same strong-axis future. (An
+8-axis pair-distance check on `(operation, actor, target)` etc. is retained as
+defense-in-depth in `branching-story-health-audit` SAU §Choice Pair-Distance Integrity,
+but the strong-axis collective-difference check above is the runtime authority.)
 
 ## CONTINUE_ONLY_PAUSE Carve-Out
 
@@ -212,7 +213,7 @@ Special-case behavior:
   - initial obligations from bootstrap Phase 5 that are salient or urgent enough to
     engage immediately;
   - active threads from bootstrap Phase 5 carrying entry pressure;
-  - seed-pool arc eligibility, where every v2 SLT whose `hard_preconds` pass against
+  - seed-pool arc eligibility, where every SLT whose `hard_preconds` pass against
     PG-0001's `state_snapshot` contributes its `arc_contract.commitment_class` as a
     candidate;
   - optional JIT synthesis when the candidate set is below
@@ -246,7 +247,7 @@ For each surviving structured choice, the LLM writes the user-facing label:
  choice_worthiness, choice_contract, likely_effects, continuation_capacity]
 
 INSTRUCTION:
-Write the user-facing label for this choice. Faithful to the validated CHC v2
+Write the user-facing label for this choice. Faithful to the validated CHC
 record - especially `commitment_class`, `choice_worthiness`, `choice_contract`,
 and `likely_effects`. Do not embellish in ways that lie about what the choice
 does. Match the prose tone. Length: 5-15 words. Prefer active voice. Do not
@@ -254,7 +255,7 @@ preview the outcome explicitly; the player should make the choice without knowin
 exactly what will happen.
 ```
 
-Labels are surface text only. They must remain faithful to the validated CHC v2
+Labels are surface text only. They must remain faithful to the validated CHC
 record and must not introduce outcome promises absent from `choice_contract`.
 
 ## Step 6: Write-In Slot

@@ -152,13 +152,13 @@ The `op_type` enum is closed; LLM proposers may not invent new op types. The `de
 
 Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) and the `continuation_capacity` block (`post_choice_delta`, `valid_seed_storylets`, `jit_shape_spec`, `validation_basis`). The choice contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks). The continuation-capacity block is enforced at this turn's Phase 8 / Phase 9 gate 9 so persisted runtime CHCs carry the same post-choice seed/JIT viability evidence as bootstrap CHCs.
 
-### CHC v2 fields (record_version: 2)
+### CHC fields (record_version: 2)
 
-SPEC-19 extends CHC records for the scene-commitment-arc pivot. The v2 extension is additive on top of the preserved v1 `choice_contract` and `continuation_capacity` blocks; no dual-version runtime logic is introduced by this reference text.
+SPEC-19 defines the CHC schema for the scene-commitment-arc contract. The scene-commitment fields (`choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`) sit alongside the load-bearing `choice_contract`, `likely_effects`, and `continuation_capacity` blocks.
 
 ```yaml
 record_version: 2
-choice_kind: scene_commitment | tactical_beat   # scene_commitment is the v2 standard;
+choice_kind: scene_commitment | tactical_beat   # scene_commitment is the standard;
                                                 # tactical_beat is reserved for narrow cases
 commitment_class: <commitment_class enum>       # required when choice_kind == scene_commitment
 strategy_cluster: <kebab-case open-vocab tag>   # required when choice_kind == scene_commitment
@@ -180,15 +180,15 @@ choice_worthiness:
   why_not_microbeat: >                          # why this is not merely a gesture
   foreseeable_difference: >                     # what sibling choices will foreseeably change
 
-# v1 blocks preserved:
+# Load-bearing blocks:
 choice_contract: {...}
-likely_effects: [...]                           # MANDATORY non-empty under v2 scene_commitment
+likely_effects: [...]                           # MANDATORY non-empty when choice_kind == scene_commitment
 continuation_capacity: {...}
 ```
 
-Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthiness` block and a non-empty `likely_effects` array. SPEC-22's `choice_worthiness_completeness` validator HARD-REJECTs empty or missing v2 fields. This closes the SPEC-19 empirical gap: 40/40 v1 CHC records in the red-bunny test bundle had `likely_effects: []` at reassessment on 2026-05-07.
+Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthiness` block and a non-empty `likely_effects` array. SPEC-22's `choice_worthiness_completeness` validator HARD-REJECTs empty or missing fields. This closes the SPEC-19 empirical gap that motivated the schema (40/40 pre-cutover CHC records in the discarded red-bunny test bundle had `likely_effects: []` at reassessment on 2026-05-07).
 
-`scene_commitment` is the default for v2 LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
+`scene_commitment` is the default for LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
 
 ## ARC_TRACE Record (story-bundle-scoped)
 

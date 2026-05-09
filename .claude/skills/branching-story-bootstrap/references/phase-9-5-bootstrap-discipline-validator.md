@@ -35,7 +35,6 @@ Phase 9.5 runs after every Phase 9 gate has recorded PASS and BEFORE Phase 10's 
 
 Phase 9.5 does NOT duplicate Phase 9 work. The 17 Phase 9 gates are FOUNDATIONS-anchored and validator-aligned; Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
 
-Under the v2 scene-commitment arc contract, storylet-pool diversity is owned by
-Phase 9 gate 9 and is measured by `arc_contract.commitment_class`. Phase 9.5
-keeps the 10 discipline checks above unchanged; it does not add a separate
-storylet-diversity row.
+Storylet-pool diversity is owned by Phase 9 gate 9 and is measured by
+`arc_contract.commitment_class`. Phase 9.5 keeps the 10 discipline checks
+above unchanged; it does not add a separate storylet-diversity row.

@@ -1,12 +1,12 @@
 # Predicate DSL — Storylet Pool Authoring
 
-Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, choice-template preconditions, and v2 `arc.stop_policy.*.predicate` entries all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, invariant-compatibility, and SPEC-20 Phase 7.6 stop-condition checks consume these predicates. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
+Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, choice-template preconditions, and `arc.stop_policy.*.predicate` entries all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, invariant-compatibility, and SPEC-20 Phase 7.6 stop-condition checks consume these predicates. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
 
 The DSL has three tiers:
 
 1. **Core forms** — the original eleven `pred` types used for storylet eligibility.
 2. **Documented extensions** — additional eligibility forms used by the bootstrap-seed pool and supported by the runtime page-cycle's Phase 4 selection.
-3. **Stop predicates** — SPEC-19 v2 `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate` forms evaluated by the SPEC-20 Phase 7.6 stop-condition evaluator.
+3. **Stop predicates** — SPEC-19 `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate` forms evaluated by the SPEC-20 Phase 7.6 stop-condition evaluator.
 
 All tiers are part of the documented DSL grammar; LLM proposers MAY use the tier appropriate to the field they are filling, but they may NOT invent new `pred` types beyond what this document enumerates. Extending the DSL further is an authorial change to this document, not a runtime act.
 
@@ -127,9 +127,9 @@ These forms are part of the operational DSL — supported by the runtime page-cy
   value: centro_wealth_register | gros_working_class_register | irun_border_register | <other location-class label>
 ```
 
-## Stop Predicates (third tier — v2 SLT arc.stop_policy)
+## Stop Predicates (third tier — SLT arc.stop_policy)
 
-Stop predicates are used only at these v2 SLT sites:
+Stop predicates are used only at these SLT sites:
 
 - `arc.stop_policy.normal_exits[].predicate`
 - `arc.stop_policy.interrupt_before[].predicate`

@@ -27,10 +27,6 @@ Each `required_effects[]` entry maps to one or more `SE.ops` entries using the c
 
 Per-character intention refresh still runs after the variant ops apply. STINT updates are deterministic engine-side follow-through, not entries in `required_effects[]`; they may produce `intention_refresh` ops after the arc-level effect batch has established the new post-arc state.
 
-## Legacy v1 Beat-Derived Inputs
-
-Post-cutover there are no v1 story records to execute. The old beat-derived input path is retained below only as a documentation note for readers comparing the v1 and v2 contracts: Phase 1's `ProposedEvent`, `required_aftermath`, and the selected storylet's `fact_effects` / `relationship_effects` / obligation effect fields are no longer the active Phase 5 source of truth. Equivalent state changes must be represented in the selected arc variant's `required_effects[]` before Phase 7 render.
-
 ## Append-Only Discipline
 
 Records are append-only. Mutations to facts (certainty change), obligations (status change), threads (status / pressure), or intentions (pressure / emotional_state) create NEW records:

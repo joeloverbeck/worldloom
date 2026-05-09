@@ -46,7 +46,7 @@ sketch:
   pays_off_obligations: []           # OBL-NNNN ids matched by the OBL matcher
   opens_obligations: []              # new OBL templates the storylet would emit
   addresses_consequences: []         # CNSQ kind matchers
-  sketch_arc_contract: null          # required when this RSP remediates an arc-conformance, choice-cadence, commitment-class-coverage, or v2 CHC continuation finding
+  sketch_arc_contract: null          # required when this RSP remediates an arc-conformance, choice-cadence, commitment-class-coverage, or CHC continuation finding
   sketch_dramatic_unit: null         # required when sketch_arc_contract is non-null; summarizes entry_pressure, turn, and exit pressure
 
 rationale: >

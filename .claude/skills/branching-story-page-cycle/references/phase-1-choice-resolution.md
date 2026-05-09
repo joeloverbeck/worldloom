@@ -6,7 +6,7 @@ Two paths converge into a single validated `ProposedEvent`.
 
 - `chosen_choice_id ∈ parent_page.emitted_choices` (verified at Pre-flight).
 - Load `_source/choices/<chosen_choice_id>.yaml`.
-- `ProposedEvent` is populated from the selected CHC v2 record's structured
+- `ProposedEvent` is populated from the selected CHC record's structured
   fields: `choice_kind`, `commitment_class`, `strategy_cluster`,
   `choice_worthiness`, `choice_contract`, `likely_effects`, and
   `continuation_capacity`, plus any deterministic operation/actor/target

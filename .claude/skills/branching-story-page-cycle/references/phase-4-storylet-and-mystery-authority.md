@@ -2,7 +2,7 @@
 
 ## Hard Filters (engine, deterministic)
 
-A storylet is eligible only when it is a v2 scene-commitment arc:
+A storylet is eligible only when it is a scene-commitment arc:
 
 - `shape: scene_commitment_arc`.
 - `arc.hard_preconds` parse and evaluate to true against the current `state_snapshot`.
@@ -49,7 +49,7 @@ Persist the top-K candidate ids + per-candidate scores + governor-nudge bias sum
 If no candidate scores above threshold (typically: top-K all score below `(median(score) + 1.0)`), AND the consequence-capacity check (Phase 3) passed only by JIT-generatable continuation, invoke `storylet-pool-authoring` as the **single-storylet JIT generator**:
 
 - Call shape: `mode='jit'`, `parent_skill_invocation=true`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, `caller_state_snapshot=<this_state_snapshot>`, plus the current branch-local pool/OBL/CNSQ/THR/cast/recent-prose context already assembled by this phase and the missing commitment-class / arc-archetype pressure discovered by the filters.
-- The delegated call returns exactly ONE approved v2 SLT record plus its internal validation packet. The returned SLT carries `shape: scene_commitment_arc`, `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped`; a global-author-pool JIT result is structurally invalid for this turn.
+- The delegated call returns exactly ONE approved SLT record plus its internal validation packet. The returned SLT carries `shape: scene_commitment_arc`, `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped`; a global-author-pool JIT result is structurally invalid for this turn.
 - `storylet-pool-authoring` runs its Phase 4 gate set over the candidate, including mystery firewall, resolution-authority declaration, predicate parsability, branch-contamination, and arc-schema compliance. Its Phase 5 diversity audit is bypassed because a single runtime arc has no batch diversity surface.
 - Selection then picks this JIT arc. Phase 4b selects its effect variant, Phase 5 applies the chosen variant's required effects, Phase 9 rechecks the full page-cycle validation gates, and Phase 11 writes the returned SLT-NNNN.yaml inside the same page-tick transaction as the new PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records.
 
