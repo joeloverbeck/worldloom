@@ -343,11 +343,13 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
 | `tools/world-index/src/parse/atomic.ts` | 3 | completed by `archive/tickets/SPEC22SCECOM-007.md` — parse story-bundle `_source/arc-traces/ARCTRACE-NNNN.yaml` records into the index |
 | `tools/world-index/src/schema/migrations/005_arc_trace_nodes.sql` | 3 | completed by `archive/tickets/SPEC22SCECOM-007.md` — add `arc_trace_node` table + edge tables (`arc_trace_describes_page`, `arc_trace_realizes_arc`, `arc_trace_observes_action_by`) |
 | `tools/world-mcp/src/tools/allocate-next-id.ts` | 3 | register `ARCTRACE` in `ID_CLASS_FORMATS` (`width: 4, zeroPad: true, regex: /^ARCTRACE-(\d{4})$/`) and `STORY_SCOPED_ID_CLASS_DIRECTORIES` (`ARCTRACE: "arc-traces"`) |
+| `tools/world-mcp/src/server.ts` | 3 | register `ARCTRACE` in the public MCP `ID_CLASSES` enum used by `allocate_next_id` input validation and `describe_capabilities()` metadata |
 | `tools/world-mcp/src/tools/get-record.ts` | 3 | accept ARCTRACE ids; section_path projection |
 | `tools/world-mcp/src/tools/list-records.ts` | 3 | accept `record_type='arc_trace_record'` |
 | `tools/world-mcp/src/tools/get-record-schema.ts` | 3 | return v2 schema metadata for `node_type='arc_trace_node'` |
 | `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` | 3 | surface new enum classes |
 | `CLAUDE.md` | 3 | add `ARCTRACE-NNNN` to §ID Allocation Conventions (story-bundle-scoped; allocate with `story_slug`); pipeline-level convention update |
+| `tools/world-mcp/README.md` | 3 | document `ARCTRACE` in the package-local `allocate_next_id` story-bundle-scoped id-class list |
 | `.claude/skills/branching-story-bootstrap/SKILL.md` | 4 | Phase 6 target_pool_size arithmetic; STORY_KERNEL template (arc-units only); Phase 7 scene-setter mode; Phase 8 PG-0001 special-case delegation; Phase 9 gate count 12 → 17 |
 | `.claude/skills/branching-story-bootstrap/references/phase-6-storylet-pool-seed.md` | 4 | rewrite for arc-granularity arithmetic |
 | `.claude/skills/branching-story-bootstrap/references/phases-1-3-premise-cast-facts.md` (or equivalent for the STORY_KERNEL template surface) | 4 | add cadence_policy + menu_policy template blocks (arc-units only per SPEC-20 §H post-2026-05-07 reassessment) |

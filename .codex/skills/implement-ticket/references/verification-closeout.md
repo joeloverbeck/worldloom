@@ -101,6 +101,7 @@ Before finishing, re-read the ticket and make it truthful:
 
 For long tickets, use this expedited stale-anchor pass before final response:
 
+- Before running stale-anchor sweep commands, inspect each literal for markdown code spans, backticks, `$`, pipes, parentheses, or other shell-active characters. Use single-quoted literals, split safer patterns, or escape the active characters before the command reaches the shell.
 - `Status`: final state, not intended state.
 - `Problem`: fixed defects are labelled as intake or pre-ticket evidence.
 - `Files to Touch`: exact landed file set, including same-seam docs/tests discovered during reassessment.

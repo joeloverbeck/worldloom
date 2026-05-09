@@ -134,6 +134,7 @@ For `tools/world-mcp` context-packet shape or layer-count changes, include layer
 ## Verification
 
 - Run producer commands before consumer proofs.
+- Before broad `tools/world-mcp` or other package suites that may read gitignored live worlds, check whether the suite depends on `worlds/<slug>/_index/` or copied live-world state. If focused package proofs already cover the owned invariant, keep acceptance on those focused proofs and record live-index failures such as `index_version_mismatch` as deviations unless the active ticket owns refreshing or repairing that live-world/index state.
 - Run package-local builds/tests from the package root when module resolution depends on package-local dependencies.
 - For retrying package APIs or CLIs that emit a machine-readable retry hint, include a focused proof that the emitted retry value is self-consistent. For example, a packet request that returns `packet_incomplete_required_classes` with `retry_with.token_budget` should be rerun with that value before closeout when the ticket changes token estimates or required payload size.
 - Before an optional broad package sweep, snapshot ignored state for each package the sweep may touch when feasible. If you skip a pre-sweep ignored-state snapshot for non-owned packages, say so in closeout before classifying later `dist/`, `node_modules/`, cache, coverage, or secret-file dirt.

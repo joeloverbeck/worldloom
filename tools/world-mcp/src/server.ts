@@ -224,6 +224,7 @@ export const ID_CLASSES = [
   "SP",
   "EPE",
   "STORY",
+  "ARCTRACE",
   "PG",
   "SE",
   "SF",

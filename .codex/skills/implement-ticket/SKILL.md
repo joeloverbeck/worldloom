@@ -237,6 +237,8 @@ Use `references/verification-closeout.md` for detailed proof-narrowing rules, in
 
 For package/tool proof details, use `references/package-tooling.md`: package roots, build/test scripts, local dependency freshness, public export checks, ignored artifact snapshots, same-package docs/examples, and direct-MCP substitution rules all live there.
 
+For `tools/world-mcp` or other package suites that may read gitignored live worlds or `_index/` artifacts, check the focused package guidance before treating a broad suite failure as owned. Prefer focused package proofs when they cover the invariant, and record local live-index failures as deviations unless the ticket owns that live-world/index state.
+
 Use the proof surface that actually proves the owned invariant. A command that merely touches the area does not count as proof, and any proof-discovered same-seam fallout must be reassessed and patched into the active ticket before the next source edit.
 
 ### 6. Close out the ticket honestly
