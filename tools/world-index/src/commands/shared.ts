@@ -9,6 +9,7 @@ import { insertEdges, resolveUnresolvedEdges } from "../index/edges";
 import { rebuildFtsIndex, shouldRebuildFts } from "../index/fts";
 import {
   deleteNodesByFile,
+  insertArcTraceRows,
   insertAnchorChecksums,
   insertEntities,
   insertEntityAliases,
@@ -269,6 +270,7 @@ export function insertParsedFile(db: Database.Database, worldSlug: string, parse
   if (parsed.nodes.length > 0) {
     insertNodes(db, parsed.nodes);
     insertAnchorChecksums(db, buildAnchorRows(parsed.nodes));
+    insertArcTraceRows(db, parsed.nodes);
   }
 
   if (parsed.edges.length > 0) {

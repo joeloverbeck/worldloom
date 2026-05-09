@@ -70,6 +70,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `Assumption Reassessment` captures the final boundary
 - `Files to Touch` matches the landed diff
 - `Acceptance Criteria` and `Test Plan` match the proof you actually ran
+- `Acceptance Criteria` contains only gates that were actually run or intentionally remain as future/spec-level goals; move non-run goals out of active "Tests That Must Pass" language or label them explicitly in `## Deviations` / out-of-scope proof
 - Every `Verification Layers` row is represented in `## Verification Result` by a matching command or manual-review entry, or is explicitly marked not exercised in `## Deviations` with the reason. Do not let a layer remain only in the plan after closeout.
 - completed implementation tickets convert planned sections such as `What to Change` to landed facts; if preserving the section as the final implementation record, prefer renaming it to `Landed Changes`
 - completed implementation tickets must not leave unperformed optional plan items in active plan sections; delete them, historicalize them as not performed, or move them to `Out of Scope` / `## Deviations` with a clear boundary

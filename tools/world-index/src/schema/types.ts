@@ -37,6 +37,7 @@ export const NODE_TYPES = [
   "page_record",
   "choice_record",
   "storylet_record",
+  "arc_trace_node",
   "story_diegetic_artifact_record",
   "audit_record_story",
   "promotion_record",
@@ -79,6 +80,9 @@ export const STORY_EDGE_TYPES = [
   "world_entity_binding",
   "story_fact_derived_from",
   "created_at_page",
+  "arc_trace_describes_page",
+  "arc_trace_realizes_arc",
+  "arc_trace_observes_action_by",
   "opens_obligation",
   "pays_off_obligation",
   "complicates_obligation",
@@ -369,6 +373,22 @@ export interface NodeRow {
   anchor_checksum: string;
   summary: string | null;
   created_at_index_version: number;
+}
+
+export interface ArcTraceNodeRow {
+  id: string;
+  arc_trace_id: string;
+  story_slug: string;
+  story_id: string;
+  created_at_page: string;
+  created_at_page_node_id: string;
+  arc_realized: string;
+  arc_realized_node_id: string;
+  effect_variant_applied: string | null;
+  semantic_critic_status: string;
+  claim_text: string | null;
+  action_text: string | null;
+  violation_text: string | null;
 }
 
 export interface EdgeRow {

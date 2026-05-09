@@ -53,6 +53,7 @@ const STORY_SOURCE_DIRECTORIES = new Set([
   "pages",
   "choices",
   "storylets",
+  "arc-traces",
   "artifacts"
 ]);
 const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
