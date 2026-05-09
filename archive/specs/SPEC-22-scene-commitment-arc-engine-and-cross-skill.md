@@ -2,7 +2,7 @@
 
 # SPEC-22: Scene-Commitment Arc Engine, Validators, and Cross-Skill Alignment
 
-**Status**: REASSESSED (2026-05-08)
+**Status**: COMPLETED (2026-05-09; capstone archived in `archive/tickets/SPEC22SCECOM-015.md`)
 **Phase**: machine-facing layer + cross-skill alignment + migration tier of the scene-commitment-arc pivot
 **Depends on**: archived SPEC-19 (schemas + canonical vocabularies)
 **Blocks**: Tier 4 pilot (SPEC-20 / SPEC-21 are completed and archived; their deterministic validator/package proof routes through this spec)
@@ -18,9 +18,10 @@ SPEC-19 defines the v2 schemas (SLT, CHC, ARC_TRACE) and the canonical-vocabular
 - **Indexer**: `world-index` parses ARC_TRACE records and surfaces arc-level rows, edges, and opt-in render output via `archive/tickets/SPEC22SCECOM-007.md`.
 - **MCP retrieval**: `get_record`, `list_records`, `get_records`, `get_records_field`, and `get_record_schema` handle ARC_TRACE records (`ARCTRACE-NNNN`, `record_type='arc_trace_record'`, schema `node_type='arc_trace_node'`) via `archive/tickets/SPEC22SCECOM-008.md`.
 - **Sibling skills**: `branching-story-bootstrap` Phase 6, Phase 7, Phase 8, Phase 9, STORY_KERNEL, and INDEX surfaces now align with v2 scene-commitment arcs via `archive/tickets/SPEC22SCECOM-010.md`: seed pools are sized in arcs, PG-0001 renders as a scene-setter, initial choices delegate to the page-cycle choice-surface gate in PG-0001 special-case mode, and bootstrap Phase 9 records 17 gates. `branching-story-health-audit` now aligns with v2 scene-commitment arcs via `archive/tickets/SPEC22SCECOM-011.md`: SAU choice cadence is arc-unit-only, ARC_TRACE closure/evidence checks are present, and RSP handoff cards carry arc fields. `story-fact-promotion-to-canon` now has the `arc_effect_promotion` source-kind contract, proposal-package fields, and story-side supersession attribution via `archive/tickets/SPEC22SCECOM-012.md`. `branching-story-page-cycle/references/record-schemas.md` now documents the PG `state_snapshot` v2 arc fields via `archive/tickets/SPEC22SCECOM-013.md`.
-- **Migration**: the existing test bundle at `worlds/erotica-world/stories/red-bunny/` carries v1 records that have no v2 form. The bundle is discarded per the user's "we have one test story we will discard."
+- **Migration**: the existing test bundle at `worlds/erotica-world/stories/red-bunny/` carried v1 records that had no v2 form. The bundle was discarded via `archive/tickets/SPEC22SCECOM-014.md` per the user's "we have one test story we will discard."
+- **Verification capstone**: the assembled v2 package and skill-contract surfaces are covered by `archive/tickets/SPEC22SCECOM-015.md`, including patch-engine validate/submit/re-read, validator registry and Phase 9 prose witnesses, canonical vocabulary counts, ARC_TRACE index ingestion, sibling-skill static contracts, migration state, and Hook 3 story-bundle `_source/` coverage.
 
-This spec lands the machine-layer + cross-skill + migration work.
+This spec landed the machine-layer + cross-skill + migration work and its verification capstone.
 
 ## Approach
 
@@ -257,11 +258,11 @@ The SP-NNNN promotion ledger and proposal-package shape extends to source from `
   - `consequence_open` / `consequence_address` → typically NOT directly promotable; story-local consequence semantics. Warning.
   - `cast_change` / `location_change` → may be promotable when the change has world-canon implications (e.g., a character's death in-story IF the user accepts the death as world-canon). Phase 2 LLM produces a CF candidate framing the change as a CF with appropriate scope.
   - `mystery_progress` → routes via `source_kind: mystery_resolution` instead, NOT `arc_effect_promotion`. If a user invokes `arc_effect_promotion` for a `mystery_progress` effect, Pre-flight HARD-REJECTs with "use source_kind=mystery_resolution for mystery progression promotions; arc_effect_promotion is for non-mystery effects."
-  
+
   The translation respects the same Phase 2 laundering firewall as the four existing source kinds — `source_basis.derived_from` carries CF parent ids only; promotion provenance flows through SP+CH+PA per the Option A schema reconciliation already documented in SPEC-22.
 - **Phase 4 mystery-firewall handling (`arc_effect_promotion` branch)**: the arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` is checked against the world's whole-class M load (already loaded at Pre-flight). If the arc's envelope omits a `forbidden`-status M id that the proposed CF could touch, HARD-REJECT with "arc envelope does not include forbidden M-NNNN; arc-effect promotion cannot proceed without explicit envelope coverage." For arc effects whose CF candidate would resolve a non-forbidden M, route via `source_kind: mystery_resolution` instead (Pre-flight HARD-REJECT per the routing-rule above for `mystery_progress`).
 - **Phase 10 superseding-record shape (`arc_effect_promotion` branch)**: the supersession unit is NOT the arc record itself (the SLT remains in the bundle's pool unmodified — arcs are reusable templates). The supersession unit is the **arc-effect-derived SF record** that the arc's variant.required_effects[<effect_index>] would have produced when the page-cycle applied the variant at the page's Phase 5 state-mutation step. Per SPEC-20 §C "Phase 5 — State Mutation at Arc-Close", every entry in `variants[<chosen>].required_effects[]` maps to one or more `SE.ops` entries that produce records (e.g., `fact_create` → `create_sf_record` with the new SF's id). Phase 10 Step 2 for `arc_effect_promotion` submits a `create_sf_record` op for a SUPERSEDING SF (allocated via `mcp__worldloom__allocate_next_id(world_slug, 'SF', story_slug=<story_slug>)`):
-  
+
   ```yaml
   id: SF-<new-id>
   story_id: STORY-NNNN
@@ -274,7 +275,7 @@ The SP-NNNN promotion ledger and proposal-package shape extends to source from `
   promoted_via_effect_index: <effect_index>
   # all other fields inherited from original SF
   ```
-  
+
   When the original arc-effect was a `relationship_axis_shift` or `cast_change` or other non-SF op, the supersession is the corresponding record class (`SREL-NNNN` superseder for relationship_axis_shift; `STENT-NNNN` superseder for cast_change). The `promoted_to_cf` / `promoted_via_*` fields are added uniformly across record classes.
 - **Proposal_package extension fields (`arc_effect_promotion` branch)**: the proposal_package's existing schema (`promotion_id`, `source_kind`, `source_record`, `promotion_branch_path`, `cf_candidate`, `provenance`, `scope_inflation_check`, `mystery_firewall`, `downstream_impact`, `rule_12_two_trace_check`, `contradiction_handling_preference`, `cross_story_impact_scan_performed`, `execution_mode`, `content_policy`) extends with:
   - `source_arc_id`: the `SLT-NNNN` whose variant is being promoted.
@@ -282,7 +283,7 @@ The SP-NNNN promotion ledger and proposal-package shape extends to source from `
   - `effect_index`: the index in `variants[<applied>].required_effects[]`.
   - `arc_trace_id`: `ARCTRACE-NNNN` if a trace was emitted for the page (per `PG.state_snapshot.arc_trace_id`); `null` if `arc_trace_emitted: false`.
   - `arc_trace_evidence_span`: when `arc_trace_id` is non-null, the `effect_evidence[<effect_index>].evidence_span` `{start, end}` byte offsets — the proof that the prose realized the effect being promoted (additional evidence for downstream canon-addition's adjudication LLM critics).
-  
+
   The `provenance.supporting_pages` carries `[source_page_id]` (one page); `provenance.supporting_prose_excerpts` carries the rendered arc page's prose (typically 1500-2000 words for an arc-cadence page vs. potentially many pages for character_arc_outcome). The `provenance.source_record` field carries `{source_arc_id, applied_variant_id, effect_index}` instead of a single record id (the four existing source kinds carry single record ids).
 
 **branching-story-page-cycle's record-schemas reference** (`.claude/skills/branching-story-page-cycle/references/record-schemas.md`):
@@ -407,7 +408,7 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
 - **Validator interaction surface**: extending `record_schema_compliance` for SLT v2 + CHC v2 + ARC_TRACE is the largest validator change. The existing v1 SLT/CHC schemas are dropped (no parallel-format support); the validator's v1 paths can be removed in lockstep with the test-bundle discard. If a partial cutover is needed (some worlds on v1, some on v2), the validator would need a `record_version` discriminator. Recommendation: full cutover, no partial coexistence.
 - **ARCTRACE id allocation contention**: under `interactive_runtime` auto-chain, multiple page-cycle ticks may run in rapid succession, each allocating ARCTRACE ids. The existing `id_allocation_race` defense-in-depth backstop covers this; no new contention model needed.
 - **Indexer schema migration**: adding `arc_trace_node` and edge tables to the SQLite index requires a schema-migration step on existing worlds. Since `_index/world.db` is gitignored and regenerated by `world-index build`, the migration is "rebuild the index" — no on-disk migration script needed.
-- **Sibling-skill rollout order**: `branching-story-bootstrap` Phase 6 depends on `storylet-pool-authoring mode=seed parent_skill_invocation=true` returning v2 records (SPEC-21). Bootstrap STORY_KERNEL template extension, bootstrap Phase 6 arithmetic, health-audit SAU extensions, and promotion `arc_effect_promotion` source-kind alignment have landed via `archive/tickets/SPEC22SCECOM-010.md`, `archive/tickets/SPEC22SCECOM-011.md`, and `archive/tickets/SPEC22SCECOM-012.md`; remaining Track 4 work is page-cycle record-schemas extension.
+- **Sibling-skill rollout order (completed)**: `branching-story-bootstrap` Phase 6 depends on `storylet-pool-authoring mode=seed parent_skill_invocation=true` returning v2 records (SPEC-21). Bootstrap STORY_KERNEL template extension, bootstrap Phase 6 arithmetic, health-audit SAU extensions, promotion `arc_effect_promotion` source-kind alignment, and page-cycle record-schema extension have landed via `archive/tickets/SPEC22SCECOM-010.md`, `archive/tickets/SPEC22SCECOM-011.md`, `archive/tickets/SPEC22SCECOM-012.md`, and `archive/tickets/SPEC22SCECOM-013.md`. The assembled surfaces are covered by the capstone in `archive/tickets/SPEC22SCECOM-015.md`.
 - **RSP card schema migration**: existing audit reports under `worlds/<slug>/stories/<slug>/audits/SAU-NNNN/remediation-storylet-proposals/` may carry RSP cards without the new fields. Since these are audit trails (informational, not engine-consumed for non-current audits), the migration is: new audits emit cards with the new fields; old audits remain as historical record. No re-emission of historical RSPs.
 - **Validator implementation effort (Track 2 completed 2026-05-08)**: the 8 rule validators plus `record_schema_compliance` structural extension have landed across `archive/tickets/SPEC22SCECOM-002.md`, `archive/tickets/SPEC22SCECOM-003.md`, `archive/tickets/SPEC22SCECOM-004.md`, and `archive/tickets/SPEC22SCECOM-005.md`. Remaining validator-related risk now moves to downstream Track 3/4 consumers and live pilot evidence, not the Track 2 validator inventory itself.
 - **Test fixtures (Track 2 completed 2026-05-08)**: SLT v2, CHC v2, ARC_TRACE structural, effect-model, trace-evidence, non-ASCII byte-offset trace evidence, narrative-point, envelope-conformance, CLI, and pre-apply materialization fixtures exist under `tools/validators/tests/`.
@@ -419,3 +420,11 @@ The existing test story bundle at `worlds/erotica-world/stories/red-bunny/` carr
   2. **`arc_envelope_conformance` validator gap (8th validator)**: SPEC-20 §E listed `arc_envelope_conformance` among the 5 new Phase 9 gates, but SPEC-22 §Track 2's original validator list defined only 7. The 8th validator was added in this reassessment — §Track 2 table now has eight rows including `arc_envelope_conformance` (deterministic counterpart to Layer 3's LLM critic verdict; checks ARC_TRACE `possible_violations[]` evidence against arc.execution_envelope at canonical-record-time; PG-0001 root-page exception preserves vacuous-at-root semantics); the implementation file `tools/validators/src/rules/arc_envelope_conformance.ts` is in the deliverables table.
 
 Audit-trail preservation note (Rule 6 No Silent Retcons): this Risks block records the cross-spec drift that was resolved on 2026-05-08; it is retained as historical context rather than deleted, so a future reader can reconstruct the post-SPEC-21 reassessment trigger and its outcomes.
+
+## Outcome (2026-05-09)
+
+SPEC-22 is complete. The patch-engine ARC_TRACE op, validators and schema coverage, canonical vocabularies, world-index ingestion, MCP retrieval, sibling skill alignment, page-cycle record-schema handoff, forward-only test-bundle discard, and verification capstone all landed through `archive/tickets/SPEC22SCECOM-001.md` through `archive/tickets/SPEC22SCECOM-015.md`.
+
+Deviations from the original plan were recorded in the ticket family and preserved here as audit-trail context: the capstone uses generated temp fixtures instead of copying gitignored live worlds; interactive Claude skill execution is represented by static contract witnesses; Hook 3 coverage is verified through the documented story-bundle `_source/` pattern rather than by attempting raw writes from a package test; and the red-bunny v1 bundle was discarded wholesale instead of migrated.
+
+Verification is captured by the archived capstone ticket: `cd tools/world-mcp && node dist/tests/integration/spec22-capstone.test.js` passed with 6 subtests, `cd tools/world-mcp && npm run test:spec22-capstone` passed, and `cd tools/world-mcp && npm run test` passed with 348 tests reported passing.

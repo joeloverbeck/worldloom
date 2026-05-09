@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && chmod +x dist/src/cli/sign-approval-token.js dist/src/cli/submit-patch-plan.js dist/src/cli/validate-patch-plan.js",
+    "test:spec22-capstone": "npm run build && node --test dist/tests/integration/spec22-capstone.test.js",
     "test": "npm run build && node --test \"dist/tests/**/*.test.js\"",
     "clean": "rm -rf dist"
   },

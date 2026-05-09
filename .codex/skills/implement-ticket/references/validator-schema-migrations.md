@@ -1,6 +1,6 @@
 # Validator And Schema Migration Checks
 
-Use this reference for tickets that change validators, JSON Schemas, hybrid frontmatter parsing, validator registries, grandfathering/waiver matchers, live-corpus validator baselines, or validator-package capstone / verification-matrix coverage.
+Use this reference for tickets that change validators, JSON Schemas, hybrid frontmatter parsing, validator registries, grandfathering/waiver matchers, live-corpus validator baselines, or validator-package capstone / verification-matrix coverage. A broader capstone that only reads current validator registry/count/matrix state as one witness does not need this reference unless it changes validator/schema behavior or owns validator-matrix classification as an acceptance surface.
 
 ## Reassessment
 

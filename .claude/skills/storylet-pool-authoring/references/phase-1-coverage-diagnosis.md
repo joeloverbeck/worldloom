@@ -259,7 +259,7 @@ provides the recommended archetype mapping.
 - `references/phase-2-generation-seeds.md` — downstream consumer of this
   diagnosis matrix. Its SPEC-21 arc-seed rewrite is owned by
   `SPEC21SCECOM-004`.
-- `specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` — Track 3
+- `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` — Track 3
   owns `COMMITMENT_CLASSES` and `ARC_ARCHETYPES`; Track 4 owns RSP card
   targeting fields.
 

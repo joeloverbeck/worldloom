@@ -42,6 +42,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - If verification uses compiled or generated artifacts such as `dist/src/...` or `dist/tests/...`, prove artifact freshness before trusting the result. Run the producer build first when that is the truthful lane. If you intentionally skip the build, compare the exercised source/generated seam or record the reason the existing artifact is an acceptable proof surface.
 - When the fix changes a shared producer/parser/contract seam, recompute any ticket-stated live totals, reproduced witness lists, and neighboring same-seam assertions from the final post-fix artifact instead of carrying forward pre-fix probe values. If the final artifact truthfully changes an adjacent same-seam expectation, update that proof surface before closeout.
 - For direct probes that write temp files outside the repo, use a unique temp directory and either clean it up before closeout or record why it was left behind. If a temp artifact becomes part of the proof story, name the artifact root in `## Verification Result` so later readers can distinguish it from live repo state.
+- For capstone tests, keep the ticket's proof language aligned to the executable structure. If one `node:test` subtest covers several acceptance bullets, say so instead of implying there is a one-to-one match between acceptance sub-cases and test-run subtests.
 - For TS packages that run tests from compiled output such as `dist/tests/*.test.js`, treat new test-time file reads as part of the proof contract: verify that fixtures, SQL files, and other disk reads resolve from the compiled test runtime, or anchor them explicitly from the source tree / repo root.
 - For atomic-source `world-index` tickets, confirm `world-index verify` understands synthetic logical rows before using it as acceptance proof. If it treats retired root markdown paths as disk paths or otherwise reports atomic-mode drift, use `build`, focused validators, and direct DB checks as the truthful proof surface, then record the verify limitation.
 - If a broader command fails, decide whether the failure is current-ticket fallout or unrelated pre-existing state.
@@ -98,6 +99,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape
 - dirty-worktree state has been refreshed using `references/dirty-worktree-ledger.md`, including hunk-level classification for mid-run changes in files you also touched and likely sibling-ticket ownership for same-family edits
+- if `git add -N` was used only to make untracked owned files visible to `git diff --check`, clear the intent-to-add entries before final status. In Codex sandboxed runs, a `git reset -- <path>` cleanup can fail with index-lock or read-only-filesystem symptoms; rerun the same cleanup with the required approval/escalation, then refresh status rather than leaving hygiene-only index state behind.
 
 For long tickets, use this expedited stale-anchor pass before final response:
 
