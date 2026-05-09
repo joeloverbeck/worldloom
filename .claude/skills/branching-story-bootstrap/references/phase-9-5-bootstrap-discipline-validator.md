@@ -1,6 +1,6 @@
 # Phase 9.5: Bootstrap Discipline Validator
 
-Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the FOUNDATIONS-anchored gate set. Phase 9 gates 1-12 are FOUNDATIONS rules; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
+Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the FOUNDATIONS-anchored gate set. The 17 Phase 9 gates are FOUNDATIONS rules; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
 
 Each check records PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. A bare "PASS" is treated as FAIL per the FOUNDATIONS skill discipline. Any FAIL halts the bootstrap and routes to the responsible upstream phase.
 

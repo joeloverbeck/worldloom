@@ -322,6 +322,10 @@ state_snapshot:
   objects_in_scope: []                   # STOBJ ids
   inventory_by_entity: {}                # { STENT-id: [STOBJ-id, ...] }
   entity_status: {}                      # { STENT-id: { alive, conscious, present, mobile, restrained } }
+  applied_effect_variant: null           # PG-0001 root special case; bootstrap is a scene-setter, no arc closes here (per phase-9-validation-gates.md gate 14)
+  narrative_point_classification: NATURAL_COMMITMENT_HINGE   # PG-0001 default per phase-9-validation-gates.md gate 16; closed enum from page-cycle Phase 8 narrative-point classification
+  arc_trace_id: null                     # PG-0001 emits no ARC_TRACE (no arc); phase-9-validation-gates.md gate 15 root-special-case
+  arc_trace_emitted: false               # paired with arc_trace_id: null at PG-0001
 
 prose_path: pages-prose/PG-0001.md
 emitted_choices: []                      # CHC ids — populated at Phase 8
@@ -342,7 +346,7 @@ narrative_health:
 
 governor_nudge_applied: "bootstrap root; no prior-page governor"
 content_intensity: mature                # tame | mature | explicit
-validation_trace:                        # Phase 9 gates 1-12 with one-line PASS rationales
+validation_trace:                        # PG-0001 records the page-cycle 12 PG-record keys (per phase-7-root-page-render.md §Phase 9 dual-validation-trace mapping) plus the 5 v2 scene-commitment validator gates below
   mystery_firewall: PASS - <rationale>
   invariant_compatibility: PASS - <rationale>
   recursive_reference_closure: PASS - <rationale>
@@ -355,6 +359,11 @@ validation_trace:                        # Phase 9 gates 1-12 with one-line PASS
   state_snapshot_integrity: PASS - <rationale>
   epistemic_class_declared: PASS - <rationale>
   consequence_persistence: PASS - <rationale>
+  arc_envelope_conformance: PASS - PG-0001 root special case, no arc selected
+  effect_model_replay_safety: PASS - PG-0001 root special case, applied_effect_variant null
+  arc_trace_evidence_alignment: PASS - PG-0001 root special case, no ARC_TRACE emitted
+  narrative_point_classification: PASS - PG-0001 defaults to NATURAL_COMMITMENT_HINGE
+  choice_worthiness_completeness: PASS - every emitted PG-0001 CHC passes Phase 8 choice-worthiness validation
 created_at: <iso8601>
 ---
 # CHC-NNNN — Choice (4-6 emitted at PG-0001; write-in slot is N+1 at runtime)

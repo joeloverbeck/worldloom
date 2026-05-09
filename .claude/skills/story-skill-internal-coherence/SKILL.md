@@ -180,7 +180,7 @@ Run before Phase 1; abort if any precondition fails.
 1. Load `docs/FOUNDATIONS.md` into working context (light read; Validation Rule 6 governs Phase 9 correction attribution). Skip per the load-mechanism-naming rule in §World-State Prerequisites if already in context.
 2. Validate `target_skill_path` resolves to one of: `.claude/skills/branching-story-bootstrap`, `.claude/skills/branching-story-page-cycle`, `.claude/skills/storylet-pool-authoring`, `.claude/skills/branching-story-health-audit`, `.claude/skills/story-fact-promotion-to-canon`. Trailing slash, leading `./`, and absolute-path forms are all normalized. Abort with `"target_skill_path does not resolve to a story-skill family member; expected one of: <list>"` on no match.
 3. Verify each family-member directory exists and contains `SKILL.md`; abort on any missing member with a list of the absent paths.
-4. Read every family member's `SKILL.md`, then enumerate `references/*.md` (or `examples/*.md` for `branching-story-health-audit` and `story-fact-promotion-to-canon`) via `Glob`, then enumerate `templates/*` via `Glob`. Read every discovered file. Track the path → content map for downstream phases.
+4. Read every family member's `SKILL.md`, then enumerate `references/*.md` (or `examples/*.md` for `branching-story-health-audit` and `story-fact-promotion-to-canon`) via `Glob`, then enumerate `templates/*` via `Glob`. Read every discovered file. Track the path → content map for downstream phases. **Oversize-file fallback**: when any discovered file exceeds the Read tool's per-call token limit (currently ~25K tokens), chunk via Read `offset` / `limit` (e.g., `offset: 1, limit: 500` then `offset: 500, limit: 500` ... until the full body is covered). Multiple chunked Reads of the same file accumulate; the HARD-GATE precondition (a) `"into working context"` is satisfied once the full body is loaded across one or more Reads. The story-skill family contains files that exceed the limit at present (`branching-story-health-audit/SKILL.md` ≈ 88KB; `story-fact-promotion-to-canon/SKILL.md` ≈ 73KB) and require chunked reads.
 5. If a worktree root is active, ALL paths resolve from the worktree root, not the main repo root.
 
 If any precondition fails, abort before Phase 1 with a clear message.
@@ -232,6 +232,8 @@ Detection rules:
 - **Frontmatter-shape drift**: same hybrid-record-class frontmatter (e.g., RSP cards' `target_branch`, `proposed_visibility`), different shape across the producer and the consumer. Severity: **HIGH** when consumer parses by exact shape.
 
 **Source-of-truth selection** (per finding):
+
+These rules apply to both **inter-sibling drift** (between two or more family members) AND **intra-skill drift** (between a single skill's own `SKILL.md`, `references/<file>.md`, and `templates/<file>` — e.g., `branching-story-bootstrap`'s `templates/story-records.yaml` lagging its own `references/phase-7-root-page-render.md`'s schema declarations). For intra-skill drift, generalize "sibling" to the skill's internal docs: the producer-vs-consumer rule applies when one intra-skill doc is the producer (typically the reference doc that declares the schema or rule) and another is the consumer (typically the template that instantiates it); the schema-anchor-bearing-doc rule applies when multiple intra-skill docs declare the same schema (canonical = the doc with the fullest declaration). The three bullets below cover both drift modes once "sibling" is read this way.
 
 - If exactly one sibling is the **producer** of the shared record (the skill whose Phase emits the record class), that sibling is canonical. Example: RSP cards are produced by `branching-story-health-audit` Phase 8 and consumed by `storylet-pool-authoring` mode=audit; the producer's schema wins.
 - If multiple siblings produce the same shared record class (e.g., `branching-story-bootstrap` and `branching-story-page-cycle` both emit PG / SE / CHC records), the **schema-anchor-bearing skill** is canonical — defined as the sibling whose `templates/*.yaml` (or `templates/*.md`) contains the full record template. Example: page-cycle ships `templates/record-schemas.md`; bootstrap inlines minimal shapes — page-cycle's templates are canonical.
@@ -317,6 +319,8 @@ For every finding, populate the field set:
 
 Any FAIL routes to the responsible loop-back phase; the audit re-runs that phase before advancing to Phase 8.
 
+**Self-check trace surfacing**: The 9 self-check tests run internally during Phase 7 consolidation; PASS-with-rationale entries are not surfaced in chat output (no Phase 9 final-summary sub-section is allocated for the trace). The act of progressing to Phase 8 with all findings populated and validated IS the audit-trail evidence that the self-check tests passed. Only on FAIL does the trace surface in chat: the failing test number, finding_id, and routed loop-back phase appear as the diagnostic message before the audit re-runs the responsible phase. The implicit-PASS / explicit-FAIL surfacing pattern keeps the chat output proportional to the audit's signal — clean audits are terse, problematic audits show their work where the work is needed.
+
 ## Phase 8: HARD-GATE Triage and Per-Finding Disposition
 
 Emit a numbered triage summary table in chat:
@@ -334,6 +338,8 @@ For each `candidate` row, obtain an explicit disposition:
 - **reject-as-false-positive** — drop the finding; record rejection rationale.
 
 For each `manual-resolution` row, no disposition is solicited at this phase — manual-resolution findings always pass through to Phase 9's final summary as user-action items, never as auto-edits.
+
+**User-supplied resolution converts manual-resolution to filed**: When the user explicitly directs a course of action on a manual-resolution finding (mid-Phase-8 directive, or response to the Phase 9 final summary's manual-resolution surfacing — e.g., `"drop both fields"`, `"keep with v1-vestige comment"`, `"merge into the v2 schema"`), the finding converts to a filed candidate retaining its original `finding_id` with a `b` suffix appended (e.g., `F-06` → `F-06b`). The auto-edit derived from the user-supplied resolution honors the source-of-truth attribution rules at Phase 9 (the user's resolution IS the source-of-truth selection). The original `F-06` id appears in the final summary as `(converted to F-06b at Phase 8 per user-supplied resolution: <resolution-summary>)` so the audit trail records the manual-resolution → filed transition. This is consistent with HARD-GATE clause (e)'s rule "manual-resolution findings are NEVER auto-applied regardless of disposition" — that rule fires while a finding is classified as manual-resolution; explicit user resolution converts the classification BEFORE the auto-apply step, so clause (e) still holds.
 
 **Inclusive-phrasing dispositions** (synonyms for "file every surviving candidate"): `proceed`, `file all`, `approve`, `implement all`, and any similar inclusive phrasing the user supplies — phrasing that does not name specific finding numbers AND does not use one of the three explicit dispositions — are synonymous with filing every surviving candidate. Per-finding overrides (e.g., `file 1, defer 2, reject 3`) take precedence when named explicitly.
 
@@ -363,7 +369,7 @@ Emit all `Edit` (and any rare `Write`) tool calls for a single batched parallel-
 
 Independent (single-file) corrections do not need rollback discipline — each is its own atomic edit.
 
-After all batched messages return, verify every intended file edit landed by re-grepping the new strings; any missed edit is surfaced in the final summary as a per-finding failure for the user to investigate manually.
+After all batched messages return, treat each `Edit` tool call's success response (`file is current in your context`) as verification that the edit landed; any `Edit` error response (e.g., `String to replace not found in file`) is a per-finding failure surfaced in the final summary for the user to investigate manually. Re-grep is only required when an `Edit` response is ambiguous (e.g., when `replace_all: true` was used and the count of replacements isn't reported, or when the operator suspects the matched region drifted from the user-approved diff during construction).
 
 ### Step 3 — Final summary in chat
 
