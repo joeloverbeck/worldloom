@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (and any reference files it ships with). No code changes.
-**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-005.md, 006, 008
+**Deps**: archive/tickets/SPEC22SCECOM-001.md, archive/tickets/SPEC22SCECOM-005.md, archive/tickets/SPEC22SCECOM-006.md, 008
 
 ## Problem
 
@@ -15,7 +15,7 @@ SPEC-22 §Track 4's story-fact-promotion-to-canon deliverable adds a fifth `sour
 1. `.claude/skills/story-fact-promotion-to-canon/SKILL.md` exists. `source_kind` enum currently has 4 values: `story_fact`, `mystery_resolution`, `character_arc_outcome`, `artifact_canonization` (verified at SPEC-22 reassessment via SKILL.md frontmatter argument).
 2. SP-NNNN proposal_package shape carries 13 fields (verified at reassessment): `promotion_id`, `source_kind`, `source_record`, `promotion_branch_path`, `cf_candidate`, `provenance`, `scope_inflation_check`, `mystery_firewall`, `downstream_impact`, `rule_12_two_trace_check`, `contradiction_handling_preference`, `cross_story_impact_scan_performed`, `execution_mode`, `content_policy`. The new source_kind extends with 5 additional fields: `source_arc_id`, `applied_variant_id`, `effect_index`, `arc_trace_id`, `arc_trace_evidence_span`.
 3. Phase 1 / Phase 2 / Phase 4 / Phase 10 numbering matches the spec's references (verified).
-4. **Cross-skill boundary under audit**: promotion consumes (a) MCP retrieval (008) — Pre-flight uses `get_record(source_arc_id)`, `get_record(source_page_id)`, `get_record(arc_trace_id)`; (b) canonical-vocabularies (006) — Phase 2 CF candidate translation cites the closed effect-type enum from archived SPEC-19 §A; (c) v2 validators (005) — `arc_envelope_conformance` semantics inform Phase 4 mystery-firewall handling; (d) patch-engine op (archive/tickets/SPEC22SCECOM-001.md) — Phase 10 superseding-record submission routes through `submit_patch_plan`. The HARD-GATE handoff to canon-addition is the only world-canon mutation path; this ticket does NOT bypass canon-addition.
+4. **Cross-skill boundary under audit**: promotion consumes (a) MCP retrieval (008) — Pre-flight uses `get_record(source_arc_id)`, `get_record(source_page_id)`, `get_record(arc_trace_id)`; (b) canonical-vocabularies (archive/tickets/SPEC22SCECOM-006.md) — Phase 2 CF candidate translation cites the closed effect-type enum from archived SPEC-19 §A; (c) v2 validators (005) — `arc_envelope_conformance` semantics inform Phase 4 mystery-firewall handling; (d) patch-engine op (archive/tickets/SPEC22SCECOM-001.md) — Phase 10 superseding-record submission routes through `submit_patch_plan`. The HARD-GATE handoff to canon-addition is the only world-canon mutation path; this ticket does NOT bypass canon-addition.
 5. **FOUNDATIONS Rule 6 (No Silent Retcons)** restated: every promotion of a story-local fact / arc-effect into world canon must produce a CH-NNNN entry through canon-addition; promotion ledger SP-NNNN + proposal-package sidecar preserve the attribution chain story-side; canon-addition produces the world-canon CH entry.
 6. **FOUNDATIONS Rule 7 (Preserve Mystery Deliberately)** restated: Phase 4 mystery-firewall handling for `arc_effect_promotion` checks the arc's `execution_envelope.mystery_preservation.forbidden_resolutions[]` against the world's whole-class M load. If the arc's envelope omits a `forbidden`-status M id that the proposed CF could touch, HARD-REJECT. For arc effects whose CF candidate would resolve a non-forbidden M, route via `source_kind: mystery_resolution` instead (Pre-flight HARD-REJECT for mystery_progress effects).
 7. **HARD-GATE / canon-write ordering preserved**: this skill writes only story-side records (SP ledger, superseding SF/SREL/STENT records via patch-engine ops) and hands off the proposal package to canon-addition; canon-addition's HARD-GATE governs the actual CF/CH/PA write.
@@ -122,7 +122,7 @@ Add 5 new fields to the proposal_package schema (when `source_kind == arc_effect
 - Page-cycle record-schemas (in 013)
 - Migration (in 014)
 - Validators (in 003/004/005)
-- Canonical vocabularies (in 006)
+- Canonical vocabularies (in archive/tickets/SPEC22SCECOM-006.md)
 - MCP retrieval extension (in 008)
 - Patch-engine op (in 001)
 - canon-addition's CF/CH/PA write logic — owned by canon-addition (existing); this skill only hands off the proposal package

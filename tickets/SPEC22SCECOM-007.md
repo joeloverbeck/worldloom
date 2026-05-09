@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-index/src/schema/types.ts` (new `arc_trace_node` node-type), adds `tools/world-index/src/parse/arc-traces.ts` (or extends `parse/yaml.ts`), adds new SQLite migration `005_arc_trace_nodes.sql`. No impact on existing node types.
-**Deps**: 006
+**Deps**: archive/tickets/SPEC22SCECOM-006.md
 
 ## Problem
 

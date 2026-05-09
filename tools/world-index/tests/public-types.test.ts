@@ -11,7 +11,16 @@ import {
   SCOPED_EDGE_TYPES,
   YAML_EDGE_TYPES
 } from "../src/public/types";
-import { CANONICAL_DOMAINS, VERDICT_ENUM } from "../src/public/canonical-vocabularies";
+import {
+  ARC_ARCHETYPES,
+  CANONICAL_DOMAINS,
+  COMMITMENT_CLASSES,
+  NARRATIVE_POINTS,
+  STOP_PREDICATES,
+  STRONG_AXES,
+  STRONG_OUTCOMES,
+  VERDICT_ENUM
+} from "../src/public/canonical-vocabularies";
 import type {
   AttributionEdgeType,
   CanonContradictionRisk,
@@ -120,6 +129,12 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
     assert.equal(canonicalVocabularies.CANONICAL_DOMAINS, CANONICAL_DOMAINS);
     assert.equal(canonicalVocabularies.VERDICT_ENUM, VERDICT_ENUM);
+    assert.equal(canonicalVocabularies.COMMITMENT_CLASSES, COMMITMENT_CLASSES);
+    assert.equal(canonicalVocabularies.ARC_ARCHETYPES, ARC_ARCHETYPES);
+    assert.equal(canonicalVocabularies.NARRATIVE_POINTS, NARRATIVE_POINTS);
+    assert.equal(canonicalVocabularies.STRONG_AXES, STRONG_AXES);
+    assert.equal(canonicalVocabularies.STRONG_OUTCOMES, STRONG_OUTCOMES);
+    assert.equal(canonicalVocabularies.STOP_PREDICATES, STOP_PREDICATES);
   } finally {
     fs.statSync = originalStatSync;
   }

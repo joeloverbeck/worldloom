@@ -63,7 +63,7 @@ No additional documentation is required — SPEC-22 §Track 5 + §Risks already 
 
 - All other Track 4 skill alignments (in 010, 011, 012, 013)
 - Validators (in 003/004/005)
-- Canonical vocabularies (in 006)
+- Canonical vocabularies (in archive/tickets/SPEC22SCECOM-006.md)
 - Indexer + MCP retrieval (in 007/008)
 - Allocator + CLAUDE.md docs (in 009)
 - Patch-engine op (in 001)

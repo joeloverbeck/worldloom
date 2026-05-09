@@ -96,6 +96,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_page_record: "story-page.schema.json",
   story_choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
+  story_arc_trace_record: "story-arc-trace.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -387,6 +388,8 @@ function operationSchema(kind: OperationKind): JsonObject {
       return baseOperationProperties(kind, storyPayloadWithRecord("story_choice_record"));
     case "create_slt_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
+    case "create_arc_trace_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_arc_trace_record"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

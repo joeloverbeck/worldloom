@@ -69,7 +69,7 @@ These tools dispatch through the same per-record-type lookup as `get_record` / `
 ## Out of Scope
 
 - Indexer parsing + migration (in 007)
-- Canonical-vocabularies + get_canonical_vocabulary (in 006)
+- Canonical-vocabularies + get_canonical_vocabulary (in archive/tickets/SPEC22SCECOM-006.md)
 - Allocator + CLAUDE.md docs (in 009)
 - Patch-engine op (in 001)
 - Same downstream Out of Scope as 001/002

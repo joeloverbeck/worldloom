@@ -76,7 +76,7 @@ The bullet follows the existing format convention used for SP-NNNN, RSP-NNNN, et
 
 - Patch-engine envelope `arc_trace_ids` field (in 001)
 - Indexer + MCP retrieval extensions (in 007, 008)
-- Canonical-vocabularies enums (in 006)
+- Canonical-vocabularies enums (in archive/tickets/SPEC22SCECOM-006.md)
 - Same downstream Out of Scope as 001/002
 
 ## Acceptance Criteria

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-bootstrap/SKILL.md` plus 5 reference files and 2 templates. No code changes.
-**Deps**: archive/tickets/SPEC22SCECOM-003.md, 004, archive/tickets/SPEC22SCECOM-005.md, 006
+**Deps**: archive/tickets/SPEC22SCECOM-003.md, 004, archive/tickets/SPEC22SCECOM-005.md, archive/tickets/SPEC22SCECOM-006.md
 
 ## Problem
 
@@ -14,7 +14,7 @@ SPEC-22 §Track 4's branching-story-bootstrap deliverable is the cohesive Track 
 
 1. `.claude/skills/branching-story-bootstrap/SKILL.md` exists; current Phase 9 has **12 gates** (verified at SPEC-22 reassessment via `phase-9-validation-gates.md` table row count + SKILL.md line 148 "12 gates"). SPEC-22 reassessment corrected the prior 13→18 math drift to 12→17.
 2. `references/` directory contents (verified at reassessment): `phase-6-storylet-pool-seed.md`, `phases-1-3-premise-cast-facts.md` (Phase 3 content lives in this combined file, not a standalone `phase-3-story-kernel.md`), `phase-7-root-page-render.md`, `phase-8-choice-generation.md`, `phase-9-validation-gates.md`, `phase-9-5-bootstrap-discipline-validator.md`, `phase-7-5-visible-affordance-extraction.md`. Templates: `templates/story-kernel.md` (cadence_policy block currently in arc-units only), `templates/story-bundle-index.md`.
-3. **Cross-skill boundary under audit**: bootstrap consumes (a) the v2 validator surface (003/004/005) — Phase 9 cites their gate names; (b) canonical-vocabularies (006) — Phase 9.5 rebinding cites `commitment_class` enum; (c) archived SPEC-20 §F's choice-surface gate — Phase 8 delegates to it in PG-0001 special-case mode. Bootstrap does NOT consume MCP retrieval (008) or the patch-engine op from archive/tickets/SPEC22SCECOM-001.md directly — those are runtime concerns.
+3. **Cross-skill boundary under audit**: bootstrap consumes (a) the v2 validator surface (003/004/005) — Phase 9 cites their gate names; (b) canonical-vocabularies (archive/tickets/SPEC22SCECOM-006.md) — Phase 9.5 rebinding cites `commitment_class` enum; (c) archived SPEC-20 §F's choice-surface gate — Phase 8 delegates to it in PG-0001 special-case mode. Bootstrap does NOT consume MCP retrieval (008) or the patch-engine op from archive/tickets/SPEC22SCECOM-001.md directly — those are runtime concerns.
 4. **FOUNDATIONS §Story Bundles §7 (Story-Pipeline Skill Category)** restated: bootstrap is Category 2c. Sibling-scan is recommended-as-defensive-default for shared surfaces (predicate DSL, STENT `role_in_story` enum, `state_snapshot` schema, RSP card schema, content_policy block). This ticket touches none of those shared surfaces (it modifies bootstrap's own phase prose + templates), so no cross-skill cascade.
 5. (HARD-GATE / canon-write ordering): Bootstrap's HARD-GATE remains intact — Phase 9 + Phase 9.5 record PASS-with-rationale; Phase 10 user approval clears the gate. Gate count grows from 12 to 17 but the per-gate PASS-with-rationale discipline is preserved.
 6. (Schema extension): STORY_KERNEL template's `cadence_policy` and `menu_policy` blocks ship with hardcoded arc-unit defaults per archived SPEC-20 §H (post-reassessment). Word-count fields (`preferred_words_per_arc`, `default_min_words_between_menus`, `max_words_without_player_commitment_soft`) are explicitly forbidden per Prose Craft Contract Rule 11.
@@ -96,7 +96,7 @@ In `templates/story-bundle-index.md`: storylet-pool summary line shifts from "co
 - Promotion alignment (in 012)
 - Migration: red-bunny discard (in 014)
 - Validators (in 003/004/005)
-- Canonical vocabularies (in 006)
+- Canonical vocabularies (in archive/tickets/SPEC22SCECOM-006.md)
 - Same downstream Out of Scope as 001/002
 
 ## Acceptance Criteria

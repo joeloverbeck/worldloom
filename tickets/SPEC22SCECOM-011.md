@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `.claude/skills/branching-story-health-audit/SKILL.md` and templates. No code changes.
-**Deps**: archive/tickets/SPEC22SCECOM-005.md, 006, 008
+**Deps**: archive/tickets/SPEC22SCECOM-005.md, archive/tickets/SPEC22SCECOM-006.md, 008
 
 ## Problem
 
@@ -15,7 +15,7 @@ SPEC-22 §Track 4's branching-story-health-audit deliverable extends the SAU rep
 1. `.claude/skills/branching-story-health-audit/SKILL.md` exists. The `audit_focus` argument enum currently has **22 values** (verified at SPEC-22 reassessment); the 3 new values bring it to 25.
 2. Phase 3 Coverage Analysis section exists with sub-checks including `mystery_firewall`, `prose_ledger_consistency`, `choice_pair_distance`, `choice_continuation_capacity` (verified). Phase 4 has "Cross-Branch Reference Closure Leakage (Recursive)" walking story-local IDs (OBL.dependent_facts[], CHC.continuation_capacity.valid_seed_storylets[], etc.). Phase 7 has 11 self-check tests (per SPEC-22 §Track 4, growing to 13 with the two new structural-floor checks).
 3. Templates: `templates/remediation-storylet-proposal-card.md` (the spec's "or equivalent" cushion accepts the actual filename, which differs from the spec's `rsp-card.md` shorthand). `templates/story-audit-report.md` exists for the SAU report shape.
-4. **Cross-skill boundary under audit**: health-audit consumes (a) v2 validators (005) — Phase 7 self-check structural floors cite `arc_trace_evidence_alignment` + `arc_envelope_conformance` failure modes; (b) canonical-vocabularies (006) — RSP card schema's `target_commitment_class` + `target_arc_archetype` use the closed enums; (c) MCP retrieval (008) — Pre-flight uses `list_records('arc_trace_record', story_slug, include_full_body=true)` to whole-class load traces. No cross-skill cascade beyond these consumer dependencies.
+4. **Cross-skill boundary under audit**: health-audit consumes (a) v2 validators (005) — Phase 7 self-check structural floors cite `arc_trace_evidence_alignment` + `arc_envelope_conformance` failure modes; (b) canonical-vocabularies (archive/tickets/SPEC22SCECOM-006.md) — RSP card schema's `target_commitment_class` + `target_arc_archetype` use the closed enums; (c) MCP retrieval (008) — Pre-flight uses `list_records('arc_trace_record', story_slug, include_full_body=true)` to whole-class load traces. No cross-skill cascade beyond these consumer dependencies.
 5. **FOUNDATIONS Rule 7 (Preserve Mystery Deliberately)** restated: Phase 7 self-check structural floor for `arc_envelope_conformance` HARD-REJECTs ARC_TRACE entries with high-severity `mystery_preservation.forbidden_resolutions[]` violations — preserves Mystery Reserve firewall at audit time as well as at canonical-record-time (005).
 6. (HARD-GATE / canon-write ordering): N/A — health-audit produces SAU reports + remediation proposals; no canon mutation.
 7. (Schema extension): RSP card schema additive (new fields `target_commitment_class` + `target_arc_archetype` + `sketch_arc_contract` + `sketch_dramatic_unit`). Existing audit reports under `worlds/<slug>/stories/<slug>/audits/SAU-NNNN/remediation-storylet-proposals/` may carry RSP cards without the new fields — those are historical records preserved as-is per SPEC-22 §Risks.
@@ -110,7 +110,7 @@ In SKILL.md SAU report section (or `templates/story-audit-report.md` if shape li
 - Page-cycle record-schemas (in 013)
 - Migration: red-bunny discard (in 014)
 - Validator implementations (in 003/004/005)
-- Canonical vocabularies (in 006)
+- Canonical vocabularies (in archive/tickets/SPEC22SCECOM-006.md)
 - MCP retrieval (in 008)
 - Same downstream Out of Scope as 001/002
 
