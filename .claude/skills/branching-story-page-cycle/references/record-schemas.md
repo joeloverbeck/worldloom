@@ -55,7 +55,13 @@ state_snapshot:
   narrative_point_classification: CONTINUE_ARC | NATURAL_COMMITMENT_HINGE | INTERRUPT_HINGE | CONTINUE_ONLY_PAUSE | TERMINAL_OR_CHAPTER_CLOSE
   arc_trace_id: ARCTRACE-NNNN | null                  # populated only when Phase 7.6 emits an ARC_TRACE
   arc_trace_emitted: true | false                     # false when low-budget interactive_runtime omits derived ARC_TRACE persistence
-prose_path: pages-prose/PG-0042.md
+prose_plan_path: pages-prose-plans/PG-0042.md       # always set at plan-commit; the comprehensive plan written by Phase 7
+prose_path: pages-prose/PG-0042.md | null            # null at plan-commit; finalize sets to pages-prose/PG-NNNN.md
+prose_status: pending | rendered | superseded        # pending at plan-commit; finalize Phase 7 flips to rendered
+deferred_validation_trace:                           # DEFERRED at plan-commit; finalize Phase 5 flips each to PASS/FAIL
+  prose_ledger_consistency: "DEFERRED — awaiting prose render"
+  arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"
+  prose_critic_8_axis: "DEFERRED — awaiting prose render"
 emitted_choices: [CHC-NNNN, ...]
 narrative_health: {...}                              # see Phase 6
 governor_nudge_applied: <description>
@@ -95,7 +101,21 @@ Page records do not carry `created_at_page`. The page record's own PG id is its 
 
 `state_snapshot.arc_trace_id` points to the derived `ARCTRACE-NNNN` record emitted for this page. It is `null` when `arc_trace_emitted: false` or at PG-0001's no-arc root.
 
-`state_snapshot.arc_trace_emitted` records whether Phase 7.6 persisted an ARC_TRACE for this page. Standard authoring/runtime paths set it to `true` when the trace is emitted; low-budget `interactive_runtime` may set it to `false` only under the Phase 7.6 omission discipline, with `arc_trace_id: null`.
+`state_snapshot.arc_trace_emitted` records whether an ARC_TRACE has been persisted for this page. Post-PROSESPLIT-007, page-cycle always sets `arc_trace_emitted: false` at plan-commit because Layer 2 / Layer 3 ARC_TRACE extraction requires rendered prose and DEFERS to `branching-story-page-prose-finalize` Phase 4. Finalize Phase 7 emits the `create_arc_trace_record` op (when `PG.storylet_realized != null`) and updates this field to `true` along with `state_snapshot.arc_trace_id: ARCTRACE-NNNN` via `update_record_field` ops.
+
+`prose_plan_path` is set at plan-commit to `pages-prose-plans/PG-NNNN.md` and is the path to the comprehensive plan authored by Phase 7. The external prose renderer reads this file verbatim as its prompt.
+
+`prose_path` is `null` at plan-commit. After the user supplies the rendered prose at `pages-prose/PG-NNNN.md` and runs `branching-story-page-prose-finalize`, finalize Phase 7 sets `prose_path: pages-prose/PG-NNNN.md` via `update_record_field`.
+
+`prose_status` carries the transitional state of the prose:
+- `pending` at plan-commit — plan exists, rendered prose does not.
+- `rendered` after finalize Phase 7 runs successfully.
+- `superseded` reserved for a future revision flow (not used by page-cycle or finalize directly).
+
+`deferred_validation_trace` carries the three keys whose verdicts cannot be computed at plan-commit because they require rendered prose:
+- `prose_ledger_consistency` — DEFERRED at plan-commit; finalize Phase 5 runs the deterministic prose-claim-vs-state comparison and flips to PASS/FAIL.
+- `arc_trace_evidence_alignment` — DEFERRED at plan-commit; finalize Phase 5 validates the Phase-4-extracted ARCTRACE's `evidence_span` byte offsets and flips to PASS/FAIL.
+- `prose_critic_8_axis` — DEFERRED at plan-commit; finalize Phase 3 runs the 8-axis prose critic and flips to PASS/SOFT_FAIL/HARD_FAIL.
 
 ## Story Event Record (SE-NNNN)
 
