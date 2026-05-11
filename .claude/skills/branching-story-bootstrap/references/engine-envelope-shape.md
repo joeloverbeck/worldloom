@@ -28,7 +28,7 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
 
 Every field is required. `approval_token` is a placeholder string in the JSON (see §4); the real signed token is computed from the envelope bytes and passed alongside the envelope at submit time. `verdict` is `"bootstrap_accept"` for this skill (a freeform string the engine accepts; the canon-addition verdict-enum constraints do not bind story-bundle plans). `originating_skill` is `"branching-story-bootstrap"` literally.
 
-A typical bootstrap envelope contains ~75-80 ops (4 STENT + 19-22 SF + 1 SE + 8 OBL + 4 THR + 2 SREL + 3 STINT + 5 STLOC + 3 STOBJ + 20 SLT + 1 BR + 1 PG + 5 CHC). At ~155KB compact JSON / ~5,800 lines pretty-printed, this is structurally too large for the MCP transport's inline parameter limits — the CLI submit path (§5) is the default for bootstrap envelopes.
+Bootstrap envelopes vary by premise complexity, cast size, location/object inventory, and storylet pool size; typical envelopes span ~40-80 ops / 100KB-250KB JSON. A lean single-location single-encounter opener with 3 cast STENTs + ~10 SFs + 1 STLOC + 1 STOBJ + 12 SLTs can land at ~50 ops; a richer multi-location bundle with 4-5 STENTs + 20+ SFs + 5 STLOCs + 3 STOBJs + 20 SLTs reaches ~75-80 ops. The CLI submit path (§5) is the default regardless of op count because even modest-sized bootstrap envelopes (≥30 ops with multi-paragraph string fields) routinely exceed the MCP transport's inline parameter limits.
 
 ---
 

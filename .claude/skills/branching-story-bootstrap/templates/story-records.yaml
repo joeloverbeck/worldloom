@@ -290,7 +290,7 @@ chosen_choice_id: null                   # null for root page
 write_in_used: false                     # true if Path B was the route
 write_in_routing: null                   # null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
 
-storylet_realized: null                  # null at PG-0001 root only — bootstrap genesis is a scene-setter without an SLT realized; non-root pages set this to the SLT id realized this turn (per references/phase-7-root-page-render.md §Emit PG-0001 record)
+storylet_realized: null                  # null at PG-0001 root only — bootstrap genesis is a scene-setter without an SLT realized; non-root pages set this to the SLT id realized this turn (per references/phase-7-root-page-plan.md §Emit PG-0001 record)
 applied_event_ops: [SE-0001]
 
 state_hash: ""
@@ -400,6 +400,17 @@ choice_contract:
     - <outcome that would betray the label>
   minimum_state_change:
     - fact                              # fact | obligation | consequence | relationship | intention | thread | location | cast | terminality
+
+choice_worthiness:                       # REQUIRED by SPEC-19 CHC schema for choice_kind: scene_commitment — the JSON schema at tools/validators/src/schemas/story-choice.schema.json enforces all five sub-fields below. See branching-story-page-cycle/references/record-schemas.md §SPEC-19 CHC schema for the runtime authority. Omitting this block fails Phase 9 gate 18 (choice_worthiness_completeness) AND fails the patch engine's record_schema_compliance validator at submit time.
+  strategic_question_answered: >         # REQUIRED; one-line scene question the choice answers (the dramatic question this commitment resolves at the menu surface)
+    The user-facing dramatic question this choice resolves at the menu surface.
+  strong_axes:                           # REQUIRED; ≥1 entry from the closed strong_axis enum (relationship_trajectory | obligation_state | information_posture | risk_cost_exposure | route_or_scene_type | thread_pressure | irreversibility | character_intention); Phase 9 gate 18 enforces collective coverage of ≥2 distinct axes across the displayed menu
+    - <strong_axis enum>
+  expected_state_delta: {}               # REQUIRED; non-empty map (minProperties: 1) — typically keyed by strong_axis with one-phrase descriptor per axis (e.g., {obligation_state: "engaged_via_approach"})
+  why_not_microbeat: >                   # REQUIRED; one-line rationale for why this CHC commits to a full scene-commitment arc rather than a microbeat — names the commitment_class's beat_plan span and what the arc tests across multiple beats
+    Why a scene-commitment arc is the right unit for this commitment.
+  foreseeable_difference: >              # REQUIRED; one-line rationale for how this CHC's downstream state-space is distinct from the menu's other choices — names the divergent strong_axes and the seed-pool continuation paths the post-choice delta opens
+    How the post-choice state space diverges from the menu's other options.
 
 likely_effects: []                       # structured effect sketches; runtime validates before commit
 continuation_capacity:

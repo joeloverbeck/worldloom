@@ -1,6 +1,6 @@
 # Phase 3: 8-axis Prose Critic
 
-Phase 3 runs an LLM critic over the rendered prose against the Prose Craft Contract's diagnostic vocabulary. The eight axes mirror the post-render critic embedded in `branching-story-page-cycle/references/phase-7-page-render.md` §Post-Render Prose Critic — but here the critic operates on user-supplied or external-LLM-rendered prose rather than on the page-cycle's own working buffer. The verdict feeds the Phase 5 `prose_critic_8_axis` gate and (on `SOFT_FAIL`) the Phase 6 ACCEPT_AS_IS routing.
+Phase 3 runs an LLM critic over the rendered prose against the Prose Craft Contract's diagnostic vocabulary. The eight axes come from `branching-story-page-cycle/references/prose-craft-contract.md` §Diagnostic Vocabulary; this Phase 3 is now the SOLE site where the post-render critic runs (the critic was moved out of `branching-story-page-cycle` Phase 7 in the prose-rendering-out-of-skill refactor — Phase 7 is now plan-authoring only, and there is no rendered prose at plan-commit to critique). The critic operates on user-supplied or external-LLM-rendered prose. The verdict feeds the Phase 5 `prose_critic_8_axis` gate and (on `SOFT_FAIL`) the Phase 6 ACCEPT_AS_IS routing.
 
 ## Axes
 

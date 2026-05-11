@@ -150,7 +150,7 @@ Body shape (selected-arc case):
      STOPPING POINT / DO NOT REVEAL (the M-NNNN forbidden list and the
      engine-vocabulary tokens list from frontmatter).
 - §19 Render-time instruction block — inline verbatim from
-     reports/prose-quality-instructions.md §3.
+     reports/prose-quality-instructions.md §"Render-Time Instruction Template".
 
 Every record id referenced in any plan section MUST be inlined verbatim in
 that section. Bare CF-NNNN / CHAR-NNNN / SLT-NNNN / OBL-NNNN / etc.
@@ -202,4 +202,4 @@ All other PG fields (identity / branch wiring, storylet_realized, applied_event_
 - Convergence point — rendered prose validators + ARC_TRACE Layer 2/3 extraction + PG.prose_status flip: `.claude/skills/branching-story-page-prose-finalize/SKILL.md`
 - 8-axis prose critic (moved out of Phase 7): `.claude/skills/branching-story-page-prose-finalize/references/phase-3-prose-critic.md`
 - ARC_TRACE Layer 2 / Layer 3 (moved out of Phase 7.6): `.claude/skills/branching-story-page-prose-finalize/references/phase-4-arc-trace-extraction.md`
-- Render-time instruction block consumed by the external renderer: `reports/prose-quality-instructions.md` §3
+- Render-time instruction block (inlined verbatim into plan §19): `reports/prose-quality-instructions.md` §"Render-Time Instruction Template"

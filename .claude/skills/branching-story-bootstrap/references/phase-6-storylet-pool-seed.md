@@ -37,6 +37,8 @@ Clamp `world_complexity_factor` to `0.8..2.4` before multiplying. Typical output
 
 If the formula yields fewer than the minimum coverage floor for gate 9, raise to that floor and record a warning in the Phase 10 deliverable summary. The coverage floor is commitment-class coverage: at least 5 distinct `arc_contract.commitment_class` values for `target_pool_size >= 8`, unless the premise has a smaller lawful commitment surface and the Phase 9 rationale records the limitation.
 
+**Operator-judgment reduction below formula** — when the formula yields a `target_pool_size` materially larger than the opening surface's natural commitment-class span (typical case: a single-location single-encounter opener at `open_ended` scale, where the formula yields 20+), the operator MAY reduce below formula with explicit Phase 10 HARD-GATE surfacing as a deviation. The reduction must (a) still satisfy gate 9 — ≥5 distinct `commitment_class` values when `target_pool_size >= 8`; (b) record the reduction in `STORY_KERNEL.md.storylet_pool_summary.notes` with the formula-suggested target alongside the chosen target and a one-line rationale (e.g., `Bootstrap formula recommended target_pool_size = 24; operator reduced to 12 for the opening encounter's narrow surface — an opening-scene seed pool deeper than 12 distinct scene-commitment arcs would generate alternatives that no PG-0002 commitment-class hinge could activate in the immediate aftermath of a first-encounter close`); (c) surface at the Phase 10 deliverable summary as a NOTE so the user explicitly authorizes the deviation. The recovery path when the runtime starves after PG-0002 is `storylet-pool-authoring focus_area=<>` top-up (per `references/phase-9-validation-gates.md` gate 9 small-batch relaxation notes). This path is distinct from the explicit `storylet_pool_seed_size` argument override above — that path is user-supplied at invocation time; this path is operator-judgment at Phase 6 evaluation time and routes through Phase 10 for user authorization.
+
 ---
 
 ## Delegation contract
@@ -62,3 +64,43 @@ Bootstrap pre-allocates the SLT id range in Phase 6 before invoking `storylet-po
 The delegated sub-routine applies storylet-pool-authoring Phase 4's 14 per-storylet gates and Phase 5's diversity audit, then returns the approved SLT records and validation summaries in memory. It does not allocate or write an SLB manifest, does not edit the story bundle INDEX, and does not require `worlds/<world-slug>/stories/<story-slug>/` to exist yet. Returned SLT records have the pre-allocated ids already populated; bootstrap writes them as-is in Phase 11.
 
 Returned seed storylets must carry `record_version: 2`, `shape: scene_commitment_arc`, `provenance.origin: bootstrap_seed`, `provenance.created_at_page: null`, and `visibility.scope: global_author_pool`. They use the schema authority at `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`; this skill's `templates/story-records.yaml` only cross-references that authority for SLT records.
+
+---
+
+## SLT schema landmines
+
+The bootstrap depends on storylet-pool-authoring to deliver valid SLTs (delegation contract above). When the bootstrap implementer authors SLTs inline within the Phase 11 patch envelope — legitimate per the in-memory return contract, since bootstrap's Phase 11 staged commit writes the returned records into the engine envelope — the patch-engine validators enforce several SLT schema requirements that `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`'s examples either omit, encode incorrectly, or split across separately-enforced sub-domains the template surface does not surface. Catch these at envelope-construction time rather than discovering them through validator iteration cycles.
+
+The live validator grammar at `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` is authoritative when this section and the sibling template disagree.
+
+**Required field gotchas:**
+
+- `beat_plan.beats[].realization_target` is REQUIRED (open-vocab string; describes what scene-movement the beat realizes — typically a kebab-case phrase like `realizes-question-framed-as-scene-movement`). The storylet template's beat examples omit this field; the JSON schema at `tools/validators/src/schemas/story-storylet.schema.json` requires it on every beat.
+- `stop_policy.interrupt_before` must be NON-EMPTY (≥1 entry). The storylet template shows it as syntactically optional, but the validator rejects empty `interrupt_before: []` arrays. Default safe interrupt: `{id: consent-boundary-imminent, predicate: consent_boundary_imminent, args: {}}` (no required args for `consent_boundary_imminent`).
+
+**Predicate-section split (NORMAL_EXIT vs INTERRUPT_BEFORE):**
+
+`stop_policy.normal_exits[].predicate` and `stop_policy.interrupt_before[].predicate` enforce DIFFERENT sub-enums of `STOP_PREDICATES`. Using a normal-exit predicate in `interrupt_before` (or vice versa) fails with `stop_policy_parsability.wrong_stop_policy_section`.
+
+- **NORMAL_EXIT_STOP_PREDICATES** (allowed in `normal_exits` only): `commitment_satisfied`, `commitment_blocked`, `commitment_overturned`, `npc_makes_demand`, `npc_makes_disclosure`, `participant_exits`, `scene_goal_resolves`, `scene_goal_changes`, `new_obligation_created`, `open_thread_reprioritized`, `time_or_location_changes`.
+- **INTERRUPT_BEFORE_STOP_PREDICATES** (allowed in `interrupt_before` only): `irreversible_cost_imminent`, `consent_boundary_imminent`, `violence_or_harm_imminent`, `forbidden_mystery_resolution_risk`, `protagonist_goal_change_required`, `selected_commitment_would_be_violated`, `user_write_in_conflicts_with_envelope`, `only_next_action_would_create_major_state_change`.
+
+**Predicate-specific `args` requirements** (validator rejects when missing required args):
+
+| Predicate | Required args |
+|---|---|
+| `commitment_satisfied` / `commitment_blocked` / `commitment_overturned` | `commitment_class` (the SLT's own `arc_contract.commitment_class`) |
+| `participant_exits` | `participant` (STENT-id or role-ref like `role:recipient`) |
+| `npc_makes_demand` / `npc_makes_disclosure` | `npc` (STENT-id or role-ref) |
+| `scene_goal_resolves` / `scene_goal_changes` / `protagonist_goal_change_required` | `goal` (open-vocab kebab-case string) |
+| `new_obligation_created` | `obligation_type` (open-vocab kebab-case string) |
+| `open_thread_reprioritized` | `thread_id` (THR-id, 4-digit-padded) |
+| `time_or_location_changes` | `change_kind` (open-vocab kebab-case string) |
+| `irreversible_cost_imminent` | `cost_axis` (open-vocab kebab-case string) |
+| `forbidden_mystery_resolution_risk` | `mystery_id` (M-id, 4-digit-padded per the `^M-[0-9]{4}$` regex) |
+| `selected_commitment_would_be_violated` | `commitment_class` (the violating commitment_class) |
+| `user_write_in_conflicts_with_envelope` | `envelope_field` (envelope field name) |
+| `only_next_action_would_create_major_state_change` | `state_axis` (open-vocab kebab-case string) |
+| `consent_boundary_imminent` / `violence_or_harm_imminent` | (no required args) |
+
+**Template-divergence note:** the storylet-pool-authoring template at `templates/storylet-record.yaml` line 404 contains an example using `predicate: safety_valve_triggered` (in `interrupt_before`). `safety_valve_triggered` is NOT in the `STOP_PREDICATES` enum at all — the example is invalid and will fail `stop_policy_parsability.unknown_predicate`. Treat the live validator grammar as authoritative when constructing SLT records; flag this template divergence in any storylet-pool-authoring audit.

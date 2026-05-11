@@ -8,7 +8,10 @@ Consumers:
 - branching-story-page-prose-finalize Phase 1 (plan/prose pairing; reads state_hash_at_plan_time)
 - External prose renderer (reads §1-§19 of the markdown body as the prompt)
 
-The plan IS the prompt. The external renderer reads ONLY this file plus reports/prose-quality-instructions.md.
+The plan IS the prompt. The external renderer reads ONLY this file (§1-§19 of the markdown body).
+§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-time instruction block) are
+inlined verbatim from `reports/prose-quality-instructions.md`, which is the upstream canonical
+source for those three sections; the report is NOT concatenated at render time.
 Every record id referenced in any plan section MUST be inlined verbatim in that section.
 
 Authoring rule: when in doubt, include more rather than less. The plan is the only context the renderer
@@ -80,9 +83,12 @@ deferred_validation_trace:
 
 ## §1 How to use this plan
 
-This file is the comprehensive prompt for rendering page <PG-NNNN>. Concatenate this file's body
-(§1 through §19) and append the render-time instruction block from `reports/prose-quality-instructions.md`
-§3. Send the concatenation as the user-facing prompt to your prose renderer (manual or external LLM).
+This file is the comprehensive prompt for rendering page <PG-NNNN>. Send §1 through §19 of this
+file's body verbatim as the user-facing prompt to your prose renderer (manual or external LLM).
+The plan is self-contained — §2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-time
+instruction block) are inlined verbatim from `reports/prose-quality-instructions.md`, which is the
+upstream canonical source. Do not concatenate the report at render time; doing so duplicates these
+sections.
 
 Output: continuous fiction prose only. No headers, no commentary, no engine vocabulary, no analysis.
 Save the rendered prose to `pages-prose/PG-NNNN.md` (a plain markdown file with prose text only;
@@ -209,5 +215,6 @@ DO NOT REVEAL:
 
 ## §19 Render-time instruction block
 
-<!-- INLINE: the literal LLM-facing instruction from reports/prose-quality-instructions.md §3.
+<!-- INLINE: the literal LLM-facing instruction from
+     reports/prose-quality-instructions.md §"Render-Time Instruction Template".
      This is the last section of the plan; the renderer reads §1-§19 in order. -->
