@@ -13,7 +13,7 @@ import { stageCreateInvRecord } from "../ops/create-inv-record.js";
 import { stageCreateMRecord } from "../ops/create-m-record.js";
 import { stageCreateOqRecord } from "../ops/create-oq-record.js";
 import { stageCreateSecRecord } from "../ops/create-sec-record.js";
-import { stageCreateStoryRecord, storyRecordMetadata } from "../ops/create-story-record.js";
+import { stageCreateStoryRecord, STORY_RECORD_SPECS, storyRecordMetadata } from "../ops/create-story-record.js";
 import { stageRemoveChAffectedCfIds } from "../ops/remove-ch-affected-cf-ids.js";
 import { stageUpdateRecordField } from "../ops/update-record-field.js";
 import type { OpContext, StagedRecord, StagedWrite } from "../ops/types.js";
@@ -78,6 +78,8 @@ function registerStagedRecord(
     return;
   }
 
+  const previous = ctx.stagedRecords?.get(metadata.nodeId);
+  const baselineHash = previous?.baseline_hash ?? previous?.current_hash;
   const record: StagedRecord = {
     node_id: metadata.nodeId,
     node_type: metadata.nodeType,
@@ -86,6 +88,9 @@ function registerStagedRecord(
     record: parsed,
     current_hash: contentHashForYaml(parsed)
   };
+  if (baselineHash !== undefined) {
+    record.baseline_hash = baselineHash;
+  }
   ctx.stagedRecords?.set(metadata.nodeId, record);
 }
 
@@ -138,6 +143,13 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
   }
 }
 
+const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.values(STORY_RECORD_SPECS).map((spec) => [spec.prefix, spec.nodeType])
+);
+
+const STORY_BUNDLE_ID_PATTERN =
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|ARCTRACE|DA)-\d{4}$/;
+
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d{4}$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "canon_fact_record" };
@@ -159,6 +171,13 @@ function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType
   }
   if (/^SEC-[A-Z]{3}-\d{3}$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "section" };
+  }
+  const storyMatch = STORY_BUNDLE_ID_PATTERN.exec(recordId);
+  if (storyMatch && storyMatch[1] !== undefined) {
+    const nodeType = STORY_BUNDLE_NODE_TYPE_BY_PREFIX[storyMatch[1]];
+    if (nodeType !== undefined) {
+      return { nodeId: recordId, nodeType };
+    }
   }
   return null;
 }

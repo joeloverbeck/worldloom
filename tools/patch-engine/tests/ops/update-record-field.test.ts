@@ -1,8 +1,29 @@
+import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { PatchOperation } from "../../src/envelope/schema.js";
+import { stageAllOps } from "../../src/commit/temp-file.js";
 import { stageUpdateRecordField } from "../../src/ops/update-record-field.js";
 import { assertOpError, assertYamlEquals, baseEnvelope, canonFact, createOp, createTestWorld, seedRecord, seedStandardRecords } from "../harness.js";
+
+function pgRecord(): Record<string, unknown> {
+  return {
+    id: "PG-0001",
+    story_id: "STORY-0001",
+    prose_plan_path: "pages-prose-plans/PG-0001.md",
+    prose_path: null,
+    prose_status: "pending",
+    deferred_validation_trace: {
+      prose_ledger_consistency: "DEFERRED — awaiting prose render",
+      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
+      prose_critic_8_axis: "DEFERRED — awaiting prose render"
+    },
+    state_snapshot: {
+      arc_trace_emitted: false,
+      arc_trace_id: null
+    }
+  };
+}
 
 test("update_record_field appends free text and sets structural field with retcon attestation", async (t) => {
   const world = createTestWorld(t);
@@ -72,28 +93,14 @@ test("update_record_field rejects missing attestation, hash drift, and invalid p
 
 test("update_record_field sets PG prose-finalize transitional fields without retcon attestation", async (t) => {
   const world = createTestWorld(t);
-  const pgRecord: Record<string, unknown> = {
-    id: "PG-0001",
-    story_id: "STORY-0001",
-    prose_plan_path: "pages-prose-plans/PG-0001.md",
-    prose_path: null,
-    prose_status: "pending",
-    deferred_validation_trace: {
-      prose_ledger_consistency: "DEFERRED — awaiting prose render",
-      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
-      prose_critic_8_axis: "DEFERRED — awaiting prose render"
-    },
-    state_snapshot: {
-      arc_trace_emitted: false,
-      arc_trace_id: null
-    }
-  };
+  const record = pgRecord();
   const pgHash = seedRecord(
     world,
-    "PG-0001",
+    "alpha:PG-0001",
     "page_record",
     "stories/alpha/_source/pages/PG-0001.yaml",
-    pgRecord
+    record,
+    "alpha"
   );
   const env = baseEnvelope();
 
@@ -109,7 +116,7 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
     }
   } satisfies Extract<PatchOperation, { op: "update_record_field" }>);
   const stagedStatus = await stageUpdateRecordField(env, setStatus, world.ctx);
-  assertYamlEquals(stagedStatus, { ...pgRecord, prose_status: "rendered" });
+  assertYamlEquals(stagedStatus, { ...record, prose_status: "rendered" });
 
   const setNestedGate = createOp({
     op: "update_record_field",
@@ -138,27 +145,114 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
   await stageUpdateRecordField(env, setArcTraceFlag, world.ctx);
 });
 
-test("update_record_field still requires retcon attestation for unrelated PG field sets", async (t) => {
+test("update_record_field accepts bare story-bundle ids and resolves the namespaced indexed record", async (t) => {
   const world = createTestWorld(t);
-  const pgRecord: Record<string, unknown> = {
-    id: "PG-0001",
-    story_id: "STORY-0001",
-    prose_plan_path: "pages-prose-plans/PG-0001.md",
-    prose_path: null,
-    prose_status: "pending",
-    deferred_validation_trace: {
-      prose_ledger_consistency: "DEFERRED — awaiting prose render",
-      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
-      prose_critic_8_axis: "DEFERRED — awaiting prose render"
-    },
-    branch_id: "BR-0001"
-  };
+  const record = pgRecord();
   const pgHash = seedRecord(
     world,
-    "PG-0001",
+    "red-bunny:PG-0001",
+    "page_record",
+    "stories/red-bunny/_source/pages/PG-0001.yaml",
+    record,
+    "red-bunny"
+  );
+  const env = baseEnvelope();
+
+  const staged = await stageUpdateRecordField(
+    env,
+    createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-0001",
+        field_path: ["prose_status"],
+        operation: "set",
+        new_value: "rendered"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    world.ctx
+  );
+
+  assertYamlEquals(staged, { ...record, prose_status: "rendered" });
+});
+
+test("update_record_field chains mutations on a story-bundle page across multiple ops", async (t) => {
+  const world = createTestWorld(t);
+  const record = pgRecord();
+  const pgHash = seedRecord(
+    world,
+    "red-bunny:PG-0001",
+    "page_record",
+    "stories/red-bunny/_source/pages/PG-0001.yaml",
+    record,
+    "red-bunny"
+  );
+  const patches: PatchOperation[] = [
+    createOp({
+      op: "update_record_field",
+      target_world: world.worldSlug,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-0001",
+        field_path: ["prose_path"],
+        operation: "set",
+        new_value: "pages-prose/PG-0001.md"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    createOp({
+      op: "update_record_field",
+      target_world: world.worldSlug,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-0001",
+        field_path: ["prose_status"],
+        operation: "set",
+        new_value: "rendered"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    createOp({
+      op: "update_record_field",
+      target_world: world.worldSlug,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-0001",
+        field_path: ["deferred_validation_trace", "prose_ledger_consistency"],
+        operation: "set",
+        new_value: "PASS — rendered prose matches the ledger"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>)
+  ];
+
+  const result = await stageAllOps({ ...baseEnvelope(), patches }, patches, world.ctx);
+
+  assert.equal(result.ok, true);
+  if (!result.ok) {
+    return;
+  }
+  assert.equal(result.staged.length, 1);
+  assertYamlEquals(result.staged[0]!, {
+    ...record,
+    prose_path: "pages-prose/PG-0001.md",
+    prose_status: "rendered",
+    deferred_validation_trace: {
+      prose_ledger_consistency: "PASS — rendered prose matches the ledger",
+      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
+      prose_critic_8_axis: "DEFERRED — awaiting prose render"
+    }
+  });
+});
+
+test("update_record_field still requires retcon attestation for unrelated PG field sets", async (t) => {
+  const world = createTestWorld(t);
+  const record = { ...pgRecord(), branch_id: "BR-0001" };
+  const pgHash = seedRecord(
+    world,
+    "alpha:PG-0001",
     "page_record",
     "stories/alpha/_source/pages/PG-0001.yaml",
-    pgRecord
+    record,
+    "alpha"
   );
   const env = baseEnvelope();
 

@@ -15,6 +15,7 @@ export interface StagedRecord {
   file_path: string;
   absolute_file_path: string;
   record: Record<string, unknown>;
+  baseline_hash?: string;
   current_hash: string;
 }
 

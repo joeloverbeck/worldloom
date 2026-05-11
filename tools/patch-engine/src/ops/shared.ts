@@ -197,6 +197,7 @@ export interface ExistingRecord {
   file_path: string;
   absolute_file_path: string;
   record: Record<string, unknown>;
+  baseline_hash?: string;
   current_hash: string;
 }
 
@@ -207,23 +208,13 @@ export async function loadExistingRecord(params: {
   expectedContentHash: string | undefined;
   opKind: OperationKind;
 }): Promise<ExistingRecord> {
-  const row = params.ctx.db
-    .prepare(
-      `
-        SELECT node_id, node_type, file_path
-        FROM nodes
-        WHERE world_slug = ? AND node_id = ?
-      `
-    )
-    .get(params.targetWorld, params.targetRecordId) as
-    | { node_id: string; node_type: string; file_path: string }
-    | undefined;
-
   const stagedRecord = params.ctx.stagedRecords?.get(params.targetRecordId);
   if (stagedRecord !== undefined) {
     verifyExpectedContentHash(stagedRecord, params.expectedContentHash, params.opKind);
     return stagedRecord;
   }
+
+  const row = findExistingRecordRow(params);
 
   if (!row) {
     throw new PatchEngineOpError({
@@ -251,20 +242,7 @@ export async function loadExistingRecord(params: {
   }
 
   const currentHash = contentHashForYaml(parsed);
-  verifyExpectedContentHash(
-    {
-      node_id: row.node_id,
-      node_type: row.node_type,
-      file_path: row.file_path,
-      absolute_file_path: absoluteFilePath,
-      record: parsed,
-      current_hash: currentHash
-    },
-    params.expectedContentHash,
-    params.opKind
-  );
-
-  return {
+  const existingRecord = {
     node_id: row.node_id,
     node_type: row.node_type,
     file_path: row.file_path,
@@ -272,6 +250,71 @@ export async function loadExistingRecord(params: {
     record: parsed,
     current_hash: currentHash
   };
+  verifyExpectedContentHash(existingRecord, params.expectedContentHash, params.opKind);
+  params.ctx.stagedRecords?.set(params.targetRecordId, {
+    ...existingRecord,
+    baseline_hash: currentHash
+  });
+
+  return existingRecord;
+}
+
+type ExistingRecordRow = { node_id: string; node_type: string; file_path: string };
+
+const BARE_STORY_BUNDLE_ID_PATTERN =
+  /^(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|ARCTRACE|DA)-\d{4}$/;
+
+function findExistingRecordRow(params: {
+  ctx: OpContext;
+  targetWorld: string;
+  targetRecordId: string;
+  opKind: OperationKind;
+}): ExistingRecordRow | undefined {
+  const exactRow = params.ctx.db
+    .prepare(
+      `
+        SELECT node_id, node_type, file_path
+        FROM nodes
+        WHERE world_slug = ? AND node_id = ?
+      `
+    )
+    .get(params.targetWorld, params.targetRecordId) as ExistingRecordRow | undefined;
+  if (exactRow !== undefined) {
+    return exactRow;
+  }
+
+  if (!BARE_STORY_BUNDLE_ID_PATTERN.test(params.targetRecordId)) {
+    return undefined;
+  }
+
+  const storyRows = params.ctx.db
+    .prepare(
+      `
+        SELECT node_id, node_type, file_path
+        FROM nodes
+        WHERE world_slug = ?
+          AND node_id LIKE ?
+          AND story_slug IS NOT NULL
+        ORDER BY node_id
+      `
+    )
+    .all(params.targetWorld, `%:${params.targetRecordId}`) as ExistingRecordRow[];
+
+  if (storyRows.length === 1) {
+    return storyRows[0];
+  }
+  if (storyRows.length > 1) {
+    throw new PatchEngineOpError({
+      code: "record_not_found",
+      message: `${params.targetRecordId} is ambiguous across story bundles (${storyRows
+        .map((row) => row.node_id)
+        .join(", ")}); use the namespaced form <storySlug>:${params.targetRecordId}`,
+      op_kind: params.opKind,
+      record_id: params.targetRecordId
+    });
+  }
+
+  return undefined;
 }
 
 function verifyExpectedContentHash(
@@ -282,7 +325,7 @@ function verifyExpectedContentHash(
   if (expectedContentHash === undefined) {
     return;
   }
-  if (expectedContentHash === record.current_hash) {
+  if (expectedContentHash === (record.baseline_hash ?? record.current_hash)) {
     return;
   }
   throw new PatchEngineOpError({

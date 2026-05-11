@@ -38,7 +38,7 @@ Use this compact checklist so required references are not skipped:
 4. HARD-GATE / validation-signal changes: `docs/HARD-GATE-DISCIPLINE.md` when the ticket changes skill HARD-GATE wording, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill validation-gate rows, content-generating pre-flight input validation, parse-time consumer schema checks, handoff-artifact required-field validation, `validation_trace` semantics, or operator PASS/FAIL criteria.
 5. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 
-Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples or package-specific edge cases here unless they are required to choose the correct reference.
+Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples, package-specific edge cases, or checklist expansions here unless they are required to choose the correct reference; otherwise keep the detailed guidance in `references/`.
 
 ## Always First
 
@@ -112,12 +112,13 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 6. If an explicit user-supplied reference glob or shorthand resolves to zero live paths, do not block the run by default. Record the miss in `Assumption Reassessment`, name the fallback live authority surface you are using instead, and continue.
 7. If the invocation uses a glob, shorthand, or near-match typo for the ticket path, resolve the first exact live ticket path inside the active repo/worktree before doing anything else. If no target ticket resolves there, stop and ask for a corrected target instead of falling back to a sibling repo.
 8. If ticket prose names a bare `references/<file>.md` path and the local-relative lookup fails, search `.codex/skills/*/references/` and `.claude/skills/*/references/` before treating it as missing. Prefer the skill context implied by the cited rule or section name, and record the resolved authority in `Assumption Reassessment` when it affects scope, proof, or ownership.
-9. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
-10. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
-11. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
-12. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
-13. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-14. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
+9. If ticket prose names a full skill/reference path such as `.claude/skills/<skill>/references/<file>.md` or `.codex/skills/<skill>/references/<file>.md` and that exact path is missing, do not stop at the missing file. Inspect the owning skill directory with `rg --files`, then use the live equivalent reference or the parent `SKILL.md` section as authority when the current checkout clearly moved or inlined that material. Record the stale path, fallback authority, and effect on scope/proof in `Assumption Reassessment`; if no live authority is clear, treat it as a real reassessment blocker or escalate.
+10. If the ticket belongs to a numbered family, inspect sibling tickets only far enough to confirm current ownership boundaries.
+11. Check whether the active ticket is tracked or untracked; keep that in mind during closeout.
+12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
+13. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
+14. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
+15. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
 
 Compact checkpoint shape:
 
