@@ -1,6 +1,6 @@
 # BSPAGE-002: Add `plan_completeness_check` field to `record-schemas.md` PG `validation_trace` block
 
-**Status**: PENDING
+**Status**: ✅ COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — documentation fix inside `.claude/skills/branching-story-page-cycle/references/`.
@@ -71,3 +71,16 @@ After line 92 (`choice_worthiness_completeness: PASS — <rationale>`), insert a
 
 - Manual diff comparison: line up the 18 `validation_trace` field names in `record-schemas.md` with the 18 gates in `phase-9-validation-gates.md`'s table; confirm 1:1 correspondence.
 - Verify a future skill-audit drift scan re-running the same Phase 3 numeric-drift pattern on this file no longer reports a finding.
+
+## Outcome
+
+Completion date: 2026-05-11.
+
+Completed as scoped. `.claude/skills/branching-story-page-cycle/references/record-schemas.md:75` header comment updated from `# Phase 9 gates 1-17 with one-line PASS rationales` to `# Phase 9 gates 1-18 with one-line PASS rationales`, and a new line `  plan_completeness_check: PASS — <rationale>` inserted as the 18th `validation_trace` field (immediately after `choice_worthiness_completeness`). No other files touched; no contract change; additive sync only.
+
+## Verification Result
+
+1. `grep -c "^\s*plan_completeness_check:" .claude/skills/branching-story-page-cycle/references/record-schemas.md` → `1` (≥1 required). PASS.
+2. `grep -c "Phase 9 gates 1-18" .claude/skills/branching-story-page-cycle/references/record-schemas.md` → `1` (≥1 required). PASS.
+3. `grep -c "Phase 9 gates 1-17" .claude/skills/branching-story-page-cycle/references/record-schemas.md` → `0` (must be 0). PASS.
+4. Manual 1:1 cross-check of the 18 `validation_trace` field names against `references/phase-9-validation-gates.md` gates 1-18 (table rows in the file): all 18 align in order — `mystery_firewall`, `invariant_compatibility`, `recursive_reference_closure`, `snapshot_replay_equality`, `id_uniqueness`, `content_policy_presence`, `prose_ledger_consistency`, `choice_contract_integrity`, `choice_consequence_capacity`, `state_snapshot_integrity`, `epistemic_class_declared`, `consequence_persistence`, `arc_envelope_conformance`, `effect_model_replay_safety`, `arc_trace_evidence_alignment`, `narrative_point_classification`, `choice_worthiness_completeness`, `plan_completeness_check`. PASS.
