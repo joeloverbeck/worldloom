@@ -2,10 +2,10 @@
 
 Phase 2 turns the Phase 1 diagnosis matrix into arc seeds. An arc seed is a
 proposal, not a structured SLT record: it names a candidate
-scene-commitment-arc shape that Phase 3 will fill into the v2 SLT scaffold.
+scene-commitment-arc shape that Phase 3 will fill into the SLT scaffold.
 
 Phase 2 is the bridge between pool diagnosis and structured drafting. It must
-carry enough information for Phase 3 to choose the right v2 blocks
+carry enough information for Phase 3 to choose the right structural blocks
 (`arc_contract`, `dramatic_unit`, `beat_plan`, `execution_envelope`,
 `stop_policy`, `effect_model`, and `exit_portfolio`) without pretending the
 seed itself is already a validated record.
@@ -49,8 +49,7 @@ from SPEC-22 Track 3 `STRONG_AXES`:
 - `irreversibility`
 - `character_intention`
 
-Do not preserve v1 `shape` buckets as aliases. Under SPEC-21, the authoring
-unit is the scene-commitment arc; every seed must be keyed by
+The authoring unit is the scene-commitment arc; every seed must be keyed by
 `commitment_class` and `arc_archetype`.
 
 ## Required And Nullable Fields
@@ -127,10 +126,9 @@ or state why its nullable target is still justified by the Phase 1 diagnosis
 matrix. Mandatory source targeting takes precedence over archetype or
 commitment-class balancing; Phase 5 will audit the resulting batch distribution.
 
-Focus mode keeps the requested `focus_area` as a pressure lens, not as a v1
-shape enum. For example, `focus_area=thread_resolution_options` should bias
-toward commitment_classes and archetypes that can lower, redirect, or close
-thread pressure; it must not emit a retired `thread_resolution` shape.
+Focus mode keeps the requested `focus_area` as a pressure lens. For example,
+`focus_area=thread_resolution_options` should bias toward commitment_classes
+and archetypes that can lower, redirect, or close thread pressure.
 
 ## Audit Mode
 
@@ -150,10 +148,6 @@ these RSP fields without defining or migrating them:
 - `target_arc_archetype`
 - `sketch_arc_contract`
 - `sketch_dramatic_unit`
-
-If a historical RSP card still has only v1 `proposed_shape` data and lacks the
-arc-targeting fields, stop and report that the card is pre-SPEC-21. Do not map a
-retired shape to a commitment_class by guesswork.
 
 ## JIT mode
 
@@ -212,7 +206,7 @@ unapproved canon facts or resolve Mystery Reserve entries.
 - `references/phase-1-coverage-diagnosis.md` is the upstream producer of the
   diagnosis matrix that drives seed selection.
 - `references/phase-3-structured-drafting.md` is the downstream consumer that
-  turns each arc seed into a v2 SLT record.
+  turns each arc seed into an SLT record.
 - `templates/arc-archetypes.md` is the local archetype vocabulary and JIT
   mapping table.
 - SPEC-22 Track 3 is the closed-vocabulary source for `COMMITMENT_CLASSES`,

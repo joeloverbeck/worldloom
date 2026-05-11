@@ -1,6 +1,6 @@
 # Phase 9.5: Bootstrap Discipline Validator
 
-Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the FOUNDATIONS-anchored gate set. Phase 9 gates 1-12 are FOUNDATIONS rules; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
+Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the Phase 9 19-gate set. The 19 Phase 9 gates split as gates 1-13 FOUNDATIONS-anchored, gates 14-18 SPEC-20/22-anchored (scene-commitment validators), and gate 19 plan-authoring-anchored; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
 
 Each check records PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. A bare "PASS" is treated as FAIL per the FOUNDATIONS skill discipline. Any FAIL halts the bootstrap and routes to the responsible upstream phase.
 
@@ -20,6 +20,7 @@ Each check records PASS with a one-line rationale into `STORY_KERNEL.md.discipli
 | 8 | OBL.coverage_cache schema (advisory but populated) | Every OBL carries a `coverage_cache` block with `compatible_storylets[]`, `checked_at_page`, `checked_at_storylet_pool_hash` — values may be empty/null at bootstrap, but the keys MUST exist | Phase 5 |
 | 9 | SE-0001 genesis discipline | `id == 'SE-0001'`, `actor: system`, `action: bootstrap`, `ops: []`, `state_hash_before: null`, `state_hash_after == PG-0001.state_hash` | Phase 7 |
 | 10 | PG-0001 state_snapshot field-key completeness | All keys named in the `templates/story-records.yaml` PG-0001 `state_snapshot` block are present on `PG-0001.state_snapshot` (values may be empty arrays / empty maps; the keys MUST exist for the runtime page-cycle's snapshot-replay equality check on PG-0002) | Phase 7 |
+| 11 | `plan_self_containment` (NEW) | The plan inlines (rather than bare-references) every CF / CHAR / SF / OBL / THR / SREL / STINT / STLOC / STOBJ / SLT / DA / M / INV id that appears in any plan section. A bare `CF-NNNN` reference in §5 without the CF record body inlined fails; a bare `OBL-NNNN` reference in §10 without the OBL fields inlined fails; etc. The plan IS the prompt — the external prose renderer reads only the plan file, so unrendered record bodies are unrenderable context that corrupts prose silently. | Phase 7 |
 
 ---
 
@@ -33,9 +34,10 @@ Phase 9.5 runs after every Phase 9 gate has recorded PASS and BEFORE Phase 10's 
 
 ## Composition with Phase 9
 
-Phase 9.5 does NOT duplicate Phase 9 work. The 17 Phase 9 gates are FOUNDATIONS-anchored and validator-aligned; Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
+Phase 9.5 does NOT duplicate Phase 9 work. The 19 Phase 9 gates are FOUNDATIONS-anchored, validator-aligned, and plan-authoring-anchored; Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
 
-Under the v2 scene-commitment arc contract, storylet-pool diversity is owned by
-Phase 9 gate 9 and is measured by `arc_contract.commitment_class`. Phase 9.5
-keeps the 10 discipline checks above unchanged; it does not add a separate
-storylet-diversity row.
+Storylet-pool diversity is owned by Phase 9 gate 9 and is measured by
+`arc_contract.commitment_class`. Phase 9.5 keeps the 11 discipline checks
+above unchanged; it does not add a separate storylet-diversity row.
+
+`plan_completeness_check` (Phase 9 gate 19) and `plan_self_containment` (this check 11) are intentionally split: gate 19 is structural (sections populated, ids resolve, frontmatter well-formed) and runs as a Phase 9 canon-safety gate; check 11 is content-completeness (every referenced id has its record body inlined verbatim) and runs as a Phase 9.5 discipline gate. The former protects parser/validator correctness; the latter protects the rendered prose's coherence.

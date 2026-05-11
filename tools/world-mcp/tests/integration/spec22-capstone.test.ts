@@ -114,8 +114,8 @@ test("SPEC-22 validator coverage is executable and mirrored by page-cycle gate p
     assert.match(`${bootstrapGates}\n${pageCycle}\n${pageCycleGates}`, new RegExp(phase9GateName));
   }
 
-  assert.match(bootstrapGates, /17-gate|17 validation gates/);
-  assert.match(pageCycle, /17 gates|17 validation gates/);
+  assert.match(bootstrapGates, /19-gate|19 validation gates/);
+  assert.match(pageCycle, /18 gates|18 validation gates/);
 });
 
 test("SPEC-22 canonical vocabulary classes expose the expected live counts", async () => {
@@ -235,6 +235,14 @@ function createSpec22RepoRoot(): string {
     branch_path: ["PG-0001"],
     storylet_realized: "SLT-0001",
     applied_event_ops: ["SE-0001"],
+    prose_path: "pages-prose/PG-0001.md",
+    prose_plan_path: "pages-prose-plans/PG-0001.md",
+    prose_status: "rendered",
+    deferred_validation_trace: {
+      prose_ledger_consistency: "PASS — rendered prose checked by fixture setup",
+      arc_trace_evidence_alignment: "PASS — rendered prose evidence spans are available",
+      prose_critic_8_axis: "PASS — fixture prose is intentionally minimal"
+    },
     state_snapshot: {
       applied_effect_variant: null,
       narrative_point_classification: "NATURAL_COMMITMENT_HINGE",

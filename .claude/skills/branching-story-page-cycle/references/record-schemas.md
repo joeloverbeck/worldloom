@@ -6,14 +6,14 @@ This skill's outputs are story-bundle records. None are Canon Fact Records or Ch
 
 ```yaml
 id: PG-0042
-story_id: STORY-001
+story_id: STORY-0001
 branch_id: BR-0007                                    # the branch this page belongs to
 parent_page_id: PG-0017
 branch_path: [PG-0001, PG-0005, PG-0017, PG-0042]
 chosen_choice_id: CHC-0098                            # null at root only
 write_in_used: false                                  # true if Path B was the route
 write_in_routing: null | accept | accept_but_transform | treat_as_attempt | refuse_only_through_world_logic
-storylet_realized: SLT-0019
+storylet_realized: SLT-0019                          # null only at PG-0001 root special case (bootstrap genesis); non-null on every non-root page
 applied_event_ops: [SE-0042]                          # event records own the structured ops
 state_hash: <hash>
 parent_state_hash: <hash>
@@ -55,7 +55,13 @@ state_snapshot:
   narrative_point_classification: CONTINUE_ARC | NATURAL_COMMITMENT_HINGE | INTERRUPT_HINGE | CONTINUE_ONLY_PAUSE | TERMINAL_OR_CHAPTER_CLOSE
   arc_trace_id: ARCTRACE-NNNN | null                  # populated only when Phase 7.6 emits an ARC_TRACE
   arc_trace_emitted: true | false                     # false when low-budget interactive_runtime omits derived ARC_TRACE persistence
-prose_path: pages-prose/PG-0042.md
+prose_plan_path: pages-prose-plans/PG-0042.md       # always set at plan-commit; the comprehensive plan written by Phase 7
+prose_path: pages-prose/PG-0042.md | null            # null at plan-commit; finalize sets to pages-prose/PG-NNNN.md
+prose_status: pending | rendered | superseded        # pending at plan-commit; finalize Phase 7 flips to rendered
+deferred_validation_trace:                           # DEFERRED at plan-commit; finalize Phase 5 flips each to PASS/FAIL
+  prose_ledger_consistency: "DEFERRED — awaiting prose render"
+  arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"
+  prose_critic_8_axis: "DEFERRED — awaiting prose render"
 emitted_choices: [CHC-NNNN, ...]
 narrative_health: {...}                              # see Phase 6
 governor_nudge_applied: <description>
@@ -66,7 +72,7 @@ storylet_selection_audit_trail:                      # Phase 4 weighted-pick dis
   jit_expansion_fired: false                          # true if the JIT generator was delegated; top_k_considered then includes the JIT-trigger condition
   weighted_pick_seed: <optional engine-internal seed for replay reproducibility>
 content_intensity: tame | mature | explicit
-validation_trace:                                    # Phase 9 gates 1-12 with one-line PASS rationales
+validation_trace:                                    # Phase 9 gates 1-17 with one-line PASS rationales
   mystery_firewall: PASS — <rationale>
   invariant_compatibility: PASS — <rationale>
   recursive_reference_closure: PASS — <rationale>
@@ -79,6 +85,11 @@ validation_trace:                                    # Phase 9 gates 1-12 with o
   state_snapshot_integrity: PASS — <rationale>
   epistemic_class_declared: PASS — <rationale>
   consequence_persistence: PASS — <rationale>
+  arc_envelope_conformance: PASS — <rationale>
+  effect_model_replay_safety: PASS — <rationale>
+  arc_trace_evidence_alignment: PASS — <rationale>
+  narrative_point_classification: PASS — <rationale>
+  choice_worthiness_completeness: PASS — <rationale>
 created_at: <iso8601>
 ```
 
@@ -90,7 +101,21 @@ Page records do not carry `created_at_page`. The page record's own PG id is its 
 
 `state_snapshot.arc_trace_id` points to the derived `ARCTRACE-NNNN` record emitted for this page. It is `null` when `arc_trace_emitted: false` or at PG-0001's no-arc root.
 
-`state_snapshot.arc_trace_emitted` records whether Phase 7.6 persisted an ARC_TRACE for this page. Standard authoring/runtime paths set it to `true` when the trace is emitted; low-budget `interactive_runtime` may set it to `false` only under the Phase 7.6 omission discipline, with `arc_trace_id: null`.
+`state_snapshot.arc_trace_emitted` records whether an ARC_TRACE has been persisted for this page. Post-PROSESPLIT-007, page-cycle always sets `arc_trace_emitted: false` at plan-commit because Layer 2 / Layer 3 ARC_TRACE extraction requires rendered prose and DEFERS to `branching-story-page-prose-finalize` Phase 4. Finalize Phase 7 emits the `create_arc_trace_record` op (when `PG.storylet_realized != null`) and updates this field to `true` along with `state_snapshot.arc_trace_id: ARCTRACE-NNNN` via `update_record_field` ops.
+
+`prose_plan_path` is set at plan-commit to `pages-prose-plans/PG-NNNN.md` and is the path to the comprehensive plan authored by Phase 7. The external prose renderer reads this file verbatim as its prompt.
+
+`prose_path` is `null` at plan-commit. After the user supplies the rendered prose at `pages-prose/PG-NNNN.md` and runs `branching-story-page-prose-finalize`, finalize Phase 7 sets `prose_path: pages-prose/PG-NNNN.md` via `update_record_field`.
+
+`prose_status` carries the transitional state of the prose:
+- `pending` at plan-commit — plan exists, rendered prose does not.
+- `rendered` after finalize Phase 7 runs successfully.
+- `superseded` reserved for a future revision flow (not used by page-cycle or finalize directly).
+
+`deferred_validation_trace` carries the three keys whose verdicts cannot be computed at plan-commit because they require rendered prose:
+- `prose_ledger_consistency` — DEFERRED at plan-commit; finalize Phase 5 runs the deterministic prose-claim-vs-state comparison and flips to PASS/FAIL.
+- `arc_trace_evidence_alignment` — DEFERRED at plan-commit; finalize Phase 5 validates the Phase-4-extracted ARCTRACE's `evidence_span` byte offsets and flips to PASS/FAIL.
+- `prose_critic_8_axis` — DEFERRED at plan-commit; finalize Phase 3 runs the 8-axis prose critic and flips to PASS/SOFT_FAIL/HARD_FAIL.
 
 ## Story Event Record (SE-NNNN)
 
@@ -98,7 +123,7 @@ The skill's replay-equality contract is `parent.snapshot + applied_event_ops == 
 
 ```yaml
 id: SE-0042
-story_id: STORY-001
+story_id: STORY-0001
 branch_id: BR-0007
 created_at_page: PG-0042
 
@@ -147,13 +172,13 @@ The `op_type` enum is closed; LLM proposers may not invent new op types. The `de
 
 Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries the `choice_contract` block (user_intent, guaranteed_action, success_policy, allowed_outcome_band, forbidden_outcomes, minimum_state_change) and the `continuation_capacity` block (`post_choice_delta`, `valid_seed_storylets`, `jit_shape_spec`, `validation_basis`). The choice contract is enforced at the next turn's Phase 1 (REFUSE/TRANSFORM/ATTEMPT/ACCEPT routing) and Phase 7 (post-render fail-fast checks). The continuation-capacity block is enforced at this turn's Phase 8 / Phase 9 gate 9 so persisted runtime CHCs carry the same post-choice seed/JIT viability evidence as bootstrap CHCs.
 
-### CHC v2 fields (record_version: 2)
+### CHC fields (record_version: 2)
 
-SPEC-19 extends CHC records for the scene-commitment-arc pivot. The v2 extension is additive on top of the preserved v1 `choice_contract` and `continuation_capacity` blocks; no dual-version runtime logic is introduced by this reference text.
+SPEC-19 defines the CHC schema for the scene-commitment-arc contract. The scene-commitment fields (`choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`) sit alongside the load-bearing `choice_contract`, `likely_effects`, and `continuation_capacity` blocks.
 
 ```yaml
 record_version: 2
-choice_kind: scene_commitment | tactical_beat   # scene_commitment is the v2 standard;
+choice_kind: scene_commitment | tactical_beat   # scene_commitment is the standard;
                                                 # tactical_beat is reserved for narrow cases
 commitment_class: <commitment_class enum>       # required when choice_kind == scene_commitment
 strategy_cluster: <kebab-case open-vocab tag>   # required when choice_kind == scene_commitment
@@ -175,15 +200,28 @@ choice_worthiness:
   why_not_microbeat: >                          # why this is not merely a gesture
   foreseeable_difference: >                     # what sibling choices will foreseeably change
 
-# v1 blocks preserved:
+# Load-bearing blocks:
 choice_contract: {...}
-likely_effects: [...]                           # MANDATORY non-empty under v2 scene_commitment
+likely_effects: [...]                           # MANDATORY non-empty when choice_kind == scene_commitment
 continuation_capacity: {...}
 ```
 
-Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthiness` block and a non-empty `likely_effects` array. SPEC-22's `choice_worthiness_completeness` validator HARD-REJECTs empty or missing v2 fields. This closes the SPEC-19 empirical gap: 40/40 v1 CHC records in the red-bunny test bundle had `likely_effects: []` at reassessment on 2026-05-07.
+Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthiness` block and a non-empty `likely_effects` array. SPEC-22's `choice_worthiness_completeness` validator HARD-REJECTs empty or missing fields. This closes the SPEC-19 empirical gap that motivated the schema (40/40 pre-cutover CHC records in the discarded red-bunny test bundle had `likely_effects: []` at reassessment on 2026-05-07).
 
-`scene_commitment` is the default for v2 LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
+`scene_commitment` is the default for LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
+
+## Field Naming Disambiguations
+
+### `success_policy` — two distinct enums
+
+Two records carry a field named `success_policy` with non-overlapping enum values:
+
+- **`CHC.choice_contract.success_policy`** (transaction-level — choice scope): enum `{guaranteed, attempted, uncertain, opposed}`. Captures whether the player's intent in choosing this option is mechanically guaranteed to land, attempted with possible failure, uncertain, or opposed by the world.
+- **`SLT.arc_contract.success_policy`** (commitment-level — arc scope): enum `{uncontested, contested, costly, uncertain}` (per `storylet-pool-authoring/templates/storylet-record.yaml`). Captures the contract under which the storylet's commitment is offered — uncontested guarantee, contested with opposition, costly even on success, or uncertain outcome.
+
+The shared value `uncertain` is intentional and means different things at the two scopes: at choice scope, "the transaction may not resolve as proposed"; at arc scope, "the commitment's outcome at the arc level cannot be guaranteed". An operator authoring CHC records MUST use the four-value transaction-level enum; an operator authoring SLT records MUST use the four-value commitment-level enum. Cross-emission (e.g., emitting `attempted` as an SLT `arc_contract.success_policy` value, or `costly` as a CHC `choice_contract.success_policy` value) is invalid record content; the validators' `record_schema_compliance` check catches this at submit time.
+
+Inline cross-disambiguation comments at `branching-story-bootstrap/templates/story-records.yaml` (CHC schema) and `storylet-pool-authoring/templates/storylet-record.yaml` (SLT schema) carry the same warning at the schema-template authoring surface; the parallel authoring-side note lives in `storylet-pool-authoring/references/governance-and-foundations.md` §Field Naming Disambiguation.
 
 ## ARC_TRACE Record (story-bundle-scoped)
 
@@ -199,7 +237,7 @@ Allocate ids through `mcp__worldloom__allocate_next_id(world_slug, 'ARCTRACE', s
 
 ```yaml
 id: ARCTRACE-NNNN
-story_id: STORY-NNN
+story_id: STORY-NNNN
 created_at_page: PG-NNNN                       # page whose render this trace describes
 arc_realized: SLT-NNNN                         # arc selected at SPEC-20 Phase 4
 effect_variant_applied: <variant id>           # from arc.effect_model.variants[]
@@ -252,7 +290,7 @@ Every claim in `observed_actions[]`, `observed_claims[]`, `possible_violations[]
 
 The remaining classes (SF, OBL, CNSQ, THR, SREL, STINT, SLT, STLOC, STOBJ, DA-story-local, BR) are emitted by this skill but their schemas are owned by `branching-story-bootstrap/templates/story-records.yaml` — the bootstrap skill is the schema authority for shared classes; this skill is the runtime authority for PG/SE/CHC. Per-turn emission rules:
 
-- **SF-NNNN** — append-only; supersession on certainty change; declares `epistemic_class`, `truth_value`, `certainty`, `known_by`, `subject/predicate/object`, `derived_from_cf | canon_relation`, `created_at_page`.
+- **SF-NNNN** — append-only; supersession on certainty change; declares `epistemic_class`, `truth_value`, `certainty`, `known_by`, `subject/predicate/object`, `derived_from_cf | canon_relation`, `visible_to_reader`, `reader_visibility_basis`, `created_at_page`.
 - **OBL-NNNN** — append-only; supersession on status change (open → paid_off / complicated / transferred / abandoned_with_acknowledgment); declares `salience`, `urgency`, ≥2 `possible_payoff_modes`.
 - **CNSQ-NNNN** — append-only; supersession on `consequence_address` op; carries `kind`, `subjects`, `scope`, `urgency`, `salience`, `created_at_page`, branch-scoped visibility.
 - **THR-NNNN** — append-only; supersession on `status` or `current_pressure` change.

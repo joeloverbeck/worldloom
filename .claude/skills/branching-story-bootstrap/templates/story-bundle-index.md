@@ -12,7 +12,7 @@ storylet pool commitment_class distribution.
 
 # Story <story_slug>
 
-**STORY-NNN**: STORY-NNNN
+**Story ID**: STORY-NNNN
 **World**: <world-slug>
 **Created**: <iso8601>
 **Designing principle**: <one sentence — same string as STORY_KERNEL.md §Designing Principle>
@@ -33,7 +33,7 @@ storylet pool commitment_class distribution.
 
 | M | Resolution safety | Touched at |
 |---|---|---|
-| M-N | low / medium / high / forbidden | declared at bootstrap |
+| M-NNNN | low / medium / high / forbidden | declared at bootstrap |
 
 ## Storylet pool
 
@@ -41,11 +41,24 @@ Total: <count> seed scene-commitment arcs covering <commitment_classes>.
 
 Commitment class distribution: ask_one_bounded_question: N | offer_practical_help: N | stay_available_without_pressure: N | withdraw_without_abandoning: N | tighten_pressure: N
 
-## Pages rendered
+## Pages
 
-| PG | Branch | Storylet | Choices emitted | Content intensity |
-|---|---|---|---|---|
-| PG-0001 | BR-0001 | SLT-NNNN | <count> | <intensity> |
+| PG | Branch | Storylet | Choices emitted | Content intensity | Prose status | Plan path |
+|---|---|---|---|---|---|---|
+| PG-0001 | BR-0001 | — | <count> | <intensity> | pending | pages-prose-plans/PG-0001.md |
+
+<!--
+Prose status legend:
+- `pending` — comprehensive plan written by branching-story-bootstrap or
+  branching-story-page-cycle; rendered prose at pages-prose/PG-NNNN.md not
+  yet supplied; branching-story-page-prose-finalize has not yet run.
+- `rendered` — branching-story-page-prose-finalize merged the user-supplied
+  pages-prose/PG-NNNN.md; deferred validators flipped from DEFERRED to
+  PASS (or FAIL with rationale).
+- `superseded` — a subsequent re-render via finalize replaced a prior
+  rendered prose file (rare).
+-->
+
 
 ## Cast
 

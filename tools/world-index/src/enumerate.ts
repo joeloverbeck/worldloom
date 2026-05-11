@@ -59,6 +59,7 @@ const STORY_SOURCE_DIRECTORIES = new Set([
 const STORY_PRIMARY_AUTHORED_FILES = new Set(["STORY_KERNEL.md"]);
 const STORY_BUNDLE_MARKDOWN_DIRECTORIES = new Set([
   "pages-prose",
+  "pages-prose-plans",
   "storylet-batches",
   "story-promotions",
   "audits",

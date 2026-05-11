@@ -27,10 +27,6 @@ Each `required_effects[]` entry maps to one or more `SE.ops` entries using the c
 
 Per-character intention refresh still runs after the variant ops apply. STINT updates are deterministic engine-side follow-through, not entries in `required_effects[]`; they may produce `intention_refresh` ops after the arc-level effect batch has established the new post-arc state.
 
-## Legacy v1 Beat-Derived Inputs
-
-Post-cutover there are no v1 story records to execute. The old beat-derived input path is retained below only as a documentation note for readers comparing the v1 and v2 contracts: Phase 1's `ProposedEvent`, `required_aftermath`, and the selected storylet's `fact_effects` / `relationship_effects` / obligation effect fields are no longer the active Phase 5 source of truth. Equivalent state changes must be represented in the selected arc variant's `required_effects[]` before Phase 7 render.
-
 ## Append-Only Discipline
 
 Records are append-only. Mutations to facts (certainty change), obligations (status change), threads (status / pressure), or intentions (pressure / emotional_state) create NEW records:
@@ -38,7 +34,7 @@ Records are append-only. Mutations to facts (certainty change), obligations (sta
 ```yaml
 # Example: an OBL goes from open → paid_off
 id: OBL-0091
-story_id: STORY-001
+story_id: STORY-0001
 logical_id: OBL-0007                  # the original logical obligation
 supersedes: OBL-0007
 created_at_page: PG-0042
@@ -68,7 +64,7 @@ for op in applied_event_ops (each op is structured per the SE schema's op_type e
     consequence_address:          move CNSQ-NNNN from pending to addressed; replace status via supersession
     thread_supersede:             replace THR-NNNN with superseder (status / pressure delta)
     relationship_supersede:       replace SREL-NNNN with superseder (axes / public_status / private_status_by_actor)
-    intention_refresh:            add new STINT-NNNN to intentions_current; replace the prior STINT for that story entity / `stent_id` via supersession (logical_id + supersedes link to the prior record)
+    intention_refresh:            add new STINT-NNNN to intentions_current; replace the prior STINT for that story entity / `stent_id` via supersession (logical_id + supersedes link to the prior record); STENT.intention_snapshot_id is NOT updated by this op — it remains the bootstrap-time pointer (per `branching-story-bootstrap/templates/story-records.yaml:33`), so post-bootstrap consumers MUST read active intentions from `intentions_current` rather than dereferencing through STENT
     cast_change:                  update cast_present
     location_change:              update current_location and accessible_locations
     inventory_change:             update inventory_by_entity via STOBJ supersession
@@ -87,7 +83,7 @@ mutation error, not a prose-only issue.
 
 `obligations_open` / `obligations_paid_off` / `obligations_complicated` / `obligations_abandoned` are **cumulative-state subsets** of the obligation state space, not per-turn deltas. An obligation transitioned to complicated at PG-N stays in `obligations_complicated` of PG-N+1, PG-N+2, ... until either superseded again to a different status or abandoned; an obligation paid off at PG-N stays in `obligations_paid_off` of every subsequent page along the branch. The same cumulative-state interpretation applies to `consequences_pending` (CNSQ-NNNN records open until addressed or expired) and `consequences_addressed` (CNSQ-NNNN records remain visible in the addressed list across subsequent pages along the branch).
 
-Per-turn deltas live in the SE record's `ops` array (the supersession events themselves: `obligation_complicate` / `obligation_pay_off` / `obligation_abandon` / `consequence_address`). The state_snapshot fields are the post-replay register at this page — what state the branch IS in, not what changed THIS turn. This is what makes snapshot-replay equality (Phase 9 gate 4) computable: replaying the parent's snapshot through this turn's structured ops yields the new cumulative-state register, not a delta. Storylet-pool-authoring's `obligation_state` predicate (per `templates/predicate-dsl.md`) reads these subset arrays as cumulative state to determine whether a candidate storylet's hard_preconds are met against the current branch register.
+Per-turn deltas live in the SE record's `ops` array (the supersession events themselves: `obligation_complicate` / `obligation_pay_off` / `obligation_supersede` / `consequence_address`). The state_snapshot fields are the post-replay register at this page — what state the branch IS in, not what changed THIS turn. This is what makes snapshot-replay equality (Phase 9 gate 4) computable: replaying the parent's snapshot through this turn's structured ops yields the new cumulative-state register, not a delta. Storylet-pool-authoring's `obligation_state` predicate (per `templates/predicate-dsl.md`) reads these subset arrays as cumulative state to determine whether a candidate storylet's hard_preconds are met against the current branch register.
 
 ## Consequence Persistence
 

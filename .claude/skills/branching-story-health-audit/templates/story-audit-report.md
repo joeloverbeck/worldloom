@@ -19,6 +19,9 @@ branches_audited:
   count: 0
   leaf_ids: []                       # list of PG-NNNN leaf ids
 pages_walked: 0
+rendered_page_count: 0               # in-scope PGs with prose_status: rendered (or missing field — pre-PROSESPLIT grandfathered)
+pending_page_count: 0                # in-scope PGs with prose_status: pending; excluded from prose-coupled sub-checks
+pending_page_ids: []                 # list of PG-NNNN ids with prose_status: pending; informational only
 story_kernel_sketch_status: unchecked   # unchecked | present | missing_legacy | missing_new_bundle | malformed | drift
 story_kernel_discipline_status: unchecked # unchecked | present | missing_legacy | missing_new_bundle | incomplete | bare_pass | malformed
 finding_count_by_severity:
@@ -58,6 +61,29 @@ user_approved: true                  # always true on a written report — writt
 | WARNING | N |
 | INFO    | N |
 
+## Coverage
+
+| Metric | Value |
+|---|---|
+| Total in-scope pages | N |
+| Rendered pages | N |
+| Pending pages | N |
+
+**Pending pages** (when `pending_page_count > 0`): PG-NNNN, PG-NNNN, ...
+
+### `pending_prose_count` (informational only)
+
+When `pending_page_count > 0`, this section reproduces the load-bearing fact that `<N>` in-scope pages have `prose_status: pending` and their `pages-prose/PG-*.md` files were not read at Pre-flight. These pages were excluded from all prose-coupled sub-checks:
+
+- Phase 3 mystery-firewall-vs-prose (prose-walking sub-step only; event-walking sub-steps still ran)
+- Phase 3 prose-ledger consistency (entirely)
+- Phase 4 content-intensity drift (entirely)
+- Phase 5 similar-scene clustering (entirely)
+
+Remediation: run `branching-story-page-prose-finalize` on each listed page to bring it into prose-coupled audit coverage on the next audit run. This entry is informational, NOT severity-bearing — it does not feed the severity histogram, does not block Phase 8 remediation proposals, and does not warrant an RSP card.
+
+When `pending_page_count == 0`, record: "Coverage: <N> in-scope pages, all rendered." (For pre-PROSESPLIT bundles whose PG records lack the `prose_status` field, the audit treats them as `rendered` per the grandfather rule; the count appears under "Rendered pages" and the pending row is `0`.)
+
 ## Flagged Pages
 
 - PG-NNNN (branch <leaf-id>) — flagged at <YYYY-MM-DD or unknown>
@@ -90,7 +116,7 @@ user_approved: true                  # always true on a written report — writt
 - **Proposed remediation**: <RSP-NNNN | manual-flag | none>
 - **Prior audit reference**: <SAU-NNNN if this finding re-surfaces from an earlier audit; absent otherwise>
 
-For `prose_ledger_consistency` findings, include page id, short prose excerpt, missing or violated state anchor (`cast_present`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible world context), and recommended remediation (`manual-flag` or page-cycle re-render). When the missing or violated state anchor is `reader_known_facts`, cite the SF id and the missing/invalid `visible_to_reader` / `reader_visibility_basis` value; clean reader-known grounding requires the cited SF to be in `reader_known_facts`, carry `visible_to_reader: true`, and use a positive basis (`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or `diegetic_artifact_visible`). Grounded offstage references are not findings. Mystery-risk prose remains `mystery_firewall`, not `prose_ledger_consistency`.
+For `prose_ledger_consistency` findings, include page id, short prose excerpt, missing or violated state anchor (`cast_present`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, DA content, or POV-accessible world context), and recommended remediation (`manual-flag` or page-cycle re-render). `prose_ledger_consistency` findings fire ONLY on pages with `prose_status: rendered` (or pre-PROSESPLIT grandfathered pages with no `prose_status` field); pending pages have no prose to compare against and are excluded from this finding type entirely — they are surfaced through the informational `pending_prose_count` Coverage entry instead. When the missing or violated state anchor is `reader_known_facts`, cite the SF id and the missing/invalid `visible_to_reader` / `reader_visibility_basis` value; clean reader-known grounding requires the cited SF to be in `reader_known_facts`, carry `visible_to_reader: true`, and use a positive basis (`shown_in_pg0001`, `known_to_pov`, `dramatic_irony`, or `diegetic_artifact_visible`). Grounded offstage references are not findings. Mystery-risk prose remains `mystery_firewall`, not `prose_ledger_consistency`.
 
 For `bootstrap_rule4_sketch_integrity` findings, include `STORY_KERNEL.md`, `story_kernel_sketch_status`, compared THR/OBL ids, whether the bundle is new/uncertain or explicit legacy, and whether the finding is a new-bundle missing/malformed/drift issue or an info-only pre-`BSBOOT-007` legacy notation. Do not propose direct `STORY_KERNEL.md` mutation from the audit; remediation is manual/bootstrap review.
 

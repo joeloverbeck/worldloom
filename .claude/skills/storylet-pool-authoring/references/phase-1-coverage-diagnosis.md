@@ -1,9 +1,9 @@
 # Phase 1: Coverage Diagnosis
 
 Phase 1 scans the current storylet pool and the open story state, then emits the
-diagnosis matrix that Phase 2 uses for seed selection. SPEC-21 rebinds this
-phase from v1 per-shape thinness to v2 scene-commitment-arc thinness:
-coverage is measured by `commitment_class` and `arc_archetype`.
+diagnosis matrix that Phase 2 uses for seed selection. Coverage is measured by
+`commitment_class` and `arc_archetype` (per the SPEC-21 scene-commitment-arc
+rebind).
 
 The matrix is a planning artifact, not a canon mutation. It must surface the
 missing routes by which the pool can pay off obligations, advance active
@@ -101,8 +101,7 @@ diagnosis_matrix:
 `arc_archetype_distribution` keys must come from SPEC-22 Track 3
 `ARC_ARCHETYPES` and the local `templates/arc-archetypes.md` library.
 `commitment_class_distribution` keys must come from SPEC-22 Track 3
-`COMMITMENT_CLASSES`. Do not invent local values or preserve v1 shape buckets
-as aliases.
+`COMMITMENT_CLASSES`. Do not invent local values.
 
 ## Obligation And Thread Classification
 
@@ -141,7 +140,7 @@ seed generation, subject to the story's actual obligation and thread pressure.
 pressure and `recent_history_repetition_signal.over_represented` as suppression
 pressure.
 
-`content_intensity_distribution` preserves the v1 intensity axis. Compare the
+`content_intensity_distribution` tracks the intensity axis. Compare the
 pool against `STORY_KERNEL.content_intensity_baseline`:
 
 - `tame` baseline: aim for roughly 60 percent tame, 30 percent mature, and
@@ -216,11 +215,8 @@ diagnosis_matrix:
 ```
 
 `target_commitment_class` and `target_arc_archetype` are owned by the
-`branching-story-health-audit` RSP card schema extension in SPEC-22 Track 4.
-This Phase 1 reference consumes those fields; it does not define or migrate the
-RSP card schema. If an older historical RSP card lacks those fields, treat that
-as a pre-cutover audit artifact and stop for operator routing rather than
-guessing silently.
+`branching-story-health-audit` RSP card schema. This Phase 1 reference consumes
+those fields; it does not define or migrate the RSP card schema.
 
 Audit mode bypasses a full pool-health diagnosis unless the operator explicitly
 requests contextual review. RSP targeting already names the remediable gap; the

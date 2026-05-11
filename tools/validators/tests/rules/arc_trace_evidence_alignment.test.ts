@@ -105,6 +105,39 @@ test("arc_trace_evidence_alignment rejects stop conditions not present on the re
   assert.ok(result.some((verdict) => verdict.code === "arc_trace_evidence_alignment.unknown_stop_condition"));
 });
 
+test("arc_trace_evidence_alignment defers when referenced page has prose_status pending", async () => {
+  const records = validRecords();
+  records[1] = pageRecordWithStatus(undefined, "pending");
+
+  const result = await arcTraceEvidenceAlignment.run({}, context(records));
+
+  assert.equal(result.length, 1);
+  const verdict = result[0]!;
+  assert.equal(verdict.code, "arc_trace_evidence_alignment.deferred_prose_pending");
+  assert.equal(verdict.severity, "info");
+  assert.match(verdict.message, /DEFERRED/);
+  assert.match(verdict.message, /prose_status="pending"/);
+});
+
+test("arc_trace_evidence_alignment defers when referenced page has prose_status superseded", async () => {
+  const records = validRecords();
+  records[1] = pageRecordWithStatus(undefined, "superseded");
+
+  const result = await arcTraceEvidenceAlignment.run({}, context(records));
+
+  assert.equal(result.length, 1);
+  const verdict = result[0]!;
+  assert.equal(verdict.code, "arc_trace_evidence_alignment.deferred_prose_pending");
+  assert.equal(verdict.severity, "info");
+  assert.match(verdict.message, /prose_status="superseded"/);
+});
+
+test("arc_trace_evidence_alignment runs evidence-span validation when prose_status is absent (grandfathered)", async () => {
+  const result = await arcTraceEvidenceAlignment.run({}, context(validRecords()));
+
+  assert.deepEqual(result, []);
+});
+
 function validRecords(prose?: string) {
   return [
     traceRecord(completeTrace()),
@@ -173,6 +206,15 @@ function pageRecord(prose = "Mara accepts the repair help and smiles.") {
     id: "PG-0002",
     story_id: "STORY-001",
     prose
+  });
+}
+
+function pageRecordWithStatus(prose: string | undefined, proseStatus: string) {
+  return record("page_record", "alpha:PG-0002", "stories/alpha/_source/pages/PG-0002.yaml", {
+    id: "PG-0002",
+    story_id: "STORY-001",
+    prose: prose ?? "Mara accepts the repair help and smiles.",
+    prose_status: proseStatus
   });
 }
 

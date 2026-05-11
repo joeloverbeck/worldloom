@@ -36,7 +36,7 @@ Before any file is written, audit the draft against class-specific requirements.
 ## meta-tooling Additional Checks
 
 - [ ] Output is report-shaped (findings, severity tables, repair menus) — not canon-write-shaped.
-- [ ] Contains an explicit rule: "This skill proposes changes; it does not apply them."
+- [ ] Contains EITHER (a) an explicit rule: "This skill proposes changes; it does not apply them.", OR (b) for HARD-GATE-gated mutator skills (e.g., `skill-consolidate` in-place rewrite, `story-skill-internal-coherence` family-file correction), an explicit HARD-GATE block (or pre-write summary serving the same auditor-review function) that prevents silent application — the gate is the structural alternative to the propose-only rule.
 - [ ] If audit-class: uses severity levels (Cosmetic → Canon Break) matching FOUNDATIONS §Continuity or locally defined.
 - [ ] If the skill reads world state OR allocates monotonic IDs for output artifacts: includes a **Pre-flight Check** section before Phase 0 that loads `docs/FOUNDATIONS.md`, verifies required world files are readable, and allocates/reserves any monotonic IDs the skill emits.
 - [ ] **World-scope declaration**: same form as canon-reading §World-scope declaration above (one of {single-world, all-worlds, meta, meta-with-multi-world-read}; same single-world rooting rule and meta-with-multi-world-read sub-rules).

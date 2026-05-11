@@ -1,13 +1,12 @@
 # Phase 3: Structured Drafting
 
-Phase 3 turns each Phase 2 arc seed into a v2 `SLT-NNNN` storylet record.
+Phase 3 turns each Phase 2 arc seed into an `SLT-NNNN` storylet record.
 The LLM produces a structured arc proposal; the engine wraps that proposal with
 schema scaffolding, validates field types and Predicate DSL parsability,
 generates obligation/fact/cast-role templates from the structured proposal, and
 assigns visibility/provenance fields according to mode.
 
-The unit of authoring is a scene-commitment arc. Do not draft a single-beat v1
-storylet, and do not preserve retired v1 shape buckets as aliases.
+The unit of authoring is a scene-commitment arc.
 
 ## Inputs Consumed
 
@@ -22,7 +21,7 @@ For each candidate seed, Phase 3 consumes:
 - `templates/predicate-dsl.md`, including the stop-predicate third tier.
 - `templates/tone-theme-tag-dictionary.md`, as recommended tag vocabulary.
 - `templates/arc-archetypes.md`, excerpted by the strategy below.
-- `templates/storylet-record.yaml`, used as the v2 SLT scaffold target.
+- `templates/storylet-record.yaml`, used as the SLT scaffold target.
 
 Phase 3 must not guess missing ids. If a seed's nullable `target_obligation` or
 `target_thread` is `null`, keep it null unless the state context contains a real
@@ -40,10 +39,10 @@ content contract binds before any world, state, or drafting instruction.
 [state context - open OBLs, active THRs, mysteries_in_play, cast roster, current_location]
 [predicate DSL - including stop predicates]
 [arc archetype excerpt for this seed's arc_archetype]
-[arc template scaffold - SLT v2 with TODO markers]
+[arc template scaffold - SLT with TODO markers]
 
 INSTRUCTION:
-Fill the SLT v2 template for this arc seed. Required:
+Fill the SLT template for this arc seed. Required:
 - arc_contract (commitment_class, arc_archetype, actor, target, user_intent,
   strategic_question_answered, commitment_scope, success_policy, allowed_outcome_band)
 - dramatic_unit (scene_question, entry_pressure, value_delta_target, natural_close_definition)
@@ -55,7 +54,7 @@ Fill the SLT v2 template for this arc seed. Required:
   use closed effect-type enum; forbidden_effects enumerate what MUST NOT happen)
 - exit_portfolio.native_seeds (3-5 entries; each commitment_class + strategy_cluster +
   expected_state_delta + continuation_arc_selector)
-- legacy fields (hard_preconds, soft_preconds, cast_requirements, location_requirements,
+- eligibility/effect fields (hard_preconds, soft_preconds, cast_requirements, location_requirements,
   tone_tags, theme_tags, tension_delta, aftermath_weight, mystery_safety, provenance, visibility)
 
 Do NOT use beat headers in any prose-bearing field. Beat plans are structural; prose flows continuously.
@@ -93,12 +92,12 @@ For the selected `arc_seed.arc_archetype`, excerpt only:
 Do not paste the full 30-50 line archetype detail by default. If the LLM cannot
 complete the scaffold from the table-only excerpt plus condensed sketch, it may
 request expanded archetype detail as a follow-up retrieval; that expansion is
-out of scope for the v1 authoring pass.
+out of scope for this authoring pass.
 
 ## Structured Arc Proposal
 
 The LLM output is a structured proposal, not the persistence authority. It must
-fill every required v2 storylet block:
+fill every required storylet block:
 
 ### `arc_contract`
 
@@ -202,12 +201,11 @@ smaller runtime arc. Each native seed has:
 - `expected_state_delta`
 - `continuation_arc_selector`
 
-Runtime choice proposal scaffolding lives here under v2. It does not live in
-v1 `choice_templates`.
+Runtime choice proposal scaffolding lives here in `exit_portfolio.native_seeds`.
 
-### Legacy Fields Preserved Under v2
+### Eligibility and Effect Fields
 
-Populate these existing fields in the v2 record:
+Populate these fields in the record:
 
 - `hard_preconds`
 - `soft_preconds`
@@ -227,7 +225,7 @@ Populate these existing fields in the v2 record:
 - `provenance`
 - `visibility`
 
-Predicate-bearing legacy fields must use the Predicate DSL core or documented
+Predicate-bearing fields must use the Predicate DSL core or documented
 extension forms. The stop-predicate tier is only for `stop_policy`.
 
 ## Engine Wrapping
@@ -235,7 +233,7 @@ extension forms. The stop-predicate tier is only for `stop_policy`.
 The engine wraps the LLM output before anything is accepted as an SLT record:
 
 1. Applies `templates/storylet-record.yaml` scaffolding and verifies every
-   required v2 field is present with the correct shape.
+   required field is present with the correct shape.
 2. Validates field types, closed-enum values, and record-id or role-matcher
    shapes.
 3. Validates Predicate DSL syntax for `hard_preconds`, `soft_preconds`,
@@ -278,8 +276,8 @@ on branches where those source records exist.
 
 ## Choice Template Retirement
 
-`choice_templates` removed under v2. `templates/storylet-record.yaml` states
-that presence of `choice_templates` on a v2 SLT is HARD-REJECTed by SPEC-22's
+`choice_templates` is forbidden. `templates/storylet-record.yaml` states
+that presence of `choice_templates` on an SLT is HARD-REJECTed by SPEC-22's
 `arc_schema_compliance` validator.
 
 Do not instruct the LLM to fill `choice_templates`. Runtime choice proposal
@@ -289,7 +287,7 @@ surface consumes those native seeds alongside engine-discovered exits.
 ## Failure Handling
 
 If the LLM produces malformed output, missing fields, wrong types, free-form
-predicates, free-form stop predicates, unknown enum values, or a v1-shaped
+predicates, free-form stop predicates, unknown enum values, or a malformed
 record, the engine re-prompts with the exact failure inlined. Retry up to 2
 times for the same seed. After two failed retries, drop the seed and replace it
 with the next under-represented seed from Phase 1's diagnosis matrix.
@@ -310,7 +308,7 @@ instead of patching the Phase 3 output by guesswork.
 - `templates/tone-theme-tag-dictionary.md` supplies recommended tag vocabulary.
 - `templates/arc-archetypes.md` supplies mapping-table rows and condensed
   archetype sketches.
-- `templates/storylet-record.yaml` is the v2 SLT scaffold target.
+- `templates/storylet-record.yaml` is the SLT scaffold target.
 - SPEC-21 §C defines this Phase 3 arc-schema-fill contract.
 - SPEC-22 Track 2 owns the executable `arc_schema_compliance`,
   `stop_policy_parsability`, and `effect_model_legality` validator extensions.

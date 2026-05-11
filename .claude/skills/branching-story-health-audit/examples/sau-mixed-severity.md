@@ -20,6 +20,8 @@ branches_audited:
   count: 3
   leaf_ids: [PG-0042, PG-0047, PG-0031]
 pages_walked: 47
+story_kernel_sketch_status: present
+story_kernel_discipline_status: present
 finding_count_by_severity:
   error: 3
   warning: 4

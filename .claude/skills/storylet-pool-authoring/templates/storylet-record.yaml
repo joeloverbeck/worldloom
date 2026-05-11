@@ -1,16 +1,15 @@
-# Storylet Record — template (SLT-NNNN) — SPEC-19 SLT v2
+# Storylet Record — template (SLT-NNNN)
 #
-# Matches SPEC-19 §A: Storylet Record (SLT) v2. A v2 storylet is a
+# Matches SPEC-19 §A: Storylet Record (SLT). A storylet is a
 # scene-commitment arc, not a single beat. The required discriminants are
 # record_version: 2 and shape: scene_commitment_arc.
 #
-# DOWNSTREAM CONSUMER PARITY: v2 preserves the v1 field names read by
-# .claude/skills/branching-story-page-cycle Phase 4 selection:
+# Engine consumer (branching-story-page-cycle Phase 4 selection) reads:
 # visibility, hard_preconds, soft_preconds, mystery_safety,
-# M_resolution_claims, provenance, and content_intensity. SPEC-20 adds
-# arc-aware Phase 4 logic for the seven v2 structural blocks below.
+# M_resolution_claims, provenance, content_intensity. SPEC-20 adds
+# arc-aware Phase 4 logic for the seven structural blocks below.
 #
-# Required structural fields for v2:
+# Required structural fields:
 #   id, story_id, title, record_version, shape, content_intensity,
 #   hard_preconds, soft_preconds, cast_requirements, location_requirements,
 #   opens_obligations, pays_off_obligations, complicates_obligations,
@@ -21,18 +20,18 @@
 #   arc_contract, dramatic_unit, beat_plan, execution_envelope, stop_policy,
 #   effect_model, exit_portfolio.
 #
-# choice_templates is REMOVED under v2. Its presence on a v2 SLT is
-# HARD-REJECTed by SPEC-22's arc_schema_compliance validator; runtime choice
-# proposal scaffolding moves to exit_portfolio.native_seeds.
+# choice_templates is forbidden. Its presence on an SLT is HARD-REJECTed
+# by SPEC-22's arc_schema_compliance validator; runtime choice proposal
+# scaffolding moves to exit_portfolio.native_seeds.
 #
 # A record missing any of those violates Rule 1 (No Floating Facts) and is
 # HARD-REJECTed at Phase 4 gate 9.
 
-record_version: 2                          # v2 schema per SPEC-19 §A; legacy v1 retired
+record_version: 2                          # current schema version per SPEC-19 §A
 id: SLT-0019                               # per-story append-only; allocated via allocate_next_id(world_slug, 'SLT', story_slug=...)
-story_id: STORY-0001                       # the parent story bundle's STORY-NNN
+story_id: STORY-0001                       # the parent story bundle's STORY-NNNN
 title: ""                                  # short human label
-shape: scene_commitment_arc                # only legal value under v2 (see SPEC-19 §A); legacy enum retired
+shape: scene_commitment_arc                # only legal value (see SPEC-19 §A)
 content_intensity: mature                  # tame | mature | explicit (must be within STORY_KERNEL.content_intensity_baseline ± 1 band; gate 6)
 
 # Engine-facing structural fields — predicates per templates/predicate-dsl.md.
@@ -85,7 +84,7 @@ transfers_obligations: []                  # {from_owner, to_owner_pattern, obli
                                            # - {from_owner: role:antagonist, to_owner_pattern: role:cuadrilla_member, obligation_matcher: {type: secret, status: open}}
 
 # Fact + relationship effects (structured ops; free-form prose is gate-9 rejected).
-# Under v2, fact_effects and relationship_effects are default per-arc effect
+# fact_effects and relationship_effects are default per-arc effect
 # packages; authors may inline-promote them into a single-variant effect_model
 # if the arc has no outcome non-determinism.
 
@@ -124,11 +123,11 @@ mystery_safety:
     #   requires_canon_promotion: false    # MUST be true iff resolution_authority == canon_candidate (gate 2)
   resolution_safety_per_M: {}              # M-NNNN -> forbidden | low | medium | high — must match the M record's actual future_resolution_safety (gate 2)
 
-# choice_templates — REMOVED under v2. The runtime LLM proposer no longer reads choice scaffolds
+# choice_templates — forbidden. The runtime LLM proposer no longer reads choice scaffolds
 # from SLT records; that role moves to exit_portfolio.native_seeds (see arc_contract below).
-# Presence of choice_templates on a v2 record is HARD-REJECTed by SPEC-22's arc_schema_compliance.
+# Presence of choice_templates is HARD-REJECTed by SPEC-22's arc_schema_compliance.
 
-# Provenance — load-bearing for branch isolation + audit trail
+# Provenance — load-bearing for branch-isolation + audit trail
 
 provenance:
   origin: focus_authoring                  # bootstrap_seed | focus_authoring | audit_remediation | runtime_jit
@@ -136,7 +135,7 @@ provenance:
   source_rsp: null                         # RSP-NNNN if origin == audit_remediation, else null
   created_at_page: null                    # null for global_author_pool storylets; PG-NNNN for branch-scoped runtime-JIT storylets
 
-# Visibility — load-bearing for branch isolation (Phase 4 gate 8 + Phase 5 batch-level)
+# Visibility — load-bearing for branch-isolation (Phase 4 gate 8 + Phase 5 batch-level)
 
 visibility:
   scope: global_author_pool                # global_author_pool | branch_prefix_scoped | branch_scoped
@@ -155,7 +154,7 @@ arc_contract:                              # what the user committed to; mirrors
   strategic_question_answered: >           # what the arc answers, in scene-question form
     Free-form prose.
   commitment_scope: scene                  # scene | sequence; default: scene
-  success_policy: contested                # uncontested | contested | costly | uncertain
+  success_policy: contested                # uncontested | contested | costly | uncertain — arc-level commitment success; distinct from CHC.choice_contract.success_policy (transaction-level: guaranteed | attempted | uncertain | opposed)
   allowed_outcome_band:                    # closed enum — see canonical-vocabularies §strong_outcome
     - <strong_outcome enum value>
 
@@ -182,7 +181,7 @@ dramatic_unit:                             # why this arc is a scene-level unit
     and the next commitment hinge is exposed.
 
 beat_plan:
-  mode: ordered_soft                       # only supported value in v1; future modes may add branchy_dag
+  mode: ordered_soft                       # only supported value currently; future modes may add branchy_dag
   min_beats: <int 2..6>
   max_beats: <int 3..8>
   beats:                                   # 3-8 entries
@@ -221,7 +220,7 @@ execution_envelope:                        # what governs prose render under thi
 stop_policy:
   normal_exits:                            # any of these closes the arc cleanly
     - id: <kebab-case stop id>
-      predicate: <stop_predicate enum>     # closed enum — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
+      predicate: <stop_predicate enum>     # closed-enum predicate selector (args below are open kebab-case vocabulary) — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
       args: {}
   interrupt_before:                        # any of these interrupts the arc before completion
     - id: <kebab-case interrupt id>
@@ -232,7 +231,7 @@ stop_policy:
     max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11)
 
 effect_model:
-  selected_before_render: true             # MUST be true for v2; replay-equality contract
+  selected_before_render: true             # MUST be true; replay-equality contract
   variants:                                # 1..N rows; runtime selects ONE at Phase 4b before render
     - id: <kebab-case variant id>
       maps_to_outcome: <strong_outcome enum> # entry from arc_contract.allowed_outcome_band

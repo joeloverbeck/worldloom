@@ -16,7 +16,7 @@ consumes this card through `source_audit_path`).
 ---
 rsp_id: RSP-NNNN
 audit_id: SAU-NNNN
-story_id: STORY-NNN
+story_id: STORY-NNNN
 
 # Findings this RSP card addresses (one or more F-NN ids from the SAU report's consolidated findings list).
 finding_ids: []
@@ -28,9 +28,6 @@ target_consequence: null             # CNSQ-NNNN | null
 target_relationship: null            # SREL-NNNN | null
 target_commitment_class: null        # commitment_class enum | null
 target_arc_archetype: null           # arc_archetype enum | null
-
-# Per the SLT shape enum (storylet-pool-authoring templates/storylet-record.yaml).
-proposed_shape: entry_pressure       # entry_pressure | cast_introduction | threat_escalation | relational_dynamics | routine_disruption | aftermath_sequel | reflection_dilemma | mystery_edge_brush | fork_recovery | thread_resolution | aftermath_residue | intimacy | confrontation | other
 
 # Within STORY_KERNEL.content_intensity_baseline ± 1 band (Phase 8 Per-Card Validation test 6).
 proposed_intensity: mature           # tame | mature | explicit
@@ -49,8 +46,7 @@ sketch:
   pays_off_obligations: []           # OBL-NNNN ids matched by the OBL matcher
   opens_obligations: []              # new OBL templates the storylet would emit
   addresses_consequences: []         # CNSQ kind matchers
-  choice_templates: []               # 4-6 entries; each with operation + target_role + likely_effects + choice_mode + poetic_effect
-  sketch_arc_contract: null          # required when this RSP remediates an arc-conformance, choice-cadence, commitment-class-coverage, or v2 CHC continuation finding
+  sketch_arc_contract: null          # required when this RSP remediates an arc-conformance, choice-cadence, commitment-class-coverage, or CHC continuation finding
   sketch_dramatic_unit: null         # required when sketch_arc_contract is non-null; summarizes entry_pressure, turn, and exit pressure
 
 rationale: >

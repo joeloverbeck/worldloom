@@ -74,7 +74,7 @@ Self-narrating-self ("I noticed I was noticing", "I clocked it as I said it", "I
 
 ## 9. No ledger-jargon in prose, ever
 
-`CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `AES-N`, `ONT-N`, `DIS-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*` are engine vocabulary. They never appear in narration, dialogue, or interiority — not as labels, not as references, not as hyphenated phrasings like "the secrecy-compounding-CAU-2 register" or "the M-3 substrate".
+`CF-NNNN`, `M-N`, `CAU-N`, `SOC-N`, `AES-N`, `ONT-N`, `DIS-N`, `OBL-NNNN`, `SF-NNNN`, `STENT-NNNN`, `SE-NNNN`, `THR-NNNN`, `CHC-NNNN`, `INV-N`, `SLT-NNNN`, `STINT-NNNN`, `SREL-NNNN`, `CNSQ-NNNN`, `STLOC-NNNN`, `STOBJ-NNNN`, `DA-NNNN`, `BR-NNNN`, `PG-NNNN`, `ENT-NNNN`, `SEC-*`, `ARCTRACE-NNNN`, `SAU-NNNN`, `RSP-NNNN`, `SP-NNNN`, `SLB-NNNN`, `PA-NNNN`, `CHAR-NNNN`, `STORY-NNNN` are engine vocabulary. They never appear in narration, dialogue, or interiority — not as labels, not as references, not as hyphenated phrasings like "the secrecy-compounding-CAU-2 register" or "the M-3 substrate".
 
 The POV's interior may name a *secret*, a *taboo*, a *promise*, a *threat*, a *bruise* — never a record id. The character does not know they live inside a ledger.
 
