@@ -25,23 +25,10 @@ Convert the user's premise into a precise design brief. Required extraction:
 ## STORY_KERNEL Cadence And Menu Policy
 
 Phase 1 populates STORY_KERNEL.md with two optional per-bundle policy blocks.
-If a bundle omits either block, downstream runtime phases use the defaults
-shown here and in `templates/story-kernel.md`.
-
-```yaml
-cadence_policy:
-  max_arcs_without_menu_soft: 2
-  max_arcs_without_player_commitment_soft: 4
-  allow_continue_only_pages: true
-  force_menu_only_on_interrupt_hinge: false
-
-menu_policy:
-  min_distinct_commitments: 2
-  max_displayed_choices: 4
-  require_likely_effects: true
-  require_strong_axis_difference: true
-  require_choice_worthiness: true
-```
+If a bundle omits either block, downstream runtime phases use the default
+values shown in `templates/story-kernel.md`. The yaml shape for both blocks
+is defined in `templates/story-kernel.md` frontmatter; see that template for
+the exact default values and inline comments.
 
 `cadence_policy` controls arc-cadence pressure: how many arc-pages may pass
 before the runtime should surface a menu, whether continue-only pages are
@@ -49,9 +36,6 @@ allowed, and whether interrupt hinges always force a menu. `menu_policy`
 controls choice-surface discipline: minimum distinct commitments, displayed
 choice cap, and whether likely effects, strong-axis difference, and
 choice-worthiness blocks are mandatory.
-
-The blocks live on STORY_KERNEL.md, not on individual arcs, because they
-describe per-bundle authorial taste rather than per-arc structure.
 
 Phase 1 may derive arc-unit overrides from premise tone signals:
 
@@ -62,21 +46,14 @@ Phase 1 may derive arc-unit overrides from premise tone signals:
 - Action-oriented, chase, survival, or high-momentum premises may raise those
   values so the runtime can carry momentum across more arc-pages before
   surfacing a menu.
-- Ambiguous premises use the defaults above.
+- Ambiguous premises use the defaults shown in the template.
 
 These derivations are recommendations, not hidden engine law. Surface any
 derived override in the Phase 10 HARD-GATE summary so the user can accept,
 revise, or later edit the STORY_KERNEL block.
 
-**No word-count fields in `cadence_policy`**: pacing is deliberately expressed
-in arc-units (`max_arcs_without_menu_soft`,
-`max_arcs_without_player_commitment_soft`) rather than word-units. This honors
-Prose Craft Contract Rule 11 — length follows content, not a per-bundle word
-budget — and prevents the padding pathology that drove commit `b28aead`
-(2026-05-06) to remove word-per-page guidelines from the rendering
-instructions. The engine-side `arc.stop_policy.safety_valves.max_words`
-remains a runaway-defense termination trigger only; it is engine-internal and
-never surfaces to the LLM or to per-bundle config.
+For the structural rule (cadence is expressed in arc-units, not word-units),
+see the inline comment at `templates/story-kernel.md` line 23.
 
 ---
 
