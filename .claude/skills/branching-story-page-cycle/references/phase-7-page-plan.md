@@ -125,7 +125,7 @@ Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. U
 
 ## Emit PG-NNNN record into working buffer
 
-Page-cycle runtime PG schema. The new schema fields (per PROSESPLIT-002) carry the plan-vs-prose split:
+Page-cycle runtime PG schema. The schema fields carry the plan-vs-prose split:
 
 - **Prose plan path (always)**: `prose_plan_path: pages-prose-plans/PG-NNNN.md`.
 - **Prose path (deferred to finalize)**: `prose_path: null` at plan-commit; finalize sets this to `pages-prose/PG-NNNN.md`.

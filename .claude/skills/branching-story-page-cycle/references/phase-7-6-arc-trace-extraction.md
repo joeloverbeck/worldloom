@@ -1,8 +1,8 @@
 # Phase 7.6: ARC_TRACE Layer 1 Validation (Layer 2 / Layer 3 deferred to finalize)
 
-Phase 7.6 runs after Phase 7's plan-completeness check and before Phase 8 decides whether a choice surface is needed. Post-PROSESPLIT-007, Phase 7.6 at plan-commit runs ONLY **Layer 1 (deterministic structural validation)** over the plan's frontmatter (`declared_intended_beats[]`, `declared_stop_condition`, `forbidden_resolutions[]`, `chosen_variant_id`, `required_effects[]`) and the inlined selected-arc record. **Layer 2 (post-render trace extraction)** and **Layer 3 (semantic conformance critic)** require rendered prose to extract evidence_spans from — they are DEFERRED to `branching-story-page-prose-finalize` Phase 4.
+Phase 7.6 runs after Phase 7's plan-completeness check and before Phase 8 decides whether a choice surface is needed. Phase 7.6 at plan-commit runs ONLY **Layer 1 (deterministic structural validation)** over the plan's frontmatter (`declared_intended_beats[]`, `declared_stop_condition`, `forbidden_resolutions[]`, `chosen_variant_id`, `required_effects[]`) and the inlined selected-arc record. **Layer 2 (post-render trace extraction)** and **Layer 3 (semantic conformance critic)** require rendered prose to extract evidence_spans from — they are DEFERRED to `branching-story-page-prose-finalize` Phase 4.
 
-ARC_TRACE is a derived debugging and validation artifact. It is not replay-authoritative. Replay equality is governed by the selected arc's `effect_model.variants[]` and the chosen variant id stored on `PG.state_snapshot.applied_effect_variant`. Page-cycle no longer emits ARC_TRACE; finalize is the only emitter post-rework.
+ARC_TRACE is a derived debugging and validation artifact. It is not replay-authoritative. Replay equality is governed by the selected arc's `effect_model.variants[]` and the chosen variant id stored on `PG.state_snapshot.applied_effect_variant`. Page-cycle does not emit ARC_TRACE; finalize is the only emitter.
 
 ## Inputs (plan-commit time)
 

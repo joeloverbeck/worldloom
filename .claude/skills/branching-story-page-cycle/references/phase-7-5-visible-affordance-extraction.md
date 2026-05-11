@@ -4,7 +4,7 @@ Reference for `branching-story-page-cycle` Phase 7.5, the deterministic post-Pha
 
 This phase runs after Phase 7's plan-authoring and plan-completeness check, and before Phase 8's choice generation. It does not write to disk; the Visible Affordance Map is a memory-only working-buffer artifact consumed by Phase 8 and discarded.
 
-Post-rework, Phase 7.5 is deterministic frontmatter-readout rather than LLM prose-parsing. The plan author (LLM) declares the visible affordances explicitly in `frontmatter.declared_visible_affordances[]`; Phase 7.5 verifies each declaration resolves to a real state id or a record this turn has already planned to create. There is no parse-from-prose ambiguity to debug, and no "the prose accidentally introduced an ungrounded object" failure class at plan commit.
+Phase 7.5 is deterministic frontmatter-readout rather than LLM prose-parsing. The plan author (LLM) declares the visible affordances explicitly in `frontmatter.declared_visible_affordances[]`; Phase 7.5 verifies each declaration resolves to a real state id or a record this turn has already planned to create. There is no parse-from-prose ambiguity to debug, and no "the prose accidentally introduced an ungrounded object" failure class at plan commit.
 
 ---
 
