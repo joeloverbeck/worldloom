@@ -1,6 +1,6 @@
 # BSPAGE-004: Resolve stale SFPC-001 ticket path in `phase-4-storylet-and-mystery-authority.md`
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — documentation fix inside `.claude/skills/branching-story-page-cycle/references/`.
@@ -67,3 +67,17 @@ Per the decision in step 1:
 
 - Confirm the cited path resolves via `test -f <path>` after the edit (Option A) or that the qualifier no longer exists (Option B).
 - A future skill-audit re-running this same drift scan no longer reports the stale ticket path.
+
+## Outcome
+
+Completed on 2026-05-11. **Option B (citation removal)** was chosen after reading `archive/tickets/SFPC-001-revert-fallbacks-after-mcpenh-lands.md`, which has `Status: COMPLETED` (closed 2026-05-03). The refactor it tracked has shipped, so the "until that lands, this pause shape is the correct posture" qualifier was stale — it implied a future migration that no longer exists. The pause-and-prompt protocol described in `phase-4-storylet-and-mystery-authority.md` is now the steady-state shape, not an interim posture, so removing the qualifier is the correct cleanup.
+
+### Landed change
+
+`.claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md:89` — removed the trailing clause `A future delegation refactor is tracked at \`tickets/SFPC-001-revert-fallbacks-after-mcpenh-lands.md\`; until that lands, this pause shape is the correct posture.` The sentence now ends at `Pause-and-tell-the-user (rather than silent degrade to \`apparent\`) preserves the canon-mutation HARD-GATE invariant.`
+
+## Verification Result
+
+1. `grep -c "tickets/SFPC-001-revert-fallbacks-after-mcpenh-lands.md" .claude/skills/branching-story-page-cycle/references/phase-4-storylet-and-mystery-authority.md` returns `0` — the unresolvable `tickets/` path is gone (Acceptance Criterion 1 ✓).
+2. `grep -rn "SFPC-001" .claude/skills/branching-story-page-cycle/` returns no matches — the citation removal is local and complete; no other site references it.
+3. The remaining `SFPC-001` mentions in `docs/triage/2026-05-11-branching-story-page-cycle-audit-triage.md` refer to BSPAGE-004 itself, not to the unresolvable ticket path.
