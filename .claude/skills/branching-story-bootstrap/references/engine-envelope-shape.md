@@ -285,4 +285,4 @@ node tools/world-mcp/dist/src/cli/submit-patch-plan.js \
   /tmp/STORY-NNNN-bootstrap-<story-slug>.token
 ```
 
-The CLI submit returns the same `PatchReceipt` object as `mcp__worldloom__submit_patch_plan`: `applied_at`, `files_written[]`, `new_nodes[]`, `id_allocations_consumed`, `index_sync_duration_ms`, and `validators_run[]`. Verify the receipt before proceeding to the post-engine markdown writes (STORY_KERNEL.md, pages-prose/PG-0001.md, INDEX.md, stories/INDEX.md per Phase 11 steps 4-6).
+The CLI submit returns the same `PatchReceipt` object as `mcp__worldloom__submit_patch_plan`: `applied_at`, `files_written[]`, `new_nodes[]`, `id_allocations_consumed`, `index_sync_duration_ms`, and `validators_run[]`. Verify the receipt before proceeding to the post-engine markdown writes (STORY_KERNEL.md, pages-prose-plans/PG-0001.md, INDEX.md, stories/INDEX.md per Phase 11 steps 4-6).
