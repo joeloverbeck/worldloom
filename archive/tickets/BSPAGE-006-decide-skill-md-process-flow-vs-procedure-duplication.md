@@ -1,6 +1,7 @@
 # BSPAGE-006: Decide on `SKILL.md` Process Flow vs Procedure duplication (parity with bootstrap audit's dismissal)
 
-**Status**: PENDING
+**Status**: Closed (wontfix) — 2026-05-11
+**Resolution**: Option A (dismiss, parity with bootstrap). Parity with `docs/triage/2026-05-11-bootstrap-skill-audit-triage.md` dismissal of analogous bootstrap M3 as "cosmetic". The Process Flow diagram retains orientation value for new readers; the cost of shrinking exceeds the gain. The Procedure section remains the operational authority. No edits to `.claude/skills/branching-story-page-cycle/SKILL.md`.
 **Priority**: MEDIUM
 **Effort**: Small (if dismiss) | Medium (if shrink)
 **Engine Changes**: None — decision + optional documentation reshaping inside `.claude/skills/branching-story-page-cycle/`.
