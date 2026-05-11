@@ -28,7 +28,7 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
 
 Every field is required. `approval_token` is a placeholder string in the JSON (see §4); the real signed token is computed from the envelope bytes and passed alongside the envelope at submit time. `verdict` is `"bootstrap_accept"` for this skill (a freeform string the engine accepts; the canon-addition verdict-enum constraints do not bind story-bundle plans). `originating_skill` is `"branching-story-bootstrap"` literally.
 
-A typical bootstrap envelope contains ~75 ops (4 STENT + 19-22 SF + 1 SE + 8 OBL + 4 THR + 2 SREL + 3 STINT + 5 STLOC + 3 STOBJ + 20 SLT + 1 BR + 1 PG + 5 CHC). At ~155KB compact JSON / ~5,800 lines pretty-printed, this is structurally too large for the MCP transport's inline parameter limits — the CLI submit path (§5) is the default for bootstrap envelopes.
+A typical bootstrap envelope contains ~75-80 ops (4 STENT + 19-22 SF + 1 SE + 8 OBL + 4 THR + 2 SREL + 3 STINT + 5 STLOC + 3 STOBJ + 20 SLT + 1 BR + 1 PG + 5 CHC). At ~155KB compact JSON / ~5,800 lines pretty-printed, this is structurally too large for the MCP transport's inline parameter limits — the CLI submit path (§5) is the default for bootstrap envelopes.
 
 ---
 
@@ -285,4 +285,4 @@ node tools/world-mcp/dist/src/cli/submit-patch-plan.js \
   /tmp/STORY-NNNN-bootstrap-<story-slug>.token
 ```
 
-The CLI submit returns the same `PatchReceipt` object as `mcp__worldloom__submit_patch_plan`: `applied_at`, `files_written[]`, `new_nodes[]`, `id_allocations_consumed`, `index_sync_duration_ms`, and `validators_run[]`. Verify the receipt before proceeding to the post-engine markdown writes (STORY_KERNEL.md, pages-prose/PG-0001.md, INDEX.md, stories/INDEX.md per Phase 11 steps 4-6).
+The CLI submit returns the same `PatchReceipt` object as `mcp__worldloom__submit_patch_plan`: `applied_at`, `files_written[]`, `new_nodes[]`, `id_allocations_consumed`, `index_sync_duration_ms`, and `validators_run[]`. Verify the receipt before proceeding to the post-engine markdown writes (STORY_KERNEL.md, pages-prose-plans/PG-0001.md, INDEX.md, stories/INDEX.md per Phase 11 steps 4-6).
