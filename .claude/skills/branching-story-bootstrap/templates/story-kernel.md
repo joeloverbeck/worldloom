@@ -89,12 +89,14 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_09_storylet_commitment_class_diversity: "PASS — <one-line rationale>"
   gate_10_prose_ledger_consistency: "PASS — <one-line rationale>"
   gate_11_choice_consequence_capacity: "PASS — <one-line rationale>"
-  gate_12_state_snapshot_completeness: "PASS — <one-line rationale>"
-  gate_13_arc_envelope_conformance: "PASS — PG-0001 root special case; no arc selected"
-  gate_14_effect_model_replay_safety: "PASS — PG-0001 root special case; applied_effect_variant is null"
-  gate_15_arc_trace_evidence_alignment: "PASS — PG-0001 root special case; no ARC_TRACE emitted"
-  gate_16_narrative_point_classification: "PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE"
-  gate_17_choice_worthiness_completeness: "PASS — <one-line rationale>"
+  gate_12_recursive_reference_closure: "PASS — <one-line rationale>"
+  gate_13_state_snapshot_integrity: "PASS — <one-line rationale>"
+  gate_14_arc_envelope_conformance: "PASS — PG-0001 root special case; no arc selected"
+  gate_15_effect_model_replay_safety: "PASS — PG-0001 root special case; applied_effect_variant is null"
+  gate_16_arc_trace_evidence_alignment: "PASS — PG-0001 root special case; no ARC_TRACE emitted"
+  gate_17_narrative_point_classification: "PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE"
+  gate_18_choice_worthiness_completeness: "PASS — <one-line rationale>"
+  gate_19_plan_completeness_check: "PASS — <one-line rationale>"
 
 discipline_validation_trace:             # populated by Phase 9.5 — every discipline check one-line PASS rationale
   discipline_check_01_choice_contract_completeness: "PASS — <one-line rationale>"
@@ -107,6 +109,7 @@ discipline_validation_trace:             # populated by Phase 9.5 — every disc
   discipline_check_08_obl_coverage_cache_schema: "PASS — <one-line rationale>"
   discipline_check_09_se0001_genesis_discipline: "PASS — <one-line rationale>"
   discipline_check_10_pg0001_state_snapshot_field_keys: "PASS — <one-line rationale>"
+  discipline_check_11_plan_self_containment: "PASS — <one-line rationale>"
 
 storylet_pool_summary:                   # populated by Phase 6
   # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
@@ -215,12 +218,14 @@ expressed in arc-units only; do not add word-count fields to `cadence_policy`.
 1. **Mystery firewall (gate 1)**: PASS — <rationale>
 2. **Invariant compatibility (gate 2)**: PASS — <rationale>
 3. ...
-12. **State_snapshot completeness (gate 12)**: PASS — <rationale>
-13. **Arc envelope conformance (gate 13)**: PASS — PG-0001 root special case; no arc selected
-14. **Effect model replay safety (gate 14)**: PASS — PG-0001 root special case; applied_effect_variant is null
-15. **Arc trace evidence alignment (gate 15)**: PASS — PG-0001 root special case; no ARC_TRACE emitted
-16. **Narrative point classification (gate 16)**: PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE
-17. **Choice worthiness completeness (gate 17)**: PASS — <rationale>
+12. **Recursive reference closure (gate 12)**: PASS — <rationale>
+13. **State_snapshot integrity (gate 13)**: PASS — <rationale>
+14. **Arc envelope conformance (gate 14)**: PASS — PG-0001 root special case; no arc selected
+15. **Effect model replay safety (gate 15)**: PASS — PG-0001 root special case; applied_effect_variant is null
+16. **Arc trace evidence alignment (gate 16)**: PASS — PG-0001 root special case; no ARC_TRACE emitted
+17. **Narrative point classification (gate 17)**: PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE
+18. **Choice worthiness completeness (gate 18)**: PASS — <rationale>
+19. **Plan completeness check (gate 19)**: PASS — <rationale>
 
 ## Discipline Validation Trace
 
@@ -230,3 +235,4 @@ expressed in arc-units only; do not add word-count fields to `cadence_policy`.
 2. **STENT role_in_story enum (discipline check 2)**: PASS — <rationale>
 3. ...
 10. **PG-0001 state_snapshot field-key completeness (discipline check 10)**: PASS — <rationale>
+11. **Plan self containment (discipline check 11)**: PASS — <rationale>
