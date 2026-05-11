@@ -327,7 +327,13 @@ state_snapshot:
   arc_trace_id: null                     # PG-0001 emits no ARC_TRACE (no arc); phase-9-validation-gates.md gate 15 root-special-case
   arc_trace_emitted: false               # paired with arc_trace_id: null at PG-0001
 
-prose_path: pages-prose/PG-0001.md
+prose_plan_path: pages-prose-plans/PG-0001.md  # always present after bundle commit; bootstrap writes this file at Phase 11 step 4
+prose_path: null                         # null at bundle commit (no rendered prose yet); populated by branching-story-page-prose-finalize when the user supplies pages-prose/PG-0001.md; pattern after finalize: pages-prose/PG-NNNN.md
+prose_status: pending                    # pending | rendered | superseded — default pending at bundle commit; flips to rendered by branching-story-page-prose-finalize; flips to superseded only if a subsequent re-render via finalize replaces a prior rendered prose file
+deferred_validation_trace:               # three keys REQUIRED; each DEFERRED at bundle commit; PASS/FAIL after finalize Phase 5
+  prose_ledger_consistency: "DEFERRED — awaiting prose render"
+  arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"   # at PG-0001 root this gate also AUTO-PASSes on validation_trace (no arc selected); deferred_validation_trace still records the DEFERRED placeholder until finalize runs
+  prose_critic_8_axis: "DEFERRED — awaiting prose render"
 emitted_choices: []                      # CHC ids — populated at Phase 8
 
 narrative_health:
