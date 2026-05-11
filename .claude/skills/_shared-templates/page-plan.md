@@ -189,7 +189,7 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 
 ## §18 Scene direction
 
-<!-- AUTHOR-WRITTEN, not record-inlined. Five fields:
+<!-- AUTHOR-WRITTEN, not record-inlined. Six fields:
 
 ENTRY PRESSURE: <one-paragraph framing of what the scene opens with>
 

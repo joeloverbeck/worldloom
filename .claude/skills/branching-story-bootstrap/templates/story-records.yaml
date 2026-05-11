@@ -382,8 +382,8 @@ created_at_page: PG-0001
 
 operation: investigate                   # canonical verb from Phase 8 affordance vocabulary
 actor: STENT-0001
-target: STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract
-uses_fact: SF-NNNN | null
+target: STENT-NNNN                        # STENT-NNNN | STOBJ-NNNN | STLOC-NNNN | abstract
+uses_fact: null                           # SF-NNNN | null
 
 choice_contract:
   user_intent: >
