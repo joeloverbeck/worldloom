@@ -58,6 +58,15 @@
 - **Phase 5 diversity audit (mode-appropriate axes)**: PASS — `<one-line rationale>`
 - **Phase 5 batch-level branch-contamination**: PASS — `<one-line rationale>`
 
+## Authoring warnings
+
+`<authoring_warnings[] entries from Pre-flight, one per line; empty when no warnings fired>`
+
+Example entries:
+- `storylet_pool_authoring_warning: zero rendered pages available along longest active branch_path; falling back to STORY_KERNEL.md only. Authored storylets may benefit from re-evaluation once early pages are finalized.`
+
+(Empty section recorded as "No authoring warnings this batch." — never silently omitted; absence and "0 warnings" are different epistemic states.)
+
 ## Notes
 
 `<free-form rationale for this batch's selection — what gap it filled, what tradeoffs were made, what was deferred to a future invocation>`

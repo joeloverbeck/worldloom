@@ -70,7 +70,11 @@ Pre-flight (resolve worlds/<world-slug>/stories/<story-slug>/;
             load current storylet pool filtered by visibility;
             load open OBLs + active THRs from this bundle's _source/;
             load recent page history — last ~10 pages along the longest
-            active branch_path only, not sibling branches;
+            active branch_path only, not sibling branches, FILTERED to
+            pages with prose_status: rendered (treat missing field as
+            rendered for pre-PROSESPLIT grandfathered bundles); if zero
+            rendered pages exist, fall back to STORY_KERNEL.md alone and
+            record the authoring_warning in the SLB manifest;
             assemble retrieval — context_packet for premise-relevant
             world canon via task_type='storylet_pool_authoring' +
             whole-class M + INV record loads;
