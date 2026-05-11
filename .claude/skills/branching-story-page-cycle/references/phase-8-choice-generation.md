@@ -140,7 +140,7 @@ until the menu's strong-axis union has size at least `2`.
 
 The strong-axis check protects commitment-level difference: the menu must not ask
 the user to choose among labels that all produce the same strong-axis future. (An
-8-axis pair-distance check on `(operation, actor, target)` etc. is retained as
+8-CHC-field pair-distance check on `(operation, actor, target)` etc. is retained as
 defense-in-depth in `branching-story-health-audit` SAU §Choice Pair-Distance Integrity,
 but the strong-axis collective-difference check above is the runtime authority.)
 

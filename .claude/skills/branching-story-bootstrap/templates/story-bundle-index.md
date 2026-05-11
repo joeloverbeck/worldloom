@@ -33,7 +33,7 @@ storylet pool commitment_class distribution.
 
 | M | Resolution safety | Touched at |
 |---|---|---|
-| M-N | low / medium / high / forbidden | declared at bootstrap |
+| M-NNNN | low / medium / high / forbidden | declared at bootstrap |
 
 ## Storylet pool
 

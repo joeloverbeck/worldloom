@@ -21,6 +21,10 @@ This skill's outputs are story-bundle records and a markdown manifest. None are 
 - **Tone/theme tag dictionary** (recommended-but-non-binding tag vocabulary) → `templates/tone-theme-tag-dictionary.md`. Documents recommended tag families (POV register, emotional charge, structural beat, class/cultural, and others) for `tone_tags` and `theme_tags` to converge cross-batch tag analysis across the pool's lifetime. Free-form tags remain allowed; the dictionary is guidance, not gate enforcement. Inlined into Phase 3's LLM prompt as a recommended vocabulary alongside the predicate DSL grammar.
 - **Content policy block** (NC-21 verbatim) → `templates/content-policy.txt`. Embedded into every Phase 3 LLM prompt as the FIRST block. Phase 6 deliverable surfaces it via the validation verdicts. Reuses the same content as `branching-story-bootstrap/templates/content-policy.txt` and `branching-story-page-cycle/templates/content-policy.txt` — single source of truth per skill, copied (not symlinked) so each skill remains self-contained.
 
+### Field Naming Disambiguation: `success_policy`
+
+`SLT.arc_contract.success_policy` is the commitment-level enum: `{uncontested, contested, costly, uncertain}`. This is distinct from `CHC.choice_contract.success_policy`, which is the transaction-level enum: `{guaranteed, attempted, uncertain, opposed}`. The shared value `uncertain` means different things at the two scopes — at arc scope, "the commitment's outcome cannot be guaranteed"; at choice scope, "the transaction may not resolve as proposed". Cross-emission (e.g., emitting `attempted` as an SLT `arc_contract.success_policy` value, or `costly` as a CHC `choice_contract.success_policy` value) is invalid record content; the validators' `record_schema_compliance` check catches this at submit time. The inline cross-disambiguation comment in `templates/storylet-record.yaml` echoes this constraint at the schema-template level. See also `branching-story-page-cycle/references/record-schemas.md` §Field Naming Disambiguations for the parallel CHC-side note.
+
 ## FOUNDATIONS Alignment
 
 | Principle | Phase / Mechanism | Notes |

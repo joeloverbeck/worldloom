@@ -190,6 +190,19 @@ Every `choice_kind: scene_commitment` CHC must carry a populated `choice_worthin
 
 `scene_commitment` is the default for LLM proposers. `tactical_beat` is reserved for structurally narrow cases such as a terminal-branch acknowledgment. Per SPEC-20 Phase 8, a menu's CHCs must collectively differ on at least two strong axes; this section documents only the per-CHC contract.
 
+## Field Naming Disambiguations
+
+### `success_policy` — two distinct enums
+
+Two records carry a field named `success_policy` with non-overlapping enum values:
+
+- **`CHC.choice_contract.success_policy`** (transaction-level — choice scope): enum `{guaranteed, attempted, uncertain, opposed}`. Captures whether the player's intent in choosing this option is mechanically guaranteed to land, attempted with possible failure, uncertain, or opposed by the world.
+- **`SLT.arc_contract.success_policy`** (commitment-level — arc scope): enum `{uncontested, contested, costly, uncertain}` (per `storylet-pool-authoring/templates/storylet-record.yaml`). Captures the contract under which the storylet's commitment is offered — uncontested guarantee, contested with opposition, costly even on success, or uncertain outcome.
+
+The shared value `uncertain` is intentional and means different things at the two scopes: at choice scope, "the transaction may not resolve as proposed"; at arc scope, "the commitment's outcome at the arc level cannot be guaranteed". An operator authoring CHC records MUST use the four-value transaction-level enum; an operator authoring SLT records MUST use the four-value commitment-level enum. Cross-emission (e.g., emitting `attempted` as an SLT `arc_contract.success_policy` value, or `costly` as a CHC `choice_contract.success_policy` value) is invalid record content; the validators' `record_schema_compliance` check catches this at submit time.
+
+Inline cross-disambiguation comments at `branching-story-bootstrap/templates/story-records.yaml` (CHC schema) and `storylet-pool-authoring/templates/storylet-record.yaml` (SLT schema) carry the same warning at the schema-template authoring surface; the parallel authoring-side note lives in `storylet-pool-authoring/references/governance-and-foundations.md` §Field Naming Disambiguation.
+
 ## ARC_TRACE Record (story-bundle-scoped)
 
 ARC_TRACE is a derived post-render trace extracted by SPEC-20 Phase 7.6. It is non-authoritative for replay: replay equality is preserved by `effect_model.variants[]` determinism on the parent SLT record plus the chosen variant id recorded in `PG.state_snapshot.applied_effect_variant`. ARC_TRACE records may be deleted, regenerated, or omitted in low-cost runtime modes without breaking replay.

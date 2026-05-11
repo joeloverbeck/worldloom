@@ -2,10 +2,35 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-page.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": ["id", "story_id", "prose_plan_path", "prose_status", "deferred_validation_trace"],
   "properties": {
     "id": { "type": "string", "pattern": "^PG-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "prose_path": {
+      "type": ["string", "null"],
+      "pattern": "^pages-prose/PG-[0-9]{4}\\.md$",
+      "description": "Relative path to rendered prose; null when prose_status != 'rendered'."
+    },
+    "prose_plan_path": {
+      "type": "string",
+      "pattern": "^pages-prose-plans/PG-[0-9]{4}\\.md$",
+      "description": "Relative path to the comprehensive plan; always present after this rework."
+    },
+    "prose_status": {
+      "enum": ["pending", "rendered", "superseded"],
+      "description": "Transitional state field; pending at bundle commit, rendered after finalize."
+    },
+    "deferred_validation_trace": {
+      "type": "object",
+      "required": ["prose_ledger_consistency", "arc_trace_evidence_alignment", "prose_critic_8_axis"],
+      "properties": {
+        "prose_ledger_consistency": { "type": "string" },
+        "arc_trace_evidence_alignment": { "type": "string" },
+        "prose_critic_8_axis": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "description": "Per-gate verdicts; DEFERRED string at plan-commit; PASS/FAIL string after finalize."
+    }
   },
   "additionalProperties": true
 }

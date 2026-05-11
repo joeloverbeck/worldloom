@@ -58,7 +58,7 @@ arguments:
 Bootstraps a new branching story bundle inside an existing worldloom world from a user premise + a selected cast + tone and content constraints, producing a fully initialized story directory with causal-engine ledgers, a rendered root page (PG-0001), 4-6 initial choices, and a scale-aware seed storylet pool.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for all 17 gates (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, commitment_class storylet diversity, prose ledger consistency, choice consequence-capacity, state_snapshot completeness + recursive reference closure, arc_envelope_conformance, effect_model_replay_safety, arc_trace_evidence_alignment, narrative_point_classification, choice_worthiness_completeness), AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale; (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
+Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for all 18 gates (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, commitment_class storylet diversity, prose ledger consistency, choice consequence-capacity, recursive reference closure, state_snapshot integrity, arc_envelope_conformance, effect_model_replay_safety, arc_trace_evidence_alignment, narrative_point_classification, choice_worthiness_completeness; at PG-0001 root, gates 14/15/16 auto-PASS as root-special-case per references/phase-9-validation-gates.md), AND Phase 9.5's 10 discipline checks record PASS with a one-line rationale; (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, opening prose preview, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
 </HARD-GATE>
 
 ## Process Flow
@@ -151,11 +151,13 @@ Phase 9: Validation Gates             (17 gates — see HARD-GATE; each PASS
                                        to responsible phase)
       |
       v
-Phase 9.5: Bootstrap Discipline       (10 soft-required-field checks
-           Validator                    outside the FOUNDATIONS-anchored
-                                        17-gate set; PASS-with-rationale
-                                        into discipline_validation_trace;
-                                        FAIL routes to responsible phase)
+Phase 9.5: Bootstrap Discipline       (10 Phase 9.5 discipline checks
+           Validator                    outside the Phase 9 18-gate set
+                                        (gates 1-13 FOUNDATIONS-anchored,
+                                        gates 14-18 SPEC-20/22-anchored);
+                                        PASS-with-rationale into
+                                        discipline_validation_trace; FAIL
+                                        routes to responsible phase)
       |
       v
 Phase 10: HARD-GATE Approval          (deliverable summary: designing
@@ -199,11 +201,11 @@ worlds/<world-slug>/stories/<story-slug>/
 │   ├── consequences/         ← CNSQ-NNNN.yaml (NOT emitted at default bootstrap; .gitkeep preserves directory; runtime page-cycle JIT-creates)
 │   ├── threads/              ← THR-NNNN.yaml
 │   ├── relationships/        ← SREL-NNNN.yaml
-│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `stent_id` field, with `world_character_id` as the optional world CHAR anchor; legacy bundles may contain suffixed-id files like `STINT-0001-iker.yaml` predating this convention — those remain valid only for those bundles, new bundles MUST use bare-numeric ids per the engine regex)
+│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `stent_id` field, with `world_character_id` as the optional world CHAR anchor; legacy bundles may contain suffixed-id files like `STINT-0001-iker.yaml` predating this convention — those remain valid only for those bundles, new bundles MUST use bare-numeric ids per the engine regex; see branching-story-page-cycle/references/record-schemas.md for full STINT id-discipline contract)
 │   ├── storylets/            ← SLT-NNNN.yaml (provenance.origin=bootstrap_seed)
 │   ├── locations/            ← STLOC-NNNN.yaml
-│   ├── objects/              ← STOBJ-NNNN.yaml
-│   ├── artifacts/            ← DA-NNNN.yaml (story-local; distinct from world DA)
+│   ├── objects/              ← STOBJ-NNNN.yaml (NOT emitted at default bootstrap unless premise establishes a pre-PG-0001 STOBJ; .gitkeep preserves directory; runtime page-cycle JIT-creates)
+│   ├── artifacts/            ← DA-NNNN.yaml (story-local; distinct from world DA; NOT emitted at default bootstrap unless premise establishes a pre-PG-0001 DA; .gitkeep preserves directory; runtime page-cycle JIT-creates)
 │   ├── branches/             ← BR-0001.yaml
 │   ├── pages/                ← PG-0001.yaml
 │   └── choices/              ← CHC-NNNN.yaml
@@ -216,7 +218,7 @@ worlds/<world-slug>/stories/<story-slug>/
 `worlds/<world-slug>/stories/INDEX.md` — created on first invocation per world; appended/replaced thereafter. One line per story bundle in the form:
 
 ```
-- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-N, M-N | execution_mode: <mode> | created: <iso8601>
+- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-NNNN, M-NNNN | execution_mode: <mode> | created: <iso8601>
 ```
 
 ### No canon-file mutations
@@ -312,7 +314,7 @@ Directory setup plus a patch-engine transaction for atomic YAML records, followe
 5. `Write worlds/<world-slug>/stories/<story-slug>/INDEX.md` (per-bundle index — branches / leaves / threads / mysteries / commitment_class distribution; template at `templates/story-bundle-index.md`).
 6. **Per-world index** at `worlds/<world-slug>/stories/INDEX.md`:
    - If file does not exist: create with header `# Stories — <World-Slug-TitleCased>` followed by one blank line, then the story line.
-   - If file exists: read; append the new story's line in the format `- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-N, M-N | execution_mode: <mode> | created: <iso8601>`; re-sort alphabetically by `STORY-NNNN`; write back via direct `Edit`.
+   - If file exists: read; append the new story's line in the format `- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-NNNN, M-NNNN | execution_mode: <mode> | created: <iso8601>`; re-sort alphabetically by `STORY-NNNN`; write back via direct `Edit`.
    - `worlds/<world-slug>/stories/INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Write` / `Edit`.
 
 Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. `STORY_KERNEL.md`, page prose, per-bundle `INDEX.md`, and `stories/INDEX.md` remain direct markdown writes.

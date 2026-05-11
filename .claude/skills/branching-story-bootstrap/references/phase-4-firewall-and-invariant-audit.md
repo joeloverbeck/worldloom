@@ -30,3 +30,9 @@ Run premise + cast + imported initial SFs + sketched initial threads/obligations
 ---
 
 **Output to STORY_KERNEL.md**: `mysteries_in_play[]` populated; `invariants_acknowledged[]` populated (cite the INV ids the story will respect — anchors later validation); `audited_thread_obligation_sketch` populated for the required Phase 5-vs-Phase 4 divergence check on new bootstrap runs.
+
+---
+
+## Rule 11 delegation note
+
+Rule 11 (No Spectator Castes by Accident) is NOT enforced at this Phase 4 firewall — it is delegated to Phase 6 storylet-pool-authoring's per-SLT gate 14 (see `storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` gate 14). The trigger fires when an SLT's `effect_model.variants[].required_effects[]` includes a `fact_create` op with `args.truth_scope.world_level == true` AND `args.exception_governance` populated. Bootstrap Phase 4 audits premise / cast / threads / obligations against INV `break_conditions`; per-SLT Rule 11 leverage runs downstream when the seed pool is generated.
