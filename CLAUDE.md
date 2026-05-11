@@ -49,7 +49,16 @@ worlds/<world-slug>/             ← generated world bundles (contents gitignore
   ├── diegetic-artifacts/        ← DA-NNNN hybrid files + INDEX.md
   ├── proposals/                 ← PR-NNNN proposal cards + batches/BATCH-NNNN manifests
   ├── audits/                    ← AU-NNNN audit reports + retcon-proposal sub-dirs
-  └── adjudications/             ← PA-NNNN-<verdict>.md canon-addition records
+  ├── adjudications/             ← PA-NNNN-<verdict>.md canon-addition records
+  └── stories/<story-slug>/      ← branching-story bundles (per-bundle layout below)
+       ├── STORY_KERNEL.md        ← primary-authored narrative root for the bundle
+       ├── _source/               ← atomic-YAML story-bundle records (15 subdirs: STENT/SF/SE/OBL/CNSQ/THR/SREL/STINT/STLOC/STOBJ/SLT/PG/CHC/BR + arc-traces/)
+       ├── pages-prose-plans/     ← comprehensive prose plans; written by bootstrap/page-cycle
+       ├── pages-prose/           ← rendered prose; supplied externally (manual or LLM); merged via branching-story-page-prose-finalize
+       ├── storylet-batches/      ← SLB-NNNN batch manifests
+       ├── story-promotions/      ← SP-NNNN promotion ledgers + proposal-package sidecars
+       ├── audits/                ← SAU-NNNN health-audit reports + remediation-storylet-proposal sub-dirs
+       └── INDEX.md
 archive/                         ← superseded brainstorming docs and plans
 ```
 
@@ -69,6 +78,12 @@ Skills divide into three categories, and these distinctions are load-bearing.
 - `propose-new-canon-facts` — writes `proposals/PR-NNNN-*.md` + `proposals/batches/BATCH-NNNN.md` + updates `proposals/INDEX.md`. Each card's path is directly consumable as `canon-addition`'s `proposal_path`.
 - `canon-facts-from-diegetic-artifacts` — same output surface, but mines an existing diegetic artifact. Enforces a Diegetic-to-World laundering firewall; contradictions with existing canon are segregated and handed off to `continuity-audit`, not emitted as cards.
 - `continuity-audit` — writes `audits/AU-NNNN-<date>.md` + optional `audits/AU-NNNN/retcon-proposals/RP-NNNN-*.md` + updates `audits/INDEX.md`.
+- `branching-story-bootstrap` — writes a story bundle at `stories/<story-slug>/` (STORY_KERNEL.md + atomic-YAML `_source/` ledgers + a comprehensive prose plan for PG-0001 at `pages-prose-plans/PG-0001.md` and its first 4-6 generated choices + a seed storylet pool). Rendered prose is supplied externally and merged via `branching-story-page-prose-finalize`.
+- `branching-story-page-cycle` — given a parent page and either a chosen `CHC-NNNN` or a free-form write-in, executes the runtime causal-promise engine to author the comprehensive prose plan for the next page at `pages-prose-plans/PG-NNNN.md` (alongside the per-turn PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records). Rendered prose is supplied externally and merged via `branching-story-page-prose-finalize`.
+- `branching-story-page-prose-finalize` — converges a `pages-prose-plans/PG-NNNN.md` plan and a user-supplied `pages-prose/PG-NNNN.md` rendered prose file. Runs deferred prose-coupled validators (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`), extracts ARC_TRACE if the page has a selected arc, updates the PG record's `prose_status` to `rendered`, emits a `prose_finalized` SE event, and emits `ARCTRACE-NNNN` if applicable. Does NOT write `pages-prose/PG-NNNN.md` (user supplies it). Does NOT route to `story-fact-promotion-to-canon`.
+- `storylet-pool-authoring` — authors or expands the storylet reservoir of a story bundle (seed / focus / jit / audit modes); writes `_source/storylets/SLT-NNNN.yaml` records + `storylet-batches/SLB-NNNN.md` manifests + INDEX summary edits.
+- `branching-story-health-audit` — writes `stories/<story-slug>/audits/SAU-NNNN-<date>.md` + optional `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md` (directly consumable by `storylet-pool-authoring` audit-mode).
+- `story-fact-promotion-to-canon` — the only lawful story-to-world canon-promotion path; writes `story-promotions/SP-NNNN.md` + proposal-package sidecar, then hands the proposal package to `canon-addition` (which assembles and submits the actual CF/CH/PA world-canon patch plan under its own HARD-GATE).
 
 **Meta** (operate on the pipeline, not on worlds):
 - `brainstorm` — confidence-driven interview producing a design doc at `docs/plans/`.
@@ -126,5 +141,6 @@ See `docs/WORKFLOWS.md` for how to invoke each skill with arguments and expected
 - **Never delete or overwrite an existing atomic record.** `_source/*.yaml` files are append-only in structural fields (mutation happens in `notes`, `modification_history[]`, `extensions[]`); existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal + retcon attestation on the patch op.
 - **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding. Post-SPEC-13, FOUNDATIONS.md §Canonical Storage Layer + §Mandatory World Files (atomic-source classification) are authoritative alongside Rules 1-7 and the CF schema.
 - **Validation test PASS entries require a one-line rationale.** A bare "PASS" without justification is treated as FAIL per the skills' own contracts.
+- **Prose pages are author-supplied.** `branching-story-bootstrap` and `branching-story-page-cycle` produce comprehensive plans at `pages-prose-plans/PG-NNNN.md`; rendered prose at `pages-prose/PG-NNNN.md` is supplied externally (manual or OpenRouter LLM) and merged via `branching-story-page-prose-finalize`. Page-cycle pre-flight aborts when the parent page's `prose_status != "rendered"` to ensure plan §14 (Recent prose continuity) can inline rendered context. Authoring becomes serialized: bootstrap-plan → finalize → page-cycle-plan → finalize → ...
 - **Do not `git commit` from inside a skill.** Writes land in the working tree; the user reviews the diff and commits.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.

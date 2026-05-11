@@ -2,6 +2,8 @@
 
 Every canon-mutating or content-generating skill in `.claude/skills/` begins with a `<HARD-GATE>` block. These gates are **absolute under Auto Mode**. Invoking a skill is not approval of its deliverable.
 
+The story-bundle family — `branching-story-bootstrap`, `branching-story-page-cycle`, `storylet-pool-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `branching-story-page-prose-finalize` — all carry HARD-GATE blocks. `branching-story-page-prose-finalize`'s gate is per-execution-mode liftable in the same shape as `branching-story-page-cycle`'s Phase 10 gate (`authoring` shows; `interactive_runtime` and `batch_generation` auto-commit after gates pass). Note that finalize does NOT trigger the Phase 4.5 canon-promotion handoff — finalize never promotes story facts to world canon; that route remains exclusive to `story-fact-promotion-to-canon` under its own HARD-GATE.
+
 ## Execution pattern
 
 1. **Pre-flight check** — verify prerequisites, allocate IDs, load required world state (current Kernel + Invariants + relevant CF records + affected domain files + open contradictions + mystery reserve entries).

@@ -385,6 +385,8 @@ No fact may exist without:
 - limits
 - consequences
 
+A plan IS load-bearing engine output. The story-pipeline `pages-prose-plans/PG-NNNN.md` artifact is consumed by Phase 7.5 declared-affordance validation, Phase 9 `plan_completeness_check`, Phase 9.5 `plan_self_containment`, and `branching-story-page-prose-finalize` Phase 1 plan/prose pairing. Producing a plan without yet-rendered prose satisfies Rule 1, because the plan's frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]` with explicit consequences and prerequisites — the rule's grounding requirements apply to the plan as engine artifact independent of whether prose has yet been rendered.
+
 ### Rule 2: No Pure Cosmetics
 No species, ritual, technology, artifact, or institution may be added as surface flavor only.
 It must change at least one of:
@@ -424,6 +426,12 @@ All canon changes must be logged with justification.
 ### Rule 7: Preserve Mystery Deliberately
 Unknowns must be chosen, bounded, and tracked.
 They must not be side effects of weak design memory.
+
+**Firewall split for the plan + finalize pipeline.** Mystery firewall enforcement now runs at two times:
+- Plan-time: deterministic check that no plan section asserts a `forbidden_resolution` (the plan's frontmatter `forbidden_resolutions[]` enumerates which `M-NNNN` must NOT be resolved by the rendered prose).
+- Finalize-time: deterministic regex over rendered prose for forbidden-mystery-resolution patterns + LLM critic (`branching-story-page-prose-finalize` Phase 3) for prose-level firewall breaches.
+
+Both gates remain mandatory. Forbidden-status `M` is NEVER resolved at either gate.
 
 ### Rule 11: No Spectator Castes by Accident
 When a canon fact introduces or depends on exceptional capability, it must name at least three forms of leverage that remain available to ordinary or mid-tier actors.
@@ -545,7 +553,9 @@ World canon read by story-pipeline skills still routes through `mcp__worldloom__
 
 Story-bundle `_source/<class>/*.yaml` writes use Shape B: they route through `mcp__worldloom__submit_patch_plan` with story-bundle record ops such as `create_slt_record`, `create_pg_record`, and `append_story_diegetic_artifact_record`. PEENH-001 landed this migration from the earlier Shape A direct-write posture.
 
-Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. Story-bundle markdown surfaces remain direct-write surfaces: `STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `audits/`, `storylet-batches/`, `story-promotions/`, and remediation proposal cards are not atomic `_source/*.yaml` records. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
+Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. Story-bundle markdown surfaces remain direct-write surfaces: `STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, and remediation proposal cards are not atomic `_source/*.yaml` records. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
+
+**Pipeline shape: plan + finalize.** The story-bundle pipeline produces a comprehensive prose plan at bundle commit (`pages-prose-plans/PG-NNNN.md`); rendered prose is supplied externally and merged via `branching-story-page-prose-finalize`. The plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`; its body inlines all canonical context the external renderer needs. Rendered prose is the authorial artifact; finalize is the convergence point that runs prose-coupled validators (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) and emits the ARC_TRACE record. Authoring serializes per page: bootstrap-plan or page-cycle-plan → external prose render → finalize → next plan. World-canon mutation remains exclusive to `story-fact-promotion-to-canon`; finalize does not promote.
 
 ### 5. Validation Rules At Story Scope
 
