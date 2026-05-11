@@ -72,6 +72,19 @@ function validateTrace(
     return;
   }
 
+  const parsedPage = asPlainRecord(page.parsed);
+  const proseStatus = stringValue(parsedPage.prose_status) ?? "rendered";
+  if (proseStatus !== "rendered") {
+    verdicts.push({
+      validator: VALIDATOR,
+      severity: "info",
+      code: "arc_trace_evidence_alignment.deferred_prose_pending",
+      message: `DEFERRED — referenced page ${pageId} has prose_status="${proseStatus}"; rule re-runs at finalize when prose is rendered`,
+      location: locationFor(trace)
+    });
+    return;
+  }
+
   const prose = proseForPage(page, input, ctx);
   if (prose === undefined) {
     addFailure(verdicts, trace, "arc_trace_evidence_alignment.missing_page_prose", `${traceId} cannot verify evidence spans because ${pageId} prose is unavailable`, "created_at_page");
