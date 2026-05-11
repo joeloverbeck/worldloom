@@ -61,7 +61,7 @@ JIT generation is not free — it expands the engine prompt budget and may produ
 
 ## Phase 4b: Effect-Variant Selection Before Render
 
-After Phase 4 selects arc `SLT-NNNN`, select exactly one row from `arc.effect_model.variants[]` before Phase 7 prose render fires.
+After Phase 4 selects arc `SLT-NNNN`, select exactly one row from `arc.effect_model.variants[]` before Phase 7 plan authoring fires.
 
 1. **Variant filtering.** Drop variants whose `forbidden_effects[]` would violate the current `state_snapshot`, the world's whole-class INV records, or the world's `forbidden`-status Mystery Reserve preservation discipline. A variant whose `required_effects[]` would require a forbidden mystery resolution is also ineligible.
 2. **Probability-weighted pick.** Among surviving variants, weighted-pick by `variant.probability_weight`. Use the page's `weighted_pick_seed` advanced by one deterministic tick after the Phase 4 arc pick. When only one variant survives, that variant is selected and the seed advancement is still recorded for replay auditability.
