@@ -53,89 +53,48 @@ frontmatter + markdown body file that the external prose renderer will later
 read in its entirety to produce pages-prose/PG-0001.md.
 
 Frontmatter shape (root case):
-- plan_id: PG-0001
-- story_id: STORY-<allocated>
-- world_slug / story_slug from arguments
+The frontmatter required keys and their shapes are documented at
+.claude/skills/_shared-templates/page-plan.md (frontmatter block). At the
+bootstrap PG-0001 root case, populate the frontmatter exactly as the
+canonical template specifies, with these root-case-specific values:
+- selected_arc_id: null
+- chosen_variant_id: null
+- required_effects: []
 - parent_page_id: null
 - branch_id: BR-0001
 - branch_path: [PG-0001]
-- state_hash_at_plan_time: <PG-0001.state_hash from the working buffer>
-- canon_revision_at_plan_time: <PG-0001.state_snapshot.canon_revision>
-- prose_status: pending
-- plan_authored_at: <iso8601 now>
-- plan_authored_by: branching-story-bootstrap
-- selected_arc_id: null            # ROOT CASE — no SLT realized at PG-0001
-- chosen_variant_id: null          # ROOT CASE — no variant chosen
-- required_effects: []             # empty array at root
-- declared_visible_affordances: [...]  # one entry per visually salient
-                                        # element the plan intends the prose
-                                        # to anchor on; each entry MUST carry
-                                        # affordance_text, affordance_type,
-                                        # mapped_state_id, grounding_source
-                                        # — see Phase 7.5 for the validator
-- declared_intended_beats: [...]
-- declared_stop_condition: { exit_class, exit_signal }
-- forbidden_resolutions: [<every M-NNNN in mysteries_in_play[] whose
-                            future_resolution_safety == forbidden>, ...]
-- forbidden_engine_vocabulary: <full list per the template>
-- deferred_validation_trace:
-    prose_ledger_consistency: "DEFERRED — awaiting prose render"
-    arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"
-    prose_critic_8_axis: "DEFERRED — awaiting prose render"
+- state_hash_at_plan_time: bootstrap-pg0001-state-<story-slug>-v1
+- forbidden_resolutions[]: <every M-NNNN in mysteries_in_play[] whose
+  future_resolution_safety == forbidden>
+- deferred_validation_trace: all three keys (prose_ledger_consistency,
+  arc_trace_evidence_alignment, prose_critic_8_axis) set to
+  "DEFERRED — awaiting prose render"
 
 Body shape (root case):
-- §1 How to use this plan — verbatim from template
-- §2 Content Policy — inline content_policy block verbatim
-- §3 Prose Craft Contract — inline prose-craft-contract.md verbatim
-- §4 Story kernel context — inline premise + designing_principle + tone +
-     central dramatic question + content_intensity_baseline + POV +
-     language_register from STORY_KERNEL
-- §5 World canon snapshot — inline every CF touching cast/location/period
-     as full record body (statement + level + mode + scope +
-     invariants_supported). Do NOT emit bare CF-NNNN references.
-- §6 World invariants in play — inline every INV referenced by an active
-     OBL/THR/STINT, with full break_conditions[].
-- §7 Mysteries in play (firewall posture) — inline every M-NNNN with status
-     and forbidden_resolutions[]; mark which the renderer MUST NOT resolve.
-- §8 Cast in this scene — for each STENT in cast_present, inline:
-     world CHAR dossier verbatim (when world_character_id set) →
-     story-local STENT record → current STINT (goals/fears/beliefs/
-     emotional_state/current_pressure) → relevant SREL records.
-- §9 Story-local facts visible — inline every SF in state_snapshot filtered
-     by POV-accessibility, with epistemic_class, certainty, known_by[],
-     derived_from_cf if applicable.
-- §10 Open obligations — inline every OBL in obligations_open with salience,
-     urgency, owner, payoff_modes[], decay_rate.
-- §11 Active threads — inline every THR in threads_active with status,
-     current_pressure, type.
-- §12 Pending consequences — at PG-0001 root the consequences ledger is
-     freshly initialized; this section reads "(no pending consequences;
-     bootstrap genesis state)" unless premise establishes a pre-PG-0001
-     CNSQ.
-- §13 Locations & objects in scope — inline current_location,
-     accessible_locations, objects_in_scope, inventory_by_entity with
-     STLOC and STOBJ records inlined verbatim.
-- §14 Recent prose continuity — at PG-0001 root there is no parent prose;
-     this section reads "(no prior prose; this is the root page)".
-- §15 Selected scene-commitment arc — OMITTED at PG-0001 root.
-- §15-alt Entry pressure framing — inline STORY_KERNEL.central_dramatic_question
-     + Phase 5 initial obligations + Phase 5 initial threads + Phase 4
-     mysteries_in_play + summary of seed-pool's available commitment_class[]
-     affordances (without selecting one SLT).
-- §16 Chosen variant — OMITTED at PG-0001 root.
-- §17 Governor nudge — "bootstrap root; no prior-page governor" (one short
-     paragraph).
-- §18 Scene direction — AUTHOR-WRITTEN five fields:
-     ENTRY PRESSURE / SCENE QUESTION / VALUE DELTA TARGET / REQUIRED TURN /
-     STOPPING POINT / DO NOT REVEAL (the M-NNNN forbidden list and the
-     engine-vocabulary tokens list from frontmatter).
-- §19 Render-time instruction block — inline verbatim from
-     reports/prose-quality-instructions.md §3.
+The body sections §1 through §19 are documented at
+.claude/skills/_shared-templates/page-plan.md (markdown body). At the
+bootstrap PG-0001 root case, populate every section per the canonical
+template, with the following root-case deviations:
+- §12 Pending consequences: at PG-0001 root the consequences ledger is
+  freshly initialized; populate with "(no pending consequences; bootstrap
+  genesis state)" unless premise establishes a pre-PG-0001 CNSQ.
+- §14 Recent prose continuity: at PG-0001 root there is no parent prose;
+  populate with "(no prior prose; this is the root page)".
+- §15 Selected scene-commitment arc: OMITTED at PG-0001 root.
+- §15-alt Entry pressure framing: PRESENT at PG-0001 root, replacing both
+  §15 and §16. Inline STORY_KERNEL.central_dramatic_question + Phase 5
+  initial obligations + Phase 5 initial threads + Phase 4 mysteries_in_play
+  + summary of seed-pool's available commitment_class[] affordances
+  (without selecting one SLT).
+- §16 Chosen variant: OMITTED at PG-0001 root.
+- §17 Governor nudge: at PG-0001 root, populate with "bootstrap root; no
+  prior-page governor".
 
 Every record id referenced in any plan section MUST be inlined verbatim in
-that section. Bare CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are
-plan-completeness failures (Phase 9 gate 19) and plan_self_containment
-failures (Phase 9.5 check 11).
+that section, per the canonical template's "Authoring rule" comment. Bare
+CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are plan-completeness
+failures (Phase 9 gate 19) and plan_self_containment failures (Phase 9.5
+check 11).
 ```
 
 LLM produces the populated plan body. Engine writes the populated plan to a working buffer (NOT to disk yet — disk write happens at Phase 11's staged commit: the engine YAML transaction writes `_source/<class>/*.yaml` records, and sequenced markdown writes handle `STORY_KERNEL.md`, `pages-prose-plans/PG-0001.md`, and per-bundle `INDEX.md`). **The 8-axis prose critic does not run at this phase** — there is no rendered prose to critique at plan-commit. The critic moves to `branching-story-page-prose-finalize` Phase 3, where it runs against the user-supplied rendered prose at `pages-prose/PG-0001.md`.
@@ -227,7 +186,7 @@ Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story
 
 ## Cross-references
 
-- Canonical plan template: `.claude/skills/_shared-templates/page-plan.md`
+- Canonical plan template (`.claude/skills/_shared-templates/page-plan.md`) — single source of truth for §1-§19 body and frontmatter shape; this reference describes the bootstrap PG-0001 root-case delta only.
 - Declared-affordance validator (Phase 7.5): `references/phase-7-5-visible-affordance-extraction.md`
 - Phase 9 gate table (including DEFERRED rows and new `plan_completeness_check`): `references/phase-9-validation-gates.md`
 - Phase 9.5 discipline checks (including new `plan_self_containment`): `references/phase-9-5-bootstrap-discipline-validator.md`
