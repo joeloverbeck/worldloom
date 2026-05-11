@@ -46,7 +46,10 @@ async function stageUpdate(
     throw fieldPathError(op.op, targetRecordId, fieldPath);
   }
 
-  if (!isFreelyAppendable(fieldPath, op.payload.operation)) {
+  if (
+    !isFreelyAppendable(fieldPath, op.payload.operation) &&
+    !isProseFinalizeTransition(fieldPath, op.payload.operation)
+  ) {
     const attestation = op.retcon_attestation ?? op.payload.retcon_attestation;
     validateRetconAttestation(op.op, targetRecordId, fieldPath, attestation);
   }
@@ -136,6 +139,29 @@ function isFreelyAppendableList(fieldPath: string[]): boolean {
     fieldPath[0] === "extensions" ||
     fieldPath[0] === "touched_by_cf"
   );
+}
+
+function isProseFinalizeTransition(
+  fieldPath: string[],
+  operation: "set" | "append_list" | "append_text"
+): boolean {
+  if (operation !== "set") {
+    return false;
+  }
+  if (fieldPath.length === 1) {
+    return fieldPath[0] === "prose_path" || fieldPath[0] === "prose_status";
+  }
+  if (fieldPath.length === 2 && fieldPath[0] === "state_snapshot") {
+    return fieldPath[1] === "arc_trace_emitted" || fieldPath[1] === "arc_trace_id";
+  }
+  if (fieldPath.length === 2 && fieldPath[0] === "deferred_validation_trace") {
+    return (
+      fieldPath[1] === "prose_ledger_consistency" ||
+      fieldPath[1] === "arc_trace_evidence_alignment" ||
+      fieldPath[1] === "prose_critic_8_axis"
+    );
+  }
+  return false;
 }
 
 function isFreelyAppendable(
