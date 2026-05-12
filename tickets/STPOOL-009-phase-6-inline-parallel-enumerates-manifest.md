@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: None — SKILL.md edit only.
-**Deps**: STPOOL-006 (the immediate F-05 correctness fix should land first; this ticket addresses the architectural drift hazard that F-05 materialized).
+**Deps**: archive/tickets/STPOOL-006-phase-6-rejected-candidates-off-by-5.md (the immediate F-05 correctness fix has landed; this ticket addresses the architectural drift hazard that F-05 materialized).
 
 ## Problem
 
@@ -35,7 +35,7 @@ This was uncovered by storylet-pool-authoring streamlining audit 2026-05-12 find
 ## Verification Layers
 
 1. **Alignment markers present** — both `SKILL.md:277-325` and `templates/storylet-batch-manifest.md` carry inline notes naming the other surface as the alignment partner.
-2. **No structural divergence** — the rejection-categories enumeration, diversity-axis names, per-storylet column order, and validation-verdict line order match across the two surfaces. (STPOOL-006 lands the rejection-categories alignment as the immediate fix.)
+2. **No structural divergence** — the rejection-categories enumeration, diversity-axis names, per-storylet column order, and validation-verdict line order match across the two surfaces. (STPOOL-006 landed the rejection-categories alignment as the immediate fix.)
 3. **Reader experience preserved** — a user reading SKILL.md without opening the manifest template can still understand what the HARD-GATE summary contains.
 
 ## What to Change
@@ -80,7 +80,7 @@ This optional compression is out of scope for this ticket unless the operator de
 
 1. `grep -n "templates/storylet-batch-manifest.md" .claude/skills/storylet-pool-authoring/SKILL.md` shows the cross-citation in the Phase 6 section.
 2. `grep -n "SKILL.md.*Phase 6" .claude/skills/storylet-pool-authoring/templates/storylet-batch-manifest.md` shows the reciprocal cross-citation.
-3. After STPOOL-006 lands, the rejection-categories enumeration matches between SKILL.md:304-318 (14 rows) and the manifest (14 rows).
+3. The rejection-categories enumeration matches between SKILL.md:304-318 (14 rows) and the manifest (14 rows), as landed by `archive/tickets/STPOOL-006-phase-6-rejected-candidates-off-by-5.md`.
 
 ### Invariants
 

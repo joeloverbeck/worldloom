@@ -311,6 +311,11 @@ REJECTED CANDIDATES (info):
 - <count> predicate-DSL rejects
 - <count> branch-contamination rejects
 - <count> schema-completeness drops (after 2 revise retries)
+- <count> arc-envelope-conformance rejects
+- <count> stop-policy-parsability rejects
+- <count> effect-model-legality rejects
+- <count> exit-portfolio-completeness rejects
+- <count> Rule 11 spectator-caste leverage rejects
 
 VALIDATION VERDICTS:
 - Phase 4 per-storylet (14 gates × N storylets): PASS — <one-line rationale>
