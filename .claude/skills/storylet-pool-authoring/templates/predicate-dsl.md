@@ -1,12 +1,12 @@
 # Predicate DSL — Storylet Pool Authoring
 
-Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, choice-template preconditions, and `arc.stop_policy.*.predicate` entries all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, invariant-compatibility, and SPEC-20 Phase 7.6 stop-condition checks consume these predicates. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
+Storylet `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, choice-template preconditions, and `arc.stop_policy.*.predicate` entries all depend on engine-checkable predicates. The runtime `branching-story-page-cycle`'s choice-validation, consequence-capacity, invariant-compatibility, and SPEC-20 Phase 7.6 Layer 1 stop-condition declaration checks consume these predicates at plan-commit; `branching-story-page-prose-finalize` Phase 4 consumes them for rendered-prose stop-condition evidence and semantic conformance. Free-form prose predicates make the engine LLM-dependent for what should be deterministic — the DSL closes the grammar.
 
 The DSL has three tiers:
 
 1. **Core forms** — the original eleven `pred` types used for storylet eligibility.
 2. **Documented extensions** — additional eligibility forms used by the bootstrap-seed pool and supported by the runtime page-cycle's Phase 4 selection.
-3. **Stop predicates** — SPEC-19 `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate` forms evaluated by the SPEC-20 Phase 7.6 stop-condition evaluator.
+3. **Stop predicates** — SPEC-19 `arc.stop_policy.normal_exits[].predicate` and `arc.stop_policy.interrupt_before[].predicate` forms checked structurally by SPEC-20 Phase 7.6 Layer 1 at plan-commit and evaluated semantically by `branching-story-page-prose-finalize` Phase 4 against rendered prose.
 
 All tiers are part of the documented DSL grammar; LLM proposers MAY use the tier appropriate to the field they are filling, but they may NOT invent new `pred` types beyond what this document enumerates. Extending the DSL further is an authorial change to this document, not a runtime act.
 
@@ -133,7 +133,7 @@ Stop predicates are used only at these SLT sites:
 
 - `arc.stop_policy.normal_exits[].predicate`
 - `arc.stop_policy.interrupt_before[].predicate`
-- the runtime page-cycle's SPEC-20 Phase 7.6 stop-condition evaluator
+- lifecycle consumption: `branching-story-page-cycle` Phase 7.6 runs Layer 1 deterministic stop-condition declaration checking at plan-commit; `branching-story-page-prose-finalize` Phase 4 runs Layer 2/3 semantic stop-condition evaluation against rendered prose. Both consume the predicates declared on the SLT.
 
 They do not replace or broaden eligibility predicates in `hard_preconds`, `soft_preconds`, `cast_requirements`, `location_requirements`, or choice-template preconditions. Stop predicates evaluate against story state, the selected commitment, the arc-local trace, mystery safety, the effect model, and participant/location changes. Those surfaces are not consulted by the eligibility-tier predicates above.
 
@@ -229,7 +229,7 @@ Semantic glosses:
 - `irreversible_cost_imminent`: interrupts before the next beat would impose an irreversible cost of the named class.
 - `consent_boundary_imminent`: interrupts before the next beat would cross a consent boundary.
 - `violence_or_harm_imminent`: interrupts before the next beat would bring violence or harm to the target.
-- `forbidden_mystery_resolution_risk`: interrupts before the render risks resolving the named `M-NNNN`. This is a structural Mystery Reserve firewall mechanism per FOUNDATIONS Story Bundles Rule 7; Phase 7.6 routes the page-cycle to `revise_prose` or `reject_arc` rather than letting an MR-forbidden answer leak into prose.
+- `forbidden_mystery_resolution_risk`: interrupts before the render risks resolving the named `M-NNNN`. This is a structural Mystery Reserve firewall mechanism per FOUNDATIONS Story Bundles Rule 7; Phase 7.6 checks the declared stop-condition shape at plan-commit, while finalize Phase 4/5 routes rendered-prose trace failures to `revise_prose` or `reject_arc` rather than letting an MR-forbidden answer leak into prose.
 - `protagonist_goal_change_required`: interrupts when continuing would require changing the protagonist's named open-vocab goal.
 - `selected_commitment_would_be_violated`: interrupts when the only continuation would violate the named commitment class.
 - `user_write_in_conflicts_with_envelope`: interrupts when a user write-in conflicts with a named execution-envelope field.
@@ -237,12 +237,12 @@ Semantic glosses:
 
 ### Safety-valve thresholds (`stop_policy.safety_valves`)
 
-Safety valves are inline thresholds, not DSL predicates. They are documented here for stop-policy completeness but are evaluated by the runtime stop-condition evaluator without parsing through the predicate-DSL grammar.
+Safety valves are inline thresholds, not DSL predicates. They are documented here for stop-policy completeness but are evaluated by the runtime lifecycle without parsing through the predicate-DSL grammar.
 
 - `max_internal_beats_reached` — fires when the prose render's beat count exceeds `arc.beat_plan.max_beats`. Default upper bound: 6 per SPEC-19 §A.
 - `max_words_reached` — fires when the prose render exceeds `arc.stop_policy.safety_valves.max_words`. Default: 2200 per SPEC-19 §A; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11).
 - `no_valid_continuation_after_effect` — fires when applying the selected `effect_variant` leaves no eligible continuation arc and no valid JIT spec. Phase 3 continuation feasibility is owned by SPEC-20.
-- `validation_confidence_low` — fires when the SPEC-20 Phase 7.6 Layer 3 semantic critic returns confidence below a per-execution-mode threshold.
+- `validation_confidence_low` — fires when `branching-story-page-prose-finalize` Phase 4 Layer 3 semantic critic returns confidence below a per-execution-mode threshold.
 
 ## Validation Rules
 
