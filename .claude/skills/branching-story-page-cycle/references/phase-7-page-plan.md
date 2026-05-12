@@ -133,8 +133,9 @@ Phase 7's post-LLM check is structural, not stylistic:
   mystery is a re-prompt to remove the body entry while preserving the
   frontmatter `forbidden_resolutions[]` list.
 - `deferred_validation_trace` has all three required keys (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) set to DEFERRED strings.
+- `cast_material_reality_consistency` scans each `frontmatter.declared_visible_affordances[]` entry mapped to a `STENT-NNNN` cast member and each §8 cast-block "Current intentions" paragraph for that same STENT. It uses the closed vocabulary at `.claude/skills/_shared-templates/clothing-consistency-vocabulary.md`; detected garment-kind tokens must be grounded in the cast member's projected `body.Material Reality` clothing / possessions summary, and detected posture tokens must not contradict the projected physical condition. FAIL re-prompts Phase 7 with the offending affordance or intention prose, the matched token, and the exact Material Reality summary inlined as correction context.
 
-Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.
+Any missing/malformed section or cast Material Reality contradiction fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.
 
 ---
 
@@ -157,7 +158,7 @@ All other PG fields (identity / branch wiring, storylet_realized, applied_event_
 - Canonical plan template (`.claude/skills/_shared-templates/page-plan.md`) — single source of truth for §1-§19 body and frontmatter shape; this reference describes the page-cycle selected-arc-case delta only.
 - Declared-affordance validator (Phase 7.5): `references/phase-7-5-visible-affordance-extraction.md`
 - ARC_TRACE Layer 1 only at plan-commit (Phase 7.6): `references/phase-7-6-arc-trace-extraction.md`
-- Phase 9 gate table (including DEFERRED rows and `plan_completeness_check`): `references/phase-9-validation-gates.md`
+- Phase 9 gate table (including DEFERRED rows, `plan_completeness_check`, and `cast_material_reality_consistency`): `references/phase-9-validation-gates.md`
 - §14 hard pre-flight block (parent.prose_status check): `references/pre-flight-and-prerequisites.md`
 - Convergence point — rendered prose validators + ARC_TRACE Layer 2/3 extraction + PG.prose_status flip: `.claude/skills/branching-story-page-prose-finalize/SKILL.md`
 - 8-axis prose critic (moved out of Phase 7): `.claude/skills/branching-story-page-prose-finalize/references/phase-3-prose-critic.md`

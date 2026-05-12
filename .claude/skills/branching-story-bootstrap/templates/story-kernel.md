@@ -97,6 +97,7 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_17_narrative_point_classification: "PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE"
   gate_18_choice_worthiness_completeness: "PASS — <one-line rationale>"
   gate_19_plan_completeness_check: "PASS — <one-line rationale>"
+  gate_20_cast_material_reality_consistency: "PASS — <one-line rationale>"
 
 discipline_validation_trace:             # populated by Phase 9.5 — every discipline check one-line PASS rationale
   discipline_check_01_choice_contract_completeness: "PASS — <one-line rationale>"
@@ -231,6 +232,7 @@ expressed in arc-units only; do not add word-count fields to `cadence_policy`.
 17. **Narrative point classification (gate 17)**: PASS — PG-0001 defaults to NATURAL_COMMITMENT_HINGE
 18. **Choice worthiness completeness (gate 18)**: PASS — <rationale>
 19. **Plan completeness check (gate 19)**: PASS — <rationale>
+20. **Cast Material Reality consistency (gate 20)**: PASS — <rationale>
 
 ## Discipline Validation Trace
 

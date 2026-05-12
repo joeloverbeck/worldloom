@@ -125,8 +125,9 @@ Phase 7's post-LLM check is structural, not stylistic:
   mystery is a re-prompt to remove the body entry while preserving the
   frontmatter `forbidden_resolutions[]` list.
 - `deferred_validation_trace` has all three required keys (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) set to DEFERRED strings.
+- `cast_material_reality_consistency` scans each `frontmatter.declared_visible_affordances[]` entry mapped to a `STENT-NNNN` cast member and each §8 cast-block "Current intentions" paragraph for that same STENT. It uses the closed vocabulary at `.claude/skills/_shared-templates/clothing-consistency-vocabulary.md`; detected garment-kind tokens must be grounded in the cast member's projected `body.Material Reality` clothing / possessions summary, and detected posture tokens must not contradict the projected physical condition. FAIL re-prompts Phase 7 with the offending affordance or intention prose, the matched token, and the exact Material Reality summary inlined as correction context.
 
-Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.
+Any missing/malformed section or cast Material Reality contradiction fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.
 
 ---
 
@@ -143,13 +144,13 @@ Page-cycle-compatible schema; `branching-story-page-cycle` §Record Schemas §Pa
 - **Prose status (transitional state)**: `prose_status: pending` (default at bundle commit; flips to `rendered` after `branching-story-page-prose-finalize` runs).
 - **state_snapshot**: `canon_revision`, `objective_facts`, `apparent_facts`, `disputed_facts`, `reader_known_facts`, `belief_state_by_actor`, `rumor_state`, `obligations_open`, `obligations_paid_off: []`, `obligations_complicated: []`, `obligations_abandoned: []`, `consequences_pending`, `consequences_addressed: []`, `threads_active`, `relationships_current`, `intentions_current`, `cast_present`, `current_location`, `accessible_locations`, `objects_in_scope`, `inventory_by_entity`, `entity_status`, `applied_effect_variant: null`, `narrative_point_classification: NATURAL_COMMITMENT_HINGE`, `arc_trace_id: null`, `arc_trace_emitted: false`.
 - **narrative_health**: `open_obligation_count`, `high_salience_unpaid_count`, `average_obligation_age: 0`, `contradiction_risk: 0.0`, `causal_connectivity: 1.0`, `character_motivation_coverage`, `unresolved_threat_pressure`, `recent_consequence_density: 0.0`, `recent_reflection_density: 0.0`, `novelty: 1.0`, `tension`, `agency_score: 1.0`.
-- **Governor / content / trace / timestamps**: `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (18 PG-record keys total — 12 non-scene-commitment plus 5 scene-commitment validator keys plus the new `plan_completeness_check` key; see §Phase 9 dual-validation-trace mapping below), `deferred_validation_trace` (three keys, all DEFERRED at bundle commit; PASS/FAIL after finalize runs), `created_at`.
+- **Governor / content / trace / timestamps**: `governor_nudge_applied: "bootstrap root; no prior-page governor"`, `content_intensity`, `validation_trace` (19 PG-record keys total — 12 non-scene-commitment plus 5 scene-commitment validator keys plus `plan_completeness_check` and `cast_material_reality_consistency`; see §Phase 9 dual-validation-trace mapping below), `deferred_validation_trace` (three keys, all DEFERRED at bundle commit; PASS/FAIL after finalize runs), `created_at`.
 
 ---
 
 ## Phase 9 dual-validation-trace mapping
 
-Phase 9's 19 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (bootstrap-time record). PG-0001's `validation_trace` uses the page-cycle's PG-record keys so PG-0001 conforms to runtime-page schema for `branching-story-page-cycle` consumption. PG-0001's `deferred_validation_trace` carries the three deferred-gate strings, both at bundle commit (DEFERRED) and after finalize (PASS/FAIL).
+Phase 9's 20 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (bootstrap-time record). PG-0001's `validation_trace` uses the page-cycle's PG-record keys so PG-0001 conforms to runtime-page schema for `branching-story-page-cycle` consumption. PG-0001's `deferred_validation_trace` carries the three deferred-gate strings, both at bundle commit (DEFERRED) and after finalize (PASS/FAIL).
 
 **Direct overlap (8 mappings, covering 9 PG-record keys; gate 12 jointly maps to recursive_reference_closure + state_snapshot_integrity)**:
 - `mystery_firewall` ↔ gate 1
@@ -179,8 +180,9 @@ Phase 9's 19 gates record on `STORY_KERNEL.md.frontmatter.validation_trace` (boo
 - `narrative_point_classification`: PASS — PG-0001 defaults to `NATURAL_COMMITMENT_HINGE`.
 - `choice_worthiness_completeness`: PASS — every emitted PG-0001 CHC passes Phase 8 choice-worthiness validation.
 
-**New plan-time gate (1)**:
+**New plan-time gates (2)**:
 - `plan_completeness_check`: PASS — every required plan section populated; every inlined record id resolves; frontmatter fields well-formed.
+- `cast_material_reality_consistency`: PASS — no garment-kind tokens detected in declared affordances / §8 intentions, or every detected token is grounded in the mapped cast member's projected Material Reality; posture tokens do not contradict projected condition.
 
 ---
 
@@ -202,7 +204,7 @@ Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story
 
 - Canonical plan template (`.claude/skills/_shared-templates/page-plan.md`) — single source of truth for §1-§19 body and frontmatter shape; this reference describes the bootstrap PG-0001 root-case delta only.
 - Declared-affordance validator (Phase 7.5): `references/phase-7-5-visible-affordance-extraction.md`
-- Phase 9 gate table (including DEFERRED rows and new `plan_completeness_check`): `references/phase-9-validation-gates.md`
+- Phase 9 gate table (including DEFERRED rows, `plan_completeness_check`, and `cast_material_reality_consistency`): `references/phase-9-validation-gates.md`
 - Phase 9.5 discipline checks (including new `plan_self_containment`): `references/phase-9-5-bootstrap-discipline-validator.md`
 - Convergence point — rendered prose validators + ARC_TRACE extraction + PG.prose_status flip: `.claude/skills/branching-story-page-prose-finalize/SKILL.md`
 - Render-time instruction block (inlined verbatim into plan §19): `reports/prose-quality-instructions.md` §"Render-Time Instruction Template"

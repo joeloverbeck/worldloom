@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — adds authoring discipline to `storylet-pool-authoring` (skill prose + template); no validator or tool change. Reaches into the page-plan failure chain because storylet `notes:` is inlined verbatim into the page plan body §15 and into Phase 7 LLM prompt assembly as scene-direction context.
-**Deps**: None directly. Pairs with PPLAN-003 (the deterministic clothing-consistency check) which catches the symptom when this discipline lapses; pairs with PPLAN-005 (§15 schema-to-prose translation) which is the consuming surface.
+**Deps**: None directly. Pairs with `archive/tickets/PPLAN-003-clothing-consistency-check.md` (the completed deterministic clothing-consistency check) which catches the symptom when this discipline lapses; pairs with PPLAN-005 (§15 schema-to-prose translation) which is the consuming surface.
 
 ## Problem
 
@@ -31,8 +31,8 @@ The storylet template (`.claude/skills/storylet-pool-authoring/templates/storyle
 
 ## Architecture Check
 
-1. The discipline is documentary (skill prose + template comment update). No code change. Detection-side support is PPLAN-003's deterministic gate. Storylet-author discipline + page-plan-time deterministic gate is the two-layer defense.
-2. No backwards-compatibility shims. Existing storylets are not re-authored; the discipline applies to new storylets authored after the rule lands. Existing storylets that carry character-specific gestural anchors continue to validate; PPLAN-003 catches the propagation at page-plan time.
+1. The discipline is documentary (skill prose + template comment update). No code change. Detection-side support is the completed deterministic gate in `archive/tickets/PPLAN-003-clothing-consistency-check.md`. Storylet-author discipline + page-plan-time deterministic gate is the two-layer defense.
+2. No backwards-compatibility shims. Existing storylets are not re-authored; the discipline applies to new storylets authored after the rule lands. Existing storylets that carry character-specific gestural anchors continue to validate; archived PPLAN-003 catches the propagation at page-plan time.
 3. Alternative considered and rejected: making the `notes:` field a structured schema (e.g., separate `tone_intent`, `gesture_examples`, `mystery_edge_notes` keys). This is over-engineering; the free-form notes shape is valuable for human authorial voice and the constraint can be expressed as a one-paragraph authoring rule.
 
 ## Verification Layers
@@ -40,7 +40,7 @@ The storylet template (`.claude/skills/storylet-pool-authoring/templates/storyle
 1. **Storylet template's `notes:` comment names the discipline** → codebase grep-proof: `grep -n 'character-agnostic\|cast-bound\|cast-locked' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` returns hits in the `notes:` field's leading comment.
 2. **Phase 3 structured-drafting reference documents the discipline as a checklist item** → codebase grep-proof: `grep -n 'gestural\|body language\|clothing' .claude/skills/storylet-pool-authoring/references/phase-3-structured-drafting.md` returns the new discipline paragraph.
 3. **Skill dry-run on seed authoring** → re-run `storylet-pool-authoring` seed mode for a hypothetical new story bundle and confirm the generated storylet `notes:` fields use character-agnostic body language by default (e.g., "a small motion to cover the bruise" not "pulls her sleeve down").
-4. **Historical audit pointer**: SLT-0012 of `worlds/erotica-world/stories/red-bunny` is the named historical case; the ticket does NOT re-author it, but does note that PPLAN-003's deterministic gate is the runtime catch for already-authored cases.
+4. **Historical audit pointer**: SLT-0012 of `worlds/erotica-world/stories/red-bunny` is the named historical case; the ticket does NOT re-author it, but does note that archived PPLAN-003's deterministic gate is the runtime catch for already-authored cases.
 
 ## What to Change
 
@@ -89,7 +89,7 @@ In the relevant phase-flow summary (around line 270-280, near the validate / sub
 ## Out of Scope
 
 - Re-authoring SLT-0012 or any other existing storylet to retroactively comply. The discipline applies to storylets authored after this ticket lands.
-- Adding a runtime gate at storylet submission. The discipline is authoring-time; runtime defense is PPLAN-003's clothing-consistency check at the consuming page-plan layer.
+- Adding a runtime gate at storylet submission. The discipline is authoring-time; runtime defense is archived PPLAN-003's clothing-consistency check at the consuming page-plan layer.
 - Cast-agnostic / cast-locked storylet visibility-flag changes. Existing `visibility.scope` and `visibility.allowed_branch_ids` semantics are unchanged.
 
 ## Acceptance Criteria
@@ -98,7 +98,7 @@ In the relevant phase-flow summary (around line 270-280, near the validate / sub
 
 1. `grep -n 'character-agnostic\|cast-locked\|sleeve' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` returns hits in the `notes:` comment block.
 2. `grep -n 'Body-language and clothing discipline' .claude/skills/storylet-pool-authoring/references/phase-3-structured-drafting.md` returns the new section header.
-3. `grep -n 'clothing-consistency-vocabulary' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` returns the new cross-reference to PPLAN-003's wordlist.
+3. `grep -n 'clothing-consistency-vocabulary' .claude/skills/storylet-pool-authoring/references/phase-4-5-canon-safety-checks.md` returns the new cross-reference to archived PPLAN-003's wordlist.
 4. Skill dry-run: re-author a small seed storylet pool for a hypothetical story bundle; the generated `notes:` content uses cast-agnostic body language by default.
 
 ### Invariants
@@ -110,7 +110,7 @@ In the relevant phase-flow summary (around line 270-280, near the validate / sub
 
 ### New/Modified Tests
 
-1. None — documentation-only ticket. The discipline is enforced at authoring discretion + PPLAN-003 runtime gate.
+1. None — documentation-only ticket. The discipline is enforced at authoring discretion + archived PPLAN-003 runtime gate.
 
 ### Commands
 

@@ -72,7 +72,7 @@ storylet_selection_audit_trail:                      # Phase 4 weighted-pick dis
   jit_expansion_fired: false                          # true if the JIT generator was delegated; top_k_considered then includes the JIT-trigger condition
   weighted_pick_seed: <optional engine-internal seed for replay reproducibility>
 content_intensity: tame | mature | explicit
-validation_trace:                                    # Phase 9 gates 1-18 with one-line PASS rationales
+validation_trace:                                    # Phase 9 gates 1-19 with one-line PASS rationales
   mystery_firewall: PASS — <rationale>
   invariant_compatibility: PASS — <rationale>
   recursive_reference_closure: PASS — <rationale>
@@ -91,6 +91,7 @@ validation_trace:                                    # Phase 9 gates 1-18 with o
   narrative_point_classification: PASS — <rationale>
   choice_worthiness_completeness: PASS — <rationale>
   plan_completeness_check: PASS — <rationale>
+  cast_material_reality_consistency: PASS — <rationale>
 created_at: <iso8601>
 ```
 

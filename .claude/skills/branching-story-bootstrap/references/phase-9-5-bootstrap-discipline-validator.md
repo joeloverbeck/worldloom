@@ -1,6 +1,6 @@
 # Phase 9.5: Bootstrap Discipline Validator
 
-Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the Phase 9 19-gate set. The 19 Phase 9 gates split as gates 1-13 FOUNDATIONS-anchored, gates 14-18 SPEC-20/22-anchored (scene-commitment validators), and gate 19 plan-authoring-anchored; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
+Reference for `branching-story-bootstrap` Phase 9.5 — the post-Phase-9 / pre-Phase-10 validator that records soft-required field discipline outside the Phase 9 20-gate set. The 20 Phase 9 gates split as gates 1-13 FOUNDATIONS-anchored, gates 14-18 SPEC-20/22-anchored (scene-commitment validators), and gates 19-20 plan-authoring-anchored; Phase 9.5 catches operationally-required residue that the JSON schemas (intentionally permissive) do not enforce.
 
 Each check records PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. A bare "PASS" is treated as FAIL per the FOUNDATIONS skill discipline. Any FAIL halts the bootstrap and routes to the responsible upstream phase.
 
@@ -34,10 +34,10 @@ Phase 9.5 runs after every Phase 9 gate has recorded PASS and BEFORE Phase 10's 
 
 ## Composition with Phase 9
 
-Phase 9.5 does NOT duplicate Phase 9 work. The 19 Phase 9 gates are FOUNDATIONS-anchored, validator-aligned, and plan-authoring-anchored; Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
+Phase 9.5 does NOT duplicate Phase 9 work. The 20 Phase 9 gates are FOUNDATIONS-anchored, validator-aligned, and plan-authoring-anchored; Phase 9.5 covers the operationally-required residue. If a future ticket promotes a Phase 9.5 check to a Phase 9 gate (because a new FOUNDATIONS principle motivates it), the corresponding row migrates from this table to `references/phase-9-validation-gates.md`.
 
 Storylet-pool diversity is owned by Phase 9 gate 9 and is measured by
 `arc_contract.commitment_class`. Phase 9.5 keeps the 11 discipline checks
 above unchanged; it does not add a separate storylet-diversity row.
 
-`plan_completeness_check` (Phase 9 gate 19) and `plan_self_containment` (this check 11) are intentionally split: gate 19 is structural (sections populated, ids resolve, frontmatter well-formed) and runs as a Phase 9 canon-safety gate; check 11 is content-completeness (every referenced id has its record body inlined verbatim) and runs as a Phase 9.5 discipline gate. The former protects parser/validator correctness; the latter protects the rendered prose's coherence.
+`plan_completeness_check` (Phase 9 gate 19), `cast_material_reality_consistency` (Phase 9 gate 20), and `plan_self_containment` (this check 11) are intentionally split: gate 19 is structural (sections populated, ids resolve, frontmatter well-formed), gate 20 is physical-consistency grounding against projected CHAR Material Reality, and check 11 is content-completeness (every referenced id has its record body inlined verbatim). The Phase 9 gates protect parser/validator correctness and physical grounding; the Phase 9.5 check protects the rendered prose's context completeness.

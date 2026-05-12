@@ -78,6 +78,6 @@ Phase 8 may revise the classification on its own evidence (cast-state changes, O
 ## Cross-references
 
 - Phase 7 plan authoring (where the structural commitments are declared): `references/phase-7-page-plan.md`
-- Phase 9 gate table (DEFERRED rows, `plan_completeness_check`, `arc_trace_evidence_alignment` deferral): `references/phase-9-validation-gates.md`
+- Phase 9 gate table (DEFERRED rows, `plan_completeness_check`, `cast_material_reality_consistency`, `arc_trace_evidence_alignment` deferral): `references/phase-9-validation-gates.md`
 - Convergence point — Layer 2 / Layer 3 extraction + ARCTRACE emission: `.claude/skills/branching-story-page-prose-finalize/references/phase-4-arc-trace-extraction.md`
 - ARC_TRACE record schema: `references/record-schemas.md` §ARC_TRACE Record

@@ -352,7 +352,7 @@ narrative_health:
 
 governor_nudge_applied: "bootstrap root; no prior-page governor"
 content_intensity: mature                # tame | mature | explicit
-validation_trace:                        # PG-0001 records the page-cycle 12 PG-record keys (per phase-7-root-page-plan.md §Phase 9 dual-validation-trace mapping) plus the 5 scene-commitment validator gates plus the plan_completeness_check key — 18 PG-record keys total per phase-7-root-page-plan.md §Emit PG-0001 record
+validation_trace:                        # PG-0001 records the page-cycle 12 PG-record keys (per phase-7-root-page-plan.md §Phase 9 dual-validation-trace mapping) plus the 5 scene-commitment validator gates plus plan_completeness_check and cast_material_reality_consistency — 19 PG-record keys total per phase-7-root-page-plan.md §Emit PG-0001 record
   mystery_firewall: PASS —<rationale>
   invariant_compatibility: PASS —<rationale>
   recursive_reference_closure: PASS —<rationale>
@@ -371,6 +371,7 @@ validation_trace:                        # PG-0001 records the page-cycle 12 PG-
   narrative_point_classification: PASS —PG-0001 defaults to NATURAL_COMMITMENT_HINGE
   choice_worthiness_completeness: PASS —every emitted PG-0001 CHC passes Phase 8 choice-worthiness validation
   plan_completeness_check: PASS —<rationale>
+  cast_material_reality_consistency: PASS —<rationale>
 created_at: <iso8601>
 ---
 # CHC-NNNN — Choice (4-6 emitted at PG-0001; write-in slot is N+1 at runtime)
