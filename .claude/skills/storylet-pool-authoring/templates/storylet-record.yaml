@@ -186,7 +186,7 @@ beat_plan:
   max_beats: <int 3..8>
   beats:                                   # 3-8 entries
     - id: B1
-      function: <beat_function string>     # open-vocab kebab-case; see references/beat-functions.md
+      function: <beat_function string>     # open-vocab kebab-case; see templates/arc-archetypes.md for per-archetype beat-function examples
       realization_target: realizes-initial-scene-movement # REQUIRED; open-vocab kebab-case scene movement this beat realizes
       required: true
       state_significance: none             # none | <strong_axis enum>
