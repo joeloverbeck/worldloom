@@ -14,7 +14,7 @@ A storylet is eligible only when it is a scene-commitment arc:
 - `content_intensity` is within ±1 band of story baseline (or matches `content_intensity_override`).
 - Is not in the recent-history avoid list (last ~5 realized arcs — prevents immediate repetition).
 - `arc.visibility` permits use along this page's `branch_path` per `references/pre-flight-and-prerequisites.md` §World-State Prerequisites.
-- `arc.arc_contract.commitment_class` matches the chosen CHC's `commitment_class` when Phase 1 Path A consumed a structured choice, OR matches the classified commitment class from Phase 1 Path B's write-in classifier. If the write-in cannot classify into a legal commitment class, Phase 1 routes through `REFUSE_ONLY_THROUGH_WORLD_LOGIC`; Phase 4 does not admit a beat-action bypass.
+- `arc.arc_contract.commitment_class` matches the chosen CHC's closed base `commitment_class` when Phase 1 Path A consumed a structured choice, OR matches the classified base class from Phase 1 Path B's write-in classifier. `commitment_family` may be checked as a consistency fallback or diagnostic when present, but a family match cannot override a base-class mismatch. `commitment_detail` is descriptive unless a future ticket adds detail-level matching. If the write-in cannot classify into a legal commitment class, Phase 1 routes through `REFUSE_ONLY_THROUGH_WORLD_LOGIC`; Phase 4 does not admit a beat-action bypass.
 
 ## Salience Scoring (engine, deterministic)
 
@@ -34,7 +34,7 @@ score(arc) =
 - 1.0 * repetition_penalty(arc)
 ```
 
-`commitment_class_continuity` gives a bonus when the arc's `arc_contract.commitment_class` aligns with the current scene question, recency-weighted from the parent page's realized arc when present. `exit_portfolio_richness` gives a bonus when `arc.exit_portfolio.native_seeds[]` contains at least 3 viable next-commitment seeds, because richer native exits reduce Phase 8 JIT pressure after this arc closes.
+`commitment_class_continuity` gives a bonus when the arc's `arc_contract.commitment_class` aligns with the current scene question, recency-weighted from the parent page's realized arc when present. `commitment_family` alignment may break ties between otherwise close candidates. `exit_portfolio_richness` gives a bonus when `arc.exit_portfolio.native_seeds[]` contains at least 3 viable next-commitment seeds with valid family/class route fields, because richer native exits reduce Phase 8 JIT pressure after this arc closes.
 
 The `governor_nudge` from the previous turn's Phase 6 (or, on first turn, from the bootstrap's storylet-pool seed bias) adjusts the weights — e.g., "story has 3 high-salience unresolved obligations and rising threat pressure; favor arcs that pay off or escalate one of those" boosts `obligation_relevance` and `tension_fit` by 1.5x.
 
@@ -48,7 +48,7 @@ Persist the top-K candidate ids + per-candidate scores + governor-nudge bias sum
 
 If no candidate scores above threshold (typically: top-K all score below `(median(score) + 1.0)`), AND the consequence-capacity check (Phase 3) passed only by JIT-generatable continuation, invoke `storylet-pool-authoring` as the **single-storylet JIT generator**:
 
-- Call shape: `mode='jit'`, `parent_skill_invocation=true`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, `caller_state_snapshot=<this_state_snapshot>`, plus the current branch-local pool/OBL/CNSQ/THR/cast/recent-prose context already assembled by this phase and the missing commitment-class / arc-archetype pressure discovered by the filters.
+- Call shape: `mode='jit'`, `parent_skill_invocation=true`, `target_pool_size=1`, `created_at_page=<this_PG_id>`, `caller_state_snapshot=<this_state_snapshot>`, plus the current branch-local pool/OBL/CNSQ/THR/cast/recent-prose context already assembled by this phase and the missing commitment-family / commitment-class / arc-archetype pressure discovered by the filters.
 - The delegated call returns exactly ONE approved SLT record plus its internal validation packet. The returned SLT carries `shape: scene_commitment_arc`, `provenance.origin: runtime_jit`, `provenance.created_at_page: <this_PG_id>`, and `visibility.scope: branch_scoped`; a global-author-pool JIT result is structurally invalid for this turn.
 - `storylet-pool-authoring` runs its Phase 4 gate set over the candidate, including mystery firewall, resolution-authority declaration, predicate parsability, branch-contamination, and arc-schema compliance. Its Phase 5 diversity audit is bypassed because a single runtime arc has no batch diversity surface.
 - Selection then picks this JIT arc. Phase 4b selects its effect variant, Phase 5 applies the chosen variant's required effects, Phase 9 rechecks the full page-cycle validation gates, and Phase 11 writes the returned SLT-NNNN.yaml inside the same page-tick transaction as the new PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records.

@@ -7,14 +7,18 @@ Two paths converge into a single validated `ProposedEvent`.
 - `chosen_choice_id ∈ parent_page.emitted_choices` (verified at Pre-flight).
 - Load `_source/choices/<chosen_choice_id>.yaml`.
 - `ProposedEvent` is populated from the selected CHC record's structured
-  fields: `choice_kind`, `commitment_class`, `strategy_cluster`,
-  `choice_worthiness`, `choice_contract`, `likely_effects`, and
+  fields: `choice_kind`, `commitment_family`, `commitment_class`,
+  optional `commitment_detail`, `strategy_cluster`, `choice_worthiness`,
+  `choice_contract`, `likely_effects`, and
   `continuation_capacity`, plus any deterministic operation/actor/target
   payload fields carried by the choice's `choice_contract`.
-- Carry the selected CHC's `commitment_class` forward to Phase 4; the arc
-  selection hard filter admits only arcs whose `arc.arc_contract.commitment_class`
-  matches that value. Phase 7 / Phase 8 / Phase 9 continue to honor
-  `choice_contract` and `continuation_capacity`.
+- Carry the selected CHC's `commitment_family`, closed base `commitment_class`,
+  and optional `commitment_detail` forward to Phase 4. The arc selection hard
+  filter admits only arcs whose `arc.arc_contract.commitment_class` matches that
+  value; `commitment_family` is carried as summary/fallback metadata and
+  `commitment_detail` is descriptive unless a future ticket adds detail-level
+  matching. Phase 7 / Phase 8 / Phase 9 continue to honor `choice_contract` and
+  `continuation_capacity`.
 
 ## Path B — Write-In (LLM acts as parser)
 
@@ -60,24 +64,29 @@ The `TREAT_AS_ATTEMPT` framing is **causal, not authorial**: the question is whe
 
 Multiple plausible outcomes (e.g., shoot → miss / wound / kill): the engine either asks the user to pick or selects per a state-coherence weighting (the LLM proposes per-outcome rationales; the engine weights). Configurable per story.
 
-### B.4 Write-In Commitment-Class Classification
+### B.4 Write-In Commitment Route Classification
 
-After the four-way routing decision, an additional commitment-class classification
-step runs for write-ins that proceed past impossible-state refusal:
+After the four-way routing decision, an additional commitment-route
+classification step runs for write-ins that proceed past impossible-state
+refusal:
 
 1. The LLM parser reads the user's free-form `manual_action_text`, the routing
-   verdict, and the arc-eligible `commitment_class` enum loaded via
-   `mcp__worldloom__get_canonical_vocabulary({class: 'commitment_class'})`.
-2. It classifies the manual action's intended commitment into exactly one entry of
-   the closed `commitment_class` enum.
-3. If classification fails because the action does not fit any commitment class,
-   route via `REFUSE_ONLY_THROUGH_WORLD_LOGIC` even if the four-way routing
-   initially returned `ACCEPT`.
+   verdict, the `commitment_family` vocabulary, the closed base
+   `commitment_class` vocabulary, and the class-to-family mapping loaded through
+   `mcp__worldloom__get_canonical_vocabulary`.
+2. It classifies the manual action's dominant scene strategy into exactly one
+   family plus one closed base class. Do not classify by surface verb when the
+   dramatic strategy differs; e.g. a physical movement may still be
+   `inquiry_discovery` if the scene commitment is to test a bounded question.
+3. It may add `commitment_detail` as an optional story-specific precision label
+   when the base class is too broad to explain the intended route.
+4. If classification fails because the action does not fit any legal base
+   commitment class, route via `REFUSE_ONLY_THROUGH_WORLD_LOGIC` even if the
+   four-way routing initially returned `ACCEPT`.
 
-The classified `commitment_class` is handed to Phase 4 as an arc-selection filter.
-See `phase-4-storylet-and-mystery-authority.md` §Hard Filters for the consumer-side
-filter that matches `arc.arc_contract.commitment_class` against the chosen CHC's
-commitment class or this write-in classifier output.
+The classified route is handed to Phase 4. The closed base `commitment_class` is
+the arc-selection filter; `commitment_family` may be used as fallback/diagnostic
+metadata, and `commitment_detail` is not a deterministic join key.
 
 ### B.5 Rule
 

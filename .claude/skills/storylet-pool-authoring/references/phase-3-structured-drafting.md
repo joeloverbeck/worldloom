@@ -43,8 +43,9 @@ content contract binds before any world, state, or drafting instruction.
 
 INSTRUCTION:
 Fill the SLT template for this arc seed. Required:
-- arc_contract (commitment_class, arc_archetype, actor, target, user_intent,
-  strategic_question_answered, commitment_scope, success_policy, allowed_outcome_band)
+- arc_contract (commitment_family, commitment_class, optional commitment_detail,
+  arc_archetype, actor, target, user_intent, strategic_question_answered,
+  commitment_scope, success_policy, allowed_outcome_band)
 - dramatic_unit (scene_question, entry_pressure, value_delta_target, natural_close_definition)
 - beat_plan (mode: ordered_soft, min_beats, max_beats, 3-8 beats with function/realization_target/required/state_significance)
 - execution_envelope (invariants, required_functions, allowed_tactics, prohibited_actions,
@@ -52,7 +53,8 @@ Fill the SLT template for this arc seed. Required:
 - stop_policy (normal_exits using stop predicates, interrupt_before, safety_valves)
 - effect_model.variants (1..N rows; each maps to one allowed_outcome_band entry; required_effects
   use closed effect-type enum; forbidden_effects enumerate what MUST NOT happen)
-- exit_portfolio.native_seeds (3-5 entries; each commitment_class + strategy_cluster +
+- exit_portfolio.native_seeds (3-5 entries; each commitment_family +
+  commitment_class + optional commitment_detail + strategy_cluster +
   expected_state_delta + continuation_arc_selector)
 - eligibility/effect fields (hard_preconds, soft_preconds, cast_requirements, location_requirements,
   tone_tags, theme_tags, tension_delta, aftermath_weight, mystery_safety, provenance, visibility)
@@ -62,7 +64,9 @@ Do NOT use beat headers in any prose-bearing field. Beat plans are structural; p
 
 The seed brief maps directly into the scaffold:
 
+- `arc_seed.commitment_family` -> `arc_contract.commitment_family`
 - `arc_seed.commitment_class` -> `arc_contract.commitment_class`
+- `arc_seed.commitment_detail` -> `arc_contract.commitment_detail`
 - `arc_seed.arc_archetype` -> `arc_contract.arc_archetype`
 - `arc_seed.entry_pressure_description` -> `dramatic_unit.entry_pressure.description`
 - `arc_seed.scene_question` -> `dramatic_unit.scene_question`
@@ -103,10 +107,13 @@ fill every required storylet block:
 
 Populate the commitment contract that this arc tests or satisfies:
 
-- `commitment_class` from the closed vocabulary and `arc_archetype` from the
-  seed. `arc_archetype` is an orienting pattern label: library values are
-  preferred when they fit, but story-specific snake_case values are valid when
-  the arc's `dramatic_unit` and `beat_plan` justify them.
+- `commitment_family` from the canonical family vocabulary, `commitment_class`
+  from the closed base vocabulary, optional `commitment_detail` from the seed,
+  and `arc_archetype` from the seed. The family must match the class-to-family
+  mapping. `commitment_detail` may be a story-specific precision label, but it
+  is not a deterministic join key. `arc_archetype` is an orienting pattern label:
+  library values are preferred when they fit, but story-specific snake_case
+  values are valid when the arc's `dramatic_unit` and `beat_plan` justify them.
 - `actor` and `target` as STENT ids or role matchers from the cast context.
 - `user_intent` as the user-side commitment encoded by the arc.
 - `strategic_question_answered` as the scene-level question the arc helps answer.
@@ -249,8 +256,10 @@ The engine wraps the LLM output before anything is accepted as an SLT record:
    `reader_visibility_basis: unrevealed_objective_truth`, unless the arc
    deliberately creates a reader-facing reveal with a positive basis.
 6. Assigns `provenance` and `visibility` from mode and source context.
-7. Records the LLM's `exit_portfolio.native_seeds[]` verbatim; these become
-   Phase 8 exit candidates at runtime.
+7. Records the LLM's `exit_portfolio.native_seeds[]` route fields verbatim;
+   these become Phase 8 exit candidates at runtime. `commitment_class` remains
+   the base selector; `commitment_family` is summary/fallback metadata and
+   `commitment_detail` is optional precision.
 
 The LLM never operates as the continuity database. Engine wrapping and Phase 4
 validation preserve the FOUNDATIONS tooling discipline that structured records

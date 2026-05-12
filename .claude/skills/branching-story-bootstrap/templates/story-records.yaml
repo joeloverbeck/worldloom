@@ -413,6 +413,9 @@ choice_worthiness:                       # REQUIRED by SPEC-19 CHC schema for ch
     How the post-choice state space diverges from the menu's other options.
 
 likely_effects: []                       # structured effect sketches; runtime validates before commit
+commitment_family: <commitment_family enum> # closed family enum; must match commitment_class mapping
+commitment_class: <commitment_class enum> # closed base route key; deterministic continuation key
+commitment_detail: null                  # optional story-specific precision; not a deterministic join key
 continuation_capacity:
   post_choice_delta:
     facts_added_or_changed: []           # SF-NNNN ids changed by minimum_state_change / likely_effects

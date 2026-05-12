@@ -86,7 +86,7 @@ validation_trace:                        # populated by Phase 9 — every gate o
   gate_06_cast_intention_coverage: "PASS — <one-line rationale>"
   gate_07_obligation_salience: "PASS — <one-line rationale>"
   gate_08_epistemic_class_declared: "PASS — <one-line rationale>"
-  gate_09_storylet_commitment_class_diversity: "PASS — <one-line rationale>"
+  gate_09_storylet_commitment_route_diversity: "PASS — <one-line rationale>"
   gate_10_prose_ledger_consistency: "PASS — <one-line rationale>"
   gate_11_choice_consequence_capacity: "PASS — <one-line rationale>"
   gate_12_recursive_reference_closure: "PASS — <one-line rationale>"
@@ -114,6 +114,11 @@ discipline_validation_trace:             # populated by Phase 9.5 — every disc
 storylet_pool_summary:                   # populated by Phase 6
   # total: derived from intended_scale + complexity per references/phase-6-storylet-pool-seed.md §Computing target_pool_size; user override permitted via `storylet_pool_seed_size` argument.
   total: 10
+  commitment_family_distribution:
+    inquiry_discovery: 2
+    care_help_protection: 4
+    pressure_coercion: 2
+    boundary_delay_withdrawal: 2
   commitment_class_distribution:
     ask_one_bounded_question: 2
     offer_practical_help: 2
@@ -201,7 +206,7 @@ expressed in arc-units only; do not add word-count fields to `cadence_policy`.
 
 ## Storylet Pool Summary
 
-<Compact summary mirrored from frontmatter `storylet_pool_summary`. Phase 9 gate 9 enforces commitment_class diversity. Every seed SLT is `shape: scene_commitment_arc`; shape distribution is not a diversity axis.>
+<Compact summary mirrored from frontmatter `storylet_pool_summary`. Phase 9 gate 9 enforces commitment_family / commitment_class diversity. Every seed SLT is `shape: scene_commitment_arc`; shape distribution is not a diversity axis.>
 
 | Commitment class | Count |
 |---|---|

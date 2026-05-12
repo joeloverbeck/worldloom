@@ -175,13 +175,15 @@ Schema reproduced in `references/phase-8-choice-generation.md` §Step 5; carries
 
 ### CHC fields (record_version: 2)
 
-SPEC-19 defines the CHC schema for the scene-commitment-arc contract. The scene-commitment fields (`choice_kind`, `commitment_class`, `strategy_cluster`, `choice_worthiness`) sit alongside the load-bearing `choice_contract`, `likely_effects`, and `continuation_capacity` blocks.
+SPEC-19 defines the CHC schema for the scene-commitment-arc contract. The scene-commitment fields (`choice_kind`, `commitment_family`, closed base `commitment_class`, optional `commitment_detail`, `strategy_cluster`, `choice_worthiness`) sit alongside the load-bearing `choice_contract`, `likely_effects`, and `continuation_capacity` blocks.
 
 ```yaml
 record_version: 2
 choice_kind: scene_commitment | tactical_beat   # scene_commitment is the standard;
                                                 # tactical_beat is reserved for narrow cases
+commitment_family: <commitment_family enum>     # required when choice_kind == scene_commitment; must match commitment_class mapping
 commitment_class: <commitment_class enum>       # required when choice_kind == scene_commitment
+commitment_detail: null                         # optional story-specific precision label; never a deterministic join key
 strategy_cluster: <kebab-case open-vocab tag>   # required when choice_kind == scene_commitment
 choice_worthiness:
   strategic_question_answered: >                # one-line scene question

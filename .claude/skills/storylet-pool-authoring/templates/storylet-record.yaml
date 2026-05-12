@@ -144,7 +144,9 @@ visibility:
   allowed_branch_ids: null                 # [BR-NNNN, ...] — optional explicit allowlist
 
 arc_contract:                              # what the user committed to; mirrors selected CHC
+  commitment_family: <commitment_family enum> # closed family enum — must match commitment_class mapping
   commitment_class: <commitment_class enum> # closed enum — see canonical-vocabularies
+  commitment_detail: null                  # optional story-specific precision label; never a deterministic join key
   arc_archetype: <arc_archetype label>     # orienting pattern label; prefer library values when they fit, but story-specific snake_case values are allowed
   actor: STENT-NNNN                        # STENT-NNNN | role:<role>
   target: null                             # STENT-NNNN | role:<role> | null
@@ -249,7 +251,9 @@ effect_model:
 exit_portfolio:
   native_seeds:                            # arc-author-declared next-commitment options
     - id: <kebab-case seed id>
+      commitment_family: <commitment_family enum>
       commitment_class: <commitment_class enum>
+      commitment_detail: null              # optional story-specific precision; not a join key
       strategy_cluster: <kebab-case open-vocab tag>
       expected_state_delta: {}             # per-strong-axis projection
       continuation_arc_selector:
@@ -270,7 +274,9 @@ notes: >
 
 # Example — fragile_offer archetype:
 # arc_contract:
+#   commitment_family: care_help_protection
 #   commitment_class: offer_practical_help
+#   commitment_detail: offer_concrete_help_without_creating_debt
 #   arc_archetype: fragile_offer
 #   actor: role:protagonist
 #   target: role:recipient
@@ -315,13 +321,15 @@ notes: >
 #     - {id: deflected-by-third-party, maps_to_outcome: partially_deflected, probability_weight: 0.20, required_effects: [{type: consequence_open, args: {kind: third_party_complication}}], forbidden_effects: [{type: fact_create, args: {truth_scope: world_level}}]}
 # exit_portfolio:
 #   native_seeds:
-#     - {id: accepted-help-followup, commitment_class: accept_offered_help, strategy_cluster: practical-followthrough, expected_state_delta: {obligation_state: accepted}, continuation_arc_selector: {include_tags: [aid-followup], require_arc_archetype: practical_aid_attempt}}
-#     - {id: refused-with-grace-followup, commitment_class: stay_available_without_pressure, strategy_cluster: aftercare, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: refusal_and_aftercare}}
-#     - {id: deflected-by-third-party-followup, commitment_class: seek_third_party, strategy_cluster: intervention, expected_state_delta: {route_or_scene_type: tested}, continuation_arc_selector: {include_tags: [third-party], require_arc_archetype: third_party_intervention}}
+#     - {id: accepted-help-followup, commitment_family: care_help_protection, commitment_class: accept_offered_help, commitment_detail: null, strategy_cluster: practical-followthrough, expected_state_delta: {obligation_state: accepted}, continuation_arc_selector: {include_tags: [aid-followup], require_arc_archetype: practical_aid_attempt}}
+#     - {id: refused-with-grace-followup, commitment_family: care_help_protection, commitment_class: stay_available_without_pressure, commitment_detail: null, strategy_cluster: aftercare, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: refusal_and_aftercare}}
+#     - {id: deflected-by-third-party-followup, commitment_family: coordination_authority, commitment_class: seek_third_party, commitment_detail: null, strategy_cluster: intervention, expected_state_delta: {route_or_scene_type: tested}, continuation_arc_selector: {include_tags: [third-party], require_arc_archetype: third_party_intervention}}
 #
 # Example — bounded_question archetype:
 # arc_contract:
+#   commitment_family: inquiry_discovery
 #   commitment_class: ask_one_bounded_question
+#   commitment_detail: ask_where_the_missing_fact_came_from
 #   arc_archetype: bounded_question
 #   actor: role:protagonist
 #   target: role:witness
@@ -366,13 +374,15 @@ notes: >
 #     - {id: useful-deflection, maps_to_outcome: partially_deflected, probability_weight: 0.30, required_effects: [{type: thread_pressure_delta, args: {delta: increase}}], forbidden_effects: [{type: fact_invalidate, args: {scope: world_level}}]}
 # exit_portfolio:
 #   native_seeds:
-#     - {id: follow-the-answer, commitment_class: ask_one_bounded_question, strategy_cluster: followup-question, expected_state_delta: {information_posture: investigated}, continuation_arc_selector: {include_tags: [investigation], require_arc_archetype: investigation_followup}}
-#     - {id: honor-the-refusal, commitment_class: stay_available_without_pressure, strategy_cluster: trust-preservation, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: silent_witness}}
-#     - {id: test-the-deflection, commitment_class: force_disclosure, strategy_cluster: pressure-test, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [disclosure-pressure], require_arc_archetype: forced_disclosure}}
+#     - {id: follow-the-answer, commitment_family: inquiry_discovery, commitment_class: ask_one_bounded_question, commitment_detail: follow_up_on_partial_answer, strategy_cluster: followup-question, expected_state_delta: {information_posture: investigated}, continuation_arc_selector: {include_tags: [investigation], require_arc_archetype: investigation_followup}}
+#     - {id: honor-the-refusal, commitment_family: presence_attention, commitment_class: stay_available_without_pressure, commitment_detail: null, strategy_cluster: trust-preservation, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [aftercare], require_arc_archetype: silent_witness}}
+#     - {id: test-the-deflection, commitment_family: pressure_coercion, commitment_class: force_disclosure, commitment_detail: null, strategy_cluster: pressure-test, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [disclosure-pressure], require_arc_archetype: forced_disclosure}}
 #
 # Example — escalation_to_confrontation archetype:
 # arc_contract:
+#   commitment_family: conflict_force_evasion
 #   commitment_class: escalate_to_confrontation
+#   commitment_detail: force_the_pressure_point_into_open_conflict
 #   arc_archetype: escalation_to_confrontation
 #   actor: role:protagonist
 #   target: role:opponent
@@ -418,6 +428,6 @@ notes: >
 #     - {id: adversary-commits, maps_to_outcome: backfires, probability_weight: 0.30, required_effects: [{type: consequence_open, args: {kind: adversary_countermove}}], forbidden_effects: [{type: thread_pressure_delta, args: {delta: decrease}}]}
 # exit_portfolio:
 #   native_seeds:
-#     - {id: deal-with-fallout, commitment_class: release_pressure, strategy_cluster: aftermath, expected_state_delta: {thread_pressure: decrease}, continuation_arc_selector: {include_tags: [aftermath], require_arc_archetype: aftermath_processing}}
-#     - {id: pursue-the-new-line, commitment_class: tighten_pressure, strategy_cluster: pressure-followup, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [confrontation], require_arc_archetype: escalation_to_confrontation}}
-#     - {id: retreat-and-regroup, commitment_class: withdraw_without_abandoning, strategy_cluster: tactical-withdrawal, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [withdrawal], require_arc_archetype: withdrawal_without_abandonment}}
+#     - {id: deal-with-fallout, commitment_family: pressure_coercion, commitment_class: release_pressure, commitment_detail: null, strategy_cluster: aftermath, expected_state_delta: {thread_pressure: decrease}, continuation_arc_selector: {include_tags: [aftermath], require_arc_archetype: aftermath_processing}}
+#     - {id: pursue-the-new-line, commitment_family: pressure_coercion, commitment_class: tighten_pressure, commitment_detail: null, strategy_cluster: pressure-followup, expected_state_delta: {thread_pressure: increase}, continuation_arc_selector: {include_tags: [confrontation], require_arc_archetype: escalation_to_confrontation}}
+#     - {id: retreat-and-regroup, commitment_family: boundary_delay_withdrawal, commitment_class: withdraw_without_abandoning, commitment_detail: null, strategy_cluster: tactical-withdrawal, expected_state_delta: {relationship_trajectory: stabilize}, continuation_arc_selector: {include_tags: [withdrawal], require_arc_archetype: withdrawal_without_abandonment}}

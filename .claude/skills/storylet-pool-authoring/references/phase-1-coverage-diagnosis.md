@@ -2,8 +2,9 @@
 
 Phase 1 scans the current storylet pool and the open story state, then emits the
 diagnosis matrix that Phase 2 uses for seed selection. Coverage is measured by
-`commitment_class` and `arc_archetype` (per the SPEC-21 scene-commitment-arc
-rebind).
+`commitment_family`, closed base `commitment_class`, and `arc_archetype`.
+`commitment_detail` is optional story-specific precision and is never the only
+continuation key.
 
 The matrix is a planning artifact, not a canon mutation. It must surface the
 missing routes by which the pool can pay off obligations, advance active
@@ -18,24 +19,30 @@ top-level keys:
 
 ```yaml
 diagnosis_matrix:
-  open_obligations_by_commitment_class:
+  open_obligations_by_commitment_route:
     OBL-NNNN:
-      eligible_commitment_classes: [<commitment_class>, ...]
+      eligible_commitment_routes:
+        - commitment_family: <commitment_family>
+          commitment_class: <commitment_class>
+          commitment_detail: <story-specific precision label | null>
       pool_arcs_by_class:
         <commitment_class>: [SLT-NNNN, ...]
-      gaps: [<commitment_class>, ...]
+      gaps: [<commitment_family>/<commitment_class>, ...]
       rationale: >
-        Why these commitment_classes could plausibly pay off, complicate,
+        Why these commitment routes could plausibly pay off, complicate,
         transfer, or otherwise engage this obligation.
 
-  active_threads_by_commitment_class:
+  active_threads_by_commitment_route:
     THR-NNNN:
-      escalation_commitment_classes: [<commitment_class>, ...]
+      escalation_commitment_routes:
+        - commitment_family: <commitment_family>
+          commitment_class: <commitment_class>
+          commitment_detail: <story-specific precision label | null>
       pool_arcs_by_class:
         <commitment_class>: [SLT-NNNN, ...]
-      gaps: [<commitment_class>, ...]
+      gaps: [<commitment_family>/<commitment_class>, ...]
       rationale: >
-        Why these commitment_classes could plausibly raise, sustain, redirect,
+        Why these commitment routes could plausibly raise, sustain, redirect,
         or close this thread's pressure.
 
   arc_archetype_distribution:
@@ -59,6 +66,11 @@ diagnosis_matrix:
     silent_witness: 0
     forced_disclosure: 0
     pressure_release: 0
+
+  commitment_family_distribution:
+    care_help_protection: 0
+    inquiry_discovery: 0
+    pressure_coercion: 0
 
   commitment_class_distribution:
     stay_available_without_pressure: 0
@@ -102,15 +114,22 @@ diagnosis_matrix:
 the pool. Values from `templates/arc-archetypes.md` are recommended library
 patterns, not an exhaustive set; story-specific labels are allowed when they
 capture a dramatic structure the library would distort.
-`commitment_class_distribution` keys must come from SPEC-22 Track 3
-`COMMITMENT_CLASSES`. Do not invent local values.
+`commitment_family_distribution` keys must come from the canonical
+`commitment_family` vocabulary. `commitment_class_distribution` keys must come
+from the canonical closed base `commitment_class` vocabulary. Do not invent
+local family or class values. `commitment_detail` may be story-specific, but it
+is not counted as a hard coverage axis.
 
 ## Obligation And Thread Classification
 
-For every open OBL, enumerate `eligible_commitment_classes` by reading the OBL's
-type, subjects, constraints, salience, and current branch context. This is an
-LLM-driven heuristic judgment, not a closed lookup table. Prompt the LLM to name
-which commitment_classes could plausibly engage the obligation and why.
+For every open OBL, enumerate `eligible_commitment_routes` by reading the OBL's
+type, subjects, constraints, salience, and current branch context. Each route
+names a canonical `commitment_family`, one closed base `commitment_class` from
+that family, and optional `commitment_detail` only when the story-state pressure
+needs more precision than the base class can carry. This is an LLM-driven
+heuristic judgment, not a closed lookup table. Prompt the LLM to name which
+families/classes could plausibly engage the obligation and why; use detail only
+as descriptive precision.
 
 Then scan the current pool for existing arcs whose `arc_contract.commitment_class`
 matches one of those eligible classes and whose effects, preconditions, and
@@ -118,12 +137,14 @@ scope can actually engage the OBL. Record those SLT ids under
 `pool_arcs_by_class`; any eligible class with no usable matching arc becomes a
 `gaps` entry.
 
-For every active THR, enumerate `escalation_commitment_classes` by reading the
+For every active THR, enumerate `escalation_commitment_routes` by reading the
 thread's current pressure, branch-local state, involved actors, and available
 story routes. As with OBL classification, this is heuristic and context-bound.
-Classes that could escalate, sustain, redirect, or close the thread are
-eligible. Existing arcs are counted only when their `commitment_class` and
-effect model can plausibly move that THR.
+Families/classes that could escalate, sustain, redirect, or close the thread
+are eligible. Existing arcs are counted only when their `commitment_class` and
+effect model can plausibly move that THR; matching `commitment_family` may be
+used as a diagnostic fallback, but `commitment_detail` is not a deterministic
+join key.
 
 If `source_obligations` or `source_threads` is supplied, those records remain
 mandatory targets for Phase 2. When `source_threads` is supplied, unpack each
@@ -137,10 +158,15 @@ and through a source thread.
 `arc_contract.arc_archetype`. Phase 2 uses low-count archetypes to diversify
 seed generation, subject to the story's actual obligation and thread pressure.
 
+`commitment_family_distribution` counts current pool occurrences by
+`arc_contract.commitment_family` when present, or by deriving the family from
+`arc_contract.commitment_class` through the canonical class-to-family mapping.
+Phase 2 uses low-count families for broad coverage.
+
 `commitment_class_distribution` counts current pool occurrences by
-`arc_contract.commitment_class`. Phase 2 uses low-count classes as positive
-pressure and `recent_history_repetition_signal.over_represented` as suppression
-pressure.
+`arc_contract.commitment_class`. Phase 2 uses low-count classes as base-routing
+diversity pressure and `recent_history_repetition_signal.over_represented` as
+suppression pressure.
 
 `content_intensity_distribution` tracks the intensity axis. Compare the
 pool against `STORY_KERNEL.content_intensity_baseline`:
@@ -239,7 +265,9 @@ diagnosis_matrix:
   jit_continuation_failure:
     gap_kind: continuation_failure
     target_record_id: <caller_state_snapshot.current_storylet_eligibility_failure_reason.record_id | null>
+    caller_commitment_family: <caller_state_snapshot.selected_chc.commitment_family | derived from commitment_class>
     caller_commitment_class: <caller_state_snapshot.selected_chc.commitment_class>
+    caller_commitment_detail: <caller_state_snapshot.selected_chc.commitment_detail | null>
     caller_state_snapshot_ref: inline
     priority_weight: max
 ```
@@ -250,9 +278,11 @@ consequence-capacity result and the failed Phase 4 eligibility/scoring context.
 
 Do not run a full pool-health scan, distribution scan, or longest-branch recent
 history scan inside the JIT sub-routine. Page-cycle has already assembled the
-branch-local state. The resulting JIT seed is one arc whose `commitment_class`
-matches the chosen CHC's `commitment_class`; `templates/arc-archetypes.md`
-provides the recommended archetype mapping.
+branch-local state. The resulting JIT seed is one arc whose closed base
+`commitment_class` matches the chosen CHC's `commitment_class`; its
+`commitment_family` is carried from the CHC when explicit or derived from the
+class, and `commitment_detail` is copied only as optional descriptive precision.
+`templates/arc-archetypes.md` provides the recommended archetype mapping.
 
 ## Cross-References
 
