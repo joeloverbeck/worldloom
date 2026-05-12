@@ -271,6 +271,19 @@ exit_portfolio:
 notes: >
   Free-form authorial notes — design rationale, mystery-edge sensitivity, tone
   intent, alternate-realization considerations.
+  Body-language and clothing discipline: when the storylet is cast-agnostic
+  (actor / target use role matchers), gestural examples MUST use
+  character-agnostic body language: anatomy ("a hand to the bruise"), posture
+  ("angling the body away"), or non-clothing-specific verbs ("a small motion to
+  cover"). Do not bake character-specific clothing details ("pulls her sleeve
+  down", "tugs the hood lower", "smooths her skirt") into cast-agnostic notes;
+  the storylet may be selected for a cast member whose wardrobe does not include
+  that garment, and page-plan authoring/rendering will propagate the
+  contradiction. When the storylet is cast-locked (actor / target or cast
+  requirements reference specific STENT ids; branch allowlists count only when
+  the branch context fixes the cast), character-specific clothing detail is
+  permitted after verifying against the cast member's Material Reality clothing
+  summary.
 
 # Example — fragile_offer archetype:
 # arc_contract:

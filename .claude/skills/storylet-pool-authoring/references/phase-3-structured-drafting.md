@@ -201,6 +201,43 @@ Closed effect types are:
 The LLM may propose semantic args, but the engine normalizes them into
 structured effect records or re-prompts on malformed shapes.
 
+### Body-language and clothing discipline in storylet notes
+
+Storylet `notes:` are scene-direction context for downstream page planning. In
+the selected-arc page-cycle case, they are carried into §15 and into the Phase 7
+plan-authoring prompt, where gestural anchors can propagate into frontmatter
+`declared_visible_affordances[]`, §8 cast-block intentions, and render-time beat
+directions.
+
+**Rule**: cast-agnostic storylets use character-agnostic body language in
+`notes:`. Use anatomy, posture, or non-clothing-specific verbs, such as "a hand
+to the bruise", "angling the body away", or "a small motion to cover".
+Cast-locked storylets may use character-specific clothing detail, but only after
+verifying against the cast member's CHAR dossier `body.Material Reality`
+clothing summary.
+
+**Cast-locked means** the storylet references specific STENT ids in
+`arc_contract.actor`, `arc_contract.target`, or cast requirements. A branch
+allowlist narrows availability, but it counts as clothing-safe only when that
+branch context fixes the cast member whose wardrobe is being invoked.
+
+**Examples**:
+
+- Cast-agnostic, audit-passing: "a glance, a small question, a small motion to
+  cover the bruise".
+- Cast-agnostic, audit-failing: "the way she pulls her sleeve down over the
+  bruise" (assumes a sleeved garment).
+- Cast-locked, audit-passing: "the way Iker (STENT-0003) tucks the manga
+  magazine under his hoodie's hem", after Iker's Material Reality wardrobe has
+  been checked for the hoodie.
+
+The motivating historical case is SLT-0012 of
+`worlds/erotica-world/stories/red-bunny`, whose `notes:` phrase "the way she
+pulls her sleeve down over the bruise" propagated into a page plan and rendered
+prose for Ane Arrieta despite her Material Reality specifying a sleeveless crop
+top. This rule prevents new cast-agnostic storylets from carrying that kind of
+floating garment fact upstream.
+
 ### `exit_portfolio`
 
 Populate 3-5 `native_seeds[]` entries unless `mode=jit` explicitly requests a

@@ -29,6 +29,28 @@ For bootstrap seed mode (`parent_skill_invocation: true`, `mode=seed`, `focus_ar
 | 13. | Exit-portfolio completeness | `exit_portfolio.native_seeds[]` has at least one native seed, each native seed has `commitment_family`, closed base `commitment_class`, optional `commitment_detail`, `strategy_cluster`, `expected_state_delta`, and `continuation_arc_selector`, and `engine_discovered_exit_budget` is present with min/max/allowed_sources. Required sub-field minimums are also enforced by SPEC-22's `arc_schema_compliance` validator. | HARD-REJECT |
 | 14. | Rule 11 spectator-caste leverage | Trigger only when `effect_model.variants[].required_effects[]` includes a `fact_create` op with `args.truth_scope.world_level == true` AND `args.exception_governance` populated. When triggered, `arc.notes` MUST carry a `leverage:`-prefixed line enumerating at least 3 ordinary-actor leverage forms from the canonical permissible set: `locality`, `secrecy`, `legitimacy`, `bureaucracy`, `numbers`, `ritual_authority`, `domain_expertise`, `access`, `timing`, `social_trust`, `deniability`, `infrastructural_control`. Arcs whose effects include only `mystery_progress`, `relationship_axis_shift`, `thread_pressure_delta`, or other story-local effects do NOT trigger this gate. This is a deliberate non-default story-scope extension of FOUNDATIONS Rule 11; the existing `rule11_action_space` engine validator applies to CF records, not SLTs. | HARD-REJECT |
 
+### Body-language and clothing discipline for `notes:`
+
+During Phase 4 revision review and Phase 5 batch review, scan each candidate
+storylet's `notes:` for character-specific garment vocabulary from
+`.claude/skills/_shared-templates/clothing-consistency-vocabulary.md`, including
+tokens such as sleeve, hood, pocket, lapel, collar, hem, cuff, button, zipper,
+belt, scarf, skirt-fold, sock, stocking, glove, hat, and jewelry/accessory
+tokens.
+
+If the storylet is cast-agnostic (role matchers rather than specific STENT ids),
+the scan must return zero character-specific garment anchors, or the wording
+must be revised to anatomy/posture/non-clothing-specific form before the
+storylet proceeds. Examples: "a hand to the bruise", "angling the body away",
+or "a small motion to cover".
+
+If the storylet is cast-locked to a specific STENT through `arc_contract.actor`,
+`arc_contract.target`, or cast requirements, garment-specific notes may remain
+only after the referenced garment is verified against that cast member's
+projected CHAR dossier `body.Material Reality` clothing summary. A branch
+allowlist narrows availability, but it counts as clothing-safe only when that
+branch context fixes the cast member whose wardrobe is being invoked.
+
 ## Gate 1 dual-field discipline
 
 The storylet-level `mystery_safety` field and the envelope-level `execution_envelope.mystery_preservation` field are not redundant.

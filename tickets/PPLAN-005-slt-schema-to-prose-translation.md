@@ -104,7 +104,7 @@ Bring the §15 prose-direction translation into the same body-cleanup posture as
 - Bootstrap PG-0001 §15-alt entry-pressure framing (unchanged — the root case omits §15 entirely).
 - The SLT record schema at `worlds/<slug>/stories/<slug>/_source/storylets/SLT-NNNN.yaml` (unchanged — the SLT record continues to carry the full schema; only the page-plan body view of the SLT changes).
 - Re-authoring of existing rendered plans.
-- Storylet-pool-authoring `notes:` field discipline (handled by PPLAN-004).
+- Storylet-pool-authoring `notes:` field discipline (handled by `archive/tickets/PPLAN-004-storylet-notes-character-agnostic-gestures.md`).
 
 ## Acceptance Criteria
 
