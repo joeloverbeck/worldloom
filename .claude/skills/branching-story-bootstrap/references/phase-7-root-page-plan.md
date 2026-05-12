@@ -42,7 +42,13 @@ Order matters; content_policy is FIRST so it binds the model before any other in
               Voice and Perception, when world_character_id set) + STENT
               record + current STINT + relevant SREL records]
 [state context — initial SFs (with epistemic_class), open OBLs, active THRs,
-                 STLOC + STOBJ in scope, cast_present, accessible_locations]
+                 STLOC + STOBJ in scope, cast_present, accessible_locations.
+                 For §10 / §11 / §12, author prose-direction translations
+                 per the canonical template: include the record id plus
+                 scene-relevant pressure / thread / aftermath direction, not
+                 schema-field dumps of salience integers, current_pressure
+                 integers, payoff_modes[] enumerations, consequence_address
+                 ops, or required_aftermath engine strings]
 [entry pressure framing — central dramatic question; Phase 5 initial obligations
                           and threads; Phase 4 mysteries_in_play; Phase 6
                           seed-pool commitment_class affordances summarized
@@ -80,6 +86,11 @@ template, with the following root-case deviations:
 - §12 Pending consequences: at PG-0001 root the consequences ledger is
   freshly initialized; populate with "(no pending consequences; bootstrap
   genesis state)" unless premise establishes a pre-PG-0001 CNSQ.
+- §10 / §11 / §12 state ledgers: at PG-0001 root, these contain only the
+  initial bootstrap obligations / threads / consequences. Use the canonical
+  prose-direction translation rule for the body view: keep the record ids and
+  scene-facing pressure / thread / aftermath direction, and leave OBL / THR /
+  CNSQ engine fields on the atomic records and `PG.state_snapshot`.
 - §14 Recent prose continuity: at PG-0001 root there is no parent prose;
   populate with "(no prior prose; this is the root page)".
 - §15 Selected scene-commitment arc: OMITTED at PG-0001 root.
@@ -100,9 +111,12 @@ template, with the following root-case deviations:
 - §17 Governor nudge: at PG-0001 root, populate with "bootstrap root; no
   prior-page governor".
 
-Every record id referenced in any plan section MUST be inlined verbatim in
-that section, per the canonical template's "Authoring rule" comment. Bare
-CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are plan-completeness
+Every record id referenced in any plan section MUST be self-contained in
+that section, per the canonical template's "Authoring rule" comment. Default:
+inline the record body verbatim. Where the canonical template defines a
+prose-direction translation rule (§10, §11, §12, §15), the translation plus
+record id satisfies self-containment without dumping engine-only schema fields.
+Bare CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are plan-completeness
 failures (Phase 9 gate 19) and plan_self_containment failures (Phase 9.5
 check 11).
 ```

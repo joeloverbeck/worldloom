@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — edits canonical page-plan template §18 / §19 body comments and both phase-7 references. Frontmatter `forbidden_engine_vocabulary[]` is unchanged.
-**Deps**: None directly. Pairs with `archive/tickets/PPLAN-002-mystery-enumeration-restriction.md` (the completed §18 DO NOT REVEAL mystery surface this ticket also touches), completed `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` (the §15 cleanup), and PPLAN-006 (the §10/§11/§12 cleanup) as the renderer-facing body cleanup tier.
+**Deps**: None directly. Pairs with `archive/tickets/PPLAN-002-mystery-enumeration-restriction.md` (the completed §18 DO NOT REVEAL mystery surface this ticket also touches), completed `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` (the §15 cleanup), and completed `archive/tickets/PPLAN-006-obligations-threads-consequences-prose-translation.md` (the §10/§11/§12 cleanup) as the renderer-facing body cleanup tier.
 
 ## Problem
 

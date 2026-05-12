@@ -336,8 +336,8 @@ The branch-isolation invariant is structurally enforced by this field combined w
     - §5 World canon snapshot: <N> CFs inlined
     - §8 Cast in this scene: <N> dossiers inlined
     - §9 Story-local facts visible: <N> SFs inlined
-    - §10 Open obligations: <N> OBLs inlined
-    - §11 Active threads: <N> THRs inlined
+    - §10 Open obligations: <N> OBLs translated as prose-direction pressure
+    - §11 Active threads: <N> THRs translated as prose-direction thread posture
     - §14 Recent prose continuity: <last 1-2 PG-* along branch_path inlined>
     - §15 Selected scene-commitment arc: SLT-NNNN id + prose-direction translation
     - §16 Chosen variant: <variant id> + required_effects[] inlined verbatim

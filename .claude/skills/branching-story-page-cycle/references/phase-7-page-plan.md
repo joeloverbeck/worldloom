@@ -41,7 +41,13 @@ Order matters; content_policy is FIRST so it binds the model before any other in
 [state context — current state_snapshot ledgers visible to POV: SFs (with
                  epistemic_class), open OBLs, active THRs, pending CNSQs,
                  STLOC + STOBJ in scope, cast_present, accessible_locations,
-                 inventory_by_entity, entity_status]
+                 inventory_by_entity, entity_status. For §10 / §11 / §12,
+                 author prose-direction translations of OBL / THR / CNSQ
+                 records per the canonical template: include the record id
+                 plus scene-relevant pressure / thread / aftermath direction,
+                 not schema-field dumps of salience integers, current_pressure
+                 integers, payoff_modes[] enumerations, consequence_address
+                 ops, or required_aftermath engine strings]
 [selected arc record — the SLT-NNNN selected at Phase 4; extract for §15 body
                        ONLY the prose-bearing fields: notes,
                        arc_contract.user_intent,
@@ -126,10 +132,10 @@ template, with the following selected-arc-case deviations:
 
 Every record id referenced in any plan section MUST be backed by body context
 in that section. Bare CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are
-plan-completeness failures (Phase 9 gate `plan_completeness_check`). §15 is
-the selected-arc exception: it MUST inline the resolvable SLT id and the
-prose-direction translation from the canonical template, not the full SLT
-schema body.
+plan-completeness failures (Phase 9 gate `plan_completeness_check`). Sections
+with canonical prose-direction translation rules (§10 OBL, §11 THR, §12 CNSQ,
+§15 SLT) MUST inline the resolvable record id and the prose-direction
+translation from the canonical template, not the full engine schema body.
 ```
 
 LLM produces the populated plan body. Engine writes the populated plan to a working buffer (NOT to disk yet — disk write happens at Phase 11 step 2 to `pages-prose-plans/PG-NNNN.md`). **The 8-axis prose critic does not run at this phase** — there is no rendered prose to critique at plan-commit. The critic moves to `branching-story-page-prose-finalize/references/phase-3-prose-critic.md`, where it runs against the user-supplied rendered prose at `pages-prose/PG-NNNN.md`.
@@ -141,7 +147,7 @@ LLM produces the populated plan body. Engine writes the populated plan to a work
 Phase 7's post-LLM check is structural, not stylistic:
 
 - Every required plan section (§1-§14, §15, §16, §17-§19 in the selected-arc case; §15-alt explicitly omitted) is populated with non-placeholder text.
-- Every inlined record id (CF-NNNN, CHAR-NNNN, SF-NNNN, OBL-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, M-NNNN, INV-id, SLT-NNNN) resolves against the current world index or story-bundle working buffer. For §15, the SLT id must resolve, but the body carries the prose-direction translation rather than the full SLT schema body.
+- Every inlined record id (CF-NNNN, CHAR-NNNN, SF-NNNN, OBL-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, M-NNNN, INV-id, SLT-NNNN) resolves against the current world index or story-bundle working buffer. For §10 / §11 / §12 / §15, the record id must resolve, but the body carries the prose-direction translation rather than the full engine schema body.
 - Frontmatter required keys are present and well-formed (`plan_id`, `story_id`, `world_slug`, `story_slug`, `parent_page_id`, `branch_id`, `branch_path`, `state_hash_at_plan_time`, `canon_revision_at_plan_time`, `prose_status`, `plan_authored_at`, `plan_authored_by`, `selected_arc_id`, `chosen_variant_id`, `required_effects`, `declared_visible_affordances`, `declared_intended_beats`, `declared_stop_condition`, `forbidden_resolutions`, `forbidden_engine_vocabulary`, `deferred_validation_trace`).
 - `selected_arc_id` matches the Phase-4-selected arc; `chosen_variant_id` matches the Phase-4b-chosen variant; `required_effects[]` matches the chosen variant's `required_effects[]` verbatim (selected-arc case shape).
 - `declared_intended_beats[]` length is within `[arc.beat_plan.min_beats, arc.beat_plan.max_beats]`.

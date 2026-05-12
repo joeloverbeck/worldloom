@@ -12,7 +12,10 @@ The plan IS the prompt. The external renderer reads ONLY this file (§1-§19 of 
 §2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-time instruction block) are
 inlined verbatim from `reports/prose-quality-instructions.md`, which is the upstream canonical
 source for those three sections; the report is NOT concatenated at render time.
-Every record id referenced in any plan section MUST be inlined verbatim in that section.
+Every record id referenced in any plan section MUST be self-contained in that section.
+Default: inline the record body verbatim. Exception: sections whose template block defines
+a prose-direction translation rule (§10, §11, §12, §15) inline the record id plus the
+specified renderer-facing translation instead of a full engine-field dump.
 
 Authoring rule: when in doubt, include more rather than less. The plan is the only context the renderer
 gets. Verbosity is a feature, not a defect.
@@ -153,16 +156,56 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 
 ## §10 Open obligations
 
-<!-- INLINE: every OBL in obligations_open with salience, urgency, who owes whom, payoff_modes[],
-     age, consequence_on_neglect. -->
+<!-- INLINE the prose-direction translation of each active obligation.
+
+     For each OBL in obligations_open, write one short paragraph with:
+     - OBL id + label / plain-language obligation
+     - who owes what to whom
+     - what makes it pressing right now, translating salience + urgency into prose register
+       ("high pressure", "background substrate", "newly pressing")
+     - how this page treats it (held / pressured / paid off / complicated / abandoned)
+     - named aftermath cue if any, translating payoff_modes[] into the scene-relevant subset
+       (typically one or two payoff modes the page might invoke, not the full enumeration)
+
+     Engine fields NOT inlined: salience and urgency integer values, payoff_modes[] full
+     enumeration, age, consequence_on_neglect verbatim text. These live on the atomic OBL
+     record at worlds/<slug>/stories/<story-slug>/_source/obligations/OBL-NNNN.yaml and on
+     PG.state_snapshot.obligations_open for validator readback (obligation_salience gate). -->
 
 ## §11 Active threads
 
-<!-- INLINE: every THR in threads_active with status, current_pressure, type. -->
+<!-- INLINE the prose-direction translation of each active thread.
+
+     For each THR in threads_active, write one short paragraph with:
+     - THR id + label / plain-language thread
+     - what the thread is about
+     - how it stood at the prior page
+     - what this page is expected to do with it (compound, hold, slacken, pivot, resolve)
+     - current_pressure translated into prose register ("the main thread",
+       "background substrate", "newly pressuring", "decisive this page") rather than
+       the integer
+
+     Engine fields NOT inlined: current_pressure integer value, status code, type enum.
+     These live on the atomic THR record and on PG.state_snapshot.threads_active for
+     validator readback. -->
 
 ## §12 Pending consequences
 
-<!-- INLINE: every CNSQ in consequences_pending with required_aftermath_text, urgency, source SE. -->
+<!-- INLINE the prose-direction translation of each pending consequence.
+
+     For each CNSQ in consequences_pending, write one short paragraph with:
+     - CNSQ id + label / plain-language consequence
+     - what is pending
+     - what the scene must acknowledge or honor about it
+     - how this page treats it (addressed, deferred, complicated)
+
+     When consequences_pending is empty, write a single sentence:
+     "(no pending consequences this turn)".
+
+     Do NOT inline engine ops vocabulary ("No consequence_address ops this turn") or schema
+     reasoning. Engine fields NOT inlined: urgency integer, source_SE identifier,
+     required_aftermath_text verbatim engine string. These live on the atomic CNSQ record
+     and on PG.state_snapshot.consequences_pending. -->
 
 ## §13 Locations & objects in scope
 

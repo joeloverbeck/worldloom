@@ -100,9 +100,9 @@ deferred_validation_trace:
    - Current STINT (goals, fears, current_pressure, beliefs, emotional_state).
    - Relevant SREL records (axes between this character and other cast in scene).
 9. **§ Story-local facts visible in this scene** — every SF in the page's `state_snapshot` filtered by POV-accessibility. Each SF inlined with `epistemic_class`, `certainty`, `known_by[]`, `derived_from_cf` if applicable.
-10. **§ Open obligations** — every OBL in `obligations_open` inlined: salience, urgency, who owes whom, payoff_modes[], age, consequence_on_neglect.
-11. **§ Active threads** — every THR in `threads_active` inlined: status, current_pressure, type.
-12. **§ Pending consequences** — every CNSQ in `consequences_pending` inlined: required_aftermath_text, urgency, source SE.
+10. **§ Open obligations** — every OBL in `obligations_open` appears as a prose-direction translation: OBL id, who owes what to whom, scene-facing pressure, page treatment, and any relevant aftermath cue. Engine fields NOT inlined: salience / urgency integers, full payoff_modes[] enumeration, age, consequence_on_neglect verbatim text.
+11. **§ Active threads** — every THR in `threads_active` appears as a prose-direction translation: THR id, what the thread is about, prior-page posture, and this page's intended movement. Engine fields NOT inlined: current_pressure integer, status code, type enum.
+12. **§ Pending consequences** — every CNSQ in `consequences_pending` appears as a prose-direction translation: CNSQ id, what is pending, what the scene must acknowledge or honor, and whether the page addresses / defers / complicates it. Engine fields NOT inlined: urgency integer, source_SE identifier, required_aftermath_text verbatim engine string.
 13. **§ Locations & objects in scope** — current_location, accessible_locations, objects_in_scope, inventory_by_entity. STLOC/STOBJ records inlined.
 14. **§ Recent prose continuity along this branch** — verbatim contents of the last 1-2 `pages-prose/PG-*.md` along `branch_path` (not sibling branches). Marked: "for continuity ONLY; do NOT reuse phrasings, metaphor tokens, or specific concrete anchors verbatim." **Hard pre-flight block in page-cycle**: this section requires the parent's prose to exist; pre-flight aborts when `parent.prose_status != rendered`.
 15. **§ Selected scene-commitment arc** — full inlined arc record (arc_contract, dramatic_unit, beat_plan with min/max/beat-functions, execution_envelope, stop_policy.normal_exits, effect_model.variants[]). **Conditional**: present when `selected_arc_id != null`.
@@ -204,8 +204,8 @@ Plan section coverage:
 - §5 World canon snapshot: <N> CFs inlined
 - §8 Cast in this scene: <N> dossiers inlined (CHAR-NNNN, CHAR-NNNN, ...)
 - §9 Story-local facts visible: <N> SFs inlined
-- §10 Open obligations: <N> OBLs inlined
-- §11 Active threads: <N> THRs inlined
+- §10 Open obligations: <N> OBLs translated as prose-direction pressure
+- §11 Active threads: <N> THRs translated as prose-direction thread posture
 - §15-alt Entry pressure framing: <one-sentence summary>
 - §18 Scene direction:
     REQUIRED TURN: <one sentence>
