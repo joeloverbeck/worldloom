@@ -6,7 +6,22 @@ Phase 7 is the only writing phase. It assembles a single patch envelope, validat
 
 The envelope contains exactly these ops, in this order:
 
-1. **`update_record_field`** — five (or seven) ops, all targeting the existing PG record:
+1. **`update_record_field`** — five (or seven) ops, all targeting the existing PG record. Each op has the shape:
+
+   ```yaml
+   op: update_record_field
+   target_world: <world-slug>
+   target_file: worlds/<world-slug>/stories/<story-slug>/_source/pages/PG-NNNN.yaml
+   target_record_id: PG-NNNN
+   expected_content_hash: <pg-current-content-hash>
+   payload:
+     target_record_id: PG-NNNN
+     field_path: [<from per-op table below>]
+     operation: set
+     new_value: <from per-op table below>
+   ```
+
+   The `payload` wrapper is required by the envelope schema (per `tools/patch-engine/src/envelope/schema.ts`'s `update_record_field` definition — the same canonical-discovery pattern documented at `branching-story-bootstrap/references/engine-envelope-shape.md §2` for the engine-routing skill cohort and queryable live via `mcp__worldloom__describe_envelope_schema(op_kind='update_record_field')`); `target_record_id` appears both at top-level (optional) and inside `payload` (required). The per-op `field_path` / `operation` / `new_value` values:
 
    | Field path | Operation | new_value |
    |---|---|---|
@@ -18,7 +33,7 @@ The envelope contains exactly these ops, in this order:
    | `["state_snapshot", "arc_trace_emitted"]` | `set` | `true` — **only when Phase 4 ran** |
    | `["state_snapshot", "arc_trace_id"]` | `set` | `"ARCTRACE-NNNN"` — **only when Phase 4 ran** |
 
-   Each op carries `target_record_id: PG-NNNN`, `target_world: <world-slug>`, `expected_content_hash: <pg-current-content-hash>` (read from `mcp__worldloom__get_record` at pre-flight and cached). The `target_file` field is shape-validation only; the engine derives the actual path from the record id. Set `target_file` to the canonical path `worlds/<world-slug>/stories/<story-slug>/_source/pages/PG-NNNN.yaml` to satisfy the envelope-shape validator. Bare `target_record_id: PG-NNNN` is the canonical form for story-bundle records — the engine resolves story-bundle namespacing internally — and chained `update_record_field` ops on the same record in a single envelope each accumulate against the prior op's staged state.
+   `expected_content_hash` is read from `mcp__worldloom__get_record` at pre-flight and cached. The `target_file` field is shape-validation only; the engine derives the actual path from the record id. Set `target_file` to the canonical path `worlds/<world-slug>/stories/<story-slug>/_source/pages/PG-NNNN.yaml` to satisfy the envelope-shape validator. Bare `target_record_id: PG-NNNN` is the canonical form for story-bundle records — the engine resolves story-bundle namespacing internally — and chained `update_record_field` ops on the same record in a single envelope each accumulate against the prior op's staged state.
 
    No `retcon_attestation` is required on these ops. The PG transitional state fields (`prose_path`, `prose_status`, `deferred_validation_trace.{prose_ledger_consistency, arc_trace_evidence_alignment, prose_critic_8_axis}`, `state_snapshot.{arc_trace_emitted, arc_trace_id}`) are recognized by the engine's `update_record_field` op as freely-settable transitional state fields (the same way `notes` is freely-appendable). The SE event in Op 2 provides the Rule 6 audit trail.
 

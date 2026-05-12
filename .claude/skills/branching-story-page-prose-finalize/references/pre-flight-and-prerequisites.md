@@ -57,7 +57,7 @@ Load `docs/FOUNDATIONS.md` into working context. The non-negotiable load (per CL
 
 - **Rule 1 — No Cosmetic Output.** The PG field updates, SE event, and (conditional) ARCTRACE record are load-bearing — they are the only record of the prose-render verdict in the bundle.
 - **Rule 6 — No Silent Retcons.** The SE event with `action: prose_finalized` is the immutable audit trail for the `pending → rendered` state transition. Without the SE event, the transition is a silent retcon.
-- **Rule 7 — Mystery Reserve Preservation.** Phase 2's forbidden-mystery scan + Phase 3's LLM critic together enforce the firewall over rendered prose. Pre-flight loads the world's whole-class Mystery Reserve (`mcp__worldloom__list_records('mystery_reserve_entry', world_slug)`) so Phase 2 can run the forbidden-resolution check against the live status of every M-NNNN, not just the plan's `forbidden_resolutions[]`.
+- **Rule 7 — Mystery Reserve Preservation.** Phase 2's forbidden-mystery scan + Phase 3's LLM critic together enforce the firewall over rendered prose. Pre-flight loads the world's whole-class Mystery Reserve (`mcp__worldloom__list_records(world_slug, record_type='mystery_record')`) so Phase 2 can run the forbidden-resolution check against the live status of every M-NNNN, not just the plan's `forbidden_resolutions[]`.
 
 **Verify FOUNDATIONS-in-context before proceeding.** A pre-flight that fails to load FOUNDATIONS is an incomplete pre-flight; treat as an abort condition.
 
@@ -71,11 +71,13 @@ Pre-flight assembles the read set that Phase 1-Phase 5 consume. No phase re-read
 | `worlds/<slug>/stories/<story-slug>/pages-prose/PG-NNNN.md` (full body) | Phase 2 (regex scans), Phase 3 (LLM critic input), Phase 5 (prose-ledger-consistency claim extraction), Phase 4 (Layer 2 evidence_span extraction) | direct file read |
 | PG record | Phase 1 (state_hash, state_snapshot.canon_revision), Phase 5 (state_snapshot for prose-ledger-consistency), Phase 7 (field updates) | `mcp__worldloom__get_record` |
 | Parent PG record + prior 1-2 prose pages along `branch_path` | Phase 3 (cross-page tic detection — recurring metaphor / identical anchor across pages) | `mcp__worldloom__get_record` for the parent + direct reads for the prose files along branch_path |
-| World canon `mystery_reserve_entry` whole-class load | Phase 2 (live forbidden-status M scan, in addition to the plan's frozen-at-plan-time `forbidden_resolutions[]`) | `mcp__worldloom__list_records('mystery_reserve_entry', world_slug)` |
-| World canon `invariant` whole-class load | Phase 5 (`prose_ledger_consistency` cross-checks claims against active INVs) | `mcp__worldloom__list_records('invariant', world_slug)` |
+| World canon `mystery_record` whole-class load | Phase 2 (live forbidden-status M scan, in addition to the plan's frozen-at-plan-time `forbidden_resolutions[]`) | `mcp__worldloom__list_records(world_slug, record_type='mystery_record')` |
+| World canon `invariant_record` whole-class load | Phase 5 (`prose_ledger_consistency` cross-checks claims against active INVs) | `mcp__worldloom__list_records(world_slug, record_type='invariant_record')` |
 | Selected arc record (SLT-NNNN named in `PG.storylet_realized`) | Phase 4 (Layer 1 structural validation + Layer 2 trace extraction + Layer 3 semantic critic) | `mcp__worldloom__get_record` — skip when `PG.storylet_realized == null` |
 | `content_policy` block from the story bundle's STORY_KERNEL.md | Phase 3 prompt assembly (loaded FIRST in the prompt) | direct file read |
 | `prose-craft-contract.md` | Phase 3 prompt assembly (loaded verbatim, after content_policy) | direct file read of `.claude/skills/branching-story-page-cycle/references/prose-craft-contract.md` |
+
+**Large plans (≥25k tokens — common past PG-0005 on prose-rich branches where §14 Recent prose continuity inlines prior pages-prose verbatim):** the Read tool errors when the file exceeds ~25k tokens. Recover via either (i) sectional reads using `offset` / `limit` to load only the regions each downstream phase consumes, or (ii) multiple chunked full-body reads via successive `offset` / `limit` calls that cumulatively cover the body. Per-phase plan-section consumption: Phase 1 reads frontmatter only (`state_hash_at_plan_time`, `canon_revision_at_plan_time`); Phase 2 reads frontmatter (`forbidden_engine_vocabulary`, `forbidden_resolutions`) + §18 (REQUIRED TURN cue); Phase 4 reads §15 (selected arc record); Phase 3 and Phase 5 do not read the plan body (Phase 3 reads the rendered prose body + prior pages along `branch_path`; Phase 5 reads `PG.state_snapshot` from the PG record).
 
 If any retrieval fails, abort with the specific source named — do NOT proceed with a partial read set.
 
