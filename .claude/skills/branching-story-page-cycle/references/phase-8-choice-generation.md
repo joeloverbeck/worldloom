@@ -64,13 +64,13 @@ before CHCs are surfaced.
    `continuation_arc_selector` matches at least one eligible arc in the storylet
    pool. Eligibility uses the same deterministic checks as Phase 4: `hard_preconds`,
    `cast_requirements`, `location_requirements`, visibility, mystery safety, and
-   `commitment_class`.
+   closed base `commitment_class`.
 2. **Engine-discovered exits**: add exits from
    `arc.exit_portfolio.engine_discovered_exit_budget.allowed_sources[]`, capped at
    `arc.exit_portfolio.engine_discovered_exit_budget.max`. Legal sources include
    `urgent_obligation`, `high_salience_thread`, `unresolved_consequence`, and
-   `user_write_in`. Each discovered exit derives a `commitment_class` from the
-   source's structural semantics.
+   `user_write_in`. Each discovered exit derives a `commitment_family` and
+   closed base `commitment_class` from the source's dominant scene strategy.
 3. **JIT synthesis**: if the candidate set remains below
    `STORY_KERNEL.menu_policy.min_distinct_commitments` (default `2`), invoke
    `storylet-pool-authoring mode=jit` to synthesize a missing arc archetype.
@@ -85,7 +85,9 @@ Every candidate intended for menu emission is assembled as a CHC working record:
 ```yaml
 record_version: 2
 choice_kind: scene_commitment
+commitment_family: <commitment_family enum>
 commitment_class: <commitment_class enum>
+commitment_detail: <story-specific precision label | null>
 strategy_cluster: <kebab-case open-vocab tag>
 choice_worthiness:
   strategic_question_answered: >
@@ -103,6 +105,9 @@ label: null
 
 `choice_contract` and `continuation_capacity` remain load-bearing. A candidate with
 no legal seed continuation and no valid JIT continuation is not emitted.
+`commitment_class` is the deterministic continuation key; `commitment_family`
+summarizes broad route coverage and may be derived from class for old records;
+`commitment_detail` is optional precision and must not be the only match key.
 
 ## Step 3: Choice-Worthiness Validation (engine; HARD-REJECT failures)
 
@@ -152,6 +157,8 @@ When Step 1 classifies `CONTINUE_ONLY_PAUSE`, emit exactly one CHC:
 record_version: 2
 choice_kind: tactical_beat
 commitment_class: continue_arc_continuation  # tactical_beat-only special-case value; NOT in storylet-pool-authoring's scene_commitment_arc COMMITMENT_CLASSES enum (per references/phase-1-coverage-diagnosis.md §Distribution Scans); auto-PASSes Phase 9 gate 9 per references/phase-9-validation-gates.md gate 9 carve-out
+commitment_family: null              # tactical_beat carve-out; no scene-commitment family
+commitment_detail: null
 strategy_cluster: continue-only
 choice_worthiness:
   strategic_question_answered: "Continue the current arc safely."
@@ -214,8 +221,8 @@ Special-case behavior:
     engage immediately;
   - active threads from bootstrap Phase 5 carrying entry pressure;
   - seed-pool arc eligibility, where every SLT whose `hard_preconds` pass against
-    PG-0001's `state_snapshot` contributes its `arc_contract.commitment_class` as a
-    candidate;
+    PG-0001's `state_snapshot` contributes its `arc_contract.commitment_family`
+    and `arc_contract.commitment_class` as a candidate route;
   - optional JIT synthesis when the candidate set is below
     `STORY_KERNEL.menu_policy.min_distinct_commitments`.
 - **Steps 3, 4, and 5**: apply normally. Every stored PG-0001 CHC has non-empty
@@ -243,13 +250,15 @@ For each surviving structured choice, the LLM writes the user-facing label:
 ```
 [content_policy block]
 [scene context summary]
-[structured choice - choice_kind, commitment_class, strategy_cluster,
+[structured choice - choice_kind, commitment_family, commitment_class,
+ commitment_detail, strategy_cluster,
  choice_worthiness, choice_contract, likely_effects, continuation_capacity]
 
 INSTRUCTION:
 Write the user-facing label for this choice. Faithful to the validated CHC
-record - especially `commitment_class`, `choice_worthiness`, `choice_contract`,
-and `likely_effects`. Do not embellish in ways that lie about what the choice
+record - especially `commitment_family`, `commitment_class`, optional
+`commitment_detail`, `choice_worthiness`, `choice_contract`, and
+`likely_effects`. Do not embellish in ways that lie about what the choice
 does. Match the prose tone. Length: 5-15 words. Prefer active voice. Do not
 preview the outcome explicitly; the player should make the choice without knowing
 exactly what will happen.

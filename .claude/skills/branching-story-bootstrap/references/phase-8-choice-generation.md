@@ -11,7 +11,7 @@ PG-0001 has no parent arc and no ARC_TRACE because Phase 7 rendered a scene-sett
 Run the page-cycle Phase 8 special-case behavior:
 
 1. **Narrative-point classification**: skipped. PG-0001 defaults to `NATURAL_COMMITMENT_HINGE` because the bootstrap root is the first commitment surface.
-2. **Hybrid exit portfolio composition**: compose candidates without native seeds from a closed arc. Candidate sources are initial obligations, active threads, seed-pool arc eligibility, and the Visible Affordance Map as a grounding/prioritization source. The seed pool contributes eligible `arc_contract.commitment_class` values; it does not imply an already-closed root arc.
+2. **Hybrid exit portfolio composition**: compose candidates without native seeds from a closed arc. Candidate sources are initial obligations, active threads, seed-pool arc eligibility, and the Visible Affordance Map as a grounding/prioritization source. The seed pool contributes eligible `arc_contract.commitment_family` and closed base `arc_contract.commitment_class` values; it does not imply an already-closed root arc.
 3. **Choice-worthiness validation**: apply normally. Every stored PG-0001 CHC must have non-empty `likely_effects`, populated `choice_worthiness`, at least one closed-enum `strong_axes` entry, and non-empty continuation capacity.
 4. **Strong-axis collective difference**: apply normally. The displayed menu must collectively cover at least two distinct `choice_worthiness.strong_axes` values.
 5. **Surface label rendering**: render labels from the validated CHC records without adding outcome promises absent from `choice_contract`.
@@ -23,7 +23,7 @@ Menu difference is commitment-level and strong-axis-level. The page-cycle Phase 
 
 ## CHC fields
 
-`branching-story-page-cycle` Phase 8 is the runtime authority. Stored PG-0001 CHCs are scene-commitment records with at least: `record_version: 2`, `choice_kind: scene_commitment`, `commitment_class`, `strategy_cluster`, populated `choice_worthiness`, populated `choice_contract`, non-empty `likely_effects[]`, populated `continuation_capacity`, `content_intensity_implied`, and `label` (the user-facing prose).
+`branching-story-page-cycle` Phase 8 is the runtime authority. Stored PG-0001 CHCs are scene-commitment records with at least: `record_version: 2`, `choice_kind: scene_commitment`, `commitment_family`, closed base `commitment_class`, optional `commitment_detail`, `strategy_cluster`, populated `choice_worthiness`, populated `choice_contract`, non-empty `likely_effects[]`, populated `continuation_capacity`, `content_intensity_implied`, and `label` (the user-facing prose).
 
 ---
 

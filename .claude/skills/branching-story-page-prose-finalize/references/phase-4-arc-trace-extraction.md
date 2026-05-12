@@ -39,7 +39,7 @@ realized_beats:
   - beat_id: B1
     function: <beat_function string>
     evidence_span: { start: <char offset>, end: <char offset> }
-    realized: true | partially | not
+    realized: "true" | "partially" | "not"  # quoted enum-string
 
 observed_actions:
   - actor: STENT-NNNN
@@ -64,8 +64,8 @@ stop_condition_hit:
   evidence_span: { start: <char offset>, end: <char offset> }
 
 effect_evidence:
-  - effect_ref: <variants[].required_effects[N]>
-    realized: true | partially | not
+  - effect_ref: <N>  # integer index into chosen variant's required_effects[]
+    realized: "true" | "partially" | "not"  # quoted enum-string
     evidence_span: { start: <char offset>, end: <char offset> }
 
 semantic_critic_verdict:

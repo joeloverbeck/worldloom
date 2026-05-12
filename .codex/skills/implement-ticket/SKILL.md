@@ -226,6 +226,7 @@ For skill tickets, verify:
 
 - If this check adds templates, examples, references, a parent `SKILL.md`, or same-seam docs/specs to the owned file set, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
 - Before editing, run a compact skill-local file inventory such as `rg --files <skill-dir>` and inspect any `templates/`, `references/`, and `examples/` whose emitted fields, phase names, source-kind enums, prompt labels, command fragments, or handoff artifacts overlap the ticket.
+- When editing skill templates or examples that emit enum-like, vocabulary, or mapping-coupled values, verify sample values against the live vocabulary, schema, or mapping authority before closeout. Do not trust plausible labels in examples when the repo has a canonical enum or class-to-family map.
 - `SKILL.md` trigger text still matches the skill's real purpose
 - required reads and prerequisites are truthful
 - HARD-GATE behavior still matches repo policy
@@ -283,6 +284,7 @@ Then run the closeout hard stops from the focused references:
 - If a package/tool ticket changes a user-facing CLI command, flag, help text, or workflow command, explicitly sweep the package README/examples and `docs/WORKFLOWS.md` before final proof or record why each surface is outside scope.
 - If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
+- If the ticket adds, removes, or reorders columns in markdown tables, manually verify the header row, separator row, and representative data/example rows have matching column counts. `git diff --check` does not catch semantic table arity mismatches.
 - Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited code, docs, tickets, or skill files. If owned edited files are still untracked, remember that plain `git diff --check` will not inspect them; run a real equivalent such as `git add -N <owned-untracked-paths>` followed by `git diff --check -- <owned-paths>`, or another explicit untracked-file whitespace check, and record which method covered the untracked files. If you used `git add -N` only for hygiene coverage, clear those intent-to-add entries with `git reset -- <owned-untracked-paths>` after the check and refresh `git status --short`.
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.

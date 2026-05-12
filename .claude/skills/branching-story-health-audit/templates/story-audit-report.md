@@ -32,7 +32,7 @@ flagged_pages: []                    # page-cycle narrative_health.flagged_for_a
 high_jit_rate_branches: []           # items carry branch_leaf_id, jit_page_count, window_page_count, rate
 choice_cadence_summary: []            # per-branch arc-unit cadence metrics; no word-count metrics
 arc_conformance_summary: []           # per-branch ARC_TRACE semantic critic, envelope, and realized-beat metrics
-commitment_class_coverage_summary: [] # per-branch and bundle commitment_class distribution metrics
+commitment_class_coverage_summary: [] # per-branch and bundle commitment_family + commitment_class distribution metrics
 rsp_card_ids: []                     # list of non-dropped RSP-NNNN ids written under audits/SAU-NNNN/remediation-storylet-proposals/
 dropped_finding_ids: []              # finding-IDs the user dropped at Phase 9 — still appear in body marked "(dropped by user at Phase 9)"
 dropped_card_ids: []                 # RSP-NNNN ids the user dropped at Phase 9 — never written; appear here and in Remediation Proposals Index marked "(dropped by user at Phase 9)"
@@ -128,7 +128,7 @@ For `choice_cadence` findings, include branch leaf id, mean arcs between menus, 
 
 For `arc_conformance` findings, include page id, ARCTRACE id, `semantic_critic_verdict.status`, offending `possible_violations[].envelope_item`, evidence_span, severity, and realized-beat evidence when relevant. High-severity envelope violations are always errors.
 
-For `commitment_class_coverage` findings, include branch leaf id, realized-arc count, commitment_class distribution, missing commitment classes, over-represented class if any, and severity rationale.
+For `commitment_class_coverage` findings, include branch leaf id, realized-arc count, commitment_family distribution, commitment_class distribution, missing commitment families/classes, over-represented family/class if any, and severity rationale. `commitment_detail` may be noted as precision when relevant, but it is not a coverage quota axis.
 
 (repeat per error finding)
 
@@ -186,11 +186,11 @@ Routing: each non-dropped RSP-NNNN-<slug>.md card under `audits/SAU-NNNN/remedia
 
 (empty section is recorded as "No ARC_TRACE records available for audited branches." only for explicit legacy or no-trace bundles)
 
-## Commitment-Class Coverage
+## Commitment-Route Coverage
 
-| Scope | Realized arcs | Top commitment class | Missing commitment classes | Over-represented classes |
-|---|---:|---|---|---|
-| <leaf-id or bundle> | N | <commitment_class> (N) | <count or none> | <class list or none> |
+| Scope | Realized arcs | Top commitment family | Top commitment class | Missing families/classes | Over-represented families/classes |
+|---|---:|---|---|---|---|
+| <leaf-id or bundle> | N | <commitment_family> (N) | <commitment_class> (N) | <family count>/<class count or none> | <family list>; <class list or none> |
 
 ## Health Snapshot at audit time
 

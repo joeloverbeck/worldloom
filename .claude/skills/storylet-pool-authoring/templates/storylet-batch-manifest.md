@@ -15,13 +15,14 @@ aligned across edits; see STPOOL-009 for the alignment rationale. -->
 
 ## Approved storylets
 
-| SLT | Title | Commitment class | Arc archetype | Value delta axes | Intensity | Engages | Mystery | Visibility |
-|---|---|---|---|---|---|---|---|---|
-| SLT-NNNN | `<title>` | `<commitment_class>` | `<arc_archetype>` | `<value_delta_target.axes[]>` | `<intensity>` | OBL-NNNN (opens), OBL-NNNN (complicates) | M-NNNN (touched) \| none | `<scope>` |
+| SLT | Title | Commitment family | Commitment class | Commitment detail | Arc archetype | Value delta axes | Intensity | Engages | Mystery | Visibility |
+|---|---|---|---|---|---|---|---|---|---|---|
+| SLT-NNNN | `<title>` | `<commitment_family>` | `<commitment_class>` | `<commitment_detail or null>` | `<arc_archetype>` | `<value_delta_target.axes[]>` | `<intensity>` | OBL-NNNN (opens), OBL-NNNN (complicates) | M-NNNN (touched) \| none | `<scope>` |
 
 ## Diversity summary
 
-- **Commitment class distribution**: `<commitment_class>: <count>; ...` (max axis: <X>%; rule ≤30% for established/top-up batches; documented small-batch relaxation allowed — PASS)
+- **Commitment family distribution**: `<commitment_family>: <count>; ...` (broad coverage axis — PASS)
+- **Commitment class distribution**: `<commitment_class>: <count>; ...` (max axis: <X>%; rule ≤30% for established/top-up batches; documented small-batch relaxation allowed — PASS; `commitment_detail` is optional precision, not a quota axis)
 - **Arc archetype distribution**: `<arc_archetype>: <count>; ...` (max axis: <X>%; rule ≤25% — PASS)
 - **Tone distribution**: `<tone>: <count>; ...` (max axis: <X>%; rule ≤40% — PASS)
 - **Content intensity distribution**: `tame: X | mature: Y | explicit: Z` (matches `<baseline>` baseline target distribution — PASS)

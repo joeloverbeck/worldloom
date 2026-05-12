@@ -16,7 +16,9 @@ Emit each seed in this shape:
 
 ```yaml
 arc_seed:
+  commitment_family: <commitment_family enum>
   commitment_class: <commitment_class enum>
+  commitment_detail: <story-specific precision label | null>
   arc_archetype: <arc_archetype label>
   target_obligation: OBL-NNNN | null
   target_thread: THR-NNNN | null
@@ -35,7 +37,12 @@ arc_seed:
     state.
 ```
 
-`commitment_class` values come from SPEC-22 Track 3 `COMMITMENT_CLASSES`.
+`commitment_family` values come from the canonical `commitment_family`
+vocabulary. `commitment_class` values come from the canonical closed base
+`commitment_class` vocabulary and must belong to the selected family. Do not
+emit `base_commitment_class`. `commitment_detail` is optional, open,
+story-specific precision; it may clarify the seed's dramatic target but must
+not become the only continuation key.
 `arc_archetype` values should use the local `templates/arc-archetypes.md`
 library when one of its orienting patterns fits. If none fits, use a concise
 story-specific snake_case label and let the `dramatic_unit` / `beat_plan` define
@@ -52,15 +59,16 @@ the structure. `value_delta_target_axes` entries come from SPEC-22 Track 3
 - `character_intention`
 
 The authoring unit is the scene-commitment arc; every seed must be keyed by
-`commitment_class` and `arc_archetype`.
+`commitment_family`, closed base `commitment_class`, and `arc_archetype`.
 
 ## Required And Nullable Fields
 
-The arc seed has 11 fields.
+The arc seed has 13 fields.
 
 Mandatory fields:
 
 - `commitment_class`
+- `commitment_family`
 - `arc_archetype`
 - `entry_pressure_description`
 - `scene_question`
@@ -74,11 +82,13 @@ Nullable fields:
 
 - `target_obligation`
 - `target_thread`
+- `commitment_detail`
 
 Nullable fields must still be explicit. Use `null` when the arc does not engage
-an OBL or THR. Arcs that engage neither an obligation nor a thread are valid
-when Phase 1 identifies another story-state pressure, such as mystery coverage,
-recent-history repetition relief, route pressure, or cast-state repair.
+an OBL or THR or when no story-specific `commitment_detail` is needed. Arcs
+that engage neither an obligation nor a thread are valid when Phase 1 identifies
+another story-state pressure, such as mystery coverage, recent-history
+repetition relief, route pressure, or cast-state repair.
 
 `target_obligation` and `target_thread` may hold real ids only when Phase 1's
 diagnosis matrix made those records available. Do not guess ids and do not
@@ -112,12 +122,14 @@ prioritize seeds from these pressures:
 - THR rows with escalation commitment_class gaps.
 - Low-count `arc_archetype_distribution` entries that fit the current story
   pressure.
-- Low-count `commitment_class_distribution` entries that fit current OBL, THR,
+- Low-count `commitment_family_distribution` entries that fit current OBL, THR,
   mystery, route, or cast-state needs.
+- Low-count `commitment_class_distribution` entries inside those families that
+  fit current OBL, THR, mystery, route, or cast-state needs.
 - `mysteries_in_play_by_arc` entries with `gap: true`, limited to safe touching
   or progressing rather than resolution.
 - `recent_history_repetition_signal.over_represented` entries, which suppress
-  repeated commitment_classes unless a supplied source OBL/THR requires them.
+  repeated commitment classes unless a supplied source OBL/THR requires them.
 - `content_intensity_distribution` gaps, constrained by
   `STORY_KERNEL.content_intensity_baseline`, `content_intensity_override`, and
   the NC-21 content policy.
@@ -129,15 +141,15 @@ matrix. Mandatory source targeting takes precedence over archetype or
 commitment-class balancing; Phase 5 will audit the resulting batch distribution.
 
 Focus mode keeps the requested `focus_area` as a pressure lens. For example,
-`focus_area=thread_resolution_options` should bias toward commitment_classes
-and archetypes that can lower, redirect, or close thread pressure.
+`focus_area=thread_resolution_options` should bias toward commitment families,
+classes, and archetypes that can lower, redirect, or close thread pressure.
 
 ## Audit Mode
 
 For audit mode (`mode=audit`), validated RSP cards drive seed creation. Each RSP produces an
 arc seed whose targeting fields come from the card: `commitment_family` from
-`RSP.target_commitment_family` when present, `commitment_class` from
-`RSP.target_commitment_class`, optional precision from
+`RSP.target_commitment_family` when present or derived from the target class,
+`commitment_class` from `RSP.target_commitment_class`, optional precision from
 `RSP.target_commitment_detail`, `arc_archetype` from
 `RSP.target_arc_archetype`, nullable `target_obligation` and `target_thread`
 from the RSP's corresponding target fields, `entry_pressure_description` and
@@ -160,11 +172,12 @@ these RSP fields without defining or migrating them:
 For JIT mode (`mode=jit`) with `parent_skill_invocation: true`, produce exactly
 one seed from the continuation-failure context in `caller_state_snapshot`.
 
-The seed's `commitment_class` must match the chosen CHC's
-`commitment_class`. Select `arc_archetype` from `templates/arc-archetypes.md`
-using the deterministic `commitment_class -> recommended arc_archetype` mapping
-unless the caller state proves a more specific story-local archetype label is
-required.
+The seed's `commitment_class` must match the chosen CHC's closed base
+`commitment_class`; carry `commitment_family` from the CHC when explicit or
+derive it from the class, and carry `commitment_detail` only as optional
+precision. Select `arc_archetype` from `templates/arc-archetypes.md` using the
+deterministic `commitment_class -> recommended arc_archetype` mapping unless
+the caller state proves a more specific story-local archetype label is required.
 
 The JIT seed should be just large enough for Phase 3's template cascade to
 produce one runtime `branch_scoped` arc:
@@ -184,8 +197,14 @@ Direct user invocation of JIT remains invalid; JIT is a no-write sub-routine for
 
 ## Field Guidance
 
-`commitment_class` should answer: what kind of commitment does this arc test,
-offer, defer, tighten, or transform?
+`commitment_family` should answer: which broad route family this arc belongs to
+for coverage and summary purposes.
+
+`commitment_class` should answer: what closed base commitment does this arc
+test, offer, defer, tighten, or transform?
+
+`commitment_detail` should answer: what story-specific precision would help an
+operator understand this arc without creating a new routing key?
 
 `arc_archetype` should answer: what dramatic structure from
 `templates/arc-archetypes.md`, or what story-specific dramatic structure if the
