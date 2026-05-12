@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: None — template edit only; the `stop_policy_parsability` validator already rejects empty/missing `interrupt_before`.
-**Deps**: STPOOL-002 (the escalation_to_confrontation `interrupt_before` block's `safety_valve_triggered` predicate must be replaced first per F-01).
+**Deps**: archive/tickets/STPOOL-002-fix-stop-predicate-args-in-storylet-record-examples.md (the escalation_to_confrontation `interrupt_before` block's `safety_valve_triggered` predicate was replaced first per F-01).
 
 ## Problem
 
@@ -13,11 +13,11 @@
 - Main scaffold at `:225-228` shows `interrupt_before:` with a comment-only sample (no concrete entry).
 - `fragile_offer` example (`:299-304`) omits `interrupt_before` entirely — only `normal_exits` and `safety_valves` present.
 - `bounded_question` example (`:348-353`) omits `interrupt_before` entirely.
-- `escalation_to_confrontation` example (`:399-405`) includes `interrupt_before` but the entry uses the invalid `safety_valve_triggered` predicate (corrected by STPOOL-002).
+- `escalation_to_confrontation` example (`:399-405`) includes `interrupt_before`; its formerly invalid `safety_valve_triggered` predicate was corrected by `archive/tickets/STPOOL-002-fix-stop-predicate-args-in-storylet-record-examples.md`.
 
 Per `branching-story-bootstrap/references/phase-6-storylet-pool-seed.md:79`: *"`stop_policy.interrupt_before` must be NON-EMPTY (≥1 entry). The storylet template shows it as syntactically optional, but the validator rejects empty `interrupt_before: []` arrays."*
 
-After STPOOL-002 lands, none of the three example arcs will demonstrate a passing `interrupt_before` block. Records constructed by following these examples will fail `stop_policy_parsability`.
+After `archive/tickets/STPOOL-002-fix-stop-predicate-args-in-storylet-record-examples.md`, none of the three example arcs demonstrates a passing `interrupt_before` block. Records constructed by following these examples will fail `stop_policy_parsability`.
 
 This was uncovered by storylet-pool-authoring streamlining audit 2026-05-12 finding F-03.
 
