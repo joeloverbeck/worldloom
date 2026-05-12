@@ -46,7 +46,7 @@ Fill the SLT template for this arc seed. Required:
 - arc_contract (commitment_class, arc_archetype, actor, target, user_intent,
   strategic_question_answered, commitment_scope, success_policy, allowed_outcome_band)
 - dramatic_unit (scene_question, entry_pressure, value_delta_target, natural_close_definition)
-- beat_plan (mode: ordered_soft, min_beats, max_beats, 3-8 beats with function/required/state_significance)
+- beat_plan (mode: ordered_soft, min_beats, max_beats, 3-8 beats with function/realization_target/required/state_significance)
 - execution_envelope (invariants, required_functions, allowed_tactics, prohibited_actions,
   style_directives, mystery_preservation)
 - stop_policy (normal_exits using stop predicates, interrupt_before, safety_valves)
@@ -133,6 +133,7 @@ beat names:
 
 - `id`
 - `function`
+- `realization_target`, an open-vocab kebab-case string naming the scene movement this beat realizes
 - `required`
 - `state_significance`, either `none` or one of the closed `strong_axis` values
 

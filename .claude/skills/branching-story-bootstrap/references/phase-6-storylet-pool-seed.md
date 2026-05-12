@@ -75,7 +75,7 @@ The live validator grammar at `tools/validators/src/rules/_shared/predicate-dsl-
 
 **Required field gotchas:**
 
-- `beat_plan.beats[].realization_target` is REQUIRED (open-vocab string; describes what scene-movement the beat realizes — typically a kebab-case phrase like `realizes-question-framed-as-scene-movement`). The storylet template's beat examples omit this field; the JSON schema at `tools/validators/src/schemas/story-storylet.schema.json` requires it on every beat.
+- `beat_plan.beats[].realization_target` is REQUIRED (open-vocab string; describes what scene-movement the beat realizes — typically a kebab-case phrase like `realizes-question-framed-as-scene-movement`). The storylet template's scaffold and examples now include this field; the JSON schema at `tools/validators/src/schemas/story-storylet.schema.json` requires it on every beat.
 - `stop_policy.interrupt_before` must be NON-EMPTY (≥1 entry). The storylet template shows it as syntactically optional, but the validator rejects empty `interrupt_before: []` arrays. Default safe interrupt: `{id: consent-boundary-imminent, predicate: consent_boundary_imminent, args: {}}` (no required args for `consent_boundary_imminent`).
 
 **Predicate-section split (NORMAL_EXIT vs INTERRUPT_BEFORE):**

@@ -24,15 +24,33 @@ Audit one worldloom skill directory for redundant, contradictory, stale, or detr
 <HARD-GATE>
 Do NOT Edit / Write any file under `tickets/` or `docs/triage/` until ALL 5 of the following hold:
 
-(a) Pre-flight has loaded `docs/FOUNDATIONS.md`, validated `target_skill_path` resolves to a readable directory containing `SKILL.md`, enumerated every file under the target via `Glob`, and (when `produce_tickets_on_approval: true`) verified `tickets/_TEMPLATE.md` exists and is readable.
+- **(a)** Pre-flight has loaded `docs/FOUNDATIONS.md`, validated `target_skill_path` resolves to a readable directory containing `SKILL.md`, enumerated every file under the target via `Glob`, and (when `produce_tickets_on_approval: true`) verified `tickets/_TEMPLATE.md` exists and is readable.
 
-(b) Phases 1-7 have completed: Phase 1 reads every file in the target; Phase 2 catalogs cross-skill load-bearing citations; Phases 3-4 detect drift and within-skill duplication findings; Phase 5 vets the negative catalog; Phase 6 severity-classifies every finding (HIGH/MEDIUM/LOW with a one-line rationale per FOUNDATIONS skill discipline — bare severity is FAIL); Phase 7 produces the report's recommendation list and bottom-line paragraph.
+- **(b)** Phases 1-7 have completed:
+  - Phase 1 reads every file in the target;
+  - Phase 2 catalogs cross-skill load-bearing citations;
+  - Phases 3-4 detect drift and within-skill duplication findings;
+  - Phase 5 vets the negative catalog;
+  - Phase 6 severity-classifies every finding (HIGH/MEDIUM/LOW with a one-line rationale per FOUNDATIONS skill discipline — bare severity is FAIL);
+  - Phase 7 produces the report's recommendation list and bottom-line paragraph.
 
-(c) Phase 7 self-check passes for every finding: severity carries a one-line rationale; every finding cites at least one `file:line` anchor; every load-bearing-by-citation item in the negative catalog is judged against Phase 2 citation evidence; the report's "Things that are NOT redundant or detrimental" block enumerates considered-and-kept items so the user can verify the audit checked them.
+- **(c)** Phase 7 self-check passes for every finding:
+  - severity carries a one-line rationale;
+  - every finding cites at least one `file:line` anchor;
+  - every load-bearing-by-citation item in the negative catalog is judged against Phase 2 citation evidence;
+  - the report's "Things that are NOT redundant or detrimental" block enumerates considered-and-kept items so the user can verify the audit checked them.
 
-(d) Phase 8 has presented the chat-only audit report AND the user has explicitly chosen one of: ACCEPT-and-create-tickets (requires `produce_tickets_on_approval: true` to have been set, or in-band reconfirmation), ACCEPT-report-only, REVISE-narrow (loops back to the relevant phase before re-entering Phase 8), or REJECT (ends the run).
+- **(d)** Phase 8 has presented the chat-only audit report AND the user has explicitly chosen one of:
+  - ACCEPT-and-create-tickets (requires `produce_tickets_on_approval: true` to have been set, or in-band reconfirmation);
+  - ACCEPT-report-only;
+  - REVISE-narrow (loops back to the relevant phase before re-entering Phase 8);
+  - REJECT (ends the run).
 
-(e) On the ACCEPT-and-create-tickets path only: Phase 9 has resolved the ticket prefix via `archive/tickets/` + `tickets/` lookup, allocated the next free `<PREFIX>-NNN` integer per-tier, planned one ticket write per HIGH finding + one per MEDIUM finding + one bundled janitorial-sweep ticket for all LOW findings, and (when ticket count ≥3) planned the triage-manifest write.
+- **(e)** On the ACCEPT-and-create-tickets path only: Phase 9 has:
+  - resolved the ticket prefix via `archive/tickets/` + `tickets/` lookup;
+  - allocated the next free `<PREFIX>-NNN` integer per-tier;
+  - planned one ticket write per HIGH finding + one per MEDIUM finding + one bundled janitorial-sweep ticket for all LOW findings;
+  - (when ticket count ≥3) planned the triage-manifest write.
 
 This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the report or the ticket batch. The skill may only proceed to Phase 9 (Ticket Generation) once every gate condition above holds simultaneously.
 </HARD-GATE>
@@ -170,6 +188,7 @@ Run before Phase 0; abort if any precondition fails.
 4. When `sibling_skill_paths` is supplied: verify each path exists and contains `SKILL.md`. Abort listing absent siblings on any miss.
 5. When `produce_tickets_on_approval=true`: verify `tickets/_TEMPLATE.md` exists and is readable; abort with `"produce_tickets_on_approval=true but tickets/_TEMPLATE.md is missing — cannot resolve ticket schema"` on miss.
 6. If a worktree root is active, ALL paths resolve from the worktree root, not the main repo root.
+7. Commit to emitting the Phase 0 surface-area summary block as user-facing text before any Phase 1 reading begins (per §Phase 0 §Output). Failure to emit before Phase 1 reads is a Pre-flight-class violation that the audit must abort or loop back to Phase 0 to resolve — the surface-area summary is the operator's anchor for the audit's budget, and the pre-emission requirement is structurally part of Pre-flight's halt-gate discipline, not advisory prose downstream.
 
 If any precondition fails, abort before Phase 0 with a clear user-facing message.
 
@@ -205,7 +224,7 @@ Resolved siblings: <list>
 Rework context: <rework_motivation if supplied, else "none supplied">
 ```
 
-This is the operator's anchor for the audit's budget. Do NOT enter Phase 1 until this summary is emitted.
+This is the operator's anchor for the audit's budget. Per §Pre-flight Check step 7, Phase 1 MUST NOT begin until this emission lands — failure to emit before Phase 1 is a Pre-flight-class violation that aborts or loops back to Phase 0 to resolve.
 
 ## Phase 1: Read Every File in Target
 
@@ -246,7 +265,7 @@ grep -rn "<target-skill-slug>" .claude/skills/ docs/ specs/ | grep -v "^<target-
 
 Filter out matches from the target skill itself (citation in its own SKILL.md doesn't count). Catalog every external citation as a tuple `(citing_file, citing_line, cited_path_or_concept, reason_for_citation)`.
 
-**Oversized-grep handling.** The target-skill-wide sweep is wide-ranging on heavily-cited targets (e.g., a target whose `references/prose-craft-contract.md` is cited as schema authority by multiple sibling skills + the canonical shared template + FOUNDATIONS.md, or a target whose `references/record-schemas.md` is cited as runtime authority). The result may exceed the harness's stdout budget and be persisted to a file. Two valid recoveries: (i) narrow the grep to specific reference paths under investigation (e.g., `grep -rn "<target-skill-slug>/references/" .claude/skills/ docs/ specs/`) rather than the bare slug, surfacing per-file citation density before broadening; or (ii) read the persisted file via `Read` and apply the citation-categorization logic against its contents. Either path is auditable — the persisted file path itself is part of the audit trail. Prefer (i) when the audit only needs schema-authority and sub-routine-contract citations from `references/` and `templates/`; prefer (ii) when the audit needs the full citation surface including incidental docs/triage mentions.
+**Oversized-grep handling.** The target-skill-wide sweep is wide-ranging on heavily-cited targets (e.g., a target whose `references/prose-craft-contract.md` is cited as schema authority by multiple sibling skills + the canonical shared template + FOUNDATIONS.md, or a target whose `references/record-schemas.md` is cited as runtime authority). The result may exceed the harness's stdout budget and be persisted to a file. Two valid recoveries: (i) narrow the grep to specific reference paths under investigation (e.g., `grep -rn "<target-skill-slug>/references/" .claude/skills/ docs/ specs/`) rather than the bare slug, surfacing per-file citation density before broadening; or (ii) read the persisted file via `Read` and apply the citation-categorization logic against its contents. Either path is auditable — the persisted file path itself is part of the audit trail. Prefer (i) when the audit only needs schema-authority and sub-routine-contract citations from `references/` and `templates/`; prefer (ii) when the audit needs the full citation surface including incidental docs/triage mentions. When path (i)'s narrowed grep also overflows (common on heavily-cited targets — when even per-`references/`-or-per-`templates/` greps exceed the budget), iterate further (additional path filters such as `| head -N`, `| grep -E '<critical-pattern>'`, or per-file-class iteration like one grep per major reference file); path (ii) remains the unconditional fallback when narrowing cannot reduce output below the budget.
 
 ### Categories of load-bearing-by-citation
 
@@ -378,6 +397,7 @@ Before emitting the report at Phase 8, verify:
 3. The negative-catalog block enumerates every item from Phase 5's standard catalog with an explicit "Keep" judgment and reason.
 4. The recommendation list is ordered HIGH → MEDIUM → LOW.
 5. The bottom-line paragraph is exactly one paragraph (not a list).
+6. For each HIGH or MEDIUM finding whose Suggestion or finding-detail field contains an absence claim (phrasings like *"dangling reference"*, *"missing field"*, *"not documented"*, *"no fallback exists"*, *"no occurrences"*, *"undefined"*) or mis-cites a specific file/line, verify the claim by Read or grep of the cited file/section BEFORE finalizing the finding's wording. Pre-finalization verification at audit-time prevents implementation-phase retraction when the claim turns out to be wrong (the 30-second-per-finding cost catches premise-falsification before the user reads the report; absence claims arise most commonly from §Phase 3 pattern 3 — path drift producing "dangling reference" findings — and pattern 6 — phase-number drift producing claims about what a phase does or doesn't enumerate — plus general correctness findings outside the named drift/duplication patterns).
 
 A self-check failure loops back to the relevant phase before Phase 8 emission.
 

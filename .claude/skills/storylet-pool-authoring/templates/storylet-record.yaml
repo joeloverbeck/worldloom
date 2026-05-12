@@ -187,14 +187,17 @@ beat_plan:
   beats:                                   # 3-8 entries
     - id: B1
       function: <beat_function string>     # open-vocab kebab-case; see references/beat-functions.md
+      realization_target: realizes-initial-scene-movement # REQUIRED; open-vocab kebab-case scene movement this beat realizes
       required: true
       state_significance: none             # none | <strong_axis enum>
     - id: B2
       function: <beat_function string>
+      realization_target: realizes-turning-scene-movement
       required: true
       state_significance: <strong_axis enum>
     - id: B3
       function: <beat_function string>
+      realization_target: realizes-closing-scene-movement
       required: false
       state_significance: none
 
@@ -287,10 +290,10 @@ notes: >
 #   min_beats: 3
 #   max_beats: 4
 #   beats:
-#     - {id: B1, function: pressure-setup, required: true, state_significance: obligation_state}
-#     - {id: B2, function: offer-extended, required: true, state_significance: relationship_trajectory}
-#     - {id: B3, function: response-received, required: true, state_significance: obligation_state}
-#     - {id: B4, function: aftermath-marked, required: false, state_significance: none}
+#     - {id: B1, function: pressure-setup, realization_target: realizes-need-being-named, required: true, state_significance: obligation_state}
+#     - {id: B2, function: offer-extended, realization_target: realizes-help-being-offered, required: true, state_significance: relationship_trajectory}
+#     - {id: B3, function: response-received, realization_target: realizes-recipient-decision, required: true, state_significance: obligation_state}
+#     - {id: B4, function: aftermath-marked, realization_target: realizes-cost-residue, required: false, state_significance: none}
 # execution_envelope:
 #   invariants: [offer-must-remain-refusable, respect-refusal-without-pressure]
 #   required_functions: [name-the-need, preserve-recipient-agency]
@@ -336,10 +339,10 @@ notes: >
 #   min_beats: 3
 #   max_beats: 4
 #   beats:
-#     - {id: B1, function: question-framed, required: true, state_significance: information_posture}
-#     - {id: B2, function: boundary-named, required: true, state_significance: character_intention}
-#     - {id: B3, function: answer-or-deflection, required: true, state_significance: information_posture}
-#     - {id: B4, function: consequence-marked, required: false, state_significance: thread_pressure}
+#     - {id: B1, function: question-framed, realization_target: realizes-information-gap-named, required: true, state_significance: information_posture}
+#     - {id: B2, function: boundary-named, realization_target: realizes-disclosure-boundary-set, required: true, state_significance: character_intention}
+#     - {id: B3, function: answer-or-deflection, realization_target: realizes-partial-answer-or-refusal, required: true, state_significance: information_posture}
+#     - {id: B4, function: consequence-marked, realization_target: realizes-inquiry-consequence-marked, required: false, state_significance: thread_pressure}
 # execution_envelope:
 #   invariants: [one-question-only, answer-may-be-partial]
 #   required_functions: [identify-information-gap, respect-refusal-channel]
@@ -385,11 +388,11 @@ notes: >
 #   min_beats: 3
 #   max_beats: 5
 #   beats:
-#     - {id: B1, function: line-crossed, required: true, state_significance: irreversibility}
-#     - {id: B2, function: accusation-or-demand, required: true, state_significance: thread_pressure}
-#     - {id: B3, function: counterpressure, required: true, state_significance: risk_cost_exposure}
-#     - {id: B4, function: outcome-locked, required: true, state_significance: relationship_trajectory}
-#     - {id: B5, function: fallout-glimpsed, required: false, state_significance: none}
+#     - {id: B1, function: line-crossed, realization_target: realizes-point-of-no-return, required: true, state_significance: irreversibility}
+#     - {id: B2, function: accusation-or-demand, realization_target: realizes-conflict-named-directly, required: true, state_significance: thread_pressure}
+#     - {id: B3, function: counterpressure, realization_target: realizes-retaliation-pressure-surfaced, required: true, state_significance: risk_cost_exposure}
+#     - {id: B4, function: outcome-locked, realization_target: realizes-forced-position-set, required: true, state_significance: relationship_trajectory}
+#     - {id: B5, function: fallout-glimpsed, realization_target: realizes-aftermath-risk-glimpsed, required: false, state_significance: none}
 # execution_envelope:
 #   invariants: [stakes-are-explicit, confrontation-has-cost]
 #   required_functions: [name-the-line, force-a-position]
