@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — edits canonical page-plan template body comments for §10 (Open obligations), §11 (Active threads), §12 (Pending consequences); page-cycle phase-7 prompt-assembly. Frontmatter and atomic OBL / THR / CNSQ records unchanged.
-**Deps**: None directly. Co-travels with PPLAN-005 (§15) and PPLAN-007 (`forbidden_engine_vocabulary`) as the renderer-facing body cleanup tier.
+**Deps**: None directly. Co-travels with completed `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` (§15) and PPLAN-007 (`forbidden_engine_vocabulary`) as the renderer-facing body cleanup tier.
 
 ## Problem
 
@@ -21,7 +21,7 @@ The renderer-facing body §10 / §11 / §12 of `worlds/erotica-world/stories/red
 
 Engine vocabulary the renderer cannot use: "Salience 6, urgency 7", "Possible payoff modes: literal fulfillment / ironic reversal / abandon with acknowledgment", "current pressure 8", "Pressure increased from 7 to 8", "consequence_address ops", "required_aftermath item". These fields drive engine validators (`obligation_salience`, `consequence_persistence`, narrative-health weights, `arc_envelope_conformance`). The renderer needs the scene-relevant translation: *"The pressing thing under the scene is that she still has to get home through hazardous geography; this page holds it as ambient register, does not resolve it."*
 
-Same conflation as PPLAN-005 §15 — engine schema vocabulary lands in body where prose-direction translation would serve. The engine OBL / THR / CNSQ records exist at `worlds/<slug>/stories/<slug>/_source/{obligations,threads,consequences}/*.yaml` and carry the schema fields; the page-plan body should carry the prose-direction read.
+Same conflation as completed `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` §15 — engine schema vocabulary lands in body where prose-direction translation would serve. The engine OBL / THR / CNSQ records exist at `worlds/<slug>/stories/<slug>/_source/{obligations,threads,consequences}/*.yaml` and carry the schema fields; the page-plan body should carry the prose-direction read.
 
 ## Assumption Reassessment (2026-05-12)
 
@@ -29,7 +29,7 @@ Same conflation as PPLAN-005 §15 — engine schema vocabulary lands in body whe
 2. **Engine vocabulary leaks into body §10/§11/§12 because the canonical template instructs verbatim record body inlining.** Verified: `.claude/skills/_shared-templates/page-plan.md:142-143` (§10 comment): *"INLINE: every OBL in obligations_open with salience, urgency, who owes whom, payoff_modes[], age, consequence_on_neglect."* This phrasing is engine-completeness oriented. Same shape at §11 (line 147): *"every THR ... with status, current_pressure, type"*. Same at §12 (line 151): *"every CNSQ ... with required_aftermath_text, urgency, source SE."*
 3. **Shared boundary under audit**: the canonical template's §10/§11/§12 comments + the page-cycle phase-7 prompt-assembly "state context" line (`.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md:41-43`) which directs the LLM author to inline these fields. Frontmatter shape and atomic-record schema fields are NOT under audit; only the body view.
 4. **FOUNDATIONS principle under audit**: §Story Bundles §4 (the frontmatter-vs-body split — frontmatter is engine-bearing; body inlines canonical context for the renderer); Rule 1 grounding (preserved — the body translation preserves all prose-bearing context the renderer needs to understand the scene's pressures).
-5. **Adjacent contradictions**: PPLAN-005's §15 cleanup uses the same "prose-direction translation; engine fields go in frontmatter" mechanism. PPLAN-007 cleans `forbidden_engine_vocabulary` body view. These three tickets together implement the body-cleanup tier of Approach B; they share the same architectural rationale and can be implemented as a single body-cleanup sweep, but each is decomposed for review and verification.
+5. **Adjacent contradictions**: completed `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` uses the same "prose-direction translation; engine fields go in frontmatter" mechanism for §15. PPLAN-007 cleans `forbidden_engine_vocabulary` body view. These tickets together implement the body-cleanup tier of Approach B; they share the same architectural rationale and can be implemented as a single body-cleanup sweep, but each is decomposed for review and verification.
 
 ## Architecture Check
 

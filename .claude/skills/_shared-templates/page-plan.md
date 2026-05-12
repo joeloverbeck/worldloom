@@ -188,8 +188,33 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 
 <!-- CONDITIONAL: present when frontmatter selected_arc_id != null. -->
 
-<!-- INLINE: full SLT-NNNN arc record (arc_contract, dramatic_unit, beat_plan with min/max/beat-functions,
-     execution_envelope, stop_policy.normal_exits, effect_model.variants[]). -->
+<!-- INLINE the prose-direction translation of the selected SLT-NNNN arc record:
+
+     **SLT id (one line)**: SLT-NNNN — <storylet title>.
+
+     **Storylet notes (verbatim)**: <SLT.notes content — the authorial prose framing>.
+
+     **What this scene commits to (one sentence)**: <SLT.arc_contract.user_intent>.
+
+     **The scene question (one sentence)**: <SLT.dramatic_unit.scene_question>.
+
+     **Natural close**: <SLT.dramatic_unit.natural_close_definition>.
+
+     **Beats this scene must realize** (1-N short paragraphs, one per intended beat):
+     - <beat 1 prose paraphrase from beat_plan.beats[0].function — translated, NOT the engine identifier>
+     - <beat 2 prose paraphrase>
+     - ...
+
+     Engine fields NOT inlined here: success_policy, allowed_outcome_band, value_delta_target
+     schema fields, beat_plan.mode, beat_plan.beats[].state_significance,
+     beat_plan.beats[].realization_target identifier, execution_envelope.{required_functions,
+     prohibited_actions, invariants, allowed_tactics, style_directives, mystery_preservation},
+     stop_policy.{normal_exits.predicate/args, interrupt_before, safety_valves},
+     effect_model.variants[].{probability_weight, maps_to_outcome, forbidden_effects},
+     mystery_safety.*, exit_portfolio.*. These remain on the SLT record at
+     worlds/<slug>/stories/<story-slug>/_source/storylets/SLT-NNNN.yaml and on plan
+     frontmatter (selected_arc_id, chosen_variant_id, required_effects,
+     forbidden_resolutions, declared_intended_beats) for engine readback. -->
 
 ## §15-alt Entry pressure framing
 

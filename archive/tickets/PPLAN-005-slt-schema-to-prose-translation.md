@@ -1,14 +1,14 @@
 # PPLAN-005: §15 Selected scene-commitment arc — replace verbatim SLT YAML inlining with prose-direction translation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — edits the canonical page-plan template, `branching-story-page-cycle/references/phase-7-page-plan.md`, and `branching-story-page-cycle/references/phase-9-validation-gates.md` (`plan_completeness_check` and `arc_envelope_conformance` consumer surfaces). Frontmatter remains the validator-bearing surface; only the body shape changes.
+**Engine Changes**: Yes — edits the canonical page-plan template, `branching-story-page-cycle/SKILL.md`, `branching-story-page-cycle/references/phase-7-page-plan.md`, `branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`, and `branching-story-page-cycle/references/phase-9-validation-gates.md` (`plan_completeness_check`, ARC_TRACE Layer 1, and `arc_envelope_conformance` consumer surfaces). Frontmatter and the Phase 4 selected SLT record remain the validator-bearing surfaces; only the §15 renderer-facing body shape changes.
 **Deps**: None directly. Pairs with PPLAN-006 (parallel cleanup of §10/§11/§12) and PPLAN-007 (`forbidden_engine_vocabulary` body cleanup).
 
 ## Problem
 
-`worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` §15 inlines the full SLT-0012 YAML record verbatim (lines 578-746, ~169 lines). The body content includes engine-only fields the external prose renderer cannot act on:
+At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` §15 inlined the full SLT-0012 YAML record verbatim (lines 578-746, ~169 lines). The body content included engine-only fields the external prose renderer cannot act on:
 
 - `arc_contract.success_policy: contested`
 - `arc_contract.allowed_outcome_band: [succeeds, partially_succeeds, fails_with_consequence, backfires, accepted_with_limits, refused_without_break, partially_deflected]`
@@ -28,9 +28,9 @@ The prose-relevant content lives in three places: storylet `notes:` (free-form a
 
 1. **Validators read engine SLT content from frontmatter, not from §15 body.** Verified: `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md:21` (gate 13 `arc_envelope_conformance` reads `frontmatter.declared_intended_beats[]`, `frontmatter.forbidden_resolutions[]`, and the chosen variant's `required_effects[]` — the variant.required_effects are read from `frontmatter.required_effects[]` which the plan author copies verbatim per `phase-7-page-plan.md:71-72`); gate 18 `plan_completeness_check` reads `frontmatter.selected_arc_id` and `frontmatter.chosen_variant_id`. Phase 7.6 Layer 1 forbidden-mystery-preservation check (`.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md:23`) reads from frontmatter.
 2. **The "every inlined record id resolves" rule of `plan_completeness_check` operates on body record-id references.** Verified: `phase-9-validation-gates.md:26` states *"every inlined record id (CF / CHAR / SF / OBL / THR / SREL / STINT / STLOC / STOBJ / M / INV / SLT) resolves against the current world index or story-bundle working buffer"*. The rule requires the SLT id to be present and resolvable; it does NOT require the full schema body. A §15 that names the SLT id, inlines its prose-bearing fields, and references it cleanly satisfies the rule.
-3. **Plan_self_containment (Phase 9.5 bootstrap-only check) does not require the full SLT YAML in §15.** Verified by reading `phase-9-5-bootstrap-discipline-validator.md` (Phase 9.5 lives at bootstrap; §15 is omitted at the root case per `phase-7-root-page-plan.md:18` `§15-alt Entry pressure framing replaces both §15 and §16`). The page-cycle case is the consumer of full §15 SLT body; bootstrap is not.
-4. **Shared boundary under audit**: the §15 body shape (canonical template + page-cycle phase-7 reference + page-cycle phase-9-validation-gates reference). Three files. The frontmatter consumer surfaces (`frontmatter.selected_arc_id`, `chosen_variant_id`, `required_effects[]`, `forbidden_resolutions[]`, `declared_intended_beats[]`) are unchanged.
-5. **FOUNDATIONS principle under audit**: §Story Bundles §4 (*"the plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`"*) — the rule already names the frontmatter as the engine-bearing surface. §Story Bundles §9 (Prose Length Discipline) is touched by the §15 `stop_policy.safety_valves.max_words` field which is engine-only runaway-defense per FOUNDATIONS §Story Bundles §9 (*"Engine-only — never surfaced in the LLM rendering prompt"*) — currently leaking into the renderer prompt via the §15 body. Cleaning this up tightens FOUNDATIONS §Story Bundles §9 compliance.
+3. **Plan_self_containment (Phase 9.5 bootstrap-only check) does not require the full SLT YAML in §15.** Verified by reading `phase-9-5-bootstrap-discipline-validator.md` (Phase 9.5 lives at bootstrap; §15 is omitted at the root case per `phase-7-root-page-plan.md:18` `§15-alt Entry pressure framing replaces both §15 and §16`). The page-cycle case was the active §15 consumer; this ticket changes that consumer body shape while preserving the selected SLT as engine context.
+4. **Shared boundary under audit**: the §15 body shape (canonical template + page-cycle parent skill summary + page-cycle phase-7 reference + page-cycle phase-7.6 Layer 1 reference + page-cycle phase-9-validation-gates reference). Five files. The frontmatter consumer surfaces (`frontmatter.selected_arc_id`, `chosen_variant_id`, `required_effects[]`, `forbidden_resolutions[]`, `declared_intended_beats[]`) are unchanged; Layer 1 still has the selected SLT record from Phase 4 as an engine input and no longer depends on the plan body carrying the full SLT schema.
+5. **FOUNDATIONS principle under audit**: §Story Bundles §4 (*"the plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`"*) — the rule already names the frontmatter as the engine-bearing surface. §Story Bundles §9 (Prose Length Discipline) is touched by the §15 `stop_policy.safety_valves.max_words` field which is engine-only runaway-defense per FOUNDATIONS §Story Bundles §9 (*"Engine-only — never surfaced in the LLM rendering prompt"*). At intake, the old §15 body instruction leaked that engine-only field into the renderer prompt; the landed §15 translation removes it from the body view and tightens FOUNDATIONS §Story Bundles §9 compliance.
 6. **Adjacent contradiction**: the §15 body's `mystery_safety` block re-asserts forbidden M ids that `archive/tickets/PPLAN-002-mystery-enumeration-restriction.md` restricts in §7. The archived PPLAN-002 engaged-mystery body filter is the right rule; this ticket's §15 prose-direction translation drops the `mystery_safety` block from body (it stays in frontmatter via the inherited SLT record + the plan's `forbidden_resolutions[]`).
 
 ## Architecture Check
@@ -41,17 +41,18 @@ The prose-relevant content lives in three places: storylet `notes:` (free-form a
 
 ## Verification Layers
 
-1. **§15 body shape rule documented at the template** → codebase grep-proof: `grep -n 'user_intent\|scene_question\|natural_close_definition' .claude/skills/_shared-templates/page-plan.md` returns the new §15 comment block.
-2. **page-cycle phase-7 reference reflects the new prose-direction translation rule** → codebase grep-proof: `grep -n 'prose-direction translation\|engine-only fields' .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` returns hits.
-3. **Validator gates (13 + 18) continue to pass on a re-authored plan** → schema validation: re-author PG-0004 of `worlds/erotica-world/stories/red-bunny` under the new §15 shape; `arc_envelope_conformance` and `plan_completeness_check` PASS by reading frontmatter values; the body §15 absence of engine fields does not affect the result.
-4. **Renderer-facing §15 is materially shorter and prose-focused** → manual review: a re-authored PG-0004 plan §15 should be approximately 25-40 lines (storylet notes + 3 one-sentence prose fields + chosen variant prose translation) versus PG-0003's ~169-line SLT YAML dump.
-5. **No regression on forbidden-mystery preservation** → schema validation: Phase 7.6 Layer 1 reads `frontmatter.forbidden_resolutions[]` which continues to carry every `forbidden`-status M in `mysteries_in_play[]` ∪ `arc.execution_envelope.mystery_preservation.forbidden_resolutions[]`; the body §15 absence of `execution_envelope.mystery_preservation` does not weaken this.
+1. **§15 body shape rule documented at the template** → codebase grep-proof: `grep -nE 'prose-direction translation|Engine fields NOT inlined' .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md`.
+2. **page-cycle phase-7 reference reflects the new prose-direction translation rule** → same grep-proof confirms the Phase 7 reference carries the new body rule.
+3. **Validator gates (13 + 18) preserve the frontmatter/engine-context split** → grep-proof/manual review: `phase-9-validation-gates.md` states `arc_envelope_conformance` consumes frontmatter plus the Phase-4-selected arc record and that `plan_completeness_check` requires the SLT id + prose-direction translation, not the full SLT schema body.
+4. **Renderer-facing §15 is materially shorter and prose-focused** → manual review of the landed template: §15 carries storylet notes + three one-sentence prose fields + beat-function paraphrases instead of a full SLT YAML dump.
+5. **No regression on forbidden-mystery preservation** → manual contract review: Phase 7.6 Layer 1 reads `frontmatter.forbidden_resolutions[]` and the Phase-4-selected arc record; the body §15 absence of `execution_envelope.mystery_preservation` does not weaken this.
+6. **Parent skill summary and Layer 1 wording match the new body contract** → codebase grep-proof/manual review: `branching-story-page-cycle/SKILL.md` and `phase-7-6-arc-trace-extraction.md` no longer require the full SLT schema to be inlined into §15 body.
 
-## What to Change
+## Landed Changes
 
-### 1. `.claude/skills/_shared-templates/page-plan.md` §15 comment (lines 173-178)
+### 1. `.claude/skills/_shared-templates/page-plan.md` §15 comment
 
-Replace:
+Replaced:
 > `<!-- INLINE: full SLT-NNNN arc record (arc_contract, dramatic_unit, beat_plan with min/max/beat-functions, execution_envelope, stop_policy.normal_exits, effect_model.variants[]). -->`
 
 with:
@@ -76,27 +77,37 @@ with:
 
 ### 2. `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md`
 
-Update the prompt-assembly block (lines 44-46) to instruct the LLM author to extract only the prose-bearing fields from the SLT record when authoring §15:
+Updated the prompt-assembly block to instruct the LLM author to extract only the prose-bearing fields from the SLT record when authoring §15:
 
 > `[selected arc record — extract from the Phase-4-selected SLT-NNNN ONLY its prose-bearing fields: notes, arc_contract.user_intent, dramatic_unit.scene_question, dramatic_unit.natural_close_definition, beat_plan.beats[].function (paraphrase as prose, NOT verbatim identifier). Engine fields (success_policy, allowed_outcome_band, beat_plan.mode, beat_plan.beats[].state_significance / realization_target, execution_envelope.*, stop_policy.*, effect_model.variants[].probability_weight / maps_to_outcome / forbidden_effects, mystery_safety.*, exit_portfolio.*) are NOT inlined into §15 body — they are validator-consumed via frontmatter or via the canonical SLT record itself]`
 
-Also update the "Body shape" §15 instruction line (around line 91-94) to direct the author to the §15 prose-direction translation block in the canonical template.
+Also updated the "Body shape" §15 instruction to direct the author to the §15 prose-direction translation block in the canonical template, and clarified the plan-completeness exception: §15 must inline the SLT id plus translation, not the full SLT schema body.
 
 ### 3. `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md`
 
-Update gate 13 (`arc_envelope_conformance`) and gate 18 (`plan_completeness_check`) rationale rows:
+Updated gate 13 (`arc_envelope_conformance`) and gate 18 (`plan_completeness_check`) rationale rows:
 
 - Gate 13: clarify that the gate reads `frontmatter.declared_intended_beats[]` (length against `arc.beat_plan.min_beats/max_beats`), `frontmatter.forbidden_resolutions[]`, and the chosen variant's `required_effects[]` from `frontmatter.required_effects[]`. The gate does NOT require the SLT body to be inlined in §15.
 - Gate 18: clarify that "every inlined record id resolves" requires the SLT id to appear in §15 and resolve against the index; it does NOT require the full SLT schema body. The §15 prose-direction translation MUST inline the SLT id (e.g., "SLT-0012 — Confess one thing about himself in answer to her") so the gate sees the resolvable reference.
 
-### 4. `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` — `forbidden_engine_vocabulary` body reference
+### 4. `.claude/skills/branching-story-page-cycle/SKILL.md`
 
-Bring the §15 prose-direction translation into the same body-cleanup posture as PPLAN-007 (`forbidden_engine_vocabulary` body view). Pair the two changes: §15 stops surfacing engine schema vocabulary; §18/§19 negative discipline says "do not use record-identifier vocabulary" without enumeration; the frontmatter `forbidden_engine_vocabulary[]` continues to be the engine surface.
+Updated the parent skill Phase 7 summary, Phase 7.6 summary, Phase 10 plan-preview example, and Phase 7 guardrail so they no longer say the full SLT record is inlined verbatim into §15. They now say the selected SLT record is an engine input, while §15 body carries the SLT id plus prose-direction translation; §16 still carries chosen variant required effects verbatim.
+
+### 5. `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md`
+
+Clarified that Layer 1 consumes the selected SLT record from the Phase 4 engine context plus plan frontmatter. The §15 body must contain the SLT id for completeness/branch-scope checks, but the full SLT schema body is not required in §15.
+
+### 6. `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` — `forbidden_engine_vocabulary` body reference
+
+Brought the §15 prose-direction translation into the same body-cleanup posture as PPLAN-007 (`forbidden_engine_vocabulary` body view). §15 stops surfacing engine schema vocabulary; the frontmatter `forbidden_engine_vocabulary[]` continues to be the engine surface.
 
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/page-plan.md` (modify — §15 comment)
+- `.claude/skills/branching-story-page-cycle/SKILL.md` (modify — Phase 7 / Phase 7.6 / Phase 10 summary wording)
 - `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` (modify — prompt-assembly + body-shape lines)
+- `.claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md` (modify — Layer 1 input/body split)
 - `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` (modify — gates 13 + 18 rationale rows)
 
 ## Out of Scope
@@ -113,8 +124,8 @@ Bring the §15 prose-direction translation into the same body-cleanup posture as
 1. The canonical template `.claude/skills/_shared-templates/page-plan.md` §15 comment names the prose-direction translation rule and explicitly lists the engine fields NOT inlined.
 2. `phase-7-page-plan.md` prompt-assembly block extracts only prose-bearing SLT fields.
 3. `phase-9-validation-gates.md` gates 13 and 18 rationale rows clarify the frontmatter-vs-body split.
-4. Skill dry-run on PG-0004 of `worlds/erotica-world/stories/red-bunny` produces a §15 of approximately 25-40 lines (vs PG-0003's ~169 lines).
-5. `arc_envelope_conformance` and `plan_completeness_check` continue to PASS on the new §15 shape.
+4. `branching-story-page-cycle/SKILL.md` and `phase-7-6-arc-trace-extraction.md` no longer require full SLT schema-body inlining for §15.
+5. Stale active-surface anchors for "full SLT verbatim" / "inlined arc record" are absent from the edited active skill/template surfaces.
 
 ### Invariants
 
@@ -131,5 +142,27 @@ Bring the §15 prose-direction translation into the same body-cleanup posture as
 ### Commands
 
 1. `grep -nE 'prose-direction translation|Engine fields NOT inlined' .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` (verifies the new rule is documented at both sites).
-2. Manual diff: compare PG-0003 §15 (≈169 lines, full SLT YAML) against re-authored PG-0004 §15 (target 25-40 lines, prose-direction translation only).
-3. Run Phase 9 validation on the re-authored PG-0004 working buffer and confirm gates 13 + 18 PASS.
+2. `grep -nE 'Phase-4-selected arc record|full SLT schema body|SLT id' .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` (verifies the parent skill, Layer 1, and gate wording match the new body contract).
+3. `if rg -n 'selected arc record \(full|full.*SLT.*verbatim|inlined selected-arc record|inlined arc record|SLT-NNNN inlined verbatim|Inline the full[[:space:]]+Phase-4-selected SLT|execution_envelope, stop_policy.normal_exits, effect_model.variants\[\]' .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md; then exit 1; fi` (verifies stale full-SLT-body anchors are gone from active edited surfaces).
+4. `git diff --check -- .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md`
+
+## Outcome
+
+Completion date: 2026-05-12.
+
+Completed the §15 SLT schema-to-prose body cleanup. The canonical page-plan template now tells plan authors to put only the SLT id, storylet notes, user intent, scene question, natural close, and beat-function prose paraphrases in §15. Engine-only SLT schema fields remain on the canonical SLT record and frontmatter/engine context for validator readback.
+
+Same-seam parent and Layer 1 docs were updated so the page-cycle skill no longer claims the full SLT schema body is inlined into §15. Phase 9 gates 13 and 18 now state the frontmatter/engine-context split explicitly.
+
+## Verification Result
+
+1. `grep -nE 'prose-direction translation|Engine fields NOT inlined' .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` — PASS; the template and Phase 7 reference contain the new §15 rule.
+2. `grep -nE 'Phase-4-selected arc record|full SLT schema body|SLT id' .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` — PASS; parent skill, Layer 1, and gate wording all describe the SLT id/prose-direction body plus engine-context SLT record.
+3. `if rg -n 'selected arc record \(full|full.*SLT.*verbatim|inlined selected-arc record|inlined arc record|SLT-NNNN inlined verbatim|Inline the full[[:space:]]+Phase-4-selected SLT|execution_envelope, stop_policy.normal_exits, effect_model.variants\[\]' ...; then exit 1; fi` over the edited active skill/template surfaces — PASS; stale full-SLT-body anchors are absent.
+4. Manual contract review — PASS; `frontmatter.selected_arc_id`, `chosen_variant_id`, `required_effects[]`, `declared_intended_beats[]`, and `forbidden_resolutions[]` remain the engine-bearing surfaces, and the selected SLT record remains available to Layer 1 as Phase 4 engine context.
+5. `git diff --check -- .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-6-arc-trace-extraction.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` — PASS after archival path repair.
+
+## Deviations
+
+- Did not re-author PG-0004 or run a live Phase 9 validation pass. The repo does not expose an executable dry-run harness for these prose workflow skills in this ticket's scope. This documentation-only contract change is verified by source contract review and grep proofs.
+- Same-seam scope widened during reassessment to include `.claude/skills/branching-story-page-cycle/SKILL.md` and `phase-7-6-arc-trace-extraction.md`; both still described the old full-SLT-body assumption.

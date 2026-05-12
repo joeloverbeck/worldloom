@@ -14,7 +14,7 @@ Unlike bootstrap PG-0001 (scene-setter, no SLT), every page-cycle turn realizes 
 - `chosen_variant_id: <variant id>` — the variant selected at Phase 4b.
 - `required_effects: [...]` — the chosen variant's `required_effects[]` array copied verbatim for engine readback at finalize time.
 
-In the plan body, **§15 (Selected scene-commitment arc) is REQUIRED** and inlines the full SLT-NNNN record (arc_contract, dramatic_unit, beat_plan with min/max/beat-functions, execution_envelope, stop_policy.normal_exits, effect_model.variants[]). **§16 (Chosen variant for this turn) is REQUIRED** and inlines the chosen variant's `required_effects[]` verbatim. **§15-alt (Entry pressure framing) is OMITTED**.
+In the plan body, **§15 (Selected scene-commitment arc) is REQUIRED** and inlines the SLT id plus the prose-direction translation of the Phase-4-selected SLT-NNNN record: `notes`, `arc_contract.user_intent`, `dramatic_unit.scene_question`, `dramatic_unit.natural_close_definition`, and `beat_plan.beats[].function` paraphrased as prose direction. Engine-only SLT fields stay on the canonical SLT record and frontmatter for validator readback. **§16 (Chosen variant for this turn) is REQUIRED** and inlines the chosen variant's `required_effects[]` verbatim. **§15-alt (Entry pressure framing) is OMITTED**.
 
 `declared_intended_beats[]` is populated as concrete scene-movement beats realizing the selected arc's `beat_plan` — one entry per intended beat, each carrying `beat_function` (drawn from the arc's `beat_plan.beat_functions`) and a one-sentence `scene_movement_summary` describing what changes in that beat. The Phase 7.6 Layer 1 deterministic check validates this array's length against `arc.beat_plan.min_beats` / `max_beats`.
 
@@ -42,9 +42,22 @@ Order matters; content_policy is FIRST so it binds the model before any other in
                  epistemic_class), open OBLs, active THRs, pending CNSQs,
                  STLOC + STOBJ in scope, cast_present, accessible_locations,
                  inventory_by_entity, entity_status]
-[selected arc record — the full SLT-NNNN selected at Phase 4: arc_contract,
-                       dramatic_unit, beat_plan, execution_envelope,
-                       stop_policy.normal_exits, effect_model.variants[]]
+[selected arc record — the SLT-NNNN selected at Phase 4; extract for §15 body
+                       ONLY the prose-bearing fields: notes,
+                       arc_contract.user_intent,
+                       dramatic_unit.scene_question,
+                       dramatic_unit.natural_close_definition, and
+                       beat_plan.beats[].function paraphrased as prose
+                       direction, NOT verbatim engine identifiers. Engine
+                       fields (success_policy, allowed_outcome_band,
+                       beat_plan.mode, beat_plan.beats[].state_significance /
+                       realization_target, execution_envelope.*, stop_policy.*,
+                       effect_model.variants[].probability_weight /
+                       maps_to_outcome / forbidden_effects, mystery_safety.*,
+                       exit_portfolio.*) are NOT inlined into §15 body; they
+                       remain on the canonical SLT record and are
+                       validator-consumed through frontmatter and engine
+                       context]
 [chosen variant — variant id + required_effects[] verbatim from Phase 4b]
 [recent prose continuity — the last 1-2 pages of rendered prose along
                            parent.branch_path (NOT sibling branches);
@@ -90,10 +103,13 @@ template, with the following selected-arc-case deviations:
 - §14 Recent prose continuity: inline the last 1-2 rendered pages along
   parent.branch_path verbatim; the §14 hard pre-flight block guarantees
   parent.prose_status == "rendered" so the section is always non-empty.
-- §15 Selected scene-commitment arc: REQUIRED. Inline the full
-  Phase-4-selected SLT-NNNN record verbatim (arc_contract, dramatic_unit,
-  beat_plan, execution_envelope, stop_policy.normal_exits,
-  effect_model.variants[]).
+- §15 Selected scene-commitment arc: REQUIRED. Populate the canonical
+  template's §15 prose-direction translation block: the SLT id, storylet
+  notes, `arc_contract.user_intent`, `dramatic_unit.scene_question`,
+  `dramatic_unit.natural_close_definition`, and prose paraphrases of the
+  intended beat functions. Do NOT inline engine-only SLT schema fields
+  (`success_policy`, `allowed_outcome_band`, `execution_envelope.*`,
+  `stop_policy.*`, `effect_model.*`, `mystery_safety.*`, `exit_portfolio.*`).
 - §15-alt Entry pressure framing: OMITTED in the selected-arc case.
 - §16 Chosen variant for this turn: REQUIRED. Inline the chosen variant's
   id + variant.required_effects[] verbatim.
@@ -108,10 +124,12 @@ template, with the following selected-arc-case deviations:
   engaged-only mystery set; do not re-list the complete
   frontmatter.forbidden_resolutions[] array in the body.
 
-Every record id referenced in any plan section MUST be inlined verbatim in
-that section. Bare CF-NNNN / CHAR-NNNN / SLT-NNNN / OBL-NNNN / etc.
-references are plan-completeness failures (Phase 9 gate
-`plan_completeness_check`).
+Every record id referenced in any plan section MUST be backed by body context
+in that section. Bare CF-NNNN / CHAR-NNNN / OBL-NNNN / etc. references are
+plan-completeness failures (Phase 9 gate `plan_completeness_check`). §15 is
+the selected-arc exception: it MUST inline the resolvable SLT id and the
+prose-direction translation from the canonical template, not the full SLT
+schema body.
 ```
 
 LLM produces the populated plan body. Engine writes the populated plan to a working buffer (NOT to disk yet — disk write happens at Phase 11 step 2 to `pages-prose-plans/PG-NNNN.md`). **The 8-axis prose critic does not run at this phase** — there is no rendered prose to critique at plan-commit. The critic moves to `branching-story-page-prose-finalize/references/phase-3-prose-critic.md`, where it runs against the user-supplied rendered prose at `pages-prose/PG-NNNN.md`.
@@ -123,7 +141,7 @@ LLM produces the populated plan body. Engine writes the populated plan to a work
 Phase 7's post-LLM check is structural, not stylistic:
 
 - Every required plan section (§1-§14, §15, §16, §17-§19 in the selected-arc case; §15-alt explicitly omitted) is populated with non-placeholder text.
-- Every inlined record id (CF-NNNN, CHAR-NNNN, SF-NNNN, OBL-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, M-NNNN, INV-id, SLT-NNNN) resolves against the current world index or story-bundle working buffer.
+- Every inlined record id (CF-NNNN, CHAR-NNNN, SF-NNNN, OBL-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, M-NNNN, INV-id, SLT-NNNN) resolves against the current world index or story-bundle working buffer. For §15, the SLT id must resolve, but the body carries the prose-direction translation rather than the full SLT schema body.
 - Frontmatter required keys are present and well-formed (`plan_id`, `story_id`, `world_slug`, `story_slug`, `parent_page_id`, `branch_id`, `branch_path`, `state_hash_at_plan_time`, `canon_revision_at_plan_time`, `prose_status`, `plan_authored_at`, `plan_authored_by`, `selected_arc_id`, `chosen_variant_id`, `required_effects`, `declared_visible_affordances`, `declared_intended_beats`, `declared_stop_condition`, `forbidden_resolutions`, `forbidden_engine_vocabulary`, `deferred_validation_trace`).
 - `selected_arc_id` matches the Phase-4-selected arc; `chosen_variant_id` matches the Phase-4b-chosen variant; `required_effects[]` matches the chosen variant's `required_effects[]` verbatim (selected-arc case shape).
 - `declared_intended_beats[]` length is within `[arc.beat_plan.min_beats, arc.beat_plan.max_beats]`.
