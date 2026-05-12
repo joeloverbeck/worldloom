@@ -1,3 +1,7 @@
+<!-- Sibling alignment: this manifest's section structure is mirrored by the HARD-GATE
+deliverable summary at .claude/skills/storylet-pool-authoring/SKILL.md Phase 6. Keep
+aligned across edits; see STPOOL-009 for the alignment rationale. -->
+
 # Storylet Batch SLB-NNNN
 
 **Story**: `<story-slug>` in `<world-slug>`

@@ -19,7 +19,7 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 | [STPOOL-006](../../archive/tickets/STPOOL-006-phase-6-rejected-candidates-off-by-5.md) | F-05 — Phase 6 HARD-GATE summary's rejected-candidates list off-by-5 | HIGH | Small | Completed and archived. The Phase 6 HARD-GATE `REJECTED CANDIDATES` block now lists all 14 Phase 4 gate-failure categories and matches `templates/storylet-batch-manifest.md:32-45` after manifest-template backtick normalization. |
 | [STPOOL-007](../../archive/tickets/STPOOL-007-genericize-tone-theme-tag-dictionary.md) | F-06 — tone-theme tag dictionary is world-bound but framed as generic | HIGH | Medium | Completed and archived. The skill-level `templates/tone-theme-tag-dictionary.md` now keeps generic family guidance, strips world-bound tag instances, and documents per-world dictionary extensions; `templates/predicate-dsl.md` now uses generic location-kind/class examples. |
 | [STPOOL-008](../../archive/tickets/STPOOL-008-consolidate-valenh-002-paragraph-duplication.md) | F-07 — VALENH-002 backstop paragraph duplicated verbatim | MEDIUM | Small | Completed and archived. The Procedure step now summarizes Phase 5b while the full VALENH-002 `record_schema_compliance` backstop paragraph remains single-sourced in the inline Phase 5b block. |
-| [STPOOL-009](../../tickets/STPOOL-009-phase-6-inline-parallel-enumerates-manifest.md) | F-08 — Phase 6 inline block parallel-enumerates manifest content | MEDIUM | Medium | `SKILL.md:277-325` re-enumerates the structural shape that `templates/storylet-batch-manifest.md` already owns. STPOOL-006 is the materialized form of this drift hazard. Add explicit alignment markers in both files so future edits trigger lockstep updates. |
+| [STPOOL-009](../../archive/tickets/STPOOL-009-phase-6-inline-parallel-enumerates-manifest.md) | F-08 — Phase 6 inline block parallel-enumerates manifest content | MEDIUM | Medium | Completed and archived. The Phase 6 HARD-GATE decision summary and `templates/storylet-batch-manifest.md` now carry reciprocal alignment markers so future edits trigger lockstep updates. |
 | [STPOOL-010](../../tickets/STPOOL-010-final-rule-paraphrases-hardgate.md) | F-09 — Final Rule paraphrases HARD-GATE pass conditions | MEDIUM | Small | `SKILL.md:384-386` paraphrases gates 1+2, gate 7, gate 8, Phase 5 checks, and the user-approval gate. If the HARD-GATE pass conditions evolve, the Final Rule silently drifts. Reframe as a thematic close that cites the HARD-GATE block as authoritative. |
 | [STPOOL-011](../../tickets/STPOOL-011-predicate-dsl-phase-7-6-reference-drift.md) | F-10 — predicate-DSL doc names Phase 7.6 as the runtime stop-condition evaluator | MEDIUM | Small | After the prose-strip rework, Phase 7.6 runs Layer 1 only (declaration check); Layer 2/3 (semantic evaluation) move to `branching-story-page-prose-finalize` Phase 4. Update the predicate-DSL reference to reflect the post-rework split. |
 | [STPOOL-012](../../tickets/STPOOL-012-janitorial-sweep-low-findings.md) | F-11 + F-12 — vestigial "(NEW)" markers + unqualified cross-skill references | LOW | Small | Drop "NEW gate 14" prefix from gate-14 references at `phase-4-5-canon-safety-checks.md:30` and `governance-and-foundations.md:41`. Add `branching-story-page-cycle/references/` path prefix to `prose-craft-contract.md` references at `templates/storylet-record.yaml:230` and `templates/predicate-dsl.md:243`. Bundled as one sweep. |
@@ -51,7 +51,7 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 **Tier 2 (clarity — do after Tier 1):**
 
 - **STPOOL-008** (VALENH-002 paragraph dedup) — completed and archived.
-- **STPOOL-009** (Phase 6 inline block alignment markers) — depends on archived STPOOL-006 (the alignment marker rationale uses STPOOL-006's 14-row enumeration alignment as the worked example). STPOOL-006 is complete, so this is unblocked.
+- **STPOOL-009** (Phase 6 inline block alignment markers) — completed and archived. The alignment marker rationale uses archived STPOOL-006's 14-row enumeration alignment as the worked example.
 - **STPOOL-010** (Final Rule reframe) — independent.
 - **STPOOL-011** (predicate-DSL Phase 7.6 drift) — independent.
 
@@ -61,7 +61,7 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 
 ## Total scope
 
-- 11 ticket files across active and archived paths: STPOOL-002 through STPOOL-008 are archived; STPOOL-009 through STPOOL-012 remain active.
+- 11 ticket files across active and archived paths: STPOOL-002 through STPOOL-009 are archived; STPOOL-010 through STPOOL-012 remain active.
 - Files touched across all 11 tickets: 7 unique files inside `.claude/skills/storylet-pool-authoring/` (`SKILL.md`, `references/phase-4-5-canon-safety-checks.md`, `references/governance-and-foundations.md`, `templates/storylet-record.yaml`, `templates/predicate-dsl.md`, `templates/storylet-batch-manifest.md`, `templates/tone-theme-tag-dictionary.md`).
 - No engine, validator, hook, or schema changes — every ticket is documentation/template-content scope.
 - No git commit at ticket-implementation time; the user reviews diffs and commits per skill discipline.

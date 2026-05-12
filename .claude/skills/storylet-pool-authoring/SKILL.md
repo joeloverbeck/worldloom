@@ -274,6 +274,8 @@ The Phase 5b dry-run mirrors the convention `branching-story-page-cycle/SKILL.md
 
 For direct user invocation, present the batch manifest deliverable summary to the user:
 
+The summary block below shows the HARD-GATE decision view; its per-storylet, diversity, rejected-candidates, validation-verdicts, and target-write-paths sub-blocks are aligned with the SLB manifest template at `templates/storylet-batch-manifest.md`. If the manifest's structural shape changes, update this summary in lockstep; STPOOL-006 documents the rejection-categories alignment as a worked example.
+
 ```
 STORYLET BATCH: SLB-NNNN
 Story: <story_slug> in <world_slug>
