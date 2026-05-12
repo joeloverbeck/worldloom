@@ -27,7 +27,7 @@ target_thread: null                  # THR-NNNN | null
 target_consequence: null             # CNSQ-NNNN | null
 target_relationship: null            # SREL-NNNN | null
 target_commitment_class: null        # commitment_class enum | null
-target_arc_archetype: null           # arc_archetype enum | null
+target_arc_archetype: null           # arc_archetype label | null; library value or story-specific snake_case label
 
 # Within STORY_KERNEL.content_intensity_baseline ± 1 band (Phase 8 Per-Card Validation test 6).
 proposed_intensity: mature           # tame | mature | explicit

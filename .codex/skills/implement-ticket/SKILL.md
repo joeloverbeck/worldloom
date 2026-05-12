@@ -118,7 +118,7 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 13. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 14. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-15. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, and whether sibling scope is absorbed, excluded, or left untouched.
+15. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
 
 Compact checkpoint shape:
 
@@ -131,6 +131,7 @@ Pre-edit checkpoint:
 - Classification: <primary class + discrepancy class if any>
 - Owner boundary: <authoritative implementation seam>
 - Sibling scope: <absorbed | excluded | left untouched>
+- HARD-GATE read: <yes | no | not required>
 ```
 
 If a `Deps` field explicitly says `None` and mentions prior ticket ids only to distinguish provenance or adjacent completed work, do not force archived-ticket reads for those ids by default. Record the non-dependency/provenance boundary in `Assumption Reassessment` when it affects scope, proof, or ownership.

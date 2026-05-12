@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { effectModelReplaySafety } from "../../src/rules/effect_model_replay_safety.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "./helpers.js";
 
@@ -26,7 +27,10 @@ const parentSnapshot = {
   accessible_locations: ["STLOC-0001"],
   objects_in_scope: [],
   inventory_by_entity: {},
-  entity_status: {}
+  entity_status: {},
+  applied_effect_variant: null,
+  arc_trace_emitted: false,
+  arc_trace_id: null
 };
 
 const nextSnapshot = {
@@ -35,7 +39,10 @@ const nextSnapshot = {
   obligations_open: ["OBL-0002"],
   threads_active: ["THR-0002"],
   relationships_current: ["SREL-0002"],
-  intentions_current: ["STINT-0002"]
+  intentions_current: ["STINT-0002"],
+  applied_effect_variant: "useful-lie",
+  arc_trace_emitted: false,
+  arc_trace_id: null
 };
 
 test("snapshot_replay_equality passes for a clean page-cycle envelope", async () => {
@@ -59,6 +66,35 @@ test("snapshot_replay_equality emits field-level drift details", async () => {
   assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
     { field: "obligations_open", expected: ["OBL-0002"], got: ["OBL-0001"] }
   ]);
+});
+
+test("snapshot_replay_equality ignores only workflow-stamped state_snapshot fields", async () => {
+  const workflowStamped = {
+    ...nextSnapshot,
+    applied_effect_variant: "different-workflow-stamp",
+    arc_trace_emitted: true,
+    arc_trace_id: "ARCTRACE-0002"
+  };
+
+  const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(workflowStamped, "hash-next"), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality exclusion does not weaken effect_model_replay_safety", async () => {
+  const missingVariant = {
+    ...nextSnapshot,
+    applied_effect_variant: null
+  };
+  const verdicts = await effectModelReplaySafety.run(undefined, context(recordsFor(missingVariant, "hash-next"), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "effect_model_replay_safety.missing_applied_effect_variant"));
 });
 
 test("snapshot_replay_equality verifies the last event hash", async () => {
@@ -125,9 +161,27 @@ function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
       id: "PG-0002",
       story_id: "STORY-001",
       parent_page_id: "PG-0001",
+      storylet_realized: "SLT-0001",
       applied_event_ops: ["SE-0002"],
       state_snapshot: pageSnapshot,
       state_hash: pageHash
+    }),
+    record("storylet_record", "test-story:SLT-0001", "stories/test-story/_source/storylets/SLT-0001.yaml", {
+      id: "SLT-0001",
+      story_id: "STORY-001",
+      effect_model: {
+        variants: [
+          {
+            id: "useful-lie",
+            required_effects: [
+              { type: "fact_create" },
+              { type: "obligation_status_change" },
+              { type: "thread_pressure_delta" },
+              { type: "relationship_axis_shift" }
+            ]
+          }
+        ]
+      }
     })
   ];
 }

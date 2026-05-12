@@ -98,8 +98,10 @@ diagnosis_matrix:
     over_represented: [<commitment_class>, ...]
 ```
 
-`arc_archetype_distribution` keys must come from SPEC-22 Track 3
-`ARC_ARCHETYPES` and the local `templates/arc-archetypes.md` library.
+`arc_archetype_distribution` keys should preserve the labels actually present in
+the pool. Values from `templates/arc-archetypes.md` are recommended library
+patterns, not an exhaustive set; story-specific labels are allowed when they
+capture a dramatic structure the library would distort.
 `commitment_class_distribution` keys must come from SPEC-22 Track 3
 `COMMITMENT_CLASSES`. Do not invent local values.
 
@@ -251,12 +253,13 @@ provides the recommended archetype mapping.
 ## Cross-References
 
 - `templates/arc-archetypes.md` — authoring vocabulary and JIT
-  `commitment_class -> recommended arc_archetype` mapping.
+  `commitment_class -> recommended arc_archetype` mapping. The mapping is a
+  default, not a closed value set.
 - `references/phase-2-generation-seeds.md` — downstream consumer of this
   diagnosis matrix. Its SPEC-21 arc-seed rewrite is owned by
   `SPEC21SCECOM-004`.
 - `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` — Track 3
-  owns `COMMITMENT_CLASSES` and `ARC_ARCHETYPES`; Track 4 owns RSP card
+  owns `COMMITMENT_CLASSES` and the initial recommended `ARC_ARCHETYPES`; Track 4 owns RSP card
   targeting fields.
 
 ## Output

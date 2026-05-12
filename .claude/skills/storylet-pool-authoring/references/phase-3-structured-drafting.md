@@ -103,7 +103,10 @@ fill every required storylet block:
 
 Populate the commitment contract that this arc tests or satisfies:
 
-- `commitment_class` and `arc_archetype` from the seed and closed vocabularies.
+- `commitment_class` from the closed vocabulary and `arc_archetype` from the
+  seed. `arc_archetype` is an orienting pattern label: library values are
+  preferred when they fit, but story-specific snake_case values are valid when
+  the arc's `dramatic_unit` and `beat_plan` justify them.
 - `actor` and `target` as STENT ids or role matchers from the cast context.
 - `user_intent` as the user-side commitment encoded by the arc.
 - `strategic_question_answered` as the scene-level question the arc helps answer.

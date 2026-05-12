@@ -145,7 +145,7 @@ visibility:
 
 arc_contract:                              # what the user committed to; mirrors selected CHC
   commitment_class: <commitment_class enum> # closed enum — see canonical-vocabularies
-  arc_archetype: <arc_archetype enum>      # closed enum
+  arc_archetype: <arc_archetype label>     # orienting pattern label; prefer library values when they fit, but story-specific snake_case values are allowed
   actor: STENT-NNNN                        # STENT-NNNN | role:<role>
   target: null                             # STENT-NNNN | role:<role> | null
   user_intent: >                           # user-side commitment encoded by this arc
@@ -251,7 +251,7 @@ exit_portfolio:
       expected_state_delta: {}             # per-strong-axis projection
       continuation_arc_selector:
         include_tags: []                   # open-vocab arc tags
-        require_arc_archetype: null        # <arc_archetype enum> | null
+        require_arc_archetype: null        # <arc_archetype label> | null; library value or story-specific snake_case label
   engine_discovered_exit_budget:
     min: 0
     max: 2                                 # default; STORY_KERNEL.cadence_policy may override
@@ -298,9 +298,9 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
 # stop_policy:
 #   normal_exits:
-#     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {outcome: accepted_with_limits}}
-#     - {id: commitment-blocked, predicate: commitment_blocked, args: {reason: refusal}}
-#     - {id: participant-exits, predicate: participant_exits, args: {role: recipient}}
+#     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {commitment_class: offer_practical_help}}
+#     - {id: commitment-blocked, predicate: commitment_blocked, args: {commitment_class: offer_practical_help, reason_class: refusal}}
+#     - {id: participant-exits, predicate: participant_exits, args: {participant: role:recipient}}
 #   safety_valves: {max_internal_beats: 6, max_words: 2200}
 # effect_model:
 #   selected_before_render: true
@@ -347,9 +347,9 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent, branch_local_counterfactual]}
 # stop_policy:
 #   normal_exits:
-#     - {id: question-answered, predicate: commitment_satisfied, args: {information_posture: investigated}}
-#     - {id: question-refused, predicate: commitment_blocked, args: {reason: refusal}}
-#     - {id: question-redirected, predicate: commitment_satisfied, args: {outcome: partially_deflected}}
+#     - {id: question-answered, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
+#     - {id: question-refused, predicate: commitment_blocked, args: {commitment_class: ask_one_bounded_question, reason_class: refusal}}
+#     - {id: question-redirected, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
 #   safety_valves: {max_internal_beats: 5, max_words: 1800}
 # effect_model:
 #   selected_before_render: true
@@ -397,11 +397,11 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
 # stop_policy:
 #   normal_exits:
-#     - {id: position-forced, predicate: commitment_satisfied, args: {thread_pressure: increased}}
-#     - {id: confrontation-interrupted, predicate: participant_exits, args: {role: opponent}}
-#     - {id: cost-accepted, predicate: commitment_satisfied, args: {outcome: fails_with_consequence}}
+#     - {id: position-forced, predicate: commitment_satisfied, args: {commitment_class: escalate_to_confrontation}}
+#     - {id: confrontation-interrupted, predicate: participant_exits, args: {participant: role:opponent}}
+#     - {id: cost-accepted, predicate: commitment_satisfied, args: {commitment_class: escalate_to_confrontation}}
 #   interrupt_before:
-#     - {id: safety-limit, predicate: safety_valve_triggered, args: {kind: escalation_limit}}
+#     - {id: irreversible-cost, predicate: irreversible_cost_imminent, args: {cost_axis: alliance_damage}}
 #   safety_valves: {max_internal_beats: 6, max_words: 2200}
 # effect_model:
 #   selected_before_render: true
