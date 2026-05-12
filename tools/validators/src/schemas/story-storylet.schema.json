@@ -88,7 +88,9 @@
         "allowed_outcome_band"
       ],
       "properties": {
+        "commitment_family": { "type": "string", "minLength": 1 },
         "commitment_class": { "type": "string", "minLength": 1 },
+        "commitment_detail": { "type": "string", "minLength": 1 },
         "arc_archetype": { "type": "string", "minLength": 1 },
         "actor": { "type": "string", "minLength": 1 },
         "target": { "type": ["string", "null"] },
@@ -244,7 +246,9 @@
             "required": ["id", "commitment_class", "strategy_cluster", "expected_state_delta", "continuation_arc_selector"],
             "properties": {
               "id": { "type": "string", "minLength": 1 },
+              "commitment_family": { "type": "string", "minLength": 1 },
               "commitment_class": { "type": "string", "minLength": 1 },
+              "commitment_detail": { "type": "string", "minLength": 1 },
               "strategy_cluster": { "type": "string", "minLength": 1 },
               "expected_state_delta": { "type": "object" },
               "continuation_arc_selector": { "type": "object" }

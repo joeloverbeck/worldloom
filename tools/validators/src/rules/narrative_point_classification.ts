@@ -85,6 +85,16 @@ function validatePage(
     return;
   }
 
+  // FOUNDATIONS §Pipeline shape: plan + finalize commits ARC_TRACE emission to
+  // branching-story-page-prose-finalize, which runs only after rendered prose
+  // is supplied. While the PG is at prose_status=pending, the ARC_TRACE record
+  // has not yet been emitted by design; deferring the consistency check until
+  // finalize matches the documented pipeline. The check still fires for any
+  // page that has reached prose_status=rendered without an ARC_TRACE.
+  if (parsedPage.prose_status === "pending") {
+    return;
+  }
+
   const traceId = typeof stateSnapshot.arc_trace_id === "string" ? stateSnapshot.arc_trace_id : undefined;
   const trace = (traceId ? tracesById.get(traceId) : undefined) ?? tracesByPage.get(pageId);
   if (!trace) {

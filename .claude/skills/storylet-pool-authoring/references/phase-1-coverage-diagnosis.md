@@ -98,8 +98,10 @@ diagnosis_matrix:
     over_represented: [<commitment_class>, ...]
 ```
 
-`arc_archetype_distribution` keys must come from SPEC-22 Track 3
-`ARC_ARCHETYPES` and the local `templates/arc-archetypes.md` library.
+`arc_archetype_distribution` keys should preserve the labels actually present in
+the pool. Values from `templates/arc-archetypes.md` are recommended library
+patterns, not an exhaustive set; story-specific labels are allowed when they
+capture a dramatic structure the library would distort.
 `commitment_class_distribution` keys must come from SPEC-22 Track 3
 `COMMITMENT_CLASSES`. Do not invent local values.
 
@@ -205,7 +207,9 @@ diagnosis_matrix:
       source_rsp: RSP-NNNN
       source_audit: SAU-NNNN
       finding_ids: [F-NN, ...]
+      target_commitment_family: <commitment_family>
       target_commitment_class: <commitment_class>
+      target_commitment_detail: <story-specific precision label | null>
       target_arc_archetype: <arc_archetype>
       sketch_arc_contract: >
         Card-provided arc-contract sketch, when present.
@@ -214,9 +218,11 @@ diagnosis_matrix:
       priority_weight: max
 ```
 
-`target_commitment_class` and `target_arc_archetype` are owned by the
+`target_commitment_family`, `target_commitment_class`, optional
+`target_commitment_detail`, and `target_arc_archetype` are owned by the
 `branching-story-health-audit` RSP card schema. This Phase 1 reference consumes
-those fields; it does not define or migrate the RSP card schema.
+those fields; it does not define or migrate the RSP card schema. The base
+`target_commitment_class` remains the deterministic join key.
 
 Audit mode bypasses a full pool-health diagnosis unless the operator explicitly
 requests contextual review. RSP targeting already names the remediable gap; the
@@ -251,12 +257,13 @@ provides the recommended archetype mapping.
 ## Cross-References
 
 - `templates/arc-archetypes.md` — authoring vocabulary and JIT
-  `commitment_class -> recommended arc_archetype` mapping.
+  `commitment_class -> recommended arc_archetype` mapping. The mapping is a
+  default, not a closed value set.
 - `references/phase-2-generation-seeds.md` — downstream consumer of this
   diagnosis matrix. Its SPEC-21 arc-seed rewrite is owned by
   `SPEC21SCECOM-004`.
 - `archive/specs/SPEC-22-scene-commitment-arc-engine-and-cross-skill.md` — Track 3
-  owns `COMMITMENT_CLASSES` and `ARC_ARCHETYPES`; Track 4 owns RSP card
+  owns `COMMITMENT_CLASSES` and the initial recommended `ARC_ARCHETYPES`; Track 4 owns RSP card
   targeting fields.
 
 ## Output

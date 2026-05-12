@@ -145,7 +145,7 @@ visibility:
 
 arc_contract:                              # what the user committed to; mirrors selected CHC
   commitment_class: <commitment_class enum> # closed enum — see canonical-vocabularies
-  arc_archetype: <arc_archetype enum>      # closed enum
+  arc_archetype: <arc_archetype label>     # orienting pattern label; prefer library values when they fit, but story-specific snake_case values are allowed
   actor: STENT-NNNN                        # STENT-NNNN | role:<role>
   target: null                             # STENT-NNNN | role:<role> | null
   user_intent: >                           # user-side commitment encoded by this arc
@@ -186,15 +186,18 @@ beat_plan:
   max_beats: <int 3..8>
   beats:                                   # 3-8 entries
     - id: B1
-      function: <beat_function string>     # open-vocab kebab-case; see references/beat-functions.md
+      function: <beat_function string>     # open-vocab kebab-case; see templates/arc-archetypes.md for per-archetype beat-function examples
+      realization_target: realizes-initial-scene-movement # REQUIRED; open-vocab kebab-case scene movement this beat realizes
       required: true
       state_significance: none             # none | <strong_axis enum>
     - id: B2
       function: <beat_function string>
+      realization_target: realizes-turning-scene-movement
       required: true
       state_significance: <strong_axis enum>
     - id: B3
       function: <beat_function string>
+      realization_target: realizes-closing-scene-movement
       required: false
       state_significance: none
 
@@ -222,13 +225,13 @@ stop_policy:
     - id: <kebab-case stop id>
       predicate: <stop_predicate enum>     # closed-enum predicate selector (args below are open kebab-case vocabulary) — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
       args: {}
-  interrupt_before:                        # any of these interrupts the arc before completion
+  interrupt_before:                        # MUST be non-empty (>=1 entry); any of these interrupts the arc before completion
     - id: <kebab-case interrupt id>
-      predicate: <interrupt_predicate enum>
-      args: {}
+      predicate: <interrupt_predicate enum> # from templates/predicate-dsl.md Interrupt-before predicates
+      args: {}                             # type-specific args; see predicate-dsl.md per-predicate args schemas
   safety_valves:
     max_internal_beats: 6                  # default: 6; matches max_beats safety-valve
-    max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11)
+    max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see branching-story-page-cycle/references/prose-craft-contract.md Rule 11)
 
 effect_model:
   selected_before_render: true             # MUST be true; replay-equality contract
@@ -251,7 +254,7 @@ exit_portfolio:
       expected_state_delta: {}             # per-strong-axis projection
       continuation_arc_selector:
         include_tags: []                   # open-vocab arc tags
-        require_arc_archetype: null        # <arc_archetype enum> | null
+        require_arc_archetype: null        # <arc_archetype label> | null; library value or story-specific snake_case label
   engine_discovered_exit_budget:
     min: 0
     max: 2                                 # default; STORY_KERNEL.cadence_policy may override
@@ -287,10 +290,10 @@ notes: >
 #   min_beats: 3
 #   max_beats: 4
 #   beats:
-#     - {id: B1, function: pressure-setup, required: true, state_significance: obligation_state}
-#     - {id: B2, function: offer-extended, required: true, state_significance: relationship_trajectory}
-#     - {id: B3, function: response-received, required: true, state_significance: obligation_state}
-#     - {id: B4, function: aftermath-marked, required: false, state_significance: none}
+#     - {id: B1, function: pressure-setup, realization_target: realizes-need-being-named, required: true, state_significance: obligation_state}
+#     - {id: B2, function: offer-extended, realization_target: realizes-help-being-offered, required: true, state_significance: relationship_trajectory}
+#     - {id: B3, function: response-received, realization_target: realizes-recipient-decision, required: true, state_significance: obligation_state}
+#     - {id: B4, function: aftermath-marked, realization_target: realizes-cost-residue, required: false, state_significance: none}
 # execution_envelope:
 #   invariants: [offer-must-remain-refusable, respect-refusal-without-pressure]
 #   required_functions: [name-the-need, preserve-recipient-agency]
@@ -298,9 +301,11 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
 # stop_policy:
 #   normal_exits:
-#     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {outcome: accepted_with_limits}}
-#     - {id: commitment-blocked, predicate: commitment_blocked, args: {reason: refusal}}
-#     - {id: participant-exits, predicate: participant_exits, args: {role: recipient}}
+#     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {commitment_class: offer_practical_help}}
+#     - {id: commitment-blocked, predicate: commitment_blocked, args: {commitment_class: offer_practical_help, reason_class: refusal}}
+#     - {id: participant-exits, predicate: participant_exits, args: {participant: role:recipient}}
+#   interrupt_before:
+#     - {id: consent-boundary, predicate: consent_boundary_imminent, args: {}}
 #   safety_valves: {max_internal_beats: 6, max_words: 2200}
 # effect_model:
 #   selected_before_render: true
@@ -336,10 +341,10 @@ notes: >
 #   min_beats: 3
 #   max_beats: 4
 #   beats:
-#     - {id: B1, function: question-framed, required: true, state_significance: information_posture}
-#     - {id: B2, function: boundary-named, required: true, state_significance: character_intention}
-#     - {id: B3, function: answer-or-deflection, required: true, state_significance: information_posture}
-#     - {id: B4, function: consequence-marked, required: false, state_significance: thread_pressure}
+#     - {id: B1, function: question-framed, realization_target: realizes-information-gap-named, required: true, state_significance: information_posture}
+#     - {id: B2, function: boundary-named, realization_target: realizes-disclosure-boundary-set, required: true, state_significance: character_intention}
+#     - {id: B3, function: answer-or-deflection, realization_target: realizes-partial-answer-or-refusal, required: true, state_significance: information_posture}
+#     - {id: B4, function: consequence-marked, realization_target: realizes-inquiry-consequence-marked, required: false, state_significance: thread_pressure}
 # execution_envelope:
 #   invariants: [one-question-only, answer-may-be-partial]
 #   required_functions: [identify-information-gap, respect-refusal-channel]
@@ -347,9 +352,11 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent, branch_local_counterfactual]}
 # stop_policy:
 #   normal_exits:
-#     - {id: question-answered, predicate: commitment_satisfied, args: {information_posture: investigated}}
-#     - {id: question-refused, predicate: commitment_blocked, args: {reason: refusal}}
-#     - {id: question-redirected, predicate: commitment_satisfied, args: {outcome: partially_deflected}}
+#     - {id: question-answered, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
+#     - {id: question-refused, predicate: commitment_blocked, args: {commitment_class: ask_one_bounded_question, reason_class: refusal}}
+#     - {id: question-redirected, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
+#   interrupt_before:
+#     - {id: forbidden-mystery-risk, predicate: forbidden_mystery_resolution_risk, args: {mystery_id: M-NNNN}}
 #   safety_valves: {max_internal_beats: 5, max_words: 1800}
 # effect_model:
 #   selected_before_render: true
@@ -385,11 +392,11 @@ notes: >
 #   min_beats: 3
 #   max_beats: 5
 #   beats:
-#     - {id: B1, function: line-crossed, required: true, state_significance: irreversibility}
-#     - {id: B2, function: accusation-or-demand, required: true, state_significance: thread_pressure}
-#     - {id: B3, function: counterpressure, required: true, state_significance: risk_cost_exposure}
-#     - {id: B4, function: outcome-locked, required: true, state_significance: relationship_trajectory}
-#     - {id: B5, function: fallout-glimpsed, required: false, state_significance: none}
+#     - {id: B1, function: line-crossed, realization_target: realizes-point-of-no-return, required: true, state_significance: irreversibility}
+#     - {id: B2, function: accusation-or-demand, realization_target: realizes-conflict-named-directly, required: true, state_significance: thread_pressure}
+#     - {id: B3, function: counterpressure, realization_target: realizes-retaliation-pressure-surfaced, required: true, state_significance: risk_cost_exposure}
+#     - {id: B4, function: outcome-locked, realization_target: realizes-forced-position-set, required: true, state_significance: relationship_trajectory}
+#     - {id: B5, function: fallout-glimpsed, realization_target: realizes-aftermath-risk-glimpsed, required: false, state_significance: none}
 # execution_envelope:
 #   invariants: [stakes-are-explicit, confrontation-has-cost]
 #   required_functions: [name-the-line, force-a-position]
@@ -397,11 +404,11 @@ notes: >
 #   mystery_preservation: {forbidden_resolutions: [M-NNNN], allowed_claims: [apparent]}
 # stop_policy:
 #   normal_exits:
-#     - {id: position-forced, predicate: commitment_satisfied, args: {thread_pressure: increased}}
-#     - {id: confrontation-interrupted, predicate: participant_exits, args: {role: opponent}}
-#     - {id: cost-accepted, predicate: commitment_satisfied, args: {outcome: fails_with_consequence}}
+#     - {id: position-forced, predicate: commitment_satisfied, args: {commitment_class: escalate_to_confrontation}}
+#     - {id: confrontation-interrupted, predicate: participant_exits, args: {participant: role:opponent}}
+#     - {id: cost-accepted, predicate: commitment_satisfied, args: {commitment_class: escalate_to_confrontation}}
 #   interrupt_before:
-#     - {id: safety-limit, predicate: safety_valve_triggered, args: {kind: escalation_limit}}
+#     - {id: irreversible-cost, predicate: irreversible_cost_imminent, args: {cost_axis: alliance_damage}}
 #   safety_valves: {max_internal_beats: 6, max_words: 2200}
 # effect_model:
 #   selected_before_render: true

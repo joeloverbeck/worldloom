@@ -72,7 +72,7 @@ storylet_selection_audit_trail:                      # Phase 4 weighted-pick dis
   jit_expansion_fired: false                          # true if the JIT generator was delegated; top_k_considered then includes the JIT-trigger condition
   weighted_pick_seed: <optional engine-internal seed for replay reproducibility>
 content_intensity: tame | mature | explicit
-validation_trace:                                    # Phase 9 gates 1-17 with one-line PASS rationales
+validation_trace:                                    # Phase 9 gates 1-18 with one-line PASS rationales
   mystery_firewall: PASS — <rationale>
   invariant_compatibility: PASS — <rationale>
   recursive_reference_closure: PASS — <rationale>
@@ -90,6 +90,7 @@ validation_trace:                                    # Phase 9 gates 1-17 with o
   arc_trace_evidence_alignment: PASS — <rationale>
   narrative_point_classification: PASS — <rationale>
   choice_worthiness_completeness: PASS — <rationale>
+  plan_completeness_check: PASS — <rationale>
 created_at: <iso8601>
 ```
 
@@ -101,7 +102,7 @@ Page records do not carry `created_at_page`. The page record's own PG id is its 
 
 `state_snapshot.arc_trace_id` points to the derived `ARCTRACE-NNNN` record emitted for this page. It is `null` when `arc_trace_emitted: false` or at PG-0001's no-arc root.
 
-`state_snapshot.arc_trace_emitted` records whether an ARC_TRACE has been persisted for this page. Post-PROSESPLIT-007, page-cycle always sets `arc_trace_emitted: false` at plan-commit because Layer 2 / Layer 3 ARC_TRACE extraction requires rendered prose and DEFERS to `branching-story-page-prose-finalize` Phase 4. Finalize Phase 7 emits the `create_arc_trace_record` op (when `PG.storylet_realized != null`) and updates this field to `true` along with `state_snapshot.arc_trace_id: ARCTRACE-NNNN` via `update_record_field` ops.
+`state_snapshot.arc_trace_emitted` records whether an ARC_TRACE has been persisted for this page. Page-cycle always sets `arc_trace_emitted: false` at plan-commit because Layer 2 / Layer 3 ARC_TRACE extraction requires rendered prose and DEFERS to `branching-story-page-prose-finalize` Phase 4. Finalize Phase 7 emits the `create_arc_trace_record` op (when `PG.storylet_realized != null`) and updates this field to `true` along with `state_snapshot.arc_trace_id: ARCTRACE-NNNN` via `update_record_field` ops.
 
 `prose_plan_path` is set at plan-commit to `pages-prose-plans/PG-NNNN.md` and is the path to the comprehensive plan authored by Phase 7. The external prose renderer reads this file verbatim as its prompt.
 

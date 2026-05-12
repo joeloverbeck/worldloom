@@ -287,6 +287,22 @@ test("validatePatchPlan runs effect-model replay safety for Shape B page ops", a
   });
 });
 
+test("validatePatchPlan accepts pending page-cycle pages before ARC_TRACE finalization", async () => {
+  await withTempRoot(async () => {
+    const result = await validatePatchPlan(pendingProsePagePlan() as unknown as PatchPlanEnvelope);
+
+    for (const name of [
+      "effect_model_replay_safety",
+      "narrative_point_classification",
+      "snapshot_replay_equality"
+    ]) {
+      const execution = result.executions.find((row) => row.name === name);
+      assert.equal(execution?.status, "pass", name);
+      assert.ok(!result.verdicts.some((verdict) => verdict.validator === name), name);
+    }
+  });
+});
+
 test("validatePatchPlan materializes ARC_TRACE records for pre-apply trace validators", async () => {
   await withTempRoot(async () => {
     const proseDir = path.resolve(process.cwd(), "../../worlds/seeded/stories/marla-kern-seduction/pages-prose");
@@ -530,6 +546,18 @@ function arcTracePlan() {
       })
     ]
   };
+}
+
+function pendingProsePagePlan() {
+  const plan = replaySafePagePlan();
+  const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
+  const page = pagePatch?.payload.record as Record<string, unknown>;
+  const stateSnapshot = page.state_snapshot as Record<string, unknown>;
+  page.prose_status = "pending";
+  stateSnapshot.arc_trace_emitted = false;
+  stateSnapshot.arc_trace_id = null;
+  stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
+  return plan;
 }
 
 function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {

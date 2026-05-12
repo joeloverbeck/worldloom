@@ -1,6 +1,6 @@
 # Prose Craft Contract
 
-This file is embedded VERBATIM into the LLM prompt at Phase 7 of `branching-story-page-cycle` and at Phase 7 of `branching-story-bootstrap`. The post-render prose critic (`phase-7-page-render.md` §Post-Render Prose Critic) checks the rendered prose against the named pathologies in §Diagnostic Vocabulary at the end of this file. Both surfaces share this single source of truth so the prompt instructions and the critic agree on the rules.
+This file is embedded VERBATIM into the LLM plan-authoring prompt at Phase 7 of `branching-story-page-cycle` and at Phase 7 of `branching-story-bootstrap` (and, transitively, into per-page plan §3 — see `_shared-templates/page-plan.md`). The 8-axis post-render prose critic now lives at `branching-story-page-prose-finalize/references/phase-3-prose-critic.md` and checks the rendered prose against the named pathologies in §Diagnostic Vocabulary at the end of this file. Both surfaces share this single source of truth so the plan-authoring prompt and the post-render critic agree on the rules.
 
 The rules below are the contract. Each rule is one principle with a concrete revision example. The critic's verdicts cite these rules by number.
 
@@ -8,7 +8,9 @@ The rules below are the contract. Each rule is one principle with a concrete rev
 
 ## 1. Pick the psychic-distance level for the moment
 
-Default to deep close-third / first-person (Gardner level 4): the narration borrows the POV character's diction, judgments, and rhythms. Move to standard third (level 3) for transit and summary; reserve stream-of-consciousness (level 5) for genuine emotional peaks, sparingly. Most prose drift is "wrong level for the moment" — abstract analysis where deep close was needed, or stream where the beat called for plain action.
+**When the plan's §4 (Story kernel context) commits to a specific POV — first-person, third-person close, alternating, or any other treatment — the renderer must honor that commitment.** The defaults below apply only when §4 leaves POV unspecified; they are not a license to pick either treatment when §4 has named one.
+
+Default (when §4 is silent): deep close-third / first-person (Gardner level 4) — the narration borrows the POV character's diction, judgments, and rhythms. Move to standard third (level 3) for transit and summary; reserve stream-of-consciousness (level 5) for genuine emotional peaks, sparingly. Most prose drift is "wrong level for the moment" — abstract analysis where deep close was needed, or stream where the beat called for plain action.
 
 ## 2. Use free indirect discourse over labeled interiority
 

@@ -17,7 +17,7 @@ Emit each seed in this shape:
 ```yaml
 arc_seed:
   commitment_class: <commitment_class enum>
-  arc_archetype: <arc_archetype enum>
+  arc_archetype: <arc_archetype label>
   target_obligation: OBL-NNNN | null
   target_thread: THR-NNNN | null
   entry_pressure_description: >
@@ -36,9 +36,11 @@ arc_seed:
 ```
 
 `commitment_class` values come from SPEC-22 Track 3 `COMMITMENT_CLASSES`.
-`arc_archetype` values come from SPEC-22 Track 3 `ARC_ARCHETYPES` and the local
-`templates/arc-archetypes.md` library. `value_delta_target_axes` entries come
-from SPEC-22 Track 3 `STRONG_AXES`:
+`arc_archetype` values should use the local `templates/arc-archetypes.md`
+library when one of its orienting patterns fits. If none fits, use a concise
+story-specific snake_case label and let the `dramatic_unit` / `beat_plan` define
+the structure. `value_delta_target_axes` entries come from SPEC-22 Track 3
+`STRONG_AXES`:
 
 - `relationship_trajectory`
 - `obligation_state`
@@ -133,18 +135,22 @@ and archetypes that can lower, redirect, or close thread pressure.
 ## Audit Mode
 
 For audit mode (`mode=audit`), validated RSP cards drive seed creation. Each RSP produces an
-arc seed whose targeting fields come from the card: `commitment_class` from
-`RSP.target_commitment_class`, `arc_archetype` from
+arc seed whose targeting fields come from the card: `commitment_family` from
+`RSP.target_commitment_family` when present, `commitment_class` from
+`RSP.target_commitment_class`, optional precision from
+`RSP.target_commitment_detail`, `arc_archetype` from
 `RSP.target_arc_archetype`, nullable `target_obligation` and `target_thread`
 from the RSP's corresponding target fields, `entry_pressure_description` and
 `scene_question` from `RSP.sketch_dramatic_unit`, and
 `dramatic_transaction_summary` from the RSP rationale plus the current
 story-state pressure named by the finding.
 
-The RSP schema extension is owned by SPEC-22 Track 4. This reference consumes
+The RSP schema extension is owned by COMTAX-002. This reference consumes
 these RSP fields without defining or migrating them:
 
 - `target_commitment_class`
+- `target_commitment_family`
+- `target_commitment_detail`
 - `target_arc_archetype`
 - `sketch_arc_contract`
 - `sketch_dramatic_unit`
@@ -157,7 +163,8 @@ one seed from the continuation-failure context in `caller_state_snapshot`.
 The seed's `commitment_class` must match the chosen CHC's
 `commitment_class`. Select `arc_archetype` from `templates/arc-archetypes.md`
 using the deterministic `commitment_class -> recommended arc_archetype` mapping
-unless the caller state proves a more specific archetype is required.
+unless the caller state proves a more specific story-local archetype label is
+required.
 
 The JIT seed should be just large enough for Phase 3's template cascade to
 produce one runtime `branch_scoped` arc:
@@ -181,8 +188,8 @@ Direct user invocation of JIT remains invalid; JIT is a no-write sub-routine for
 offer, defer, tighten, or transform?
 
 `arc_archetype` should answer: what dramatic structure from
-`templates/arc-archetypes.md` best carries that commitment_class in this story
-state?
+`templates/arc-archetypes.md`, or what story-specific dramatic structure if the
+library does not fit, best carries that commitment_class in this story state?
 
 `entry_pressure_description` should be concrete and story-state grounded. It is
 the pressure on entry, not a plot synopsis.
@@ -207,8 +214,8 @@ unapproved canon facts or resolve Mystery Reserve entries.
   diagnosis matrix that drives seed selection.
 - `references/phase-3-structured-drafting.md` is the downstream consumer that
   turns each arc seed into an SLT record.
-- `templates/arc-archetypes.md` is the local archetype vocabulary and JIT
-  mapping table.
+- `templates/arc-archetypes.md` is the local archetype pattern library and JIT
+  default mapping table.
 - SPEC-22 Track 3 is the closed-vocabulary source for `COMMITMENT_CLASSES`,
-  `ARC_ARCHETYPES`, and `STRONG_AXES`.
+  `STRONG_AXES`, and the initial recommended `ARC_ARCHETYPES`.
 - SPEC-22 Track 4 owns the RSP card schema fields consumed by audit mode.

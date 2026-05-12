@@ -63,94 +63,39 @@ frontmatter + markdown body file that the external prose renderer will later
 read in its entirety to produce pages-prose/PG-NNNN.md.
 
 Frontmatter shape (selected-arc case):
-- plan_id: PG-NNNN
-- story_id: STORY-NNNN
-- world_slug / story_slug from arguments
+The frontmatter required keys and their shapes are documented at
+.claude/skills/_shared-templates/page-plan.md (frontmatter block). At the
+page-cycle selected-arc case, populate the frontmatter exactly as the
+canonical template specifies, with these selected-arc-case-specific values:
+- selected_arc_id: SLT-NNNN
+- chosen_variant_id: <variant id>
+- required_effects: [...] (variant.required_effects verbatim)
 - parent_page_id: <parent PG-NNNN>
 - branch_id: <BR-NNNN — new on fork, existing logical_id on continuation>
 - branch_path: <parent.branch_path + [PG-NNNN]>
-- state_hash_at_plan_time: <PG-NNNN.state_hash from the working buffer>
+- state_hash_at_plan_time: <PG-NNNN.state_hash from working buffer>
 - canon_revision_at_plan_time: <PG-NNNN.state_snapshot.canon_revision>
 - prose_status: pending
-- plan_authored_at: <iso8601 now>
-- plan_authored_by: branching-story-page-cycle
-- selected_arc_id: SLT-NNNN            # selected-arc case — non-null
-- chosen_variant_id: <variant id>      # selected-arc case — non-null
-- required_effects: [...]              # chosen variant's required_effects[] verbatim
-- declared_visible_affordances: [...]  # one entry per visually salient
-                                        # element the plan intends the prose
-                                        # to anchor on; each entry MUST carry
-                                        # affordance_text, affordance_type,
-                                        # mapped_state_id, grounding_source
-                                        # — see Phase 7.5 for the validator
-- declared_intended_beats: [...]       # one entry per intended beat, count
-                                        # within [arc.beat_plan.min_beats,
-                                        # arc.beat_plan.max_beats]
-- declared_stop_condition:
-    exit_class: normal | terminal | interrupt
-    exit_signal: "<one-sentence narrative cue that fires the stop>"
-- forbidden_resolutions: [<every M-NNNN in mysteries_in_play[] whose
-                            future_resolution_safety == forbidden>, ...]
-- forbidden_engine_vocabulary: <full list per the template>
-- deferred_validation_trace:
-    prose_ledger_consistency: "DEFERRED — awaiting prose render"
-    arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"
-    prose_critic_8_axis: "DEFERRED — awaiting prose render"
+- deferred_validation_trace: all three keys (prose_ledger_consistency,
+  arc_trace_evidence_alignment, prose_critic_8_axis) set to
+  "DEFERRED — awaiting prose render"
 
 Body shape (selected-arc case):
-- §1 How to use this plan — verbatim from template
-- §2 Content Policy — inline content_policy block verbatim
-- §3 Prose Craft Contract — inline prose-craft-contract.md verbatim
-- §4 Story kernel context — inline premise + designing_principle + tone +
-     central dramatic question + content_intensity_baseline + POV +
-     language_register from STORY_KERNEL
-- §5 World canon snapshot — inline every CF touching cast/location/period
-     as full record body (statement + level + mode + scope +
-     invariants_supported). Do NOT emit bare CF-NNNN references.
-- §6 World invariants in play — inline every INV referenced by an active
-     OBL/THR/STINT/SLT-precondition, with full break_conditions[].
-- §7 Mysteries in play (firewall posture) — inline every M-NNNN with status
-     and forbidden_resolutions[]; mark which the renderer MUST NOT resolve.
-- §8 Cast in this scene — for each STENT in cast_present, inline:
-     world CHAR dossier verbatim (when world_character_id set) →
-     story-local STENT record → current STINT (goals/fears/beliefs/
-     emotional_state/current_pressure) → relevant SREL records.
-- §9 Story-local facts visible — inline every SF in state_snapshot filtered
-     by POV-accessibility, with epistemic_class, certainty, known_by[],
-     derived_from_cf if applicable.
-- §10 Open obligations — inline every OBL in obligations_open with salience,
-     urgency, owner, payoff_modes[], decay_rate.
-- §11 Active threads — inline every THR in threads_active with status,
-     current_pressure, type.
-- §12 Pending consequences — inline every CNSQ in consequences_pending with
-     required_aftermath_text, urgency, source SE. (Empty allowed when the
-     parent state had no pending consequences.)
-- §13 Locations & objects in scope — inline current_location,
-     accessible_locations, objects_in_scope, inventory_by_entity with
-     STLOC and STOBJ records inlined verbatim.
-- §14 Recent prose continuity — inline verbatim the last 1-2 pages of
-     pages-prose/PG-*.md along parent.branch_path (NOT sibling branches).
-     The §14 hard pre-flight block guarantees this section is non-empty:
-     page-cycle aborts when parent.prose_status != "rendered", so there
-     is always rendered prose to inline.
-- §15 Selected scene-commitment arc — REQUIRED in the selected-arc case.
-     Inline the full SLT-NNNN record verbatim: arc_contract, dramatic_unit,
-     beat_plan (min_beats, max_beats, beat_functions, required turn-shape
-     notes), execution_envelope (invariants, required_functions,
-     allowed_tactics, prohibited_actions, style_directives,
-     mystery_preservation), stop_policy.normal_exits, effect_model.variants[].
-- §15-alt Entry pressure framing — OMITTED in the selected-arc case.
-- §16 Chosen variant — REQUIRED in the selected-arc case. Inline the chosen
-     variant's id + required_effects[] verbatim, with the note: "the prose
-     must realize these as scene consequences, not as ledger jargon."
-- §17 Governor nudge — inline the Phase 6 homeostat signal verbatim (e.g.,
-     "obligation density is high; favor reflection cadence over action").
-- §18 Scene direction — AUTHOR-WRITTEN five fields:
-     ENTRY PRESSURE / SCENE QUESTION / VALUE DELTA TARGET / REQUIRED TURN /
-     STOPPING POINT / DO NOT REVEAL (the M-NNNN forbidden list and the
-     engine-vocabulary tokens list from frontmatter).
-- §19 Render-time instruction block — inline verbatim from
-     reports/prose-quality-instructions.md §3.
+The body sections §1 through §19 are documented at
+.claude/skills/_shared-templates/page-plan.md (markdown body). At the
+page-cycle selected-arc case, populate every section per the canonical
+template, with the following selected-arc-case deviations:
+- §14 Recent prose continuity: inline the last 1-2 rendered pages along
+  parent.branch_path verbatim; the §14 hard pre-flight block guarantees
+  parent.prose_status == "rendered" so the section is always non-empty.
+- §15 Selected scene-commitment arc: REQUIRED. Inline the full
+  Phase-4-selected SLT-NNNN record verbatim (arc_contract, dramatic_unit,
+  beat_plan, execution_envelope, stop_policy.normal_exits,
+  effect_model.variants[]).
+- §15-alt Entry pressure framing: OMITTED in the selected-arc case.
+- §16 Chosen variant for this turn: REQUIRED. Inline the chosen variant's
+  id + variant.required_effects[] verbatim.
+- §17 Governor nudge: inline the Phase 6 homeostat signal verbatim.
 
 Every record id referenced in any plan section MUST be inlined verbatim in
 that section. Bare CF-NNNN / CHAR-NNNN / SLT-NNNN / OBL-NNNN / etc.
@@ -180,7 +125,7 @@ Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. U
 
 ## Emit PG-NNNN record into working buffer
 
-Page-cycle runtime PG schema. The new schema fields (per PROSESPLIT-002) carry the plan-vs-prose split:
+Page-cycle runtime PG schema. The schema fields carry the plan-vs-prose split:
 
 - **Prose plan path (always)**: `prose_plan_path: pages-prose-plans/PG-NNNN.md`.
 - **Prose path (deferred to finalize)**: `prose_path: null` at plan-commit; finalize sets this to `pages-prose/PG-NNNN.md`.
@@ -194,7 +139,7 @@ All other PG fields (identity / branch wiring, storylet_realized, applied_event_
 
 ## Cross-references
 
-- Canonical plan template: `.claude/skills/_shared-templates/page-plan.md`
+- Canonical plan template (`.claude/skills/_shared-templates/page-plan.md`) — single source of truth for §1-§19 body and frontmatter shape; this reference describes the page-cycle selected-arc-case delta only.
 - Declared-affordance validator (Phase 7.5): `references/phase-7-5-visible-affordance-extraction.md`
 - ARC_TRACE Layer 1 only at plan-commit (Phase 7.6): `references/phase-7-6-arc-trace-extraction.md`
 - Phase 9 gate table (including DEFERRED rows and `plan_completeness_check`): `references/phase-9-validation-gates.md`
@@ -202,4 +147,4 @@ All other PG fields (identity / branch wiring, storylet_realized, applied_event_
 - Convergence point — rendered prose validators + ARC_TRACE Layer 2/3 extraction + PG.prose_status flip: `.claude/skills/branching-story-page-prose-finalize/SKILL.md`
 - 8-axis prose critic (moved out of Phase 7): `.claude/skills/branching-story-page-prose-finalize/references/phase-3-prose-critic.md`
 - ARC_TRACE Layer 2 / Layer 3 (moved out of Phase 7.6): `.claude/skills/branching-story-page-prose-finalize/references/phase-4-arc-trace-extraction.md`
-- Render-time instruction block consumed by the external renderer: `reports/prose-quality-instructions.md` §3
+- Render-time instruction block (inlined verbatim into plan §19): `reports/prose-quality-instructions.md` §"Render-Time Instruction Template"

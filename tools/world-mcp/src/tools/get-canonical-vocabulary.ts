@@ -8,7 +8,9 @@ import {
   CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
   CF_TYPE_VALUES,
   CHANGE_TYPE_VALUES,
+  COMMITMENT_CLASS_TO_FAMILY,
   COMMITMENT_CLASSES,
+  COMMITMENT_FAMILIES,
   ENTITY_KIND_VALUES,
   INVARIANT_CATEGORY_VALUES,
   MYSTERY_RESOLUTION_SAFETY_ENUM,
@@ -36,6 +38,7 @@ export const VOCABULARY_CLASSES = [
   "mystery_reserve_effect",
   "revision_difficulty",
   "cf_type",
+  "commitment_family",
   "commitment_class",
   "arc_archetype",
   "narrative_point",
@@ -61,10 +64,16 @@ export interface PerValueCoupling {
   requires_exception_governance: boolean;
 }
 
+export interface PerValueFamily {
+  value: string;
+  family: string;
+}
+
 export interface GetCanonicalVocabularyResponse {
   canonical_values: string[];
   coupling?: VocabularyCoupling;
   per_value_coupling?: PerValueCoupling[];
+  per_value_family?: PerValueFamily[];
 }
 
 function isVocabularyClass(value: string): value is VocabularyClass {
@@ -171,8 +180,20 @@ export async function getCanonicalVocabulary(
           requires_exception_governance: (CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED as readonly string[]).includes(value)
         }))
       };
+    case "commitment_family":
+      return { canonical_values: [...COMMITMENT_FAMILIES] };
     case "commitment_class":
-      return { canonical_values: [...COMMITMENT_CLASSES] };
+      return {
+        canonical_values: [...COMMITMENT_CLASSES],
+        coupling: {
+          field: "commitment_family",
+          rule: "Every closed commitment_class maps to exactly one closed commitment_family. Future commitment_detail values are open story-specific labels and are not part of this vocabulary."
+        },
+        per_value_family: COMMITMENT_CLASSES.map((value) => ({
+          value,
+          family: COMMITMENT_CLASS_TO_FAMILY[value]
+        }))
+      };
     case "arc_archetype":
       return { canonical_values: [...ARC_ARCHETYPES] };
     case "narrative_point":

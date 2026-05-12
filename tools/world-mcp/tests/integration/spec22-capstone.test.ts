@@ -120,7 +120,8 @@ test("SPEC-22 validator coverage is executable and mirrored by page-cycle gate p
 
 test("SPEC-22 canonical vocabulary classes expose the expected live counts", async () => {
   const expected = [
-    ["commitment_class", 20],
+    ["commitment_family", 16],
+    ["commitment_class", 81],
     ["arc_archetype", 20],
     ["narrative_point", 5],
     ["strong_axis", 8],

@@ -105,7 +105,7 @@ When a source skill is structured as Pre-flight + Phases 1-N (with optional half
 | 4 | Phases 4 + 4.5 | `references/phase-4-storylet-and-mystery-authority.md` |
 | 5 | Phase 5 | `references/phase-5-state-mutation.md` |
 | 6 | Phases 6 + 6.5 | `references/phase-6-governor-and-closure.md` |
-| 7 | Phase 7 | `references/phase-7-page-render.md` |
+| 7 | Phase 7 | `references/phase-7-page-plan.md` |
 | 8 | Phase 8 | `references/phase-8-choice-generation.md` |
 | 9 | Phase 9 | `references/phase-9-validation-gates.md` |
 | 10 | Phase 10 (HARD-GATE approval) | INLINE per the Commit / HARD-GATE phases stay inline rule above |

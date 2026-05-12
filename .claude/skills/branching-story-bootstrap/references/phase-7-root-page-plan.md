@@ -191,4 +191,4 @@ Page-cycle-compatible schema in `templates/story-records.yaml`; `branching-story
 - Phase 9 gate table (including DEFERRED rows and new `plan_completeness_check`): `references/phase-9-validation-gates.md`
 - Phase 9.5 discipline checks (including new `plan_self_containment`): `references/phase-9-5-bootstrap-discipline-validator.md`
 - Convergence point — rendered prose validators + ARC_TRACE extraction + PG.prose_status flip: `.claude/skills/branching-story-page-prose-finalize/SKILL.md`
-- Render-time instruction block consumed by the external renderer: `reports/prose-quality-instructions.md` §3
+- Render-time instruction block (inlined verbatim into plan §19): `reports/prose-quality-instructions.md` §"Render-Time Instruction Template"

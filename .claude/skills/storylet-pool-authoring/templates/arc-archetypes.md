@@ -1,8 +1,9 @@
 # Arc Archetype Library
 
 This template is the authoring reference for SPEC-21 scene-commitment arcs.
-It gives proposers a stable vocabulary for matching a `commitment_class` to an
-`arc_archetype`, then turning that pairing into a multi-beat dramatic unit.
+It gives proposers a stable set of orienting patterns for matching a
+`commitment_class` to an `arc_archetype`, then turning that pairing into a
+multi-beat dramatic unit.
 
 Each archetype entry names the normal use case, the pressure it expects on
 entry, the state delta it is designed to move, a small beat-plan pattern, an
@@ -10,9 +11,11 @@ execution envelope, a stop-policy sketch, an effect-model pattern, and native
 exit seeds. The sketches are deliberately compact: Phase 3 should use them as
 structural prompts, not as prewritten prose.
 
-Authors may extend this library only by append-only authorial change. New
-archetype names must also land in SPEC-22's canonical-vocabularies
-`ARC_ARCHETYPES` enum before records using them can pass validation.
+Authors should use these archetypes when one fits cleanly. They may also emit a
+story-specific `arc_archetype` label when the library would distort the actual
+dramatic structure. Novel labels should be concise snake_case, explained by the
+arc's `dramatic_unit` and `beat_plan`, and treated as candidates for later
+library expansion if they recur.
 
 ## fragile_offer
 

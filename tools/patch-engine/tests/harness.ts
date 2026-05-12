@@ -111,7 +111,8 @@ export function seedRecord(
   nodeId: string,
   nodeType: string,
   filePath: string,
-  record: Record<string, unknown>
+  record: Record<string, unknown>,
+  storySlug: string | null = null
 ): string {
   const absolutePath = path.join(world.worldRoot, "worlds", world.worldSlug, filePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
@@ -121,14 +122,14 @@ export function seedRecord(
     .prepare(
       `
         INSERT INTO nodes (
-          node_id, world_slug, file_path, heading_path, byte_start, byte_end,
+          node_id, world_slug, story_slug, file_path, heading_path, byte_start, byte_end,
           line_start, line_end, node_type, body, content_hash, anchor_checksum,
           summary, created_at_index_version
         )
-        VALUES (?, ?, ?, NULL, 0, 0, 1, 1, ?, ?, ?, ?, NULL, 1)
+        VALUES (?, ?, ?, ?, NULL, 0, 0, 1, 1, ?, ?, ?, ?, NULL, 1)
       `
     )
-    .run(nodeId, world.worldSlug, filePath, nodeType, serializeStableYaml(record), hash, hash);
+    .run(nodeId, world.worldSlug, storySlug, filePath, nodeType, serializeStableYaml(record), hash, hash);
   return hash;
 }
 
@@ -366,6 +367,7 @@ function createSchema(db: Database.Database): void {
     CREATE TABLE nodes (
       node_id TEXT PRIMARY KEY,
       world_slug TEXT NOT NULL,
+      story_slug TEXT,
       file_path TEXT NOT NULL,
       heading_path TEXT,
       byte_start INTEGER NOT NULL,
