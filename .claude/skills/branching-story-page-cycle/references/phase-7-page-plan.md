@@ -34,9 +34,10 @@ Order matters; content_policy is FIRST so it binds the model before any other in
                 + POV + central dramatic question + invariants_acknowledged
                 + mysteries_in_play]
 [PROSE CRAFT CONTRACT — verbatim from references/prose-craft-contract.md]
-[cast bound — for each STENT in cast_present, full CHAR dossier (when
-              world_character_id set) + STENT record + current STINT
-              + relevant SREL records]
+[cast bound — for each STENT in cast_present, CHAR dossier projections
+              (frontmatter + Material Reality + Goals and Pressures +
+              Capabilities + Voice and Perception, when world_character_id set)
+              + STENT record + current STINT + relevant SREL records]
 [state context — current state_snapshot ledgers visible to POV: SFs (with
                  epistemic_class), open OBLs, active THRs, pending CNSQs,
                  STLOC + STOBJ in scope, cast_present, accessible_locations,

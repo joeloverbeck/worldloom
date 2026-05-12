@@ -126,8 +126,9 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 ## §8 Cast in this scene
 
 <!-- For each STENT in cast_present, INLINE in this order:
-     - World-level CHAR dossier verbatim (essence, niche, voice signature, relationships, visible/hidden traits)
-       when world_character_id is set;
+     - World-level CHAR dossier verbatim — Material Reality (clothing, body,
+       possessions, condition), Goals and Pressures, Capabilities, Voice and
+       Perception — when world_character_id is set;
      - Story-local STENT record (role_in_story, current narrative function);
      - Current STINT (goals, fears, current_pressure, beliefs, emotional_state);
      - Relevant SREL records (axes between this character and other cast in scene). -->

@@ -37,8 +37,10 @@ Order matters; content_policy is FIRST so it binds the model before any other in
                + POV + central dramatic question]
 [PROSE CRAFT CONTRACT — verbatim from
                         .claude/skills/branching-story-page-cycle/references/prose-craft-contract.md]
-[cast bound — for each STENT, full CHAR dossier (when world_character_id set)
-              + STENT record + current STINT + relevant SREL records]
+[cast bound — for each STENT, CHAR dossier projections (frontmatter +
+              Material Reality + Goals and Pressures + Capabilities +
+              Voice and Perception, when world_character_id set) + STENT
+              record + current STINT + relevant SREL records]
 [state context — initial SFs (with epistemic_class), open OBLs, active THRs,
                  STLOC + STOBJ in scope, cast_present, accessible_locations]
 [entry pressure framing — central dramatic question; Phase 5 initial obligations
