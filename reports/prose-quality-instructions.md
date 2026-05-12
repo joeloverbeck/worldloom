@@ -214,6 +214,7 @@ Respect content_intensity_baseline. Do not invent facts beyond the state context
 supplied in the plan. Do not violate any prohibited_actions listed in the
 execution_envelope. Do not resolve any mystery declared as forbidden in the
 plan's forbidden_resolutions list or in mysteries_in_play[].
+Do not use internal record-identifier vocabulary in the prose.
 
 Honor the PROSE CRAFT CONTRACT above. The post-render prose critic will flag
 filter_word_saturation, recurring_metaphor_across_pages,

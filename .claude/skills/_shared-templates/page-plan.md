@@ -300,7 +300,9 @@ DO NOT REVEAL:
 - The mysteries from §7 above carry their per-mystery posture cues; do not collapse to a
   flat "never mention" list (the renderer must understand why each mystery is held, not
   just that it is held).
-- engine vocabulary tokens (frontmatter forbidden_engine_vocabulary list) -->
+- Do not use internal record-identifier vocabulary in the prose. The literal prefix list
+  stays in frontmatter forbidden_engine_vocabulary[] for finalize Phase 2's deterministic
+  regex scan; the body carries only this renderer-facing negative discipline. -->
 
 ## §19 Render-time instruction block
 

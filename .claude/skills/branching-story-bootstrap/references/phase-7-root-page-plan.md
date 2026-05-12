@@ -106,7 +106,10 @@ template, with the following root-case deviations:
   engaged by this page remain in frontmatter when forbidden, not in the §7 body.
 - §18 Scene direction / DO NOT REVEAL: carry the posture cues from §7's
   engaged-only mystery set; do not re-list the complete
-  frontmatter.forbidden_resolutions[] array in the body.
+  frontmatter.forbidden_resolutions[] array in the body. Add only the one-line
+  "do not use internal record-identifier vocabulary in the prose" negative
+  discipline; do not carry the frontmatter forbidden_engine_vocabulary[] prefix
+  list into the body.
 - §16 Chosen variant: OMITTED at PG-0001 root.
 - §17 Governor nudge: at PG-0001 root, populate with "bootstrap root; no
   prior-page governor".

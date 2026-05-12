@@ -16,7 +16,7 @@ Approach B (recommended; renderer-facing body cleanup + Material Reality project
 - `archive/tickets/PPLAN-004-storylet-notes-character-agnostic-gestures.md` — completed; storylet-pool-authoring discipline: cast-agnostic storylet `notes:` use character-agnostic body language; cast-locked storylets may carry character-specific clothing detail after Material Reality verification.
 - `archive/tickets/PPLAN-005-slt-schema-to-prose-translation.md` — COMPLETED; §15 (Selected scene-commitment arc) replaces verbatim SLT YAML inlining with prose-direction translation (storylet `notes`, `user_intent`, `scene_question`, `natural_close_definition`, chosen variant `required_effects` paraphrase). Engine fields stay in frontmatter for validator readback.
 - `archive/tickets/PPLAN-006-obligations-threads-consequences-prose-translation.md` — COMPLETED; §10 / §11 / §12 body replaces engine-narrative vocabulary ("Salience 6, urgency 7", "current_pressure 8", "consequence_address ops") with prose-direction translation. Numeric values stay in atomic records + state_snapshot.
-- `tickets/PPLAN-007-forbidden-engine-vocabulary-body-cleanup.md` — drop the 28-prefix `forbidden_engine_vocabulary[]` enumeration from §18 / §19 body view; one-line negative discipline replaces it. Frontmatter list unchanged; Phase 2 finalize regex scan unchanged.
+- `archive/tickets/PPLAN-007-forbidden-engine-vocabulary-body-cleanup.md` — COMPLETED; drops the 28-prefix `forbidden_engine_vocabulary[]` enumeration from §18 / §19 body view; one-line negative discipline replaces it. Frontmatter list unchanged; Phase 2 finalize regex scan unchanged.
 
 ## Dismissed (1 item)
 

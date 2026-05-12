@@ -73,8 +73,10 @@ Order matters; content_policy is FIRST so it binds the model before any other in
 [governor_nudge — Phase 6 homeostat signal for this turn]
 [scene direction — REQUIRED TURN, STOPPING POINT, DO NOT REVEAL
                    (the engaged-mystery posture cues from §7, not the
-                   complete frontmatter forbidden_resolutions[] list; plus
-                   engine-vocabulary tokens list from frontmatter)]
+                   complete frontmatter forbidden_resolutions[] list; plus the
+                   one-line "do not use internal record-identifier vocabulary
+                   in the prose" negative discipline, not the frontmatter
+                   forbidden_engine_vocabulary[] prefix list)]
 
 INSTRUCTION:
 Populate the canonical plan template at .claude/skills/_shared-templates/page-plan.md
