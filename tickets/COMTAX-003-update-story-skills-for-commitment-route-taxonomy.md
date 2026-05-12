@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — updates storylet-pool-authoring, branching-story-page-cycle, branching-story-bootstrap, branching-story-health-audit, templates, and reports to author and audit `commitment_family`, closed base `commitment_class`, and optional `commitment_detail`.
-**Deps**: `tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`, `tickets/COMTAX-002-story-record-commitment-route-fields-and-red-bunny-validity.md`
+**Deps**: `archive/tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`, `tickets/COMTAX-002-story-record-commitment-route-fields-and-red-bunny-validity.md`
 
 ## Problem
 
-After COMTAX-001 and COMTAX-002, the machine contract will support:
+After archived COMTAX-001 and active COMTAX-002, the machine contract will support:
 
 ```yaml
 commitment_family: inquiry_discovery

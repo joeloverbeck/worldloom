@@ -1,6 +1,6 @@
 # COMTAX-001: Add commitment-family and expanded base commitment taxonomy
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — extends `tools/world-index/src/public/canonical-vocabularies.ts`, `tools/world-mcp/src/tools/get-canonical-vocabulary.ts`, package tests, and machine-facing docs with a new `commitment_family` vocabulary and an expanded `commitment_class` base taxonomy.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-The current `COMMITMENT_CLASSES` vocabulary has 20 values. That set is coherent for the original scene-commitment arc pilot, but it is too narrow for broad fiction. It collapses important scene-strategy commitments such as investigation, trade, deception, pursuit, command, ritual, craft, survival, sacrifice, and legal/moral action into nearby but lossy classes.
+At intake, the `COMMITMENT_CLASSES` vocabulary had 20 values. That set was coherent for the original scene-commitment arc pilot, but it was too narrow for broad fiction. It collapsed important scene-strategy commitments such as investigation, trade, deception, pursuit, command, ritual, craft, survival, sacrifice, and legal/moral action into nearby but lossy classes.
 
 The research report at `reports/commitment-class-taxonomy.md` rejects both extremes:
 
@@ -27,13 +27,14 @@ This ticket owns only the taxonomy substrate: define closed `commitment_family` 
 
 ## Assumption Reassessment (2026-05-12)
 
-1. Current codebase state: `tools/world-index/src/public/canonical-vocabularies.ts` defines `COMMITMENT_CLASSES` as a 20-value `as const` array and exports `CommitmentClass`; it has no `COMMITMENT_FAMILIES` export and no `commitment_class -> family` mapping.
-2. Current tool surface: `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` exposes `commitment_class` via `COMMITMENT_CLASSES`, and tests currently assert a length of 20 in `tools/world-mcp/tests/tools/get-canonical-vocabulary.test.ts` and `tools/world-mcp/tests/integration/spec22-capstone.test.ts`.
+1. Intake codebase state: `tools/world-index/src/public/canonical-vocabularies.ts` defined `COMMITMENT_CLASSES` as a 20-value `as const` array and exported `CommitmentClass`; it had no `COMMITMENT_FAMILIES` export and no `commitment_class -> family` mapping. This ticket added those producer exports.
+2. Intake tool surface: `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` exposed `commitment_class` via `COMMITMENT_CLASSES`, and tests asserted a length of 20 in `tools/world-mcp/tests/tools/get-canonical-vocabulary.test.ts` and `tools/world-mcp/tests/integration/spec22-capstone.test.ts`. This ticket updated the handler and focused tests to include `commitment_family` and the expanded `commitment_class` count.
 3. Shared boundary under audit: `@worldloom/world-index/public/canonical-vocabularies` is consumed by validators, MCP tooling, and skill-facing vocabulary lookup. This ticket changes the canonical vocabulary contract but not record shapes.
 4. FOUNDATIONS Rule 1 alignment: the new taxonomy prevents floating or ad hoc commitment labels by giving broad-fiction commitments a documented semantic anchor before record/schema consumers adopt them.
 5. Schema extension scope: no story-bundle record schema changes in this ticket. `red-bunny` records must remain valid because this ticket only changes vocabulary exports and retrieval metadata.
-6. Current research input: `reports/commitment-class-taxonomy.md` recommends 16 families and 80 base classes. The report’s field naming is adjusted here: keep `commitment_class` as the closed base routing key, and introduce `commitment_detail` later as the optional open story-specific label.
+6. Research input: `reports/commitment-class-taxonomy.md` recommends 16 families and 80 base classes. The report’s field naming is adjusted here: keep `commitment_class` as the closed base routing key, and introduce `commitment_detail` later as the optional open story-specific label. The landed base taxonomy has 81 classes because this ticket intentionally adds `heal_or_tend` under `care_help_protection`.
 7. Mismatch + correction: the report proposes `base_commitment_class` plus open `commitment_class`; that would rename the current join key and create unnecessary migration ambiguity. This ticket keeps `commitment_class` as the closed join key and defers `commitment_detail` to COMTAX-002.
+8. Package dependency check: `tools/world-mcp/node_modules/@worldloom/world-index` is a symlink to `../../../world-index`, so producer build plus consumer build exercises the fresh public vocabulary surface without reinstall.
 
 ## Architecture Check
 
@@ -49,30 +50,30 @@ This ticket owns only the taxonomy substrate: define closed `commitment_family` 
 4. `get_canonical_vocabulary({class: "commitment_family"})` returns the 16 families and `get_canonical_vocabulary({class: "commitment_class"})` returns the expanded base classes -> MCP unit test.
 5. Machine-facing docs state that `commitment_class` is an expanded closed base taxonomy, while later `commitment_detail` is the open story-specific layer -> grep/manual review.
 
-## What to Change
+## Landed Changes
 
 ### 1. Expand canonical vocabularies
 
 In `tools/world-index/src/public/canonical-vocabularies.ts`:
 
-- Add `COMMITMENT_FAMILIES`.
-- Expand `COMMITMENT_CLASSES` from 20 to the approved base taxonomy from `reports/commitment-class-taxonomy.md`.
-- Add `COMMITMENT_CLASS_TO_FAMILY` as a total mapping from every class to one family.
-- Add helper/type exports such as `CommitmentFamily`, `CommitmentClassToFamily`, and `commitmentFamilyForClass(value)`.
+- Added `COMMITMENT_FAMILIES`.
+- Expanded `COMMITMENT_CLASSES` from 20 to the approved base taxonomy from `reports/commitment-class-taxonomy.md`, plus `heal_or_tend`.
+- Added `COMMITMENT_CLASS_TO_FAMILY` as a total mapping from every class to one family.
+- Added `CommitmentFamily`, `CommitmentClassToFamily`, and `commitmentFamilyForClass(value)` exports.
 
-Add `heal_or_tend` under `care_help_protection`; the research report mentions it as a possible story-local subclass, but healing/tending is common enough across genres to be a base class.
+`heal_or_tend` landed under `care_help_protection`; the research report mentions it as a possible story-local subclass, but healing/tending is common enough across genres to be a base class.
 
 ### 2. Expose the new vocabulary
 
 In `tools/world-mcp/src/tools/get-canonical-vocabulary.ts`:
 
-- Add `commitment_family` to `VOCABULARY_CLASSES`.
-- Return `COMMITMENT_FAMILIES` for `class: "commitment_family"`.
-- Keep `class: "commitment_class"` returning base class values.
+- Added `commitment_family` to `VOCABULARY_CLASSES`.
+- Returned `COMMITMENT_FAMILIES` for `class: "commitment_family"`.
+- Kept `class: "commitment_class"` returning base class values and added `coupling` plus `per_value_family` metadata for the class-to-family mapping.
 
 ### 3. Update tests and docs
 
-Update:
+Updated:
 
 - `tools/world-index/tests/public-types.test.ts`
 - `tools/world-mcp/tests/tools/get-canonical-vocabulary.test.ts`
@@ -106,7 +107,8 @@ Update:
 1. `cd tools/world-index && npm run build`
 2. `cd tools/world-index && node --test dist/tests/public-types.test.js`
 3. `cd tools/world-mcp && npm run build`
-4. `cd tools/world-mcp && node --test dist/tests/tools/get-canonical-vocabulary.test.js dist/tests/integration/spec22-capstone.test.js`
+4. `cd tools/world-mcp && node --test --test-name-pattern "canonical vocabulary|scene-commitment taxonomy|unsupported vocabulary" dist/tests/tools/get-canonical-vocabulary.test.js dist/tests/integration/spec22-capstone.test.js`
+5. `cd tools/world-mcp && node --test --test-name-pattern "get_canonical_vocabulary|describe_capabilities" dist/tests/server/dispatch.test.js`
 
 ### Invariants
 
@@ -120,7 +122,7 @@ Update:
 ### New/Modified Tests
 
 1. `tools/world-index/tests/public-types.test.ts` — cover `COMMITMENT_FAMILIES`, expanded `COMMITMENT_CLASSES`, mapping totality, and helper export.
-2. `tools/world-mcp/tests/tools/get-canonical-vocabulary.test.ts` — cover `commitment_family` retrieval and updated `commitment_class` count.
+2. `tools/world-mcp/tests/tools/get-canonical-vocabulary.test.ts` — cover `commitment_family` retrieval, updated `commitment_class` count, and class-to-family mapping metadata.
 3. `tools/world-mcp/tests/integration/spec22-capstone.test.ts` — update expected live vocabulary counts.
 
 ### Commands
@@ -128,4 +130,32 @@ Update:
 1. `cd tools/world-index && npm run build`
 2. `cd tools/world-index && npm test`
 3. `cd tools/world-mcp && npm run build`
-4. `cd tools/world-mcp && npm test`
+4. `cd tools/world-mcp && node --test --test-name-pattern "canonical vocabulary|scene-commitment taxonomy|unsupported vocabulary" dist/tests/tools/get-canonical-vocabulary.test.js dist/tests/integration/spec22-capstone.test.js`
+5. `cd tools/world-mcp && node --test --test-name-pattern "get_canonical_vocabulary|describe_capabilities" dist/tests/server/dispatch.test.js`
+6. `cd tools/world-mcp && npm test` (broad diagnostic lane; see Deviations)
+
+## Outcome
+
+Completed on 2026-05-12.
+
+The machine-facing commitment taxonomy now has a closed 16-value `commitment_family` routing layer, an expanded 81-value closed `commitment_class` base taxonomy, and a total `COMMITMENT_CLASS_TO_FAMILY` mapping. `get_canonical_vocabulary` exposes `commitment_family`, returns the expanded `commitment_class` list, and includes class-to-family mapping metadata for downstream callers. Package and machine-facing docs now describe `commitment_class` as the closed base routing key and `commitment_detail` as the future open story-specific layer.
+
+## Verification Result
+
+Passed:
+
+1. `cd tools/world-index && npm run build`
+2. `cd tools/world-index && node --test dist/tests/public-types.test.js`
+3. `cd tools/world-index && npm test`
+4. `cd tools/world-mcp && npm run build`
+5. `cd tools/world-mcp && node --test --test-name-pattern "canonical vocabulary|scene-commitment taxonomy|unsupported vocabulary" dist/tests/tools/get-canonical-vocabulary.test.js dist/tests/integration/spec22-capstone.test.js`
+6. `cd tools/world-mcp && node --test --test-name-pattern "get_canonical_vocabulary|describe_capabilities" dist/tests/server/dispatch.test.js`
+
+Broad lane:
+
+1. `cd tools/world-mcp && npm test` rebuilt successfully, then failed one unrelated capstone migration assertion also visible in the direct unfiltered capstone run: `SPEC-22 migration and Hook 3 coverage are visible in live repo contracts` expects `worlds/erotica-world/stories/red-bunny` to be absent, but this checkout has that local/gitignored story path present. The taxonomy-owned handler, focused capstone vocabulary-count subtest, and MCP capability metadata proof passed.
+
+## Deviations
+
+1. The research report recommends 80 base classes, but the active ticket explicitly adds `heal_or_tend`; the landed `commitment_class` count is therefore 81.
+2. The unfiltered combined command `cd tools/world-mcp && node --test dist/tests/tools/get-canonical-vocabulary.test.js dist/tests/integration/spec22-capstone.test.js` fails on the unrelated local `red-bunny` migration assertion. The accepted proof was narrowed to the vocabulary-owned subtests plus MCP capability metadata.

@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — extends CHC/SLT/RSP story-bundle record contracts, validators, schema discovery, and live-corpus proof so `commitment_family` and optional `commitment_detail` can coexist with the expanded closed `commitment_class`.
-**Deps**: `tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`
+**Deps**: `archive/tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`
 
 ## Problem
 
-After COMTAX-001, `commitment_class` will be an expanded closed base taxonomy and every class will map to a `commitment_family`. Story records still need a way to carry the family explicitly for routing/coverage and a way to carry story-specific precision without making `commitment_class` open.
+With COMTAX-001 archived, `commitment_class` is an expanded closed base taxonomy and every class maps to a `commitment_family`. Story records still need a way to carry the family explicitly for routing/coverage and a way to carry story-specific precision without making `commitment_class` open.
 
 The target representation is:
 
@@ -26,7 +26,7 @@ The existing story `worlds/erotica-world/stories/red-bunny/*` must remain valid.
 2. Current SLT schema: `tools/validators/src/schemas/story-storylet.schema.json` requires `arc_contract.commitment_class` and `exit_portfolio.native_seeds[].commitment_class` but only validates them as non-empty strings.
 3. Shared boundary under audit: CHC `commitment_class`, SLT `arc_contract.commitment_class`, SLT `exit_portfolio.native_seeds[].commitment_class`, stop-policy predicate args that name `commitment_class`, and RSP `target_commitment_class` all refer to the same base routing taxonomy.
 4. Existing live story constraint: `worlds/erotica-world/stories/red-bunny/_source/choices/CHC-0001.yaml` through `CHC-0009.yaml` and `_source/storylets/SLT-0001.yaml` through `SLT-0012.yaml` currently use only the original 20 commitment classes. Their prose/content should remain valid under the expanded taxonomy.
-5. Schema strategy: this ticket should prefer additive fields with derivation fallback over breaking required fields unless it also performs a bounded live-corpus migration. `commitment_family` can be derived from `commitment_class` via COMTAX-001 mapping for old records.
+5. Schema strategy: this ticket should prefer additive fields with derivation fallback over breaking required fields unless it also performs a bounded live-corpus migration. `commitment_family` can be derived from `commitment_class` via the archived COMTAX-001 mapping for old records.
 6. Red-bunny data strategy: if the implementation chooses to materialize `commitment_family` in `red-bunny`, add it mechanically from the mapping and do not rewrite labels, prose, obligations, threads, story facts, or storylet dramatic content.
 7. Mismatch + correction: the research report proposed `base_commitment_class`. This repo should not add that field; `commitment_class` remains the base routing key, and `commitment_detail` is the new open label.
 
