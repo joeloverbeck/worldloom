@@ -141,8 +141,8 @@ The stop-policy grammar is finite. LLM-side invention is HARD-REJECTed by SPEC-2
 
 Closed-vs-open args discipline:
 
-- `<commitment_class enum>` and `<strong_axis enum>` are closed values from canonical vocabularies.
-- Kebab-case class labels such as `reason_class`, `demand_class`, `disclosure_class`, `goal`, `cost_axis`, `violation_kind`, and `envelope_item` are open typed vocabulary unless a bundle registry closes them later.
+- `<commitment_class enum>` values are closed values from canonical vocabularies.
+- Kebab-case class labels such as `reason_class`, `demand_class`, `disclosure_class`, `goal`, `cost_axis`, `obligation_type`, `change_kind`, `envelope_field`, and `state_axis` are open typed vocabulary unless a bundle registry closes them later.
 - Record ids (`STENT-NNNN`, `THR-NNNN`, `M-NNNN`) and `role:<role>` matchers retain their documented id/matcher shapes.
 
 ### Normal-exit predicates (`stop_policy.normal_exits[].predicate`)
@@ -155,7 +155,7 @@ Closed-vs-open args discipline:
   args: {commitment_class: <commitment_class enum>, reason_class: <kebab-case open-vocab>}
 
 - pred: commitment_overturned
-  args: {by_actor: STENT-NNNN | role:<role>, new_commitment_class: <commitment_class enum>}
+  args: {commitment_class: <commitment_class enum>}
 
 - pred: npc_makes_demand
   args: {npc: STENT-NNNN | role:<role>, demand_class: <kebab-case open-vocab>}
@@ -170,31 +170,31 @@ Closed-vs-open args discipline:
   args: {goal: <kebab-case open-vocab>}
 
 - pred: scene_goal_changes
-  args: {from: <kebab-case open-vocab>, to: <kebab-case open-vocab>}
+  args: {goal: <kebab-case open-vocab>}
 
 - pred: new_obligation_created
-  args: {salience_min: <int 0..10>}
+  args: {obligation_type: <kebab-case open-vocab>}
 
 - pred: open_thread_reprioritized
-  args: {thread: THR-NNNN, direction: increase | decrease}
+  args: {thread_id: THR-NNNN}
 
 - pred: time_or_location_changes
-  args: {axis: time | location}
+  args: {change_kind: <kebab-case open-vocab>}
 ```
 
 Semantic glosses:
 
 - `commitment_satisfied`: closes when the selected commitment has achieved its intended class of outcome.
 - `commitment_blocked`: closes when the selected commitment cannot proceed for a named open-vocab reason class.
-- `commitment_overturned`: closes when an actor changes the commitment into a new closed commitment class.
+- `commitment_overturned`: closes when the named commitment class has been overturned.
 - `npc_makes_demand`: closes when the named NPC/role creates a demand that exposes the next commitment hinge.
 - `npc_makes_disclosure`: closes when the named NPC/role discloses information that changes the scene's strategic posture.
 - `participant_exits`: closes when a participant leaves the scene or active exchange.
 - `scene_goal_resolves`: closes when the open-vocab scene goal has been answered or exhausted.
-- `scene_goal_changes`: closes when the scene's open-vocab goal shifts from one target to another.
-- `new_obligation_created`: closes when the arc creates a new obligation at or above the required salience.
-- `open_thread_reprioritized`: closes when the named thread's pressure is raised or lowered enough to expose a new hinge.
-- `time_or_location_changes`: closes when the arc changes the time or location axis.
+- `scene_goal_changes`: closes when the named open-vocab scene goal shifts.
+- `new_obligation_created`: closes when the arc creates a new obligation of the named type.
+- `open_thread_reprioritized`: closes when the named thread's pressure is reprioritized enough to expose a new hinge.
+- `time_or_location_changes`: closes when the arc creates a named kind of time or location change.
 
 ### Interrupt-before predicates (`stop_policy.interrupt_before[].predicate`)
 
@@ -206,22 +206,22 @@ Semantic glosses:
   args: {}
 
 - pred: violence_or_harm_imminent
-  args: {target: STENT-NNNN | role:<role>}
+  args: {}
 
 - pred: forbidden_mystery_resolution_risk
   args: {mystery_id: M-NNNN}
 
 - pred: protagonist_goal_change_required
-  args: {from: <kebab-case open-vocab>, to: <kebab-case open-vocab>}
+  args: {goal: <kebab-case open-vocab>}
 
 - pred: selected_commitment_would_be_violated
-  args: {violation_kind: <kebab-case open-vocab>}
+  args: {commitment_class: <commitment_class enum>}
 
 - pred: user_write_in_conflicts_with_envelope
-  args: {envelope_item: <kebab-case open-vocab>}
+  args: {envelope_field: <kebab-case open-vocab>}
 
 - pred: only_next_action_would_create_major_state_change
-  args: {axis: <strong_axis enum>}           # closed enum
+  args: {state_axis: <kebab-case open-vocab>}
 ```
 
 Semantic glosses:
@@ -230,10 +230,10 @@ Semantic glosses:
 - `consent_boundary_imminent`: interrupts before the next beat would cross a consent boundary.
 - `violence_or_harm_imminent`: interrupts before the next beat would bring violence or harm to the target.
 - `forbidden_mystery_resolution_risk`: interrupts before the render risks resolving the named `M-NNNN`. This is a structural Mystery Reserve firewall mechanism per FOUNDATIONS Story Bundles Rule 7; Phase 7.6 routes the page-cycle to `revise_prose` or `reject_arc` rather than letting an MR-forbidden answer leak into prose.
-- `protagonist_goal_change_required`: interrupts when continuing would require changing the protagonist's goal from one open-vocab class to another.
-- `selected_commitment_would_be_violated`: interrupts when the only continuation would violate the selected commitment.
-- `user_write_in_conflicts_with_envelope`: interrupts when a user write-in conflicts with a named execution-envelope item.
-- `only_next_action_would_create_major_state_change`: interrupts when the only valid next action would create a major state change on the named strong-axis enum.
+- `protagonist_goal_change_required`: interrupts when continuing would require changing the protagonist's named open-vocab goal.
+- `selected_commitment_would_be_violated`: interrupts when the only continuation would violate the named commitment class.
+- `user_write_in_conflicts_with_envelope`: interrupts when a user write-in conflicts with a named execution-envelope field.
+- `only_next_action_would_create_major_state_change`: interrupts when the only valid next action would create a major state change on the named state axis.
 
 ### Safety-valve thresholds (`stop_policy.safety_valves`)
 

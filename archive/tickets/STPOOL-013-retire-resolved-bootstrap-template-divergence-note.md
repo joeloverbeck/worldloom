@@ -24,7 +24,7 @@ This was exposed during post-ticket review of STPOOL-004 on 2026-05-12.
 4. FOUNDATIONS Rule 1 alignment: bootstrap authors still need structural SLT fields and parser-valid stop policies, but stale "template diverges" prose weakens traceability by pointing implementers at already-fixed divergences.
 5. HARD-GATE / validation-signal surface: this is a content-generating skill reference used before engine-routed story-bundle writes. The intended edit must not relax any gate, approval requirement, patch-engine write route, or Mystery Reserve firewall; it should only truth the reference text against the corrected template and live validator.
 6. Adjacent contradiction classification: the stale bootstrap note is separate follow-up cleanup, not unfinished STPOOL-004 work, because STPOOL-004 owned the storylet-pool-authoring template/prompt grammar and explicitly left bootstrap reference cleanup out of scope.
-7. Reassessment found unrelated predicate-DSL args drift in `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` for stop predicates not exercised by the STPOOL-002/STPOOL-003/STPOOL-004 example fixes. That is a separate storylet-pool-authoring grammar-alignment bug, not STPOOL-013's bootstrap-reference cleanup seam; this ticket creates `tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` as the follow-up owner and narrows STPOOL-013 proof to the resolved bootstrap/template-divergence claims.
+7. Reassessment found unrelated predicate-DSL args drift in `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` for stop predicates not exercised by the STPOOL-002/STPOOL-003/STPOOL-004 example fixes. That was a separate storylet-pool-authoring grammar-alignment bug, not STPOOL-013's bootstrap-reference cleanup seam; this ticket created the follow-up now archived at `archive/tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` and narrowed STPOOL-013 proof to the resolved bootstrap/template-divergence claims.
 
 ## Architecture Check
 
@@ -56,7 +56,7 @@ Updated `docs/triage/2026-05-12-storylet-pool-authoring-audit-triage.md` so the 
 
 - `.claude/skills/branching-story-bootstrap/references/phase-6-storylet-pool-seed.md` (modify)
 - `docs/triage/2026-05-12-storylet-pool-authoring-audit-triage.md` (modify)
-- `tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` (new follow-up)
+- `archive/tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` (completed follow-up)
 
 ## Out of Scope
 
@@ -103,4 +103,4 @@ Completed on 2026-05-12. The bootstrap Phase 6 SLT landmines reference no longer
 
 ## Deviations
 
-1. Reassessment narrowed the drafted full predicate-DSL comparison because unrelated stop-predicate args drift remains in `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` outside the resolved STPOOL-002/STPOOL-003/STPOOL-004 example fixes. Created `tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` as the follow-up owner.
+1. Reassessment narrowed the drafted full predicate-DSL comparison because unrelated stop-predicate args drift remained in `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` outside the resolved STPOOL-002/STPOOL-003/STPOOL-004 example fixes. Created `archive/tickets/STPOOL-014-align-predicate-dsl-stop-args-with-validator.md` as the follow-up owner; that follow-up is now completed and archived.
