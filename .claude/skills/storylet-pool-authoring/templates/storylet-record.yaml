@@ -231,7 +231,7 @@ stop_policy:
       args: {}                             # type-specific args; see predicate-dsl.md per-predicate args schemas
   safety_valves:
     max_internal_beats: 6                  # default: 6; matches max_beats safety-valve
-    max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11)
+    max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see branching-story-page-cycle/references/prose-craft-contract.md Rule 11)
 
 effect_model:
   selected_before_render: true             # MUST be true; replay-equality contract

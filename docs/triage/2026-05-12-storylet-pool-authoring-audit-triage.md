@@ -22,7 +22,7 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 | [STPOOL-009](../../archive/tickets/STPOOL-009-phase-6-inline-parallel-enumerates-manifest.md) | F-08 — Phase 6 inline block parallel-enumerates manifest content | MEDIUM | Medium | Completed and archived. The Phase 6 HARD-GATE decision summary and `templates/storylet-batch-manifest.md` now carry reciprocal alignment markers so future edits trigger lockstep updates. |
 | [STPOOL-010](../../archive/tickets/STPOOL-010-final-rule-paraphrases-hardgate.md) | F-09 — Final Rule paraphrases HARD-GATE pass conditions | MEDIUM | Small | Completed and archived. The Final Rule now closes thematically and points to the top HARD-GATE block as the authoritative pass-condition source instead of enumerating individual pass conditions. |
 | [STPOOL-011](../../archive/tickets/STPOOL-011-predicate-dsl-phase-7-6-reference-drift.md) | F-10 — predicate-DSL doc names Phase 7.6 as the runtime stop-condition evaluator | MEDIUM | Small | Completed and archived. The predicate-DSL lifecycle references now state that Phase 7.6 runs Layer 1 declaration checks at plan-commit while `branching-story-page-prose-finalize` Phase 4 runs rendered-prose Layer 2/3 evaluation. |
-| [STPOOL-012](../../tickets/STPOOL-012-janitorial-sweep-low-findings.md) | F-11 + F-12 — vestigial "(NEW)" markers + unqualified cross-skill references | LOW | Small | Drop "NEW gate 14" prefix from gate-14 references at `phase-4-5-canon-safety-checks.md:30` and `governance-and-foundations.md:41`. Add `branching-story-page-cycle/references/` path prefix to `prose-craft-contract.md` references at `templates/storylet-record.yaml:230` and `templates/predicate-dsl.md:243`. Bundled as one sweep. |
+| [STPOOL-012](../../archive/tickets/STPOOL-012-janitorial-sweep-low-findings.md) | F-11 + F-12 — vestigial "(NEW)" markers + unqualified cross-skill references | LOW | Small | Completed and archived. Reassessment found the phase-4/5 canon-safety reference was already clean; the live vestigial `NEW gate 14` marker was removed from `references/governance-and-foundations.md`, and the two `prose-craft-contract.md` references now include the `branching-story-page-cycle/references/` path prefix. |
 
 ## Dismissed items (audit findings NOT actioned)
 
@@ -57,11 +57,11 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 
 **Tier 3 (polish — do whenever):**
 
-- **STPOOL-012** (janitorial sweep — F-11 + F-12) — independent. Trivial.
+- **STPOOL-012** (janitorial sweep — F-11 + F-12) — completed and archived.
 
 ## Total scope
 
-- 11 ticket files across active and archived paths: STPOOL-002 through STPOOL-011 are archived; STPOOL-012 remains active.
+- 11 ticket files across active and archived paths: STPOOL-002 through STPOOL-012 are archived.
 - Files touched across all 11 tickets: 7 unique files inside `.claude/skills/storylet-pool-authoring/` (`SKILL.md`, `references/phase-4-5-canon-safety-checks.md`, `references/governance-and-foundations.md`, `templates/storylet-record.yaml`, `templates/predicate-dsl.md`, `templates/storylet-batch-manifest.md`, `templates/tone-theme-tag-dictionary.md`).
 - No engine, validator, hook, or schema changes — every ticket is documentation/template-content scope.
 - No git commit at ticket-implementation time; the user reviews diffs and commits per skill discipline.
