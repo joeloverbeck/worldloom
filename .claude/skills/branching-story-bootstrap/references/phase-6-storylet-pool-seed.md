@@ -69,14 +69,14 @@ Returned seed storylets must carry `record_version: 2`, `shape: scene_commitment
 
 ## SLT schema landmines
 
-The bootstrap depends on storylet-pool-authoring to deliver valid SLTs (delegation contract above). When the bootstrap implementer authors SLTs inline within the Phase 11 patch envelope — legitimate per the in-memory return contract, since bootstrap's Phase 11 staged commit writes the returned records into the engine envelope — the patch-engine validators enforce several SLT schema requirements that `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml`'s examples either omit, encode incorrectly, or split across separately-enforced sub-domains the template surface does not surface. Catch these at envelope-construction time rather than discovering them through validator iteration cycles.
+The bootstrap depends on storylet-pool-authoring to deliver valid SLTs (delegation contract above). When the bootstrap implementer authors SLTs inline within the Phase 11 patch envelope — legitimate per the in-memory return contract, since bootstrap's Phase 11 staged commit writes the returned records into the engine envelope — catch the validator-enforced SLT requirements below at envelope-construction time rather than discovering them through validator iteration cycles.
 
 The live validator grammar at `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` is authoritative when this section and the sibling template disagree.
 
 **Required field gotchas:**
 
 - `beat_plan.beats[].realization_target` is REQUIRED (open-vocab string; describes what scene-movement the beat realizes — typically a kebab-case phrase like `realizes-question-framed-as-scene-movement`). The storylet template's scaffold and examples now include this field; the JSON schema at `tools/validators/src/schemas/story-storylet.schema.json` requires it on every beat.
-- `stop_policy.interrupt_before` must be NON-EMPTY (≥1 entry). The storylet template shows it as syntactically optional, but the validator rejects empty `interrupt_before: []` arrays. Default safe interrupt: `{id: consent-boundary-imminent, predicate: consent_boundary_imminent, args: {}}` (no required args for `consent_boundary_imminent`).
+- `stop_policy.interrupt_before` must be NON-EMPTY (≥1 entry). The storylet template's scaffold and examples now surface populated interrupt-before entries; validator rejects empty `interrupt_before: []` arrays. Default safe interrupt: `{id: consent-boundary-imminent, predicate: consent_boundary_imminent, args: {}}` (no required args for `consent_boundary_imminent`).
 
 **Predicate-section split (NORMAL_EXIT vs INTERRUPT_BEFORE):**
 
@@ -102,5 +102,3 @@ The live validator grammar at `tools/validators/src/rules/_shared/predicate-dsl-
 | `user_write_in_conflicts_with_envelope` | `envelope_field` (envelope field name) |
 | `only_next_action_would_create_major_state_change` | `state_axis` (open-vocab kebab-case string) |
 | `consent_boundary_imminent` / `violence_or_harm_imminent` | (no required args) |
-
-**Template-divergence note:** the storylet-pool-authoring template at `templates/storylet-record.yaml` line 404 contains an example using `predicate: safety_valve_triggered` (in `interrupt_before`). `safety_valve_triggered` is NOT in the `STOP_PREDICATES` enum at all — the example is invalid and will fail `stop_policy_parsability.unknown_predicate`. Treat the live validator grammar as authoritative when constructing SLT records; flag this template divergence in any storylet-pool-authoring audit.
