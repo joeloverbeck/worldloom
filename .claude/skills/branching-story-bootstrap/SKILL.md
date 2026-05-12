@@ -305,7 +305,7 @@ Plan section coverage:
 - §18 Scene direction:
     REQUIRED TURN: <one sentence>
     STOPPING POINT: <one sentence>
-    DO NOT REVEAL: <list of M-NNNN forbidden + engine-vocabulary list>
+    DO NOT REVEAL: <engaged mystery posture cues from §7 + engine-vocabulary list>
 - §19 Render-time instruction block: present
 
 Plan self-containment check: PASS (every record id in plan is inlined)

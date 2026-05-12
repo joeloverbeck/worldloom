@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — edits canonical page-plan template §18 / §19 body comments and both phase-7 references. Frontmatter `forbidden_engine_vocabulary[]` is unchanged.
-**Deps**: None directly. Pairs with PPLAN-002 (the §18 DO NOT REVEAL surface this ticket also touches), PPLAN-005 (the §15 cleanup), and PPLAN-006 (the §10/§11/§12 cleanup) as the renderer-facing body cleanup tier.
+**Deps**: None directly. Pairs with `archive/tickets/PPLAN-002-mystery-enumeration-restriction.md` (the completed §18 DO NOT REVEAL mystery surface this ticket also touches), PPLAN-005 (the §15 cleanup), and PPLAN-006 (the §10/§11/§12 cleanup) as the renderer-facing body cleanup tier.
 
 ## Problem
 
@@ -22,7 +22,7 @@ The body then mirrors this in two places:
 - §3 Prose Craft Contract Rule 9 (`no ledger-jargon in prose, ever`) explicitly tells the LLM about the engine ledger.
 - §19 Render-time instruction block re-asserts the negative discipline.
 
-This is the same "don't think of a pink elephant" pathology as PPLAN-002's mystery-list problem. By enumerating 28 prefix patterns the renderer should never use, the plan introduces 28 vocabulary tokens as candidates the renderer must remember to suppress. The renderer in a clean rendering would never invent these prefixes (the prefix vocabulary is engine-internal — no natural prose ever produces "CF-NNNN" or "ARCTRACE-NNNN"). The enumeration teaches what to suppress rather than what to render.
+This is the same "don't think of a pink elephant" pathology as the archived PPLAN-002 mystery-list problem. By enumerating 28 prefix patterns the renderer should never use, the plan introduces 28 vocabulary tokens as candidates the renderer must remember to suppress. The renderer in a clean rendering would never invent these prefixes (the prefix vocabulary is engine-internal — no natural prose ever produces "CF-NNNN" or "ARCTRACE-NNNN"). The enumeration teaches what to suppress rather than what to render.
 
 `§3 Rule 9` "no ledger-jargon" is verbatim-inlined per the canonical Prose Craft Contract and stays per [[feedback-page-plan-verbatim-sections]] — the user requires §3 to remain verbatim. The §18 / §19 negative-discipline re-enumeration is what this ticket cleans.
 
@@ -56,7 +56,7 @@ Replace:
 > `- engine vocabulary tokens (frontmatter forbidden_engine_vocabulary list) -->`
 
 with:
-> `- mysteries the renderer is in semantic risk of touching this page (carry the per-mystery posture cues from §7; do NOT collapse into a flat "never mention" list — see PPLAN-002 for the engaged-mystery filter rule that drives §7)`
+> `- mysteries the renderer is in semantic risk of touching this page (carry the per-mystery posture cues from §7; do NOT collapse into a flat "never mention" list — see archive/tickets/PPLAN-002-mystery-enumeration-restriction.md for the engaged-mystery filter rule that drives §7)`
 > `- "Do not use internal record-identifier vocabulary in the prose" (the literal 28-prefix list is engine-internal — surfaced in frontmatter forbidden_engine_vocabulary[] for branching-story-page-prose-finalize Phase 2's deterministic regex scan; the renderer-facing rule is the one-line negative). The §3 Prose Craft Contract Rule 9 ("no ledger-jargon in prose, ever") is the craft-level discipline that survives every page verbatim per [[feedback-page-plan-verbatim-sections]] — DO NOT compact it.`
 
 ### 2. `reports/prose-quality-instructions.md` §"Render-Time Instruction Template"

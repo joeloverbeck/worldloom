@@ -53,8 +53,9 @@ Order matters; content_policy is FIRST so it binds the model before any other in
                            != "rendered"]
 [governor_nudge — Phase 6 homeostat signal for this turn]
 [scene direction — REQUIRED TURN, STOPPING POINT, DO NOT REVEAL
-                   (the M-NNNN forbidden list and engine-vocabulary tokens
-                   list from frontmatter)]
+                   (the engaged-mystery posture cues from §7, not the
+                   complete frontmatter forbidden_resolutions[] list; plus
+                   engine-vocabulary tokens list from frontmatter)]
 
 INSTRUCTION:
 Populate the canonical plan template at .claude/skills/_shared-templates/page-plan.md
@@ -97,6 +98,15 @@ template, with the following selected-arc-case deviations:
 - §16 Chosen variant for this turn: REQUIRED. Inline the chosen variant's
   id + variant.required_effects[] verbatim.
 - §17 Governor nudge: inline the Phase 6 homeostat signal verbatim.
+- §7 Mysteries in play: use the canonical template's engaged-mystery filter.
+  Inline only mysteries semantically engaged by the selected storylet,
+  current scene domain, in-scope CF / OBL / THR / character intention, or
+  accidental-resolution risk. Mysteries declared in `mysteries_in_play[]` for
+  kernel completeness but not engaged by this page remain in frontmatter when
+  forbidden, not in the §7 body.
+- §18 Scene direction / DO NOT REVEAL: carry the posture cues from §7's
+  engaged-only mystery set; do not re-list the complete
+  frontmatter.forbidden_resolutions[] array in the body.
 
 Every record id referenced in any plan section MUST be inlined verbatim in
 that section. Bare CF-NNNN / CHAR-NNNN / SLT-NNNN / OBL-NNNN / etc.
@@ -118,6 +128,10 @@ Phase 7's post-LLM check is structural, not stylistic:
 - `selected_arc_id` matches the Phase-4-selected arc; `chosen_variant_id` matches the Phase-4b-chosen variant; `required_effects[]` matches the chosen variant's `required_effects[]` verbatim (selected-arc case shape).
 - `declared_intended_beats[]` length is within `[arc.beat_plan.min_beats, arc.beat_plan.max_beats]`.
 - `forbidden_resolutions[]` carries every M-NNNN in `mysteries_in_play[]` whose `future_resolution_safety == forbidden`.
+- §7 body follows the engaged-mystery filter from the canonical template:
+  missing an engaged mystery is a re-prompt; including a non-engaged forbidden
+  mystery is a re-prompt to remove the body entry while preserving the
+  frontmatter `forbidden_resolutions[]` list.
 - `deferred_validation_trace` has all three required keys (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) set to DEFERRED strings.
 
 Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.

@@ -11,7 +11,7 @@ Approach B (recommended; renderer-facing body cleanup + Material Reality project
 ## Accepted (7 tickets)
 
 - `archive/tickets/PPLAN-001-cast-material-reality-projection.md` — completed; adds `body.Material Reality` to CHAR-dossier projection in bootstrap + page-cycle pre-flight + canonical template + both phase-7 references. Blocks PPLAN-003 and PPLAN-004.
-- `tickets/PPLAN-002-mystery-enumeration-restriction.md` — restrict §7 / §18 body mystery enumeration to engaged mysteries; non-engaged forbidden mysteries stay in `frontmatter.forbidden_resolutions[]` only.
+- `archive/tickets/PPLAN-002-mystery-enumeration-restriction.md` — completed; restricts §7 / §18 body mystery enumeration to engaged mysteries; non-engaged forbidden mysteries stay in `frontmatter.forbidden_resolutions[]` only.
 - `tickets/PPLAN-003-clothing-consistency-check.md` — add Phase-7-post-LLM deterministic gate `cast_material_reality_consistency` validating body-part affordances/intentions against projected Material Reality clothing summary. Depends on archived PPLAN-001 projection landing.
 - `tickets/PPLAN-004-storylet-notes-character-agnostic-gestures.md` — storylet-pool-authoring discipline: cast-agnostic storylet `notes:` use character-agnostic body language; cast-locked storylets may carry character-specific clothing detail.
 - `tickets/PPLAN-005-slt-schema-to-prose-translation.md` — §15 (Selected scene-commitment arc) replaces verbatim SLT YAML inlining with prose-direction translation (storylet `notes`, `user_intent`, `scene_question`, `natural_close_definition`, chosen variant `required_effects` paraphrase). Engine fields stay in frontmatter for validator readback.

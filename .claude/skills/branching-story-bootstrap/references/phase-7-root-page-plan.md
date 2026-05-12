@@ -88,6 +88,14 @@ template, with the following root-case deviations:
   initial obligations + Phase 5 initial threads + Phase 4 mysteries_in_play
   + summary of seed-pool's available commitment_class[] affordances
   (without selecting one SLT).
+- §7 Mysteries in play: use the canonical template's engaged-mystery filter.
+  Inline only mysteries semantically engaged by this root page's cast, opening
+  pressure, obligations, threads, or accidental-resolution risk. Mysteries
+  declared in Phase 4 `mysteries_in_play[]` for kernel completeness but not
+  engaged by this page remain in frontmatter when forbidden, not in the §7 body.
+- §18 Scene direction / DO NOT REVEAL: carry the posture cues from §7's
+  engaged-only mystery set; do not re-list the complete
+  frontmatter.forbidden_resolutions[] array in the body.
 - §16 Chosen variant: OMITTED at PG-0001 root.
 - §17 Governor nudge: at PG-0001 root, populate with "bootstrap root; no
   prior-page governor".
@@ -112,6 +120,10 @@ Phase 7's post-LLM check is structural, not stylistic:
 - Frontmatter required keys are present and well-formed (`plan_id`, `story_id`, `world_slug`, `story_slug`, `parent_page_id`, `branch_id`, `branch_path`, `state_hash_at_plan_time`, `canon_revision_at_plan_time`, `prose_status`, `plan_authored_at`, `plan_authored_by`, `selected_arc_id`, `chosen_variant_id`, `required_effects`, `declared_visible_affordances`, `declared_intended_beats`, `declared_stop_condition`, `forbidden_resolutions`, `forbidden_engine_vocabulary`, `deferred_validation_trace`).
 - `selected_arc_id: null`, `chosen_variant_id: null`, `required_effects: []` (root-case shape).
 - `forbidden_resolutions[]` carries every M-NNNN in `mysteries_in_play[]` whose `future_resolution_safety == forbidden`.
+- §7 body follows the engaged-mystery filter from the canonical template:
+  missing an engaged mystery is a re-prompt; including a non-engaged forbidden
+  mystery is a re-prompt to remove the body entry while preserving the
+  frontmatter `forbidden_resolutions[]` list.
 - `deferred_validation_trace` has all three required keys (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) set to DEFERRED strings.
 
 Any missing/malformed section fails the post-LLM check and re-prompts Phase 7. Up to 3 re-prompts share the existing Phase 7 budget; if exhausted, escalate to the user with the unmapped failures inlined.

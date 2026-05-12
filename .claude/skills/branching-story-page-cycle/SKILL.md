@@ -344,7 +344,7 @@ The branch-isolation invariant is structurally enforced by this field combined w
     - §18 Scene direction:
         REQUIRED TURN: <one sentence>
         STOPPING POINT: <one sentence>
-        DO NOT REVEAL: <list of M-NNNN forbidden + engine-vocabulary list>
+        DO NOT REVEAL: <engaged mystery posture cues from §7 + engine-vocabulary list>
     - §19 Render-time instruction block: present
 
     Plan completeness check: PASS (every required section populated; every inlined record id resolves)

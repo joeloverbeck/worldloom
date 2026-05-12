@@ -120,8 +120,21 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 
 ## §7 Mysteries in play (firewall posture)
 
-<!-- INLINE: every M-NNNN with status and forbidden_resolutions[]. Mark which mysteries the
-     renderer must NOT resolve in this page. -->
+<!-- INLINE only mysteries the renderer is in semantic risk of touching this page.
+     Inclusion criteria (any of):
+     - M-NNNN appears in the selected storylet's mystery_safety.M_touched[] or M_progressed[];
+     - M-NNNN's domain overlaps an in-scope CF, OBL, THR, or character intention;
+     - M-NNNN has status forbidden AND this page's beat plan operates in a domain where
+       accidental resolution is non-trivial.
+
+     Mysteries declared in mysteries_in_play[] for kernel completeness but with no semantic
+     engagement on this page do NOT appear in the §7 body. The complete
+     frontmatter.forbidden_resolutions[] list remains the validator-bearing surface
+     (Phase 9 gate 1; finalize Phase 2 regex / critic).
+
+     Each inlined entry carries: M id, status, future_resolution_safety, one-line "what is
+     unknown" prose, and a one-line scene-relevant posture cue ("hold as ambient register;
+     do not resolve"; "engaged via cast member's belief; do not commit a world-truth value"). -->
 
 ## §8 Cast in this scene
 
@@ -216,7 +229,9 @@ STOPPING POINT: <one-sentence narrative cue at which the page ends — e.g., "En
 notices that Iker recognized the handwriting">
 
 DO NOT REVEAL:
-- <list of M-NNNN forbidden resolutions, with one-line summary of what each forbids>
+- The mysteries from §7 above carry their per-mystery posture cues; do not collapse to a
+  flat "never mention" list (the renderer must understand why each mystery is held, not
+  just that it is held).
 - engine vocabulary tokens (frontmatter forbidden_engine_vocabulary list) -->
 
 ## §19 Render-time instruction block
