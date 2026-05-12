@@ -142,7 +142,7 @@ The stop-policy grammar is finite. LLM-side invention is HARD-REJECTed by SPEC-2
 Closed-vs-open args discipline:
 
 - `<commitment_class enum>` and `<strong_axis enum>` are closed values from canonical vocabularies.
-- Kebab-case class labels such as `reason_class`, `demand_class`, `disclosure_class`, `goal`, `cost_axis`, `boundary_class`, `violation_kind`, and `envelope_item` are open typed vocabulary unless a bundle registry closes them later.
+- Kebab-case class labels such as `reason_class`, `demand_class`, `disclosure_class`, `goal`, `cost_axis`, `violation_kind`, and `envelope_item` are open typed vocabulary unless a bundle registry closes them later.
 - Record ids (`STENT-NNNN`, `THR-NNNN`, `M-NNNN`) and `role:<role>` matchers retain their documented id/matcher shapes.
 
 ### Normal-exit predicates (`stop_policy.normal_exits[].predicate`)
@@ -203,13 +203,13 @@ Semantic glosses:
   args: {cost_axis: <kebab-case open-vocab>}
 
 - pred: consent_boundary_imminent
-  args: {boundary_class: <kebab-case open-vocab>}
+  args: {}
 
 - pred: violence_or_harm_imminent
   args: {target: STENT-NNNN | role:<role>}
 
 - pred: forbidden_mystery_resolution_risk
-  args: {mystery: M-NNNN}
+  args: {mystery_id: M-NNNN}
 
 - pred: protagonist_goal_change_required
   args: {from: <kebab-case open-vocab>, to: <kebab-case open-vocab>}

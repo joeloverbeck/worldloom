@@ -225,10 +225,10 @@ stop_policy:
     - id: <kebab-case stop id>
       predicate: <stop_predicate enum>     # closed-enum predicate selector (args below are open kebab-case vocabulary) — grammar in templates/predicate-dsl.md (SPEC-19); enum/validator in SPEC-22
       args: {}
-  interrupt_before:                        # any of these interrupts the arc before completion
+  interrupt_before:                        # MUST be non-empty (>=1 entry); any of these interrupts the arc before completion
     - id: <kebab-case interrupt id>
-      predicate: <interrupt_predicate enum>
-      args: {}
+      predicate: <interrupt_predicate enum> # from templates/predicate-dsl.md Interrupt-before predicates
+      args: {}                             # type-specific args; see predicate-dsl.md per-predicate args schemas
   safety_valves:
     max_internal_beats: 6                  # default: 6; matches max_beats safety-valve
     max_words: 2200                        # default: 2200; engine-only runaway-defense ceiling (NOT a soft target; see prose-craft-contract.md Rule 11)
@@ -304,6 +304,8 @@ notes: >
 #     - {id: commitment-satisfied, predicate: commitment_satisfied, args: {commitment_class: offer_practical_help}}
 #     - {id: commitment-blocked, predicate: commitment_blocked, args: {commitment_class: offer_practical_help, reason_class: refusal}}
 #     - {id: participant-exits, predicate: participant_exits, args: {participant: role:recipient}}
+#   interrupt_before:
+#     - {id: consent-boundary, predicate: consent_boundary_imminent, args: {}}
 #   safety_valves: {max_internal_beats: 6, max_words: 2200}
 # effect_model:
 #   selected_before_render: true
@@ -353,6 +355,8 @@ notes: >
 #     - {id: question-answered, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
 #     - {id: question-refused, predicate: commitment_blocked, args: {commitment_class: ask_one_bounded_question, reason_class: refusal}}
 #     - {id: question-redirected, predicate: commitment_satisfied, args: {commitment_class: ask_one_bounded_question}}
+#   interrupt_before:
+#     - {id: forbidden-mystery-risk, predicate: forbidden_mystery_resolution_risk, args: {mystery_id: M-NNNN}}
 #   safety_valves: {max_internal_beats: 5, max_words: 1800}
 # effect_model:
 #   selected_before_render: true

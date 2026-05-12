@@ -14,7 +14,7 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 |---|---|---|---|---|
 | [STPOOL-002](../../archive/tickets/STPOOL-002-fix-stop-predicate-args-in-storylet-record-examples.md) | F-01 — stop-predicate args drift in storylet-record.yaml examples | HIGH | Small | Completed and archived. The worked examples now use validator-aligned `commitment_class`, `participant`, and `irreversible_cost_imminent` / `cost_axis` stop-policy args; the paired predicate-DSL prompt text now matches the live validator grammar. |
 | [STPOOL-003](../../archive/tickets/STPOOL-003-add-realization-target-to-beat-scaffolds.md) | F-02 — `realization_target` missing from beat scaffolds | HIGH | Small | Completed and archived. The main beat scaffold and all three example arcs now include `beat_plan.beats[].realization_target`, and the direct Phase 3 / bootstrap reference prose now matches the validator-required beat field set. |
-| [STPOOL-004](../../tickets/STPOOL-004-add-non-empty-interrupt-before-to-examples.md) | F-03 — `interrupt_before` must be non-empty | HIGH | Small | Two of three example arcs omit `interrupt_before` entirely; the third formerly used an invalid predicate (corrected by archived STPOOL-002). Per bootstrap reference, validator rejects empty `interrupt_before: []` arrays. After archived STPOOL-002, none of the three examples demonstrates a passing block — this ticket fixes that. |
+| [STPOOL-004](../../archive/tickets/STPOOL-004-add-non-empty-interrupt-before-to-examples.md) | F-03 — `interrupt_before` must be non-empty | HIGH | Small | Completed and archived. The main SLT scaffold now states `interrupt_before` must be non-empty, fragile_offer and bounded_question worked examples include populated interrupt-before entries, and predicate-dsl prompt grammar matches validator/bootstrap args for the interrupt predicates used by those examples. |
 | [STPOOL-005](../../tickets/STPOOL-005-remove-dangling-beat-functions-reference.md) | F-04 — dangling cross-reference to non-existent file | HIGH | Small | `templates/storylet-record.yaml:189` references `references/beat-functions.md`, which does not exist. Redirect to `templates/arc-archetypes.md` (the de facto beat-function vocabulary source). |
 | [STPOOL-006](../../tickets/STPOOL-006-phase-6-rejected-candidates-off-by-5.md) | F-05 — Phase 6 HARD-GATE summary's rejected-candidates list off-by-5 | HIGH | Small | `SKILL.md:304-313` lists 9 of 14 Phase 4 gate-failure categories. `templates/storylet-batch-manifest.md:32-45` correctly lists 14. The user-facing HARD-GATE deliverable silently masks 5 categories of rejection. Numeric drift between HARD-GATE 14-gate block, manifest template's 14 rows, and Phase 6 summary's 9 rows. |
 | [STPOOL-007](../../tickets/STPOOL-007-genericize-tone-theme-tag-dictionary.md) | F-06 — tone-theme tag dictionary is world-bound but framed as generic | HIGH | Medium | `templates/tone-theme-tag-dictionary.md` is structured as generic guidance but ≥40 of its tags are bound to one specific world (Marla/Iker mystery-thriller in Basque Country). The skill claims to be invocable against any world; the template will produce misleading guidance for any other world. Recommended remediation: genericize-in-place (keep family headings + descriptions; strip world-bound instances; add per-world dictionary authoring guidance). |
@@ -32,19 +32,19 @@ The skill is structurally sound — the schema-authority arrangement with `branc
 
 ## Follow-up considerations
 
-- **Bootstrap reference's Template-divergence note can be revisited once STPOOL-002/003/004 land.** `branching-story-bootstrap/references/phase-6-storylet-pool-seed.md:72-106` documents the same divergences and explicitly hands them off to a storylet-pool-authoring audit. After this ticket batch lands, the bootstrap reference's "flag this template divergence in any storylet-pool-authoring audit" sentence becomes stale — either delete it or update it to reference these tickets as resolved.
+- **Bootstrap reference's resolved Template-divergence note is now ticketed as [STPOOL-013](../../tickets/STPOOL-013-retire-resolved-bootstrap-template-divergence-note.md).** `branching-story-bootstrap/references/phase-6-storylet-pool-seed.md:72-106` still documents divergences that STPOOL-002/STPOOL-003/STPOOL-004 have resolved. STPOOL-013 owns truthing that bootstrap landmine reference without widening the completed storylet-pool-authoring template tickets.
 - **The bound-world for `tone-theme-tag-dictionary.md` is identifiable but not bound by this triage.** The tags reference a Marla/Iker mystery-thriller set in Basque Country (San Sebastián / Centro / Gros / Irún). If the user wants the existing dictionary preserved as a per-world artifact rather than stripped, the relocation target would be `worlds/<bound-world-slug>/templates/tone-theme-tag-dictionary.md`; STPOOL-007's Assumption Reassessment item 5 names the option but does not commit to it.
 - **Cross-skill alignment with bootstrap's SLT inline-authoring landmines.** STPOOL-002/003/004 align with bootstrap's `phase-6-storylet-pool-seed.md:70-106` landmine documentation. If a future ticket touches that bootstrap reference (e.g., to add new landmines as the schema evolves), the storylet-pool-authoring template should be re-audited to confirm continued alignment.
 
 ## Implementation order recommendation
 
-**Tier 1 (correctness — do first; STPOOL-002 unlocks STPOOL-004):**
+**Tier 1 (correctness — do first; partially completed):**
 
-- **STPOOL-002** (stop-predicate args drift) — fixes invalid examples in the schema-authority template. Independent.
+- **STPOOL-002** (stop-predicate args drift) — completed and archived.
 - **STPOOL-003** (add realization_target) — completed and archived.
 - **STPOOL-005** (dangling beat-functions.md ref) — independent. Trivial.
 - **STPOOL-006** (Phase 6 rejected-candidates off-by-5) — independent. Trivial.
-- **STPOOL-004** (interrupt_before non-empty) — depends on STPOOL-002 (the escalation-to-confrontation example's `interrupt_before` block uses `safety_valve_triggered`, which STPOOL-002 corrects). Run after STPOOL-002.
+- **STPOOL-004** (interrupt_before non-empty) — completed and archived after STPOOL-002 corrected the escalation-to-confrontation example's interrupt predicate.
 - **STPOOL-007** (genericize tone-theme dictionary) — independent of STPOOL-002/003/004/005/006. Medium-effort decision required during implementation (genericize-in-place recommended). Run after Tier 1 small fixes settle.
 
 **Tier 2 (clarity — do after Tier 1):**
