@@ -207,7 +207,9 @@ diagnosis_matrix:
       source_rsp: RSP-NNNN
       source_audit: SAU-NNNN
       finding_ids: [F-NN, ...]
+      target_commitment_family: <commitment_family>
       target_commitment_class: <commitment_class>
+      target_commitment_detail: <story-specific precision label | null>
       target_arc_archetype: <arc_archetype>
       sketch_arc_contract: >
         Card-provided arc-contract sketch, when present.
@@ -216,9 +218,11 @@ diagnosis_matrix:
       priority_weight: max
 ```
 
-`target_commitment_class` and `target_arc_archetype` are owned by the
+`target_commitment_family`, `target_commitment_class`, optional
+`target_commitment_detail`, and `target_arc_archetype` are owned by the
 `branching-story-health-audit` RSP card schema. This Phase 1 reference consumes
-those fields; it does not define or migrate the RSP card schema.
+those fields; it does not define or migrate the RSP card schema. The base
+`target_commitment_class` remains the deterministic join key.
 
 Audit mode bypasses a full pool-health diagnosis unless the operator explicitly
 requests contextual review. RSP targeting already names the remediable gap; the

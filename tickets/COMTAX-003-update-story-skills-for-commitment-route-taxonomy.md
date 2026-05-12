@@ -4,11 +4,11 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — updates storylet-pool-authoring, branching-story-page-cycle, branching-story-bootstrap, branching-story-health-audit, templates, and reports to author and audit `commitment_family`, closed base `commitment_class`, and optional `commitment_detail`.
-**Deps**: `archive/tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`, `tickets/COMTAX-002-story-record-commitment-route-fields-and-red-bunny-validity.md`
+**Deps**: `archive/tickets/COMTAX-001-commitment-family-and-expanded-base-taxonomy.md`, `archive/tickets/COMTAX-002-story-record-commitment-route-fields-and-red-bunny-validity.md`
 
 ## Problem
 
-After archived COMTAX-001 and active COMTAX-002, the machine contract will support:
+After archived COMTAX-001 and completed COMTAX-002, the machine contract supports:
 
 ```yaml
 commitment_family: inquiry_discovery
@@ -26,7 +26,7 @@ This ticket owns the prompt/procedure layer.
 2. Current page-cycle write-in handling classifies free-form `manual_action_text` into exactly one closed `commitment_class` in `.claude/skills/branching-story-page-cycle/references/phase-1-choice-resolution.md`.
 3. Current bootstrap and health-audit logic uses commitment-class coverage and target fields without family/detail layers.
 4. Shared boundary under audit: skill-generated CHC, SLT, and RSP records must match COMTAX-002 record schemas and COMTAX-001 vocabulary semantics.
-5. Red-bunny preservation: skills must be able to read existing `red-bunny` records that lack explicit `commitment_family` or `commitment_detail` if COMTAX-002 chose derivation compatibility. If COMTAX-002 materialized fields, skills must still not require prose/content rewrites.
+5. Red-bunny preservation: COMTAX-002 chose derivation compatibility, so skills must be able to read existing `red-bunny` records that lack explicit `commitment_family` or `commitment_detail`. Skills must not require prose/content rewrites.
 6. Mismatch + correction: do not follow the research report’s field naming where open `commitment_class` replaces the base key. In active skills, `commitment_class` remains closed/base; `commitment_detail` is the story-specific label.
 
 ## Architecture Check
@@ -124,7 +124,7 @@ Health-audit should:
 
 - Canonical vocabulary implementation (COMTAX-001).
 - Validator/schema implementation (COMTAX-002).
-- Editing `red-bunny` content directly, except if COMTAX-002 already chose a materialized migration and this ticket must adjust skill examples to match that shape.
+- Editing `red-bunny` content directly. COMTAX-002 chose derivation compatibility, so this ticket must not require story-content rewrites.
 - Adding detail-level routing.
 
 ## Acceptance Criteria

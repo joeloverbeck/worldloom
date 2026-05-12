@@ -26,7 +26,9 @@ target_obligation: null              # OBL-NNNN | null
 target_thread: null                  # THR-NNNN | null
 target_consequence: null             # CNSQ-NNNN | null
 target_relationship: null            # SREL-NNNN | null
-target_commitment_class: null        # commitment_class enum | null
+target_commitment_family: null       # commitment_family enum | null; optional route family, must match target_commitment_class when both are present
+target_commitment_class: null        # closed base commitment_class enum | null
+target_commitment_detail: null       # optional story-specific precision label | null; not a deterministic join key
 target_arc_archetype: null           # arc_archetype label | null; library value or story-specific snake_case label
 
 # Within STORY_KERNEL.content_intensity_baseline ± 1 band (Phase 8 Per-Card Validation test 6).

@@ -169,8 +169,15 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   assert.ok(!("code" in branch));
 
   assert.equal(storylet.schema.additionalProperties, true);
-  const storyletProperties = storylet.schema.properties as Record<string, { pattern?: string }>;
+  const storyletProperties = storylet.schema.properties as Record<string, { pattern?: string; properties?: Record<string, unknown> }>;
   assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
+  assert.ok(storyletProperties.arc_contract?.properties?.commitment_family);
+  assert.ok(storyletProperties.arc_contract?.properties?.commitment_detail);
+  const exitPortfolio = storyletProperties.exit_portfolio as {
+    properties?: { native_seeds?: { items?: { properties?: Record<string, unknown> } } };
+  };
+  assert.ok(exitPortfolio.properties?.native_seeds?.items?.properties?.commitment_family);
+  assert.ok(exitPortfolio.properties?.native_seeds?.items?.properties?.commitment_detail);
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");
   assert.deepEqual(storylet.required_fields, readSourceSchema("storylet_record").required);
   assert.ok(storylet.required_fields.includes("arc_contract"));
@@ -195,6 +202,16 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     "semantic_critic_verdict"
   ]);
   assert.equal(branch.schema.$id, "https://worldloom.local/schemas/story-branch.schema.json");
+});
+
+test("getRecordSchema exposes choice commitment route fields", async () => {
+  const choice = await getRecordSchema({ node_type: "choice_record" });
+
+  assert.ok(!("code" in choice));
+  const properties = choice.schema.properties as Record<string, unknown>;
+  assert.ok(properties.commitment_family);
+  assert.ok(properties.commitment_class);
+  assert.ok(properties.commitment_detail);
 });
 
 test("getRecordSchema returns an empty referenced schema map when the schema has no refs", async () => {

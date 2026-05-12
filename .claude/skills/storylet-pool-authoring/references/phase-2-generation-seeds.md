@@ -135,18 +135,22 @@ and archetypes that can lower, redirect, or close thread pressure.
 ## Audit Mode
 
 For audit mode (`mode=audit`), validated RSP cards drive seed creation. Each RSP produces an
-arc seed whose targeting fields come from the card: `commitment_class` from
-`RSP.target_commitment_class`, `arc_archetype` from
+arc seed whose targeting fields come from the card: `commitment_family` from
+`RSP.target_commitment_family` when present, `commitment_class` from
+`RSP.target_commitment_class`, optional precision from
+`RSP.target_commitment_detail`, `arc_archetype` from
 `RSP.target_arc_archetype`, nullable `target_obligation` and `target_thread`
 from the RSP's corresponding target fields, `entry_pressure_description` and
 `scene_question` from `RSP.sketch_dramatic_unit`, and
 `dramatic_transaction_summary` from the RSP rationale plus the current
 story-state pressure named by the finding.
 
-The RSP schema extension is owned by SPEC-22 Track 4. This reference consumes
+The RSP schema extension is owned by COMTAX-002. This reference consumes
 these RSP fields without defining or migrating them:
 
 - `target_commitment_class`
+- `target_commitment_family`
+- `target_commitment_detail`
 - `target_arc_archetype`
 - `sketch_arc_contract`
 - `sketch_dramatic_unit`
