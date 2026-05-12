@@ -1,14 +1,14 @@
 # STPOOL-007: Genericize the world-bound tone-theme tag dictionary
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: None — template content edit only.
+**Engine Changes**: None — skill-template and triage-doc content edits only.
 **Deps**: None
 
 ## Problem
 
-`.claude/skills/storylet-pool-authoring/templates/tone-theme-tag-dictionary.md` is framed as generic recommended tag vocabulary for `tone_tags` and `theme_tags` in any storylet pool, but the actual tag dictionary is bound to one specific world (a Marla/Iker mystery-thriller set in Basque Country / San Sebastián).
+At intake, `.claude/skills/storylet-pool-authoring/templates/tone-theme-tag-dictionary.md` was framed as generic recommended tag vocabulary for `tone_tags` and `theme_tags` in any storylet pool, but the actual tag dictionary was bound to one specific world (a Marla/Iker mystery-thriller set in Basque Country / San Sebastián).
 
 World-specific tags (≥40 items) include:
 
@@ -19,24 +19,25 @@ World-specific tags (≥40 items) include:
 - Specific-location bound tags: `centro_register`, `gros_working_class_pov`, `irun_border_register`, `cuadrilla_register`, plus location-class references in `templates/predicate-dsl.md:127-128` (`centro_wealth_register`, `gros_working_class_register`, `irun_border_register`).
 - Specific-SF bound: `sf_0007_payoff_literal`.
 
-The "Convergence target" paragraph (lines 198-200) treats the dictionary as pool-lifetime shared vocabulary for cross-batch tag-distribution analysis (per Phase 5 §Tone distribution and §Theme distribution checks at `references/phase-4-5-canon-safety-checks.md:58-60`). But the dictionary as authored cannot serve as shared vocabulary across worlds — every other world that invokes `storylet-pool-authoring` receives misleading guidance, since the tag names reference characters, mysteries, CFs, and locations that don't exist in their world.
+At intake, the "Convergence target" paragraph treated the dictionary as pool-lifetime shared vocabulary for cross-batch tag-distribution analysis (per Phase 5 Tone distribution and Theme distribution checks in `references/phase-4-5-canon-safety-checks.md`). But the dictionary as authored could not serve as shared vocabulary across worlds — every other world that invoked `storylet-pool-authoring` received misleading guidance, since the tag names referenced characters, mysteries, CFs, and locations that did not exist in their world.
 
-The skill's stated invocation contract (per `SKILL.md:6-7`) is "any existing world under `worlds/<world-slug>/`". The template's actual scope is incompatible with that contract.
+The skill's stated invocation contract is "any existing world under `worlds/<world-slug>/`". The genericized template is now compatible with that contract.
 
 This was uncovered by storylet-pool-authoring streamlining audit 2026-05-12 finding F-06.
 
 ## Assumption Reassessment (2026-05-12)
 
-1. Verified `templates/tone-theme-tag-dictionary.md:106-181` enumerates the world-bound tags. The family headings (POV register, Emotional charge, Structural beat, Class/cultural register, Temporal/spatial register, Narrative-mechanic) are generic; the per-family tag instances are world-bound.
-2. Verified `templates/predicate-dsl.md:117-128` repeats some of the same world-bound location-class labels (`centro_wealth_register`, `gros_working_class_register`, `irun_border_register`); these would be touched in lockstep if the genericization extends to predicate-DSL location-class examples.
+1. At intake, verified `templates/tone-theme-tag-dictionary.md` enumerated the world-bound tags. The family headings (POV register, Emotional charge, Structural beat, Class/cultural register, Temporal/spatial register, Narrative-mechanic) were generic; the per-family tag instances were world-bound.
+2. At intake, verified `templates/predicate-dsl.md` repeated some of the same world-bound location-class labels (`centro_wealth_register`, `gros_working_class_register`, `irun_border_register`); these were touched in lockstep by genericizing the location-kind, location-id, location-class, and role-matcher examples.
 3. Verified `references/phase-4-5-canon-safety-checks.md:58-60` (Phase 5 tone/theme distribution checks) treats the dictionary as recommended vocabulary, not gate-enforced; the genericization does NOT require validator changes.
 4. The intent of the dictionary — cross-batch tag-convergence for distribution analysis — is sound and worth preserving. The instance set is the misfit, not the structure.
-5. Genericization options (decision required during implementation):
+5. Verified `docs/triage/2026-05-12-storylet-pool-authoring-audit-triage.md` recorded STPOOL-007 as the active accepted remediation for the world-bound dictionary. That status prose was same-seam closeout fallout and has been updated.
+6. Genericization options resolved during implementation:
    - (a) **Move-per-world**: relocate the world-bound dictionary to `worlds/<bound-world>/templates/tone-theme-tag-dictionary.md` (preserves the existing dictionary as a per-world artifact for the world it was authored against). Skill-level file becomes a generic-only stub.
    - (b) **Genericize-in-place**: strip world-bound instances; keep family headings + family descriptions + a "When to invent a new tag" note + an "Authoring a per-world dictionary" note pointing to where world-specific tags should live.
    - (c) **Replace-with-source-doc**: document that bootstrap's per-world `STORY_KERNEL.themes` is the actual source of tag vocabulary and reduce this file to family-naming guidance only.
 
-   Recommended: (b) genericize-in-place. (a) and (c) are larger reshapings; (b) preserves the family taxonomy at the skill level while cleanly separating world-bound vocabulary from skill-bound guidance.
+   Chosen: (b) genericize-in-place. (a) and (c) are larger reshapings; (b) preserves the family taxonomy at the skill level while cleanly separating world-bound vocabulary from skill-bound guidance.
 
 ## Architecture Check
 
@@ -46,31 +47,37 @@ This was uncovered by storylet-pool-authoring streamlining audit 2026-05-12 find
 ## Verification Layers
 
 1. **Generic content audit** — every tag instance in the genericized dictionary is world-agnostic (no character names, no specific CF / INV / M / DA / SF / SREL / STENT ids, no specific location names) → grep the file for the offending patterns (`marla|iker|cuadrilla|centro|gros|irun|gaztelufit|cf_0004|cau_1|soc_1|m_[0-9]|sf_[0-9]|stage_[2-6]_`) returns zero matches in the skill-level file.
-2. **Cross-template alignment with predicate-dsl** — `templates/predicate-dsl.md:117-128` location-class examples either get the same genericization treatment or are explicitly marked as world-specific placeholder example values to be replaced per-world.
+2. **Cross-template alignment with predicate-dsl** — `templates/predicate-dsl.md` location-kind, location-id, location-class, and role-matcher examples get the same genericization treatment.
 3. **Skill invocation against a non-bound world is coherent** — a hypothetical storylet-pool-authoring invocation against a fantasy world (no Marla, no Iker, no Centro) produces tag suggestions that make sense.
 
-## What to Change
+## Landed Changes
 
-### 1. Decide between genericization options (a/b/c above)
+### 1. Chose genericization option b
 
-The user-facing decision belongs in the implementation step's first hour. Recommendation: (b) genericize-in-place. If (a), open a sub-ticket for the per-world relocation.
+This ticket genericized the skill-level dictionary in place. The previous world-bound dictionary was not relocated because no user-identified world slug was supplied and the ticket's owned invariant was the skill-level shared-vocabulary contract.
 
-### 2. (Assuming option b) Genericize `tone-theme-tag-dictionary.md`
+### 2. Genericized `tone-theme-tag-dictionary.md`
 
 In `templates/tone-theme-tag-dictionary.md`:
 
-- **Keep**: family headings (lines 17, 30, 48, 62, 80, 92, 106, 117, 128, 141, 148, 154, 164, 172); family-description sentences immediately following each heading; generic-family tag examples (`working_class_pov`, `wealthy_outsider_pov`, `rural_pov`, `urban_pov`, `child_pov`, `restrained`, `charged`, `gentle`, `tense`, etc.); the "When to invent a new tag" section (lines 184-196); the "Convergence target" section (lines 198-200) reframed against family-level convergence.
-- **Strip**: every world-bound instance per the list in §Problem. For each stripped instance, either drop it entirely (when the instance has no generic equivalent) or replace with a generic family-member tag (when one exists).
-- **Add**: a new section "Authoring a per-world dictionary" that documents the convention for per-world tag extensions — where the world-specific dictionary lives (e.g., `worlds/<slug>/templates/tone-theme-tag-dictionary.md`), how it inherits family structure from this skill's dictionary, and how Phase 5 distribution-analysis aggregates across both family-level (skill-bound) and instance-level (world-bound) granularity.
+- preserved the family-taxonomy structure for `tone_tags` and `theme_tags`;
+- replaced world-bound tag instances with generic family-member examples;
+- added "Authoring a per-world dictionary" with the `worlds/<slug>/templates/tone-theme-tag-dictionary.md` extension convention;
+- reframed convergence as combined skill-level family convergence plus optional per-world instance convergence.
 
-### 3. Genericize the location-class examples in `templates/predicate-dsl.md:117-128`
+### 3. Genericized predicate-DSL location examples
 
-Replace world-bound `cafe | gallery | hotel_lobby | terraza | public_path | gym | school | family_home | study_space | cuadrilla_bar | bedroom | walking_path | taxi_back_seat | surf_watch_spot | centro_residential_street` with a shorter generic set + a per-world-customization comment, OR add an explicit "These are example values from a specific world; replace with per-world location-kind vocabulary" disclaimer above the line. Similarly for `centro_wealth_register | gros_working_class_register | irun_border_register` at line 127-128.
+In `templates/predicate-dsl.md`, the location-kind, location-id, location-class, and role-matcher examples now use generic world-local vocabulary instead of bound-world place names or character names.
+
+### 4. Updated same-seam triage status
+
+`docs/triage/2026-05-12-storylet-pool-authoring-audit-triage.md` now records STPOOL-007 as completed and archived and notes that per-world relocation was intentionally not performed.
 
 ## Files to Touch
 
 - `.claude/skills/storylet-pool-authoring/templates/tone-theme-tag-dictionary.md` (modify; substantial rewrite)
 - `.claude/skills/storylet-pool-authoring/templates/predicate-dsl.md` (modify; location-class example genericization)
+- `docs/triage/2026-05-12-storylet-pool-authoring-audit-triage.md` (modify; same-seam status truthing)
 
 ## Out of Scope
 
@@ -101,3 +108,20 @@ Replace world-bound `cafe | gallery | hotel_lobby | terraza | public_path | gym 
 1. The grep from Acceptance Criteria test 1.
 2. Visual inspection of the genericized file: family-structure preserved, world-bound instances stripped, new "Authoring a per-world dictionary" section added.
 3. A hypothetical mental walk through invoking `storylet-pool-authoring` against a non-Marla/Iker world to confirm the dictionary's guidance makes sense.
+
+## Outcome
+
+Completion date: 2026-05-12
+
+Implemented option b, genericize-in-place. The skill-level tone/theme dictionary is now world-agnostic, still carries stable tone/theme family examples, and documents where per-world extensions belong. Predicate DSL location examples were also genericized so the prompt no longer suggests bound-world location values as universal examples. The audit triage record was updated to reflect the landed status and the non-relocation boundary.
+
+## Verification Result
+
+1. `grep -iE "marla|iker|cuadrilla|centro|gros|irun|gaztelufit|cf_0004|cau_[12]|soc_[12]|aes_[12]|dis_1|ont_2|m_[0-9]_|sf_[0-9]+|stage_[2-6]_" .claude/skills/storylet-pool-authoring/templates/tone-theme-tag-dictionary.md` returned zero matches.
+2. Manual review confirmed `tone-theme-tag-dictionary.md` preserves discoverable `tone_tags` / `theme_tags` family headings, generic per-family examples, the "When to invent a new tag" section, and the new "Authoring a per-world dictionary" section.
+3. Manual review confirmed `templates/predicate-dsl.md` location-kind, location-id, location-class, and role-matcher examples are generic and world-local rather than bound to the intake world.
+4. Manual non-bound-world walkthrough: a fantasy, science-fiction, or historical world can use the skill-level dictionary without receiving character-name, location-name, or world-record-specific tag suggestions; per-world tags can be added under `worlds/<slug>/templates/tone-theme-tag-dictionary.md`.
+
+## Deviations
+
+- The previous bound-world dictionary was not moved to a `worlds/<slug>/templates/` path. That remains out of scope until the user identifies the target world bundle and wants the old tag set preserved as world content.

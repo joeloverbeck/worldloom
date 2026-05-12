@@ -115,16 +115,16 @@ These forms are part of the operational DSL — supported by the runtime page-cy
 - pred: location_kind
   location: role:current_location | STLOC-NNNN
   op: == | in
-  value: cafe | gallery | hotel_lobby | terraza | public_path | gym | school | family_home | study_space | cuadrilla_bar | bedroom | walking_path | taxi_back_seat | surf_watch_spot | centro_residential_street | <list when op=in>
+  value: market | shrine | workshop | council_hall | tavern | harbor | road | classroom | family_home | archive | bedroom | carriage | lookout | residential_street | <world-specific location-kind> | <list when op=in>
 
 - pred: location_id
   op: ==
-  value: entity:<world-entity-slug>           # binds to a world-level named entity (e.g., entity:gaztelufit)
+  value: entity:<world-entity-slug>           # binds to a world-level named entity (e.g., entity:old-market-gate)
 
 - pred: location_class
   location: role:current_location | STLOC-NNNN
   op: ==
-  value: centro_wealth_register | gros_working_class_register | irun_border_register | <other location-class label>
+  value: elite_quarter | working_quarter | border_crossing | sacred_precinct | industrial_zone | <world-specific location-class label>
 ```
 
 ## Stop Predicates (third tier — SLT arc.stop_policy)
@@ -261,14 +261,14 @@ For `global_author_pool`-scope storylets that need to reference scenes in locati
 
 The role-name SHOULD be a descriptive kebab-case identifier capturing the location's salient characteristics (genre, register, social class, ambient register), not a proper-noun-like binding to a specific instance:
 
-- ✅ `role:loft_centro_luxury` (captures genre + neighborhood + class register)
-- ✅ `role:gros_working_class_district` (captures neighborhood + register)
-- ✅ `role:centro_long_tenure_venue` (captures CF-0004 grammar engagement surface)
-- ✅ `role:centro_hospitality_or_public_venue` (captures permissive scene-type union)
-- ❌ `role:marla_loft` (proper-noun-like — should be an STLOC binding instead, but only in branch-scoped storylets)
-- ❌ `role:that_specific_cafe_iker_likes` (proper-noun-like AND scene-context-bound)
+- ✅ `role:elite_archive` (captures kind + class register)
+- ✅ `role:working_quarter_district` (captures social geography + register)
+- ✅ `role:old_institutional_venue` (captures institutional age + public function)
+- ✅ `role:harbor_public_venue` (captures scene type + access pattern)
+- ❌ `role:antagonist_loft` (proper-noun-like — should be an STLOC binding instead, but only in branch-scoped storylets)
+- ❌ `role:that_specific_cafe_the_protagonist_likes` (proper-noun-like AND scene-context-bound)
 
-**Runtime resolution**: at Phase 4 selection time, `branching-story-page-cycle` matches `role:<location-role>` against the current `state_snapshot.current_location` STLOC by checking the STLOC's `tags`, `kind`, and `class` fields for membership. A storylet with `location: {current_location: role:loft_centro_luxury}` is eligible at any page whose `current_location` STLOC carries `kind: loft` AND `tags` including `centro` AND `class: wealth_register`. This makes role-matchers a tag-and-class union, not a free-text predicate. Authors should pick role-names whose constituent words map cleanly onto the location-tagging vocabulary the bundle uses; the location-tag dictionary lives at `branching-story-bootstrap/templates/story-records.yaml` §STLOC schema.
+**Runtime resolution**: at Phase 4 selection time, `branching-story-page-cycle` matches `role:<location-role>` against the current `state_snapshot.current_location` STLOC by checking the STLOC's `tags`, `kind`, and `class` fields for membership. A storylet with `location: {current_location: role:elite_archive}` is eligible at any page whose `current_location` STLOC carries `kind: archive` AND `class: elite_quarter`. This makes role-matchers a tag-and-class union, not a free-text predicate. Authors should pick role-names whose constituent words map cleanly onto the location-tagging vocabulary the bundle uses; the location-tag dictionary lives at `branching-story-bootstrap/templates/story-records.yaml` §STLOC schema.
 
 ## Obligation matcher schema
 

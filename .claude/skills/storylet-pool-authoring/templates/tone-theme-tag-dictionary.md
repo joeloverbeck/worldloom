@@ -1,200 +1,215 @@
-# Tone & Theme Tag Dictionary — Storylet Pool Authoring
+# Tone & Theme Tag Dictionary - Storylet Pool Authoring
 
-Recommended-but-non-binding tag vocabulary for storylet `tone_tags` and `theme_tags`. Convergence on this dictionary across batches enables cross-batch tag-distribution analysis (Phase 5 §Tone distribution and §Theme distribution) and cross-pool tag-search reproducibility. Free-form tags remain allowed; the dictionary is guidance, not gate enforcement.
+Recommended-but-non-binding tag vocabulary for storylet `tone_tags` and `theme_tags`. Convergence on this dictionary across batches enables cross-batch tag-distribution analysis (Phase 5 Tone distribution and Theme distribution) and cross-pool tag-search reproducibility. Free-form tags remain allowed; the dictionary is guidance, not gate enforcement.
 
 This file is inlined into Phase 3's LLM prompt alongside `templates/predicate-dsl.md` as recommended vocabulary. The LLM should prefer dictionary tags when applicable and only invent tags when no dictionary entry captures the storylet's specific register.
 
 ## Why this matters
 
-Each batch's Phase 5 diversity audit checks per-tag distribution thresholds (`tone_tags` ≤40% per axis, `theme_tags` ≤50% per axis). Without a shared vocabulary, each batch invents its own tags ad hoc, producing tag fragmentation across the pool's lifetime: SLB-0001 tags `tell_surfacing` while SLB-0002 tags `register_slipping` for the same beat, defeating cross-batch tag analysis. A canonical dictionary keeps tags semantically aligned so:
+Each batch's Phase 5 diversity audit checks per-tag distribution thresholds (`tone_tags` <=40% per axis, `theme_tags` <=50% per axis). Without a shared vocabulary, each batch invents its own tags ad hoc, producing tag fragmentation across the pool's lifetime: one batch tags a concealed clue as `secret_surfacing` while another tags the same beat as `hidden_truth_emerging`, defeating cross-batch tag analysis. A canonical dictionary keeps tags semantically aligned so:
 
 - `branching-story-page-cycle` Phase 4 selection's tone-distribution scoring sees consistent signal across the pool;
 - `branching-story-health-audit` repetition-detection scans see consistent tag families;
-- pool-lifetime tag-distribution analysis (across multiple batches) is meaningful rather than dominated by synonym-fragmentation noise.
+- pool-lifetime tag-distribution analysis across multiple batches is meaningful rather than dominated by synonym-fragmentation noise.
 
-## Tag families — `tone_tags`
+## Tag families - `tone_tags`
 
-### POV register family — captures whose perceptual frame the storylet operates inside
+### POV register family - captures whose perceptual frame the storylet operates inside
 
-- `working_class_pov` — POV character is working-class; surface details read through scarcity / labor / household economics
-- `wealthy_outsider_pov` — POV character is wealthy / non-local; surface details read through commodity / mobility / register
-- `rural_pov` — POV character grounded in non-urban register
-- `urban_pov` — POV character grounded in dense-urban register
-- `migrant_pov` — POV character in transit / between geographies / linguistic register-switching
-- `child_pov` — POV character is a minor; surface details read through youth-perception filters
-- `elderly_pov` — POV character is significantly older than the surrounding cast; surface details carry generational weight
-- `outsider_to_subculture_pov` — POV character is partial to a subculture (cuadrilla, profession, faith) without full membership
-- `insider_to_subculture_pov` — POV character is fully embedded in a subculture; reads its codes as ordinary
+- `working_class_pov` - POV character reads the scene through scarcity, labor, or household economics
+- `elite_pov` - POV character reads the scene through rank, privilege, status, or institutional access
+- `rural_pov` - POV character is grounded in non-urban lifeways or spatial assumptions
+- `urban_pov` - POV character is grounded in dense-urban systems, movement, or social proximity
+- `migrant_pov` - POV character is in transit, displaced, or moving between social/geographic registers
+- `child_pov` - POV character's perception is shaped by youth, dependency, or partial comprehension
+- `elder_pov` - POV character's perception carries generational memory or long-horizon comparison
+- `outsider_to_subculture_pov` - POV character is near a subculture without full fluency in its codes
+- `insider_to_subculture_pov` - POV character is embedded in a subculture and reads its codes as ordinary
 
-### Emotional charge family — captures the storylet's affective register
+### Emotional charge family - captures the storylet's affective register
 
-- `restrained` — affect is held below visible surface; reader infers
-- `charged` — affect is operationally present, audible / visible to other characters
-- `gentle` — soft register; tenderness rather than tension
-- `tense` — high affect, forward-leaning
-- `ardent` — intense desire / commitment register
-- `possessive` — claiming-against-rivals affect register
-- `secretive` — affect concealed for plot reasons
-- `ironic` — surface affect diverges from underlying state (dramatic irony)
-- `tragic` — affect is loss-shaped / mourning-shaped
-- `dread` — anticipatory negative affect
-- `dread_inside_desire` — desire register carrying simultaneous threat (recurring undercurrent in erotica/thriller)
-- `charged_quiet` — quiet surface, charged interior
-- `charged_threshold` — affect at the moment of decision / commitment
-- `charged_observation` — observation register that itself carries affect
-- `charged_eavesdropping` — observation-without-being-observed register
+- `restrained` - affect is held below the visible surface
+- `charged` - affect is operationally present and legible to others
+- `gentle` - soft register; tenderness matters more than pressure
+- `tense` - forward-leaning pressure, discomfort, or anticipation
+- `ardent` - intense desire, commitment, devotion, or hunger
+- `possessive` - claiming, territoriality, or rivalry shapes the beat
+- `secretive` - affect is concealed because disclosure would change the scene
+- `ironic` - surface affect diverges from underlying state
+- `tragic` - affect is loss-shaped, mourning-shaped, or consequence-heavy
+- `dread` - anticipatory negative affect drives the scene
+- `desire_under_threat` - desire register carries simultaneous risk or danger
+- `quietly_charged` - quiet surface, charged interior
+- `threshold_charge` - affect peaks at a decision point
+- `charged_observation` - watching or noticing is itself emotionally loaded
+- `unseen_witness` - observation without being observed shapes the beat
 
-### Structural beat family — captures where in the storylet's arc the beat sits
+### Structural beat family - captures where in the storylet's arc the beat sits
 
-- `threshold` — moment of decision / commitment / first-time-doing-X
-- `aftermath` — after-the-event affect (next page, hours later, days later)
-- `confrontation` — face-to-face naming of conflict
-- `disclosure` — handing of a previously-concealed fact
-- `pre_disclosure` — buildup to a coming disclosure beat
-- `imprint_carrying` — POV character holds residue from a prior event
-- `eight_second_window` — micro-time decisions where the choice is made and unmade in seconds
-- `cumulative_realization` — POV character integrates several prior beats into a new understanding
-- `frame_inverting` — what was assumed becomes unassumable
-- `dramatic_irony_collapsing` — reader's prior dramatic irony collapses into the POV character's awareness
-- `dramatic_irony_pivoting` — dramatic irony rotates rather than resolves
+- `threshold` - moment of decision, commitment, entry, or refusal
+- `aftermath` - immediate or delayed residue after an event
+- `confrontation` - conflict is named face-to-face or role-to-role
+- `disclosure` - a concealed fact, motive, identity, or cost is handed over
+- `pre_disclosure` - buildup toward a likely disclosure beat
+- `imprint_carrying` - POV carries residue from a prior scene into this one
+- `micro_choice_window` - a compressed decision window shapes the outcome
+- `cumulative_realization` - several prior beats integrate into a new understanding
+- `frame_inverting` - an assumed frame becomes untenable
+- `dramatic_irony_collapsing` - reader knowledge catches up to character knowledge
+- `dramatic_irony_pivoting` - reader knowledge changes meaning without fully resolving
 
-### Class / cultural register family — captures social / institutional register
+### Social / cultural register family - captures social, institutional, or group code
 
-- `class_register` — class asymmetry visible / operational
-- `class_landing_in_body` — class asymmetry felt physically by POV
-- `class_in_numbers` — class asymmetry registers as a specific number
-- `centro_register` — Centro-luxury hospitality / residential register
-- `gros_working_class_pov` — Gros / working-class neighborhood register
-- `irun_border_register` — Irún / border / transit register
-- `cf_0004_grammar_engaging` — CF-0004 service-class discretion grammar visible / operational
-- `cuadrilla_register` — Basque close-friend-group register
-- `family_register` — kin-group register (parents, siblings, extended)
-- `peer_life_register` — middling-distance peer / not-yet-defined-relationship register
-- `held_life_register` — POV character's pre-existing life architecture (cuadrilla + family + routine)
-- `staged_life_register` — antagonist's engineered scene-architecture
-- `linguistic_layering` — multiple linguistic registers operating simultaneously
-- `code_switching` — POV character moves between linguistic registers within the storylet
+- `class_register` - class asymmetry is visible or operational
+- `class_landing_in_body` - class asymmetry is felt physically by the POV
+- `class_in_numbers` - price, wage, debt, distance, or count makes status concrete
+- `institutional_register` - a formal institution's rules shape the scene
+- `kinship_register` - family or household role obligations shape the beat
+- `peer_group_register` - peers, friends, colleagues, or cohort norms shape the beat
+- `held_life_register` - the POV character's pre-existing routines and bonds matter
+- `staged_life_register` - another actor has engineered the scene's social architecture
+- `linguistic_layering` - multiple language or register systems operate at once
+- `code_switching` - a character moves between social, linguistic, or institutional codes
 
-### Temporal / spatial register family — captures when / where the beat is set
+### Temporal / spatial register family - captures when or where the beat is set
 
-- `gold_hour` — late-afternoon to early-evening light register
-- `dusk` — twilight register
-- `late_night` — post-midnight register
-- `morning` — early-day register
-- `weekend_register` — non-work-day register (slow, family-adjacent)
-- `weekday_register` — work-day register (transit, school, routine)
-- `interior` — POV character alone / in solo space
-- `public` — POV character in a public-visible scene
-- `clandestine` — POV character in a hidden / secret scene
-- `transit` — POV character in motion (Topo, walk, bike)
+- `gold_hour` - late-afternoon or early-evening light register
+- `dusk` - twilight or transition-light register
+- `late_night` - post-midnight or exhausted-time register
+- `morning` - early-day reset, routine, or exposure register
+- `weekend_register` - non-work-day pace, ritual, or social looseness
+- `weekday_register` - work-day, school-day, transit, or schedule pressure
+- `interior` - enclosed or private space shapes the scene
+- `public` - public visibility shapes conduct or risk
+- `clandestine` - hidden, unauthorized, or covert space shapes the scene
+- `transit` - movement between places is part of the pressure
 
-### Narrative-mechanic family — captures the storylet's structural function
+### Narrative-mechanic family - captures the storylet's structural function
 
-- `register_inverting` — surface relationship between elements inverts within the storylet
-- `register_collapsing` — multi-layer register breaks down into single layer
-- `register_holding` — register persists through pressure
-- `register_under_pressure` — register tested but not yet broken
-- `geometric_inversion` — predator/quarry or other role-pair inverts
-- `predator_quarry_inverting` — specific role-inversion of pursuer/pursued
-- `surveillance_register_returning` — DA/CF surveillance pattern surfaces in-scene
-- `proximity_pursuit` — CAU-1 instantiation (proximity compounds desire)
-- `cau_1_register` — invariant CAU-1 visibly engaged
-- `cau_2_register` — invariant CAU-2 visibly engaged (secrecy compounds)
+- `register_inverting` - a social or emotional register flips during the scene
+- `register_collapsing` - multiple layers collapse into one exposed layer
+- `register_holding` - a register persists under pressure
+- `register_under_pressure` - a register is tested but not yet broken
+- `role_inversion` - pursuer/pursued, teacher/student, host/guest, or similar roles invert
+- `pattern_returning` - a prior pattern returns in changed circumstances
+- `proximity_pressure` - closeness itself increases stakes
+- `secrecy_pressure` - secrecy compounds cost, desire, fear, or obligation
 
-## Tag families — `theme_tags`
+## Tag families - `theme_tags`
 
-### Mystery-and-secret family — captures storylet's relationship to OBL secrets
+### Mystery-and-secret family - captures the storylet's relationship to withheld knowledge
 
-- `marla_hidden_register_legible_to_iker` — secret register becomes partially visible to POV
-- `surveillance_artifact_discovery` — physical artifact of surveillance found
-- `us_backstory_leak` — backstory leaks via external channel
-- `sf_0007_payoff_literal` — anatomy disclosure runs literal_fulfillment route
-- `engineered_chance_visible` — staged-as-chance frame becomes visible
-- `dramatic_irony_collapsing` — reader's dramatic irony collapses into POV awareness
-- `epistemic_asymmetry_collapsing` — knowledge asymmetry between cast members narrows
-- `staged_register_unverifiable` — antagonist's stage-craft leaves traces that resist evidence
+- `hidden_register_becoming_legible` - a concealed pattern becomes partly readable
+- `surveillance_artifact_discovery` - a physical or procedural trace of watching is found
+- `backstory_leak` - past information leaks through an external channel
+- `secret_payoff_literal` - an obligation or secret is paid off literally
+- `engineered_chance_visible` - staged-as-chance framing becomes visible
+- `epistemic_asymmetry_collapsing` - knowledge asymmetry between characters narrows
+- `staged_register_unverifiable` - traces point to staging but resist proof
 
-### Class / DIS family — captures DIS-1 / DIS-2 invariant engagement
+### Class / material-pressure family - captures resource and status engagement
 
-- `dis_1_made_concrete` — DIS-1 housing-class asymmetry concretized
-- `dis_1_at_centro_acquisition_layer` — class asymmetry at the property-acquisition layer (M-1 brushing surface)
-- `material_asymmetry_beat` — specific number / brand / price registers asymmetry
-- `class_cross_at_centro_hospitality` — class asymmetry concretized at hospitality venue
-- `class_geography_inverted` — spatial register flips (POV's neighborhood vs antagonist's)
-- `iker_home_register_inversion` — antagonist enters POV's geography
-- `marla_inside_discretion_infrastructure` — antagonist embedded in CF-0004 register
-- `marla_native_register_versus_calibrated_register` — antagonist's two registers visible
+- `material_asymmetry_concrete` - resource or status asymmetry becomes specific
+- `resource_gate_brushed` - access to a place, object, role, or privilege is brushed but not resolved
+- `material_asymmetry_beat` - a number, object, brand, distance, or cost registers pressure
+- `class_crossing_scene` - characters cross classed space or expectation
+- `class_geography_inverted` - social geography reverses or destabilizes expectations
+- `power_inside_infrastructure` - power is embedded in ordinary systems rather than spectacle
+- `native_register_versus_calibrated_register` - a character's fluent register contrasts with performed adaptation
 
-### Held-life family — captures POV's pre-existing life architecture
+### Held-life family - captures a character's pre-existing life architecture
 
-- `held_life_pressure` — held-life architecture pressured but intact
-- `held_life_eroding` — held-life architecture beginning to fray
-- `held_life_intact_but_pressured` — explicit held-life pressure without erosion
-- `held_life_intersecting_engineered_life` — held-life and antagonist's plan collide
-- `cuadrilla_disclosure_pressure` — cuadrilla-internal disclosure register engages
-- `marla_displacement_compounding` — antagonist's Stage 5 displacement plan visibly engages
-- `marla_displacement_invisible_but_real` — Stage 5 displacement engages without POV recognition
-- `weekend_rituals_changing` — weekend register reorganizes around antagonist
-- `three_year_routine_cracking` — long-tenure routine breaks for first time
+- `held_life_pressure` - established routine, bond, or duty is pressured but intact
+- `held_life_eroding` - established life architecture begins to fray
+- `held_life_intact_but_pressured` - pressure appears without immediate erosion
+- `held_life_intersecting_engineered_life` - ordinary life collides with another actor's design
+- `group_disclosure_pressure` - a closed group becomes the pressure surface for disclosure
+- `displacement_compounding` - one pressure displaces a character from ordinary life in layers
+- `displacement_invisible_but_real` - displacement occurs before the POV recognizes it
+- `rituals_changing` - recurring practices reorganize around new pressure
+- `routine_cracking` - a long-running pattern breaks for the first time
 
-### Reader-expectation family — captures OBL-0001 reader-expectation engagement
+### Reader-expectation family - captures expectation, payoff, and reversal
 
-- `iker_pursuit_engaging` — POV begins pursuing antagonist
-- `imprint_carrying` — POV holds prior-encounter imprint
-- `body_knowing_before_mind` — POV's body integrates beat before mind articulates
-- `marla_seed_landing` — antagonist's Stage 4 gentleness-as-seed lands
-- `central_dramatic_question_engaged` — arc question (whole/broken/transformed) explicitly engages
+- `pursuit_engaging` - a character begins actively pursuing a person, answer, object, or goal
+- `imprint_carrying` - a prior encounter shapes the current beat
+- `body_knowing_before_mind` - embodied reaction precedes articulated understanding
+- `seed_landing` - an earlier planted gesture, clue, or offer begins to matter
+- `central_dramatic_question_engaged` - the story's core dramatic question becomes active in-scene
 
-### Agency family — captures POV's agency arc
+### Agency family - captures shifts in a character's capacity to act
 
-- `iker_agency_emerging` — POV begins acting from articulated want rather than reaction
-- `central_dramatic_question_engaged` — arc question explicitly engages (paired with reader-expectation)
-- `marla_register_under_pressure` — antagonist's stage-craft pressured by POV agency
+- `agency_emerging` - a character acts from articulated want rather than reaction
+- `agency_contested` - a character's capacity to choose is pressured by another actor or system
+- `agency_misdirected` - action is real but aimed at the wrong target or premise
+- `agency_cost_named` - the cost of acting becomes explicit
+- `control_register_under_pressure` - a controlling actor or system is pressured by another agent
 
-### Theme-stage family — captures DA-0001 stage-progression mapping
+### Progression family - captures broad sequence movement without world-specific stage ids
 
-- `stage_2_engineered_first_contact` — DA-0001 Stage 2 register
-- `stage_3_register_engaging` — Stage 3 (let second meeting be his idea)
-- `stage_4_buildup` — Stage 4 (loft / gentleness-as-seed) buildup
-- `stage_4_disclosure_runtime` — Stage 4 disclosure event
-- `stage_5_register_engaging` — Stage 5 (displacement) register
-- `stage_6_ironic_pre_figure` — Stage 6 perfect-confession ironically pre-figured
-- `marla_stage_3_register_engaging` — antagonist's Stage 3 specifically (subset of stage_3_register_engaging)
+- `first_contact_engineered` - an initial encounter is arranged or shaped by design
+- `second_contact_reframed` - a repeat encounter changes the frame of the first
+- `buildup_register` - a scene accumulates pressure toward a later turn
+- `runtime_disclosure` - disclosure occurs during the active scene rather than as backstory
+- `displacement_register` - a character is moved out of an expected place, role, or routine
+- `ironic_prefigure` - a beat foreshadows a later reversal through irony
 
-### Mystery-edge family — captures M-NNNN brushing without resolution
+### Mystery-edge family - captures Mystery Reserve brushing without resolution
 
-- `m_1_property_gating_brushed_not_resolved` — M-1 brushed; no old-family coordination claimed
-- `m_2_locked_rooms_brushed_not_resolved` — M-2 brushed; no specific room-content claimed
-- `m_3_substrate_untouched` — M-3 firewall holds (saturation never source-attributed)
-- `m_4_variant_untouched` — M-4 firewall holds (variant prevalence never source-attributed)
-- `m_4_referenced_no_cause_proposed` — M-4 instantiated in narrative without proposing cause for prevalence (legal at SLT-0026 / SLT-0027 disclosure-aftermath route)
+- `mystery_brushed_not_resolved` - a Mystery Reserve surface is touched without answer
+- `locked_surface_brushed` - an inaccessible room, archive, object, or system is noticed but not opened
+- `substrate_untouched` - underlying mechanism remains protected by the firewall
+- `variant_pattern_untouched` - pattern variation is observed without cause attribution
+- `referenced_no_cause_proposed` - a mystery-relevant fact appears without proposing its origin
 
-### Invariant-instantiation family — captures invariant engagement
+### Invariant-instantiation family - captures world-rule engagement
 
-- `ont_2_bodily_substrate_exception_instantiated` — ONT-2 bodily-substrate exception engaged in-scene
-- `cau_1_register` — CAU-1 instantiated
-- `cau_2_register` — CAU-2 instantiated
-- `aes_1_register` — AES-1 instantiated (every surface charged)
-- `aes_2_register` — AES-2 instantiated (taboo desire as recurring undercurrent)
-- `dis_1_register` — DIS-1 instantiated (class asymmetry)
-- `soc_1_register_ambient` — SOC-1 ambient (Catholic-residual + secular-permissive register)
-- `soc_2_legal_frame_holding` — SOC-2 legal frame visible (consent law + abuse-of-authority)
+- `ontological_rule_instantiated` - an ontological invariant is engaged in-scene
+- `causal_rule_instantiated` - a causal invariant becomes operational
+- `aesthetic_rule_instantiated` - an aesthetic invariant shapes the register
+- `distribution_rule_instantiated` - access, scarcity, or distribution constraints matter
+- `social_rule_instantiated` - social, legal, ritual, or institutional rules visibly hold
+- `mystery_firewall_holding` - a storylet approaches a protected mystery without resolving it
+
+## Authoring a per-world dictionary
+
+This skill-level dictionary is intentionally world-agnostic. If a story bundle needs named characters, locations, artifacts, local social categories, or world-specific canon ids in tag names, create a per-world extension such as:
+
+```text
+worlds/<slug>/templates/tone-theme-tag-dictionary.md
+```
+
+Use the same family headings where possible, then add world-specific tag instances beneath them. A per-world dictionary should:
+
+1. inherit the family structure from this file;
+2. define any world-bound or story-bound tags in terms of the relevant world/story records;
+3. avoid reintroducing generic synonyms already present here;
+4. keep mystery-related tags firewall-safe by describing contact with a mystery surface rather than a resolved answer.
+
+Phase 5 distribution analysis should read both layers when a per-world dictionary exists: the skill-level layer keeps family-level convergence stable across worlds, while the per-world layer preserves instance-level convergence inside that world or story bundle.
 
 ## When to invent a new tag
 
 The dictionary is non-exhaustive. Invent a new tag when:
 
-1. **No dictionary entry captures the specific register** — the closest dictionary tag would lose semantic precision (e.g., a specific theme like `surveillance_archive_breach` may not yet have a dictionary entry; coin one rather than dilute `surveillance_artifact_discovery`).
-2. **The new tag captures a recurring pattern** — if you find yourself wanting to coin the same tag in multiple seeds, the recurring pattern is itself a candidate for dictionary inclusion in a future revision.
-3. **The new tag is more precise than the dictionary's** — a dictionary tag may be too coarse for the specific beat (e.g., `dramatic_irony_collapsing` may not capture a specific pivot — coin `dramatic_irony_partial_collapse` or similar).
+1. **No dictionary entry captures the specific register** - the closest dictionary tag would lose semantic precision.
+2. **The new tag captures a recurring pattern** - if you find yourself wanting to coin the same tag in multiple seeds, the recurring pattern is itself a candidate for dictionary inclusion in a future revision.
+3. **The new tag is more precise than the dictionary's** - a dictionary tag may be too coarse for the specific beat.
 
 **Avoid**:
-- Inventing synonyms for existing dictionary entries (`tell_revealing` when the dictionary has `tell_surfacing`)
-- Inventing batch-internal tags that only one storylet uses
-- Inventing tags whose meaning only the immediate authoring context can decode
+
+- inventing synonyms for existing dictionary entries;
+- inventing batch-internal tags that only one storylet uses;
+- inventing tags whose meaning only the immediate authoring context can decode;
+- encoding record ids, proper names, or local geography into the skill-level dictionary.
 
 When in doubt, prefer the closest dictionary tag plus a more specific tag, rather than coining a single new tag that combines multiple registers.
 
 ## Convergence target
 
-Across the pool's lifetime, target ≥80% of `tone_tags` and `theme_tags` drawn from this dictionary. The remaining ≤20% can be batch-specific or storylet-specific tags that capture registers the dictionary doesn't yet cover. When the ≤20% buffer regularly exceeds 20% in practice, the dictionary itself should be revised — convergence failure is a dictionary-coverage gap, not a tag-discipline failure.
+Across the pool's lifetime, target >=80% of `tone_tags` and `theme_tags` drawn from the combined dictionary available to the run. For worlds without a per-world dictionary, this skill-level file is the dictionary. For worlds with a per-world extension, aggregate distribution at two levels:
+
+- family-level convergence from this skill-level dictionary, used to keep tone/theme diversity comparable across worlds;
+- instance-level convergence from the per-world extension, used to keep local vocabulary stable inside that world or story bundle.
+
+The remaining <=20% can be batch-specific or storylet-specific tags that capture registers neither dictionary covers yet. When the <=20% buffer regularly exceeds 20% in practice, revise the relevant dictionary layer - convergence failure is a dictionary-coverage gap, not a tag-discipline failure.
