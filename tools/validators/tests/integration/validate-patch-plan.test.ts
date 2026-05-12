@@ -24,6 +24,7 @@ function createTempRoot(): string {
     const migrations = path.resolve(process.cwd(), "../world-index/src/schema/migrations");
     db.exec(readFileSync(path.join(migrations, "001_initial.sql"), "utf8"));
     db.exec(readFileSync(path.join(migrations, "002_scoped_references.sql"), "utf8"));
+    db.exec(readFileSync(path.join(migrations, "004_story_bundle_scope.sql"), "utf8"));
   } finally {
     db.close();
   }
@@ -323,6 +324,26 @@ test("validatePatchPlan materializes ARC_TRACE records for pre-apply trace valid
   });
 });
 
+test("validatePatchPlan finds indexed ARC_TRACE rows for rendered parent pages", async () => {
+  await withTempRoot(async () => {
+    seedIndexedStoryRecord("PG-0002", "page_record", "pages", renderedParentPage());
+    seedIndexedStoryRecord("ARCTRACE-0001", "arc_trace_node", "arc-traces", existingArcTrace());
+
+    const result = await validatePatchPlan(pendingChildAfterRenderedParentPlan() as unknown as PatchPlanEnvelope);
+
+    const narrativeExecution = result.executions.find(
+      (row) => row.name === "narrative_point_classification"
+    );
+    assert.equal(narrativeExecution?.status, "pass");
+    assert.ok(!result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "narrative_point_classification" &&
+        verdict.code === "narrative_point_classification.missing_arc_trace" &&
+        verdict.location.node_id === "marla-kern-seduction:PG-0002"
+    ));
+  });
+});
+
 test("validatePatchPlan rejects Shape B storylet ops missing schema-required fields", async () => {
   await withTempRoot(async () => {
     const missingMysterySafety = completeStoryletRecord();
@@ -560,6 +581,30 @@ function pendingProsePagePlan() {
   return plan;
 }
 
+function pendingChildAfterRenderedParentPlan() {
+  const plan = replaySafePagePlan();
+  const eventPatch = plan.patches.find((patch) => patch.op === "create_se_record");
+  const event = eventPatch?.payload.record as Record<string, unknown>;
+  event.id = "SE-0003";
+  event.created_at_page = "PG-0003";
+
+  const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
+  if (pagePatch === undefined) {
+    throw new Error("replaySafePagePlan fixture must include a create_pg_record patch");
+  }
+  pagePatch.target_file = "stories/marla-kern-seduction/_source/pages/PG-0003.yaml";
+  const page = pagePatch.payload.record as Record<string, unknown>;
+  const stateSnapshot = page.state_snapshot as Record<string, unknown>;
+  page.id = "PG-0003";
+  page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
+  page.applied_event_ops = ["SE-0003"];
+  page.prose_status = "pending";
+  stateSnapshot.arc_trace_emitted = false;
+  stateSnapshot.arc_trace_id = null;
+  stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
+  return plan;
+}
+
 function storyPatch(op: string, sourceDir: string, record: Record<string, unknown>) {
   return {
     op,
@@ -568,6 +613,49 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
     payload: {
       story_slug: "marla-kern-seduction",
       record
+    }
+  };
+}
+
+function renderedParentPage(): Record<string, unknown> {
+  return {
+    id: "PG-0002",
+    story_id: "STORY-001",
+    branch_path: ["PG-0001", "PG-0002"],
+    storylet_realized: "SLT-0001",
+    applied_event_ops: ["SE-0002"],
+    prose_status: "rendered",
+    state_snapshot: {
+      ...completeStateSnapshot(),
+      applied_effect_variant: "partial-repair",
+      narrative_point_classification: "NATURAL_COMMITMENT_HINGE",
+      arc_trace_emitted: true,
+      arc_trace_id: "ARCTRACE-0001"
+    }
+  };
+}
+
+function existingArcTrace(): Record<string, unknown> {
+  return {
+    id: "ARCTRACE-0001",
+    story_id: "STORY-001",
+    created_at_page: "PG-0002",
+    arc_realized: "SLT-0001",
+    effect_variant_applied: "partial-repair",
+    realized_beats: [],
+    observed_actions: [],
+    observed_claims: [],
+    possible_violations: [],
+    stop_condition_hit: {
+      id: "help-accepted",
+      category: "normal_exit",
+      evidence_span: { start: 0, end: 12 }
+    },
+    effect_evidence: [],
+    semantic_critic_verdict: {
+      status: "pass",
+      reasons: [],
+      required_revision_constraints: []
     }
   };
 }
@@ -642,6 +730,57 @@ function seedIndexedCf(id: string, parsed: Record<string, unknown>): void {
       `anchor-${id}`,
       null,
       1
+    );
+  } finally {
+    db.close();
+  }
+}
+
+function seedIndexedStoryRecord(
+  id: string,
+  nodeType: string,
+  sourceDir: string,
+  parsed: Record<string, unknown>
+): void {
+  const storySlug = "marla-kern-seduction";
+  const nodeId = `${storySlug}:${id}`;
+  const dbPath = path.resolve(process.cwd(), "../../worlds/seeded/_index/world.db");
+  const db = new Database(dbPath);
+  try {
+    db.prepare(
+      `INSERT INTO nodes (
+        node_id,
+        world_slug,
+        file_path,
+        heading_path,
+        byte_start,
+        byte_end,
+        line_start,
+        line_end,
+        node_type,
+        body,
+        content_hash,
+        anchor_checksum,
+        summary,
+        created_at_index_version,
+        story_slug
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      nodeId,
+      "seeded",
+      `stories/${storySlug}/_source/${sourceDir}/${id}.yaml`,
+      null,
+      0,
+      0,
+      1,
+      1,
+      nodeType,
+      yaml.dump(parsed),
+      `hash-${nodeId}`,
+      `anchor-${nodeId}`,
+      null,
+      1,
+      storySlug
     );
   } finally {
     db.close();

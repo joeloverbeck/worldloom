@@ -181,9 +181,9 @@ SPEC-19 defines the CHC schema for the scene-commitment-arc contract. The scene-
 record_version: 2
 choice_kind: scene_commitment | tactical_beat   # scene_commitment is the standard;
                                                 # tactical_beat is reserved for narrow cases
-commitment_family: <commitment_family enum>     # required when choice_kind == scene_commitment; must match commitment_class mapping
+commitment_family: <commitment_family enum>     # required when choice_kind == scene_commitment; closed family enum — fetch values via mcp__worldloom__get_canonical_vocabulary(class='commitment_family'); the COMMITMENT_CLASS_TO_FAMILY mapping at tools/world-index/src/public/canonical-vocabularies.ts:229 enforces the commitment_class → commitment_family relation
 commitment_class: <commitment_class enum>       # required when choice_kind == scene_commitment
-commitment_detail: null                         # optional story-specific precision label; never a deterministic join key
+commitment_detail: <string>                     # optional story-specific precision label; OMIT entirely when not used (do NOT serialize as null — the schema rejects null and requires non-empty string when the field is present); never a deterministic join key
 strategy_cluster: <kebab-case open-vocab tag>   # required when choice_kind == scene_commitment
 choice_worthiness:
   strategic_question_answered: >                # one-line scene question
@@ -249,7 +249,7 @@ realized_beats:
   - beat_id: B1
     function: <beat_function string>
     evidence_span: { start: <char offset>, end: <char offset> }
-    realized: true | partially | not
+    realized: "true" | "partially" | "not"  # quoted enum-string
 
 observed_actions:
   - actor: STENT-NNNN
@@ -274,8 +274,8 @@ stop_condition_hit:
   evidence_span: { start: <char offset>, end: <char offset> }
 
 effect_evidence:
-  - effect_ref: <variants[].required_effects[N]>
-    realized: true | partially | not
+  - effect_ref: <N>  # integer index into chosen variant's required_effects[]
+    realized: "true" | "partially" | "not"  # quoted enum-string
     evidence_span: { start: <char offset>, end: <char offset> }
 
 semantic_critic_verdict:

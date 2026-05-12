@@ -121,7 +121,7 @@ mystery_safety:
     #   resolution_authority: apparent | branch_local_counterfactual | canon_candidate
     #   claim_strength: clue | theory | confession | proof | objective_event
     #   requires_canon_promotion: false    # MUST be true iff resolution_authority == canon_candidate (gate 2)
-  resolution_safety_per_M: {}              # M-NNNN -> forbidden | low | medium | high — must match the M record's actual future_resolution_safety (gate 2)
+  resolution_safety_per_M: {}              # M-NNNN -> forbidden | low | medium | high — keys use the same 4-digit-padded form (M-0003) as forbidden_resolutions below; must match the M record's actual future_resolution_safety (gate 2)
 
 # choice_templates — forbidden. The runtime LLM proposer no longer reads choice scaffolds
 # from SLT records; that role moves to exit_portfolio.native_seeds (see arc_contract below).
@@ -144,9 +144,9 @@ visibility:
   allowed_branch_ids: null                 # [BR-NNNN, ...] — optional explicit allowlist
 
 arc_contract:                              # what the user committed to; mirrors selected CHC
-  commitment_family: <commitment_family enum> # closed family enum — must match commitment_class mapping
+  commitment_family: null                  # optional, closed family enum when filled — fetch values via mcp__worldloom__get_canonical_vocabulary(class='commitment_family'); the canonical mapping enforces commitment_class → commitment_family. Bootstrap-seeded SLTs commonly carry null; populate when the family is authoritatively known.
   commitment_class: <commitment_class enum> # closed enum — see canonical-vocabularies
-  commitment_detail: null                  # optional story-specific precision label; never a deterministic join key
+  commitment_detail: <string>              # optional story-specific precision label; OMIT entirely when not used (do NOT serialize as null — the schema rejects null and requires non-empty string when present); never a deterministic join key
   arc_archetype: <arc_archetype label>     # orienting pattern label; prefer library values when they fit, but story-specific snake_case values are allowed
   actor: STENT-NNNN                        # STENT-NNNN | role:<role>
   target: null                             # STENT-NNNN | role:<role> | null
@@ -215,7 +215,7 @@ execution_envelope:                        # what governs prose render under thi
   style_directives:                        # prose-craft hints; non-validator-bound
     - <style_directive kebab-case string>
   mystery_preservation:
-    forbidden_resolutions:                 # M-NNNN ids whose forbidden-status must be preserved
+    forbidden_resolutions:                 # M-NNNN ids whose forbidden-status must be preserved — use 4-digit-padded form (M-0003, not M-3) per engine schema regex ^M-[0-9]{4}$; see branching-story-bootstrap/references/phase-6-storylet-pool-seed.md:100 for the canonical statement of this convention
       - M-NNNN
     allowed_claims:                        # legal resolution_authority values in this arc
       - apparent
@@ -251,9 +251,9 @@ effect_model:
 exit_portfolio:
   native_seeds:                            # arc-author-declared next-commitment options
     - id: <kebab-case seed id>
-      commitment_family: <commitment_family enum>
+      commitment_family: null                  # optional, closed family enum when filled — same canonical taxonomy as arc_contract.commitment_family above (see line 147 note for the canonical_vocabulary fetch)
       commitment_class: <commitment_class enum>
-      commitment_detail: null              # optional story-specific precision; not a join key
+      commitment_detail: <string>          # optional story-specific precision; OMIT entirely when not used (do NOT serialize as null — the schema rejects null and requires non-empty string when present); not a join key
       strategy_cluster: <kebab-case open-vocab tag>
       expected_state_delta: {}             # per-strong-axis projection
       continuation_arc_selector:

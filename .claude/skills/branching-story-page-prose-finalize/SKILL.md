@@ -196,16 +196,6 @@ Both are story-bundle-scoped; allocate via `mcp__worldloom__allocate_next_id(wor
 - **`INDEX.md` is the LAST direct write.** Partial-failure recovery: if engine-submit fails, no `_source` YAML lands; no INDEX edit either. If INDEX edit fails after a successful submit, the YAML records are the authoritative state and the operator hand-edits INDEX next.
 - **Worktree discipline.** If invoked inside a worktree, all paths resolve from the worktree root. **Do NOT commit to git.**
 
-## Known Integration Debt
-
-- **PEENH-006 (patch-engine `update_record_field` for story-bundle records).** Two engine bugs affect the Phase 7 envelope until PEENH-006 lands:
-  - (a) `tools/patch-engine/src/ops/shared.ts` `loadExistingRecord` SQL queries `node_id = ?` directly, but the world-index stores story-bundle records as `<storySlug>:<recordId>` (per `tools/world-index/src/parse/atomic.ts:315` `storyNodeId(spec.storySlug, authoredId)`). Bare `target_record_id: "PG-NNNN"` returns `record_not_found`.
-  - (b) `tools/patch-engine/src/commit/temp-file.ts:141-164` `metadataForTargetRecordId` doesn't recognize story-bundle records, so the `stagedRecords` cache in `stageAllOps` is never populated for them. Chained `update_record_field` ops on the same PG record in one envelope all read from disk (not the prior op's staged state), and `replaceStagedWrite` keeps only the LAST op's mutation. The engine returns `{ ok: true, files_written: [{ ops_applied: 1 }] }` despite the file being byte-identical to its prior content.
-
-  **Workaround until PEENH-006 lands**: (i) use namespaced `target_record_id: "<story-slug>:PG-NNNN"` for every `update_record_field` op (e.g., `red-bunny:PG-0001`); AND (ii) split the 5-or-7 PG field updates across that-many separate single-op envelopes, each signed independently. The SE-`prose_finalized` event remains a single 1-op envelope (no chaining concern; `create_se_record` is unaffected). The INDEX.md flip stays as the LAST direct write per `references/phase-7-engine-submit.md` §INDEX.md Edit (LAST).
-
-  Once PEENH-006 lands and the engine accepts bare `target_record_id` + correctly caches chained ops, revert to the documented multi-op envelope structure at `references/phase-7-engine-submit.md` §Op Inventory and remove this Known Integration Debt entry.
-
 ## Final Rule
 
 A finalize is not a rubber stamp. It is the convergence point where the plan-and-validate path (Claude Code) and the prose-rendering path (manual or external LLM) meet — and it is the only step in the rework that can catch a prose render that drifts from the plan's contract. If finalize cannot find a forbidden-M resolution, an engine-vocabulary leak, a REQUIRED TURN miss, a craft-contract violation, or an arc-envelope conformance failure that the rendered prose introduced, those failures land in the bundle as silent corruption. The skill's discipline is what makes the manual-rendering path safe.

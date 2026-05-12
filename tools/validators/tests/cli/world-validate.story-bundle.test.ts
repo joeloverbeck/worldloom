@@ -147,7 +147,7 @@ function createIndexedV2StoryWorld(): string {
   insert.run("alpha:CHC-0001", "alpha", "stories/alpha/_source/choices/CHC-0001.yaml", "choice_record", yaml.dump(choice));
   insert.run("alpha:PG-0002", "alpha", "stories/alpha/_source/pages/PG-0002.yaml", "page_record", yaml.dump(completePage()));
   insert.run("alpha:SE-0002", "alpha", "stories/alpha/_source/events/SE-0002.yaml", "story_event_record", yaml.dump(completeEvent()));
-  insert.run("alpha:ARCTRACE-0001", "alpha", "stories/alpha/_source/arc-traces/ARCTRACE-0001.yaml", "arc_trace_record", yaml.dump(completeArcTrace()));
+  insert.run("alpha:ARCTRACE-0001", "alpha", "stories/alpha/_source/arc-traces/ARCTRACE-0001.yaml", "arc_trace_node", yaml.dump(completeArcTrace()));
   db.close();
 
   mkdirSync(path.join(world, "stories", "alpha", "pages-prose"), { recursive: true });

@@ -157,9 +157,14 @@ no frontmatter), then run `branching-story-page-prose-finalize` to validate and 
 
 ## §14 Recent prose continuity along this branch
 
-<!-- INLINE: verbatim contents of the last 1-2 pages-prose/PG-*.md along branch_path (NOT sibling
-     branches). Mark: "for continuity ONLY; do NOT reuse phrasings, metaphor tokens, or specific
-     concrete anchors verbatim."
+<!-- INLINE: rendered prose along branch_path (NOT sibling branches), using the following rule: always
+     inline the immediate parent's pages-prose/PG-*.md when parent_page_id != null; additionally inline
+     the grandparent's rendered prose when the branch has exactly 2 prior pages (i.e., the current page
+     is PG-0003 on a continuation branch with no fork); for deeper branches (3+ prior pages), default to
+     parent-only unless the grandparent's content is specifically cited in §17 governor nudge or §18
+     scene direction as load-bearing for the current arc's beat plan or substrate-rotation discipline
+     (e.g., a sensory anchor introduced two pages ago that this page must rotate off). Mark: "for
+     continuity ONLY; do NOT reuse phrasings, metaphor tokens, or specific concrete anchors verbatim."
 
      PRE-FLIGHT GUARANTEE: page-cycle aborts when parent.prose_status != "rendered", so this section
      always has rendered prose to inline (except for the bootstrap PG-0001 case, which has no parent —
