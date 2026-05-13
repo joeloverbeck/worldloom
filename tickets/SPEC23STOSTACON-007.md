@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/world-mcp/src/context-packet/shared.ts`, `tools/world-mcp/src/context-packet/story-bundle-context.ts`
-**Deps**: SPEC23STOSTACON-006
+**Deps**: archive/tickets/SPEC23STOSTACON-006.md
 
 ## Problem
 
@@ -66,7 +66,7 @@ After the change lands in `world-mcp`, the `world-index` package's tests also ex
 
 - Patch-engine ops that mutate STENT.role_in_story — `tools/patch-engine/src/ops/create-story-record.ts` is generic and doesn't introspect role_in_story; no patch-engine change needed.
 - Skill prose updates referencing role_in_story closed values — SPEC23STOSTACON-009.
-- Schema validation of role_in_story — SPEC23STOSTACON-006 (this ticket's dependency).
+- Schema validation of role_in_story — archive/tickets/SPEC23STOSTACON-006.md (this ticket's dependency).
 - Contract amendment — `archive/tickets/SPEC23STOSTACON-001.md`.
 
 ## Acceptance Criteria

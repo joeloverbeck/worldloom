@@ -100,7 +100,7 @@ Update `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`:
     "any"
   ] as const;
   ```
-- Remove `FACT_MATCHES_PREDICATES`, `ENTITY_STATE_PROPERTIES`, `EPISTEMIC_CLASSES`, `OBLIGATION_STATE_PROPERTIES`, `OBLIGATION_STATUSES` IF they have no surviving consumer. RELATIONSHIP_AXES (lines 58-73) survives — referenced by SPEC23STOSTACON-006's `axis` enum in story-relationship.schema.json.
+- Remove `FACT_MATCHES_PREDICATES`, `ENTITY_STATE_PROPERTIES`, `EPISTEMIC_CLASSES`, `OBLIGATION_STATE_PROPERTIES`, `OBLIGATION_STATUSES` IF they have no surviving consumer. RELATIONSHIP_AXES (lines 58-73) survives — referenced by archive/tickets/SPEC23STOSTACON-006.md's `axis` enum in story-relationship.schema.json.
 - Determine STOP_PREDICATES fate: after `stop_policy_parsability.ts` is deleted, is STOP_PREDICATES still consumed? If yes, retain; if no, drop. Drop STOP_PREDICATE_ARG_SCHEMAS / NORMAL_EXIT_STOP_PREDICATES / INTERRUPT_BEFORE_STOP_PREDICATES alongside STOP_PREDICATES.
 - Add argument-schema constants for the 5 new predicates following the STOP_PREDICATE_ARG_SCHEMAS pattern (or whatever shape `rule_storylet_predicate_dsl_parsability.ts` consumes after its rewrite):
   - `record_active`: argument 1 is a record-id matching the union pattern for STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA.
