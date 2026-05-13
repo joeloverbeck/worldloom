@@ -8,9 +8,9 @@
 
 ## Problem
 
-FOUNDATIONS-002 canonicalized per-class record IDs to unpadded natural-integer suffixes across `docs/FOUNDATIONS.md`, schemas, allocators, index parsing, MCP retrieval helpers, and patch-engine validation. Post-review found that multiple skill-facing prose and template surfaces still teach padded or placeholder forms such as `SP-NNNN`, `PG-NNNN`, `M-NNNN`, `CF-NNNN`, `SEC-GEO-NNN`, `DA-0000`, and `^CF-[0-9]{4}$`.
+At intake, FOUNDATIONS-002 had canonicalized per-class record IDs to unpadded natural-integer suffixes across `docs/FOUNDATIONS.md`, schemas, allocators, index parsing, MCP retrieval helpers, and patch-engine validation. Post-review found that multiple skill-facing prose and template surfaces still taught padded or placeholder forms such as `SP-NNNN`, `PG-NNNN`, `M-NNNN`, `CF-NNNN`, `SEC-GEO-NNN`, `DA-0000`, and `^CF-[0-9]{4}$`.
 
-Those stale examples are not just cosmetic: story and canon skills are operational instructions. If left unchanged, future runs can mint or request padded IDs that no longer match the documented allocation convention.
+Those stale examples were not just cosmetic: story and canon skills are operational instructions. Left unchanged, they could have caused future runs to mint or request padded IDs that no longer match the documented allocation convention.
 
 ## Assumption Reassessment (2026-05-13)
 
@@ -19,6 +19,8 @@ Those stale examples are not just cosmetic: story and canon skills are operation
 3. Shared boundary under audit: human/agent-facing skill instructions and templates must use the same ID notation as `docs/FOUNDATIONS.md` and the machine-facing allocator/schema surfaces. This ticket owns prose/template cleanup only, not engine behavior.
 4. FOUNDATIONS principle under audit: §Canonical Storage Layer now requires unpadded natural-integer IDs; skill instructions that still prefer padded examples undermine the canonical storage contract and the Tooling Recommendation's retrievable-record expectation.
 5. Adjacent contradictions: some stale examples may intentionally describe historical ticket prefixes such as `<PREFIX>-NNN`; those should be classified and left alone when they are not world/story record IDs. The implementation must distinguish world/story ID examples from ticket-number placeholders.
+6. Live sweep showed the stale notation was broader than the initial named files. Same-seam skill surfaces under `.claude/skills/` also carried active pipeline, hybrid, proposal, audit, pressure-event, and story-bundle ID examples such as `PR-NNNN`, `BATCH-NNNN`, `NCP-NNNN`, `NWB-NNNN`, `EPE-NNNN`, concrete `PG-0001` / `SEC-GEO-001` examples, and `MR-0003` Mystery Reserve examples. These are absorbed as skill-facing notation cleanup because they share the same FOUNDATIONS-002 ID-format contract.
+7. Historical example directories were not treated as the acceptance surface for the negative grep. A few example files moved where the same mechanical notation cleanup touched active skill examples, but remaining historical example IDs are classified as example provenance rather than active operator instructions.
 
 ## Architecture Check
 
@@ -31,26 +33,27 @@ Those stale examples are not just cosmetic: story and canon skills are operation
 2. Canon-addition envelope examples match the active patch-engine/validator allocation contract -> manual review against `docs/FOUNDATIONS.md` §Canonical Storage Layer and `tools/world-mcp/README.md`.
 3. Ticket-number placeholders remain distinguishable from record IDs -> manual classification of remaining `NNN`/`NNNN` hits after the cleanup.
 
-## What to Change
+## Landed Changes
 
-### 1. Update stale record-ID notation in skill prose
+### 1. Updated stale record-ID notation in skill prose
 
-Replace active world/story record placeholders such as `CF-NNNN`, `CH-NNNN`, `M-NNNN`, `SEC-GEO-NNN`, `PG-NNNN`, `CHC-NNNN`, `SP-NNNN`, and `SAU-NNNN` with `<integer>` forms or unpadded concrete examples.
+Active world, story, hybrid, proposal, audit, and pipeline record placeholders now use `<integer>` forms or unpadded concrete examples.
 
-### 2. Update templates and schema comments
+### 2. Updated templates and schema comments
 
-Refresh template comments and embedded regex examples that still pin fixed-width IDs, especially comments like `DA-0000`, `CF-NNNN`, and `^CF-[0-9]{4}$`.
+Template comments and embedded regex examples that pinned fixed-width IDs now use unpadded notation, including the diegetic artifact template, canon-addition envelope examples, story-pipeline templates, and skill-local guidance.
 
-### 3. Preserve non-record placeholders
+### 3. Preserved non-record placeholders
 
-Leave ticket-family placeholders such as `<PREFIX>-NNN` intact when they describe ticket IDs rather than world/story record IDs. Record any intentionally preserved hits in closeout.
+Ticket-family placeholders such as `<PREFIX>-NNN` remain intact when they describe ticket IDs rather than world/story record IDs. Remaining historical example IDs are classified as historical examples, not active current contract prose.
 
 ## Files to Touch
 
 - `.claude/skills/**/*.md` (modify where stale world/story record ID notation appears)
 - `.claude/skills/**/templates/*` (modify where stale world/story record ID notation appears)
 - `.claude/skills/**/references/*.md` (modify where stale world/story record ID notation appears)
-- `.codex/skills/implement-ticket/references/validator-schema-migrations.md` (modify if the `DA-NNNN` example still describes a world/story record ID)
+- `.claude/skills/**/examples/*.md` (modify only where same-seam example prose was mechanically aligned)
+- `.codex/skills/implement-ticket/references/validator-schema-migrations.md` (updated the `DA-NNNN` overlap example)
 
 ## Out of Scope
 
@@ -81,3 +84,24 @@ Leave ticket-family placeholders such as `<PREFIX>-NNN` intact when they describ
 
 1. `rg -n 'CF-NNNN|CH-NNNN|M-NNNN|OQ-NNNN|ENT-NNNN|SEC-[A-Z]{3}-NNN|PG-NNNN|CHC-NNNN|SLT-NNNN|SLB-NNNN|SAU-NNNN|SP-NNNN|RSP-NNNN|DA-0000|\\[0-9\\]\\{4\\}|\\\\d\\{4\\}' .claude/skills .codex/skills`
 2. `git diff --check`
+
+## Outcome
+
+FOUNDATIONS-003 is implemented. Skill-facing current-contract surfaces now use the FOUNDATIONS-002 unpadded natural-integer notation for record IDs, including story-bundle, canon-addition, creation, audit, proposal, pressure-event, character, diegetic-artifact, and Codex implement-ticket reference surfaces. No package/runtime code or world content was changed.
+
+## Post-Review Blocker (2026-05-13)
+
+Archival is blocked inside `post-ticket-review` boundaries. The post-move archive sweep found `.claude/skills/branching-story-bootstrap/SKILL.md` still referencing `tickets/FOUNDATIONS-003.md` as a completed ticket pending archival. That is a touched skill surface, so it must be corrected under implementation authority before this ticket can be archived.
+
+## Verification Result
+
+- `rg -n 'CF-NNNN|CH-NNNN|M-NNNN|OQ-NNNN|ENT-NNNN|SEC-[A-Z]{3}-NNN|PG-NNNN|CHC-NNNN|SLT-NNNN|SLB-NNNN|SAU-NNNN|SP-NNNN|RSP-NNNN|DA-0000|\\[0-9\\]\\{4\\}|\\\\d\\{4\\}' .claude/skills .codex/skills` passed with no matches.
+- `rg -n 'zero-padded|4-digit|SEC-<PREFIX>-NNN|SEC-[A-Z]{3}-001|[A-Z]{1,6}-NNNN|[A-Z]{1,6}-0000|MR-[0-9]{4}' .claude/skills .codex/skills --glob '!**/examples/**'` passed with no matches.
+- Manual review confirmed canon-addition envelope examples now use `CF-<integer>`, `CH-<integer>`, `PA-<integer>`, `M-<integer>`, `OQ-<integer>`, and unpadded concrete examples such as `CF-1`.
+- Manual review confirmed story-pipeline skills/templates now use story ID classes such as `PG-<integer>`, `SE-<integer>`, `SP-<integer>`, `RSP-<integer>`, and `SLT-<integer>`.
+- `git diff --check` passed.
+
+## Deviations
+
+- The cleanup widened within the same skill-facing notation seam to include active pipeline/proposal/audit/pressure-event IDs beyond the ticket's initial examples (`NCP`, `NCB`, `NWP`, `NWB`, `EPE`, `PR`, `BATCH`, `AU`, `RP`) because those surfaces are governed by the same FOUNDATIONS-002 ID-format rule.
+- Historical example directories are not the acceptance boundary for the active-contract grep. Remaining concrete padded IDs inside examples are historical provenance unless a future ticket explicitly refreshes or renames example files.

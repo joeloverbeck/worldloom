@@ -4,7 +4,7 @@ Phase 1 scans the world's atomic-record state for thinness / overstability / ove
 
 ## Phase 1: Diagnose the Current World
 
-Execute three scans across the world's atomic records via record-addressed retrieval (`mcp__worldloom__search_nodes`, `mcp__worldloom__get_record`). Each finding cites the specific record id (e.g., `SEC-INS-007`, `CF-0042`, `M-0003`) and the concern (file class) it sits under.
+Execute three scans across the world's atomic records via record-addressed retrieval (`mcp__worldloom__search_nodes`, `mcp__worldloom__get_record`). Each finding cites the specific record id (e.g., `SEC-INS-007`, `CF-42`, `M-3`) and the concern (file class) it sits under.
 
 **Per-concern scan pattern**:
 
@@ -12,7 +12,7 @@ Execute three scans across the world's atomic records via record-addressed retri
 mcp__worldloom__search_nodes(node_type='section', filters={file_class: '<concern>'})
 ```
 
-For each of the seven prose concerns — `everyday-life`, `institutions`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline` — enumerate the `SEC-*` ids, then `get_record` selectively for the indicators below. Pair with `search_nodes(node_type='canon_fact')` for cross-CF redundancy / pressure-system coverage, and with `get_record` on cited `M-NNNN` / `OQ-NNNN` / `INV-*` ids when an indicator implicates them.
+For each of the seven prose concerns — `everyday-life`, `institutions`, `magic-or-tech-systems`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline` — enumerate the `SEC-*` ids, then `get_record` selectively for the indicators below. Pair with `search_nodes(node_type='canon_fact')` for cross-CF redundancy / pressure-system coverage, and with `get_record` on cited `M-<integer>` / `OQ-<integer>` / `INV-*` ids when an indicator implicates them.
 
 **Thinness scan** — 12 indicators:
 

@@ -41,12 +41,12 @@ Specify the character's relation to every institutional axis present in the SEC-
 Define, for this specific character at this specific date:
 - what the character knows firsthand (witnessed, experienced, handled)
 - what they know only by rumor (heard from neighbors, priests, travelers, merchants)
-- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-NNNN records and any M-NNNN records whose `unknowns` block overlaps their epistemic surface)
+- what they cannot know (spatially, institutionally, or epistemically out of reach — cross-reference OQ-<integer> records and any M-<integer> records whose `unknowns` block overlaps their epistemic surface)
 - what they firmly believe but are wrong about (folk theories, propaganda, inherited superstitions — SEC-INS religious/ideological blocks + SEC-ELF common beliefs)
 - what words they have for major world phenomena (their vocabulary, per SEC-ELF language/slang by region/class)
 - what categories they lack entirely (concepts foreign to their class/region/education)
 
-**Rule**: The character's epistemic position is a firewall against later Rule 7 failures. If Phase 3 has them "knowing" anything listed in any M-NNNN record's `disallowed_cheap_answers`, that must be caught here rather than at Phase 7b — the earlier the catch, the cheaper the repair.
+**Rule**: The character's epistemic position is a firewall against later Rule 7 failures. If Phase 3 has them "knowing" anything listed in any M-<integer> record's `disallowed_cheap_answers`, that must be caught here rather than at Phase 7b — the earlier the catch, the cheaper the repair.
 
 **FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — Phase 3 is the first of two Rule 7 enforcement points; Phase 7b is the second (audit-and-firewall).
 

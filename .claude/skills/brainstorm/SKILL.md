@@ -91,7 +91,7 @@ Keep asking questions until confidence reaches 95%. Then announce: "I'm at 95% c
 **Worked example of the canonical format** (use this literal shape — `(N) X — assuming Y` with parenthesized index, the unknown stated as X, the assumption stated after `— assuming` — so user redirection ("you assumed Y; actually it's Z") is one-line correctable):
 
 ```
-Assumptions (unresolved gaps): (1) the existing test bundle's discard timing — assuming it lands in Tier 2 of the implementation order, not before; (2) RSP id-class preservation — assuming the audit sub-directory paths must remain stable, so we keep RSP-NNNN even though the semantic name shifts; (3) effect_model.variants[] semantics — assuming a list of effect rows per outcome-band entry, with Phase 4b weighted-pick selection.
+Assumptions (unresolved gaps): (1) the existing test bundle's discard timing — assuming it lands in Tier 2 of the implementation order, not before; (2) RSP id-class preservation — assuming the audit sub-directory paths must remain stable, so we keep RSP-<integer> even though the semantic name shifts; (3) effect_model.variants[] semantics — assuming a list of effect rows per outcome-band entry, with Phase 4b weighted-pick selection.
 ```
 
 The audit-failing form to avoid: a numbered list of full-sentence assumptions (e.g., `1. The existing test bundle is discarded as part of rollout`) merges "the unknown" with "what is assumed" and forces the user to parse each sentence to identify what they could redirect.

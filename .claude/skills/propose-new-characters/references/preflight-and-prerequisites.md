@@ -20,9 +20,9 @@ Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + inva
 
 ### Choosing seed_nodes
 
-- If `parameters_path` declares an `upstream_audit_path`, derive seeds from records the audit cites (`AU-NNNN`'s findings list specific CF / SEC / M / ENT ids).
-- If `parameters_path` declares `under_modeled_priority` or `target_domains` that name specific named entities (institutions, regions, species), resolve them via `mcp__worldloom__find_named_entities(names)` and pass the resulting `ENT-NNNN` ids.
-- If neither is specified (interview-driven), seed with a small set (3–6) of representative anchor nodes drawn from WORLD_KERNEL §Core Pressures plus the institutions / regions / species named there as `ENT-NNNN` or `SEC-*` records.
+- If `parameters_path` declares an `upstream_audit_path`, derive seeds from records the audit cites (`AU-<integer>`'s findings list specific CF / SEC / M / ENT ids).
+- If `parameters_path` declares `under_modeled_priority` or `target_domains` that name specific named entities (institutions, regions, species), resolve them via `mcp__worldloom__find_named_entities(names)` and pass the resulting `ENT-<integer>` ids.
+- If neither is specified (interview-driven), seed with a small set (3–6) of representative anchor nodes drawn from WORLD_KERNEL §Core Pressures plus the institutions / regions / species named there as `ENT-<integer>` or `SEC-*` records.
 
 ## Persisted-with-summary delivery handling
 
@@ -45,10 +45,10 @@ When a phase needs records beyond what the packet returned:
   - `node_type='section', filters={file_class: 'institutions'}` — Phase 5 institutions-without-insiders/dissenters/enforcers; analogously for `everyday-life`, `geography`, `economy-and-resources`, `peoples-and-species`, `timeline`.
   - `node_type='canon_fact', filters={domain: ...}` — Phase 10c distribution discipline lookups (capability CFs whose `who_can_do_it` / `who_cannot_easily_do_it` blocks bear on the seeds under consideration).
   - `node_type='invariant'` — Phase 10a expansion when the packet did not surface an invariant the seed implicates.
-- `mcp__worldloom__get_firewall_content(world_slug)` — Phase 10b bulk firewall projection when a seed implicates an M entry not in the packet; use `get_record('M-NNNN')` only when full M-record context is needed beyond the projection.
+- `mcp__worldloom__get_firewall_content(world_slug)` — Phase 10b bulk firewall projection when a seed implicates an M entry not in the packet; use `get_record('M-<integer>')` only when full M-record context is needed beyond the projection.
 - `mcp__worldloom__get_persisted_packet_slice(persisted_path, slice_path)` — structured slice extraction from a `persisted_with_summary` packet body. Use when Pre-flight returned only inline `governing_summary` id lists and the persisted packet's ranked layer context is needed.
 - `mcp__worldloom__get_neighbors(node_id)` — relation graph around a resolved entity (regions / institutions / species / characters).
-- `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-NNNN` ids; also used at Phase 1 to surface registry-occupying figures the artifact frontmatter names.
+- `mcp__worldloom__find_named_entities(names)` — resolve names from `parameters_path` or `upstream_audit_path` to `ENT-<integer>` ids; also used at Phase 1 to surface registry-occupying figures the artifact frontmatter names.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` — when Phase 2 needs to ground a CF against the section context where it was applied.
 
 ## Person Registry retrieval (Phase 1)
@@ -72,12 +72,12 @@ These remain primary-authored at the world root and are read directly:
 ## Hybrid files (direct Read permitted at Pre-flight)
 
 - `worlds/<world-slug>/character-proposals/INDEX.md` — quick scan of prior batch coverage; not load-bearing for allocation (the engine's `allocate_next_id` is authoritative).
-- `worlds/<world-slug>/proposals/INDEX.md` — informational only: if pending canon-fact proposals exist, an NCP card's `canon_assumption_flags.implied_new_facts` may point to a pending `PR-NNNN` rather than recommend a duplicate.
+- `worlds/<world-slug>/proposals/INDEX.md` — informational only: if pending canon-fact proposals exist, an NCP card's `canon_assumption_flags.implied_new_facts` may point to a pending `PR-<integer>` rather than recommend a duplicate.
 
 ## ID allocation
 
-- Pre-flight: `mcp__worldloom__allocate_next_id(world_slug, 'NCB')` → `NCB-NNNN`. Single call.
-- Phase 13 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'NCP')` per slot-filling card, called in card order. `NCP-NNNN` IDs are bound to surviving cards before Phase 14 begins so the audit trail (Phase 10 sub-phases, Phase 10e repairs, Phase 15 tests) can reference them. Note: the allocator is idempotent in absence of disk writes — calling `allocate_next_id(world_slug, 'NCP')` N times before any card lands on disk returns the same next-id N times. Reserve NCP-NNNNs in card order (first call returns `NCP-N`; assign `NCP-N` to card 1, `NCP-(N+1)` to card 2, ..., `NCP-(N+M-1)` to card M); the disk writes at Phase 16 commit (cards written in card order) bump the counter for the next batch.
+- Pre-flight: `mcp__worldloom__allocate_next_id(world_slug, 'NCB')` → `NCB-<integer>`. Single call.
+- Phase 13 (after diversification settles): `mcp__worldloom__allocate_next_id(world_slug, 'NCP')` per slot-filling card, called in card order. `NCP-<integer>` IDs are bound to surviving cards before Phase 14 begins so the audit trail (Phase 10 sub-phases, Phase 10e repairs, Phase 15 tests) can reference them. Note: the allocator is idempotent in absence of disk writes — calling `allocate_next_id(world_slug, 'NCP')` N times before any card lands on disk returns the same next-id N times. Reserve NCP-<integer>s in card order (first call returns `NCP-N`; assign `NCP-N` to card 1, `NCP-(N+1)` to card 2, ..., `NCP-(N+M-1)` to card M); the disk writes at Phase 16 commit (cards written in card order) bump the counter for the next batch.
 
 The allocator scans the indexed world state for the highest existing id of the requested class and returns the next. Drops at Phase 10e or Phase 16 leave permanent gaps — the next batch's allocator picks up at `highest_existing + 1`, never reusing a dropped id.
 
@@ -97,5 +97,5 @@ Enforced by Pre-flight (canonical abort messages live in the thin SKILL.md):
 - `worlds/<world-slug>/` missing → "World directory not found. Run `create-base-world` first, or supply a valid `world_slug`."
 - `parameters_path` or `upstream_audit_path` provided but unreadable → abort naming the file.
 - `mcp__worldloom__allocate_next_id` returns an error (e.g., world-index missing or stale; rebuild via `world-index build` before proceeding).
-- Card-slug collision detected at Phase 16 (would-be `character-proposals/NCP-NNNN-<slug>.md` already exists) → abort; never overwrite.
+- Card-slug collision detected at Phase 16 (would-be `character-proposals/NCP-<integer>-<slug>.md` already exists) → abort; never overwrite.
 - Missing `characters/` or `diegetic-artifacts/` directory → NOT an abort; treat as empty registry.

@@ -1,6 +1,6 @@
 ---
 name: story-fact-promotion-to-canon
-description: "Use when creating a proposal package for promoting a branch-local story claim into world canon. One common flow over 6 source kinds (story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome, other_branch_claim). Produces: story-promotions/SP-NNNN-proposal-package.yaml CF-shaped candidate + story-promotions/SP-NNNN.md ledger + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when creating a proposal package for promoting a branch-local story claim into world canon. One common flow over 6 source kinds (story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome, other_branch_claim). Produces: story-promotions/SP-<integer>-proposal-package.yaml CF-shaped candidate + story-promotions/SP-<integer>.md ledger + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -13,13 +13,13 @@ arguments:
     description: "One of: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim. Changes required evidence, not workflow shape."
     required: true
   - name: source_record_ids
-    description: "List of record ids constituting the candidate (e.g., [SF-0042] for story_fact; [M-0003] for mystery_resolution; [STENT-0007] for character_outcome)."
+    description: "List of record ids constituting the candidate (e.g., [SF-42] for story_fact; [M-3] for mystery_resolution; [STENT-7] for character_outcome)."
     required: true
   - name: branch_path
-    description: "BR-NNNN of the branch where the claim is established. Every source record's lineage must trace to branch_path."
+    description: "BR-<integer> of the branch where the claim is established. Every source record's lineage must trace to branch_path."
     required: true
   - name: supporting_page_ids
-    description: "List of PG-NNNN ids whose rendered prose constitutes evidence. Required-prose source kinds: story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome. Optional for other_branch_claim."
+    description: "List of PG-<integer> ids whose rendered prose constitutes evidence. Required-prose source kinds: story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome. Optional for other_branch_claim."
     required: true
   - name: desired_canon_status
     description: "hard_canon | soft_canon | contested_canon | mystery_reserve. Default: derive from source_kind."
@@ -37,11 +37,11 @@ arguments:
 Create a proposal package for promoting a branch-local story claim into world canon — assembles a CF-shaped candidate, runs scope-inflation + mystery-firewall + downstream-impact analyses, and writes the proposal package; never mutates world canon.
 
 <HARD-GATE>
-Do NOT write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml`, `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN.md`, or update bundle `INDEX.md` until:
+Do NOT write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml`, `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md`, or update bundle `INDEX.md` until:
 
-(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; source records loaded and traced to `branch_path`; supporting pages + rendered prose + receipts loaded (FAIL receipts surfaced for explicit user acceptance); `SP-NNNN` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', ...)`.
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; source records loaded and traced to `branch_path`; supporting pages + rendered prose + receipts loaded (FAIL receipts surfaced for explicit user acceptance); `SP-<integer>` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', ...)`.
 
-(b) Phases 1-6 have completed in working memory: source + branch provenance loaded (Phase 1); CF-shaped candidate translated per FOUNDATIONS §Canon Fact Record Schema (Phase 2); scope-inflation report produced (Phase 3); mystery-firewall report produced with `firewall_verdict: PASS | REQUIRES_USER_ACCEPTANCE` — `firewall_verdict: ABORT` exits before Phase 5 with no proposal written (Phase 4); downstream-impact report produced (Phase 5); full proposal package assembled per the SP-NNNN-proposal-package.yaml shape (Phase 6).
+(b) Phases 1-6 have completed in working memory: source + branch provenance loaded (Phase 1); CF-shaped candidate translated per FOUNDATIONS §Canon Fact Record Schema (Phase 2); scope-inflation report produced (Phase 3); mystery-firewall report produced with `firewall_verdict: PASS | REQUIRES_USER_ACCEPTANCE` — `firewall_verdict: ABORT` exits before Phase 5 with no proposal written (Phase 4); downstream-impact report produced (Phase 5); full proposal package assembled per the SP-<integer>-proposal-package.yaml shape (Phase 6).
 
 (c) Phase 4 `firewall_verdict` is NOT `ABORT`. Forbidden-mystery resolution attempts cause abort before Phase 5.
 
@@ -83,8 +83,8 @@ Phase 5: Downstream impact analysis (world domains affected; same-story
 Phase 6: Assemble proposal package (combine Phase 1-5 outputs)
         |
         v
-Phase 7: HARD-GATE fires → write SP-NNNN-proposal-package.yaml
-                          + SP-NNNN.md ledger + INDEX update; instruct
+Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
+                          + SP-<integer>.md ledger + INDEX update; instruct
                           user to invoke canon-addition separately
 ```
 
@@ -96,8 +96,8 @@ Phase 7: HARD-GATE fires → write SP-NNNN-proposal-package.yaml
 - `story_slug` — string — existing story bundle slug under `worlds/<world_slug>/stories/`
 - `source_kind` — enum — one of `story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim`
 - `source_record_ids` — list — record ids constituting the candidate (mapping per source_kind documented below)
-- `branch_path` — `BR-NNNN` — branch where the claim is established
-- `supporting_page_ids` — list[PG-NNNN] — pages whose rendered prose is evidence
+- `branch_path` — `BR-<integer>` — branch where the claim is established
+- `supporting_page_ids` — list[PG-<integer>] — pages whose rendered prose is evidence
 
 ### Optional
 
@@ -109,17 +109,17 @@ Phase 7: HARD-GATE fires → write SP-NNNN-proposal-package.yaml
 
 | source_kind | Required source_record class(es) | Prose evidence |
 |---|---|---|
-| `story_fact` | `SF-NNNN` (plus authoring `SE` + witness `BEL`) | Required |
-| `mystery_resolution` | `M-NNNN` (plus resolving `SE` + pre-resolution `BEL` chain) | Required |
-| `character_outcome` | `STENT-NNNN` (plus the supersession chain showing the outcome) | Required |
-| `artifact_canonization` | `DA-NNNN` (story-local; plus authoring `SE`) | Required |
-| `relationship_or_institutional_outcome` | `SREL-NNNN` (plus supersession chain + supporting events) | Required |
+| `story_fact` | `SF-<integer>` (plus authoring `SE` + witness `BEL`) | Required |
+| `mystery_resolution` | `M-<integer>` (plus resolving `SE` + pre-resolution `BEL` chain) | Required |
+| `character_outcome` | `STENT-<integer>` (plus the supersession chain showing the outcome) | Required |
+| `artifact_canonization` | `DA-<integer>` (story-local; plus authoring `SE`) | Required |
+| `relationship_or_institutional_outcome` | `SREL-<integer>` (plus supersession chain + supporting events) | Required |
 | `other_branch_claim` | user-supplied records | Optional |
 
 ## Output
 
-- `story-promotions/SP-NNNN-proposal-package.yaml` — Always (CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition`)
-- `story-promotions/SP-NNNN.md` — Always (human-readable ledger pointing at YAML package)
+- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition`)
+- `story-promotions/SP-<integer>.md` — Always (human-readable ledger pointing at YAML package)
 - Bundle `INDEX.md` — Always (updated last)
 
 All direct-write. No patch-engine submissions to world scope. **No world-canon writes occur — `canon-addition` is invoked separately by the user with the proposal-package path.**
@@ -133,7 +133,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — for each `supporting_page_ids` entry (required for prose-evidence source kinds)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', seed_nodes=<source_record_ids + every M-NNNN whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', seed_nodes=<source_record_ids + every M-<integer> whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`
 
 The bundle MUST exist (non-bootstrap variant); source records MUST exist and trace to `branch_path`; supporting prose MUST exist for required-prose source kinds. Receipt `verdict: PASS | WARN` is acceptable at Pre-flight; `verdict: FAIL` requires explicit user acceptance at Phase 7.
 
@@ -144,9 +144,9 @@ Before Phase 1:
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). Abort with source-not-found or source-kind-mismatch error on any miss.
-4. Resolve supporting pages: for each `PG-NNNN` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
+4. Resolve supporting pages: for each `PG-<integer>` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
 5. Resolve branch: load `_source/branches/<branch_path>.yaml`. Verify every source record's branch lineage traces to `branch_path` (a `story_fact` source cannot be promoted from a branch that didn't author it). Abort with branch-mismatch error on any failure.
-6. Allocate `SP-NNNN` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
+6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
 7. Load world canon context packet seeded with: source record ids + whole-class Mystery Reserve (for Phase 4 firewall) + whole-class INV (for invariant check) + parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
 
 If any precondition fails, the skill aborts before Phase 1.
@@ -156,9 +156,9 @@ If any precondition fails, the skill aborts before Phase 1.
 Load into working memory:
 
 - The source records named in `source_record_ids` (per the source-kind-to-record-class mapping in §Inputs).
-- The `SE-NNNN` events that authored or modified each source record (traverse `_source/events/SE-*.yaml` for events whose `state_delta.create / supersede` references any source record).
-- The `BEL-NNNN` records showing who knows / believes / witnesses the claim — load every BEL whose `consequences.opens[]` or `basis.source_event` references any authoring `SE`.
-- The `branch_path` `BR-NNNN.yaml` record + sibling branch summaries (for Phase 5 downstream impact on same-story contradictory branches).
+- The `SE-<integer>` events that authored or modified each source record (traverse `_source/events/SE-*.yaml` for events whose `state_delta.create / supersede` references any source record).
+- The `BEL-<integer>` records showing who knows / believes / witnesses the claim — load every BEL whose `consequences.opens[]` or `basis.source_event` references any authoring `SE`.
+- The `branch_path` `BR-<integer>.yaml` record + sibling branch summaries (for Phase 5 downstream impact on same-story contradictory branches).
 - Rendered prose at `pages-prose/<page_id>.md` and receipts at `pages-prose-receipts/<page_id>.yaml` for each `supporting_page_ids` entry.
 - Whole-class Mystery Reserve and whole-class INV (loaded at Pre-flight) for Phase 4 firewall.
 - World canon CF records relevant to Phase 2 candidate translation + Phase 3 scope-inflation + Phase 5 downstream impact.
@@ -200,8 +200,8 @@ candidate:
     story_evidence:
       source_records: [<source_record_ids>]
       supporting_pages: [<supporting_page_ids>]
-      authoring_events: [<SE-NNNN ids>]
-      belief_witnesses: [<BEL-NNNN ids>]
+      authoring_events: [SE-<integer> ids]
+      belief_witnesses: [BEL-<integer> ids]
   promotion_provenance:
     story_slug: <story_slug>
     source_kind: <source_kind>
@@ -252,9 +252,9 @@ Produce a structured `mystery_firewall_report`:
 
 ```yaml
 mystery_firewall_report:
-  mysteries_scanned: <count of M-NNNN records loaded>
-  forbidden_resolution_attempts: [<M-NNNN, if any>]
-  accidental_resolution_warnings: [<M-NNNN, if any>]
+  mysteries_scanned: <count of M-<integer> records loaded
+  forbidden_resolution_attempts: [M-<integer>, if any]
+  accidental_resolution_warnings: [M-<integer>, if any]
   counterfactual_promotion_attempts: [<source SF id, if any>]
   source_kind_mismatch_warnings: [<recommended source_kind change, if any>]
   firewall_verdict: PASS | ABORT | REQUIRES_USER_ACCEPTANCE
@@ -267,7 +267,7 @@ mystery_firewall_report:
 Enumerate:
 
 1. **World domains affected** — list FOUNDATIONS §Mandatory World Files concerns the promotion would touch (`peoples-and-species`, `institutions`, `economy-and-resources`, `magic-or-tech-systems`, `everyday-life`, `geography`, `timeline`).
-2. **Same-story contradictory branches** — list other branches (`BR-NNNN`) in this bundle whose state contradicts the candidate. The proposal's `contradiction_preference` field records the user's desired handling (`flag | archive_same_story_branches | leave_counterfactual`); `story-promotion-closeout` applies the chosen action after canon-addition adjudicates. This skill does NOT modify other branches.
+2. **Same-story contradictory branches** — list other branches (`BR-<integer>`) in this bundle whose state contradicts the candidate. The proposal's `contradiction_preference` field records the user's desired handling (`flag | archive_same_story_branches | leave_counterfactual`); `story-promotion-closeout` applies the chosen action after canon-addition adjudicates. This skill does NOT modify other branches.
 3. **Cross-story contradictions** — list sibling story bundles (other `worlds/<world_slug>/stories/<sibling_story>/`) whose state contradicts the candidate. Flag-only here; resolution belongs to `branching-story-health-audit` `cross_story` mode or a separate world-level workflow.
 
 Produce a structured `downstream_impact_report`:
@@ -275,7 +275,7 @@ Produce a structured `downstream_impact_report`:
 ```yaml
 downstream_impact_report:
   world_domains_affected: [<domain>]
-  same_story_contradictory_branches: [<BR-NNNN>]
+  same_story_contradictory_branches: [BR-<integer>]
   cross_story_contradictions: [<sibling_story_slug:record_id>]
   affected_world_files: [<file path under worlds/<world_slug>/>]
   promotion_provenance_narrative: <one-paragraph explanation>
@@ -283,19 +283,19 @@ downstream_impact_report:
 
 ## Phase 6: Assemble proposal package
 
-Combine Phase 1-5 outputs into the full `SP-NNNN-proposal-package.yaml` shape (see `templates/proposal-package.yaml`):
+Combine Phase 1-5 outputs into the full `SP-<integer>-proposal-package.yaml` shape (see `templates/proposal-package.yaml`):
 
 ```yaml
-promotion_id: SP-NNNN
+promotion_id: SP-<integer>
 story_slug: <story_slug>
 source_kind: <source_kind>
 source_records: [<source_record_ids>]
 branch_path: <branch_path>
 supporting_pages: [<supporting_page_ids>]
-authoring_events: [<SE-NNNN ids>]
-belief_witnesses: [<BEL-NNNN ids>]
+authoring_events: [SE-<integer> ids]
+belief_witnesses: [BEL-<integer> ids]
 claim_visibility:
-  who_holds_belief: [<STENT-NNNN | group:<name> | public>]
+  who_holds_belief: [STENT-<integer> | group:<name> | public]
   belief_truth_relations: [<truth_relation per BEL>]
 candidate: <Phase 2 CF-shaped candidate>
 scope_inflation_report: <Phase 3 report>
@@ -308,18 +308,18 @@ user_decision:
 prose_receipt_failures_accepted: []
 ```
 
-The companion `SP-NNNN.md` ledger is a human-readable narrative explanation pointing at the YAML package.
+The companion `SP-<integer>.md` ledger is a human-readable narrative explanation pointing at the YAML package.
 
 ## Phase 7: Commit / Write — HARD-GATE fires
 
 1. Present the deliverable summary to the user:
-   - `SP-NNNN` id + candidate `title` / `status` / `type` / `statement` (one-line each).
+   - `SP-<integer>` id + candidate `title` / `status` / `type` / `statement` (one-line each).
    - Scope-inflation report findings (widening applied, scope_argument supplied, trace_count, flags).
    - Mystery-firewall report findings (firewall_verdict, REQUIRES_USER_ACCEPTANCE items if any).
    - Downstream-impact report (world domains affected, same-story contradictory branches, cross-story contradictions).
    - Prose-receipt failures requiring acceptance (per Pre-flight step 4).
    - Contradiction-preference disposition.
-   - Recommended next step: *"Run `canon-addition` with `proposal_path=worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml`. After canon-addition adjudicates, run `story-promotion-closeout` to write the verdict back onto story-local records."*
+   - Recommended next step: *"Run `canon-addition` with `proposal_path=worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml`. After canon-addition adjudicates, run `story-promotion-closeout` to write the verdict back onto story-local records."*
 
 2. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 
@@ -327,8 +327,8 @@ The companion `SP-NNNN.md` ledger is a human-readable narrative explanation poin
    - Set `user_decision.hard_gate_approved: true`.
    - Record `user_decision.acceptance_of_warnings` per the user's explicit acceptances of REQUIRES_USER_ACCEPTANCE items.
    - Record `prose_receipt_failures_accepted` per the user's explicit acceptances of FAIL receipts.
-   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml` (direct write — `templates/proposal-package.yaml` is the schema reference).
-   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN.md` (direct write — `templates/story-promotion-ledger.md` is the format reference).
+   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` (direct write — `templates/proposal-package.yaml` is the schema reference).
+   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` (direct write — `templates/story-promotion-ledger.md` is the format reference).
    - Update bundle `INDEX.md` to reflect the new promotion entry.
 
 4. Report the proposal paths to the user. Explicitly instruct the next step. Do NOT `git commit`.

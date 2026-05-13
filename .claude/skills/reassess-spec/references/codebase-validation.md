@@ -27,7 +27,7 @@ For patterns referenced across multiple files or packages (e.g., type imports li
 
 Glob/Grep to confirm each path exists. If moved, renamed, or deleted, record the discrepancy and actual location.
 
-Distinguish existing paths (must exist now) from proposed paths (will exist after implementation). Proposed paths still need validation — parent directory must exist, path must not collide with an existing file, naming must follow worldloom conventions (kebab-case filenames, `SPEC-NN-<slug>.md` for specs, `PR-NNNN-<slug>.md` for proposal cards, etc.).
+Distinguish existing paths (must exist now) from proposed paths (will exist after implementation). Proposed paths still need validation — parent directory must exist, path must not collide with an existing file, naming must follow worldloom conventions (kebab-case filenames, `SPEC-NN-<slug>.md` for specs, `PR-<integer>-<slug>.md` for proposal cards, etc.).
 
 For specs that reference world files by canonical name (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`), verify the spec treats these as read-only pattern references, not write targets. A spec that proposes writes to a canonical world file from outside `canon-addition` is a CRITICAL Issue.
 

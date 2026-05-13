@@ -1,6 +1,6 @@
 ---
 name: emergent-pressure-events
-description: "Use when generating candidate emergent-pressure-event cards for an existing worldloom world — diversified batches representing what the world is doing right now under its existing pressures. Produces: pressure-event cards at worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.md + canonize-routed sidecar proposal cards at worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.proposal.md + batch manifest at worlds/<world-slug>/pressure-events/batches/BATCH-NNNN.md + auto-updated pressure-events/INDEX.md. Mutates: only worlds/<world-slug>/pressure-events/ (never WORLD_KERNEL.md, ONTOLOGY.md, or any _source/ atomic record). Each canonize-routed card's sidecar path is directly consumable as canon-addition's proposal_path."
+description: "Use when generating candidate emergent-pressure-event cards for an existing worldloom world — diversified batches representing what the world is doing right now under its existing pressures. Produces: pressure-event cards at worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.md + canonize-routed sidecar proposal cards at worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.proposal.md + batch manifest at worlds/<world-slug>/pressure-events/batches/BATCH-<integer>.md + auto-updated pressure-events/INDEX.md. Mutates: only worlds/<world-slug>/pressure-events/ (never WORLD_KERNEL.md, ONTOLOGY.md, or any _source/ atomic record). Each canonize-routed card's sidecar path is directly consumable as canon-addition's proposal_path."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -16,7 +16,7 @@ arguments:
 Generates a diversified batch of candidate pressure-event cards for an existing worldloom world — events the world's existing pressures plausibly produce right now, traceable to specific CFs, routed canonize / story_fuel / ambient with explicit rationale. Pre-flight loads world state primarily via direct per-record-class retrieval (`list_records` for CF / INV / M / OQ; use `include_full_body=true` for whole-class INV / M firewall loads) plus direct reads of FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; `get_context_packet(task_type='emergent_pressure_events', ...)` is available as a complement when explicit record-ID-shaped seed_nodes are resolvable. Surviving cards write direct-Edit on hybrid files (pressure-events are NOT canon — Hook 3 hybrid-file allowlist permits the writes). Each canonize-routed card's sidecar path is directly consumable as `canon-addition`'s `proposal_path` for separate adjudication.
 
 <HARD-GATE>
-Do NOT write any file — pressure-event card, sidecar proposal card, batch manifest, INDEX.md update — until: (a) pre-flight resolves `worlds/<world-slug>/`, allocates the next `BATCH-NNNN` via `mcp__worldloom__allocate_next_id`, and loads the context packet plus FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; (b) Phase 4 Traceability Anchoring has dropped every untraceable seed (slot left empty as diagnostic signal); (c) Phase 6 Canon Safety Check passes for every surviving card with zero unrepaired violations; (d) Phase 7 Validation Tests pass with zero failures at both per-card and batch levels; (e) the user has explicitly approved the Phase 8 deliverable summary (full batch + pressure inventory + diversification audit + Canon Safety Check Trace + sidecar `proposal_card_extract` previews for every canonize-routed card + any 6e repairs + any drops). The user's approval may include a drop-list of card-IDs to exclude; dropped cards are never written, and dropped cards' sidecars are never emitted. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
+Do NOT write any file — pressure-event card, sidecar proposal card, batch manifest, INDEX.md update — until: (a) pre-flight resolves `worlds/<world-slug>/`, allocates the next `BATCH-<integer>` via `mcp__worldloom__allocate_next_id`, and loads the context packet plus FOUNDATIONS / WORLD_KERNEL / ONTOLOGY; (b) Phase 4 Traceability Anchoring has dropped every untraceable seed (slot left empty as diagnostic signal); (c) Phase 6 Canon Safety Check passes for every surviving card with zero unrepaired violations; (d) Phase 7 Validation Tests pass with zero failures at both per-card and batch levels; (e) the user has explicitly approved the Phase 8 deliverable summary (full batch + pressure inventory + diversification audit + Canon Safety Check Trace + sidecar `proposal_card_extract` previews for every canonize-routed card + any 6e repairs + any drops). The user's approval may include a drop-list of card-IDs to exclude; dropped cards are never written, and dropped cards' sidecars are never emitted. This gate is absolute under Auto Mode — invoking the skill is not deliverable approval.
 </HARD-GATE>
 
 ## Process Flow
@@ -42,11 +42,11 @@ Phase 2:    Origin-Type Mapping
       |
       v
 Phase 3:    Seed Generation
-            (1-3 seeds per slot; allocate EPE-NNNN per seed via allocate_next_id)
+            (1-3 seeds per slot; allocate EPE-<integer> per seed via allocate_next_id)
       |
       v
 Phase 4:    Traceability Anchoring
-            (every seed cites >=1 CF-NNNN; untraceable seeds DROPPED — slot
+            (every seed cites >=1 CF-<integer>; untraceable seeds DROPPED — slot
              becomes empty as diagnostic signal; no regeneration)
       |
       v
@@ -96,16 +96,16 @@ Phase 8:    HARD-GATE deliverable summary --> on approval, direct-Edit
 
 ## Output
 
-- **Pressure-event cards** at `worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.md` — one hybrid YAML-frontmatter + markdown-body file per surviving card. Frontmatter shape per `templates/pressure-event-card.md`.
-- **Sidecar proposal cards** at `worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.proposal.md` — one hybrid file per **canonize-routed** card only. Frontmatter is byte-parallel to `propose-new-canon-facts/templates/proposal-card.md` (with `proposal_id` = freshly-allocated `PR-NNNN`, `source_basis.derived_from_cfs` populated from the parent EPE card's `traceability.cited_canon_facts`, `enrichment_category: derived_from_epe`, `proposal_family: 0`). Each sidecar's filesystem path is directly consumable as `canon-addition`'s `proposal_path`.
-- **Batch manifest** at `worlds/<world-slug>/pressure-events/batches/BATCH-NNNN.md` — hybrid file per `templates/batch-manifest.md`. Frontmatter carries `batch_id`, `world_slug`, `parameters`, `card_ids`, `dropped_card_ids`, `sidecars_emitted`, `user_approved`. Body carries pressure inventory, origin-type mapping, seed log, Phase 4 drop log, diversification audit, Phase 6 trace, Phase 6e repair log, Phase 7 test results.
-- **INDEX.md update** at `worlds/<world-slug>/pressure-events/INDEX.md` — partitioned by `status` (active / resolved / superseded), one line per non-dropped card sorted by EPE-NNNN within each partition. Created if absent.
+- **Pressure-event cards** at `worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.md` — one hybrid YAML-frontmatter + markdown-body file per surviving card. Frontmatter shape per `templates/pressure-event-card.md`.
+- **Sidecar proposal cards** at `worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.proposal.md` — one hybrid file per **canonize-routed** card only. Frontmatter is byte-parallel to `propose-new-canon-facts/templates/proposal-card.md` (with `proposal_id` = freshly-allocated `PR-<integer>`, `source_basis.derived_from_cfs` populated from the parent EPE card's `traceability.cited_canon_facts`, `enrichment_category: derived_from_epe`, `proposal_family: 0`). Each sidecar's filesystem path is directly consumable as `canon-addition`'s `proposal_path`.
+- **Batch manifest** at `worlds/<world-slug>/pressure-events/batches/BATCH-<integer>.md` — hybrid file per `templates/batch-manifest.md`. Frontmatter carries `batch_id`, `world_slug`, `parameters`, `card_ids`, `dropped_card_ids`, `sidecars_emitted`, `user_approved`. Body carries pressure inventory, origin-type mapping, seed log, Phase 4 drop log, diversification audit, Phase 6 trace, Phase 6e repair log, Phase 7 test results.
+- **INDEX.md update** at `worlds/<world-slug>/pressure-events/INDEX.md` — partitioned by `status` (active / resolved / superseded), one line per non-dropped card sorted by EPE-<integer> within each partition. Created if absent.
 
 **No canon-file mutations.** This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/<subdir>/*.yaml` record. Hook 3 enforces. No CF, CH, INV, M, OQ, ENT, or SEC record is emitted. Each card is a *candidate*; canonization happens only when `canon-addition` accepts the canonize-routed sidecar in a separate run.
 
 ## World-State Prerequisites
 
-`docs/FOUNDATIONS.md`, `worlds/<slug>/WORLD_KERNEL.md`, and `worlds/<slug>/ONTOLOGY.md` load via direct `Read` (primary-authored at the world root; not in `_source/`). The atomic-record world-state slice loads primarily via direct per-record-class retrieval — `list_records(world_slug, record_type=...)` for every CF / OQ batch, plus `list_records(world_slug, record_type='invariant_record', include_full_body=true)` and `list_records(world_slug, record_type='mystery_record', include_full_body=true)` for Phase 6 whole-class firewall loads. Use `search_nodes` / `get_record` for targeted follow-up. When `get_context_packet` is invoked as a complement, use `task_type='emergent_pressure_events'` with explicit `seed_nodes` (record-ID-shaped — e.g., `CF-0007`, `M-1`, `SEC-INS-005`; NOT prose pressure labels from WORLD_KERNEL §Core Pressures, NOT taxonomy values from `parameters_path.origin_type_focus`). To resolve a §Core Pressures prose label or an `origin_type_focus` taxonomy value to seed-able record IDs, call `search_nodes(query='<label>')` first and feed the resolved record IDs to `seed_nodes`.
+`docs/FOUNDATIONS.md`, `worlds/<slug>/WORLD_KERNEL.md`, and `worlds/<slug>/ONTOLOGY.md` load via direct `Read` (primary-authored at the world root; not in `_source/`). The atomic-record world-state slice loads primarily via direct per-record-class retrieval — `list_records(world_slug, record_type=...)` for every CF / OQ batch, plus `list_records(world_slug, record_type='invariant_record', include_full_body=true)` and `list_records(world_slug, record_type='mystery_record', include_full_body=true)` for Phase 6 whole-class firewall loads. Use `search_nodes` / `get_record` for targeted follow-up. When `get_context_packet` is invoked as a complement, use `task_type='emergent_pressure_events'` with explicit `seed_nodes` (record-ID-shaped — e.g., `CF-7`, `M-1`, `SEC-INS-005`; NOT prose pressure labels from WORLD_KERNEL §Core Pressures, NOT taxonomy values from `parameters_path.origin_type_focus`). To resolve a §Core Pressures prose label or an `origin_type_focus` taxonomy value to seed-able record IDs, call `search_nodes(query='<label>')` first and feed the resolved record IDs to `seed_nodes`.
 
 For records the packet does not surface, retrieve on demand:
 
@@ -127,10 +127,10 @@ Runs before Phase 0. On any failure, abort before pipeline begins.
 
 1. Normalize `world_slug` (strip `worlds/` prefix; verify `[a-z0-9-]+`).
 2. Verify `worlds/<world-slug>/` exists. If absent, abort with the create-base-world instruction.
-3. Allocate the batch id: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-NNNN`.
+3. Allocate the batch id: `mcp__worldloom__allocate_next_id(world_slug, 'BATCH')` → `BATCH-<integer>`.
 4. Load FOUNDATIONS + WORLD_KERNEL + ONTOLOGY via direct `Read`.
 5. Optionally call `mcp__worldloom__describe_capabilities()` when available to verify the running MCP server currently accepts `task_type='emergent_pressure_events'` and `id_class='EPE'`. If the tool is unavailable or reports a stale enum set, continue with the documented older-server fallbacks rather than treating source prose as deployed-schema proof.
-6. Load world state per §World-State Prerequisites: primary path is per-record-class retrieval via `list_records` for CF / OQ and `list_records(..., include_full_body=true)` for INV / M Phase 6 firewall loads, plus targeted `search_nodes` / `get_record` for follow-up. If invoking `get_context_packet` as a complement, derive `seed_nodes` as record-ID-shaped — resolve `parameters_path.origin_type_focus` taxonomy values (e.g., `'scarcity'`) and §Core Pressures prose labels (e.g., `'artifact unearthing'`) to record IDs first via `search_nodes(query=<label>)`, then feed the resolved record IDs (e.g., `CF-0007`, `M-1`) to `seed_nodes`. Never pass raw prose labels or taxonomy values directly to `seed_nodes`.
+6. Load world state per §World-State Prerequisites: primary path is per-record-class retrieval via `list_records` for CF / OQ and `list_records(..., include_full_body=true)` for INV / M Phase 6 firewall loads, plus targeted `search_nodes` / `get_record` for follow-up. If invoking `get_context_packet` as a complement, derive `seed_nodes` as record-ID-shaped — resolve `parameters_path.origin_type_focus` taxonomy values (e.g., `'scarcity'`) and §Core Pressures prose labels (e.g., `'artifact unearthing'`) to record IDs first via `search_nodes(query=<label>)`, then feed the resolved record IDs (e.g., `CF-7`, `M-1`) to `seed_nodes`. Never pass raw prose labels or taxonomy values directly to `seed_nodes`.
 7. List `worlds/<slug>/pressure-events/EPE-*.md` (filenames + slug parsing only; no per-file Read) to populate the recurrence-detection registry. Empty pool is acceptable — first run.
 
 ## Procedure
@@ -158,10 +158,10 @@ Output: a structured **Pressure Inventory** with one entry per pressure, each sh
 
 ```yaml
 - pressure_label: <short label>
-  source_records: [CF-NNNN, SEC-INS-NN, M-NN, ...]
+  source_records: [CF-<integer>, SEC-INS-NN, M-NN, ...]
   pressure_type: scarcity | succession | ecological | taboo | ...   # one of the 14 origin_type values
   current_intensity: low | moderate | high
-  recurrence_flag: <EPE-NNNN id from prior batches if same pressure_type fired before, else null>
+  recurrence_flag: EPE-<integer> id from prior batches if same pressure_type fired before, else null
 ```
 
 ### Phase 2: Origin-Type Mapping
@@ -180,15 +180,15 @@ Slot assignment honors `parameters_path.origin_type_focus` (if present, restrict
 
 ### Phase 3: Seed Generation
 
-For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-NNNN` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`. If `describe_capabilities` reported that `id_class='EPE'` is unavailable, or if the allocator call errors with `Unsupported id_class`, fall back to scanning `worlds/<world-slug>/pressure-events/EPE-*.md` for the highest existing id and incrementing; this fallback is a defensive recovery path for environments where the MCP server is older than this skill.
+For each non-empty slot, generate 1-3 seed events grounded in Pressure Inventory entries assigned to that slot. Each seed is a single sentence pairing one or more pressure-inventory entries with a concrete event-shape from the slot's `origin_type` set. Allocate `EPE-<integer>` per seed via `mcp__worldloom__allocate_next_id(world_slug, 'EPE')`. If `describe_capabilities` reported that `id_class='EPE'` is unavailable, or if the allocator call errors with `Unsupported id_class`, fall back to scanning `worlds/<world-slug>/pressure-events/EPE-*.md` for the highest existing id and incrementing; this fallback is a defensive recovery path for environments where the MCP server is older than this skill.
 
 Seeds inherit the pressure-inventory source records as **provisional traceability** — Phase 4 verifies and finalizes.
 
 ### Phase 4: Traceability Anchoring
 
-For every seed, verify the proposal's Traceability Rule: at least one CF-NNNN id is cited. Optional fields (`cited_institutions`, `cited_material_conditions`, `cited_pressures`) populated from inventory entries.
+For every seed, verify the proposal's Traceability Rule: at least one CF-<integer> id is cited. Optional fields (`cited_institutions`, `cited_material_conditions`, `cited_pressures`) populated from inventory entries.
 
-**Drop-not-regenerate discipline.** Seeds whose provisional traceability resolves to zero CFs (e.g., a pressure entry that only cited SEC records, with no CF anchor) are **dropped**. The slot is marked empty for the diversification audit. Drops are logged to the batch manifest's Phase 4 Drop Log with: seed text, missing-anchor reason, slot label, dropped EPE-NNNN id.
+**Drop-not-regenerate discipline.** Seeds whose provisional traceability resolves to zero CFs (e.g., a pressure entry that only cited SEC records, with no CF anchor) are **dropped**. The slot is marked empty for the diversification audit. Drops are logged to the batch manifest's Phase 4 Drop Log with: seed text, missing-anchor reason, slot label, dropped EPE-<integer> id.
 
 Rationale: regenerating a seed against the same canon-thin slot will likely fail again; the empty slot is the diagnostic signal that the world's CF coverage of that origin_type is too thin for plausible event-seeding. The user reads this in Phase 8 and may follow up with `propose-new-canon-facts` to thicken the relevant domain.
 
@@ -229,7 +229,7 @@ Four sub-checks per the proposal's Canon Safety Check + 1 batch-level check + re
 
 **6d — Batch-level Light Check.** For every card pair (PR-A, PR-B):
 
-- **Joint-MR-resolution check**: do the two cards together resolve an M record neither alone would? (e.g., card A reveals where the lost city is, card B reveals when it fell — neither alone fires 6b, jointly they pre-empt M-0007's forbidden answer)
+- **Joint-MR-resolution check**: do the two cards together resolve an M record neither alone would? (e.g., card A reveals where the lost city is, card B reveals when it fell — neither alone fires 6b, jointly they pre-empt M-7's forbidden answer)
 - **Direct contradiction check**: do the two events claim incompatible visible_consequences in overlapping geographic+temporal scope?
 - **Redundant-origin_type check**: are two cards filling the same slot with the same `origin_type` AND same primary pressure-inventory entry? (slot diversity is honored at Phase 2; this catches drift from Phase 6e regeneration that re-fills a slot with a near-duplicate)
 
@@ -259,7 +259,7 @@ Run all 8 tests (4 per-card + 4 batch-level). Each result is PASS / FAIL with a 
 - **Test 5 (Phase 2, no silent empty slots)**: every empty slot in the diversification audit names its rationale (CF-thinness drop / no inventory entry / other). PASS rationale: total slot count + empty count + each empty slot's stated reason summarized.
 - **Test 6 (Phase 6d, batch-level collision trace complete)**: every card pair has all three 6d sub-checks recorded (pass or fail) in the manifest's Phase 6d Trace section. PASS rationale names total pair count.
 - **Test 7 (Schema completeness)**: every required field on every card and on the batch manifest is non-empty (no TODO, no empty list where a list is required, no null where a value is required). Includes recurrence_flag handling: null is acceptable for first-time pressures; non-null requires the cited prior EPE id be a valid file in `pressure-events/`.
-- **Test 8 (Sidecar parse-readiness)**: for every canonize-routed card, `proposal_card_extract` is non-null AND every PR-card-shaped required field is populated AND `recommended_scope.geographic`, `temporal`, `social` all non-null AND `proposal_id` is a freshly-allocated `PR-NNNN` not colliding with any existing PR file in `worlds/<slug>/proposals/`. Cards routed story_fuel / ambient auto-pass with rationale `non-canonize routing; sidecar N/A`.
+- **Test 8 (Sidecar parse-readiness)**: for every canonize-routed card, `proposal_card_extract` is non-null AND every PR-card-shaped required field is populated AND `recommended_scope.geographic`, `temporal`, `social` all non-null AND `proposal_id` is a freshly-allocated `PR-<integer>` not colliding with any existing PR file in `worlds/<slug>/proposals/`. Cards routed story_fuel / ambient auto-pass with rationale `non-canonize routing; sidecar N/A`.
 
 ### Phase 8: HARD-GATE Commit
 
@@ -274,8 +274,8 @@ Present the deliverable summary:
 
 #### Drop-list behavior
 
-- **Surviving cards retain their originally-allocated `EPE-NNNN` IDs.** No renumbering. Dropped IDs become permanent gaps; the next batch's `allocate_next_id` increments past them.
-- **Dropped cards' allocated `PR-NNNN` IDs (sidecars) also become permanent gaps.** The sidecar is never written; the PR-NNNN ID is permanently retired.
+- **Surviving cards retain their originally-allocated `EPE-<integer>` IDs.** No renumbering. Dropped IDs become permanent gaps; the next batch's `allocate_next_id` increments past them.
+- **Dropped cards' allocated `PR-<integer>` IDs (sidecars) also become permanent gaps.** The sidecar is never written; the PR-<integer> ID is permanently retired.
 - **Slots formerly filled by dropped cards become empty in the Phase 2 Diversification Audit table** of the written manifest, with `user-drop at Phase 8` cited as the rationale.
 - **Phase 6d trace in the written manifest covers all card-pairs tested at generation time, including pairs involving dropped cards.** Dropped-pair results are retained as audit evidence.
 
@@ -283,10 +283,10 @@ Present the deliverable summary:
 
 Sequencing matters because the tool environment cannot guarantee transactional atomicity:
 
-1. **Each non-dropped card first**: `worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.md` via direct `Write`. Set `source_basis.user_approved: true` on each card immediately before its write. `user_approved: true` here means "kept in batch after review", NOT "canonized".
-2. **Each canonize-routed surviving card's sidecar second**: `worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.proposal.md` via direct `Write`. Set the sidecar's `source_basis.user_approved: true`.
-3. **Batch manifest third**: `worlds/<world-slug>/pressure-events/batches/BATCH-NNNN.md` via direct `Write` with `dropped_card_ids` populated, `sidecars_emitted` listing every canonize-card EPE-NNNN, and `user_approved: true`. Create `batches/` if absent.
-4. **INDEX.md last**: `Read` existing file (create with header `# Pressure Events — <World-Slug-TitleCased>` followed by status partition headers if absent), append one line per non-dropped card under its appropriate `status:` partition (active / resolved / superseded), sorted by EPE-NNNN ascending within each partition. Line shape: `- [<title>](EPE-NNNN-<slug>.md) — <origin_type> / <downstream_routing>, batch BATCH-NNNN [sidecar: <PR-NNNN>]` (sidecar suffix only if canonize-routed).
+1. **Each non-dropped card first**: `worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.md` via direct `Write`. Set `source_basis.user_approved: true` on each card immediately before its write. `user_approved: true` here means "kept in batch after review", NOT "canonized".
+2. **Each canonize-routed surviving card's sidecar second**: `worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.proposal.md` via direct `Write`. Set the sidecar's `source_basis.user_approved: true`.
+3. **Batch manifest third**: `worlds/<world-slug>/pressure-events/batches/BATCH-<integer>.md` via direct `Write` with `dropped_card_ids` populated, `sidecars_emitted` listing every canonize-card EPE-<integer>, and `user_approved: true`. Create `batches/` if absent.
+4. **INDEX.md last**: `Read` existing file (create with header `# Pressure Events — <World-Slug-TitleCased>` followed by status partition headers if absent), append one line per non-dropped card under its appropriate `status:` partition (active / resolved / superseded), sorted by EPE-<integer> ascending within each partition. Line shape: `- [<title>](EPE-<integer>-<slug>.md) — <origin_type> / <downstream_routing>, batch BATCH-<integer> [sidecar: PR-<integer>]` (sidecar suffix only if canonize-routed).
 
 All paths sit under `worlds/<slug>/pressure-events/`, which Hook 3's hybrid-file allowlist permits for direct `Write` / `Edit`. Cards-first-then-sidecars sequencing means a partial-failure state has either cards-without-sidecars (detectable by listing files matching `EPE-*.md` and checking for matching `EPE-*.proposal.md` for canonize-routed) or a manifest-without-INDEX-row (detectable by grepping INDEX.md for the batch). **Recovery is manual.**
 
@@ -317,11 +317,11 @@ Report all written paths. Do NOT commit to git.
 | Rule 3 (No Specialness Inflation) | N/A | Not applicable — EPE cards are candidate events, not canonized exceptional capabilities. Distribution discipline at Phase 6c covers the overlapping ground (scope + why_not_universal). Rule 3's "exceptional element with no impact" failure mode is structurally prevented by Phase 1's pressure-must-cite-canon discipline. Handoff: `canon-addition` enforces Rule 3 when adjudicating a sidecar's proposed CF. |
 | Rule 4 (No Globalization by Accident) | Phase 6c + Phase 7 Test 2 | Distribution Discipline sub-check + per-card validation test. |
 | Rule 5 (No Consequence Evasion) | Phase 7 Test 3 | First-order + second-order consequence-field check. |
-| Rule 6 (No Silent Retcons) | N/A | Not applicable — canon-reading skill, no canon mutation. Handoff: `canon-addition` emits CH-NNNN entries when a canonize-routed sidecar is accepted. |
+| Rule 6 (No Silent Retcons) | N/A | Not applicable — canon-reading skill, no canon mutation. Handoff: `canon-addition` emits CH-<integer> entries when a canonize-routed sidecar is accepted. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 6b + Phase 7 Test 4 + Phase 6d | Per-card MR firewall (every M record tested, not just overlapping); forbidden-MR auto-drop; batch-level joint-MR-resolution check. |
 | Rule 11 (No Spectator Castes by Accident) | N/A | Not applicable — EPE cards do not introduce world-level capabilities. The proposal_card_extract on a canonize-routed card may imply a capability, but Rule 11's three-leverage requirement is `canon-addition`'s adjudication concern. Handoff: `canon-addition` Phase 5+ enforces Rule 11 when a sidecar's proposal_card_extract proposes a capability fact. |
 | Rule 12 (No Single-Trace Truths) | N/A | Not applicable — EPE cards are candidate events, not canonized truths. Two-register-trace requirement applies to accepted hard canon. Handoff: `canon-addition` enforces Rule 12 at adjudication time. |
-| Change Control Policy | N/A | Not applicable — canon-reading skill, no Change Log Entry emitted. Handoff: `canon-addition` emits CH-NNNN per accepted sidecar. |
+| Change Control Policy | N/A | Not applicable — canon-reading skill, no Change Log Entry emitted. Handoff: `canon-addition` emits CH-<integer> per accepted sidecar. |
 | Canonical Storage Layer (atomic-source discipline) | Pre-flight + Phase 1 + Phase 6 | All `_source/` reads via MCP retrieval (Hook 2 enforces); writes restricted to `worlds/<slug>/pressure-events/` (Hook 3 hybrid-file allowlist permits). |
 
 ## Guardrails
@@ -331,7 +331,7 @@ Report all written paths. Do NOT commit to git.
 - **EPE cards are not canon.** Every emitted card is a candidate. A card on disk is NOT equivalent to accepted canon. canonize-routed sidecars are candidates for `canon-addition`'s separate adjudication; story_fuel cards are passive inputs for separately invoked `branching-story-bootstrap` / `branching-story-page-cycle` story-engine workflows; ambient cards are pure background. Downstream consumers must verify each card's `source_basis.user_approved: true` refers to *review approval for inclusion in the batch*, not to canon acceptance.
 - **Skills do not chain.** This skill never invokes `propose-new-canon-facts`, `canon-addition`, `branching-story-bootstrap`, or any other sibling. `downstream_routing` is a passive label for consumer filtering, not a callback or trigger. The user separately invokes downstream skills with the EPE card or sidecar path as input.
 - **Story-fuel routing names shipped story-engine consumers.** `branching-story-bootstrap` and `branching-story-page-cycle` now exist as workflow skills. Cards routed `story_fuel` write to disk with the routing label so those story-engine workflows can be invoked separately with the EPE card as input. The EPE skill does not call them, enqueue them, or assert that a story_fuel card has become accepted canon. **Known concern to surface to maintainers**: when either story-engine skill changes its EPE consumption expectations, run `skill-audit` on this skill to verify that the EPE card schema still matches the consumer contract.
-- **ID-collision abort.** If `allocate_next_id` returns an error or the resulting `EPE-NNNN-<slug>.md` / `EPE-NNNN-<slug>.proposal.md` would collide with an existing file (concurrent run), abort and ask the user to resolve before retrying. Never overwrite an existing card, sidecar, batch manifest, or INDEX row.
+- **ID-collision abort.** If `allocate_next_id` returns an error or the resulting `EPE-<integer>-<slug>.md` / `EPE-<integer>-<slug>.proposal.md` would collide with an existing file (concurrent run), abort and ask the user to resolve before retrying. Never overwrite an existing card, sidecar, batch manifest, or INDEX row.
 - **Sidecar emission is canonize-routing-conditional.** A story_fuel or ambient card never emits a sidecar. The `proposal_card_extract` field on those cards is null. A future maintainer adding a phase between Phase 5 and Phase 8 that touches sidecar emission must preserve this conditional or explicitly document the change.
 - **Phase 4 drop-not-regenerate is intentional.** A future maintainer tempted to add a regeneration loop must read the Phase 4 rationale: regenerating against a canon-thin slot perpetuates the problem; the empty slot is the diagnostic signal that the world's CF coverage of that origin_type is too thin for plausible event-seeding. The user reads this in Phase 8 and may follow up with `propose-new-canon-facts` to thicken the relevant domain.
 - **Phase 6b + Phase 6d are the two Rule 7 enforcement points.** A future maintainer adding a phase between Phase 5 and Phase 7 that exposes cards to Mystery Reserve content must either extend both checks or explicitly classify the phase as out-of-scope for Rule 7 (documented in the manifest notes).

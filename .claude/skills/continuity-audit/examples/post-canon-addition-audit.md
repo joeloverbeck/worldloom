@@ -43,9 +43,9 @@ focus_domains: []
   artifacts), `proposals/` (present, 2 open cards), `adjudications/`
   (present, 12 records), `audits/` (absent — this is the first audit; skill
   creates the directory at Phase 13).
-- AU-NNNN allocation: **AU-0001** via
+- AU-<integer> allocation: **AU-0001** via
   `mcp__worldloom__allocate_next_id('ashen-dunes', 'AU')`.
-- RP-NNNN allocation: lazy at Phase 8 per emitted card.
+- RP-<integer> allocation: lazy at Phase 8 per emitted card.
 - Cutoff verification: `search_nodes(query='change_id:CH-0018',
   node_types=['change_log_entry'])` returns one match. Cutoff valid.
 - Canonical vocabularies cached: `domain`, `verdict`,
@@ -304,7 +304,7 @@ Report paths written. No git commit.
 
 2. **F-02 shows sub-floor-severity handling** — the finding is surfaced and
    recorded in the report body, but because severity 2 is below the
-   severity_floor 3, no RP-NNNN is emitted. F-02 is not dropped or lost; it
+   severity_floor 3, no RP-<integer> is emitted. F-02 is not dropped or lost; it
    simply doesn't escalate to retcon-recommendation status. A user who later
    lowers severity_floor to 2 in a subsequent audit would re-surface F-02
    (and the new audit would cite this prior AU-0001 per the prior-audit
@@ -321,7 +321,7 @@ Report paths written. No git commit.
    RP-0001 and RP-0002 to disk but neither is accepted canon. To accept them,
    the user runs `canon-addition` on each card separately:
    `/canon-addition ashen-dunes worlds/ashen-dunes/audits/AU-0001/retcon-proposals/RP-0001-guild-founding-timeline.md`
-   canon-addition's Phase 0 Normalization treats the RP-NNNN card's
+   canon-addition's Phase 0 Normalization treats the RP-<integer> card's
    `source_basis.direct_user_approval: true` as "reviewed and kept in the
    audit", NOT as canon acceptance — acceptance is canon-addition's Phase 11
    verdict.
@@ -330,7 +330,7 @@ Report paths written. No git commit.
    interrupted after writing RP-0001 but before RP-0002, recovery is manual:
    either write RP-0002 manually and then the report+INDEX, or delete the
    AU-0001/ subdirectory entirely and re-run the skill (which allocates fresh
-   AU-NNNN and RP-NNNN ids). The skill never retries automatically.
+   AU-<integer> and RP-<integer> ids). The skill never retries automatically.
 
 6. **No raw `Read` of `_source/`** — every CF, CH, M, OQ, SEC, ENT lookup goes
    through `mcp__worldloom__get_record`, `get_neighbors`,

@@ -45,7 +45,7 @@ If the spec modifies canon-pipeline semantics (patch-engine write paths, validat
 1. **Write authority**: Who is authorized to commit the change? (HARD-GATE on canon-addition; HARD-GATE on create-base-world; implicit user approval on surgical-edit tools via patch-engine's approval flow.) Specs that bypass HARD-GATE are CRITICAL Issues.
 2. **Scope declaration**: Does the proposal respect world-scope {single-world, all-worlds, meta}? Silent cross-world writes are CRITICAL.
 3. **Audit trail**: Does the change emit a log entry (Change Log Entry, adjudication record, anchor-checksum record)? Missing audit trail is a Rule-6 violation.
-4. **Mystery Reserve firewall**: Does the change preserve the MR firewall (no silent resolution of M-N entries)? Missing firewall is a Rule-7 violation.
+4. **Mystery Reserve firewall**: Does the change preserve the MR firewall (no silent resolution of M-<integer> entries)? Missing firewall is a Rule-7 violation.
 5. **Invariant preservation**: Does the change preserve INVARIANTS.md entries? Silent invariant breaks are CRITICAL.
 6. **Canon-layer discipline**: Does the change respect Canon Layers (hard / derived / soft / contested / mystery-reserve)? Promotions from soft → hard without adjudication are Rule-6 violations.
 7. **Rollback discipline**: Can the change be reversed if found wrong? For append-only structures (`CANON_LEDGER.md`), reversal requires a follow-up retcon entry, not a deletion.

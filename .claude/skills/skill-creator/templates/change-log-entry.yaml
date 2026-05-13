@@ -7,13 +7,13 @@
 # Copy this file into the generated skill's templates/ directory. All fields
 # below are required unless explicitly marked optional.
 
-change_id: CH-0000                         # canonical change ID, monotonic
+change_id: CH-<integer>                         # canonical change ID, monotonic
 date: ""                                   # ISO date, e.g. 2026-04-18
 
 change_type: addition                      # addition | scope_retcon | cost_retcon | perspective_retcon | chronology_retcon | ontology_retcon | clarification | de_canonization
 
 affected_fact_ids: []                      # list of CF ids touched by this change
-  # - CF-0102
+  # - CF-102
 
 summary: >
   One-paragraph natural-language summary of what changed.
@@ -34,7 +34,7 @@ downstream_updates: []                     # files that must be updated as part 
   # - DIEGETIC_TEXTS/relic_manuals.md
 
 impact_on_existing_texts: []               # any diegetic artifacts now re-contextualized
-  # - "travelogue DA-0014 now treated as regional overgeneralization"
+  # - "travelogue DA-14 now treated as regional overgeneralization"
 
 severity_before_fix: 0                     # 0-5 (see continuity-audit §Contradiction Severity Levels)
 severity_after_fix: 0

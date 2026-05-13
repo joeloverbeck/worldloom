@@ -1,6 +1,6 @@
 ---
 name: branching-story-prose-attach
-description: "Use when validating and attaching user-supplied rendered prose to an already-committed page in a branching-story bundle. Produces: pages-prose-receipts/PG-NNNN.yaml receipt + bundle INDEX.md update + optional SE-NNNN event (only when emit_attach_event=true). Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when validating and attaching user-supplied rendered prose to an already-committed page in a branching-story bundle. Produces: pages-prose-receipts/PG-<integer>.yaml receipt + bundle INDEX.md update + optional SE-<integer> event (only when emit_attach_event=true). Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Existing story bundle slug under worlds/<world_slug>/stories/"
     required: true
   - name: page_id
-    description: "PG-NNNN whose plan + prose pair is being validated"
+    description: "PG-<integer> whose plan + prose pair is being validated"
     required: true
   - name: strict
     description: "true | false; default false. When true, a FAIL verdict blocks the bundle INDEX publication marker; the receipt is still written."
@@ -22,7 +22,7 @@ arguments:
     description: "true | false; default false. When false, a mismatch between PG.plan.plan_hash / state_hash and computed values fails the receipt; when true, drift is recorded in receipt notes without forcing fail. Drift is NEVER written to the PG record."
     required: false
   - name: emit_attach_event
-    description: "true | false; default false. When true, emits one SE-NNNN with event_kind: prose_attach. This is the ONLY way prose-attach mutates atomic story-bundle records, and it is opt-in."
+    description: "true | false; default false. When true, emits one SE-<integer> with event_kind: prose_attach. This is the ONLY way prose-attach mutates atomic story-bundle records, and it is opt-in."
     required: false
 ---
 
@@ -37,7 +37,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `prose_hash` derived; hash drift check applied per `accept_plan_drift`; 6 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.5 (engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
-(c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-NNNN id + patch op preview when `emit_attach_event: true`).
+(c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
 This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
@@ -79,22 +79,22 @@ Phase 6: HARD-GATE fires → write receipt + update INDEX
 
 - `world_slug` — string — existing world directory slug under `worlds/`
 - `story_slug` — string — existing story bundle slug under `worlds/<world_slug>/stories/`
-- `page_id` — `PG-NNNN` — page whose plan + prose pair is validated
+- `page_id` — `PG-<integer>` — page whose plan + prose pair is validated
 
 ### Optional
 
 - `strict` — `true | false` — default `false`. Blocks INDEX publication marker on FAIL.
 - `run_craft_critic` — `true | false` — default `false`. Engages qualitative craft critic.
 - `accept_plan_drift` — `true | false` — default `false`. Tolerates plan_hash / state_hash mismatch.
-- `emit_attach_event` — `true | false` — default `false`. Emits one `SE-NNNN` with `event_kind: prose_attach`.
+- `emit_attach_event` — `true | false` — default `false`. Emits one `SE-<integer>` with `event_kind: prose_attach`.
 
 ## Output
 
 - `pages-prose-receipts/<page_id>.yaml` — Always (the receipt; direct-write YAML per shared contract §4.5)
 - Bundle `INDEX.md` — Always (updated with prose status + receipt verdict)
-- `SE-NNNN.yaml` — IF `emit_attach_event: true` (single-op patch plan via `create_se_record`)
+- `SE-<integer>.yaml` — IF `emit_attach_event: true` (single-op patch plan via `create_se_record`)
 
-Atomic-record writes (the optional `SE-NNNN`) route through `mcp__worldloom__submit_patch_plan`. Receipt and INDEX writes are direct after HARD-GATE approval.
+Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom__submit_patch_plan`. Receipt and INDEX writes are direct after HARD-GATE approval.
 
 ## World-State Prerequisites
 
@@ -166,7 +166,7 @@ Run the 6 deterministic checks defined in shared contract §4.5, each producing 
 
    **Closed engine-vocabulary list** (inline; promote to `.claude/skills/_shared-templates/engine-vocabulary.md` only if list grows beyond ~30 tokens OR another skill consumes it):
 
-   - Record-ID patterns: `PG-\d{4}`, `SE-\d{4}`, `BEL-\d{4}`, `SF-\d{4}`, `STENT-\d{4}`, `STINT-\d{4}`, `OBL-\d{4}`, `CNSQ-\d{4}`, `THR-\d{4}`, `SREL-\d{4}`, `STLOC-\d{4}`, `STOBJ-\d{4}`, `DA-\d{4}`, `BR-\d{4}`, `CHC-\d{4}`, `SLT-\d{4}`, `STORY-\d+`
+   - Record-ID patterns: `PG-\d+`, `SE-\d+`, `BEL-\d+`, `SF-\d+`, `STENT-\d+`, `STINT-\d+`, `OBL-\d+`, `CNSQ-\d+`, `THR-\d+`, `SREL-\d+`, `STLOC-\d+`, `STOBJ-\d+`, `DA-\d+`, `BR-\d+`, `CHC-\d+`, `SLT-\d+`, `STORY-\d+`
    - Gate names (literal): `input legality`, `parent snapshot compatibility`, `mystery firewall`, `branch isolation`, `append-only delta`, `consequence capacity`, `plan grounding`, `canon promotion hold`
    - Predicate-DSL terms (literal): `fact_true(`, `belief(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
@@ -246,7 +246,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
    repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
    ```
 
-2. Present deliverable summary to user: receipt path, per-check verdict table, roll-up verdict, `repair_recommendation`, strict-mode publication-blocking decision (if `strict: true` AND `verdict: FAIL`, INDEX will mark the page "rendered (FAILED receipt — publication blocked)"; otherwise "rendered" with a verdict glyph), optional `SE-NNNN` id + patch op preview when `emit_attach_event: true`.
+2. Present deliverable summary to user: receipt path, per-check verdict table, roll-up verdict, `repair_recommendation`, strict-mode publication-blocking decision (if `strict: true` AND `verdict: FAIL`, INDEX will mark the page "rendered (FAILED receipt — publication blocked)"; otherwise "rendered" with a verdict glyph), optional `SE-<integer>` id + patch op preview when `emit_attach_event: true`.
 
 3. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 

@@ -15,7 +15,7 @@
 # decorative. Silent empty lists fail Phase 8 Tests 5 and 7.
 
 ---
-character_id: CHAR-0000                      # allocated at Pre-flight by scanning characters/
+character_id: CHAR-<integer>                      # allocated at Pre-flight by scanning characters/
 slug: ""                                     # kebab-case of the in-world name; filename stem
 name: ""                                     # in-world display name
 species: ""                                  # bound to a PEOPLES_AND_SPECIES.md cluster
@@ -34,11 +34,11 @@ intended_narrative_role: ""                  # protagonist / witness / antagonis
 # These five lists ARE the audit trail. Empty lists are suspicious by default;
 # Phase 8 Tests 5 and 7 reject empty-where-non-empty-is-required.
 world_consistency:
-  canon_facts_consulted: []                  # bare CF-NNNN ids only (regex ^CF-[0-9]{4}$); CFs consulted during Phases 5 and 7c. Add descriptive context to the Phase 7c trace prose, NOT to this array — record_schema_compliance rejects mixed-format entries
+  canon_facts_consulted: []                  # bare CF-<integer> ids only (regex ^CF-[0-9]+$); CFs consulted during Phases 5 and 7c. Add descriptive context to the Phase 7c trace prose, NOT to this array — record_schema_compliance rejects mixed-format entries
   invariants_respected: []                   # bare invariant ids only — ONT-N / CAU-N / DIS-N / SOC-N / AES-N (regex ^(ONT|CAU|DIS|SOC|AES)-[0-9]+$); invariants tested at Phase 7a. Descriptive context belongs in the Phase 7a trace prose
-  mystery_reserve_firewall: []               # bare M-NNNN ids only (regex ^M-[0-9]+$); MR entries checked at Phase 7b (non-empty required if MR has touching entries). Per-entry overlap-or-no-overlap status belongs in the Phase 7b trace prose
+  mystery_reserve_firewall: []               # bare M-<integer> ids only (regex ^M-[0-9]+$); MR entries checked at Phase 7b (non-empty required if MR has touching entries). Per-entry overlap-or-no-overlap status belongs in the Phase 7b trace prose
   distribution_exceptions: []                # free-form strings of form "<CF-id>: <justification citing Phase 2 embedding>"
-  continuity_checked_with: []                # bare CHAR-NNNN ids only (regex ^CHAR-[0-9]{4}$); CHAR-ids of existing dossiers read at Pre-flight step 6 for continuity-preservation; empty if no existing dossiers name this character
+  continuity_checked_with: []                # bare CHAR-<integer> ids only (regex ^CHAR-[0-9]+$); CHAR-ids of existing dossiers read at Pre-flight step 6 for continuity-preservation; empty if no existing dossiers name this character
 
 source_basis:
   world_slug: ""                             # the world this character belongs to

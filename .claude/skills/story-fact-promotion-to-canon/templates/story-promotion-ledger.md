@@ -1,21 +1,21 @@
 ---
-promotion_id: SP-NNNN
+promotion_id: SP-<integer>
 story_slug: <story_slug>
 world_slug: <world_slug>
 created: <iso8601 date>
 source_kind: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim
-branch_path: BR-NNNN
-proposal_package_path: worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml
+branch_path: BR-<integer>
+proposal_package_path: worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml
 hard_gate_approved: true
 firewall_verdict: PASS | REQUIRES_USER_ACCEPTANCE   # ABORT verdicts never reach the write phase
 status: AWAITING_CANON_ADDITION
 ---
 
-# SP-NNNN: <Short title from the candidate>
+# SP-<integer>: <Short title from the candidate>
 
 ## Overview
 
-Branch-local story claim from `<branch_path>` in story `<story_slug>` proposed for promotion to world canon as **<candidate.status>** (`<candidate.type>`). The full machine-readable proposal package is at [`<proposal_package_path>`](../story-promotions/SP-NNNN-proposal-package.yaml); this ledger is the human-readable narrative record of the promotion attempt and its HARD-GATE approval.
+Branch-local story claim from `<branch_path>` in story `<story_slug>` proposed for promotion to world canon as **<candidate.status>** (`<candidate.type>`). The full machine-readable proposal package is at [`<proposal_package_path>`](../story-promotions/SP-<integer>-proposal-package.yaml); this ledger is the human-readable narrative record of the promotion attempt and its HARD-GATE approval.
 
 ## Candidate
 
@@ -33,8 +33,8 @@ Branch-local story claim from `<branch_path>` in story `<story_slug>` proposed f
 
 - **Source records**: <list of source_record_ids>
 - **Supporting pages**: <list of supporting_page_ids>
-- **Authoring events**: <list of SE-NNNN ids>
-- **Witness beliefs**: <list of BEL-NNNN ids>
+- **Authoring events**: <list of SE-<integer> ids
+- **Witness beliefs**: <list of BEL-<integer> ids
 - **Branch lineage**: <branch_path> (every source record's `created_at_page` traces to this branch)
 
 ## Analyses
@@ -60,7 +60,7 @@ Branch-local story claim from `<branch_path>` in story `<story_slug>` proposed f
 ### Downstream impact report
 
 - **World domains affected**: <comma-separated list>
-- **Same-story contradictory branches**: <list of BR-NNNN>
+- **Same-story contradictory branches**: <list of BR-<integer>
 - **Cross-story contradictions**: <list of sibling_story_slug:record_id>
 - **Affected world files**: <list>
 - **Promotion provenance narrative**: <one-paragraph explanation>

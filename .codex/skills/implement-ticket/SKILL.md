@@ -95,6 +95,8 @@ Use the classification to choose which repo surfaces must be read and which veri
 
 If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
 
+If the shared contract changes repo-wide workflow terminology, ID formats, gate names, command shapes, machine-facing conventions, or other quick-reference language, decide during intake whether `docs/WORKFLOWS.md` is in scope. If it is in scope, include it in the early stale-anchor sweep before source edits. If it is out of scope, record the exclusion and rationale in `Assumption Reassessment` before editing so closeout does not discover the boundary late.
+
 If the primary class is `docs-only / contract-truthing` or `skill rewrite or skill-local behavior` but the strongest proof is a read-only package handler, CLI, or compiled artifact probe, keep the implementation boundary on docs/skills and apply only the relevant package-proof hygiene from `references/package-tooling.md` and `references/verification-closeout.md`. Do not widen the ticket into package code changes just because the proof route exercises a package artifact.
 
 If the primary class is `tool or script implementation`, or the ticket changes a package manifest, package-local command, serializer, hash/checksum, public export, or package-local README/example contract, also load `references/package-tooling.md` from this skill directory and apply its focused reassessment and closeout checks. Keep specialized package behavior in that reference instead of expanding the top-level workflow.
@@ -233,6 +235,7 @@ For skill tickets, verify:
 
 - If this check adds templates, examples, references, a parent `SKILL.md`, or same-seam docs/specs to the owned file set, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
 - Before editing, run a compact skill-local file inventory such as `rg --files <skill-dir>` and inspect any `templates/`, `references/`, and `examples/` whose emitted fields, phase names, source-kind enums, prompt labels, command fragments, or handoff artifacts overlap the ticket.
+- For cross-skill sweeps rather than one target skill, use `rg` to identify active hits first, group them by skill family and surface type (`SKILL.md`, `references/`, `templates/`, `examples/`), inspect representative parent/template/reference files per hit family, and classify `examples/` separately as active contract, historical provenance, or out-of-scope. Then run the exact stale-anchor grep that proves the owned contract, plus any broader manual-classification sweep needed for remaining legitimate examples.
 - When editing skill templates or examples that emit enum-like, vocabulary, or mapping-coupled values, verify sample values against the live vocabulary, schema, or mapping authority before closeout. Do not trust plausible labels in examples when the repo has a canonical enum or class-to-family map.
 - `SKILL.md` trigger text still matches the skill's real purpose
 - required reads and prerequisites are truthful
@@ -248,6 +251,7 @@ For skill tickets, verify:
 - Prefer existing repo contracts over ad hoc patterns.
 - Do not broaden into unrelated cleanup unless reassessment proves it is required consequence fallout.
 - For manual code, docs, ticket, or skill edits, use `apply_patch`; do not use shell rewrite commands such as `perl -pi`, `sed -i`, or similar when replacement text contains markdown/code literals, regex assertions, test expectation strings, backticks, `$`, `{}`, backslashes, quotes, or other shell-active characters. Mechanical bulk rewrites are only acceptable when the pattern is simple, the replacement is shell-safe, and the resulting diff is reviewed before closeout.
+- Before a scripted mechanical bulk rewrite, do a dry-run inventory: list candidate files, confirm they are inside writable roots, split read-only or exceptional paths into a separate manual patch plan, and avoid mixing writable and possibly read-only roots in one write pass. If a bulk rewrite still fails partway through, stop and inspect the partial diff before continuing.
 - If reassessment proves required consequence fallout, keep the implementation inside the same owned seam and record the widened-but-still-owned boundary in the ticket before closeout.
 - After package-manager, lockfile, formatter, generator, or codegen commands, re-read the touched contract files and confirm the generated diff still satisfies ticket invariants before closeout.
 - If package-manager output reports audit vulnerabilities, deprecations, or funding notices outside the ticket's owned dependency-remediation scope, record the relevant warning in closeout instead of running broad audit fixes. Only run package-manager repair commands when the ticket explicitly owns dependency remediation or the user approves that scope.

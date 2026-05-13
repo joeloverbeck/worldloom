@@ -17,14 +17,14 @@
 # A file missing any of those fails Phase 8 Test 11 (schema completeness).
 
 ---
-artifact_id: DA-0000                         # canonical artifact ID, monotonic, DA-NNNN
+artifact_id: DA-<integer>                         # canonical artifact ID, monotonic, DA-<integer>
 slug: ""                                     # kebab-case of title, lowercase, punctuation-stripped
 title: ""                                    # in-world title of the artifact
 artifact_type: ""                            # chronicle | sermon | travelogue | herbal | cult_tract | legal_decree | funerary_inscription | manual | letter | folk_tale | fragmentary_myth | prison_confession | scholarly_dispute | battle_song | practical_treatise | grimoire_fragment | relic_manual | other_derived_from_world
 statement_of_existence: ""                   # one-line description of what physically exists in-world: paper, stone tablet, wax seal, oral performance record, woven pattern, scratched cave wall, etc.
 
 author: ""                                   # attributed author's name in-world (may be anonymous, pseudonymous, pen name, or institutional — "the charter-house of Port Serekh")
-author_character_id: null                    # CHAR-NNNN if character_path was used to lift author; else null
+author_character_id: null                    # CHAR-<integer> if character_path was used to lift author; else null
 date: ""                                     # world-calendar date per SEC-TML records (e.g., "Year 412 After Flood")
 place: ""                                    # ENT/SEC-GEO-bound place of production (settlement, region, or institutional site)
 audience: ""                                 # SEC-INS stratum / SEC-ELF demographic / SEC-PAS cluster (not "the public")
@@ -32,11 +32,11 @@ scoped_references: []                        # Phase 0c output — list of cast-
 communicative_purpose: ""                    # legitimize | warn | memorialize | instruct | accuse | propitiate | narrate | contest
 desired_relation_to_truth: ""                # accurate | biased_but_mostly_true | propaganda | mythicized | fragmentary | deliberately_false_in_places
 world_relation:                              # explicit relation to canon facts; omit if relation is purely implicit in claim_map
-  corroborates: []                           # CF-NNNN list of canon facts this artifact reinforces
-  contests: []                               # CF-NNNN list this artifact disputes
-  conceals: []                               # CF-NNNN list this artifact hides or obscures
-  mythologizes: []                           # CF-NNNN list this artifact transforms into legend
-  ritualizes: []                             # CF-NNNN list this artifact embeds in ritual/ceremony
+  corroborates: []                           # CF-<integer> list of canon facts this artifact reinforces
+  contests: []                               # CF-<integer> list this artifact disputes
+  conceals: []                               # CF-<integer> list this artifact hides or obscures
+  mythologizes: []                           # CF-<integer> list this artifact transforms into legend
+  ritualizes: []                             # CF-<integer> list this artifact embeds in ritual/ceremony
 
 # SOFT inputs — null is acceptable if unspecified; Phase 0 records derivation source in `notes` when defaulted
 canon_facts_accessible: null                 # explicit CF list if user-specified; null means "derived from author epistemic horizon" (note in `notes`)
@@ -93,9 +93,9 @@ canon_links: []                              # flat list of CF-ids the artifact 
 cannot_know: []                              # explicit list of MR-ids + CAU-3-style restricted items this narrator cannot know — paired with epistemic_horizon.impossible_knowledge but indexed
 
 world_consistency:                           # audit trail — what was checked, what was found
-  canon_facts_consulted: []                  # bare CF-NNNN ids only (regex ^CF-[0-9]{4}$); every CF read at Phase 3 or Phase 7c. Add descriptive context to the Phase 7c trace prose, NOT to this array — record_schema_compliance rejects mixed-format entries
+  canon_facts_consulted: []                  # bare CF-<integer> ids only (regex ^CF-[0-9]+$); every CF read at Phase 3 or Phase 7c. Add descriptive context to the Phase 7c trace prose, NOT to this array — record_schema_compliance rejects mixed-format entries
   invariants_respected: []                   # bare invariant ids only — ONT-N / CAU-N / DIS-N / SOC-N / AES-N (regex ^(ONT|CAU|DIS|SOC|AES)-[0-9]+$); every invariant tested at Phase 7a
-  mystery_reserve_firewall: []               # bare M-NNNN ids only (regex ^M-[0-9]+$); every MR checked at Phase 7b, regardless of overlap (proof-of-check). Per-entry overlap-or-no-overlap status belongs in the Phase 7b trace prose
+  mystery_reserve_firewall: []               # bare M-<integer> ids only (regex ^M-[0-9]+$); every MR checked at Phase 7b, regardless of overlap (proof-of-check). Per-entry overlap-or-no-overlap status belongs in the Phase 7b trace prose
   distribution_exceptions: []                # free-form strings of form "<CF-id>: <Phase 0b embedding that justifies the exception>"
 
 source_basis:

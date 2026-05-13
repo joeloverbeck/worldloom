@@ -10,7 +10,7 @@ Three layers, in strict precedence:
 
 1. **World canon** — authoritative world-level truth, stored as atomic YAML under `worlds/<slug>/_source/` (CF / CH / INV / M / OQ / ENT / SEC records per FOUNDATIONS §Mandatory World Files). Story skills may read it. They never mutate it directly. The only lawful story-to-world canon mutation path is `story-fact-promotion-to-canon` → `canon-addition` → optional `story-promotion-closeout`.
 2. **Story state** — authoritative branch-local narrative state inside a story bundle at `worlds/<slug>/stories/<story-slug>/_source/`. Written through story-bundle record-ops on the patch engine.
-3. **Rendered prose** — authorial surface text at `pages-prose/PG-NNNN.md`. It can reveal, dramatize, omit, or stylize story state, but **it does not create story state by itself**. Prose is a rendering of state, not a second state engine.
+3. **Rendered prose** — authorial surface text at `pages-prose/PG-<integer>.md`. It can reveal, dramatize, omit, or stylize story state, but **it does not create story state by itself**. Prose is a rendering of state, not a second state engine.
 
 **Plan-authority boundary.** Story state is authoritative at page-plan commit. A `PG` record is real the moment the patch engine accepts the page-cycle plan. Rendered prose is supplied externally (manual or LLM) and attached later via a prose receipt. The page snapshot is the fork primitive — any committed page is a valid parent for the next turn-cycle invocation, regardless of whether its prose has been rendered.
 
@@ -65,21 +65,21 @@ Required fields are marked `*`. Fields not listed are not part of the schema. Al
 ### 4.1 `BEL` (13 fields)
 
 ```yaml
-id: BEL-NNNN*
-story_id: STORY-NNNN*
-created_at_page: PG-NNNN*
-supersedes: BEL-NNNN | null            # default null
-holder: STENT-NNNN | group:<name> | public | narrator   # *
+id: BEL-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: BEL-<integer> | null            # default null
+holder: STENT-<integer> | group:<name> | public | narrator   # *
 claim: >                               # * natural-language statement
 belief_mode: knows | believes | suspects | doubts | denies | reports | claims | deceives | misremembers | interprets   # *
 truth_relation: true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent   # *
 confidence: certain | high | medium | low | uncommitted   # *
 visibility: private | shared | factional | public | rumored | concealed | suppressed   # *
 basis:
-  source_event: SE-NNNN*               # the event that established this belief
+  source_event: SE-<integer>*               # the event that established this belief
 consequences:
-  opens: [OBL-NNNN | THR-NNNN | CNSQ-NNNN]
-  constrains_choices: [CHC-NNNN]
+  opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]
+  constrains_choices: [CHC-<integer>]
 ```
 
 The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor — other provenance refinements (`witnessed_page`, `told_by`, `inferred_from`) are not retained at this layer.
@@ -87,43 +87,43 @@ The `belief_mode` field separates sincerity / epistemic stance from `confidence`
 ### 4.2 `PG` (~21 sub-paths)
 
 ```yaml
-id: PG-NNNN*
-story_id: STORY-NNNN*
-branch_id: BR-NNNN*
-parent_page_id: PG-NNNN | null         # * null only for PG-0001
+id: PG-<integer>*
+story_id: STORY-<integer>*
+branch_id: BR-<integer>*
+parent_page_id: PG-<integer> | null         # * null only for PG-1
 turn_index: 0*
 input:
-  choice_id: CHC-NNNN | null           # exactly one of choice_id / manual_action_text is non-null
+  choice_id: CHC-<integer> | null           # exactly one of choice_id / manual_action_text is non-null
   manual_action_text: null | string
-  resolved_event_id: SE-NNNN*
-state_hash_parent: null | sha256       # null only for PG-0001
+  resolved_event_id: SE-<integer>*
+state_hash_parent: null | sha256       # null only for PG-1
 state_hash: sha256*
 state_snapshot:
   active_records:                      # *
-    STENT: [STENT-NNNN]
-    STINT: [STINT-NNNN]
-    SF: [SF-NNNN]
-    BEL: [BEL-NNNN]
-    OBL: [OBL-NNNN]
-    CNSQ: [CNSQ-NNNN]
-    THR: [THR-NNNN]
-    SREL: [SREL-NNNN]
-    STLOC: [STLOC-NNNN]
-    STOBJ: [STOBJ-NNNN]
-    DA: [DA-NNNN]
+    STENT: [STENT-<integer>]
+    STINT: [STINT-<integer>]
+    SF: [SF-<integer>]
+    BEL: [BEL-<integer>]
+    OBL: [OBL-<integer>]
+    CNSQ: [CNSQ-<integer>]
+    THR: [THR-<integer>]
+    SREL: [SREL-<integer>]
+    STLOC: [STLOC-<integer>]
+    STOBJ: [STOBJ-<integer>]
+    DA: [DA-<integer>]
   entity_status:                       # * one entry per active STENT
-    STENT-NNNN:
+    STENT-<integer>:
       life: alive | dead | unknown
       agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown
-      location: STLOC-NNNN | unknown | concealed | offstage
+      location: STLOC-<integer> | unknown | concealed | offstage
   visible_affordances:                 # *
     - ordinal: 0                       # page-local index, not an allocated id
       label: "door to the alley"
-      grounded_in: [STLOC-NNNN, STOBJ-NNNN]
-      available_to: [STENT-NNNN]
+      grounded_in: [STLOC-<integer>, STOBJ-<integer>]
+      available_to: [STENT-<integer>]
       action_families: [<action_family>]
   unresolved_mystery_claims:           # *
-    - mystery_id: M-NNNN
+    - mystery_id: M-<integer>
       authority: apparent | branch_local_counterfactual | canon_candidate
       status: preserved | clue_added | narrowed | apparent_resolution | held_for_promotion
   continuation:                        # *
@@ -131,12 +131,12 @@ state_snapshot:
     terminal_status: open | branch_pause | terminal_closed
     terminal_rationale: null | string
 plan:
-  path: pages-prose-plans/PG-NNNN.md*
+  path: pages-prose-plans/PG-<integer>.md*
   plan_hash: sha256*
 rendered_prose:
-  path: pages-prose/PG-NNNN.md | null  # default null
-  receipt_path: pages-prose-receipts/PG-NNNN.yaml | null   # default null
-emitted_choices: [CHC-NNNN]*
+  path: pages-prose/PG-<integer>.md | null  # default null
+  receipt_path: pages-prose-receipts/PG-<integer>.yaml | null   # default null
+emitted_choices: [CHC-<integer>]*
 validation_trace:                      # * one entry per shared gate with PASS + one-line rationale
   input_legality: "PASS: <rationale>"
   parent_snapshot_compatibility: "PASS: <rationale>"
@@ -153,13 +153,13 @@ validation_trace:                      # * one entry per shared gate with PASS +
 ### 4.3 `SE` (~12 sub-paths)
 
 ```yaml
-id: SE-NNNN*
-story_id: STORY-NNNN*
-created_at_page: PG-NNNN*
-parent_page_id: PG-NNNN | null         # * null only for SE-0001
+id: SE-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+parent_page_id: PG-<integer> | null         # * null only for SE-1
 event_kind: story_start | selected_choice | write_in_attempt | system_repair | audit_repair | prose_attach | promotion_closeout   # *
-actor: STENT-NNNN | system | unknown   # *
-targets: [STENT-NNNN | STLOC-NNNN | STOBJ-NNNN]
+actor: STENT-<integer> | system | unknown   # *
+targets: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
 world_logic_rationale: >               # * natural-language justification of why this route follows from world canon + branch state
 state_delta:
@@ -167,7 +167,7 @@ state_delta:
   supersede: [record_id]
   close: [record_id]
 promotion_claims:
-  - source_record: SF-NNNN | BEL-NNNN | DA-NNNN | STENT-NNNN
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
 
@@ -176,13 +176,13 @@ promotion_claims:
 ### 4.4 `SLT` commitment block (~18 sub-paths)
 
 ```yaml
-id: SLT-NNNN*
-story_id: STORY-NNNN*
+id: SLT-<integer>*
+story_id: STORY-<integer>*
 scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
-  branch_id: BR-NNNN | null            # * null only for global_author_pool
-  visible_branch_path_prefix: [PG-NNNN] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
-created_at_page: PG-NNNN | null        # null only for global_author_pool
+  branch_id: BR-<integer> | null            # * null only for global_author_pool
+  visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
+created_at_page: PG-<integer> | null        # null only for global_author_pool
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
@@ -205,7 +205,7 @@ saliency:
   cooldown_pages: 0*
   tags: [<string>]
 mystery_policy:
-  forbidden_resolutions: [M-NNNN]
+  forbidden_resolutions: [M-<integer>]
   allowed_authority: apparent | branch_local_counterfactual | canon_candidate | none   # *
 provenance:
   origin: bootstrap_seed | manual_authoring | author_batch | audit_repair | runtime_jit   # *
@@ -303,13 +303,13 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 
 ### 4.5 Prose receipt
 
-Stored at `pages-prose-receipts/PG-NNNN.yaml` (direct-write artifact; not an atomic `_source/` record).
+Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record).
 
 ```yaml
-page_id: PG-NNNN*
-story_id: STORY-NNNN*
-plan_path: pages-prose-plans/PG-NNNN.md*
-prose_path: pages-prose/PG-NNNN.md*
+page_id: PG-<integer>*
+story_id: STORY-<integer>*
+plan_path: pages-prose-plans/PG-<integer>.md*
+prose_path: pages-prose/PG-<integer>.md*
 plan_hash: sha256*
 prose_hash: sha256*
 state_hash_at_plan_time: sha256*
@@ -336,20 +336,20 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 
 | Predicate | Shape | Consumed by |
 |---|---|---|
-| `fact_true(SF-NNNN)` | Branch-local fact must be currently active. | turn-cycle eligibility |
+| `fact_true(SF-<integer>)` | Branch-local fact must be currently active. | turn-cycle eligibility |
 | `belief(holder, claim, mode?, confidence_floor?)` | Belief must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall |
-| `entity_status(STENT-NNNN, field, value)` | `field` is one of `life | agency | location`. | turn-cycle eligibility |
-| `relationship_axis(SREL-NNNN, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
-| `obligation_open(OBL-NNNN)` | Obligation must be in an open state. | turn-cycle eligibility |
-| `consequence_pending(CNSQ-NNNN)` | Consequence must be pending (unresolved). | turn-cycle eligibility |
-| `thread_active(THR-NNNN)` | Thread must be active. | turn-cycle eligibility |
-| `location(STENT-NNNN, STLOC-NNNN)` | Entity must currently be at location. | turn-cycle eligibility |
+| `entity_status(STENT-<integer>, field, value)` | `field` is one of `life | agency | location`. | turn-cycle eligibility |
+| `relationship_axis(SREL-<integer>, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
+| `obligation_open(OBL-<integer>)` | Obligation must be in an open state. | turn-cycle eligibility |
+| `consequence_pending(CNSQ-<integer>)` | Consequence must be pending (unresolved). | turn-cycle eligibility |
+| `thread_active(THR-<integer>)` | Thread must be active. | turn-cycle eligibility |
+| `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
 | `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA ids. | turn-cycle eligibility |
-| `intention_active(STINT-NNNN)` | Named intention must be currently active. | turn-cycle eligibility |
-| `object_accessible(STENT-NNNN, STOBJ-NNNN)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
-| `artifact_accessible(STENT-NNNN, DA-NNNN)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
-| `affordance_available_to(STENT-NNNN, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
+| `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
+| `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
+| `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
+| `affordance_available_to(STENT-<integer>, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
 
 `has_affordance(<action_family>)` is valid only for author-pool prefiltering when an actor is not yet bound. Branch-execution eligibility checks use `affordance_available_to(<actor>, <family>)` so plan-time grounding is actor-specific.
@@ -379,7 +379,7 @@ Every state-changing skill validates against these eight gates at page-plan comm
 |---|---|---|
 | 1 | input legality | Exactly one source action (chosen CHC or write-in). Parent page exists and belongs to the named story bundle. The chosen CHC, if any, was emitted by the parent page and not retired. |
 | 2 | parent snapshot compatibility | The loaded parent snapshot's `state_hash` matches `PG.state_hash_parent`. |
-| 3 | mystery / invariant firewall | No `M-NNNN` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
+| 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |
 | 5 | append-only delta | All changes in `SE.state_delta` are creates / supersessions / closes. No in-place mutation of a prior record. |
 | 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. |
@@ -390,7 +390,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 
 ## 8. Page Plan Minimum Contract
 
-`pages-prose-plans/PG-NNNN.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 sections:
+`pages-prose-plans/PG-<integer>.md` is a direct-write artifact (not an atomic `_source/` record). It is the prompt package for the external prose renderer. Each plan body has 19 sections:
 
 | § | Section | Source |
 |---|---|---|
@@ -425,7 +425,7 @@ The plan must not include word-count targets, floors, ceilings, ranges, or budge
 To advance the story from any committed page (continuation or fork):
 
 1. Load that page's `state_snapshot`. No sibling-branch records are read.
-2. If continuing the existing branch, reuse `parent.branch_id`. If forking, allocate a new `BR-NNNN` whose `parent_branch_id` names the parent's branch and `forked_at_page_id` names the parent page.
+2. If continuing the existing branch, reuse `parent.branch_id`. If forking, allocate a new `BR-<integer>` whose `parent_branch_id` names the parent's branch and `forked_at_page_id` names the parent page.
 3. Resolve the selected `CHC` or write-in via §6 action routing.
 4. Select or JIT-create one `SLT` commitment block.
 5. Build the state delta, build the next snapshot, compute the new `state_hash`.
@@ -442,7 +442,7 @@ Every state-changing skill follows this order at commit:
 2. Dry-run validate via `mcp__worldloom__validate_patch_plan`.
 3. Obtain approval token when execution mode requires it.
 4. Submit patch plan via `mcp__worldloom__submit_patch_plan`.
-5. Write direct-markdown artifacts: page plan (`pages-prose-plans/PG-NNNN.md`), story kernel updates, receipts, manifests.
+5. Write direct-markdown artifacts: page plan (`pages-prose-plans/PG-<integer>.md`), story kernel updates, receipts, manifests.
 6. Update bundle `INDEX.md` last.
 7. Update per-world `stories/INDEX.md` only when story visibility changed (new bundle, archived bundle).
 

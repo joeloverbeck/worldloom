@@ -3,7 +3,7 @@
 #
 # Emitted by the canon-facts-from-diegetic-artifacts skill as the audit record
 # for a single invocation. Pairs with a set of proposal-card files at
-# worlds/<world-slug>/proposals/PR-NNNN-<slug>.md whose ids appear in card_ids.
+# worlds/<world-slug>/proposals/PR-<integer>-<slug>.md whose ids appear in card_ids.
 #
 # The manifest is the batch's audit trail: every phase output has a named home
 # in the body. The frontmatter is summary metadata; the body is the proof-of-work.
@@ -15,9 +15,9 @@
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 7 T8/T9/T10/T11).
 
-batch_id: BATCH-0000                         # monotonic per-world
+batch_id: BATCH-<integer>                         # monotonic per-world
 world_slug: ""
-source_artifact_id: DA-0000                  # DA-NNNN of the source artifact
+source_artifact_id: DA-<integer>                  # DA-<integer> of the source artifact
 source_artifact_path: ""                     # full path — e.g., worlds/<slug>/diegetic-artifacts/<da-slug>.md
 generated_date: ""                           # ISO date
 
@@ -44,20 +44,20 @@ classification_counts:                       # Phase 2 output — Phase 7 T8 acc
 
 flagged_contradictions: []                   # Phase 2 output — not cards; handoff to continuity-audit
   # - claim_summary: "author asserts X in region Y"
-  #   conflict_with: CF-0042
+  #   conflict_with: CF-42
   #   conflict_type: extends_soft             # contradicts | extends_soft
   #   handoff_note: >
-  #     "The author's assertion that X obtains in region Y extends CF-0042's
+  #     "The author's assertion that X obtains in region Y extends CF-42's
   #      soft_canon scoping (currently region Z only). Run continuity-audit on
-  #      this artifact + CF-0042 to adjudicate whether this is canon diffusion
+  #      this artifact + CF-42 to adjudicate whether this is canon diffusion
   #      (retcon) or author overreach (rejection)."
 
 mr_positional_flags: []                      # Phase 6d.3 author-level warnings
   # - author_descriptor: "the chronicle's monastic author"
-  #   mr_id_overlap: MR-0003
-  #   per_card_rejections: [PR-0012]
+  #   mr_id_overlap: M-3
+  #   per_card_rejections: [PR-12]
   #   session_warning: >
-  #     "The author's world-position may give them access to MR-0003's forbidden-
+  #     "The author's world-position may give them access to M-3's forbidden-
   #      answer set. Cards from this artifact (and potentially other artifacts by
   #      the same author) should be mined with elevated MR firewall caution."
 
@@ -67,12 +67,12 @@ single_narrator_concentration_flag:          # Phase 6e flag
   affected_card_ids: []
   rationale: ""
 
-card_ids: []                                 # every PR-NNNN emitted by this batch (surviving Phase 6-7)
-  # - PR-0012
-  # - PR-0013
+card_ids: []                                 # every PR-<integer> emitted by this batch (surviving Phase 6-7)
+  # - PR-12
+  # - PR-13
 
 dropped_card_ids: []                         # card ids the user excluded at Phase 8 HARD-GATE drop-list
-  # - PR-0014
+  # - PR-14
 
 user_approved: false                         # set true at Phase 8 commit
 
@@ -82,7 +82,7 @@ notes: >
   safety signals the user should carry across sessions.
 ---
 
-# Batch BATCH-NNNN — <World-Slug-TitleCased> — mined from DA-NNNN
+# Batch BATCH-<integer> — <World-Slug-TitleCased> — mined from DA-<integer>
 
 ## Source Artifact
 
@@ -129,13 +129,13 @@ that was non-trivial, one bullet with:
 
 **Claim**: <verbatim or paraphrased claim from artifact with citation.>
 
-**Conflicts with**: <CF-NNNN or invariant id>
+**Conflicts with**: CF-<integer> or invariant id
 
 **Conflict type**: contradicts / extends_soft
 
 **Handoff note to continuity-audit**: <prose explaining what continuity-audit
 should adjudicate. Include specific invocation recommendation:
-`/continuity-audit <world_slug> --focus-on DA-NNNN + CF-NNNN`.>
+`/continuity-audit <world_slug> --focus-on DA-<integer> + CF-<integer>`.>
 
 If no flagged contradictions, state: "No contradictions with existing canon detected.">
 
@@ -152,7 +152,7 @@ If no flagged contradictions, state: "No contradictions with existing canon dete
 
 | Claim / Card | coherence | propagation | story_yield | distinctiveness | ordinary_life | mystery_preservation | integration_burden | redundancy | aggregate |
 |---|---|---|---|---|---|---|---|---|---|
-| PR-NNNN ... | | | | | | | | | |
+| PR-<integer> ... | | | | | | | | | |
 
 ## Phase 5 Rejected-Candidates Log
 
@@ -166,7 +166,7 @@ If no flagged contradictions, state: "No contradictions with existing canon dete
 
 <Ranked list of cards that passed Phase 5 cap. Each row:
 - rank
-- card_id (PR-NNNN)
+- card_id (PR-<integer>)
 - title
 - proposed_status
 - mining_context (one line)
@@ -182,7 +182,7 @@ If no flagged contradictions, state: "No contradictions with existing canon dete
 
 <For each card, a sub-block:
 
-#### PR-NNNN — <title>
+#### PR-<integer> — <title>
 
 **6d.1 Evidence-breadth**: <result + impact on proposed_status>
 **6d.2 Epistemic-horizon**: <result + scope adjustments if any>
@@ -231,8 +231,8 @@ applied, empty-batch status if applicable. On write, this section records the
 state at user approval moment.>
 
 **Target paths**:
-- `worlds/<world-slug>/proposals/PR-NNNN-<slug>.md` (per non-dropped card)
-- `worlds/<world-slug>/proposals/batches/BATCH-NNNN.md` (this manifest)
+- `worlds/<world-slug>/proposals/PR-<integer>-<slug>.md` (per non-dropped card)
+- `worlds/<world-slug>/proposals/batches/BATCH-<integer>.md` (this manifest)
 - `worlds/<world-slug>/proposals/INDEX.md` (append or create)
 
 **User-dropped cards**: <card_ids removed by drop-list, or "none">

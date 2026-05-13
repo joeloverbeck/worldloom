@@ -291,7 +291,7 @@ Identify contradictions within the target skill itself. Drift between SKILL.md /
 
 2. **Name drift** — the SKILL.md / references rename a key or gate (e.g., `state_snapshot_completeness` → `state_snapshot_integrity`); templates retain the stale name. Cite both names with file paths. Severity: **HIGH**.
 
-3. **Path drift after rework** — references mention a file path the skill no longer writes (e.g., post-prose-strip skills referring to `pages-prose/PG-NNNN.md` instead of `pages-prose-plans/PG-NNNN.md`). Cite the path against the SKILL.md's current write contract. Severity: **HIGH**.
+3. **Path drift after rework** — references mention a file path the skill no longer writes (e.g., post-prose-strip skills referring to `pages-prose/PG-<integer>.md` instead of `pages-prose-plans/PG-<integer>.md`). Cite the path against the SKILL.md's current write contract. Severity: **HIGH**.
 
 4. **Off-by-N enumeration** — a section says "N fields" then lists N+1 (or N-1). Common in `§18 Scene direction — AUTHOR-WRITTEN five fields:` followed by 6 items. Cite the count claim AND the actual count. Severity: **LOW**.
 

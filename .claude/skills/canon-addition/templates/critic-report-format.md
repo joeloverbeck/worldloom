@@ -30,8 +30,8 @@ Word budget: each report should fit under 600 words. Conciseness is a feature.
      record(s) this critic owns. Post-SPEC-13, "Owned Files" includes both the
      root-level primary-authored files (`WORLD_KERNEL.md`, `ONTOLOGY.md`) and
      atomic-record classes under `_source/<subdir>/` (CF / CH / INV / M / OQ /
-     SEC-<PREFIX>-NNN). List per-file or per-atomic-record-class (e.g., "CF-0001",
-     "SEC-INS-NNN extension", "M-NNNN firewall annotation"). The format used here
+     SEC-<PREFIX>-<integer>). List per-file or per-atomic-record-class (e.g., "CF-1",
+     "SEC-INS-<integer> extension", "M-<integer> firewall annotation"). The format used here
      is what the main agent will translate into Phase 12a Required Update List
      entries and Phase 13a patches. -->
 
@@ -105,7 +105,7 @@ should omit them. They capture the role's distinctive contribution.
 
 #### Per-Cluster Signatures
 
-<!-- One bullet per cluster present in `_source/everyday-life/SEC-ELF-NNN.yaml`
+<!-- One bullet per cluster present in `_source/everyday-life/SEC-ELF-<integer>.yaml`
      (the post-SPEC-13 atomic-source equivalent of the legacy `EVERYDAY_LIFE.md`
      file). Note where the signature is weak or absent and explain. -->
 
@@ -148,7 +148,7 @@ should omit them. They capture the role's distinctive contribution.
 
 #### Required Scope Commitments
 
-<!-- What must the CF record explicitly say to preserve each at-risk M-N? -->
+<!-- What must the CF record explicitly say to preserve each at-risk M-<integer>? -->
 
 #### Firewall Adequacy
 

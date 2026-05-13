@@ -1,6 +1,6 @@
 # Repair Menu, Retcon Taxonomy, and Severity
 
-The semantic glue between a Phase 4 finding and an emitted RP-NNNN card. Mechanism (anchor matching, write ordering) is not here — that lives in the engine and Hook 3.
+The semantic glue between a Phase 4 finding and an emitted RP-<integer> card. Mechanism (anchor matching, write ordering) is not here — that lives in the engine and Hook 3.
 
 ## Severity Classification (Phase 5)
 
@@ -14,7 +14,7 @@ Each finding gets a severity 1–5 with a one-line rationale citing the specific
 | 4 | World-Identity Risk | The world's core logic or feel is degrading. |
 | 5 | Canon Break | Hard contradiction or catastrophic drift. |
 
-Severity rationale must reference the specific drift mechanism: e.g., `"CF-0042's scope.geographic: local is treated as regional in SEC-GEO-007 ¶7 without diffusion history — structural tension, not yet world-identity risk, because no other CF depends on the regional reading"`. Bare "Severity 4" without rationale is treated as FAIL at Phase 9. Mirrors `canon-addition`'s discipline: PASS-without-rationale = FAIL.
+Severity rationale must reference the specific drift mechanism: e.g., `"CF-42's scope.geographic: local is treated as regional in SEC-GEO-007 ¶7 without diffusion history — structural tension, not yet world-identity risk, because no other CF depends on the regional reading"`. Bare "Severity 4" without rationale is treated as FAIL at Phase 9. Mirrors `canon-addition`'s discipline: PASS-without-rationale = FAIL.
 
 ## Repair Menu (Phase 7)
 
@@ -42,7 +42,7 @@ For each finding at or above `severity_floor`, select the **lightest viable repa
 
 The mapping must be **consistent** — Phase 9 self-check fails any card where `retcon_type` does not match the chosen repair.
 
-- **Split the Fact** typically produces a B+A pair (one narrower, one clarificatory), not a single card; emit two RP-NNNN cards.
+- **Split the Fact** typically produces a B+A pair (one narrower, one clarificatory), not a single card; emit two RP-<integer> cards.
 - **Type D** can issue from either Add Limiting Condition (targeting the CF's `costs_and_limits`) or Add Institutional Response (targeting an institution-SEC patch). Misclassifying institution-routed D as "Type D on the CF directly" is a Phase 9 trigger — the difference shows in the card body's `required_world_updates`.
 
 The `retcon_type` field is the semantic framing the Change Log Entry's `change_type` will carry when canon-addition later processes the card (Rule 6 — No Silent Retcons; field parity preserves the traceability chain).
@@ -84,4 +84,4 @@ Ties break on `finding_id` ascending. Buckets:
 
 ## Inherited-Drift Discipline
 
-If Phase 4 finds a pre-existing inconsistency inherited from prior CFs (a counting drift where the ledger's prose says "three" but names four items, naming drift, etc.), the skill surfaces the finding but does NOT recommend a silent-rewrite retcon. The retcon card (if emitted) explicitly names the drift as inherited-from-CH-NNNN, mirroring canon-addition's inherited-drift discipline. Silently correcting old prose via an audit-originated retcon violates Rule 6 even when factually right; the retcon must log the drift explicitly.
+If Phase 4 finds a pre-existing inconsistency inherited from prior CFs (a counting drift where the ledger's prose says "three" but names four items, naming drift, etc.), the skill surfaces the finding but does NOT recommend a silent-rewrite retcon. The retcon card (if emitted) explicitly names the drift as inherited-from-CH-<integer>, mirroring canon-addition's inherited-drift discipline. Silently correcting old prose via an audit-originated retcon violates Rule 6 even when factually right; the retcon must log the drift explicitly.

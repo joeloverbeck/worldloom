@@ -11,8 +11,8 @@
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 8 Test 10).
 
-proposal_id: PR-0000                         # monotonic per-world
-batch_id: BATCH-0000                         # the batch this card was emitted in
+proposal_id: PR-<integer>                         # monotonic per-world
+batch_id: BATCH-<integer>                         # the batch this card was emitted in
 slug: ""                                     # kebab-case slug derived from title
 title: ""                                    # short human label
 
@@ -88,7 +88,7 @@ canon_safety_check:                          # audit trail (Phase 7 outputs)
 
 source_basis:
   world_slug: ""
-  batch_id: BATCH-0000
+  batch_id: BATCH-<integer>
   generated_date: ""                         # ISO date, e.g. 2026-04-18
   user_approved: false                       # set true at Phase 9 commit — means "kept in batch after review", NOT "canonized"
   derived_from_cfs: []                       # parent CF ids this proposal derives from
