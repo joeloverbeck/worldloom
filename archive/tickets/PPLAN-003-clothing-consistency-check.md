@@ -8,10 +8,10 @@
 
 ## Problem
 
-At intake, even with `body.Material Reality` projected at pre-flight (PPLAN-001), the plan-authoring LLM could still author a `frontmatter.declared_visible_affordances[]` entry or a §8 cast-block intention that contradicted the projected clothing/body data. The PG-0003 failure on `worlds/erotica-world/stories/red-bunny`:
+At intake, even with `body.Material Reality` projected at pre-flight (PPLAN-001), the plan-authoring LLM could still author a `frontmatter.declared_visible_affordances[]` entry or a §8 cast-block intention that contradicted the projected clothing/body data. The PG-3 failure on `worlds/erotica-world/stories/red-bunny`:
 
-- `pages-prose-plans/PG-0003.md:31` `frontmatter.declared_visible_affordances[0].affordance_text`: *"Ane on the bench, sleeve angling to cover the bruise"*
-- `pages-prose-plans/PG-0003.md:378` §8 Ane "Current intentions": *"Cover the bruise more deliberately now that he has named it (pull sleeve, angle the body away)."*
+- `pages-prose-plans/PG-3.md:31` `frontmatter.declared_visible_affordances[0].affordance_text`: *"Ane on the bench, sleeve angling to cover the bruise"*
+- `pages-prose-plans/PG-3.md:378` §8 Ane "Current intentions": *"Cover the bruise more deliberately now that he has named it (pull sleeve, angle the body away)."*
 - Same plan §8 line 374: clothing correctly stated as *"pink off-shoulder crop top, pink short flared skirt, white thigh-high socks with pink hearts, white platform sneakers"*. A crop top has no sleeves.
 
 That plan was internally inconsistent: §8 clothing prose and frontmatter/intention body-cover gestural language disagreed. Before this ticket, Phase 7's existing post-LLM `plan_completeness_check` was structural (every section populated; record ids resolve; required keys present); it did not test prose-vs-prose semantic consistency.
@@ -41,7 +41,7 @@ A deterministic check at Phase 7's post-LLM step now catches the common class of
 1. **Gate registered as Phase 7 post-LLM check** → codebase grep-proof: gate name `cast_material_reality_consistency` appears in both `phase-7-root-page-plan.md` and `phase-7-page-plan.md` post-LLM check enumeration AND in `phase-9-validation-gates.md` validation_trace mapping under the structural / by-construction layer (since Phase 7 surfaces it at plan-commit).
 2. **Closed garment / posture wordlist is documented** → codebase grep-proof: `.claude/skills/_shared-templates/page-plan.md` or a new sibling reference (e.g., `.claude/skills/branching-story-page-cycle/references/clothing-consistency-vocabulary.md`) enumerates the garment-kind and posture-verb wordlists the check uses.
 3. **Contradiction and non-contradiction cases are specified at the deterministic boundary** → manual contract review: the vocabulary + Phase 7 gate prose define that `sleeve` fails against a crop-top-only Material Reality summary, while generic anatomy such as shoulder, hand, arm, bruise, face, or body is not a garment-kind token.
-4. **Existing PG-0003 case is covered by the specified gate** → manual review: the historical `sleeve` frontmatter / §8 intention examples match the `sleeve` token and fail when the mapped cast member's Material Reality contains only crop-top wardrobe evidence.
+4. **Existing PG-3 case is covered by the specified gate** → manual review: the historical `sleeve` frontmatter / §8 intention examples match the `sleeve` token and fail when the mapped cast member's Material Reality contains only crop-top wardrobe evidence.
 5. **Validation-trace contract stays coherent** → codebase grep-proof/manual review: parent skill HARD-GATE summaries, Phase 9 references, `record-schemas.md`, and bootstrap templates all include the new validation-trace key and updated gate counts.
 
 ## Landed Changes
@@ -51,7 +51,7 @@ A deterministic check at Phase 7's post-LLM step now catches the common class of
 Documented the closed wordlists the check uses:
 - Garment kinds: sleeve, hood, pocket, lapel, collar, hem, cuff, button, zipper, belt, scarf, tie, jacket-tail, skirt-fold, sock, stocking, glove, hat, cap, helmet, veil, bandana, headband, headscarf, kerchief, brooch, pin, watch, bracelet, necklace, earring, ring (clothing + accessory subset that body-cover affordances commonly invoke).
 - Garment-kind → parent-garment mapping: sleeve → {shirt, blouse, sweater, jacket, coat, dress, robe}; hood → {hoodie, sweatshirt, jacket, coat, robe, cape}; collar → {shirt, blouse, jacket, coat, dress}; etc. A garment-kind passes the check when its parent garment OR a synonym is present in the cast member's Material Reality clothing summary.
-- Posture verbs: stands, walks, kneels, crouches, runs, sits, lies, leans, climbs, jumps — paired with projected condition checks (immobile, seated-only, bedridden, etc.). Posture inconsistency is a secondary check; garment inconsistency is the primary case the PG-0003 failure motivates.
+- Posture verbs: stands, walks, kneels, crouches, runs, sits, lies, leans, climbs, jumps — paired with projected condition checks (immobile, seated-only, bedridden, etc.). Posture inconsistency is a secondary check; garment inconsistency is the primary case the PG-3 failure motivates.
 
 ### 2. New deterministic check spec — added inline to both phase-7 references
 
@@ -100,7 +100,7 @@ When the check fires, the re-prompt assembly inlines:
 2. Both `phase-7-root-page-plan.md` and `phase-7-page-plan.md` document the new `cast_material_reality_consistency` check in the post-LLM gate enumeration.
 3. Both `phase-9-validation-gates.md` references include the new check as a recorded gate in the validation_trace mapping.
 4. Manual contract review confirms the hand-crafted contradiction case (sleeve affordance, crop-top wardrobe) is a FAIL/re-prompt under the landed vocabulary and gate prose.
-5. Manual contract review confirms the existing PG-0003 frontmatter + §8 intention prose matches the `sleeve` token and would FAIL against Ane Arrieta's crop-top Material Reality summary.
+5. Manual contract review confirms the existing PG-3 frontmatter + §8 intention prose matches the `sleeve` token and would FAIL against Ane Arrieta's crop-top Material Reality summary.
 
 ### Invariants
 
@@ -130,7 +130,7 @@ Completed. The branching-story bootstrap and page-cycle skills now define `cast_
 1. `grep -n 'cast_material_reality_consistency' .claude/skills/branching-story-bootstrap/references/phase-7-root-page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-bootstrap/references/phase-9-validation-gates.md .claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-page-cycle/SKILL.md .claude/skills/branching-story-page-cycle/references/record-schemas.md .claude/skills/branching-story-bootstrap/templates/story-kernel.md .claude/skills/branching-story-bootstrap/templates/story-records.yaml` — PASS; every required trace/gate surface names the new key.
 2. `grep -n 'sleeve' .claude/skills/_shared-templates/clothing-consistency-vocabulary.md` — PASS; `sleeve` appears in both the garment-kind token list and parent-garment mapping.
 3. `rg -n 'Phase 9 19-gate|19 Phase 9 gates|18 gates|gates 1-18|18 PG-record' .claude/skills/branching-story-bootstrap .claude/skills/branching-story-page-cycle .claude/skills/_shared-templates` — PASS; no stale old-count hits remain.
-4. Manual contract review — PASS; the historical PG-0003 "sleeve" contradiction is covered because `sleeve` is a garment token and crop top is not a mapped parent garment. Generic anatomy references are explicitly excluded from garment-token failures.
+4. Manual contract review — PASS; the historical PG-3 "sleeve" contradiction is covered because `sleeve` is a garment token and crop top is not a mapped parent garment. Generic anatomy references are explicitly excluded from garment-token failures.
 5. `git diff --check -- <owned paths>` after `git add -N .claude/skills/_shared-templates/clothing-consistency-vocabulary.md` — PASS; whitespace hygiene covered the new untracked vocabulary file and all modified owned paths.
 
 ## Deviations

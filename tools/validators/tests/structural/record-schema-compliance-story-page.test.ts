@@ -16,6 +16,11 @@ function validPagePayload(): Record<string, unknown> {
     story_id: "STORY-001",
     prose_path: null,
     prose_plan_path: "pages-prose-plans/PG-0001.md",
+    plan: {
+      path: "pages-prose-plans/PG-0001.md",
+      plan_hash: "0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    state_hash: "0000000000000000000000000000000000000000000000000000000000000002",
     state_snapshot: {
       entity_status: {
         "STENT-0001": {
@@ -76,6 +81,30 @@ test("record_schema_compliance rejects PG records missing prose_plan_path", asyn
   )));
 });
 
+test("record_schema_compliance rejects PG records missing plan", async () => {
+  const parsed = validPagePayload();
+  delete parsed.plan;
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("must have required property 'plan'")
+  )));
+});
+
+test("record_schema_compliance rejects PG records missing state_hash", async () => {
+  const parsed = validPagePayload();
+  delete parsed.state_hash;
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("must have required property 'state_hash'")
+  )));
+});
+
 test("record_schema_compliance does not require retired prose-status fields", async () => {
   const parsed = validPagePayload();
 
@@ -120,6 +149,31 @@ test("record_schema_compliance rejects PG records with a prose_path string that 
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.pattern" &&
     verdict.message.includes("/prose_path")
+  )));
+});
+
+test("record_schema_compliance rejects PG records with placeholder plan_hash", async () => {
+  const parsed = validPagePayload();
+  const plan = parsed.plan as Record<string, unknown>;
+  plan.plan_hash = "PLACEHOLDER_TO_BE_COMPUTED";
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/plan/plan_hash")
+  )));
+});
+
+test("record_schema_compliance rejects PG records with placeholder state_hash", async () => {
+  const parsed = validPagePayload();
+  parsed.state_hash = "PLACEHOLDER_TO_BE_COMPUTED_BY_ENGINE";
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/state_hash")
   )));
 });
 

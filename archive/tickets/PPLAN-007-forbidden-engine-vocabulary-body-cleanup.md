@@ -8,7 +8,7 @@
 
 ## Problem
 
-At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` frontmatter `forbidden_engine_vocabulary[]` (lines 74-102) enumerated 28 internal record-id prefixes the renderer must not use in prose:
+At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-3.md` frontmatter `forbidden_engine_vocabulary[]` (lines 74-102) enumerated 28 internal record-id prefixes the renderer must not use in prose:
 
 ```
 CF-NNNN, CH-NNNN, CHAR-NNNN, DA-NNNN, SF-NNNN, OBL-NNNN, THR-NNNN, SREL-NNNN,
@@ -45,7 +45,7 @@ This was the same "don't think of a pink elephant" pathology as the archived PPL
 1. **§18 DO NOT REVEAL body bullet replaced with one-line negative** → codebase grep-proof: `rg -n 'frontmatter forbidden_engine_vocabulary list|engine-vocabulary tokens list from frontmatter' .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-bootstrap/references/phase-7-root-page-plan.md` returns no hits.
 2. **§19 render-time-instruction block updated at the canonical source** → codebase grep-proof: `rg -n 'internal record-identifier vocabulary' reports/prose-quality-instructions.md .claude/skills/_shared-templates/page-plan.md .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md .claude/skills/branching-story-bootstrap/references/phase-7-root-page-plan.md` returns the simplified directive across the source and body-authoring surfaces.
 3. **Phase 2 finalize forbidden-engine-vocabulary regex scan remains frontmatter-driven and unchanged** → manual contract review of `.claude/skills/branching-story-page-prose-finalize/references/phase-2-deterministic-pre-critic.md` confirms the deterministic regex still reads `plan.forbidden_engine_vocabulary[]`.
-4. **Skill dry-run substitute** → manual populated-template contract review verifies next plans authored from the shared template and Phase 7 references produce §18 / §19 without the frontmatter-list body parenthetical. No executable skill runner exists in this repo for a side-effect-free PG-0004 dry-run.
+4. **Skill dry-run substitute** → manual populated-template contract review verifies next plans authored from the shared template and Phase 7 references produce §18 / §19 without the frontmatter-list body parenthetical. No executable skill runner exists in this repo for a side-effect-free PG-4 dry-run.
 
 ## Landed Changes
 
@@ -132,4 +132,4 @@ Completed the forward page-plan body cleanup:
 
 ## Deviations
 
-The drafted PG-0004 side-effect-free skill dry-run was replaced with manual populated-template contract review because this repo has no executable runner for invoking the story skills without mutating a live story bundle. The §19 reassessment also found no live 28-prefix enumeration inside `reports/prose-quality-instructions.md`; the landed change adds the one-line negative there instead of replacing a nonexistent list.
+The drafted PG-4 side-effect-free skill dry-run was replaced with manual populated-template contract review because this repo has no executable runner for invoking the story skills without mutating a live story bundle. The §19 reassessment also found no live 28-prefix enumeration inside `reports/prose-quality-instructions.md`; the landed change adds the one-line negative there instead of replacing a nonexistent list.

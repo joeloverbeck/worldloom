@@ -19,20 +19,20 @@ The cascade is severe in practice. Story-bundle records contain raw `PG-NNNN` st
 The validator also follows `supersedes` chains and walks into existing on-disk records' bodies (records committed before VALENH-004 landed), so on a real bundle with any supersession history, the failure cascade reaches dozens of PG references through paths like:
 
 ```
-state_snapshot.relationships_current[0]    # SREL-0005 (this turn)
-  .supersedes                              # SREL-0004 (prior turn)
-  .supersedes                              # SREL-0003 (turn before)
-  .last_meaningful_interaction             # PG-0002 (string)  → look up → no created_at_page → FAIL
+state_snapshot.relationships_current[0]    # SREL-5 (this turn)
+  .supersedes                              # SREL-4 (prior turn)
+  .supersedes                              # SREL-3 (turn before)
+  .last_meaningful_interaction             # PG-2 (string)  → look up → no created_at_page → FAIL
 ```
 
-A real reproduction case landed in this work session: page-cycle invocation `--world_slug erotica-world --story_slug red-bunny --parent_page_id PG-0003 --chosen_choice_id CHC-0015`. The new PG-0004 patch envelope (`/tmp/STORY-0001-page-cycle-PG-0004-red-bunny.json`) passed every other validator (snapshot_replay_equality, record_schema_compliance, rule1-rule12, id_allocation_race, cross_file_reference, etc.) and produced cascading branch-leak verdicts from PG-reference recursion. During implementation, the same reproduction also exposed pre-existing OBL-0001 through OBL-0008 records without `created_at_page`; those records carry `introduced_at_page: PG-0001`, which is the truthful legacy branch anchor for obligations and is now handled without mutating old story source records.
+A real reproduction case landed in this work session: page-cycle invocation `--world_slug erotica-world --story_slug red-bunny --parent_page_id PG-3 --chosen_choice_id CHC-15`. The new PG-4 patch envelope (`/tmp/STORY-1-page-cycle-PG-4-red-bunny.json`) passed every other validator (snapshot_replay_equality, record_schema_compliance, rule1-rule12, id_allocation_race, cross_file_reference, etc.) and produced cascading branch-leak verdicts from PG-reference recursion. During implementation, the same reproduction also exposed pre-existing OBL-1 through OBL-8 records without `created_at_page`; those records carry `introduced_at_page: PG-1`, which is the truthful legacy branch anchor for obligations and is now handled without mutating old story source records.
 
 ## Assumption Reassessment (2026-05-06)
 
 1. `tools/validators/src/structural/recursive-reference-closure.ts` defines `STORY_LOCAL_ID` with `PG` included, resolves branch containment through `createdAtPageFor`, and previously rejected `createdAtPage === undefined` outright. PG records produced by the story pipeline carry `id`, `parent_page_id`, `branch_path`, etc., but not `created_at_page`.
-2. `tools/validators/tests/structural/recursive-reference-closure.test.ts` previously included `created_at_page: "PG-0002"` on the PG fixture used by the closure test. Live page records do not match that fixture shape, so focused PG tests were required.
-3. `worlds/erotica-world/stories/red-bunny/_source/pages/PG-0001.yaml`, `PG-0002.yaml`, `PG-0003.yaml` — all three were authored before VALENH-004 landed, and none carry `created_at_page`. Verified by `grep -E "created_at_page" worlds/erotica-world/stories/red-bunny/_source/pages/*.yaml` returning no matches on the page records themselves (the matches inside `validation_trace` notes are prose, not record fields).
-4. The first post-fix reproduction run showed the PG bug was not the only live-shape mismatch in the envelope: `worlds/erotica-world/stories/red-bunny/_source/obligations/OBL-0001.yaml` through `OBL-0008.yaml` lack `created_at_page` and carry `introduced_at_page: PG-0001`. Treating `introduced_at_page` as the legacy OBL branch anchor is same-validator fallout because otherwise the accepted reproduction lane still fails without any PG leak remaining.
+2. `tools/validators/tests/structural/recursive-reference-closure.test.ts` previously included `created_at_page: "PG-2"` on the PG fixture used by the closure test. Live page records do not match that fixture shape, so focused PG tests were required.
+3. `worlds/erotica-world/stories/red-bunny/_source/pages/PG-1.yaml`, `PG-2.yaml`, `PG-3.yaml` — all three were authored before VALENH-004 landed, and none carry `created_at_page`. Verified by `grep -E "created_at_page" worlds/erotica-world/stories/red-bunny/_source/pages/*.yaml` returning no matches on the page records themselves (the matches inside `validation_trace` notes are prose, not record fields).
+4. The first post-fix reproduction run showed the PG bug was not the only live-shape mismatch in the envelope: `worlds/erotica-world/stories/red-bunny/_source/obligations/OBL-1.yaml` through `OBL-8.yaml` lack `created_at_page` and carry `introduced_at_page: PG-1`. Treating `introduced_at_page` as the legacy OBL branch anchor is same-validator fallout because otherwise the accepted reproduction lane still fails without any PG leak remaining.
 5. The shared boundary under audit is the validator's `isAllowedReference`, `createdAtPageFor`, and branch-anchor selection behavior plus the implicit data-shape contract for page records and legacy obligations produced by the story-pipeline skill family.
 6. FOUNDATIONS §Story Bundles §5 (Validation Rules At Story Scope) names Rule 4 (No Globalization by Accident) as the principle behind story-scope branch isolation — global author-pool storylets must not reference branch-local record IDs whose branch anchor is non-null.
 7. HARD-GATE / Canon Safety Check semantics: this ticket strengthens `recursive_reference_closure` correctness without weakening any firewall. The Mystery Reserve firewall is owned by `rule7_mystery_reserve_preservation` and is unaffected.
@@ -51,11 +51,11 @@ A real reproduction case landed in this work session: page-cycle invocation `--w
 
 ## Verification Layers
 
-1. PG references resolved against `branch_path` directly → structural validator test for PG references in same-branch positions (PG-0001 reachable from PG-0002 via `OBL.introduced_at_page` passes).
-2. PG references outside `branch_path` rejected → structural validator test for sibling-branch PG references (PG-0099 reachable from PG-0002 via `OBL.introduced_at_page` fails with a `branch_leak` verdict).
+1. PG references resolved against `branch_path` directly → structural validator test for PG references in same-branch positions (PG-1 reachable from PG-2 via `OBL.introduced_at_page` passes).
+2. PG references outside `branch_path` rejected → structural validator test for sibling-branch PG references (PG-99 reachable from PG-2 via `OBL.introduced_at_page` fails with a `branch_leak` verdict).
 3. Legacy OBL records without `created_at_page` resolve their branch anchor from `introduced_at_page` only → structural validator pass/fail tests for in-branch and sibling-page `introduced_at_page`.
 4. Existing same-branch and sibling-branch tests continue to pass → re-run the existing `recursive-reference-closure.test.ts` suite with the new cases.
-5. Live reproduction case clears → re-validate `/tmp/STORY-0001-page-cycle-PG-0004-red-bunny.json` (the prepared PG-0004 envelope already on disk) and confirm `recursive_reference_closure` returns `pass` with no verdicts.
+5. Live reproduction case clears → re-validate `/tmp/STORY-1-page-cycle-PG-4-red-bunny.json` (the prepared PG-4 envelope already on disk) and confirm `recursive_reference_closure` returns `pass` with no verdicts.
 6. FOUNDATIONS / HARD-GATE alignment → manual review against `docs/FOUNDATIONS.md` §Story Bundles §5 (Rule 4 No Globalization by Accident) and `.claude/skills/branching-story-page-cycle/references/phase-9-validation-gates.md` gate 3 prose.
 
 ## Landed Changes
@@ -72,11 +72,11 @@ When a PG reference is rejected, `branchLeak` now reports the page id as the `cr
 
 In `tools/validators/tests/structural/recursive-reference-closure.test.ts`, added five test cases:
 
-- **`recursive_reference_closure passes for same-branch PG references`** — fixture where an OBL has `introduced_at_page: "PG-0001"` and PG-0001 is in `branch_path` for PG-0002; expect no verdicts. PG-0001 record may be authored either with or without `created_at_page` (cover both shapes).
-- **`recursive_reference_closure fails for sibling-branch PG references`** — fixture where an OBL has `introduced_at_page: "PG-0099"` reachable from PG-0002.state_snapshot; PG-0099 is NOT in `branch_path`; expect a `branch_leak` verdict whose `detail.reference_id === "PG-0099"`.
-- **`recursive_reference_closure passes for PG references with no created_at_page field`** — explicit coverage that the test fixture's currently-implicit shape (PG record without `created_at_page`) does not regress: a PG-0001 record authored without `created_at_page`, reachable from PG-0002 via `SREL.last_meaningful_interaction = "PG-0001"`, must pass when PG-0001 is in branch_path.
-- **`recursive_reference_closure accepts legacy obligations with introduced_at_page`** — fixture where an OBL has no `created_at_page` but has `introduced_at_page: "PG-0001"` and remains in branch.
-- **`recursive_reference_closure rejects legacy obligations introduced outside the branch`** — fixture where an OBL has no `created_at_page` and `introduced_at_page: "PG-0099"` outside branch.
+- **`recursive_reference_closure passes for same-branch PG references`** — fixture where an OBL has `introduced_at_page: "PG-1"` and PG-1 is in `branch_path` for PG-2; expect no verdicts. PG-1 record may be authored either with or without `created_at_page` (cover both shapes).
+- **`recursive_reference_closure fails for sibling-branch PG references`** — fixture where an OBL has `introduced_at_page: "PG-99"` reachable from PG-2.state_snapshot; PG-99 is NOT in `branch_path`; expect a `branch_leak` verdict whose `detail.reference_id === "PG-99"`.
+- **`recursive_reference_closure passes for PG references with no created_at_page field`** — explicit coverage that the test fixture's currently-implicit shape (PG record without `created_at_page`) does not regress: a PG-1 record authored without `created_at_page`, reachable from PG-2 via `SREL.last_meaningful_interaction = "PG-1"`, must pass when PG-1 is in branch_path.
+- **`recursive_reference_closure accepts legacy obligations with introduced_at_page`** — fixture where an OBL has no `created_at_page` but has `introduced_at_page: "PG-1"` and remains in branch.
+- **`recursive_reference_closure rejects legacy obligations introduced outside the branch`** — fixture where an OBL has no `created_at_page` and `introduced_at_page: "PG-99"` outside branch.
 
 ## Files to Touch
 
@@ -97,7 +97,7 @@ In `tools/validators/tests/structural/recursive-reference-closure.test.ts`, adde
 1. `cd tools/validators && npm run build` — succeeds.
 2. `cd tools/validators && node --test dist/tests/structural/recursive-reference-closure.test.js dist/tests/structural/registry.test.js` — passes.
 3. `cd tools/validators && npm test` — passes (130/130 tests; no regressions across the full validators package).
-4. **Live reproduction case clears**: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-0001-page-cycle-PG-0004-red-bunny.json` returns `status: pass`. (The envelope is already prepared on disk and is bit-identical to what the page-cycle skill submitted at the moment this ticket was authored.)
+4. **Live reproduction case clears**: `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-1-page-cycle-PG-4-red-bunny.json` returns `status: pass`. (The envelope is already prepared on disk and is bit-identical to what the page-cycle skill submitted at the moment this ticket was authored.)
 
 ### Invariants
 
@@ -120,7 +120,7 @@ In `tools/validators/tests/structural/recursive-reference-closure.test.ts`, adde
 1. `cd tools/validators && npm run build` — producer build.
 2. `cd tools/validators && node --test dist/tests/structural/recursive-reference-closure.test.js dist/tests/structural/registry.test.js` — targeted compiled structural/registry pass.
 3. `cd tools/validators && npm test` — full validators-package pass.
-4. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-0001-page-cycle-PG-0004-red-bunny.json` — end-to-end reproduction-case pass.
+4. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-1-page-cycle-PG-4-red-bunny.json` — end-to-end reproduction-case pass.
 
 ## Outcome
 
@@ -135,9 +135,9 @@ During reproduction verification, the same live red-bunny envelope exposed legac
 1. `cd tools/validators && npm run build` — passed.
 2. `cd tools/validators && node --test dist/tests/structural/recursive-reference-closure.test.js dist/tests/structural/registry.test.js` — passed.
 3. `cd tools/validators && npm test` — passed, 130/130 tests.
-4. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-0001-page-cycle-PG-0004-red-bunny.json` — passed with `status: "pass"`, no verdicts, and `recursive_reference_closure` status `pass`.
+4. `node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/STORY-1-page-cycle-PG-4-red-bunny.json` — passed with `status: "pass"`, no verdicts, and `recursive_reference_closure` status `pass`.
 
 ## Deviations
 
-- The active implementation added a narrow legacy OBL fallback after the first reproduction rerun showed remaining `recursive_reference_closure.branch_leak` verdicts for OBL-0001 through OBL-0008. Those records lacked `created_at_page` but carried `introduced_at_page: PG-0001`. This was same-validator fallout needed for the ticket's live reproduction acceptance and avoided retroactive story-source migration.
+- The active implementation added a narrow legacy OBL fallback after the first reproduction rerun showed remaining `recursive_reference_closure.branch_leak` verdicts for OBL-1 through OBL-8. Those records lacked `created_at_page` but carried `introduced_at_page: PG-1`. This was same-validator fallout needed for the ticket's live reproduction acceptance and avoided retroactive story-source migration.
 - Pre-existing dirty edits in `.claude/skills/branching-story-page-cycle/` were left untouched. Some same-family skill prose still discusses current story-record `created_at_page` discipline, but the active validator ticket only changed the package implementation and tests.

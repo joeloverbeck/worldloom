@@ -21,12 +21,12 @@ At intake, when a `world-index build` (or any tool that calls it transitively, i
 Session evidence (storylet-pool-authoring run on 2026-05-04, `world_slug=erotica-world`, `story_slug=red-bunny`): a single `mcp__worldloom__get_context_packet` call surfaced 7 `unexpected_path` warnings for files in `stories/red-bunny/` and `stories/marla-kern-seduction/`:
 
 ```
-- 'stories/red-bunny/pages-prose/PG-0001.md'
+- 'stories/red-bunny/pages-prose/PG-1.md'
 - 'stories/red-bunny/STORY_KERNEL.md'
 - 'stories/marla-kern-seduction/storylet-batches/SLB-0001.md'
-- 'stories/marla-kern-seduction/pages-prose/PG-0003.md'
-- 'stories/marla-kern-seduction/pages-prose/PG-0002.md'
-- 'stories/marla-kern-seduction/pages-prose/PG-0001.md'
+- 'stories/marla-kern-seduction/pages-prose/PG-3.md'
+- 'stories/marla-kern-seduction/pages-prose/PG-2.md'
+- 'stories/marla-kern-seduction/pages-prose/PG-1.md'
 - 'stories/marla-kern-seduction/STORY_KERNEL.md'
 ```
 
@@ -131,7 +131,7 @@ The exact shape for SAU sub-audit RSPs is 6-segment when the basename is include
 
 In `tools/world-index/tests/enumerate.test.ts`, added per-shape positive and negative cases:
 
-- positive: `stories/foo/STORY_KERNEL.md`, `stories/foo/pages-prose/PG-0001.md`, `stories/foo/storylet-batches/SLB-0001.md`, `stories/foo/story-promotions/SP-0001.md`, `stories/foo/audits/SAU-0001-2026-05-04.md`, `stories/foo/audits/SAU-0001/remediation-storylet-proposals/RSP-0001-fix-thread-coverage.md`.
+- positive: `stories/foo/STORY_KERNEL.md`, `stories/foo/pages-prose/PG-1.md`, `stories/foo/storylet-batches/SLB-0001.md`, `stories/foo/story-promotions/SP-0001.md`, `stories/foo/audits/SAU-0001-2026-05-04.md`, `stories/foo/audits/SAU-0001/remediation-storylet-proposals/RSP-0001-fix-thread-coverage.md`.
 - negative: `stories/foo/notes.md` (orphan root file), `stories/foo/scratch/draft.md` (unknown sub-directory), `stories/foo/audits/SAU-0001/RSP-0001.md` (RSPs must be nested under `remediation-storylet-proposals/`, not directly under SAU-NNNN).
 
 ### 3. Verify `world-index build` against a story-bundle fixture emits zero false-positive `unexpected_path` warnings
@@ -213,4 +213,4 @@ Completed on 2026-05-04:
 
 - The drafted targeted command `npm test -- --filter=enumerate` was replaced with `npm run build` plus compiled `node --test dist/tests/enumerate.test.js` because `tools/world-index/package.json` runs tests from compiled `dist/tests/**/*.test.js`.
 - The drafted RSP segment count was corrected from 5 to 6 because `stories/<slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` includes the basename as the sixth segment.
-- The optional `erotica-world` rebuild still emitted three non-owned schema-pattern skip warnings: `_source/change-log/CH-0006.yaml` is missing its `change_id`, and two `STINT-0001-*` story intention records do not match `^STINT-[0-9]{4}$`. Those warnings are unrelated to story markdown path enumeration; the story `unexpected_path` count is `0`.
+- The optional `erotica-world` rebuild still emitted three non-owned schema-pattern skip warnings: `_source/change-log/CH-0006.yaml` is missing its `change_id`, and two `STINT-1-*` story intention records do not match `^STINT-[0-9]{4}$`. Those warnings are unrelated to story markdown path enumeration; the story `unexpected_path` count is `0`.
