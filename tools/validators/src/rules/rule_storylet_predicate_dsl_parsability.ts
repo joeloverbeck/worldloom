@@ -20,20 +20,22 @@ const ENTITY_STATUS_AXES = new Set(["life", "agency", "location"]);
 
 const ROLE_REF = /^role:[a-z][a-z0-9_-]*$/;
 const OPEN_LABEL = /^[a-z][a-z0-9_:-]*$/;
+// FOUNDATIONS-002 mandates unpadded natural-integer suffixes (e.g. STENT-1, not STENT-0001).
+// Pre-FOUNDATIONS-002 fixtures (padded form) remain accepted by \d+.
 const STORY_ID_PATTERNS = {
-  fact: /^SF-\d{4}$/,
-  entity: /^STENT-\d{4}$/,
-  belief: /^BEL-\d{4}$/,
-  obligation: /^OBL-\d{4}$/,
-  consequence: /^CNSQ-\d{4}$/,
-  thread: /^THR-\d{4}$/,
-  relationship: /^SREL-\d{4}$/,
-  location: /^STLOC-\d{4}$/,
-  object: /^STOBJ-\d{4}$/,
-  artifact: /^DA-\d{4}$/,
-  intention: /^STINT-\d{4}$/
+  fact: /^SF-\d+$/,
+  entity: /^STENT-\d+$/,
+  belief: /^BEL-\d+$/,
+  obligation: /^OBL-\d+$/,
+  consequence: /^CNSQ-\d+$/,
+  thread: /^THR-\d+$/,
+  relationship: /^SREL-\d+$/,
+  location: /^STLOC-\d+$/,
+  object: /^STOBJ-\d+$/,
+  artifact: /^DA-\d+$/,
+  intention: /^STINT-\d+$/
 } as const;
-const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA)-\d{4}$/;
+const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA)-\d+$/;
 
 type RefKind = keyof typeof STORY_ID_PATTERNS;
 

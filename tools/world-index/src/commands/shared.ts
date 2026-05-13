@@ -66,6 +66,7 @@ export const MENTION_EVIDENCE_SOURCE_NODE_TYPES = new Set([
   "character_proposal_batch",
   "retcon_proposal_card",
   "story_entity_record",
+  "belief_record",
   "story_fact_record",
   "story_event_record",
   "obligation_record",
