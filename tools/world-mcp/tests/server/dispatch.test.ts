@@ -657,6 +657,19 @@ test("story-scoped id_class dispatches through the MCP boundary", async () => {
   });
 });
 
+test("story-scoped id_class dispatches first-run ids for fresh missing story bundles", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "STENT", story_slug: "fresh-bundle" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "STENT-0001");
+  });
+});
+
 test("BEL id_class dispatches through the MCP boundary", async () => {
   await withServerClient(async (client) => {
     const result = await client.callTool({

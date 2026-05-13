@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -354,6 +354,46 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
   }
 });
 
+test("allocateNextId returns first-run story-scoped ids for fresh missing story bundles", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+
+    const storyDirectory = path.join(root, "worlds", "seeded", "stories", "fresh-bundle");
+    assert.equal(existsSync(storyDirectory), false);
+
+    for (const entry of STORY_CLASS_CASES) {
+      const result = await withRepoRoot(root, () =>
+        allocateNextId({
+          world_slug: "seeded",
+          id_class: entry.idClass,
+          story_slug: "fresh-bundle"
+        })
+      );
+
+      assert.ok(!("code" in result));
+      assert.equal(result.next_id, `${entry.idClass}-0001`);
+    }
+
+    assert.equal(existsSync(storyDirectory), false);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("allocateNextId ignores legacy suffixed STINT records", async () => {
   const root = createTempRepoRoot();
 
@@ -632,8 +672,8 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const worldScopedWithStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "CF", story_slug: "wolf-tale" })
     );
-    const storyScopedMissingStory = await withRepoRoot(root, () =>
-      allocateNextId({ world_slug: "seeded", id_class: "PG", story_slug: "missing-story" })
+    const storyScopedMissingWorld = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "missing-world", id_class: "PG", story_slug: "missing-story" })
     );
 
     assert.ok("code" in pipelineClassWithWorldSlug);
@@ -650,7 +690,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in rspWithMalformedAuditId);
     assert.ok("code" in nonSubAuditScopedWithAuditId);
     assert.ok("code" in worldScopedWithStorySlug);
-    assert.ok("code" in storyScopedMissingStory);
+    assert.ok("code" in storyScopedMissingWorld);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
     assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
     assert.equal(epeWithPipelineSlug.code, "invalid_input");
@@ -665,7 +705,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(rspWithMalformedAuditId.code, "invalid_input");
     assert.equal(nonSubAuditScopedWithAuditId.code, "invalid_input");
     assert.equal(worldScopedWithStorySlug.code, "invalid_input");
-    assert.equal(storyScopedMissingStory.code, "invalid_input");
+    assert.equal(storyScopedMissingWorld.code, "world_not_found");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);

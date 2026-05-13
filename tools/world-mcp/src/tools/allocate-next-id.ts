@@ -297,11 +297,7 @@ function findHighestStoryScopedId(
 
   const storyDirectory = path.join(worldDirectory, "stories", storySlug);
   if (!existsSync(storyDirectory)) {
-    return createMcpError(
-      "invalid_input",
-      `Story '${storySlug}' does not exist in world '${worldSlug}'.`,
-      { world_slug: worldSlug, story_slug: storySlug }
-    );
+    return 0;
   }
 
   const format = ID_CLASS_FORMATS[idClass];
