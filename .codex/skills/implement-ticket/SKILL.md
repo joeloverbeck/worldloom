@@ -287,6 +287,7 @@ Then run the closeout hard stops from the focused references:
 
 - Use `references/verification-closeout.md` for completed-ticket truthing, stale-anchor sweeps, historicalized problem text, exact proof-command wording, shell-safe grep patterns, and final-proof timing.
 - Use `references/package-tooling.md` for all package/tool public-surface, README/example, command-doc, registered metadata, scoped stale-anchor, local dependency refresh, and generated/ignored artifact checks. Keep package-specific closeout detail in that reference instead of expanding this top-level router.
+- For package/tool tickets, explicitly confirm package README/docs/examples were inspected, or record why no package user-facing surface applies.
 - Use `references/dirty-worktree-ledger.md` for final ownership classification, including untracked owned files, pre-existing dirt, externally appeared changes, sibling scope, and expected ignored artifacts.
 - If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
@@ -300,6 +301,8 @@ If reassessment widened the active ticket by absorbing sibling tickets, make the
 - update each absorbed sibling ticket to state that its work landed via the active ticket
 - archive absorbed siblings when archival is in scope and the user asked for full completion or archival
 - leave unabsorbed siblings active and untouched except for reference fixes that are necessary to keep ownership truthful
+
+For implementation-only runs, do not create follow-up tickets unless the user asked for follow-up drafting or the active ticket cannot close honestly without it. When reassessment or verification exposes real adjacent work that remains outside the active owner, name the follow-up owner or missing owner in `Assumption Reassessment`, `## Deviations`, or the final response so the completed ticket does not silently drop it.
 
 If archival is in scope, follow `docs/archival-workflow.md` exactly and update any roadmap/spec references that still point at the active ticket path.
 
