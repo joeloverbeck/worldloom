@@ -63,5 +63,5 @@ Before closeout, directly verify:
 - the intended `_source/*.yaml` files changed through the engine receipt and on disk
 - any created or modified CH / modification-history / extension attribution is valid, when the operation class required those artifacts
 - the world index was rebuilt or synced
-- `world-validate <world>` reports the intended post-change state
+- `world-validate <world>` reports the intended post-change state, or a narrower validator/hash/index proof directly proves the repaired invariant and the skipped broad validation is recorded in `## Deviations`
 - ignored generated/world artifacts are classified in the dirty-worktree ledger

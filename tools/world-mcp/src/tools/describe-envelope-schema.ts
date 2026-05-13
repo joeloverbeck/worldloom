@@ -429,10 +429,15 @@ function retconAttestationSchema(): JsonObject {
   return {
     type: "object",
     additionalProperties: false,
-    required: ["retcon_type", "originating_ch", "rationale"],
+    required: ["retcon_type", "rationale"],
+    oneOf: [
+      { required: ["originating_ch"], not: { required: ["originating_se"] } },
+      { required: ["originating_se"], not: { required: ["originating_ch"] } }
+    ],
     properties: {
       retcon_type: { type: "string", enum: ["A", "B", "C", "D", "E", "F"] },
       originating_ch: stringSchema("^CH-[0-9]+$"),
+      originating_se: stringSchema("^SE-[0-9]+$"),
       rationale: stringSchema()
     }
   };

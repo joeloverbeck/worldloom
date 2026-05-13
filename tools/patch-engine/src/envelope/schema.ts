@@ -93,7 +93,8 @@ export type OperationKind = (typeof OPERATION_KINDS)[number];
 
 export interface RetconAttestation {
   retcon_type: "A" | "B" | "C" | "D" | "E" | "F";
-  originating_ch: string;
+  originating_ch?: string;
+  originating_se?: string;
   rationale: string;
 }
 

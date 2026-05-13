@@ -2,6 +2,74 @@ export type StateSnapshot = Record<string, unknown>;
 export type StoryEventOp = Record<string, unknown>;
 export type StoryRecordMap = ReadonlyMap<string, Record<string, unknown>>;
 
+// Active-records classes per story state contract §4.2 (PG.state_snapshot.active_records).
+// Auxiliary classes (CHC, SLT, BR, PG, SE, ...) are tracked on other PG fields
+// or as page-level metadata; they are not part of active_records.
+export const ACTIVE_RECORDS_CLASSES = [
+  "STENT",
+  "STINT",
+  "SF",
+  "BEL",
+  "OBL",
+  "CNSQ",
+  "THR",
+  "SREL",
+  "STLOC",
+  "STOBJ",
+  "DA"
+] as const;
+
+export type ActiveRecordsClass = (typeof ACTIVE_RECORDS_CLASSES)[number];
+
+export interface StateDelta {
+  create?: readonly string[];
+  supersede?: readonly string[];
+  close?: readonly string[];
+}
+
+export function activeRecordsClassOf(id: string): ActiveRecordsClass | null {
+  const match = id.match(/^([A-Z]+)-[0-9]+$/);
+  if (match === null) {
+    return null;
+  }
+  const prefix = match[1] as ActiveRecordsClass;
+  return (ACTIVE_RECORDS_CLASSES as readonly string[]).includes(prefix) ? prefix : null;
+}
+
+export function replayActiveRecords(
+  parentActiveRecords: Record<string, readonly string[]>,
+  delta: StateDelta
+): Record<ActiveRecordsClass, string[]> {
+  const next = {} as Record<ActiveRecordsClass, string[]>;
+  for (const cls of ACTIVE_RECORDS_CLASSES) {
+    const seed = parentActiveRecords[cls];
+    next[cls] = Array.isArray(seed)
+      ? seed.filter((item): item is string => typeof item === "string")
+      : [];
+  }
+
+  const dropIds = new Set<string>([
+    ...(delta.supersede ?? []),
+    ...(delta.close ?? [])
+  ]);
+  for (const cls of ACTIVE_RECORDS_CLASSES) {
+    next[cls] = next[cls].filter((id) => !dropIds.has(id));
+  }
+
+  for (const id of delta.create ?? []) {
+    const cls = activeRecordsClassOf(id);
+    if (cls === null) {
+      continue;
+    }
+    const list = next[cls];
+    if (!list.includes(id)) {
+      list.push(id);
+    }
+  }
+
+  return next;
+}
+
 export class SnapshotReplayError extends Error {
   readonly code: string;
 
