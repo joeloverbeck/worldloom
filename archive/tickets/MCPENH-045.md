@@ -1,34 +1,34 @@
 # MCPENH-045: compute-pg-hashes CLI + shared canonical-JSON helpers for deterministic PG hash computation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — `tools/world-index/src/hash/content.ts` (new exports: `canonicalJsonStringify`, `sha256OfUtf8`, `computePgStateHash`, `computePlanHash`); `tools/world-mcp/src/cli/compute-pg-hashes.ts` (new CLI script); `tools/world-mcp/package.json` (register `compute-pg-hashes` bin entry and add to build script); `.claude/skills/_shared-templates/story-state-contract.md` (§4.2a "Tooling" paragraph naming the CLI as the canonical hash-computation surface for `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9). The validator package (VALENH-019) consumes the same `canonicalJsonStringify` / `computePgStateHash` helpers — single source of truth for canonical-JSON across authoring and validation paths.
-**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md` (predecessor: enforced sha256 shape on PG hash fields but provided no canonical computation tooling — every PG-authoring skill had to JIT a script); `tickets/VALENH-019.md` (companion: validator-side consumer of the shared helpers introduced here; the two tickets land together).
+**Engine Changes**: Yes — `tools/world-index/src/hash/content.ts` (new exports: `canonicalJsonStringify`, `sha256OfUtf8`, `computePgStateHash`, `computePlanHash`); `tools/world-mcp/src/cli/compute-pg-hashes.ts` (new CLI script); `tools/world-mcp/package.json` (registered `compute-pg-hashes` bin entry and added it to the build chmod list); `.claude/skills/_shared-templates/story-state-contract.md` (§4.2a "Tooling" paragraph naming the CLI as the canonical hash-computation surface for `branching-story-bootstrap` Phase 7 and `branching-story-turn-cycle` Phase 9); focused tests in `tools/world-index/tests/hash/content.test.ts` and `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts`. The validator package (VALENH-019) consumes the same `canonicalJsonStringify` / `computePgStateHash` helpers — single source of truth for canonical-JSON across authoring and validation paths.
+**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md` (predecessor: enforced sha256 shape on PG hash fields but provided no canonical computation tooling — every PG-authoring skill had to JIT a script); `tickets/VALENH-019.md` (companion: validator-side consumer of the shared helpers introduced here; separately owned validator closeout).
 
 ## Problem
 
-The shared story state contract `.claude/skills/_shared-templates/story-state-contract.md` §4.2a specifies the deterministic PG hash computation in prose:
+At intake, the shared story state contract `.claude/skills/_shared-templates/story-state-contract.md` §4.2a specified the deterministic PG hash computation in prose:
 
 - `plan_hash` = sha256 over the exact UTF-8 bytes of `pages-prose-plans/PG-<integer>.md`
 - `state_hash` = sha256 over the canonical-JSON serialization of the PG fork-state payload (the complete PG mapping except `state_hash` itself and `rendered_prose`)
 - Canonical JSON = objects with keys sorted lexicographically at every depth, arrays in authored order, UTF-8 strings, no insignificant whitespace, no anchors
 
-But §4.2a leaves the *implementation* to each skill. Every PG-authoring skill (`branching-story-bootstrap` Phase 7, `branching-story-turn-cycle` Phase 9) must rediscover the canonical-JSON algorithm in working memory. The canonical pattern is non-obvious — `localeCompare` vs byte-comparison sorts diverge on non-ASCII keys; whether to include `prose_path` / `prose_plan_path` legacy fields requires reading the schema; the exclusion set (`state_hash`, `rendered_prose`) must be applied to a buffer that is otherwise byte-identical to the on-disk record.
+Before this ticket, §4.2a left the *implementation* to each skill. Every PG-authoring skill (`branching-story-bootstrap` Phase 7, `branching-story-turn-cycle` Phase 9) had to rediscover the canonical-JSON algorithm in working memory. The canonical pattern is non-obvious — `localeCompare` vs byte-comparison sorts diverge on non-ASCII keys; whether to include `prose_path` / `prose_plan_path` legacy fields requires reading the schema; the exclusion set (`state_hash`, `rendered_prose`) must be applied to a buffer that is otherwise byte-identical to the on-disk record.
 
-Concrete trigger this session (2026-05-13): `branching-story-turn-cycle` invoked on `worlds/erotica-world/stories/red-bunny/` for PG-2 had to JIT a script at `/tmp/compute-pg2-hash.js` to compute the hashes. The script had an authoring bug — `validation_trace.parent_snapshot_compatibility` contained truncated text (`d5acd57086758...4b639ae` ellipsis) while the actual patch envelope submitted the full hash. Result: the initially committed PG-2 record's `state_hash = f4f268d5b6ca0212b33a218351a7f2c307dfd77757cd3212ba97d10930742f93` differed from the canonical hash of its on-disk content (`25d7a8cb5be13e13d1d3163b68ee453359e1a529246673d12c76ba71db2909b3`). The validator did not catch this at the time because the new-schema replay branch (VALENH-019) did not yet exist; the PG-2 repair landed in `archive/tickets/PEENH-009-story-record-field-repair.md`.
+Historical trigger this session (2026-05-13): `branching-story-turn-cycle` invoked on `worlds/erotica-world/stories/red-bunny/` for PG-2 had to JIT a script at `/tmp/compute-pg2-hash.js` to compute the hashes. The script had an authoring bug — `validation_trace.parent_snapshot_compatibility` contained truncated text (`d5acd57086758...4b639ae` ellipsis) while the actual patch envelope submitted the full hash. Result: the initially committed PG-2 record's `state_hash = f4f268d5b6ca0212b33a218351a7f2c307dfd77757cd3212ba97d10930742f93` differed from the canonical hash of its on-disk content (`25d7a8cb5be13e13d1d3163b68ee453359e1a529246673d12c76ba71db2909b3`). The validator did not catch this at the time because the new-schema replay branch (VALENH-019) did not yet exist; the PG-2 repair landed in `archive/tickets/PEENH-009-story-record-field-repair.md`.
 
 The user's question in-session: "Shouldn't we make it into a permanent CLI app or something, and instruct its use in a common document shared by any story-related skill that may use it?" — the answer is yes; this ticket lands it.
 
 ## Assumption Reassessment (2026-05-13)
 
-1. **Codebase reassessment.** `git show HEAD:tools/world-index/src/hash/content.ts` exports only `sha256Hex` (NFC-normalized), `normalizeProseWhitespace`, and `serializeStableYaml`. No `canonicalJsonStringify`. No `computePgStateHash`. `git show HEAD:tools/world-mcp/src/cli/` lists only `sign-approval-token.ts`, `submit-patch-plan.ts`, `validate-patch-plan.ts` — no `compute-pg-hashes.ts`. `git status --porcelain` at audit time shows `M tools/world-index/src/hash/content.ts`, `M tools/world-mcp/package.json`, `?? tools/world-mcp/src/cli/compute-pg-hashes.ts`, `M .claude/skills/_shared-templates/story-state-contract.md` — uncommitted in-session work implements this ticket; the landed version should match the working-tree shape. Verified by `ls tools/world-mcp/src/cli/` (working tree has the file) and `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` (CLI runs).
-2. **Doc reassessment.** `.claude/skills/_shared-templates/story-state-contract.md` §4.2a is the contract specification; no implementation pointer at HEAD. `archive/tickets/VALENH-016.md` enforces sha256 shape via `^[0-9a-f]{64}$` regex but provides no computation surface. `archive/tickets/MCPENH-*` content-grep for `compute-pg-hashes|canonicalJsonStringify|plan_hash|computePgStateHash` returns zero matches — no prior ticket attempts this surface.
+1. **Codebase reassessment.** At final closeout, `tools/world-index/src/hash/content.ts` exports `canonicalJsonStringify`, `sha256OfUtf8`, `computePgStateHash`, and `computePlanHash` alongside the existing `sha256Hex`, `normalizeProseWhitespace`, and `serializeStableYaml` exports. `tools/world-mcp/src/cli/compute-pg-hashes.ts` exists next to the existing `sign-approval-token.ts`, `submit-patch-plan.ts`, and `validate-patch-plan.ts` CLIs. `tools/world-mcp/package.json` registers the `compute-pg-hashes` bin and refreshes the compiled CLI chmod during `npm run build`. The remaining active-ticket delta was focused test coverage and closeout truthing.
+2. **Doc reassessment.** `.claude/skills/_shared-templates/story-state-contract.md` §4.2a is the contract specification and now includes the Tooling paragraph that points PG-authoring skills to `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`. `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md` enforces sha256 shape via `^[0-9a-f]{64}$` regex but provided no computation surface. This ticket fills that writer-side computation surface; `tickets/VALENH-019.md` remains the companion validator-side consumer.
 3. **Shared boundary under audit.** The canonical-JSON serialization sits at the intersection of (a) `branching-story-bootstrap` Phase 7 hash-computation steps, (b) `branching-story-turn-cycle` Phase 9 step 2/3 hash-computation steps, (c) `tools/validators/src/structural/snapshot-replay-equality.ts`'s drift-detection comparison (VALENH-019), and (d) any future PG-record-touching skill (e.g., `branching-story-health-audit` if it ever verifies hashes). All four consumers need byte-identical canonical-JSON output. The shared boundary is the canonical-JSON algorithm itself; the implementation must live in the lowest-level package depended on by all consumers — that is `@worldloom/world-index` (depended on by `@worldloom/validators` and `@worldloom/world-mcp`).
 4. **FOUNDATIONS principle under audit.** Tooling Recommendation (§"non-negotiable"): "LLM agents should never operate on prose alone." For PG hash authoring, the prose surface is §4.2a's algorithm description; the machine-facing surface is the CLI this ticket introduces. Without the CLI, every skill operates on prose alone for canonical-JSON serialization — the empirically-observed bug (PG-2 truncated-text inconsistency) is the cost. Rule 6 (No Silent Retcons) retcon justification: existing skills compute hashes inline via ad-hoc scripts; this ticket replaces that with a single canonical CLI plus shared library helpers. The session-evidence one-liner (PG-2's bad hash) is the audit's emergence-warrant.
-5. **Pipeline-wide blast-radius scan for the new symbols.** `grep -rn 'canonicalJsonStringify|computePgStateHash|computePlanHash|sha256OfUtf8' tools/ .claude/skills/ docs/ specs/` — at HEAD, zero matches anywhere. The new symbols are introduced cleanly; no rename / replace risk. Consumers added by this ticket: `tools/world-mcp/src/cli/compute-pg-hashes.ts` (the CLI); `tools/validators/src/structural/snapshot-replay-equality.ts` (replaces local `sortJson`/`stableJson` with `canonicalJsonStringify`, adds `computePgStateHash` for the state_hash equality check — landed by VALENH-019).
+5. **Pipeline-wide blast-radius scan for the new symbols.** Final grep for `compute-pg-hashes|canonicalJsonStringify|computePgStateHash|computePlanHash|sha256OfUtf8` over the owned source/test/template and companion-ticket surfaces shows the expected users only: `tools/world-index/src/hash/content.ts`, the new world-index tests, `tools/world-mcp/src/cli/compute-pg-hashes.ts`, the new world-mcp CLI tests, `.claude/skills/_shared-templates/story-state-contract.md`, and the validator-side `tools/validators/src/structural/snapshot-replay-equality.ts` / `tickets/VALENH-019.md` companion seam. Final grep for `sortJson|stableJson|JSON\.stringify.*sort` in `tools/validators/src`, `tools/world-mcp/src`, and `tools/patch-engine/src` returns no hits.
 6. **Adjacent contradictions.** (a) At intake, PG-2 in `worlds/erotica-world/stories/red-bunny/` carried the inconsistent state_hash that motivated this ticket; classified as: separate bug, since repaired by `archive/tickets/PEENH-009-story-record-field-repair.md`. (b) Target skill `branching-story-turn-cycle` SKILL.md Phase 9 step 2/3 prose describes the hash computation inline rather than pointing at the new CLI; classified as: skill-prose drift, routed via `/skill-audit .claude/skills/branching-story-turn-cycle` (and `branching-story-bootstrap` for symmetry — its Phase 7 hash steps describe the same algorithm inline).
-7. **Mismatch + correction.** Working-tree-vs-HEAD: uncommitted in-session edits to `tools/world-index/src/hash/content.ts`, `tools/world-mcp/package.json`, `.claude/skills/_shared-templates/story-state-contract.md` and the new file `tools/world-mcp/src/cli/compute-pg-hashes.ts` partially implement this ticket. The Phase 5 codebase verification was performed against HEAD (`git show HEAD:<path>` + directory listings); the landed version should match the working-tree shape. The CLI was smoke-tested in-session against PG-1 (root page, committed by `branching-story-bootstrap`): `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md --pg worlds/erotica-world/stories/red-bunny/_source/pages/PG-1.yaml` reproduces the committed `plan_hash = c58469f6…` and `state_hash = d5acd570…` exactly.
+7. **Mismatch + correction.** Final reassessment found the main source/doc pieces already present in the tracked tree while the active ticket still read as `PENDING` and lacked the promised focused tests. The ticket boundary was narrowed to the missing tests, package proof, PG-1 CLI smoke, and truthful closeout. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md --pg worlds/erotica-world/stories/red-bunny/_source/pages/PG-1.yaml` reproduces the committed `plan_hash = c58469f6a87562fb9fcd8b8a5f31e62c03b599c3761c7ed8f2ebbf9564e7f5ce` and `state_hash = d5acd5708675880e96d56b52a137f945d2681c913a82bed06f3c18a324b639ae` exactly.
 
 ## Architecture Check
 
@@ -45,11 +45,11 @@ The user's question in-session: "Shouldn't we make it into a permanent CLI app o
 3. **Invariant**: single source of truth for canonical-JSON across authoring and validation → codebase grep-proof that `tools/validators/src/` and `tools/world-mcp/src/cli/` import `canonicalJsonStringify` from `@worldloom/world-index/hash/content` and do NOT reimplement it locally.
 4. **Invariant**: CLI argument-handling and error paths follow the existing world-mcp CLI pattern → unit / integration test on the CLI's `runComputePgHashesCli` exported function exercising help text, missing-argument errors, file-not-found errors, malformed-YAML errors, and the happy path.
 
-## What to Change
+## Landed Changes
 
 ### 1. `tools/world-index/src/hash/content.ts` — shared canonical-JSON helpers
 
-Add (alongside existing exports):
+Added alongside existing exports:
 
 ```typescript
 export const ACTIVE_RECORDS_CLASSES = [...]; // (see VALENH-019; alternatively colocate here)
@@ -93,11 +93,11 @@ New file following the existing CLI pattern (`validate-patch-plan.ts` shape):
 
 ### 3. `tools/world-mcp/package.json` — bin + build wiring
 
-Add `compute-pg-hashes` to `bin` and `dist/src/cli/compute-pg-hashes.js` to the `build` script's chmod list. Sibling to existing `sign-approval-token` / `submit-patch-plan` / `validate-patch-plan`.
+Added `compute-pg-hashes` to `bin` and `dist/src/cli/compute-pg-hashes.js` to the `build` script's chmod list. Sibling to existing `sign-approval-token` / `submit-patch-plan` / `validate-patch-plan`.
 
 ### 4. `.claude/skills/_shared-templates/story-state-contract.md` §4.2a — Tooling paragraph
 
-Insert a "Tooling" paragraph after the existing prose-level algorithm description. Pattern:
+Inserted a "Tooling" paragraph after the existing prose-level algorithm description:
 
 > **Tooling.** Every PG-authoring skill (`branching-story-bootstrap` Phase 7 hash steps, `branching-story-turn-cycle` Phase 9) MUST compute these hashes through the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js`, not through ad-hoc one-off scripts. The CLI reuses the same `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator package (`snapshot_replay_equality`) uses for drift detection, so authoring-time hashes and validation-time drift comparisons are byte-identical by construction.
 >
@@ -154,3 +154,33 @@ Insert a "Tooling" paragraph after the existing prose-level algorithm descriptio
 2. `cd tools/world-mcp && npm test`
 3. `cd tools/validators && npm test` (VALENH-019's consumer-side test surface must pass against the new shared helpers)
 4. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md --pg worlds/erotica-world/stories/red-bunny/_source/pages/PG-1.yaml` — reproduction smoke test against committed PG-1.
+5. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` — CLI usage smoke.
+
+## Outcome
+
+Completion date: 2026-05-13.
+
+`@worldloom/world-index/hash/content` now owns canonical PG hash computation via `canonicalJsonStringify`, `sha256OfUtf8`, `computePgStateHash`, and `computePlanHash`. `@worldloom/world-mcp` now exposes the `compute-pg-hashes` CLI as a package bin and compiled script, with help/error/happy-path behavior covered by CLI tests. The shared story-state contract now points PG-authoring skills to that CLI instead of ad-hoc hash scripts.
+
+Focused tests now cover deterministic key sorting, raw UTF-8 hashing without NFC normalization, PG state-hash exclusions, plan byte hashing, CLI help/missing-arg/error paths, malformed YAML handling, and YAML PG draft hash output. The existing validator package consumes the same helper seam through the VALENH-019 companion path.
+
+## Verification Result
+
+1. `cd tools/world-index && npm run build` — passed; `dist/` refreshed.
+2. `cd tools/world-index && node --test dist/tests/hash/content.test.js` — passed; 5 focused hash-helper tests passed.
+3. `cd tools/world-mcp && npm run build` — passed; `dist/src/cli/compute-pg-hashes.js` emitted and chmod refreshed.
+4. `cd tools/world-mcp && node --test dist/tests/cli/compute-pg-hashes.test.js` — passed; 5 focused CLI tests passed.
+5. `cd tools/world-index && npm test` — passed; 83 compiled tests passed.
+6. `cd tools/world-mcp && npm test` — passed; 359 compiled tests passed.
+7. `cd tools/validators && npm test` — passed; 183 compiled tests passed.
+8. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-1.md --pg worlds/erotica-world/stories/red-bunny/_source/pages/PG-1.yaml` — passed; printed `plan_hash = c58469f6a87562fb9fcd8b8a5f31e62c03b599c3761c7ed8f2ebbf9564e7f5ce` and `state_hash = d5acd5708675880e96d56b52a137f945d2681c913a82bed06f3c18a324b639ae`.
+9. `node tools/world-mcp/dist/src/cli/compute-pg-hashes.js --help` — passed; printed CLI usage and exited 0.
+10. `rg -n 'compute-pg-hashes|canonicalJsonStringify|computePgStateHash|computePlanHash|sha256OfUtf8' tools/world-index/src tools/world-index/tests tools/world-mcp/src tools/world-mcp/tests tools/validators/src .claude/skills/_shared-templates/story-state-contract.md tickets/VALENH-019.md tickets/MCPENH-045.md` — passed as discovery proof; hits are the owned helper, CLI, tests, shared contract, active ticket, and companion validator seam.
+11. `rg -n 'sortJson|stableJson|JSON\.stringify.*sort' tools/validators/src tools/world-mcp/src tools/patch-engine/src` — passed as a negative grep; no local alternate canonical-JSON implementation remains in those package source trees.
+12. `git add -N tools/world-index/tests/hash/content.test.ts tools/world-mcp/tests/cli/compute-pg-hashes.test.ts && git diff --check -- tickets/MCPENH-045.md tools/world-index/tests/hash/content.test.ts tools/world-mcp/tests/cli/compute-pg-hashes.test.ts && git reset -- tools/world-index/tests/hash/content.test.ts tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` — passed; whitespace hygiene covered both tracked ticket edits and untracked new test files, then cleared the intent-to-add state.
+
+## Deviations
+
+- The implementation was already partially landed in the tracked tree when this run started. This run did not rewrite the existing helper/CLI/doc source; it added the missing focused tests, proved the full package surfaces, and completed the ticket closeout.
+- The drafted invariant named `localeCompare` in a broad grep. Final proof used the narrower `sortJson|stableJson|JSON\.stringify.*sort` stale-implementation sweep because `localeCompare` is legitimately used elsewhere for ordinary user-facing or deterministic list ordering unrelated to canonical PG JSON serialization.
+- Validator-side enforcement remains owned by companion `tickets/VALENH-019.md`; this ticket only proves that the shared helper seam is available and that the validator package still passes against it.

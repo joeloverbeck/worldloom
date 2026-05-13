@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/_helpers/state-snapshot-replay.ts` (new schema-aware replay helpers; legacy `replayStateSnapshot` retained for `applied_event_ops`-bearing fixtures); `tools/validators/src/structural/snapshot-replay-equality.ts` (schema discrimination + new-schema replay path + state_hash equality check via `computePgStateHash`). The validator now imports `canonicalJsonStringify` and `computePgStateHash` from `@worldloom/world-index/hash/content` introduced by MCPENH-045.
-**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md` (predecessor: enforced sha256 shape but explicitly out-scoped the validator's full rewrite — see VALENH-016 line 87); `archive/tickets/VALENH-011-register-bel-record-schema-compliance-and-drop-arc-trace-validators.md` (predecessor: noted "wholesale PG/SE replay-model rewrite to the rebuilt story-skill family" as out-of-scope — VALENH-011 line 26); `tickets/MCPENH-045.md` (companion: provides the shared `canonicalJsonStringify` / `computePgStateHash` helpers this ticket consumes).
+**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md` (predecessor: enforced sha256 shape but explicitly out-scoped the validator's full rewrite — see VALENH-016 line 87); `archive/tickets/VALENH-011-register-bel-record-schema-compliance-and-drop-arc-trace-validators.md` (predecessor: noted "wholesale PG/SE replay-model rewrite to the rebuilt story-skill family" as out-of-scope — VALENH-011 line 26); `archive/tickets/MCPENH-045.md` (companion: provides the shared `canonicalJsonStringify` / `computePgStateHash` helpers this ticket consumes).
 
 ## Problem
 
@@ -111,7 +111,7 @@ No skill-prose edits in this ticket. Skill-prose drift on `branching-story-turn-
 - Repairing the inconsistent PG-2.state_hash in `worlds/erotica-world/stories/red-bunny/_source/pages/PG-2.yaml`. Completed by `archive/tickets/PEENH-009-story-record-field-repair.md` (engine support for story-bundle field repair).
 - Wholesale replacement of the legacy `replayStateSnapshot` op_type semantics. The legacy fixtures continue to exercise the legacy code path; a future ticket may retire it once no committed PG records carry `applied_event_ops`.
 - Updating `branching-story-turn-cycle` / `branching-story-bootstrap` SKILL.md prose to reference this ticket from their Guardrails §Known integration debt. Routed to `/skill-audit` per the audit's Phase 8 sibling handoff.
-- The compute-pg-hashes CLI and shared canonical-JSON helpers in `@worldloom/world-index/hash/content`. Owned by `tickets/MCPENH-045.md`.
+- The compute-pg-hashes CLI and shared canonical-JSON helpers in `@worldloom/world-index/hash/content`. Owned by `archive/tickets/MCPENH-045.md`.
 
 ## Acceptance Criteria
 

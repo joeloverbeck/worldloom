@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md` (new sub-case in the existing stale-server troubleshooting matrix); `tools/world-mcp/README.md` (CLI usage section update naming the second purpose). No code changes; documentation-only ticket.
-**Deps**: `archive/tickets/MCPENH-005` and `archive/tickets/ENGINESYNC-002` (the friction cases that motivated the existing `describe_capabilities()` introspection path documented at `docs/MACHINE-FACING-LAYER.md` line 110); `tickets/MCPENH-045.md` (introduces the `compute-pg-hashes` CLI; the broader pattern this docs ticket documents is "CLI scripts as fresh-process escape valves for the running MCP server's in-memory state").
+**Deps**: `archive/tickets/MCPENH-005` and `archive/tickets/ENGINESYNC-002` (the friction cases that motivated the existing `describe_capabilities()` introspection path documented at `docs/MACHINE-FACING-LAYER.md` line 110); `archive/tickets/MCPENH-045.md` (introduces the `compute-pg-hashes` CLI; the broader pattern this docs ticket documents is "CLI scripts as fresh-process escape valves for the running MCP server's in-memory state").
 
 ## Problem
 
