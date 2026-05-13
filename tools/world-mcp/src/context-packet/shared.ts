@@ -77,6 +77,20 @@ export interface ContextPacketStoryBundleContextSummary {
   invariant_ids: string[];
 }
 
+export type RoleInStory =
+  | "viewpoint"
+  | "player_proxy"
+  | "primary_actor"
+  | "opposing_actor"
+  | "allied_actor"
+  | "authority"
+  | "dependent"
+  | "witness"
+  | "information_source"
+  | "pressure_source"
+  | "social_bridge"
+  | "background";
+
 export interface ContextPacketStoryBundleContext {
   story_slug: string;
   storylet_pool_summary: {
@@ -128,7 +142,7 @@ export interface ContextPacketStoryBundleContext {
   cast_bind_list: Array<{
     char_id: string | null;
     stent_id: string;
-    role_in_story: string;
+    role_in_story: RoleInStory[];
   }>;
   invariants_acknowledged: string[];
 }

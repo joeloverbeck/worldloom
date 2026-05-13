@@ -8,32 +8,25 @@ import yaml from "js-yaml";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record } from "./helpers.js";
 
-test("record_schema_compliance accepts v2 scene-commitment storylets", async () => {
+test("record_schema_compliance rejects legacy v2 scene-commitment storylets", async () => {
   const result = await recordSchemaCompliance.run({}, context([storyletRecord(completeStorylet())]));
 
-  assert.deepEqual(result, []);
+  assert.ok(result.some((verdict) => (
+    verdict.location.node_id === "SLT-0001" &&
+    verdict.code === "record_schema_compliance.additionalProperties"
+  )));
 });
 
-test("record_schema_compliance rejects v2 scene-commitment storylets missing structural arc blocks", async () => {
-  for (const field of [
-    "arc_contract",
-    "dramatic_unit",
-    "beat_plan",
-    "execution_envelope",
-    "stop_policy",
-    "effect_model",
-    "exit_portfolio"
-  ] as const) {
-    const parsed = completeStorylet();
-    delete parsed[field];
+test("record_schema_compliance rejects legacy storylets before checking retired arc blocks", async () => {
+  const parsed = completeStorylet();
+  delete parsed.arc_contract;
 
-    const result = await recordSchemaCompliance.run({}, context([storyletRecord(parsed)]));
+  const result = await recordSchemaCompliance.run({}, context([storyletRecord(parsed)]));
 
-    assert.ok(result.some((verdict) => (
-      verdict.code === "record_schema_compliance.required" &&
-      verdict.message.includes(`must have required property '${field}'`)
-    )));
-  }
+  assert.ok(result.some((verdict) => (
+    verdict.location.node_id === "SLT-0001" &&
+    verdict.code === "record_schema_compliance.additionalProperties"
+  )));
 });
 
 test("record_schema_compliance accepts v2 scene-commitment choices with populated worthiness", async () => {
@@ -43,40 +36,22 @@ test("record_schema_compliance accepts v2 scene-commitment choices with populate
 });
 
 test("record_schema_compliance accepts explicit commitment route fields", async () => {
-  const storylet = completeStorylet();
-  (storylet.arc_contract as Record<string, unknown>).commitment_family = "care_help_protection";
-  (storylet.arc_contract as Record<string, unknown>).commitment_detail = "repair_the_gate_without_pressure";
-  const nativeSeed = ((storylet.exit_portfolio as Record<string, unknown>).native_seeds as Record<string, unknown>[])[0]!;
-  nativeSeed.commitment_family = "inquiry_discovery";
-  nativeSeed.commitment_detail = "ask_how_the_gate_broke";
-
   const choice = completeChoice();
   choice.commitment_family = "care_help_protection";
   choice.commitment_detail = "offer_gate_repair";
 
-  const result = await recordSchemaCompliance.run({}, context([
-    storyletRecord(storylet),
-    choiceRecord(choice)
-  ]));
+  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
 
   assert.deepEqual(result, []);
 });
 
 test("record_schema_compliance rejects mismatched explicit commitment families", async () => {
-  const storylet = completeStorylet();
-  (storylet.arc_contract as Record<string, unknown>).commitment_family = "inquiry_discovery";
-  const nativeSeed = ((storylet.exit_portfolio as Record<string, unknown>).native_seeds as Record<string, unknown>[])[0]!;
-  nativeSeed.commitment_family = "care_help_protection";
-
   const choice = completeChoice();
   choice.commitment_family = "inquiry_discovery";
 
-  const result = await recordSchemaCompliance.run({}, context([
-    storyletRecord(storylet),
-    choiceRecord(choice)
-  ]));
+  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
 
-  assert.equal(result.filter((verdict) => verdict.code === "record_schema_compliance.commitment_family_mismatch").length, 3);
+  assert.equal(result.filter((verdict) => verdict.code === "record_schema_compliance.commitment_family_mismatch").length, 1);
 });
 
 test("record_schema_compliance rejects commitment classes outside the closed taxonomy", async () => {

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { effectModelReplaySafety } from "../../src/rules/effect_model_replay_safety.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "./helpers.js";
 
@@ -66,6 +65,7 @@ test("snapshot_replay_equality compares active_records snapshots with BEL entrie
     record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
       id: "SE-0002",
       story_id: "STORY-001",
+      event_kind: "selected_choice",
       ops: [],
       state_hash_after: "hash-next"
     }),
@@ -118,19 +118,6 @@ test("snapshot_replay_equality ignores only workflow-stamped state_snapshot fiel
   assert.deepEqual(verdicts, []);
 });
 
-test("snapshot_replay_equality exclusion does not weaken effect_model_replay_safety", async () => {
-  const missingVariant = {
-    ...nextSnapshot,
-    applied_effect_variant: null
-  };
-  const verdicts = await effectModelReplaySafety.run(undefined, context(recordsFor(missingVariant, "hash-next"), {
-    run_mode: "pre-apply",
-    patch_plan: patchPlan()
-  }));
-
-  assert.ok(verdicts.some((verdict) => verdict.code === "effect_model_replay_safety.missing_applied_effect_variant"));
-});
-
 test("snapshot_replay_equality verifies the last event hash", async () => {
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(nextSnapshot, "wrong-hash"), {
     run_mode: "pre-apply",
@@ -181,6 +168,7 @@ function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
     record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
       id: "SE-0002",
       story_id: "STORY-001",
+      event_kind: "selected_choice",
       ops: [
         { op_id: "OP-0001", op_type: "fact_create", input_records: [], output_records: ["SF-0002"], deterministic_payload: {} },
         { op_id: "OP-0002", op_type: "obligation_supersede", input_records: ["OBL-0001"], output_records: ["OBL-0002"], deterministic_payload: {} },

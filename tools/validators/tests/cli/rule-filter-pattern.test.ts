@@ -12,11 +12,6 @@ test("RULE_FILTER_PATTERN accepts mechanized rule 11 and 12 combinations", () =>
     "1,2,11,12",
     "7,12,1",
     "all",
-    "arc_schema_compliance",
-    "choice_worthiness_completeness",
-    "effect_model_legality",
-    "effect_model_replay_safety",
-    "stop_policy_parsability",
     "storylet_predicate_dsl_parsability"
   ]) {
     assert.equal(validateOptions({ rules }), null, rules);

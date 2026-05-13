@@ -593,13 +593,13 @@ Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class
 
 `SF` records what is true in the branch; `BEL` records what a holder believes, claims, witnesses, suspects, denies, or is deceived about. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
 
-`BEL.truth_relation` (`true | false | partly_true | unknown | contested | branch_counterfactual`) distinguishes belief from truth. `BEL.visibility` (`private | shared | public | concealed | suppressed`) is consumed by the social-state firewall. Schemas live in `.claude/skills/_shared-templates/story-state-contract.md` §4.1 (BEL) and §4 generally (every other story-bundle record class).
+`BEL.belief_mode` separates sincerity / epistemic stance from confidence. `BEL.truth_relation` (`true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent`) distinguishes belief from truth. `BEL.visibility` (`private | shared | factional | public | rumored | concealed | suppressed`) is consumed by the social-state firewall. Schemas live in `.claude/skills/_shared-templates/story-state-contract.md` §4.1 (BEL) and §4 generally (every other story-bundle record class).
 
 ### 7. Story-Pipeline Skill Category
 
 The seven story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`.
 
-FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the closed 10-predicate DSL, the STENT `role_in_story` enum, the `PG.state_snapshot` schema (per the shared story state contract), the RSP card schema, and the shared `content_policy` block.
+FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the shared predicate DSL, the STENT `role_in_story` enum, the `PG.state_snapshot` schema (per the shared story state contract), the RSP card schema, and page-plan content-policy / prose-craft / render-time instruction surfaces per the shared story state contract §8.
 
 ### 8. Story Bundle As Derived Per-World Layer
 

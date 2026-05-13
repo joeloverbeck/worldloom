@@ -158,12 +158,14 @@ For each scoped branch:
 4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`.
 5. Divergence → `snapshot_replay_mismatch` finding, `severity: error`, `repair_kind: branch_flag` (replay corruption is not auto-repairable).
 
+When replaying repair events, distinguish `system_repair` (engine-initiated repair such as schema-gate recovery) from `audit_repair` (audit-finding-driven repair). The old undifferentiated value is not a valid current-contract event kind.
+
 ### Phase 2b: Branch isolation
 
 Flag:
 
 - `branch_isolation_leak` — records in a branch's `state_snapshot.active_records` whose `created_at_page` belongs to a sibling branch. ERROR; `repair_kind: branch_flag`.
-- `author_pool_branch_dependency` — author-pool `SLT` records (`scope.visibility: author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
+- `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
 - `plan_state_reference_dangling` — page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot. ERROR; `repair_kind: prose_revision` (the plan body needs revision OR a repair turn must add the missing state).
 - `choice_state_reference_dangling` — emitted `CHC` records whose `target_or_action_family` requires records not in the page's active snapshot. ERROR; `repair_kind: turn_repair`.
 
@@ -183,7 +185,7 @@ Flag:
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_basis` — `SREL` supersessions whose `basis` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
 - `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's `STENT.entity_status` + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
-- `lie_promoted_silently` — `BEL` records with `truth_relation: false, confidence: performative_lie` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
+- `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
 ### Phase 2e: Mystery / canon safety (per FOUNDATIONS Rule 7 + shared contract §11)
 
@@ -239,8 +241,8 @@ finding_ids: [<finding ids from this audit>]
 repair_kind: commitment_block | turn_repair | prose_revision | promotion | branch_flag
 target_records: [<record ids the repair should engage with>]
 target_branch: BR-NNNN | null
-suggested_block_purpose: aftermath | escalation | reveal | refusal | negotiation | flight | investigation | intimacy | conflict | repair | closure | transition | null
-visibility: author_pool | branch_scoped | null
+suggested_block_move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery | null
+visibility: global_author_pool | branch_scoped | null
 ---
 
 # RSP-NNNN: <short title>
@@ -403,7 +405,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 
 - **Never mutate story state or world canon.** The audit reads `_source/` records, `pages-prose-plans/*.md`, `pages-prose/*.md`, `pages-prose-receipts/*.yaml`, and bundle `INDEX.md`. It writes ONLY to `audits/SAU-NNNN-*.md` + `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md` + `audits/INDEX.md`. No patch-engine submissions.
 - **Never write rendered prose.** The audit reads prose for Phase 3 checks; it does not author prose.
-- **RSP cards are repair requests, not blocks.** Phase 5 drafts requests with `repair_kind`, `target_records`, `target_branch`, `rationale`, `suggested_block_purpose`, `visibility` — never full SLT records. `commitment-block-authoring` `audit_repair` mode owns SLT drafting.
+- **RSP cards are repair requests, not blocks.** Phase 5 drafts requests with `repair_kind`, `target_records`, `target_branch`, `rationale`, `suggested_block_move_family`, `visibility` — never full SLT records. `commitment-block-authoring` `audit_repair` mode owns SLT drafting.
 - **Audit is read-only with respect to bundle records.** Drift between rendered prose and committed state, replay mismatches, branch-isolation violations are all REPORTED in findings; the audit does NOT alter `PG` records, `SE` deltas, `SLT` blocks, or any other bundle-record file to "fix" what it finds.
 - **Schema minimalism per shared contract §2.** SAU report + RSP card shapes defined inline. No nice-to-have fields.
 - **Skills do not chain.** The audit never invokes `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. RSP cards record sibling-handoff recommendations; the user separately invokes the named sibling with the RSP card path as input.

@@ -19,6 +19,7 @@ Apply directly when the correction is mechanical and directionally obvious:
 - wrong `Files to Touch` list
 - wrong `Deps` path when the live active or archived target is unambiguous
 - acceptance or verification wording that only needs to match the already-known truthful boundary
+- internally contradictory acceptance or invariant wording when the truthful correction is narrower and already dictated by another accepted ticket boundary, such as preserving top-level `additionalProperties: true` while removing a field from `required[]` / `properties`
 
 Record these in `Assumption Reassessment`.
 

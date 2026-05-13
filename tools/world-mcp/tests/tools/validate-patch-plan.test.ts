@@ -115,8 +115,9 @@ test("validatePatchPlan accepts create_bel_record through pre-apply validation",
               created_at_page: "PG-0001",
               holder: "STENT-0001",
               claim: "Mara believes Kern controls the harbor ledgers.",
+              belief_mode: "believes",
               truth_relation: "unknown",
-              confidence: "suspected",
+              confidence: "low",
               visibility: "private",
               basis: {
                 source_event: "SE-0001"

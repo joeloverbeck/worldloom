@@ -22,7 +22,9 @@ The field lists below are canonical. Skills must not add fields to these schemas
 
 ## 3. Record Class Inventory
 
-Story-bundle record classes (allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`):
+Story-bundle record classes allocate via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`.
+
+Core page-cycle state records:
 
 | Class | Purpose |
 |---|---|
@@ -43,6 +45,15 @@ Story-bundle record classes (allocate via `mcp__worldloom__allocate_next_id(worl
 | `CHC` | Emitted choice. |
 | `SLT` | Commitment block (causal move with preconditions, beats, effects, exits, saliency). |
 
+Auxiliary story-bundle records:
+
+| Class | Purpose |
+|---|---|
+| `SLB` | Storylet / commitment-block batch manifest. |
+| `SAU` | Story-bundle health audit. |
+| `SP` | Story-promotion record. |
+| `RSP` | Remediation-storylet proposal card scoped under an audit. |
+
 `SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
 
 **Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `-NNNN` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
@@ -51,7 +62,7 @@ Story-bundle record classes (allocate via `mcp__worldloom__allocate_next_id(worl
 
 Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named.
 
-### 4.1 `BEL` (12 fields)
+### 4.1 `BEL` (13 fields)
 
 ```yaml
 id: BEL-NNNN*
@@ -60,9 +71,10 @@ created_at_page: PG-NNNN*
 supersedes: BEL-NNNN | null            # default null
 holder: STENT-NNNN | group:<name> | public | narrator   # *
 claim: >                               # * natural-language statement
-truth_relation: true | false | partly_true | unknown | contested | branch_counterfactual   # *
-confidence: certain | likely | suspected | rumor | performative_lie   # *
-visibility: private | shared | public | concealed | suppressed   # *
+belief_mode: knows | believes | suspects | doubts | denies | reports | claims | deceives | misremembers | interprets   # *
+truth_relation: true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent   # *
+confidence: certain | high | medium | low | uncommitted   # *
+visibility: private | shared | factional | public | rumored | concealed | suppressed   # *
 basis:
   source_event: SE-NNNN*               # the event that established this belief
 consequences:
@@ -70,7 +82,7 @@ consequences:
   constrains_choices: [CHC-NNNN]
 ```
 
-The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor — other provenance refinements (`witnessed_page`, `told_by`, `inferred_from`) are not retained at this layer.
+The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor — other provenance refinements (`witnessed_page`, `told_by`, `inferred_from`) are not retained at this layer.
 
 ### 4.2 `PG` (~21 sub-paths)
 
@@ -101,19 +113,19 @@ state_snapshot:
     DA: [DA-NNNN]
   entity_status:                       # * one entry per active STENT
     STENT-NNNN:
-      life: alive | dead | incapacitated | missing | unknown
-      agency: free | constrained | captive | unconscious | dead
-      location: STLOC-NNNN | unknown
+      life: alive | dead | unknown
+      agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown
+      location: STLOC-NNNN | unknown | concealed | offstage
   visible_affordances:                 # *
     - ordinal: 0                       # page-local index, not an allocated id
       label: "door to the alley"
       grounded_in: [STLOC-NNNN, STOBJ-NNNN]
       available_to: [STENT-NNNN]
-      action_families: [escape, hide, pursue]
+      action_families: [<action_family>]
   unresolved_mystery_claims:           # *
     - mystery_id: M-NNNN
       authority: apparent | branch_local_counterfactual | canon_candidate
-      status: preserved | advanced | held_for_promotion
+      status: preserved | clue_added | narrowed | apparent_resolution | held_for_promotion
   continuation:                        # *
     has_eligible_commitment_block: true | false
     terminal_status: open | branch_pause | terminal_closed
@@ -145,7 +157,7 @@ id: SE-NNNN*
 story_id: STORY-NNNN*
 created_at_page: PG-NNNN*
 parent_page_id: PG-NNNN | null         # * null only for SE-0001
-event_kind: story_start | selected_choice | write_in_attempt | world_block | repair | prose_attach | promotion_closeout   # *
+event_kind: story_start | selected_choice | write_in_attempt | system_repair | audit_repair | prose_attach | promotion_closeout   # *
 actor: STENT-NNNN | system | unknown   # *
 targets: [STENT-NNNN | STLOC-NNNN | STOBJ-NNNN]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
@@ -167,24 +179,24 @@ promotion_claims:
 id: SLT-NNNN*
 story_id: STORY-NNNN*
 scope:
-  visibility: author_pool | branch_scoped   # *
-  branch_id: BR-NNNN | null            # * null only for author_pool
-created_at_page: PG-NNNN | null        # null only for author_pool
+  visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
+  branch_id: BR-NNNN | null            # * null only for global_author_pool
+created_at_page: PG-NNNN | null        # null only for global_author_pool
 title: string*
-purpose: aftermath | escalation | reveal | refusal | negotiation | flight | investigation | intimacy | conflict | repair | closure | transition   # *
+move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
   hard: [<predicate>]*                 # see §5 closed predicate DSL
   soft: [<predicate>]
 beats:                                 # * 1-5 beats per block
   - beat_id: B1*
-    function: setup | pressure | turn | consequence | exit   # *
+    function: setup | action | pressure | turn | consequence | exit   # *
     instruction: >                     # * prose-facing beat instruction, no engine jargon
 effects:                               # mirrors SE.state_delta
   create: [record_id]
   supersede: [record_id]
   close: [record_id]
 exit_options:                          # *
-  - intent: flee | confront | confess | hide | ask | attack | spare | bargain | wait | custom   # *
+  - action_family: <action_family>*    # see §4.4a shared taxonomy
     surface_hint: string*
     likely_effects: [<short label>]
 saliency:
@@ -195,12 +207,98 @@ mystery_policy:
   forbidden_resolutions: [M-NNNN]
   allowed_authority: apparent | branch_local_counterfactual | canon_candidate | none   # *
 provenance:
-  origin: bootstrap_seed | author_batch | audit_repair | runtime_jit   # *
+  origin: bootstrap_seed | manual_authoring | author_batch | audit_repair | runtime_jit   # *
 ```
+
+`move_family` values:
+
+| Value | Operational definition |
+|---|---|
+| `orient` | Establishes where the actors are, what matters now, or what changed since the prior page. |
+| `world_pressure` | Brings an external pressure, hazard, institution, scarcity, or deadline to bear. |
+| `pursuit` | Advances a chase, search, pursuit, or closing distance toward a target. |
+| `investigation` | Tests, searches, questions, traces, or compares evidence to learn something. |
+| `disclosure` | Reveals, withholds, reframes, or forces acknowledgement of information. |
+| `negotiation` | Trades offers, terms, leverage, concessions, threats, or agreements. |
+| `bond_shift` | Changes trust, intimacy, loyalty, resentment, fear, or obligation between actors. |
+| `status_shift` | Changes rank, legitimacy, public standing, access, or institutional position. |
+| `conflict` | Directly contests another actor, force, institution, obstacle, or claim. |
+| `evasion` | Avoids pursuit, exposure, obligation, danger, or unwanted contact. |
+| `protection` | Shields a person, place, object, secret, bond, or resource from harm or exposure. |
+| `resource_exchange` | Gains, spends, transfers, loses, withholds, or bargains over a concrete resource. |
+| `transformation` | Changes a condition, object, relationship, environment, or capability. |
+| `ritual_protocol` | Performs a formal, magical, legal, social, religious, or institutional procedure. |
+| `decision` | Forces, delays, clarifies, or commits to a consequential choice. |
+| `recovery` | Restores capacity, repairs damage, regroups, heals, rests, or stabilizes after pressure. |
 
 There is no `record_version` (greenfield resets to 1; no v2 / v3 history). There is no `shape` discriminator (single shape — reintroduce only if a second shape is ever needed). There is no `required_context` block (redundant with predicate preconditions). There is no `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, or `stop_policy` — these are arc / plot-rail framings that commitment blocks deliberately reject. There is no `safety_valves.max_words` ceiling — the engine does not enforce word counts.
 
 Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stories, or plot rails. A good block says: "when these conditions hold, this kind of action can happen, these beats dramatize it, these state effects follow." A bad block says: "advance Act II" or "raise stakes before midpoint."
+
+### 4.4a Shared `action_family` taxonomy
+
+`action_family` is the shared coarse taxonomy used by `PG.visible_affordances[].action_families` and `SLT.exit_options[].action_family`. Per-affordance `surface_hint: string` and `likely_effects: [<label>]` carry local specificity.
+
+| Value | Operational definition |
+|---|---|
+| `move` | Change physical position or navigate to a different place, route, stance, or cover. |
+| `evade` | Avoid detection, pursuit, contact, obligation, or immediate danger. |
+| `pursue` | Follow, chase, track, shadow, or close distance toward a target. |
+| `perceive` | Look, listen, sense, inspect, notice, or attend to available evidence. |
+| `investigate` | Test a hypothesis, interrogate evidence, search a location, or reconstruct causes. |
+| `communicate` | Say, signal, write, reveal, ask, report, warn, or otherwise convey information. |
+| `persuade` | Try to change another actor's belief, stance, permission, or willingness. |
+| `negotiate` | Exchange terms, bargain, compromise, threaten, or settle conditions. |
+| `bond` | Strengthen, strain, repair, acknowledge, or redefine a relationship. |
+| `oppose` | Resist, challenge, block, refuse, undercut, or contest another actor or force. |
+| `harm` | Damage, wound, sabotage, degrade, or impose a cost. |
+| `protect` | Defend, shield, hide, preserve, escort, or secure something at risk. |
+| `control` | Restrain, command, contain, direct, lock down, or otherwise govern behavior or access. |
+| `transfer` | Give, take, trade, steal, lend, return, or move possession / custody. |
+| `use` | Employ an object, place, capability, relationship, or institution for its ordinary function. |
+| `make_change` | Alter a material, social, informational, or environmental state. |
+| `ritual_protocol` | Perform a formalized procedure with magical, legal, social, religious, or institutional force. |
+| `recover` | Rest, heal, repair, regain, stabilize, resupply, or de-escalate damage. |
+| `wait` | Hold, observe, delay, defer, maintain position, or let a condition mature. |
+| `decide` | Choose, commit, prioritize, accept, reject, or resolve between alternatives. |
+
+### 4.4b STENT role and SREL axis taxonomies
+
+`STENT.role_in_story` is a closed list field, not a scalar. A story-local entity may carry more than one role when that role is operationally useful.
+
+| Value | Operational definition |
+|---|---|
+| `viewpoint` | The entity can anchor scene perception or page-plan point of view. |
+| `player_proxy` | The entity is the user's primary agency surface in the story bundle. |
+| `primary_actor` | The entity can initiate major page actions or state changes. |
+| `opposing_actor` | The entity actively resists or pressures a primary actor's goals. |
+| `allied_actor` | The entity materially supports a primary actor's goals. |
+| `authority` | The entity can grant, deny, enforce, or legitimate permissions and consequences. |
+| `dependent` | The entity's safety, access, or agency depends on another actor or institution. |
+| `witness` | The entity can observe and later testify, remember, report, or misreport events. |
+| `information_source` | The entity is a likely source of branch-relevant knowledge. |
+| `pressure_source` | The entity generates urgency, danger, obligation, scarcity, or social pressure. |
+| `social_bridge` | The entity connects otherwise separate actors, groups, institutions, or locations. |
+| `background` | The entity is present for continuity, texture, or constraints but is not currently action-driving. |
+
+`SREL.axis` is a closed relationship-axis list:
+
+| Value | Operational definition |
+|---|---|
+| `trust` | Degree of reliance on another actor's honesty, competence, or follow-through. |
+| `fear` | Degree of apprehension, intimidation, dread, or threat sensitivity. |
+| `desire` | Degree of wanting, attraction, envy, ambition, or motivated pull. |
+| `debt` | Degree of owed favor, compensation, restitution, gratitude, or liability. |
+| `intimacy` | Degree of private knowledge, emotional closeness, bodily closeness, or vulnerability. |
+| `loyalty` | Degree of durable allegiance, duty, or willingness to prioritize the relation. |
+| `resentment` | Degree of grievance, bitterness, jealousy, humiliation, or stored anger. |
+| `power_imbalance` | Degree of asymmetry in command, leverage, dependency, status, or coercive capacity. |
+| `attention` | Degree of focus, surveillance, fascination, neglect, or scrutiny. |
+| `familiarity` | Degree of personal knowledge, routine contact, recognition, or ease. |
+| `approval` | Degree of praise, sanction, endorsement, acceptance, or social permission. |
+| `respect` | Degree of esteem, deference, credibility, or perceived worth. |
+| `obligation` | Degree of duty, promise, role-bound responsibility, or expected performance. |
+| `hostility` | Degree of active antagonism, aggression, rivalry, contempt, or intent to harm. |
 
 ### 4.5 Prose receipt
 
@@ -238,7 +336,7 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | Predicate | Shape | Consumed by |
 |---|---|---|
 | `fact_true(SF-NNNN)` | Branch-local fact must be currently active. | turn-cycle eligibility |
-| `belief(holder, claim, confidence?)` | Belief must be held with at least the named confidence. | turn-cycle eligibility, social-state firewall |
+| `belief(holder, claim, mode?, confidence_floor?)` | Belief must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall |
 | `entity_status(STENT-NNNN, field, value)` | `field` is one of `life | agency | location`. | turn-cycle eligibility |
 | `relationship_axis(SREL-NNNN, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
 | `obligation_open(OBL-NNNN)` | Obligation must be in an open state. | turn-cycle eligibility |
@@ -246,7 +344,14 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `thread_active(THR-NNNN)` | Thread must be active. | turn-cycle eligibility |
 | `location(STENT-NNNN, STLOC-NNNN)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA ids. | turn-cycle eligibility |
+| `intention_active(STINT-NNNN)` | Named intention must be currently active. | turn-cycle eligibility |
+| `object_accessible(STENT-NNNN, STOBJ-NNNN)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
+| `artifact_accessible(STENT-NNNN, DA-NNNN)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
+| `affordance_available_to(STENT-NNNN, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
+
+`has_affordance(<action_family>)` is valid only for author-pool prefiltering when an actor is not yet bound. Branch-execution eligibility checks use `affordance_available_to(<actor>, <family>)` so plan-time grounding is actor-specific.
 
 ## 6. Action Routing
 
@@ -262,6 +367,8 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 | `terminal` | The action coherently closes the branch. |
 
 **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route and a page plan that dramatizes the outcome. A skill that drops a player action without producing a page is broken.
+
+`outcome_route: world_block` is still the routing value for impossible actions. It no longer pairs with the retired event-kind value named `world_block`; the `SE.event_kind` records the event source (`selected_choice`, `write_in_attempt`, `system_repair`, or `audit_repair`) while the route records the impossibility.
 
 ## 7. Eight Shared Hard Gates
 

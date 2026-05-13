@@ -16,7 +16,7 @@ arguments:
     description: "direct_batch only — integer; default 6, max 12. Number of SLT records to create. Matches bootstrap's minimal-seed growth increment."
     required: false
   - name: focus
-    description: "direct_batch only — natural-language hint guiding which purposes / action families the batch should emphasize (e.g., 'post-violence reflection arc', 'investigation phase coverage'). The Phase 4 diversity gate enforces minimum spread regardless."
+    description: "direct_batch only — natural-language hint guiding which move families / action families the batch should emphasize (e.g., 'post-violence recovery', 'investigation coverage'). The Phase 4 diversity gate enforces minimum spread regardless."
     required: false
   - name: audit_id
     description: "audit_repair only — SAU-NNNN of the source branching-story-health-audit report supplying the RSP cards."
@@ -35,9 +35,9 @@ Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-NNNN
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded from `_source/storylets/SLT-*.yaml` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)` (MCPENH-041 lands the task_type rename — see Guardrails §Known integration debt).
 
-(b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — purpose diversity, aftermath coverage, belief-or-relationship coverage, no branch-local dependencies in author-pool blocks); SLB-NNNN batch manifest drafted.
+(b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — move-family diversity, recovery coverage, belief-or-relationship coverage, no branch-local dependencies in global-author-pool blocks); SLB-NNNN batch manifest drafted.
 
-(c) The user has explicitly approved the deliverable summary (mode + source, SLT inventory by purpose, per-block one-line summary, per-block validation traces, batch-diversity result for `direct_batch`, skipped RSP cards for `audit_repair`, SLB manifest preview).
+(c) The user has explicitly approved the deliverable summary (mode + source, SLT inventory by move_family, per-block one-line summary, per-block validation traces, batch-diversity result for `direct_batch`, skipped RSP cards for `audit_repair`, SLB manifest preview).
 
 This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
@@ -84,7 +84,7 @@ Phase 6: HARD-GATE fires → atomic patch (create_slt_record per block)
 For `direct_batch`:
 
 - `target_count` — integer; default `6`, max `12`. Number of new SLT records to create.
-- `focus` — optional natural-language hint guiding purpose / action-family emphasis.
+- `focus` — optional natural-language hint guiding move-family / action-family emphasis.
 
 For `audit_repair`:
 
@@ -97,7 +97,7 @@ For `audit_repair`:
 - `storylet-batches/SLB-NNNN.md` — Always (batch manifest; direct-write markdown after patch submission)
 - Bundle `INDEX.md` — Always (updated last)
 
-All SLT records in a batch share the same `provenance.origin` value: `author_batch` for `direct_batch`, `audit_repair` for `audit_repair`. The third valid `provenance.origin` value (`bootstrap_seed`) is reserved for bootstrap; the fourth (`runtime_jit`) is reserved for turn-cycle's inlined JIT block creation.
+All SLT records in a batch share the same `provenance.origin` value: `author_batch` for `direct_batch`, `audit_repair` for `audit_repair`. The other valid `provenance.origin` values (`bootstrap_seed`, `manual_authoring`, `runtime_jit`) are reserved for bootstrap, one-off manual authoring, and turn-cycle's inlined JIT block creation.
 
 ## World-State Prerequisites
 
@@ -120,7 +120,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Validate `mode`: must be `direct_batch` or `audit_repair`; for `direct_batch`, validate `target_count` (1–12 inclusive, default 6); for `audit_repair`, validate `audit_id` matches the `SAU-NNNN` pattern and `finding_ids` is non-empty.
 4. Mode-specific load:
-   - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `purpose`.
+   - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `move_family`.
    - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-NNNN` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
 6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-NNNN` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / threads (for `direct_batch` gap diagnosis weighting).
@@ -131,21 +131,21 @@ If any precondition fails, the skill aborts before Phase 1.
 
 **`direct_batch`**: Analyze the current SLT pool against 11 causal-function coverage targets:
 
-1. Aftermath block (for violence / death / sex / betrayal outcomes)
+1. Recovery block (for violence / death / sex / betrayal outcomes)
 2. Belief-repair block (after deception or public discovery)
-3. Movement / escape block
-4. Relationship-pressure block (intimacy, conflict, alliance, severance)
-5. Consequence-payoff block (delivering on a pending `CNSQ`)
-6. Terminal / closure block
+3. Movement / evasion block
+4. Bond-shift or status-shift block (intimacy, conflict, alliance, severance)
+5. Consequence-resolution block (delivering on a pending `CNSQ`)
+6. Decision or terminal-setup block
 7. Fallback continuation block (proceeds when no specific block matches)
 8. Information-seeking / investigation block
-9. Reveal / disclosure block
-10. Refusal / declination block
-11. Negotiation / bargain block
+9. Disclosure block
+10. Opposition / refusal block
+11. Negotiation / resource-exchange block
 
 Identify which coverage targets are absent or under-represented in the current pool. If a `focus` hint was supplied, weight gap diagnosis toward the named focus area (the Phase 4 diversity gate still enforces minimum spread regardless).
 
-Output: a list of `target_count` planned blocks, each with a `purpose` value from the 12-purpose enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
+Output: a list of `target_count` planned blocks, each with a `move_family` value from the 16-value enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
 
 **`audit_repair`**: For each `RSP-NNNN` card in `finding_ids`, extract:
 
@@ -153,8 +153,8 @@ Output: a list of `target_count` planned blocks, each with a `purpose` value fro
 - `target_records` — records the block should engage with
 - `target_branch` — `BR-NNNN` or null (author-pool when null)
 - `rationale` — natural-language reason from the audit
-- `suggested_block_purpose` — from the 12-purpose enum
-- `visibility` — `author_pool | branch_scoped`
+- `suggested_block_move_family` — from the 16-value `move_family` enum
+- `visibility` — `global_author_pool | branch_scoped`
 
 Each commitment-block-kind card maps 1:1 to one planned block.
 
@@ -166,17 +166,17 @@ For each planned block (from Phase 1), draft a full `SLT` record per shared cont
 id: SLT-NNNN
 story_id: STORY-NNNN
 scope:
-  visibility: author_pool | branch_scoped   # branch_scoped only when audit_repair RSP specifies it
+  visibility: global_author_pool | branch_scoped   # branch_scoped only when audit_repair RSP specifies it
   branch_id: BR-NNNN | null
 created_at_page: null   # null for both modes; runtime_jit case lives in turn-cycle Phase 2
 title: <short descriptive title>
-purpose: aftermath | escalation | reveal | refusal | negotiation | flight | investigation | intimacy | conflict | repair | closure | transition
+move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery
 preconditions:
   hard: [<predicate per shared contract §5>]
   soft: [<predicate per shared contract §5>]
 beats:
   - beat_id: B1
-    function: setup | pressure | turn | consequence | exit
+    function: setup | action | pressure | turn | consequence | exit
     instruction: >
       <prose-facing beat instruction, no engine jargon>
   # 1-5 beats per block
@@ -185,7 +185,7 @@ effects:
   supersede: [<record id placeholder>]
   close: [<record id placeholder>]
 exit_options:
-  - intent: flee | confront | confess | hide | ask | attack | spare | bargain | wait | custom
+  - action_family: move | evade | pursue | perceive | investigate | communicate | persuade | negotiate | bond | oppose | harm | protect | control | transfer | use | make_change | ritual_protocol | recover | wait | decide
     surface_hint: <player-visible label>
     likely_effects: [<short label>]
 saliency:
@@ -199,9 +199,9 @@ provenance:
   origin: author_batch | audit_repair   # never runtime_jit for this skill
 ```
 
-**Predicate DSL discipline** (per shared contract §5): every predicate in `preconditions.hard` and `preconditions.soft` is one of the closed 10-predicate set (`fact_true`, `belief`, `entity_status`, `relationship_axis`, `obligation_open`, `consequence_pending`, `thread_active`, `location`, `has_affordance`, plus `all[]` / `any[]` / `not[]` combinators). No free-form predicate prose.
+**Predicate DSL discipline** (per shared contract §5): every predicate in `preconditions.hard` and `preconditions.soft` is one of the closed 17-predicate set (`fact_true`, `belief`, `entity_status`, `relationship_axis`, `obligation_open`, `consequence_pending`, `thread_active`, `location`, `has_affordance`, `record_active`, `intention_active`, `object_accessible`, `artifact_accessible`, `affordance_available_to`, plus `all[]` / `any[]` / `not[]` combinators). Prefer `affordance_available_to(<actor>, <action_family>)` for branch-scoped blocks; `has_affordance(<action_family>)` is only an author-pool prefilter when the actor is not yet bound. Use refined `belief(holder, claim, mode?, confidence_floor?)`, where `mode` is a `BEL.belief_mode` value. No free-form predicate prose.
 
-**Beat discipline**: 1–5 beats per block. Each beat names a `function` (setup / pressure / turn / consequence / exit) and a prose-facing instruction that the renderer can dramatize without engine vocabulary.
+**Beat discipline**: 1–5 beats per block. Each beat names a `function` (setup / action / pressure / turn / consequence / exit) and a prose-facing instruction that the renderer can dramatize without engine vocabulary.
 
 **Schema-minimalism discipline** (per FOUNDATIONS §Story Bundles §5b): every field on the block conforms to the shared contract §4.4 schema. **NO** `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version` discriminator above `1`, or `shape:` discriminator. The block is a causal move, not a dramatic-act surrogate.
 
@@ -209,17 +209,17 @@ provenance:
 
 Run 6 per-block gates on each drafted SLT record:
 
-1. **Schema completeness** — all required fields per shared contract §4.4 are present (`id`, `story_id`, `scope.visibility`, `title`, `purpose`, `preconditions.hard` with ≥1 entry, `beats[]` with ≥1 entry, `exit_options[]` with ≥1 entry, `saliency.urgency`, `saliency.cooldown_pages`, `mystery_policy.allowed_authority`, `provenance.origin`). The presence of ANY of the explicitly-forbidden legacy fields (`arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version > 1`, `shape:`) is `FAIL` per FOUNDATIONS §Story Bundles §5a. Missing required field OR presence of forbidden field → `FAIL`.
+1. **Schema completeness** — all required fields per shared contract §4.4 are present (`id`, `story_id`, `scope.visibility`, `title`, `move_family`, `preconditions.hard` with ≥1 entry, `beats[]` with ≥1 entry, `exit_options[]` with ≥1 entry, `saliency.urgency`, `saliency.cooldown_pages`, `mystery_policy.allowed_authority`, `provenance.origin`). The presence of ANY of the explicitly-forbidden legacy fields (`arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version > 1`, `shape:`) is `FAIL` per FOUNDATIONS §Story Bundles §5a. Missing required field OR presence of forbidden field → `FAIL`.
 
-2. **Predicate parse** — every predicate in `preconditions.hard` and `preconditions.soft` is one of the 10 closed-DSL predicates, with valid record-id references. Free-form prose, undefined predicates, or ill-formed combinator syntax → `FAIL`.
+2. **Predicate parse** — every predicate in `preconditions.hard` and `preconditions.soft` is one of the 17 closed-DSL predicates, with valid argument shapes and record-id references. Free-form prose, undefined predicates, or ill-formed combinator syntax → `FAIL`.
 
-3. **Branch-scope legality** — `scope.visibility: author_pool` blocks reference NO branch-local records (records whose `created_at_page` is non-null). `scope.visibility: branch_scoped` blocks reference only records in the named `scope.branch_id`'s lineage. Cross-branch references → `FAIL`.
+3. **Branch-scope legality** — `scope.visibility: global_author_pool` blocks reference NO branch-local records (records whose `created_at_page` is non-null). `scope.visibility: branch_prefix_scoped` blocks reference only records in the named branch's lineage and descendants. `scope.visibility: branch_scoped` blocks reference only records in the named `scope.branch_id`'s lineage. Cross-branch references → `FAIL`.
 
 4. **Mystery / invariant firewall** — `mystery_policy.forbidden_resolutions[]` does NOT include any mystery the block's effects could resolve. `mystery_policy.allowed_authority` is compatible with the block's effects (a block whose effects create a `canon_candidate`-authority `SF` cannot have `allowed_authority: none`). World invariants (loaded in Pre-flight step 6) are NOT violated by any predicate or effect. Inconsistent OR violating → `FAIL`.
 
 5. **Effect legality** — `effects.create | supersede | close` references valid record classes; supersede targets must reference records the block's preconditions establish as active; close targets must reference records that are currently open per the bundle state. Dangling references → `FAIL`.
 
-6. **Exit-option grounding** — each entry in `exit_options[]` has a non-empty `intent`, `surface_hint`, and at least an empty `likely_effects[]` list (per shared contract §4.4). Missing field → `FAIL`.
+6. **Exit-option grounding** — each entry in `exit_options[]` has a non-empty `action_family`, `surface_hint`, and at least an empty `likely_effects[]` list (per shared contract §4.4). Missing field → `FAIL`.
 
 Blocks that fail any gate are removed from the batch with a logged rejection reason in Phase 5's manifest. If all blocks fail, abort before Phase 4.
 
@@ -229,10 +229,10 @@ Blocks that fail any gate are removed from the batch with a logged rejection rea
 
 For `direct_batch`, verify across the surviving blocks:
 
-1. **Purpose diversity** — at least 3 distinct `purpose` values across the batch.
-2. **Aftermath coverage** — at least 1 block has `purpose: aftermath`. The bundle needs aftermath coverage so that violence, betrayal, sex, and death outcomes route to graceful follow-up.
+1. **Move-family diversity** — at least 3 distinct `move_family` values across the batch.
+2. **Recovery coverage** — at least 1 block has `move_family: recovery`. The bundle needs recovery coverage so that violence, betrayal, sex, and death outcomes route to graceful follow-up.
 3. **Belief-or-relationship coverage** — at least 1 block has effects that modify `BEL` or `SREL` records (the social-state engine needs ongoing pool support per FOUNDATIONS §Story Bundles §6a).
-4. **No branch-local dependencies in author-pool blocks** — re-verifies Phase 3 gate 3 at batch scope.
+4. **No branch-local dependencies in global-author-pool blocks** — re-verifies Phase 3 gate 3 at batch scope.
 
 If any batch-level check fails, regenerate the affected blocks (loop to Phase 2 for replacements) OR shrink the batch to the diversity-compliant subset. Surface the regeneration / shrink decision in the Phase 6 deliverable summary.
 
@@ -250,9 +250,9 @@ Draft `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-NNNN.md`:
 
 ## Blocks
 
-| SLT id | purpose | scope | source RSP (if audit_repair) | validation |
+| SLT id | move_family | scope | source RSP (if audit_repair) | validation |
 |---|---|---|---|---|
-| SLT-NNNN | <purpose> | author_pool | RSP-NNNN | PASS (6/6 gates) |
+| SLT-NNNN | <move_family> | global_author_pool | RSP-NNNN | PASS (6/6 gates) |
 | ... | | | | |
 
 ## Skipped RSP cards (audit_repair only)
@@ -277,8 +277,8 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
 2. Dry-run via `mcp__worldloom__validate_patch_plan` (exercises `record_schema_compliance` for each SLT record).
 3. Present the complete deliverable summary to the user:
    - Mode + source (focus hint OR audit_id + finding_ids).
-   - SLT inventory by `purpose` value (Phase 1 + Phase 4 diagnosis preserved).
-   - Per-block one-line summary (id, purpose, title, beat count, exit-option count).
+   - SLT inventory by `move_family` value (Phase 1 + Phase 4 diagnosis preserved).
+   - Per-block one-line summary (id, move_family, title, beat count, exit-option count).
    - Per-block validation trace (6 gates → PASS / rationale).
    - Batch-diversity validation result (`direct_batch` only).
    - Any skipped RSP cards (`audit_repair` only, with `repair_kind` + recommended sibling + skip reason).
@@ -302,7 +302,7 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
 All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
 - `SLT` (§4.4) — commitment block schema (this skill's primary output).
-- Predicate DSL (§5) — closed 10-predicate language for `preconditions.hard | soft`.
+- Predicate DSL (§5) — closed 17-predicate language for `preconditions.hard | soft`.
 - The SLB manifest is a markdown direct-write artifact (not an atomic `_source/` record); its shape is defined inline in this skill's Phase 5 template.
 
 ## FOUNDATIONS Alignment
@@ -334,7 +334,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 - **Never write rendered prose.** Commitment-block-authoring writes record schemas, not narrative text. Beat instructions are inputs to the external renderer when turn-cycle later authors a page plan using the selected block.
 - **Commitment blocks are causal moves, not dramatic acts.** Per FOUNDATIONS §Story Bundles §5a, the schema explicitly forbids `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version` discriminators above `1`, and `shape:` discriminators. The skill REJECTS any attempt to write blocks with those fields (Phase 3 gate 1 schema completeness extends to schema strictness).
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Every field in every record drafted by this skill conforms to the shared contract §4.4 schema. No nice-to-have fields.
-- **Predicate DSL is closed** (10 predicates per shared contract §5). No free-form predicate prose; Phase 3 gate 2 rejects undefined predicates.
+- **Predicate DSL is closed** (17 predicates per shared contract §5). No free-form predicate prose; Phase 3 gate 2 rejects undefined predicates.
 - **No `in_memory_jit` mode.** The streamlined-pipeline source report named three modes; this skill ships two (`direct_batch`, `audit_repair`). Turn-cycle's Phase 2 inlines JIT block creation following the same shared contract §4.4 schema. The two skills share the schema discipline without chaining: turn-cycle never invokes commitment-block-authoring; commitment-block-authoring never produces a `runtime_jit`-origin block. If a future refactor extracts JIT to a shared sub-routine, a new ticket can capture that work.
 - **No word-count enforcement** (per FOUNDATIONS §Story Bundles §9). Beat instructions carry no min/max word counts.
 - **Skills do not chain.** Commitment-block-authoring never invokes `branching-story-turn-cycle`, `branching-story-prose-attach`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. When `audit_repair` skips an RSP card with non-commitment-block `repair_kind`, the SLB manifest records the sibling-handoff recommendation; the user separately invokes the named sibling.

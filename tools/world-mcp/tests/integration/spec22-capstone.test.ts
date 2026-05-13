@@ -42,6 +42,7 @@ test("greenfield story schema discovery exposes BEL and omits retired ARC_TRACE"
     "created_at_page",
     "holder",
     "claim",
+    "belief_mode",
     "truth_relation",
     "confidence",
     "visibility",

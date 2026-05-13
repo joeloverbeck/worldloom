@@ -55,6 +55,7 @@ test("recursive_reference_closure fails for sibling-branch leakage at nested dep
       storyRecord("story_event_record", "SE-0009", "events", {
         id: "SE-0009",
         story_id: "STORY-001",
+        event_kind: "selected_choice",
         created_at_page: "PG-0099",
         ops: []
       })
@@ -381,6 +382,7 @@ test("recursive_reference_closure fails for sibling applied_event_ops page peers
       storyRecord("story_event_record", "SE-0099", "events", {
         id: "SE-0099",
         story_id: "STORY-001",
+        event_kind: "selected_choice",
         created_at_page: "PG-0099",
         ops: []
       })

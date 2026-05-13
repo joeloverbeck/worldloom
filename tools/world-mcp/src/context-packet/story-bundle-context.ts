@@ -8,7 +8,8 @@ import { resolveWorldDirectory } from "../db";
 
 import type {
   ContextPacketStoryBundleContext,
-  ContextPacketStoryBundleContextSummary
+  ContextPacketStoryBundleContextSummary,
+  RoleInStory
 } from "./shared";
 
 interface StoryNodeRow {
@@ -34,6 +35,20 @@ interface PageRecord {
 const ACTIVE_THREAD_STATUSES = new Set(["active", "pressured", "critical", "dormant"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
+const ROLE_IN_STORY_VALUES = new Set<RoleInStory>([
+  "viewpoint",
+  "player_proxy",
+  "primary_actor",
+  "opposing_actor",
+  "allied_actor",
+  "authority",
+  "dependent",
+  "witness",
+  "information_source",
+  "pressure_source",
+  "social_bridge",
+  "background"
+]);
 
 function rowsForNodeType(
   db: Database.Database,
@@ -86,6 +101,24 @@ function asNumber(value: unknown, fallback = 0): number {
 
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+}
+
+function isRoleInStory(value: string): value is RoleInStory {
+  return ROLE_IN_STORY_VALUES.has(value as RoleInStory);
+}
+
+function asRoleInStoryList(value: unknown): RoleInStory[] {
+  const candidates =
+    typeof value === "string"
+      ? value.split(",")
+      : Array.isArray(value)
+        ? value
+        : [];
+
+  return candidates
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.trim())
+    .filter((entry): entry is RoleInStory => isRoleInStory(entry));
 }
 
 function incrementCounter(counter: Record<string, number>, key: string): void {
@@ -286,7 +319,7 @@ function buildCastBindList(frontmatter: Record<string, unknown>): ContextPacketS
   return arrayOfObjects(frontmatter.cast_bind_list).map((entry) => ({
     char_id: asNullableString(entry.char_id),
     stent_id: asString(entry.stent_id),
-    role_in_story: asString(entry.role_in_story)
+    role_in_story: asRoleInStoryList(entry.role_in_story)
   }));
 }
 

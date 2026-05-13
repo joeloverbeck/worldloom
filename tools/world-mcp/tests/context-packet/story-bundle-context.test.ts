@@ -61,6 +61,10 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       result.story_bundle_context.cast_bind_list.map((entry) => entry.stent_id),
       ["STENT-0002"]
     );
+    assert.deepEqual(result.story_bundle_context.cast_bind_list[0]?.role_in_story, [
+      "viewpoint",
+      "primary_actor"
+    ]);
     assert.deepEqual(result.story_bundle_context.invariants_acknowledged, [
       "INV-social-intimacy"
     ]);

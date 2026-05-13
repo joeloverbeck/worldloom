@@ -89,26 +89,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
-    const arcSchemaExecution = result.executions.find(
-      (execution) => execution.name === "arc_schema_compliance"
-    );
-    assert.equal(arcSchemaExecution?.status, "skipped");
-    const choiceWorthinessExecution = result.executions.find(
-      (execution) => execution.name === "choice_worthiness_completeness"
-    );
-    assert.equal(choiceWorthinessExecution?.status, "skipped");
-    const stopPolicyExecution = result.executions.find(
-      (execution) => execution.name === "stop_policy_parsability"
-    );
-    assert.equal(stopPolicyExecution?.status, "skipped");
-    const effectModelLegalityExecution = result.executions.find(
-      (execution) => execution.name === "effect_model_legality"
-    );
-    assert.equal(effectModelLegalityExecution?.status, "skipped");
-    const effectModelReplaySafetyExecution = result.executions.find(
-      (execution) => execution.name === "effect_model_replay_safety"
-    );
-    assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
     assert.ok(!result.executions.some((execution) => execution.name === "narrative_point_classification"));
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
@@ -127,11 +107,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     for (const execution of result.executions.filter(
       (row) =>
         row !== storyletExecution &&
-        row !== arcSchemaExecution &&
-        row !== choiceWorthinessExecution &&
-        row !== stopPolicyExecution &&
-        row !== effectModelLegalityExecution &&
-        row !== effectModelReplaySafetyExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution
@@ -223,7 +198,9 @@ test("validatePatchPlan runs storylet predicate parsing for Shape B storylet ops
     const plan = storyletPlan({
       id: "SLT-0001",
       story_id: "STORY-001",
-      hard_preconds: [{ pred: "unknown_predicate", op: "==", value: true }]
+      preconditions: {
+        hard: [{ pred: "unknown_predicate", op: "==", value: true }]
+      }
     });
 
     const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
@@ -240,7 +217,9 @@ test("validatePatchPlan applies story-bundle record schemas to Shape B story ops
   await withTempRoot(async () => {
     const plan = storyletPlan({
       id: "SLT-0001",
-      hard_preconds: []
+      preconditions: {
+        hard: []
+      }
     });
 
     const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
@@ -259,19 +238,7 @@ test("validatePatchPlan accepts complete storylet records in Shape B story ops",
     const result = await validatePatchPlan(storyletPlan(completeStoryletRecord()) as unknown as PatchPlanEnvelope);
 
     assert.ok(result.executions.some((row) => row.name === "record_schema_compliance" && row.status === "pass"));
-    assert.ok(result.executions.some((row) => row.name === "effect_model_legality" && row.status === "pass"));
     assert.ok(!result.verdicts.some((verdict) => verdict.validator === "record_schema_compliance"));
-    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_legality"));
-  });
-});
-
-test("validatePatchPlan runs effect-model replay safety for Shape B page ops", async () => {
-  await withTempRoot(async () => {
-    const result = await validatePatchPlan(replaySafePagePlan() as unknown as PatchPlanEnvelope);
-
-    const execution = result.executions.find((row) => row.name === "effect_model_replay_safety");
-    assert.equal(execution?.status, "pass");
-    assert.ok(!result.verdicts.some((verdict) => verdict.validator === "effect_model_replay_safety"));
   });
 });
 
@@ -280,7 +247,6 @@ test("validatePatchPlan accepts pending page-cycle pages after prose-state valid
     const result = await validatePatchPlan(pendingProsePagePlan() as unknown as PatchPlanEnvelope);
 
     for (const name of [
-      "effect_model_replay_safety",
       "snapshot_replay_equality"
     ]) {
       const execution = result.executions.find((row) => row.name === name);
@@ -292,16 +258,16 @@ test("validatePatchPlan accepts pending page-cycle pages after prose-state valid
 
 test("validatePatchPlan rejects Shape B storylet ops missing schema-required fields", async () => {
   await withTempRoot(async () => {
-    const missingMysterySafety = completeStoryletRecord();
-    delete missingMysterySafety.mystery_safety;
+    const missingMysteryPolicy = completeStoryletRecord();
+    delete missingMysteryPolicy.mystery_policy;
 
-    const result = await validatePatchPlan(storyletPlan(missingMysterySafety) as unknown as PatchPlanEnvelope);
+    const result = await validatePatchPlan(storyletPlan(missingMysteryPolicy) as unknown as PatchPlanEnvelope);
 
     assert.ok(result.verdicts.some(
       (verdict) =>
         verdict.validator === "record_schema_compliance" &&
         verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
-        verdict.message.includes("mystery_safety")
+        verdict.message.includes("mystery_policy")
     ));
   });
 });
@@ -383,6 +349,7 @@ function pagePlanWithBranchLeak() {
       storyPatch("create_se_record", "events", {
         id: "SE-0009",
         story_id: "STORY-001",
+        event_kind: "selected_choice",
         created_at_page: "PG-0099",
         ops: []
       })
@@ -430,6 +397,7 @@ function replaySafePagePlan() {
       storyPatch("create_se_record", "events", {
         id: "SE-0002",
         story_id: "STORY-001",
+        event_kind: "selected_choice",
         created_at_page: "PG-0002",
         ops: [
           {
@@ -464,7 +432,6 @@ function pendingProsePagePlan() {
   const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
   const page = pagePatch?.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
-  page.prose_status = "pending";
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
@@ -486,7 +453,6 @@ function pendingChildAfterRenderedParentPlan() {
   page.id = "PG-0003";
   page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
   page.applied_event_ops = ["SE-0003"];
-  page.prose_status = "pending";
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
@@ -504,10 +470,62 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
 }
 
 function completeStoryletRecord(): Record<string, unknown> {
-  return yaml.load(
-    readFileSync(path.join(FIXTURE_ROOT, "story-storylet-complete.yaml"), "utf8"),
-    { schema: yaml.JSON_SCHEMA }
-  ) as Record<string, unknown>;
+  return {
+    id: "SLT-0001",
+    story_id: "STORY-001",
+    scope: {
+      visibility: "global_author_pool",
+      branch_id: null
+    },
+    created_at_page: null,
+    title: "Complete commitment block",
+    move_family: "protection",
+    preconditions: {
+      hard: [],
+      soft: []
+    },
+    beats: [
+      {
+        beat_id: "B1",
+        function: "setup",
+        instruction: "Establish the damaged gate and Mara's boundary."
+      },
+      {
+        beat_id: "B2",
+        function: "action",
+        instruction: "Offer practical help without forcing disclosure."
+      },
+      {
+        beat_id: "B3",
+        function: "exit",
+        instruction: "Close on the next concrete commitment."
+      }
+    ],
+    effects: {
+      create: [],
+      supersede: [],
+      close: []
+    },
+    exit_options: [
+      {
+        action_family: "communicate",
+        surface_hint: "Ask one bounded follow-up question.",
+        likely_effects: ["limited-disclosure"]
+      }
+    ],
+    saliency: {
+      urgency: "medium",
+      cooldown_pages: 0,
+      tags: ["gate-repair"]
+    },
+    mystery_policy: {
+      forbidden_resolutions: [],
+      allowed_authority: "apparent"
+    },
+    provenance: {
+      origin: "manual_authoring"
+    }
+  };
 }
 
 function completeStateSnapshot(): Record<string, unknown> {

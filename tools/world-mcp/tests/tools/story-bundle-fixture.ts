@@ -63,7 +63,7 @@ export function buildStoryBundleWorld(root: string): void {
           "id: STENT-0002",
           "name: Marla Kern",
           "world_ent_id: entity:marla-kern",
-          "role_in_story: protagonist",
+          "role_in_story: [viewpoint, primary_actor]",
           ""
         ].join("\n")
       },
@@ -318,7 +318,7 @@ export function buildStoryBundleWorld(root: string): void {
       "cast_bind_list:",
       "  - char_id: CHAR-0001",
       "    stent_id: STENT-0002",
-      "    role_in_story: protagonist",
+      "    role_in_story: [viewpoint, primary_actor]",
       "invariants_acknowledged:",
       "  - INV-social-intimacy",
       "---",

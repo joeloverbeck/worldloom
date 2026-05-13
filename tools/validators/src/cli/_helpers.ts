@@ -42,11 +42,6 @@ const RULE_NUMBER_TO_PREFIX = new Map([
   ["12", "rule12_"]
 ]);
 const NAMED_RULE_SELECTORS = new Set([
-  "arc_schema_compliance",
-  "choice_worthiness_completeness",
-  "effect_model_legality",
-  "effect_model_replay_safety",
-  "stop_policy_parsability",
   "storylet_predicate_dsl_parsability"
 ]);
 

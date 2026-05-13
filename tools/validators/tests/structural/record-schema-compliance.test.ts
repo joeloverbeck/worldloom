@@ -276,7 +276,7 @@ test("record_schema_compliance accepts complete storylet records", async () => {
 });
 
 test("record_schema_compliance rejects storylets missing required structural fields", async () => {
-  for (const field of ["mystery_safety", "provenance", "visibility"] as const) {
+  for (const field of ["move_family", "preconditions", "beats", "mystery_policy"] as const) {
     const parsed = completeStorylet();
     delete parsed[field];
 
@@ -296,59 +296,58 @@ test("record_schema_compliance rejects storylet nested required-field omissions"
   const provenanceMissingOrigin = completeStorylet();
   delete (provenanceMissingOrigin.provenance as Record<string, unknown>).origin;
 
-  const visibilityMissingScope = completeStorylet();
-  delete (visibilityMissingScope.visibility as Record<string, unknown>).scope;
+  const scopeMissingVisibility = completeStorylet();
+  delete (scopeMissingVisibility.scope as Record<string, unknown>).visibility;
 
   const beatMissingTarget = completeStorylet();
-  delete (((beatMissingTarget.beat_plan as Record<string, unknown>).beats as Record<string, unknown>[])[0]!).realization_target;
+  delete ((beatMissingTarget.beats as Record<string, unknown>[])[0]!).instruction;
 
   const result = await recordSchemaCompliance.run(
     {},
     context([
       storyletRecord(provenanceMissingOrigin, "SLT-0002"),
-      storyletRecord(visibilityMissingScope, "SLT-0003"),
+      storyletRecord(scopeMissingVisibility, "SLT-0003"),
       storyletRecord(beatMissingTarget, "SLT-0004")
     ])
   );
 
   assert.ok(result.some((verdict) => verdict.message.includes("/provenance")));
-  assert.ok(result.some((verdict) => verdict.message.includes("/visibility")));
-  assert.ok(result.some((verdict) => verdict.message.includes("/beat_plan/beats/0")));
+  assert.ok(result.some((verdict) => verdict.message.includes("/scope")));
+  assert.ok(result.some((verdict) => verdict.message.includes("/beats/0")));
 });
 
-test("record_schema_compliance enforces v2 storylet shape and retired choice templates", async () => {
-  const retiredChoiceTemplate = completeStorylet();
-  retiredChoiceTemplate.choice_templates = [choiceTemplate("observe")];
+test("record_schema_compliance enforces minimalist storylet shape and retired legacy fields", async () => {
+  const legacyChoiceTemplate = completeStorylet();
+  legacyChoiceTemplate.choice_templates = [choiceTemplate("observe")];
 
-  const invalidShape = completeStorylet();
-  invalidShape.shape = "invalid_shape";
+  const legacyShape = completeStorylet();
+  legacyShape.shape = "scene_commitment_arc";
 
-  const invalidIntensity = completeStorylet();
-  invalidIntensity.content_intensity = "extreme";
+  const invalidMoveFamily = completeStorylet();
+  invalidMoveFamily.move_family = "aftermath";
 
   const invalidOrigin = completeStorylet();
   (invalidOrigin.provenance as Record<string, unknown>).origin = "weird_origin";
 
-  const invalidEffectType = completeStorylet();
-  ((((invalidEffectType.effect_model as Record<string, unknown>).variants as Record<string, unknown>[])[0]!)
-    .required_effects as Record<string, unknown>[])[0]!.type = "weird_effect";
+  const invalidActionFamily = completeStorylet();
+  ((invalidActionFamily.exit_options as Record<string, unknown>[])[0]!).action_family = "custom";
 
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(retiredChoiceTemplate, "SLT-0005"),
-      storyletRecord(invalidShape, "SLT-0007"),
-      storyletRecord(invalidIntensity, "SLT-0008"),
+      storyletRecord(legacyChoiceTemplate, "SLT-0005"),
+      storyletRecord(legacyShape, "SLT-0007"),
+      storyletRecord(invalidMoveFamily, "SLT-0008"),
       storyletRecord(invalidOrigin, "SLT-0009"),
-      storyletRecord(invalidEffectType, "SLT-0010")
+      storyletRecord(invalidActionFamily, "SLT-0010")
     ])
   );
 
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.message.includes("/choice_templates")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0007" && verdict.message.includes("/shape")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0008" && verdict.message.includes("/content_intensity")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0007" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0008" && verdict.message.includes("/move_family")));
   assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0009" && verdict.message.includes("/provenance/origin")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/effect_model/variants/0/required_effects/0/type")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/exit_options/0/action_family")));
 });
 
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {
@@ -443,7 +442,62 @@ function readFixture(filename: string): string {
 }
 
 function completeStorylet(): Record<string, unknown> {
-  return yaml.load(readFixture("story-storylet-complete.yaml"), { schema: yaml.JSON_SCHEMA }) as Record<string, unknown>;
+  return {
+    id: "SLT-0001",
+    story_id: "STORY-001",
+    scope: {
+      visibility: "global_author_pool",
+      branch_id: null
+    },
+    created_at_page: null,
+    title: "Complete commitment block",
+    move_family: "protection",
+    preconditions: {
+      hard: [],
+      soft: []
+    },
+    beats: [
+      {
+        beat_id: "B1",
+        function: "setup",
+        instruction: "Establish the damaged gate and Mara's boundary."
+      },
+      {
+        beat_id: "B2",
+        function: "action",
+        instruction: "Offer practical help without forcing disclosure."
+      },
+      {
+        beat_id: "B3",
+        function: "exit",
+        instruction: "Close on the next concrete commitment."
+      }
+    ],
+    effects: {
+      create: [],
+      supersede: [],
+      close: []
+    },
+    exit_options: [
+      {
+        action_family: "communicate",
+        surface_hint: "Ask one bounded follow-up question.",
+        likely_effects: ["limited-disclosure"]
+      }
+    ],
+    saliency: {
+      urgency: "medium",
+      cooldown_pages: 0,
+      tags: ["gate-repair"]
+    },
+    mystery_policy: {
+      forbidden_resolutions: [],
+      allowed_authority: "apparent"
+    },
+    provenance: {
+      origin: "manual_authoring"
+    }
+  };
 }
 
 function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "SLT-0001")) {

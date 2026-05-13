@@ -5,7 +5,26 @@
   "required": ["id", "story_id"],
   "properties": {
     "id": { "type": "string", "pattern": "^STENT-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "role_in_story": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "viewpoint",
+          "player_proxy",
+          "primary_actor",
+          "opposing_actor",
+          "allied_actor",
+          "authority",
+          "dependent",
+          "witness",
+          "information_source",
+          "pressure_source",
+          "social_bridge",
+          "background"
+        ]
+      }
+    }
   },
   "additionalProperties": true
 }

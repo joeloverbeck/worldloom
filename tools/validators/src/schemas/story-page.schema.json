@@ -2,33 +2,131 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-page.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "prose_plan_path", "prose_status", "deferred_validation_trace"],
+  "required": ["id", "story_id", "prose_plan_path"],
   "properties": {
     "id": { "type": "string", "pattern": "^PG-[0-9]{4}$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
     "prose_path": {
       "type": ["string", "null"],
       "pattern": "^pages-prose/PG-[0-9]{4}\\.md$",
-      "description": "Relative path to rendered prose; null when prose_status != 'rendered'."
+      "description": "Relative path to rendered prose; null until prose is attached via branching-story-prose-attach."
     },
     "prose_plan_path": {
       "type": "string",
       "pattern": "^pages-prose-plans/PG-[0-9]{4}\\.md$",
       "description": "Relative path to the comprehensive plan; always present after this rework."
     },
-    "prose_status": {
-      "enum": ["pending", "rendered", "superseded"],
-      "description": "Transitional state field; pending at bundle commit, rendered after finalize."
-    },
-    "deferred_validation_trace": {
+    "validation_trace": {
       "type": "object",
-      "required": ["prose_ledger_consistency", "prose_critic_8_axis"],
+      "additionalProperties": true,
+      "description": "One PASS-with-rationale entry per shared hard gate."
+    },
+    "state_snapshot": {
+      "type": "object",
       "properties": {
-        "prose_ledger_consistency": { "type": "string" },
-        "prose_critic_8_axis": { "type": "string" }
+        "entity_status": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["life", "agency", "location"],
+            "properties": {
+              "life": {
+                "enum": ["alive", "dead", "unknown"]
+              },
+              "agency": {
+                "enum": ["free", "constrained", "coerced", "captive", "incapacitated", "unconscious", "dead", "unknown"]
+              },
+              "location": {
+                "oneOf": [
+                  { "type": "string", "pattern": "^STLOC-[0-9]{4}$" },
+                  { "enum": ["unknown", "concealed", "offstage"] }
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "unresolved_mystery_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["mystery_id", "authority", "status"],
+            "properties": {
+              "mystery_id": {
+                "type": "string",
+                "pattern": "^M-[0-9]{4}$"
+              },
+              "authority": {
+                "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"]
+              },
+              "status": {
+                "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "visible_affordances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ordinal", "label", "grounded_in", "available_to", "action_families"],
+            "properties": {
+              "ordinal": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "grounded_in": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(STLOC|STOBJ)-[0-9]{4}$"
+                }
+              },
+              "available_to": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^STENT-[0-9]{4}$"
+                }
+              },
+              "action_families": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "move",
+                    "evade",
+                    "pursue",
+                    "perceive",
+                    "investigate",
+                    "communicate",
+                    "persuade",
+                    "negotiate",
+                    "bond",
+                    "oppose",
+                    "harm",
+                    "protect",
+                    "control",
+                    "transfer",
+                    "use",
+                    "make_change",
+                    "ritual_protocol",
+                    "recover",
+                    "wait",
+                    "decide"
+                  ]
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
       },
-      "additionalProperties": false,
-      "description": "Per-gate verdicts; DEFERRED string at plan-commit; PASS/FAIL string after finalize."
+      "additionalProperties": true
     }
   },
   "additionalProperties": true
