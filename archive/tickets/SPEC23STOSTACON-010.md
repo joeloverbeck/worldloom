@@ -1,6 +1,6 @@
 # SPEC23STOSTACON-010: Refresh machine-facing storylet filter examples after SLT schema rebuild
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md`
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`docs/MACHINE-FACING-LAYER.md` still documents a `list_records` storylet filter example using old SLT fields: `shape`, `content_intensity`, and `"visibility.scope"`. `archive/tickets/SPEC23STOSTACON-002.md` rebuilt `tools/validators/src/schemas/story-storylet.schema.json` to the contract §4.4 minimalist shape, where those fields are gone and the visibility path is `scope.visibility`. Leaving the public machine-facing docs with old filter keys can teach callers to query fields that current contract-shaped SLT records no longer carry.
+At intake, `docs/MACHINE-FACING-LAYER.md` documented a `list_records` storylet filter example using old SLT fields: `shape`, `content_intensity`, and `"visibility.scope"`. `archive/tickets/SPEC23STOSTACON-002.md` rebuilt `tools/validators/src/schemas/story-storylet.schema.json` to the contract §4.4 minimalist shape, where those fields are gone and the visibility path is `scope.visibility`. Leaving the public machine-facing docs with old filter keys would have taught callers to query fields that current contract-shaped SLT records no longer carry.
 
 ## Assumption Reassessment (2026-05-13)
 
@@ -17,6 +17,7 @@
 3. Shared boundary under audit: this is the public retrieval docs surface for `list_records` filters, not the validator schema itself. The filter example should demonstrate field paths that exist on current parsed storylet records.
 4. FOUNDATIONS principle motivating this ticket: §Story Bundles §5b makes the shared story-state contract authoritative for story-record schemas. Machine-facing docs should not advertise old fields as current retrieval examples after the schema rebuild.
 5. Adjacent contradiction classification: this was explicitly excluded from `archive/tickets/SPEC23STOSTACON-002.md` because that ticket owned the validators-schema seam. This ticket owns only the docs/public retrieval example.
+6. Verification command correction: the drafted stale-key grep included bare `shape`, but `docs/MACHINE-FACING-LAYER.md` legitimately uses that word in unrelated response-shape prose. The landed negative proof scopes to the distinctive old example literals (`routine_disruption`, `reflection_dilemma`, `content_intensity`, and `visibility.scope`) instead of pretending the document has no generic `shape` wording.
 
 ## Architecture Check
 
@@ -29,23 +30,23 @@
 2. Replacement example uses current SLT contract fields such as `move_family`, `scope.visibility`, and `exit_options.action_family` -> manual review against `.claude/skills/_shared-templates/story-state-contract.md` §4.4.
 3. No implementation behavior changes -> documentation-only verification boundary.
 
-## What to Change
+## Landed Changes
 
-### 1. Update the `list_records` filter example
+### 1. Updated the `list_records` filter example
 
-In `docs/MACHINE-FACING-LAYER.md`, replace the old storylet example:
+In `docs/MACHINE-FACING-LAYER.md`, replaced the old storylet example:
 
 - `shape`
 - `content_intensity`
 - `"visibility.scope"`
 
-with current contract-shaped examples such as:
+with current contract-shaped examples:
 
 - `move_family`
 - `"scope.visibility"`
 - `"exit_options.action_family"`
 
-Keep the surrounding description of dotted paths and filter arrays intact.
+The surrounding description of dotted paths and filter arrays remains intact.
 
 ## Files to Touch
 
@@ -61,7 +62,7 @@ Keep the surrounding description of dotted paths and filter arrays intact.
 
 ### Tests That Must Pass
 
-1. `grep -nE 'shape|content_intensity|visibility\\.scope' docs/MACHINE-FACING-LAYER.md` shows no hits in the `list_records` storylet filter example.
+1. `grep -nE 'routine_disruption|reflection_dilemma|content_intensity|visibility\\.scope' docs/MACHINE-FACING-LAYER.md` returns no hits for the stale example literals.
 2. `grep -nE 'move_family|scope\\.visibility|exit_options\\.action_family' docs/MACHINE-FACING-LAYER.md` shows the updated example.
 3. Manual review confirms the replacement paths exist in `.claude/skills/_shared-templates/story-state-contract.md` §4.4 and `tools/validators/src/schemas/story-storylet.schema.json`.
 
@@ -78,5 +79,19 @@ Keep the surrounding description of dotted paths and filter arrays intact.
 
 ### Commands
 
-1. `grep -nE 'shape|content_intensity|visibility\\.scope' docs/MACHINE-FACING-LAYER.md`
+1. `grep -nE 'routine_disruption|reflection_dilemma|content_intensity|visibility\\.scope' docs/MACHINE-FACING-LAYER.md`
 2. `grep -nE 'move_family|scope\\.visibility|exit_options\\.action_family' docs/MACHINE-FACING-LAYER.md`
+
+## Outcome
+
+Completed on 2026-05-13. `docs/MACHINE-FACING-LAYER.md` now shows the `list_records` storylet filter example with current SLT contract fields: `move_family`, `scope.visibility`, and `exit_options.action_family`. No retrieval behavior, validator schema, runtime code, or world content changed.
+
+## Verification Result
+
+1. `grep -nE 'routine_disruption|reflection_dilemma|content_intensity|visibility\\.scope' docs/MACHINE-FACING-LAYER.md` — PASS; returned no hits.
+2. `grep -nE 'move_family|scope\\.visibility|exit_options\\.action_family' docs/MACHINE-FACING-LAYER.md` — PASS; returned the updated `list_records` row.
+3. Manual review against `.claude/skills/_shared-templates/story-state-contract.md` §4.4 and `tools/validators/src/schemas/story-storylet.schema.json` — PASS; `move_family`, nested `scope.visibility`, and `exit_options[].action_family` are current SLT fields.
+
+## Deviations
+
+1. The drafted negative grep included bare `shape`, but the live document uses `shape` legitimately in unrelated response-shape prose. The completed proof uses the stale example's distinctive literals instead.
