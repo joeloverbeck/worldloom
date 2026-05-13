@@ -21,8 +21,8 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
   "approval_token": "placeholder",
   "verdict": "APPROVED",
   "originating_skill": "create-base-world",
-  "originating_cf_ids": ["CF-0001"],
-  "originating_ch_id": "CH-0001",
+  "originating_cf_ids": ["CF-1"],
+  "originating_ch_id": "CH-1",
   "expected_id_allocations": { ... },
   "patches": [ ... ]
 }
@@ -42,8 +42,8 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 {
   "op": "create_cf_record",
   "target_world": "<world-slug>",
-  "target_file": "_source/canon/CF-0001.yaml",
-  "payload": { "cf_record": { "id": "CF-0001", ... } }
+  "target_file": "_source/canon/CF-1.yaml",
+  "payload": { "cf_record": { "id": "CF-1", ... } }
 }
 ```
 
@@ -55,13 +55,13 @@ For a focused per-op view, call `mcp__worldloom__describe_envelope_schema({op_ki
 
 | Op kind | `target_file` |
 |---|---|
-| `create_cf_record` | `_source/canon/CF-NNNN.yaml` |
-| `create_ch_record` | `_source/change-log/CH-NNNN.yaml` |
+| `create_cf_record` | `_source/canon/CF-<integer>.yaml` |
+| `create_ch_record` | `_source/change-log/CH-<integer>.yaml` |
 | `create_inv_record` | `_source/invariants/<ID>.yaml` (where `<ID>` is `ONT-N` / `CAU-N` / `DIS-N` / `SOC-N` / `AES-N`) |
-| `create_m_record` | `_source/mystery-reserve/M-N.yaml` |
-| `create_oq_record` | `_source/open-questions/OQ-NNNN.yaml` |
-| `create_ent_record` | `_source/entities/ENT-NNNN.yaml` |
-| `create_sec_record` (per file class) | `_source/geography/SEC-GEO-NNN.yaml` (GEOGRAPHY) · `_source/peoples-and-species/SEC-PAS-NNN.yaml` (PEOPLES_AND_SPECIES) · `_source/institutions/SEC-INS-NNN.yaml` (INSTITUTIONS) · `_source/economy-and-resources/SEC-ECR-NNN.yaml` (ECONOMY_AND_RESOURCES) · `_source/magic-or-tech-systems/SEC-MTS-NNN.yaml` (MAGIC_OR_TECH_SYSTEMS) · `_source/everyday-life/SEC-ELF-NNN.yaml` (EVERYDAY_LIFE) · `_source/timeline/SEC-TML-NNN.yaml` (TIMELINE) |
+| `create_m_record` | `_source/mystery-reserve/M-<integer>.yaml` |
+| `create_oq_record` | `_source/open-questions/OQ-<integer>.yaml` |
+| `create_ent_record` | `_source/entities/ENT-<integer>.yaml` |
+| `create_sec_record` (per file class) | `_source/geography/SEC-GEO-<integer>.yaml` (GEOGRAPHY) · `_source/peoples-and-species/SEC-PAS-<integer>.yaml` (PEOPLES_AND_SPECIES) · `_source/institutions/SEC-INS-<integer>.yaml` (INSTITUTIONS) · `_source/economy-and-resources/SEC-ECR-<integer>.yaml` (ECONOMY_AND_RESOURCES) · `_source/magic-or-tech-systems/SEC-MTS-<integer>.yaml` (MAGIC_OR_TECH_SYSTEMS) · `_source/everyday-life/SEC-ELF-<integer>.yaml` (EVERYDAY_LIFE) · `_source/timeline/SEC-TML-<integer>.yaml` (TIMELINE) |
 
 The directory portion is lowercase-kebab-case; the file class inside the SEC record is UPPER_SNAKE (e.g., `file_class: GEOGRAPHY` for files under `_source/geography/`).
 
@@ -74,9 +74,9 @@ The engine's pre-apply check has **two layers** that both run on `expected_id_al
 1. **Per-op check** (`tools/patch-engine/src/ops/shared.ts` `stageNewRecordFile`): every `create_*_record` op verifies its `record.id` appears in the corresponding allocation list via `.includes()`.
 2. **Verifier check** (`tools/patch-engine/src/apply.ts` `verifyExpectedIdAllocations`): verifies that allocated IDs match the engine's next-id calculation for that class. Multi-prefix classes (`inv_ids`, `sec_ids`) are checked per prefix.
 
-Most classes are consistent across both layers — `cf_ids` uses `CF-NNNN` (4-digit zero-padded), `ch_ids` uses `CH-NNNN`, `m_ids` uses `M-N`, `oq_ids` uses `OQ-NNNN`, `ent_ids` uses `ENT-NNNN`. These pass both layers when populated with their natural format.
+Most classes are consistent across both layers — `cf_ids` uses `CF-<integer>` (unpadded natural-integer), `ch_ids` uses `CH-<integer>`, `m_ids` uses `M-<integer>`, `oq_ids` uses `OQ-<integer>`, `ent_ids` uses `ENT-<integer>`. These pass both layers when populated with their natural format.
 
-`sec_ids` uses `SEC-<PREFIX>-NNN` (e.g., `SEC-GEO-001`); the verifier scans nodes per-prefix, so each SEC ID is checked against the next-id for that specific prefix. Lay them out in the order ops are emitted (`SEC-GEO-001`, `SEC-PAS-001`, `SEC-INS-001`, ...).
+`sec_ids` uses `SEC-<PREFIX>-<integer>` (e.g., `SEC-GEO-1`); the verifier scans nodes per-prefix, so each SEC ID is checked against the next-id for that specific prefix. Lay them out in the order ops are emitted (`SEC-GEO-1`, `SEC-PAS-1`, `SEC-INS-1`, ...).
 
 `inv_ids` uses category-prefix IDs directly (`ONT-N`, `CAU-N`, `DIS-N`, `SOC-N`, `AES-N`). After PATCHENG-001, the verifier scans per category prefix just like `sec_ids`; do not include any `INV-N` sentinel. For multiple new invariants under the same category, list them in monotonic order (`ONT-1`, `ONT-2`, ...).
 
@@ -84,13 +84,13 @@ Most classes are consistent across both layers — `cf_ids` uses `CF-NNNN` (4-di
 
 ```json
 {
-  "cf_ids": ["CF-0001"],
-  "ch_ids": ["CH-0001"],
+  "cf_ids": ["CF-1"],
+  "ch_ids": ["CH-1"],
   "inv_ids": ["ONT-1", "ONT-2", "CAU-1", "CAU-2", "DIS-1", "DIS-2", "SOC-1", "SOC-2", "AES-1", "AES-2"],
   "m_ids": ["M-1", "M-2", "M-3"],
-  "oq_ids": ["OQ-0001", "OQ-0002", "OQ-0003", "OQ-0004", "OQ-0005", "OQ-0006", "OQ-0007"],
-  "ent_ids": ["ENT-0001", "ENT-0002", ...],
-  "sec_ids": ["SEC-GEO-001", "SEC-PAS-001", "SEC-INS-001", "SEC-ECR-001", "SEC-MTS-001", "SEC-ELF-001", "SEC-TML-001"]
+  "oq_ids": ["OQ-1", "OQ-2", "OQ-3", "OQ-4", "OQ-5", "OQ-6", "OQ-7"],
+  "ent_ids": ["ENT-1", "ENT-2", ...],
+  "sec_ids": ["SEC-GEO-1", "SEC-PAS-1", "SEC-INS-1", "SEC-ECR-1", "SEC-MTS-1", "SEC-ELF-1", "SEC-TML-1"]
 }
 ```
 
@@ -170,16 +170,16 @@ After any user-authorized direct-`Edit` to a hybrid-file frontmatter under `worl
 
 ## 7. Worked example: minimal genesis op
 
-A complete `create_cf_record` op for CF-0001:
+A complete `create_cf_record` op for CF-1:
 
 ```json
 {
   "op": "create_cf_record",
   "target_world": "<world-slug>",
-  "target_file": "_source/canon/CF-0001.yaml",
+  "target_file": "_source/canon/CF-1.yaml",
   "payload": {
     "cf_record": {
-      "id": "CF-0001",
+      "id": "CF-1",
       "title": "...",
       "status": "hard_canon",
       "type": "metaphysical_rule",

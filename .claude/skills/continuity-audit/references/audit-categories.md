@@ -51,7 +51,7 @@ The eight named audit categories are: contradictions, scope drift, capability cr
 ### 4h — Mystery Corruption
 
 - **Rule**: 7 (Preserve Mystery Deliberately).
-- **Enumeration**: `search_nodes(node_types=['mystery_reserve_entry'])`; `get_neighbors(M-NNNN, edge_types=['threatened_by_cf'])`.
+- **Enumeration**: `search_nodes(node_types=['mystery_reserve_entry'])`; `get_neighbors(M-<integer>, edge_types=['threatened_by_cf'])`.
 - **Judgment**: an MR entry is being explained too fast or becoming incoherent. Operator decides whether a CF accidentally resolves a `status: forbidden` mystery, or whether the resolution remains genre-safe under the entry's `future_resolution_safety` declaration. Validators (`rule7_mystery_reserve_preservation`) catch boolean violations; the firewall judgment stays here.
 - **Sub-pattern — dossier MR-firewall staleness**: for each character dossier or diegetic artifact whose `generated_date` predates a subsequent CH that added MR entries, record the MR-list gap as a sev-2 audit-trail finding (below default floor of 3 — report-only, no retcon card). Verify the dossier/artifact body and `known_firsthand` / `wrongly_believes` / `epistemic_horizon` against the newer MR entries' `disallowed cheap answers`. If actual leakage IS present, severity escalates per Phase 5. Naming this sub-pattern explicitly prevents it being re-discovered ad-hoc per audit run.
 
@@ -70,7 +70,7 @@ The eight named audit categories are: contradictions, scope drift, capability cr
 ### 4k — Silent-Area Canonization
 
 - **Rule**: 6 (No Silent Retcons) plus FOUNDATIONS §Default Reality.
-- **Enumeration**: `search_nodes(node_types=['canon_fact_record'])` to enumerate candidate CFs and their `domains_affected`; `get_record(CF-NNNN)` when `notes` or `source_basis` are needed for acknowledgment checks.
+- **Enumeration**: `search_nodes(node_types=['canon_fact_record'])` to enumerate candidate CFs and their `domains_affected`; `get_record(CF-<integer>)` when `notes` or `source_basis` are needed for acknowledgment checks.
 - **Judgment**: a CF canonizes a domain absent from the prior `domains_affected` union and does not acknowledge that the area was previously unmodeled or silent. The operator decides whether the acknowledgment is explicit enough; accepted patterns include `previously unmodeled`, `previously silent`, `first canonization of <domain>`, `silent area`, and `default reality`. Findings emit retcon-proposal candidates, never hard failures, because `continuity-audit` proposes repairs and `canon-addition` applies them.
 - **Firewall**: this check does not inspect Mystery Reserve entries. A previously silent domain is not permission to answer a reserved mystery.
 

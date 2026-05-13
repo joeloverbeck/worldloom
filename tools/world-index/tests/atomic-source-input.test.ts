@@ -164,7 +164,7 @@ test("build logs and skips story records whose id fails the registered schema pa
       "utf8"
     );
     assert.match(skipLog, /stories\/harborwatch\/_source\/intentions\/STINT-0001-iker\.yaml/);
-    assert.match(skipLog, /\tintention_record\tSTINT-0001-iker\tschema_pattern_mismatch\t\^STINT-\[0-9\]\{4\}\$/);
+    assert.match(skipLog, /\tintention_record\tSTINT-0001-iker\tschema_pattern_mismatch\t\^STINT-\[0-9\]\+\$/);
   } finally {
     cleanup(root);
   }

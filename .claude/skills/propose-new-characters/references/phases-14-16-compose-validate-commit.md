@@ -2,7 +2,7 @@
 
 ## Phase 14: Compose Proposal Cards
 
-Materialize each surviving seed into the `NCP-NNNN-<slug>.md` card schema. No new content is generated here — this is format only.
+Materialize each surviving seed into the `NCP-<integer>-<slug>.md` card schema. No new content is generated here — this is format only.
 
 **Frontmatter**:
 
@@ -77,7 +77,7 @@ Present the deliverable summary:
 
 ### Drop-list behavior
 
-- Surviving cards retain originally-allocated `NCP-NNNN` IDs (no renumbering); dropped IDs become permanent gaps.
+- Surviving cards retain originally-allocated `NCP-<integer>` IDs (no renumbering); dropped IDs become permanent gaps.
 - Slots formerly filled by dropped cards become empty in the written Phase 13 Diversification Audit with `user-drop at Phase 16` cited; no regeneration fires.
 - Phase 10d trace in the written manifest covers all pairs tested at generation time, including pairs involving dropped cards (audit evidence that the full batch passed before drop).
 - Phase 12 Rejected-Candidate Log is not affected by drops (different audit trail).
@@ -86,9 +86,9 @@ Present the deliverable summary:
 
 On approval, write in this order — sequencing matters because the tool environment cannot guarantee transactional atomicity:
 
-1. **Each non-dropped card first** — `worlds/<world-slug>/character-proposals/NCP-NNNN-<slug>.md` via direct `Write`. Set `source_basis.user_approved: true` immediately before each write. `user_approved: true` here means "kept in batch after review", NOT "accepted as a character".
-2. **Batch manifest second** — `worlds/<world-slug>/character-proposals/batches/NCB-NNNN.md` via direct `Write` with `dropped_card_ids` populated and `user_approved: true`. Create `batches/` if absent.
-3. **INDEX.md last** — `Read` existing file (create with header `# Character Proposal Cards — <World-Slug-TitleCased>` followed by a blank line if absent), append one line per non-dropped card in the form `- [<title>](NCP-NNNN-<slug>.md) — <depth_class> / <intended_narrative_role> / <canon_assumption_flags.status>, batch NCB-NNNN`, sort by NCP-NNNN ascending, write back via direct `Edit`.
+1. **Each non-dropped card first** — `worlds/<world-slug>/character-proposals/NCP-<integer>-<slug>.md` via direct `Write`. Set `source_basis.user_approved: true` immediately before each write. `user_approved: true` here means "kept in batch after review", NOT "accepted as a character".
+2. **Batch manifest second** — `worlds/<world-slug>/character-proposals/batches/NCB-<integer>.md` via direct `Write` with `dropped_card_ids` populated and `user_approved: true`. Create `batches/` if absent.
+3. **INDEX.md last** — `Read` existing file (create with header `# Character Proposal Cards — <World-Slug-TitleCased>` followed by a blank line if absent), append one line per non-dropped card in the form `- [<title>](NCP-<integer>-<slug>.md) — <depth_class> / <intended_narrative_role> / <canon_assumption_flags.status>, batch NCB-<integer>`, sort by NCP-<integer> ascending, write back via direct `Edit`.
 
 All three paths sit under `worlds/<slug>/character-proposals/`, which Hook 3's hybrid-file allowlist permits for direct `Write` / `Edit`. Cards-first sequencing means a partial-failure state has either cards-without-index (detectable by grepping INDEX.md for card slugs) or a manifest-without-INDEX-row (detectable by grepping INDEX.md for the batch). **Recovery is manual.**
 

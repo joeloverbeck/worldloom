@@ -66,7 +66,7 @@ Validation sweep (summarized):
 
 - **§Tooling Recommendation**: ✓ SPEC-03 declares world-state read contract (reads `anchor_checksum`, `content_hash` from world-index; reads target file content; reads `MYSTERY_RESERVE.md` for firewall check).
 - **§Canon Fact Record Schema**: ✓ SPEC-03 preserves every field when patching a CF record.
-- **Rule 6 No Silent Retcons**: ✓ Every applied patch records which `CH-NNNN` approved it via anchor-checksum metadata.
+- **Rule 6 No Silent Retcons**: ✓ Every applied patch records which `CH-<integer>` approved it via anchor-checksum metadata.
 - **Rule 7 Preserve Mystery Deliberately**: ✓ MR firewall check implemented at pre-commit.
 - **Canon-Pipeline Impact Rule (4.4)**: triggered; all 7 items pass.
 
@@ -98,7 +98,7 @@ Redesign count: 0/7 deliverables materially changed (below 50% threshold; Substa
 ### Canon-Pipeline Impact Rule
 1. Write authority — pass (HARD-GATE on canon-addition controls commit)
 2. Scope declaration — pass (single-world, world-slug required)
-3. Audit trail — pass (anchor-checksum metadata + CH-NNNN reference)
+3. Audit trail — pass (anchor-checksum metadata + CH-<integer> reference)
 4. Mystery Reserve firewall — pass (pre-commit check)
 5. Invariant preservation — pass (validator framework gate)
 6. Canon-layer discipline — pass (layer transitions require adjudication via canon-addition)

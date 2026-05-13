@@ -16,11 +16,11 @@
     "provenance"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^SLT-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "id": { "type": "string", "pattern": "^SLT-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
     "supersedes": {
       "type": ["string", "null"],
-      "pattern": "^SLT-[0-9]{4}$"
+      "pattern": "^SLT-[0-9]+$"
     },
     "scope": {
       "type": "object",
@@ -32,14 +32,61 @@
         },
         "branch_id": {
           "type": ["string", "null"],
-          "pattern": "^BR-[0-9]{4}$"
+          "pattern": "^BR-[0-9]+$"
+        },
+        "visible_branch_path_prefix": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^PG-[0-9]+$"
+          }
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "visibility": { "const": "branch_prefix_scoped" } },
+            "required": ["visibility"]
+          },
+          "then": {
+            "required": ["visible_branch_path_prefix"],
+            "properties": {
+              "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" },
+              "visible_branch_path_prefix": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "visibility": { "const": "global_author_pool" } },
+            "required": ["visibility"]
+          },
+          "then": {
+            "not": { "required": ["visible_branch_path_prefix"] },
+            "properties": {
+              "branch_id": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "visibility": { "const": "branch_scoped" } },
+            "required": ["visibility"]
+          },
+          "then": {
+            "not": { "required": ["visible_branch_path_prefix"] },
+            "properties": {
+              "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" }
+            }
+          }
+        }
+      ]
     },
     "created_at_page": {
       "type": ["string", "null"],
-      "pattern": "^PG-[0-9]{4}$"
+      "pattern": "^PG-[0-9]+$"
     },
     "title": { "type": "string", "minLength": 1 },
     "move_family": {
@@ -170,7 +217,7 @@
       "properties": {
         "forbidden_resolutions": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^M-[0-9]{4}$" }
+          "items": { "type": "string", "pattern": "^M-[0-9]+$" }
         },
         "allowed_authority": {
           "type": "string",

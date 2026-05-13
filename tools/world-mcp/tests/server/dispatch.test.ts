@@ -627,7 +627,7 @@ test("EPE id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "EPE-0004");
+    assert.equal(structured.next_id, "EPE-4");
   });
 });
 
@@ -640,7 +640,7 @@ test("STORY id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "STORY-0004");
+    assert.equal(structured.next_id, "STORY-4");
   });
 });
 
@@ -653,7 +653,20 @@ test("story-scoped id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "PG-0004");
+    assert.equal(structured.next_id, "PG-4");
+  });
+});
+
+test("story-scoped id_class dispatches first-run ids for fresh missing story bundles", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "STENT", story_slug: "fresh-bundle" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "STENT-1");
   });
 });
 
@@ -666,7 +679,7 @@ test("BEL id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "BEL-0001");
+    assert.equal(structured.next_id, "BEL-1");
   });
 });
 
@@ -679,7 +692,7 @@ test("SLB id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "SLB-0004");
+    assert.equal(structured.next_id, "SLB-4");
   });
 });
 
@@ -692,7 +705,7 @@ test("SAU id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "SAU-0004");
+    assert.equal(structured.next_id, "SAU-4");
   });
 });
 
@@ -705,7 +718,7 @@ test("SP id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "SP-0004");
+    assert.equal(structured.next_id, "SP-4");
   });
 });
 
@@ -723,7 +736,7 @@ test("RSP id_class dispatches through the MCP boundary", async () => {
 
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
-    assert.equal(structured.next_id, "RSP-0004");
+    assert.equal(structured.next_id, "RSP-4");
   });
 });
 
@@ -890,12 +903,12 @@ test("sub-audit-scoped id classes validate audit_id at the MCP handler boundary"
         world_slug: "seeded",
         id_class: "RSP",
         story_slug: "opening-bells",
-        audit_id: "SAU-99"
+        audit_id: "SAU-X"
       }
     });
 
     assert.equal(result.isError, true);
-    assert.match(textContent(result), /SAU-NNNN/);
+    assert.match(textContent(result), /SAU-<integer>/);
     const structured = result.structuredContent as { code?: string };
     assert.equal(structured.code, "invalid_input");
   });

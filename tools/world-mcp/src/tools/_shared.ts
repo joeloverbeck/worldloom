@@ -124,7 +124,7 @@ export const STORY_BUNDLE_ID_PREFIXES = [
 ] as const;
 
 const STORY_BUNDLE_RECORD_ID_PATTERN = new RegExp(
-  `^(?:${STORY_BUNDLE_ID_PREFIXES.join("|")})-\\d{4}$`
+  `^(?:${STORY_BUNDLE_ID_PREFIXES.join("|")})-\\d+$`
 );
 
 export function isStoryBundleNodeType(nodeType: NodeType): nodeType is StoryBundleNodeType {

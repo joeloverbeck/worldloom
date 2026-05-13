@@ -254,8 +254,8 @@ test("submitPatchPlan creates OQ records before adjudications that cite them", a
   const world = createIndexedTestWorld(t);
   const secret = Buffer.from("integration-oq-secret");
   const secretPath = writeSecret(world.worldRoot, secret);
-  const oqId = nextId(world.db, "OQ", 4);
-  const paId = nextId(world.db, "PA", 4);
+  const oqId = nextId(world.db, "OQ", 1);
+  const paId = nextId(world.db, "PA", 1);
   const patches: PatchOperation[] = [
     createOp({
       op: "append_adjudication_record",
@@ -376,9 +376,9 @@ interface CanonAdditionIds {
 
 function nextCanonAdditionIds(world: ReturnType<typeof createIndexedTestWorld>): CanonAdditionIds {
   return {
-    cfId: nextId(world.db, "CF", 4),
-    chId: nextId(world.db, "CH", 4),
-    secId: nextId(world.db, "SEC-GEO", 3)
+    cfId: nextId(world.db, "CF", 1),
+    chId: nextId(world.db, "CH", 1),
+    secId: nextId(world.db, "SEC-GEO", 1)
   };
 }
 

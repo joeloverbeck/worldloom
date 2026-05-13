@@ -16,7 +16,7 @@ task_header:
     requested: 12000
     allocated: 9800
   seed_nodes:
-    - CHAR-0002
+    - CHAR-2
   full_body_classes_delivered: []
   harness_ceiling_chars: 60000
   envelope_overhead_reserve_chars: 4000
@@ -177,8 +177,8 @@ Worked example: a request with `token_budget: 33000` can still serialize to more
 truncation_summary:
   dropped_layers: ["impact_surfaces", "scoped_local_context"]   # ordered by priority
   dropped_node_ids_by_layer:
-    impact_surfaces: ["SEC-INS-007", "SEC-ELF-002"]
-    scoped_local_context: ["CF-0033", "M-12"]
+    impact_surfaces: ["SEC-INS-7", "SEC-ELF-2"]
+    scoped_local_context: ["CF-33", "M-12"]
   full_body_downgrades:
     - layer: governing_world_context
       node_id: ONT-1
@@ -277,7 +277,7 @@ Beyond the general packet retrieval, a small set of use-case-specific tools proj
 | `get_record_field(record_id, field_path)` | Read a single field of a single atomic record without paying the full-record parse cost. | `{ value, content_hash, file_path }` |
 | `get_firewall_content(world_slug, m_ids?)` | Phase 7b Mystery Reserve firewall audits — bulk projection of every (or selected) M record's firewall-relevant fields in a single call. | `{ records: { [m_id]: { title, status, unknowns, common_interpretations, disallowed_cheap_answers } }, not_found: string[] }` |
 
-`get_firewall_content` is the canonical bulk-retrieval path for Phase 7b firewall scoping. Use `get_record('M-NNNN')` instead when the audit needs full M-record context (e.g., `notes`, `extensions`, or `modification_history`); use `get_context_packet(... node_classes: ['mystery_reserve_entry'])` for discovery (which M records exist around the seed) rather than for the firewall projection itself.
+`get_firewall_content` is the canonical bulk-retrieval path for Phase 7b firewall scoping. Use `get_record('M-<integer>')` instead when the audit needs full M-record context (e.g., `notes`, `extensions`, or `modification_history`); use `get_context_packet(... node_classes: ['mystery_reserve_entry'])` for discovery (which M records exist around the seed) rather than for the firewall projection itself.
 
 ## Delivery Modes
 
@@ -342,7 +342,7 @@ A `diegetic-artifact-generation` Phase 7b firewall scoping call:
 request:
   task_type: diegetic_artifact_generation
   world_slug: animalia
-  seed_nodes: [CF-0044]
+  seed_nodes: [CF-44]
   token_budget: 8000
   node_classes: [mystery_reserve_entry]
 
@@ -351,13 +351,13 @@ response (selected fields):
     task_type: diegetic_artifact_generation
     world_slug: animalia
     token_budget: { requested: 8000, allocated: 4200 }
-    seed_nodes: [CF-0044]
+    seed_nodes: [CF-44]
     harness_ceiling_chars: 60000
     envelope_overhead_reserve_chars: 4000
     estimator_version: chars-per-token-v1
     packet_version: 2
   local_authority:
-    nodes: []                        # CF-0044 filtered out (canon_fact_record not in node_classes)
+    nodes: []                        # CF-44 filtered out (canon_fact_record not in node_classes)
     why_included: ["seed node supplied by caller"]
   exact_record_links:
     nodes: []
@@ -369,8 +369,8 @@ response (selected fields):
     active_rules: ["No silent canon mutation from diegetic generation", "Rule 7: preserve Mystery Reserve deliberately"]
     protected_surfaces: [...]
     nodes:
-      - { id: M-0003, node_type: mystery_reserve_entry, ... }
-      - { id: M-0007, node_type: mystery_reserve_entry, ... }
+      - { id: M-3, node_type: mystery_reserve_entry, ... }
+      - { id: M-7, node_type: mystery_reserve_entry, ... }
     why_included: ["Mystery Reserve firewall for the locality-first packet", ...]
   impact_surfaces:
     nodes: []

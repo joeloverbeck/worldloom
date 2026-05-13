@@ -113,9 +113,11 @@ async function loadReferenceSets(ctx: Context): Promise<ReferenceSets> {
     entities: await query("story_entity_record"),
     beliefs: await query("belief_record"),
     obligations: await query("obligation_record"),
-    consequences: await query("story_consequence_record"),
+    // VALENH-013: pre-apply in-plan creates are supplied by ctx.index's overlay.
+    // Keep these keys aligned to the live index node types so overlay and on-disk reads match.
+    consequences: await query("consequence_record"),
     threads: await query("thread_record"),
-    relationships: await query("story_relationship_record"),
+    relationships: await query("relationship_record_story"),
     locations: await query("story_location_record"),
     objects: await query("story_object_record"),
     artifacts: await query("story_diegetic_artifact_record"),

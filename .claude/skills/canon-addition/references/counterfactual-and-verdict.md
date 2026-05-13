@@ -17,7 +17,7 @@ Typical stabilizers: rarity, secrecy, high mortality, unreliability, expensive p
 Using Phase 2 + Phase 6 output, classify every detected conflict:
 - **Hard** — cannot coexist without changing established truths.
 - **Soft** — can coexist, but existing canon owes explanation or visible consequences (seeds `required_updates`).
-- **Latent Burden** — mandatory future lore work (tracked in CF `notes`; may seed a new `OQ-NNNN` record under `_source/open-questions/` via a `create_oq_record` op in the patch plan).
+- **Latent Burden** — mandatory future lore work (tracked in CF `notes`; may seed a new `OQ-<integer>` record under `_source/open-questions/` via a `create_oq_record` op in the patch plan).
 - **Scope Drift Risk** — acceptable only if kept local/temporary/secret (routes toward `ACCEPT_AS_LOCAL_EXCEPTION`).
 - **Tone/Thematic Mismatch** — logic intact but world feels unlike itself (routes to REVISE/REJECT or `ACCEPT_AS_CONTESTED_BELIEF`).
 
@@ -37,8 +37,8 @@ If promising but destabilizing, propose repairs: reduce scope / reduce reproduci
 
 **Ledger precedent** (Animalia):
 
-- **Composite pattern (one CF with sub-types)**: CF-0021 (crafter-creation, primary `craft` with capability + artifact + taboo-pressure sub-aspects); CF-0029 (guardian constructions, primary `artifact` with hazard + non-sentience-firewall sub-aspects); CF-0034 (endemic banditry, primary `historical_process` with capability + law + distribution-asymmetry sub-aspects); CF-0035 (artifact-mutated non-sentient beasts, primary `hazard` with species + local_anomaly + historical_process sub-aspects).
-- **Honest-split pattern (two or more paired CFs introduced in one CH)**: CF-0027 + CF-0028 (a single ruin-expedition proposal yielded two CFs — the enterable-ruin category and the patron-funded expedition mode — because each sub-fact carries its own stabilizer chain, `required_world_updates` footprint, and Mystery Reserve exposure profile; the pair is coordinated via `derived_from` without being fragmented into cross-referencing stubs).
+- **Composite pattern (one CF with sub-types)**: CF-21 (crafter-creation, primary `craft` with capability + artifact + taboo-pressure sub-aspects); CF-29 (guardian constructions, primary `artifact` with hazard + non-sentience-firewall sub-aspects); CF-34 (endemic banditry, primary `historical_process` with capability + law + distribution-asymmetry sub-aspects); CF-35 (artifact-mutated non-sentient beasts, primary `hazard` with species + local_anomaly + historical_process sub-aspects).
+- **Honest-split pattern (two or more paired CFs introduced in one CH)**: CF-27 + CF-28 (a single ruin-expedition proposal yielded two CFs — the enterable-ruin category and the patron-funded expedition mode — because each sub-fact carries its own stabilizer chain, `required_world_updates` footprint, and Mystery Reserve exposure profile; the pair is coordinated via `derived_from` without being fragmented into cross-referencing stubs).
 
 **Rule of thumb**: if splitting would force you to write "see also CF-X, CF-Y, CF-Z" three times in a single CF's `notes` field, the phenomenon is tightly coupled and wants one composite CF. If the split CFs naturally diverge at Phase 6 consequence propagation (touching different files with little overlap), the split is honest.
 
@@ -53,7 +53,7 @@ Prefer **separate entries** when:
 - **One unknown belongs to an existing MR surface** (M-1 / M-2 / etc.) while the other manufactures a genuinely new one — the first is handled by an Extension clause on the existing MR; the second gets its own new MR entry.
 - The **domains_touched differ substantively** — an entry with only partial-overlap disallowed answers and distinct domain scope is cleaner separated.
 
-Worked precedent (CH-0013 / CF-0038 Brinewick): the proposal manufactured two bounded unknowns (canal-network origin; outskirts-estate underground-tunnel origin). Mystery Curator critic initially proposed M-19 + M-20 (separate parallel entries). Phase 6b synthesis merged them into one M-19 because (a) the relationship between canal and tunnel origin IS contested (are they integrated infrastructure or separate constructions?); (b) the same four readings apply (ancestral-consortium / lost-polity / composite / Maker-substrate); (c) a Maker-substrate reveal on one would partial-constrain the other; (d) the disallowed cheap answers overlap (definitive Maker-Age attribution forbidden in both). Merged M-19 captures "Brinewick Canal and Underground Network Origin" as one bounded-unknown surface.
+Worked precedent (CH-13 / CF-38 Brinewick): the proposal manufactured two bounded unknowns (canal-network origin; outskirts-estate underground-tunnel origin). Mystery Curator critic initially proposed M-19 + M-20 (separate parallel entries). Phase 6b synthesis merged them into one M-19 because (a) the relationship between canal and tunnel origin IS contested (are they integrated infrastructure or separate constructions?); (b) the same four readings apply (ancestral-consortium / lost-polity / composite / Maker-substrate); (c) a Maker-substrate reveal on one would partial-constrain the other; (d) the disallowed cheap answers overlap (definitive Maker-Age attribution forbidden in both). Merged M-19 captures "Brinewick Canal and Underground Network Origin" as one bounded-unknown surface.
 
 **Rule**: Repairs must preserve the user's dramatic intent. Surface each option with its trade-off (preserved vs sacrificed) in the Phase 15a summary.
 
@@ -63,13 +63,13 @@ Evaluate: deepens identity? creates tensions? trivializes struggle? universalize
 
 **Rule**: Reject technically consistent but dramatically flattening facts.
 
-**FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — collision with a `disallowed_answers[]` list on any `M-NNNN.yaml` record under `_source/mystery-reserve/` → REJECT or repair toward Mystery Reserve placement.
+**FOUNDATIONS cross-ref**: Rule 7 (Preserve Mystery Deliberately) — collision with a `disallowed_answers[]` list on any `M-<integer>.yaml` record under `_source/mystery-reserve/` → REJECT or repair toward Mystery Reserve placement.
 
-**Open Questions pressure scan (required)**: enumerate the `OQ-NNNN` records the context packet returned (or `mcp__worldloom__search_nodes` against `node_type: open_question_record` if the packet under-covered). For each, classify under this proposal as one of:
+**Open Questions pressure scan (required)**: enumerate the `OQ-<integer>` records the context packet returned (or `mcp__worldloom__search_nodes` against `node_type: open_question_record` if the packet under-covered). For each, classify under this proposal as one of:
 
 - **UNCHANGED** — no pressure from the proposal; the deferral scope is unaffected.
-- **PRESSURED** — the proposal narrows the deferral scope, adds a cross-reference annotation, extends the caution clause, or otherwise touches the item without resolving the question. Pressured items receive an `append_extension` op on the target `OQ-NNNN.yaml` at Phase 13a and appear in the PA frontmatter's `open_questions_touched[]` array.
-- **NEW** — the proposal creates a deferred item; emit a `create_oq_record` op for the new `OQ-NNNN` and cite the resulting id in `open_questions_touched[]`. PA frontmatter no longer carries free-form OQ topic-strings — it carries `OQ-NNNN` ids only (per SPEC-14).
+- **PRESSURED** — the proposal narrows the deferral scope, adds a cross-reference annotation, extends the caution clause, or otherwise touches the item without resolving the question. Pressured items receive an `append_extension` op on the target `OQ-<integer>.yaml` at Phase 13a and appear in the PA frontmatter's `open_questions_touched[]` array.
+- **NEW** — the proposal creates a deferred item; emit a `create_oq_record` op for the new `OQ-<integer>` and cite the resulting id in `open_questions_touched[]`. PA frontmatter no longer carries free-form OQ topic-strings — it carries `OQ-<integer>` ids only (per SPEC-14).
 - **RESOLVED** — the proposal commits on a previously-deferred question (rare). Treat with Phase 10 narrative-fit scrutiny — a resolved OQ is a deliberate commitment, not a silent one, and its resolution must be justified in the PA's Justification section. Silent OQ resolution violates Rule 6 (No Silent Retcons).
 
 Record the full list (every OQ examined, with classification) in the PA `body_markdown` `# Phase 0–11 Analysis` → Phase 10 sub-section, NOT in `# Discovery` (which is reserved for substantively-touched items per SKILL.md §PA body_markdown Structure and the §PA body-markdown structural template below). Populate the frontmatter `open_questions_touched[]` array with PRESSURED + NEW + RESOLVED ids only — UNCHANGED items appear only in the Phase 10 sub-section enumeration (the scan itself MUST cover them to produce the PRESSURED / NEW / RESOLVED list correctly, but they do NOT enter the frontmatter array or the Discovery section). Missing this scan produces silent OQ drift: a pressured item that receives no extension carries a reader into the next adjudication assuming the deferral is uncontested when in fact this proposal narrowed or cross-referenced it — a Rule 6 audit-trail gap parallel to the modification_history-array gap the Phase 12a scan prevents.
@@ -133,7 +133,7 @@ PASS requires:
 - Classify the CF status and whether it is a hard-canon core truth.
 - If it is not a hard-canon core truth, PASS with a one-line status rationale.
 - If it is hard-canon core truth, name at least two distinct trace registers and the concrete in-world form each trace takes. Registers include law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, or another named register.
-- For intentionally hidden truths, cite the `M-NNNN` Mystery Reserve entry or other canonized hiding mechanism that explains why ordinary trace redundancy is suppressed.
+- For intentionally hidden truths, cite the `M-<integer>` Mystery Reserve entry or other canonized hiding mechanism that explains why ordinary trace redundancy is suppressed.
 
 FAIL examples:
 - A core truth appears only in one archive, one artifact, or one scholar's claim with no second register.
@@ -163,10 +163,10 @@ FAIL examples:
 Applies to every accept-branch and non-accept-branch adjudication. The test is judgment-only and confirms the Phase 10 Open Questions pressure scan was actually run and recorded in the PA body — closing the Rule 6 audit-trail gap that an unrecorded scan opens.
 
 PASS requires:
-- The PA `body_markdown` `# Phase 0–11 Analysis` → Phase 10 sub-section enumerates every `OQ-NNNN` record returned by the pre-flight context packet (or backfilled via `mcp__worldloom__list_records({record_type: 'open_question_record'})` if the packet under-covered).
-- Each enumerated `OQ-NNNN` is classified as one of `{UNCHANGED, PRESSURED, NEW, RESOLVED}`.
+- The PA `body_markdown` `# Phase 0–11 Analysis` → Phase 10 sub-section enumerates every `OQ-<integer>` record returned by the pre-flight context packet (or backfilled via `mcp__worldloom__list_records({record_type: 'open_question_record'})` if the packet under-covered).
+- Each enumerated `OQ-<integer>` is classified as one of `{UNCHANGED, PRESSURED, NEW, RESOLVED}`.
 - The frontmatter `open_questions_touched[]` array contains the PRESSURED + NEW + RESOLVED subset; UNCHANGED items appear only in the Phase 10 sub-section enumeration, not the frontmatter or the `# Discovery` section.
-- For each PRESSURED item, an `append_extension` op on the target `OQ-NNNN.yaml` exists in the patch plan; for each NEW item, a `create_oq_record` op exists; for each RESOLVED item, the Justification section explains the resolution explicitly (Rule 6 — silent OQ resolution is forbidden).
+- For each PRESSURED item, an `append_extension` op on the target `OQ-<integer>.yaml` exists in the patch plan; for each NEW item, a `create_oq_record` op exists; for each RESOLVED item, the Justification section explains the resolution explicitly (Rule 6 — silent OQ resolution is forbidden).
 
 FAIL examples:
 - The Phase 10 sub-section omits the enumeration entirely (the scan was skipped).

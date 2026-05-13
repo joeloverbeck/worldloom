@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["artifact_id", "slug", "title", "artifact_type", "author", "author_character_id", "date", "place", "audience", "communicative_purpose", "desired_relation_to_truth", "author_profile", "epistemic_horizon", "claim_map", "world_consistency", "source_basis"],
   "properties": {
-    "artifact_id": { "type": "string", "pattern": "^DA-[0-9]{4}$" },
+    "artifact_id": { "type": "string", "pattern": "^DA-[0-9]+$" },
     "slug": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "artifact_type": { "type": "string", "minLength": 1 },
@@ -14,7 +14,7 @@
     "author": { "type": "string" },
     "author_character_id": {
       "anyOf": [
-        { "type": "string", "pattern": "^CHAR-[0-9]{4}$" },
+        { "type": "string", "pattern": "^CHAR-[0-9]+$" },
         { "type": "null" }
       ]
     },
@@ -41,26 +41,26 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "corroborates": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
-        "contests": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
-        "conceals": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
-        "mythologizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
-        "ritualizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }
+        "corroborates": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+        "contests": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+        "conceals": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+        "mythologizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
+        "ritualizes": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } }
       }
     },
-    "canon_facts_accessible": { "anyOf": [{ "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } }, { "type": "null" }] },
+    "canon_facts_accessible": { "anyOf": [{ "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } }, { "type": "null" }] },
     "taboo_censorship_conditions": { "anyOf": [{ "type": "array" }, { "type": "string" }, { "type": "null" }] },
     "desired_length": { "anyOf": [{ "type": "string" }, { "type": "integer" }, { "type": "null" }] },
     "emotional_tone": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
     "rhetorical_style": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
     "ornament_level": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
     "mystery_seeding_intent": { "anyOf": [{ "type": "boolean" }, { "type": "null" }] },
-    "contradiction_target": { "anyOf": [{ "type": "string", "pattern": "^DA-[0-9]{4}$" }, { "type": "null" }] },
+    "contradiction_target": { "anyOf": [{ "type": "string", "pattern": "^DA-[0-9]+$" }, { "type": "null" }] },
     "genre_conventions": { "type": "object" },
     "author_profile": { "type": "object" },
     "epistemic_horizon": { "type": "object" },
     "claim_map": { "type": "array" },
-    "canon_links": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+    "canon_links": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
     "cannot_know": { "type": "array", "items": { "type": "string" } },
     "world_consistency": { "type": "object" },
     "source_basis": { "type": "object" },

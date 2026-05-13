@@ -30,20 +30,20 @@ test("SPEC-14 roundtrip: engine-emitted PA frontmatter passes record_schema_comp
   const patch: PatchOperation = {
     op: "append_adjudication_record",
     target_world: WORLD_SLUG,
-    target_file: "adjudications/PA-0001-roundtrip.md",
+    target_file: "adjudications/PA-1-roundtrip.md",
     payload: {
       adjudication_frontmatter: {
-        pa_id: "PA-0001",
+        pa_id: "PA-1",
         verdict: "ACCEPT",
         date: "2026-04-25",
         originating_skill: "canon-addition",
         mystery_reserve_touched: [],
         invariants_touched: [],
         cf_records_touched: [],
-        open_questions_touched: ["OQ-0001"],
-        change_id: "CH-0001"
+        open_questions_touched: ["OQ-1"],
+        change_id: "CH-1"
       },
-      body_markdown: "# PA-0001 -- Adjudication Record\n\nEngine-emitted body prose."
+      body_markdown: "# PA-1 -- Adjudication Record\n\nEngine-emitted body prose."
     }
   };
   const oqPatch: PatchOperation = {
@@ -51,7 +51,7 @@ test("SPEC-14 roundtrip: engine-emitted PA frontmatter passes record_schema_comp
     target_world: WORLD_SLUG,
     payload: {
       oq_record: {
-        id: "OQ-0001",
+        id: "OQ-1",
         topic: "Roundtrip question",
         body: "A minimal open question keeps the test world atomic-source enabled.",
         when_to_resolve: "When the test requires it.",
@@ -65,7 +65,7 @@ test("SPEC-14 roundtrip: engine-emitted PA frontmatter passes record_schema_comp
     approval_token: "unused",
     verdict: "ACCEPT",
     originating_skill: "canon-addition",
-    expected_id_allocations: { oq_ids: ["OQ-0001"], pa_ids: ["PA-0001"] },
+    expected_id_allocations: { oq_ids: ["OQ-1"], pa_ids: ["PA-1"] },
     patches: [oqPatch, patch]
   };
 
@@ -76,7 +76,7 @@ test("SPEC-14 roundtrip: engine-emitted PA frontmatter passes record_schema_comp
   });
 
   assert.ok(!("ok" in result), JSON.stringify(result));
-  const relativePath = "adjudications/PA-0001-roundtrip.md";
+  const relativePath = "adjudications/PA-1-roundtrip.md";
   const content = fs.readFileSync(path.join(worldPath, relativePath), "utf8");
   const verdicts = await recordSchemaCompliance.run(
     { files: [{ path: relativePath, content }] },

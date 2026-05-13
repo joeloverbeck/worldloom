@@ -11,19 +11,19 @@
 # here so canon-addition's parsing stays clean. Do NOT add candidate fields not present in FOUNDATIONS;
 # do NOT remove candidate fields present in FOUNDATIONS.
 
-promotion_id: SP-NNNN
+promotion_id: SP-<integer>
 story_slug: <story_slug>
 source_kind: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim
 
 # Evidence sets — branch-local records constituting the candidate's basis.
 source_records: [<source record ids>]
-branch_path: BR-NNNN
-supporting_pages: [<PG-NNNN ids>]
-authoring_events: [<SE-NNNN ids>]
-belief_witnesses: [<BEL-NNNN ids>]
+branch_path: BR-<integer>
+supporting_pages: [PG-<integer> ids]
+authoring_events: [SE-<integer> ids]
+belief_witnesses: [BEL-<integer> ids]
 
 claim_visibility:
-  who_holds_belief: [<STENT-NNNN | group:<name> | public>]
+  who_holds_belief: [STENT-<integer> | group:<name> | public]
   belief_truth_relations: [<true | false | partly_true | unknown | contested | branch_counterfactual>]
 
 # ====================================================================================
@@ -61,8 +61,8 @@ candidate:
     story_evidence:
       source_records: [<source_record_ids>]
       supporting_pages: [<supporting_page_ids>]
-      authoring_events: [<SE-NNNN ids>]
-      belief_witnesses: [<BEL-NNNN ids>]
+      authoring_events: [SE-<integer> ids]
+      belief_witnesses: [BEL-<integer> ids]
   promotion_provenance:
     story_slug: <story_slug>
     source_kind: <source_kind>
@@ -111,16 +111,16 @@ scope_inflation_report:
   flags: [<short label per failed sub-check>]
 
 mystery_firewall_report:
-  mysteries_scanned: <count of M-NNNN records loaded>
-  forbidden_resolution_attempts: [<M-NNNN, if any>]
-  accidental_resolution_warnings: [<M-NNNN, if any>]
+  mysteries_scanned: <count of M-<integer> records loaded
+  forbidden_resolution_attempts: [M-<integer>, if any]
+  accidental_resolution_warnings: [M-<integer>, if any]
   counterfactual_promotion_attempts: [<source SF id, if any>]
   source_kind_mismatch_warnings: [<recommended source_kind change, if any>]
   firewall_verdict: PASS | ABORT | REQUIRES_USER_ACCEPTANCE
 
 downstream_impact_report:
   world_domains_affected: [<domain>]
-  same_story_contradictory_branches: [<BR-NNNN>]
+  same_story_contradictory_branches: [BR-<integer>]
   cross_story_contradictions: [<sibling_story_slug:record_id>]
   affected_world_files: [<file path under worlds/<world_slug>/>]
   promotion_provenance_narrative: >

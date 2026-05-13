@@ -129,8 +129,9 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
       storyRecord("storylet_record", "SLT-0001", "storylets", {
         id: "SLT-0001",
         story_id: "STORY-001",
-        provenance: { origin: "bootstrap_seed", created_at_page: null },
-        visibility: { scope: "global_author_pool" }
+        scope: { visibility: "global_author_pool", branch_id: null },
+        created_at_page: null,
+        provenance: { origin: "bootstrap_seed" }
       })
     ]
   }), {
@@ -141,22 +142,13 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
   assert.deepEqual(verdicts, []);
 });
 
-test("recursive_reference_closure allows branch-prefix-scoped storylets visible from this branch", async () => {
+test("recursive_reference_closure allows null-created branch-prefix-scoped storylets with a canonical prefix", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
-    pageOverrides: {
-      branch_path: ["PG-0001", "PG-0002", "PG-0003"]
-    },
     obligationOverrides: {
       coverage_cache: { compatible_storylets: ["SLT-0002"] }
     },
     extra: [
-      storyRecord("page_record", "PG-0001", "pages", {
-        id: "PG-0001",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001"],
-        state_snapshot: {}
-      }),
-      branchPrefixStorylet("SLT-0002", ["PG-0001", "PG-0002"])
+      branchPrefixStorylet("SLT-0002", ["PG-0001"])
     ]
   }), {
     run_mode: "pre-apply",
@@ -166,13 +158,13 @@ test("recursive_reference_closure allows branch-prefix-scoped storylets visible 
   assert.deepEqual(verdicts, []);
 });
 
-test("recursive_reference_closure rejects branch-prefix-scoped storylets on sibling branches", async () => {
+test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with sibling prefixes", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0003"] }
+      coverage_cache: { compatible_storylets: ["SLT-0002"] }
     },
     extra: [
-      branchPrefixStorylet("SLT-0003", ["PG-0001", "PG-0099"])
+      branchPrefixStorylet("SLT-0002", ["PG-0099"])
     ]
   }), {
     run_mode: "pre-apply",
@@ -182,37 +174,51 @@ test("recursive_reference_closure rejects branch-prefix-scoped storylets on sibl
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SLT-0003",
+    reference_id: "SLT-0002",
     reference_path: "state_snapshot.obligations_open[0].coverage_cache.compatible_storylets[0]",
-    referenced_file: "stories/test-story/_source/storylets/SLT-0003.yaml",
-    referenced_node_id: "test-story:SLT-0003",
+    referenced_file: "stories/test-story/_source/storylets/SLT-0002.yaml",
+    referenced_node_id: "test-story:SLT-0002",
     created_at_page: null
   });
 });
 
-test("recursive_reference_closure rejects branch-prefix-scoped storylets with null prefix", async () => {
-  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
-    obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0004"] }
-    },
-    extra: [
-      branchPrefixStorylet("SLT-0004", null)
-    ]
-  }), {
-    run_mode: "pre-apply",
-    patch_plan: patchPlan()
-  }));
+test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with malformed prefixes", async () => {
+  const malformedValues: unknown[] = [undefined, [], ["PG-0002"], ["PG-0001", "bad"]];
 
-  assert.ok(verdicts.some((verdict) => verdict.code === "recursive_reference_closure.branch_leak"));
+  for (const [index, visible_branch_path_prefix] of malformedValues.entries()) {
+    const storyletId = `SLT-001${index}`;
+    const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+      obligationOverrides: {
+        coverage_cache: { compatible_storylets: [storyletId] }
+      },
+      extra: [
+        branchPrefixStorylet(storyletId, visible_branch_path_prefix)
+      ]
+    }), {
+      run_mode: "pre-apply",
+      patch_plan: patchPlan()
+    }));
+
+    assert.ok(
+      verdicts.some((verdict) => verdict.code === "recursive_reference_closure.branch_leak"),
+      `expected branch leak for ${JSON.stringify(visible_branch_path_prefix)}`
+    );
+  }
 });
 
-test("recursive_reference_closure rejects branch-prefix-scoped storylets with malformed prefix", async () => {
+test("recursive_reference_closure rejects branch-scoped storylets with null created_at_page", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0005"] }
+      coverage_cache: { compatible_storylets: ["SLT-0003"] }
     },
     extra: [
-      branchPrefixStorylet("SLT-0005", "PG-0001")
+      storyRecord("storylet_record", "SLT-0003", "storylets", {
+        id: "SLT-0003",
+        story_id: "STORY-001",
+        scope: { visibility: "branch_scoped", branch_id: "BR-0001" },
+        created_at_page: null,
+        provenance: { origin: "runtime_jit" }
+      })
     ]
   }), {
     run_mode: "pre-apply",
@@ -353,8 +359,9 @@ test("recursive_reference_closure fails for sibling storylet_realized page peers
       storyRecord("storylet_record", "SLT-0099", "storylets", {
         id: "SLT-0099",
         story_id: "STORY-001",
-        provenance: { origin: "runtime_jit", created_at_page: "PG-0099" },
-        visibility: { scope: "branch_scoped" }
+        scope: { visibility: "branch_scoped", branch_id: "BR-0099" },
+        created_at_page: "PG-0099",
+        provenance: { origin: "runtime_jit" }
       })
     ]
   }), {
@@ -514,15 +521,17 @@ function storyRecord(
   };
 }
 
-function branchPrefixStorylet(id: string, visibleBranchPathPrefix: unknown) {
+function branchPrefixStorylet(id: string, visible_branch_path_prefix?: unknown) {
   return storyRecord("storylet_record", id, "storylets", {
     id,
     story_id: "STORY-001",
-    provenance: { origin: "focus_authoring", created_at_page: null },
-    visibility: {
-      scope: "branch_prefix_scoped",
-      visible_branch_path_prefix: visibleBranchPathPrefix
-    }
+    scope: {
+      visibility: "branch_prefix_scoped",
+      branch_id: "BR-0001",
+      ...(visible_branch_path_prefix === undefined ? {} : { visible_branch_path_prefix })
+    },
+    created_at_page: null,
+    provenance: { origin: "focus_authoring" }
   });
 }
 

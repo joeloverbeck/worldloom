@@ -29,67 +29,25 @@ test("record_schema_compliance rejects legacy storylets before checking retired 
   )));
 });
 
-test("record_schema_compliance accepts v2 scene-commitment choices with populated worthiness", async () => {
+test("record_schema_compliance accepts contract-canonical choices without COMTAX fields", async () => {
   const result = await recordSchemaCompliance.run({}, context([choiceRecord(completeChoice())]));
 
   assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance accepts explicit commitment route fields", async () => {
-  const choice = completeChoice();
-  choice.commitment_family = "care_help_protection";
-  choice.commitment_detail = "offer_gate_repair";
-
-  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
+test("record_schema_compliance accepts choices carrying legacy COMTAX overlay fields", async () => {
+  const result = await recordSchemaCompliance.run({}, context([choiceRecord(legacyComtaxChoice())]));
 
   assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance rejects mismatched explicit commitment families", async () => {
-  const choice = completeChoice();
-  choice.commitment_family = "inquiry_discovery";
+test("record_schema_compliance rejects choices missing universal required fields", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    rawChoiceRecord({ id: "CHC-0002", surface_label: "Wait" }, "CHC-0002"),
+    rawChoiceRecord({ story_id: "STORY-1", surface_label: "Wait" }, "CHC-0003")
+  ]));
 
-  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
-
-  assert.equal(result.filter((verdict) => verdict.code === "record_schema_compliance.commitment_family_mismatch").length, 1);
-});
-
-test("record_schema_compliance rejects commitment classes outside the closed taxonomy", async () => {
-  const choice = completeChoice();
-  choice.commitment_class = "repair_the_gate_without_pressure";
-
-  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.location.node_id === "CHC-0001" &&
-    verdict.code === "record_schema_compliance.unknown_commitment_class"
-  )));
-});
-
-test("record_schema_compliance rejects empty commitment detail when present", async () => {
-  const choice = completeChoice();
-  choice.commitment_detail = "";
-
-  const result = await recordSchemaCompliance.run({}, context([choiceRecord(choice)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.location.node_id === "CHC-0001" &&
-    verdict.code === "record_schema_compliance.minLength" &&
-    verdict.message.includes("/commitment_detail")
-  )));
-});
-
-test("record_schema_compliance rejects scene-commitment choices with empty likely effects", async () => {
-  const parsed = completeChoice();
-  parsed.likely_effects = [];
-
-  const result = await recordSchemaCompliance.run({}, context([choiceRecord(parsed)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.location.node_id === "CHC-0001" &&
-    verdict.code === "record_schema_compliance.minItems" &&
-    verdict.message.includes("/likely_effects")
-  )));
+  assert.equal(result.filter((verdict) => verdict.code === "record_schema_compliance.required").length, 2);
 });
 
 function completeStorylet(): Record<string, unknown> {
@@ -98,11 +56,24 @@ function completeStorylet(): Record<string, unknown> {
 
 function completeChoice(): Record<string, unknown> {
   return {
-    id: "CHC-0001",
-    story_id: "STORY-001",
+    id: "CHC-1",
+    story_id: "STORY-1",
+    surface_label: "Offer careful help",
+    player_visible_intent: "Approach without pressure and offer practical help.",
+    target_or_action_family: "communicate",
+    likely_state_pressure: "trust and obligation",
+    associated_commitment_block: "SLT-1"
+  };
+}
+
+function legacyComtaxChoice(): Record<string, unknown> {
+  return {
+    ...completeChoice(),
     record_version: 2,
     choice_kind: "scene_commitment",
+    commitment_family: "care_help_protection",
     commitment_class: "offer_practical_help",
+    commitment_detail: "offer_gate_repair",
     strategy_cluster: "careful-help",
     choice_contract: {
       user_intent: "Offer practical help.",
@@ -144,9 +115,12 @@ function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?
 }
 
 function choiceRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "CHC-0001")) {
+  return rawChoiceRecord({ ...parsed, id }, id);
+}
+
+function rawChoiceRecord(parsed: Record<string, unknown>, id: string) {
   return record("choice_record", id, `stories/red-bunny/_source/choices/${id}.yaml`, {
-    ...parsed,
-    id
+    ...parsed
   });
 }
 

@@ -1,6 +1,6 @@
 ---
 name: branching-story-turn-cycle
-description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-NNNN.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-<integer>.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,10 +10,10 @@ arguments:
     description: "Existing story bundle slug under worlds/<world_slug>/stories/"
     required: true
   - name: parent_page_id
-    description: "PG-NNNN; any committed page in the bundle. Continuation is implicit when parent is the active branch leaf; fork is implicit when parent is any non-leaf page or a sibling-branch leaf."
+    description: "PG-<integer>; any committed page in the bundle. Continuation is implicit when parent is the active branch leaf; fork is implicit when parent is any non-leaf page or a sibling-branch leaf."
     required: true
   - name: chosen_choice_id
-    description: "CHC-NNNN emitted by parent_page_id. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 4)."
+    description: "CHC-<integer> emitted by parent_page_id. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 4)."
     required: false
   - name: manual_action_text
     description: "Natural-language player write-in. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 4)."
@@ -22,7 +22,7 @@ arguments:
     description: "authoring | interactive_runtime | batch; default: authoring"
     required: false
   - name: force_branch_id
-    description: "When intentionally forking into a named branch; otherwise the skill derives BR-NNNN from continuation-vs-fork detection"
+    description: "When intentionally forking into a named branch; otherwise the skill derives BR-<integer> from continuation-vs-fork detection"
     required: false
   - name: accept_parent_unrendered
     description: "true | false; default: true. Setting false aborts Pre-flight when parent.rendered_prose.path is null. Default true honors FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."
@@ -34,13 +34,13 @@ arguments:
 Advance a branching-story bundle by one causal tick from any committed parent page — continuation or fork. Consumes a chosen `CHC` or write-in, applies world logic to route the action, commits the resulting state delta, materializes the next page snapshot, authors the comprehensive prose plan for the next page, and emits the next choices. Parent rendered prose is optional.
 
 <HARD-GATE>
-Do NOT write `pages-prose-plans/PG-NNNN.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
+Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)`; parent prose policy verified.
 
-(b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-NNNN` and `PG-NNNN` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-NNNN.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
+(b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
-(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-NNNN.validation_trace`, plus the 4 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale).
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 4 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale).
 
 (d) The user has explicitly approved the deliverable summary (branch label, resolved outcome route, state delta inventory by class, commitment block used, page plan structural preview, emitted choices list, any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation).
 
@@ -72,10 +72,10 @@ Phase 4: Update belief and visibility state → BEL records (in memory)
 Phase 5: Classify mystery and canon authority
         |
         v
-Phase 6: Materialize next page snapshot → SE-NNNN + PG-NNNN (in memory)
+Phase 6: Materialize next page snapshot → SE-<integer> + PG-<integer> (in memory)
         |
         v
-Phase 7: Author page plan → pages-prose-plans/PG-NNNN.md (in memory)
+Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
         |
         v
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
@@ -93,40 +93,40 @@ Phase 10: HARD-GATE fires → atomic patch + markdown writes
 
 - `world_slug` — string — existing world directory slug under `worlds/`
 - `story_slug` — string — existing story bundle slug under `worlds/<world_slug>/stories/`
-- `parent_page_id` — `PG-NNNN` — any committed page in the bundle
+- `parent_page_id` — `PG-<integer>` — any committed page in the bundle
 
 ### XOR-required (exactly one)
 
-- `chosen_choice_id` — `CHC-NNNN` emitted by `parent_page_id` and not retired
+- `chosen_choice_id` — `CHC-<integer>` emitted by `parent_page_id` and not retired
 - `manual_action_text` — natural-language player write-in
 
 ### Optional
 
 - `execution_mode` — enum — `authoring | interactive_runtime | batch`; default: `authoring`
-- `force_branch_id` — `BR-NNNN` — when intentionally forking into a named branch
+- `force_branch_id` — `BR-<integer>` — when intentionally forking into a named branch
 - `accept_parent_unrendered` — `true | false` — default: `true` (honors FOUNDATIONS §Story Bundles §4a)
 
 ## Output
 
 | Class | File path | Created when |
 |---|---|---|
-| `SE-NNNN` | `_source/events/SE-NNNN.yaml` | Always (the causal tick) |
-| `PG-NNNN` | `_source/pages/PG-NNNN.yaml` | Always |
-| `BR-NNNN` | `_source/branches/BR-NNNN.yaml` | IF fork (parent is non-leaf OR `force_branch_id` set) |
-| `STENT-NNNN` (supersession) | `_source/entities/STENT-NNNN.yaml` | IF entity status changes (life / agency / location) |
-| `STINT-NNNN` (new or supersession) | `_source/intentions/STINT-NNNN.yaml` | IF intentions change this turn |
-| `SF-NNNN` | `_source/facts/SF-NNNN.yaml` | IF new branch-local facts emerge |
-| `BEL-NNNN` (new or supersession) | `_source/beliefs/BEL-NNNN.yaml` | IF belief/visibility changes — **mandatory** for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual (Phase 4) |
-| `OBL-NNNN` (new or supersession) | `_source/obligations/OBL-NNNN.yaml` | IF obligations open / close / escalate |
-| `CNSQ-NNNN` | `_source/consequences/CNSQ-NNNN.yaml` | IF consequences fire |
-| `THR-NNNN` (supersession) | `_source/threads/THR-NNNN.yaml` | IF threads advance or close |
-| `SREL-NNNN` (supersession) | `_source/relationships/SREL-NNNN.yaml` | IF relationships change (mandatory after death/incapacity reconciliation) |
-| `STLOC-NNNN` | `_source/locations/STLOC-NNNN.yaml` | IF new story-local location introduced |
-| `STOBJ-NNNN` (new or supersession) | `_source/objects/STOBJ-NNNN.yaml` | IF objects are created / moved / changed |
-| `DA-NNNN` | `_source/artifacts/DA-NNNN.yaml` | IF in-story diegetic artifact introduced |
-| `SLT-NNNN` | `_source/storylets/SLT-NNNN.yaml` | IF Phase 2 created a JIT block (`provenance.origin: runtime_jit`) |
-| `CHC-NNNN` | `_source/choices/CHC-NNNN.yaml` | 3-5 records if Phase 8 emits choice set; 1 for continue-or-pause; 0 if terminal |
-| Page plan | `pages-prose-plans/PG-NNNN.md` | Always |
+| `SE-<integer>` | `_source/events/SE-<integer>.yaml` | Always (the causal tick) |
+| `PG-<integer>` | `_source/pages/PG-<integer>.yaml` | Always |
+| `BR-<integer>` | `_source/branches/BR-<integer>.yaml` | IF fork (parent is non-leaf OR `force_branch_id` set) |
+| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF entity status changes (life / agency / location) |
+| `STINT-<integer>` (new or supersession) | `_source/intentions/STINT-<integer>.yaml` | IF intentions change this turn |
+| `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge |
+| `BEL-<integer>` (new or supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF belief/visibility changes — **mandatory** for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual (Phase 4) |
+| `OBL-<integer>` (new or supersession) | `_source/obligations/OBL-<integer>.yaml` | IF obligations open / close / escalate |
+| `CNSQ-<integer>` | `_source/consequences/CNSQ-<integer>.yaml` | IF consequences fire |
+| `THR-<integer>` (supersession) | `_source/threads/THR-<integer>.yaml` | IF threads advance or close |
+| `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF relationships change (mandatory after death/incapacity reconciliation) |
+| `STLOC-<integer>` | `_source/locations/STLOC-<integer>.yaml` | IF new story-local location introduced |
+| `STOBJ-<integer>` (new or supersession) | `_source/objects/STOBJ-<integer>.yaml` | IF objects are created / moved / changed |
+| `DA-<integer>` | `_source/artifacts/DA-<integer>.yaml` | IF in-story diegetic artifact introduced |
+| `SLT-<integer>` | `_source/storylets/SLT-<integer>.yaml` | IF Phase 2 created a JIT block (`provenance.origin: runtime_jit`) |
+| `CHC-<integer>` | `_source/choices/CHC-<integer>.yaml` | 3-5 records if Phase 8 emits choice set; 1 for continue-or-pause; 0 if terminal |
+| Page plan | `pages-prose-plans/PG-<integer>.md` | Always |
 | Bundle INDEX | `INDEX.md` | Always (updated) |
 
 Atomic-record writes route through `mcp__worldloom__submit_patch_plan`. Supersession is file-level append-only per shared contract §3 — a "supersession" is a new record file carrying `supersedes: <prior-id>`, using the existing `create_*_record` ops. Markdown writes are direct after patch submission per shared contract §10.
@@ -144,7 +144,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - Optional `pages-prose/<recent>.md` for §14 continuity (only when parent prose exists)
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)`
 
-The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `_source/pages/PG-NNNN.yaml` MUST NOT exist (collision aborts Pre-flight).
+The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `_source/pages/PG-<integer>.yaml` MUST NOT exist (collision aborts Pre-flight).
 
 ## Pre-flight Check
 
@@ -154,11 +154,11 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if the directory does not exist or is missing `STORY_KERNEL.md` / `_source/`.
 3. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
 4. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
-5. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-NNNN` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
+5. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
 6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.rendered_prose.path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
 7. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known. The `BEL` id class lands via MCPENH-040 — see Guardrails §Known integration debt.
 8. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
-9. Verify the new `_source/pages/PG-NNNN.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
+9. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -170,7 +170,7 @@ If `manual_action_text` is supplied, parse it into a structured `proposed_action
 
 ```yaml
 proposed_action:
-  actor: STENT-NNNN | player_character | unknown
+  actor: STENT-<integer> | player_character | unknown
   action_family: move | evade | pursue | perceive | investigate | communicate | persuade | negotiate | bond | oppose | harm | protect | control | transfer | use | make_change | ritual_protocol | recover | wait | decide
   target_records: [<record id>]
   intended_outcome: <natural-language statement>
@@ -225,9 +225,9 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 - Advance or close threads (`THR` supersession).
 - Move entities or objects (`STENT.entity_status.location` supersession; `STOBJ` supersession).
 - Create or alter story-local artifacts (`DA` new or supersession).
-- Mark the branch terminal (set `PG-NNNN.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale`).
+- Mark the branch terminal (set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale`).
 
-Supersession is file-level append-only per shared contract §3 — a new record file (e.g., `SREL-NNNN+1.yaml`) carries `supersedes: SREL-NNNN` in its YAML body. The existing `create_*_record` patch ops handle this.
+Supersession is file-level append-only per shared contract §3 — a new record file (e.g., `SREL-<integer>+1.yaml`) carries `supersedes: SREL-<integer>` in its YAML body. The existing `create_*_record` patch ops handle this.
 
 **Deaths and removals are first-class outcomes.** Do not protect "main characters" with out-of-world logic. When an entity dies, becomes incapacitated, or becomes unavailable, reconcile in the same delta:
 
@@ -263,12 +263,12 @@ If the action would resolve any mystery with `status: forbidden`, abort before p
 
 ## Phase 6: Materialize next page snapshot
 
-Draft `SE-NNNN` per shared contract §4.3:
+Draft `SE-<integer>` per shared contract §4.3:
 
 ```yaml
-id: SE-NNNN
+id: SE-<integer>
 event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
-actor: STENT-NNNN | system | unknown
+actor: STENT-<integer> | system | unknown
 targets: [<record id>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal
 world_logic_rationale: <why this route follows from current state + world canon>
@@ -277,17 +277,17 @@ state_delta:
   supersede: [<every record id that received a supersession>]
   close: [<every record id closed this turn>]
 promotion_claims:
-  - source_record: <SF-NNNN | BEL-NNNN | DA-NNNN | STENT-NNNN>
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
 
-Draft `PG-NNNN` per shared contract §4.2:
+Draft `PG-<integer>` per shared contract §4.2:
 
 - `parent_page_id: <parent>`, `branch_id: <active or new>`, `turn_index: parent.turn_index + 1`.
-- `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-NNNN`.
+- `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash`, `state_hash: <computed>`.
 - Full `state_snapshot`: `active_records` (per-class lists including `BEL` key); `entity_status` per active STENT; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
-- `plan.path: pages-prose-plans/PG-NNNN.md`, `plan.plan_hash: <computed>`.
+- `plan.path: pages-prose-plans/PG-<integer>.md`, `plan.plan_hash: <computed>`.
 - `rendered_prose.path: null`, `rendered_prose.receipt_path: null`.
 - `validation_trace`: populated by Phase 9.
 
@@ -295,7 +295,7 @@ The snapshot is the future fork point — complete enough to be a valid parent f
 
 ## Phase 7: Author the page plan
 
-Write `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-NNNN.md` per shared contract §8 — 19 sections.
+Write `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-<integer>.md` per shared contract §8 — 19 sections.
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
@@ -305,19 +305,19 @@ The plan must not expose engine jargon to prose. Engine terms confined to §15 f
 
 ## Phase 8: Generate next choices
 
-Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit a single continue-or-pause `CHC` if continuing into the next beat without a meaningful commitment surface. Emit zero `CHC` if the branch is terminal — in that case, set `PG-NNNN.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale` naming how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved.
+Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit a single continue-or-pause `CHC` if continuing into the next beat without a meaningful commitment surface. Emit zero `CHC` if the branch is terminal — in that case, set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale` naming how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved.
 
 The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
 
-Each `CHC` carries `surface_label`, `player_visible_intent`, `target_or_action_family`, `likely_state_pressure`, `associated_commitment_block` (`SLT-NNNN` or null — turn-cycle will JIT next turn if null), `success_policy` (only when `target_or_action_family == 'attempt'`).
+Each `CHC` carries `surface_label`, `player_visible_intent`, `target_or_action_family`, `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), `success_policy` (only when `target_or_action_family == 'attempt'`).
 
 ## Phase 9: Validate
 
-Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-NNNN.validation_trace` with one-line PASS rationale per gate:
+Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one-line PASS rationale per gate:
 
 1. **input legality** — XOR action source enforced; chosen CHC belongs to parent and is not retired; bundle + parent exist.
-2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-NNNN.state_hash_parent`.
-3. **mystery / invariant firewall** — no forbidden `M-NNNN` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
+2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`.
+3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
 5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
 6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure.
@@ -338,17 +338,17 @@ If any gate or additional check fails, abort before Phase 10 — write nothing.
 1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record` (PEENH-007 lands the op).
 2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run exercises `record_schema_compliance` for BEL (VALENH-011 lands the BEL schema entry).
 3. Present the complete deliverable summary to the user:
-   - Branch label (continuation of `BR-NNNN` or fork into new `BR-NNNN`).
+   - Branch label (continuation of `BR-<integer>` or fork into new `BR-<integer>`).
    - Resolved outcome route (`accept` / `accommodate` / `attempt` / `world_block` / `promotion_hold` / `terminal`).
    - State delta inventory (creates + supersessions + closes per class).
-   - Commitment block used (author-pool `SLT-NNNN` or new JIT `SLT-NNNN`).
+   - Commitment block used (author-pool `SLT-<integer>` or new JIT `SLT-<integer>`).
    - Page plan structural preview (§5 / §6 / §7 / §12 / §13 — verbatim §2 / §3 / §19 excluded for length).
    - Emitted choices list (or terminal rationale).
    - Any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
-5. On approval: obtain patch approval token; submit the patch plan via `mcp__worldloom__submit_patch_plan`.
-6. On patch success: write `pages-prose-plans/PG-NNNN.md` → update bundle `INDEX.md` (per shared contract §10 write order).
-7. Report page path + record inventory to the user. If `promotion_claims[]` were emitted, surface the recommended next step (invoke `story-fact-promotion-to-canon` with the new `SE-NNNN` as evidence). Do NOT `git commit`.
+5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: turn-cycle envelopes vary widely (a tight continuation may be 10-20KB; a large supersession-heavy turn may exceed 50KB); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan.
+6. On patch success: write `pages-prose-plans/PG-<integer>.md` → update bundle `INDEX.md` (per shared contract §10 write order).
+7. Report page path + record inventory to the user. If `promotion_claims[]` were emitted, surface the recommended next step (invoke `story-fact-promotion-to-canon` with the new `SE-<integer>` as evidence). Do NOT `git commit`.
 
 **Failure behavior**: patch fail → write nothing; surface failed gate. Patch success + markdown fail → story-bundle `_source/` authoritative; surface partial-failure; no silent retry. Terminal page without `terminal_rationale` → authoring error, abort before patch.
 
@@ -367,7 +367,7 @@ Only the page plan requires long-form language generation. All other state work 
 - **Rule 1 (No Floating Facts)** — Phase 3 + Phase 7. Mechanism: every drafted record conforms to shared contract §4 schemas; Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
 - **Rule 4 (No Globalization by Accident)** — Phase 5 + Phase 9 gate 4. Mechanism: Phase 5 canon-authority classification keeps branch-local truth from leaking world-wide (`branch_local_counterfactual` vs. `canon_candidate`); Phase 9 gate 4 branch isolation rejects sibling-branch records.
 - **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure).
-- **Rule 7 (Preserve Mystery Deliberately)** — Phase 5 + Phase 9 gate 3. Mechanism: Phase 5 classifies claims and rejects forbidden mystery resolution; Phase 9 gate 3 mystery firewall verifies no forbidden `M-NNNN` is resolved and no selected SLT's `mystery_policy.forbidden_resolutions` is breached.
+- **Rule 7 (Preserve Mystery Deliberately)** — Phase 5 + Phase 9 gate 3. Mechanism: Phase 5 classifies claims and rejects forbidden mystery resolution; Phase 9 gate 3 mystery firewall verifies no forbidden `M-<integer>` is resolved and no selected SLT's `mystery_policy.forbidden_resolutions` is breached.
 
 ## Record Schemas
 
@@ -388,7 +388,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 12 (No Single-Trace Truths) | N/A | Not applicable — story-bundle scope, not world canon. |
 | Canon Layers | Pre-flight, Phase 5 | World canon layers loaded via context packet; story-bundle records carry story-local truths per FOUNDATIONS §Story Bundles §1. |
 | Mystery Reserve | Pre-flight, Phase 5, 9 | Whole-class Mystery Reserve loaded; Phase 5 classification; Phase 9 gate 3 enforces firewall. |
-| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-NNNN.rendered_prose.path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
+| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.rendered_prose.path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `BEL` records for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; `truth_relation` + `visibility` + `confidence` consumed by social-state firewall. |
@@ -398,13 +398,13 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 ## Guardrails
 
 - **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. Story-bundle records at `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` are the exclusive write surface, routed through the patch engine.
-- **Never write rendered prose at turn-cycle.** Rendered prose at `pages-prose/PG-NNNN.md` is supplied externally and validated by `branching-story-prose-attach`. Turn-cycle writes only the plan and updates the bundle INDEX.
+- **Never write rendered prose at turn-cycle.** Rendered prose at `pages-prose/PG-<integer>.md` is supplied externally and validated by `branching-story-prose-attach`. Turn-cycle writes only the plan and updates the bundle INDEX.
 - **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` and a page plan. `world_block` and `terminal` are first-class outcomes routed through the same machinery as `accept`.
 - **Deaths and removals are first-class outcomes.** No main-character protection via out-of-world logic. Phase 3 reconciliation propagates death / incapacity effects in the same delta.
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Every field in every record drafted by this skill conforms to the shared contract §4 schemas. No nice-to-have fields. Supersession is file-level append-only (a new record file carrying `supersedes:` in its YAML body, using existing `create_*_record` ops).
 - **Verbatim §2 / §3 / §19 of the page plan** inlined from `reports/prose-quality-instructions.md` on every page. Operationally load-bearing — external LLM has no cross-plan state.
 - **No word-count targets** anywhere in the plan (per FOUNDATIONS §Story Bundles §9). Pacing is expressed structurally via beats and stop conditions.
-- **Skills do not chain.** Turn-cycle never invokes `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. When `promotion_claims[]` are emitted, turn-cycle surfaces the recommendation; the user separately invokes `story-fact-promotion-to-canon` with the new `SE-NNNN` as evidence.
+- **Skills do not chain.** Turn-cycle never invokes `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. When `promotion_claims[]` are emitted, turn-cycle surfaces the recommendation; the user separately invokes `story-fact-promotion-to-canon` with the new `SE-<integer>` as evidence.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
 - **Known integration debt**:
   - **MCPENH-040** — Register `BEL` id class in `tools/world-mcp/src/tools/allocate-next-id.ts`; drop `ARCTRACE` registration. Lands as a rebuilt-family prerequisite per bootstrap's Shape C rollout. Turn-cycle's Pre-flight step 7 depends on this for `BEL` allocation.

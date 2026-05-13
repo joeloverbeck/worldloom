@@ -10,9 +10,9 @@
 # update every CF producer/validator surface in the same change so the
 # `record_schema_compliance` validator continues to pass.
 #
-# Post-SPEC-13, create-base-world emits CF-0001 as the genesis primary-difference
+# Post-SPEC-13, create-base-world emits CF-1 as the genesis primary-difference
 # fact via mcp__worldloom__submit_patch_plan's create_cf_record op. The record
-# lands at worlds/<world-slug>/_source/canon/CF-0001.yaml as a single atomic file.
+# lands at worlds/<world-slug>/_source/canon/CF-1.yaml as a single atomic file.
 # No monolithic CANON_LEDGER.md exists post-SPEC-13.
 #
 # Trim fields that do not apply to the fact's type (e.g., a pure-law fact
@@ -24,7 +24,7 @@
 #
 # A record missing any of those violates Rule 1 (No Floating Facts).
 
-id: CF-0000                                # canonical fact ID, monotonic within this world
+id: CF-<integer>                                # canonical fact ID, monotonic within this world
 title: ""                                  # short human label
 status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
 type: ""                                   # common enum: capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
@@ -103,7 +103,7 @@ notes: >
   parallel notes paragraph solely to mirror audit history.
 
 # Genesis-world conditionally mandatory blocks (per SPEC-09).
-# New worlds adopt the full CF schema from CF-0001 onward. Use the
+# New worlds adopt the full CF schema from CF-1 onward. Use the
 # source-module helpers in tools/validators/src/structural/record-schema-compliance.ts:
 #   requiresEpistemicProfile(cf.type)
 #   requiresExceptionGovernance(cf.type)

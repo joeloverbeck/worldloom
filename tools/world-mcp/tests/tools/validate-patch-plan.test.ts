@@ -16,10 +16,10 @@ function buildValidPatchPlan() {
       {
         op: "create_cf_record",
         target_world: "seeded",
-        target_file: "_source/canon/CF-0001.yaml",
+        target_file: "_source/canon/CF-1.yaml",
         payload: {
           cf_record: {
-            id: "CF-0001",
+            id: "CF-1",
             title: "Brinewick Harbor Office",
             status: "hard_canon",
             type: "institution",
@@ -46,17 +46,17 @@ function buildValidPatchPlan() {
       {
         op: "create_sec_record",
         target_world: "seeded",
-        target_file: "_source/institutions/SEC-INS-001.yaml",
+        target_file: "_source/institutions/SEC-INS-1.yaml",
         payload: {
           sec_record: {
-            id: "SEC-INS-001",
+            id: "SEC-INS-1",
             file_class: "INSTITUTIONS",
             order: 1,
             heading: "Harbor Office",
             heading_level: 2,
             body: "Brinewick maintains a harbor office.",
             extensions: [],
-            touched_by_cf: ["CF-0001"]
+            touched_by_cf: ["CF-1"]
           }
         }
       }
@@ -101,26 +101,26 @@ test("validatePatchPlan accepts create_bel_record through pre-apply validation",
       approval_token: "token-from-gate",
       verdict: "ACCEPT",
       originating_skill: "branching-story-bootstrap",
-      expected_id_allocations: { bel_ids: ["BEL-0001"] },
+      expected_id_allocations: { bel_ids: ["BEL-1"] },
       patches: [
         {
           op: "create_bel_record",
           target_world: "seeded",
-          target_file: "stories/marla-kern-seduction/_source/beliefs/BEL-0001.yaml",
+          target_file: "stories/marla-kern-seduction/_source/beliefs/BEL-1.yaml",
           payload: {
             story_slug: "marla-kern-seduction",
             record: {
-              id: "BEL-0001",
-              story_id: "STORY-001",
-              created_at_page: "PG-0001",
-              holder: "STENT-0001",
+              id: "BEL-1",
+              story_id: "STORY-1",
+              created_at_page: "PG-1",
+              holder: "STENT-1",
               claim: "Mara believes Kern controls the harbor ledgers.",
               belief_mode: "believes",
               truth_relation: "unknown",
               confidence: "low",
               visibility: "private",
               basis: {
-                source_event: "SE-0001"
+                source_event: "SE-1"
               },
               consequences: {
                 opens: [],
@@ -158,17 +158,17 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
       approval_token: "token-from-gate",
       verdict: "ACCEPT",
       originating_skill: "story-promotion-closeout",
-      expected_id_allocations: { story_da_ids: ["DA-0001"] },
+      expected_id_allocations: { story_da_ids: ["DA-1"] },
       patches: [
         {
           op: "append_story_diegetic_artifact_record",
           target_world: "seeded",
-          target_file: "stories/marla-kern-seduction/_source/artifacts/DA-0001.yaml",
+          target_file: "stories/marla-kern-seduction/_source/artifacts/DA-1.yaml",
           payload: {
             story_slug: "marla-kern-seduction",
             record: {
-              id: "DA-0001",
-              story_id: "STORY-001",
+              id: "DA-1",
+              story_id: "STORY-1",
               supersedes: "DA-0000",
               linked_world_da: "DA-0042"
             }
@@ -217,7 +217,7 @@ test("validatePatchPlan returns fail and surfaces id allocation races before sig
 
   try {
     const plan = buildValidPatchPlan();
-    plan.expected_id_allocations = { cf_ids: ["CF-0002"] };
+    plan.expected_id_allocations = { cf_ids: ["CF-2"] };
     const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
 
     assert.ok("verdicts" in result);
@@ -232,7 +232,7 @@ test("validatePatchPlan returns fail and surfaces id allocation races before sig
         (verdict) =>
           verdict.validator === "id_allocation_race" &&
           verdict.code === "id_allocation_race" &&
-          verdict.message.includes("cf_ids allocation race: expected CF-0002, current next id is CF-0001.")
+          verdict.message.includes("cf_ids allocation race: expected CF-2, current next id is CF-1.")
       )
     );
   } finally {
@@ -276,7 +276,7 @@ test("validatePatchPlan preserves additional envelope-shape errors on skipped re
   const plan = buildValidPatchPlan();
   plan.patches = [
     { op: "", target_world: "seeded", target_file: "", payload: {} },
-    { op: "create_sec_record", target_world: "", target_file: "_source/institutions/SEC-INS-001.yaml" }
+    { op: "create_sec_record", target_world: "", target_file: "_source/institutions/SEC-INS-1.yaml" }
   ] as unknown as ReturnType<typeof buildValidPatchPlan>["patches"];
 
   const result = await validatePatchPlan({ patch_plan: plan });

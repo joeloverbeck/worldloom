@@ -6,15 +6,15 @@ Quick reference for invoking each skill. For detailed skill behavior, see the sk
 
 - **Start a new world**: `/create-base-world` with a `world_name` and optional `premise_path` (a markdown brief under `briefs/`). Produces the 13-file bundle at `worlds/<slug>/`.
 - **Add a canon fact to an existing world**: `/canon-addition` with `world_slug` and `proposal_path`. Accept outcomes extend the ledger and patch affected domain files; non-accept outcomes write only an adjudication record.
-- **Audit a world for contradictions, drift, or dangling consequences**: `/continuity-audit` with `world_slug`. Produces an audit report at `worlds/<slug>/audits/AU-NNNN-<date>.md` and optional retcon-proposal cards directly consumable as `canon-addition`'s `proposal_path`.
+- **Audit a world for contradictions, drift, or dangling consequences**: `/continuity-audit` with `world_slug`. Produces an audit report at `worlds/<slug>/audits/AU-<integer>-<date>.md` and optional retcon-proposal cards directly consumable as `canon-addition`'s `proposal_path`.
 
 Canon-addition validation now includes Test 11 (action-space leverage), Test 12 (trace redundancy), and Test 13 (misrecognition probe addressed). `epistemic_profile` and `exception_governance` remain governed by the conditional-mandate regime in `docs/FOUNDATIONS.md` §Canon Fact Record Schema and §Validation Rules.
 
 ## Canon fact generation
 
-- **Propose new canon facts (thinness gaps, institutional adaptations, mystery seeds, cross-domain couplings)**: `/propose-new-canon-facts` with `world_slug`. Produces proposal cards at `worlds/<slug>/proposals/PR-NNNN-*.md` plus a batch manifest.
+- **Propose new canon facts (thinness gaps, institutional adaptations, mystery seeds, cross-domain couplings)**: `/propose-new-canon-facts` with `world_slug`. Produces proposal cards at `worlds/<slug>/proposals/PR-<integer>-*.md` plus a batch manifest.
 - **Mine canon facts from an existing diegetic artifact**: `/canon-facts-from-diegetic-artifacts` with `world_slug` and the artifact path. Same output surface as above; enforces a Diegetic-to-World laundering firewall and segregates contradictions for `continuity-audit` rather than emitting them as cards.
-- **Feed a proposal card into adjudication**: pass the `PR-NNNN-*.md` card path as `proposal_path` to `/canon-addition`.
+- **Feed a proposal card into adjudication**: pass the `PR-<integer>-*.md` card path as `proposal_path` to `/canon-addition`.
 
 ## Content generation (never mutates world-level canon)
 
@@ -25,26 +25,26 @@ Canon-addition validation now includes Test 11 (action-space leverage), Test 12 
 
 Story-pipeline skills produce story-local records under `worlds/<slug>/stories/<story-slug>/`. They never mutate world-level canon directly — the only lawful story-to-world canon-promotion path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`.
 
-Story state is authoritative when a page plan is committed. Bootstrap and turn-cycle author comprehensive plans at `pages-prose-plans/PG-NNNN.md`; rendered prose at `pages-prose/PG-NNNN.md` is supplied externally and attached later by `branching-story-prose-attach`, which emits a receipt at `pages-prose-receipts/PG-NNNN.yaml` without mutating page state.
+Story state is authoritative when a page plan is committed. Bootstrap and turn-cycle author comprehensive plans at `pages-prose-plans/PG-<integer>.md`; rendered prose at `pages-prose/PG-<integer>.md` is supplied externally and attached later by `branching-story-prose-attach`, which emits a receipt at `pages-prose-receipts/PG-<integer>.yaml` without mutating page state.
 
-- **Start a new branching story bundle**: `/branching-story-bootstrap` with `world_slug`, `story_slug`, `premise_path`, and a selected cast (drawn from the world's `characters/INDEX.md`). Writes `STORY_KERNEL.md`, the atomic `_source/` ledgers, the `pages-prose-plans/PG-0001.md` comprehensive plan and its first 4-6 generated choices, and seed commitment-block records / batch manifests. Rendered prose for PG-0001 is supplied externally and attached later with `branching-story-prose-attach`.
-- **Advance one tick**: `/branching-story-turn-cycle` with `world_slug`, `story_slug`, parent `page_id`, and either a chosen `choice_id` (`CHC-NNNN`) from that page's emitted choices or a free-form `write_in`. Authors the comprehensive prose plan for the next page at `pages-prose-plans/PG-NNNN.md` (alongside the per-turn PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records). Any committed page snapshot can be a parent, whether or not rendered prose has been attached.
-- **Attach rendered prose for a page**: `/branching-story-prose-attach` with `world_slug`, `story_slug`, `page_id`, and the rendered prose already present at `pages-prose/PG-NNNN.md`. Validates the prose against the committed plan and writes `pages-prose-receipts/PG-NNNN.yaml` plus an INDEX update; if `emit_attach_event=true`, it also submits a single `SE` event with `event_kind: prose_attach`. It never mutates the PG record and never gates future page planning.
-  - Example: `/branching-story-prose-attach world_slug=<slug> story_slug=<slug> page_id=PG-NNNN`
-- **Author or expand commitment blocks**: `/commitment-block-authoring` with `world_slug`, `story_slug`, and the mode / audit handoff described by that skill. Audit mode consumes RSP cards from `branching-story-health-audit`'s output. Writes `_source/storylets/SLT-NNNN.yaml` records + `storylet-batches/SLB-NNNN.md` manifests + INDEX summary edits.
-- **Audit story-bundle health**: `/branching-story-health-audit` with `world_slug` and `story_slug`. Writes `stories/<story-slug>/audits/SAU-NNNN-<date>.md` + optional `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md` (directly consumable by `commitment-block-authoring` audit mode).
-- **Promote a story-local fact into world canon**: `/story-fact-promotion-to-canon` with `world_slug`, `story_slug`, the source-record reference, and a promotion rationale. Writes `story-promotions/SP-NNNN.md` + proposal-package sidecar, then hands the proposal package to `canon-addition` (which assembles and submits the actual CF/CH/PA world-canon patch plan under its own HARD-GATE).
+- **Start a new branching story bundle**: `/branching-story-bootstrap` with `world_slug`, `story_slug`, `premise_path`, and a selected cast (drawn from the world's `characters/INDEX.md`). Writes `STORY_KERNEL.md`, the atomic `_source/` ledgers, the `pages-prose-plans/PG-1.md` comprehensive plan and its first 4-6 generated choices, and seed commitment-block records / batch manifests. Rendered prose for `PG-1` is supplied externally and attached later with `branching-story-prose-attach`.
+- **Advance one tick**: `/branching-story-turn-cycle` with `world_slug`, `story_slug`, parent `page_id`, and either a chosen `choice_id` (`CHC-<integer>`) from that page's emitted choices or a free-form `write_in`. Authors the comprehensive prose plan for the next page at `pages-prose-plans/PG-<integer>.md` (alongside the per-turn PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/CHC records). Any committed page snapshot can be a parent, whether or not rendered prose has been attached.
+- **Attach rendered prose for a page**: `/branching-story-prose-attach` with `world_slug`, `story_slug`, `page_id`, and the rendered prose already present at `pages-prose/PG-<integer>.md`. Validates the prose against the committed plan and writes `pages-prose-receipts/PG-<integer>.yaml` plus an INDEX update; if `emit_attach_event=true`, it also submits a single `SE` event with `event_kind: prose_attach`. It never mutates the PG record and never gates future page planning.
+  - Example: `/branching-story-prose-attach world_slug=<slug> story_slug=<slug> page_id=PG-<integer>`
+- **Author or expand commitment blocks**: `/commitment-block-authoring` with `world_slug`, `story_slug`, and the mode / audit handoff described by that skill. Audit mode consumes RSP cards from `branching-story-health-audit`'s output. Writes `_source/storylets/SLT-<integer>.yaml` records + `storylet-batches/SLB-<integer>.md` manifests + INDEX summary edits.
+- **Audit story-bundle health**: `/branching-story-health-audit` with `world_slug` and `story_slug`. Writes `stories/<story-slug>/audits/SAU-<integer>-<date>.md` + optional `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md` (directly consumable by `commitment-block-authoring` audit mode).
+- **Promote a story-local fact into world canon**: `/story-fact-promotion-to-canon` with `world_slug`, `story_slug`, the source-record reference, and a promotion rationale. Writes `story-promotions/SP-<integer>.md` + proposal-package sidecar, then hands the proposal package to `canon-addition` (which assembles and submits the actual CF/CH/PA world-canon patch plan under its own HARD-GATE).
 
 ### Authoring loop after the prose-attach split
 
 ```
-bootstrap plan PG-0001 → optional external prose render → prose-attach receipt PG-0001
+bootstrap plan PG-1 → optional external prose render → prose-attach receipt PG-1
              ↓
-turn-cycle plan PG-0002 ← any committed parent page snapshot
+turn-cycle plan PG-2 ← any committed parent page snapshot
              ↓
-optional external prose render → prose-attach receipt PG-0002
+optional external prose render → prose-attach receipt PG-2
              ↓
-turn-cycle plan PG-0003 ← ...
+turn-cycle plan PG-3 ← ...
 ```
 
 Branching is plan-first: any committed page can be a fork parent, including a non-leaf page or a page whose rendered prose has not yet been attached. Rendered prose and prose receipts are evidence / publication artifacts, not parent-page gates.

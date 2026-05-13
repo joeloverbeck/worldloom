@@ -2,7 +2,7 @@
 #
 # Emitted by the propose-new-characters skill as the audit record for a single
 # invocation. Pairs with a set of NCP proposal-card files at
-# worlds/<world-slug>/character-proposals/NCP-NNNN-<slug>.md whose ids appear in card_ids.
+# worlds/<world-slug>/character-proposals/NCP-<integer>-<slug>.md whose ids appear in card_ids.
 #
 # The manifest is the batch's audit trail: every phase output has a named home
 # in the body. The frontmatter is summary metadata; the body is the proof-of-work.
@@ -10,7 +10,7 @@
 # Required fields must not be left as TODO or empty (enforced by Phase 15 Test 10-12).
 
 ---
-batch_id: NCB-0000                           # monotonic per-world
+batch_id: NCB-<integer>                           # monotonic per-world
 world_slug: ""
 generated_date: ""                           # ISO date, e.g. 2026-04-20
 
@@ -43,12 +43,12 @@ registry_summary: >                          # one-paragraph prose summary
   balanced / character-dense) and the domains the registry already covers
   well vs those it leaves open.
 
-card_ids: []                                 # every NCP-NNNN emitted by this batch (surviving through Phase 15)
-  # - NCP-0001
-  # - NCP-0002
+card_ids: []                                 # every NCP-<integer> emitted by this batch (surviving through Phase 15)
+  # - NCP-1
+  # - NCP-2
 
 dropped_card_ids: []                         # card ids the user excluded at Phase 16 HARD-GATE drop-list
-  # - NCP-0003
+  # - NCP-3
 
 user_approved: false                         # set true at Phase 16 commit
 
@@ -60,7 +60,7 @@ notes: >
   new institutions").
 ---
 
-# Batch NCB-NNNN — <World-Slug-TitleCased>
+# Batch NCB-<integer> — <World-Slug-TitleCased>
 
 ## Registry Summary
 
@@ -146,16 +146,16 @@ notes: >
 
 | Slot | Composition Type | Filled By | Empty? / Rationale |
 |------|------------------|-----------|---------------------|
-| 1    | ordinary-life lens | NCP-NNNN | — |
-| 2    | institution insider | NCP-NNNN | — |
+| 1    | ordinary-life lens | NCP-<integer> | — |
+| 2    | institution insider | NCP-<integer> | — |
 | 3    | boundary broker | — | **true** — <rationale for why no seed filled this slot> |
-| 4    | pressure enforcer / gatekeeper | NCP-NNNN | — |
-| 5    | sufferer / witness with low formal power | NCP-NNNN | — |
-| 6    | artifact-native author | NCP-NNNN | — |
-| 7    | ideological misreader / dissenter | NCP-NNNN | — |
-| 8    | regionally distant mosaic figure | NCP-NNNN | — |
+| 4    | pressure enforcer / gatekeeper | NCP-<integer> | — |
+| 5    | sufferer / witness with low formal power | NCP-<integer> | — |
+| 6    | artifact-native author | NCP-<integer> | — |
+| 7    | ideological misreader / dissenter | NCP-<integer> | — |
+| 8    | regionally distant mosaic figure | NCP-<integer> | — |
 | 9    | body / species-differentiated lens | — | **true** — <rationale> |
-| 10   | load-bearing round character | NCP-NNNN | — |
+| 10   | load-bearing round character | NCP-<integer> | — |
 
 ### Contrast-Axis Coverage
 

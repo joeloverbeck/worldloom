@@ -19,7 +19,7 @@
   ],
   "properties": {
     "record_kind": { "type": "string", "const": "canon_fact" },
-    "id": { "type": "string", "pattern": "^CF-[0-9]{4}$" },
+    "id": { "type": "string", "pattern": "^CF-[0-9]+$" },
     "title": { "type": "string", "minLength": 1 },
     "status": {
       "type": "string",
@@ -71,7 +71,7 @@
         "direct_user_approval": { "type": "boolean" },
         "derived_from": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(CF|DA)-[0-9]{4}$" }
+          "items": { "type": "string", "pattern": "^(CF|DA)-[0-9]+$" }
         }
       }
     },
@@ -142,10 +142,10 @@
         "additionalProperties": false,
         "required": ["change_id", "originating_cf", "date", "summary"],
         "properties": {
-          "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
+          "change_id": { "type": "string", "pattern": "^CH-[0-9]+$" },
           "originating_cf": {
             "type": "string",
-            "pattern": "^(CF-[0-9]{4}|none_clarification_retcon)$"
+            "pattern": "^(CF-[0-9]+|none_clarification_retcon)$"
           },
           "date": { "type": "string", "format": "date" },
           "summary": { "type": "string", "minLength": 1 }
@@ -154,7 +154,7 @@
     },
     "pre_figured_by": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" }
+      "items": { "type": "string", "pattern": "^CF-[0-9]+$" }
     },
     "extensions": { "type": "array", "items": { "$ref": "https://worldloom.local/schemas/extension-entry.schema.json" } }
   }

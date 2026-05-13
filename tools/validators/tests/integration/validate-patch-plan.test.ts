@@ -213,6 +213,54 @@ test("validatePatchPlan runs storylet predicate parsing for Shape B storylet ops
   });
 });
 
+test("validatePatchPlan resolves same-envelope CNSQ references for storylet predicate parsing", async () => {
+  await withTempRoot(async () => {
+    const storylet = completeStoryletRecord();
+    storylet.preconditions = {
+      hard: [{ pred: "record_active", record: "CNSQ-0001" }],
+      soft: []
+    };
+    const plan = storyletPlan(storylet) as unknown as { patches: unknown[] };
+    plan.patches.unshift(storyPatch("create_cnsq_record", "consequences", {
+      id: "CNSQ-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }));
+
+    const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
+
+    const execution = result.executions.find(
+      (row) => row.name === "storylet_predicate_dsl_parsability"
+    );
+    assert.notEqual(execution?.status, "fail");
+    assert.ok(!result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "storylet_predicate_dsl_parsability" &&
+        verdict.code === "predicate.unresolved_reference" &&
+        verdict.message.includes("CNSQ-0001")
+    ));
+  });
+});
+
+test("validatePatchPlan rejects missing CNSQ references for storylet predicate parsing", async () => {
+  await withTempRoot(async () => {
+    const storylet = completeStoryletRecord();
+    storylet.preconditions = {
+      hard: [{ pred: "record_active", record: "CNSQ-0099" }],
+      soft: []
+    };
+
+    const result = await validatePatchPlan(storyletPlan(storylet) as unknown as PatchPlanEnvelope);
+
+    assert.ok(result.verdicts.some(
+      (verdict) =>
+        verdict.validator === "storylet_predicate_dsl_parsability" &&
+        verdict.code === "predicate.unresolved_reference" &&
+        verdict.message.includes("CNSQ-0099")
+    ));
+  });
+});
+
 test("validatePatchPlan applies story-bundle record schemas to Shape B story ops", async () => {
   await withTempRoot(async () => {
     const plan = storyletPlan({

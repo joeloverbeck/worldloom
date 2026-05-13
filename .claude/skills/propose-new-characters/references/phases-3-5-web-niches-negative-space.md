@@ -4,7 +4,7 @@
 
 Two simultaneous views.
 
-**Constellation view** — existing registry entries linked by kinship / patronage / rivalry / debt / mentorship / desire / conflict / co-presence / contrast / moral-opposition / thematic-analogy. Use `get_neighbors` on registry-entry `ENT-NNNN` ids when the relation graph is not already in the packet.
+**Constellation view** — existing registry entries linked by kinship / patronage / rivalry / debt / mentorship / desire / conflict / co-presence / contrast / moral-opposition / thematic-analogy. Use `get_neighbors` on registry-entry `ENT-<integer>` ids when the relation graph is not already in the packet.
 
 **Mosaic view** — registry entries linked even if they never meet, through shared institution / trade route / species pressure / border / taboo system / relic economy / war residue / archive chain / artifact circulation / rumor ecology / mirrored contradictions across regions.
 
@@ -57,7 +57,7 @@ Run 17 probes against the registry + world state:
 16. Mystery-adjacent vantage points without an epistemic inhabitant (careful: targets vantage, NOT mystery-resolving knowledge — Phase 10b firewall still applies)
 17. Monopoly-window domains (Phase 3 output) risking single-point-of-failure
 
-Drive the probes via `search_nodes` per file class (`institutions`, `peoples-and-species`, `geography`, `everyday-life`, `timeline`) plus `get_record` on cited `SEC-*` / `M-*` / `CF-*` ids. Each finding cites the specific record id (e.g., `SEC-INS-007`, `CF-0044`, `M-0003`) and the concern it sits under.
+Drive the probes via `search_nodes` per file class (`institutions`, `peoples-and-species`, `geography`, `everyday-life`, `timeline`) plus `get_record` on cited `SEC-*` / `M-*` / `CF-*` ids. Each finding cites the specific record id (e.g., `SEC-INS-007`, `CF-44`, `M-3`) and the concern it sits under.
 
 If `upstream_audit_path` was loaded at Phase 0, merge its person-thinness findings; skip overlapping probes.
 

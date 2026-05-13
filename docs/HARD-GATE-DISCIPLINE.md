@@ -2,7 +2,7 @@
 
 Every canon-mutating or content-generating skill in `.claude/skills/` begins with a `<HARD-GATE>` block. These gates are **absolute under Auto Mode**. Invoking a skill is not approval of its deliverable.
 
-The story-bundle family — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout` — all carry HARD-GATE blocks. `branching-story-prose-attach` validates externally supplied prose and writes a `pages-prose-receipts/PG-NNNN.yaml` receipt; it never mutates the PG record, never promotes story facts to world canon, and never gates future `branching-story-turn-cycle` planning. Canon promotion remains exclusive to `story-fact-promotion-to-canon`, which hands approved candidates to `canon-addition` under its own HARD-GATE.
+The story-bundle family — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout` — all carry HARD-GATE blocks. `branching-story-prose-attach` validates externally supplied prose and writes a `pages-prose-receipts/PG-<integer>.yaml` receipt; it never mutates the PG record, never promotes story facts to world canon, and never gates future `branching-story-turn-cycle` planning. Canon promotion remains exclusive to `story-fact-promotion-to-canon`, which hands approved candidates to `canon-addition` under its own HARD-GATE.
 
 ## Execution pattern
 

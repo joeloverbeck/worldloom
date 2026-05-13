@@ -10,7 +10,7 @@ For the bound Author at the bound date/place, determine what they can:
 - **repeat secondhand** (rumor, sermon, merchant gossip, bardic transmission)
 - **get wrong** (folk theories; inherited propaganda; professional blind spots — cross-reference SEC-INS religious/ideological material, SEC-ELF common beliefs)
 - **intentionally conceal** (given `political_dependency`, `desired_relation_to_truth`, `taboo_censorship_conditions`)
-- **never know** (cross-reference M-NNNN `what is unknown` blocks; OQ-NNNN items; CAU-N-style restricted vocabulary CFs)
+- **never know** (cross-reference M-<integer> `what is unknown` blocks; OQ-<integer> items; CAU-N-style restricted vocabulary CFs)
 
 ### Dossier-transfer (when `character_path` is provided)
 
@@ -86,8 +86,8 @@ Build the artifact's claim list. For each claim, record:
 | `contradiction_risk` | `none` \| `soft` \| `hard` |
 | `mode` | `direct` \| `implied` \| `symbolic` |
 | `adaptive_behavior_preserved_under_wrong_ontology` | optional boolean, default false. When true, the narrator's explanation diverges from canon while the prescribed behavior implied by the claim is correct survival / social / ritual behavior under canon truth. Pattern #80: the wrong explanation is the distortion, and the right behavior is what the distortion preserves. |
-| `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve to a `_source/canon/CF-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
-| `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve to a `_source/mystery-reserve/M-NNNN.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
+| `cf_id` | singular CF-id string; required when `canon_status: canonically_true`; must resolve to a `_source/canon/CF-<integer>.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
+| `mr_id` | singular MR-id string; required when `canon_status: mystery_adjacent`; must resolve to a `_source/mystery-reserve/M-<integer>.yaml` record (verifiable via `mcp__worldloom__get_record`); null otherwise |
 | `repair_trace` | null by default; populated by Phase 7f with `{repair_type, reason}` when the claim is retagged, rescoped, moved, or removed |
 
 Every claim with `canon_status: canonically_true` must populate `cf_id` with a CF-id resolvable via `mcp__worldloom__get_record`. Every claim with `canon_status: mystery_adjacent` must populate `mr_id` with an MR-id resolvable via `mcp__worldloom__get_record`. Every claim repaired at Phase 7f must record the repair under `repair_trace`. Every claim tagged `prohibited_for_this_artifact` is **removed from the artifact body** — it stays in the record as an audit trail of what was considered and rejected.

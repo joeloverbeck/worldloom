@@ -12,7 +12,7 @@
 ---
 # ===== identification =====
 
-batch_id: NWB-0000                           # monotonic, pipeline-scoped
+batch_id: NWB-<integer>                           # monotonic, pipeline-scoped
 generated_date: ""                           # ISO date
 source_preference_document: ""               # path to preference_path argument
 parameters_path: ""                          # path to parameters_path argument (or "" if interview)
@@ -43,8 +43,8 @@ existing_worlds_scanned: []                  # list of {world_slug, occupancy_su
 
 # ===== generation output =====
 
-card_ids: []                                 # list of NWP-NNNN ids written this batch
-dropped_card_ids: []                         # list of NWP-NNNN ids the user dropped at the HARD-GATE
+card_ids: []                                 # list of NWP-<integer> ids written this batch
+dropped_card_ids: []                         # list of NWP-<integer> ids the user dropped at the HARD-GATE
                                              # dropped cards are recorded but never written to disk
 
 # ===== bootstrap surface =====

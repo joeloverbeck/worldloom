@@ -7,13 +7,13 @@
 # CANON POSTURE: This file is NOT canon. source_basis.user_approved=true means
 # the card was reviewed and kept in the batch at Phase 8 HARD-GATE — it does
 # NOT mean any fact has been canonized. canonize-routed cards spawn a sidecar
-# proposal-card file (EPE-NNNN-<slug>.proposal.md) that canon-addition may
+# proposal-card file (EPE-<integer>-<slug>.proposal.md) that canon-addition may
 # accept in a separate run.
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 7 Test 7).
 
-event_id: EPE-0000                           # monotonic per-world
-batch_id: BATCH-0000                         # the batch this card was emitted in
+event_id: EPE-<integer>                           # monotonic per-world
+batch_id: BATCH-<integer>                         # the batch this card was emitted in
 slug: ""                                     # kebab-case slug derived from title
 title: ""                                    # short human label
 
@@ -28,10 +28,10 @@ origin_type: ""                              # one of the 14-value taxonomy:
                                              # theological_dispute | anniversary | relic_discovery |
                                              # trade_collapse | climate
 
-# Phase 4 Traceability Rule — at least one CF-NNNN required
+# Phase 4 Traceability Rule — at least one CF-<integer> required
 traceability:
   cited_canon_facts: []                      # REQUIRED — at least one CF id
-    # - CF-0042
+    # - CF-42
   cited_institutions: []                     # optional — entity ids or institution names
   cited_material_conditions: []              # optional — SEC-ECR / SEC-MTS ids
   cited_pressures: []                        # optional — pressure_label strings from Phase 1 inventory
@@ -43,7 +43,7 @@ who_benefits: []                             # at least one of who_benefits / wh
 who_suffers: []                              # / what_changes_immediately must be non-empty (Rule 2)
 rumor_waves: []                              # public-rumor versions of the event; story-fuel staple
 mysteries_touched: []                        # Phase 6b firewall declaration; required if any M record overlapped
-  # - M-0007
+  # - M-7
 
 scope:                                       # Phase 6c Distribution Discipline
   geographic: local                          # local | regional | global
@@ -62,7 +62,7 @@ routing_rationale: >
 # completeness before sidecar emission. Shape is byte-parallel to
 # propose-new-canon-facts/templates/proposal-card.md frontmatter.
 proposal_card_extract: null                  # null OR the following shape:
-  # proposal_id: PR-0000                     # freshly-allocated via allocate_next_id
+  # proposal_id: PR-<integer>                     # freshly-allocated via allocate_next_id
   # canon_fact_statement: ""                 # one-sentence canon-fact-shaped truth distilled from event_seed
   # proposed_status: hard_canon              # hard_canon | soft_canon | contested_canon
   # type: ""                                 # capability | event | institution | etc.
@@ -86,7 +86,7 @@ canon_safety_flags:                          # Phase 6 sub-check audit trail
   mystery_reserve_firewall_status: pass      # pass | needs_review
   distribution_discipline_status: pass       # pass | needs_review
 
-recurrence_flag: null                        # null OR an EPE-NNNN id from a prior batch with same
+recurrence_flag: null                        # null OR an EPE-<integer> id from a prior batch with same
                                              # origin_type / pressure_label cluster (recurrence detection)
 
 status: active                               # active | resolved | superseded
@@ -95,7 +95,7 @@ status: active                               # active | resolved | superseded
 
 source_basis:
   world_slug: ""
-  batch_id: BATCH-0000
+  batch_id: BATCH-<integer>
   generated_date: ""                         # ISO date
   user_approved: false                       # set true at Phase 8 commit — means "kept in batch after review",
                                              # NOT "canonized"

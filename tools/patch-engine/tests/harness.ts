@@ -91,7 +91,7 @@ export function writeSecret(worldRoot: string, secret = Buffer.from("integration
   return secretPath;
 }
 
-export function nextId(db: Database.Database, prefix: string, width: number, zeroPad = true): string {
+export function nextId(db: Database.Database, prefix: string, width: number, zeroPad = false): string {
   const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(`^${escapedPrefix}-(\\d+)$`);
   const rows = db.prepare("SELECT node_id FROM nodes ORDER BY node_id").all() as Array<{ node_id: string }>;

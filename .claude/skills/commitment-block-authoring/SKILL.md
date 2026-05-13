@@ -1,6 +1,6 @@
 ---
 name: commitment-block-authoring
-description: "Use when creating compact reusable commitment blocks (SLT records) for the author pool of a branching-story bundle. Two modes: direct_batch (fresh batch addressing coverage gaps) or audit_repair (consumes RSP cards from branching-story-health-audit). Produces: SLT-NNNN records via patch engine + storylet-batches/SLB-NNNN.md batch manifest + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when creating compact reusable commitment blocks (SLT records) for the author pool of a branching-story bundle. Two modes: direct_batch (fresh batch addressing coverage gaps) or audit_repair (consumes RSP cards from branching-story-health-audit). Produces: SLT-<integer> records via patch engine + storylet-batches/SLB-<integer>.md batch manifest + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -10,7 +10,7 @@ arguments:
     description: "Existing story bundle slug under worlds/<world_slug>/stories/"
     required: true
   - name: mode
-    description: "direct_batch | audit_repair. direct_batch creates a fresh batch addressing coverage gaps in the current SLT pool. audit_repair consumes RSP-NNNN cards from a named branching-story-health-audit report."
+    description: "direct_batch | audit_repair. direct_batch creates a fresh batch addressing coverage gaps in the current SLT pool. audit_repair consumes RSP-<integer> cards from a named branching-story-health-audit report."
     required: true
   - name: target_count
     description: "direct_batch only — integer; default 6, max 12. Number of SLT records to create. Matches bootstrap's minimal-seed growth increment."
@@ -19,10 +19,10 @@ arguments:
     description: "direct_batch only — natural-language hint guiding which move families / action families the batch should emphasize (e.g., 'post-violence recovery', 'investigation coverage'). The Phase 4 diversity gate enforces minimum spread regardless."
     required: false
   - name: audit_id
-    description: "audit_repair only — SAU-NNNN of the source branching-story-health-audit report supplying the RSP cards."
+    description: "audit_repair only — SAU-<integer> of the source branching-story-health-audit report supplying the RSP cards."
     required: false
   - name: finding_ids
-    description: "audit_repair only — list of RSP-NNNN ids to address. One SLT block is created per RSP card; cards with repair_kind != commitment_block are skipped with a sibling-handoff recommendation."
+    description: "audit_repair only — list of RSP-<integer> ids to address. One SLT block is created per RSP card; cards with repair_kind != commitment_block are skipped with a sibling-handoff recommendation."
     required: false
 ---
 
@@ -31,11 +31,11 @@ arguments:
 Create compact reusable commitment blocks (`SLT` records) for the author pool of a branching-story bundle — causal moves with preconditions, beats, effects, exit options, and saliency, NOT dramatic acts or arcs.
 
 <HARD-GATE>
-Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-NNNN.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
+Do NOT write `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; mode validated; current SLT pool loaded from `_source/storylets/SLT-*.yaml` (`direct_batch`) OR audit + RSP cards loaded from `audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` (`audit_repair`); SLT ids and one SLB id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', ...)` (MCPENH-041 lands the task_type rename — see Guardrails §Known integration debt).
 
-(b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — move-family diversity, recovery coverage, belief-or-relationship coverage, no branch-local dependencies in global-author-pool blocks); SLB-NNNN batch manifest drafted.
+(b) Phases 1-5 have completed in working memory: coverage gaps diagnosed (`direct_batch`) OR RSP cards loaded with non-commitment-block `repair_kind` cards skipped (`audit_repair`); per-block drafts authored per shared contract §4.4 schema + §5 predicate DSL; 6-gate per-block validation complete (schema completeness, predicate parse, branch-scope legality, mystery/invariant firewall, effect legality, exit-option grounding); 4-check batch-diversity validation complete (`direct_batch` only — move-family diversity, recovery coverage, belief-or-relationship coverage, no branch-local dependencies in global-author-pool blocks); SLB-<integer> batch manifest drafted.
 
 (c) The user has explicitly approved the deliverable summary (mode + source, SLT inventory by move_family, per-block one-line summary, per-block validation traces, batch-diversity result for `direct_batch`, skipped RSP cards for `audit_repair`, SLB manifest preview).
 
@@ -64,7 +64,7 @@ Phase 3: Per-block validation (6 gates per shared contract §4.4 + §5)
 Phase 4: Batch-diversity validation (direct_batch only; 4 checks)
         |
         v
-Phase 5: Author SLB-NNNN batch manifest
+Phase 5: Author SLB-<integer> batch manifest
         |
         v
 Phase 6: HARD-GATE fires → atomic patch (create_slt_record per block)
@@ -88,13 +88,13 @@ For `direct_batch`:
 
 For `audit_repair`:
 
-- `audit_id` — `SAU-NNNN` of the source health-audit report.
-- `finding_ids` — list of `RSP-NNNN` ids to address.
+- `audit_id` — `SAU-<integer>` of the source health-audit report.
+- `finding_ids` — list of `RSP-<integer>` ids to address.
 
 ## Output
 
-- `SLT-NNNN` records — Always (`target_count` for `direct_batch`; `len(finding_ids)` minus skipped RSP cards for `audit_repair`); written via `create_slt_record` patch op
-- `storylet-batches/SLB-NNNN.md` — Always (batch manifest; direct-write markdown after patch submission)
+- `SLT-<integer>` records — Always (`target_count` for `direct_batch`; `len(finding_ids)` minus skipped RSP cards for `audit_repair`); written via `create_slt_record` patch op
+- `storylet-batches/SLB-<integer>.md` — Always (batch manifest; direct-write markdown after patch submission)
 - Bundle `INDEX.md` — Always (updated last)
 
 All SLT records in a batch share the same `provenance.origin` value: `author_batch` for `direct_batch`, `audit_repair` for `audit_repair`. The other valid `provenance.origin` values (`bootstrap_seed`, `manual_authoring`, `runtime_jit`) are reserved for bootstrap, one-off manual authoring, and turn-cycle's inlined JIT block creation.
@@ -118,12 +118,12 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
-3. Validate `mode`: must be `direct_batch` or `audit_repair`; for `direct_batch`, validate `target_count` (1–12 inclusive, default 6); for `audit_repair`, validate `audit_id` matches the `SAU-NNNN` pattern and `finding_ids` is non-empty.
+3. Validate `mode`: must be `direct_batch` or `audit_repair`; for `direct_batch`, validate `target_count` (1–12 inclusive, default 6); for `audit_repair`, validate `audit_id` matches the `SAU-<integer>` pattern and `finding_ids` is non-empty.
 4. Mode-specific load:
    - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `move_family`.
-   - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-NNNN` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
+   - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-<integer>` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
-6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-NNNN` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / threads (for `direct_batch` gap diagnosis weighting).
+6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / threads (for `direct_batch` gap diagnosis weighting).
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -147,11 +147,11 @@ Identify which coverage targets are absent or under-represented in the current p
 
 Output: a list of `target_count` planned blocks, each with a `move_family` value from the 16-value enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
 
-**`audit_repair`**: For each `RSP-NNNN` card in `finding_ids`, extract:
+**`audit_repair`**: For each `RSP-<integer>` card in `finding_ids`, extract:
 
-- `repair_kind` — `commitment_block | turn_repair | prose_revision | promotion | branch_flag`. This skill handles ONLY `commitment_block`; cards with other kinds produce a warning ("RSP-NNNN is repair_kind=`<X>`; not handled by commitment-block-authoring; recommend `<sibling-skill>` instead") and are skipped (audit-trail preserved in Phase 5's manifest).
+- `repair_kind` — `commitment_block | turn_repair | prose_revision | promotion | branch_flag`. This skill handles ONLY `commitment_block`; cards with other kinds produce a warning ("RSP-<integer> is repair_kind=`<X>`; not handled by commitment-block-authoring; recommend `<sibling-skill>` instead") and are skipped (audit-trail preserved in Phase 5's manifest).
 - `target_records` — records the block should engage with
-- `target_branch` — `BR-NNNN` or null (author-pool when null)
+- `target_branch` — `BR-<integer>` or null (author-pool when null)
 - `rationale` — natural-language reason from the audit
 - `suggested_block_move_family` — from the 16-value `move_family` enum
 - `visibility` — `global_author_pool | branch_scoped`
@@ -163,11 +163,11 @@ Each commitment-block-kind card maps 1:1 to one planned block.
 For each planned block (from Phase 1), draft a full `SLT` record per shared contract §4.4:
 
 ```yaml
-id: SLT-NNNN
-story_id: STORY-NNNN
+id: SLT-<integer>
+story_id: STORY-<integer>
 scope:
   visibility: global_author_pool | branch_scoped   # branch_scoped only when audit_repair RSP specifies it
-  branch_id: BR-NNNN | null
+  branch_id: BR-<integer> | null
 created_at_page: null   # null for both modes; runtime_jit case lives in turn-cycle Phase 2
 title: <short descriptive title>
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery
@@ -193,7 +193,7 @@ saliency:
   cooldown_pages: 0
   tags: [<string>]
 mystery_policy:
-  forbidden_resolutions: [M-NNNN]
+  forbidden_resolutions: [M-<integer>]
   allowed_authority: apparent | branch_local_counterfactual | canon_candidate | none
 provenance:
   origin: author_batch | audit_repair   # never runtime_jit for this skill
@@ -238,10 +238,10 @@ If any batch-level check fails, regenerate the affected blocks (loop to Phase 2 
 
 ## Phase 5: Author the batch manifest
 
-Draft `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-NNNN.md`:
+Draft `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-<integer>.md`:
 
 ```markdown
-# SLB-NNNN: <mode> batch
+# SLB-<integer>: <mode> batch
 
 **Mode**: direct_batch | audit_repair
 **Source**: <focus hint, if direct_batch> | <audit_id + finding_ids, if audit_repair>
@@ -252,7 +252,7 @@ Draft `worlds/<world_slug>/stories/<story_slug>/storylet-batches/SLB-NNNN.md`:
 
 | SLT id | move_family | scope | source RSP (if audit_repair) | validation |
 |---|---|---|---|---|
-| SLT-NNNN | <move_family> | global_author_pool | RSP-NNNN | PASS (6/6 gates) |
+| SLT-<integer> | <move_family> | global_author_pool | RSP-<integer> | PASS (6/6 gates) |
 | ... | | | | |
 
 ## Skipped RSP cards (audit_repair only)
@@ -284,8 +284,8 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
    - Any skipped RSP cards (`audit_repair` only, with `repair_kind` + recommended sibling + skip reason).
    - The SLB manifest path + contents preview.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
-5. On approval: obtain patch approval token; submit the patch plan via `mcp__worldloom__submit_patch_plan`.
-6. On patch success: write the markdown artifacts in shared contract §10 write order: `storylet-batches/SLB-NNNN.md` → update bundle `INDEX.md`.
+5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: commitment-block-authoring envelopes scale with batch size (one `create_slt_record` op per block; a `standard` 8-14-block batch is typically 15-30KB, but `audit_repair` batches consuming many RSP cards or `direct_batch` calls authoring widely-cast SLTs may exceed 50KB); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan.
+6. On patch success: write the markdown artifacts in shared contract §10 write order: `storylet-batches/SLB-<integer>.md` → update bundle `INDEX.md`.
 7. Report SLT ids + SLB id + bundle INDEX state to the user. Do NOT `git commit`.
 
 **Failure behavior**: patch fail → write nothing; surface the failed per-block gate and corrective action. Patch success + markdown fail → story-bundle `_source/` records authoritative; the SLB manifest can be repaired directly; surface partial-failure to user. Per-block rejections in Phase 3 → blocks removed from batch with logged reason; surface the per-block rejection summary at sub-step 3 even on overall success.

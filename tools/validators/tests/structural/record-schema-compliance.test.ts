@@ -275,6 +275,63 @@ test("record_schema_compliance accepts complete storylet records", async () => {
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts branch-prefix-scoped storylets with canonical nested prefix", async () => {
+  const storylet = completeStorylet();
+  storylet.scope = {
+    visibility: "branch_prefix_scoped",
+    branch_id: "BR-0001",
+    visible_branch_path_prefix: ["PG-0001"]
+  };
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([storyletRecord(storylet)])
+  );
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects malformed branch-prefix-scoped storylet prefix fields", async () => {
+  const missingPrefix = completeStorylet();
+  missingPrefix.scope = {
+    visibility: "branch_prefix_scoped",
+    branch_id: "BR-0001"
+  };
+
+  const emptyPrefix = completeStorylet();
+  emptyPrefix.scope = {
+    visibility: "branch_prefix_scoped",
+    branch_id: "BR-0001",
+    visible_branch_path_prefix: []
+  };
+
+  const legacyTopLevelPrefix = completeStorylet();
+  legacyTopLevelPrefix.scope = {
+    visibility: "branch_prefix_scoped",
+    branch_id: "BR-0001",
+    visible_branch_path_prefix: ["PG-0001"]
+  };
+  legacyTopLevelPrefix.visible_branch_path_prefix = ["PG-0001"];
+
+  const globalWithPrefix = completeStorylet();
+  (globalWithPrefix.scope as Record<string, unknown>).visible_branch_path_prefix = ["PG-0001"];
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(missingPrefix, "SLT-0011"),
+      storyletRecord(emptyPrefix, "SLT-0012"),
+      storyletRecord(legacyTopLevelPrefix, "SLT-0013"),
+      storyletRecord(globalWithPrefix, "SLT-0014")
+    ])
+  );
+
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0011" && verdict.code === "record_schema_compliance.required"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0012" && verdict.message.includes("/scope/visible_branch_path_prefix")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0013" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0014" && verdict.message.includes("/scope")));
+});
+
 test("record_schema_compliance rejects storylets missing required structural fields", async () => {
   for (const field of ["move_family", "preconditions", "beats", "mystery_policy"] as const) {
     const parsed = completeStorylet();

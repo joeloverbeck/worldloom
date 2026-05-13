@@ -195,9 +195,9 @@ function envelopeSchema(opKinds: readonly OperationKind[]): JsonObject {
       approval_token: stringSchema(),
       verdict: stringSchema(),
       originating_skill: stringSchema(),
-      originating_cf_ids: stringArraySchema("^CF-[0-9]{4}$"),
-      originating_ch_id: stringSchema("^CH-[0-9]{4}$"),
-      originating_pa_id: stringSchema("^PA-[0-9]{4}$"),
+      originating_cf_ids: stringArraySchema("^CF-[0-9]+$"),
+      originating_ch_id: stringSchema("^CH-[0-9]+$"),
+      originating_pa_id: stringSchema("^PA-[0-9]+$"),
       expected_id_allocations: idAllocationsSchema(),
       patches: {
         type: "array",
@@ -310,7 +310,7 @@ function operationSchema(kind: OperationKind): JsonObject {
         additionalProperties: false,
         required: ["target_ch_id"],
         properties: {
-          target_ch_id: stringSchema("^CH-[0-9]{4}$")
+          target_ch_id: stringSchema("^CH-[0-9]+$")
         }
       });
     case "append_extension":
@@ -329,8 +329,8 @@ function operationSchema(kind: OperationKind): JsonObject {
         additionalProperties: false,
         required: ["target_sec_id", "cf_id"],
         properties: {
-          target_sec_id: stringSchema("^SEC-[A-Z]{3}-[0-9]{3}$"),
-          cf_id: stringSchema("^CF-[0-9]{4}$")
+          target_sec_id: stringSchema("^SEC-[A-Z]{3}-[0-9]+$"),
+          cf_id: stringSchema("^CF-[0-9]+$")
         }
       });
     case "append_modification_history_entry":
@@ -339,9 +339,9 @@ function operationSchema(kind: OperationKind): JsonObject {
         additionalProperties: false,
         required: ["target_cf_id", "change_id", "originating_cf", "date", "summary"],
         properties: {
-          target_cf_id: stringSchema("^CF-[0-9]{4}$"),
-          change_id: stringSchema("^CH-[0-9]{4}$"),
-          originating_cf: stringSchema("^CF-[0-9]{4}$"),
+          target_cf_id: stringSchema("^CF-[0-9]+$"),
+          change_id: stringSchema("^CH-[0-9]+$"),
+          originating_cf: stringSchema("^CF-[0-9]+$"),
           date: { type: "string", minLength: 1, format: "date" },
           summary: stringSchema()
         }
@@ -408,7 +408,7 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "create_slt_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
     case "create_bel_record":
-      return baseOperationProperties(kind, storyPayloadWithGenericRecord("^BEL-[0-9]{4}$"));
+      return baseOperationProperties(kind, storyPayloadWithGenericRecord("^BEL-[0-9]+$"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }
@@ -421,7 +421,7 @@ function retconAttestationSchema(): JsonObject {
     required: ["retcon_type", "originating_ch", "rationale"],
     properties: {
       retcon_type: { type: "string", enum: ["A", "B", "C", "D", "E", "F"] },
-      originating_ch: stringSchema("^CH-[0-9]{4}$"),
+      originating_ch: stringSchema("^CH-[0-9]+$"),
       rationale: stringSchema()
     }
   };
@@ -433,8 +433,8 @@ function extensionPayloadSchema(): JsonObject {
     additionalProperties: false,
     required: ["originating_cf", "change_id", "date", "label", "body"],
     properties: {
-      originating_cf: stringSchema("^CF-[0-9]{4}$"),
-      change_id: stringSchema("^CH-[0-9]{4}$"),
+      originating_cf: stringSchema("^CF-[0-9]+$"),
+      change_id: stringSchema("^CH-[0-9]+$"),
       date: { type: "string", minLength: 1, format: "date" },
       label: stringSchema(),
       body: stringSchema()

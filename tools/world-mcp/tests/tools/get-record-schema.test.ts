@@ -107,7 +107,7 @@ test("getRecordSchema keeps the primary schema ref intact while exposing referen
   const preFiguredBy = properties.pre_figured_by as { items: { pattern: string } };
   const extensions = properties.extensions as { items: { $ref: string } };
 
-  assert.equal(preFiguredBy.items.pattern, "^CF-[0-9]{4}$");
+  assert.equal(preFiguredBy.items.pattern, "^CF-[0-9]+$");
   assert.equal(extensions.items.$ref, EXTENSION_ENTRY_ID);
   assert.equal(result.referenced_schemas[EXTENSION_ENTRY_ID]?.$id, EXTENSION_ENTRY_ID);
 });
@@ -173,7 +173,7 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     string,
     { enum?: string[]; pattern?: string; properties?: Record<string, unknown> }
   >;
-  assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
+  assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]+$");
   assert.ok(storyletProperties.move_family?.enum?.includes("investigation"));
   assert.ok(storyletProperties.exit_options);
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");
@@ -201,14 +201,21 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   assert.equal(branch.schema.$id, "https://worldloom.local/schemas/story-branch.schema.json");
 });
 
-test("getRecordSchema exposes choice commitment route fields", async () => {
+test("getRecordSchema exposes post-reset choice carrier fields", async () => {
   const choice = await getRecordSchema({ node_type: "choice_record" });
 
   assert.ok(!("code" in choice));
   const properties = choice.schema.properties as Record<string, unknown>;
-  assert.ok(properties.commitment_family);
-  assert.ok(properties.commitment_class);
-  assert.ok(properties.commitment_detail);
+  assert.deepEqual(choice.required_fields, ["id", "story_id"]);
+  assert.ok(properties.surface_label);
+  assert.ok(properties.player_visible_intent);
+  assert.ok(properties.target_or_action_family);
+  assert.ok(properties.likely_state_pressure);
+  assert.ok(properties.associated_commitment_block);
+  assert.ok(properties.success_policy);
+  assert.equal(properties.commitment_family, undefined);
+  assert.equal(properties.commitment_class, undefined);
+  assert.equal(properties.commitment_detail, undefined);
 });
 
 test("getRecordSchema returns an empty referenced schema map when the schema has no refs", async () => {

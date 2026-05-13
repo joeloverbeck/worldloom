@@ -77,7 +77,7 @@ Domains touched in Phase 6: economy, law, religion, architecture (ruin managemen
 - **Politics/Institution Critic**: state ruin-wardens imply a state capable of regional enforcement — tension with "civilization is institutionally thin." Resolve: wardens are contract-based, not state-salaried; accountable to landowners, not crowns.
 - **Everyday-Life Critic**: good coverage; relic-sickness penetrates daily life. No "only affects heroes" drift.
 - **Theme/Tone Critic**: matches grim low-fantasy register. Enhances rather than violates the Kernel's "frontier is hazardous" frame.
-- **Mystery Curator**: relics' origin is a natural Mystery Reserve expansion vector — "who made them, and why did it end" is a forbidden-answer candidate. Recommend a new `M-NNNN` record committed alongside this CF.
+- **Mystery Curator**: relics' origin is a natural Mystery Reserve expansion vector — "who made them, and why did it end" is a forbidden-answer candidate. Recommend a new `M-<integer>` record committed alongside this CF.
 
 ### Phase 7: Counterfactual Pressure Test
 
@@ -137,7 +137,7 @@ patch_plan = [
 
 Skill-side judgment Tests recorded in PA body_markdown:
 - Test 3 (judgment layer — stabilizer quality): PASS — geological clustering + activation cost + handler mortality + specialist knowledge are all concrete mechanisms.
-- Test 6 (judgment layer — forbidden-answer overlap): PASS — proposal does not commit on relic origin; new M-NNNN entry preserves the boundary.
+- Test 6 (judgment layer — forbidden-answer overlap): PASS — proposal does not commit on relic origin; new M-<integer> entry preserves the boundary.
 - Test 8 (judgment layer — hand-wave detection): PASS — every stabilizer names a mechanism.
 - Test 9: PASS — verdict cites Phases 2, 7, 10, 6.
 - Test 10 (Rule 3): PASS — no superlative claims; "rare" and "clustered" are pragmatic-quantity language.

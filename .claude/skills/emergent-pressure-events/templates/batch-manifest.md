@@ -3,8 +3,8 @@
 #
 # Emitted by the emergent-pressure-events skill as the audit record for a single
 # invocation. Pairs with a set of pressure-event card files at
-# worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.md plus optional sidecar
-# files at worlds/<world-slug>/pressure-events/EPE-NNNN-<slug>.proposal.md
+# worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.md plus optional sidecar
+# files at worlds/<world-slug>/pressure-events/EPE-<integer>-<slug>.proposal.md
 # whose ids appear in card_ids and sidecars_emitted respectively.
 #
 # The manifest is the batch's audit trail: every phase output has a named home
@@ -12,7 +12,7 @@
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 7 Test 7).
 
-batch_id: BATCH-0000                         # monotonic per-world
+batch_id: BATCH-<integer>                         # monotonic per-world
 world_slug: ""
 generated_date: ""                           # ISO date
 
@@ -31,20 +31,20 @@ pressure_inventory_summary: >                # one-paragraph prose summary of Ph
   origin_type clusters dominate, which canon facts and section records anchor
   them, which mysteries are in play. Detailed inventory lives in the body.
 
-card_ids: []                                 # every EPE-NNNN emitted by this batch (Phase 4-survivors)
-  # - EPE-0001
-  # - EPE-0002
+card_ids: []                                 # every EPE-<integer> emitted by this batch (Phase 4-survivors)
+  # - EPE-1
+  # - EPE-2
 
 sidecars_emitted: []                         # subset of card_ids whose downstream_routing == canonize
-                                             # (each sidecar is EPE-NNNN-<slug>.proposal.md next to the EPE card)
-  # - EPE-0001                               # canonize-routed, sidecar PR-0042 emitted
-  # - EPE-0003                               # canonize-routed, sidecar PR-0043 emitted
+                                             # (each sidecar is EPE-<integer>-<slug>.proposal.md next to the EPE card)
+  # - EPE-1                               # canonize-routed, sidecar PR-42 emitted
+  # - EPE-3                               # canonize-routed, sidecar PR-43 emitted
 
 dropped_card_ids: []                         # card ids the user excluded at Phase 8 HARD-GATE drop-list
-  # - EPE-0002
+  # - EPE-2
 
 phase_4_drop_log_ids: []                     # seed ids dropped at Phase 4 (untraceable seeds; never reached card form)
-  # - EPE-0099                               # allocated EPE-NNNN, dropped at Phase 4 — permanent gap
+  # - EPE-99                               # allocated EPE-<integer>, dropped at Phase 4 — permanent gap
 
 user_approved: false                         # set true at Phase 8 commit
 
@@ -53,7 +53,7 @@ notes: >
   collisions that forced a card drop + slot-regeneration) may be summarized here.
 ---
 
-# Batch BATCH-NNNN — <World-Slug-TitleCased>
+# Batch BATCH-<integer> — <World-Slug-TitleCased>
 
 ## Pressure Inventory
 
@@ -73,10 +73,10 @@ grid slot. Each row shows pressure_label -> slot label.>
 
 | Slot | Slot label | Pressures mapped | Filled by EPE |
 |------|------------|------------------|---------------|
-| 1 | Material pressure | ... | EPE-NNNN |
-| 2 | Social/political pressure | ... | EPE-NNNN |
+| 1 | Material pressure | ... | EPE-<integer> |
+| 2 | Social/political pressure | ... | EPE-<integer> |
 | 3 | Ideological/ritual pressure | ... | — (empty: <reason>) |
-| 4 | Capability/economic edge | ... | EPE-NNNN |
+| 4 | Capability/economic edge | ... | EPE-<integer> |
 | 5 | Public-health pressure | ... | — (empty: no inventory entry mapped) |
 
 ## Phase 3 Seed Generation Log
@@ -88,9 +88,9 @@ List each seed as one sentence with its slot label and provisional traceability.
 
 <For each seed dropped at Phase 4 (untraceable), a row:>
 
-| EPE-NNNN | Seed text | Slot | Missing-anchor reason |
+| EPE-<integer> | Seed text | Slot | Missing-anchor reason |
 |----------|-----------|------|----------------------|
-| EPE-0099 | ... | 3 (Ideological/ritual) | Pressure entry only cited SEC-INS-007; no CF anchor |
+| EPE-99 | ... | 3 (Ideological/ritual) | Pressure entry only cited SEC-INS-007; no CF anchor |
 
 ## Phase 6 Canon Safety Check Traces
 
@@ -116,7 +116,7 @@ contradiction, redundant origin_type) recorded.>
 
 | Pair | Joint-MR | Contradiction | Redundancy | 6e action |
 |------|----------|---------------|------------|-----------|
-| (EPE-0001, EPE-0002) | pass | pass | pass | none |
+| (EPE-1, EPE-2) | pass | pass | pass | none |
 
 ## Phase 6e Repair Log
 
@@ -124,7 +124,7 @@ contradiction, redundant origin_type) recorded.>
 
 | Card | Sub-phase | Repair-type | Justification |
 |------|-----------|-------------|---------------|
-| EPE-0003 | 6c | narrow | scope.geographic dropped global -> regional after capability-CF check |
+| EPE-3 | 6c | narrow | scope.geographic dropped global -> regional after capability-CF check |
 
 ## Phase 2 Diversification Audit
 
@@ -132,10 +132,10 @@ contradiction, redundant origin_type) recorded.>
 
 | Slot | Title | Filled by | Empty? Rationale |
 |------|-------|-----------|-------------------|
-| 1 | Material pressure (scarcity) | EPE-0001 | — |
-| 2 | Social/political pressure (succession) | EPE-0002 | — |
+| 1 | Material pressure (scarcity) | EPE-1 | — |
+| 2 | Social/political pressure (succession) | EPE-2 | — |
 | 3 | Ideological/ritual pressure | — | empty: Phase 4 drop (CF coverage too thin for taboo_breach origin_type) |
-| 4 | Capability/economic edge | EPE-0003 | — |
+| 4 | Capability/economic edge | EPE-3 | — |
 | 5 | Public-health pressure | — | empty: no inventory entry mapped (no active disease pressure in current world state) |
 
 ## Phase 7 Test Results

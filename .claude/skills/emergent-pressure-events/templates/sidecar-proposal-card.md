@@ -3,8 +3,8 @@
 #
 # Hybrid YAML frontmatter + markdown body. Emitted by the emergent-pressure-events
 # skill ONLY for canonize-routed pressure-event cards (one sidecar per such card).
-# Filename pattern: EPE-NNNN-<slug>.proposal.md (sits next to the parent
-# EPE-NNNN-<slug>.md in worlds/<slug>/pressure-events/).
+# Filename pattern: EPE-<integer>-<slug>.proposal.md (sits next to the parent
+# EPE-<integer>-<slug>.md in worlds/<slug>/pressure-events/).
 #
 # Frontmatter is byte-parallel to propose-new-canon-facts/templates/proposal-card.md
 # so canon-addition's Phase 0 proposal-parser can field-copy directly. Three
@@ -22,8 +22,8 @@
 # the parent EPE card was reviewed and kept at Phase 8 HARD-GATE. Canonization
 # happens only when canon-addition accepts this sidecar in a separate run.
 
-proposal_id: PR-0000                         # freshly-allocated via allocate_next_id at Phase 5
-batch_id: BATCH-0000                         # parent EPE card's batch_id
+proposal_id: PR-<integer>                         # freshly-allocated via allocate_next_id at Phase 5
+batch_id: BATCH-<integer>                         # parent EPE card's batch_id
 slug: ""                                     # parent EPE card's slug (same kebab-case slug)
 title: ""                                    # parent EPE card's title (or a canon-fact-shaped reframing)
 
@@ -90,16 +90,16 @@ canon_safety_check:                          # mirrors parent EPE card's canon_s
 
 source_basis:
   world_slug: ""
-  batch_id: BATCH-0000
+  batch_id: BATCH-<integer>
   generated_date: ""                         # ISO date
   user_approved: false                       # set true at Phase 8 commit — "kept in batch after review", NOT "canonized"
   derived_from_cfs: []                       # populated from parent EPE traceability.cited_canon_facts
-  derived_from_epe: ""                       # parent EPE-NNNN id — non-empty for sidecars; absent on
+  derived_from_epe: ""                       # parent EPE-<integer> id — non-empty for sidecars; absent on
                                              # native propose-new-canon-facts proposal cards
 
 notes: >
   Free-form notes. EPE-origin sidecars carry the parent card's Phase 6e repair
-  log (if any) here as: "Parent EPE-NNNN Phase 6e repair: <check-id> — <repair-type> — <justification>".
+  log (if any) here as: "Parent EPE-<integer> Phase 6e repair: <check-id> — <repair-type> — <justification>".
   canon-addition's Phase 0 may also append normalization notes here.
 ---
 
@@ -134,7 +134,7 @@ require firewall discipline during canon-addition's adjudication.>
 
 ## EPE-Origin Provenance
 
-<Prose: one paragraph naming the parent EPE-NNNN card, the pressure-inventory
+<Prose: one paragraph naming the parent EPE-<integer> card, the pressure-inventory
 entries that seeded it, and the routing_rationale from the parent card.
 Helps canon-addition's adjudicator understand why this candidate was distilled
 from a richer event into a single canon-fact-shaped statement.>

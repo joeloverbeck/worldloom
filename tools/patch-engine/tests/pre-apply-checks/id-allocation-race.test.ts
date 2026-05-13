@@ -14,27 +14,27 @@ import {
 
 test("checkIdAllocationRace passes matching world and story-bundle allocations", (t) => {
   const world = createIndexedTestWorld(t);
-  seedStoryRecord(world, "red-bunny", "OBL-0012");
+  seedStoryRecord(world, "red-bunny", "OBL-12");
   const patches = [
     createOp({
       op: "create_ch_record",
       target_world: world.worldSlug,
-      payload: { ch_record: changeLog("CH-0001") }
+      payload: { ch_record: changeLog("CH-1") }
     } satisfies Extract<PatchOperation, { op: "create_ch_record" }>),
     createOp({
       op: "create_sec_record",
       target_world: world.worldSlug,
-      payload: { sec_record: { ...section("SEC-GEO-001"), id: "SEC-GEO-001", file_class: "GEOGRAPHY" } }
+      payload: { sec_record: { ...section("SEC-GEO-1"), id: "SEC-GEO-1", file_class: "GEOGRAPHY" } }
     } satisfies Extract<PatchOperation, { op: "create_sec_record" }>),
-    createObligationPatch(world.worldSlug, "red-bunny", "OBL-0013")
+    createObligationPatch(world.worldSlug, "red-bunny", "OBL-13")
   ];
   const envelope = {
     ...baseEnvelope({
-      cf_ids: ["CF-0002"],
-      ch_ids: ["CH-0001"],
+      cf_ids: ["CF-2"],
+      ch_ids: ["CH-1"],
       inv_ids: ["ONT-2", "CAU-1"],
-      sec_ids: ["SEC-GEO-001"],
-      obl_ids: ["OBL-0013"]
+      sec_ids: ["SEC-GEO-1"],
+      obl_ids: ["OBL-13"]
     }),
     target_world: world.worldSlug,
     patches
@@ -45,11 +45,11 @@ test("checkIdAllocationRace passes matching world and story-bundle allocations",
 
 test("checkIdAllocationRace reports a story-bundle off-by-one with the submit-time message format", (t) => {
   const world = createIndexedTestWorld(t);
-  seedStoryRecord(world, "red-bunny", "OBL-0012");
+  seedStoryRecord(world, "red-bunny", "OBL-12");
   const envelope = {
-    ...baseEnvelope({ obl_ids: ["OBL-0014"] }),
+    ...baseEnvelope({ obl_ids: ["OBL-14"] }),
     target_world: world.worldSlug,
-    patches: [createObligationPatch(world.worldSlug, "red-bunny", "OBL-0014")]
+    patches: [createObligationPatch(world.worldSlug, "red-bunny", "OBL-14")]
   };
 
   const result = checkIdAllocationRace(world.db, envelope);
@@ -59,15 +59,15 @@ test("checkIdAllocationRace reports a story-bundle off-by-one with the submit-ti
     assert.equal(result.code, "id_allocation_race");
     assert.equal(
       result.message,
-      "obl_ids allocation race for story 'red-bunny': expected OBL-0014, current next id is OBL-0013."
+      "obl_ids allocation race for story 'red-bunny': expected OBL-14, current next id is OBL-13."
     );
     assert.deepEqual(result.failures, [
       {
         key: "obl_ids",
-        expected: "OBL-0014",
-        current: "OBL-0013",
+        expected: "OBL-14",
+        current: "OBL-13",
         story_slug: "red-bunny",
-        message: "obl_ids allocation race for story 'red-bunny': expected OBL-0014, current next id is OBL-0013."
+        message: "obl_ids allocation race for story 'red-bunny': expected OBL-14, current next id is OBL-13."
       }
     ]);
   }
@@ -76,11 +76,11 @@ test("checkIdAllocationRace reports a story-bundle off-by-one with the submit-ti
 test("checkIdAllocationRace rejects duplicate BEL allocations in one story-bundle plan", (t) => {
   const world = createIndexedTestWorld(t);
   const envelope = {
-    ...baseEnvelope({ bel_ids: ["BEL-0001", "BEL-0001"] }),
+    ...baseEnvelope({ bel_ids: ["BEL-1", "BEL-1"] }),
     target_world: world.worldSlug,
     patches: [
-      createBelPatch(world.worldSlug, "red-bunny", "BEL-0001"),
-      createBelPatch(world.worldSlug, "red-bunny", "BEL-0001")
+      createBelPatch(world.worldSlug, "red-bunny", "BEL-1"),
+      createBelPatch(world.worldSlug, "red-bunny", "BEL-1")
     ]
   };
 
@@ -92,11 +92,11 @@ test("checkIdAllocationRace rejects duplicate BEL allocations in one story-bundl
     assert.deepEqual(result.failures, [
       {
         key: "bel_ids",
-        expected: "BEL-0001",
-        current: "BEL-0002",
+        expected: "BEL-1",
+        current: "BEL-2",
         story_slug: "red-bunny",
         message:
-          "bel_ids allocation race for story 'red-bunny': expected BEL-0001, current next id is BEL-0002."
+          "bel_ids allocation race for story 'red-bunny': expected BEL-1, current next id is BEL-2."
       }
     ]);
   }
@@ -104,18 +104,18 @@ test("checkIdAllocationRace rejects duplicate BEL allocations in one story-bundl
 
 test("checkIdAllocationRace returns every mismatch while preserving the first message", (t) => {
   const world = createIndexedTestWorld(t);
-  seedStoryRecord(world, "red-bunny", "OBL-0012");
+  seedStoryRecord(world, "red-bunny", "OBL-12");
   const envelope = {
-    ...baseEnvelope({ cf_ids: ["CF-0003"], inv_ids: ["ONT-4"], obl_ids: ["OBL-0014"] }),
+    ...baseEnvelope({ cf_ids: ["CF-3"], inv_ids: ["ONT-4"], obl_ids: ["OBL-14"] }),
     target_world: world.worldSlug,
-    patches: [createObligationPatch(world.worldSlug, "red-bunny", "OBL-0014")]
+    patches: [createObligationPatch(world.worldSlug, "red-bunny", "OBL-14")]
   };
 
   const result = checkIdAllocationRace(world.db, envelope);
 
   assert.equal(result.ok, false);
   if (!result.ok) {
-    assert.equal(result.message, "cf_ids allocation race: expected CF-0003, current next id is CF-0002.");
+    assert.equal(result.message, "cf_ids allocation race: expected CF-3, current next id is CF-2.");
     assert.deepEqual(
       result.failures.map((failure) => failure.key),
       ["cf_ids", "inv_ids", "obl_ids"]
@@ -124,7 +124,7 @@ test("checkIdAllocationRace returns every mismatch while preserving the first me
       result.failures.some(
         (failure) =>
           failure.message ===
-          "obl_ids allocation race for story 'red-bunny': expected OBL-0014, current next id is OBL-0013."
+          "obl_ids allocation race for story 'red-bunny': expected OBL-14, current next id is OBL-13."
       )
     );
   }

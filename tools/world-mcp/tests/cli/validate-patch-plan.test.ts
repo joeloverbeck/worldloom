@@ -22,10 +22,10 @@ function buildValidPatchPlan() {
       {
         op: "create_cf_record",
         target_world: "seeded",
-        target_file: "_source/canon/CF-0001.yaml",
+        target_file: "_source/canon/CF-1.yaml",
         payload: {
           cf_record: {
-            id: "CF-0001",
+            id: "CF-1",
             title: "Brinewick Harbor Office",
             status: "hard_canon",
             type: "institution",
@@ -52,17 +52,17 @@ function buildValidPatchPlan() {
       {
         op: "create_sec_record",
         target_world: "seeded",
-        target_file: "_source/institutions/SEC-INS-001.yaml",
+        target_file: "_source/institutions/SEC-INS-1.yaml",
         payload: {
           sec_record: {
-            id: "SEC-INS-001",
+            id: "SEC-INS-1",
             file_class: "INSTITUTIONS",
             order: 1,
             heading: "Harbor Office",
             heading_level: 2,
             body: "Brinewick maintains a harbor office.",
             extensions: [],
-            touched_by_cf: ["CF-0001"]
+            touched_by_cf: ["CF-1"]
           }
         }
       }
@@ -160,7 +160,7 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on id allocati
 
   try {
     const plan = buildValidPatchPlan();
-    plan.expected_id_allocations = { cf_ids: ["CF-0002"] };
+    plan.expected_id_allocations = { cf_ids: ["CF-2"] };
     const planPath = writeJson(tmp, "plan.json", plan);
 
     const cliResult = await withRepoRoot(root, () => runValidatePatchPlanCli([planPath]));
@@ -180,7 +180,7 @@ test("cli-validate-patch-plan: CLI exits 1 and prints fail status on id allocati
         (verdict: { validator: string; code: string; message: string }) =>
           verdict.validator === "id_allocation_race" &&
           verdict.code === "id_allocation_race" &&
-          verdict.message.includes("cf_ids allocation race: expected CF-0002, current next id is CF-0001.")
+          verdict.message.includes("cf_ids allocation race: expected CF-2, current next id is CF-1.")
       )
     );
   } finally {

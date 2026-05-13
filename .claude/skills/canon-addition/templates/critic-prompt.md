@@ -30,7 +30,7 @@ You are the {ROLE_NAME} critic for a worldbuilding canon-addition adjudication. 
 
 You return ONLY a critique report. You do NOT write files. You do not modify the world. You do not run other tools beyond reading the files explicitly listed below.
 
-**Note on world layout (post-SPEC-13):** This world stores canon as atomic YAML records under `worlds/{WORLD_SLUG}/_source/<subdir>/`. The legacy single-file forms (`CANON_LEDGER.md`, `TIMELINE.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, plus the seven prose-concern files like `EVERYDAY_LIFE.md` / `INSTITUTIONS.md` / `ECONOMY_AND_RESOURCES.md` / `PEOPLES_AND_SPECIES.md` / `MAGIC_OR_TECH_SYSTEMS.md` / `GEOGRAPHY.md`) do NOT exist in this world's tree — they have been atomized to `_source/` subdirectories per file class. Do NOT bulk-read `_source/`; Hook 2 redirects oversized directory reads to MCP retrieval. The Reference Files list below names atomic-record paths and MCP retrieval directives. Use `mcp__worldloom__get_record(record_id, world_slug)` for individual records (CF-NNNN, CH-NNNN, ONT-N / CAU-N / DIS-N / SOC-N / AES-N invariants, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-<PREFIX>-NNN sections); `mcp__worldloom__get_records({world_slug, record_ids: [...]})` for batches; `mcp__worldloom__find_sections_touched_by({world_slug, cf_id})` for SEC reverse-index; `mcp__worldloom__search_nodes({query})` for prose-body discovery. The world's `WORLD_KERNEL.md` and `ONTOLOGY.md` remain root-level primary-authored files and are read directly. See `references/retrieval-tool-tree.md` for the phase-by-phase retrieval-tool decision tree.
+**Note on world layout (post-SPEC-13):** This world stores canon as atomic YAML records under `worlds/{WORLD_SLUG}/_source/<subdir>/`. The legacy single-file forms (`CANON_LEDGER.md`, `TIMELINE.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, plus the seven prose-concern files like `EVERYDAY_LIFE.md` / `INSTITUTIONS.md` / `ECONOMY_AND_RESOURCES.md` / `PEOPLES_AND_SPECIES.md` / `MAGIC_OR_TECH_SYSTEMS.md` / `GEOGRAPHY.md`) do NOT exist in this world's tree — they have been atomized to `_source/` subdirectories per file class. Do NOT bulk-read `_source/`; Hook 2 redirects oversized directory reads to MCP retrieval. The Reference Files list below names atomic-record paths and MCP retrieval directives. Use `mcp__worldloom__get_record(record_id, world_slug)` for individual records (CF-<integer>, CH-<integer>, ONT-N / CAU-N / DIS-N / SOC-N / AES-N invariants, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-<PREFIX>-<integer> sections); `mcp__worldloom__get_records({world_slug, record_ids: [...]})` for batches; `mcp__worldloom__find_sections_touched_by({world_slug, cf_id})` for SEC reverse-index; `mcp__worldloom__search_nodes({query})` for prose-body discovery. The world's `WORLD_KERNEL.md` and `ONTOLOGY.md` remain root-level primary-authored files and are read directly. See `references/retrieval-tool-tree.md` for the phase-by-phase retrieval-tool decision tree.
 
 ## Proposal
 
@@ -103,13 +103,13 @@ The role-specific briefs below replace the {ROLE_FOCUS}, {ROLE_CONCERNS}, and {R
 - **{ROLE_FOCUS}**: scan the world's CF / CH atomic records and the timeline section records for direct contradictions, soft conflicts, and latent burdens the proposal would create. Recommend the cleanest retcon framing.
 - **{ROLE_CONCERNS}**:
   1. Specific CF records that contradict, conflict with, or are softened by the proposal.
-  2. Timeline section records (`SEC-TML-NNN`) that need revision or annotation.
+  2. Timeline section records (`SEC-TML-<integer>`) that need revision or annotation.
   3. Latent burdens the world will inherit (questions that will demand future canon work).
   4. Any place where the proposal would silently retcon previously-stated facts (per Rule 6).
   5. Whether `ontology_retcon` is the cleanest framing for any required CF revision, or whether `scope_retcon` / qualification / addition is more honest.
 - **{ROLE_FILES}**:
-  - CF / CH records under `_source/canon/CF-NNNN.yaml` and `_source/change-log/CH-NNNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or batched via `get_records`); use `find_sections_touched_by(cf_id)` to enumerate the SEC records each CF cites
-  - Timeline records under `_source/timeline/SEC-TML-NNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
+  - CF / CH records under `_source/canon/CF-<integer>.yaml` and `_source/change-log/CH-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or batched via `get_records`); use `find_sections_touched_by(cf_id)` to enumerate the SEC records each CF cites
+  - Timeline records under `_source/timeline/SEC-TML-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
   - Invariant records under `_source/invariants/<ID>.yaml` (for invariant cross-check) — `<ID>` is `ONT-N` / `CAU-N` / `DIS-N` / `SOC-N` / `AES-N`
 
 ## Systems/Economy Critic
@@ -122,8 +122,8 @@ The role-specific briefs below replace the {ROLE_FOCUS}, {ROLE_CONCERNS}, and {R
   4. Compatibility with existing market structure / wage spreads / value stores.
   5. Hidden subsidy, arbitrage, or regulatory-capture opportunities the proposal silently creates.
 - **{ROLE_FILES}**:
-  - Economy section records under `_source/economy-and-resources/SEC-ECR-NNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
-  - Institution section records under `_source/institutions/SEC-INS-NNN.yaml` (relevant guild subsections) — fetch via `mcp__worldloom__get_record(record_id)`
+  - Economy section records under `_source/economy-and-resources/SEC-ECR-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
+  - Institution section records under `_source/institutions/SEC-INS-<integer>.yaml` (relevant guild subsections) — fetch via `mcp__worldloom__get_record(record_id)`
   - Distribution invariants under `_source/invariants/DIS-N.yaml` for cross-check
 
 ## Politics/Institution Critic
@@ -136,8 +136,8 @@ The role-specific briefs below replace the {ROLE_FOCUS}, {ROLE_CONCERNS}, and {R
   4. Recordkeeping / Archives / knowledge-custody pressure.
   5. Political pressures the main agent has missed (extradition, asset capture, sectarian alignment).
 - **{ROLE_FILES}**:
-  - Institution section records under `_source/institutions/SEC-INS-NNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
-  - Timeline section records under `_source/timeline/SEC-TML-NNN.yaml` (recent layers) — fetch via `mcp__worldloom__get_record(record_id)`
+  - Institution section records under `_source/institutions/SEC-INS-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
+  - Timeline section records under `_source/timeline/SEC-TML-<integer>.yaml` (recent layers) — fetch via `mcp__worldloom__get_record(record_id)`
   - Social invariants under `_source/invariants/SOC-N.yaml` for cross-check
 
 ## Everyday-Life Critic
@@ -150,7 +150,7 @@ The role-specific briefs below replace the {ROLE_FOCUS}, {ROLE_CONCERNS}, and {R
   4. Concrete ordinary-life touch points: new fears, gossip, drills, precautions, norms.
   5. Children: would children in each cluster know about this? How? What would they be told?
 - **{ROLE_FILES}**:
-  - Everyday-life section records under `_source/everyday-life/SEC-ELF-NNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
+  - Everyday-life section records under `_source/everyday-life/SEC-ELF-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)`
   - `worlds/{WORLD_SLUG}/WORLD_KERNEL.md` (for tonal contract; root-level primary-authored, read directly)
   - Aesthetic / thematic invariants under `_source/invariants/AES-N.yaml` for cross-check
 
@@ -172,10 +172,10 @@ The role-specific briefs below replace the {ROLE_FOCUS}, {ROLE_CONCERNS}, and {R
 - **{ROLE_FOCUS}**: protect the Mystery Reserve and Open Questions from forbidden-answer collisions and trivializing reveals.
 - **{ROLE_CONCERNS}**:
   1. For each Mystery Reserve entry: is it enriched, preserved, narrowed, or forbidden-cheap-answer-touched by the proposal?
-  2. Required scope commitments — what must the CF record explicitly say to preserve each at-risk M-N?
-  3. M-N firewall adequacy — is any required cross-application firewall absent?
+  2. Required scope commitments — what must the CF record explicitly say to preserve each at-risk M-<integer>?
+  3. M-<integer> firewall adequacy — is any required cross-application firewall absent?
   4. OPEN_QUESTIONS items now pressured — which can no longer be cleanly deferred?
   5. New Mystery Reserve entries the proposal manufactures (Rule 7 obligation).
 - **{ROLE_FILES}**:
-  - Mystery Reserve records under `_source/mystery-reserve/M-NNNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or `mcp__worldloom__list_records({record_type: 'mystery_record', world_slug})` for the full set)
-  - Open Question records under `_source/open-questions/OQ-NNNN.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or `mcp__worldloom__list_records({record_type: 'open_question_record', world_slug})` for the full set)
+  - Mystery Reserve records under `_source/mystery-reserve/M-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or `mcp__worldloom__list_records({record_type: 'mystery_record', world_slug})` for the full set)
+  - Open Question records under `_source/open-questions/OQ-<integer>.yaml` — fetch via `mcp__worldloom__get_record(record_id)` (or `mcp__worldloom__list_records({record_type: 'open_question_record', world_slug})` for the full set)

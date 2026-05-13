@@ -26,8 +26,8 @@
 ---
 # ===== identification =====
 
-proposal_id: NWP-0000                        # monotonic, pipeline-scoped (not world-scoped)
-batch_id: NWB-0000                           # the batch this card was emitted in
+proposal_id: NWP-<integer>                        # monotonic, pipeline-scoped (not world-scoped)
+batch_id: NWB-<integer>                           # the batch this card was emitted in
 slug: ""                                     # kebab-case; thematic-name first
 title: ""                                    # short evocative human label
 generated_date: ""                           # ISO date
@@ -39,7 +39,7 @@ core_sentence: >
   One concrete impossible sentence — not a genre, not an aesthetic, not a vibe.
 
 intended_canon_layer: hard_canon             # hard_canon (default — primary-difference facts almost always
-                                             # land here for create-base-world's CF-0001 lift).
+                                             # land here for create-base-world's CF-1 lift).
                                              # FOUNDATIONS §Canon Layers enumerates five layers
                                              # (hard_canon | derived_canon | soft_canon | contested_canon |
                                              # mystery_reserve); a primary-difference proposal targeting any of the
@@ -125,7 +125,7 @@ canon_safety_check:
   cross_world_mr_firewall:
     checked: []                              # list of "<world_slug>/<M-id>" strings (e.g., "animalia/M-5") —
                                              # every existing world's forbidden M-id checked at Phase 11a.
-                                             # The world_slug prefix is mandatory — bare "M-N" is ambiguous once
+                                             # The world_slug prefix is mandatory — bare "M-<integer>" is ambiguous once
                                              # multiple worlds exist. Empty list ONLY when skipped=true (Empty
                                              # Worlds Path); a non-empty cross-world map with an empty checked[]
                                              # is internally inconsistent and fails Phase 11b verification.
@@ -334,8 +334,8 @@ When `create-base-world` ingests this proposal, it will need to compose:
 
 - WORLD_KERNEL.md
 - ONTOLOGY.md
-- CF-0001 (the primary-difference fact)
-- CH-0001 (genesis change-log entry)
+- CF-1 (the primary-difference fact)
+- CH-1 (genesis change-log entry)
 - ≥1 invariant per category (ontological / causal / distribution / social / aesthetic_thematic)
 - ≥1 mystery seed per status (active / passive / forbidden)
 - One initial section per prose concern (GEO / PAS / INS / ECR / MTS / ELF / TML)

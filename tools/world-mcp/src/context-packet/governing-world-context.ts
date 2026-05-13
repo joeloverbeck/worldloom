@@ -358,7 +358,7 @@ const CHARACTER_GENERATION_PRIORITY_SECTION_FILE_CLASSES = new Set([
   "GEOGRAPHY"
 ]);
 
-const CF_ID_PATTERN = /^CF-\d{4}$/;
+const CF_ID_PATTERN = /^CF-\d+$/;
 
 function addReason(
   orderedNodeIds: string[],

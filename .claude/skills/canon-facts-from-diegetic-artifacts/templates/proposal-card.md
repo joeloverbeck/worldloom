@@ -21,18 +21,18 @@
 # canon-addition accepts this card in a separate run.
 #
 # MINING-SPECIFIC FIELDS (not present in sibling template):
-#   source_artifact_id                 — the DA-NNNN this card was mined from
+#   source_artifact_id                 — the DA-<integer> this card was mined from
 #   source_basis.derived_from_artifact_path — full path to source artifact
 #   canon_safety_check.diegetic_to_world_laundering — Phase 6d sub-test results
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 7 T5/T6/T7).
 
-proposal_id: PR-0000                         # monotonic per-world
-batch_id: BATCH-0000                         # the batch this card was emitted in
+proposal_id: PR-<integer>                         # monotonic per-world
+batch_id: BATCH-<integer>                         # the batch this card was emitted in
 slug: ""                                     # kebab-case slug derived from title
 title: ""                                    # short human label
 
-source_artifact_id: DA-0000                  # DA-NNNN of the diegetic artifact mined
+source_artifact_id: DA-<integer>                  # DA-<integer> of the diegetic artifact mined
 mining_context: ""                           # one-line note on what artifact feature
                                              # the claim arose from (e.g., "chronicle's
                                              # opening invocation of the Year-Counters'
@@ -116,8 +116,8 @@ canon_safety_check:                          # full Phase 6 audit trail — Phas
   invariants_respected: []                   # every invariant id tested at 6a, pass
   invariants_violated: []                    # every invariant id tested at 6a, fail (must be empty for write)
   mystery_reserve_firewall: []               # every MR id checked at 6b (overlap or not — absent id = un-checked)
-    # - { mr_id: MR-0003, overlap: false, note: "claim does not touch forbidden-answer set" }
-    # - { mr_id: MR-0007, overlap: false, note: "claim adjacent but does not resolve" }
+    # - { mr_id: M-3, overlap: false, note: "claim does not touch forbidden-answer set" }
+    # - { mr_id: M-7, overlap: false, note: "claim adjacent but does not resolve" }
   distribution_discipline:
     canon_facts_consulted: []                # every CF id consulted at 6c
     why_not_universal_basis: ""              # one-line: what anchors the stabilizers to canon
@@ -153,8 +153,8 @@ canon_safety_check:                          # full Phase 6 audit trail — Phas
 
 source_basis:
   world_slug: ""
-  batch_id: BATCH-0000
-  source_artifact_id: DA-0000
+  batch_id: BATCH-<integer>
+  source_artifact_id: DA-<integer>
   derived_from_artifact_path: ""             # full path — e.g., worlds/<slug>/diegetic-artifacts/<da-slug>.md
   generated_date: ""                         # ISO date
   user_approved: false                       # set true at Phase 8 commit — means "kept in batch after

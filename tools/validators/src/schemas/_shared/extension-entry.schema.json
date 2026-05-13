@@ -6,8 +6,8 @@
   "additionalProperties": false,
   "required": ["originating_cf", "change_id", "date", "label", "body"],
   "properties": {
-    "originating_cf": { "type": "string", "pattern": "^CF-[0-9]{4}$" },
-    "change_id": { "type": "string", "pattern": "^CH-[0-9]{4}$" },
+    "originating_cf": { "type": "string", "pattern": "^CF-[0-9]+$" },
+    "change_id": { "type": "string", "pattern": "^CH-[0-9]+$" },
     "date": { "type": "string", "format": "date" },
     "label": { "type": "string", "minLength": 1 },
     "body": { "type": "string", "minLength": 1 }

@@ -49,7 +49,7 @@ Distinguish factual assertions (canonizable candidates) from voice/flavor (autho
 | *"The contract was posted at forty silver"* | Yes — institutional fact |
 | *"I do not agree with the public-silence order in all particulars"* | Not at the world-level — narrator opinion; contested narrator-belief, not canonizable |
 | *"The cold-weather trace was not difficult"* | Marginal — if "cold-weather trace" is a tracking-craft term, the claim asserts a craft fact; if purely descriptive of this tracking session, it's voice. Default to recording with narrator-stance `hedged` and let Phase 5 R10 decide. |
-| *"I killed the leader with the longsword"* | Yes — event-fact (personal-action narration contributing to CF-020-grounded combat claim) |
+| *"I killed the leader with the longsword"* | Yes — event-fact (personal-action narration contributing to CF-20-grounded combat claim) |
 | *"He did not say this in the register of apology. He said it in the register of procedure."* | Yes — register-distinction fact about institutional ritual form |
 
 When in doubt, record the claim. Over-extraction is cheap; under-extraction loses canonizable material that cannot be recovered downstream.

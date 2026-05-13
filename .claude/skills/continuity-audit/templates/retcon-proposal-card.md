@@ -2,7 +2,7 @@
 Retcon-Proposal Card — template (EMITTED by continuity-audit Phase 8 / Phase 13)
 
 This file is a candidate canon change produced by a continuity-audit run. Written to:
-  worlds/<world-slug>/audits/AU-NNNN/retcon-proposals/RP-NNNN-<slug>.md
+  worlds/<world-slug>/audits/AU-<integer>/retcon-proposals/RP-<integer>-<slug>.md
 
 CF-SCHEMA PARITY (load-bearing design constraint — preserve across schema evolution):
 The frontmatter below is structurally parallel to the engine-owned canon_fact_record
@@ -11,7 +11,7 @@ authoritative source: docs/FOUNDATIONS.md §Canon Fact Record Schema).
 Matching fields use matching names (type, scope, truth_scope, domains_affected,
 distribution, costs_and_limits, visible_consequences, required_world_updates,
 source_basis, contradiction_risk, notes) so that when canon-addition accepts an
-RP-NNNN card, its Phase 0 normalization can field-copy from the card into a new
+RP-<integer> card, its Phase 0 normalization can field-copy from the card into a new
 CF record rather than field-re-derive. Retcon-specific fields (retcon_type,
 target_cf_ids, severity_before_fix, severity_after_fix, audit_origin, finding_id)
 are additive — canon-addition consumes them at adjudication time and then discards
@@ -26,7 +26,7 @@ For Type A Clarificatory retcons that do not change the target CF's status
 `proposed_status: unchanged` — canon-addition's Phase 0 Normalization treats
 this as a signal to preserve the target CF's current `status` field unchanged.
 
-SUB-DIRECTORY CONTEXT: RP-NNNN cards live under audits/AU-NNNN/retcon-proposals/
+SUB-DIRECTORY CONTEXT: RP-<integer> cards live under audits/AU-<integer>/retcon-proposals/
 rather than in a flat cards/ directory, so each audit run's recommendations stay
 grouped. Deleting a stale audit run's subdirectory is safe; deleting the audit
 report without the subdirectory is not. Direct-`Edit` is allowed for these files
@@ -34,7 +34,7 @@ report without the subdirectory is not. Direct-`Edit` is allowed for these files
 -->
 
 ---
-id: RP-NNNN                                 # monotonic across all RP-NNNN cards globally in this world
+id: RP-<integer>                                 # monotonic across all RP-<integer> cards globally in this world
 title: ""                                   # short human label; same naming conventions as CF title
 proposed_status: hard_canon                 # hard_canon | soft_canon | contested_canon | mystery_reserve | unchanged
                                             # (if different from target CF's current status, this retcon is a
@@ -58,13 +58,13 @@ retcon_type: B                              # A: Clarificatory | B: Scope | C: P
                                             # Must match the Phase 7 repair-menu-to-type mapping.
 
 target_cf_ids:                              # CFs being modified by this retcon. Every id must resolve via
-  - CF-NNNN                                 # `mcp__worldloom__get_record(CF-NNNN)` (Phase 12 test 6 verifies this).
+  - CF-<integer>                                 # `mcp__worldloom__get_record(CF-<integer>)` (Phase 12 test 6 verifies this).
 
 severity_before_fix: 0                      # 0-5 (see SKILL.md Phase 5 Severity Classification)
 severity_after_fix: 0                       # projected severity if this retcon is accepted and downstream
                                             # updates applied
 
-audit_origin: AU-NNNN                       # the audit run that produced this card
+audit_origin: AU-<integer>                       # the audit run that produced this card
 finding_id: F-NN                            # the finding within that audit run this card addresses
 
 # CF-schema-parallel fields (match the engine-owned canon_fact_record schema for canon-addition field-copy)
@@ -105,7 +105,7 @@ source_basis:
                                             # this card in the audit's recommendations" — NOT "canon-addition
                                             # has accepted this retcon")
   derived_from:                             # parent CF ids this retcon modifies (usually matches target_cf_ids)
-    - CF-NNNN
+    - CF-<integer>
 
 contradiction_risk:
   hard: false                               # does accepting this retcon create any hard-canon contradictions?
@@ -117,11 +117,11 @@ notes: >
   annotations (per SKILL.md Guardrails §Inherited-drift handling).
 ---
 
-# RP-NNNN — <card title>
+# RP-<integer> — <card title>
 
 ## Cited Finding
 
-**Finding ID**: F-NN (from AU-NNNN)
+**Finding ID**: F-NN (from AU-<integer>)
 **Category**: Phase 4 sub-category (e.g., 4j Local/Global Drift)
 
 One-paragraph description of the finding as it appears in the audit report's
@@ -135,12 +135,12 @@ The precise text of what the target CF's statement should become, and which
 other CFs (if any) need cross-referenced `modification_history` entries when
 canon-addition processes this card.
 
-**Target CF (CF-NNNN)** — statement revision:
+**Target CF (CF-<integer>)** — statement revision:
 > <the new statement text that would replace the current CF's statement>
 
 **Other CFs requiring modification_history entries** (via canon-addition's
 Phase 12a modification_history scan):
-- CF-NNNN — <one-line describing what qualifies this CF under axis (a), (b), or (c)>
+- CF-<integer> — <one-line describing what qualifies this CF under axis (a), (b), or (c)>
 
 If no other CFs need modification_history entries, record "None — the target
 CF is the sole affected record."
@@ -168,7 +168,7 @@ carry a one-line justification. Bare `true` / `false` fails Phase 9 test 4.
 
 If ANY checklist item would be `false`, the card CANNOT be emitted. Phase 8
 rule escalates the finding to "requires user design decision" status in the
-audit report, and no RP-NNNN id is consumed.
+audit report, and no RP-<integer> id is consumed.
 
 ## Downstream Updates
 
@@ -176,7 +176,7 @@ SEC records (and other atomic records) requiring patches if canon-addition
 accepts this retcon. Matches the frontmatter `required_world_updates` list —
 reproduced here with one-line descriptions for the canon-addition adjudicator.
 
-- **SEC-XXX-NNN**: <one-line describing what patch this SEC record will
+- **SEC-XXX-<integer>**: <one-line describing what patch this SEC record will
   receive — e.g., "narrow §Eastern Reach paragraph from 'practiced across the
   continent' to 'practiced in the Eastern Reach'">
 
@@ -189,7 +189,7 @@ revision is self-contained."
 A brief paragraph the downstream canon-addition adjudicator will read at the
 start of its Phase 0 Normalization. Include:
 
-- The audit origin (AU-NNNN) and why this audit was run (trigger_context).
+- The audit origin (AU-<integer>) and why this audit was run (trigger_context).
 - The severity calculus: why severity_before_fix was assigned N and why
   severity_after_fix is projected as M.
 - Critical-path decisions: any Phase 7 repair alternatives considered and

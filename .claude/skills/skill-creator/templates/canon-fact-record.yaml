@@ -12,7 +12,7 @@
 #
 # A record missing any of those violates Rule 1 (No Floating Facts).
 
-id: CF-0000                                # canonical fact ID, monotonic
+id: CF-<integer>                                # canonical fact ID, monotonic
 title: ""                                  # short human label
 status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
 type: ""                                   # capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule

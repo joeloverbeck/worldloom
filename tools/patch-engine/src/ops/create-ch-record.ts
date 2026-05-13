@@ -17,7 +17,7 @@ export function stageCreateChRecord(
     opKind: "create_ch_record",
     record,
     recordId: record.change_id,
-    idPattern: /^CH-\d{4}$/,
+    idPattern: /^CH-\d+$/,
     allocations: env.expected_id_allocations,
     allocationKey: "ch_ids",
     targetFilePath: path.join(ctx.worldRoot, "worlds", env.target_world, "_source", "change-log", `${record.change_id}.yaml`)

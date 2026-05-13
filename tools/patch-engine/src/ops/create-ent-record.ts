@@ -17,7 +17,7 @@ export function stageCreateEntRecord(
     opKind: "create_ent_record",
     record,
     recordId: record.id,
-    idPattern: /^ENT-\d{4}$/,
+    idPattern: /^ENT-\d+$/,
     allocations: env.expected_id_allocations,
     allocationKey: "ent_ids",
     targetFilePath: path.join(ctx.worldRoot, "worlds", env.target_world, "_source", "entities", `${record.id}.yaml`)

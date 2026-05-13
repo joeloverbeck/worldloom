@@ -9,7 +9,15 @@ import {
 } from "./utils.js";
 
 const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
-const NON_EDGE_FIELDS = new Set(["id", "story_id", "branch_id", "created_at_page", "branch_path"]);
+const PAGE_ID = /^PG-\d{4}$/;
+const NON_EDGE_FIELDS = new Set([
+  "id",
+  "story_id",
+  "branch_id",
+  "created_at_page",
+  "branch_path",
+  "visible_branch_path_prefix"
+]);
 
 export const recursiveReferenceClosure: Validator = {
   name: "recursive_reference_closure",
@@ -25,8 +33,8 @@ export const recursiveReferenceClosure: Validator = {
         continue;
       }
 
-      const orderedBranchPath = stringArray(parsed.branch_path);
-      const branchPath = new Set(orderedBranchPath);
+      const branchPath = stringArray(parsed.branch_path);
+      const branchPathSet = new Set(branchPath);
       const maps = recordMapForStory(records, page.story_slug ?? null);
       const roots = pageClosureRoots(parsed);
       const visited = new Set<string>();
@@ -49,7 +57,7 @@ export const recursiveReferenceClosure: Validator = {
 
         const parsedTarget = asPlainRecord(target.parsed);
         const createdAtPage = referenceBranchPageFor(target, parsedTarget);
-        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath, orderedBranchPath)) {
+        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath, branchPathSet)) {
           verdicts.push(branchLeak(page, current, target, createdAtPage));
         }
 
@@ -190,36 +198,36 @@ function isAllowedReference(
   target: IndexedRecord,
   parsed: Record<string, unknown>,
   createdAtPage: string | null | undefined,
-  branchPath: ReadonlySet<string>,
-  orderedBranchPath: readonly string[]
+  branchPath: readonly string[],
+  branchPathSet: ReadonlySet<string>
 ): boolean {
   if (target.node_type === "page_record") {
     const pageIdValue = stringValue(parsed.id);
-    return pageIdValue !== undefined && branchPath.has(pageIdValue);
+    return pageIdValue !== undefined && branchPathSet.has(pageIdValue);
   }
   if (createdAtPage === null) {
     if (target.node_type !== "storylet_record") {
       return false;
     }
-    const visibility = asPlainRecord(parsed.visibility);
-    const scope = stringValue(visibility.scope);
-    if (scope === "global_author_pool") {
+    // VALENH-012/014: SLT visibility and branch-prefix proof are schema-canonical under scope.
+    const scope = asPlainRecord(parsed.scope);
+    const visibility = stringValue(scope.visibility);
+    if (visibility === "global_author_pool") {
       return true;
     }
-    if (scope === "branch_prefix_scoped") {
-      return isOrderedPrefix(visibility.visible_branch_path_prefix, orderedBranchPath);
+    if (visibility === "branch_prefix_scoped") {
+      return isVisibleBranchPathPrefix(scope.visible_branch_path_prefix, branchPath);
     }
     return false;
   }
-  return createdAtPage !== undefined && branchPath.has(createdAtPage);
+  return createdAtPage !== undefined && branchPathSet.has(createdAtPage);
 }
 
-function isOrderedPrefix(prefix: unknown, branchPath: readonly string[]): boolean {
-  const prefixValues = stringArray(prefix);
-  if (prefixValues.length === 0 || prefixValues.length > branchPath.length) {
+function isVisibleBranchPathPrefix(value: unknown, branchPath: readonly string[]): boolean {
+  if (!Array.isArray(value) || value.length === 0 || value.length > branchPath.length) {
     return false;
   }
-  return prefixValues.every((value, index) => value === branchPath[index]);
+  return value.every((item, index) => typeof item === "string" && PAGE_ID.test(item) && item === branchPath[index]);
 }
 
 function missingReference(page: IndexedRecord, reference: StoryReference): Verdict {
@@ -263,7 +271,7 @@ function branchLeak(
     },
     suggested_fix: isPageTarget
       ? `Replace ${reference.id} with a page in this branch's branch_path.`
-      : `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, scope the storylet as a valid global author-pool record, or scope it as branch_prefix_scoped with a visible_branch_path_prefix that is an ordered prefix of this page's branch_path.`
+      : `Replace ${reference.id} with a record created on this branch, remove the sibling-branch dependency, or scope the storylet as a valid global author-pool record.`
   };
 }
 

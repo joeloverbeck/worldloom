@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["character_id", "slug", "name", "species", "age_band", "place_of_origin", "current_location", "date", "social_position", "profession", "kinship_situation", "religious_ideological_environment", "major_local_pressures", "intended_narrative_role", "world_consistency", "source_basis"],
   "properties": {
-    "character_id": { "type": "string", "pattern": "^CHAR-[0-9]{4}$" },
+    "character_id": { "type": "string", "pattern": "^CHAR-[0-9]+$" },
     "slug": { "type": "string", "minLength": 1 },
     "name": { "type": "string", "minLength": 1 },
     "aliases": { "type": "array", "items": { "type": "string" } },
@@ -40,11 +40,11 @@
       "additionalProperties": false,
       "required": ["canon_facts_consulted", "invariants_respected", "mystery_reserve_firewall", "distribution_exceptions", "continuity_checked_with"],
       "properties": {
-        "canon_facts_consulted": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]{4}$" } },
+        "canon_facts_consulted": { "type": "array", "items": { "type": "string", "pattern": "^CF-[0-9]+$" } },
         "invariants_respected": { "type": "array", "items": { "type": "string", "pattern": "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$" } },
         "mystery_reserve_firewall": { "type": "array", "items": { "type": "string", "pattern": "^M-[0-9]+$" } },
         "distribution_exceptions": { "type": "array", "items": { "type": "string" } },
-        "continuity_checked_with": { "type": "array", "items": { "type": "string", "pattern": "^CHAR-[0-9]{4}$" } }
+        "continuity_checked_with": { "type": "array", "items": { "type": "string", "pattern": "^CHAR-[0-9]+$" } }
       }
     },
     "source_basis": { "type": "object" },

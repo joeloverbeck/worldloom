@@ -21,9 +21,9 @@ Every patch plan submitted to `mcp__worldloom__submit_patch_plan` (or its CLI eq
   "approval_token": "placeholder",
   "verdict": "ACCEPT_AS_LOCAL_EXCEPTION",
   "originating_skill": "canon-addition",
-  "originating_cf_ids": ["CF-NNNN"],
-  "originating_ch_id": "CH-NNNN",
-  "originating_pa_id": "PA-NNNN",
+  "originating_cf_ids": ["CF-<integer>"],
+  "originating_ch_id": "CH-<integer>",
+  "originating_pa_id": "PA-<integer>",
   "expected_id_allocations": { ... },
   "patches": [ ... ]
 }
@@ -41,8 +41,8 @@ Each entry in `patches[]` is a `PatchOperationEnvelope` with this shape:
 {
   "op": "create_cf_record",
   "target_world": "<world-slug>",
-  "target_file": "_source/canon/CF-NNNN.yaml",
-  "payload": { "cf_record": { "id": "CF-NNNN", ... } }
+  "target_file": "_source/canon/CF-<integer>.yaml",
+  "payload": { "cf_record": { "id": "CF-<integer>", ... } }
 }
 ```
 
@@ -56,25 +56,25 @@ The TypeScript interface in `tools/patch-engine/src/envelope/schema.ts` declares
 
 Two distinct semantics apply, neither obvious from the typed interface:
 
-- **Hybrid-file ops** (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`) — `target_file` is the actual write path the engine will create. It must be **world-relative** (relative to `worlds/<world-slug>/`, NOT workspace-relative) and must start with the expected directory prefix. The engine's `resolveHybridFilePath` in `tools/patch-engine/src/ops/types.ts:35-68` enforces this: a workspace-relative path like `worlds/erotica-world/adjudications/PA-0001-<slug>.md` fails with `target_file_outside_world: "<path> must resolve under adjudications/"`.
+- **Hybrid-file ops** (`append_adjudication_record`, `append_character_record`, `append_diegetic_artifact_record`) — `target_file` is the actual write path the engine will create. It must be **world-relative** (relative to `worlds/<world-slug>/`, NOT workspace-relative) and must start with the expected directory prefix. The engine's `resolveHybridFilePath` in `tools/patch-engine/src/ops/types.ts:35-68` enforces this: a workspace-relative path like `worlds/erotica-world/adjudications/PA-1-<slug>.md` fails with `target_file_outside_world: "<path> must resolve under adjudications/"`.
 - **Atomic-record ops** (all `create_*_record`, `append_extension`, `append_touched_by_cf`, `append_modification_history_entry`, `update_record_field`) — `target_file` is shape-validation-only. The engine derives the actual write path from the record's id (per `tools/patch-engine/src/ops/create-cf-record.ts`, `create-ch-record.ts`, and siblings — they construct paths like `path.join(ctx.worldRoot, "worlds", env.target_world, "_source", "canon", "${record.change_id}.yaml")`). The shape validator still requires a non-empty string; the canonical convention is `_source/<subdir>/<ID>.yaml` so atomic-record `target_file` values match the file-class-to-directory mapping below.
 
 ### File-class → directory mapping for `target_file` paths
 
 | Op kind | `target_file` |
 |---|---|
-| `create_cf_record` | `_source/canon/CF-NNNN.yaml` |
-| `create_ch_record` | `_source/change-log/CH-NNNN.yaml` |
-| `create_m_record` | `_source/mystery-reserve/M-N.yaml` |
-| `create_oq_record` | `_source/open-questions/OQ-NNNN.yaml` |
+| `create_cf_record` | `_source/canon/CF-<integer>.yaml` |
+| `create_ch_record` | `_source/change-log/CH-<integer>.yaml` |
+| `create_m_record` | `_source/mystery-reserve/M-<integer>.yaml` |
+| `create_oq_record` | `_source/open-questions/OQ-<integer>.yaml` |
 | `create_inv_record` | `_source/invariants/<ID>.yaml` (where `<ID>` is `ONT-N` / `CAU-N` / `DIS-N` / `SOC-N` / `AES-N`) — rare in canon-addition; mostly used by `create-base-world` |
-| `create_ent_record` | `_source/entities/ENT-NNNN.yaml` — rare in canon-addition |
-| `create_sec_record` | per file class: `_source/peoples-and-species/SEC-PAS-NNN.yaml` (PEOPLES_AND_SPECIES) · `_source/everyday-life/SEC-ELF-NNN.yaml` (EVERYDAY_LIFE) · `_source/institutions/SEC-INS-NNN.yaml` (INSTITUTIONS) · `_source/economy-and-resources/SEC-ECR-NNN.yaml` (ECONOMY_AND_RESOURCES) · `_source/magic-or-tech-systems/SEC-MTS-NNN.yaml` (MAGIC_OR_TECH_SYSTEMS) · `_source/geography/SEC-GEO-NNN.yaml` (GEOGRAPHY) · `_source/timeline/SEC-TML-NNN.yaml` (TIMELINE) — rare in canon-addition; mostly `append_extension` / `append_touched_by_cf` against existing SEC records |
+| `create_ent_record` | `_source/entities/ENT-<integer>.yaml` — rare in canon-addition |
+| `create_sec_record` | per file class: `_source/peoples-and-species/SEC-PAS-<integer>.yaml` (PEOPLES_AND_SPECIES) · `_source/everyday-life/SEC-ELF-<integer>.yaml` (EVERYDAY_LIFE) · `_source/institutions/SEC-INS-<integer>.yaml` (INSTITUTIONS) · `_source/economy-and-resources/SEC-ECR-<integer>.yaml` (ECONOMY_AND_RESOURCES) · `_source/magic-or-tech-systems/SEC-MTS-<integer>.yaml` (MAGIC_OR_TECH_SYSTEMS) · `_source/geography/SEC-GEO-<integer>.yaml` (GEOGRAPHY) · `_source/timeline/SEC-TML-<integer>.yaml` (TIMELINE) — rare in canon-addition; mostly `append_extension` / `append_touched_by_cf` against existing SEC records |
 | `append_extension` | the existing record's path (atomic record's `_source/<subdir>/<ID>.yaml`) |
-| `append_touched_by_cf` | the existing SEC's path (`_source/<subdir>/SEC-<PREFIX>-NNN.yaml`) |
-| `append_modification_history_entry` | the target CF's path (`_source/canon/CF-NNNN.yaml`) |
+| `append_touched_by_cf` | the existing SEC's path (`_source/<subdir>/SEC-<PREFIX>-<integer>.yaml`) |
+| `append_modification_history_entry` | the target CF's path (`_source/canon/CF-<integer>.yaml`) |
 | `update_record_field` | the target record's path |
-| `append_adjudication_record` | `adjudications/PA-NNNN-<slug>.md` (world-relative, must start with `adjudications/`) |
+| `append_adjudication_record` | `adjudications/PA-<integer>-<slug>.md` (world-relative, must start with `adjudications/`) |
 | `append_character_record` | `characters/<char-slug>.md` (world-relative, must start with `characters/`) |
 | `append_diegetic_artifact_record` | `diegetic-artifacts/<da-slug>.md` (world-relative, must start with `diegetic-artifacts/`) |
 
@@ -88,7 +88,7 @@ MCP retrieval tools inject `record_kind` into parsed-record responses for consum
 
 PATCHENG-003 unified the CH-record schema on `affected_fact_ids` as the single canonical CF-reference field. The retired `affected_cf_ids` alias is rejected by `tools/validators/src/schemas/change-log-entry.schema.json`.
 
-For any plan that modifies an existing CF — `append_modification_history_entry`, `append_extension` against an existing CF, `update_record_field` on an existing CF, or any other op that touches a pre-existing `_source/canon/CF-NNNN.yaml` — the CH-record's `affected_fact_ids` array MUST list every modified CF id alongside any newly-created CF ids. This matches the field read by `rule6_no_silent_retcons`, the genesis CH-0001 template in `create-base-world`, and the worked example at `examples/accept-with-required-updates.md`.
+For any plan that modifies an existing CF — `append_modification_history_entry`, `append_extension` against an existing CF, `update_record_field` on an existing CF, or any other op that touches a pre-existing `_source/canon/CF-<integer>.yaml` — the CH-record's `affected_fact_ids` array MUST list every modified CF id alongside any newly-created CF ids. This matches the field read by `rule6_no_silent_retcons`, the genesis CH-1 template in `create-base-world`, and the worked example at `examples/accept-with-required-updates.md`.
 
 ---
 
@@ -99,17 +99,17 @@ The engine's pre-apply check has two layers that both run on `expected_id_alloca
 1. **Per-op check** (`tools/patch-engine/src/ops/shared.ts` `stageNewRecordFile`): every `create_*_record` op verifies its `record.id` appears in the corresponding allocation list via `.includes()`.
 2. **Verifier check** (`tools/patch-engine/src/apply.ts` `verifyExpectedIdAllocations`): verifies that allocated IDs match the engine's next-id calculation for that class. Multi-prefix classes (`inv_ids`, `sec_ids`) are checked per prefix.
 
-For canon-addition's typical accept-branch envelope, the relevant classes are `cf_ids` (1 entry — the new CF), `ch_ids` (1 — the new CH), `pa_ids` (1 — the adjudication), and optionally `m_ids` / `oq_ids` if the run creates new mystery-reserve or open-question records. `cf_ids` uses `CF-NNNN` (4-digit zero-padded), `ch_ids` uses `CH-NNNN`, `pa_ids` uses `PA-NNNN`, `m_ids` uses `M-N`, `oq_ids` uses `OQ-NNNN`.
+For canon-addition's typical accept-branch envelope, the relevant classes are `cf_ids` (1 entry — the new CF), `ch_ids` (1 — the new CH), `pa_ids` (1 — the adjudication), and optionally `m_ids` / `oq_ids` if the run creates new mystery-reserve or open-question records. `cf_ids` uses `CF-<integer>` (unpadded natural-integer), `ch_ids` uses `CH-<integer>`, `pa_ids` uses `PA-<integer>`, `m_ids` uses `M-<integer>`, `oq_ids` uses `OQ-<integer>`.
 
 ### Typical canon-addition accept-branch shape
 
 ```json
 {
-  "cf_ids": ["CF-0002"],
-  "ch_ids": ["CH-0002"],
-  "pa_ids": ["PA-0001"],
+  "cf_ids": ["CF-2"],
+  "ch_ids": ["CH-2"],
+  "pa_ids": ["PA-1"],
   "m_ids": ["M-4"],
-  "oq_ids": ["OQ-0008"]
+  "oq_ids": ["OQ-8"]
 }
 ```
 
@@ -200,13 +200,13 @@ After any user-authorized direct-`Edit` to a hybrid-file frontmatter under `worl
 
 A CF's `required_world_updates` field lists the prose concerns whose initial SEC records cite the CF in `touched_by_cf` (bidirectional pointer per §8). The validator `rule5_no_consequence_evasion` (`tools/validators/src/rules/rule5-no-consequence-evasion.ts`) requires every entry to have a matching SEC operation in the patch plan and recognizes ONLY the seven SEC file classes:
 
-- `GEOGRAPHY` (matches `SEC-GEO-NNN`)
-- `PEOPLES_AND_SPECIES` (matches `SEC-PAS-NNN`)
-- `INSTITUTIONS` (matches `SEC-INS-NNN`)
-- `ECONOMY_AND_RESOURCES` (matches `SEC-ECR-NNN`)
-- `MAGIC_OR_TECH_SYSTEMS` (matches `SEC-MTS-NNN`)
-- `EVERYDAY_LIFE` (matches `SEC-ELF-NNN`)
-- `TIMELINE` (matches `SEC-TML-NNN`)
+- `GEOGRAPHY` (matches `SEC-GEO-<integer>`)
+- `PEOPLES_AND_SPECIES` (matches `SEC-PAS-<integer>`)
+- `INSTITUTIONS` (matches `SEC-INS-<integer>`)
+- `ECONOMY_AND_RESOURCES` (matches `SEC-ECR-<integer>`)
+- `MAGIC_OR_TECH_SYSTEMS` (matches `SEC-MTS-<integer>`)
+- `EVERYDAY_LIFE` (matches `SEC-ELF-<integer>`)
+- `TIMELINE` (matches `SEC-TML-<integer>`)
 
 Listing any non-SEC file class (notably `INVARIANTS`, but also `CANON_LEDGER`, `MYSTERY_RESERVE`, `OPEN_QUESTIONS`, `ENTITIES`) fails validation with `rule5.required_update_not_patched: "<CF-id> requires <FILE-CLASS>, but the patch plan has no matching SEC operation"`.
 
@@ -248,16 +248,16 @@ const envelope = {
   approval_token: "placeholder",
   verdict: "ACCEPT_AS_LOCAL_EXCEPTION",
   originating_skill: "canon-addition",
-  originating_cf_ids: ["CF-NNNN"],
-  originating_ch_id: "CH-NNNN",
-  originating_pa_id: "PA-NNNN",
-  expected_id_allocations: { cf_ids: ["CF-NNNN"], ch_ids: ["CH-NNNN"], pa_ids: ["PA-NNNN"] },
+  originating_cf_ids: ["CF-<integer>"],
+  originating_ch_id: "CH-<integer>",
+  originating_pa_id: "PA-<integer>",
+  expected_id_allocations: { cf_ids: ["CF-<integer>"], ch_ids: ["CH-<integer>"], pa_ids: ["PA-<integer>"] },
   patches: [
     {
       op: "create_cf_record",
       target_world: "<world-slug>",
-      target_file: "_source/canon/CF-NNNN.yaml",
-      payload: { cf_record: { id: "CF-NNNN", /* ... */ } }
+      target_file: "_source/canon/CF-<integer>.yaml",
+      payload: { cf_record: { id: "CF-<integer>", /* ... */ } }
     },
     // ...
   ]
@@ -287,10 +287,10 @@ A complete `create_cf_record` op for a new soft-canon CF:
 {
   "op": "create_cf_record",
   "target_world": "<world-slug>",
-  "target_file": "_source/canon/CF-NNNN.yaml",
+  "target_file": "_source/canon/CF-<integer>.yaml",
   "payload": {
     "cf_record": {
-      "id": "CF-NNNN",
+      "id": "CF-<integer>",
       "title": "...",
       "status": "soft_canon",
       "type": "local_anomaly",
@@ -303,7 +303,7 @@ A complete `create_cf_record` op for a new soft-canon CF:
       "costs_and_limits": ["..."],
       "visible_consequences": ["..."],
       "required_world_updates": ["PEOPLES_AND_SPECIES", "EVERYDAY_LIFE"],
-      "source_basis": { "direct_user_approval": true, "derived_from": ["CF-0001"] },
+      "source_basis": { "direct_user_approval": true, "derived_from": ["CF-1"] },
       "contradiction_risk": { "hard": false, "soft": true },
       "notes": "...",
       "epistemic_profile": { "n_a": "<rationale tied to fact-type keyword>" },
@@ -322,18 +322,18 @@ A complete `append_adjudication_record` op for the PA:
 {
   "op": "append_adjudication_record",
   "target_world": "<world-slug>",
-  "target_file": "adjudications/PA-NNNN-<verdict-slug>.md",
+  "target_file": "adjudications/PA-<integer>-<verdict-slug>.md",
   "payload": {
     "adjudication_frontmatter": {
-      "pa_id": "PA-NNNN",
+      "pa_id": "PA-<integer>",
       "verdict": "ACCEPT_AS_LOCAL_EXCEPTION",
       "date": "YYYY-MM-DD",
       "originating_skill": "canon-addition",
-      "change_id": "CH-NNNN",
+      "change_id": "CH-<integer>",
       "mystery_reserve_touched": ["M-3", "M-4"],
       "invariants_touched": ["ONT-2"],
-      "cf_records_touched": ["CF-0001", "CF-NNNN"],
-      "open_questions_touched": ["OQ-NNNN"]
+      "cf_records_touched": ["CF-1", "CF-<integer>"],
+      "open_questions_touched": ["OQ-<integer>"]
     },
     "body_markdown": "# Discovery\n\n... full Phase 0–11 analysis ..."
   }

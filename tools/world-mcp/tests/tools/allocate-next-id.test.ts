@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
@@ -14,34 +14,34 @@ import { ID_CLASSES } from "../../src/server";
 import { createTempRepoRoot, destroyTempRepoRoot, seedWorld, withRepoRoot } from "./_shared";
 
 const CLASS_CASES: Array<{ idClass: IdClass; highest: string; expected: string }> = [
-  { idClass: "CF", highest: "CF-0047", expected: "CF-0048" },
-  { idClass: "CH", highest: "CH-0018", expected: "CH-0019" },
-  { idClass: "PA", highest: "PA-0017", expected: "PA-0018" },
-  { idClass: "CHAR", highest: "CHAR-0007", expected: "CHAR-0008" },
-  { idClass: "DA", highest: "DA-0003", expected: "DA-0004" },
-  { idClass: "PR", highest: "PR-0042", expected: "PR-0043" },
-  { idClass: "BATCH", highest: "BATCH-0011", expected: "BATCH-0012" },
-  { idClass: "NCP", highest: "NCP-0007", expected: "NCP-0008" },
-  { idClass: "NCB", highest: "NCB-0001", expected: "NCB-0002" },
-  { idClass: "AU", highest: "AU-0002", expected: "AU-0003" },
-  { idClass: "RP", highest: "RP-0005", expected: "RP-0006" },
-  { idClass: "EPE", highest: "EPE-0005", expected: "EPE-0006" },
-  { idClass: "STORY", highest: "STORY-0007", expected: "STORY-0008" },
+  { idClass: "CF", highest: "CF-0047", expected: "CF-48" },
+  { idClass: "CH", highest: "CH-0018", expected: "CH-19" },
+  { idClass: "PA", highest: "PA-0017", expected: "PA-18" },
+  { idClass: "CHAR", highest: "CHAR-0007", expected: "CHAR-8" },
+  { idClass: "DA", highest: "DA-0003", expected: "DA-4" },
+  { idClass: "PR", highest: "PR-0042", expected: "PR-43" },
+  { idClass: "BATCH", highest: "BATCH-0011", expected: "BATCH-12" },
+  { idClass: "NCP", highest: "NCP-0007", expected: "NCP-8" },
+  { idClass: "NCB", highest: "NCB-0001", expected: "NCB-2" },
+  { idClass: "AU", highest: "AU-0002", expected: "AU-3" },
+  { idClass: "RP", highest: "RP-0005", expected: "RP-6" },
+  { idClass: "EPE", highest: "EPE-0005", expected: "EPE-6" },
+  { idClass: "STORY", highest: "STORY-0007", expected: "STORY-8" },
   { idClass: "M", highest: "M-20", expected: "M-21" },
   { idClass: "ONT", highest: "ONT-3", expected: "ONT-4" },
   { idClass: "CAU", highest: "CAU-2", expected: "CAU-3" },
   { idClass: "DIS", highest: "DIS-1", expected: "DIS-2" },
   { idClass: "SOC", highest: "SOC-4", expected: "SOC-5" },
   { idClass: "AES", highest: "AES-3", expected: "AES-4" },
-  { idClass: "OQ", highest: "OQ-0014", expected: "OQ-0015" },
-  { idClass: "ENT", highest: "ENT-0029", expected: "ENT-0030" },
-  { idClass: "SEC-ELF", highest: "SEC-ELF-006", expected: "SEC-ELF-007" },
-  { idClass: "SEC-INS", highest: "SEC-INS-011", expected: "SEC-INS-012" },
-  { idClass: "SEC-MTS", highest: "SEC-MTS-002", expected: "SEC-MTS-003" },
-  { idClass: "SEC-GEO", highest: "SEC-GEO-018", expected: "SEC-GEO-019" },
-  { idClass: "SEC-ECR", highest: "SEC-ECR-005", expected: "SEC-ECR-006" },
-  { idClass: "SEC-PAS", highest: "SEC-PAS-007", expected: "SEC-PAS-008" },
-  { idClass: "SEC-TML", highest: "SEC-TML-001", expected: "SEC-TML-002" }
+  { idClass: "OQ", highest: "OQ-0014", expected: "OQ-15" },
+  { idClass: "ENT", highest: "ENT-0029", expected: "ENT-30" },
+  { idClass: "SEC-ELF", highest: "SEC-ELF-006", expected: "SEC-ELF-7" },
+  { idClass: "SEC-INS", highest: "SEC-INS-011", expected: "SEC-INS-12" },
+  { idClass: "SEC-MTS", highest: "SEC-MTS-002", expected: "SEC-MTS-3" },
+  { idClass: "SEC-GEO", highest: "SEC-GEO-018", expected: "SEC-GEO-19" },
+  { idClass: "SEC-ECR", highest: "SEC-ECR-005", expected: "SEC-ECR-6" },
+  { idClass: "SEC-PAS", highest: "SEC-PAS-007", expected: "SEC-PAS-8" },
+  { idClass: "SEC-TML", highest: "SEC-TML-001", expected: "SEC-TML-2" }
 ];
 
 const STORY_CLASS_CASES: Array<{
@@ -50,25 +50,25 @@ const STORY_CLASS_CASES: Array<{
   fileName: string;
   expected: string;
 }> = [
-  { idClass: "PG", subdir: "pages", fileName: "PG-0007.yaml", expected: "PG-0008" },
-  { idClass: "SE", subdir: "events", fileName: "SE-0007.yaml", expected: "SE-0008" },
-  { idClass: "SF", subdir: "facts", fileName: "SF-0007.yaml", expected: "SF-0008" },
-  { idClass: "BEL", subdir: "beliefs", fileName: "BEL-0007.yaml", expected: "BEL-0008" },
-  { idClass: "OBL", subdir: "obligations", fileName: "OBL-0007.yaml", expected: "OBL-0008" },
-  { idClass: "CNSQ", subdir: "consequences", fileName: "CNSQ-0007.yaml", expected: "CNSQ-0008" },
-  { idClass: "THR", subdir: "threads", fileName: "THR-0007.yaml", expected: "THR-0008" },
-  { idClass: "SREL", subdir: "relationships", fileName: "SREL-0007.yaml", expected: "SREL-0008" },
-  { idClass: "STINT", subdir: "intentions", fileName: "STINT-0007.yaml", expected: "STINT-0008" },
-  { idClass: "SLT", subdir: "storylets", fileName: "SLT-0007.yaml", expected: "SLT-0008" },
-  { idClass: "SLB", subdir: "storylet-batches", fileName: "SLB-0007.md", expected: "SLB-0008" },
-  { idClass: "SAU", subdir: "audits", fileName: "SAU-0007-2026-05-03.md", expected: "SAU-0008" },
-  { idClass: "SP", subdir: "story-promotions", fileName: "SP-0007.md", expected: "SP-0008" },
-  { idClass: "STLOC", subdir: "locations", fileName: "STLOC-0007.yaml", expected: "STLOC-0008" },
-  { idClass: "STOBJ", subdir: "objects", fileName: "STOBJ-0007.yaml", expected: "STOBJ-0008" },
-  { idClass: "BR", subdir: "branches", fileName: "BR-0007.yaml", expected: "BR-0008" },
-  { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-0008" },
-  { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-0008" },
-  { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-0008" }
+  { idClass: "PG", subdir: "pages", fileName: "PG-0007.yaml", expected: "PG-8" },
+  { idClass: "SE", subdir: "events", fileName: "SE-0007.yaml", expected: "SE-8" },
+  { idClass: "SF", subdir: "facts", fileName: "SF-0007.yaml", expected: "SF-8" },
+  { idClass: "BEL", subdir: "beliefs", fileName: "BEL-0007.yaml", expected: "BEL-8" },
+  { idClass: "OBL", subdir: "obligations", fileName: "OBL-0007.yaml", expected: "OBL-8" },
+  { idClass: "CNSQ", subdir: "consequences", fileName: "CNSQ-0007.yaml", expected: "CNSQ-8" },
+  { idClass: "THR", subdir: "threads", fileName: "THR-0007.yaml", expected: "THR-8" },
+  { idClass: "SREL", subdir: "relationships", fileName: "SREL-0007.yaml", expected: "SREL-8" },
+  { idClass: "STINT", subdir: "intentions", fileName: "STINT-0007.yaml", expected: "STINT-8" },
+  { idClass: "SLT", subdir: "storylets", fileName: "SLT-0007.yaml", expected: "SLT-8" },
+  { idClass: "SLB", subdir: "storylet-batches", fileName: "SLB-0007.md", expected: "SLB-8" },
+  { idClass: "SAU", subdir: "audits", fileName: "SAU-0007-2026-05-03.md", expected: "SAU-8" },
+  { idClass: "SP", subdir: "story-promotions", fileName: "SP-0007.md", expected: "SP-8" },
+  { idClass: "STLOC", subdir: "locations", fileName: "STLOC-0007.yaml", expected: "STLOC-8" },
+  { idClass: "STOBJ", subdir: "objects", fileName: "STOBJ-0007.yaml", expected: "STOBJ-8" },
+  { idClass: "BR", subdir: "branches", fileName: "BR-0007.yaml", expected: "BR-8" },
+  { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-8" },
+  { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-8" },
+  { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-8" }
 ];
 
 function seedAllocationWorld(root: string): void {
@@ -208,13 +208,13 @@ test("allocateNextId returns first-run ids for missing world-scoped classes", as
     assert.ok(!("code" in secResult));
     assert.ok(!("code" in epeResult));
     assert.ok(!("code" in storyResult));
-    assert.equal(cfResult.next_id, "CF-0001");
-    assert.equal(ncpResult.next_id, "NCP-0001");
+    assert.equal(cfResult.next_id, "CF-1");
+    assert.equal(ncpResult.next_id, "NCP-1");
     assert.equal(mysteryResult.next_id, "M-1");
     assert.equal(aesResult.next_id, "AES-1");
-    assert.equal(secResult.next_id, "SEC-GEO-001");
-    assert.equal(epeResult.next_id, "EPE-0001");
-    assert.equal(storyResult.next_id, "STORY-0001");
+    assert.equal(secResult.next_id, "SEC-GEO-1");
+    assert.equal(epeResult.next_id, "EPE-1");
+    assert.equal(storyResult.next_id, "STORY-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -252,7 +252,7 @@ test("allocateNextId scans STORY_KERNEL frontmatter for story ids", async () => 
     );
 
     assert.ok(!("code" in result));
-    assert.equal(result.next_id, "STORY-0008");
+    assert.equal(result.next_id, "STORY-8");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -343,12 +343,52 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in sauResult));
     assert.ok(!("code" in spResult));
     assert.ok(!("code" in beliefResult));
-    assert.equal(pageResult.next_id, "PG-0001");
-    assert.equal(stintResult.next_id, "STINT-0001");
-    assert.equal(slbResult.next_id, "SLB-0001");
-    assert.equal(sauResult.next_id, "SAU-0001");
-    assert.equal(spResult.next_id, "SP-0001");
-    assert.equal(beliefResult.next_id, "BEL-0001");
+    assert.equal(pageResult.next_id, "PG-1");
+    assert.equal(stintResult.next_id, "STINT-1");
+    assert.equal(slbResult.next_id, "SLB-1");
+    assert.equal(sauResult.next_id, "SAU-1");
+    assert.equal(spResult.next_id, "SP-1");
+    assert.equal(beliefResult.next_id, "BEL-1");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("allocateNextId returns first-run story-scoped ids for fresh missing story bundles", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    seedWorld(root, {
+      worldSlug: "seeded",
+      nodes: [
+        {
+          node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+          world_slug: "seeded",
+          file_path: "WORLD_KERNEL.md",
+          heading_path: "Kernel",
+          node_type: "section",
+          body: "Kernel text only."
+        }
+      ]
+    });
+
+    const storyDirectory = path.join(root, "worlds", "seeded", "stories", "fresh-bundle");
+    assert.equal(existsSync(storyDirectory), false);
+
+    for (const entry of STORY_CLASS_CASES) {
+      const result = await withRepoRoot(root, () =>
+        allocateNextId({
+          world_slug: "seeded",
+          id_class: entry.idClass,
+          story_slug: "fresh-bundle"
+        })
+      );
+
+      assert.ok(!("code" in result));
+      assert.equal(result.next_id, `${entry.idClass}-1`);
+    }
+
+    assert.equal(existsSync(storyDirectory), false);
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -386,7 +426,7 @@ test("allocateNextId ignores legacy suffixed STINT records", async () => {
     );
 
     assert.ok(!("code" in result));
-    assert.equal(result.next_id, "STINT-0001");
+    assert.equal(result.next_id, "STINT-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -425,7 +465,7 @@ test("allocateNextId counts only bare-numeric STINT records when legacy suffixes
     );
 
     assert.ok(!("code" in result));
-    assert.equal(result.next_id, "STINT-0002");
+    assert.equal(result.next_id, "STINT-2");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -460,7 +500,7 @@ test("allocateNextId counts SP ledger and proposal-package sidecar files togethe
     );
 
     assert.ok(!("code" in result));
-    assert.equal(result.next_id, "SP-0004");
+    assert.equal(result.next_id, "SP-4");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -509,8 +549,8 @@ test("allocateNextId returns next sub-audit-scoped RSP ids per SAU directory", a
 
     assert.ok(!("code" in nextForAudit));
     assert.ok(!("code" in firstRunForMissingAuditDirectory));
-    assert.equal(nextForAudit.next_id, "RSP-0004");
-    assert.equal(firstRunForMissingAuditDirectory.next_id, "RSP-0001");
+    assert.equal(nextForAudit.next_id, "RSP-4");
+    assert.equal(firstRunForMissingAuditDirectory.next_id, "RSP-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -534,8 +574,8 @@ test("allocateNextId returns the next pipeline-scoped ids from world-proposals",
 
     assert.ok(!("code" in batchResult));
     assert.ok(!("code" in proposalResult));
-    assert.equal(batchResult.next_id, "NWB-0002");
-    assert.equal(proposalResult.next_id, "NWP-0009");
+    assert.equal(batchResult.next_id, "NWB-2");
+    assert.equal(proposalResult.next_id, "NWP-9");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -554,8 +594,8 @@ test("allocateNextId returns first-run pipeline ids when world-proposals is abse
 
     assert.ok(!("code" in batchResult));
     assert.ok(!("code" in proposalResult));
-    assert.equal(batchResult.next_id, "NWB-0001");
-    assert.equal(proposalResult.next_id, "NWP-0001");
+    assert.equal(batchResult.next_id, "NWB-1");
+    assert.equal(proposalResult.next_id, "NWP-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -618,7 +658,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
         world_slug: "seeded",
         id_class: "RSP",
         story_slug: "wolf-tale",
-        audit_id: "SAU-99"
+        audit_id: "SAU-X"
       })
     );
     const nonSubAuditScopedWithAuditId = await withRepoRoot(root, () =>
@@ -632,8 +672,8 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const worldScopedWithStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "CF", story_slug: "wolf-tale" })
     );
-    const storyScopedMissingStory = await withRepoRoot(root, () =>
-      allocateNextId({ world_slug: "seeded", id_class: "PG", story_slug: "missing-story" })
+    const storyScopedMissingWorld = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "missing-world", id_class: "PG", story_slug: "missing-story" })
     );
 
     assert.ok("code" in pipelineClassWithWorldSlug);
@@ -650,7 +690,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in rspWithMalformedAuditId);
     assert.ok("code" in nonSubAuditScopedWithAuditId);
     assert.ok("code" in worldScopedWithStorySlug);
-    assert.ok("code" in storyScopedMissingStory);
+    assert.ok("code" in storyScopedMissingWorld);
     assert.equal(pipelineClassWithWorldSlug.code, "invalid_input");
     assert.equal(worldClassWithPipelineSlug.code, "invalid_input");
     assert.equal(epeWithPipelineSlug.code, "invalid_input");
@@ -665,7 +705,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(rspWithMalformedAuditId.code, "invalid_input");
     assert.equal(nonSubAuditScopedWithAuditId.code, "invalid_input");
     assert.equal(worldScopedWithStorySlug.code, "invalid_input");
-    assert.equal(storyScopedMissingStory.code, "invalid_input");
+    assert.equal(storyScopedMissingWorld.code, "world_not_found");
     assert.match(pipelineClassWithWorldSlug.message, /__pipeline__/);
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);
@@ -675,7 +715,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.match(spWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutAuditId.message, /requires audit_id/);
-    assert.match(rspWithMalformedAuditId.message, /SAU-NNNN/);
+    assert.match(rspWithMalformedAuditId.message, /SAU-<integer>/);
     assert.match(nonSubAuditScopedWithAuditId.message, /does not accept audit_id/);
     assert.match(worldScopedWithStorySlug.message, /does not accept story_slug/);
   } finally {
@@ -683,7 +723,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 49 id classes with existing formats preserved", () => {
+test("allocateNextId exposes all 49 id classes with canonical unpadded formats", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -737,28 +777,28 @@ test("allocateNextId exposes all 49 id classes with existing formats preserved",
   ]);
   assert.equal(Object.keys(ID_CLASS_FORMATS).length, 49);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
-  assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
-  assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
-  assert.equal(ID_CLASS_FORMATS.BEL.zeroPad, true);
-  assert.match("BEL-0008", ID_CLASS_FORMATS.BEL.regex);
-  assert.equal(ID_CLASS_FORMATS.PG.zeroPad, true);
-  assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
-  assert.match("STINT-0008", ID_CLASS_FORMATS.STINT.regex);
+  assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, false);
+  assert.match("STORY-8", ID_CLASS_FORMATS.STORY.regex);
+  assert.equal(ID_CLASS_FORMATS.BEL.zeroPad, false);
+  assert.match("BEL-8", ID_CLASS_FORMATS.BEL.regex);
+  assert.equal(ID_CLASS_FORMATS.PG.zeroPad, false);
+  assert.match("PG-8", ID_CLASS_FORMATS.PG.regex);
+  assert.match("STINT-8", ID_CLASS_FORMATS.STINT.regex);
   assert.doesNotMatch("STINT-0008-rill", ID_CLASS_FORMATS.STINT.regex);
-  assert.match("SLB-0008", ID_CLASS_FORMATS.SLB.regex);
-  assert.match("RSP-0008-payoff", ID_CLASS_FORMATS.RSP.regex);
-  assert.match("SAU-0008-2026-05-03", ID_CLASS_FORMATS.SAU.regex);
-  assert.match("SP-0008-proposal-package", ID_CLASS_FORMATS.SP.regex);
+  assert.match("SLB-8", ID_CLASS_FORMATS.SLB.regex);
+  assert.match("RSP-8-payoff", ID_CLASS_FORMATS.RSP.regex);
+  assert.match("SAU-8-2026-05-03", ID_CLASS_FORMATS.SAU.regex);
+  assert.match("SP-8-proposal-package", ID_CLASS_FORMATS.SP.regex);
   assert.match("M-21", ID_CLASS_FORMATS.M.regex);
-  assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, true);
-  assert.match("OQ-0001", ID_CLASS_FORMATS.OQ.regex);
+  assert.equal(ID_CLASS_FORMATS.OQ.zeroPad, false);
+  assert.match("OQ-1", ID_CLASS_FORMATS.OQ.regex);
   assert.equal(ID_CLASS_FORMATS.AES.zeroPad, false);
   assert.match("AES-1", ID_CLASS_FORMATS.AES.regex);
-  assert.equal(ID_CLASS_FORMATS["SEC-GEO"].width, 3);
-  assert.match("SEC-GEO-001", ID_CLASS_FORMATS["SEC-GEO"].regex);
-  assert.match("NWB-0001", ID_CLASS_FORMATS.NWB.regex);
-  assert.match("NWP-0001", ID_CLASS_FORMATS.NWP.regex);
-  assert.match("EPE-0001", ID_CLASS_FORMATS.EPE.regex);
+  assert.equal(ID_CLASS_FORMATS["SEC-GEO"].width, 1);
+  assert.match("SEC-GEO-1", ID_CLASS_FORMATS["SEC-GEO"].regex);
+  assert.match("NWB-1", ID_CLASS_FORMATS.NWB.regex);
+  assert.match("NWP-1", ID_CLASS_FORMATS.NWP.regex);
+  assert.match("EPE-1", ID_CLASS_FORMATS.EPE.regex);
 });
 
 test("allocateNextId class formats stay in lockstep with the MCP input enum", () => {

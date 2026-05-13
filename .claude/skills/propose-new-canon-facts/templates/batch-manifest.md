@@ -3,14 +3,14 @@
 #
 # Emitted by the propose-new-canon-facts skill as the audit record for a single
 # invocation. Pairs with a set of proposal-card files at
-# worlds/<world-slug>/proposals/PR-NNNN-<slug>.md whose ids appear in card_ids.
+# worlds/<world-slug>/proposals/PR-<integer>-<slug>.md whose ids appear in card_ids.
 #
 # The manifest is the batch's audit trail: every phase output has a named home
 # in the body. The frontmatter is summary metadata; the body is the proof-of-work.
 #
 # Required fields must not be left as TODO or empty (enforced by Phase 8 Test 10).
 
-batch_id: BATCH-0000                         # monotonic per-world
+batch_id: BATCH-<integer>                         # monotonic per-world
 world_slug: ""
 generated_date: ""                           # ISO date, e.g. 2026-04-18
 
@@ -29,12 +29,12 @@ diagnosis_summary: >                         # one-paragraph prose summary of Ph
   most weaknesses, which domains were overrepresented / underrepresented,
   what the dominant remediation direction is.
 
-card_ids: []                                 # every PR-NNNN emitted by this batch (surviving Phases 4-7)
-  # - PR-0001
-  # - PR-0002
+card_ids: []                                 # every PR-<integer> emitted by this batch (surviving Phases 4-7)
+  # - PR-1
+  # - PR-2
 
 dropped_card_ids: []                         # card ids the user excluded at Phase 9 HARD-GATE drop-list
-  # - PR-0003
+  # - PR-3
 
 user_approved: false                         # set true at Phase 9 commit
 
@@ -43,7 +43,7 @@ notes: >
   collisions that forced a card drop + slot-regeneration) may be summarized here.
 ---
 
-# Batch BATCH-NNNN — <World-Slug-TitleCased>
+# Batch BATCH-<integer> — <World-Slug-TitleCased>
 
 ## Diagnosis Dossier
 
@@ -96,17 +96,17 @@ notes: >
 
 ## Phase 6 Diversification Audit
 
-<Table: slot (1-7) | filled by (PR-NNNN) | alternative candidates considered | empty?>
+<Table: slot (1-7) | filled by (PR-<integer>) | alternative candidates considered | empty?>
 
 | Slot | Title | Filled by | Empty |
 |------|-------|-----------|-------|
-| 1 (local texture) | ... | PR-NNNN | false |
-| 2 (institutional adaptation) | ... | PR-NNNN | false |
+| 1 (local texture) | ... | PR-<integer> | false |
+| 2 (institutional adaptation) | ... | PR-<integer> | false |
 | 3 (pressure-system intensifier) | ... | — | **true** — <rationale> |
-| 4 (contested-belief) | ... | PR-NNNN | false |
-| 5 (history residue) | ... | PR-NNNN | false |
-| 6 (mystery-seeding) | ... | PR-NNNN | false |
-| 7 (cross-domain connection) | ... | PR-NNNN | false |
+| 4 (contested-belief) | ... | PR-<integer> | false |
+| 5 (history residue) | ... | PR-<integer> | false |
+| 6 (mystery-seeding) | ... | PR-<integer> | false |
+| 7 (cross-domain connection) | ... | PR-<integer> | false |
 
 ## Phase 7d Batch-level Check Trace
 

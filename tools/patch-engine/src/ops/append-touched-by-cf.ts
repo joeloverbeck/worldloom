@@ -40,7 +40,7 @@ export async function stageAppendTouchedByCf(
     });
   }
 
-  if (!/^CF-\d{4}$/.test(op.payload.cf_id)) {
+  if (!/^CF-\d+$/.test(op.payload.cf_id)) {
     throw new PatchEngineOpError({
       code: "invalid_record_id",
       message: `${op.payload.cf_id} is not a valid CF id`,

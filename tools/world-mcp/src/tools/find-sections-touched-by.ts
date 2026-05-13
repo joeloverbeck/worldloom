@@ -26,7 +26,7 @@ interface SectionCandidateRow {
   body: string;
 }
 
-const CF_ID_PATTERN = /^CF-\d{4}$/;
+const CF_ID_PATTERN = /^CF-\d+$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -84,7 +84,7 @@ async function findSectionsTouchedByImpl(
   if (!CF_ID_PATTERN.test(args.cf_id)) {
     return createMcpError("invalid_input", `cf_id '${args.cf_id}' is not a Canon Fact id.`, {
       field: "cf_id",
-      expected: "CF-NNNN"
+      expected: "CF-<integer>"
     });
   }
 

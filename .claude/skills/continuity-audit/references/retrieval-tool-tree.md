@@ -12,14 +12,14 @@ The audit is an enumerate-and-judge workflow: every category/check sub-pass enum
 
 ## Phase 0–1: Normalize Parameters and Scope
 
-- `mcp__worldloom__search_nodes(query='change_id:CH-NNNN', node_types=['change_log_entry'])` to verify a `recent_canon_addition_cutoff` value before locking the delta window. If the cutoff CH-id is absent from the index, abort.
-- `mcp__worldloom__get_record(record_id)` on the latest CH-NNNN to confirm the cutoff equals the latest CH (inclusive-anchor disambiguation per SKILL.md Phase 0 cutoff semantics).
+- `mcp__worldloom__search_nodes(query='change_id:CH-<integer>', node_types=['change_log_entry'])` to verify a `recent_canon_addition_cutoff` value before locking the delta window. If the cutoff CH-id is absent from the index, abort.
+- `mcp__worldloom__get_record(record_id)` on the latest CH-<integer> to confirm the cutoff equals the latest CH (inclusive-anchor disambiguation per SKILL.md Phase 0 cutoff semantics).
 
 ## Phase 2: Change Log Delta Analysis
 
 - `mcp__worldloom__search_nodes(node_types=['change_log_entry'], filters={...})` to enumerate CH records inside the cutoff window.
-- For each known CH window: `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for `affected_fact_ids`, `required_world_updates`, `change_type`. Use singular `get_record(CH-NNNN)` only for the one latest-CH cutoff check or when later ids depend on reading an earlier record.
-- `mcp__worldloom__get_neighbors(CH-NNNN, edge_types=['affects_cf', 'touches_invariant', 'touches_mystery_reserve'])` to fan out from each CH to its affected CFs, invariants, and mystery interactions.
+- For each known CH window: `mcp__worldloom__get_records(record_ids=[...], world_slug=<slug>)` for `affected_fact_ids`, `required_world_updates`, `change_type`. Use singular `get_record(CH-<integer>)` only for the one latest-CH cutoff check or when later ids depend on reading an earlier record.
+- `mcp__worldloom__get_neighbors(CH-<integer>, edge_types=['affects_cf', 'touches_invariant', 'touches_mystery_reserve'])` to fan out from each CH to its affected CFs, invariants, and mystery interactions.
 - `mcp__worldloom__find_sections_touched_by(cf_id)` per affected CF to verify the `required_world_updates` list reflects actual `touched_by_cf` state on the SEC records (Rule 6 surface: a CH whose stated required updates do not match the SEC `touched_by_cf` arrays is a silent-retcon candidate).
 
 ## Phase 3: Continuity Lint Sweep
@@ -39,10 +39,10 @@ Each category/check names its preferred enumeration tool. All `_source/*.yaml` c
 - **4e Institutional Contradictions** — `search_nodes(node_types=['section_record'], filters={file_class: 'institutions'})`; cross-reference against CFs whose `domains_affected` includes institutional domains.
 - **4f Everyday-Life Contradictions** — `search_nodes(node_types=['section_record'], filters={file_class: 'everyday-life'})`; flag any CF whose `visible_consequences` would reshape ordinary life and is not reflected in any ELF SEC.
 - **4g Tone / Identity Drift** — `get_record(WORLD_KERNEL.md)` for tonal contract; `search_nodes` over recent CFs' `notes` and `statement` fields for drift markers.
-- **4h Mystery Corruption** — `search_nodes(node_types=['mystery_reserve_entry'])`; for each, `get_neighbors(M-NNNN, edge_types=['threatened_by_cf'])` to surface CFs that may have softened the firewall.
-- **4i Diegetic Leakage** — `list_records(record_type='character_record', include_full_body=true)` and `list_records(record_type='diegetic_artifact_record', include_full_body=true)` to enumerate dossiers/artifacts; use `get_record` only for targeted follow-up slices if the full-body list output was projected or too broad for the sub-pass. Cross-check `known_firsthand` / `wrongly_believes` / artifact body claims against M-NNNN `disallowed cheap answers`.
+- **4h Mystery Corruption** — `search_nodes(node_types=['mystery_reserve_entry'])`; for each, `get_neighbors(M-<integer>, edge_types=['threatened_by_cf'])` to surface CFs that may have softened the firewall.
+- **4i Diegetic Leakage** — `list_records(record_type='character_record', include_full_body=true)` and `list_records(record_type='diegetic_artifact_record', include_full_body=true)` to enumerate dossiers/artifacts; use `get_record` only for targeted follow-up slices if the full-body list output was projected or too broad for the sub-pass. Cross-check `known_firsthand` / `wrongly_believes` / artifact body claims against M-<integer> `disallowed cheap answers`.
 - **4j Local/Global Drift** — `search_nodes(filters={'scope.geographic': ['local'], 'scope.social': ['restricted_group']})`; `find_impacted_fragments(CF-id)` to enumerate prose surfaces and flag scope-qualifier-dropping.
-- **4k Silent-Area Canonization** — `search_nodes(node_types=['canon_fact_record'])` to enumerate CFs and `domains_affected`; `get_record(CF-NNNN)` for any candidate whose `notes` or `source_basis` acknowledgment surface is not fully available in the search result. Compare candidate domains against the prior CF-domain union from the Phase 2 delta window when present, or against all other CFs during full-history audits.
+- **4k Silent-Area Canonization** — `search_nodes(node_types=['canon_fact_record'])` to enumerate CFs and `domains_affected`; `get_record(CF-<integer>)` for any candidate whose `notes` or `source_basis` acknowledgment surface is not fully available in the search result. Compare candidate domains against the prior CF-domain union from the Phase 2 delta window when present, or against all other CFs during full-history audits.
 
 ## Phase 6: Burden Debt Analysis
 
@@ -58,4 +58,4 @@ Each category/check names its preferred enumeration tool. All `_source/*.yaml` c
 
 ## Phase 13: Commit
 
-- No retrieval call. Direct-`Edit` writes to `audits/AU-NNNN-<date>.md`, `audits/AU-NNNN/retcon-proposals/RP-NNNN-*.md`, and `audits/INDEX.md`. Hook 3 allows these because they live outside `_source/`.
+- No retrieval call. Direct-`Edit` writes to `audits/AU-<integer>-<date>.md`, `audits/AU-<integer>/retcon-proposals/RP-<integer>-*.md`, and `audits/INDEX.md`. Hook 3 allows these because they live outside `_source/`.

@@ -16,10 +16,10 @@ test("create_bel_record validates and submits through the story-record patch-eng
   const world = createIndexedTestWorld(t);
   const secret = Buffer.from("belief-integration-secret");
   const secretPath = writeSecret(world.worldRoot, secret);
-  const patch = createBelPatch(world.worldSlug, "red-bunny", "BEL-0001");
+  const patch = createBelPatch(world.worldSlug, "red-bunny", "BEL-1");
   const envelope: PatchPlanEnvelope = {
-    ...baseEnvelope({ bel_ids: ["BEL-0001"] }),
-    plan_id: "PLAN-BEL-0001",
+    ...baseEnvelope({ bel_ids: ["BEL-1"] }),
+    plan_id: "PLAN-BEL-1",
     target_world: world.worldSlug,
     patches: [patch]
   };
@@ -34,10 +34,10 @@ test("create_bel_record validates and submits through the story-record patch-eng
   });
 
   assertPatchReceipt(result);
-  assert.deepEqual(result.id_allocations_consumed.bel_ids, ["BEL-0001"]);
+  assert.deepEqual(result.id_allocations_consumed.bel_ids, ["BEL-1"]);
   assert.ok(
     result.new_nodes.some(
-      (node) => node.node_id === "red-bunny:BEL-0001" && node.node_type === "belief_record"
+      (node) => node.node_id === "red-bunny:BEL-1" && node.node_type === "belief_record"
     ),
     `missing BEL receipt node: ${JSON.stringify(result.new_nodes)}`
   );
@@ -50,7 +50,7 @@ test("create_bel_record validates and submits through the story-record patch-eng
     "red-bunny",
     "_source",
     "beliefs",
-    "BEL-0001.yaml"
+    "BEL-1.yaml"
   );
   assert.ok(fs.existsSync(writtenPath));
   assert.deepEqual(YAML.parse(fs.readFileSync(writtenPath, "utf8")), patch.payload.record);
@@ -93,7 +93,7 @@ function createBelPatch(
       story_slug: storySlug,
       record: {
         id,
-        holder: "STENT-0001",
+        holder: "STENT-1",
         claim: "Kern believes the harbor office will hide the bribe ledger.",
         truth_relation: "unknown",
         visibility: "private"

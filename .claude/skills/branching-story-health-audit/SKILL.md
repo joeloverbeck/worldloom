@@ -1,6 +1,6 @@
 ---
 name: branching-story-health-audit
-description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + mystery/canon + continuation), prose (compare rendered prose + receipts against state), remediation (draft RSP-NNNN cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-NNNN-<date>.md + optional audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
+description: "Use when diagnosing the health of a branching-story bundle. Four modes: structural (default; replay + snapshots + isolation + debt + belief/visibility + mystery/canon + continuation), prose (compare rendered prose + receipts against state), remediation (draft RSP-<integer> cards consumed by commitment-block-authoring), cross_story (sibling-bundle contradiction scan). Produces: audits/SAU-<integer>-<date>.md + optional audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md + audits/INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/audits/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -13,13 +13,13 @@ arguments:
     description: "Comma-separated list of modes; default 'structural'. Valid: structural, prose, remediation, cross_story. Modes can be combined."
     required: false
   - name: branch_path_filter
-    description: "BR-NNNN or list; restricts structural checks to named branches + descendants. Default: all branches."
+    description: "BR-<integer> or list; restricts structural checks to named branches + descendants. Default: all branches."
     required: false
   - name: severity_threshold
     description: "error | warning | info; default 'info' (report everything). When 'error', only error-severity findings appear; 'warning' reports errors + warnings."
     required: false
   - name: emit_remediation_requests
-    description: "true | false; default false. When true, the audit drafts RSP-NNNN cards for fixable findings even if 'remediation' is not in mode. When 'remediation' is in mode, RSP drafting is unconditional."
+    description: "true | false; default false. When true, the audit drafts RSP-<integer> cards for fixable findings even if 'remediation' is not in mode. When 'remediation' is in mode, RSP drafting is unconditional."
     required: false
 ---
 
@@ -28,11 +28,11 @@ arguments:
 Diagnose the health of a branching-story bundle via deterministic structural-replay checks, optional prose-mode receipt scan, optional remediation-mode RSP card drafting, and optional cross-story contradiction scan — the audit never mutates story state or world canon.
 
 <HARD-GATE>
-Do NOT write `audits/SAU-NNNN-<YYYY-MM-DD>.md`, any `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` cards, or update `audits/INDEX.md` until:
+Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md` cards, or update `audits/INDEX.md` until:
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 6 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-NNNN` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 6 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -90,14 +90,14 @@ Phase 7: HARD-GATE fires → write SAU report + RSP cards (if any)
 ### Optional
 
 - `mode` — comma-separated list — default `structural`. Valid values: `structural`, `prose`, `remediation`, `cross_story`. Modes can be combined.
-- `branch_path_filter` — `BR-NNNN` or list — restricts structural checks to named branches + descendants. Default: all branches.
+- `branch_path_filter` — `BR-<integer>` or list — restricts structural checks to named branches + descendants. Default: all branches.
 - `severity_threshold` — enum — `error | warning | info`. Default: `info` (report everything).
 - `emit_remediation_requests` — `true | false` — default `false`. Forces RSP drafting even without explicit `remediation` mode.
 
 ## Output
 
-- `audits/SAU-NNNN-<YYYY-MM-DD>.md` — Always (audit report with severity-filtered findings table)
-- `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` — One per fixable finding when `remediation` in mode OR `emit_remediation_requests: true`. Sub-directory created on first use.
+- `audits/SAU-<integer>-<YYYY-MM-DD>.md` — Always (audit report with severity-filtered findings table)
+- `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md` — One per fixable finding when `remediation` in mode OR `emit_remediation_requests: true`. Sub-directory created on first use.
 - `audits/INDEX.md` — Always (updated last)
 
 All direct-write markdown. No patch-engine submissions — the audit is read-only with respect to bundle records.
@@ -114,7 +114,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STINT, STLOC, STOBJ, DA, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-NNNN with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`
 
 Bundle MUST exist. For `cross_story`, sibling bundles are enumerated at Pre-flight (zero siblings is legitimate and produces a no-op for Phase 4).
 
@@ -125,8 +125,8 @@ Before Phase 1:
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md`. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Parse `mode` argument — comma-separated list of `structural | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set.
-4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-NNNN')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
-5. Load world canon context packet seeded with: every `M-NNNN` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification).
+4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
+5. Load world canon context packet seeded with: every `M-<integer>` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by `derived_from_cf`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
 If any precondition fails, the skill aborts before Phase 1.
@@ -212,10 +212,10 @@ For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
-For each `PG-NNNN` in the scoped branches:
+For each `PG-<integer>` in the scoped branches:
 
 - `missing_prose_file` — `PG.rendered_prose.path` is set but the file is absent. WARNING; `repair_kind: prose_revision`.
-- `missing_prose_receipt` — prose has been rendered (file exists, `PG.rendered_prose.path` non-null) but no `pages-prose-receipts/PG-NNNN.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
+- `missing_prose_receipt` — prose has been rendered (file exists, `PG.rendered_prose.path` non-null) but no `pages-prose-receipts/PG-<integer>.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
 - `prose_receipt_failed` — receipt's `verdict: FAIL`. Severity from receipt's `repair_recommendation`: FAIL with `run_story_fact_promotion_to_canon` → ERROR + `repair_kind: promotion`; FAIL with `run_turn_cycle_repair` → ERROR + `repair_kind: turn_repair`; FAIL with `revise_prose` → WARNING + `repair_kind: prose_revision`.
 - `unrepaired_prose_invention` — receipt's `checks.invented_structural_fact: FAIL` flag persists with no subsequent repair turn. WARNING; `repair_kind: turn_repair`.
 - `state_change_unrendered` — receipt's `checks.required_event_rendered: WARN | FAIL`. WARNING; `repair_kind: prose_revision`.
@@ -230,22 +230,22 @@ For each sibling bundle in `worlds/<world_slug>/stories/`:
 
 ## Phase 5: Remediation drafting (conditional on `remediation` in `mode` OR `emit_remediation_requests: true`)
 
-For each finding tagged with a fixable `repair_kind` (everything except findings tagged with no `repair_kind`), allocate an `RSP` id via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-NNNN')` and draft a card:
+For each finding tagged with a fixable `repair_kind` (everything except findings tagged with no `repair_kind`), allocate an `RSP` id via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` and draft a card:
 
 ```markdown
 ---
-id: RSP-NNNN
-audit_id: SAU-NNNN
+id: RSP-<integer>
+audit_id: SAU-<integer>
 created: <iso8601 date>
 finding_ids: [<finding ids from this audit>]
 repair_kind: commitment_block | turn_repair | prose_revision | promotion | branch_flag
 target_records: [<record ids the repair should engage with>]
-target_branch: BR-NNNN | null
+target_branch: BR-<integer> | null
 suggested_block_move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery | null
 visibility: global_author_pool | branch_scoped | null
 ---
 
-# RSP-NNNN: <short title>
+# RSP-<integer>: <short title>
 
 ## Findings addressed
 
@@ -260,7 +260,7 @@ visibility: global_author_pool | branch_scoped | null
 (Sibling-handoff guidance per `repair_kind`:
  - `commitment_block` → invoke `commitment-block-authoring` `audit_repair` mode with this RSP id
  - `turn_repair` → invoke `branching-story-turn-cycle` with a `manual_action_text` framing the repair
- - `prose_revision` → revise `pages-prose/PG-NNNN.md` and re-invoke `branching-story-prose-attach`
+ - `prose_revision` → revise `pages-prose/PG-<integer>.md` and re-invoke `branching-story-prose-attach`
  - `promotion` → invoke `story-fact-promotion-to-canon` with the canon-candidate evidence
  - `branch_flag` → manual user attention; no automated repair recommended)
 ```
@@ -269,7 +269,7 @@ visibility: global_author_pool | branch_scoped | null
 
 - `commitment_block` — author pool needs a new block. Consumed by `commitment-block-authoring` `audit_repair` mode.
 - `turn_repair` — bundle needs a repair turn adding branch-local state to support unrepaired prose invention or unactionable debt. Consumed by `branching-story-turn-cycle`.
-- `prose_revision` — rendered prose needs revision. User revises `pages-prose/PG-NNNN.md` and re-invokes `branching-story-prose-attach`.
+- `prose_revision` — rendered prose needs revision. User revises `pages-prose/PG-<integer>.md` and re-invokes `branching-story-prose-attach`.
 - `promotion` — a `canon_candidate` authority claim should be promoted via `story-fact-promotion-to-canon`.
 - `branch_flag` — branch is structurally broken (replay mismatch, forbidden mystery resolution, etc.); flag for user attention without automated repair.
 
@@ -277,17 +277,17 @@ visibility: global_author_pool | branch_scoped | null
 
 ## Phase 6: Author SAU report
 
-Draft `worlds/<world_slug>/stories/<story_slug>/audits/SAU-NNNN-<YYYY-MM-DD>.md`:
+Draft `worlds/<world_slug>/stories/<story_slug>/audits/SAU-<integer>-<YYYY-MM-DD>.md`:
 
 ```markdown
 ---
-audit_id: SAU-NNNN
-story_id: STORY-NNNN
+audit_id: SAU-<integer>
+story_id: STORY-<integer>
 story_slug: <story_slug>
 world_slug: <world_slug>
 created: <iso8601 date>
 modes_run: [structural, prose, remediation, cross_story]   # whichever ran
-branch_path_filter: null | BR-NNNN | [BR-NNNN, ...]
+branch_path_filter: null | BR-<integer> | [BR-<integer>, ...]
 severity_threshold: error | warning | info
 findings_total: N
 findings_by_severity:
@@ -297,7 +297,7 @@ findings_by_severity:
 rsp_cards_emitted: N | 0
 ---
 
-# SAU-NNNN — Bundle health audit (<YYYY-MM-DD>)
+# SAU-<integer> — Bundle health audit (<YYYY-MM-DD>)
 
 ## Summary
 
@@ -346,7 +346,7 @@ rsp_cards_emitted: N | 0
 
 ## Remediation requests (if any)
 
-(One bullet per emitted RSP-NNNN with its `repair_kind` + suggested consumer skill + finding link.)
+(One bullet per emitted RSP-<integer> with its `repair_kind` + suggested consumer skill + finding link.)
 ```
 
 Apply `severity_threshold` to filter the findings table and per-phase sections. When `severity_threshold: error`, only ERROR findings appear; `warning` reports ERROR + WARNING; `info` (default) reports everything.
@@ -356,8 +356,8 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 1. Present the deliverable summary to the user: audit path, modes run, severity breakdown, top-5 highest-severity findings (one-liner each), RSP card count + per-card `repair_kind` summary, per-`repair_kind` recommended-sibling guidance, severity-threshold filter applied (if any).
 2. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 3. On approval:
-   - Write `audits/SAU-NNNN-<YYYY-MM-DD>.md` (direct write).
-   - For each RSP card (if any): create `audits/SAU-NNNN/remediation-storylet-proposals/` sub-directory on first use (idempotent `mkdir -p`); write `RSP-NNNN-<slug>.md` (direct write).
+   - Write `audits/SAU-<integer>-<YYYY-MM-DD>.md` (direct write).
+   - For each RSP card (if any): create `audits/SAU-<integer>/remediation-storylet-proposals/` sub-directory on first use (idempotent `mkdir -p`); write `RSP-<integer>-<slug>.md` (direct write).
    - Update `audits/INDEX.md` last.
 4. Report SAU path + RSP card inventory to the user. Surface the recommended next-step sibling skill per `repair_kind` cluster (`commitment-block-authoring audit_repair` for `commitment_block` cards; `branching-story-turn-cycle` for `turn_repair`; `branching-story-prose-attach` re-run for `prose_revision`; `story-fact-promotion-to-canon` for `promotion`; manual attention for `branch_flag`). Do NOT `git commit`.
 
@@ -403,7 +403,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 
 ## Guardrails
 
-- **Never mutate story state or world canon.** The audit reads `_source/` records, `pages-prose-plans/*.md`, `pages-prose/*.md`, `pages-prose-receipts/*.yaml`, and bundle `INDEX.md`. It writes ONLY to `audits/SAU-NNNN-*.md` + `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md` + `audits/INDEX.md`. No patch-engine submissions.
+- **Never mutate story state or world canon.** The audit reads `_source/` records, `pages-prose-plans/*.md`, `pages-prose/*.md`, `pages-prose-receipts/*.yaml`, and bundle `INDEX.md`. It writes ONLY to `audits/SAU-<integer>-*.md` + `audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md` + `audits/INDEX.md`. No patch-engine submissions.
 - **Never write rendered prose.** The audit reads prose for Phase 3 checks; it does not author prose.
 - **RSP cards are repair requests, not blocks.** Phase 5 drafts requests with `repair_kind`, `target_records`, `target_branch`, `rationale`, `suggested_block_move_family`, `visibility` — never full SLT records. `commitment-block-authoring` `audit_repair` mode owns SLT drafting.
 - **Audit is read-only with respect to bundle records.** Drift between rendered prose and committed state, replay mismatches, branch-isolation violations are all REPORTED in findings; the audit does NOT alter `PG` records, `SE` deltas, `SLT` blocks, or any other bundle-record file to "fix" what it finds.

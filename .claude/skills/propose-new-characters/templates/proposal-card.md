@@ -47,8 +47,8 @@ taboo_limit_themes: []                       # themes character-generation shoul
 
 # ===== NCP-specific identification =====
 
-proposal_id: NCP-0000                        # monotonic per-world
-batch_id: NCB-0000                           # the batch this card was emitted in
+proposal_id: NCP-<integer>                        # monotonic per-world
+batch_id: NCB-<integer>                           # the batch this card was emitted in
 slug: ""                                     # kebab-case; personal-name-first per character-generation convention
 title: ""                                    # short human label
 
@@ -123,7 +123,7 @@ canon_safety_check:
 
 source_basis:
   world_slug: ""
-  batch_id: NCB-0000
+  batch_id: NCB-<integer>
   generated_date: ""                         # ISO date, e.g. 2026-04-20
   user_approved: false                       # set true at Phase 16 commit — means "kept in batch after review", NOT "realized as character"
 

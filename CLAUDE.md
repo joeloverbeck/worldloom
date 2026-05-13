@@ -8,7 +8,7 @@ Worldloom is a **prose-and-YAML worldbuilding pipeline**, not a software project
 
 ## Authoritative Source of Truth
 
-`docs/FOUNDATIONS.md` is the **non-negotiable design contract**. It defines Canon Layers (hard / derived / soft / contested / mystery-reserve), the thirteen mandatory world concerns and their storage form (see §Mandatory World Files for the atomic-source classification per SPEC-13), the Canon Fact Record (`CF-NNNN`) and Change Log Entry (`CH-NNNN`) schemas, the Seven Validation Rules, and the §Canonical Storage Layer contract. Skills load it automatically in their pre-flight checks; if a workflow doesn't, the workflow is incomplete.
+`docs/FOUNDATIONS.md` is the **non-negotiable design contract**. It defines Canon Layers (hard / derived / soft / contested / mystery-reserve), the thirteen mandatory world concerns and their storage form (see §Mandatory World Files for the atomic-source classification per SPEC-13), the Canon Fact Record (`CF-<integer>`) and Change Log Entry (`CH-<integer>`) schemas, the Seven Validation Rules, and the §Canonical Storage Layer contract. Skills load it automatically in their pre-flight checks; if a workflow doesn't, the workflow is incomplete.
 
 ## Repository Layout
 
@@ -31,34 +31,34 @@ worlds/<world-slug>/             ← generated world bundles (contents gitignore
   ├── WORLD_KERNEL.md            ← primary-authored narrative summary (only narrative root file)
   ├── ONTOLOGY.md                ← primary-authored (Categories + Relation Types + Notes); Named Entity Registry atomized to _source/entities/
   ├── _source/                   ← canonical atomic-YAML storage (SPEC-13); tracked in git
-  │   ├── canon/                 ← CF-NNNN.yaml (one file per Canon Fact Record)
-  │   ├── change-log/            ← CH-NNNN.yaml
+  │   ├── canon/                 ← CF-<integer>.yaml (one file per Canon Fact Record)
+  │   ├── change-log/            ← CH-<integer>.yaml
   │   ├── invariants/            ← <ID>.yaml (ONT-N, CAU-N, SOC-N, AES-N, DIS-N)
-  │   ├── mystery-reserve/       ← M-NNNN.yaml
-  │   ├── open-questions/        ← OQ-NNNN.yaml
-  │   ├── entities/              ← ENT-NNNN.yaml (named entity registry)
-  │   ├── everyday-life/         ← SEC-ELF-NNN.yaml (per-H2-section records)
-  │   ├── institutions/          ← SEC-INS-NNN.yaml
-  │   ├── magic-or-tech-systems/ ← SEC-MTS-NNN.yaml
-  │   ├── geography/             ← SEC-GEO-NNN.yaml
-  │   ├── economy-and-resources/ ← SEC-ECR-NNN.yaml
-  │   ├── peoples-and-species/   ← SEC-PAS-NNN.yaml
-  │   └── timeline/              ← SEC-TML-NNN.yaml (per-historical-Layer records)
+  │   ├── mystery-reserve/       ← M-<integer>.yaml
+  │   ├── open-questions/        ← OQ-<integer>.yaml
+  │   ├── entities/              ← ENT-<integer>.yaml (named entity registry)
+  │   ├── everyday-life/         ← SEC-ELF-<integer>.yaml (per-H2-section records)
+  │   ├── institutions/          ← SEC-INS-<integer>.yaml
+  │   ├── magic-or-tech-systems/ ← SEC-MTS-<integer>.yaml
+  │   ├── geography/             ← SEC-GEO-<integer>.yaml
+  │   ├── economy-and-resources/ ← SEC-ECR-<integer>.yaml
+  │   ├── peoples-and-species/   ← SEC-PAS-<integer>.yaml
+  │   └── timeline/              ← SEC-TML-<integer>.yaml (per-historical-Layer records)
   ├── _index/world.db            ← derived index artifact (gitignored)
-  ├── characters/                ← CHAR-NNNN hybrid YAML-frontmatter + prose body per file + INDEX.md
-  ├── diegetic-artifacts/        ← DA-NNNN hybrid files + INDEX.md
-  ├── proposals/                 ← PR-NNNN proposal cards + batches/BATCH-NNNN manifests
-  ├── audits/                    ← AU-NNNN audit reports + retcon-proposal sub-dirs
-  ├── adjudications/             ← PA-NNNN-<verdict>.md canon-addition records
+  ├── characters/                ← CHAR-<integer> hybrid YAML-frontmatter + prose body per file + INDEX.md
+  ├── diegetic-artifacts/        ← DA-<integer> hybrid files + INDEX.md
+  ├── proposals/                 ← PR-<integer> proposal cards + batches/BATCH-<integer> manifests
+  ├── audits/                    ← AU-<integer> audit reports + retcon-proposal sub-dirs
+  ├── adjudications/             ← PA-<integer>-<verdict>.md canon-addition records
   └── stories/<story-slug>/      ← branching-story bundles (per-bundle layout below)
        ├── STORY_KERNEL.md        ← primary-authored narrative root for the bundle
        ├── _source/               ← atomic-YAML story-bundle records (16 subdirs: entities/STENT, intentions/STINT, facts/SF, beliefs/BEL, events/SE, obligations/OBL, consequences/CNSQ, threads/THR, relationships/SREL, locations/STLOC, objects/STOBJ, artifacts/DA, branches/BR, pages/PG, choices/CHC, storylets/SLT) — schemas canonical at `.claude/skills/_shared-templates/story-state-contract.md` §4
-       ├── pages-prose-plans/     ← PG-NNNN comprehensive prose plans; written by branching-story-bootstrap (PG-0001) and branching-story-turn-cycle (PG-NNNN, N>1)
+       ├── pages-prose-plans/     ← PG-<integer> comprehensive prose plans; written by branching-story-bootstrap and branching-story-turn-cycle
        ├── pages-prose/           ← rendered prose; supplied externally (manual or LLM); validated by branching-story-prose-attach
-       ├── pages-prose-receipts/  ← PG-NNNN.yaml prose-validation receipts written by branching-story-prose-attach
-       ├── storylet-batches/      ← SLB-NNNN batch manifests written by commitment-block-authoring
-       ├── story-promotions/      ← SP-NNNN-proposal-package.yaml + SP-NNNN.md ledgers (story-fact-promotion-to-canon) + SP-NNNN-closeout.md ledgers (story-promotion-closeout)
-       ├── audits/                ← SAU-NNNN-<date>.md health-audit reports + SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md sub-dirs (branching-story-health-audit)
+       ├── pages-prose-receipts/  ← PG-<integer>.yaml prose-validation receipts written by branching-story-prose-attach
+       ├── storylet-batches/      ← SLB-<integer> batch manifests written by commitment-block-authoring
+       ├── story-promotions/      ← SP-<integer>-proposal-package.yaml + SP-<integer>.md ledgers (story-fact-promotion-to-canon) + SP-<integer>-closeout.md ledgers (story-promotion-closeout)
+       ├── audits/                ← SAU-<integer>-<date>.md health-audit reports + SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-*.md sub-dirs (branching-story-health-audit)
        └── INDEX.md
 archive/                         ← superseded brainstorming docs and plans
 ```
@@ -70,22 +70,22 @@ Only the pipeline (skills, foundations, docs) is version-controlled. Each user m
 Skills divide into three categories, and these distinctions are load-bearing.
 
 **Canon-mutating** (write to world-level records under `_source/`; all begin with a `<HARD-GATE>` block requiring explicit user approval before any write):
-- `create-base-world` — bootstraps a new world's full `_source/` tree + WORLD_KERNEL.md + ONTOLOGY.md + genesis `CF-0001` and `CH-0001` records. Refuses to overwrite an existing world directory. Emits atomic `_source/` form directly (post-SPEC-13).
-- `canon-addition` — evaluates a proposed canon fact. On accept: creates a new `_source/canon/CF-NNNN.yaml` record, a new `_source/change-log/CH-NNNN.yaml` record, appends extensions to affected invariant / mystery / open-question / section records, auto-updates `touched_by_cf[]` on affected sections, writes an adjudication. On non-accept: writes only the adjudication record. Append-only — the only way to change an accepted fact is another run producing an explicit retcon entry with retcon attestation.
+- `create-base-world` — bootstraps a new world's full `_source/` tree + WORLD_KERNEL.md + ONTOLOGY.md + genesis `CF-1` and `CH-1` records. Refuses to overwrite an existing world directory. Emits atomic `_source/` form directly (post-SPEC-13).
+- `canon-addition` — evaluates a proposed canon fact. On accept: creates a new `_source/canon/CF-<integer>.yaml` record, a new `_source/change-log/CH-<integer>.yaml` record, appends extensions to affected invariant / mystery / open-question / section records, auto-updates `touched_by_cf[]` on affected sections, writes an adjudication. On non-accept: writes only the adjudication record. Append-only — the only way to change an accepted fact is another run producing an explicit retcon entry with retcon attestation.
 
 **Canon-reading** (read world state; write only under sub-directories of `worlds/<slug>/` — never mutate `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `_source/*.yaml` record):
 - `character-generation` — writes `characters/<char-slug>.md` + updates `characters/INDEX.md`. Enforces a Mystery Reserve firewall and CF distribution conformance.
 - `diegetic-artifact-generation` — writes `diegetic-artifacts/<da-slug>.md` + updates `diegetic-artifacts/INDEX.md`. Same canon-safety posture.
-- `propose-new-canon-facts` — writes `proposals/PR-NNNN-*.md` + `proposals/batches/BATCH-NNNN.md` + updates `proposals/INDEX.md`. Each card's path is directly consumable as `canon-addition`'s `proposal_path`.
+- `propose-new-canon-facts` — writes `proposals/PR-<integer>-*.md` + `proposals/batches/BATCH-<integer>.md` + updates `proposals/INDEX.md`. Each card's path is directly consumable as `canon-addition`'s `proposal_path`.
 - `canon-facts-from-diegetic-artifacts` — same output surface, but mines an existing diegetic artifact. Enforces a Diegetic-to-World laundering firewall; contradictions with existing canon are segregated and handed off to `continuity-audit`, not emitted as cards.
-- `continuity-audit` — writes `audits/AU-NNNN-<date>.md` + optional `audits/AU-NNNN/retcon-proposals/RP-NNNN-*.md` + updates `audits/INDEX.md`.
-- `branching-story-bootstrap` — bootstraps a new story bundle inside an existing world. Writes story-bundle records (STENT/STINT/SF/BEL/SE/OBL/CNSQ/THR/SREL/STLOC/STOBJ/optional DA/BR/PG/CHC/optional SLT) via the patch engine + `STORY_KERNEL.md` + `pages-prose-plans/PG-0001.md` + per-bundle `INDEX.md` + per-world `stories/INDEX.md` first-run create-or-append. Rendered prose is supplied externally; no prose-rendering lifecycle.
-- `branching-story-turn-cycle` — advances a story bundle by one causal tick from any committed parent page (continuation or fork). Writes one `SE` event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new `BR` (fork) + new `PG` snapshot + optional JIT `SLT` + emitted `CHC` records via patch engine + `pages-prose-plans/PG-NNNN.md`. Parent rendered prose is optional per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary); silent action rejection is forbidden.
-- `branching-story-prose-attach` — validates user-supplied rendered prose at `pages-prose/PG-NNNN.md` against the page's plan + state and emits a `pages-prose-receipts/PG-NNNN.yaml` receipt. Six deterministic checks + optional craft critic. Never mutates the `PG` record; no ARC_TRACE.
-- `commitment-block-authoring` — creates reusable commitment blocks (`SLT` records) for a bundle's author pool. Two modes: `direct_batch` (fresh batch addressing 11 causal-function coverage targets) and `audit_repair` (consumes `RSP-NNNN` cards from health-audit). Writes via patch engine + `storylet-batches/SLB-NNNN.md` batch manifest. Enforces the closed 10-predicate DSL.
-- `branching-story-health-audit` — diagnoses bundle health via deterministic structural-replay checks. Four modes: `structural` (default; 6 sub-phases), `prose`, `remediation` (drafts `RSP-NNNN` cards consumed by commitment-block-authoring), `cross_story`. Writes `audits/SAU-NNNN-<date>.md` + optional RSP cards; never mutates story state or world canon.
-- `story-fact-promotion-to-canon` — the only lawful story-to-world canon-promotion path. Creates a proposal package for promoting a branch-local claim into world canon (six source kinds: story_fact / mystery_resolution / character_outcome / artifact_canonization / relationship_or_institutional_outcome / other_branch_claim). Writes `story-promotions/SP-NNNN-proposal-package.yaml` (CF-shaped candidate) + `SP-NNNN.md` ledger. Hands off to `canon-addition` for adjudication; never mutates world canon directly.
-- `story-promotion-closeout` — closes a story promotion after canon-addition has adjudicated. Supersedes story-local records with canon links (`accepted` / `accepted_with_limits`), rejection markers (`rejected`), or no changes (`deferred`). Writes `story-promotions/SP-NNNN-closeout.md` companion + bundle INDEX update + optional per-world `stories/INDEX.md` archive update. Never mutates world canon — records canon-addition's outputs read-only.
+- `continuity-audit` — writes `audits/AU-<integer>-<date>.md` + optional `audits/AU-<integer>/retcon-proposals/RP-<integer>-*.md` + updates `audits/INDEX.md`.
+- `branching-story-bootstrap` — bootstraps a new story bundle inside an existing world. Writes story-bundle records (STENT/STINT/SF/BEL/SE/OBL/CNSQ/THR/SREL/STLOC/STOBJ/optional DA/BR/PG/CHC/optional SLT) via the patch engine + `STORY_KERNEL.md` + `pages-prose-plans/PG-1.md` + per-bundle `INDEX.md` + per-world `stories/INDEX.md` first-run create-or-append. Rendered prose is supplied externally; no prose-rendering lifecycle.
+- `branching-story-turn-cycle` — advances a story bundle by one causal tick from any committed parent page (continuation or fork). Writes one `SE` event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new `BR` (fork) + new `PG` snapshot + optional JIT `SLT` + emitted `CHC` records via patch engine + `pages-prose-plans/PG-<integer>.md`. Parent rendered prose is optional per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary); silent action rejection is forbidden.
+- `branching-story-prose-attach` — validates user-supplied rendered prose at `pages-prose/PG-<integer>.md` against the page's plan + state and emits a `pages-prose-receipts/PG-<integer>.yaml` receipt. Six deterministic checks + optional craft critic. Never mutates the `PG` record; no ARC_TRACE.
+- `commitment-block-authoring` — creates reusable commitment blocks (`SLT` records) for a bundle's author pool. Two modes: `direct_batch` (fresh batch addressing 11 causal-function coverage targets) and `audit_repair` (consumes `RSP-<integer>` cards from health-audit). Writes via patch engine + `storylet-batches/SLB-<integer>.md` batch manifest. Enforces the closed 10-predicate DSL.
+- `branching-story-health-audit` — diagnoses bundle health via deterministic structural-replay checks. Four modes: `structural` (default; 6 sub-phases), `prose`, `remediation` (drafts `RSP-<integer>` cards consumed by commitment-block-authoring), `cross_story`. Writes `audits/SAU-<integer>-<date>.md` + optional RSP cards; never mutates story state or world canon.
+- `story-fact-promotion-to-canon` — the only lawful story-to-world canon-promotion path. Creates a proposal package for promoting a branch-local claim into world canon (six source kinds: story_fact / mystery_resolution / character_outcome / artifact_canonization / relationship_or_institutional_outcome / other_branch_claim). Writes `story-promotions/SP-<integer>-proposal-package.yaml` (CF-shaped candidate) + `SP-<integer>.md` ledger. Hands off to `canon-addition` for adjudication; never mutates world canon directly.
+- `story-promotion-closeout` — closes a story promotion after canon-addition has adjudicated. Supersedes story-local records with canon links (`accepted` / `accepted_with_limits`), rejection markers (`rejected`), or no changes (`deferred`). Writes `story-promotions/SP-<integer>-closeout.md` companion + bundle INDEX update + optional per-world `stories/INDEX.md` archive update. Never mutates world canon — records canon-addition's outputs read-only.
 
 **Meta** (operate on the pipeline, not on worlds):
 - `brainstorm` — confidence-driven interview producing a design doc at `docs/plans/`.
@@ -109,25 +109,25 @@ Every canon-mutating or content-generating skill begins with a `<HARD-GATE>` blo
 
 ## ID Allocation Conventions
 
-IDs are append-only. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific direct filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan); story-bundle-scoped classes require `story_slug`, and sub-audit-scoped classes require `story_slug` plus `audit_id`. Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
+IDs are append-only and use the FOUNDATIONS-002 unpadded natural-integer suffix convention: `M-1`, not `M-0001`. Filenames match the ID field exactly except where a hybrid markdown artifact appends a slug/date suffix after the ID. On machine-layer-enabled workflows, allocate at pre-flight via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug?, audit_id?)`, which scans the indexed world state or the class-specific direct filesystem surface for the highest id of that class and returns the next. Allocation is per-class-directory post-SPEC-13 (one file = one record = trivial scan); story-bundle-scoped classes require `story_slug`, and sub-audit-scoped classes require `story_slug` plus `audit_id`. Never reuse or overwrite an ID; if allocation would collide (concurrent plan), the patch engine's pre-apply validation or the workflow's final filename-collision check detects and aborts.
 
-- `CF-NNNN` — Canon Fact Records (`worlds/<slug>/_source/canon/CF-NNNN.yaml`)
-- `CH-NNNN` — Change Log Entries (`worlds/<slug>/_source/change-log/CH-NNNN.yaml`; `CH-0001` is always the genesis entry)
-- `<INV-ID>` — Invariants (`worlds/<slug>/_source/invariants/<ID>.yaml`) — IDs follow category convention: `ONT-N` (ontological), `CAU-N` (causal), `DIS-N` (distribution), `SOC-N` (social), `AES-N` (aesthetic/thematic). New worlds use category-prefix + 1-based counter per category.
-- `M-NNNN` — Mystery Reserve entries (`worlds/<slug>/_source/mystery-reserve/M-NNNN.yaml`)
-- `OQ-NNNN` — Open Questions (`worlds/<slug>/_source/open-questions/OQ-NNNN.yaml`)
-- `ENT-NNNN` — Named Entities (`worlds/<slug>/_source/entities/ENT-NNNN.yaml`)
-- `SEC-<PREFIX>-NNN` — Prose Sections (`worlds/<slug>/_source/<file-subdir>/SEC-<PREFIX>-NNN.yaml`); prefix per file class: `ELF` (everyday life), `INS` (institutions), `MTS` (magic or tech systems), `GEO` (geography), `ECR` (economy and resources), `PAS` (peoples and species), `TML` (timeline)
-- `PA-NNNN` — adjudication records (`worlds/<slug>/adjudications/`)
-- `CHAR-NNNN` — character dossiers (stored in the dossier's frontmatter `character_id`; filenames use kebab-case slugs)
-- `DA-NNNN` — diegetic artifacts (same pattern as characters)
-- `PR-NNNN` — proposal cards (`worlds/<slug>/proposals/`)
-- `BATCH-NNNN` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
-- `AU-NNNN` — audit reports (`worlds/<slug>/audits/`)
-- `RP-NNNN` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
-- `SAU-NNNN` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN-<date>.md`; allocate with `story_slug`)
-- `SP-NNNN` — story promotion ledgers and proposal-package sidecars (`worlds/<slug>/stories/<story-slug>/story-promotions/SP-NNNN.md` and `SP-NNNN-proposal-package.yaml`; allocate with `story_slug`)
-- `RSP-NNNN` — remediation-storylet proposal cards (`worlds/<slug>/stories/<story-slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md`; allocate with `story_slug` and `audit_id: SAU-NNNN`)
+- `CF-<integer>` — Canon Fact Records (`worlds/<slug>/_source/canon/CF-<integer>.yaml`)
+- `CH-<integer>` — Change Log Entries (`worlds/<slug>/_source/change-log/CH-<integer>.yaml`; `CH-1` is always the genesis entry)
+- `<INV-ID>` — Invariants (`worlds/<slug>/_source/invariants/<ID>.yaml`) — IDs follow category convention: `ONT-<integer>` (ontological), `CAU-<integer>` (causal), `DIS-<integer>` (distribution), `SOC-<integer>` (social), `AES-<integer>` (aesthetic/thematic). New worlds use category-prefix + 1-based counter per category.
+- `M-<integer>` — Mystery Reserve entries (`worlds/<slug>/_source/mystery-reserve/M-<integer>.yaml`)
+- `OQ-<integer>` — Open Questions (`worlds/<slug>/_source/open-questions/OQ-<integer>.yaml`)
+- `ENT-<integer>` — Named Entities (`worlds/<slug>/_source/entities/ENT-<integer>.yaml`)
+- `SEC-<PREFIX>-<integer>` — Prose Sections (`worlds/<slug>/_source/<file-subdir>/SEC-<PREFIX>-<integer>.yaml`); prefix per file class: `ELF` (everyday life), `INS` (institutions), `MTS` (magic or tech systems), `GEO` (geography), `ECR` (economy and resources), `PAS` (peoples and species), `TML` (timeline)
+- `PA-<integer>` — adjudication records (`worlds/<slug>/adjudications/`)
+- `CHAR-<integer>` — character dossiers (stored in the dossier's frontmatter `character_id`; filenames use kebab-case slugs)
+- `DA-<integer>` — diegetic artifacts (same pattern as characters)
+- `PR-<integer>` — proposal cards (`worlds/<slug>/proposals/`)
+- `BATCH-<integer>` — proposal batch manifests (`worlds/<slug>/proposals/batches/`)
+- `AU-<integer>` — audit reports (`worlds/<slug>/audits/`)
+- `RP-<integer>` — retcon-proposal cards (emitted by `continuity-audit` under its audit sub-directory)
+- `SAU-<integer>` — story-bundle health audit reports (`worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>-<date>.md`; allocate with `story_slug`)
+- `SP-<integer>` — story promotion ledgers and proposal-package sidecars (`worlds/<slug>/stories/<story-slug>/story-promotions/SP-<integer>.md` and `SP-<integer>-proposal-package.yaml`; allocate with `story_slug`)
+- `RSP-<integer>` — remediation-storylet proposal cards (`worlds/<slug>/stories/<story-slug>/audits/SAU-<integer>/remediation-storylet-proposals/RSP-<integer>-<slug>.md`; allocate with `story_slug` and `audit_id: SAU-<integer>`)
 
 ## Common Workflows
 
@@ -142,6 +142,6 @@ See `docs/WORKFLOWS.md` for how to invoke each skill with arguments and expected
 - **Never delete or overwrite an existing atomic record.** `_source/*.yaml` files are append-only in structural fields (mutation happens in `notes`, `modification_history[]`, `extensions[]`); existing dossiers, artifacts, proposals, and audit records are treated as committed state. To change an accepted canon fact, run `canon-addition` again with an explicit retcon proposal + retcon attestation on the patch op.
 - **Never skip FOUNDATIONS.md.** If a workflow's pre-flight doesn't explicitly load it, the workflow is incomplete — stop and add the load before proceeding. Post-SPEC-13, FOUNDATIONS.md §Canonical Storage Layer + §Mandatory World Files (atomic-source classification) are authoritative alongside Rules 1-7 and the CF schema.
 - **Validation test PASS entries require a one-line rationale.** A bare "PASS" without justification is treated as FAIL per the skills' own contracts.
-- **Prose pages are author-supplied.** Rendered prose at `pages-prose/PG-NNNN.md` is supplied externally (manual or LLM) and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-NNNN.yaml` receipt without mutating the `PG` record. The page snapshot is the fork primitive per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) — `branching-story-turn-cycle` may advance from any committed page snapshot without requiring rendered parent prose.
+- **Prose pages are author-supplied.** Rendered prose at `pages-prose/PG-<integer>.md` is supplied externally (manual or LLM) and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-<integer>.yaml` receipt without mutating the `PG` record. The page snapshot is the fork primitive per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) — `branching-story-turn-cycle` may advance from any committed page snapshot without requiring rendered parent prose.
 - **Do not `git commit` from inside a skill.** Writes land in the working tree; the user reviews the diff and commits.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.
