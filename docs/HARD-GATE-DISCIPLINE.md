@@ -70,13 +70,13 @@ WORLD_MCP_TOKEN_EXPIRY_MIN=30 node tools/world-mcp/dist/src/cli/sign-approval-to
 
 The HMAC secret lives at `tools/world-mcp/.secret` (gitignored, generated on first signer invocation if absent).
 
-### Validating and submitting the plan: MCP path (default) and CLI path (size-constrained bypass)
+### Validating and submitting the plan: MCP path (default) and CLI path (exception path)
 
-Before approval, a patch plan can be validated through either the MCP tool or the CLI size-bypass path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, validators_run, reason?, details? }` object; `validators_run[]` carries per-validator `{ validator_name, status, duration_ms, detail? }` telemetry and is empty on `skipped` because the envelope never reached validation. Validation includes structural validators and the patch-engine `id_allocation_race` check for `expected_id_allocations`; approval-token verification remains submit-only. Malformed envelopes with multiple shape errors include `details.additional_errors[]` on the `skipped` response. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
+Before approval, a patch plan can be validated through either the MCP tool or the CLI exception path. After a token is issued, the patch plan + token can be submitted to the engine via either of two functionally equivalent paths. The validate paths both route through the same `validate_patch_plan` handler and return the same `{ status: "pass" | "fail" | "skipped", verdicts, validators_run, reason?, details? }` object; `validators_run[]` carries per-validator `{ validator_name, status, duration_ms, detail? }` telemetry and is empty on `skipped` because the envelope never reached validation. Validation includes structural validators and the patch-engine `id_allocation_race` check for `expected_id_allocations`; approval-token verification remains submit-only. Malformed envelopes with multiple shape errors include `details.additional_errors[]` on the `skipped` response. The submit paths both route through the same `submitPatchPlan` engine code in `tools/patch-engine/src/apply.ts` and produce the same `PatchReceipt`.
 
 **Validate MCP path (default)** — call `mcp__worldloom__validate_patch_plan(plan)` with the plan envelope. This is the canonical pre-apply validation path for ordinary plan sizes.
 
-**Validate CLI path (size-constrained bypass)** — for plans whose envelope strains MCP transport, persist the envelope JSON and invoke:
+**Validate CLI path (exception path)** — for plans whose envelope strains MCP transport, or for the stale-validators-bundle case where the running MCP server holds a pre-rebuild `@worldloom/validators` bundle and a full session restart is not immediately available, persist the envelope JSON and invoke:
 
 ```bash
 node tools/world-mcp/dist/src/cli/validate-patch-plan.js <plan-path>
@@ -88,7 +88,7 @@ On `pass`, the CLI prints the validate status object, including `validators_run[
 
 **MCP path (default)** — call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the plan envelope and the issued token. This is the canonical submission path for ordinary plan sizes.
 
-**CLI path (size-constrained bypass)** — for plans whose envelope strains MCP transport (typical threshold: tens of KB; e.g., diegetic-artifact submissions with rich frontmatter and ~5K-word bodies, or canon-addition accept-paths with many ops), invoke the CLI parallel to the signer:
+**CLI path (exception path)** — for plans whose envelope strains MCP transport (typical threshold: tens of KB; e.g., diegetic-artifact submissions with rich frontmatter and ~5K-word bodies, or canon-addition accept-paths with many ops), or for the stale-validators-bundle case when a full MCP server/client restart is not immediately available, invoke the CLI parallel to the signer:
 
 ```bash
 node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>
@@ -102,7 +102,7 @@ The CLI requires the plan to be persisted to a JSON file (skills already do this
 - Same failure-mode codes: `approval_expired`, `approval_replayed`, `index_stale`, `validator_failed`, `id_allocation_race`, `envelope_shape_invalid`, `invalid_input`, etc. — surfaced on stderr as JSON instead of MCP error fields.
 - The CLI is a thin delegator over `handleSubmitPatchPlanTool`; it is not a separate engine implementation.
 
-The MCP path remains the default. The CLI path exists strictly to bypass MCP transport for size-constrained envelopes, not as a general-purpose alternative.
+The MCP path remains the default. The CLI path is reserved for size-constrained envelopes and stale in-memory dependency bundles when restart is not immediately available; it is not a general-purpose alternative.
 
 ## Why write order matters (engine-enforced)
 
