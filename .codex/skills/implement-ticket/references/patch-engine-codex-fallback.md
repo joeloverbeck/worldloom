@@ -20,6 +20,8 @@ The goal is to preserve the patch-engine write boundary, not to make canon write
    - `tools/world-mcp/src/approval/token.ts` or the current approval-token implementation
 5. Never direct-edit `_source/*.yaml` as a fallback.
 6. Stop and escalate if the only available path would weaken a real hard gate, silently skip required approval semantics, or mutate canon without patch-engine staging.
+7. If the target `_source` record exists on disk but is skipped by `world-index`, indexed-record ops such as `update_record_field` cannot target it and create ops must not overwrite it. Reassess and patch the ticket before source edits. If the repair is still same-seam schema or maintenance migration, add or use a narrow patch-engine maintenance op that stages the existing file by explicit `target_file`, validates the replacement record, and still flows through validate / approval-token / submit. Escalate instead when the needed op would broaden canon policy, skip approval semantics, or cross into a separate workflow family.
+8. When using the CLI path after explicit approval, persist the signer stdout to a temp token file outside the repo, pass that token file to `submit-patch-plan`, and record both the plan path and token path in ticket closeout. Do not treat the temp token file as a repo artifact.
 
 ## Operation Class
 

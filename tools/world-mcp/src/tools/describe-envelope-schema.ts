@@ -304,6 +304,17 @@ function operationSchema(kind: OperationKind): JsonObject {
           retcon_attestation: retconAttestationSchema()
         }
       });
+    case "repair_skipped_change_log_entry":
+      return baseOperationProperties(kind, {
+        type: "object",
+        additionalProperties: false,
+        required: ["target_ch_id", "repaired_record", "repair_reason"],
+        properties: {
+          target_ch_id: stringSchema("^CH-[0-9]+$"),
+          repaired_record: { $ref: schemaRef("ch_record") },
+          repair_reason: stringSchema()
+        }
+      });
     case "remove_ch_affected_cf_ids":
       return baseOperationProperties(kind, {
         type: "object",

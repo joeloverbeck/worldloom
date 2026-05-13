@@ -110,6 +110,20 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   };
   assert.deepEqual(updatePayload.properties?.operation?.enum, ["set", "append_list", "append_text"]);
 
+  const repairManifest = await describeEnvelopeSchema({ op_kind: "repair_skipped_change_log_entry" });
+  assert.equal(repairManifest.delivery_status, "inline");
+  const repairProperties = repairManifest.op_schemas.repair_skipped_change_log_entry!.properties as Record<
+    string,
+    unknown
+  >;
+  const repairPayload = repairProperties.payload as {
+    required?: string[];
+    properties?: { target_ch_id?: { pattern?: string }; repaired_record?: { $ref?: string } };
+  };
+  assert.deepEqual(repairPayload.required, ["target_ch_id", "repaired_record", "repair_reason"]);
+  assert.equal(repairPayload.properties?.target_ch_id?.pattern, "^CH-[0-9]+$");
+  assert.equal(repairPayload.properties?.repaired_record?.$ref, "https://worldloom.local/schemas/change-log-entry.schema.json");
+
   const removeAliasManifest = await describeEnvelopeSchema({ op_kind: "remove_ch_affected_cf_ids" });
   assert.equal(removeAliasManifest.delivery_status, "inline");
   const removeAliasProperties = removeAliasManifest.op_schemas.remove_ch_affected_cf_ids!.properties as Record<
