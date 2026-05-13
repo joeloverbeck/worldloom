@@ -1,6 +1,6 @@
 # SPEC23STOSTACON-011: Align workflow docs with plan + prose-attach story pipeline
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None -- documentation-only (`docs/WORKFLOWS.md`, `docs/HARD-GATE-DISCIPLINE.md`)
@@ -8,11 +8,11 @@
 
 ## Problem
 
-`docs/WORKFLOWS.md` and `docs/HARD-GATE-DISCIPLINE.md` still describe the retired page-cycle/finalize/prose-status story pipeline after SPEC23STOSTACON-001 and SPEC23STOSTACON-003 moved the live contract to plan-first pages plus optional prose-attach receipts. That stale guidance can mislead operators into calling removed or renamed skills, expecting `PG.prose_status` lifecycle fields, or treating rendered prose as a parent-page gate for continued turn-cycle authoring.
+At intake, `docs/WORKFLOWS.md` and `docs/HARD-GATE-DISCIPLINE.md` still described the retired page-cycle/finalize/prose-status story pipeline after SPEC23STOSTACON-001 and SPEC23STOSTACON-003 moved the live contract to plan-first pages plus optional prose-attach receipts. That stale guidance could mislead operators into calling removed or renamed skills, expecting `PG.prose_status` lifecycle fields, or treating rendered prose as a parent-page gate for continued turn-cycle authoring.
 
 ## Assumption Reassessment (2026-05-13)
 
-1. Live workflow docs still contain stale story-bundle terms and semantics: `docs/WORKFLOWS.md` names `branching-story-page-cycle`, `branching-story-page-prose-finalize`, page `prose_status`, parent render gates, deferred prose validators, and `ARC_TRACE`; `docs/HARD-GATE-DISCIPLINE.md` still names the retired storylet/page-cycle/finalize family and finalize semantics.
+1. At intake, live workflow docs still contained stale story-bundle terms and semantics: `docs/WORKFLOWS.md` named `branching-story-page-cycle`, `branching-story-page-prose-finalize`, page `prose_status`, parent render gates, deferred prose validators, and `ARC_TRACE`; `docs/HARD-GATE-DISCIPLINE.md` named the retired storylet/page-cycle/finalize family and finalize semantics.
 2. Current authority is the Story Bundles contract in `docs/FOUNDATIONS.md`: story pages are plan-first records, rendered prose is attached by `branching-story-prose-attach`, and `branching-story-turn-cycle` may advance from a committed page snapshot without requiring rendered parent prose.
 3. Shared boundary under audit is documentation only: this ticket owns the quick-reference workflow docs and hard-gate prose, not `.claude/skills/`, validator schemas, MCP tools, or generated world content.
 4. FOUNDATIONS principle motivating this ticket is Story Bundles schema minimalism and plan authority: no floating facts and no lifecycle-only `prose_status` field should be presented as current operator contract.
@@ -31,15 +31,19 @@
 3. Rendered prose is not described as a turn-cycle parent gate -> manual review against `docs/FOUNDATIONS.md`.
 4. Single-layer docs ticket: no code, schema, or skill dry-run verification applies.
 
-## What to Change
+## Landed Changes
 
 ### 1. `docs/WORKFLOWS.md` branching story bundles section
 
-Replace the retired page-cycle/finalize flow with the current `branching-story-turn-cycle` plus `branching-story-prose-attach` operator model. Remove `PG.prose_status`, deferred prose-validation, parent rendered-prose gates, and `ARC_TRACE` finalization language from current guidance.
+Replaced the retired page-cycle/finalize flow with the current `branching-story-turn-cycle` plus `branching-story-prose-attach` operator model. The section now states that page plans are authoritative at commit, rendered prose is externally supplied, prose receipts live under `pages-prose-receipts/`, and any committed page snapshot can be a turn-cycle parent regardless of attached prose.
+
+Updated the commitment-block authoring and health-audit bullets to name `commitment-block-authoring` instead of the retired `storylet-pool-authoring`, and removed the `world-index render --arc-traces` ARC_TRACE example.
 
 ### 2. `docs/HARD-GATE-DISCIPLINE.md` story-bundle family paragraph
 
-Align the hard-gate overview with the current story-bundle skill names and the prose-attach receipt model. Do not describe finalize as mutating page lifecycle status, and do not imply that rendered prose gates future page planning.
+Aligned the hard-gate overview with the current story-bundle skill names and the prose-attach receipt model. The paragraph now says prose-attach writes a receipt, never mutates PG state, never promotes story facts, and never gates future turn-cycle planning.
+
+Expanded the direct-write surface list to include `pages-prose-plans/` and `pages-prose-receipts/`, matching the shared story-state contract and FOUNDATIONS prose-attach discipline.
 
 ## Files to Touch
 
@@ -77,3 +81,18 @@ Align the hard-gate overview with the current story-bundle skill names and the p
 1. `rg -n 'branching-story-page-cycle|branching-story-page-prose-finalize|storylet-pool-authoring|prose_status|deferred_validation_trace|ARC_TRACE' docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md`
 2. `rg -n 'branching-story-turn-cycle|branching-story-prose-attach|pages-prose-receipts' docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md`
 3. `git diff --check -- docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md tickets/SPEC23STOSTACON-011.md`
+
+## Outcome
+
+Completed on 2026-05-13. `docs/WORKFLOWS.md` now presents the current plan-first story-bundle operator model: bootstrap and turn-cycle commit page plans, prose-attach validates externally supplied rendered prose and writes receipts, and rendered prose is not a parent-page gate. `docs/HARD-GATE-DISCIPLINE.md` now names the live story-bundle skill family and describes prose-attach as a receipt-writing, non-PG-mutating flow.
+
+## Verification Result
+
+1. `rg -n 'branching-story-page-cycle|branching-story-page-prose-finalize|storylet-pool-authoring|prose_status|deferred_validation_trace|ARC_TRACE' docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md` — PASS; returned no matches.
+2. `rg -n 'branching-story-turn-cycle|branching-story-prose-attach|pages-prose-receipts' docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md` — PASS; returned current-contract matches in both docs.
+3. Manual review against `docs/FOUNDATIONS.md` §Story Bundles §4 / §4a — PASS; the updated docs preserve plan authority, prose receipts, and the rule that turn-cycle may advance from any committed page snapshot without rendered parent prose.
+4. `git diff --check -- docs/WORKFLOWS.md docs/HARD-GATE-DISCIPLINE.md tickets/SPEC23STOSTACON-011.md` — PASS; no whitespace errors.
+
+## Deviations
+
+None.
