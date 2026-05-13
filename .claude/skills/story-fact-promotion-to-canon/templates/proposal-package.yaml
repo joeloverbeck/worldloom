@@ -1,0 +1,134 @@
+# Proposal package — story-fact-promotion-to-canon
+#
+# Parity intent: this template's `candidate:` block preserves FOUNDATIONS §Canon Fact Record Schema
+# byte-for-byte so canon-addition can field-copy at parse time (sub-class (a) of skill-creator's
+# template-derivation discipline). The wrapping envelope (promotion_id, story_slug, source_kind,
+# evidence sets, scope_inflation_report, mystery_firewall_report, downstream_impact_report,
+# contradiction_preference, user_decision) is promotion-specific and does NOT pollute CF parity.
+#
+# Named consumer: canon-addition's parse-time CF-schema requirement (FOUNDATIONS §Canon Fact Record Schema).
+# Future maintainers: when FOUNDATIONS §Canon Fact Record Schema gains a field, mirror it inside `candidate:`
+# here so canon-addition's parsing stays clean. Do NOT add candidate fields not present in FOUNDATIONS;
+# do NOT remove candidate fields present in FOUNDATIONS.
+
+promotion_id: SP-NNNN
+story_slug: <story_slug>
+source_kind: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim
+
+# Evidence sets — branch-local records constituting the candidate's basis.
+source_records: [<source record ids>]
+branch_path: BR-NNNN
+supporting_pages: [<PG-NNNN ids>]
+authoring_events: [<SE-NNNN ids>]
+belief_witnesses: [<BEL-NNNN ids>]
+
+claim_visibility:
+  who_holds_belief: [<STENT-NNNN | group:<name> | public>]
+  belief_truth_relations: [<true | false | partly_true | unknown | contested | branch_counterfactual>]
+
+# ====================================================================================
+# CF-shaped candidate (byte-for-byte parity with FOUNDATIONS §Canon Fact Record Schema)
+# ====================================================================================
+candidate:
+  title: <short descriptive title>
+  status: hard_canon | soft_canon | contested_canon | mystery_reserve
+  type: capability | artifact | law | belief | event | institution | species | <etc>
+  statement: >
+    <natural-language statement of the fact>
+  scope:
+    geographic: local | regional | global | cosmic
+    temporal: ancient | historical | current | future | cyclical
+    social: restricted_group | public | elite | secret | rumor
+  truth_scope:
+    world_level: true | false | uncertain
+    diegetic_status: objective | believed | disputed | propagandistic | legendary
+  domains_affected: [<domain per canonical-vocabularies domain enum>]
+  prerequisites: [<prerequisite>]
+  distribution:
+    who_can_do_it: [<group>]
+    who_cannot_easily_do_it: [<group>]
+    why_not_universal: [<reason>]
+  costs_and_limits: [<limit>]
+  visible_consequences: [<consequence>]
+  required_world_updates: [<file or domain>]
+  contradiction_risk:
+    hard: true | false
+    soft: true | false
+  source_basis:
+    direct_user_approval: false   # set true at Phase 7 HARD-GATE approval
+    derived_from: [<parent CF id if mirrored, or null if novel>]   # NEVER put branch ids here
+    story_branch: <branch_path>
+    story_evidence:
+      source_records: [<source_record_ids>]
+      supporting_pages: [<supporting_page_ids>]
+      authoring_events: [<SE-NNNN ids>]
+      belief_witnesses: [<BEL-NNNN ids>]
+  promotion_provenance:
+    story_slug: <story_slug>
+    source_kind: <source_kind>
+    branch_path: <branch_path>
+    rationale: >
+      <natural-language explanation of why this branch-local claim should become world canon>
+  notes: >
+    <optional notes; included verbatim in canon-addition's CF record if accepted>
+
+  # FOUNDATIONS §Canon Fact Record Schema also documents optional epistemic_profile + exception_governance
+  # blocks. These are required when knowability or exception axes are non-trivial; n_a permitted with rationale.
+  # Include them when the candidate's nature warrants; omit when n_a applies and rationale can live in `notes`.
+  # epistemic_profile:
+  #   directly_observable_by: []
+  #   inferable_by: []
+  #   recorded_by: []
+  #   suppressed_by: []
+  #   distortion_vectors: []
+  #   propagation_channels: []
+  #   evidence_left: []
+  #   knowledge_exclusions: []
+  # exception_governance:
+  #   activation_conditions: []
+  #   rate_limits: []
+  #   mobility_limits: []
+  #   diffusion_barriers: []
+  #   countermeasures: []
+  #   nondeployment_reasons: []
+
+# ====================================================================================
+# Promotion-specific analyses (skill-internal; NOT part of canon-addition's CF schema)
+# ====================================================================================
+
+scope_inflation_report:
+  source_actual_scope:
+    geographic: <derived from source records>
+    temporal: <derived from source records>
+    social: <derived from source records>
+  candidate_proposed_scope:
+    geographic: <from candidate.scope>
+    temporal: <from candidate.scope>
+    social: <from candidate.scope>
+  widening_applied: none | geographic_local_to_regional | temporal_current_to_historical | <etc>
+  scope_argument: <user-supplied or null>
+  trace_count: <integer>
+  flags: [<short label per failed sub-check>]
+
+mystery_firewall_report:
+  mysteries_scanned: <count of M-NNNN records loaded>
+  forbidden_resolution_attempts: [<M-NNNN, if any>]
+  accidental_resolution_warnings: [<M-NNNN, if any>]
+  counterfactual_promotion_attempts: [<source SF id, if any>]
+  source_kind_mismatch_warnings: [<recommended source_kind change, if any>]
+  firewall_verdict: PASS | ABORT | REQUIRES_USER_ACCEPTANCE
+
+downstream_impact_report:
+  world_domains_affected: [<domain>]
+  same_story_contradictory_branches: [<BR-NNNN>]
+  cross_story_contradictions: [<sibling_story_slug:record_id>]
+  affected_world_files: [<file path under worlds/<world_slug>/>]
+  promotion_provenance_narrative: >
+    <one-paragraph explanation of how this promotion ripples through the world model>
+
+contradiction_preference: flag | archive_same_story_branches | leave_counterfactual
+
+user_decision:
+  hard_gate_approved: false   # set true after Phase 7 user approval
+  acceptance_of_warnings: []  # list of warning ids the user explicitly accepted
+prose_receipt_failures_accepted: []   # FAIL-verdict pages the user explicitly accepted as evidence

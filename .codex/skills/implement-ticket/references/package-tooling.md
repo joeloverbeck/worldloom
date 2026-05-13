@@ -8,6 +8,8 @@ Use this reference for tickets whose owned seam includes `tools/`, package manif
 
 Before coding a package/tool ticket, inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
 
+When a ticket asks for a new public operation, enum member, tool, command, allocation key, or manifest entry, first search the live package manifest, package README, exported runtime registry, schema-discovery surface, and completed same-family precedent for a semantic equivalent. If an existing public name already owns the same behavior, do not add an alias or duplicate spelling by default; rewrite the active ticket and same-seam callers/tests to the live name, then prove the existing surface instead.
+
 If the package test lane runs compiled `dist/tests/**/*.js` output and this ticket renames or removes a source/test file, run the package clean script before the first broad test. If no clean script exists, explicitly remove or check for the stale compiled artifact before broad proof so deleted/renamed source tests cannot keep running from `dist/`.
 
 When a ticket adds, removes, renames, or registers validators, inspect same-package validator inventory surfaces such as the package README before source edits. Treat stale validator counts, missing validator names, or retired validator names in those inventories as same-seam package fallout, and patch the active ticket's file list/proof plan before coding when they must move with the registry change.

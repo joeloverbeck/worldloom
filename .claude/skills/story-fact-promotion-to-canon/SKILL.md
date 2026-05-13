@@ -1,0 +1,388 @@
+---
+name: story-fact-promotion-to-canon
+description: "Use when creating a proposal package for promoting a branch-local story claim into world canon. One common flow over 6 source kinds (story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome, other_branch_claim). Produces: story-promotions/SP-NNNN-proposal-package.yaml CF-shaped candidate + story-promotions/SP-NNNN.md ledger + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+user-invocable: true
+arguments:
+  - name: world_slug
+    description: "Existing world directory slug under worlds/"
+    required: true
+  - name: story_slug
+    description: "Existing story bundle slug under worlds/<world_slug>/stories/"
+    required: true
+  - name: source_kind
+    description: "One of: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim. Changes required evidence, not workflow shape."
+    required: true
+  - name: source_record_ids
+    description: "List of record ids constituting the candidate (e.g., [SF-0042] for story_fact; [M-0003] for mystery_resolution; [STENT-0007] for character_outcome)."
+    required: true
+  - name: branch_path
+    description: "BR-NNNN of the branch where the claim is established. Every source record's lineage must trace to branch_path."
+    required: true
+  - name: supporting_page_ids
+    description: "List of PG-NNNN ids whose rendered prose constitutes evidence. Required-prose source kinds: story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome. Optional for other_branch_claim."
+    required: true
+  - name: desired_canon_status
+    description: "hard_canon | soft_canon | contested_canon | mystery_reserve. Default: derive from source_kind."
+    required: false
+  - name: scope_argument
+    description: "Natural-language rationale for the promotion's geographic / temporal / social scope (consumed by Phase 3 scope-inflation check)."
+    required: false
+  - name: contradiction_preference
+    description: "flag | archive_same_story_branches | leave_counterfactual. Default: flag. Story-promotion-closeout applies the chosen action after canon-addition adjudicates."
+    required: false
+---
+
+# Story Fact Promotion to Canon
+
+Create a proposal package for promoting a branch-local story claim into world canon — assembles a CF-shaped candidate, runs scope-inflation + mystery-firewall + downstream-impact analyses, and writes the proposal package; never mutates world canon.
+
+<HARD-GATE>
+Do NOT write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml`, `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN.md`, or update bundle `INDEX.md` until:
+
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; source records loaded and traced to `branch_path`; supporting pages + rendered prose + receipts loaded (FAIL receipts surfaced for explicit user acceptance); `SP-NNNN` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', ...)`.
+
+(b) Phases 1-6 have completed in working memory: source + branch provenance loaded (Phase 1); CF-shaped candidate translated per FOUNDATIONS §Canon Fact Record Schema (Phase 2); scope-inflation report produced (Phase 3); mystery-firewall report produced with `firewall_verdict: PASS | REQUIRES_USER_ACCEPTANCE` — `firewall_verdict: ABORT` exits before Phase 5 with no proposal written (Phase 4); downstream-impact report produced (Phase 5); full proposal package assembled per the SP-NNNN-proposal-package.yaml shape (Phase 6).
+
+(c) Phase 4 `firewall_verdict` is NOT `ABORT`. Forbidden-mystery resolution attempts cause abort before Phase 5.
+
+(d) The user has explicitly approved the deliverable summary (candidate title / status / type / statement; scope-inflation report findings including widening applied + scope_argument + flags; mystery-firewall report findings including any REQUIRES_USER_ACCEPTANCE items; downstream-impact report including world domains affected + same-story contradictory branches + cross-story contradictions; prose-receipt failures requiring acceptance; contradiction-preference disposition; the recommended next step is invoking `canon-addition` with the proposal-package path).
+
+This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary. World-canon promotion is too high-stakes for automation override.
+</HARD-GATE>
+
+## Process Flow
+
+```
+Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle;
+  resolve source records; resolve supporting pages + prose + receipts;
+  resolve branch + verify source records trace to branch_path;
+  allocate SP id; load world canon context packet)
+        |
+        v
+Phase 1: Load source and branch provenance (records + authoring SE +
+                                            witness BEL + rendered prose)
+        |
+        v
+Phase 2: Translate source into CF-shaped candidate (per FOUNDATIONS
+                                                    §Canon Fact Record Schema)
+        |
+        v
+Phase 3: Scope-inflation check (Rule 4 — structured scope_inflation_report)
+        |
+        v
+Phase 4: Mystery firewall (Rule 7 — firewall_verdict PASS | ABORT |
+                                    REQUIRES_USER_ACCEPTANCE)
+                                    [ABORT exits before Phase 5]
+        |
+        v
+Phase 5: Downstream impact analysis (world domains affected; same-story
+                                     contradictory branches; cross-story
+                                     contradictions)
+        |
+        v
+Phase 6: Assemble proposal package (combine Phase 1-5 outputs)
+        |
+        v
+Phase 7: HARD-GATE fires → write SP-NNNN-proposal-package.yaml
+                          + SP-NNNN.md ledger + INDEX update; instruct
+                          user to invoke canon-addition separately
+```
+
+## Inputs
+
+### Required
+
+- `world_slug` — string — existing world directory slug under `worlds/`
+- `story_slug` — string — existing story bundle slug under `worlds/<world_slug>/stories/`
+- `source_kind` — enum — one of `story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim`
+- `source_record_ids` — list — record ids constituting the candidate (mapping per source_kind documented below)
+- `branch_path` — `BR-NNNN` — branch where the claim is established
+- `supporting_page_ids` — list[PG-NNNN] — pages whose rendered prose is evidence
+
+### Optional
+
+- `desired_canon_status` — enum — `hard_canon | soft_canon | contested_canon | mystery_reserve`. Default: derive from source_kind.
+- `scope_argument` — string — rationale for the candidate's scope (consumed by Phase 3)
+- `contradiction_preference` — enum — `flag | archive_same_story_branches | leave_counterfactual`. Default `flag`.
+
+### Source-kind record-class mapping
+
+| source_kind | Required source_record class(es) | Prose evidence |
+|---|---|---|
+| `story_fact` | `SF-NNNN` (plus authoring `SE` + witness `BEL`) | Required |
+| `mystery_resolution` | `M-NNNN` (plus resolving `SE` + pre-resolution `BEL` chain) | Required |
+| `character_outcome` | `STENT-NNNN` (plus the supersession chain showing the outcome) | Required |
+| `artifact_canonization` | `DA-NNNN` (story-local; plus authoring `SE`) | Required |
+| `relationship_or_institutional_outcome` | `SREL-NNNN` (plus supersession chain + supporting events) | Required |
+| `other_branch_claim` | user-supplied records | Optional |
+
+## Output
+
+- `story-promotions/SP-NNNN-proposal-package.yaml` — Always (CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition`)
+- `story-promotions/SP-NNNN.md` — Always (human-readable ledger pointing at YAML package)
+- Bundle `INDEX.md` — Always (updated last)
+
+All direct-write. No patch-engine submissions to world scope. **No world-canon writes occur — `canon-addition` is invoked separately by the user with the proposal-package path.**
+
+## World-State Prerequisites
+
+Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
+
+- `docs/FOUNDATIONS.md` — §Canon Layers (candidate status enum), §Canon Fact Record Schema (parity target for Phase 2 candidate), §Story Bundles §11 (mystery and canon authority), Rules 1-7 + 11-12 (canon-addition enforces; this skill's candidate must respect them)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3 — read as evidence), §11 mystery and canon authority
+- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
+- `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
+- `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — for each `supporting_page_ids` entry (required for prose-evidence source kinds)
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', seed_nodes=<source_record_ids + every M-NNNN whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`
+
+The bundle MUST exist (non-bootstrap variant); source records MUST exist and trace to `branch_path`; supporting prose MUST exist for required-prose source kinds. Receipt `verdict: PASS | WARN` is acceptable at Pre-flight; `verdict: FAIL` requires explicit user acceptance at Phase 7.
+
+## Pre-flight Check
+
+Before Phase 1:
+
+1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
+2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
+3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). Abort with source-not-found or source-kind-mismatch error on any miss.
+4. Resolve supporting pages: for each `PG-NNNN` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
+5. Resolve branch: load `_source/branches/<branch_path>.yaml`. Verify every source record's branch lineage traces to `branch_path` (a `story_fact` source cannot be promoted from a branch that didn't author it). Abort with branch-mismatch error on any failure.
+6. Allocate `SP-NNNN` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
+7. Load world canon context packet seeded with: source record ids + whole-class Mystery Reserve (for Phase 4 firewall) + whole-class INV (for invariant check) + parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
+
+If any precondition fails, the skill aborts before Phase 1.
+
+## Phase 1: Load source and branch provenance
+
+Load into working memory:
+
+- The source records named in `source_record_ids` (per the source-kind-to-record-class mapping in §Inputs).
+- The `SE-NNNN` events that authored or modified each source record (traverse `_source/events/SE-*.yaml` for events whose `state_delta.create / supersede` references any source record).
+- The `BEL-NNNN` records showing who knows / believes / witnesses the claim — load every BEL whose `consequences.opens[]` or `basis.source_event` references any authoring `SE`.
+- The `branch_path` `BR-NNNN.yaml` record + sibling branch summaries (for Phase 5 downstream impact on same-story contradictory branches).
+- Rendered prose at `pages-prose/<page_id>.md` and receipts at `pages-prose-receipts/<page_id>.yaml` for each `supporting_page_ids` entry.
+- Whole-class Mystery Reserve and whole-class INV (loaded at Pre-flight) for Phase 4 firewall.
+- World canon CF records relevant to Phase 2 candidate translation + Phase 3 scope-inflation + Phase 5 downstream impact.
+
+## Phase 2: Translate source into CF-shaped candidate
+
+Produce a candidate matching FOUNDATIONS §Canon Fact Record Schema strictly. The field set is the SAME across all 6 source kinds (source kind changes required evidence, not workflow shape):
+
+```yaml
+candidate:
+  title: <short descriptive title>
+  status: hard_canon | soft_canon | contested_canon | mystery_reserve
+  type: capability | artifact | law | belief | event | institution | species | <etc per CF schema enum>
+  statement: >
+    <natural-language statement of the fact>
+  scope:
+    geographic: local | regional | global | cosmic
+    temporal: ancient | historical | current | future | cyclical
+    social: restricted_group | public | elite | secret | rumor
+  truth_scope:
+    world_level: true | false | uncertain
+    diegetic_status: objective | believed | disputed | propagandistic | legendary
+  domains_affected: [<domain per canonical-vocabularies domain enum>]
+  prerequisites: [<prerequisite>]
+  distribution:
+    who_can_do_it: [<group>]
+    who_cannot_easily_do_it: [<group>]
+    why_not_universal: [<reason>]
+  costs_and_limits: [<limit>]
+  visible_consequences: [<consequence>]
+  required_world_updates: [<file or domain>]
+  contradiction_risk:
+    hard: true | false
+    soft: true | false
+  source_basis:
+    direct_user_approval: false   # set true after Phase 7 HARD-GATE approval
+    derived_from: [<parent CF id if mirrored, or null if novel>]
+    story_branch: <branch_path>
+    story_evidence:
+      source_records: [<source_record_ids>]
+      supporting_pages: [<supporting_page_ids>]
+      authoring_events: [<SE-NNNN ids>]
+      belief_witnesses: [<BEL-NNNN ids>]
+  promotion_provenance:
+    story_slug: <story_slug>
+    source_kind: <source_kind>
+    branch_path: <branch_path>
+    rationale: <natural-language explanation of why this branch-local claim should become world canon>
+```
+
+**Branch provenance lives in `source_basis.story_branch` + `source_basis.story_evidence` + `promotion_provenance` — NEVER in `source_basis.derived_from`** (which is reserved for parent CF references — world authority). The branch is evidence, not authority.
+
+## Phase 3: Scope-inflation check (FOUNDATIONS Rule 4)
+
+For each source record, verify the candidate's `scope` does not over-promote. Five sub-checks:
+
+1. **Branch-local-counterfactual cap** — if any source `SF` carries `branch_local_counterfactual` authority, the candidate cannot exceed `contested_canon` status. Hard-canon promotion of counterfactuals → FAIL.
+2. **Scope-widening rationale** — if candidate's `scope.geographic` / `scope.temporal` / `scope.social` exceeds the source records' actual scope, `scope_argument` must be supplied. Widening without rationale → FAIL.
+3. **Trace-count sufficiency (Rule 12 anticipation)** — when `desired_canon_status: hard_canon`, the supporting prose must demonstrate the claim across at least 2 distinct registers (per Rule 12). Single-trace hard-canon → FLAG (canon-addition will enforce at adjudication; this skill flags potential failure).
+4. **Inter-branch contradiction risk** — populate `candidate.contradiction_risk.hard` and `contradiction_risk.soft` per Phase 5 cross-branch enumeration.
+5. **Mystery-collapse cross-reference** — if Phase 4 firewall identifies mystery-collapse risk, surface in the report.
+
+Produce a structured `scope_inflation_report`:
+
+```yaml
+scope_inflation_report:
+  source_actual_scope:
+    geographic: <derived>
+    temporal: <derived>
+    social: <derived>
+  candidate_proposed_scope:
+    geographic: <from candidate>
+    temporal: <from candidate>
+    social: <from candidate>
+  widening_applied: <none | geographic_local_to_regional | temporal_current_to_historical | etc>
+  scope_argument: <user-supplied or null>
+  trace_count: <integer; the number of distinct registers the supporting prose covers>
+  flags: [<short label per failed sub-check>]
+```
+
+## Phase 4: Mystery firewall (FOUNDATIONS Rule 7 + shared contract §11)
+
+Reject conditions:
+
+1. **Forbidden mystery resolution** — any mystery with `status: forbidden` whose effect would be resolved by accepting this candidate. `firewall_verdict: ABORT` (no proposal written; Phase 5+ skipped).
+2. **Accidental resolution of unrelated mystery** — the candidate's `statement` / `domains_affected` / `visible_consequences` would resolve a mystery the user didn't explicitly intend to resolve. `firewall_verdict: REQUIRES_USER_ACCEPTANCE` (flag at Phase 7).
+3. **Branch-local counterfactual presented as objective canon** — if any source `SF` carries `branch_local_counterfactual` authority, reject unless `desired_canon_status: contested_canon`. `firewall_verdict: ABORT`.
+4. **Source_kind mismatch** — e.g., a `story_fact` source_kind whose effect would resolve a mystery should be `mystery_resolution`. `firewall_verdict: REQUIRES_USER_ACCEPTANCE` with recommended source_kind change.
+
+Produce a structured `mystery_firewall_report`:
+
+```yaml
+mystery_firewall_report:
+  mysteries_scanned: <count of M-NNNN records loaded>
+  forbidden_resolution_attempts: [<M-NNNN, if any>]
+  accidental_resolution_warnings: [<M-NNNN, if any>]
+  counterfactual_promotion_attempts: [<source SF id, if any>]
+  source_kind_mismatch_warnings: [<recommended source_kind change, if any>]
+  firewall_verdict: PASS | ABORT | REQUIRES_USER_ACCEPTANCE
+```
+
+`ABORT` exits before Phase 5 with no proposal written. `REQUIRES_USER_ACCEPTANCE` continues to Phase 5 but the items appear at Phase 7 HARD-GATE for explicit user acceptance.
+
+## Phase 5: Downstream impact analysis
+
+Enumerate:
+
+1. **World domains affected** — list FOUNDATIONS §Mandatory World Files concerns the promotion would touch (`peoples-and-species`, `institutions`, `economy-and-resources`, `magic-or-tech-systems`, `everyday-life`, `geography`, `timeline`).
+2. **Same-story contradictory branches** — list other branches (`BR-NNNN`) in this bundle whose state contradicts the candidate. The proposal's `contradiction_preference` field records the user's desired handling (`flag | archive_same_story_branches | leave_counterfactual`); `story-promotion-closeout` applies the chosen action after canon-addition adjudicates. This skill does NOT modify other branches.
+3. **Cross-story contradictions** — list sibling story bundles (other `worlds/<world_slug>/stories/<sibling_story>/`) whose state contradicts the candidate. Flag-only here; resolution belongs to `branching-story-health-audit` `cross_story` mode or a separate world-level workflow.
+
+Produce a structured `downstream_impact_report`:
+
+```yaml
+downstream_impact_report:
+  world_domains_affected: [<domain>]
+  same_story_contradictory_branches: [<BR-NNNN>]
+  cross_story_contradictions: [<sibling_story_slug:record_id>]
+  affected_world_files: [<file path under worlds/<world_slug>/>]
+  promotion_provenance_narrative: <one-paragraph explanation>
+```
+
+## Phase 6: Assemble proposal package
+
+Combine Phase 1-5 outputs into the full `SP-NNNN-proposal-package.yaml` shape (see `templates/proposal-package.yaml`):
+
+```yaml
+promotion_id: SP-NNNN
+story_slug: <story_slug>
+source_kind: <source_kind>
+source_records: [<source_record_ids>]
+branch_path: <branch_path>
+supporting_pages: [<supporting_page_ids>]
+authoring_events: [<SE-NNNN ids>]
+belief_witnesses: [<BEL-NNNN ids>]
+claim_visibility:
+  who_holds_belief: [<STENT-NNNN | group:<name> | public>]
+  belief_truth_relations: [<truth_relation per BEL>]
+candidate: <Phase 2 CF-shaped candidate>
+scope_inflation_report: <Phase 3 report>
+mystery_firewall_report: <Phase 4 report>
+downstream_impact_report: <Phase 5 report>
+contradiction_preference: flag | archive_same_story_branches | leave_counterfactual
+user_decision:
+  hard_gate_approved: false   # set true at Phase 7
+  acceptance_of_warnings: []
+prose_receipt_failures_accepted: []
+```
+
+The companion `SP-NNNN.md` ledger is a human-readable narrative explanation pointing at the YAML package.
+
+## Phase 7: Commit / Write — HARD-GATE fires
+
+1. Present the deliverable summary to the user:
+   - `SP-NNNN` id + candidate `title` / `status` / `type` / `statement` (one-line each).
+   - Scope-inflation report findings (widening applied, scope_argument supplied, trace_count, flags).
+   - Mystery-firewall report findings (firewall_verdict, REQUIRES_USER_ACCEPTANCE items if any).
+   - Downstream-impact report (world domains affected, same-story contradictory branches, cross-story contradictions).
+   - Prose-receipt failures requiring acceptance (per Pre-flight step 4).
+   - Contradiction-preference disposition.
+   - Recommended next step: *"Run `canon-addition` with `proposal_path=worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml`. After canon-addition adjudicates, run `story-promotion-closeout` to write the verdict back onto story-local records."*
+
+2. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
+
+3. On approval:
+   - Set `user_decision.hard_gate_approved: true`.
+   - Record `user_decision.acceptance_of_warnings` per the user's explicit acceptances of REQUIRES_USER_ACCEPTANCE items.
+   - Record `prose_receipt_failures_accepted` per the user's explicit acceptances of FAIL receipts.
+   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml` (direct write — `templates/proposal-package.yaml` is the schema reference).
+   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN.md` (direct write — `templates/story-promotion-ledger.md` is the format reference).
+   - Update bundle `INDEX.md` to reflect the new promotion entry.
+
+4. Report the proposal paths to the user. Explicitly instruct the next step. Do NOT `git commit`.
+
+**Failure behavior**: Pre-flight failure → write nothing; surface the precondition violation. Phase 4 ABORT → write nothing; surface the forbidden-mystery / counterfactual / source-kind-mismatch violation. Phase 7 user rejection → write nothing; surface the rejection reason. Partial write success (YAML written but markdown failed) → YAML proposal package is authoritative for canon-addition; surface partial-failure; user can manually author or re-run the ledger.
+
+## Validation Rules This Skill Upholds
+
+- **Rule 4 (No Globalization by Accident)** — Phase 3 scope-inflation check. Mechanism: every candidate's `scope.geographic / temporal / social` verified against source records' actual scope; scope-widening requires explicit `scope_argument`.
+- **Rule 7 (Preserve Mystery Deliberately)** — Phase 4 mystery firewall. Mechanism: forbidden-mystery-resolution check against whole-class Mystery Reserve; counterfactual-promotion check; accidental-mystery-resolution flagging; source_kind-mismatch flagging.
+
+Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforced by **`canon-addition`** at adjudication time. This skill is canon-reading; it does NOT enforce those rules itself, but the proposal package's CF-shaped candidate is structured (per FOUNDATIONS §Canon Fact Record Schema) so canon-addition's enforcement is clean field-copy parsing.
+
+## Record Schemas
+
+- `templates/proposal-package.yaml` — CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition` at parse time.
+- `templates/story-promotion-ledger.md` — human-readable ledger entry pointing at the YAML package.
+- Read schemas: shared contract §4 (BEL §4.1, PG §4.2, SE §4.3) + FOUNDATIONS §Canon Fact Record Schema (the candidate's target).
+
+## FOUNDATIONS Alignment
+
+| Principle | Phase | Mechanism |
+|---|---|---|
+| Rule 1 (No Floating Facts) | N/A at this skill | Canon-addition enforces on the candidate at adjudication time (required CF-schema fields). |
+| Rule 2 (No Pure Cosmetics) | N/A at this skill | Canon-addition enforces. |
+| Rule 3 (No Specialness Inflation) | N/A at this skill | Canon-addition enforces. |
+| Rule 4 (No Globalization by Accident) | Phase 3 | Scope-inflation check on candidate scope. |
+| Rule 5 (No Consequence Evasion) | N/A at this skill | Canon-addition enforces. |
+| Rule 6 (No Silent Retcons) | N/A at this skill | Canon-addition writes the Change Log Entry. |
+| Rule 7 (Preserve Mystery Deliberately) | Phase 4 | Mystery firewall + forbidden-status rejection. |
+| Rule 11 (No Spectator Castes) | N/A at this skill | Canon-addition enforces. |
+| Rule 12 (No Single-Trace Truths) | Phase 3 (anticipation) + N/A | Phase 3 trace_count flagging anticipates the rule; canon-addition enforces at adjudication. |
+| Canon Layers | Pre-flight, Phase 2 | Candidate's `status` field selects layer. |
+| Mystery Reserve | Pre-flight, Phase 4 | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
+| Canon Fact Record Schema | Phase 2, 6 | Candidate strictly matches FOUNDATIONS §Canon Fact Record Schema. |
+| §Story Bundles §4a (Plan-Authority Boundary) | All phases | Skill reads `PG` records as authoritative state; never mutates. |
+| §Story Bundles §11 (Mystery and Canon Authority) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
+| Change Control Policy | N/A at this skill | Canon-addition writes the Change Log Entry. |
+| Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
+
+## Guardrails
+
+- **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. This skill writes ONLY to `worlds/<world_slug>/stories/<story_slug>/story-promotions/` + bundle `INDEX.md`. No patch-engine submissions to world scope.
+- **Output is NOT canon until canon-addition adjudicates.** The proposal package is a CANDIDATE. The skill explicitly instructs the user to invoke canon-addition separately. No automatic chaining; no implicit acceptance.
+- **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
+- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in `source_basis.story_branch` + `source_basis.story_evidence`, NEVER in `source_basis.derived_from` (which is reserved for parent CF references — world authority).
+- **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
+- **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL / BR records that the canon-addition outcome implicates).
+- **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
+- **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
+- **Known integration debt**:
+  - **MCPENH-040** (BEL allocator registration), **PEENH-007** (`create_bel_record` patch op), **VALENH-011** (BEL `record_schema_compliance`) — Phase 1 reads `BEL` records as evidence for mystery_resolution / story_fact / character_outcome source kinds. Inherited from bootstrap's Shape C rollout.
+  - **MCPENH-041** (task_type rename) — does NOT affect this skill; `story_fact_promotion_to_canon` task_type was not renamed.
+
+## Final Rule
+
+This skill creates a proposal package for promoting a branch-local story claim into world canon — never mutates world canon, never resolves a forbidden mystery, never elevates branch-local counterfactual to objective canon without explicit `contested_canon` framing, and always pauses at the HARD-GATE for explicit user approval; `canon-addition` is the only authority that turns the candidate into canon.

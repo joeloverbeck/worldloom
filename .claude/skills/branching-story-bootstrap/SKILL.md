@@ -285,7 +285,7 @@ If any gate or additional check fails, abort before Phase 10 — write nothing.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record`, `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `create_da_record` (if applicable), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record`, `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `append_story_diegetic_artifact_record` (if story-local DA records are applicable, with `expected_id_allocations.story_da_ids`), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
 2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL`.
 3. Present the complete deliverable summary to the user: bundle path, cast roster, record inventory by class with counts, page plan structural preview (§1 / §5 / §6 / §12 / §13 — the engine-readable sections; §2 / §3 / §19 are too long to inline in preview), emitted choices list.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.

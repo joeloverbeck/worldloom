@@ -1,585 +1,352 @@
-# Branching story health audit
+# branching-story-health-audit
 
 ## Purpose
 
-Audit an existing branching story for narrative health issues without mutating any story state.
+Diagnose the health of a branching-story bundle. The default audit is **deterministic and fast** — structural-replay-based checks over the bundle's `_source/` records with no LLM semantic pass. Three additional opt-in modes extend coverage:
 
-This pipeline is the diagnostic counterpart of `branching-story-page-cycle`. It walks the pages of one or more branches, assembles per-branch state via the snapshot-per-page semantics (never crossing branches), and reports findings on:
+- **`structural`** (default) — snapshot replay, branch isolation, debt health, belief / visibility health, mystery / canon safety, continuation or terminal proof.
+- **`prose`** — compare rendered prose and prose receipts against committed state.
+- **`remediation`** — draft `RSP-NNNN` (remediation-storylet-proposal) cards for fixable findings; consumed by `commitment-block-authoring` `audit_repair` mode.
+- **`cross_story`** — world-level contradiction scan across sibling story bundles in the same world.
 
-- open obligations without payoff routes
-- contradiction risk (fact invalidations, abandoned high-salience promises)
-- dangling threads (active threads with no recent attention)
-- character motivation coverage (actions explicable by current STINT)
-- narrative debt level (open / paid_off ratio over time)
-- repetition (over-used storylets, similar-scene clustering)
-- mystery firewall integrity (no `forbidden` M leakage; resolution-authority routing — apparent / branch_local_counterfactual / canon_candidate — correctly applied)
-- branch-isolation invariant compliance (recursive reference closure on all story-local records reachable from each page's snapshot)
-- snapshot-replay equality (parent.snapshot + applied_event_ops == this_page.snapshot; state_hash chain integrity for every page)
-- consequence-ledger coverage (CNSQs pending without addressing storylets; CNSQs orphaned without source events)
-- relationship continuity (SREL chains coherent; relationship_effects produced superseding records)
-- storylet-scope leakage (global_author_pool storylets that reference branch-local records; audit-mode storylets with mismatched visibility)
-- terminal-branch health (BR records with `status: terminal` whose terminal pages satisfy closure-readiness criteria; non-terminal branches that are de-facto dead-ended)
-- content_intensity drift from baseline
-- canon-baseline drift (audit trail: `state_snapshot.canon_revision` per page, useful for forensic reconstruction when promotions land between branch ticks)
+Modes can be combined; the audit report names which checks ran.
 
-Findings are reported by severity (info / warning / error). Optional remediation outputs include:
-- `RSP-NNNN` storylet-proposal cards directly consumable as `storylet-pool-authoring`'s `source_audit_path` input
-- flags for manual user intervention (e.g., "obligation OBL-0042 has been open for 23 pages with zero compatible storylets — author one or close the obligation")
+**The audit NEVER mutates story state or world canon.** Outputs are read-only reports + opt-in repair-request cards.
 
-This pipeline is read-only. It never mutates `_source/`. It writes only to `audits/` under the story directory.
-
-This document is intentionally standalone and repeats repository assumptions on purpose.
-
----
+Branching-story-health-audit is the fifth skill in the rebuilt story-skill family per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md`.
 
 ## Inputs
 
-### Required
+Required:
 
-- `world_slug`
-- `story_slug`
+- `world_slug` — existing world directory slug under `worlds/`.
+- `story_slug` — existing story bundle slug under `worlds/<world_slug>/stories/`.
 
-### Optional
+Optional:
 
-- `branch_path_filter` — audit a specific branch_path OR all leaf-bearing branches (default: all)
-- `audit_focus` — one of:
-  - `obligation_payoff_coverage` — which open OBLs lack compatible storylets
-  - `contradiction_risk` — fact invalidations, abandoned promises, retcon density
-  - `dangling_threads` — active threads with no recent attention
-  - `character_motivation_coverage` — actions unjustified by STINT
-  - `debt_level` — narrative-debt evolution over time
-  - `repetition` — over-used storylets, similar-scene clustering
-  - `mystery_firewall` — firewall integrity (per-claim resolution-authority routing)
-  - `branch_isolation_recursive` — recursive reference-closure compliance (replaces the prior shallow `cross_branch_consistency` check)
-  - `snapshot_integrity` — replay-equality validation; state_hash chain integrity
-  - `consequence_coverage` — CNSQ-pending without addressing storylet; orphaned CNSQs
-  - `relationship_continuity` — SREL chain coherence; relationship_effects produced superseding records
-  - `storylet_scope_leakage` — global_author_pool storylets referencing branch-local records; audit-mode visibility mismatches
-  - `terminal_health` — terminal-branch pages satisfy closure-readiness; non-terminal branches that look dead-ended
-  - `content_intensity_drift` — drift from STORY_KERNEL baseline
-  - `canon_baseline_drift` — audit-trail review of `state_snapshot.canon_revision` over the branch's history
-  - `all` (default)
-- `severity_threshold` — `info` | `warning` | `error` (default: `warning`; findings below threshold are suppressed in the report but still counted)
-- `emit_remediation_proposals` — `true` | `false` (default: `true`)
-- `cross_story_scope` — `false` | `true` (default: `false`; if true, also flags potential conflicts with other stories in the same world)
+- `mode` — comma-separated list of modes to run; default `structural`. Valid values: `structural`, `prose`, `remediation`, `cross_story`. Mode `cross_story` requires no `story_slug` companion check — it scans every sibling bundle within `worlds/<world_slug>/stories/`.
+- `branch_path_filter` — `BR-NNNN` or list; restricts replay + isolation + debt + continuation checks to the named branches and their descendants. Default: all branches.
+- `severity_threshold` — `error | warning | info`; default `info` (report everything). When set to `error`, only error-severity findings appear; `warning` reports errors + warnings.
+- `emit_remediation_requests` — `true | false`; default `false`. When `true`, the audit drafts `RSP-NNNN` cards for fixable findings even if `remediation` is not explicitly in `mode`. When `mode` includes `remediation`, RSP drafting is unconditional regardless of this flag.
 
-### Reads
+## Output Bundle
 
-- `STORY_KERNEL.md`
-- all pages in scope (`_source/pages/PG-*.yaml`)
-- all records cited by those pages' `state_snapshot`s
-- current storylet pool (`_source/storylets/SLT-*.yaml`)
-- `pages-prose/PG-*.md` (for repetition + content-intensity analysis)
-- world canon (M-NNNN, INVs) via MCP
-- if `cross_story_scope: true`: other stories' STORY_KERNEL + facts touched in promotion ledgers
+Direct-write markdown:
 
----
+- `worlds/<world_slug>/stories/<story_slug>/audits/SAU-NNNN-<YYYY-MM-DD>.md` — the audit report; structured by severity ladder + per-mode sections + summary findings table.
+- `worlds/<world_slug>/stories/<story_slug>/audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` — one RSP card per fixable finding when `mode` includes `remediation` OR `emit_remediation_requests: true`. The sub-directory is created on first use of remediation mode for this audit.
+- `worlds/<world_slug>/stories/<story_slug>/audits/INDEX.md` — bundle-local audit index updated last.
 
-## Output
+No patch-engine submissions. The audit is read-only with respect to story-bundle state.
 
-### Files Written
+## Pre-Flight
 
-- `worlds/<world-slug>/stories/<story-slug>/audits/SAU-NNNN-<date>.md` — consolidated audit report
-- (optional) `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md` — proposal cards
-- `worlds/<world-slug>/stories/<story-slug>/audits/INDEX.md` — audit index update
+1. **Load FOUNDATIONS** — `docs/FOUNDATIONS.md`. §Story Bundles §5 (Validation Rules at Story Scope), §5a (Commitment Blocks Are Causal Moves), §5b (Schema-Minimalism), §6a (Belief vs. Fact), §11 (Mystery and Canon Authority — via the shared contract) govern the audit's checks.
+2. **Load the shared contract** — `.claude/skills/_shared-templates/story-state-contract.md`. §4 record schemas (the audit compares records against these), §5 closed predicate DSL (for SLT precondition parse-back), §7 eight hard gates (the audit verifies bundle state respects them retrospectively), §9 branching procedure (for replay logic), §11 mystery and canon authority (for Phase 2e classification).
+3. **Resolve the bundle** — `worlds/<world_slug>/stories/<story_slug>/` must exist with `STORY_KERNEL.md`, `_source/`, and at minimum `_source/branches/`, `_source/pages/`, `_source/events/`.
+4. **Allocate ids**:
+   - One `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`.
+   - Per-RSP `RSP` ids (allocated at Phase 5 after findings are enumerated; `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-NNNN')`).
+5. **Load world canon context** via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-NNNN with status:forbidden + every INV record + active cast + any CF the bundle's mirrored SF records derive from>, token_budget=<default>)`. Whole-class Mystery Reserve + Invariants loaded for the Phase 2e firewall.
+6. **Cross-story Pre-flight** (only when `cross_story` in `mode`): enumerate every sibling bundle in `worlds/<world_slug>/stories/`; load each sibling's `_source/` index for cross-bundle reference resolution.
+7. **HARD-GATE deferral** — the HARD-GATE fires at Phase 7 (Commit / Write) AFTER the audit report + optional RSP cards are drafted in working memory. The user reviews the full deliverable before any write.
 
-### ID Conventions
+## Phases
 
-- `SAU-NNNN` — story audit report ID (allocated per-story append-only)
-- `RSP-NNNN` — remediation storylet proposal (under `audits/SAU-NNNN/remediation-storylet-proposals/`)
+### Phase 1: Scope branches
 
----
+Build the branch tree from `_source/branches/BR-*.yaml` records. For each branch:
 
-## Phase 0: Pre-flight
+- Identify the root page (lowest `turn_index` in the branch).
+- Identify the active leaf (highest `turn_index` with no superseding entry).
+- Identify any terminal pages (`PG.state_snapshot.continuation.terminal_status: terminal_closed | branch_pause`).
+- Determine descendants and ancestors via the `parent_branch_id` chain.
 
-- Load `STORY_KERNEL.md`
-- Allocate next `SAU-NNNN`
-- Load world canon (M-NNNN, INVs) via MCP
-- If `cross_story_scope: true`: enumerate sibling stories under `worlds/<world-slug>/stories/`
+Apply `branch_path_filter` if supplied — restrict subsequent structural checks to the named branches and their descendants. Cross-branch findings (e.g., branch-isolation violations) still scan across all branches; the filter affects which branches are walked for replay / debt / continuation.
 
----
+Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
-## Phase 1: Branch Scope Resolution
+### Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Determine which branches to audit.
+Six sub-checks running in sequence. Each emits findings tagged with `severity` (error / warning / info) and `branch` (for branch-scoped findings) or `cross_branch` (for inter-branch findings).
 
-- Parse `_source/pages/` to build the branch tree (parent_page_id → children)
-- Identify all leaves (pages with no descendants)
-- If `branch_path_filter` provided: validate it; audit only that path
-- Otherwise: audit every distinct leaf-bearing branch
+**Phase 2a: Replay events**
 
-For each branch in scope, the audit walks `branch_path` from root to leaf, reading per-page state_snapshots.
+For each scoped branch:
 
----
+1. Load the root page's `state_snapshot`.
+2. Walk the page chain in branch order.
+3. For each page, apply the corresponding `SE.state_delta` to the running snapshot.
+4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`.
+5. Record divergence as a `snapshot_replay_mismatch` finding with `severity: error`.
 
-## Phase 2: Per-Branch State Assembly
+Snapshot divergence indicates corruption — the bundle's authoritative state hashes don't match a fresh replay from root. ERROR.
 
-For each branch in scope:
+**Phase 2b: Branch isolation**
 
-- Walk `branch_path` from `PG-0001` to leaf
-- For each page, load its `state_snapshot` and the records it cites
-- Cross-check: every cited record's `created_at_page` must be in this `branch_path` (defense check on branch-isolation invariant — captured here as an explicit audit finding if violated)
-- Build a per-branch evolution timeline:
-  - facts created and invalidated (with introducing events and superseder chains)
-  - obligations opened, paid_off, complicated, transferred, abandoned (with status timeline)
-  - threads' pressure / status changes per page
-  - intentions' refresh history per character
-  - storylet selections per page (which SLT realized at each PG)
-  - JIT-expansion events per page
+Flag:
 
-The timeline becomes the input to all subsequent diagnostics.
+- Records appearing in a branch's `state_snapshot.active_records` that were `created_at_page` of a sibling branch's page — `branch_isolation_leak`, ERROR.
+- Author-pool `SLT` records (`scope.visibility: author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null) — `author_pool_branch_dependency`, ERROR.
+- Page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot — `plan_state_reference_dangling`, ERROR.
+- Emitted `CHC` records whose `target_or_action_family` requires records not in the page's active snapshot — `choice_state_reference_dangling`, ERROR.
 
-**Rule**: this phase NEVER reads pages outside this branch's `branch_path`. Sibling branches are invisible. Cross-branch comparison happens only in Phase 6 (cross-branch consistency) and even then is structural-prefix-only — never content cross-reading.
+**Phase 2c: Debt health**
 
----
+For each open `OBL-NNNN`, `CNSQ-NNNN`, and `THR-NNNN` in the scoped branches' leaf snapshots:
 
-## Phase 3: Coverage Analysis
+- Is it still actionable (referenced by at least one eligible commitment block's preconditions or effects)? If not — `unactionable_debt`, severity depends on `saliency.urgency` (HIGH urgency → WARNING; LOW urgency → INFO).
+- Has it been ignored beyond its urgency threshold (specific to the bundle's cadence; default: HIGH urgency → ignored for >5 pages flags WARNING; MEDIUM → >10 pages flags WARNING; LOW → never)?
+- Has it been invalidated by an upstream change (entity death / location move / belief shift that should have closed the debt)? — `invalidated_debt`, WARNING.
 
-### Obligation Payoff Coverage
+**Phase 2d: Belief / visibility health (FOUNDATIONS §Story Bundles §6a)**
 
-For every open OBL on the branch's leaf state_snapshot:
-- Find compatible storylets in the pool (storylets whose `pays_off_obligations` matcher matches this OBL)
-- If zero matches AND zero JIT-probable matches (brief LLM check) AND OBL.salience >= 5 → finding `error`: "OBL-NNNN has no payoff route"
-- If 1-2 matches AND OBL has been open for ≥10 pages → finding `warning`: "OBL-NNNN payoff routes are thin"
-- If many matches but OBL is `required_closure: true` and salience >= 7 and age >= 15 pages → finding `warning`: "OBL-NNNN is overdue for closure"
+Flag:
 
-### Thread Payoff / Escalation Coverage
+- Public consequences (`CNSQ` with high social-impact tags) with no `public` / `shared`-visibility `BEL` records anchoring them — `public_consequence_without_witness`, WARNING.
+- Secret actions (events with `outcome_route: accommodate` involving deception) known by everyone (i.e., `BEL.holder: public` records derived from them without a corresponding revealing event) — `secret_publicly_known_without_event`, WARNING.
+- Relationship changes (`SREL` supersessions) without a belief or event basis (`SREL.basis` doesn't trace to an `SE` or `BEL`) — `relationship_change_without_basis`, WARNING.
+- Choices (`CHC` records) whose `player_visible_intent` requires the actor's `STENT.entity_status` + active `BEL` to support knowledge the prior page didn't establish — `choice_relies_on_unestablished_knowledge`, WARNING.
+- Lies (`BEL` with `truth_relation: false, confidence: performative_lie`) that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker) — `lie_promoted_silently`, ERROR.
 
-For every active THR:
-- Find storylets whose effects raise this thread's pressure (escalation candidates)
-- Find storylets whose effects close or partially resolve this thread (closure candidates)
-- If THR is `pressured` or `critical` and zero closure candidates → finding `error`: "THR-NNNN has no closure path"
-- If THR's `current_pressure` has not changed in ≥10 pages → finding `warning`: "THR-NNNN is dormant; consider escalation or graceful closure"
+**Phase 2e: Mystery and canon safety (FOUNDATIONS Rule 7 + shared contract §11)**
 
-### Character Motivation Coverage
+Flag:
 
-For every page on the branch:
-- Identify the actor of the applied event
-- Verify the actor's STINT at that page would justify the action (goals or fears or pressure-thresholds match)
-- If unjustified → finding `warning`: "Page PG-NNNN: <actor> performed <action> without STINT support; missing pressure or belief change"
+- Any mystery with `status: forbidden` resolved by an `SE.state_delta` — `forbidden_mystery_resolved`, ERROR.
+- A `branch_local_counterfactual`-authority `SF` record treated as `world_level: true` in any downstream effect — `counterfactual_promoted_to_canon`, ERROR.
+- A `canon_candidate`-authority `SE.promotion_claims[]` entry that didn't pause the bundle (no subsequent `story-fact-promotion-to-canon` invocation found in the audit-window) — `canon_candidate_not_promoted`, WARNING (the candidate may still be a deliberate hold).
+- Promotion claims with rendered evidence required but missing rendered prose — `promotion_lacks_evidence`, WARNING (only when paired with a prose-attached page that should have rendered the claim).
 
-### Mystery Firewall Integrity
+ERROR-severity findings here are the hardest audit failures — they indicate the bundle has actively-broken canon discipline.
 
-For every M-NNNN declared in `mysteries_in_play[]`:
-- Walk the prose: did any page resolve this M without authorization? → `error`
-- Walk the events: did any applied_event_op resolve this M with `resolution_authority: canon_candidate` that did NOT pause for `story-fact-promotion-to-canon`? → `error`
-- Walk the events: did any applied_event_op produce an `apparent` or `branch_local_counterfactual` resolution whose resulting SF carries the wrong `epistemic_class` (e.g., apparent claim landed as `objective`)? → `error`
-- For `forbidden`-status Ms: any touch beyond the storylet's declared `mystery_safety.M_touched` is `error`
+**Phase 2f: Continuation or terminal proof**
 
-### Consequence-Ledger Coverage
+For each non-terminal leaf page:
 
-For every CNSQ-NNNN with `status: pending` on any branch's leaf state_snapshot:
-- Find storylets whose `fact_effects` or `relationship_effects` would address this CNSQ kind
-- If zero compatible storylets AND zero JIT-probable AND `urgency >= 7` → finding `error`: "CNSQ-NNNN (<kind>) cannot be addressed; aftermath is dead"
-- If pending for ≥10 pages with rising salience → finding `warning`: "CNSQ-NNNN has been pending for <count> pages without addressing"
-- For each CNSQ: verify `source_event` and `subjects[]` resolve to records on this branch_path (otherwise the CNSQ is orphaned) → `error` if violated
+- Is at least one author-pool or JIT-eligible `SLT` available against the page's `state_snapshot`? — if not, `unactionable_leaf`, ERROR.
+- Does the page emit choices grounded in active records? — if not, `leaf_without_choices`, ERROR.
 
-### Relationship Continuity
+For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 
-For every SREL-NNNN cited in any page's `relationships_current`:
-- Verify the supersession chain from the SREL at branch root to the current SREL is contiguous (each superseder cites the prior as `supersedes:`)
-- Verify every storylet selected on this branch whose `relationship_effects` named these parties produced a corresponding superseding SREL record (no dropped effects) → `warning` if violated
-- Flag SRELs whose axes have not changed in ≥10 pages despite the parties being co-present in active scenes — possible relational stagnation → `info`
+- Does `terminal_rationale` name how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved? — if not, `terminal_without_rationale`, WARNING.
+- Are any debts orphaned (open in the leaf snapshot but not referenced by `terminal_rationale`)? — `orphan_debt_at_terminal`, WARNING.
 
-### Storylet-Scope Leakage
+### Phase 3: Prose checks (conditional on `prose` in `mode`)
 
-For every storylet in the pool with `visibility.scope: global_author_pool`:
-- Recursively inspect its predicates, fact_templates, obligation_matchers, and relationship_effects for direct references to story-local records whose `created_at_page` is non-null → `error`: "Global storylet SLT-NNNN references branch-local <record_id>; should be branch_prefix_scoped or branch_scoped"
+For each `PG-NNNN` in the scoped branches:
 
-For every audit-mode storylet (provenance.origin == audit_remediation):
-- Verify `visibility` matches the source RSP's `target_branch` → `warning` if mismatched
+- Does `pages-prose/PG-NNNN.md` exist when `PG.rendered_prose.path` is set? — if not, `missing_prose_file`, WARNING.
+- Does `pages-prose-receipts/PG-NNNN.yaml` exist when prose has been rendered (one of the bundle's pages has a non-null `rendered_prose.path` for this PG)? — if not, `missing_prose_receipt`, INFO.
+- For each existing receipt, does it record `verdict: FAIL`? — if so, `prose_receipt_failed`, severity from receipt's `repair_recommendation` (FAIL with `run_story_fact_promotion_to_canon` → ERROR; FAIL with `run_turn_cycle_repair` → ERROR; FAIL with `revise_prose` → WARNING).
+- Does the prose receipt's `checks.invented_structural_fact: FAIL` flag a state-fact invention not yet repaired? — `unrepaired_prose_invention`, WARNING.
+- Are there `SE.state_delta` records (state changes) that the prose for the corresponding `PG` doesn't render (per `required_event_rendered: WARN | FAIL`)? — `state_change_unrendered`, WARNING.
 
-### Terminal-Branch Health
+### Phase 4: Cross-story checks (conditional on `cross_story` in `mode`)
 
-For every BR-NNNN with `status: terminal`:
-- Verify the terminal page's `state_snapshot.branch_terminal == true` and `terminal_reason` is set → `error` if violated
-- Verify closure-readiness criteria were met at terminal-page time (no required-closure OBL open without acknowledgment, no high-urgency CNSQ pending, contradiction_risk below threshold) → `warning` if violated
+For each sibling bundle in `worlds/<world_slug>/stories/`:
 
-For every non-terminal active branch whose latest 5 pages show: zero state delta, no choices that materially advance any thread, and `narrative_health.agency_score < 0.3`:
-- Finding `warning`: "BR-NNNN appears de-facto dead-ended without explicit terminal marking; consider terminal acknowledgment or remediation storylets"
+- Do the sibling's mirrored `SF` records contradict this bundle's mirrored `SF` records on the same `derived_from_cf`? — `cross_story_mirrored_fact_contradiction`, WARNING. (Bundles can legitimately interpret canon differently; the audit flags but doesn't fail.)
+- Do the sibling's `SE.promotion_claims[]` and this bundle's `SE.promotion_claims[]` contradict on the same target — i.e., both claim canon-candidate authority on contradictory `SF` content? — `cross_story_promotion_contradiction`, ERROR (a world-canon promotion path cannot have two contradictory canon candidates queued).
+- Do the sibling's terminal closures inherit debts that exist in this bundle as still-open? — `cross_story_inherited_debt_mismatch`, INFO.
 
----
+### Phase 5: Remediation drafting (conditional on `remediation` in `mode` OR `emit_remediation_requests: true`)
 
-## Phase 4: Drift Detection
-
-### Snapshot-Replay Equality + State Hash Chain
-
-For every page on the branch (except root):
-- Compute: `parent.state_snapshot + applied_event_ops` (the SE record's structured ops drive the replay)
-- Compare to: `this_page.state_snapshot`
-- If unequal → finding `error`: "PG-NNNN snapshot drift; engine bug or corrupt data"
-- Verify `this_page.parent_state_hash == parent.state_hash` and `this_page.state_hash == hash(canonicalize(this_page.state_snapshot))`
-- Verify the SE chain: for each SE in `applied_event_ops`, `SE.state_hash_before` == prior op's `state_hash_after` (or parent.state_hash for the first op), and the last op's `state_hash_after == this_page.state_hash`
-- Any chain break → `error`: "PG-NNNN state-hash chain broken at op <op_id>"
-
-### Canon-Baseline Drift (Audit Trail)
-
-For every page on the branch:
-- Record `state_snapshot.canon_revision` value
-- Plot the chain over the branch's history; expected pattern is monotonic-non-decreasing (canon revisions only increase as the world's canon ledger grows)
-- A page whose `canon_revision` is older than its parent → `error`: "PG-NNNN regressed canon_revision below parent (engine bug or manual edit)"
-- For each transition where `canon_revision` jumped (one or more new CFs became visible to this branch since parent): if any of those new CFs contradicts an SF in this page's snapshot, cross-reference `story-fact-promotion-to-canon`'s adjudication record (`PA-NNNN`) — the contradiction handling preference should have been applied. If the branch's INDEX entry was not flagged or archived per the preference → `warning`: "Canon contradiction at PG-NNNN not surfaced via promotion handling"
-
-This is a forensic-trail check, not a structural failure: world canon propagation IS the design; the audit just makes the propagation visible.
-
-### Cross-Branch Reference Closure Leakage (Recursive)
-
-The prior shallow check — "every record cited in `state_snapshot` has `created_at_page ∈ branch_path`" — is necessary but insufficient. A record created on the current branch can carry internal references (in `dependent_facts`, `coverage_cache.compatible_storylets`, `subjects`, `payoff_event`, `input_records`, `output_records`, etc.) to records on sibling branches. The top-level check passes; the dependency leaks.
-
-For every story-local record reachable from any page's `state_snapshot`, recursively walk all story-local ID references inside that record's body:
-- `OBL.dependent_facts[]`, `OBL.coverage_cache.compatible_storylets[]`
-- `SF.evidence[].event_id`, `SF.evidence[].page_id`
-- `SE.input_records[]`, `SE.output_records[]`, `SE.source.parent_page_id`, `SE.source.storylet_realized`
-- `CNSQ.source_event`, `CNSQ.source_choice`, `CNSQ.subjects[]`, `CNSQ.addressable_by_storylets[]`
-- `THR.obligations[]`, `THR.owner_cast[]`
-- `SREL.party_a`, `SREL.party_b`, `SREL.source_events[]`
-- `STINT.beliefs[]`, `STINT.secrets[]`, `STINT.relationships{}`
-- `SLT-JIT` predicates that name story-local IDs
-- `CHC.uses_fact`, `CHC.actor`, `CHC.target`
-- `STOBJ` and `STLOC` references
-- `DA.creator`, `DA.current_holder`, `DA.source_events[]`
-- `BR.forked_from_branch_id`, `BR.forked_from_page_id`, `BR.forked_from_choice_id`
-
-Every referenced ID must satisfy ONE of:
-- the referenced record has `created_at_page == null` AND globally legal (author-pool storylets only — verified against the storylet's `visibility.scope: global_author_pool` declaration)
-- the referenced record's `created_at_page ∈ this_page.branch_path`
-
-Any sibling-branch reference at any depth → finding `error`: "PG-NNNN reaches <record_id> via <path> whose created_at_page is on sibling branch (recursive reference closure violated)".
-
-This is the **primary structural check** for the user's "no cross-contamination between branches" requirement. Top-level provenance alone misses dependencies.
-
-### Content Intensity Drift
-
-For every page on the branch:
-- Compare `this_page.content_intensity` to `STORY_KERNEL.content_intensity_baseline`
-- Allow ±1 band (the runtime's filter)
-- If a page sits 2+ bands away from baseline → finding `warning`: "PG-NNNN drifted from baseline (<baseline> → <intensity>)"
-- If multiple consecutive pages drift in the same direction → finding `warning`: "Sustained drift detected over PG-X..PG-Y"
-
----
-
-## Phase 5: Repetition + Thinness Analysis
-
-### Storylet Reuse
-
-- Tabulate SLT-NNNN selection counts across the branch
-- If any SLT was selected in >25% of pages → finding `warning`: "SLT-NNNN over-used"
-- If <30% of the pool was ever selected on this branch → finding `info`: "Pool under-utilized; many storylets never realized"
-
-### Similar-Scene Clustering
-
-For every consecutive page pair on the branch:
-- Compute prose similarity (vector embedding distance OR shared-tone+shape+cast match)
-- If similarity > threshold → finding `warning`: "Pages PG-X and PG-Y read as variations of the same scene"
-
-### Narrative-Debt Evolution
-
-- Plot `open_obligation_count` and `high_salience_unpaid_count` per page
-- If `high_salience_unpaid_count` has been ≥4 for ≥10 pages → finding `warning`: "Narrative debt is sustainedly high; story risks losing coherence"
-- If `open_obligation_count` is monotonically rising with no payoffs in ≥15 pages → finding `error`: "Story is accumulating debt without payoff; structural problem"
-
----
-
-## Phase 6: Cross-Branch Consistency Check
-
-This phase audits across multiple branches in the story (NOT cross-branch state reads — only structural-prefix consistency).
-
-For every pair of branches (A, B) in scope:
-- Find their longest common prefix in `branch_path` (the divergence point)
-- The shared prefix MUST refer to the SAME page records (same PG IDs, same applied_event_ops, same state_snapshots)
-- If A and B's branch_path[0..shared_len] arrays differ → finding `error`: "Branches A and B claim divergent shared prefix — engine inconsistency"
-
-This is defense-in-depth against branch-isolation invariant violations: if the engine ever wrote a fork with a corrupted shared prefix, this catches it.
-
-For cross-branch state contradictions on shared prefix: this is NOT a finding, since branch divergence is the entire point. The audit only checks that the SHARED prefix was identical — divergence after the fork point is correct.
-
----
-
-## Phase 7: Findings Consolidation
-
-Group findings by severity (info / warning / error).
-
-Severity rubric:
-- **error**: structural violations, dead-ending obligations, firewall breaches, snapshot drift, branch-isolation breaches. Always reported regardless of `severity_threshold`.
-- **warning**: thinness, drift, repetition, dangling threads, motivation gaps, debt accumulation. Reported if `severity_threshold ≤ warning`.
-- **info**: pool under-utilization, low-impact patterns. Reported if `severity_threshold ≤ info`.
-
-For each finding, record:
-- finding_id (sequential within this audit)
-- severity
-- category (one of the audit_focus categories)
-- branch (or `all-branches` if shared)
-- pages affected
-- records affected
-- description
-- proposed remediation (if applicable)
-
----
-
-## Phase 8: Remediation Proposals (optional)
-
-If `emit_remediation_proposals: true`, for each remediable finding produce one of:
-
-### A. Remediation Storylet Proposal Card (RSP-NNNN)
-
-Used for findings where a new storylet would close the gap (e.g., "OBL-NNNN has no payoff route" → propose a storylet that pays it off).
-
-```yaml
----
-rsp_id: RSP-NNNN
-audit_id: SAU-NNNN
-story_id: STORY-001
-finding_ids: [F-NN, ...]                 # findings this RSP addresses
-target_obligation: OBL-NNNN | null
-target_thread: THR-NNNN | null
-target_consequence: CNSQ-NNNN | null
-target_relationship: SREL-NNNN | null
-proposed_shape: entry_pressure | cast_introduction | threat_escalation |
-                relational_dynamics | routine_disruption | aftermath_sequel |
-                reflection_dilemma | mystery_edge_brush | fork_recovery |
-                thread_resolution | aftermath_residue | intimacy | confrontation | other
-proposed_intensity: tame | mature | explicit
-target_branch: <branch_path | "all branches" | "global pool">
-proposed_visibility:
-  scope: global_author_pool | branch_scoped | branch_prefix_scoped
-  visible_branch_path_prefix: [PG-NNNN, ...] | null
-sketch:
-  hard_preconds: [...]                    # predicates per the storylet-pool-authoring DSL
-  fact_effects: [...]                      # fact_templates with epistemic_class
-  pays_off_obligations: [...]
-  opens_obligations: [...]
-  addresses_consequences: [...]            # CNSQ kind matchers
-  choice_templates: [...]
-rationale: >
-  <why this storylet would address the finding>
----
-
-# Body
-
-## Diagnosis
-<what the finding identified>
-
-## Proposed remediation
-<the storylet shape and effects>
-
-## Routing
-<consume this card as `storylet-pool-authoring`'s `source_audit_path` input>
-```
-
-These cards are directly consumable by `storylet-pool-authoring` (run with `mode: audit`).
-
-### B. Manual-Intervention Flag (in-report)
-
-Used for findings that don't have a clean storylet remediation:
-- "Mystery M-NNNN was resolved at PG-X without canon promotion — review and decide whether to retroactively promote (via `story-fact-promotion-to-canon`) or roll back the branch"
-- "Branch-isolation invariant violated at PG-Y — engine bug; investigate before continuing this branch"
-- "Snapshot drift at PG-Z — recompute and replace, or roll back to prior coherent page"
-
-These are inline in the report, not RSP cards.
-
----
-
-## Phase 9: HARD-GATE Approval
-
-Present consolidated findings + RSP cards to user:
-
-```
-AUDIT REPORT: SAU-NNNN-<date>
-
-Story: <story_slug> in <world_slug>
-Branches audited: <count> (paths: <list of leaf IDs>)
-Pages walked: <count>
-
-FINDINGS BY SEVERITY:
-- ERROR: <count>
-- WARNING: <count>
-- INFO: <count>
-
-ERRORS:
-- F-01 [branch_isolation] PG-0042 cites OBL-0066 whose created_at_page is on a sibling branch
-- F-02 [obligation_payoff] OBL-0007 (salience 9) has no payoff route in current pool
-
-WARNINGS:
-- F-03 [debt_level] high_salience_unpaid_count has been >=4 for 12 pages on branch <leaf>
-- F-04 [repetition] SLT-0019 selected in 7 of last 20 pages
-- ...
-
-INFO:
-- F-12 [pool_utilization] 14 of 38 pool storylets never realized on this branch
-- ...
-
-REMEDIATION PROPOSALS:
-- RSP-0001: Storylet to pay off OBL-0007 (relational_dynamics, mature) → consume via storylet-pool-authoring
-- RSP-0002: Storylet to escalate THR-0003 (threat_escalation, mature) → consume via storylet-pool-authoring
-- ...
-
-MANUAL INTERVENTION FLAGS:
-- F-01: Branch-isolation breach. Action required: investigate engine bug; do not continue this branch until resolved.
-```
-
-User options:
-- ACCEPT REPORT → write SAU + RSP files; halt
-- REVISE — different focus → re-run with different `audit_focus`
-- REVISE — narrower scope → re-run on specific branch_path
-- REJECT → no writes; halt
-
----
-
-## Phase 10: Atomic Write
-
-Single transaction:
-
-1. Write `audits/SAU-NNNN-<date>.md`
-2. Write each `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-<slug>.md`
-3. Update `audits/INDEX.md`
-
-Do NOT git commit.
-
----
-
-## SAU Report Template
+For each finding tagged `repair_kind != none` (the audit's finding emitter assigns a `repair_kind` from the streamlined-pipeline taxonomy: `commitment_block | turn_repair | prose_revision | promotion | branch_flag`), draft an `RSP-NNNN-<slug>.md` card:
 
 ```markdown
-# Story Audit SAU-NNNN
+---
+id: RSP-NNNN
+audit_id: SAU-NNNN
+created: <iso8601 date>
+finding_ids: [<finding ids from this audit>]
+repair_kind: commitment_block | turn_repair | prose_revision | promotion | branch_flag
+target_records: [<record ids the repair should engage with>]
+target_branch: BR-NNNN | null
+suggested_block_purpose: aftermath | escalation | reveal | refusal | negotiation | flight | investigation | intimacy | conflict | repair | closure | transition | null
+visibility: author_pool | branch_scoped | null
+---
 
-**Story**: <story_slug> in <world_slug>
-**Date**: <iso8601>
-**Audit focus**: <focus_area>
-**Severity threshold**: <threshold>
-**Branches audited**: <count>
-**Pages walked**: <count>
+# RSP-NNNN: <short title>
+
+## Findings addressed
+
+(One bullet per finding_id, with severity + one-line summary)
+
+## Rationale
+
+(Narrative explanation of why this repair is needed and which lawful repair path applies.)
+
+## Recommended next step
+
+(Sibling-handoff guidance: which downstream skill consumes this RSP, with the relevant invocation hint.)
+```
+
+`repair_kind` taxonomy (per the streamlined-pipeline report):
+
+- `commitment_block` — author pool needs a new block. Consumed by `commitment-block-authoring` `audit_repair` mode.
+- `turn_repair` — the bundle needs a repair turn that adds branch-local state to support an unrepaired prose invention or an unactionable debt. Consumed by `branching-story-turn-cycle` with the user supplying a manual_action_text framing.
+- `prose_revision` — rendered prose needs revision (typically tied to a `prose_receipt_failed` finding). User revises `pages-prose/PG-NNNN.md` and re-invokes `branching-story-prose-attach`.
+- `promotion` — a `canon_candidate` authority claim should be promoted via `story-fact-promotion-to-canon`.
+- `branch_flag` — a branch is structurally broken (e.g., replay mismatch); flag for the user's attention without proposing automated repair.
+
+**Do NOT draft full commitment blocks here.** RSP cards are repair requests; `commitment-block-authoring` `audit_repair` mode consumes them and produces the actual SLT records.
+
+### Phase 6: Author SAU report
+
+Draft `worlds/<world_slug>/stories/<story_slug>/audits/SAU-NNNN-<YYYY-MM-DD>.md` with this structure:
+
+```markdown
+---
+audit_id: SAU-NNNN
+story_id: STORY-NNNN
+story_slug: <story_slug>
+world_slug: <world_slug>
+created: <iso8601 date>
+modes_run: [structural, prose, remediation, cross_story]   # whichever ran
+branch_path_filter: null | BR-NNNN | [BR-NNNN, ...]
+severity_threshold: error | warning | info
+findings_total: N
+findings_by_severity:
+  error: <count>
+  warning: <count>
+  info: <count>
+rsp_cards_emitted: N | 0
+---
+
+# SAU-NNNN — Bundle health audit (<YYYY-MM-DD>)
 
 ## Summary
 
-| Severity | Count |
-|---|---|
-| ERROR | N |
-| WARNING | N |
-| INFO | N |
+<3-5 sentence overview of bundle health by mode.>
 
-## Findings
+## Branch coverage
 
-### Errors
+(Per-branch one-line: branch id, root page, leaf page, terminal status, finding count.)
 
-#### F-01: <title>
-- **Category**: <category>
-- **Branch**: <branch_path>
-- **Pages affected**: <list>
-- **Records affected**: <list>
-- **Description**: <what was detected>
-- **Proposed remediation**: <RSP-NNNN | manual flag | none>
+## Replay / hash errors
 
-(repeat per error)
+(Phase 2a findings.)
 
-### Warnings
+## Branch isolation
 
-(same structure)
+(Phase 2b findings.)
 
-### Info
+## Open debt health
 
-(same structure)
+(Phase 2c findings.)
 
-## Remediation proposals
+## Belief / visibility health
 
-### RSP-0001: <title>
-- File: `audits/SAU-NNNN/remediation-storylet-proposals/RSP-0001-<slug>.md`
-- Addresses findings: F-NN, F-NN
-- Routing: `storylet-pool-authoring --source_audit_path=...`
+(Phase 2d findings.)
 
-(repeat per RSP)
+## Mystery / canon safety
 
-## Manual intervention flags
+(Phase 2e findings.)
 
-- F-NN: <description>; action required: <recommendation>
-- ...
+## Continuation / terminal status
 
-## Health snapshot at audit time
+(Phase 2f findings.)
 
-| Branch | Open OBL | High-salience unpaid | Avg OBL age | Tension | Agency |
-|---|---|---|---|---|---|
-| <leaf-id> | N | N | N pages | 0..1 | 0..1 |
+## Prose health (if `prose` in modes)
 
-## Notes
+(Phase 3 findings.)
 
-<free-form rationale; what the audit revealed; recommended next moves>
+## Cross-story consistency (if `cross_story` in modes)
+
+(Phase 4 findings.)
+
+## Findings table
+
+| Finding id | Severity | Branch | Type | One-line summary |
+|---|---|---|---|---|
+
+## Remediation requests (if any)
+
+(One bullet per emitted RSP-NNNN with its `repair_kind` + suggested consumer skill + finding link.)
 ```
 
----
+Apply `severity_threshold` to filter the findings table and per-phase sections.
 
-## Rules (load-bearing)
+### Phase 7: Commit / Write — HARD-GATE fires
 
-- **Read-only against story state.** Never mutates `_source/`. Writes only to `audits/`
-- **May produce RSP cards** under `audits/SAU-NNNN/remediation-storylet-proposals/`, consumable by `storylet-pool-authoring`
-- **May NOT produce CF / CH / INV / M proposals** — those route through `canon-addition` / `propose-new-canon-facts` at the world level, not from a story audit
-- **Branch-isolation invariant violations are ALWAYS `error`**, never `warning` — structural violations
-- **Snapshot-replay equality failures are ALWAYS `error`**
-- **A `forbidden` M-NNNN brushed-against without proper declaration is `error`**
-- **The audit walks each branch independently.** Sibling-branch reads are forbidden during state assembly. Cross-branch checks (Phase 6) compare branch_path arrays only — never content
-- **The audit is invokable repeatedly.** Multiple SAU-NNNN reports can coexist; each is a snapshot in time
-- **The audit never mutates pages.** If a finding implies a page should be rolled back, that's a manual user action
+1. Present the deliverable summary to the user: audit path, modes run, severity breakdown, top-5 highest-severity findings (one-liner each), RSP card count + per-card `repair_kind` summary, recommended next steps.
+2. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
+3. On approval:
+   - Write `audits/SAU-NNNN-<YYYY-MM-DD>.md` (direct write).
+   - For each RSP card (if any), create the `audits/SAU-NNNN/remediation-storylet-proposals/` sub-directory on first use (idempotent `mkdir -p`), then write `RSP-NNNN-<slug>.md` (direct write).
+   - Update `audits/INDEX.md` last.
+4. Report the SAU path + RSP card inventory to the user. Surface the recommended next-step skill for each `repair_kind` cluster (`commitment-block-authoring audit_repair` for `commitment_block` cards; `branching-story-turn-cycle` for `turn_repair` cards; `branching-story-prose-attach` re-run for `prose_revision`; `story-fact-promotion-to-canon` for `promotion`; manual attention for `branch_flag`). Do NOT `git commit`.
 
----
+**Failure behavior**: file-write fail → surface diagnostic to user; the audit was the deliverable, so this is a hard fail. Partial write success (SAU written but some RSP cards failed) → SAU is authoritative; remaining RSP cards can be repaired directly; surface partial-failure.
 
-## Acceptance Tests
+## Validation Rules This Skill Upholds
 
-An audit succeeds only if all of these hold.
+- **Rule 1 (No Floating Facts)** — Phase 2a (replay events). Mechanism: snapshot replay verifies every record referenced in `state_snapshot.active_records` corresponds to a real record file; missing references surface as replay mismatches.
+- **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies.
+- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof). Mechanism: unactionable debt + terminal-without-rationale findings expose Rule 5 violations after-the-fact (the audit catches what bootstrap / turn-cycle's eight-gate validation missed or accepted).
+- **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery and canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon checks against whole-class Mystery Reserve loaded at Pre-flight.
 
-### Read-Only Tests
-- The audit makes zero modifications to `_source/`, `pages-prose/`, or any record outside `audits/`
-- The audit reads only pages in scope (no sibling-branch reads during state assembly)
+## Record Schemas
 
-### Coverage Tests
-- Every active obligation on every leaf is checked for payoff routes
-- Every active thread is checked for closure / escalation candidates
-- Every page is checked for snapshot-replay equality + state_hash chain integrity
-- Every record reachable from any page's state_snapshot is checked for recursive reference closure (not just top-level)
-- Every CNSQ-pending is checked for addressing-storylet coverage
-- Every SREL chain is checked for continuity
-- Every storylet's visibility scope is verified (global_author_pool storylets do not touch branch-local records)
-- Every BR with `status: terminal` is verified against closure-readiness
-- Every M-NNNN in `mysteries_in_play[]` is checked for firewall integrity (per resolution_authority)
-- Every page's canon_revision is recorded and chain-checked for monotonic-non-decreasing progression
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
-### Severity Tests
-- Branch-isolation breaches reported as `error`, never `warning`
-- Snapshot drift reported as `error`
-- Forbidden-M leakage reported as `error`
+- `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.5) — the audit reads these record types.
 
-### Remediation Tests
-- Every remediable finding produces either an RSP card or a manual-intervention flag
-- RSP cards are valid storylet-pool-authoring `source_audit_path` inputs (schema verified)
-- No RSP card proposes a storylet that would resolve a `forbidden` M-NNNN
+The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_source/` records). Their shapes are defined inline in Phase 6 (SAU template) and Phase 5 (RSP template) above.
 
----
+## FOUNDATIONS Alignment
 
-## Mandatory LLM Roles
+| Principle | Phase | Mechanism |
+|---|---|---|
+| Rule 1 (No Floating Facts) | Phase 2a | Replay verifies every active-record reference resolves. |
+| Rule 2 (No Pure Cosmetics) | N/A | Story-bundle scope. World-canon principle. |
+| Rule 3 (No Specialness Inflation) | N/A | Same as Rule 2. |
+| Rule 4 (No Globalization by Accident) | Phase 2b | Branch-isolation enforcement. |
+| Rule 5 (No Consequence Evasion) | Phase 2c, 2f | Debt-health + continuation-or-terminal-proof findings. |
+| Rule 6 (No Silent Retcons) | N/A | Audit reads only; emits no canon changes. |
+| Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks. |
+| Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |
+| Rule 12 (No Single-Trace Truths) | N/A | World-canon-only principle. |
+| Canon Layers | Pre-flight, Phase 2e | World canon loaded via context packet; per-event canon-authority classification. |
+| Mystery Reserve | Pre-flight, Phase 2e | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
+| §Story Bundles §4a (Plan-Authority Boundary) | All phases | The audit reads `PG` records as authoritative; does NOT mutate them. Drift between rendered prose and state is reported in findings, not in PG records. |
+| §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool SLT records validated for branch-local-dependency leaks; debt-block matching validates eligibility. |
+| §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records but does not draft new ones. SLT schema enforcement is `commitment-block-authoring`'s scope. |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (lie-promotion, public-consequence-without-witness, etc.). |
+| §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
+| Change Control Policy | N/A | Audit emits no Change Log Entries. |
+| Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 
-Run the audit through at least these critics:
+## Guardrails
 
-- Continuity Critic (snapshot integrity, fact invalidation chains)
-- Mystery Curator (firewall integrity)
-- Pacing Critic (debt-level evolution, narrative-health trends)
-- Storylet Diversity Critic (pool utilization, repetition)
-- Character Motivation Critic (STINT-justified actions)
-- Branch-Isolation Auditor (structural prefix consistency, cross-branch leakage)
+- **Never mutate story state or world canon.** The audit reads `_source/` records, `pages-prose-plans/*.md`, `pages-prose/*.md`, `pages-prose-receipts/*.yaml`, and the bundle's `INDEX.md`. It writes ONLY to `audits/SAU-NNNN-*.md` + `audits/SAU-NNNN/remediation-storylet-proposals/RSP-NNNN-*.md` + `audits/INDEX.md`. No patch-engine submissions.
+- **Never write rendered prose.** The audit reads prose for Phase 3 prose checks; it does not author prose.
+- **RSP cards are repair requests, not blocks.** The audit drafts requests with `repair_kind`, `target_records`, `target_branch`, `rationale`, `suggested_block_purpose`, `visibility` — but NOT full SLT records. `commitment-block-authoring` `audit_repair` mode consumes RSP cards and produces the actual SLT records.
+- **Audit is read-only with respect to bundle records.** Drift between rendered prose and committed state, replay mismatches, branch-isolation violations are all REPORTED in findings; the audit does NOT alter `PG` records, `SE` deltas, `SLT` blocks, or any other bundle-record file to "fix" what it finds.
+- **Schema minimalism per shared contract §2.** The SAU report and RSP card shapes are defined inline in this skill's Phase 5 / Phase 6 templates. No nice-to-have fields.
+- **Skills do not chain.** The audit never invokes `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. RSP cards record sibling-handoff recommendations; the user separately invokes the named sibling with the RSP card path as input.
+- **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
+- **Known integration debt**:
+  - **MCPENH-040** (BEL allocator registration), **PEENH-007** (`create_bel_record` patch op), **VALENH-011** (BEL `record_schema_compliance`) — Phase 2d (belief / visibility health) reads `BEL` records. Inherited from bootstrap's Shape C rollout.
+  - **MCPENH-041** (task_type rename) — does NOT affect this skill; `branching_story_health_audit` task_type was not renamed.
 
-Then synthesize.
+## What is intentionally NOT in this skill
 
----
+- **No LLM semantic pass by default.** Default `structural` mode is fully deterministic — replay, schema checks, predicate parse, hash comparison. The optional `prose` mode reads prose receipts (already deterministic-checked by `branching-story-prose-attach`) but does not run a fresh LLM critic over prose. A future ticket could add an opt-in `prose_critic` mode if needed.
+- **No bundle mutation.** The audit reports; it does not edit `PG` / `SE` / `SLT` / `BEL` records.
+- **No RSP-to-SLT inflation.** RSP cards are requests; the audit does NOT draft full SLT records. `commitment-block-authoring` `audit_repair` mode owns SLT drafting.
+- **No cross-world audit.** `cross_story` mode is bounded to sibling bundles within the same world. World-level audits across `worlds/*/` are out of scope (handled by `continuity-audit` if and when it extends to cross-world coverage).
+- **No word-count metrics** (per FOUNDATIONS §Story Bundles §9). Prose-mode findings cite receipt verdicts, not word counts.
 
-## Final Rule
+## References
 
-A branching story is healthy not when it is long, but when:
-
-- every salient obligation has at least one viable closure route
-- every pending consequence has at least one addressing storylet (CNSQs are not orphaned)
-- every active thread is either advancing, closing gracefully, or visibly stalled by world logic
-- every applied event is justified by character intention OR by external pressure
-- every mystery declared in play is preserved (or properly promoted with audit trail; or branch-locally / apparently resolved with the correct epistemic_class)
-- every branch is structurally isolated from siblings (recursive reference closure holds, not merely top-level provenance)
-- every relationship state is coherent through its supersession chain
-- every page is replay-coherent from its parent (state_hash chain unbroken)
-- every storylet's visibility scope matches its scope of dependence (global_author_pool storylets do not depend on branch-local state)
-- every terminal branch satisfies the closure-readiness criteria its terminal page claims
-
-This pipeline tells you whether your story is healthy by those standards. It does not fix the story — it produces the diagnosis and the remediation proposal cards. Fixing the story is the user's choice and routes through `storylet-pool-authoring`, `branching-story-page-cycle` (rollback / re-render), or — for canon-level retroactive moves — `story-fact-promotion-to-canon`.
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas, §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority.
+- `docs/FOUNDATIONS.md` — §Story Bundles §5 / §5a / §5b / §6a govern the audit's checks.
+- `reports/streamlined-story-pipelines/06-branching-story-health-audit.md` — streamlined-pipeline source report.
+- `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md` §C.5 — blueprint summary.
+- Sibling skills:
+  - `.claude/skills/branching-story-bootstrap/SKILL.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-prose-attach/SKILL.md`, `.claude/skills/commitment-block-authoring/SKILL.md` — upstream producers of the records this audit reads.
+  - `commitment-block-authoring` `audit_repair` mode (already shipping) consumes this audit's `RSP-NNNN` cards.
+  - `story-fact-promotion-to-canon` (future, not yet shipping) is the recommended next step for RSP cards with `repair_kind: promotion`.
+- `tools/world-mcp/src/tools/allocate-next-id.ts` — `SAU` and `RSP` id-class registration. RSP is sub-audit-scoped (requires `story_slug` + `audit_id`).

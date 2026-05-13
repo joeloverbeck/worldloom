@@ -146,6 +146,51 @@ test("validatePatchPlan accepts create_bel_record through pre-apply validation",
   }
 });
 
+test("validatePatchPlan accepts append_story_diegetic_artifact_record through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = {
+      plan_id: "plan-story-da-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "story-promotion-closeout",
+      expected_id_allocations: { story_da_ids: ["DA-0001"] },
+      patches: [
+        {
+          op: "append_story_diegetic_artifact_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/artifacts/DA-0001.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "DA-0001",
+              story_id: "STORY-001",
+              supersedes: "DA-0000",
+              linked_world_da: "DA-0042"
+            }
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass");
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("validatePatchPlan returns fail and surfaces rule verdicts from the validators package", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);
