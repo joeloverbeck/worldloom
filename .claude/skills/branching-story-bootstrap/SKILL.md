@@ -1,402 +1,356 @@
 ---
 name: branching-story-bootstrap
-description: "Use when starting a new branching story bundle inside an existing worldloom world — a premise + a selected cast (drawn from the world's characters/INDEX.md) + tone and content constraints. Produces: a story bundle at worlds/<world-slug>/stories/<story-slug>/ — STORY_KERNEL.md + atomic-YAML causal-engine ledgers under _source/ (entities, facts, events, obligations, threads, intentions, storylets, branches, pages, choices, plus story-local relationships, locations, objects, consequences, artifacts) + a comprehensive prose plan for the root page (PG-0001) at pages-prose-plans/PG-0001.md and its first 4-6 generated choices + a seed storylet pool; rendered prose is supplied externally and merged via branching-story-page-prose-finalize. Mutates: only worlds/<world-slug>/stories/<story-slug>/ (never WORLD_KERNEL.md, ONTOLOGY.md, or any _source/<world-subdir>/*.yaml record); writes worlds/<world-slug>/stories/INDEX.md on first invocation per world (idempotent append on subsequent runs)."
+description: "Use when creating a new branching-story bundle inside an existing worldloom world. Produces: story-bundle records (STENT/STINT/SF/BEL/SE/OBL/CNSQ/THR/SREL/STLOC/STOBJ/optional DA/BR/PG/CHC/optional SLT) via patch engine + STORY_KERNEL.md + pages-prose-plans/PG-0001.md + per-bundle INDEX.md + per-world stories/INDEX.md first-run create-or-append. Mutates: only worlds/<world_slug>/stories/<story_slug>/ plus worlds/<world_slug>/stories/INDEX.md."
 user-invocable: true
 arguments:
   - name: world_slug
-    description: "Directory slug of an existing world under worlds/<world-slug>/. Pre-flight aborts if the directory is missing."
+    description: "Existing world directory slug under worlds/"
     required: true
   - name: story_slug
-    description: "Kebab-case slug for the new story bundle. Pre-flight aborts if worlds/<world-slug>/stories/<story-slug>/ already exists — this skill never overwrites an existing bundle."
+    description: "Kebab-case slug for the new bundle; must not collide with an existing story in the target world"
     required: true
-  - name: premise_path
-    description: "Path to a markdown file containing the user's premise (genre, tonal register, intended scale, opening situation, implied threads/obligations/cast tensions). Required unless `premise` is provided inline."
-    required: false
   - name: premise
-    description: "Inline premise text. Required unless `premise_path` is provided. If both are provided, `premise_path` wins."
-    required: false
-  - name: cast_bind_list
-    description: "Comma-separated list of CHAR-NNNN ids drawn from worlds/<world-slug>/characters/INDEX.md. Pre-flight verifies every id exists. At least one CHAR is required; the protagonist must be among them."
+    description: "One-to-three-paragraph natural-language premise establishing the situation"
     required: true
-  - name: intended_scale
-    description: "One of: one_shot | chapter | arc | open_ended. Recorded in STORY_KERNEL.md and used by Phase 6 storylet-pool sizing."
+  - name: selected_cast
+    description: "List of CHAR-NNNN ids from the world's characters/INDEX.md"
     required: true
-  - name: tone_constraints
-    description: "Free-form prose hints. Optional."
+  - name: pov
+    description: "Perspective convention (first-person | close third | omniscient); default: close third"
     required: false
-  - name: themes
-    description: "Comma-separated theme tags. Optional."
+  - name: tone
+    description: "Tonal contract; default: inherit from WORLD_KERNEL.md tonal contract"
     required: false
-  - name: content_intensity_baseline
-    description: "One of: tame | mature | explicit. Default: mature. Routing tag for storylet/page selection — never a censor (the content_policy block is NC-21 by skill contract)."
+  - name: content_intensity
+    description: "tame | mature | explicit; default: mature"
     required: false
-  - name: pov_mode
-    description: "One of: single | rotating | omniscient. Default: single."
+  - name: initial_location
+    description: "STLOC candidate (label and grounding canon)"
     required: false
-  - name: language_register
-    description: "Register hints (formal / colloquial / mixed). Optional."
+  - name: opening_pressure
+    description: "Natural-language statement of the pressure that puts the cast into motion at the opening"
     required: false
-  - name: seed_threads
-    description: "User-named active narrative threads to install at bootstrap. Optional — Phase 5 derives threads from premise if absent."
-    required: false
-  - name: seed_obligations
-    description: "User-named promises to install at bootstrap. Optional — Phase 5 derives from premise if absent."
-    required: false
-  - name: storylet_pool_seed_size
-    description: "Number of seed storylets in Phase 6. Default: computed from `intended_scale` + state complexity (see `references/phase-6-storylet-pool-seed.md` §Computing target_pool_size). Setting this argument explicitly overrides the formula."
-    required: false
-  - name: epe_card_filter
-    description: "Comma-separated EPE-NNNN ids from worlds/<world-slug>/pressure-events/ to consume as initial thread / obligation seeds. Optional."
-    required: false
-  - name: execution_mode
-    description: "One of: authoring (default) | interactive_runtime | batch_generation. Recorded on STORY_KERNEL.md as execution_mode_default for downstream runtime page-cycle. Bootstrap is always an authorial act regardless of mode — HARD-GATE always fires."
+  - name: seed_commitment_blocks
+    description: "none | minimal | standard; default: minimal"
     required: false
 ---
 
 # Branching Story Bootstrap
 
-Bootstraps a new branching story bundle inside an existing worldloom world from a user premise + a selected cast + tone and content constraints, producing a fully initialized story directory with causal-engine ledgers, a comprehensive prose plan for the root page (PG-0001) at `pages-prose-plans/PG-0001.md`, 4-6 initial choices, and a scale-aware seed storylet pool. Rendered prose is produced externally (manual author or external LLM renderer) after bundle commit and merged via `branching-story-page-prose-finalize`.
+Bootstrap a new branching-story bundle inside an existing worldloom world — initialize root causal state, commit the root page snapshot, author the comprehensive root prose plan, and emit the first choices. Bootstrap does not render prose and does not establish any prose-rendering lifecycle.
 
 <HARD-GATE>
-Do NOT write any file under `worlds/<world-slug>/stories/<story-slug>/` and do NOT `Edit` `worlds/<world-slug>/stories/INDEX.md` until: (a) Pre-flight resolves `worlds/<world-slug>/`, allocates the next `STORY-NNNN` via `mcp__worldloom__allocate_next_id`, verifies `worlds/<world-slug>/stories/<story-slug>/` does not already exist, validates every `CHAR-NNNN` in `cast_bind_list` against `worlds/<world-slug>/characters/INDEX.md`, loads `docs/FOUNDATIONS.md` into working context (the Validation Rules that govern Phase 4 firewall + INV audit, Phase 5 obligation discipline, and Phase 9 storylet-diversity / consequence-capacity gates all live there; CLAUDE.md §Non-Negotiables explicitly forbids skipping this load), and confirms the content_policy block is loaded for downstream prompt assembly; (b) Phase 4 Mystery Firewall + Invariant Audit passes with zero `forbidden`-status M resolutions and zero unresolvable INV tensions; (c) Phase 9 Validation Gates record PASS with a one-line rationale for all 20 gates (mystery firewall, invariant compatibility, content policy presence, ID uniqueness, branch path consistency, cast intention coverage, obligation salience, epistemic class declared, commitment_family / commitment_class storylet diversity, prose ledger consistency [DEFERRED — awaiting prose render], choice consequence-capacity, recursive reference closure, state_snapshot integrity, arc_envelope_conformance, effect_model_replay_safety, arc_trace_evidence_alignment, narrative_point_classification, choice_worthiness_completeness, plan_completeness_check, cast_material_reality_consistency; at PG-0001 root, gates 14/15/16 auto-PASS as root-special-case per references/phase-9-validation-gates.md; gate 10 records DEFERRED at bundle commit and is flipped to PASS/FAIL by branching-story-page-prose-finalize), AND Phase 9.5's 11 discipline checks record PASS with a one-line rationale (including the new `plan_self_containment` check); (d) the user has explicitly approved the Phase 10 deliverable summary (designing principle, cast/threads/mysteries-in-play summary, PLAN COMPREHENSIVENESS PREVIEW, CHC labels, firewall verdicts, target write paths). The gate is absolute under Auto Mode — invoking the skill is not approval of the deliverable.
+Do NOT write any of `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md`, `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-0001.md`, `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, or `worlds/<world_slug>/stories/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
+
+(a) Pre-flight Check has completed: world resolved, story-slug collision-free against `worlds/<world_slug>/stories/<story_slug>/`, all ids allocated via `mcp__worldloom__allocate_next_id`, context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', ...)`, and the canonical prose-quality sources (`docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `reports/prose-quality-instructions.md`) are loaded.
+
+(b) Phases 1-9 have completed in working memory: state seed normalized; SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / (optional SLT) seed records drafted; `SE-0001` drafted; `PG-0001` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-0001.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; 3-5 `CHC` records drafted.
+
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-0001.validation_trace`, plus the 4 bootstrap-additional checks (cast resolution to existing CHAR dossiers; no mirrored SF globalizes its parent CF scope; root page plan is self-contained per shared contract §8; continuation capacity satisfied — at least one eligible seed SLT or a planned runtime JIT path; terminal root rejected as authoring error).
+
+(d) The user has explicitly approved the deliverable summary (bundle path, cast roster, record inventory by class, page plan structural preview, emitted choices list).
+
+This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
 
 ## Process Flow
 
 ```
-Pre-flight (resolve worlds/<world-slug>/; allocate STORY-NNNN via
-            allocate_next_id; slug-collision
-            check on stories/<story-slug>/; validate cast_bind_list
-            against characters/INDEX.md; load content_policy block;
-            assemble retrieval load — context_packet for premise-relevant
-            world state + whole-class M-record load + whole-class
-            INV-record load)
-      |
-      v
-Phase 1: Premise Normalization        (genre/tonal register, designing
-                                       principle, central dramatic question,
-                                       POV mode, content_intensity baseline,
-                                       implied threads/obligations/cast
-                                       tensions/locations/period)
-      |
-      v
-Phase 2: Cast Binding                 (mirror each CHAR into STENT-NNNN;
-                                       create initial STINT-0001 per major
-                                       (bare-numeric id; stent_id points to
-                                       the story entity this snapshot drives;
-                                       world_character_id is the world CHAR
-                                       anchor or null for story-only cast);
-                                       story-only entities)
-      |
-      v
-Phase 3: World-Fact Import            (import CFs touching cast/location/
-                                       period as SF-NNNN with derived_from_cf,
-                                       certainty, known_by, epistemic_class;
-                                       create premise-specific SFs with
-                                       canon_relation: not_applicable)
-      |
-      v
-Phase 4: Mystery Firewall +           (declare mysteries_in_play[] in
-         Invariant Audit               STORY_KERNEL; hard reject
-                                       forbidden-status M resolutions;
-                                       run premise + threads + obligations
-                                       against every INV record;
-                                       hard reject unresolvable tensions)
-      |
-      v
-Phase 5: Initial Threads +            (2-5 THR-NNNN — main + relationship +
-         Obligations                   optional threat/mystery-edge/subthread;
-                                       initial OBL-NNNN per thread with
-                                       salience + urgency + ≥2 payoff_modes;
-                                       initialize consequences ledger)
-      |
-      v
-Phase 6: Storylet Pool Seed           (delegated to storylet-pool-authoring
-                                       seed mode with focus_area:
-                                       bootstrap_mix and
-                                       parent_skill_invocation: true and
-                                       pre-allocated target_slt_ids[];
-                                       returns approved SLTs with final ids
-                                       in memory)
-      |
-      v
-Phase 7: Root Page Plan Authoring     (populate canonical plan template at
-                                       .claude/skills/_shared-templates/
-                                       page-plan.md for PG-0001 scene-setter;
-                                       assemble LLM prompt with content_policy
-                                       verbatim + world context + story
-                                       kernel + prose craft contract verbatim +
-                                       cast + state context + entry pressure
-                                       framing;
-                                       LLM authors plan body — NOT prose;
-                                       inline every referenced record as
-                                       self-contained renderer context
-                                       (CFs/CHARs/SFs/SRELs/STINTs/STLOCs/
-                                       STOBJs default to verbatim body; OBLs/
-                                       THRs/CNSQs use the canonical §10/§11/
-                                       §12 prose-direction translation);
-                                       frontmatter records
-                                       selected_arc_id: null, declared_visible_
-                                       affordances[], forbidden_resolutions[],
-                                       deferred_validation_trace; plan-
-                                       completeness post-LLM check; up to 3
-                                       re-prompts shared budget. No post-render
-                                       8-axis prose critic — deferred to
-                                       branching-story-page-prose-finalize)
-      |
-      v
-Phase 7.5: Declared-Affordance        (read plan frontmatter's
-           Validation                  declared_visible_affordances[]; for
-                                       each entry, validate mapped_state_id
-                                       resolves to a real STENT/STOBJ/STLOC/
-                                       OBL/THR/M per affordance_type and
-                                       grounding_source; ungrounded → re-
-                                       prompt Phase 7; grounded → feed
-                                       Visible Affordance Map to Phase 8 as
-                                       additional anchors)
-      |
-      v
-Phase 8: Initial Choice Generation    (delegate to page-cycle Phase 8
-                                       choice-surface gate in PG-0001
-                                       special-case mode; emit 4-6
-                                       scene-commitment CHCs with
-                                       choice-worthiness + consequence-capacity)
-      |
-      v
-Phase 9: Validation Gates             (20 gates — see HARD-GATE; each PASS
-         (Canon Safety Check phase)    with one-line rationale, except
-                                       prose_ledger_consistency (gate 10),
-                                       which records DEFERRED — awaiting prose
-                                       render and is flipped to PASS/FAIL by
-                                       branching-story-page-prose-finalize;
-                                       FAIL routes to responsible phase)
-      |
-      v
-Phase 9.5: Bootstrap Discipline       (11 Phase 9.5 discipline checks
-           Validator                    outside the Phase 9 20-gate set
-                                        (gates 1-13 FOUNDATIONS-anchored,
-                                        gates 14-18 SPEC-20/22-anchored,
-                                        gates 19-20 plan-authoring-anchored);
-                                        new check 11 plan_self_containment;
-                                        PASS-with-rationale into
-                                        discipline_validation_trace; FAIL
-                                        routes to responsible phase)
-      |
-      v
-Phase 10: HARD-GATE Approval          (deliverable summary: designing
-                                       principle + cast/threads/
-                                       mysteries-in-play + PLAN
-                                       COMPREHENSIVENESS PREVIEW + CHC
-                                       labels + firewall verdicts +
-                                       target paths;
-                                       --user options-->
-                                       ACCEPT / REVISE-narrow /
-                                       REVISE-re-author-plan /
-                                       REVISE-different opening / REJECT)
-      |
-   accept
-      |
-      v
-Phase 11: Commit / Engine Submit      (create
-                                       stories/<story-slug>/ tree
-                                       (incl. pages-prose-plans/ and
-                                       pages-prose/ with .gitkeep);
-                                       write markdown root/plan/index files
-                                       directly; submit all
-                                       _source/<class>/<ID>.yaml records
-                                       through the patch engine,
-                                       pages-prose-plans/PG-0001.md,
-                                       stories/<story-slug>/INDEX.md;
-                                       append/create
-                                       stories/INDEX.md per-world index;
-                                       rendered prose at pages-prose/
-                                       PG-0001.md is supplied externally
-                                       and merged via branching-story-
-                                       page-prose-finalize; NO git commit)
+Pre-flight Check (FOUNDATIONS + contract + prose-quality sources loaded;
+  world resolved; cast verified; bundle-target collision-free;
+  ids allocated; context packet loaded)
+        |
+        v
+Phase 1: Normalize premise → state_seed
+        |
+        v
+Phase 2: Mirror load-bearing world facts → SF records (in memory)
+        |
+        v
+Phase 3: Create initial beliefs → BEL records (in memory)
+        |
+        v
+Phase 4: Create initial debts → OBL / CNSQ / THR / SREL records (in memory)
+        |
+        v
+Phase 5: [optional] Seed commitment blocks → SLT author-pool records (in memory)
+        |
+        v
+Phase 6: Commit root event + page snapshot → SE-0001 + PG-0001 (in memory)
+        |
+        v
+Phase 7: Author root page plan → pages-prose-plans/PG-0001.md (in memory)
+        |
+        v
+Phase 8: Generate first choices → CHC records (in memory)
+        |
+        v
+Phase 9: Validate against shared 8 hard gates + 4 bootstrap-additional checks
+        |
+        v
+Phase 10: HARD-GATE fires → atomic patch + markdown writes
 ```
+
+## Inputs
+
+### Required
+
+- `world_slug` — string — existing world directory slug under `worlds/`
+- `story_slug` — string — kebab-case slug for the new bundle
+- `premise` — string — 1-3 paragraph natural-language premise
+- `selected_cast` — list[CHAR-NNNN] — cast member ids from the world's `characters/INDEX.md`
+
+### Optional
+
+- `pov` — string — perspective convention; default: close third
+- `tone` — string — tonal contract; default: inherit from `WORLD_KERNEL.md`
+- `content_intensity` — enum — `tame | mature | explicit`; default: `mature`
+- `initial_location` — string — STLOC candidate (label and grounding canon)
+- `opening_pressure` — string — natural-language pressure statement
+- `seed_commitment_blocks` — enum — `none | minimal | standard`; default: `minimal`
 
 ## Output
 
-### Story bundle structure (staged commit - engine YAML transaction + sequenced markdown writes)
+Atomic story-bundle records (via `mcp__worldloom__submit_patch_plan`) + direct-write markdown artifacts. All `_source/*.yaml` paths below are relative to `worlds/<world_slug>/stories/<story_slug>/`.
 
-```
-worlds/<world-slug>/stories/<story-slug>/
-├── STORY_KERNEL.md
-├── _source/
-│   ├── entities/             ← STENT-NNNN.yaml
-│   ├── facts/                ← SF-NNNN.yaml (epistemic_class declared)
-│   ├── events/               ← SE-NNNN.yaml
-│   ├── obligations/          ← OBL-NNNN.yaml
-│   ├── consequences/         ← CNSQ-NNNN.yaml (NOT emitted at default bootstrap; .gitkeep preserves directory; runtime page-cycle JIT-creates)
-│   ├── threads/              ← THR-NNNN.yaml
-│   ├── relationships/        ← SREL-NNNN.yaml
-│   ├── intentions/           ← STINT-NNNN.yaml (bare-numeric id per the patch engine's `^STINT-\d{4}$` contract; per-character semantics carried via the record's `stent_id` field, with `world_character_id` as the optional world CHAR anchor; legacy bundles may contain suffixed-id files like `STINT-0001-iker.yaml` predating this convention — those remain valid only for those bundles, new bundles MUST use bare-numeric ids per the engine regex; see branching-story-page-cycle/references/record-schemas.md for full STINT id-discipline contract)
-│   ├── storylets/            ← SLT-NNNN.yaml (provenance.origin=bootstrap_seed)
-│   ├── locations/            ← STLOC-NNNN.yaml
-│   ├── objects/              ← STOBJ-NNNN.yaml (NOT emitted at default bootstrap unless premise establishes a pre-PG-0001 STOBJ; .gitkeep preserves directory; runtime page-cycle JIT-creates)
-│   ├── artifacts/            ← DA-NNNN.yaml (story-local; distinct from world DA; NOT emitted at default bootstrap unless premise establishes a pre-PG-0001 DA; .gitkeep preserves directory; runtime page-cycle JIT-creates)
-│   ├── branches/             ← BR-0001.yaml
-│   ├── pages/                ← PG-0001.yaml
-│   └── choices/              ← CHC-NNNN.yaml
-├── pages-prose-plans/        ← PG-0001.md (comprehensive plan; this skill writes it at Phase 11)
-├── pages-prose/              ← .gitkeep only at bundle commit; rendered prose supplied externally; branching-story-page-prose-finalize merges it later
-└── INDEX.md
-```
+| Class | File path | Created when |
+|---|---|---|
+| `STORY-NNNN` | (per-world identifier; resolved at allocation) | Always |
+| `STENT-NNNN` | `_source/entities/STENT-NNNN.yaml` | Always (one per cast member) |
+| `STINT-NNNN` | `_source/intentions/STINT-NNNN.yaml` | Always (≥1 per cast member) |
+| `SF-NNNN` | `_source/facts/SF-NNNN.yaml` | Always (load-bearing mirrored world facts) |
+| `BEL-NNNN` | `_source/beliefs/BEL-NNNN.yaml` | Always (initial belief state per cast member) |
+| `OBL-NNNN` | `_source/obligations/OBL-NNNN.yaml` | IF opening pressure demands explicit obligation |
+| `CNSQ-NNNN` | `_source/consequences/CNSQ-NNNN.yaml` | IF opening pressure demands explicit consequence |
+| `THR-NNNN` | `_source/threads/THR-NNNN.yaml` | Always (1-3 threads tracking opening pressure) |
+| `SREL-NNNN` | `_source/relationships/SREL-NNNN.yaml` | IF cast relationships constrain opening choice |
+| `STLOC-NNNN` | `_source/locations/STLOC-NNNN.yaml` | Always (initial location) |
+| `STOBJ-NNNN` | `_source/objects/STOBJ-NNNN.yaml` | IF an object is grounded in the opening situation |
+| `DA-NNNN` | `_source/artifacts/DA-NNNN.yaml` | IF an in-story diegetic artifact is in play at opening |
+| `BR-0001` | `_source/branches/BR-0001.yaml` | Always (root branch) |
+| `SE-0001` | `_source/events/SE-0001.yaml` | Always (event_kind: story_start) |
+| `PG-0001` | `_source/pages/PG-0001.yaml` | Always (root page snapshot) |
+| `CHC-NNNN` | `_source/choices/CHC-NNNN.yaml` | Always (3-5 choices emitted by PG-0001 + write-in slot) |
+| `SLT-NNNN` | `_source/storylets/SLT-NNNN.yaml` | IF `seed_commitment_blocks != 'none'` (4-8 for `minimal`; 8-14 cap for `standard`) |
+| STORY_KERNEL.md | `STORY_KERNEL.md` | Always (direct write after patch submission) |
+| Root page plan | `pages-prose-plans/PG-0001.md` | Always (direct write after patch submission) |
+| Bundle INDEX | `INDEX.md` | Always (direct write after patch submission) |
+| Per-world stories INDEX | `worlds/<world_slug>/stories/INDEX.md` | Always (first-run create; append thereafter) |
 
-### Per-world index (idempotent)
+Bootstrap does NOT write `pages-prose/PG-0001.md` (rendered prose is supplied externally) and does NOT write any prose receipt.
 
-`worlds/<world-slug>/stories/INDEX.md` — created on first invocation per world; appended/replaced thereafter. One line per story bundle in the form:
+## World-State Prerequisites
 
-```
-- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-NNNN, M-NNNN | execution_mode: <mode> | created: <iso8601>
-```
+Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-### No canon-file mutations
+- `docs/FOUNDATIONS.md` — §Story Bundles governs this skill's record discipline; §Tooling Recommendation mandates the retrieval surface
+- `.claude/skills/_shared-templates/story-state-contract.md` — shared schemas (§4), predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), shared write order (§10)
+- `reports/prose-quality-instructions.md` — canonical source for the page plan's verbatim §2 (Content Policy), §3 (Prose Craft Contract), §19 (Render-Time Instruction Template)
+- `worlds/<world_slug>/WORLD_KERNEL.md` and `worlds/<world_slug>/ONTOLOGY.md` — world identity, invariants, ontology categories the bundle's records must respect
+- `worlds/<world_slug>/characters/INDEX.md` — every entry in `selected_cast[]` must resolve to an existing CHAR-NNNN dossier
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', seed_nodes=<cast CHAR ids + initial_location label if provided>, token_budget=<default>)` — relevant CF / INV / M / OQ / ENT / SEC records bearing on the cast and opening situation
 
-This skill never writes to `WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter. No CF, CH, INV, M, OQ, ENT, or world-level SEC record is emitted. If the user later wants to promote a story-local SF / STENT / DA to world canon, that is a separate `story-fact-promotion-to-canon` run — not this skill's responsibility.
+Bundle-target collision discipline (per-nested-scope bootstrap variant): `worlds/<world_slug>/stories/<story_slug>/` MUST NOT exist; the parent world directory MUST exist. Absence of the bundle target IS the prerequisite — collision aborts at Pre-flight.
 
-### Record schemas
+## Pre-flight Check
 
-Inlined in this skill's templates and backed by story-bundle patch-engine ops / record-schema validators for `_source/<class>/*.yaml` records:
+Before Phase 1:
 
-- STORY_KERNEL.md → `templates/story-kernel.md`
-- STENT-NNNN, SF-NNNN, SE-NNNN, OBL-NNNN, CNSQ-NNNN, THR-NNNN, SREL-NNNN, STINT-NNNN, STLOC-NNNN, STOBJ-NNNN, BR-NNNN, PG-NNNN, CHC-NNNN → `templates/story-records.yaml` (one document per record class with required+optional field enumeration and example values)
-- SLT-NNNN → `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` (bootstrap delegates Phase 6 to storylet-pool-authoring and writes the returned records in Phase 11)
-- DA-NNNN (story-local) → derived from world-level DA frontmatter shape with `story_id` field added; documented in `templates/story-records.yaml`.
-- Per-bundle INDEX.md → `templates/story-bundle-index.md`
-- Content policy block (NC-21 verbatim) → `templates/content-policy.txt`
+1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `reports/prose-quality-instructions.md` into working context. Abort with clear missing-file error on any unreadable path.
+2. Resolve `worlds/<world_slug>/`. Abort if the directory does not exist, or if `WORLD_KERNEL.md` / `ONTOLOGY.md` are absent.
+3. Verify `worlds/<world_slug>/stories/<story_slug>/` does NOT exist. Abort with a slug-collision error if it does.
+4. Load `worlds/<world_slug>/characters/INDEX.md`. For every entry in `selected_cast[]`, verify it resolves to an existing CHAR dossier in the world. Abort with a cast-resolution error on any miss.
+5. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for every class to be created: `STORY` (per-world; no story_slug param needed), `BR` (will be `BR-0001`), `SE` (will be `SE-0001`), `PG` (will be `PG-0001`), and class-specific ids for every STENT / STINT / SF / **BEL** / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / CHC / (optional SLT) record to be drafted in Phases 1-8. The `BEL` id class lands via MCPENH-040 — see §Guardrails §Known integration debt.
+6. Load world canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', seed_nodes=<cast CHAR ids + initial_location label if provided>, token_budget=<default>)`.
 
-## Procedure
+If any precondition fails, the skill aborts before Phase 1.
 
-1. **Pre-flight + World-State Prerequisites.** Run preconditions and load all world-state inputs. Load `references/pre-flight-and-prerequisites.md`. Abort the bootstrap on any precondition failure (missing world, slug collision, missing CHAR, missing EPE, etc.).
-2. **Phases 1-3: Premise Normalization, Cast Binding, World-Fact Import.** Convert the premise into a design brief, mirror the cast into STENT/STINT records, and import relevant world CFs as story-local SFs with declared `epistemic_class`. Load `references/phases-1-3-premise-cast-facts.md`.
-3. **Phase 4: Mystery Firewall + Invariant Audit.** Hard-reject any `forbidden`-status M resolution; audit premise + cast + sketched threads/obligations against every INV's `break_conditions`. Load `references/phase-4-firewall-and-invariant-audit.md`.
-4. **Phase 5: Initial Threads + Obligations.** Emit 2-5 THR records, initial OBL records per thread (Rule 5 halt: salience + urgency + ≥2 payoff_modes mandatory), and initialize the consequences ledger. Load `references/phase-5-threads-and-obligations.md`.
-5. **Phase 6: Storylet Pool Seed.** Compute `target_pool_size`, pre-allocate `target_slt_ids[]`, then delegate to `storylet-pool-authoring` (`mode: seed`, `focus_area: bootstrap_mix`, `parent_skill_invocation: true`, `target_slt_ids[]`); the sub-routine returns approved SLT records with final ids in memory for Phase 11 to write. Load `references/phase-6-storylet-pool-seed.md`.
-6. **Phase 7: Root Page Plan Authoring.** Populate the canonical plan template at `.claude/skills/_shared-templates/page-plan.md` for PG-0001 in scene-setter mode without selecting an SLT (frontmatter `selected_arc_id: null`, `chosen_variant_id: null`, `required_effects: []`); assemble the content_policy-first LLM prompt with the Prose Craft Contract embedded; the LLM authors the plan body (NOT prose), inlining every referenced CF / CHAR / SF / SREL / STINT / STLOC / STOBJ / M / INV record body verbatim while §10 / §11 / §12 carry OBL / THR / CNSQ ids plus the canonical prose-direction translation instead of full engine-field dumps; declared visible affordances are recorded in frontmatter; the §15-alt entry pressure framing replaces §15 + §16 at the root case; the deferred validators (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) are recorded as DEFERRED in `deferred_validation_trace`; run deterministic post-LLM checks for plan completeness and cast Material Reality consistency; emit page-cycle-compatible PG-0001 + BR-0001 + SE-0001 records into the working buffer with the PG-0001 root special-case fields and new schema fields (`prose_plan_path: pages-prose-plans/PG-0001.md`, `prose_path: null`, `prose_status: pending`, `deferred_validation_trace`). The 8-axis prose critic (formerly run after prose render) is REMOVED from this phase — it runs in `branching-story-page-prose-finalize` Phase 3 against the user-supplied rendered prose. Load `references/phase-7-root-page-plan.md`.
-7. **Phase 7.5: Declared-Affordance Validation.** Read the Phase 7 plan buffer's `declared_visible_affordances[]` frontmatter; for each entry validate `mapped_state_id` resolves against state per `affordance_type` and `grounding_source`; route any ungrounded declaration back to Phase 7 as a re-prompt trigger; feed the Visible Affordance Map to Phase 8. Load `references/phase-7-5-visible-affordance-extraction.md`.
-8. **Phase 8: Initial Choice Generation.** Delegate to `branching-story-page-cycle` Phase 8 choice-surface gate in PG-0001 special-case mode with `PG-0001.state_snapshot`, the Phase 7.5 Visible Affordance Map as anchors, and the bootstrap governor nudge; emit 4-6 scene-commitment CHC records satisfying choice-worthiness, strong-axis collective difference, and consequence-capacity; populate `PG-0001.emitted_choices`. Load `references/phase-8-choice-generation.md`.
-9. **Phase 9: Validation Gates (Canon Safety Check phase).** Run all 20 gates; each must record PASS with a one-line rationale into `STORY_KERNEL.md.validation_trace`, except `prose_ledger_consistency` (gate 10) which records `DEFERRED — awaiting prose render` and is flipped to PASS/FAIL by `branching-story-page-prose-finalize` Phase 5. The plan-authoring backstops verify plan-template completeness / id-resolution (`plan_completeness_check`, gate 19) and cast Material Reality consistency (`cast_material_reality_consistency`, gate 20). Any FAIL halts and routes to the responsible phase. Load `references/phase-9-validation-gates.md`.
-9.5. **Phase 9.5: Bootstrap Discipline Validator.** Run all 11 discipline checks (including the new `plan_self_containment` check, which verifies the plan inlines rather than bare-references every record id appearing in any plan section); each must record PASS with a one-line rationale into `STORY_KERNEL.md.discipline_validation_trace`. Any FAIL halts and routes to the responsible upstream phase. Load `references/phase-9-5-bootstrap-discipline-validator.md`.
-10. **Phase 10: HARD-GATE Approval.** Inline below.
-11. **Phase 11: Commit / Engine Submit.** Inline below.
+## Phase 1: Normalize the premise into a state seed
 
-## Phase 10: HARD-GATE Approval
+Produce a structured seed capturing only the information required to initialize causal state. Do NOT author dramatic acts, act obligations, plot milestones, mandatory midpoint reversals, climax structures, or fixed ending paths.
 
-Present the deliverable summary to the user:
-
-```
-PROPOSED STORY BUNDLE: <story_slug> in <world_slug>
-
-STORY-NNNN: STORY-<allocated id>
-Designing principle: <one sentence>
-Cast: <list of STENT with role_in_story>
-Mysteries in play: <list of M-NNNN with status + future_resolution_safety>
-Threads: <list of THR with type + status + current_pressure>
-Initial obligations: <count by salience tier>
-Storylet pool: <count> seed scene-commitment arcs covering <commitment_families> / <commitment_classes>
-
-PLAN COMPREHENSIVENESS PREVIEW:
-PLAN: pages-prose-plans/PG-0001.md (~<word count> words; <byte count> bytes)
-
-Plan section coverage:
-- §5 World canon snapshot: <N> CFs inlined
-- §8 Cast in this scene: <N> dossiers inlined (CHAR-NNNN, CHAR-NNNN, ...)
-- §9 Story-local facts visible: <N> SFs inlined
-- §10 Open obligations: <N> OBLs translated as prose-direction pressure
-- §11 Active threads: <N> THRs translated as prose-direction thread posture
-- §15-alt Entry pressure framing: <one-sentence summary>
-- §18 Scene direction:
-    REQUIRED TURN: <one sentence>
-    STOPPING POINT: <one sentence>
-    DO NOT REVEAL: <engaged mystery posture cues from §7 + engine-vocabulary list>
-- §19 Render-time instruction block: present
-
-Plan self-containment check: PASS (every record id in plan is inlined)
-
-CHOICES OFFERED:
-1. <CHC-NNNN label>
-2. <CHC-NNNN label>
-...
-N+1. (write your own)
-
-FIREWALL VERDICTS:
-- Mystery firewall (gate 1): PASS — <rationale>
-- Invariant compatibility (gate 2): PASS — <rationale>
-- Content policy (gate 3): embedded in STORY_KERNEL.md + plan §2
-- Prose ledger consistency (gate 10): DEFERRED — awaiting prose render (finalize Phase 5)
-- arc_trace_evidence_alignment (gate 16): PASS — PG-0001 root special case (no arc selected)
-- plan_completeness_check (gate 19): PASS — <rationale>
-- cast_material_reality_consistency (gate 20): PASS — <rationale>
-- Bootstrap discipline (Phase 9.5): PASS — <rationale>
-- plan_self_containment (Phase 9.5 check 11): PASS — <rationale>
-- Branch isolation (gate 12): structural
-
-TARGET WRITE PATHS:
-- worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md
-- worlds/<world-slug>/stories/<story-slug>/_source/<class>/<ID>.yaml
-  (<count> records across 15 subdirectories)
-- worlds/<world-slug>/stories/<story-slug>/pages-prose-plans/PG-0001.md
-- worlds/<world-slug>/stories/<story-slug>/pages-prose/.gitkeep
-- worlds/<world-slug>/stories/<story-slug>/INDEX.md
-- worlds/<world-slug>/stories/INDEX.md (per-world; create or append)
-
-NEXT STEP (post-commit, externally):
-Author or render the prose for PG-0001 into
-worlds/<world-slug>/stories/<story-slug>/pages-prose/PG-0001.md (reading
-pages-prose-plans/PG-0001.md as the prompt), then invoke
-branching-story-page-prose-finalize world_slug=<...> story_slug=<...>
-page_id=PG-0001 to run the deferred prose-coupled validators and flip
-PG-0001.prose_status from pending to rendered.
+```yaml
+story_seed:
+  premise: <verbatim user premise>
+  pov: <inherited or supplied>
+  tone: <inherited or supplied>
+  content_intensity: tame | mature | explicit
+  initial_location: <STLOC label + grounding canon>
+  initial_pressure: <natural-language statement>
+  starting_cast: [STENT-NNNN]   # one entry per cast member
+  initial_public_situation: <what is publicly known or visible at the opening>
+  private_knowledge: [<short label>]   # things one or more cast members know that the public does not
+  contested_claims: [<short label>]    # claims one cast member holds that another denies
+  forbidden_mystery_resolutions: [M-NNNN]   # forbidden mysteries plausibly triggered by this premise's pressures
 ```
 
-User options:
+## Phase 2: Mirror load-bearing world facts
 
-- **ACCEPT** → proceed to Phase 11.
-- **REVISE — narrow** → user adjusts cast / threads / obligations / tone; restart from the affected phase.
-- **REVISE — re-author plan** → re-run Phase 7 with constraint feedback inline (re-prompt counter resets).
-- **REVISE — different opening storylet** → re-run Phase 7 with a different storylet selection (next-best by score).
-- **REJECT** → no writes; halt the bootstrap.
+Create `SF` records for facts the opening state actually depends on. Each mirrored `SF` records: `derived_from_cf: CF-NNNN` (the world canon fact it mirrors), branch / story scope, certainty, who-knows-it cross-reference (linking to `BEL` if epistemic asymmetry exists), and a one-line `why_it_matters_at_opening` note.
 
-**HARD-GATE fires here**: no file is written until the user explicitly ACCEPTs. Auto Mode does not override.
+Do NOT mirror broad world background. The mirror exists so the turn-cycle does not re-query the world index for facts already known to constrain opening choices.
 
-## Phase 11: Commit / Engine Submit
+## Phase 3: Create initial belief state
 
-Directory setup plus a patch-engine transaction for atomic YAML records, followed by direct markdown writes. The phase is a staged commit, not a single all-or-nothing transaction: the engine envelope is atomic for `_source/<class>/*.yaml` records, but the surrounding markdown writes (`STORY_KERNEL.md`, `pages-prose-plans/PG-0001.md`, per-bundle `INDEX.md`, per-world `INDEX.md`) are sequential and recoverable per the partial-failure note below. File order matters — the per-world INDEX.md is the LAST direct write so partial failure leaves the per-world index unmutated:
+For every cast member, create only the `BEL` records that affect immediate choice logic at the opening (per shared contract §4.1 schema, FOUNDATIONS §Story Bundles §6a Belief vs. Fact):
 
-1. `mkdir -p worlds/<world-slug>/stories/<story-slug>/_source/{entities,facts,events,obligations,consequences,threads,relationships,intentions,storylets,locations,objects,artifacts,branches,pages,choices}` and `worlds/<world-slug>/stories/<story-slug>/pages-prose-plans` and `worlds/<world-slug>/stories/<story-slug>/pages-prose`. Touch a `.gitkeep` in `pages-prose/` — bootstrap NEVER writes `pages-prose/PG-0001.md`; the rendered prose file is supplied externally and merged by `branching-story-page-prose-finalize`. Touch a `.gitkeep` in any `_source/<class>/` subdirectory that does NOT receive a record at this bootstrap (typically `consequences/`, `objects/`, `artifacts/` — runtime page-cycle JIT-creates records here). The `.gitkeep` files preserve the directory tree under `git add` so the runtime page-cycle and finalize can JIT-write into the structurally-expected paths without first having to recreate the subdirectories.
-2. `Write worlds/<world-slug>/stories/<story-slug>/STORY_KERNEL.md` per `templates/story-kernel.md` (premise + content_policy preamble verbatim + designing principle + cast bind list + themes + content_intensity baseline + POV mode + central dramatic question + `mysteries_in_play[]` + `invariants_acknowledged[]` + `execution_mode_default` + `cadence_policy` + `menu_policy` + `validation_trace` + STORY-NNNN frontmatter). The `cadence_policy` and `menu_policy` blocks default to the values shown in `templates/story-kernel.md` frontmatter when an older bundle omits them; see `references/phases-1-3-premise-cast-facts.md` §STORY_KERNEL Cadence And Menu Policy for premise-tone-derived overrides.
-3. Submit one patch-plan envelope containing `create_stent_record`, `create_sf_record`, `create_se_record`, `create_obl_record`, `create_thr_record`, `create_srel_record`, `create_stint_record`, `create_stloc_record`, `create_stobj_record`, `create_br_record`, `create_pg_record`, `create_chc_record`, and `create_slt_record` ops for each default `_source/<class>/<ID>.yaml` record. CNSQ records (`create_cnsq_record`) and story-local diegetic artifact records (`append_story_diegetic_artifact_record`) are emitted ONLY when the premise establishes a pre-PG-0001 consequence or a story-local diegetic artifact present at bootstrap; otherwise omit both those ops and their `expected_id_allocations` keys. Schemas at `templates/story-records.yaml` and the storylet template. **Submit-path convention** — see [`references/engine-envelope-shape.md`](references/engine-envelope-shape.md) for the canonical envelope shape (§1-§3), the `approval_token` signing CLI (§4), validate / submit path selection by envelope size (§5), and failure-mode response codes (§6). Bootstrap envelopes vary by premise complexity, cast size, location/object inventory, and storylet pool size; typical envelopes span ~40-80 ops / 100KB-250KB JSON. Use the CLI submit path (`node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` after `sign-approval-token.js`) as the default regardless of op count, rather than `mcp__worldloom__submit_patch_plan`'s inline path — even modest-sized bootstrap envelopes routinely exceed the MCP transport's inline parameter limits. Use `mcp__worldloom__validate_patch_plan` (or the CLI equivalent) before signing — the validator catches schema and rule errors without mutating state, shortening the diagnose-and-fix loop. **Schema-exemplar tip**: if the world has an existing story bundle under `worlds/<world-slug>/stories/`, reading one record per class from that bundle (e.g., `worlds/<slug>/stories/<existing-bundle>/_source/entities/STENT-0001.yaml`, `.../facts/SF-0001.yaml`, `.../pages/PG-0001.yaml`, etc.) provides complete worked schema examples that complement the abstract `templates/story-records.yaml` reference. Bundle-scoped IDs are independent across bundles, so reading one bundle's record at id N does not conflict with allocating the same id N in the new bundle.
-4. `Write worlds/<world-slug>/stories/<story-slug>/pages-prose-plans/PG-0001.md` (the populated canonical plan template from Phase 7's working buffer — hybrid YAML frontmatter + markdown body §1-§19 with §15 and §16 omitted at the root case in favor of §15-alt entry pressure framing). Bootstrap NEVER writes `pages-prose/PG-0001.md` itself — the rendered prose is produced externally (manual author or external LLM renderer) after bundle commit by reading `pages-prose-plans/PG-0001.md` as the prompt, and merged via `branching-story-page-prose-finalize`.
-5. `Write worlds/<world-slug>/stories/<story-slug>/INDEX.md` (per-bundle index — branches / leaves / threads / mysteries / commitment_family and commitment_class distribution; template at `templates/story-bundle-index.md`).
-6. **Per-world index** at `worlds/<world-slug>/stories/INDEX.md`:
-   - If file does not exist: create with header `# Stories — <World-Slug-TitleCased>` followed by one blank line, then the story line.
-   - If file exists with placeholder content (e.g., `No active story bundles.` from `create-base-world`'s genesis emission, or any header-only content with zero matches of the regex `^- \[STORY-\d{4}\]`): replace the placeholder body with the standard `# Stories — <World-Slug-TitleCased>` header followed by one blank line, then the story line. Treat this branch as a first-write-after-genesis case rather than an append. The placeholder-detection trigger is zero matches of `^- \[STORY-\d{4}\]` in the existing content; if any story line is already present, the file is not in placeholder state and the append branch below applies.
-   - If file exists with one or more story lines: read; append the new story's line in the format `- [STORY-NNNN] <story-slug> — <designing-principle one-liner> | cast: CHAR-NNNN, CHAR-NNNN | mysteries_in_play: M-NNNN, M-NNNN | execution_mode: <mode> | created: <iso8601>`; re-sort alphabetically by `STORY-NNNN`; write back via direct `Edit`.
-   - `worlds/<world-slug>/stories/INDEX.md` is NOT under `_source/`, so Hook 3 does not block direct `Write` / `Edit`.
+- What they want (use `STINT` if active goal; `BEL` if felt belief about possibility).
+- What they think is happening.
+- What they know or misunderstand about other cast members.
+- What they can plausibly perceive at the opening (grounded in `state_snapshot.visible_affordances`).
 
-Direct `Write` is forbidden for story-bundle `_source/<class>/*.yaml` records. Hook 3 now covers `worlds/<slug>/stories/<slug>/_source/...`; story YAML writes must route through story-bundle patch-engine ops. `STORY_KERNEL.md`, page prose, per-bundle `INDEX.md`, and `stories/INDEX.md` remain direct markdown writes.
+Use `BEL` (not `SF`) for false beliefs, suspicions, rumors, lies, and private assumptions. `BEL.truth_relation` and `BEL.visibility` set per shared contract §4.1 — these are consumed by the social-state firewall per FOUNDATIONS §Story Bundles §6a.
 
-**Partial-failure recovery**: if patch-engine submission fails, no `_source` YAML should land; report the engine error and do not write the plan file or indexes. If a later markdown write fails, the user receives the failure with the specific path and instruction to either manually clean up the partial bundle or repair the markdown surface. The per-world INDEX.md write at step 6 is intentionally LAST so a partial bundle never appears in the per-world index. The `pages-prose/PG-0001.md` rendered prose file is supplied externally after this skill exits and is NOT part of the partial-failure recovery surface — its absence is the expected post-commit state (`prose_status: pending`).
+## Phase 4: Create initial debts
 
-Report all written paths. **Do NOT commit to git.** The user reviews the diff and commits.
+Create 1–3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` records only when they constrain a choice, demand response, track promise / risk / threat / cost, or create a future consequence if ignored. Create `SREL` records for relationships that constrain opening choice.
+
+**Good debt** changes what a cast member can actually do at the opening. **Bad debt** restates the premise, names a theme, encodes an act structure, or predicts a future plot beat. Do not create bad debt.
+
+## Phase 5: Seed commitment blocks (optional)
+
+Conditional on the `seed_commitment_blocks` argument:
+
+- `none`: skip; the turn-cycle will create branch-scoped JIT blocks at runtime.
+- `minimal`: create 4–8 broad `SLT` records covering aftermath / confrontation-or-refusal / information-seeking / relationship-pressure / movement-or-escape / fallback-continuation. Add reveal and/or repair blocks only if the opening pressure plausibly calls for them within the first few turns.
+- `standard`: create 8–14 blocks (cap).
+
+All seed blocks: `scope.visibility: author_pool`, `scope.branch_id: null`, `created_at_page: null`, `provenance.origin: bootstrap_seed`. Predicate preconditions reference only world canon, mirrored `SF` from Phase 2, and bootstrap-created `BEL` / `SREL` / `STENT` ids from Phases 3-4 — no branch-local records (there is no branch-local state yet at bootstrap; including any would fail Phase 9 gate 4 branch isolation).
+
+Commitment blocks are causal moves, not dramatic acts, arcs, or plot rails — the schema discipline at shared contract §4.4 plus FOUNDATIONS §Story Bundles §5a (Commitment Blocks Are Causal Moves) forbids `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, and shape discriminators.
+
+## Phase 6: Commit root event and root page snapshot
+
+In working memory, draft `SE-0001`:
+
+```yaml
+id: SE-0001
+event_kind: story_start
+actor: system
+outcome_route: accept
+world_logic_rationale: >
+  <how each cast member's opening location, intention, and belief state
+   arises from the premise + world canon>
+state_delta:
+  create: [<every STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL /
+           STLOC / STOBJ / DA id created in Phases 1-4>]
+```
+
+Draft `PG-0001` per shared contract §4.2:
+
+- `parent_page_id: null`, `state_hash_parent: null`, `turn_index: 0`
+- `input.choice_id: null`, `input.manual_action_text: null`, `input.resolved_event_id: SE-0001`
+- Full `state_snapshot` (active_records including the BEL key; entity_status per active STENT; visible_affordances with ordinal indices; unresolved_mystery_claims; continuation status)
+- `plan.path: pages-prose-plans/PG-0001.md`, `plan.plan_hash: <computed>`
+- `rendered_prose.path: null`, `rendered_prose.receipt_path: null`
+- `validation_trace`: populated in Phase 9
+
+## Phase 7: Author the root page plan
+
+Draft `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-0001.md` per shared contract §8 — 19 sections.
+
+**§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** This is operationally load-bearing — the external prose renderer has no cross-plan state, so every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
+
+Bootstrap-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to the opening (faction stances, taboos, hazards constraining opening choices); §5 enumerates active cast and entity statuses; §6 names the initial location and the grounded affordances available there; §7 dramatizes the `story_start` event without inventing structural facts; §8 names the required opening beats (typically: establish situation, surface the pressure, set up the first hinge); §9 names the load-bearing relationships and beliefs at play; §10 lists open obligations / consequences / threads; §11 names forbidden mystery resolutions; §12 names the intended stopping point (the first commitment hinge); §13 previews the emitted choices.
+
+No word-count target anywhere in the plan. Engine jargon (record ids, gate names) confined to §15 frontmatter only.
+
+## Phase 8: Generate first choices
+
+Emit 3-5 `CHC` records representing different commitments — not variants of the same wording. Sample different axes: action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire (at authorial discretion within the opening's plausibility envelope). Always emit a write-in slot.
+
+Each `CHC` carries: `surface_label`, `player_visible_intent`, `target_or_action_family` (per shared contract §6 action families), `likely_state_pressure` (which debts / beliefs the choice engages), `associated_commitment_block` (`SLT-NNNN` if known, else null — turn-cycle will JIT), `success_policy` (only when `target_or_action_family == 'attempt'`).
+
+## Phase 9: Validate
+
+Run the 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 against the drafted records. Populate `PG-0001.validation_trace` with one-line PASS rationale per gate:
+
+1. **input legality** — story_start has no parent page; required arguments present.
+2. **parent snapshot compatibility** — no parent snapshot; `state_hash_parent: null` matches.
+3. **mystery / invariant firewall** — no forbidden `M-NNNN` resolved; no INV violated; `forbidden_mystery_resolutions` properly enumerated in state seed.
+4. **branch isolation** — no sibling-branch state in `state_snapshot.active_records`; no seed SLT references branch-local records (none exist at bootstrap).
+5. **append-only delta** — `SE-0001.state_delta` is creates-only; no supersessions or closes at root.
+6. **consequence capacity or terminal proof** — at least one eligible commitment block (seed or JIT-able); terminal root rejected as authoring error.
+7. **plan grounding** — every visible affordance, every required beat, every emitted CHC is grounded in active records or world canon.
+8. **canon promotion hold** — `NOT_APPLICABLE: bootstrap does not assert canon-level truths at root; no SE.promotion_claims drafted`.
+
+Plus 4 bootstrap-additional checks (recorded in working memory; not on `PG.validation_trace`):
+
+1. **Cast resolution** — every `selected_cast[]` entry resolved to an existing CHAR dossier (covered by Pre-flight step 4; re-verified here).
+2. **No SF globalization** — every mirrored `SF` carries `derived_from_cf` and its branch / story scope does not widen the parent CF's geographic / temporal / social scope.
+3. **Root page plan self-containment** — the plan body contains all 19 sections including the verbatim §2 / §3 / §19, with no external-renderer-undefined references.
+4. **Continuation capacity** — at least one seed `SLT` is eligible at `PG-0001` (`seed_commitment_blocks != 'none'`) OR the turn-cycle's JIT path is the planned continuation (`seed_commitment_blocks: 'none'`). Terminal root rejected as authoring error.
+
+If any gate or additional check fails, abort before Phase 10 — write nothing.
+
+## Phase 10: Commit / Write — HARD-GATE fires
+
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record` (via PEENH-007 — see §Guardrails §Known integration debt), `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `create_da_record` (if applicable), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL` (via VALENH-011 — see §Guardrails §Known integration debt).
+3. Present the complete deliverable summary to the user: bundle path, cast roster, record inventory by class with counts, page plan structural preview (§1 / §5 / §6 / §12 / §13 — the engine-readable sections; §2 / §3 / §19 are too long to inline in preview), emitted choices list.
+4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
+5. On approval: obtain patch approval token; submit the patch plan via `mcp__worldloom__submit_patch_plan`.
+6. On patch success, write the markdown artifacts in the shared contract §10 write order: `STORY_KERNEL.md` → `pages-prose-plans/PG-0001.md` → bundle `INDEX.md` → per-world `stories/INDEX.md` (first-run create or append).
+7. Report bundle path + record inventory to the user. Do NOT `git commit`.
+
+**Failure behavior**: patch fail → write nothing; surface failed gate and the corrective action. Patch success + markdown write fail → story-bundle `_source/` records are authoritative; surface the partial-failure to the user with a one-paragraph diagnostic; do not silently retry. Terminal root → authoring error, abort before patch submission.
+
+## Validation Rules This Skill Upholds
+
+- **Rule 1 (No Floating Facts)** — enforced at Phase 2 + Phase 7. Mechanism: every drafted record conforms to the shared contract §4 schemas (required fields per record class); Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
+- **Rule 4 (No Globalization by Accident)** — enforced at Phase 2 + Phase 9 bootstrap-additional check 2. Mechanism: each mirrored `SF` records `derived_from_cf` plus branch/story scope; the bootstrap-additional check rejects scope-widening (a regional CF cannot be mirrored as a globally-scoped `SF`).
+- **Rule 5 (No Consequence Evasion)** — enforced at Phase 4 + Phase 9 gate 6. Mechanism: the good-debt-vs-bad-debt filter at Phase 4 rejects debt that does not change what a cast member can do; Phase 9 gate 6 requires continuation capacity (at least one eligible commitment block) or terminal proof (which is itself rejected at root).
+- **Rule 7 (Preserve Mystery Deliberately)** — enforced at Phase 1 + Phase 9 gate 3. Mechanism: `forbidden_mystery_resolutions` enumerated in the state seed during Phase 1 (drawn from the loaded Mystery Reserve); Phase 9 gate 3 (mystery / invariant firewall) verifies no forbidden `M` is resolved and no `mystery_policy.forbidden_resolutions` are breached by any drafted seed `SLT`.
 
 ## Record Schemas
 
-See Output §Record schemas above for the full mapping. This skill emits no Canon Fact Records or Change Log Entries — explicit N/A in the FOUNDATIONS Alignment table at `references/governance-and-foundations.md`.
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
-## FOUNDATIONS Alignment and Guardrails
+- `STENT`, `STINT`, `SF`, `BEL` (§4.1), `OBL`, `CNSQ`, `THR`, `SREL`, `STLOC`, `STOBJ`, `DA` — story-bundle record classes
+- `PG` (§4.2) — page snapshot
+- `SE` (§4.3) — event
+- `SLT` (§4.4) — commitment block
+- `BR` — branch
+- `CHC` — emitted choice
 
-Full per-Rule mapping and the complete Guardrails list live in `references/governance-and-foundations.md`. Load that reference for any audit-trail inspection. Load-bearing guardrails kept inline:
+The shared contract is the canonical schema reference. This skill does not duplicate schemas locally.
 
-- **HARD-GATE is absolute** (top of file). No file is written until Phase 9 records 18 PASSes + 1 DEFERRED (`prose_ledger_consistency`) with rationale AND Phase 9.5 records 11 PASSes with rationale AND the user explicitly approves the Phase 10 deliverable summary. Auto Mode does not override.
-- **Never write world-level canon.** This skill never `Write`s or `Edit`s `worlds/<world-slug>/WORLD_KERNEL.md`, `ONTOLOGY.md`, or any `worlds/<world-slug>/_source/<world-subdir>/*.yaml` record. Hook 3 enforces the latter.
-- **Never overwrite an existing story bundle.** Pre-flight slug-collision aborts when `worlds/<world-slug>/stories/<story-slug>/` exists.
-- **Story-bundle YAML writes are engine-routed.** Direct `Write` to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml` is forbidden by Hook 3 — use `mcp__worldloom__submit_patch_plan` with story-bundle create ops after HARD-GATE approval.
-- **Never write rendered prose.** This skill writes only `pages-prose-plans/PG-0001.md` (the comprehensive plan). The rendered prose file `pages-prose/PG-0001.md` is supplied externally (manual author or external LLM renderer) after bundle commit and merged via `branching-story-page-prose-finalize`. Phase 11 step 1 leaves `pages-prose/` with only a `.gitkeep` until finalize runs.
-- **Content policy is a contract, not a setting.** The NC-21 block in `templates/content-policy.txt` is embedded verbatim in STORY_KERNEL.md AND inlined verbatim into the plan body's §2 AND prepended to every Phase 7 LLM plan-authoring prompt. `content_intensity_baseline` is a routing tag, never a censor.
-- **Do NOT commit to git.** Writes land in the working tree only; the user reviews the diff and commits.
+## FOUNDATIONS Alignment
+
+| Principle | Phase | Mechanism |
+|---|---|---|
+| Rule 1 (No Floating Facts) | Phase 2, 7 | Shared contract §4 record schemas; Phase 7 plan-grounding (gate 7). |
+| Rule 2 (No Pure Cosmetics) | N/A | Not applicable — bootstrap mirrors existing world canon; it does not introduce new species / rituals / technology / artifacts to world canon. Handoff to `canon-addition` when a story claim is promoted via `story-fact-promotion-to-canon`. |
+| Rule 3 (No Specialness Inflation) | N/A | Not applicable — same handoff as Rule 2; bootstrap does not add exceptional capabilities to world canon. |
+| Rule 4 (No Globalization by Accident) | Phase 2, 9 | Mirrored SF records carry `derived_from_cf` + branch / story scope; Phase 9 bootstrap-additional check 2 rejects scope-widening. |
+| Rule 5 (No Consequence Evasion) | Phase 4, 9 | Good-debt-vs-bad-debt filter at Phase 4; Phase 9 gate 6 (consequence capacity / terminal proof). |
+| Rule 6 (No Silent Retcons) | N/A | Not applicable — bootstrap creates new story-bundle records; it does not mutate world canon. World canon mutation routes through `canon-addition` (the only Rule-6-enforcing skill). |
+| Rule 7 (Preserve Mystery Deliberately) | Phase 1, 9 | `forbidden_mystery_resolutions` enumerated in state seed; Phase 9 gate 3 (mystery firewall). |
+| Rule 11 (No Spectator Castes) | N/A | Not applicable — Rule 11 governs new exceptional capabilities at world canon; bootstrap does not add them. |
+| Rule 12 (No Single-Trace Truths) | N/A | Not applicable — Rule 12 governs hard-canon core truths; bootstrap operates at story-bundle scope, not world canon. |
+| Canon Layers | Pre-flight, Phase 2 | Bootstrap reads world canon (layers 1-4 + Mystery Reserve) via context packet; story-bundle records carry story-local truths per FOUNDATIONS §Story Bundles §1. |
+| Mystery Reserve | Pre-flight, Phase 1, 9 | World mysteries loaded via context packet; `forbidden_mystery_resolutions` enumerated; Phase 9 gate 3 enforces firewall. |
+| §Story Bundles §4a (Plan-Authority Boundary) | Phase 6, 7, 10 | Story state is authoritative at PG-0001 commit; no `pages-prose/PG-0001.md` is written by this skill; the page snapshot is the fork primitive. No ARC_TRACE record emitted. |
+| §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 5 | Seed `SLT` records follow the §4.4 schema discipline; no `arc_contract` / `dramatic_unit` / `execution_envelope` / nested `effect_model` / `stop_policy` / `shape:` / `record_version` discriminators. |
+| §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record (STENT/STINT/SF/BEL/SE/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA/BR/PG/CHC/SLT) conforms to the shared contract §4 schemas; nice-to-have fields are not added at this skill. |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 3 | Initial belief state uses `BEL` (not `SF`) for false beliefs / suspicions / rumors / lies / private assumptions; `truth_relation` and `visibility` set per shared contract §4.1. |
+| Change Control Policy | N/A | Not applicable — canon-reading skill does not emit Change Log Entries. Handoff to `canon-addition` when story claims promote to canon. |
+| Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet` per FOUNDATIONS §Tooling Recommendation. |
+
+## Guardrails
+
+- **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<subdir>/*.yaml` (CF / CH / INV / M / OQ / ENT / SEC); this skill NEVER attempts such writes. Story-bundle records under `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` are this skill's exclusive write surface, routed through the patch engine.
+- **Never write rendered prose at bootstrap.** `pages-prose/PG-0001.md` is supplied externally by the user (manual or LLM) and validated by `branching-story-prose-attach`. Bootstrap writes only the plan at `pages-prose-plans/PG-0001.md`.
+- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Every field in every record drafted by this skill conforms to the shared contract §4 schemas. No nice-to-have fields, no derived rollups, no legacy lifecycle fields (no `prose_status`, no `state_delta_summary`, no `record_version`, no `shape:` discriminator, no `stop_policy`). Each retained field is consumed by a validation gate, replay primitive, predicate, fork operation, or audit-trail record.
+- **Verbatim §2 / §3 / §19 of the page plan.** Phase 7 inlines `reports/prose-quality-instructions.md` §Content Policy / §Prose Craft Contract / §Render-Time Instruction Template verbatim. The external LLM has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
+- **No word-count targets** anywhere in the plan (per FOUNDATIONS §Story Bundles §9). Pacing is expressed structurally via beats and stop conditions, not as a per-page or per-arc word quota.
+- **Skills do not chain.** Bootstrap never invokes `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. Bootstrap writes its outputs to disk; the user separately invokes downstream siblings with the bundle path as input.
+- **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.
+- **Known integration debt** (per Shape C deferred-infrastructure architecture from the gap-filler interview):
+  - **MCPENH-040** — Register `BEL` id class in `tools/world-mcp/src/tools/allocate-next-id.ts` (`STORY_SCOPED_ID_CLASS_DIRECTORIES["BEL"] = "beliefs"`); drop `ARCTRACE` registration (greenfield plan deletes the class). Lands before bootstrap is first invoked so the allocator call works cleanly.
+  - **PEENH-007** — Add `create_bel_record` operation to `tools/patch-engine/src/envelope/schema.ts`; drop `create_arctrace_record` if present. Ships alongside the new family.
+  - **VALENH-011** — Register `BEL` in `record_schema_compliance` and other applicable structural validators; drop ARC_TRACE-related validators per the greenfield plan. Ships alongside the new family.
 
 ## Final Rule
 
-A story bundle is not bootstrapped because PG-0001's prose is rendered — and after this rework the prose is never rendered by this skill at all. It is bootstrapped only when the causal-engine ledgers are populated (entities, facts with declared epistemic class, events, obligations with ≥2 payoff modes, consequences ledger initialized, threads, relationships, intentions, scene-commitment arcs with commitment_family / commitment_class diversity, locations, objects, branches, pages, choices), the cast has intentions, the storylet pool has commitment_family / commitment_class diversity, the choices have continuation paths and choice-worthiness, the firewall is intact, the root branch (BR-0001) record exists, the recursive-reference-closure rule is satisfied at PG-0001, the comprehensive plan at `pages-prose-plans/PG-0001.md` is fully self-contained (referenced records inlined as body context, with canonical prose-direction translations satisfying §10 / §11 / §12; `plan_completeness_check`, `cast_material_reality_consistency`, and `plan_self_containment` PASS), the deferred prose validators are recorded as DEFERRED on `PG-0001.deferred_validation_trace`, and the user has explicitly approved the Phase 10 deliverable. The runtime page-cycle inherits this state — if any of the above is missing, the runtime cannot honor wild user choices coherently, and that is the entire reason this pipeline exists. Rendered prose joins the bundle later via `branching-story-page-prose-finalize`, which runs the deferred prose-coupled validators against the user-supplied `pages-prose/PG-0001.md` and flips `prose_status` to `rendered`.
+Bootstrap initializes a story bundle's root causal state without rendering prose and without establishing any prose-rendering lifecycle — the page snapshot is the fork primitive, and rendered prose is the external renderer's authorial artifact, not bootstrap's responsibility.

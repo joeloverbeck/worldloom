@@ -50,15 +50,10 @@ const STORY_CLASS_CASES: Array<{
   fileName: string;
   expected: string;
 }> = [
-  {
-    idClass: "ARCTRACE",
-    subdir: "arc-traces",
-    fileName: "ARCTRACE-0007.yaml",
-    expected: "ARCTRACE-0008"
-  },
   { idClass: "PG", subdir: "pages", fileName: "PG-0007.yaml", expected: "PG-0008" },
   { idClass: "SE", subdir: "events", fileName: "SE-0007.yaml", expected: "SE-0008" },
   { idClass: "SF", subdir: "facts", fileName: "SF-0007.yaml", expected: "SF-0008" },
+  { idClass: "BEL", subdir: "beliefs", fileName: "BEL-0007.yaml", expected: "BEL-0008" },
   { idClass: "OBL", subdir: "obligations", fileName: "OBL-0007.yaml", expected: "OBL-0008" },
   { idClass: "CNSQ", subdir: "consequences", fileName: "CNSQ-0007.yaml", expected: "CNSQ-0008" },
   { idClass: "THR", subdir: "threads", fileName: "THR-0007.yaml", expected: "THR-0008" },
@@ -338,8 +333,8 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const spResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SP", story_slug: "empty-story" })
     );
-    const arcTraceResult = await withRepoRoot(root, () =>
-      allocateNextId({ world_slug: "seeded", id_class: "ARCTRACE", story_slug: "empty-story" })
+    const beliefResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "BEL", story_slug: "empty-story" })
     );
 
     assert.ok(!("code" in pageResult));
@@ -347,13 +342,13 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in slbResult));
     assert.ok(!("code" in sauResult));
     assert.ok(!("code" in spResult));
-    assert.ok(!("code" in arcTraceResult));
+    assert.ok(!("code" in beliefResult));
     assert.equal(pageResult.next_id, "PG-0001");
     assert.equal(stintResult.next_id, "STINT-0001");
     assert.equal(slbResult.next_id, "SLB-0001");
     assert.equal(sauResult.next_id, "SAU-0001");
     assert.equal(spResult.next_id, "SP-0001");
-    assert.equal(arcTraceResult.next_id, "ARCTRACE-0001");
+    assert.equal(beliefResult.next_id, "BEL-0001");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -603,8 +598,8 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     const storyScopedWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "PG" })
     );
-    const arcTraceWithoutStorySlug = await withRepoRoot(root, () =>
-      allocateNextId({ world_slug: "seeded", id_class: "ARCTRACE" })
+    const beliefWithoutStorySlug = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "BEL" })
     );
     const sauWithoutStorySlug = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "SAU" })
@@ -647,7 +642,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.ok("code" in storyWithPipelineSlug);
     assert.ok("code" in sauWithPipelineSlug);
     assert.ok("code" in storyScopedWithoutStorySlug);
-    assert.ok("code" in arcTraceWithoutStorySlug);
+    assert.ok("code" in beliefWithoutStorySlug);
     assert.ok("code" in sauWithoutStorySlug);
     assert.ok("code" in spWithoutStorySlug);
     assert.ok("code" in rspWithoutStorySlug);
@@ -662,7 +657,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.equal(storyWithPipelineSlug.code, "invalid_input");
     assert.equal(sauWithPipelineSlug.code, "invalid_input");
     assert.equal(storyScopedWithoutStorySlug.code, "invalid_input");
-    assert.equal(arcTraceWithoutStorySlug.code, "invalid_input");
+    assert.equal(beliefWithoutStorySlug.code, "invalid_input");
     assert.equal(sauWithoutStorySlug.code, "invalid_input");
     assert.equal(spWithoutStorySlug.code, "invalid_input");
     assert.equal(rspWithoutStorySlug.code, "invalid_input");
@@ -675,7 +670,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
     assert.match(worldClassWithPipelineSlug.message, /NWB, NWP/);
     assert.match(sauWithPipelineSlug.message, /NWB, NWP/);
     assert.match(storyScopedWithoutStorySlug.message, /requires story_slug/);
-    assert.match(arcTraceWithoutStorySlug.message, /requires story_slug/);
+    assert.match(beliefWithoutStorySlug.message, /requires story_slug/);
     assert.match(sauWithoutStorySlug.message, /requires story_slug/);
     assert.match(spWithoutStorySlug.message, /requires story_slug/);
     assert.match(rspWithoutStorySlug.message, /requires story_slug/);
@@ -708,10 +703,10 @@ test("allocateNextId exposes all 49 id classes with existing formats preserved",
     "SP",
     "EPE",
     "STORY",
-    "ARCTRACE",
     "PG",
     "SE",
     "SF",
+    "BEL",
     "OBL",
     "CNSQ",
     "THR",
@@ -744,8 +739,8 @@ test("allocateNextId exposes all 49 id classes with existing formats preserved",
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, true);
   assert.match("STORY-0008", ID_CLASS_FORMATS.STORY.regex);
-  assert.equal(ID_CLASS_FORMATS.ARCTRACE.zeroPad, true);
-  assert.match("ARCTRACE-0008", ID_CLASS_FORMATS.ARCTRACE.regex);
+  assert.equal(ID_CLASS_FORMATS.BEL.zeroPad, true);
+  assert.match("BEL-0008", ID_CLASS_FORMATS.BEL.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, true);
   assert.match("PG-0008", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-0008", ID_CLASS_FORMATS.STINT.regex);
@@ -784,6 +779,16 @@ test("allocateNextId rejects unsupported id classes in the direct module API", a
         })
       ),
       /Unsupported id_class/
+    );
+    await assert.rejects(
+      withRepoRoot(root, () =>
+        allocateNextId({
+          world_slug: "seeded",
+          id_class: "ARCTRACE" as AllocateNextIdArgs["id_class"],
+          story_slug: "opening-bells"
+        })
+      ),
+      /Unsupported id_class 'ARCTRACE'/
     );
   } finally {
     destroyTempRepoRoot(root);

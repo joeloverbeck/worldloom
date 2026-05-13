@@ -1,7 +1,8 @@
 # Clothing Consistency Vocabulary
 
-Closed vocabulary for Phase 7 post-LLM `cast_material_reality_consistency`
-checks in `branching-story-bootstrap` and `branching-story-page-cycle`.
+Closed vocabulary for post-LLM `cast_material_reality_consistency` checks in
+the story-pipeline skills (rebuilt family per
+`docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md`).
 
 The check is deterministic. It scans only plan-authored affordance and cast
 intention prose, matches the literal garment-kind and posture tokens below, and

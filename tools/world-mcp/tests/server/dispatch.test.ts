@@ -396,6 +396,11 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "BEL", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SLB", story_slug: "opening-bells" },
         expectError: false
       },
@@ -496,13 +501,15 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
 
 test("unsupported id classes fail at the MCP validation boundary", async () => {
   await withServerClient(async (client) => {
-    const result = await client.callTool({
-      name: MCP_TOOL_NAMES.allocate_next_id,
-      arguments: { world_slug: "seeded", id_class: "NOT_A_CLASS" }
-    });
+    for (const idClass of ["NOT_A_CLASS", "ARCTRACE"]) {
+      const result = await client.callTool({
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        arguments: { world_slug: "seeded", id_class: idClass, story_slug: "opening-bells" }
+      });
 
-    assert.equal(result.isError, true);
-    assert.match(textContent(result), /invalid/i);
+      assert.equal(result.isError, true);
+      assert.match(textContent(result), /invalid/i);
+    }
   });
 });
 
@@ -628,6 +635,19 @@ test("story-scoped id_class dispatches through the MCP boundary", async () => {
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
     assert.equal(structured.next_id, "PG-0004");
+  });
+});
+
+test("BEL id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "BEL", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "BEL-0001");
   });
 });
 

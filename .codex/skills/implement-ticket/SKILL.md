@@ -279,9 +279,8 @@ Update the active ticket before finishing:
 Then run the closeout hard stops from the focused references:
 
 - Use `references/verification-closeout.md` for completed-ticket truthing, stale-anchor sweeps, historicalized problem text, exact proof-command wording, shell-safe grep patterns, and final-proof timing.
-- Use `references/package-tooling.md` for package/tool public-surface sweeps, package docs/examples, `describe_capabilities` metadata, local dependency refresh, and generated/ignored package artifacts.
+- Use `references/package-tooling.md` for all package/tool public-surface, README/example, command-doc, registered metadata, scoped stale-anchor, local dependency refresh, and generated/ignored artifact checks. Keep package-specific closeout detail in that reference instead of expanding this top-level router.
 - Use `references/dirty-worktree-ledger.md` for final ownership classification, including untracked owned files, pre-existing dirt, externally appeared changes, sibling scope, and expected ignored artifacts.
-- If a package/tool ticket changes a user-facing CLI command, flag, help text, or workflow command, explicitly sweep the package README/examples and `docs/WORKFLOWS.md` before final proof or record why each surface is outside scope.
 - If world content or ignored world artifacts were touched, verify the exact paths directly; git-tracked status is not enough.
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
 - If the ticket adds, removes, or reorders columns in markdown tables, manually verify the header row, separator row, and representative data/example rows have matching column counts. `git diff --check` does not catch semantic table arity mismatches.
