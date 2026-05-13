@@ -205,6 +205,8 @@ provenance:
 
 **Schema-minimalism discipline** (per FOUNDATIONS §Story Bundles §5b): every field on the block conforms to the shared contract §4.4 schema. **NO** `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version` discriminator above `1`, or `shape:` discriminator. The block is a causal move, not a dramatic-act surrogate.
 
+**Effects-field convention**: `effects.create`, `effects.supersede`, and `effects.close` MAY be left empty (`[]`) when the block's effect-shape is contextual at runtime — matching bootstrap practice for `SLT-1..SLT-10` in any bootstrapped bundle. Populate `effects.{create,supersede,close}` with concrete record IDs only when the block's intent mandates a specific delta the author-time template is willing to commit to (e.g., a negotiation block that always supersedes the current attention `SREL`). Phase 4 check 3 (belief-or-relationship coverage) tests the literal `effects` field, not intent expressed in beats — so any block intended to satisfy that check must populate `effects.create`, `effects.supersede`, or `effects.close` with a concrete `BEL-<integer>` or `SREL-<integer>` reference.
+
 ## Phase 3: Per-block validation
 
 Run 6 per-block gates on each drafted SLT record:
@@ -213,7 +215,7 @@ Run 6 per-block gates on each drafted SLT record:
 
 2. **Predicate parse** — every predicate in `preconditions.hard` and `preconditions.soft` is one of the 17 closed-DSL predicates, with valid argument shapes and record-id references. Free-form prose, undefined predicates, or ill-formed combinator syntax → `FAIL`.
 
-3. **Branch-scope legality** — `scope.visibility: global_author_pool` blocks reference NO branch-local records (records whose `created_at_page` is non-null). `scope.visibility: branch_prefix_scoped` blocks reference only records in the named branch's lineage and descendants. `scope.visibility: branch_scoped` blocks reference only records in the named `scope.branch_id`'s lineage. Cross-branch references → `FAIL`.
+3. **Branch-scope legality** — `scope.visibility: global_author_pool` blocks reference NO branch-LOCAL records — that is, records whose `created_at_page` is non-null AND whose creating page is NOT in every branch's `branch_path`. Root-of-tree records (those created on the root branch BR-1's root page PG-1) ARE in every branch's `branch_path` per shared contract §4.2 and remain visible to global-author-pool blocks; this matches bootstrap practice (e.g., SLT-9 in any bootstrapped bundle references `BEL-3` minted at PG-1). `scope.visibility: branch_prefix_scoped` blocks reference only records in the named branch's lineage and descendants. `scope.visibility: branch_scoped` blocks reference only records in the named `scope.branch_id`'s lineage. Cross-branch references to records minted on non-root pages of sibling branches → `FAIL`.
 
 4. **Mystery / invariant firewall** — `mystery_policy.forbidden_resolutions[]` does NOT include any mystery the block's effects could resolve. `mystery_policy.allowed_authority` is compatible with the block's effects (a block whose effects create a `canon_candidate`-authority `SF` cannot have `allowed_authority: none`). World invariants (loaded in Pre-flight step 6) are NOT violated by any predicate or effect. Inconsistent OR violating → `FAIL`.
 
@@ -231,7 +233,7 @@ For `direct_batch`, verify across the surviving blocks:
 
 1. **Move-family diversity** — at least 3 distinct `move_family` values across the batch.
 2. **Recovery coverage** — at least 1 block has `move_family: recovery`. The bundle needs recovery coverage so that violence, betrayal, sex, and death outcomes route to graceful follow-up.
-3. **Belief-or-relationship coverage** — at least 1 block has effects that modify `BEL` or `SREL` records (the social-state engine needs ongoing pool support per FOUNDATIONS §Story Bundles §6a).
+3. **Belief-or-relationship coverage** — at least 1 block has `effects.create`, `effects.supersede`, or `effects.close` containing a `BEL-<integer>` or `SREL-<integer>` reference. Intent expressed only in beats or `exit_options.likely_effects` does NOT satisfy this check — the engine's batch-diversity test is on the literal effects field. For `supersede` / `close` targets, the referenced record must be established active by the block's `preconditions.hard` (per Phase 3 gate 5 effect legality). The social-state engine needs ongoing pool support per FOUNDATIONS §Story Bundles §6a.
 4. **No branch-local dependencies in global-author-pool blocks** — re-verifies Phase 3 gate 3 at batch scope.
 
 If any batch-level check fails, regenerate the affected blocks (loop to Phase 2 for replacements) OR shrink the batch to the diversity-compliant subset. Surface the regeneration / shrink decision in the Phase 6 deliverable summary.
@@ -273,7 +275,7 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
 
 ## Phase 6: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering all surviving SLT records as a single envelope: one `create_slt_record` op per block.
+1. Build the patch plan covering all surviving SLT records as a single envelope: one `create_slt_record` op per block. Each op requires a `target_file` field naming the on-disk write path (`worlds/<world_slug>/stories/<story_slug>/_source/storylets/SLT-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` for the full envelope and per-op payload schemas, or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_slt_record')` at pre-flight for the machine-readable shape.
 2. Dry-run via `mcp__worldloom__validate_patch_plan` (exercises `record_schema_compliance` for each SLT record).
 3. Present the complete deliverable summary to the user:
    - Mode + source (focus hint OR audit_id + finding_ids).
@@ -285,7 +287,7 @@ The SLB file is a markdown direct-write manifest, not an atomic YAML record. No 
    - The SLB manifest path + contents preview.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: commitment-block-authoring envelopes scale with batch size (one `create_slt_record` op per block; a `standard` 8-14-block batch is typically 15-30KB, but `audit_repair` batches consuming many RSP cards or `direct_batch` calls authoring widely-cast SLTs may exceed 50KB); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan.
-6. On patch success: write the markdown artifacts in shared contract §10 write order: `storylet-batches/SLB-<integer>.md` → update bundle `INDEX.md`.
+6. On patch success: write the markdown artifacts in shared contract §10 write order: `storylet-batches/SLB-<integer>.md` → update bundle `INDEX.md`. Create `storylet-batches/` if it does not already exist (idempotent `mkdir -p` — `branching-story-bootstrap` does not pre-create the directory, so the first SLB write in a bundle's lifetime needs to make it).
 7. Report SLT ids + SLB id + bundle INDEX state to the user. Do NOT `git commit`.
 
 **Failure behavior**: patch fail → write nothing; surface the failed per-block gate and corrective action. Patch success + markdown fail → story-bundle `_source/` records authoritative; the SLB manifest can be repaired directly; surface partial-failure to user. Per-block rejections in Phase 3 → blocks removed from batch with logged reason; surface the per-block rejection summary at sub-step 3 even on overall success.

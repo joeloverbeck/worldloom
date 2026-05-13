@@ -66,6 +66,7 @@ const ATOMIC_DIRS = new Map<string, AtomicRecordSpec>([
 ]);
 const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]+$")],
+  ["beliefs", recordSpec("belief_record", "id", "^BEL-[0-9]+$")],
   ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]+$")],
   ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")],
   ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]+$")],

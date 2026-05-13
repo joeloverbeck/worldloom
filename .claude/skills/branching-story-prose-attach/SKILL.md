@@ -255,7 +255,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 4. On approval:
    - Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
    - Update bundle `INDEX.md` to reflect prose status + receipt verdict.
-   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach`; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
+   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach`; the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
