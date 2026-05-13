@@ -54,6 +54,46 @@ test("snapshot_replay_equality passes for a clean page-cycle envelope", async ()
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality compares active_records snapshots with BEL entries", async () => {
+  const activeRecordsSnapshot = {
+    active_records: {
+      BEL: ["BEL-0001"]
+    }
+  };
+  const verdicts = await snapshotReplayEquality.run(undefined, context([
+    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
+      id: "PG-0001",
+      story_id: "STORY-001",
+      state_snapshot: activeRecordsSnapshot,
+      state_hash: "hash-parent"
+    }),
+    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
+      id: "SE-0002",
+      story_id: "STORY-001",
+      ops: [],
+      state_hash_after: "hash-next"
+    }),
+    record("belief_record", "test-story:BEL-0001", "stories/test-story/_source/beliefs/BEL-0001.yaml", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
+    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", {
+      id: "PG-0002",
+      story_id: "STORY-001",
+      parent_page_id: "PG-0001",
+      applied_event_ops: ["SE-0002"],
+      state_snapshot: activeRecordsSnapshot,
+      state_hash: "hash-next"
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("snapshot_replay_equality emits field-level drift details", async () => {
   const drifted = { ...nextSnapshot, obligations_open: ["OBL-0001"] };
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(drifted, "hash-next"), {
@@ -71,9 +111,7 @@ test("snapshot_replay_equality emits field-level drift details", async () => {
 test("snapshot_replay_equality ignores only workflow-stamped state_snapshot fields", async () => {
   const workflowStamped = {
     ...nextSnapshot,
-    applied_effect_variant: "different-workflow-stamp",
-    arc_trace_emitted: true,
-    arc_trace_id: "ARCTRACE-0002"
+    applied_effect_variant: "different-workflow-stamp"
   };
 
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(workflowStamped, "hash-next"), {

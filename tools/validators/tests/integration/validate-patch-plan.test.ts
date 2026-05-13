@@ -109,18 +109,9 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "effect_model_replay_safety"
     );
     assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
-    const arcTraceEvidenceExecution = result.executions.find(
-      (execution) => execution.name === "arc_trace_evidence_alignment"
-    );
-    assert.equal(arcTraceEvidenceExecution?.status, "skipped");
-    const narrativePointExecution = result.executions.find(
-      (execution) => execution.name === "narrative_point_classification"
-    );
-    assert.equal(narrativePointExecution?.status, "skipped");
-    const arcEnvelopeExecution = result.executions.find(
-      (execution) => execution.name === "arc_envelope_conformance"
-    );
-    assert.equal(arcEnvelopeExecution?.status, "skipped");
+    assert.ok(!result.executions.some((execution) => execution.name === "arc_trace_evidence_alignment"));
+    assert.ok(!result.executions.some((execution) => execution.name === "narrative_point_classification"));
+    assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
     );
@@ -142,9 +133,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== stopPolicyExecution &&
         row !== effectModelLegalityExecution &&
         row !== effectModelReplaySafetyExecution &&
-        row !== arcTraceEvidenceExecution &&
-        row !== narrativePointExecution &&
-        row !== arcEnvelopeExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution
@@ -288,39 +276,18 @@ test("validatePatchPlan runs effect-model replay safety for Shape B page ops", a
   });
 });
 
-test("validatePatchPlan accepts pending page-cycle pages before ARC_TRACE finalization", async () => {
+test("validatePatchPlan accepts pending page-cycle pages after prose-state validators were retired", async () => {
   await withTempRoot(async () => {
     const result = await validatePatchPlan(pendingProsePagePlan() as unknown as PatchPlanEnvelope);
 
     for (const name of [
       "effect_model_replay_safety",
-      "narrative_point_classification",
       "snapshot_replay_equality"
     ]) {
       const execution = result.executions.find((row) => row.name === name);
       assert.equal(execution?.status, "pass", name);
       assert.ok(!result.verdicts.some((verdict) => verdict.validator === name), name);
     }
-  });
-});
-
-test("validatePatchPlan finds indexed ARC_TRACE rows for rendered parent pages", async () => {
-  await withTempRoot(async () => {
-    seedIndexedStoryRecord("PG-0002", "page_record", "pages", renderedParentPage());
-    seedIndexedStoryRecord("ARCTRACE-0001", "arc_trace_node", "arc-traces", existingArcTrace());
-
-    const result = await validatePatchPlan(pendingChildAfterRenderedParentPlan() as unknown as PatchPlanEnvelope);
-
-    const narrativeExecution = result.executions.find(
-      (row) => row.name === "narrative_point_classification"
-    );
-    assert.equal(narrativeExecution?.status, "pass");
-    assert.ok(!result.verdicts.some(
-      (verdict) =>
-        verdict.validator === "narrative_point_classification" &&
-        verdict.code === "narrative_point_classification.missing_arc_trace" &&
-        verdict.location.node_id === "marla-kern-seduction:PG-0002"
-    ));
   });
 });
 
@@ -537,49 +504,6 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
     payload: {
       story_slug: "marla-kern-seduction",
       record
-    }
-  };
-}
-
-function renderedParentPage(): Record<string, unknown> {
-  return {
-    id: "PG-0002",
-    story_id: "STORY-001",
-    branch_path: ["PG-0001", "PG-0002"],
-    storylet_realized: "SLT-0001",
-    applied_event_ops: ["SE-0002"],
-    prose_status: "rendered",
-    state_snapshot: {
-      ...completeStateSnapshot(),
-      applied_effect_variant: "partial-repair",
-      narrative_point_classification: "NATURAL_COMMITMENT_HINGE",
-      arc_trace_emitted: true,
-      arc_trace_id: "ARCTRACE-0001"
-    }
-  };
-}
-
-function existingArcTrace(): Record<string, unknown> {
-  return {
-    id: "ARCTRACE-0001",
-    story_id: "STORY-001",
-    created_at_page: "PG-0002",
-    arc_realized: "SLT-0001",
-    effect_variant_applied: "partial-repair",
-    realized_beats: [],
-    observed_actions: [],
-    observed_claims: [],
-    possible_violations: [],
-    stop_condition_hit: {
-      id: "help-accepted",
-      category: "normal_exit",
-      evidence_span: { start: 0, end: 12 }
-    },
-    effect_evidence: [],
-    semantic_critic_verdict: {
-      status: "pass",
-      reasons: [],
-      required_revision_constraints: []
     }
   };
 }

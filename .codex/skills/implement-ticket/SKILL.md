@@ -23,10 +23,10 @@ Use this as the default path, then apply the detailed rules below when the ticke
 1. Resolve the live ticket/spec paths inside the active repo/worktree and snapshot the worktree.
 2. Read the required repo contracts (`AGENTS.md`, `docs/FOUNDATIONS.md`, ticket template/readme, ticket, and explicit references).
 3. Classify the ticket and load only the focused reference docs needed for that class. For validator, JSON Schema, or schema-discovery tickets that project schema metadata, resolve `$ref` chains, or expose schema-derived fields through package tools, load `references/validator-schema-migrations.md` before reassessment edits.
-4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits.
+4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits. If the reassessment will edit the ticket before any source edit, issue the pre-edit checkpoint before that ticket edit.
 5. State the owned implementation slice to the user, then make minimal edits.
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate.
-7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. During closeout, explicitly re-check the active ticket's `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, and `Deviations` against the landed diff and commands.
+7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. If post-proof edits are ticket prose only and do not change package/source/test contracts, rerun hygiene and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite. During closeout, explicitly re-check the active ticket's `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, and `Deviations` against the landed diff and commands.
 
 ### Mandatory References By Phase
 
@@ -118,7 +118,7 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 13. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 14. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-15. Before the first edit, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
+15. Before the first file edit, including ticket-only reassessment edits, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
 
 Compact checkpoint shape:
 

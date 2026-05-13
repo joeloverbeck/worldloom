@@ -93,15 +93,8 @@ function queryRows(
   const predicates = ["world_slug = ?"];
   const params: unknown[] = [worldSlug];
   if (recordType !== undefined) {
-    // Indexer stores ARCTRACE rows under node_type "arc_trace_node" (per
-    // tools/world-index/src/parse/atomic.ts and migration 005); validators,
-    // schemas, and MCP retrieval use the canonical "arc_trace_record".
-    // Translate at the DB boundary so the validator's typed query matches
-    // on-disk rows; mirrors the existing mapping in
-    // tools/world-mcp/src/tools/list-records.ts.
-    const dbNodeType = recordType === "arc_trace_record" ? "arc_trace_node" : recordType;
     predicates.push("node_type = ?");
-    params.push(dbNodeType);
+    params.push(recordType);
   }
   if (storySlug !== undefined && storySlug !== null && hasStorySlug) {
     predicates.push("story_slug = ?");

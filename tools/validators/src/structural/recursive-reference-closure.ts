@@ -8,7 +8,7 @@ import {
   stringValue
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
 const NON_EDGE_FIELDS = new Set(["id", "story_id", "branch_id", "created_at_page", "branch_path"]);
 
 export const recursiveReferenceClosure: Validator = {

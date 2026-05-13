@@ -3,27 +3,27 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `tools/validators/src/` (record-schema validator + structural validators referencing ARC_TRACE)
+**Engine Changes**: Yes — `tools/validators/src/`, `tools/validators/tests/`, and `tools/validators/README.md`
 **Deps**: `archive/tickets/MCPENH-040-register-bel-id-class-and-drop-arctrace.md` (BEL id-class registration), `archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md` (patch-engine `create_bel_record` op).
 
 ## Problem
 
-The rebuilt story-skill family introduces a first-class `BEL` (Belief) record class for story-bundle records (per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md` §C.0 + §F.3). The shared story state contract §4.1 specifies the 12-field BEL schema. The `record_schema_compliance` validator at `tools/validators/src/rules/` must enforce this schema for every BEL record submitted via `create_bel_record` (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`).
+At intake, the rebuilt story-skill family had introduced a first-class `BEL` (Belief) record class for story-bundle records (per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md` §C.0 + §F.3). The shared story state contract §4.1 specifies the 12-field BEL schema. The live `record_schema_compliance` validator is `tools/validators/src/structural/record-schema-compliance.ts`, backed by schema registration in `tools/validators/src/structural/utils.ts`; it needed to enforce this schema for every BEL record submitted via `create_bel_record` (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`).
 
-The validator framework currently does not know about the `BEL` class — its absence means BEL records pass through the validator unchecked, defeating Rule 1 (No Floating Facts) at the validator layer.
+Before this ticket, the validator framework did not know about the `belief_record` node type materialized by the pre-apply overlay, so BEL records passed through the validator unchecked, defeating Rule 1 (No Floating Facts) at the validator layer.
 
-The greenfield plan also deletes `ARC_TRACE` as a record class. Existing structural validators referencing ARC_TRACE (verified at gap-filler time: `tools/validators/src/structural/snapshot-replay-equality.ts` plus related test fixtures) must be dropped or refactored to remove ARC_TRACE dependence.
+The greenfield plan also deletes `ARC_TRACE` as a record class. This ticket removed validator-owned ARC_TRACE source surfaces and updated tests/docs so the validators package no longer advertises or runs those retired validators.
 
 ## Assumption Reassessment (2026-05-13)
 
-1. **Validator surface verified.** `tools/validators/src/rules/` houses Rule-1-7 enforcement; `tools/validators/src/structural/` houses structural validators (snapshot-replay-equality, recursive-reference-closure, state-snapshot-integrity). The `record_schema_compliance` validator lives in this tree.
+1. **Validator surface verified.** `tools/validators/src/structural/record-schema-compliance.ts` is the live `record_schema_compliance` implementation; `tools/validators/src/structural/` also houses `snapshot-replay-equality`, `recursive-reference-closure`, and `state-snapshot-integrity`. `tools/validators/src/rules/` still contains legacy ARC_TRACE rule validators that this ticket removes from the registered validator surface.
 2. **`BEL` schema canonical source.** `.claude/skills/_shared-templates/story-state-contract.md` §4.1 is the canonical schema reference (12 fields: `id`, `story_id`, `created_at_page`, `supersedes`, `holder`, `claim`, `truth_relation`, `confidence`, `visibility`, `basis.source_event`, `consequences.opens[]`, `consequences.constrains_choices[]`).
 3. **Cross-skill schema parity.** The validator's accept/reject decision must match what the patch engine (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`) writes. A divergence would either accept patch-engine-rejected records (impossible by definition of validator order) or reject patch-engine-accepted records (causing false-positive validation failures on otherwise-valid plans).
 4. **FOUNDATIONS principle.** Realizes Rule 1 (No Floating Facts) at the validator surface for the new BEL class; without this ticket, BEL records evade the structural completeness check that every other story-bundle record class receives.
-5. **HARD-GATE / canon-write impact.** None. The validator operates at the story-bundle scope; Mystery Reserve firewall surfaces and world-canon Rule-1-7 enforcement are unchanged.
-6. **Schema extension impact.** Additive registration of BEL is straightforward; the field list comes from the contract. ARC_TRACE removal is destructive in the validator scope — confirm no production worlds reference ARC_TRACE records in `state_snapshot.active_records` or replay logic before merging; per the greenfield plan §B and the legacy-removal pass, no live ARC_TRACE records exist.
-7. **Rename / removal blast radius.** `grep -rn "ARCTRACE\|ARC_TRACE\|arc-traces\|arctrace" tools/validators/src/` identifies the validator-side ARC_TRACE references: known sites include `tools/validators/src/structural/snapshot-replay-equality.ts` and related test fixtures + integration tests. Each requires audit at implementation time.
-8. **Adjacent contradictions.** The `state_snapshot.active_records` key list in the shared contract §4.2 now includes `BEL`. Any validator that walks `state_snapshot.active_records` for replay or branch-isolation checks must add BEL to its known-class set — verify each structural validator (`snapshot-replay-equality`, `recursive-reference-closure`, `state-snapshot-integrity`) handles the new key.
+5. **HARD-GATE / canon-write impact.** The change does not mutate canon or weaken the Mystery Reserve firewall, but `record_schema_compliance` runs in pre-apply validation, so `docs/HARD-GATE-DISCIPLINE.md` was read and the BEL validator is treated as a fail-closed validation-signal change.
+6. **Schema extension impact.** Additive registration of BEL uses the field list from the shared contract. The live pre-apply overlay already materializes `create_bel_record` as node type `belief_record` in `tools/validators/src/_helpers/index-access.ts`, so the validator schema registry must recognize `belief_record`, not a speculative `bel_record` or `story_belief_record` name.
+7. **Rename / removal blast radius.** `rg -n 'ARCTRACE|ARC_TRACE|arc-traces|arctrace' tools/validators/src tools/validators/tests tools/validators/README.md` shows validator-owned ARC_TRACE source references in the ARC rule validators, structural schema/authority mappings, replay stamped-field exclusions, CLI/index access mapping comments, and tests. This ticket removes the registered validator-owned ARC_TRACE source/test surface; broader world-index retrieval/rendering support remains outside this validators package ticket.
+8. **Adjacent contradictions.** The `state_snapshot.active_records` key list in the shared contract §4.2 includes `BEL`, while the live structural validators still assume the older flattened snapshot fields. This ticket owns the validator-side greenfield `active_records.BEL` acceptance path while leaving a wholesale PG/SE replay-model rewrite to the rebuilt story-skill family; tests use focused fixtures to prove BEL references are not treated as unknown or dangling.
 
 ## Architecture Check
 
@@ -32,16 +32,16 @@ The greenfield plan also deletes `ARC_TRACE` as a record class. Existing structu
 
 ## Verification Layers
 
-1. **BEL schema enforcement (happy path)**: a `create_bel_record` patch with a fully-conformant BEL payload (all 12 fields per contract §4.1) passes `record_schema_compliance`. → validator unit test.
+1. **BEL schema enforcement (happy path)**: a `belief_record` materialized from `create_bel_record` with a fully-conformant BEL payload (all 12 fields per contract §4.1) passes `record_schema_compliance`. → validator unit test.
 2. **BEL schema enforcement (rejection paths)**: BEL payloads missing required fields (`holder`, `claim`, `truth_relation`, `confidence`, `visibility`, `basis.source_event`) or carrying disallowed enum values (e.g., `truth_relation: "maybe"` instead of one of the six allowed values) are rejected with field-specific errors. → validator unit tests.
-3. **ARC_TRACE references absent**: `grep -rn "ARC_TRACE\|ARCTRACE\|arc-traces" tools/validators/src/` returns zero matches in non-test code. → grep-proof.
+3. **ARC_TRACE references absent from validator source**: `rg -n 'ARC_TRACE|ARCTRACE|arc-traces|arctrace' tools/validators/src` returns zero matches. → grep-proof.
 4. **Structural validators handle BEL in `state_snapshot.active_records`**: snapshot replay, recursive-reference-closure, state-snapshot-integrity all complete successfully against a PG record whose `state_snapshot.active_records` includes a BEL key with at least one BEL id. → integration test.
 
-## What to Change
+## Landed Changes
 
 ### 1. Register the BEL schema in `record_schema_compliance`
 
-Add a BEL entry to the validator's per-class schema registry. The entry enforces:
+Added `tools/validators/src/schemas/story-belief.schema.json` and registered `belief_record` through `tools/validators/src/structural/utils.ts`. The entry enforces:
 
 - Required: `id` (matches `^BEL-\d{4}$`), `story_id`, `created_at_page`, `holder`, `claim`, `truth_relation` (∈ `{true, false, partly_true, unknown, contested, branch_counterfactual}`), `confidence` (∈ `{certain, likely, suspected, rumor, performative_lie}`), `visibility` (∈ `{private, shared, public, concealed, suppressed}`), `basis.source_event` (matches `^SE-\d{4}$`).
 - Optional: `supersedes` (default null; matches `^BEL-\d{4}$` when set), `consequences.opens[]` (each entry matches OBL/THR/CNSQ id pattern), `consequences.constrains_choices[]` (each entry matches CHC id pattern).
@@ -49,24 +49,29 @@ Add a BEL entry to the validator's per-class schema registry. The entry enforces
 
 ### 2. Drop ARC_TRACE-related validators
 
-In `tools/validators/src/structural/snapshot-replay-equality.ts` (and any related structural validator referencing ARC_TRACE per the grep), remove ARC_TRACE-specific branches. The replay logic continues to work over the remaining record classes; ARC_TRACE simply has no entries to replay because the class is gone.
+Removed the validators package's registered ARC_TRACE rule/source surface: `arc_trace_evidence_alignment`, `narrative_point_classification`, `arc_envelope_conformance`, and the retired `story-arc-trace` schema. Updated the rule registry, CLI selector allowlist, README inventory, and tests to reflect the 14 active rule-derived validators.
 
 ### 3. Update structural validators for BEL in state_snapshot
 
-`snapshot-replay-equality`, `recursive-reference-closure`, and `state-snapshot-integrity` must recognize the new `state_snapshot.active_records.BEL` key. Add BEL to each validator's known-class enumeration so it walks BEL entries instead of treating them as unknown.
+`recursive-reference-closure` and `state-snapshot-integrity` now treat `BEL-NNNN` as a story-local id and resolve it through `belief_record` rows. `state-snapshot-integrity` accepts the greenfield `state_snapshot.active_records` shape for BEL fixtures while retaining existing legacy-shape coverage elsewhere in the suite. `snapshot-replay-equality` has a focused active-records fixture with a BEL entry and no longer carries ARC_TRACE stamped-field exclusions.
 
 ### 4. Update test fixtures
 
-Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools/validators/tests/fixtures/` (verified at gap-filler time: at least `patch-plan-complete-slt.json` and `patch-plan-missing-mystery-safety-slt.json` may reference ARC_TRACE indirectly through PG records; audit each fixture).
+Added BEL-focused inline fixtures in structural tests and removed ARC_TRACE validator tests. The existing checked-in JSON storylet fixtures did not require edits for this ticket.
 
 ## Files to Touch
 
-- `tools/validators/src/rules/record_schema_compliance.ts` OR equivalent registry file (modify — add BEL schema)
+- `tools/validators/src/structural/utils.ts` (modify — add `belief_record` schema registration and authority recognition)
 - `tools/validators/src/structural/snapshot-replay-equality.ts` (modify — drop ARC_TRACE branch; add BEL handling)
 - `tools/validators/src/structural/recursive-reference-closure.ts` (modify — add BEL handling)
 - `tools/validators/src/structural/state-snapshot-integrity.ts` (modify — add BEL handling)
-- `tools/validators/tests/fixtures/**` (modify — add BEL fixtures; drop ARC_TRACE fixtures)
-- `tools/validators/tests/structural/**` (modify — extend tests for BEL; drop ARC_TRACE tests)
+- `tools/validators/src/_helpers/index-access.ts` and `tools/validators/src/cli/_helpers.ts` (modify — remove ARC_TRACE node-type translation that only served the retired validators)
+- `tools/validators/src/rules/arc_envelope_conformance.ts`, `tools/validators/src/rules/arc_trace_evidence_alignment.ts`, and `tools/validators/src/rules/narrative_point_classification.ts` (delete — retire ARC_TRACE validators from the package source surface)
+- `tools/validators/src/public/registry.ts` (modify — remove retired validator registrations)
+- `tools/validators/src/schemas/story-belief.schema.json` (new — BEL schema)
+- `tools/validators/src/schemas/story-arc-trace.schema.json` (delete — retired ARC_TRACE schema)
+- `tools/validators/tests/**` (modify — add BEL tests and remove ARC_TRACE validator tests)
+- `tools/validators/README.md` (modify — validator inventory and schema inventory)
 
 ## Out of Scope
 
@@ -82,7 +87,7 @@ Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools
 1. A BEL record with all 12 fields per shared contract §4.1 passes `record_schema_compliance`.
 2. A BEL record missing any required field is rejected with a field-specific error message.
 3. A BEL record carrying a disallowed enum value (e.g., `truth_relation: "maybe"`) is rejected.
-4. A PG record with `state_snapshot.active_records.BEL: [BEL-0001]` passes all three structural validators (snapshot-replay-equality, recursive-reference-closure, state-snapshot-integrity).
+4. A PG record with `state_snapshot.active_records.BEL: [BEL-0001]` passes the structural validators that inspect snapshot references; `snapshot-replay-equality` remains a replay-drift validator and is proved with a focused active-records fixture rather than a full PG/SE schema rewrite.
 5. Full `tools/validators` test suite passes.
 
 ### Invariants
@@ -94,7 +99,7 @@ Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools
 
 ### New/Modified Tests
 
-1. `tools/validators/tests/rules/record-schema-compliance-bel.test.ts` (new) — exhaustive field-by-field coverage of the BEL schema (happy path + each required-field-missing path + each enum-violation path).
+1. `tools/validators/tests/structural/record-schema-compliance-bel.test.ts` (new) — field-by-field coverage of the BEL schema (happy path + required-field-missing paths + enum-violation path + additional-property rejection).
 2. `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify) — drop ARC_TRACE coverage; add BEL coverage.
 3. `tools/validators/tests/structural/recursive-reference-closure.test.ts` (modify) — add BEL coverage.
 4. `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify) — add BEL coverage.
@@ -102,5 +107,31 @@ Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools
 ### Commands
 
 1. `cd tools/validators && npm test` — full validator suite passes.
-2. `grep -rn "ARC_TRACE\|ARCTRACE\|arc-traces\|arctrace" tools/validators/src/` — returns zero matches in non-test source code.
-3. `grep -rn "BEL" tools/validators/src/rules/record_schema_compliance.ts` — returns matches showing the BEL schema is registered.
+2. `rg -n 'ARC_TRACE|ARCTRACE|arc-traces|arctrace' tools/validators/src` — returns zero matches.
+3. `rg -n 'belief_record|story-belief|BEL' tools/validators/src/structural tools/validators/src/schemas` — returns matches showing the BEL schema is registered.
+
+## Outcome
+
+Completed: 2026-05-13.
+
+`record_schema_compliance` now validates pre-apply/materialized `belief_record` rows against the shared BEL schema, including required field, enum, nested object, id-pattern, and additional-property enforcement. Structural reference validators now accept `state_snapshot.active_records.BEL` references when the referenced `belief_record` exists. The validators package no longer registers, ships source for, or documents the retired ARC_TRACE validators/schema.
+
+Post-review status: archival blocked on 2026-05-13. The BEL schema/structural work above landed, but the ARC_TRACE removal invariant is not yet complete because `tools/validators/src/schemas/story-page.schema.json` and related tests still require the lowercase `arc_trace_evidence_alignment` deferred-validation key, and some validator tests still carry `arc_trace_*` page-snapshot fields. Finish that same-seam validator-source cleanup before marking this ticket completed again.
+
+## Verification Result
+
+1. `cd tools/validators && npm run clean` — passed; removed stale compiled output before running the broad package suite after source/test deletions.
+2. `cd tools/validators && npm test` — passed; `npm run build` succeeded and `node --test dist/tests/**/*.test.js` reported 190 passing tests.
+3. `rg -n 'ARC_TRACE|ARCTRACE|arc-traces|arctrace' tools/validators/src` — no matches.
+4. `rg -n 'belief_record|story-belief|BEL' tools/validators/src/structural tools/validators/src/schemas` — found `belief_record` registration/authority handling and the `story-belief` schema.
+
+## Deviations
+
+- `record_schema_compliance` lives under `tools/validators/src/structural/`, not `tools/validators/src/rules/`; the implementation registered BEL through the existing schema map in `tools/validators/src/structural/utils.ts`.
+- `create_bel_record` materializes as node type `belief_record` in the existing pre-apply overlay, so the validator schema key is `belief_record`.
+- The active-records proof is focused on validator reference handling and replay comparison. A complete PG/SE schema migration from the older flattened page snapshot shape to the new shared contract remains outside this ticket.
+- Post-ticket review found the ARC_TRACE stale-anchor proof was too narrow: `rg -n 'ARC_TRACE|ARCTRACE|arc-traces|arctrace|arc_trace' tools/validators/src tools/validators/tests tools/validators/README.md` still reports `arc_trace_evidence_alignment` in the story-page schema/tests and `arc_trace_*` page-snapshot fixture fields. These remaining validators-package references are same-seam blockers, not follow-up work.
+
+## Post-Review Blocker
+
+Archival is blocked until the validators package no longer carries ARC_TRACE-derived PG schema/test requirements. The next implementation pass should either remove/replace the `arc_trace_evidence_alignment` deferred-validation key and related `arc_trace_*` page-snapshot fixtures, or narrow this ticket's stated ARC_TRACE invariant if a live, non-ARC_TRACE meaning exists for those lower-case fields. After that, rerun the validators package proof and the broader stale-anchor sweep that includes `arc_trace`.

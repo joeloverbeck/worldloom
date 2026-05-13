@@ -1,17 +1,17 @@
 # validators
 
-Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus scene-commitment arc rule validators, story-scope predicate parsability, and structural invariant enforcement.
+Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus scene-commitment rule validators, story-scope predicate parsability, and structural invariant enforcement.
 
 **Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 9 structural validators, the 17 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 9 structural validators, the 14 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
 OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
 atomic YAML record classes (STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
-STOBJ, BR, PG, CHC, SLT, and story-local DA). The PA schema validates YAML frontmatter parsed from
+STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The PA schema validates YAML frontmatter parsed from
 `adjudications/PA-NNNN-*.md`; PA body prose is not schema-constrained.
 
 ## Validator Inventory
@@ -28,9 +28,6 @@ Rule-derived mechanized validators:
 - `choice_worthiness_completeness`
 - `effect_model_legality`
 - `effect_model_replay_safety`
-- `arc_trace_evidence_alignment`
-- `narrative_point_classification`
-- `arc_envelope_conformance`
 - `stop_policy_parsability`
 - `storylet_predicate_dsl_parsability`
 - `rule11_action_space`

@@ -135,16 +135,9 @@ function replayErrorVerdict(page: IndexedRecord, err: unknown): Verdict {
 }
 
 // Fields stamped onto state_snapshot by Phase-level workflow logic rather than
-// by replayable SE.ops. The page-cycle skill's Phase 4b stamps
-// applied_effect_variant; PROSESPLIT-005 / branching-story-page-prose-finalize
-// Phase 7 stamps arc_trace_emitted and arc_trace_id when it emits the
-// ARC_TRACE record. FOUNDATIONS §Story Bundles "Pipeline shape: plan +
-// finalize" commits these fields to that workflow path, so snapshot replay
-// cannot derive them from SE.ops alone.
+// by replayable SE.ops.
 const POST_REPLAY_STAMPED_FIELDS: ReadonlySet<string> = new Set([
-  "applied_effect_variant",
-  "arc_trace_emitted",
-  "arc_trace_id"
+  "applied_effect_variant"
 ]);
 
 function snapshotDrifts(expected: StateSnapshot, got: StateSnapshot): Array<{ field: string; expected: unknown; got: unknown }> {

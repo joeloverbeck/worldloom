@@ -13,6 +13,30 @@ test("state_snapshot_integrity passes for a complete page snapshot", async () =>
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity accepts active_records BEL references", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context([
+    storyRecord("page_record", "PG-0002", "pages", {
+      id: "PG-0002",
+      story_id: "STORY-001",
+      state_snapshot: {
+        active_records: {
+          BEL: ["BEL-0001"]
+        }
+      }
+    }),
+    storyRecord("belief_record", "BEL-0001", "beliefs", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("state_snapshot_integrity fails when required fields are missing", async () => {
   const { current_location: _currentLocation, entity_status: _entityStatus, ...snapshot } = completeStateSnapshot();
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({ pageSnapshot: snapshot }), {

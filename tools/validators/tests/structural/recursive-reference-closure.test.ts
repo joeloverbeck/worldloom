@@ -22,6 +22,30 @@ test("recursive_reference_closure passes for same-branch recursive references", 
   assert.deepEqual(verdicts, []);
 });
 
+test("recursive_reference_closure accepts BEL records in active_records", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      state_snapshot: {
+        active_records: {
+          BEL: ["BEL-0001"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("belief_record", "BEL-0001", "beliefs", {
+        id: "BEL-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0001"
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("recursive_reference_closure fails for sibling-branch leakage at nested depth", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     factOverrides: {
