@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { computePgStateHash } from "@worldloom/world-index/hash/content";
+
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "./helpers.js";
 
@@ -88,6 +90,46 @@ test("snapshot_replay_equality compares active_records snapshots with BEL entrie
   }));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality replays new-schema SE state_delta active_records", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality reports new-schema active_records class drift", async () => {
+  const childPage = newSchemaChildPage({
+    ...newSchemaExpectedActiveRecords(),
+    OBL: ["OBL-0001"]
+  });
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
+  assert.ok(drift);
+  assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
+    { field: "active_records.OBL", expected: ["OBL-0001", "OBL-0002"], got: ["OBL-0001"] }
+  ]);
+});
+
+test("snapshot_replay_equality reports new-schema canonical state_hash mismatches", async () => {
+  const childPage = {
+    ...newSchemaChildPage(newSchemaExpectedActiveRecords()),
+    state_hash: "f".repeat(64)
+  };
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.ok(verdicts.some((verdict) => verdict.code === "snapshot_replay_equality.state_hash_mismatch"));
 });
 
 test("snapshot_replay_equality emits field-level drift details", async () => {
@@ -226,5 +268,87 @@ function patchPlan() {
         }
       }
     ]
+  };
+}
+
+function newSchemaRecords(childPage: Record<string, unknown>) {
+  return [
+    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
+      id: "PG-0001",
+      story_id: "STORY-001",
+      state_snapshot: { active_records: newSchemaParentActiveRecords() },
+      state_hash: "0".repeat(64)
+    }),
+    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
+      id: "SE-0002",
+      story_id: "STORY-001",
+      state_delta: {
+        create: ["SF-0002", "OBL-0002", "CHC-0002"],
+        supersede: ["STINT-0001", "THR-0001"],
+        close: ["BEL-0001"]
+      }
+    }),
+    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", childPage)
+  ];
+}
+
+function newSchemaChildPage(activeRecords: Record<string, readonly string[]>): Record<string, unknown> {
+  const page: Record<string, unknown> = {
+    id: "PG-0002",
+    story_id: "STORY-001",
+    parent_page_id: "PG-0001",
+    input: { resolved_event_id: "SE-0002" },
+    state_hash_parent: "0".repeat(64),
+    state_snapshot: {
+      active_records: activeRecords,
+      visible_affordances: ["CHC-0002"],
+      entity_status: { "STENT-0001": "present" },
+      unresolved_mystery_claims: [],
+      continuation: { next_storylets: ["SLT-0002"] }
+    },
+    plan: {
+      path: "pages-prose-plans/PG-0002.md",
+      plan_hash: "1".repeat(64)
+    },
+    validation_trace: {
+      parent_snapshot_compatibility: "matched parent state_hash"
+    }
+  };
+
+  return {
+    ...page,
+    state_hash: computePgStateHash(page)
+  };
+}
+
+function newSchemaParentActiveRecords(): Record<string, string[]> {
+  return {
+    STENT: ["STENT-0001"],
+    STINT: ["STINT-0001"],
+    SF: ["SF-0001"],
+    BEL: ["BEL-0001"],
+    OBL: ["OBL-0001"],
+    CNSQ: [],
+    THR: ["THR-0001"],
+    SREL: [],
+    STLOC: ["STLOC-0001"],
+    STOBJ: [],
+    DA: []
+  };
+}
+
+function newSchemaExpectedActiveRecords(): Record<string, string[]> {
+  return {
+    STENT: ["STENT-0001"],
+    STINT: [],
+    SF: ["SF-0001", "SF-0002"],
+    BEL: [],
+    OBL: ["OBL-0001", "OBL-0002"],
+    CNSQ: [],
+    THR: [],
+    SREL: [],
+    STLOC: ["STLOC-0001"],
+    STOBJ: [],
+    DA: []
   };
 }
