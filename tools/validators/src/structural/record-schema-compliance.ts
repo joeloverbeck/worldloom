@@ -7,12 +7,8 @@ import yaml from "js-yaml";
 
 import {
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
-  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
-  COMMITMENT_CLASS_TO_FAMILY,
-  COMMITMENT_CLASSES,
-  COMMITMENT_FAMILIES
+  CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED
 } from "@worldloom/world-index/public/canonical-vocabularies";
-import type { CommitmentClass, CommitmentFamily } from "@worldloom/world-index/public/canonical-vocabularies";
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
   RECORD_TYPE_TO_SCHEMA,
@@ -91,7 +87,6 @@ export const recordSchemaCompliance: Validator = {
         verdicts.push(...schemaVerdicts(record, validate.errors ?? []));
       }
       verdicts.push(...canonSafetyBlockVerdicts(record, ctx, preApplyTouchedFiles));
-      verdicts.push(...commitmentRouteVerdicts(record));
     }
 
     for (const hybrid of hybridRecordsFromFiles(input, ctx)) {
@@ -102,7 +97,6 @@ export const recordSchemaCompliance: Validator = {
       if (!validate(hybrid.parsed)) {
         verdicts.push(...schemaVerdicts(hybrid, validate.errors ?? []));
       }
-      verdicts.push(...commitmentRouteVerdicts(hybrid));
     }
 
     return verdicts;
@@ -162,78 +156,6 @@ function canonSafetyBlockVerdicts(
   verdicts.push(...naRationaleVerdicts(record, "epistemic_profile", parsed.epistemic_profile));
   verdicts.push(...naRationaleVerdicts(record, "exception_governance", parsed.exception_governance));
   return verdicts;
-}
-
-function commitmentRouteVerdicts(record: SchemaTarget): Verdict[] {
-  const parsed = asPlainRecord(record.parsed);
-  if (record.node_type === "choice_record") {
-    return routeVerdictsForBlock(record, parsed, "");
-  }
-  if (record.node_type !== "storylet_record") {
-    return [];
-  }
-
-  const verdicts = [
-    ...routeVerdictsForBlock(record, asPlainRecord(parsed.arc_contract), "arc_contract")
-  ];
-  const exitPortfolio = asPlainRecord(parsed.exit_portfolio);
-  const nativeSeeds = Array.isArray(exitPortfolio.native_seeds) ? exitPortfolio.native_seeds : [];
-  nativeSeeds.forEach((seed, index) => {
-    verdicts.push(...routeVerdictsForBlock(
-      record,
-      asPlainRecord(seed),
-      `exit_portfolio.native_seeds.${index}`
-    ));
-  });
-  return verdicts;
-}
-
-function routeVerdictsForBlock(record: SchemaTarget, block: Record<string, unknown>, pathPrefix: string): Verdict[] {
-  const verdicts: Verdict[] = [];
-  const commitmentClass = block.commitment_class;
-  const family = block.commitment_family;
-
-  if (typeof commitmentClass === "string" && commitmentClass.length > 0 && !isCommitmentClass(commitmentClass)) {
-    verdicts.push(customSchemaVerdict(
-      record,
-      "record_schema_compliance.unknown_commitment_class",
-      `${record.node_id} route violation at ${routePath(pathPrefix, "commitment_class")}: '${commitmentClass}' is not in the closed commitment_class taxonomy`
-    ));
-    return verdicts;
-  }
-
-  if (typeof family === "string" && family.length > 0 && !isCommitmentFamily(family)) {
-    verdicts.push(customSchemaVerdict(
-      record,
-      "record_schema_compliance.unknown_commitment_family",
-      `${record.node_id} route violation at ${routePath(pathPrefix, "commitment_family")}: '${family}' is not in the closed commitment_family taxonomy`
-    ));
-  }
-
-  if (isCommitmentClass(commitmentClass) && typeof family === "string" && isCommitmentFamily(family)) {
-    const expected = COMMITMENT_CLASS_TO_FAMILY[commitmentClass];
-    if (family !== expected) {
-      verdicts.push(customSchemaVerdict(
-        record,
-        "record_schema_compliance.commitment_family_mismatch",
-        `${record.node_id} route violation at ${routePath(pathPrefix, "commitment_family")}: '${family}' does not match commitment_class '${commitmentClass}' expected family '${expected}'`
-      ));
-    }
-  }
-
-  return verdicts;
-}
-
-function routePath(prefix: string, field: string): string {
-  return prefix.length > 0 ? `/${prefix.replaceAll(".", "/")}/${field}` : `/${field}`;
-}
-
-function isCommitmentClass(value: unknown): value is CommitmentClass {
-  return typeof value === "string" && (COMMITMENT_CLASSES as readonly string[]).includes(value);
-}
-
-function isCommitmentFamily(value: unknown): value is CommitmentFamily {
-  return typeof value === "string" && (COMMITMENT_FAMILIES as readonly string[]).includes(value);
 }
 
 export function requiresExceptionGovernance(type: string): boolean {

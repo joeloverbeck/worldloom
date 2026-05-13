@@ -103,6 +103,7 @@ Before finishing, re-read the ticket and make it truthful:
 - `## Outcome` states what changed
 - `## Verification Result` lists commands/reviews actually completed
 - `## Deviations` is present when reassessment or verification changed the intended shape
+- after adding `## Outcome`, `## Verification Result`, or `## Deviations`, re-read the active ticket one more time for stale file names, proof paths, required-field claims, and test-command fragments introduced or preserved by closeout edits
 - dirty-worktree state has been refreshed using `references/dirty-worktree-ledger.md`, including hunk-level classification for mid-run changes in files you also touched and likely sibling-ticket ownership for same-family edits
 - if `git add -N` was used only to make untracked owned files visible to `git diff --check`, clear the intent-to-add entries before final status. In Codex sandboxed runs, a `git reset -- <path>` cleanup can fail with index-lock or read-only-filesystem symptoms; rerun the same cleanup with the required approval/escalation, then refresh status rather than leaving hygiene-only index state behind.
 
