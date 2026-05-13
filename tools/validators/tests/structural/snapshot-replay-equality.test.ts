@@ -66,6 +66,7 @@ test("snapshot_replay_equality compares active_records snapshots with BEL entrie
     record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
       id: "SE-0002",
       story_id: "STORY-001",
+      event_kind: "selected_choice",
       ops: [],
       state_hash_after: "hash-next"
     }),
@@ -181,6 +182,7 @@ function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
     record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
       id: "SE-0002",
       story_id: "STORY-001",
+      event_kind: "selected_choice",
       ops: [
         { op_id: "OP-0001", op_type: "fact_create", input_records: [], output_records: ["SF-0002"], deterministic_payload: {} },
         { op_id: "OP-0002", op_type: "obligation_supersede", input_records: ["OBL-0001"], output_records: ["OBL-0002"], deterministic_payload: {} },

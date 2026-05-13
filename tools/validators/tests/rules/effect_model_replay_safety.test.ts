@@ -82,6 +82,7 @@ function eventRecord(id: string, opTypes: string[]) {
   return record("story_event_record", id, `stories/alpha/_source/events/${id}.yaml`, {
     id,
     story_id: "STORY-001",
+    event_kind: "selected_choice",
     ops: opTypes.map((opType, index) => ({
       op_id: `OP-${String(index + 1).padStart(4, "0")}`,
       op_type: opType,

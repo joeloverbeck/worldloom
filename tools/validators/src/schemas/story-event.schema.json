@@ -2,10 +2,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-event.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": ["id", "story_id", "event_kind"],
   "properties": {
     "id": { "type": "string", "pattern": "^SE-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "event_kind": {
+      "enum": [
+        "story_start",
+        "selected_choice",
+        "write_in_attempt",
+        "system_repair",
+        "audit_repair",
+        "prose_attach",
+        "promotion_closeout"
+      ]
+    }
   },
   "additionalProperties": true
 }

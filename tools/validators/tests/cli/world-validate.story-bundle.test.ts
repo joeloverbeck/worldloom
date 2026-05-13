@@ -173,6 +173,7 @@ function completeEvent(): Record<string, unknown> {
   return {
     id: "SE-0002",
     story_id: "STORY-001",
+    event_kind: "selected_choice",
     created_at_page: "PG-0002",
     ops: [
       {
