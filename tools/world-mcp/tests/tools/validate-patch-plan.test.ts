@@ -111,10 +111,20 @@ test("validatePatchPlan accepts create_bel_record through pre-apply validation",
             story_slug: "marla-kern-seduction",
             record: {
               id: "BEL-0001",
+              story_id: "STORY-001",
+              created_at_page: "PG-0001",
               holder: "STENT-0001",
               claim: "Mara believes Kern controls the harbor ledgers.",
               truth_relation: "unknown",
-              visibility: "private"
+              confidence: "suspected",
+              visibility: "private",
+              basis: {
+                source_event: "SE-0001"
+              },
+              consequences: {
+                opens: [],
+                constrains_choices: []
+              }
             }
           }
         }

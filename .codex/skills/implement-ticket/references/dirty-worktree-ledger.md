@@ -75,3 +75,5 @@ Do not silently attribute same-family sibling work to the active ticket just bec
 ## Ignored Artifacts
 
 For package/tool tickets, run an ignored-aware targeted status check for affected package directories before the first package command likely to create ignored artifacts and again before final response. Classify `node_modules/`, `dist/`, coverage output, caches, compiled tests, secret files, and rebuilt indexes as pre-existing, expected generated artifacts, cleaned state, or unexpected fallout.
+
+When the tracked worktree is otherwise clean for the active ticket but the affected package already has ignored artifacts, keep the final wording explicit about provenance and refresh behavior. Example: `Pre-existing ignored package artifacts: tools/world-mcp/.secret, tools/world-mcp/node_modules/; expected ignored generated artifact: tools/world-mcp/dist/ refreshed by npm run build / npm test; left in place.`
