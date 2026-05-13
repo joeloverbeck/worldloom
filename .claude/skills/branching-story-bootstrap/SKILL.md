@@ -357,7 +357,7 @@ The shared contract is the canonical schema reference. This skill does not dupli
   - `archive/tickets/MCPENH-043.md` — taught `mcp__worldloom__allocate_next_id` to return `<CLASS>-1` for story-bundle-scoped classes when the parent world exists but the bundle directory does not yet exist. Bootstrap's Pre-flight step 5 allocations now succeed pre-bundle without skill-side workarounds.
   - `archive/tickets/VALENH-012.md` — corrected `recursive_reference_closure` to read the canonical `scope.visibility` nested location on SLT records (no longer the legacy top-level `visibility.scope`). Phase 5's seed-SLT discipline (`scope.visibility: global_author_pool`, `scope.branch_id: null`, `created_at_page: null`) now passes validation as written.
   - `archive/tickets/VALENH-013.md` — corrected `storylet_predicate_dsl_parsability`'s CNSQ/SREL reference buckets to query the live world-index node types (`consequence_record`, `relationship_record_story`). Seed SLT preconditions with `{pred: 'record_active', record: 'CNSQ-<integer>'}` against same-envelope CNSQ records now resolve through the pre-apply overlay.
-  - `tickets/FOUNDATIONS-003.md` (COMPLETED, pending archival) — refreshed story-pipeline skill prose and templates to use the FOUNDATIONS-002 unpadded `<integer>` notation; this skill's notation is post-refresh.
+  - `FOUNDATIONS-003` — refreshed story-pipeline skill prose and templates to use the FOUNDATIONS-002 unpadded `<integer>` notation; this skill's notation is post-refresh.
 
 ## Final Rule
 

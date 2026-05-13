@@ -1,6 +1,6 @@
 # FOUNDATIONS-003: Refresh skill ID notation after FOUNDATIONS-002
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — skill and skill-reference prose/templates only; no package/runtime code or world content.
@@ -21,6 +21,7 @@ Those stale examples were not just cosmetic: story and canon skills are operatio
 5. Adjacent contradictions: some stale examples may intentionally describe historical ticket prefixes such as `<PREFIX>-NNN`; those should be classified and left alone when they are not world/story record IDs. The implementation must distinguish world/story ID examples from ticket-number placeholders.
 6. Live sweep showed the stale notation was broader than the initial named files. Same-seam skill surfaces under `.claude/skills/` also carried active pipeline, hybrid, proposal, audit, pressure-event, and story-bundle ID examples such as `PR-NNNN`, `BATCH-NNNN`, `NCP-NNNN`, `NWB-NNNN`, `EPE-NNNN`, concrete `PG-0001` / `SEC-GEO-001` examples, and `MR-0003` Mystery Reserve examples. These are absorbed as skill-facing notation cleanup because they share the same FOUNDATIONS-002 ID-format contract.
 7. Historical example directories were not treated as the acceptance surface for the negative grep. A few example files moved where the same mechanical notation cleanup touched active skill examples, but remaining historical example IDs are classified as example provenance rather than active operator instructions.
+8. Post-review reopened the ticket for one same-seam active-reference blocker: `.claude/skills/branching-story-bootstrap/SKILL.md` still named `tickets/FOUNDATIONS-003.md` as a completed pending-archival prerequisite. The live correction removes the active-ticket path from the skill prerequisite list so archival will not leave a stale source reference.
 
 ## Architecture Check
 
@@ -50,6 +51,7 @@ Ticket-family placeholders such as `<PREFIX>-NNN` remain intact when they descri
 ## Files to Touch
 
 - `.claude/skills/**/*.md` (modify where stale world/story record ID notation appears)
+- `.claude/skills/branching-story-bootstrap/SKILL.md` (modified to remove the stale active `tickets/FOUNDATIONS-003.md` reference from completed prerequisite prose)
 - `.claude/skills/**/templates/*` (modify where stale world/story record ID notation appears)
 - `.claude/skills/**/references/*.md` (modify where stale world/story record ID notation appears)
 - `.claude/skills/**/examples/*.md` (modify only where same-seam example prose was mechanically aligned)
@@ -83,15 +85,18 @@ Ticket-family placeholders such as `<PREFIX>-NNN` remain intact when they descri
 ### Commands
 
 1. `rg -n 'CF-NNNN|CH-NNNN|M-NNNN|OQ-NNNN|ENT-NNNN|SEC-[A-Z]{3}-NNN|PG-NNNN|CHC-NNNN|SLT-NNNN|SLB-NNNN|SAU-NNNN|SP-NNNN|RSP-NNNN|DA-0000|\\[0-9\\]\\{4\\}|\\\\d\\{4\\}' .claude/skills .codex/skills`
-2. `git diff --check`
+2. `rg -n 'tickets/FOUNDATIONS-003.md|archive/tickets/FOUNDATIONS-003.md' .claude/skills .codex/skills docs tickets --glob '!tickets/FOUNDATIONS-003.md'`
+3. `git diff --check`
 
 ## Outcome
 
-FOUNDATIONS-003 is implemented. Skill-facing current-contract surfaces now use the FOUNDATIONS-002 unpadded natural-integer notation for record IDs, including story-bundle, canon-addition, creation, audit, proposal, pressure-event, character, diegetic-artifact, and Codex implement-ticket reference surfaces. No package/runtime code or world content was changed.
+FOUNDATIONS-003 is implemented. Skill-facing current-contract surfaces now use the FOUNDATIONS-002 unpadded natural-integer notation for record IDs, including story-bundle, canon-addition, creation, audit, proposal, pressure-event, character, diegetic-artifact, and Codex implement-ticket reference surfaces.
 
-## Post-Review Blocker (2026-05-13)
+Post-review refinement on 2026-05-13 also removed the stale active `tickets/FOUNDATIONS-003.md` reference from `.claude/skills/branching-story-bootstrap/SKILL.md`. No package/runtime code or world content was changed.
 
-Archival is blocked inside `post-ticket-review` boundaries. The post-move archive sweep found `.claude/skills/branching-story-bootstrap/SKILL.md` still referencing `tickets/FOUNDATIONS-003.md` as a completed ticket pending archival. That is a touched skill surface, so it must be corrected under implementation authority before this ticket can be archived.
+## Post-Review Refinement (2026-05-13)
+
+Resolved the post-review blocker: `.claude/skills/branching-story-bootstrap/SKILL.md` no longer references `tickets/FOUNDATIONS-003.md` as a completed pending-archival prerequisite.
 
 ## Verification Result
 
@@ -100,6 +105,7 @@ Archival is blocked inside `post-ticket-review` boundaries. The post-move archiv
 - Manual review confirmed canon-addition envelope examples now use `CF-<integer>`, `CH-<integer>`, `PA-<integer>`, `M-<integer>`, `OQ-<integer>`, and unpadded concrete examples such as `CF-1`.
 - Manual review confirmed story-pipeline skills/templates now use story ID classes such as `PG-<integer>`, `SE-<integer>`, `SP-<integer>`, `RSP-<integer>`, and `SLT-<integer>`.
 - `git diff --check` passed.
+- `rg -n 'tickets/FOUNDATIONS-003.md|archive/tickets/FOUNDATIONS-003.md' .claude/skills .codex/skills docs tickets --glob '!tickets/FOUNDATIONS-003.md'` emitted no matches.
 
 ## Deviations
 

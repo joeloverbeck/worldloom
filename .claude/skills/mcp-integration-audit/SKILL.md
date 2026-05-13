@@ -82,8 +82,9 @@ Phase 7: Allocate ticket IDs per namespace (scan tickets/ + archive/tickets/
        v
 Phase 8: Final summary — ticket paths, namespace distribution, dependency
          graph (if any cross-ticket Deps were declared), suggested
-         implementation order, sibling-handoff to /skill-audit for
-         skill-prose findings (per Shape B). Do NOT commit.
+         implementation order, shape-B-out-of-scope routing (sibling-handoff
+         to /skill-audit for skill-prose findings; direct edit for
+         shared-template / contract findings). Do NOT commit.
 ```
 
 ## Inputs
@@ -281,7 +282,10 @@ After all writes succeed:
 3. **Cross-ticket dependency graph** — when emitted tickets share Deps relationships (rare but real for paired index-schema + retrieval findings, parallel to MCPENH-025/026/027), name them. Use `test -f` (or equivalent path-existence check) on every Deps path to capture any auto-archival that happened mid-flow.
 4. **Suggested implementation order** — typically by severity (CRITICAL → HIGH → MEDIUM → LOW) within each namespace, then by Deps dependency where present.
 5. **Deferred findings** (per `defer-with-rationale` dispositions at Phase 6) and **rejected findings** (per `reject-as-false-positive`) — listed with their rationale so the audit trail is complete.
-6. **Sibling-handoff to `/skill-audit`** — when Phase 2 surfaced any candidate finding whose nature is "skill prose unclear / step ordering wrong / instruction missing" (i.e., a Shape-B-out-of-scope concern), explicitly recommend `/skill-audit <target_skill_path>` as the follow-up so the operator can route those findings through the right skill. This sibling-handoff is the closeout-menu's conditional out-of-scope option.
+6. **Shape-B-out-of-scope routing** — when Phase 2 surfaced a candidate finding whose nature is out of this skill's pipeline-fallback audit boundary, recommend the appropriate follow-up. The routing splits into two distinct paths depending on the finding's target:
+   - **(a) Skill-prose drift** in the target skill itself OR in another sibling SKILL.md / its `references/` / `templates/` (unclear instructions, misordered steps, missing examples, stale terminology in a skill's prose) — recommend `/skill-audit <target_skill_path>` as the follow-up so the operator can route the finding through the right meta-tooling skill. `/skill-audit` accepts only paths to actual skill directories (it auto-resolves `SKILL.md` within the supplied path); a path without a `SKILL.md` inside is invalid input.
+   - **(b) Shared-template / contract / pipeline-doc inconsistency** — when the surfaced finding's target is `.claude/skills/_shared-templates/*.md`, `docs/MACHINE-FACING-LAYER.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/HARD-GATE-DISCIPLINE.md`, `CLAUDE.md`, or any other pipeline-level documentation file that is NOT a skill directory, recommend a direct edit by the operator. `/skill-audit` does NOT accept non-skill targets, so routing this case to `/skill-audit` would produce an invocation error rather than a working follow-up. The **No FOUNDATIONS edits** guardrail (see §Guardrails) is the exception: when the finding's target is `docs/FOUNDATIONS.md`, the canonical route is a `FOUNDATIONS-NNN` ticket through this skill (or a separate audit invocation that emits one), NOT a direct edit and NOT a `/skill-audit` recommendation. Routing path (b) covers direct edits to shared templates and `CLAUDE.md` but explicitly excludes `docs/FOUNDATIONS.md` itself.
+   - **Worked example**: in this session's second `/mcp-integration-audit .claude/skills/branching-story-bootstrap` invocation, Phase 8 surfaced F2 (shared-template internal inconsistency between §4.2 PG schema enumeration and §4.4 SLT's reference to `PG.branch_path` in `.claude/skills/_shared-templates/story-state-contract.md`). The audit initially recommended `/skill-audit .claude/skills/_shared-templates/story-state-contract.md` — which is routing path (a) misapplied to a non-skill target and would have produced an invocation error. The correct routing was path (b): direct edit of the contract file to add `branch_path: [PG-<integer>]*` to the §4.2 enumeration. The user corrected the recommendation; this rule prevents the same mistake on future audits.
 
 Do NOT commit. Leave files for user review.
 

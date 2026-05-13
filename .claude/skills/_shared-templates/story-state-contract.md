@@ -84,13 +84,14 @@ consequences:
 
 The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor — other provenance refinements (`witnessed_page`, `told_by`, `inferred_from`) are not retained at this layer.
 
-### 4.2 `PG` (~21 sub-paths)
+### 4.2 `PG` (~22 sub-paths)
 
 ```yaml
 id: PG-<integer>*
 story_id: STORY-<integer>*
 branch_id: BR-<integer>*
 parent_page_id: PG-<integer> | null         # * null only for PG-1
+branch_path: [PG-<integer>]*           # * ordered list of pages from root to here on this branch; for root page (PG-1) contains exactly [PG-1]; turn-cycle extends the parent page's branch_path by appending the new PG id. Referenced from §4.4 SLT.scope.visible_branch_path_prefix as the canonical prefix source; read by recursive_reference_closure to authorize in-branch references.
 turn_index: 0*
 input:
   choice_id: CHC-<integer> | null           # exactly one of choice_id / manual_action_text is non-null
