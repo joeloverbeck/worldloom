@@ -8,8 +8,8 @@ import {
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
   storyFactPromotionToCanonRankingProfile,
-  storyPageCycleRankingProfile,
-  storyletPoolAuthoringRankingProfile
+  storyTurnCycleRankingProfile,
+  commitmentBlockAuthoringRankingProfile
 } from "./canon-pipeline-adjacent";
 import { canonAdditionRankingProfile } from "./canon-addition";
 import { characterGenerationRankingProfile } from "./character-generation";
@@ -27,8 +27,8 @@ export const TASK_TYPES = [
   "canon_facts_from_diegetic_artifacts",
   "emergent_pressure_events",
   "story_bootstrap",
-  "story_page_cycle",
-  "storylet_pool_authoring",
+  "story_turn_cycle",
+  "commitment_block_authoring",
   "branching_story_health_audit",
   "story_fact_promotion_to_canon",
   "other"
@@ -47,8 +47,8 @@ export const rankingProfilesByTaskType: Record<TaskType, RankingWeights> = {
   canon_facts_from_diegetic_artifacts: canonFactsFromDiegeticArtifactsRankingProfile,
   emergent_pressure_events: emergentPressureEventsRankingProfile,
   story_bootstrap: storyBootstrapRankingProfile,
-  story_page_cycle: storyPageCycleRankingProfile,
-  storylet_pool_authoring: storyletPoolAuthoringRankingProfile,
+  story_turn_cycle: storyTurnCycleRankingProfile,
+  commitment_block_authoring: commitmentBlockAuthoringRankingProfile,
   branching_story_health_audit: branchingStoryHealthAuditRankingProfile,
   story_fact_promotion_to_canon: storyFactPromotionToCanonRankingProfile,
   other: defaultRankingProfile
@@ -65,8 +65,8 @@ export const DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE: Record<TaskType, number> = {
   canon_facts_from_diegetic_artifacts: 12000,
   emergent_pressure_events: 15000,
   story_bootstrap: 18000,
-  story_page_cycle: 18000,
-  storylet_pool_authoring: 18000,
+  story_turn_cycle: 18000,
+  commitment_block_authoring: 18000,
   branching_story_health_audit: 12000,
   story_fact_promotion_to_canon: 8000,
   other: 8000
@@ -89,6 +89,6 @@ export {
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
   storyFactPromotionToCanonRankingProfile,
-  storyPageCycleRankingProfile,
-  storyletPoolAuthoringRankingProfile
+  storyTurnCycleRankingProfile,
+  commitmentBlockAuthoringRankingProfile
 };

@@ -36,7 +36,7 @@ Advance a branching-story bundle by one causal tick from any committed parent pa
 <HARD-GATE>
 Do NOT write `pages-prose-plans/PG-NNNN.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
-(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)` (MCPENH-041 lands the task_type rename — see Guardrails §Known integration debt); parent prose policy verified.
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)`; parent prose policy verified.
 
 (b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-NNNN` and `PG-NNNN` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-NNNN.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
@@ -142,7 +142,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml` — parent page; MUST exist
 - Parent's `state_snapshot.active_records` resolved to their `_source/<class>/*.yaml` files
 - Optional `pages-prose/<recent>.md` for §14 continuity (only when parent prose exists)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)` — MCPENH-041 lands the `story_turn_cycle` task_type rename
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)`
 
 The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `_source/pages/PG-NNNN.yaml` MUST NOT exist (collision aborts Pre-flight).
 
@@ -409,7 +409,6 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
   - **MCPENH-040** — Register `BEL` id class in `tools/world-mcp/src/tools/allocate-next-id.ts`; drop `ARCTRACE` registration. Lands as a rebuilt-family prerequisite per bootstrap's Shape C rollout. Turn-cycle's Pre-flight step 7 depends on this for `BEL` allocation.
   - **PEENH-007** — Add `create_bel_record` operation to `tools/patch-engine/src/envelope/schema.ts`. Ships alongside the rebuilt family. Turn-cycle's Phase 10 submits `create_bel_record` ops.
   - **VALENH-011** — Register `BEL` in `record_schema_compliance` and structural validators; drop ARC_TRACE-related validators. Ships alongside the rebuilt family. Turn-cycle's Phase 10 dry-run exercises the BEL validator.
-  - **MCPENH-041** — Rename legacy task_types in `tools/world-mcp/src/context-packet/shared.ts`: `story_page_cycle` → `story_turn_cycle`; `storylet_pool_authoring` → `commitment_block_authoring`. Drop the legacy names (their consumer skills are deleted). Turn-cycle's Pre-flight uses `task_type='story_turn_cycle'`. Ships alongside this skill.
 
 ## Final Rule
 

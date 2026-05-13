@@ -268,7 +268,7 @@ test("story_bootstrap reserves governing invariant and Mystery Reserve full bodi
   }
 });
 
-test("story_page_cycle reserves governing invariant and Mystery Reserve full bodies", async () => {
+test("story_turn_cycle reserves governing invariant and Mystery Reserve full bodies", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -280,7 +280,7 @@ test("story_page_cycle reserves governing invariant and Mystery Reserve full bod
           world_slug: "seeded",
           file_path: "_source/canon/CF-0001.yaml",
           node_type: "canon_fact_record",
-          body: `id: CF-0001\nstatement: ${"Page-cycle seed fact. ".repeat(600)}\n`
+          body: `id: CF-0001\nstatement: ${"Turn-cycle seed fact. ".repeat(600)}\n`
         },
         {
           node_id: "ONT-1",
@@ -301,7 +301,7 @@ test("story_page_cycle reserves governing invariant and Mystery Reserve full bod
 
     const packet = await withRepoRoot(root, () =>
       getContextPacket({
-        task_type: "story_page_cycle",
+        task_type: "story_turn_cycle",
         world_slug: "seeded",
         story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
@@ -312,7 +312,7 @@ test("story_page_cycle reserves governing invariant and Mystery Reserve full bod
     assert.ok(!("code" in packet));
     assert.deepEqual(
       packet.task_header.governing_full_body_priority,
-      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.story_page_cycle
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.story_turn_cycle
     );
 
     const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));
@@ -323,7 +323,7 @@ test("story_page_cycle reserves governing invariant and Mystery Reserve full bod
   }
 });
 
-test("storylet_pool_authoring reserves governing invariant and Mystery Reserve full bodies", async () => {
+test("commitment_block_authoring reserves governing invariant and Mystery Reserve full bodies", async () => {
   const root = createTempRepoRoot();
 
   try {
@@ -335,7 +335,7 @@ test("storylet_pool_authoring reserves governing invariant and Mystery Reserve f
           world_slug: "seeded",
           file_path: "_source/canon/CF-0001.yaml",
           node_type: "canon_fact_record",
-          body: `id: CF-0001\nstatement: ${"Storylet pool seed fact. ".repeat(600)}\n`
+          body: `id: CF-0001\nstatement: ${"Commitment block seed fact. ".repeat(600)}\n`
         },
         {
           node_id: "ONT-1",
@@ -356,7 +356,7 @@ test("storylet_pool_authoring reserves governing invariant and Mystery Reserve f
 
     const packet = await withRepoRoot(root, () =>
       getContextPacket({
-        task_type: "storylet_pool_authoring",
+        task_type: "commitment_block_authoring",
         world_slug: "seeded",
         story_slug: "reserve-fixture",
         seed_nodes: ["CF-0001"],
@@ -367,7 +367,7 @@ test("storylet_pool_authoring reserves governing invariant and Mystery Reserve f
     assert.ok(!("code" in packet));
     assert.deepEqual(
       packet.task_header.governing_full_body_priority,
-      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.storylet_pool_authoring
+      GOVERNING_FULL_BODY_PRIORITY_BY_TASK_TYPE.commitment_block_authoring
     );
 
     const nodesById = new Map(collectNodes(packet).map((node) => [node.id, node]));

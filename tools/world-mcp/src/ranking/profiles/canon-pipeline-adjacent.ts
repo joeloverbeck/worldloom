@@ -130,7 +130,7 @@ export const storyBootstrapRankingProfile: RankingWeights = {
   }
 };
 
-export const storyPageCycleRankingProfile: RankingWeights = {
+export const storyTurnCycleRankingProfile: RankingWeights = {
   ...defaultRankingProfile,
   file_class_priority: {
     ...defaultRankingProfile.file_class_priority,
@@ -155,7 +155,7 @@ export const storyPageCycleRankingProfile: RankingWeights = {
   }
 };
 
-export const storyletPoolAuthoringRankingProfile: RankingWeights = {
+export const commitmentBlockAuthoringRankingProfile: RankingWeights = {
   ...defaultRankingProfile,
   file_class_priority: {
     ...defaultRankingProfile.file_class_priority,

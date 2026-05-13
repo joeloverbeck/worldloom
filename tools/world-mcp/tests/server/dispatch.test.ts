@@ -499,6 +499,25 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
   });
 });
 
+test("legacy story task types fail at the MCP validation boundary", async () => {
+  await withServerClient(async (client) => {
+    for (const taskType of ["story_page_cycle", "storylet_pool_authoring"]) {
+      const result = (await client.callTool({
+        name: MCP_TOOL_NAMES.get_context_packet,
+        arguments: {
+          task_type: taskType,
+          world_slug: "seeded",
+          story_slug: "opening-bells",
+          seed_nodes: ["CF-0001"]
+        }
+      })) as any;
+
+      assert.equal(result.isError, true);
+      assert.match(textContent(result), /invalid/i);
+    }
+  });
+});
+
 test("unsupported id classes fail at the MCP validation boundary", async () => {
   await withServerClient(async (client) => {
     for (const idClass of ["NOT_A_CLASS", "ARCTRACE"]) {
@@ -951,12 +970,12 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.ok(
       byName
         .get(MCP_TOOL_NAMES.get_context_packet)
-        ?.input_schema_enums?.task_type?.includes("story_page_cycle")
+        ?.input_schema_enums?.task_type?.includes("story_turn_cycle")
     );
     assert.ok(
       byName
         .get(MCP_TOOL_NAMES.get_context_packet)
-        ?.input_schema_enums?.task_type?.includes("storylet_pool_authoring")
+        ?.input_schema_enums?.task_type?.includes("commitment_block_authoring")
     );
     assert.ok(
       byName

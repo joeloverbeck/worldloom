@@ -89,7 +89,7 @@ test("persisted context-packet summaries include story-bundle context summary", 
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "storylet_pool_authoring",
+        task_type: "commitment_block_authoring",
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
         seed_nodes: ["entity:marla-kern"],

@@ -20,7 +20,7 @@ test("getContextPacket requires story_slug for story-pipeline task types", async
       () =>
         withRepoRoot(root, () =>
           getContextPacket({
-            task_type: "storylet_pool_authoring",
+            task_type: "commitment_block_authoring",
             world_slug: STORY_FIXTURE_WORLD,
             seed_nodes: ["entity:marla-kern"]
           })
@@ -40,8 +40,8 @@ test("getContextPacket returns story_bundle_context for each story-pipeline task
 
     for (const taskType of [
       "story_bootstrap",
-      "story_page_cycle",
-      "storylet_pool_authoring",
+      "story_turn_cycle",
+      "commitment_block_authoring",
       "branching_story_health_audit",
       "story_fact_promotion_to_canon"
     ] as const) {

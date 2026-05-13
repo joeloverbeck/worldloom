@@ -58,7 +58,7 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
-  story_page_cycle: [
+  story_turn_cycle: [
     "WORLD_KERNEL.md",
     "ONTOLOGY.md",
     "TIMELINE.md",
@@ -69,7 +69,7 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
     "ECONOMY_AND_RESOURCES.md",
     "EVERYDAY_LIFE.md"
   ],
-  storylet_pool_authoring: [
+  commitment_block_authoring: [
     "WORLD_KERNEL.md",
     "ONTOLOGY.md",
     "TIMELINE.md",
@@ -159,16 +159,16 @@ const ACTIVE_RULES: Record<TaskType, string[]> = {
     "Rule 5: separate story-local truth from world-level canon",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
-  story_page_cycle: [
-    "Story page cycle is story-local; world canon remains read-only",
+  story_turn_cycle: [
+    "Story turn cycle is story-local; world canon remains read-only",
     "Rule 1: imported facts must cite world authority",
     "Rule 4: distribution discipline",
     "Rule 5: separate story-local truth from world-level canon",
     "Rule 6: story state changes remain append-only by supersession",
     "Rule 7: preserve Mystery Reserve deliberately"
   ],
-  storylet_pool_authoring: [
-    "Storylet pool authoring is story-local; world canon remains read-only",
+  commitment_block_authoring: [
+    "Commitment block authoring is story-local; world canon remains read-only",
     "Rule 1: imported facts must cite world authority",
     "Rule 4: distribution discipline",
     "Rule 5: separate story-local truth from world-level canon",
@@ -214,7 +214,7 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Per-bundle INDEX.md",
     "Per-world stories INDEX.md"
   ],
-  story_page_cycle: [
+  story_turn_cycle: [
     "Page record",
     "Story event record",
     "Story-local atomic records",
@@ -222,7 +222,7 @@ const REQUIRED_OUTPUT_SCHEMA: Record<TaskType, string[]> = {
     "Choice records",
     "Per-bundle INDEX.md"
   ],
-  storylet_pool_authoring: [
+  commitment_block_authoring: [
     "Storylet record",
     "Storylet batch manifest",
     "Story-local atomic records",
@@ -285,14 +285,14 @@ const PROHIBITED_MOVES: Record<TaskType, string[]> = {
     "Do not resolve or pre-empt forbidden Mystery Reserve answers",
     "Do not treat story-local facts as accepted world canon"
   ],
-  story_page_cycle: [
+  story_turn_cycle: [
     "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
     "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
     "Do not resolve or pre-empt forbidden Mystery Reserve answers",
     "Do not treat story-local facts as accepted world canon",
     "Do not read sibling-branch pages as continuity context"
   ],
-  storylet_pool_authoring: [
+  commitment_block_authoring: [
     "Do not write CF, CH, INV, M, OQ, ENT, or world-level SEC records",
     "Do not mutate WORLD_KERNEL.md, ONTOLOGY.md, or mandatory world files",
     "Do not resolve or pre-empt forbidden Mystery Reserve answers",
@@ -344,8 +344,8 @@ const GOVERNING_ATOMIC_NODE_TYPES: Partial<Record<TaskType, readonly string[]>> 
   propose_new_characters: ["invariant"],
   canon_facts_from_diegetic_artifacts: ["invariant", "mystery_reserve_entry"],
   story_bootstrap: ["invariant", "mystery_reserve_entry"],
-  story_page_cycle: ["invariant", "mystery_reserve_entry"],
-  storylet_pool_authoring: ["invariant", "mystery_reserve_entry"],
+  story_turn_cycle: ["invariant", "mystery_reserve_entry"],
+  commitment_block_authoring: ["invariant", "mystery_reserve_entry"],
   branching_story_health_audit: ["invariant", "mystery_reserve_entry"],
   story_fact_promotion_to_canon: ["invariant", "mystery_reserve_entry", "open_question_entry"]
 };
@@ -725,7 +725,7 @@ export async function buildGoverningWorldContext(
   }
 
   if (
-    taskType === "story_page_cycle" ||
+    taskType === "story_turn_cycle" ||
     taskType === "branching_story_health_audit" ||
     taskType === "story_fact_promotion_to_canon"
   ) {

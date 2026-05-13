@@ -8,7 +8,7 @@ The packet is locality-first. It must secure seed-local authority and the govern
 
 ```yaml
 task_header:
-  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_page_cycle | storylet_pool_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
+  task_type: canon_addition | character_generation | diegetic_artifact_generation | continuity_audit | propose_new_canon_facts | propose_new_characters | propose_new_worlds_from_preferences | canon_facts_from_diegetic_artifacts | emergent_pressure_events | story_bootstrap | story_turn_cycle | commitment_block_authoring | branching_story_health_audit | story_fact_promotion_to_canon | other
   world_slug: animalia
   story_slug: null
   generated_at: "2026-04-24T00:00:00Z"
@@ -122,7 +122,7 @@ This layer carries:
 
 The indexed story-bundle state required by story-pipeline task types.
 
-This layer is `null` for world-canon task types. For `story_bootstrap`, `story_page_cycle`, `storylet_pool_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter.
+This layer is `null` for world-canon task types. For `story_bootstrap`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter.
 
 This layer carries:
 
@@ -220,8 +220,8 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `propose_new_canon_facts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
-| `story_page_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
-| `storylet_pool_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
+| `story_turn_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
+| `commitment_block_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `branching_story_health_audit` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `story_fact_promotion_to_canon` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `continuity_audit`, `propose_new_worlds_from_preferences`, `emergent_pressure_events`, `other` | none; use targeted retrieval or `list_records(... include_full_body=true)` where whole-class loading is required |
@@ -233,25 +233,25 @@ The assembler first fits the normal preview/summary packet under the requested t
 | `character_generation` | `reserve` | `reserve` |
 | `diegetic_artifact_generation` | `reserve` | `reserve` |
 | `story_bootstrap` | `reserve` | `reserve` |
-| `story_page_cycle` | `reserve` | `reserve` |
-| `storylet_pool_authoring` | `reserve` | `reserve` |
+| `story_turn_cycle` | `reserve` | `reserve` |
+| `commitment_block_authoring` | `reserve` | `reserve` |
 | `branching_story_health_audit` | `reserve` | `reserve` |
 | `story_fact_promotion_to_canon` | `reserve` | `reserve` |
 | all other task types | `opportunistic` | `opportunistic` |
 
 `reserve` means every matching governing-context node receives its `full_body` before any opportunistic layer spends full-body budget. If the packet can no longer fit after dropping `impact_surfaces`, `scoped_local_context`, and `exact_record_links`, the assembler returns `packet_incomplete_required_classes` with `missing_classes: ['governing_world_context.full_body']` rather than silently downgrading those governing full bodies. `opportunistic` means the existing one-node-at-a-time allocation applies: if a candidate would exceed either ceiling, that node is downgraded back to preview/summary delivery and recorded in `truncation_summary.full_body_downgrades` with reason `high_value_full_body_budget_exceeded`. `task_header.governing_full_body_priority` reports the active policy, and `task_header.full_body_classes_delivered` lists the live node classes that actually retained at least one `full_body` after allocation and layer enforcement.
 
-### Story Page Cycle Profile
+### Story Turn Cycle Profile
 
-`story_page_cycle` is the registered context-packet profile for `branching-story-page-cycle` Pre-flight. The skill derives `seed_nodes` from the parent page state: cast members' resolved world entity ids, current location, and active period. The profile uses an 18000 default budget and prioritizes seed-scoped canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and a latest `change_log_entry` node in `governing_world_context` so the page can persist `state_snapshot.canon_revision`.
+`story_turn_cycle` is the registered context-packet profile for `branching-story-turn-cycle` Pre-flight. The skill derives `seed_nodes` from the parent page state: cast members' resolved world entity ids, current location, and active period. The profile uses an 18000 default budget and prioritizes seed-scoped canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and a latest `change_log_entry` node in `governing_world_context` so the page can persist `state_snapshot.canon_revision`.
 
-The profile remains world-canon read-only for world-level records and now also requires `story_slug`. `get_context_packet(task_type='story_page_cycle', story_slug=...)` returns world-canon/indexed context, the governing audit trail needed to interpret the story-local turn safely, and `story_bundle_context` for the indexed bundle-local pool / obligation / thread / recent-page state.
+The profile remains world-canon read-only for world-level records and requires `story_slug`. `get_context_packet(task_type='story_turn_cycle', story_slug=...)` returns world-canon/indexed context, the governing audit trail needed to interpret the story-local turn safely, and `story_bundle_context` for the indexed bundle-local pool / obligation / thread / recent-page state.
 
-### Storylet Pool Authoring Profile
+### Commitment Block Authoring Profile
 
-`storylet_pool_authoring` is the registered context-packet profile for `storylet-pool-authoring` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids, recent page-history named entities, and the active story period. The profile uses an 18000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and ontology-grounding context.
+`commitment_block_authoring` is the registered context-packet profile for the planned `commitment-block-authoring` Pre-flight. The skill derives `seed_nodes` from the story kernel cast bind list's resolved world entity ids, recent page-history named entities, and the active story period. The profile uses an 18000 default budget and prioritizes premise-relevant canon facts, governing invariant and Mystery Reserve records, named-entity neighbors, relevant section context, and ontology-grounding context.
 
-The profile remains world-canon read-only for world-level records and now also requires `story_slug`. `get_context_packet(task_type='storylet_pool_authoring', story_slug=...)` returns world-canon/indexed context plus `story_bundle_context` for current pool, open obligations, active threads, branch metadata, and `STORY_KERNEL.md` declarations used to author story-local SLT records without promoting storylet claims to world canon.
+The profile remains world-canon read-only for world-level records and requires `story_slug`. `get_context_packet(task_type='commitment_block_authoring', story_slug=...)` returns world-canon/indexed context plus `story_bundle_context` for current pool, open obligations, active threads, branch metadata, and `STORY_KERNEL.md` declarations used to author story-local SLT records without promoting story-local commitments to world canon.
 
 ### Branching Story Health Audit Profile
 
