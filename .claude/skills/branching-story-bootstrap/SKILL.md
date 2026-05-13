@@ -85,7 +85,8 @@ Phase 7: Author root page plan → pages-prose-plans/PG-1.md (in memory)
 Phase 8: Generate first choices → CHC records (in memory)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 4 bootstrap-additional checks
+Phase 9: Validate against shared 8 hard gates + 4 bootstrap-additional checks;
+  compute final PG hashes per shared contract §4.2a
         |
         v
 Phase 10: HARD-GATE fires → atomic patch + markdown writes
@@ -244,13 +245,16 @@ Draft `PG-1` per shared contract §4.2:
 - `branch_path: ["PG-1"]` — the ordered list of pages in this branch from root to here; for the root page the list contains exactly the root id. Referenced from shared contract §4.4 as `PG.branch_path` (the basis for storylet `visible_branch_path_prefix` prefix checks); §4.2's PG schema enumeration omits explicit listing of the field but §4.4 treats it as canonical, and the `recursive_reference_closure` validator reads `parsed.branch_path` to determine in-branch eligibility for every story-local reference reachable from this page. Subsequent pages emitted by `branching-story-turn-cycle` extend the parent's `branch_path` by appending the new PG id.
 - `input.choice_id: null`, `input.manual_action_text: null`, `input.resolved_event_id: SE-1`
 - Full `state_snapshot` (active_records including the BEL key; entity_status per active STENT; visible_affordances with ordinal indices; unresolved_mystery_claims; continuation status)
-- `plan.path: pages-prose-plans/PG-1.md`, `plan.plan_hash: <computed>`
+- `plan.path: pages-prose-plans/PG-1.md`, `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`
+- `state_hash`: final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
 - `rendered_prose.path: null`, `rendered_prose.receipt_path: null`
 - `validation_trace`: populated in Phase 9
 
 ## Phase 7: Author the root page plan
 
 Draft `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/PG-1.md` per shared contract §8 — 19 sections.
+
+The drafted plan bytes are the future direct-write artifact. Keep the complete UTF-8 bytes stable in working memory so Phase 9 can compute `PG-1.plan.plan_hash` over exactly the bytes that will be written after patch submission.
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** This is operationally load-bearing — the external prose renderer has no cross-plan state, so every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
@@ -284,16 +288,22 @@ Plus 4 bootstrap-additional checks (recorded in working memory; not on `PG.valid
 3. **Root page plan self-containment** — the plan body contains all 19 sections including the verbatim §2 / §3 / §19, with no external-renderer-undefined references.
 4. **Continuation capacity** — at least one seed `SLT` is eligible at `PG-1` (`seed_commitment_blocks != 'none'`) OR the turn-cycle's JIT path is the planned continuation (`seed_commitment_blocks: 'none'`). Terminal root rejected as authoring error.
 
-If any gate or additional check fails, abort before Phase 10 — write nothing.
+After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
+
+1. Compute `PG-1.plan.plan_hash` from the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-1.md` draft.
+2. Compute `PG-1.state_hash` from the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself and `rendered_prose`.
+3. Verify both values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
+
+If any gate, additional check, or hash check fails, abort before Phase 10 — write nothing.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
 1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record`, `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `append_story_diegetic_artifact_record` (if story-local DA records are applicable, with `expected_id_allocations.story_da_ids`), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
-2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL`.
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL` and `PG`; placeholder or malformed PG hashes must not reach this step.
 3. Present the complete deliverable summary to the user: bundle path, cast roster, record inventory by class with counts, page plan structural preview (§1 / §5 / §6 / §12 / §13 — the engine-readable sections; §2 / §3 / §19 are too long to inline in preview), emitted choices list.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: bootstrap envelopes routinely exceed 50KB (a full cast + standard seed-pool bundle produces 50+ records with full snapshot fields, easily 70KB+); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan.
-6. On patch success, write the markdown artifacts in the shared contract §10 write order: `STORY_KERNEL.md` → `pages-prose-plans/PG-1.md` → bundle `INDEX.md` → per-world `stories/INDEX.md` (first-run create or append).
+6. On patch success, write the markdown artifacts in the shared contract §10 write order: `STORY_KERNEL.md` → `pages-prose-plans/PG-1.md` using the exact bytes hashed into `PG-1.plan.plan_hash` → bundle `INDEX.md` → per-world `stories/INDEX.md` (first-run create or append).
 7. Report bundle path + record inventory to the user. Do NOT `git commit`.
 
 **Failure behavior**: patch fail → write nothing; surface failed gate and the corrective action. Patch success + markdown write fail → story-bundle `_source/` records are authoritative; surface the partial-failure to the user with a one-paragraph diagnostic; do not silently retry. Terminal root → authoring error, abort before patch submission.

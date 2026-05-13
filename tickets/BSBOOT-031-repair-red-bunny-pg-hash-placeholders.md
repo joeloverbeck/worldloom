@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — story-bundle world-content repair through patch-engine record updates plus direct receipt artifact truthing if still applicable.
-**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md`; `tickets/BSBOOT-030-define-pg-hash-computation-contract.md`
+**Deps**: `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md`; `archive/tickets/BSBOOT-030-define-pg-hash-computation-contract.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@
 - `plan.plan_hash: PLACEHOLDER_TO_BE_COMPUTED`
 - `state_hash: PLACEHOLDER_TO_BE_COMPUTED_BY_ENGINE`
 
-The prose receipt at `worlds/erotica-world/stories/red-bunny/pages-prose-receipts/PG-1.yaml` also records `state_hash_at_plan_time: PLACEHOLDER_TO_BE_COMPUTED_BY_ENGINE` and notes the placeholder drift. This ticket owns repairing that local content after the canonical writer-side hash procedure exists.
+The prose receipt at `worlds/erotica-world/stories/red-bunny/pages-prose-receipts/PG-1.yaml` also records `state_hash_at_plan_time: PLACEHOLDER_TO_BE_COMPUTED_BY_ENGINE` and notes the placeholder drift. This ticket owns repairing that local content using the canonical writer-side hash procedure defined by `archive/tickets/BSBOOT-030-define-pg-hash-computation-contract.md`.
 
 ## Assumption Reassessment (2026-05-13)
 
@@ -21,7 +21,7 @@ The prose receipt at `worlds/erotica-world/stories/red-bunny/pages-prose-receipt
 2. The PG record contains the two placeholder hash strings named above. `worlds/erotica-world/stories/red-bunny/pages-prose-receipts/PG-1.yaml` contains a computed `plan_hash` but still records placeholder state hash evidence.
 3. `docs/FOUNDATIONS.md` §Story Bundles §4 says story-bundle `_source/<class>/*.yaml` writes route through patch-engine story-bundle record ops, not direct edits. The receipt file is a direct-write artifact, not an atomic `_source/*.yaml` record.
 4. Cross-artifact boundary: the PG record and its prose receipt must agree on the final plan/state hashes so `branching-story-prose-attach` drift evidence does not keep reporting a resolved bootstrap placeholder as current drift.
-5. Dependency boundary: `tickets/BSBOOT-030-define-pg-hash-computation-contract.md` must land first so this repair uses the canonical byte/serialization procedure rather than inventing one ad hoc.
+5. Dependency boundary: `archive/tickets/BSBOOT-030-define-pg-hash-computation-contract.md` now defines the canonical byte/serialization procedure this repair must use rather than inventing one ad hoc.
 
 ## Architecture Check
 
@@ -62,7 +62,7 @@ If `pages-prose-receipts/PG-1.yaml` still carries placeholder drift as current e
 ## Out of Scope
 
 - Changing validators; completed by `archive/tickets/VALENH-016-enforce-pg-plan-hash-and-state-hash-sha256.md`.
-- Defining the canonical hash algorithm; owned by `tickets/BSBOOT-030-define-pg-hash-computation-contract.md`.
+- Defining the canonical hash algorithm; owned by `archive/tickets/BSBOOT-030-define-pg-hash-computation-contract.md`.
 - Re-bootstrap of the entire `red-bunny` story bundle unless reassessment proves field-level repair cannot be made truthful.
 
 ## Acceptance Criteria
