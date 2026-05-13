@@ -22,7 +22,7 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "create_pg_record",
   "create_chc_record",
   "create_slt_record",
-  "create_arc_trace_record",
+  "create_bel_record",
   "append_story_diegetic_artifact_record"
 ]);
 

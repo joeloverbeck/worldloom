@@ -25,8 +25,7 @@ export const narrativePointClassification: Validator = {
   applies_to: (ctx: Context): boolean =>
     ctx.run_mode === "full-world" ||
     (ctx.run_mode === "pre-apply" && (ctx.patch_plan?.patches ?? []).some((patch) =>
-      patch.op === "create_pg_record" ||
-      patch.op === "create_arc_trace_record"
+      patch.op === "create_pg_record"
     )) ||
     (ctx.run_mode === "incremental" && ctx.touched_files.some(isNarrativePointRelevantPath)),
   run: async (_input: unknown, ctx: Context): Promise<Verdict[]> => {

@@ -12,14 +12,14 @@ import { baseEnvelope, createIndexedTestWorld, createOp, signedToken, writeSecre
 
 const OK_VALIDATOR = async () => ({ ok: true as const });
 
-test("create_arc_trace_record validates and submits through the story-record patch-engine path", async (t) => {
+test("create_bel_record validates and submits through the story-record patch-engine path", async (t) => {
   const world = createIndexedTestWorld(t);
-  const secret = Buffer.from("arc-trace-integration-secret");
+  const secret = Buffer.from("belief-integration-secret");
   const secretPath = writeSecret(world.worldRoot, secret);
-  const patch = createArcTracePatch(world.worldSlug, "red-bunny", "ARCTRACE-0001");
+  const patch = createBelPatch(world.worldSlug, "red-bunny", "BEL-0001");
   const envelope: PatchPlanEnvelope = {
-    ...baseEnvelope({ arc_trace_ids: ["ARCTRACE-0001"] }),
-    plan_id: "PLAN-ARC-TRACE-0001",
+    ...baseEnvelope({ bel_ids: ["BEL-0001"] }),
+    plan_id: "PLAN-BEL-0001",
     target_world: world.worldSlug,
     patches: [patch]
   };
@@ -34,12 +34,12 @@ test("create_arc_trace_record validates and submits through the story-record pat
   });
 
   assertPatchReceipt(result);
-  assert.deepEqual(result.id_allocations_consumed.arc_trace_ids, ["ARCTRACE-0001"]);
+  assert.deepEqual(result.id_allocations_consumed.bel_ids, ["BEL-0001"]);
   assert.ok(
     result.new_nodes.some(
-      (node) => node.node_id === "red-bunny:ARCTRACE-0001" && node.node_type === "arc_trace_record"
+      (node) => node.node_id === "red-bunny:BEL-0001" && node.node_type === "belief_record"
     ),
-    `missing ARC_TRACE receipt node: ${JSON.stringify(result.new_nodes)}`
+    `missing BEL receipt node: ${JSON.stringify(result.new_nodes)}`
   );
 
   const writtenPath = path.join(
@@ -49,38 +49,57 @@ test("create_arc_trace_record validates and submits through the story-record pat
     "stories",
     "red-bunny",
     "_source",
-    "arc-traces",
-    "ARCTRACE-0001.yaml"
+    "beliefs",
+    "BEL-0001.yaml"
   );
   assert.ok(fs.existsSync(writtenPath));
   assert.deepEqual(YAML.parse(fs.readFileSync(writtenPath, "utf8")), patch.payload.record);
 });
 
-function createArcTracePatch(
+test("create_arc_trace_record is rejected by envelope validation", () => {
+  const envelope = {
+    ...baseEnvelope({}),
+    patches: [
+      createOp({
+        op: "create_arc_trace_record",
+        target_world: "minimal-world",
+        target_file: "stories/red-bunny/_source/arc-traces/ARCTRACE-0001.yaml",
+        payload: {
+          story_slug: "red-bunny",
+          record: { id: "ARCTRACE-0001" }
+        }
+      } as unknown as PatchOperation)
+    ]
+  };
+
+  const result = validateEnvelopeShape(envelope);
+
+  assert.deepEqual(result, {
+    ok: false,
+    errors: ["patches[0].op must be a supported operation kind"]
+  });
+});
+
+function createBelPatch(
   worldSlug: string,
   storySlug: string,
   id: string
-): Extract<PatchOperation, { op: "create_arc_trace_record" }> {
+): Extract<PatchOperation, { op: "create_bel_record" }> {
   return createOp({
-    op: "create_arc_trace_record",
+    op: "create_bel_record",
     target_world: worldSlug,
-    target_file: `stories/${storySlug}/_source/arc-traces/${id}.yaml`,
+    target_file: `stories/${storySlug}/_source/beliefs/${id}.yaml`,
     payload: {
       story_slug: storySlug,
       record: {
         id,
-        created_at_page: "PG-0002",
-        arc_realized: "SLT-0001",
-        effect_variant_applied: "variant-a",
-        semantic_critic_verdict: { status: "pass" },
-        realized_beats: [],
-        possible_violations: [],
-        stop_condition_hit: { category: "normal_exit", id: "exit-1" },
-        effect_evidence: [],
-        observed_actions: []
+        holder: "STENT-0001",
+        claim: "Kern believes the harbor office will hide the bribe ledger.",
+        truth_relation: "unknown",
+        visibility: "private"
       }
     }
-  } satisfies Extract<PatchOperation, { op: "create_arc_trace_record" }>);
+  } satisfies Extract<PatchOperation, { op: "create_bel_record" }>);
 }
 
 function assertPatchReceipt(result: PatchReceipt | EngineError): asserts result is PatchReceipt {

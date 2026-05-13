@@ -304,26 +304,6 @@ test("validatePatchPlan accepts pending page-cycle pages before ARC_TRACE finali
   });
 });
 
-test("validatePatchPlan materializes ARC_TRACE records for pre-apply trace validators", async () => {
-  await withTempRoot(async () => {
-    const proseDir = path.resolve(process.cwd(), "../../worlds/seeded/stories/marla-kern-seduction/pages-prose");
-    mkdirSync(proseDir, { recursive: true });
-    writeFileSync(path.join(proseDir, "PG-0002.md"), "Mara offers repair help and Mara accepts.", "utf8");
-
-    const result = await validatePatchPlan(arcTracePlan() as unknown as PatchPlanEnvelope);
-
-    for (const name of [
-      "arc_trace_evidence_alignment",
-      "narrative_point_classification",
-      "arc_envelope_conformance"
-    ]) {
-      const execution = result.executions.find((row) => row.name === name);
-      assert.equal(execution?.status, "pass", name);
-      assert.ok(!result.verdicts.some((verdict) => verdict.validator === name), name);
-    }
-  });
-});
-
 test("validatePatchPlan finds indexed ARC_TRACE rows for rendered parent pages", async () => {
   await withTempRoot(async () => {
     seedIndexedStoryRecord("PG-0002", "page_record", "pages", renderedParentPage());
@@ -507,62 +487,6 @@ function replaySafePagePlan() {
           current_location: "STLOC-0001",
           applied_effect_variant: "partial-repair",
           narrative_point_classification: "CONTINUE_ARC"
-        }
-      })
-    ]
-  };
-}
-
-function arcTracePlan() {
-  return {
-    plan_id: "plan-arc-trace-001",
-    target_world: "seeded",
-    approval_token: "token-from-gate",
-    verdict: "ACCEPT",
-    originating_skill: "branching-story-page-cycle",
-    expected_id_allocations: {},
-    patches: [
-      ...replaySafePagePlan().patches,
-      storyPatch("create_arc_trace_record", "arc-traces", {
-        id: "ARCTRACE-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
-        arc_realized: "SLT-0001",
-        effect_variant_applied: "partial-repair",
-        realized_beats: [
-          {
-            beat_id: "B1",
-            function: "offer-help",
-            realized: "true",
-            evidence_span: { start: 0, end: 14 }
-          }
-        ],
-        observed_actions: [
-          {
-            actor: "STENT-0001",
-            action: "offers repair help",
-            target: "STENT-0002",
-            evidence_span: { start: 0, end: 14 }
-          }
-        ],
-        observed_claims: [],
-        possible_violations: [],
-        stop_condition_hit: {
-          id: "help-accepted",
-          category: "normal_exit",
-          evidence_span: { start: 21, end: 31 }
-        },
-        effect_evidence: [
-          {
-            effect_ref: 0,
-            realized: "true",
-            evidence_span: { start: 21, end: 31 }
-          }
-        ],
-        semantic_critic_verdict: {
-          status: "pass",
-          reasons: [],
-          required_revision_constraints: []
         }
       })
     ]

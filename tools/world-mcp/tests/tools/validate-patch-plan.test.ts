@@ -90,6 +90,52 @@ test("validatePatchPlan returns pass when validators run without failures", asyn
   }
 });
 
+test("validatePatchPlan accepts create_bel_record through pre-apply validation", async () => {
+  const root = createTempRepoRoot();
+  seedEmptyWorld(root);
+
+  try {
+    const plan = {
+      plan_id: "plan-bel-001",
+      target_world: "seeded",
+      approval_token: "token-from-gate",
+      verdict: "ACCEPT",
+      originating_skill: "branching-story-bootstrap",
+      expected_id_allocations: { bel_ids: ["BEL-0001"] },
+      patches: [
+        {
+          op: "create_bel_record",
+          target_world: "seeded",
+          target_file: "stories/marla-kern-seduction/_source/beliefs/BEL-0001.yaml",
+          payload: {
+            story_slug: "marla-kern-seduction",
+            record: {
+              id: "BEL-0001",
+              holder: "STENT-0001",
+              claim: "Mara believes Kern controls the harbor ledgers.",
+              truth_relation: "unknown",
+              visibility: "private"
+            }
+          }
+        }
+      ]
+    };
+
+    const result = await withRepoRoot(root, () => validatePatchPlan({ patch_plan: plan }));
+
+    assert.ok("status" in result);
+    assert.equal(result.status, "pass");
+    assert.deepEqual(result.verdicts, []);
+    assert.ok(
+      result.validators_run.some(
+        (entry) => entry.validator_name === "id_allocation_race" && entry.status === "pass"
+      )
+    );
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("validatePatchPlan returns fail and surfaces rule verdicts from the validators package", async () => {
   const root = createTempRepoRoot();
   seedEmptyWorld(root);
@@ -195,6 +241,30 @@ test("validatePatchPlan preserves additional envelope-shape errors on skipped re
       "patch_plan.patches[1].payload"
     ]
   );
+});
+
+test("validatePatchPlan rejects retired create_arc_trace_record before validator delegation", async () => {
+  const plan = buildValidPatchPlan();
+  plan.patches = [
+    {
+      op: "create_arc_trace_record",
+      target_world: "seeded",
+      target_file: "stories/marla-kern-seduction/_source/arc-traces/ARCTRACE-0001.yaml",
+      payload: {
+        story_slug: "marla-kern-seduction",
+        record: { id: "ARCTRACE-0001" }
+      }
+    }
+  ] as unknown as ReturnType<typeof buildValidPatchPlan>["patches"];
+
+  const result = await validatePatchPlan({ patch_plan: plan });
+
+  assert.deepEqual(result, {
+    status: "skipped",
+    reason: "patch_plan.patches[0].op must be a supported operation kind.",
+    verdicts: [],
+    validators_run: []
+  });
 });
 
 function assertValidatorRunEntries(

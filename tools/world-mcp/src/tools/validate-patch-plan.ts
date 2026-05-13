@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { createMcpError, type McpError } from "../errors";
-import { checkIdAllocationRace, type ValidatorRunReceipt } from "@worldloom/patch-engine";
+import { checkIdAllocationRace, OPERATION_KINDS, type ValidatorRunReceipt } from "@worldloom/patch-engine";
 import { openExistingIndex } from "@worldloom/world-index/index/open";
 import { validatePatchPlan as runValidatePatchPlan } from "@worldloom/validators";
 import type { ValidatorExecution, Verdict } from "@worldloom/validators/public/types";
@@ -11,6 +11,8 @@ import {
   type PatchPlanEnvelope,
   validatePatchPlanEnvelopeShape
 } from "./_shared";
+
+const OPERATION_KIND_SET = new Set<string>(OPERATION_KINDS);
 
 export interface ValidatePatchPlanArgs {
   patch_plan: PatchPlanEnvelope;
@@ -44,6 +46,16 @@ export async function validatePatchPlan(
       };
     }
     return { status: "skipped", reason: shapeError.message, verdicts: [], validators_run: [] };
+  }
+
+  const unsupportedOp = args.patch_plan.patches.findIndex((patch) => !OPERATION_KIND_SET.has(patch.op));
+  if (unsupportedOp !== -1) {
+    return {
+      status: "skipped",
+      reason: `patch_plan.patches[${unsupportedOp}].op must be a supported operation kind.`,
+      verdicts: [],
+      validators_run: []
+    };
   }
 
   const result = await runValidatePatchPlan(

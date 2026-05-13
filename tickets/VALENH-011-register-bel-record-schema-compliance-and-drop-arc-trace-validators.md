@@ -4,11 +4,11 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `tools/validators/src/` (record-schema validator + structural validators referencing ARC_TRACE)
-**Deps**: `archive/tickets/MCPENH-040-register-bel-id-class-and-drop-arctrace.md` (BEL id-class registration), PEENH-007 (patch-engine `create_bel_record` op). Lands alongside or after PEENH-007.
+**Deps**: `archive/tickets/MCPENH-040-register-bel-id-class-and-drop-arctrace.md` (BEL id-class registration), `archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md` (patch-engine `create_bel_record` op).
 
 ## Problem
 
-The rebuilt story-skill family introduces a first-class `BEL` (Belief) record class for story-bundle records (per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md` §C.0 + §F.3). The shared story state contract §4.1 specifies the 12-field BEL schema. The `record_schema_compliance` validator at `tools/validators/src/rules/` must enforce this schema for every BEL record submitted via `create_bel_record` (PEENH-007).
+The rebuilt story-skill family introduces a first-class `BEL` (Belief) record class for story-bundle records (per `docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md` §C.0 + §F.3). The shared story state contract §4.1 specifies the 12-field BEL schema. The `record_schema_compliance` validator at `tools/validators/src/rules/` must enforce this schema for every BEL record submitted via `create_bel_record` (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`).
 
 The validator framework currently does not know about the `BEL` class — its absence means BEL records pass through the validator unchecked, defeating Rule 1 (No Floating Facts) at the validator layer.
 
@@ -18,7 +18,7 @@ The greenfield plan also deletes `ARC_TRACE` as a record class. Existing structu
 
 1. **Validator surface verified.** `tools/validators/src/rules/` houses Rule-1-7 enforcement; `tools/validators/src/structural/` houses structural validators (snapshot-replay-equality, recursive-reference-closure, state-snapshot-integrity). The `record_schema_compliance` validator lives in this tree.
 2. **`BEL` schema canonical source.** `.claude/skills/_shared-templates/story-state-contract.md` §4.1 is the canonical schema reference (12 fields: `id`, `story_id`, `created_at_page`, `supersedes`, `holder`, `claim`, `truth_relation`, `confidence`, `visibility`, `basis.source_event`, `consequences.opens[]`, `consequences.constrains_choices[]`).
-3. **Cross-skill schema parity.** The validator's accept/reject decision must match what the patch engine (PEENH-007) writes. A divergence would either accept patch-engine-rejected records (impossible by definition of validator order) or reject patch-engine-accepted records (causing false-positive validation failures on otherwise-valid plans).
+3. **Cross-skill schema parity.** The validator's accept/reject decision must match what the patch engine (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`) writes. A divergence would either accept patch-engine-rejected records (impossible by definition of validator order) or reject patch-engine-accepted records (causing false-positive validation failures on otherwise-valid plans).
 4. **FOUNDATIONS principle.** Realizes Rule 1 (No Floating Facts) at the validator surface for the new BEL class; without this ticket, BEL records evade the structural completeness check that every other story-bundle record class receives.
 5. **HARD-GATE / canon-write impact.** None. The validator operates at the story-bundle scope; Mystery Reserve firewall surfaces and world-canon Rule-1-7 enforcement are unchanged.
 6. **Schema extension impact.** Additive registration of BEL is straightforward; the field list comes from the contract. ARC_TRACE removal is destructive in the validator scope — confirm no production worlds reference ARC_TRACE records in `state_snapshot.active_records` or replay logic before merging; per the greenfield plan §B and the legacy-removal pass, no live ARC_TRACE records exist.
@@ -70,7 +70,7 @@ Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools
 
 ## Out of Scope
 
-- The patch-engine `create_bel_record` op itself — PEENH-007.
+- The patch-engine `create_bel_record` op itself — `archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`.
 - The allocator's BEL id-class registration — `archive/tickets/MCPENH-040-register-bel-id-class-and-drop-arctrace.md`.
 - Renaming legacy `story_page_cycle` / `storylet_pool_authoring` task types — separate MCPENH-NNN ticket.
 - BEL-specific Rule 7 enforcement (mystery firewall) beyond schema-completeness — the shared contract §11 routes mystery authority through `mystery_policy.allowed_authority` on `SLT` and `unresolved_mystery_claims` on `PG`, not on `BEL` directly. If a future BEL-touching firewall surfaces, file a separate ticket.
@@ -87,7 +87,7 @@ Add BEL-bearing fixtures for the happy path; drop ARC_TRACE fixtures from `tools
 
 ### Invariants
 
-1. Every `BEL-NNNN.yaml` written by `create_bel_record` (PEENH-007) is structurally validated against the shared contract §4.1 schema before patch-apply.
+1. Every `BEL-NNNN.yaml` written by `create_bel_record` (`archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md`) is structurally validated against the shared contract §4.1 schema before patch-apply.
 2. No ARC_TRACE references remain in `tools/validators/src/` after this ticket lands.
 
 ## Test Plan

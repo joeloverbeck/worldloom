@@ -285,7 +285,7 @@ function collectNewNodes(patches: PatchOperation[]): NewNodeReceipt[] {
       case "create_pg_record":
       case "create_chc_record":
       case "create_slt_record":
-      case "create_arc_trace_record":
+      case "create_bel_record":
       case "append_story_diegetic_artifact_record": {
         const metadata = storyRecordMetadata(patch);
         return metadata === null

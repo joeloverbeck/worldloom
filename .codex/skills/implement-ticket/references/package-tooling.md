@@ -8,6 +8,8 @@ Use this reference for tickets whose owned seam includes `tools/`, package manif
 
 Before coding a package/tool ticket, inspect the package manifest and test/build scripts, dry-run or otherwise verify drafted proof command shapes and their `cwd`, check whether drafted direct `mcp__worldloom__...` invocations are exposed in the active Codex session, locate existing same-seam tests before creating new files, and confirm live fixture/count assumptions when tests copy or assert against current world state.
 
+If the package test lane runs compiled `dist/tests/**/*.js` output and this ticket renames or removes a source/test file, run the package clean script before the first broad test. If no clean script exists, explicitly remove or check for the stale compiled artifact before broad proof so deleted/renamed source tests cannot keep running from `dist/`.
+
 When a ticket adds, removes, renames, or registers validators, inspect same-package validator inventory surfaces such as the package README before source edits. Treat stale validator counts, missing validator names, or retired validator names in those inventories as same-seam package fallout, and patch the active ticket's file list/proof plan before coding when they must move with the registry change.
 
 If reassessment changes the ticket's problem model, proof surface, public response shape, package command shape, or consumer contract, patch the active ticket before source edits. This is a hard pre-edit stop even when the implementation remains same-seam and obvious. Update `Problem`, `Assumption Reassessment`, `What to Change`, `Files to Touch`, `Verification Layers`, `Acceptance Criteria`, and `Test Plan` enough that the later code edit is implementing the live contract rather than the stale draft.

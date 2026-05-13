@@ -9,7 +9,6 @@ export const arcEnvelopeConformance: Validator = {
   applies_to: (ctx: Context): boolean =>
     ctx.run_mode === "full-world" ||
     (ctx.run_mode === "pre-apply" && (ctx.patch_plan?.patches ?? []).some((patch) =>
-      patch.op === "create_arc_trace_record" ||
       patch.op === "create_slt_record"
     )) ||
     (ctx.run_mode === "incremental" && ctx.touched_files.some(isEnvelopeRelevantPath)),

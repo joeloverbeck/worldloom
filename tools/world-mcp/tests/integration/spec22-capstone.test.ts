@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -12,12 +11,10 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { canonicalOpHash, submitPatchPlan, type PatchPlanEnvelope } from "@worldloom/patch-engine";
 import { build } from "@worldloom/world-index/commands/build";
 import YAML from "yaml";
 
 import { getCanonicalVocabulary } from "../../src/tools/get-canonical-vocabulary";
-import { getRecord } from "../../src/tools/get-record";
 import { validatePatchPlan } from "../../src/tools/validate-patch-plan";
 import type { PatchPlanEnvelope as McpPatchPlanEnvelope } from "../../src/tools/_shared";
 
@@ -25,11 +22,8 @@ const REPO_ROOT = path.resolve(process.cwd(), "..", "..");
 const WORLD_SLUG = "spec22-capstone";
 const STORY_SLUG = "harborwatch";
 
-test("SPEC-22 patch-engine round-trip validates, submits, and re-reads ARC_TRACE records", async () => {
+test("SPEC-22 legacy ARC_TRACE create op is rejected before patch submission", async () => {
   const root = createSpec22RepoRoot();
-  const secret = Buffer.from("spec22-capstone-secret");
-  const secretPath = path.join(root, "tools", "world-mcp", ".secret");
-  writeFileSync(secretPath, secret, "utf8");
 
   try {
     const envelope = buildArcTraceEnvelope("ARCTRACE-0001");
@@ -38,43 +32,10 @@ test("SPEC-22 patch-engine round-trip validates, submits, and re-reads ARC_TRACE
       validatePatchPlan({ patch_plan: envelope as unknown as McpPatchPlanEnvelope })
     );
     assert.ok("status" in validation);
-    assert.equal(validation.status, "pass", JSON.stringify(validation.verdicts, null, 2));
+    assert.equal(validation.status, "skipped");
+    assert.equal(validation.reason, "patch_plan.patches[0].op must be a supported operation kind.");
     assert.deepEqual(validation.verdicts, []);
-    assert.ok(validation.validators_run.some((entry) => entry.validator_name === "arc_trace_evidence_alignment"));
-
-    const receipt = await submitPatchPlan(envelope, signToken(envelope, secret), {
-      worldRoot: root,
-      hmacSecretPath: secretPath,
-      preApplyValidator: () => ({
-        ok: true,
-        validators_run: [{ validator_name: "spec22_capstone_injected_preapply", status: "pass", duration_ms: 0 }]
-      })
-    });
-
-    assert.ok(!("ok" in receipt), JSON.stringify(receipt));
-    assert.deepEqual(receipt.id_allocations_consumed.arc_trace_ids, ["ARCTRACE-0001"]);
-
-    const writtenPath = path.join(
-      root,
-      "worlds",
-      WORLD_SLUG,
-      "stories",
-      STORY_SLUG,
-      "_source",
-      "arc-traces",
-      "ARCTRACE-0001.yaml"
-    );
-    assert.ok(existsSync(writtenPath));
-    assert.deepEqual(YAML.parse(readFileSync(writtenPath, "utf8")), arcTraceRecord("ARCTRACE-0001"));
-
-    const reread = await withWorldMcpCwd(root, () =>
-      getRecord({ world_slug: WORLD_SLUG, story_slug: STORY_SLUG, record_id: "ARCTRACE-0001" })
-    );
-    assert.ok("record" in reread);
-    assert.deepEqual(reread.record, {
-      record_kind: "arc_trace_node",
-      ...arcTraceRecord("ARCTRACE-0001")
-    });
+    assert.deepEqual(validation.validators_run, []);
   } finally {
     cleanup(root);
   }
@@ -266,7 +227,7 @@ function createSpec22RepoRoot(): string {
   return root;
 }
 
-function buildArcTraceEnvelope(id: string): PatchPlanEnvelope {
+function buildArcTraceEnvelope(id: string): McpPatchPlanEnvelope {
   return {
     plan_id: `PLAN-SPEC22-${id}`,
     target_world: WORLD_SLUG,
@@ -360,18 +321,6 @@ function writeStoryMarkdown(root: string, relativePath: string, content: string)
   const targetPath = path.join(root, "worlds", WORLD_SLUG, "stories", STORY_SLUG, relativePath);
   mkdirSync(path.dirname(targetPath), { recursive: true });
   writeFileSync(targetPath, content, "utf8");
-}
-
-function signToken(envelope: PatchPlanEnvelope, secret: Buffer): string {
-  const payload = JSON.stringify({
-    plan_id: envelope.plan_id,
-    world_slug: envelope.target_world,
-    patch_hashes: envelope.patches.map(canonicalOpHash),
-    issued_at: "2026-05-09T00:00:00.000Z",
-    expires_at: "2999-01-01T00:00:00.000Z"
-  });
-  const signature = createHmac("sha256", secret).update(Buffer.from(payload, "utf8")).digest("hex");
-  return Buffer.from(`${payload}.${signature}`, "utf8").toString("base64url");
 }
 
 function readRepoFile(relativePath: string): string {

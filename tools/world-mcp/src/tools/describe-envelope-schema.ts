@@ -68,6 +68,7 @@ const ID_ALLOCATION_KEYS = [
   "pg_ids",
   "chc_ids",
   "slt_ids",
+  "bel_ids",
   "story_da_ids"
 ] as const;
 
@@ -96,7 +97,6 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_page_record: "story-page.schema.json",
   story_choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
-  story_arc_trace_record: "story-arc-trace.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 } as const;
 
@@ -256,6 +256,25 @@ function storyPayloadWithRecord(payloadKey: keyof typeof RECORD_SCHEMA_BY_PAYLOA
   };
 }
 
+function storyPayloadWithGenericRecord(idPattern: string): JsonObject {
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: ["story_slug", "record"],
+    properties: {
+      story_slug: stringSchema("^[a-z0-9-]+$"),
+      record: {
+        type: "object",
+        additionalProperties: true,
+        required: ["id"],
+        properties: {
+          id: stringSchema(idPattern)
+        }
+      }
+    }
+  };
+}
+
 function operationSchema(kind: OperationKind): JsonObject {
   switch (kind) {
     case "create_cf_record":
@@ -388,8 +407,8 @@ function operationSchema(kind: OperationKind): JsonObject {
       return baseOperationProperties(kind, storyPayloadWithRecord("story_choice_record"));
     case "create_slt_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
-    case "create_arc_trace_record":
-      return baseOperationProperties(kind, storyPayloadWithRecord("story_arc_trace_record"));
+    case "create_bel_record":
+      return baseOperationProperties(kind, storyPayloadWithGenericRecord("^BEL-[0-9]{4}$"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }

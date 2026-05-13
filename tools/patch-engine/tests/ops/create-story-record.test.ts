@@ -39,22 +39,21 @@ test("create_slt_record writes story-bundle YAML under the story _source tree", 
   assertYamlEquals(staged, op.payload.record);
 });
 
-test("create_arc_trace_record writes ARC_TRACE YAML under the story _source tree", async (t) => {
+test("create_bel_record writes BEL YAML under the story _source tree", async (t) => {
   const world = createTestWorld(t);
-  const env = baseEnvelope({ arc_trace_ids: ["ARCTRACE-0001"] });
+  const env = baseEnvelope({ bel_ids: ["BEL-0001"] });
   const op = {
-    op: "create_arc_trace_record",
+    op: "create_bel_record",
     target_world: env.target_world,
     payload: {
       story_slug: "marla-kern-seduction",
       record: {
-        id: "ARCTRACE-0001",
-        created_at_page: "PG-0002",
-        arc_realized: "SLT-0001",
-        effect_variant_applied: "variant-a"
+        id: "BEL-0001",
+        holder: "STENT-0001",
+        claim: "Marla believes Kern controls the harbor ledgers."
       }
     }
-  } satisfies Extract<PatchOperation, { op: "create_arc_trace_record" }>;
+  } satisfies Extract<PatchOperation, { op: "create_bel_record" }>;
 
   const staged = await stageCreateStoryRecord(env, op, world.ctx);
 
@@ -67,8 +66,8 @@ test("create_arc_trace_record writes ARC_TRACE YAML under the story _source tree
       "stories",
       "marla-kern-seduction",
       "_source",
-      "arc-traces",
-      "ARCTRACE-0001.yaml"
+      "beliefs",
+      "BEL-0001.yaml"
     )
   );
   assertYamlEquals(staged, op.payload.record);
