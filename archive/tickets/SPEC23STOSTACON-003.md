@@ -1,6 +1,6 @@
 # SPEC23STOSTACON-003: Clean PG schema + add nested validation
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `tools/validators/src/schemas/story-page.schema.json`, affected tests under `tools/validators/tests/`
@@ -22,6 +22,7 @@ This ticket performs both edits atomically — removing the stale fields and upd
 4. FOUNDATIONS principle motivating this ticket: Rule 1 (No Floating Facts). The post-SPEC23STOSTACON-001 contract drops `prose_status` because the field has no load-bearing consumer in the rebuilt skill family (prose attachment is opt-in via `branching-story-prose-attach` `emit_attach_event` flag, not via a PG lifecycle column). The nested-enum additions make the contract's PG sub-paths load-bearing through schema validation.
 5. Skill / tool / hook / validator field rename or removal (menu item 7 per `tickets/_TEMPLATE.md`): `prose_status` and `deferred_validation_trace` are removed. Blast radius grep: `grep -rnE "prose_status|deferred_validation_trace" tools/ .claude/skills/ | grep -v "/dist/"` returns matches in `tools/validators/src/schemas/story-page.schema.json` (the schema itself) + `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (lines 19, 20, 36, 37) + `tools/validators/tests/integration/validate-patch-plan.test.ts` (lines 467, 489). No production-code consumers outside the schema; all blast radius is in tests, fixed in this ticket.
 6. Adjacent contradictions: (a) The current schema's `prose_path` property at lines 9-13 documents "null when prose_status != 'rendered'" — this prose_path field is not in the contract's PG block lines 76-137 either; verify whether to retain (the contract has `rendered_prose.path` at line 125 — different path naming). Retain prose_path-equivalent under the contract's `rendered_prose.path` sub-structure. (b) `validation_trace` per contract §4.2 lines 128-136 has 8 named sub-keys (one per hard gate); the schema currently doesn't validate these — out of scope for this ticket (leave additionalProperties: true on validation_trace; gate-trace validation can land in a follow-up if needed).
+7. Reassessment correction (2026-05-13): the drafted invariant claiming that PG records carrying `prose_status` or `deferred_validation_trace` "produce a schema-validation FAIL" conflicts with this ticket's explicit top-level `additionalProperties: true` boundary. This ticket removes those keys from `required[]`, `properties`, and same-package tests so the validator no longer requires or consumes them; it does not reject their incidental presence. A future full PG schema-closure ticket would own top-level unknown-key rejection.
 
 ## Architecture Check
 
@@ -100,7 +101,7 @@ Add `state_snapshot.visible_affordances` as an array; items are objects with req
 
 ### Invariants
 
-1. PG records carrying `prose_status` or `deferred_validation_trace` keys produce a schema-validation FAIL (additionalProperties at the top-level remains `true`, so the keys are allowed; but the `required` constraint no longer demands them — the assertion is that consumers don't depend on them).
+1. PG records no longer require or schema-interpret `prose_status` or `deferred_validation_trace`; those keys are absent from the schema's `required[]` and `properties` blocks while top-level `additionalProperties: true` remains unchanged.
 2. The schema's `state_snapshot.entity_status.<STENT-id>.life | agency | location` enums are strictly the post-SPEC23STOSTACON-001 sets — adding `"missing"` to life (a dropped value) produces schema FAIL.
 
 ## Test Plan
@@ -115,3 +116,23 @@ Add `state_snapshot.visible_affordances` as an array; items are objects with req
 1. `cd tools/validators && npm run build && npm test` — full validators build + test pass.
 2. `grep -rnE "prose_status|deferred_validation_trace" tools/ | grep -v "/dist/"` returns no matches (schema + tests cleaned).
 3. `jq '.properties.state_snapshot.properties' tools/validators/src/schemas/story-page.schema.json` returns the three nested-validation blocks (entity_status, unresolved_mystery_claims, visible_affordances).
+
+## Outcome
+
+Completed on 2026-05-13. `tools/validators/src/schemas/story-page.schema.json` no longer requires or defines `prose_status` / `deferred_validation_trace`, and the dangling `prose_path` description no longer references `prose_status`. The schema now validates the three SPEC-23 PG snapshot subcontracts owned by this ticket: `state_snapshot.entity_status` nested `life` / `agency` / `location` enums, `state_snapshot.unresolved_mystery_claims[].status`, and `state_snapshot.visible_affordances[].action_families[]` against the 20-value shared `action_family` taxonomy.
+
+The structural PG schema tests now cover current-contract valid snapshots plus rejection cases for `life: "missing"`, `status: "advanced"`, and non-canonical action-family values. The patch-plan integration fixtures no longer write `prose_status`.
+
+## Verification Result
+
+1. `cd tools/validators && npm test` — PASS; package build succeeded and 189 tests passed.
+2. `rg -n 'prose_status|deferred_validation_trace' tools/validators/src tools/validators/tests` — PASS; no matches in source or tests.
+3. `jq -r '.required[]' tools/validators/src/schemas/story-page.schema.json` — PASS; returned `id`, `story_id`, `prose_plan_path`.
+4. `jq '.properties | has("prose_status") or has("deferred_validation_trace")' tools/validators/src/schemas/story-page.schema.json` — PASS; returned `false`.
+5. `jq '.properties.state_snapshot.properties.entity_status' tools/validators/src/schemas/story-page.schema.json` — PASS; returned the nested entity-status validation object with 3 / 8 / 3-value location alternatives.
+6. `jq '.properties.state_snapshot.properties.unresolved_mystery_claims.items.properties.status.enum | length' tools/validators/src/schemas/story-page.schema.json` — PASS; returned `5`.
+7. `jq '.properties.state_snapshot.properties.visible_affordances.items.properties.action_families.items.enum | length' tools/validators/src/schemas/story-page.schema.json` — PASS; returned `20`.
+
+## Deviations
+
+1. Reassessment corrected the drafted invariant that old PG keys should schema-fail. Because this ticket keeps top-level `additionalProperties: true`, `prose_status` / `deferred_validation_trace` are removed from required/schema-interpreted surfaces but are not rejected solely for appearing as unknown top-level keys. A future full PG schema-closure ticket would own rejecting unknown top-level keys.

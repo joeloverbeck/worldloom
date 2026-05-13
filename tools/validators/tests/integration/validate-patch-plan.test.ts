@@ -464,7 +464,6 @@ function pendingProsePagePlan() {
   const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
   const page = pagePatch?.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
-  page.prose_status = "pending";
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
@@ -486,7 +485,6 @@ function pendingChildAfterRenderedParentPlan() {
   page.id = "PG-0003";
   page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
   page.applied_event_ops = ["SE-0003"];
-  page.prose_status = "pending";
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }

@@ -16,15 +16,40 @@ function validPagePayload(): Record<string, unknown> {
     story_id: "STORY-001",
     prose_path: null,
     prose_plan_path: "pages-prose-plans/PG-0001.md",
-    prose_status: "pending",
-    deferred_validation_trace: {
-      prose_ledger_consistency: "DEFERRED — awaiting prose render",
-      prose_critic_8_axis: "DEFERRED — awaiting prose render"
+    state_snapshot: {
+      entity_status: {
+        "STENT-0001": {
+          life: "alive",
+          agency: "free",
+          location: "STLOC-0001"
+        },
+        "STENT-0002": {
+          life: "unknown",
+          agency: "unknown",
+          location: "concealed"
+        }
+      },
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "clue_added"
+        }
+      ],
+      visible_affordances: [
+        {
+          ordinal: 0,
+          label: "door to the alley",
+          grounded_in: ["STLOC-0001", "STOBJ-0001"],
+          available_to: ["STENT-0001"],
+          action_families: ["move", "evade"]
+        }
+      ]
     }
   };
 }
 
-test("record_schema_compliance accepts a pending PG record with null prose_path", async () => {
+test("record_schema_compliance accepts a PG record with null prose_path and contract-shaped snapshot blocks", async () => {
   const result = await recordSchemaCompliance.run({}, context([pageRecord(validPagePayload())]));
 
   assert.deepEqual(result, []);
@@ -33,11 +58,6 @@ test("record_schema_compliance accepts a pending PG record with null prose_path"
 test("record_schema_compliance accepts a rendered PG record with a string prose_path", async () => {
   const parsed = validPagePayload();
   parsed.prose_path = "pages-prose/PG-0001.md";
-  parsed.prose_status = "rendered";
-  parsed.deferred_validation_trace = {
-    prose_ledger_consistency: "PASS — render aligned with ledger",
-    prose_critic_8_axis: "PASS — 8-axis verdict accepted"
-  };
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
@@ -56,39 +76,26 @@ test("record_schema_compliance rejects PG records missing prose_plan_path", asyn
   )));
 });
 
-test("record_schema_compliance rejects PG records missing prose_status", async () => {
+test("record_schema_compliance does not require retired prose-status fields", async () => {
   const parsed = validPagePayload();
-  delete parsed.prose_status;
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("must have required property 'prose_status'")
-  )));
+  assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance rejects PG records missing deferred_validation_trace", async () => {
+test("record_schema_compliance rejects PG records with invalid entity life enum values", async () => {
   const parsed = validPagePayload();
-  delete parsed.deferred_validation_trace;
-
-  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("must have required property 'deferred_validation_trace'")
-  )));
-});
-
-test("record_schema_compliance rejects PG records with an invalid prose_status enum value", async () => {
-  const parsed = validPagePayload();
-  parsed.prose_status = "draft";
+  const stateSnapshot = parsed.state_snapshot as Record<string, unknown>;
+  const entityStatus = stateSnapshot.entity_status as Record<string, unknown>;
+  const mara = entityStatus["STENT-0001"] as Record<string, unknown>;
+  mara.life = "missing";
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.enum" &&
-    verdict.message.includes("/prose_status")
+    verdict.message.includes("/state_snapshot/entity_status/STENT-0001/life")
   )));
 });
 
@@ -116,32 +123,30 @@ test("record_schema_compliance rejects PG records with a prose_path string that 
   )));
 });
 
-test("record_schema_compliance rejects PG records whose deferred_validation_trace omits a required gate key", async () => {
+test("record_schema_compliance rejects PG records with invalid mystery claim status values", async () => {
   const parsed = validPagePayload();
-  parsed.deferred_validation_trace = {
-    prose_ledger_consistency: "DEFERRED — awaiting prose render"
-  };
+  const stateSnapshot = parsed.state_snapshot as Record<string, unknown>;
+  const claims = stateSnapshot.unresolved_mystery_claims as Record<string, unknown>[];
+  claims[0]!.status = "advanced";
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
   assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("must have required property 'prose_critic_8_axis'")
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/state_snapshot/unresolved_mystery_claims/0/status")
   )));
 });
 
-test("record_schema_compliance rejects PG records whose deferred_validation_trace carries unexpected keys", async () => {
+test("record_schema_compliance rejects PG records with invalid affordance action families", async () => {
   const parsed = validPagePayload();
-  parsed.deferred_validation_trace = {
-    prose_ledger_consistency: "DEFERRED — awaiting prose render",
-    prose_critic_8_axis: "DEFERRED — awaiting prose render",
-    extra_gate: "DEFERRED — awaiting prose render"
-  };
+  const stateSnapshot = parsed.state_snapshot as Record<string, unknown>;
+  const affordances = stateSnapshot.visible_affordances as Record<string, unknown>[];
+  affordances[0]!.action_families = ["hide"];
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
   assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.additionalProperties" &&
-    verdict.message.includes("/deferred_validation_trace")
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/state_snapshot/visible_affordances/0/action_families/0")
   )));
 });
