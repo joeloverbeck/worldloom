@@ -98,9 +98,9 @@ interface CanonAdditionIds {
 
 function canonAdditionIds(world: ReturnType<typeof createIndexedTestWorld>): CanonAdditionIds {
   return {
-    cfId: nextId(world.db, "CF", 4),
-    chId: nextId(world.db, "CH", 4),
-    secId: nextId(world.db, "SEC-GEO", 3)
+    cfId: nextId(world.db, "CF", 1),
+    chId: nextId(world.db, "CH", 1),
+    secId: nextId(world.db, "SEC-GEO", 1)
   };
 }
 

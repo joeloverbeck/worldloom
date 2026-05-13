@@ -51,14 +51,14 @@ function collectIdAllocationRaceFailures(
 ): IdAllocationRaceFailure[] {
   const failures: IdAllocationRaceFailure[] = [];
   const classByKey: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
-    ["cf_ids", "CF", /^CF-(\d{4})$/, 4, true],
-    ["ch_ids", "CH", /^CH-(\d{4})$/, 4, true],
+    ["cf_ids", "CF", /^CF-(\d+)$/, 1, false],
+    ["ch_ids", "CH", /^CH-(\d+)$/, 1, false],
     ["m_ids", "M", /^M-(\d+)$/, 1, false],
-    ["oq_ids", "OQ", /^OQ-(\d{4})$/, 4, true],
-    ["ent_ids", "ENT", /^ENT-(\d{4})$/, 4, true],
-    ["pa_ids", "PA", /^PA-(\d{4})$/, 4, true],
-    ["char_ids", "CHAR", /^CHAR-(\d{4})$/, 4, true],
-    ["da_ids", "DA", /^DA-(\d{4})$/, 4, true]
+    ["oq_ids", "OQ", /^OQ-(\d+)$/, 1, false],
+    ["ent_ids", "ENT", /^ENT-(\d+)$/, 1, false],
+    ["pa_ids", "PA", /^PA-(\d+)$/, 1, false],
+    ["char_ids", "CHAR", /^CHAR-(\d+)$/, 1, false],
+    ["da_ids", "DA", /^DA-(\d+)$/, 1, false]
   ];
 
   for (const [key, prefix, regex, width, zeroPad] of classByKey) {
@@ -106,7 +106,7 @@ function collectIdAllocationRaceFailures(
 
   const secIds = allocations.sec_ids ?? [];
   for (const secId of secIds) {
-    const match = /^(SEC-[A-Z]{3})-\d{3}$/.exec(secId);
+    const match = /^(SEC-[A-Z]{3})-\d+$/.exec(secId);
     if (match === null) {
       failures.push({
         key: "sec_ids",
@@ -116,7 +116,7 @@ function collectIdAllocationRaceFailures(
       continue;
     }
     const prefix = match[1] ?? "";
-    const nextId = nextIdFor(db, worldSlug, prefix, new RegExp(`^${prefix}-(\\d{3})$`), 3, true);
+    const nextId = nextIdFor(db, worldSlug, prefix, new RegExp(`^${prefix}-(\\d+)$`), 1, false);
     if (secId !== nextId) {
       failures.push({
         key: "sec_ids",
@@ -128,22 +128,22 @@ function collectIdAllocationRaceFailures(
   }
 
   const storyAllocations: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
-    ["stent_ids", "STENT", /^STENT-(\d{4})$/, 4, true],
-    ["sf_ids", "SF", /^SF-(\d{4})$/, 4, true],
-    ["se_ids", "SE", /^SE-(\d{4})$/, 4, true],
-    ["obl_ids", "OBL", /^OBL-(\d{4})$/, 4, true],
-    ["cnsq_ids", "CNSQ", /^CNSQ-(\d{4})$/, 4, true],
-    ["thr_ids", "THR", /^THR-(\d{4})$/, 4, true],
-    ["srel_ids", "SREL", /^SREL-(\d{4})$/, 4, true],
-    ["stint_ids", "STINT", /^STINT-(\d{4})$/, 4, true],
-    ["stloc_ids", "STLOC", /^STLOC-(\d{4})$/, 4, true],
-    ["stobj_ids", "STOBJ", /^STOBJ-(\d{4})$/, 4, true],
-    ["br_ids", "BR", /^BR-(\d{4})$/, 4, true],
-    ["pg_ids", "PG", /^PG-(\d{4})$/, 4, true],
-    ["chc_ids", "CHC", /^CHC-(\d{4})$/, 4, true],
-    ["slt_ids", "SLT", /^SLT-(\d{4})$/, 4, true],
-    ["bel_ids", "BEL", /^BEL-(\d{4})$/, 4, true],
-    ["story_da_ids", "DA", /^DA-(\d{4})$/, 4, true]
+    ["stent_ids", "STENT", /^STENT-(\d+)$/, 1, false],
+    ["sf_ids", "SF", /^SF-(\d+)$/, 1, false],
+    ["se_ids", "SE", /^SE-(\d+)$/, 1, false],
+    ["obl_ids", "OBL", /^OBL-(\d+)$/, 1, false],
+    ["cnsq_ids", "CNSQ", /^CNSQ-(\d+)$/, 1, false],
+    ["thr_ids", "THR", /^THR-(\d+)$/, 1, false],
+    ["srel_ids", "SREL", /^SREL-(\d+)$/, 1, false],
+    ["stint_ids", "STINT", /^STINT-(\d+)$/, 1, false],
+    ["stloc_ids", "STLOC", /^STLOC-(\d+)$/, 1, false],
+    ["stobj_ids", "STOBJ", /^STOBJ-(\d+)$/, 1, false],
+    ["br_ids", "BR", /^BR-(\d+)$/, 1, false],
+    ["pg_ids", "PG", /^PG-(\d+)$/, 1, false],
+    ["chc_ids", "CHC", /^CHC-(\d+)$/, 1, false],
+    ["slt_ids", "SLT", /^SLT-(\d+)$/, 1, false],
+    ["bel_ids", "BEL", /^BEL-(\d+)$/, 1, false],
+    ["story_da_ids", "DA", /^DA-(\d+)$/, 1, false]
   ];
 
   for (const [key, prefix, regex, width, zeroPad] of storyAllocations) {

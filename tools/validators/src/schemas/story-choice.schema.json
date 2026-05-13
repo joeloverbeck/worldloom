@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["id", "story_id", "record_version", "choice_kind"],
   "properties": {
-    "id": { "type": "string", "pattern": "^CHC-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "id": { "type": "string", "pattern": "^CHC-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
     "record_version": { "const": 2 },
     "choice_kind": { "type": "string", "enum": ["scene_commitment", "tactical_beat"] },
     "commitment_family": { "type": "string", "minLength": 1 },

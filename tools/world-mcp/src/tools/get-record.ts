@@ -110,7 +110,7 @@ export interface RecordRow {
 const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
-const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d{4}$/;
+const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d+$/;
 
 const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
   "storylet_batch_manifest",
@@ -170,7 +170,7 @@ export function validateRecordId(recordId: string): McpError | null {
   return createMcpError("invalid_input", `record_id '${recordId}' is not a supported record id.`, {
     field: "record_id",
     expected:
-      "atomic (CF-NNNN, CH-NNNN, M-N, OQ-NNNN, ENT-NNNN, invariant category id, SEC-<class>-NNN), hybrid (CHAR-NNNN, DA-NNNN, PA-NNNN), or story-bundle (PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STLOC/STOBJ/BR/CHC/SLT/SLB/SAU/SP/RSP-NNNN)"
+      "atomic (CF-<integer>, CH-<integer>, M-<integer>, OQ-<integer>, ENT-<integer>, invariant category id, SEC-<class>-<integer>), hybrid (CHAR-<integer>, DA-<integer>, PA-<integer>), or story-bundle (PG/SE/SF/OBL/CNSQ/THR/SREL/STINT/STENT/STLOC/STOBJ/BR/CHC/SLT/SLB/SAU/SP/RSP-<integer>)"
   });
 }
 

@@ -174,7 +174,7 @@ const findImpactedFragmentsInputSchema = z.object({
 });
 
 const findSectionsTouchedByInputSchema = z.object({
-  cf_id: z.string().regex(/^CF-\d{4}$/),
+  cf_id: z.string().regex(/^CF-\d+$/),
   world_slug: z.string().min(1)
 });
 
@@ -335,7 +335,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-NNNN, CH-NNNN, INV-*, M-NNNN, OQ-NNNN, ENT-NNNN, SEC-*-NNN) returning parsed YAML, hybrid records (CHAR-NNNN, DA-NNNN, PA-NNNN) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-NNNN, SLT-NNNN, or ARCTRACE-NNNN. Optional section_path projects parsed atomic/story records with dotted paths such as 'effect_evidence' or 'semantic_critic_verdict.status'; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, DA-<integer>, PA-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, SLT-<integer>, or ARCTRACE-<integer>. Optional section_path projects parsed atomic/story records with dotted paths such as 'effect_evidence' or 'semantic_critic_verdict.status'; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );

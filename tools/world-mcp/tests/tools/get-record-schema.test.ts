@@ -107,7 +107,7 @@ test("getRecordSchema keeps the primary schema ref intact while exposing referen
   const preFiguredBy = properties.pre_figured_by as { items: { pattern: string } };
   const extensions = properties.extensions as { items: { $ref: string } };
 
-  assert.equal(preFiguredBy.items.pattern, "^CF-[0-9]{4}$");
+  assert.equal(preFiguredBy.items.pattern, "^CF-[0-9]+$");
   assert.equal(extensions.items.$ref, EXTENSION_ENTRY_ID);
   assert.equal(result.referenced_schemas[EXTENSION_ENTRY_ID]?.$id, EXTENSION_ENTRY_ID);
 });
@@ -173,7 +173,7 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     string,
     { enum?: string[]; pattern?: string; properties?: Record<string, unknown> }
   >;
-  assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
+  assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]+$");
   assert.ok(storyletProperties.move_family?.enum?.includes("investigation"));
   assert.ok(storyletProperties.exit_options);
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");

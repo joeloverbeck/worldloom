@@ -16,16 +16,16 @@
     "consequences"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^BEL-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
-    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]{4}$" },
+    "id": { "type": "string", "pattern": "^BEL-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
     "supersedes": {
       "type": ["string", "null"],
-      "pattern": "^BEL-[0-9]{4}$"
+      "pattern": "^BEL-[0-9]+$"
     },
     "holder": {
       "type": "string",
-      "pattern": "^(STENT-[0-9]{4}|group:[A-Za-z0-9 _:-]+|public|narrator)$"
+      "pattern": "^(STENT-[0-9]+|group:[A-Za-z0-9 _:-]+|public|narrator)$"
     },
     "claim": { "type": "string", "minLength": 1 },
     "belief_mode": {
@@ -44,7 +44,7 @@
       "type": "object",
       "required": ["source_event"],
       "properties": {
-        "source_event": { "type": "string", "pattern": "^SE-[0-9]{4}$" }
+        "source_event": { "type": "string", "pattern": "^SE-[0-9]+$" }
       },
       "additionalProperties": false
     },
@@ -54,11 +54,11 @@
       "properties": {
         "opens": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^(OBL|THR|CNSQ)-[0-9]{4}$" }
+          "items": { "type": "string", "pattern": "^(OBL|THR|CNSQ)-[0-9]+$" }
         },
         "constrains_choices": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^CHC-[0-9]{4}$" }
+          "items": { "type": "string", "pattern": "^CHC-[0-9]+$" }
         }
       },
       "additionalProperties": false

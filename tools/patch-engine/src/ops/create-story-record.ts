@@ -64,112 +64,112 @@ const STORY_RECORD_OPERATION_KIND_SET = new Set<OperationKind>(STORY_RECORD_OPER
 export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, StoryRecordSpec>> = {
   create_stent_record: {
     allocationKey: "stent_ids",
-    idPattern: /^STENT-\d{4}$/,
+    idPattern: /^STENT-\d+$/,
     nodeType: "story_entity_record",
     prefix: "STENT",
     sourceDir: "entities"
   },
   create_sf_record: {
     allocationKey: "sf_ids",
-    idPattern: /^SF-\d{4}$/,
+    idPattern: /^SF-\d+$/,
     nodeType: "story_fact_record",
     prefix: "SF",
     sourceDir: "facts"
   },
   create_se_record: {
     allocationKey: "se_ids",
-    idPattern: /^SE-\d{4}$/,
+    idPattern: /^SE-\d+$/,
     nodeType: "story_event_record",
     prefix: "SE",
     sourceDir: "events"
   },
   create_obl_record: {
     allocationKey: "obl_ids",
-    idPattern: /^OBL-\d{4}$/,
+    idPattern: /^OBL-\d+$/,
     nodeType: "obligation_record",
     prefix: "OBL",
     sourceDir: "obligations"
   },
   create_cnsq_record: {
     allocationKey: "cnsq_ids",
-    idPattern: /^CNSQ-\d{4}$/,
+    idPattern: /^CNSQ-\d+$/,
     nodeType: "consequence_record",
     prefix: "CNSQ",
     sourceDir: "consequences"
   },
   create_thr_record: {
     allocationKey: "thr_ids",
-    idPattern: /^THR-\d{4}$/,
+    idPattern: /^THR-\d+$/,
     nodeType: "thread_record",
     prefix: "THR",
     sourceDir: "threads"
   },
   create_srel_record: {
     allocationKey: "srel_ids",
-    idPattern: /^SREL-\d{4}$/,
+    idPattern: /^SREL-\d+$/,
     nodeType: "relationship_record_story",
     prefix: "SREL",
     sourceDir: "relationships"
   },
   create_stint_record: {
     allocationKey: "stint_ids",
-    idPattern: /^STINT-\d{4}$/,
+    idPattern: /^STINT-\d+$/,
     nodeType: "intention_record",
     prefix: "STINT",
     sourceDir: "intentions"
   },
   create_stloc_record: {
     allocationKey: "stloc_ids",
-    idPattern: /^STLOC-\d{4}$/,
+    idPattern: /^STLOC-\d+$/,
     nodeType: "story_location_record",
     prefix: "STLOC",
     sourceDir: "locations"
   },
   create_stobj_record: {
     allocationKey: "stobj_ids",
-    idPattern: /^STOBJ-\d{4}$/,
+    idPattern: /^STOBJ-\d+$/,
     nodeType: "story_object_record",
     prefix: "STOBJ",
     sourceDir: "objects"
   },
   create_br_record: {
     allocationKey: "br_ids",
-    idPattern: /^BR-\d{4}$/,
+    idPattern: /^BR-\d+$/,
     nodeType: "branch_record",
     prefix: "BR",
     sourceDir: "branches"
   },
   create_pg_record: {
     allocationKey: "pg_ids",
-    idPattern: /^PG-\d{4}$/,
+    idPattern: /^PG-\d+$/,
     nodeType: "page_record",
     prefix: "PG",
     sourceDir: "pages"
   },
   create_chc_record: {
     allocationKey: "chc_ids",
-    idPattern: /^CHC-\d{4}$/,
+    idPattern: /^CHC-\d+$/,
     nodeType: "choice_record",
     prefix: "CHC",
     sourceDir: "choices"
   },
   create_slt_record: {
     allocationKey: "slt_ids",
-    idPattern: /^SLT-\d{4}$/,
+    idPattern: /^SLT-\d+$/,
     nodeType: "storylet_record",
     prefix: "SLT",
     sourceDir: "storylets"
   },
   create_bel_record: {
     allocationKey: "bel_ids",
-    idPattern: /^BEL-\d{4}$/,
+    idPattern: /^BEL-\d+$/,
     nodeType: "belief_record",
     prefix: "BEL",
     sourceDir: "beliefs"
   },
   append_story_diegetic_artifact_record: {
     allocationKey: "story_da_ids",
-    idPattern: /^DA-\d{4}$/,
+    idPattern: /^DA-\d+$/,
     nodeType: "story_diegetic_artifact_record",
     prefix: "DA",
     sourceDir: "artifacts"

@@ -193,7 +193,7 @@ function validateRetconAttestation(
   if (
     !attestation ||
     !RETCON_TYPES.has(attestation.retcon_type) ||
-    !/^CH-\d{4}$/.test(attestation.originating_ch) ||
+    !/^CH-\d+$/.test(attestation.originating_ch) ||
     attestation.rationale.trim().length === 0
   ) {
     throw new PatchEngineOpError({

@@ -78,9 +78,9 @@ function validatePayload(op: AppendModificationHistoryEntryOperation): void {
   const payload = op.payload as Record<string, unknown>;
   if (
     typeof payload.change_id !== "string" ||
-    !/^CH-\d{4}$/.test(payload.change_id) ||
+    !/^CH-\d+$/.test(payload.change_id) ||
     typeof payload.originating_cf !== "string" ||
-    !/^CF-\d{4}$/.test(payload.originating_cf) ||
+    !/^CF-\d+$/.test(payload.originating_cf) ||
     typeof payload.date !== "string" ||
     payload.date.trim().length === 0 ||
     typeof payload.summary !== "string" ||

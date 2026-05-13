@@ -139,7 +139,7 @@ function validateExtension(
   const missingField = fields.find(
     (field) => typeof extension[field] !== "string" || extension[field].trim().length === 0
   );
-  if (missingField || !/^CF-\d{4}$/.test(extension.originating_cf) || !/^CH-\d{4}$/.test(extension.change_id)) {
+  if (missingField || !/^CF-\d+$/.test(extension.originating_cf) || !/^CH-\d+$/.test(extension.change_id)) {
     throw new PatchEngineOpError({
       code: "invalid_extension_payload",
       message: `${targetRecordId} extension payload is malformed`,

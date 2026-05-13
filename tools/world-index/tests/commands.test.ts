@@ -324,7 +324,7 @@ test("sync reports schema-failed record skips and quiet mode suppresses per-reco
     assert.equal(noisySync.result, 0);
     assert.match(noisySync.stdout, /Warning: skipped schema-failed record stories\/harborwatch\/_source\/intentions\/STINT-0001-iker\.yaml/);
     assert.match(noisySync.stdout, /id=STINT-0001-iker/);
-    assert.match(noisySync.stdout, /expected=\^STINT-\[0-9\]\{4\}\$/);
+    assert.match(noisySync.stdout, /expected=\^STINT-\[0-9\]\+\$/);
     assert.match(noisySync.stdout, /Skipped 1 records due to schema-pattern mismatch; see /);
 
     const quietSync = withCapturedOutput(() => sync(root, "atomic-world", { quiet: true }));

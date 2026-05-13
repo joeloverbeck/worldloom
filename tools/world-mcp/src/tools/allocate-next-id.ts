@@ -9,55 +9,55 @@ import { createMcpError } from "../errors";
 import type { McpError } from "../errors";
 
 export const ID_CLASS_FORMATS = {
-  CF: { width: 4, zeroPad: true, regex: /^CF-(\d{4})$/ },
-  CH: { width: 4, zeroPad: true, regex: /^CH-(\d{4})$/ },
-  PA: { width: 4, zeroPad: true, regex: /^PA-(\d{4})$/ },
-  CHAR: { width: 4, zeroPad: true, regex: /^CHAR-(\d{4})$/ },
-  DA: { width: 4, zeroPad: true, regex: /^DA-(\d{4})$/ },
-  PR: { width: 4, zeroPad: true, regex: /^PR-(\d{4})$/ },
-  BATCH: { width: 4, zeroPad: true, regex: /^BATCH-(\d{4})$/ },
-  NWB: { width: 4, zeroPad: true, regex: /^NWB-(\d{4})$/ },
-  NWP: { width: 4, zeroPad: true, regex: /^NWP-(\d{4})$/ },
-  NCP: { width: 4, zeroPad: true, regex: /^NCP-(\d{4})$/ },
-  NCB: { width: 4, zeroPad: true, regex: /^NCB-(\d{4})$/ },
-  AU: { width: 4, zeroPad: true, regex: /^AU-(\d{4})$/ },
-  RP: { width: 4, zeroPad: true, regex: /^RP-(\d{4})$/ },
-  RSP: { width: 4, zeroPad: true, regex: /^RSP-(\d{4})(?:-.+)?$/ },
-  SAU: { width: 4, zeroPad: true, regex: /^SAU-(\d{4})(?:-.+)?$/ },
-  SP: { width: 4, zeroPad: true, regex: /^SP-(\d{4})(?:-proposal-package)?$/ },
-  EPE: { width: 4, zeroPad: true, regex: /^EPE-(\d{4})$/ },
-  STORY: { width: 4, zeroPad: true, regex: /^STORY-(\d{4})$/ },
-  PG: { width: 4, zeroPad: true, regex: /^PG-(\d{4})$/ },
-  SE: { width: 4, zeroPad: true, regex: /^SE-(\d{4})$/ },
-  SF: { width: 4, zeroPad: true, regex: /^SF-(\d{4})$/ },
-  BEL: { width: 4, zeroPad: true, regex: /^BEL-(\d{4})$/ },
-  OBL: { width: 4, zeroPad: true, regex: /^OBL-(\d{4})$/ },
-  CNSQ: { width: 4, zeroPad: true, regex: /^CNSQ-(\d{4})$/ },
-  THR: { width: 4, zeroPad: true, regex: /^THR-(\d{4})$/ },
-  SREL: { width: 4, zeroPad: true, regex: /^SREL-(\d{4})$/ },
-  STINT: { width: 4, zeroPad: true, regex: /^STINT-(\d{4})$/ },
-  SLT: { width: 4, zeroPad: true, regex: /^SLT-(\d{4})$/ },
-  SLB: { width: 4, zeroPad: true, regex: /^SLB-(\d{4})$/ },
-  STLOC: { width: 4, zeroPad: true, regex: /^STLOC-(\d{4})$/ },
-  STOBJ: { width: 4, zeroPad: true, regex: /^STOBJ-(\d{4})$/ },
-  BR: { width: 4, zeroPad: true, regex: /^BR-(\d{4})$/ },
-  CHC: { width: 4, zeroPad: true, regex: /^CHC-(\d{4})$/ },
-  STENT: { width: 4, zeroPad: true, regex: /^STENT-(\d{4})$/ },
+  CF: { width: 1, zeroPad: false, regex: /^CF-(\d+)$/ },
+  CH: { width: 1, zeroPad: false, regex: /^CH-(\d+)$/ },
+  PA: { width: 1, zeroPad: false, regex: /^PA-(\d+)$/ },
+  CHAR: { width: 1, zeroPad: false, regex: /^CHAR-(\d+)$/ },
+  DA: { width: 1, zeroPad: false, regex: /^DA-(\d+)$/ },
+  PR: { width: 1, zeroPad: false, regex: /^PR-(\d+)$/ },
+  BATCH: { width: 1, zeroPad: false, regex: /^BATCH-(\d+)$/ },
+  NWB: { width: 1, zeroPad: false, regex: /^NWB-(\d+)$/ },
+  NWP: { width: 1, zeroPad: false, regex: /^NWP-(\d+)(?:-.+)?$/ },
+  NCP: { width: 1, zeroPad: false, regex: /^NCP-(\d+)$/ },
+  NCB: { width: 1, zeroPad: false, regex: /^NCB-(\d+)$/ },
+  AU: { width: 1, zeroPad: false, regex: /^AU-(\d+)$/ },
+  RP: { width: 1, zeroPad: false, regex: /^RP-(\d+)$/ },
+  RSP: { width: 1, zeroPad: false, regex: /^RSP-(\d+)(?:-.+)?$/ },
+  SAU: { width: 1, zeroPad: false, regex: /^SAU-(\d+)(?:-.+)?$/ },
+  SP: { width: 1, zeroPad: false, regex: /^SP-(\d+)(?:-proposal-package)?$/ },
+  EPE: { width: 1, zeroPad: false, regex: /^EPE-(\d+)(?:-.+)?$/ },
+  STORY: { width: 1, zeroPad: false, regex: /^STORY-(\d+)$/ },
+  PG: { width: 1, zeroPad: false, regex: /^PG-(\d+)$/ },
+  SE: { width: 1, zeroPad: false, regex: /^SE-(\d+)$/ },
+  SF: { width: 1, zeroPad: false, regex: /^SF-(\d+)$/ },
+  BEL: { width: 1, zeroPad: false, regex: /^BEL-(\d+)$/ },
+  OBL: { width: 1, zeroPad: false, regex: /^OBL-(\d+)$/ },
+  CNSQ: { width: 1, zeroPad: false, regex: /^CNSQ-(\d+)$/ },
+  THR: { width: 1, zeroPad: false, regex: /^THR-(\d+)$/ },
+  SREL: { width: 1, zeroPad: false, regex: /^SREL-(\d+)$/ },
+  STINT: { width: 1, zeroPad: false, regex: /^STINT-(\d+)$/ },
+  SLT: { width: 1, zeroPad: false, regex: /^SLT-(\d+)$/ },
+  SLB: { width: 1, zeroPad: false, regex: /^SLB-(\d+)$/ },
+  STLOC: { width: 1, zeroPad: false, regex: /^STLOC-(\d+)$/ },
+  STOBJ: { width: 1, zeroPad: false, regex: /^STOBJ-(\d+)$/ },
+  BR: { width: 1, zeroPad: false, regex: /^BR-(\d+)$/ },
+  CHC: { width: 1, zeroPad: false, regex: /^CHC-(\d+)$/ },
+  STENT: { width: 1, zeroPad: false, regex: /^STENT-(\d+)$/ },
   M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
   ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
   CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
   DIS: { width: 1, zeroPad: false, regex: /^DIS-(\d+)$/ },
   SOC: { width: 1, zeroPad: false, regex: /^SOC-(\d+)$/ },
   AES: { width: 1, zeroPad: false, regex: /^AES-(\d+)$/ },
-  OQ: { width: 4, zeroPad: true, regex: /^OQ-(\d{4})$/ },
-  ENT: { width: 4, zeroPad: true, regex: /^ENT-(\d{4})$/ },
-  "SEC-ELF": { width: 3, zeroPad: true, regex: /^SEC-ELF-(\d{3})$/ },
-  "SEC-INS": { width: 3, zeroPad: true, regex: /^SEC-INS-(\d{3})$/ },
-  "SEC-MTS": { width: 3, zeroPad: true, regex: /^SEC-MTS-(\d{3})$/ },
-  "SEC-GEO": { width: 3, zeroPad: true, regex: /^SEC-GEO-(\d{3})$/ },
-  "SEC-ECR": { width: 3, zeroPad: true, regex: /^SEC-ECR-(\d{3})$/ },
-  "SEC-PAS": { width: 3, zeroPad: true, regex: /^SEC-PAS-(\d{3})$/ },
-  "SEC-TML": { width: 3, zeroPad: true, regex: /^SEC-TML-(\d{3})$/ }
+  OQ: { width: 1, zeroPad: false, regex: /^OQ-(\d+)$/ },
+  ENT: { width: 1, zeroPad: false, regex: /^ENT-(\d+)$/ },
+  "SEC-ELF": { width: 1, zeroPad: false, regex: /^SEC-ELF-(\d+)$/ },
+  "SEC-INS": { width: 1, zeroPad: false, regex: /^SEC-INS-(\d+)$/ },
+  "SEC-MTS": { width: 1, zeroPad: false, regex: /^SEC-MTS-(\d+)$/ },
+  "SEC-GEO": { width: 1, zeroPad: false, regex: /^SEC-GEO-(\d+)$/ },
+  "SEC-ECR": { width: 1, zeroPad: false, regex: /^SEC-ECR-(\d+)$/ },
+  "SEC-PAS": { width: 1, zeroPad: false, regex: /^SEC-PAS-(\d+)$/ },
+  "SEC-TML": { width: 1, zeroPad: false, regex: /^SEC-TML-(\d+)$/ }
 } as const;
 
 export type IdClass = keyof typeof ID_CLASS_FORMATS;
@@ -147,8 +147,7 @@ function findHighestPipelineId(idClass: IdClass): number {
     }
 
     const stem = fileName.slice(0, -".md".length);
-    const idCandidate = idClass === "NWP" ? stem.slice(0, "NWP-0000".length) : stem;
-    const match = format.regex.exec(idCandidate);
+    const match = format.regex.exec(stem);
     if (match === null) {
       continue;
     }
@@ -188,7 +187,7 @@ function findHighestPressureEventId(worldSlug: string): number | McpError {
       continue;
     }
 
-    const idCandidate = fileName.slice(0, "EPE-0000".length);
+    const idCandidate = fileName.slice(0, -".md".length);
     const match = format.regex.exec(idCandidate);
     if (match === null) {
       continue;
@@ -366,10 +365,10 @@ function findHighestSubAuditScopedId(
     );
   }
 
-  if (!/^SAU-\d{4}$/.test(auditId)) {
+  if (!/^SAU-\d+$/.test(auditId)) {
     return createMcpError(
       "invalid_input",
-      `audit_id must match pattern 'SAU-NNNN'; got '${auditId}'.`,
+      `audit_id must match pattern 'SAU-<integer>'; got '${auditId}'.`,
       { audit_id: auditId }
     );
   }

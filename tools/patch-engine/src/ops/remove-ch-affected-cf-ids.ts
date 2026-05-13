@@ -31,7 +31,7 @@ async function stageRemoval(
   ctx: OpContext
 ): Promise<StagedWrite> {
   const targetChId = op.payload.target_ch_id;
-  if (!/^CH-\d{4}$/.test(targetChId)) {
+  if (!/^CH-\d+$/.test(targetChId)) {
     throw new PatchEngineOpError({
       code: "invalid_record_id",
       message: `${targetChId} is not a valid change-log id`,

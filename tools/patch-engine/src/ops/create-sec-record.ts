@@ -18,7 +18,7 @@ export function stageCreateSecRecord(
     opKind: "create_sec_record",
     record,
     recordId: record.id,
-    idPattern: /^SEC-(ELF|INS|MTS|GEO|ECR|PAS|TML)-\d{3}$/,
+    idPattern: /^SEC-(ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+$/,
     allocations: env.expected_id_allocations,
     allocationKey: "sec_ids",
     targetFilePath: path.join(ctx.worldRoot, "worlds", env.target_world, "_source", subdir, `${record.id}.yaml`)

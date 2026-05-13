@@ -102,17 +102,17 @@ At minimum, every world model must express all thirteen concerns below. On machi
 |---|---|
 | `WORLD_KERNEL.md` | **Primary-authored** (root-level) — narrative summary; read cover-to-cover |
 | `ONTOLOGY.md` | **Primary-authored** (root-level) — Categories in Use, Relation Types in Use, Notes on Use. Named Entity Registry atomized to `_source/entities/`. |
-| Canon Ledger | Atomized: `_source/canon/CF-NNNN.yaml` + `_source/change-log/CH-NNNN.yaml` |
+| Canon Ledger | Atomized: `_source/canon/CF-<integer>.yaml` + `_source/change-log/CH-<integer>.yaml` |
 | Invariants | Atomized: `_source/invariants/<ID>.yaml` (one file per invariant, category preserved in the record) |
-| Mystery Reserve | Atomized: `_source/mystery-reserve/M-NNNN.yaml` |
-| Open Questions | Atomized: `_source/open-questions/OQ-NNNN.yaml` |
-| Timeline | Atomized: `_source/timeline/SEC-TML-NNN.yaml` (one record per historical Layer) |
-| Geography | Atomized: `_source/geography/SEC-GEO-NNN.yaml` (one record per H2 section) |
-| Peoples and Species | Atomized: `_source/peoples-and-species/SEC-PAS-NNN.yaml` |
-| Institutions | Atomized: `_source/institutions/SEC-INS-NNN.yaml` |
-| Economy and Resources | Atomized: `_source/economy-and-resources/SEC-ECR-NNN.yaml` |
-| Magic or Tech Systems | Atomized: `_source/magic-or-tech-systems/SEC-MTS-NNN.yaml` |
-| Everyday Life | Atomized: `_source/everyday-life/SEC-ELF-NNN.yaml` |
+| Mystery Reserve | Atomized: `_source/mystery-reserve/M-<integer>.yaml` |
+| Open Questions | Atomized: `_source/open-questions/OQ-<integer>.yaml` |
+| Timeline | Atomized: `_source/timeline/SEC-TML-<integer>.yaml` (one record per historical Layer) |
+| Geography | Atomized: `_source/geography/SEC-GEO-<integer>.yaml` (one record per H2 section) |
+| Peoples and Species | Atomized: `_source/peoples-and-species/SEC-PAS-<integer>.yaml` |
+| Institutions | Atomized: `_source/institutions/SEC-INS-<integer>.yaml` |
+| Economy and Resources | Atomized: `_source/economy-and-resources/SEC-ECR-<integer>.yaml` |
+| Magic or Tech Systems | Atomized: `_source/magic-or-tech-systems/SEC-MTS-<integer>.yaml` |
+| Everyday Life | Atomized: `_source/everyday-life/SEC-ELF-<integer>.yaml` |
 
 The thirteen concerns remain load-bearing. The **storage form** is atomic-YAML-under-`_source/` for the eleven compiled concerns plus the Named Entity Registry. There are no compiled-markdown views at the world root for atomized concerns — the `_source/` tree is the sole canonical form. Humans read atomic records directly in their IDE (file-tree view over `_source/` subdirectories). Story-bundle records can also be inspected on demand via `world-index render <world-slug> --story <story-slug>` for a merged read-only view; world-canon `--file <class>` rendering remains a future human-UX surface.
 
@@ -269,7 +269,7 @@ Examples:
 Use this record format for every accepted canon fact.
 
 ```yaml
-id: CF-0001
+id: CF-2
 title: Raiders can reprogram robots
 status: hard_canon | soft_canon | contested_canon | mystery_reserve
 type: capability | artifact | law | belief | event | institution | species | etc
@@ -317,7 +317,7 @@ required_world_updates:
 source_basis:
   direct_user_approval: true
   derived_from:
-    - CF-0000
+    - CF-1
 contradiction_risk:
   hard: false
   soft: true
@@ -352,9 +352,9 @@ exception_governance:
 
 The optional `pre_figured_by[]` field, when present in machine-readable Canon Fact Records, accepts CF ids only and records CF-to-CF foreshadowing: an earlier accepted CF that hinted at the later commitment before it was canonized. Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references.
 
-*Genesis-world rule.* New worlds adopt the full schema from `CF-0001`. Existing worlds honor the append-only ledger — historical CFs predating a schema extension remain valid; new CFs appended after a schema extension meet the current schema.
+*Genesis-world rule.* New worlds adopt the full schema from `CF-1`. Existing worlds honor the append-only ledger — historical CFs predating a schema extension remain valid; new CFs appended after a schema extension meet the current schema.
 
-> **Canonical storage (machine-layer-enabled worlds, per SPEC-13)**: Canon Fact Records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-NNNN.yaml` — one record per file. The `notes` field and `modification_history[]` array are the authorized in-place mutation surfaces for an accepted CF; structural fields (`statement`, `scope`, `domains_affected`, `distribution`, etc.) are append-only in practice (changing them requires an explicit retcon attestation through the patch engine).
+> **Canonical storage (machine-layer-enabled worlds, per SPEC-13)**: Canon Fact Records are stored as atomic YAML files at `worlds/<slug>/_source/canon/CF-<integer>.yaml` — one record per file. The `notes` field and `modification_history[]` array are the authorized in-place mutation surfaces for an accepted CF; structural fields (`statement`, `scope`, `domains_affected`, `distribution`, etc.) are append-only in practice (changing them requires an explicit retcon attestation through the patch engine).
 
 ---
 
@@ -385,7 +385,7 @@ No fact may exist without:
 - limits
 - consequences
 
-A plan IS load-bearing engine output. The story-pipeline `pages-prose-plans/PG-NNNN.md` artifact is validated by the shared eight hard gates (plan grounding is gate 7) at page-plan commit per `.claude/skills/_shared-templates/story-state-contract.md` §7. Producing a plan without yet-rendered prose satisfies Rule 1, because the plan's frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]` with explicit consequences and prerequisites — the rule's grounding requirements apply to the plan as engine artifact independent of whether prose has yet been rendered.
+A plan IS load-bearing engine output. The story-pipeline `pages-prose-plans/PG-<integer>.md` artifact is validated by the shared eight hard gates (plan grounding is gate 7) at page-plan commit per `.claude/skills/_shared-templates/story-state-contract.md` §7. Producing a plan without yet-rendered prose satisfies Rule 1, because the plan's frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]` with explicit consequences and prerequisites — the rule's grounding requirements apply to the plan as engine artifact independent of whether prose has yet been rendered.
 
 ### Rule 2: No Pure Cosmetics
 No species, ritual, technology, artifact, or institution may be added as surface flavor only.
@@ -517,9 +517,11 @@ For the operational overview, rollout boundaries, and troubleshooting guidance, 
 
 Canonical storage for world state is atomic YAML under `worlds/<slug>/_source/` — one file per record, per the classification in §Mandatory World Files. There are no compiled-markdown views at the world root for atomized concerns. The `_source/` tree is the sole source-of-truth for CF / CH / INV / M / OQ / ENT / SEC records. The retired root-level markdown files (`CANON_LEDGER.md`, `INVARIANTS.md`, `MYSTERY_RESERVE.md`, `OPEN_QUESTIONS.md`, `TIMELINE.md`, and the five large prose files) do not exist on machine-layer-enabled worlds.
 
+**Per-class ID format conventions (FOUNDATIONS-002)**: Record IDs use an unpadded natural-integer suffix for every per-world atomic-source class, hybrid class, pipeline class, and story-bundle class. Filenames match the `id` field exactly: use `M-1.yaml` with `id: M-1`, not `M-0001.yaml` with `id: M-0001`. Engine schemas and allocation checks use `^<CLASS>-[0-9]+$` patterns, with the class prefix expanded as needed for section records (`SEC-GEO-1`) or invariant categories (`CAU-1`). Slug or date suffixes that are part of a hybrid filename, such as `SAU-1-2026-05-13.md` or `RSP-1-payoff.md`, follow the unpadded numeric ID. This decision preserves existing world data, keeps human file trees legible, and prevents schema-accepted references from resolving to non-existent padded IDs.
+
 **Write discipline**: `worlds/<slug>/_source/` is an engine-only write surface. Direct `Edit`/`Write` on any `_source/*.yaml` file is blocked by Hook 3; mutations route through `mcp__worldloom__submit_patch_plan` with typed record-ops (per SPEC-03 op vocabulary: `create_cf_record`, `update_record_field`, `append_extension`, `append_touched_by_cf`, etc.). The append-only ledger discipline of Rule 6 is preserved per-file: a CF's YAML file is append-only in its structural fields; mutations happen only in `notes`, `modification_history[]`, and `extensions[]`.
 
-**Read discipline**: Skills read atomic records via `mcp__worldloom__get_record(record_id)` or `get_context_packet(task_type, seed_nodes, token_budget)`. Hybrid records (`CHAR-NNNN`, `DA-NNNN`, `PA-NNNN`) are also retrievable via `get_record(record_id)` with optional `section_path` projection — frontmatter blocks (`frontmatter.world_consistency`, `frontmatter.author_profile`) and body sections (`body.Capabilities`) project as structured slices, paralleling `get_record_field` for atomic records. Whole-class hybrid enumeration uses `list_records(record_type='character_record'|'diegetic_artifact_record'|'adjudication_record')`; `include_full_body=true` returns parsed frontmatter plus body sections. Raw reads of `_source/` subdirectories via the `Read` tool are redirected to MCP retrieval by Hook 2. Humans read atomic world records directly in their IDE; story-bundle records can be rendered with `world-index render <world-slug> --story <story-slug>` for a merged markdown view (read-only; not persisted to disk).
+**Read discipline**: Skills read atomic records via `mcp__worldloom__get_record(record_id)` or `get_context_packet(task_type, seed_nodes, token_budget)`. Hybrid records (`CHAR-<integer>`, `DA-<integer>`, `PA-<integer>`) are also retrievable via `get_record(record_id)` with optional `section_path` projection — frontmatter blocks (`frontmatter.world_consistency`, `frontmatter.author_profile`) and body sections (`body.Capabilities`) project as structured slices, paralleling `get_record_field` for atomic records. Whole-class hybrid enumeration uses `list_records(record_type='character_record'|'diegetic_artifact_record'|'adjudication_record')`; `include_full_body=true` returns parsed frontmatter plus body sections. Raw reads of `_source/` subdirectories via the `Read` tool are redirected to MCP retrieval by Hook 2. Humans read atomic world records directly in their IDE; story-bundle records can be rendered with `world-index render <world-slug> --story <story-slug>` for a merged markdown view (read-only; not persisted to disk).
 
 **Authored-primary surfaces**: `WORLD_KERNEL.md` and the reduced `ONTOLOGY.md` (Categories / Relation Types / Notes) remain directly editable at the world root. `characters/`, `diegetic-artifacts/`, `proposals/`, `audits/`, `adjudications/` continue as hybrid YAML-frontmatter-plus-markdown per-file artifacts (skill-owned mutation via engine ops; not atomized further).
 
@@ -551,7 +553,7 @@ Story-bundle `_source/<class>/*.yaml` writes use Shape B: they route through `mc
 
 Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. Story-bundle markdown surfaces remain direct-write surfaces: `STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, and remediation proposal cards are not atomic `_source/*.yaml` records. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
 
-**Pipeline shape: plan + (optional) prose-attach.** Story state is authoritative at page-plan commit; rendered prose is a renderable receipt artifact, not a second state-transition workflow. The story-bundle pipeline produces a comprehensive prose plan at bundle commit (`pages-prose-plans/PG-NNNN.md`); rendered prose at `pages-prose/PG-NNNN.md` is supplied externally and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-NNNN.yaml` receipt without mutating page state. The plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`; its body inlines all canonical context the external renderer needs. `branching-story-turn-cycle` may advance the story from any committed page snapshot without requiring rendered parent prose. No ARC_TRACE class. World-canon mutation remains exclusive to `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `story-promotion-closeout` records the verdict on story-local records after adjudication.
+**Pipeline shape: plan + (optional) prose-attach.** Story state is authoritative at page-plan commit; rendered prose is a renderable receipt artifact, not a second state-transition workflow. The story-bundle pipeline produces a comprehensive prose plan at bundle commit (`pages-prose-plans/PG-<integer>.md`); rendered prose at `pages-prose/PG-<integer>.md` is supplied externally and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-<integer>.yaml` receipt without mutating page state. The plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`; its body inlines all canonical context the external renderer needs. `branching-story-turn-cycle` may advance the story from any committed page snapshot without requiring rendered parent prose. No ARC_TRACE class. World-canon mutation remains exclusive to `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `story-promotion-closeout` records the verdict on story-local records after adjudication.
 
 ### 4a. Plan-Authority Boundary
 
@@ -585,7 +587,7 @@ The canonical field lists for the five core story-bundle schemas live in the sha
 
 ### 6. Story-Bundle ID Classes
 
-Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-NNN` is per-world. Per-bundle records include STENT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit.
+Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
 
 Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
 
@@ -615,6 +617,6 @@ Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, c
 
 **Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`. The Prose Craft Contract is hosted at `reports/prose-quality-instructions.md` §Prose Craft Contract and inlined verbatim as page-plan §3 per `.claude/skills/_shared-templates/story-state-contract.md` §8.
 
-**Out of scope**: choice-button text length budgets (e.g., "5-15 words" for individual CHC text), INDEX preview excerpts (`first ~300 words of PG-NNNN.md` for display), prose-quality-density metrics (e.g., `filter_word_saturation per 100 words` as a filter-verb-ratio quality axis), and unrelated word-choice / vocabulary guidance are not word-quota mechanisms and remain outside this discipline.
+**Out of scope**: choice-button text length budgets (e.g., "5-15 words" for individual CHC text), INDEX preview excerpts (`first ~300 words of PG-<integer>.md` for display), prose-quality-density metrics (e.g., `filter_word_saturation per 100 words` as a filter-verb-ratio quality axis), and unrelated word-choice / vocabulary guidance are not word-quota mechanisms and remain outside this discipline.
 
 The greenfield SLT schema (per `.claude/skills/_shared-templates/story-state-contract.md` §4.4) has no `stop_policy` field; no engine-side `max_words` ceiling exists anywhere in the story-pipeline surface. The prose renderer is external to the engine; runaway-defense is not the engine's concern.

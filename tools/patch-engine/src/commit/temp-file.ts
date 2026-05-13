@@ -148,13 +148,13 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|BEL|DA)-\d{4}$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|BEL|DA)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
-  if (/^CF-\d{4}$/.test(recordId)) {
+  if (/^CF-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "canon_fact_record" };
   }
-  if (/^CH-\d{4}$/.test(recordId)) {
+  if (/^CH-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "change_log_entry" };
   }
   if (/^INV-\d+$/.test(recordId)) {
@@ -163,13 +163,13 @@ function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType
   if (/^M-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "mystery_reserve_entry" };
   }
-  if (/^OQ-\d{4}$/.test(recordId)) {
+  if (/^OQ-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "open_question_entry" };
   }
-  if (/^ENT-\d{4}$/.test(recordId)) {
+  if (/^ENT-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "named_entity" };
   }
-  if (/^SEC-[A-Z]{3}-\d{3}$/.test(recordId)) {
+  if (/^SEC-[A-Z]{3}-\d+$/.test(recordId)) {
     return { nodeId: recordId, nodeType: "section" };
   }
   const storyMatch = STORY_BUNDLE_ID_PATTERN.exec(recordId);

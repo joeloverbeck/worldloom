@@ -17,7 +17,7 @@ export function stageCreateOqRecord(
     opKind: "create_oq_record",
     record,
     recordId: record.id,
-    idPattern: /^OQ-\d{4}$/,
+    idPattern: /^OQ-\d+$/,
     allocations: env.expected_id_allocations,
     allocationKey: "oq_ids",
     targetFilePath: path.join(ctx.worldRoot, "worlds", env.target_world, "_source", "open-questions", `${record.id}.yaml`)

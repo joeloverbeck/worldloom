@@ -50,37 +50,37 @@ type AtomicRecordSpec = {
 };
 
 const ATOMIC_DIRS = new Map<string, AtomicRecordSpec>([
-  ["canon", recordSpec("canon_fact_record", "id", "^CF-[0-9]{4}$")],
-  ["change-log", recordSpec("change_log_entry", "change_id", "^CH-[0-9]{4}$")],
+  ["canon", recordSpec("canon_fact_record", "id", "^CF-[0-9]+$")],
+  ["change-log", recordSpec("change_log_entry", "change_id", "^CH-[0-9]+$")],
   ["invariants", recordSpec("invariant", "id", "^(ONT|CAU|DIS|SOC|AES)-[0-9]+$")],
   ["mystery-reserve", recordSpec("mystery_reserve_entry", "id", "^M-[0-9]+$")],
-  ["open-questions", recordSpec("open_question_entry", "id", "^OQ-[0-9]{4}$")],
-  ["entities", recordSpec("named_entity", "id", "^ENT-[0-9]{4}$")],
-  ["everyday-life", recordSpec("section", "id", "^SEC-ELF-[0-9]{3}$")],
-  ["institutions", recordSpec("section", "id", "^SEC-INS-[0-9]{3}$")],
-  ["magic-or-tech-systems", recordSpec("section", "id", "^SEC-MTS-[0-9]{3}$")],
-  ["geography", recordSpec("section", "id", "^SEC-GEO-[0-9]{3}$")],
-  ["economy-and-resources", recordSpec("section", "id", "^SEC-ECR-[0-9]{3}$")],
-  ["peoples-and-species", recordSpec("section", "id", "^SEC-PAS-[0-9]{3}$")],
-  ["timeline", recordSpec("section", "id", "^SEC-TML-[0-9]{3}$")]
+  ["open-questions", recordSpec("open_question_entry", "id", "^OQ-[0-9]+$")],
+  ["entities", recordSpec("named_entity", "id", "^ENT-[0-9]+$")],
+  ["everyday-life", recordSpec("section", "id", "^SEC-ELF-[0-9]+$")],
+  ["institutions", recordSpec("section", "id", "^SEC-INS-[0-9]+$")],
+  ["magic-or-tech-systems", recordSpec("section", "id", "^SEC-MTS-[0-9]+$")],
+  ["geography", recordSpec("section", "id", "^SEC-GEO-[0-9]+$")],
+  ["economy-and-resources", recordSpec("section", "id", "^SEC-ECR-[0-9]+$")],
+  ["peoples-and-species", recordSpec("section", "id", "^SEC-PAS-[0-9]+$")],
+  ["timeline", recordSpec("section", "id", "^SEC-TML-[0-9]+$")]
 ]);
 const STORY_DIRS = new Map<string, AtomicRecordSpec>([
-  ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]{4}$")],
-  ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]{4}$")],
-  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]{4}$")],
-  ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]{4}$")],
-  ["consequences", recordSpec("consequence_record", "id", "^CNSQ-[0-9]{4}$")],
-  ["threads", recordSpec("thread_record", "id", "^THR-[0-9]{4}$")],
-  ["relationships", recordSpec("relationship_record_story", "id", "^SREL-[0-9]{4}$")],
-  ["intentions", recordSpec("intention_record", "id", "^STINT-[0-9]{4}$")],
-  ["locations", recordSpec("story_location_record", "id", "^STLOC-[0-9]{4}$")],
-  ["objects", recordSpec("story_object_record", "id", "^STOBJ-[0-9]{4}$")],
-  ["branches", recordSpec("branch_record", "id", "^BR-[0-9]{4}$")],
-  ["pages", recordSpec("page_record", "id", "^PG-[0-9]{4}$")],
-  ["choices", recordSpec("choice_record", "id", "^CHC-[0-9]{4}$")],
-  ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]{4}$")],
-  ["arc-traces", recordSpec("arc_trace_node", "id", "^ARCTRACE-[0-9]{4}$")],
-  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]{4}$")]
+  ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]+$")],
+  ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]+$")],
+  ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")],
+  ["obligations", recordSpec("obligation_record", "id", "^OBL-[0-9]+$")],
+  ["consequences", recordSpec("consequence_record", "id", "^CNSQ-[0-9]+$")],
+  ["threads", recordSpec("thread_record", "id", "^THR-[0-9]+$")],
+  ["relationships", recordSpec("relationship_record_story", "id", "^SREL-[0-9]+$")],
+  ["intentions", recordSpec("intention_record", "id", "^STINT-[0-9]+$")],
+  ["locations", recordSpec("story_location_record", "id", "^STLOC-[0-9]+$")],
+  ["objects", recordSpec("story_object_record", "id", "^STOBJ-[0-9]+$")],
+  ["branches", recordSpec("branch_record", "id", "^BR-[0-9]+$")],
+  ["pages", recordSpec("page_record", "id", "^PG-[0-9]+$")],
+  ["choices", recordSpec("choice_record", "id", "^CHC-[0-9]+$")],
+  ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]+$")],
+  ["arc-traces", recordSpec("arc_trace_node", "id", "^ARCTRACE-[0-9]+$")],
+  ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")]
 ]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;

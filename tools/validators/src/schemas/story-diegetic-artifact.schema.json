@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["id", "story_id"],
   "properties": {
-    "id": { "type": "string", "pattern": "^DA-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" }
+    "id": { "type": "string", "pattern": "^DA-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" }
   },
   "additionalProperties": true
 }

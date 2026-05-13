@@ -37,7 +37,7 @@ export function stageAppendAdjudicationRecord(
 }
 
 function validateAdjudicationFrontmatter(frontmatter: AdjudicationFrontmatter): void {
-  if (!/^PA-\d{4}$/.test(frontmatter.pa_id)) {
+  if (!/^PA-\d+$/.test(frontmatter.pa_id)) {
     throw new PatchEngineOpError({
       code: "invalid_record_id",
       message: `${frontmatter.pa_id} is not a valid PA id`,

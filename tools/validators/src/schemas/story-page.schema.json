@@ -4,16 +4,16 @@
   "type": "object",
   "required": ["id", "story_id", "prose_plan_path"],
   "properties": {
-    "id": { "type": "string", "pattern": "^PG-[0-9]{4}$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "id": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
     "prose_path": {
       "type": ["string", "null"],
-      "pattern": "^pages-prose/PG-[0-9]{4}\\.md$",
+      "pattern": "^pages-prose/PG-[0-9]+\\.md$",
       "description": "Relative path to rendered prose; null until prose is attached via branching-story-prose-attach."
     },
     "prose_plan_path": {
       "type": "string",
-      "pattern": "^pages-prose-plans/PG-[0-9]{4}\\.md$",
+      "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
       "description": "Relative path to the comprehensive plan; always present after this rework."
     },
     "validation_trace": {
@@ -38,7 +38,7 @@
               },
               "location": {
                 "oneOf": [
-                  { "type": "string", "pattern": "^STLOC-[0-9]{4}$" },
+                  { "type": "string", "pattern": "^STLOC-[0-9]+$" },
                   { "enum": ["unknown", "concealed", "offstage"] }
                 ]
               }
@@ -54,7 +54,7 @@
             "properties": {
               "mystery_id": {
                 "type": "string",
-                "pattern": "^M-[0-9]{4}$"
+                "pattern": "^M-[0-9]+$"
               },
               "authority": {
                 "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"]
@@ -84,14 +84,14 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^(STLOC|STOBJ)-[0-9]{4}$"
+                  "pattern": "^(STLOC|STOBJ)-[0-9]+$"
                 }
               },
               "available_to": {
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "pattern": "^STENT-[0-9]{4}$"
+                  "pattern": "^STENT-[0-9]+$"
                 }
               },
               "action_families": {

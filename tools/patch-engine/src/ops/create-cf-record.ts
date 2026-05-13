@@ -17,7 +17,7 @@ export function stageCreateCfRecord(
     opKind: "create_cf_record",
     record,
     recordId: record.id,
-    idPattern: /^CF-\d{4}$/,
+    idPattern: /^CF-\d+$/,
     allocations: env.expected_id_allocations,
     allocationKey: "cf_ids",
     targetFilePath: path.join(ctx.worldRoot, "worlds", env.target_world, "_source", "canon", `${record.id}.yaml`)

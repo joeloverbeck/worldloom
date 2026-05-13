@@ -69,7 +69,7 @@ test("describeEnvelopeSchema exposes create_bel_record wrapper schema", async ()
   assert.deepEqual(payload.required, ["story_slug", "record"]);
   assert.equal(payload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
   assert.deepEqual(payload.properties?.record?.required, ["id"]);
-  assert.equal(payload.properties?.record?.properties?.id?.pattern, "^BEL-[0-9]{4}$");
+  assert.equal(payload.properties?.record?.properties?.id?.pattern, "^BEL-[0-9]+$");
 });
 
 test("describeEnvelopeSchema filters to one op kind and exposes CF payload schema", async () => {
@@ -121,7 +121,7 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
     properties?: { target_ch_id?: { pattern?: string } };
   };
   assert.deepEqual(removeAliasPayload.required, ["target_ch_id"]);
-  assert.equal(removeAliasPayload.properties?.target_ch_id?.pattern, "^CH-[0-9]{4}$");
+  assert.equal(removeAliasPayload.properties?.target_ch_id?.pattern, "^CH-[0-9]+$");
 
   const adjudicationManifest = await describeEnvelopeSchema({ op_kind: "append_adjudication_record" });
   assert.equal(adjudicationManifest.delivery_status, "inline");
