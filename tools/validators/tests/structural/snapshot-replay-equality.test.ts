@@ -28,9 +28,7 @@ const parentSnapshot = {
   objects_in_scope: [],
   inventory_by_entity: {},
   entity_status: {},
-  applied_effect_variant: null,
-  arc_trace_emitted: false,
-  arc_trace_id: null
+  applied_effect_variant: null
 };
 
 const nextSnapshot = {
@@ -40,9 +38,7 @@ const nextSnapshot = {
   threads_active: ["THR-0002"],
   relationships_current: ["SREL-0002"],
   intentions_current: ["STINT-0002"],
-  applied_effect_variant: "useful-lie",
-  arc_trace_emitted: false,
-  arc_trace_id: null
+  applied_effect_variant: "useful-lie"
 };
 
 test("snapshot_replay_equality passes for a clean page-cycle envelope", async () => {

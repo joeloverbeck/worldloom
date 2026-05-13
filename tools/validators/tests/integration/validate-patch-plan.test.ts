@@ -109,7 +109,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "effect_model_replay_safety"
     );
     assert.equal(effectModelReplaySafetyExecution?.status, "skipped");
-    assert.ok(!result.executions.some((execution) => execution.name === "arc_trace_evidence_alignment"));
     assert.ok(!result.executions.some((execution) => execution.name === "narrative_point_classification"));
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
@@ -466,8 +465,6 @@ function pendingProsePagePlan() {
   const page = pagePatch?.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
   page.prose_status = "pending";
-  stateSnapshot.arc_trace_emitted = false;
-  stateSnapshot.arc_trace_id = null;
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
@@ -490,8 +487,6 @@ function pendingChildAfterRenderedParentPlan() {
   page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
   page.applied_event_ops = ["SE-0003"];
   page.prose_status = "pending";
-  stateSnapshot.arc_trace_emitted = false;
-  stateSnapshot.arc_trace_id = null;
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }

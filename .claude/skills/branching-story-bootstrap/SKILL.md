@@ -160,7 +160,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/`. Abort if the directory does not exist, or if `WORLD_KERNEL.md` / `ONTOLOGY.md` are absent.
 3. Verify `worlds/<world_slug>/stories/<story_slug>/` does NOT exist. Abort with a slug-collision error if it does.
 4. Load `worlds/<world_slug>/characters/INDEX.md`. For every entry in `selected_cast[]`, verify it resolves to an existing CHAR dossier in the world. Abort with a cast-resolution error on any miss.
-5. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for every class to be created: `STORY` (per-world; no story_slug param needed), `BR` (will be `BR-0001`), `SE` (will be `SE-0001`), `PG` (will be `PG-0001`), and class-specific ids for every STENT / STINT / SF / **BEL** / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / CHC / (optional SLT) record to be drafted in Phases 1-8. The `BEL` id class lands via MCPENH-040 — see §Guardrails §Known integration debt.
+5. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for every class to be created: `STORY` (per-world; no story_slug param needed), `BR` (will be `BR-0001`), `SE` (will be `SE-0001`), `PG` (will be `PG-0001`), and class-specific ids for every STENT / STINT / SF / **BEL** / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / CHC / (optional SLT) record to be drafted in Phases 1-8.
 6. Load world canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', seed_nodes=<cast CHAR ids + initial_location label if provided>, token_budget=<default>)`.
 
 If any precondition fails, the skill aborts before Phase 1.
@@ -285,8 +285,8 @@ If any gate or additional check fails, abort before Phase 10 — write nothing.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record` (via PEENH-007 — see §Guardrails §Known integration debt), `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `create_da_record` (if applicable), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
-2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL` (via VALENH-011 — see §Guardrails §Known integration debt).
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations: `create_stent_record`, `create_stint_record`, `create_sf_record`, `create_bel_record`, `create_obl_record`, `create_cnsq_record`, `create_thr_record`, `create_srel_record`, `create_stloc_record`, `create_stobj_record`, `create_da_record` (if applicable), `create_br_record`, `create_se_record`, `create_pg_record`, `create_chc_record` (per choice), `create_slt_record` (per seed block if `seed_commitment_blocks != 'none'`).
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run also exercises `record_schema_compliance` for `BEL`.
 3. Present the complete deliverable summary to the user: bundle path, cast roster, record inventory by class with counts, page plan structural preview (§1 / §5 / §6 / §12 / §13 — the engine-readable sections; §2 / §3 / §19 are too long to inline in preview), emitted choices list.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
 5. On approval: obtain patch approval token; submit the patch plan via `mcp__worldloom__submit_patch_plan`.
@@ -346,10 +346,10 @@ The shared contract is the canonical schema reference. This skill does not dupli
 - **No word-count targets** anywhere in the plan (per FOUNDATIONS §Story Bundles §9). Pacing is expressed structurally via beats and stop conditions, not as a per-page or per-arc word quota.
 - **Skills do not chain.** Bootstrap never invokes `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. Bootstrap writes its outputs to disk; the user separately invokes downstream siblings with the bundle path as input.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root, not the main repo root.
-- **Known integration debt** (per Shape C deferred-infrastructure architecture from the gap-filler interview):
-  - **MCPENH-040** — Register `BEL` id class in `tools/world-mcp/src/tools/allocate-next-id.ts` (`STORY_SCOPED_ID_CLASS_DIRECTORIES["BEL"] = "beliefs"`); drop `ARCTRACE` registration (greenfield plan deletes the class). Lands before bootstrap is first invoked so the allocator call works cleanly.
-  - **PEENH-007** — Add `create_bel_record` operation to `tools/patch-engine/src/envelope/schema.ts`; drop `create_arctrace_record` if present. Ships alongside the new family.
-  - **VALENH-011** — Register `BEL` in `record_schema_compliance` and other applicable structural validators; drop ARC_TRACE-related validators per the greenfield plan. Ships alongside the new family.
+- **Completed integration prerequisites**:
+  - `archive/tickets/MCPENH-040-register-bel-id-class-and-drop-arctrace.md` — registered the `BEL` id class and dropped `ARCTRACE` registration.
+  - `archive/tickets/PEENH-007-add-create-bel-record-op-and-drop-create-arctrace-record.md` — added the `create_bel_record` operation and removed the retired ARC_TRACE operation surface.
+  - `archive/tickets/VALENH-011-register-bel-record-schema-compliance-and-drop-arc-trace-validators.md` — registered `BEL` in `record_schema_compliance` and applicable structural validators; removed ARC_TRACE validators/schema from the validators package.
 
 ## Final Rule
 

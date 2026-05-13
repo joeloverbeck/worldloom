@@ -22,10 +22,9 @@
     },
     "deferred_validation_trace": {
       "type": "object",
-      "required": ["prose_ledger_consistency", "arc_trace_evidence_alignment", "prose_critic_8_axis"],
+      "required": ["prose_ledger_consistency", "prose_critic_8_axis"],
       "properties": {
         "prose_ledger_consistency": { "type": "string" },
-        "arc_trace_evidence_alignment": { "type": "string" },
         "prose_critic_8_axis": { "type": "string" }
       },
       "additionalProperties": false,
