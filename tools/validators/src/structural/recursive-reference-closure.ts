@@ -9,7 +9,15 @@ import {
 } from "./utils.js";
 
 const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
-const NON_EDGE_FIELDS = new Set(["id", "story_id", "branch_id", "created_at_page", "branch_path"]);
+const PAGE_ID = /^PG-\d{4}$/;
+const NON_EDGE_FIELDS = new Set([
+  "id",
+  "story_id",
+  "branch_id",
+  "created_at_page",
+  "branch_path",
+  "visible_branch_path_prefix"
+]);
 
 export const recursiveReferenceClosure: Validator = {
   name: "recursive_reference_closure",
@@ -25,7 +33,8 @@ export const recursiveReferenceClosure: Validator = {
         continue;
       }
 
-      const branchPath = new Set(stringArray(parsed.branch_path));
+      const branchPath = stringArray(parsed.branch_path);
+      const branchPathSet = new Set(branchPath);
       const maps = recordMapForStory(records, page.story_slug ?? null);
       const roots = pageClosureRoots(parsed);
       const visited = new Set<string>();
@@ -48,7 +57,7 @@ export const recursiveReferenceClosure: Validator = {
 
         const parsedTarget = asPlainRecord(target.parsed);
         const createdAtPage = referenceBranchPageFor(target, parsedTarget);
-        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath)) {
+        if (!isAllowedReference(target, parsedTarget, createdAtPage, branchPath, branchPathSet)) {
           verdicts.push(branchLeak(page, current, target, createdAtPage));
         }
 
@@ -189,26 +198,36 @@ function isAllowedReference(
   target: IndexedRecord,
   parsed: Record<string, unknown>,
   createdAtPage: string | null | undefined,
-  branchPath: ReadonlySet<string>
+  branchPath: readonly string[],
+  branchPathSet: ReadonlySet<string>
 ): boolean {
   if (target.node_type === "page_record") {
     const pageIdValue = stringValue(parsed.id);
-    return pageIdValue !== undefined && branchPath.has(pageIdValue);
+    return pageIdValue !== undefined && branchPathSet.has(pageIdValue);
   }
   if (createdAtPage === null) {
     if (target.node_type !== "storylet_record") {
       return false;
     }
-    // VALENH-012: SLT visibility is schema-canonical at scope.visibility.
+    // VALENH-012/014: SLT visibility and branch-prefix proof are schema-canonical under scope.
     const scope = asPlainRecord(parsed.scope);
     const visibility = stringValue(scope.visibility);
     if (visibility === "global_author_pool") {
       return true;
     }
-    // No greenfield prefix field exists yet, so null-created non-global storylets fail closed.
+    if (visibility === "branch_prefix_scoped") {
+      return isVisibleBranchPathPrefix(scope.visible_branch_path_prefix, branchPath);
+    }
     return false;
   }
-  return createdAtPage !== undefined && branchPath.has(createdAtPage);
+  return createdAtPage !== undefined && branchPathSet.has(createdAtPage);
+}
+
+function isVisibleBranchPathPrefix(value: unknown, branchPath: readonly string[]): boolean {
+  if (!Array.isArray(value) || value.length === 0 || value.length > branchPath.length) {
+    return false;
+  }
+  return value.every((item, index) => typeof item === "string" && PAGE_ID.test(item) && item === branchPath[index]);
 }
 
 function missingReference(page: IndexedRecord, reference: StoryReference): Verdict {

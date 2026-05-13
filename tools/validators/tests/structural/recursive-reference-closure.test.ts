@@ -142,13 +142,29 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
   assert.deepEqual(verdicts, []);
 });
 
-test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets without a canonical prefix field", async () => {
+test("recursive_reference_closure allows null-created branch-prefix-scoped storylets with a canonical prefix", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
       coverage_cache: { compatible_storylets: ["SLT-0002"] }
     },
     extra: [
-      branchPrefixStorylet("SLT-0002")
+      branchPrefixStorylet("SLT-0002", ["PG-0001"])
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with sibling prefixes", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    obligationOverrides: {
+      coverage_cache: { compatible_storylets: ["SLT-0002"] }
+    },
+    extra: [
+      branchPrefixStorylet("SLT-0002", ["PG-0099"])
     ]
   }), {
     run_mode: "pre-apply",
@@ -164,6 +180,30 @@ test("recursive_reference_closure rejects null-created branch-prefix-scoped stor
     referenced_node_id: "test-story:SLT-0002",
     created_at_page: null
   });
+});
+
+test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with malformed prefixes", async () => {
+  const malformedValues: unknown[] = [undefined, [], ["PG-0002"], ["PG-0001", "bad"]];
+
+  for (const [index, visible_branch_path_prefix] of malformedValues.entries()) {
+    const storyletId = `SLT-001${index}`;
+    const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+      obligationOverrides: {
+        coverage_cache: { compatible_storylets: [storyletId] }
+      },
+      extra: [
+        branchPrefixStorylet(storyletId, visible_branch_path_prefix)
+      ]
+    }), {
+      run_mode: "pre-apply",
+      patch_plan: patchPlan()
+    }));
+
+    assert.ok(
+      verdicts.some((verdict) => verdict.code === "recursive_reference_closure.branch_leak"),
+      `expected branch leak for ${JSON.stringify(visible_branch_path_prefix)}`
+    );
+  }
 });
 
 test("recursive_reference_closure rejects branch-scoped storylets with null created_at_page", async () => {
@@ -481,11 +521,15 @@ function storyRecord(
   };
 }
 
-function branchPrefixStorylet(id: string) {
+function branchPrefixStorylet(id: string, visible_branch_path_prefix?: unknown) {
   return storyRecord("storylet_record", id, "storylets", {
     id,
     story_id: "STORY-001",
-    scope: { visibility: "branch_prefix_scoped", branch_id: "BR-0001" },
+    scope: {
+      visibility: "branch_prefix_scoped",
+      branch_id: "BR-0001",
+      ...(visible_branch_path_prefix === undefined ? {} : { visible_branch_path_prefix })
+    },
     created_at_page: null,
     provenance: { origin: "focus_authoring" }
   });

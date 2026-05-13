@@ -181,6 +181,7 @@ story_id: STORY-NNNN*
 scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
   branch_id: BR-NNNN | null            # * null only for global_author_pool
+  visible_branch_path_prefix: [PG-NNNN] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
 created_at_page: PG-NNNN | null        # null only for global_author_pool
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
