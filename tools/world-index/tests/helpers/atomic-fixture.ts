@@ -127,7 +127,7 @@ export function createAtomicRepoRoot(worldSlug = "atomic-world"): string {
     "world_ent_id: ENT-0001",
     "character_id: null",
     "name: Brinewick",
-    "role_in_story: protagonist",
+    "role_in_story: [primary_actor]",
     "present_at_start: true",
     "story_only: false",
     "created_at_page: PG-0001",

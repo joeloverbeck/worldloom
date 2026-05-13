@@ -168,19 +168,17 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   assert.ok(!("code" in belief));
   assert.ok(!("code" in branch));
 
-  assert.equal(storylet.schema.additionalProperties, true);
-  const storyletProperties = storylet.schema.properties as Record<string, { pattern?: string; properties?: Record<string, unknown> }>;
+  assert.equal(storylet.schema.additionalProperties, false);
+  const storyletProperties = storylet.schema.properties as Record<
+    string,
+    { enum?: string[]; pattern?: string; properties?: Record<string, unknown> }
+  >;
   assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]{4}$");
-  assert.ok(storyletProperties.arc_contract?.properties?.commitment_family);
-  assert.ok(storyletProperties.arc_contract?.properties?.commitment_detail);
-  const exitPortfolio = storyletProperties.exit_portfolio as {
-    properties?: { native_seeds?: { items?: { properties?: Record<string, unknown> } } };
-  };
-  assert.ok(exitPortfolio.properties?.native_seeds?.items?.properties?.commitment_family);
-  assert.ok(exitPortfolio.properties?.native_seeds?.items?.properties?.commitment_detail);
+  assert.ok(storyletProperties.move_family?.enum?.includes("investigation"));
+  assert.ok(storyletProperties.exit_options);
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");
   assert.deepEqual(storylet.required_fields, readSourceSchema("storylet_record").required);
-  assert.ok(storylet.required_fields.includes("arc_contract"));
+  assert.ok(storylet.required_fields.includes("move_family"));
   assert.deepEqual(storylet.conditional_blocks, {});
 
   assert.equal(storyFact.schema.$id, "https://worldloom.local/schemas/story-fact.schema.json");
@@ -193,6 +191,7 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     "created_at_page",
     "holder",
     "claim",
+    "belief_mode",
     "truth_relation",
     "confidence",
     "visibility",
