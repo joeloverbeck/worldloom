@@ -105,5 +105,5 @@ Completed. `storylet_predicate_dsl_parsability` now accepts FOUNDATIONS-002 unpa
 ## Deviations
 
 - The drafted `/tmp/slb-1-red-bunny-plan.json` CLI smoke was not run because that plan file is not a checked-in or otherwise available proof artifact. The accepted proof is the package-local validator build/test lane plus a direct regex assertion over every ID class this ticket owns.
-- The remaining `SLT-\d{4}` filename selector in `applies_to` is intentionally left untouched. It is sibling scope owned by `tickets/VALENH-018-predicate-dsl-applies-to-filename-regex-foundations-002-alignment.md`.
+- The remaining `SLT-\d{4}` filename selector in `applies_to` was intentionally left untouched by this ticket. That sibling scope was completed and archived as `archive/tickets/VALENH-018-predicate-dsl-applies-to-filename-regex-foundations-002-alignment.md`.
 - The source regex hunk already existed as pre-existing same-seam dirty work at this run's intake. This run verified the hunk, rebuilt the compiled artifact, and closed out the ticket against the live proof surface.
