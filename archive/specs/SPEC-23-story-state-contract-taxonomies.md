@@ -4,8 +4,8 @@
 
 **Phase**: Independent — amends the shared story state contract and its three implementation surfaces (validator schemas, predicate DSL grammar, patch-engine record-ops) ahead of the first production use of the rebuilt story-pipeline skill family.
 **Depends on**: None (the rebuilt story-skill family has landed; per FOUNDATIONS §Story Bundles §5b the contract is the authoritative source for story-record schemas).
-**Blocks**: First production story-bundle authoring against the rebuilt skills (the contract/schema mismatches catalogued in Workstream 1 would otherwise reproduce drift on every committed SLT, BEL, and PG).
-**Status (2026-05-13)**: PROPOSED
+**Blocks**: None — completed; first production story-bundle authoring is no longer blocked by this spec family's taxonomy work.
+**Status**: COMPLETED — archived on 2026-05-13 after `SPEC23STOSTACON-001` through `SPEC23STOSTACON-011` completed the contract, schema, validator, machine-facing documentation, workflow-documentation, and story-skill prose slices.
 
 **Implementation notes (2026-05-13)**:
 - `SPEC23STOSTACON-001` completed the shared story-state contract and FOUNDATIONS lockstep amendments.
@@ -15,6 +15,9 @@
 - `SPEC23STOSTACON-006` completed the STENT / SREL JSON Schema update in `tools/validators/src/schemas/story-entity.schema.json` and `tools/validators/src/schemas/story-relationship.schema.json`; those schemas now enforce optional `role_in_story` as a 12-value array and optional `axis` as the 14-value relationship-axis enum matching `RELATIONSHIP_AXES`.
 - `SPEC23STOSTACON-007` completed the `tools/world-mcp` context-packet projection update for `STENT.role_in_story`; `ContextPacketStoryBundleContext.cast_bind_list[].role_in_story` is now `RoleInStory[]`, STORY_KERNEL `cast_bind_list` roles are projected as canonical lists, and same-package fixtures now use list-form canonical values.
 - `SPEC23STOSTACON-008` completed old-pipeline validator retirement and predicate DSL validator realignment in `tools/validators`: the five retired scene-commitment / effect-model / stop-policy / choice-worthiness rule validators and their tests are deleted, the active rule registry now exposes 9 rule validators, `predicate-dsl-grammar.ts` is pinned to contract §5's 17 predicate names plus shared helper vocabularies, and `rule_storylet_predicate_dsl_parsability.ts` now validates nested `preconditions.hard | soft` plus the five new predicate argument shapes. Remaining references below to the old 21-entry grammar, stop-policy predicates, or old-pipeline validators are historical intake context unless a later ticket explicitly updates them.
+- `SPEC23STOSTACON-009` completed the four named story-skill prose updates for the post-contract vocabularies: `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-bootstrap`, and `branching-story-health-audit` now use `move_family`, `action_family`, current `event_kind` repair values, current `scope.visibility` values, canonical `role_in_story` list guidance, and the expanded predicate / BEL wording. Remaining references below to old per-skill prose are historical intake context unless a later ticket explicitly updates them.
+- `SPEC23STOSTACON-010` completed the machine-facing storylet filter example refresh in `docs/MACHINE-FACING-LAYER.md`; the documented examples now use `move_family`, nested `preconditions.hard | soft`, `scope.visibility`, and the current storylet vocabulary instead of the retired storylet-filter shape.
+- `SPEC23STOSTACON-011` completed workflow and hard-gate documentation alignment in `docs/WORKFLOWS.md` and `docs/HARD-GATE-DISCIPLINE.md`; those docs now describe the plan/prose-attach story pipeline and its validation/failure surfaces under the completed contract.
 
 ## Problem Statement
 
@@ -158,3 +161,16 @@ The contract markdown is the human-readable canon for these surfaces; the JSON s
 - **Compiler/parser implementations of the new predicates' runtime evaluation.** This spec specifies the grammar and validator-side argument-shape checks; the runtime evaluator (which executes predicates against `PG.state_snapshot`) is unchanged in this spec — it consumes the same predicate-name dispatch.
 - **Word-count guidance, render-time directives, or prose-quality contract changes.** This spec amends story-state structure only; per FOUNDATIONS §Story Bundles §9, length follows content and is not part of the contract surface.
 - **New record classes.** This spec extends inventories and vocabularies for existing classes only; no new record class (no `STORY`, `EPISODE`, `CHAPTER`, etc.) is introduced.
+
+## Outcome
+
+Completed and archived on 2026-05-13.
+
+The spec landed through `SPEC23STOSTACON-001` through `SPEC23STOSTACON-011`, which together completed the shared story-state contract amendments, validator schema updates, predicate DSL cleanup, context-packet projection, machine-facing documentation, workflow/hard-gate documentation, and active story-skill vocabulary updates.
+
+The deliverables and risk text above is retained as historical decomposition context. Where the implementation notes above identify a completed ticket, those notes are the authoritative closeout for that slice unless a later ticket explicitly reopens it.
+
+Verification at archive time:
+- Active same-family ticket sweep completed before archival; `SPEC23STOSTACON-009` was the final active same-family ticket and is archived.
+- `archive/tickets/SPEC23STOSTACON-010.md` and `archive/tickets/SPEC23STOSTACON-011.md` confirm the final machine-facing and workflow-documentation slices are complete.
+- The spec has no remaining active blocking claim after completion.

@@ -171,7 +171,7 @@ If `manual_action_text` is supplied, parse it into a structured `proposed_action
 ```yaml
 proposed_action:
   actor: STENT-NNNN | player_character | unknown
-  action_family: attack | flee | hide | confess | ask | deceive | negotiate | steal | destroy | spare | help | wait | custom
+  action_family: move | evade | pursue | perceive | investigate | communicate | persuade | negotiate | bond | oppose | harm | protect | control | transfer | use | make_change | ritual_protocol | recover | wait | decide
   target_records: [<record id>]
   intended_outcome: <natural-language statement>
   visible_method: <natural-language statement>
@@ -194,12 +194,13 @@ Route to exactly one of six outcomes per shared contract §6:
 Filter the bundle's `SLT` records for eligibility against the parent snapshot:
 
 - All `preconditions.hard` predicates evaluate true (per shared contract §5 closed predicate DSL).
-- `scope.visibility: author_pool` blocks are universally eligible (subject to predicates); `scope.visibility: branch_scoped` blocks are eligible only when `scope.branch_id` matches the active or new branch.
+- `scope.visibility: global_author_pool` blocks are universally eligible (subject to predicates); `scope.visibility: branch_prefix_scoped` blocks are eligible when `scope.branch_id` is in the active branch's lineage; `scope.visibility: branch_scoped` blocks are eligible only when `scope.branch_id` matches the active or new branch.
+- For action grounding, prefer `affordance_available_to(<actor>, <action_family>)`; `has_affordance(<action_family>)` is only an actor-agnostic author-pool prefilter when the actor is not yet bound.
 - `saliency.cooldown_pages` permits use.
 - `mystery_policy.forbidden_resolutions` does not include any mystery the resolved action would resolve.
 - `mystery_policy.allowed_authority` is compatible with `outcome_route`.
 
-Rank eligible blocks by: (1) `purpose` × `action_family` match; (2) `saliency.urgency` (high > medium > low); (3) coverage of `target_records`; (4) diversity (avoid repeating the most-recently-used `purpose` on this branch).
+Rank eligible blocks by: (1) `move_family` × `action_family` match; (2) `saliency.urgency` (high > medium > low); (3) coverage of `target_records`; (4) diversity (avoid repeating the most-recently-used `move_family` on this branch).
 
 If no eligible block exists, create one branch-scoped JIT block:
 
@@ -241,11 +242,11 @@ Supersession is file-level append-only per shared contract §3 — a new record 
 
 For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL` records per shared contract §4.1 + FOUNDATIONS §Story Bundles §6a:
 
-- Who knows (`truth_relation: true`, `visibility: shared` or `public`, `confidence: certain`).
-- Who suspects (`truth_relation: unknown`, `confidence: suspected`).
+- Who knows (`belief_mode: knows`, `truth_relation: true`, `visibility: shared` or `public`, `confidence: certain`).
+- Who suspects (`belief_mode: suspects`, `truth_relation: unknown`, `confidence: medium | low`).
 - Who misunderstands (`truth_relation: partly_true | false`, `confidence: certain`).
 - Who can prove it (`consequences.opens[]` linking to potential `OBL` / `CNSQ`).
-- What rumor or lie may spread (additional `BEL` with `visibility: shared`, `confidence: rumor`; or `performative_lie` when the holder knows the claim is false but presents it as true).
+- What rumor or lie may spread (additional `BEL` with `belief_mode: reports`, `visibility: rumored`; or `belief_mode: deceives` when the holder knows the claim is false but presents it as true).
 - What choices are now constrained (`consequences.constrains_choices[]` linking to upcoming `CHC`).
 
 **This phase is mandatory** for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual. Phase 9 turn-cycle-additional check 3 verifies coverage.
@@ -266,7 +267,7 @@ Draft `SE-NNNN` per shared contract §4.3:
 
 ```yaml
 id: SE-NNNN
-event_kind: selected_choice | write_in_attempt | world_block | repair | terminal
+event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
 actor: STENT-NNNN | system | unknown
 targets: [<record id>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal

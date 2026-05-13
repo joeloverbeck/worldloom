@@ -116,7 +116,7 @@ Atomic story-bundle records (via `mcp__worldloom__submit_patch_plan`) + direct-w
 | Class | File path | Created when |
 |---|---|---|
 | `STORY-NNNN` | (per-world identifier; resolved at allocation) | Always |
-| `STENT-NNNN` | `_source/entities/STENT-NNNN.yaml` | Always (one per cast member) |
+| `STENT-NNNN` | `_source/entities/STENT-NNNN.yaml` | Always (one per cast member; `role_in_story` uses canonical list values such as `[viewpoint, primary_actor]`) |
 | `STINT-NNNN` | `_source/intentions/STINT-NNNN.yaml` | Always (≥1 per cast member) |
 | `SF-NNNN` | `_source/facts/SF-NNNN.yaml` | Always (load-bearing mirrored world facts) |
 | `BEL-NNNN` | `_source/beliefs/BEL-NNNN.yaml` | Always (initial belief state per cast member) |
@@ -201,6 +201,8 @@ For every cast member, create only the `BEL` records that affect immediate choic
 
 Use `BEL` (not `SF`) for false beliefs, suspicions, rumors, lies, and private assumptions. `BEL.truth_relation` and `BEL.visibility` set per shared contract §4.1 — these are consumed by the social-state firewall per FOUNDATIONS §Story Bundles §6a.
 
+For every cast-member `STENT`, set `role_in_story` as a list from the closed shared contract §4.4b values: `viewpoint`, `player_proxy`, `primary_actor`, `opposing_actor`, `allied_actor`, `authority`, `dependent`, `witness`, `information_source`, `pressure_source`, `social_bridge`, `background`. Use multiple values only when both are operationally true.
+
 ## Phase 4: Create initial debts
 
 Create 1–3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` records only when they constrain a choice, demand response, track promise / risk / threat / cost, or create a future consequence if ignored. Create `SREL` records for relationships that constrain opening choice.
@@ -212,10 +214,10 @@ Create 1–3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` 
 Conditional on the `seed_commitment_blocks` argument:
 
 - `none`: skip; the turn-cycle will create branch-scoped JIT blocks at runtime.
-- `minimal`: create 4–8 broad `SLT` records covering aftermath / confrontation-or-refusal / information-seeking / relationship-pressure / movement-or-escape / fallback-continuation. Add reveal and/or repair blocks only if the opening pressure plausibly calls for them within the first few turns.
+- `minimal`: create 4-8 broad `SLT` records covering recovery / conflict-or-evasion / investigation / bond_shift-or-status_shift / movement-or-protection / fallback-continuation. Add disclosure and/or recovery blocks only if the opening pressure plausibly calls for them within the first few turns.
 - `standard`: create 8–14 blocks (cap).
 
-All seed blocks: `scope.visibility: author_pool`, `scope.branch_id: null`, `created_at_page: null`, `provenance.origin: bootstrap_seed`. Predicate preconditions reference only world canon, mirrored `SF` from Phase 2, and bootstrap-created `BEL` / `SREL` / `STENT` ids from Phases 3-4 — no branch-local records (there is no branch-local state yet at bootstrap; including any would fail Phase 9 gate 4 branch isolation).
+All seed blocks: `scope.visibility: global_author_pool`, `scope.branch_id: null`, `created_at_page: null`, `provenance.origin: bootstrap_seed`. Predicate preconditions reference only world canon, mirrored `SF` from Phase 2, and bootstrap-created `BEL` / `SREL` / `STENT` ids from Phases 3-4 — no branch-local records (there is no branch-local state yet at bootstrap; including any would fail Phase 9 gate 4 branch isolation).
 
 Commitment blocks are causal moves, not dramatic acts, arcs, or plot rails — the schema discipline at shared contract §4.4 plus FOUNDATIONS §Story Bundles §5a (Commitment Blocks Are Causal Moves) forbids `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, and shape discriminators.
 
@@ -259,7 +261,7 @@ No word-count target anywhere in the plan. Engine jargon (record ids, gate names
 
 Emit 3-5 `CHC` records representing different commitments — not variants of the same wording. Sample different axes: action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire (at authorial discretion within the opening's plausibility envelope). Always emit a write-in slot.
 
-Each `CHC` carries: `surface_label`, `player_visible_intent`, `target_or_action_family` (per shared contract §6 action families), `likely_state_pressure` (which debts / beliefs the choice engages), `associated_commitment_block` (`SLT-NNNN` if known, else null — turn-cycle will JIT), `success_policy` (only when `target_or_action_family == 'attempt'`).
+Each `CHC` carries: `surface_label`, `player_visible_intent`, `target_or_action_family` (using the shared contract §4.4a `action_family` taxonomy where an action family is needed), `likely_state_pressure` (which debts / beliefs the choice engages), `associated_commitment_block` (`SLT-NNNN` if known, else null — turn-cycle will JIT), `success_policy` (only when `target_or_action_family == 'attempt'`).
 
 ## Phase 9: Validate
 
