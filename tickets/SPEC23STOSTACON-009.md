@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/commitment-block-authoring/SKILL.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`
-**Deps**: archive/tickets/SPEC23STOSTACON-001.md
+**Deps**: archive/tickets/SPEC23STOSTACON-001.md, archive/tickets/SPEC23STOSTACON-008.md
 
 ## Problem
 
@@ -65,7 +65,7 @@ This ticket lands the vocabulary updates atomically across all four skill files.
 
 - Differentiate `system_repair` (engine-initiated, e.g., schema gate failure repair) from `audit_repair` (audit-finding-driven) in any prose that currently uses `event_kind: repair`.
 - Update audit prose to reference `move_family` (replacing `purpose`) in SLT-quality audit checks.
-- If the audit prose mentions `arc_contract`, `effect_model`, `stop_policy`, or any of the retired-validator names, drop those references — the retired validators (per SPEC23STOSTACON-008) no longer produce findings.
+- If the audit prose mentions `arc_contract`, `effect_model`, `stop_policy`, or any of the retired-validator names, drop those references — the retired validators (per archive/tickets/SPEC23STOSTACON-008.md) no longer produce findings.
 
 ### 5. `branching-story-prose-attach/SKILL.md` — verify no change
 

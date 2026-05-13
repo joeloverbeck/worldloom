@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { effectModelReplaySafety } from "../../src/rules/effect_model_replay_safety.js";
 import { snapshotReplayEquality } from "../../src/structural/snapshot-replay-equality.js";
 import { context, record } from "./helpers.js";
 
@@ -117,19 +116,6 @@ test("snapshot_replay_equality ignores only workflow-stamped state_snapshot fiel
   }));
 
   assert.deepEqual(verdicts, []);
-});
-
-test("snapshot_replay_equality exclusion does not weaken effect_model_replay_safety", async () => {
-  const missingVariant = {
-    ...nextSnapshot,
-    applied_effect_variant: null
-  };
-  const verdicts = await effectModelReplaySafety.run(undefined, context(recordsFor(missingVariant, "hash-next"), {
-    run_mode: "pre-apply",
-    patch_plan: patchPlan()
-  }));
-
-  assert.ok(verdicts.some((verdict) => verdict.code === "effect_model_replay_safety.missing_applied_effect_variant"));
 });
 
 test("snapshot_replay_equality verifies the last event hash", async () => {
