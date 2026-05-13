@@ -62,9 +62,13 @@ test("deleted legacy story skills are not required by current capstone coverage"
     assert.equal(existsSync(path.join(REPO_ROOT, relativePath)), false, `${relativePath} should stay deleted`);
   }
 
-  const greenfieldPlan = readRepoFile("docs/plans/2026-05-13-streamlined-story-skills-greenfield-plan.md");
-  assert.match(greenfieldPlan, /BEL` is a day-one first-class record class/);
-  assert.match(greenfieldPlan, /No `ARC_TRACE` class/);
+  const foundations = readRepoFile("docs/FOUNDATIONS.md");
+  assert.match(foundations, /Per-bundle records include STENT, SF, BEL, SE/);
+  assert.match(foundations, /No ARC_TRACE class/);
+
+  const storyStateContract = readRepoFile(".claude/skills/_shared-templates/story-state-contract.md");
+  assert.match(storyStateContract, /\| `BEL` \| Belief, knowledge, suspicion, public claim, lie, witness memory, or misconception/);
+  assert.match(storyStateContract, /There is no `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, or `stop_policy`/);
 });
 
 function buildArcTraceEnvelope(id: string): McpPatchPlanEnvelope {
