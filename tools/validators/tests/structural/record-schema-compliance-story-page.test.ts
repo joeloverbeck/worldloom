@@ -19,7 +19,6 @@ function validPagePayload(): Record<string, unknown> {
     prose_status: "pending",
     deferred_validation_trace: {
       prose_ledger_consistency: "DEFERRED — awaiting prose render",
-      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
       prose_critic_8_axis: "DEFERRED — awaiting prose render"
     }
   };
@@ -37,7 +36,6 @@ test("record_schema_compliance accepts a rendered PG record with a string prose_
   parsed.prose_status = "rendered";
   parsed.deferred_validation_trace = {
     prose_ledger_consistency: "PASS — render aligned with ledger",
-    arc_trace_evidence_alignment: "PASS — arc trace cited",
     prose_critic_8_axis: "PASS — 8-axis verdict accepted"
   };
 
@@ -121,8 +119,7 @@ test("record_schema_compliance rejects PG records with a prose_path string that 
 test("record_schema_compliance rejects PG records whose deferred_validation_trace omits a required gate key", async () => {
   const parsed = validPagePayload();
   parsed.deferred_validation_trace = {
-    prose_ledger_consistency: "DEFERRED — awaiting prose render",
-    arc_trace_evidence_alignment: "DEFERRED — awaiting prose render"
+    prose_ledger_consistency: "DEFERRED — awaiting prose render"
   };
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
@@ -137,7 +134,6 @@ test("record_schema_compliance rejects PG records whose deferred_validation_trac
   const parsed = validPagePayload();
   parsed.deferred_validation_trace = {
     prose_ledger_consistency: "DEFERRED — awaiting prose render",
-    arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
     prose_critic_8_axis: "DEFERRED — awaiting prose render",
     extra_gate: "DEFERRED — awaiting prose render"
   };

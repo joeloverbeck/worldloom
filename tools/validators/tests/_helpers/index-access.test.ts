@@ -18,16 +18,14 @@ function createDb(): Database.Database {
   db.exec(readFileSync(path.join(MIGRATIONS, "002_scoped_references.sql"), "utf8"));
   db.exec(readFileSync(path.join(MIGRATIONS, "004_story_bundle_scope.sql"), "utf8"));
   seedNode(db, {
-    nodeId: "alpha:ARCTRACE-0001",
-    nodeType: "arc_trace_node",
-    filePath: "stories/alpha/_source/arc-traces/ARCTRACE-0001.yaml",
+    nodeId: "alpha:BEL-0001",
+    nodeType: "belief_record",
+    filePath: "stories/alpha/_source/beliefs/BEL-0001.yaml",
     storySlug: "alpha",
     parsed: {
-      id: "ARCTRACE-0001",
+      id: "BEL-0001",
       story_id: "STORY-001",
-      created_at_page: "PG-0002",
-      arc_realized: "SLT-0001",
-      stop_condition_hit: { category: "normal_exit" }
+      created_at_page: "PG-0002"
     }
   });
   seedNode(db, {
@@ -38,21 +36,21 @@ function createDb(): Database.Database {
     parsed: {
       id: "PG-0002",
       story_id: "STORY-001",
-      state_snapshot: { arc_trace_id: "ARCTRACE-0001" }
+      state_snapshot: { active_records: { BEL: ["BEL-0001"] } }
     }
   });
   return db;
 }
 
-test("pre-apply read surface translates arc_trace_record to indexed arc_trace_node", async () => {
+test("pre-apply read surface reads BEL records by indexed node type", async () => {
   const db = createDb();
   try {
     const surface = buildPreApplyReadSurface(db, envelope());
 
-    const traces = await surface.query({
+    const beliefs = await surface.query({
       world_slug: "seeded",
       story_slug: "alpha",
-      record_type: "arc_trace_record"
+      record_type: "belief_record"
     });
     const pages = await surface.query({
       world_slug: "seeded",
@@ -60,22 +58,22 @@ test("pre-apply read surface translates arc_trace_record to indexed arc_trace_no
       record_type: "page_record"
     });
 
-    assert.deepEqual(traces.map((record) => record.node_id), ["alpha:ARCTRACE-0001"]);
+    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-0001"]);
     assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-0002"]);
   } finally {
     db.close();
   }
 });
 
-test("full-world CLI read surface translates arc_trace_record without affecting other types", async () => {
+test("full-world CLI read surface reads BEL records without affecting other types", async () => {
   const db = createDb();
   try {
     const surface = buildReadSurface(db, "seeded");
 
-    const traces = await surface.query({
+    const beliefs = await surface.query({
       world_slug: "seeded",
       story_slug: "alpha",
-      record_type: "arc_trace_record"
+      record_type: "belief_record"
     });
     const pages = await surface.query({
       world_slug: "seeded",
@@ -83,7 +81,7 @@ test("full-world CLI read surface translates arc_trace_record without affecting 
       record_type: "page_record"
     });
 
-    assert.deepEqual(traces.map((record) => record.node_id), ["alpha:ARCTRACE-0001"]);
+    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-0001"]);
     assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-0002"]);
   } finally {
     db.close();
@@ -92,7 +90,7 @@ test("full-world CLI read surface translates arc_trace_record without affecting 
 
 function envelope(): PatchPlanEnvelope {
   return {
-    plan_id: "plan-arc-trace-translation-001",
+    plan_id: "plan-bel-read-surface-001",
     target_world: "seeded",
     approval_token: "token-from-gate",
     verdict: "ACCEPT",

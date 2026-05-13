@@ -45,6 +45,31 @@ test("describeEnvelopeSchema returns the full envelope and every operation schem
   assert.ok(allocations.properties?.pa_ids);
   assert.ok(allocations.properties?.char_ids);
   assert.ok(allocations.properties?.da_ids);
+  assert.ok(allocations.properties?.bel_ids);
+  assert.equal(allocations.properties?.arc_trace_ids, undefined);
+});
+
+test("describeEnvelopeSchema exposes create_bel_record wrapper schema", async () => {
+  const manifest = await describeEnvelopeSchema({ op_kind: "create_bel_record" });
+
+  assert.equal(manifest.delivery_status, "inline");
+  assert.deepEqual(Object.keys(manifest.op_schemas), ["create_bel_record"]);
+
+  const schema = manifest.op_schemas.create_bel_record!;
+  const properties = schema.properties as Record<string, unknown>;
+  assert.deepEqual(properties.op, { const: "create_bel_record" });
+
+  const payload = properties.payload as {
+    required?: string[];
+    properties?: {
+      story_slug?: { pattern?: string };
+      record?: { required?: string[]; properties?: { id?: { pattern?: string } } };
+    };
+  };
+  assert.deepEqual(payload.required, ["story_slug", "record"]);
+  assert.equal(payload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
+  assert.deepEqual(payload.properties?.record?.required, ["id"]);
+  assert.equal(payload.properties?.record?.properties?.id?.pattern, "^BEL-[0-9]{4}$");
 });
 
 test("describeEnvelopeSchema filters to one op kind and exposes CF payload schema", async () => {

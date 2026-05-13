@@ -142,7 +142,7 @@ function collectIdAllocationRaceFailures(
     ["pg_ids", "PG", /^PG-(\d{4})$/, 4, true],
     ["chc_ids", "CHC", /^CHC-(\d{4})$/, 4, true],
     ["slt_ids", "SLT", /^SLT-(\d{4})$/, 4, true],
-    ["arc_trace_ids", "ARCTRACE", /^ARCTRACE-(\d{4})$/, 4, true],
+    ["bel_ids", "BEL", /^BEL-(\d{4})$/, 4, true],
     ["story_da_ids", "DA", /^DA-(\d{4})$/, 4, true]
   ];
 

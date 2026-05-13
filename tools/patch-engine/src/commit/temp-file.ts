@@ -124,7 +124,7 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
-    case "create_arc_trace_record":
+    case "create_bel_record":
     case "append_story_diegetic_artifact_record": {
       const metadata = storyRecordMetadata(patch);
       return metadata === null ? null : { nodeId: metadata.nodeId, nodeType: metadata.nodeType };
@@ -148,7 +148,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|ARCTRACE|DA)-\d{4}$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|BEL|DA)-\d{4}$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d{4}$/.test(recordId)) {
@@ -237,7 +237,7 @@ function stageOne(
     case "create_pg_record":
     case "create_chc_record":
     case "create_slt_record":
-    case "create_arc_trace_record":
+    case "create_bel_record":
     case "append_story_diegetic_artifact_record":
       return stageCreateStoryRecord(envelope, patch, ctx);
   }

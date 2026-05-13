@@ -385,7 +385,7 @@ No fact may exist without:
 - limits
 - consequences
 
-A plan IS load-bearing engine output. The story-pipeline `pages-prose-plans/PG-NNNN.md` artifact is consumed by Phase 7.5 declared-affordance validation, Phase 9 `plan_completeness_check`, Phase 9.5 `plan_self_containment`, and `branching-story-page-prose-finalize` Phase 1 plan/prose pairing. Producing a plan without yet-rendered prose satisfies Rule 1, because the plan's frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]` with explicit consequences and prerequisites — the rule's grounding requirements apply to the plan as engine artifact independent of whether prose has yet been rendered.
+A plan IS load-bearing engine output. The story-pipeline `pages-prose-plans/PG-NNNN.md` artifact is validated by the shared eight hard gates (plan grounding is gate 7) at page-plan commit per `.claude/skills/_shared-templates/story-state-contract.md` §7. Producing a plan without yet-rendered prose satisfies Rule 1, because the plan's frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]` with explicit consequences and prerequisites — the rule's grounding requirements apply to the plan as engine artifact independent of whether prose has yet been rendered.
 
 ### Rule 2: No Pure Cosmetics
 No species, ritual, technology, artifact, or institution may be added as surface flavor only.
@@ -427,11 +427,7 @@ All canon changes must be logged with justification.
 Unknowns must be chosen, bounded, and tracked.
 They must not be side effects of weak design memory.
 
-**Firewall split for the plan + finalize pipeline.** Mystery firewall enforcement now runs at two times:
-- Plan-time: deterministic check that no plan section asserts a `forbidden_resolution` (the plan's frontmatter `forbidden_resolutions[]` enumerates which `M-NNNN` must NOT be resolved by the rendered prose).
-- Finalize-time: deterministic regex over rendered prose for forbidden-mystery-resolution patterns + LLM critic (`branching-story-page-prose-finalize` Phase 3) for prose-level firewall breaches.
-
-Both gates remain mandatory. Forbidden-status `M` is NEVER resolved at either gate.
+**Mystery firewall enforcement.** The firewall is a single plan-time gate — gate 3 (mystery / invariant firewall) of the shared eight hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 — in every state-changing story-pipeline skill. The deterministic forbidden-mystery-resolution check inside `branching-story-prose-attach` is a redundant downstream guard on rendered prose, not a second authoritative gate. Forbidden-status `M` is NEVER resolved at either site.
 
 ### Rule 11: No Spectator Castes by Accident
 When a canon fact introduces or depends on exceptional capability, it must name at least three forms of leverage that remain available to ordinary or mid-tier actors.
@@ -535,7 +531,7 @@ Canonical storage for world state is atomic YAML under `worlds/<slug>/_source/` 
 
 ### 1. What A Story Bundle Is
 
-A story bundle is a per-world derived layer at `worlds/<slug>/stories/<story-slug>/`. It carries a localized causal-engine state bound to a specific premise, cast, and tone contract: story-local entities, facts, events, obligations, consequences, threads, relationships, intentions, locations, objects, pages, branches, choices, storylets, and artifacts.
+A story bundle is a per-world derived layer at `worlds/<slug>/stories/<story-slug>/`. It carries a localized causal-engine state bound to a specific premise, cast, and tone contract: story-local entities, facts, beliefs, events, obligations, consequences, threads, relationships, intentions, locations, objects, pages, branches, choices, storylets, and artifacts.
 
 Story bundles are distinct from world canon. Story-bundle records are story-local truths: they can be branch-scoped, counterfactual, provisional, or true only inside a particular narrative run. World canon remains world-level truth, expressed through CF / CH / INV / M / OQ / ENT / SEC records under `worlds/<slug>/_source/`.
 
@@ -555,31 +551,55 @@ Story-bundle `_source/<class>/*.yaml` writes use Shape B: they route through `mc
 
 Hook 3 blocks direct `Edit` / `Write` to both `worlds/<slug>/_source/...` and `worlds/<slug>/stories/<story-slug>/_source/...` YAML records. Story-bundle markdown surfaces remain direct-write surfaces: `STORY_KERNEL.md`, `INDEX.md`, `pages-prose/`, `pages-prose-plans/`, `audits/`, `storylet-batches/`, `story-promotions/`, and remediation proposal cards are not atomic `_source/*.yaml` records. Story-pipeline skills must not mutate world canon directly. The only lawful story-to-world mutation path is `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `canon-addition` then assembles and submits the actual CF / CH / PA world-canon patch plan through the standard HARD-GATE and patch-engine route.
 
-**Pipeline shape: plan + finalize.** The story-bundle pipeline produces a comprehensive prose plan at bundle commit (`pages-prose-plans/PG-NNNN.md`); rendered prose is supplied externally and merged via `branching-story-page-prose-finalize`. The plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`; its body inlines all canonical context the external renderer needs. Rendered prose is the authorial artifact; finalize is the convergence point that runs prose-coupled validators (`prose_ledger_consistency`, `arc_trace_evidence_alignment`, `prose_critic_8_axis`) and emits the ARC_TRACE record. Authoring serializes per page: bootstrap-plan or page-cycle-plan → external prose render → finalize → next plan. World-canon mutation remains exclusive to `story-fact-promotion-to-canon`; finalize does not promote.
+**Pipeline shape: plan + (optional) prose-attach.** Story state is authoritative at page-plan commit; rendered prose is a renderable receipt artifact, not a second state-transition workflow. The story-bundle pipeline produces a comprehensive prose plan at bundle commit (`pages-prose-plans/PG-NNNN.md`); rendered prose at `pages-prose/PG-NNNN.md` is supplied externally and validated by `branching-story-prose-attach`, which emits a `pages-prose-receipts/PG-NNNN.yaml` receipt without mutating page state. The plan is engine-readable and validation-bearing — its frontmatter declares affordances, intended beats, stop conditions, and `forbidden_resolutions[]`; its body inlines all canonical context the external renderer needs. `branching-story-turn-cycle` may advance the story from any committed page snapshot without requiring rendered parent prose. No ARC_TRACE class. World-canon mutation remains exclusive to `story-fact-promotion-to-canon`, which hands the candidate to `canon-addition`; `story-promotion-closeout` records the verdict on story-local records after adjudication.
+
+### 4a. Plan-Authority Boundary
+
+Story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine. A `PG` record is real the moment the patch engine accepts the page-cycle plan; rendered prose is supplied externally and attached later via a prose receipt.
+
+Page snapshots are the fork primitive. Any committed page is a valid parent for `branching-story-turn-cycle`, regardless of whether its prose has been rendered. There is no parallel "did the prose realize the planned arc" state engine — no ARC_TRACE class, no second state-transition pass. Prose deviating from plan is routed by `branching-story-prose-attach` as either a prose-quality issue (revise prose), a structural-fact issue (run a repair turn), or a canon-candidate (run promotion).
 
 ### 5. Validation Rules At Story Scope
 
-Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_safety`, `provenance`, `visibility`, predicate-DSL preconditions, and structured fact / relationship effects per `storylet-pool-authoring/templates/storylet-record.yaml`.
+Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_policy`, `provenance.origin`, `scope.visibility`, `preconditions.hard|soft` (in the closed predicate DSL), and `effects.create|supersede|close` (mirroring `SE.state_delta`) per the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4.4.
 
 Rule 4 (No Globalization by Accident) governs story-scope branch isolation. Global author-pool storylets must not reference branch-local record IDs whose `created_at_page` is non-null.
 
 Rule 5 (No Consequence Evasion) governs per-page consequence capacity. Every page must leave at least one continuation storylet eligible.
 
-Rule 7 (Preserve Mystery Deliberately) governs story-local `M_resolution_claims` authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate.
+Rule 7 (Preserve Mystery Deliberately) governs story-local `unresolved_mystery_claims` (on `PG.state_snapshot`) and `mystery_policy.allowed_authority` (on commitment blocks) authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate.
 
 Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces such as `canon-addition`, `propose-new-canon-facts`, and `create-base-world`; they are not story-scope record validators by default.
 
+### 5a. Commitment Blocks Are Causal Moves
+
+`SLT` records are reusable causal moves with preconditions, beats, effects, exits, and saliency — not dramatic acts, not arcs, not mini-stories, not plot rails. A good block says: *"when these conditions hold, this kind of action can happen, these beats dramatize it, and these state effects follow."* A bad block says: *"advance Act II"* or *"raise stakes before midpoint."*
+
+The schema (per `.claude/skills/_shared-templates/story-state-contract.md` §4.4) explicitly forbids `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version` discriminators above `1`, and `shape:` discriminators (until a second shape is ever needed). Each block's `effects.*` mirrors `SE.state_delta` (`create | supersede | close`).
+
+### 5b. Schema-Minimalism At Story Scope
+
+Every field in every story-bundle record schema (`BEL`, `PG`, `SE`, `SLT`, prose receipt) must be load-bearing — directly consumed by a validation gate, a replay primitive, a predicate, a fork operation, or recorded audit-trail discipline. Nice-to-have fields are dropped, because each field costs LLM tokens to author at every record and to read at every retrieval.
+
+The canonical field lists for the five core story-bundle schemas live in the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4. That contract is authoritative for story-record schemas; skills must not add fields to those schemas without amending the contract first.
+
 ### 6. Story-Bundle ID Classes
 
-Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-NNN` is per-world. Per-bundle records include STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit.
+Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-NNN` is per-world. Per-bundle records include STENT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit.
 
 Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
 
+### 6a. Belief vs. Fact
+
+`SF` records what is true in the branch; `BEL` records what a holder believes, claims, witnesses, suspects, denies, or is deceived about. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
+
+`BEL.truth_relation` (`true | false | partly_true | unknown | contested | branch_counterfactual`) distinguishes belief from truth. `BEL.visibility` (`private | shared | public | concealed | suppressed`) is consumed by the social-state firewall. Schemas live in `.claude/skills/_shared-templates/story-state-contract.md` §4.1 (BEL) and §4 generally (every other story-bundle record class).
+
 ### 7. Story-Pipeline Skill Category
 
-The five story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-page-cycle`, `storylet-pool-authoring`, `branching-story-health-audit`, and `story-fact-promotion-to-canon`.
+The seven story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`.
 
-FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the predicate DSL, the STENT `role_in_story` enum, the `state_snapshot` schema, the RSP card schema, and the shared `content_policy` block.
+FOUNDATIONS alignment applies per the story-scope validation rules above. Sibling-scan is recommended as a defensive default for inter-skill shared surfaces, including the closed 10-predicate DSL, the STENT `role_in_story` enum, the `PG.state_snapshot` schema (per the shared story state contract), the RSP card schema, and the shared `content_policy` block.
 
 ### 8. Story Bundle As Derived Per-World Layer
 
@@ -593,13 +613,8 @@ Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, c
 
 **Why**: word-count quotas at the LLM-facing surface produced empirically observed prose-padding (the LLM extending scenes to reach the floor) and prose-truncation (the LLM compressing scenes to fit the ceiling) pathologies. Commit `b28aead` (2026-05-06) removed the word-per-page guidelines from the page-render instructions on that basis; the archived SPEC-20 §H reassessment (2026-05-07) dropped `default_min_words_between_menus`, `preferred_words_per_arc`, and `max_words_without_player_commitment_soft` from `cadence_policy` for the same reason.
 
-**Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-page-cycle`, `storylet-pool-authoring`, `branching-story-health-audit`, and `story-fact-promotion-to-canon`. Prose Craft Contract Rule 11 (`.claude/skills/branching-story-page-cycle/references/prose-craft-contract.md`) is the per-skill expression of this principle.
-
-**Engine-side runaway-defense exception**: an engine-only `arc.stop_policy.safety_valves.max_words` ceiling IS permitted on storylet `stop_policy` as runaway-defense, with a strict shape:
-
-- Engine-only — never surfaced in the LLM rendering prompt and never used as a re-prompt soft target.
-- Invisible to per-bundle config — `STORY_KERNEL.cadence_policy` must contain no word-count fields.
-- Failure mode is HARD-FAIL re-prompt (Phase 7 re-prompts the LLM with runaway-defense framing) or graceful `CONTINUE_ONLY_PAUSE` (Phase 8 emits a single "Continue" affordance) — NEVER content truncation.
-- Default ceiling sits well above realistic multi-beat prose so the safety valve fires only on genuine runaway, not on legitimate long scenes.
+**Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`. The Prose Craft Contract is hosted at `reports/prose-quality-instructions.md` §Prose Craft Contract and inlined verbatim as page-plan §3 per `.claude/skills/_shared-templates/story-state-contract.md` §8.
 
 **Out of scope**: choice-button text length budgets (e.g., "5-15 words" for individual CHC text), INDEX preview excerpts (`first ~300 words of PG-NNNN.md` for display), prose-quality-density metrics (e.g., `filter_word_saturation per 100 words` as a filter-verb-ratio quality axis), and unrelated word-choice / vocabulary guidance are not word-quota mechanisms and remain outside this discipline.
+
+The greenfield SLT schema (per `.claude/skills/_shared-templates/story-state-contract.md` §4.4) has no `stop_policy` field; no engine-side `max_words` ceiling exists anywhere in the story-pipeline surface. The prose renderer is external to the engine; runaway-defense is not the engine's concern.

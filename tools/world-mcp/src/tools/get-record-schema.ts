@@ -37,7 +37,7 @@ export const SUPPORTED_RECORD_SCHEMA_NODE_TYPES = [
   "page_record",
   "choice_record",
   "storylet_record",
-  "arc_trace_node",
+  "belief_record",
   "story_diegetic_artifact_record"
 ] as const;
 
@@ -82,7 +82,7 @@ const NODE_TYPE_TO_SCHEMA_FILE: Record<SupportedRecordSchemaNodeType, string> = 
   page_record: "story-page.schema.json",
   choice_record: "story-choice.schema.json",
   storylet_record: "story-storylet.schema.json",
-  arc_trace_node: "story-arc-trace.schema.json",
+  belief_record: "story-belief.schema.json",
   story_diegetic_artifact_record: "story-diegetic-artifact.schema.json"
 };
 

@@ -73,14 +73,14 @@ test("checkIdAllocationRace reports a story-bundle off-by-one with the submit-ti
   }
 });
 
-test("checkIdAllocationRace rejects duplicate ARCTRACE allocations in one story-bundle plan", (t) => {
+test("checkIdAllocationRace rejects duplicate BEL allocations in one story-bundle plan", (t) => {
   const world = createIndexedTestWorld(t);
   const envelope = {
-    ...baseEnvelope({ arc_trace_ids: ["ARCTRACE-0001", "ARCTRACE-0001"] }),
+    ...baseEnvelope({ bel_ids: ["BEL-0001", "BEL-0001"] }),
     target_world: world.worldSlug,
     patches: [
-      createArcTracePatch(world.worldSlug, "red-bunny", "ARCTRACE-0001"),
-      createArcTracePatch(world.worldSlug, "red-bunny", "ARCTRACE-0001")
+      createBelPatch(world.worldSlug, "red-bunny", "BEL-0001"),
+      createBelPatch(world.worldSlug, "red-bunny", "BEL-0001")
     ]
   };
 
@@ -91,12 +91,12 @@ test("checkIdAllocationRace rejects duplicate ARCTRACE allocations in one story-
     assert.equal(result.code, "id_allocation_race");
     assert.deepEqual(result.failures, [
       {
-        key: "arc_trace_ids",
-        expected: "ARCTRACE-0001",
-        current: "ARCTRACE-0002",
+        key: "bel_ids",
+        expected: "BEL-0001",
+        current: "BEL-0002",
         story_slug: "red-bunny",
         message:
-          "arc_trace_ids allocation race for story 'red-bunny': expected ARCTRACE-0001, current next id is ARCTRACE-0002."
+          "bel_ids allocation race for story 'red-bunny': expected BEL-0001, current next id is BEL-0002."
       }
     ]);
   }
@@ -150,25 +150,24 @@ function createObligationPatch(
   } satisfies Extract<PatchOperation, { op: "create_obl_record" }>);
 }
 
-function createArcTracePatch(
+function createBelPatch(
   worldSlug: string,
   storySlug: string,
   id: string
-): Extract<PatchOperation, { op: "create_arc_trace_record" }> {
+): Extract<PatchOperation, { op: "create_bel_record" }> {
   return createOp({
-    op: "create_arc_trace_record",
+    op: "create_bel_record",
     target_world: worldSlug,
-    target_file: `stories/${storySlug}/_source/arc-traces/${id}.yaml`,
+    target_file: `stories/${storySlug}/_source/beliefs/${id}.yaml`,
     payload: {
       story_slug: storySlug,
       record: {
         id,
-        created_at_page: "PG-0002",
-        arc_realized: "SLT-0001",
-        effect_variant_applied: "variant-a"
+        holder: "STENT-0001",
+        claim: `Belief ${id}`
       }
     }
-  } satisfies Extract<PatchOperation, { op: "create_arc_trace_record" }>);
+  } satisfies Extract<PatchOperation, { op: "create_bel_record" }>);
 }
 
 function seedStoryRecord(

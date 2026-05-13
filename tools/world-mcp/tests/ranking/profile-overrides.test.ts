@@ -15,8 +15,8 @@ import {
   proposeNewWorldsFromPreferencesRankingProfile,
   storyBootstrapRankingProfile,
   storyFactPromotionToCanonRankingProfile,
-  storyPageCycleRankingProfile,
-  storyletPoolAuthoringRankingProfile
+  storyTurnCycleRankingProfile,
+  commitmentBlockAuthoringRankingProfile
 } from "../../src/ranking/profiles";
 
 test("canon_addition lifts canon-facing file class priorities above default", () => {
@@ -57,8 +57,8 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
     canonFactsFromDiegeticArtifactsRankingProfile,
     emergentPressureEventsRankingProfile,
     storyBootstrapRankingProfile,
-    storyPageCycleRankingProfile,
-    storyletPoolAuthoringRankingProfile,
+    storyTurnCycleRankingProfile,
+    commitmentBlockAuthoringRankingProfile,
     branchingStoryHealthAuditRankingProfile,
     storyFactPromotionToCanonRankingProfile
   ];
@@ -103,23 +103,23 @@ test("canon-pipeline-adjacent task profiles do not reuse the other fallback", ()
   );
   assert.ok((storyBootstrapRankingProfile.edge_type_boost?.references_scoped_name ?? 0) > 0);
   assert.ok(
-    (storyPageCycleRankingProfile.file_class_priority.canon_fact_record ?? 0) >
+    (storyTurnCycleRankingProfile.file_class_priority.canon_fact_record ?? 0) >
       (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
   );
   assert.ok(
-    (storyPageCycleRankingProfile.file_class_priority.invariant ?? 0) >
+    (storyTurnCycleRankingProfile.file_class_priority.invariant ?? 0) >
       (defaultRankingProfile.file_class_priority.invariant ?? 0)
   );
-  assert.ok((storyPageCycleRankingProfile.edge_type_boost?.mentions_entity ?? 0) > 0);
+  assert.ok((storyTurnCycleRankingProfile.edge_type_boost?.mentions_entity ?? 0) > 0);
   assert.ok(
-    (storyletPoolAuthoringRankingProfile.file_class_priority.canon_fact_record ?? 0) >
+    (commitmentBlockAuthoringRankingProfile.file_class_priority.canon_fact_record ?? 0) >
       (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
   );
   assert.ok(
-    (storyletPoolAuthoringRankingProfile.file_class_priority.mystery_reserve_entry ?? 0) >
+    (commitmentBlockAuthoringRankingProfile.file_class_priority.mystery_reserve_entry ?? 0) >
       (defaultRankingProfile.file_class_priority.mystery_reserve_entry ?? 0)
   );
-  assert.ok((storyletPoolAuthoringRankingProfile.edge_type_boost?.firewall_for ?? 0) > 0);
+  assert.ok((commitmentBlockAuthoringRankingProfile.edge_type_boost?.firewall_for ?? 0) > 0);
   assert.ok(
     (branchingStoryHealthAuditRankingProfile.file_class_priority.canon_fact_record ?? 0) >
       (defaultRankingProfile.file_class_priority.canon_fact_record ?? 0)
@@ -151,8 +151,8 @@ test("canon-pipeline-adjacent task types have task-specific default budgets", ()
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.canon_facts_from_diegetic_artifacts, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.emergent_pressure_events, 15000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_bootstrap, 18000);
-  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_page_cycle, 18000);
-  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.storylet_pool_authoring, 18000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_turn_cycle, 18000);
+  assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.commitment_block_authoring, 18000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.branching_story_health_audit, 12000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.story_fact_promotion_to_canon, 8000);
   assert.equal(DEFAULT_TOKEN_BUDGET_BY_TASK_TYPE.other, 8000);

@@ -1,71 +1,79 @@
-# Story Promotion SP-NNNN
+---
+promotion_id: SP-NNNN
+story_slug: <story_slug>
+world_slug: <world_slug>
+created: <iso8601 date>
+source_kind: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim
+branch_path: BR-NNNN
+proposal_package_path: worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml
+hard_gate_approved: true
+firewall_verdict: PASS | REQUIRES_USER_ACCEPTANCE   # ABORT verdicts never reach the write phase
+status: AWAITING_CANON_ADDITION
+---
 
-**Story**: <story_slug> in <world_slug>
-**Date**: <iso8601>
-**Source kind**: <story_fact | mystery_resolution | character_arc_outcome | artifact_canonization | arc_effect_promotion>
-**Source record**: <source ID>
-**Branch promoted from**: <promotion_branch_path>
-**Execution mode**: <authoring | interactive_runtime | batch_generation>
+# SP-NNNN: <Short title from the candidate>
 
-## Outcome
+## Overview
 
-**This-pipeline outcome**: <ACCEPT (handed to canon-addition) | REVISE | REJECT (firewall — <reason>) | REJECT (user)>
-**canon-addition outcome** (if handoff fired): <ACCEPT | ACCEPT_WITH_REQUIRED_UPDATES | ACCEPT_AS_LOCAL_EXCEPTION | ACCEPT_AS_CONTESTED_BELIEF | REVISE_AND_RESUBMIT | REJECT | n/a (not handed off)>
-**Resulting CF** (if accepted): CF-NNNN | n/a
-**Resulting CH** (if accepted): CH-NNNN | n/a
-**Adjudication record**: PA-NNNN | n/a
-**World-DA created** (if artifact_canonization accepted): DA-NNNN | n/a
+Branch-local story claim from `<branch_path>` in story `<story_slug>` proposed for promotion to world canon as **<candidate.status>** (`<candidate.type>`). The full machine-readable proposal package is at [`<proposal_package_path>`](../story-promotions/SP-NNNN-proposal-package.yaml); this ledger is the human-readable narrative record of the promotion attempt and its HARD-GATE approval.
 
-## Provenance
+## Candidate
 
-- Story: STORY-NNNN
-- Branch: <promotion_branch_path>
-- Supporting pages: [PG-NNNN, PG-NNNN, ...]
-- Arc effect source (if source_kind=arc_effect_promotion): source_arc_id=<SLT-NNNN>, source_page_id=<PG-NNNN>, applied_variant_id=<variant>, effect_index=<N>, arc_trace_id=<ARCTRACE-NNNN | null>, arc_trace_evidence_span=<byte span | null>
-- Supporting prose excerpts:
-  - <quoted snippet 1, with PG-NNNN cite>
-  - <quoted snippet 2, with PG-NNNN cite>
+**Title**: <candidate.title>
 
-## Scope and status
+**Statement**: <candidate.statement>
 
-- Proposed scope: geographic=<...> / temporal=<...> / social=<...>
-- Final scope (post canon-addition): <as accepted | n/a>
-- Proposed status: <hard_canon | soft_canon | contested_canon | mystery_reserve>
-- Final status: <as accepted | n/a>
+**Scope**: geographic `<candidate.scope.geographic>` | temporal `<candidate.scope.temporal>` | social `<candidate.scope.social>`
 
-## Downstream impact handling
+**Truth scope**: world_level `<candidate.truth_scope.world_level>` | diegetic_status `<candidate.truth_scope.diegetic_status>`
 
-- Within this story: <handling applied per contradiction_handling_preference>
-  - Branch <leaf>: <flagged | left alone | archived | n/a>
-  - Branch <leaf>: <flagged | left alone | archived | n/a>
-- Cross-story (if scan performed): <handling applied — always flag>
-  - Story <slug>, branch <leaf>: flagged
-  - Story <slug>, branch <leaf>: flagged
+**Domains affected**: <comma-separated list>
 
-## Story-local source record
+## Evidence
 
-The original <source ID> remains in this story's `_source/`.
+- **Source records**: <list of source_record_ids>
+- **Supporting pages**: <list of supporting_page_ids>
+- **Authoring events**: <list of SE-NNNN ids>
+- **Witness beliefs**: <list of BEL-NNNN ids>
+- **Branch lineage**: <branch_path> (every source record's `created_at_page` traces to this branch)
 
-<On accept-flavored verdict:>
-A superseding record was written: <new SF/STENT/SREL/DA id> at `_source/<class>/<new-id>.yaml` adding `promoted_to_cf: CF-NNNN`. For `arc_effect_promotion`, the superseder also adds `promoted_via_arc`, `promoted_via_variant`, and `promoted_via_effect_index`; the reusable SLT arc template is not superseded. Story-local truth and world-level truth are tracked separately even after promotion; the link is recorded, not erased.
+## Analyses
 
-<On non-accept (REVISE_AND_RESUBMIT, REJECT, firewall-reject, user-reject):>
-No superseding record was written. The story-local source remains unchanged.
+### Scope-inflation report
 
-## Mandatory critic verdicts (Phase 7)
+- **Source actual scope**: `<derived geographic / temporal / social>`
+- **Candidate proposed scope**: `<candidate geographic / temporal / social>`
+- **Widening applied**: <none | named widening>
+- **Scope argument**: <user-supplied rationale, if any>
+- **Trace count**: <integer; for hard-canon Rule 12 anticipation>
+- **Flags**: <list, if any>
 
-- Provenance: <PASS | FAIL — rationale>
-- Scope-Inflation: <PASS | FAIL — rationale>
-- Mystery-Firewall: <PASS | FAIL — rationale>
-- Downstream-Impact: <PASS | FAIL — rationale>
-- Rule 12 Two-Trace: <PASS | FAIL | N/A — rationale>
+### Mystery firewall report
 
-## canon-addition adjudication summary
+- **Mysteries scanned**: <count>
+- **Firewall verdict**: <PASS | REQUIRES_USER_ACCEPTANCE>
+- **Forbidden resolution attempts**: <list, or none>
+- **Accidental resolution warnings**: <list, or none>
+- **Counterfactual promotion attempts**: <list, or none>
+- **Source-kind mismatch warnings**: <list, or none>
 
-<Free-form summary of canon-addition's verdict and rationale, copied from PA-NNNN's body_markdown # Verdict + # Justification sections. Cross-reference to the full PA at `worlds/<slug>/adjudications/PA-NNNN-<verdict>.md`.>
+### Downstream impact report
 
-<On firewall-reject or user-reject before canon-addition handoff: state "Not handed to canon-addition — rejected at <Phase 4 firewall | Phase 8 user> with reason: <reason>.">
+- **World domains affected**: <comma-separated list>
+- **Same-story contradictory branches**: <list of BR-NNNN>
+- **Cross-story contradictions**: <list of sibling_story_slug:record_id>
+- **Affected world files**: <list>
+- **Promotion provenance narrative**: <one-paragraph explanation>
 
-## Notes
+## Contradiction preference
 
-<Free-form rationale, user-provided context for the promotion, follow-up audit recommendations (e.g., "branching-story-health-audit recommended after this promotion to verify no other branches developed unflagged contradictions").>
+`<flag | archive_same_story_branches | leave_counterfactual>` — `story-promotion-closeout` will apply this preference after `canon-addition` adjudicates.
+
+## User acceptances at HARD-GATE
+
+- **Warnings accepted**: <list of warning ids, or none>
+- **Prose-receipt failures accepted**: <list of (page_id, receipt verdict, acceptance rationale), or none>
+
+## Recommended next step
+
+Run `canon-addition` with `proposal_path=<proposal_package_path>`. After canon-addition emits its adjudication verdict (accept / accept_with_limits / reject / defer), run `story-promotion-closeout` with the verdict + this `promotion_id` to write the verdict back onto story-local records.

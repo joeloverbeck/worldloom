@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-belief.schema.json",
+  "type": "object",
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "holder",
+    "claim",
+    "truth_relation",
+    "confidence",
+    "visibility",
+    "basis",
+    "consequences"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^BEL-[0-9]{4}$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]{4}$" },
+    "supersedes": {
+      "type": ["string", "null"],
+      "pattern": "^BEL-[0-9]{4}$"
+    },
+    "holder": {
+      "type": "string",
+      "pattern": "^(STENT-[0-9]{4}|group:[A-Za-z0-9 _:-]+|public|narrator)$"
+    },
+    "claim": { "type": "string", "minLength": 1 },
+    "truth_relation": {
+      "enum": ["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual"]
+    },
+    "confidence": {
+      "enum": ["certain", "likely", "suspected", "rumor", "performative_lie"]
+    },
+    "visibility": {
+      "enum": ["private", "shared", "public", "concealed", "suppressed"]
+    },
+    "basis": {
+      "type": "object",
+      "required": ["source_event"],
+      "properties": {
+        "source_event": { "type": "string", "pattern": "^SE-[0-9]{4}$" }
+      },
+      "additionalProperties": false
+    },
+    "consequences": {
+      "type": "object",
+      "required": ["opens", "constrains_choices"],
+      "properties": {
+        "opens": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(OBL|THR|CNSQ)-[0-9]{4}$" }
+        },
+        "constrains_choices": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^CHC-[0-9]{4}$" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

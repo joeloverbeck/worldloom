@@ -6,7 +6,6 @@ import test from "node:test";
 import yaml from "js-yaml";
 
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
-import { RECORD_TYPE_TO_SCHEMA, STRUCTURAL_NODE_TYPES } from "../../src/structural/utils.js";
 import { context, record } from "./helpers.js";
 
 test("record_schema_compliance accepts v2 scene-commitment storylets", async () => {
@@ -118,40 +117,6 @@ test("record_schema_compliance rejects scene-commitment choices with empty likel
   )));
 });
 
-test("record_schema_compliance accepts ARC_TRACE records and exposes structural registration", async () => {
-  const result = await recordSchemaCompliance.run({}, context([arcTraceRecord(completeArcTrace())]));
-
-  assert.deepEqual(result, []);
-  assert.equal(RECORD_TYPE_TO_SCHEMA.arc_trace_record, "story-arc-trace");
-  assert.ok((STRUCTURAL_NODE_TYPES as readonly string[]).includes("arc_trace_record"));
-});
-
-test("record_schema_compliance rejects ARC_TRACE records with malformed evidence spans", async () => {
-  const parsed = completeArcTrace();
-  (parsed.effect_evidence as Record<string, unknown>[])[0]!.evidence_span = { start: -1, end: 100 };
-
-  const result = await recordSchemaCompliance.run({}, context([arcTraceRecord(parsed)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.location.node_id === "ARCTRACE-0001" &&
-    verdict.code === "record_schema_compliance.minimum" &&
-    verdict.message.includes("/effect_evidence/0/evidence_span/start")
-  )));
-});
-
-test("record_schema_compliance rejects ARC_TRACE records missing semantic critic verdict", async () => {
-  const parsed = completeArcTrace();
-  delete parsed.semantic_critic_verdict;
-
-  const result = await recordSchemaCompliance.run({}, context([arcTraceRecord(parsed)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.location.node_id === "ARCTRACE-0001" &&
-    verdict.code === "record_schema_compliance.required" &&
-    verdict.message.includes("semantic_critic_verdict")
-  )));
-});
-
 function completeStorylet(): Record<string, unknown> {
   return yaml.load(readFixture("story-storylet-complete.yaml"), { schema: yaml.JSON_SCHEMA }) as Record<string, unknown>;
 }
@@ -196,59 +161,6 @@ function completeChoice(): Record<string, unknown> {
   };
 }
 
-function completeArcTrace(): Record<string, unknown> {
-  return {
-    id: "ARCTRACE-0001",
-    story_id: "STORY-001",
-    created_at_page: "PG-0002",
-    arc_realized: "SLT-0001",
-    effect_variant_applied: "partial-repair",
-    realized_beats: [
-      {
-        beat_id: "B1",
-        function: "offer-help",
-        evidence_span: { start: 0, end: 24 },
-        realized: "true"
-      }
-    ],
-    observed_actions: [
-      {
-        actor: "STENT-0001",
-        action: "offers-help",
-        target: "STENT-0002",
-        evidence_span: { start: 0, end: 24 }
-      }
-    ],
-    observed_claims: [
-      {
-        claim: "The offer was made without coercion.",
-        source: "inference",
-        canon_status: "story_local",
-        evidence_span: { start: 0, end: 24 }
-      }
-    ],
-    possible_violations: [],
-    stop_condition_hit: {
-      id: "help-accepted",
-      category: "normal_exit",
-      evidence_span: { start: 10, end: 24 }
-    },
-    effect_evidence: [
-      {
-        effect_ref: 0,
-        realized: "true",
-        evidence_span: { start: 0, end: 24 }
-      }
-    ],
-    semantic_critic_verdict: {
-      status: "pass",
-      reasons: [],
-      required_revision_constraints: []
-    },
-    notes: "Trace fixture."
-  };
-}
-
 function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "SLT-0001")) {
   return record("storylet_record", id, `stories/red-bunny/_source/storylets/${id}.yaml`, {
     ...parsed,
@@ -258,13 +170,6 @@ function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?
 
 function choiceRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "CHC-0001")) {
   return record("choice_record", id, `stories/red-bunny/_source/choices/${id}.yaml`, {
-    ...parsed,
-    id
-  });
-}
-
-function arcTraceRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "ARCTRACE-0001")) {
-  return record("arc_trace_record", id, `stories/red-bunny/_source/arc-traces/${id}.yaml`, {
     ...parsed,
     id
   });

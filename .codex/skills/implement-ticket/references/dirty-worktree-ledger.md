@@ -46,6 +46,8 @@ When a file is already dirty before the run and the active ticket also needs to 
 
 When a same-seam file lives under a path that was already untracked at initial snapshot, normal `git diff` and path-specific tracked diffs will not show its content. Re-read the file directly, or use an explicit no-index/status-aware inspection, before and after editing. Classify the path as `pre-existing untracked same-seam` and distinguish the active ticket's hunks from the pre-existing untracked directory or sibling-ticket work; do not describe the whole untracked directory as newly created by the active ticket unless this run created it.
 
+If the active ticket edits an already-untracked skill directory, ticket file, template, or same-seam docs path, carry that classification through to closeout instead of collapsing it into `new/untracked owned files`. Final wording should name the path as `pre-existing untracked same-seam` and summarize only the hunks or topics changed by the active ticket.
+
 When the active ticket file itself was already untracked at the initial snapshot, do not rely on `git diff`, `git diff --stat`, or path-specific tracked diffs to verify closeout content. Use direct file reads plus `git status --short` to confirm the ticket remains present, updated, and correctly classified as `pre-existing untracked same-seam`.
 
 ## Mid-Run Changes
@@ -75,3 +77,5 @@ Do not silently attribute same-family sibling work to the active ticket just bec
 ## Ignored Artifacts
 
 For package/tool tickets, run an ignored-aware targeted status check for affected package directories before the first package command likely to create ignored artifacts and again before final response. Classify `node_modules/`, `dist/`, coverage output, caches, compiled tests, secret files, and rebuilt indexes as pre-existing, expected generated artifacts, cleaned state, or unexpected fallout.
+
+When the tracked worktree is otherwise clean for the active ticket but the affected package already has ignored artifacts, keep the final wording explicit about provenance and refresh behavior. Example: `Pre-existing ignored package artifacts: tools/world-mcp/.secret, tools/world-mcp/node_modules/; expected ignored generated artifact: tools/world-mcp/dist/ refreshed by npm run build / npm test; left in place.`

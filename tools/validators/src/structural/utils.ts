@@ -30,7 +30,7 @@ export const STRUCTURAL_NODE_TYPES = [
   "page_record",
   "choice_record",
   "storylet_record",
-  "arc_trace_record",
+  "belief_record",
   "story_diegetic_artifact_record"
 ] as const;
 
@@ -91,7 +91,7 @@ export const RECORD_TYPE_TO_SCHEMA: Readonly<Record<string, string>> = {
   page_record: "story-page",
   choice_record: "story-choice",
   storylet_record: "story-storylet",
-  arc_trace_record: "story-arc-trace",
+  belief_record: "story-belief",
   story_diegetic_artifact_record: "story-diegetic-artifact"
 };
 
@@ -282,8 +282,8 @@ function isStructuralAuthorityRecord(record: IndexedRecord): boolean {
   if (record.node_type === "storylet_record") {
     return /^stories\/[^/]+\/_source\/storylets\/SLT-\d+\.yaml$/.test(filePath);
   }
-  if (record.node_type === "arc_trace_record") {
-    return /^stories\/[^/]+\/_source\/arc-traces\/ARCTRACE-\d+\.yaml$/.test(filePath);
+  if (record.node_type === "belief_record") {
+    return /^stories\/[^/]+\/_source\/beliefs\/BEL-\d+\.yaml$/.test(filePath);
   }
   if (record.node_type === "story_diegetic_artifact_record") {
     return /^stories\/[^/]+\/_source\/artifacts\/DA-\d+\.yaml$/.test(filePath);

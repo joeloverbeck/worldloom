@@ -126,6 +126,8 @@ Decision rule:
 - if the reviewed ticket's owned invariant is complete but a broader shared proof surface is stale because adjacent family work changed the contract, archive the reviewed ticket and create a separate bounded follow-up instead of treating the stale proof lane as unfinished owned work
 - if downstream tickets depend on a user-owned commit, release, manual approval, or other post-review gate that the reviewed ticket intentionally did not perform, update those dependency chains to name both the archived/completed ticket state and the remaining user-owned gate
 
+When the completed ticket's closeout names a cheap broad proof lane as failing out of scope, rerun that lane or directly inspect its current failure output before drafting a follow-up, unless it is expensive, flaky, destructive, or outside the review boundary. The follow-up should cite the current failure surface and count/classes when available, not only the completed ticket's older deviation note.
+
 When a new follow-up depends on the reviewed ticket's completed state, decide that the follow-up is warranted before archival, then draft or finalize it after the archive move so `Deps` and evidence can truthfully point at `archive/tickets/...`.
 
 If the review confirms archival readiness after the review-surface audit and follow-up/blocker decision, follow `docs/archival-workflow.md` exactly:
@@ -145,9 +147,10 @@ Before creating a new ticket:
 2. inspect nearby active specs or plans only if the completed ticket changed their live assumptions unambiguously
 3. confirm the concern is not already owned elsewhere
 4. decide the ticket family from the concern's owning boundary, not only from the reviewed ticket's family. If a SPEC-14 review exposes a patch-engine bug, for example, inspect the patch-engine ticket/spec family and create the follow-up there instead of defaulting to the reviewed ticket prefix.
-5. scan active and archived ticket IDs in both the reviewed family and the concern-owning family before choosing the follow-up ID
-6. use the next non-colliding append-only ID in the concern-owning family, and record any gap, collision, or cross-family handoff reason in the ticket or report when it affects handoff clarity
-7. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
+5. inspect active tickets/specs/plans first for same-seam ownership, then scan active and archived ticket filenames/headers in both the reviewed family and the concern-owning family before choosing the follow-up ID
+6. avoid broad archived-ticket body searches by default; inspect archived ticket bodies only with narrow patterns when you need evidence that a surface previously worked or previously carried a different truthful status
+7. use the next non-colliding append-only ID in the concern-owning family, and record any gap, collision, or cross-family handoff reason in the ticket or report when it affects handoff clarity
+8. if the concern is a regression in a shared proof surface or family-wide workflow lane, archived sibling tickets may be inspected as evidence that the surface previously worked or previously carried a different truthful status
 
 ### 6. Author follow-up tickets
 

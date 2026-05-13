@@ -224,10 +224,10 @@ export const ID_CLASSES = [
   "SP",
   "EPE",
   "STORY",
-  "ARCTRACE",
   "PG",
   "SE",
   "SF",
+  "BEL",
   "OBL",
   "CNSQ",
   "THR",
@@ -372,7 +372,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record_schema",
-    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type, including schema-backed story-bundle node types such as arc_trace_node.",
+    "get_record_schema: Return the validator JSON Schema and referenced schemas for a record node type, including schema-backed story-bundle node types such as belief_record.",
     getRecordSchemaInputSchema,
     async (args) => getRecordSchema(args as unknown as Parameters<typeof getRecordSchema>[0]),
     { node_type: SUPPORTED_RECORD_SCHEMA_NODE_TYPES }

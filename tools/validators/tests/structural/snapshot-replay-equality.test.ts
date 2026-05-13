@@ -28,9 +28,7 @@ const parentSnapshot = {
   objects_in_scope: [],
   inventory_by_entity: {},
   entity_status: {},
-  applied_effect_variant: null,
-  arc_trace_emitted: false,
-  arc_trace_id: null
+  applied_effect_variant: null
 };
 
 const nextSnapshot = {
@@ -40,13 +38,51 @@ const nextSnapshot = {
   threads_active: ["THR-0002"],
   relationships_current: ["SREL-0002"],
   intentions_current: ["STINT-0002"],
-  applied_effect_variant: "useful-lie",
-  arc_trace_emitted: false,
-  arc_trace_id: null
+  applied_effect_variant: "useful-lie"
 };
 
 test("snapshot_replay_equality passes for a clean page-cycle envelope", async () => {
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(nextSnapshot, "hash-next"), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality compares active_records snapshots with BEL entries", async () => {
+  const activeRecordsSnapshot = {
+    active_records: {
+      BEL: ["BEL-0001"]
+    }
+  };
+  const verdicts = await snapshotReplayEquality.run(undefined, context([
+    record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
+      id: "PG-0001",
+      story_id: "STORY-001",
+      state_snapshot: activeRecordsSnapshot,
+      state_hash: "hash-parent"
+    }),
+    record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
+      id: "SE-0002",
+      story_id: "STORY-001",
+      ops: [],
+      state_hash_after: "hash-next"
+    }),
+    record("belief_record", "test-story:BEL-0001", "stories/test-story/_source/beliefs/BEL-0001.yaml", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
+    record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", {
+      id: "PG-0002",
+      story_id: "STORY-001",
+      parent_page_id: "PG-0001",
+      applied_event_ops: ["SE-0002"],
+      state_snapshot: activeRecordsSnapshot,
+      state_hash: "hash-next"
+    })
+  ], {
     run_mode: "pre-apply",
     patch_plan: patchPlan()
   }));
@@ -71,9 +107,7 @@ test("snapshot_replay_equality emits field-level drift details", async () => {
 test("snapshot_replay_equality ignores only workflow-stamped state_snapshot fields", async () => {
   const workflowStamped = {
     ...nextSnapshot,
-    applied_effect_variant: "different-workflow-stamp",
-    arc_trace_emitted: true,
-    arc_trace_id: "ARCTRACE-0002"
+    applied_effect_variant: "different-workflow-stamp"
   };
 
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(workflowStamped, "hash-next"), {

@@ -93,15 +93,8 @@ function queryRows(
   const predicates = ["world_slug = ?"];
   const params: unknown[] = [worldSlug];
   if (recordType !== undefined) {
-    // Indexer stores ARCTRACE rows under node_type "arc_trace_node" (per
-    // tools/world-index/src/parse/atomic.ts and migration 005); validators,
-    // schemas, and MCP retrieval use the canonical "arc_trace_record".
-    // Translate at the DB boundary so the validator's typed query matches
-    // on-disk rows; mirrors the existing mapping in
-    // tools/world-mcp/src/tools/list-records.ts.
-    const dbNodeType = recordType === "arc_trace_record" ? "arc_trace_node" : recordType;
     predicates.push("node_type = ?");
-    params.push(dbNodeType);
+    params.push(recordType);
   }
   if (storySlug !== undefined && storySlug !== null && hasStorySlug) {
     predicates.push("story_slug = ?");
@@ -186,7 +179,7 @@ const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: s
   create_pg_record: { nodeType: "page_record", sourceDir: "pages" },
   create_chc_record: { nodeType: "choice_record", sourceDir: "choices" },
   create_slt_record: { nodeType: "storylet_record", sourceDir: "storylets" },
-  create_arc_trace_record: { nodeType: "arc_trace_record", sourceDir: "arc-traces" },
+  create_bel_record: { nodeType: "belief_record", sourceDir: "beliefs" },
   append_story_diegetic_artifact_record: { nodeType: "story_diegetic_artifact_record", sourceDir: "artifacts" }
 };
 

@@ -18,7 +18,7 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
 
     const result = await withRepoRoot(root, () =>
       assembleContextPacket({
-        task_type: "storylet_pool_authoring",
+        task_type: "commitment_block_authoring",
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,
         seed_nodes: ["entity:marla-kern"],

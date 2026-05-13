@@ -7,7 +7,7 @@ import {
   stringValue
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
 
 const ARRAY_FIELDS = [
   "objective_facts",
@@ -52,22 +52,31 @@ export const stateSnapshotIntegrity: Validator = {
       const snapshot = asPlainRecord(parsed.state_snapshot);
       const pageLabel = pageId(parsed);
       const maps = recordMapForStory(records, page.story_slug ?? null);
+      const activeRecords = asPlainRecord(snapshot.active_records);
 
-      for (const field of ARRAY_FIELDS) {
-        if (!Array.isArray(snapshot[field])) {
-          verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.${field}`, "must be present as an array"));
+      if (Object.keys(activeRecords).length > 0) {
+        for (const [recordClass, ids] of Object.entries(activeRecords)) {
+          if (!Array.isArray(ids)) {
+            verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.active_records.${recordClass}`, "must be present as an array"));
+          }
         }
-      }
-
-      for (const field of OBJECT_FIELDS) {
-        if (!isPlainRecord(snapshot[field])) {
-          verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.${field}`, "must be present as an object"));
+      } else {
+        for (const field of ARRAY_FIELDS) {
+          if (!Array.isArray(snapshot[field])) {
+            verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.${field}`, "must be present as an array"));
+          }
         }
-      }
 
-      const currentLocation = stringValue(snapshot.current_location);
-      if (currentLocation === undefined) {
-        verdicts.push(missingOrMalformed(page, pageLabel, "state_snapshot.current_location", "must be a non-empty STLOC id"));
+        for (const field of OBJECT_FIELDS) {
+          if (!isPlainRecord(snapshot[field])) {
+            verdicts.push(missingOrMalformed(page, pageLabel, `state_snapshot.${field}`, "must be present as an object"));
+          }
+        }
+
+        const currentLocation = stringValue(snapshot.current_location);
+        if (currentLocation === undefined) {
+          verdicts.push(missingOrMalformed(page, pageLabel, "state_snapshot.current_location", "must be a non-empty STLOC id"));
+        }
       }
 
       for (const reference of storyLocalReferences(snapshot, "state_snapshot")) {

@@ -396,6 +396,11 @@ test("registered tools dispatch with either a success payload or the documented 
       },
       {
         name: MCP_TOOL_NAMES.allocate_next_id,
+        args: { world_slug: "seeded", id_class: "BEL", story_slug: "opening-bells" },
+        expectError: false
+      },
+      {
+        name: MCP_TOOL_NAMES.allocate_next_id,
         args: { world_slug: "seeded", id_class: "SLB", story_slug: "opening-bells" },
         expectError: false
       },
@@ -494,15 +499,36 @@ test("missing required inputs fail at the MCP validation boundary", async () => 
   });
 });
 
+test("legacy story task types fail at the MCP validation boundary", async () => {
+  await withServerClient(async (client) => {
+    for (const taskType of ["story_page_cycle", "storylet_pool_authoring"]) {
+      const result = (await client.callTool({
+        name: MCP_TOOL_NAMES.get_context_packet,
+        arguments: {
+          task_type: taskType,
+          world_slug: "seeded",
+          story_slug: "opening-bells",
+          seed_nodes: ["CF-0001"]
+        }
+      })) as any;
+
+      assert.equal(result.isError, true);
+      assert.match(textContent(result), /invalid/i);
+    }
+  });
+});
+
 test("unsupported id classes fail at the MCP validation boundary", async () => {
   await withServerClient(async (client) => {
-    const result = await client.callTool({
-      name: MCP_TOOL_NAMES.allocate_next_id,
-      arguments: { world_slug: "seeded", id_class: "NOT_A_CLASS" }
-    });
+    for (const idClass of ["NOT_A_CLASS", "ARCTRACE"]) {
+      const result = await client.callTool({
+        name: MCP_TOOL_NAMES.allocate_next_id,
+        arguments: { world_slug: "seeded", id_class: idClass, story_slug: "opening-bells" }
+      });
 
-    assert.equal(result.isError, true);
-    assert.match(textContent(result), /invalid/i);
+      assert.equal(result.isError, true);
+      assert.match(textContent(result), /invalid/i);
+    }
   });
 });
 
@@ -628,6 +654,19 @@ test("story-scoped id_class dispatches through the MCP boundary", async () => {
     assert.notEqual(result.isError, true);
     const structured = result.structuredContent as { next_id?: string };
     assert.equal(structured.next_id, "PG-0004");
+  });
+});
+
+test("BEL id_class dispatches through the MCP boundary", async () => {
+  await withServerClient(async (client) => {
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "BEL", story_slug: "opening-bells" }
+    });
+
+    assert.notEqual(result.isError, true);
+    const structured = result.structuredContent as { next_id?: string };
+    assert.equal(structured.next_id, "BEL-0001");
   });
 });
 
@@ -931,12 +970,12 @@ test("describe_capabilities dispatches through the MCP boundary with no argument
     assert.ok(
       byName
         .get(MCP_TOOL_NAMES.get_context_packet)
-        ?.input_schema_enums?.task_type?.includes("story_page_cycle")
+        ?.input_schema_enums?.task_type?.includes("story_turn_cycle")
     );
     assert.ok(
       byName
         .get(MCP_TOOL_NAMES.get_context_packet)
-        ?.input_schema_enums?.task_type?.includes("storylet_pool_authoring")
+        ?.input_schema_enums?.task_type?.includes("commitment_block_authoring")
     );
     assert.ok(
       byName

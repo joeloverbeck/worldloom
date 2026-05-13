@@ -46,9 +46,6 @@ const NAMED_RULE_SELECTORS = new Set([
   "choice_worthiness_completeness",
   "effect_model_legality",
   "effect_model_replay_safety",
-  "arc_trace_evidence_alignment",
-  "narrative_point_classification",
-  "arc_envelope_conformance",
   "stop_policy_parsability",
   "storylet_predicate_dsl_parsability"
 ]);
@@ -200,12 +197,8 @@ export function buildReadSurface(db: Database.Database, worldSlug: string): Worl
       const params: unknown[] = [worldSlug];
 
       if (record_type) {
-        // Indexer stores ARCTRACE rows under node_type "arc_trace_node" while
-        // validators, schemas, and MCP retrieval use "arc_trace_record".
-        // Keep full-world CLI reads aligned with the pre-apply read surface.
-        const dbNodeType = record_type === "arc_trace_record" ? "arc_trace_node" : record_type;
         predicates.push("node_type = ?");
-        params.push(dbNodeType);
+        params.push(record_type);
       }
       if (hasStorySlug && story_slug) {
         predicates.push("story_slug = ?");

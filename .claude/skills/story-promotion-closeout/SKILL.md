@@ -1,0 +1,365 @@
+---
+name: story-promotion-closeout
+description: "Use when closing a story promotion after canon-addition has adjudicated the proposal package. Records the verdict on story-local records via supersession (accepted-flavored), rejection markers (rejected), or deferral notes (deferred). Produces: superseding SF/BEL/STENT/SREL/DA/BR records via patch engine + SP-NNNN-closeout.md ledger + bundle INDEX.md update + conditional per-world stories/INDEX.md update on archive + optional SE-NNNN closeout event. Mutates: only worlds/<world_slug>/stories/<story_slug>/ plus optionally worlds/<world_slug>/stories/INDEX.md when same_story_branch_handling: archive."
+user-invocable: true
+arguments:
+  - name: world_slug
+    description: "Existing world directory slug under worlds/"
+    required: true
+  - name: story_slug
+    description: "Existing story bundle slug under worlds/<world_slug>/stories/"
+    required: true
+  - name: promotion_id
+    description: "SP-NNNN of the source promotion (whose proposal package was previously written by story-fact-promotion-to-canon)"
+    required: true
+  - name: canon_addition_verdict
+    description: "accepted | accepted_with_limits | rejected | deferred. The verdict canon-addition emitted on the proposal package."
+    required: true
+  - name: linked_cf_ids
+    description: "List of CF-NNNN ids canon-addition created (or modified). Required when verdict is accepted-flavored; ignored otherwise."
+    required: false
+  - name: linked_ch_ids
+    description: "List of CH-NNNN (Change Log) ids canon-addition created. Required when verdict is accepted-flavored; ignored otherwise."
+    required: false
+  - name: linked_pa_ids
+    description: "List of PA-NNNN (Adjudication) ids canon-addition created. Required when verdict is accepted-flavored; ignored otherwise."
+    required: false
+  - name: same_story_branch_handling
+    description: "none | flag | archive. Default: derive from the proposal package's contradiction_preference. Limits branch-handling to same-story branches only."
+    required: false
+  - name: affected_branch_ids
+    description: "List of BR-NNNN to apply same_story_branch_handling to. Default: enumerate from the proposal package's downstream_impact_report.same_story_contradictory_branches."
+    required: false
+  - name: notes
+    description: "Natural-language closeout notes captured in the SP-NNNN-closeout.md ledger."
+    required: false
+  - name: emit_closeout_event
+    description: "true | false. Default false. When true, emit one SE-NNNN with event_kind: promotion_closeout."
+    required: false
+---
+
+# Story Promotion Closeout
+
+Close a story promotion after canon-addition has adjudicated — record the verdict on story-local records via supersession (accepted-flavored), rejection markers (rejected), or deferral note (deferred); never mutate world canon.
+
+<HARD-GATE>
+Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-closeout.md`, update bundle `INDEX.md`, or update per-world `stories/INDEX.md`, until:
+
+(a) Pre-flight Check has completed: bundle resolved; `SP-NNNN-proposal-package.yaml` + `SP-NNNN.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified at `worlds/<world_slug>/_source/canon/`, `worlds/<world_slug>/_source/change-log/`, `worlds/<world_slug>/adjudications/`; supersession ids allocated per source_records count + optional SE id allocated.
+
+(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; supersession count matches proposal package source_records inventory); `SP-NNNN-closeout.md` ledger drafted (Phase 4).
+
+(c) Phase 3 validation passed across all 6 gates.
+
+(d) The user has explicitly approved the deliverable summary (verdict + linked-records inventory; per-source-record supersession plan; branch-handling actions per `affected_branch_ids`; optional SE event preview; closeout ledger preview).
+
+This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
+</HARD-GATE>
+
+## Process Flow
+
+```
+Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle +
+  SP-NNNN-proposal-package.yaml + SP-NNNN.md ledger; verify verdict-
+  linked CF / CH / PA records exist; allocate supersession ids +
+  optional SE id)
+        |
+        v
+Phase 1: Load promotion package + canon-addition verdict context
+                                   (read-only linked CF / CH / PA refs)
+        |
+        v
+Phase 2: Determine story-local effects per verdict
+                                   (verdict-specific supersession pattern)
+        |
+        v
+Phase 3: Validate (6 gates: no world canon mutation; linked-records
+                  exist; branch-handling same-story; supersedes used;
+                  rejected preserves history; supersession count matches)
+        |
+        v
+Phase 4: Author SP-NNNN-closeout.md ledger
+        |
+        v
+Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
+                                   optional create_se_record)
+                          + SP-NNNN-closeout.md write
+                          + bundle INDEX.md update
+                          + conditional per-world stories/INDEX.md
+                            update on archive
+```
+
+## Inputs
+
+### Required
+
+- `world_slug` — string — existing world directory slug under `worlds/`
+- `story_slug` — string — existing story bundle slug under `worlds/<world_slug>/stories/`
+- `promotion_id` — `SP-NNNN` — source promotion id
+- `canon_addition_verdict` — enum — `accepted | accepted_with_limits | rejected | deferred`
+
+### Conditionally required (on accepted-flavored verdicts: `accepted | accepted_with_limits`)
+
+- `linked_cf_ids` — list[CF-NNNN] — canon-addition's CF outputs
+- `linked_ch_ids` — list[CH-NNNN] — canon-addition's Change Log outputs
+- `linked_pa_ids` — list[PA-NNNN] — canon-addition's Adjudication outputs
+
+### Optional
+
+- `same_story_branch_handling` — enum — `none | flag | archive`. Default: derive from proposal package's `contradiction_preference`.
+- `affected_branch_ids` — list[BR-NNNN] — branches to apply `same_story_branch_handling`. Default: enumerate from proposal package's `downstream_impact_report.same_story_contradictory_branches`.
+- `notes` — string — closeout notes captured in the ledger.
+- `emit_closeout_event` — `true | false`. Default `false`. Emits one `SE-NNNN` with `event_kind: promotion_closeout`.
+
+## Output
+
+| Class | File path | Created when |
+|---|---|---|
+| `SF-NNNN` (supersession) | `_source/facts/SF-NNNN.yaml` | IF verdict ∈ {accepted, accepted_with_limits, rejected} AND proposal contains SF source records |
+| `BEL-NNNN` (supersession) | `_source/beliefs/BEL-NNNN.yaml` | IF belief witnesses need canon-aware updates (accepted-flavored) OR rejection-disposition note (rejected, conditional on `notes`) |
+| `STENT-NNNN` (supersession) | `_source/entities/STENT-NNNN.yaml` | IF `source_kind: character_outcome` AND verdict accepted-flavored |
+| `SREL-NNNN` (supersession) | `_source/relationships/SREL-NNNN.yaml` | IF `source_kind: relationship_or_institutional_outcome` AND verdict accepted-flavored |
+| `DA-NNNN` (supersession) | `_source/artifacts/DA-NNNN.yaml` | IF `source_kind: artifact_canonization` AND verdict accepted-flavored (uses `append_story_diegetic_artifact_record`) |
+| `BR-NNNN` (supersession) | `_source/branches/BR-NNNN.yaml` | IF `same_story_branch_handling ∈ {flag, archive}` (one per branch in `affected_branch_ids`) |
+| `SE-NNNN` | `_source/events/SE-NNNN.yaml` | IF `emit_closeout_event: true` (single record with `event_kind: promotion_closeout`) |
+| `SP-NNNN-closeout.md` | `story-promotions/SP-NNNN-closeout.md` | Always (closeout ledger; companion to original SP-NNNN.md which stays unchanged) |
+| Bundle `INDEX.md` | `INDEX.md` | Always (updated last) |
+| Per-world stories INDEX | `worlds/<world_slug>/stories/INDEX.md` | IF `same_story_branch_handling: archive` (archived branch status reflected) |
+
+All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/<world_slug>/_source/<world-subdir>/*.yaml`. The original `SP-NNNN.md` ledger stays unchanged as the historical proposal-time record.
+
+## World-State Prerequisites
+
+Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
+
+- `docs/FOUNDATIONS.md` — §Story Bundles §11 (mystery and canon authority), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, BR, SE — all classes that may be superseded), §10 shared write order, §11 mystery and canon authority
+- `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-proposal-package.yaml` — source of truth for the promotion's `source_records` / `source_kind` / `branch_path` / `contradiction_preference` / `downstream_impact_report`
+- `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN.md` — original ledger (read-only; cross-referenced in closeout ledger)
+- `worlds/<world_slug>/_source/canon/CF-NNNN.yaml` (each linked CF) — read-only world-canon reference
+- `worlds/<world_slug>/_source/change-log/CH-NNNN.yaml` (each linked CH) — read-only Change Log Entry citation for Rule 6 audit-trail
+- `worlds/<world_slug>/adjudications/PA-NNNN-*.md` (each linked PA) — read-only adjudication record
+- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` for each source record from the proposal package
+
+The bundle MUST exist; SP-NNNN proposal package + ledger MUST exist; on accepted-flavored verdicts, every linked CF / CH / PA MUST exist (Pre-flight aborts with linked-record-not-found error otherwise — this prevents recording a fake canon-addition outcome).
+
+## Pre-flight Check
+
+Before Phase 1:
+
+1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context.
+2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found on miss.
+3. Load `story-promotions/SP-NNNN-proposal-package.yaml` and `story-promotions/SP-NNNN.md`. Verify the package's `promotion_id` matches the `promotion_id` argument. Abort with promotion-not-found or promotion-id-mismatch error on miss.
+4. Validate `canon_addition_verdict`: must be one of `accepted | accepted_with_limits | rejected | deferred`. On accepted-flavored verdicts, validate that `linked_cf_ids`, `linked_ch_ids`, `linked_pa_ids` are all supplied + non-empty.
+5. On accepted-flavored verdicts: verify each `linked_cf_ids` entry resolves to `worlds/<world_slug>/_source/canon/CF-NNNN.yaml`; each `linked_ch_ids` entry resolves to `worlds/<world_slug>/_source/change-log/CH-NNNN.yaml`; each `linked_pa_ids` entry resolves to a `worlds/<world_slug>/adjudications/PA-NNNN-*.md` file. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
+6. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)`:
+   - One id per superseding record (count determined by source_records inventory + branch-handling count).
+   - One `SE-NNNN` when `emit_closeout_event: true`.
+7. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting.
+
+If any precondition fails, the skill aborts before Phase 1.
+
+## Phase 1: Load promotion package + canon-addition verdict context
+
+Load into working memory:
+
+- The `SP-NNNN-proposal-package.yaml` (per Pre-flight step 3).
+- The original `SP-NNNN.md` ledger (for cross-reference in the closeout ledger).
+- On accepted-flavored verdicts: each linked CF record (`worlds/<world_slug>/_source/canon/CF-NNNN.yaml`) + each linked CH record + each linked PA record. **Read-only** — closeout cites these in superseding story-local records but does NOT modify them.
+- All source records from the proposal package: SF / BEL / STENT / SREL / DA per source_kind.
+- The branches in `affected_branch_ids` (for Phase 2 branch-handling decisions).
+
+## Phase 2: Determine story-local effects per verdict
+
+The verdict dictates the supersession pattern:
+
+### `accepted`
+
+The candidate is now world canon. Story-local source records are superseded to carry the canon link:
+
+- Each `SF-NNNN` source → new `SF-NNNN+M` with `supersedes: SF-NNNN`, `promoted_to_cf: CF-NNNN` (from `linked_cf_ids`), `promoted_via_ch: CH-NNNN` (from `linked_ch_ids`), `promoted_via_pa: PA-NNNN` (from `linked_pa_ids`).
+- Each implicated `BEL-NNNN` (whose `truth_relation` should now reflect canon truth) → new BEL with `truth_relation: true` (or other update reflecting canon), `supersedes: <prior BEL id>`, `promoted_via_cf: CF-NNNN`.
+- For `source_kind: artifact_canonization`: new story-local `DA-NNNN+M` with `supersedes: <prior DA id>`, `linked_world_da: <world-level DA id canon-addition created; may be null if canon-addition didn't write a world-level DA>`. Uses the existing `append_story_diegetic_artifact_record` patch op with `expected_id_allocations.story_da_ids`.
+- For `source_kind: character_outcome`: new `STENT-NNNN+M` superseding prior STENT with `promoted_to_cf: CF-NNNN`.
+- For `source_kind: relationship_or_institutional_outcome`: new `SREL-NNNN+M` superseding with `promoted_to_cf: CF-NNNN`.
+
+### `accepted_with_limits`
+
+Same supersession pattern as `accepted`, plus each superseding record includes a `canon_limits: <natural-language description>` field reproducing canon-addition's restrictions (e.g., "accepted only when the claim is qualified as 'under the Marsh-Court's jurisdiction'").
+
+### `rejected`
+
+The candidate is NOT canon. Story-local source records are superseded to mark rejection but preserve the claim as branch-local:
+
+- Each `SF-NNNN` source → new `SF-NNNN+M` with `supersedes: <prior SF id>`, `promotion_rejected: SP-NNNN`, `authority: branch_local_counterfactual` (downgraded if was `canon_candidate`), retaining branch / story scope.
+- Optionally a new `BEL-NNNN` marking the claim as `false | disputed | rumor` when the user's `notes` argument indicates the rejection should manifest in-story.
+- No CF / CH / PA links — no canon-addition outputs to cite.
+
+### `deferred`
+
+Canon-addition didn't decide either way. No supersessions. Closeout records `deferred_at: <iso8601>` + user's `notes` in the ledger.
+
+### Branch-handling (per `same_story_branch_handling`)
+
+- `flag`: new `BR-NNNN+M` superseding each branch in `affected_branch_ids` with `flagged_contradicting: SP-NNNN`.
+- `archive`: new `BR-NNNN+M` with `archived_at: <iso8601>`, `archived_due_to: SP-NNNN`.
+- `none`: no branch supersessions.
+
+## Phase 3: Validate
+
+Run 6 validation gates BEFORE patch submission:
+
+1. **No world-canon mutation attempted** — every op in the patch plan targets `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml`; ZERO ops target `worlds/<world_slug>/_source/<world-subdir>/*.yaml`. Hook 3 enforces structurally; this gate verifies before submission as defense-in-depth.
+
+2. **Accepted-flavored links reference actual canon-addition outputs** — re-verify Pre-flight step 5 (each `linked_cf_ids` / `linked_ch_ids` / `linked_pa_ids` entry resolves to a real file).
+
+3. **Branch-handling actions only affect same-story branches** — when `same_story_branch_handling ∈ {flag, archive}`, every branch in `affected_branch_ids` MUST exist in this bundle's `_source/branches/`. Cross-story branch modifications are forbidden.
+
+4. **Story records superseded append-only** — every superseding record carries `supersedes: <prior-id>`; no in-place structural mutation of prior records.
+
+5. **Rejected outcomes preserve branch-local history** — on `rejected`, source records are superseded (new file with `promotion_rejected` marker), NOT deleted or replaced in-place. The original `SF` / `BEL` / etc. remain on disk.
+
+6. **Verdict-driven supersession count matches the proposal package's source_records inventory** — every source record gets a corresponding supersession (or non-supersession on `deferred`). Missing supersessions for accepted-flavored verdicts indicate the closeout is incomplete; abort.
+
+## Phase 4: Author SP-NNNN-closeout.md ledger
+
+Draft `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-closeout.md`:
+
+```markdown
+---
+promotion_id: SP-NNNN
+canon_addition_verdict: accepted | accepted_with_limits | rejected | deferred
+linked_cf_ids: [<CF-NNNN>]
+linked_ch_ids: [<CH-NNNN>]
+linked_pa_ids: [<PA-NNNN>]
+same_story_branch_handling: none | flag | archive
+affected_branch_ids: [<BR-NNNN>]
+closeout_event: SE-NNNN | null
+closed_at: <iso8601 date>
+---
+
+# SP-NNNN closeout: <verdict>
+
+## Verdict
+
+<canon_addition_verdict> — <one-paragraph narrative explanation>
+
+## Linked canon-addition outputs (accepted-flavored only)
+
+- **CF records**: <CF-NNNN list with one-line title each>
+- **CH records**: <CH-NNNN list>
+- **PA records**: <PA-NNNN list with adjudication-verdict summary>
+
+## Story-local effects applied
+
+<Per superseding record: prior id → new id, with the canon link / rejection marker / deferral note>
+
+## Branch handling
+
+<Per branch in affected_branch_ids: prior status → new status (flagged / archived / unchanged)>
+
+## Notes
+
+<User-supplied notes>
+
+## Recommended next steps
+
+<For accepted: bundle is now canon-aware; turn-cycle reads the superseding records.>
+<For rejected: branch-local counterfactual preserved; no further closeout action required.>
+<For deferred: the promotion remains open; re-run canon-addition when evidence accumulates.>
+```
+
+The original `SP-NNNN.md` ledger stays unchanged as the historical proposal-time record. Sub-class (b) inline template — no separate `templates/` directory needed; the ledger is structurally simple and the inline format suffices.
+
+## Phase 5: Commit / Write — HARD-GATE fires
+
+1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record` (via PEENH-007 inheritance — now landed), `create_stent_record`, `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), `create_br_record` (for branch supersessions), and optionally `create_se_record` (when `emit_closeout_event: true`).
+
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance` (BEL via VALENH-011 inheritance).
+
+3. Present the complete deliverable summary to the user:
+   - `SP-NNNN` id + verdict.
+   - Linked canon-addition outputs (CF / CH / PA records cited with one-line summaries).
+   - Per-source-record supersession plan (prior id → new id, with canon link or rejection marker).
+   - Branch-handling actions per `affected_branch_ids` (flag / archive / none).
+   - Optional SE event preview.
+   - Closeout ledger preview.
+
+4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
+
+5. On approval: obtain patch approval token; submit the patch plan via `mcp__worldloom__submit_patch_plan`.
+
+6. On patch success:
+   - Write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-NNNN-closeout.md` (direct write).
+   - Update bundle `INDEX.md` to reflect closeout entry + branch-status changes.
+   - For `same_story_branch_handling: archive`: update per-world `stories/INDEX.md` to reflect archived branch status. This is the ONLY condition under which the per-world index changes (flag-only or none leave it alone).
+
+7. Report closeout path + supersession inventory + branch-handling actions. Do NOT `git commit`.
+
+**Failure behavior**: Pre-flight failure (missing promotion / missing linked canon-addition records / verdict-record mismatch) → write nothing; surface the missing-reference error. Phase 3 validation failure → write nothing; surface the failed gate. Patch submission failure → write nothing; the verdict is recorded only in user-side state until re-invoked. Partial write success (patch succeeded but markdown failed) → patch is authoritative; closeout ledger can be repaired manually; surface partial-failure.
+
+## Validation Rules This Skill Upholds
+
+- **Rule 4 (No Globalization by Accident)** — Phase 3 gate 3 (branch-handling actions limited to same-story). Mechanism: closeout cannot reach into sibling story bundles or world-canon branches.
+- **Rule 6 (No Silent Retcons)** — Phase 1 + Phase 3 gate 2. Mechanism: closeout reads canon-addition's `CH-NNNN` Change Log Entry (which satisfies Rule 6 at world scope); closeout's story-local supersessions cite the `CH-NNNN` via `promoted_via_ch` so the audit trail is intact end-to-end.
+- **Rule 7 (Preserve Mystery Deliberately)** — N/A at this skill; upstream-enforced at `story-fact-promotion-to-canon` Phase 4 (mystery firewall on the proposal) and at `canon-addition` (mystery-firewall re-check at adjudication). Closeout's Phase 3 gate 2 (linked-records exist) verifies the canon-addition outputs are real, ensuring closeout never cites a fake CF that could have bypassed the firewall.
+
+Rules 1 / 2 / 3 / 5 / 11 / 12 enforced upstream by `canon-addition` at adjudication time. Closeout records the outcome; does not re-enforce.
+
+## Record Schemas
+
+All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
+
+- `SF` (§4), `BEL` (§4.1), `STENT`, `SREL`, `DA`, `BR`, `SE` (§4.3) — record classes that may be superseded.
+
+The `SP-NNNN-closeout.md` ledger schema is defined inline in Phase 4's template (sub-class (b) authored from scratch; no per-skill `templates/` directory needed — the ledger is structurally simple and inline format suffices).
+
+## FOUNDATIONS Alignment
+
+| Principle | Phase | Mechanism |
+|---|---|---|
+| Rule 1 (No Floating Facts) | N/A at this skill | Canon-addition enforced at adjudication. |
+| Rule 2 (No Pure Cosmetics) | N/A at this skill | Canon-addition enforced. |
+| Rule 3 (No Specialness Inflation) | N/A at this skill | Canon-addition enforced. |
+| Rule 4 (No Globalization by Accident) | Phase 3 gate 3 | Branch-handling limited to same-story. |
+| Rule 5 (No Consequence Evasion) | N/A at this skill | Canon-addition vetted consequences at adjudication. |
+| Rule 6 (No Silent Retcons) | Phase 1, Phase 3 gate 2 | Read canon-addition's CH-NNNN; cite via `promoted_via_ch` on supersessions. |
+| Rule 7 (Preserve Mystery Deliberately) | N/A at this skill | Story-fact-promotion-to-canon's firewall ran at proposal time + canon-addition re-checked at adjudication. Closeout's Phase 3 gate 2 verifies linked records exist (defense against fake-verdict invocations). |
+| Rule 11 (No Spectator Castes) | N/A at this skill | Canon-addition enforced. |
+| Rule 12 (No Single-Trace Truths) | N/A at this skill | Canon-addition enforced. |
+| Canon Layers | Phase 1 | Read linked CF records' `status` (5 layer values). |
+| Mystery Reserve | N/A at this skill | Story-fact-promotion-to-canon + canon-addition handled. |
+| §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA / BR, NOT page records. |
+| §Story Bundles §11 (Mystery and Canon Authority) | Phase 2 | On accepted verdicts, story-local SF records gain `promoted_to_cf` + authority updated from `canon_candidate` to canonical. |
+| Change Control Policy | Phase 1, Phase 3 gate 2 | Closeout reads canon-addition's CH Change Log Entry; story-local supersession cites it via `promoted_via_ch`. |
+| Tooling Recommendation | Pre-flight | Linked canon-addition records loaded via direct file reads (CF / CH / PA paths); no `get_context_packet` retrieval needed since closeout works against direct record paths. |
+
+## Guardrails
+
+- **Never mutate world canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. Patch plans target ONLY story-bundle scope + the one authorized per-world `stories/INDEX.md` write on archive. Phase 3 gate 1 verifies before submission as defense-in-depth.
+- **Closeout records the verdict; it does NOT decide.** Canon-addition decided at adjudication; closeout writes back faithfully.
+- **Rejected outcomes preserve branch-local history.** Closeout supersedes (new record file with rejection marker) rather than deleting. Original SF / BEL / etc. remain on disk; supersession adds canon-rejection metadata.
+- **Branch-handling actions only affect same-story branches.** Phase 3 gate 3. Cross-story branch modifications are forbidden; cross-story contradictions belong to `branching-story-health-audit` `cross_story` mode or a separate world-level workflow.
+- **The original SP-NNNN.md ledger stays unchanged.** Closeout writes a NEW `SP-NNNN-closeout.md` companion. This preserves the historical proposal-time record append-only at the markdown layer.
+- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Superseding records add only the canon-link fields (`promoted_to_cf` / `promoted_via_ch` / `promoted_via_pa` / `canon_limits` / `promotion_rejected` / `flagged_contradicting` / `archived_at` / `archived_due_to`); no other extras.
+- **Skills do not chain.** Closeout never invokes `canon-addition` (already ran), `story-fact-promotion-to-canon` (already ran), or any other sibling. The user invokes closeout separately after canon-addition adjudicates.
+- **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
+- **Known integration debt**:
+  - **MCPENH-040** (BEL allocator registration) — Phase 2 supersedes BEL records during accepted-flavored verdicts. Inherited from bootstrap's Shape C rollout.
+  - **PEENH-007** (`create_bel_record` patch op) — Phase 2 + Phase 5 submit BEL supersession ops. **Now landed** (verified during this skill's gap-filler infrastructure audit; the op is present in `tools/patch-engine/src/envelope/schema.ts`).
+  - **VALENH-011** (BEL `record_schema_compliance`) — Phase 5 dry-run exercises BEL validator on each BEL supersession.
+  - **PEENH-008** — Phase 2 + Phase 5 submit DA supersession ops for `source_kind: artifact_canonization` accepted-flavored verdicts. Closeout uses the existing story-local DA op `append_story_diegetic_artifact_record`, which writes `DA-NNNN` records under `_source/artifacts/` and consumes `expected_id_allocations.story_da_ids`.
+  - **MCPENH-041** (task_type rename) — does NOT affect this skill; closeout does not use `get_context_packet` retrieval.
+
+## What is intentionally NOT in this skill
+
+- **No world-canon writes.** Canon-addition already wrote the CF / CH / PA records during adjudication. Closeout reads them as references; never modifies.
+- **No re-enforcement of world-canon rules.** Rules 1 / 2 / 3 / 5 / 6 / 7 / 11 / 12 were enforced upstream (canon-addition at adjudication; story-fact-promotion-to-canon's firewall at proposal time). Closeout assumes those gates already passed.
+- **No re-running of canon-addition.** Closeout consumes the verdict; never re-adjudicates.
+- **No cross-story modifications.** Closeout's branch-handling is bounded to the source bundle.
+- **No mutation of the original SP-NNNN.md ledger.** New closeout ledger is written as a companion file; original is preserved as historical proposal-time record.
+- **No automatic invocation of further siblings.** When closeout completes, the user may want to run `branching-story-health-audit` to verify the bundle's post-closeout state, or `branching-story-turn-cycle` to advance the story now that canon has been updated — but closeout does NOT trigger those automatically.
+
+## Final Rule
+
+This skill records canon-addition's verdict on story-local records — supersedes source records with canon links on accepted-flavored verdicts, with rejection markers on rejected, with no changes on deferred; never mutates world canon, never invokes another skill, and routes every CF / CH / PA reference read-only.
