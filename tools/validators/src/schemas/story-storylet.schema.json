@@ -5,332 +5,191 @@
   "required": [
     "id",
     "story_id",
+    "scope",
     "title",
-    "record_version",
-    "shape",
-    "content_intensity",
-    "hard_preconds",
-    "soft_preconds",
-    "cast_requirements",
-    "location_requirements",
-    "opens_obligations",
-    "pays_off_obligations",
-    "complicates_obligations",
-    "transfers_obligations",
-    "fact_effects",
-    "relationship_effects",
-    "tone_tags",
-    "theme_tags",
-    "tension_delta",
-    "aftermath_weight",
-    "mystery_safety",
-    "provenance",
-    "visibility",
-    "arc_contract",
-    "dramatic_unit",
-    "beat_plan",
-    "execution_envelope",
-    "stop_policy",
-    "effect_model",
-    "exit_portfolio"
+    "move_family",
+    "preconditions",
+    "beats",
+    "exit_options",
+    "saliency",
+    "mystery_policy",
+    "provenance"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^SLT-[0-9]{4}$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]{3,4}$" },
-    "title": { "type": "string", "minLength": 1 },
-    "record_version": { "const": 2 },
-    "shape": { "const": "scene_commitment_arc" },
-    "content_intensity": { "type": "string", "enum": ["tame", "mature", "explicit"] },
-    "hard_preconds": { "type": "array" },
-    "soft_preconds": { "type": "array" },
-    "cast_requirements": { "type": "array" },
-    "location_requirements": { "type": "array" },
-    "opens_obligations": { "type": "array" },
-    "pays_off_obligations": { "type": "array" },
-    "complicates_obligations": { "type": "array" },
-    "transfers_obligations": { "type": "array" },
-    "fact_effects": { "type": "array" },
-    "relationship_effects": { "type": "array" },
-    "tone_tags": { "type": "array" },
-    "theme_tags": { "type": "array" },
-    "tension_delta": { "type": "integer", "minimum": -2, "maximum": 2 },
-    "aftermath_weight": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-    "mystery_safety": {
-      "type": "object",
-      "required": [
-        "forbidden_M_resolved",
-        "M_touched",
-        "M_progressed",
-        "M_resolution_claims",
-        "resolution_safety_per_M"
-      ],
-      "properties": {
-        "forbidden_M_resolved": { "type": "boolean" },
-        "M_touched": { "type": "array" },
-        "M_progressed": { "type": "array" },
-        "M_resolution_claims": { "type": "array" },
-        "resolution_safety_per_M": { "type": "object" }
-      },
-      "additionalProperties": true
+    "supersedes": {
+      "type": ["string", "null"],
+      "pattern": "^SLT-[0-9]{4}$"
     },
-    "choice_templates": false,
-    "arc_contract": {
+    "scope": {
       "type": "object",
-      "required": [
-        "commitment_class",
-        "arc_archetype",
-        "actor",
-        "target",
-        "user_intent",
-        "strategic_question_answered",
-        "commitment_scope",
-        "success_policy",
-        "allowed_outcome_band"
-      ],
+      "required": ["visibility", "branch_id"],
       "properties": {
-        "commitment_family": { "type": "string", "minLength": 1 },
-        "commitment_class": { "type": "string", "minLength": 1 },
-        "commitment_detail": { "type": "string", "minLength": 1 },
-        "arc_archetype": { "type": "string", "minLength": 1 },
-        "actor": { "type": "string", "minLength": 1 },
-        "target": { "type": ["string", "null"] },
-        "user_intent": { "type": "string", "minLength": 1 },
-        "strategic_question_answered": { "type": "string", "minLength": 1 },
-        "commitment_scope": { "type": "string", "enum": ["scene", "sequence"] },
-        "success_policy": { "type": "string", "enum": ["uncontested", "contested", "costly", "uncertain"] },
-        "allowed_outcome_band": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
-      },
-      "additionalProperties": true
-    },
-    "dramatic_unit": {
-      "type": "object",
-      "required": ["scene_question", "entry_pressure", "value_delta_target", "natural_close_definition"],
-      "properties": {
-        "scene_question": { "type": "string", "minLength": 1 },
-        "entry_pressure": {
-          "type": "object",
-          "required": ["thread", "description"],
-          "properties": {
-            "thread": { "type": ["string", "null"] },
-            "description": { "type": "string", "minLength": 1 }
-          },
-          "additionalProperties": true
-        },
-        "value_delta_target": { "type": "object" },
-        "natural_close_definition": { "type": "string", "minLength": 1 }
-      },
-      "additionalProperties": true
-    },
-    "beat_plan": {
-      "type": "object",
-      "required": ["mode", "min_beats", "max_beats", "beats"],
-      "properties": {
-        "mode": { "const": "ordered_soft" },
-        "min_beats": { "type": "integer", "minimum": 2, "maximum": 6 },
-        "max_beats": { "type": "integer", "minimum": 3, "maximum": 8 },
-        "beats": {
-          "type": "array",
-          "minItems": 3,
-          "maxItems": 8,
-          "items": {
-            "type": "object",
-            "required": ["id", "function", "required", "state_significance", "realization_target"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "function": { "type": "string", "minLength": 1 },
-              "required": { "type": "boolean" },
-              "state_significance": { "type": "string", "minLength": 1 },
-              "realization_target": { "type": "string", "minLength": 1 }
-            },
-            "additionalProperties": true
-          }
-        }
-      },
-      "additionalProperties": true
-    },
-    "execution_envelope": {
-      "type": "object",
-      "required": [
-        "invariants",
-        "required_functions",
-        "allowed_tactics",
-        "prohibited_actions",
-        "style_directives",
-        "mystery_preservation"
-      ],
-      "properties": {
-        "invariants": { "type": "array" },
-        "required_functions": { "type": "array" },
-        "allowed_tactics": { "type": "array" },
-        "prohibited_actions": { "type": "array" },
-        "style_directives": { "type": "array" },
-        "mystery_preservation": {
-          "type": "object",
-          "required": ["forbidden_resolutions", "allowed_claims"],
-          "properties": {
-            "forbidden_resolutions": { "type": "array", "items": { "type": "string", "pattern": "^M-[0-9]{4}$" } },
-            "allowed_claims": {
-              "type": "array",
-              "items": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] }
-            }
-          },
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": true
-    },
-    "stop_policy": {
-      "type": "object",
-      "required": ["normal_exits", "interrupt_before", "safety_valves"],
-      "properties": {
-        "normal_exits": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/stopCondition" }
-        },
-        "interrupt_before": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/stopCondition" }
-        },
-        "safety_valves": {
-          "type": "object",
-          "required": ["max_internal_beats", "max_words"],
-          "properties": {
-            "max_internal_beats": { "type": "integer", "minimum": 1 },
-            "max_words": { "type": "integer", "minimum": 1 }
-          },
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": true
-    },
-    "effect_model": {
-      "type": "object",
-      "required": ["selected_before_render", "variants"],
-      "properties": {
-        "selected_before_render": { "const": true },
-        "variants": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": ["id", "maps_to_outcome", "probability_weight", "required_effects", "forbidden_effects"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "maps_to_outcome": { "type": "string", "minLength": 1 },
-              "probability_weight": { "type": "number", "minimum": 0, "maximum": 1 },
-              "required_effects": {
-                "type": "array",
-                "minItems": 1,
-                "items": { "$ref": "#/$defs/effect" }
-              },
-              "forbidden_effects": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/effect" }
-              }
-            },
-            "additionalProperties": true
-          }
-        }
-      },
-      "additionalProperties": true
-    },
-    "exit_portfolio": {
-      "type": "object",
-      "required": ["native_seeds", "engine_discovered_exit_budget"],
-      "properties": {
-        "native_seeds": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["id", "commitment_class", "strategy_cluster", "expected_state_delta", "continuation_arc_selector"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "commitment_family": { "type": "string", "minLength": 1 },
-              "commitment_class": { "type": "string", "minLength": 1 },
-              "commitment_detail": { "type": "string", "minLength": 1 },
-              "strategy_cluster": { "type": "string", "minLength": 1 },
-              "expected_state_delta": { "type": "object" },
-              "continuation_arc_selector": { "type": "object" }
-            },
-            "additionalProperties": true
-          }
-        },
-        "engine_discovered_exit_budget": {
-          "type": "object",
-          "required": ["min", "max", "allowed_sources"],
-          "properties": {
-            "min": { "type": "integer", "minimum": 0 },
-            "max": { "type": "integer", "minimum": 0 },
-            "allowed_sources": { "type": "array", "items": { "type": "string", "minLength": 1 } }
-          },
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": true
-    },
-    "provenance": {
-      "type": "object",
-      "required": ["origin", "source_audit", "source_rsp", "created_at_page"],
-      "properties": {
-        "origin": {
-          "type": "string",
-          "enum": ["bootstrap_seed", "focus_authoring", "audit_remediation", "runtime_jit"]
-        },
-        "source_audit": { "type": ["string", "null"] },
-        "source_rsp": { "type": ["string", "null"] },
-        "created_at_page": { "type": ["string", "null"] }
-      },
-      "additionalProperties": true
-    },
-    "visibility": {
-      "type": "object",
-      "required": ["scope", "visible_from_page", "visible_branch_path_prefix", "allowed_branch_ids"],
-      "properties": {
-        "scope": {
+        "visibility": {
           "type": "string",
           "enum": ["global_author_pool", "branch_prefix_scoped", "branch_scoped"]
         },
-        "visible_from_page": { "type": ["string", "null"] },
-        "visible_branch_path_prefix": { "type": ["array", "null"] },
-        "allowed_branch_ids": { "type": ["array", "null"] }
-      },
-      "additionalProperties": true
-    }
-  },
-  "$defs": {
-    "stopCondition": {
-      "type": "object",
-      "required": ["id", "predicate", "args"],
-      "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "predicate": { "type": "string", "minLength": 1 },
-        "args": { "type": "object" }
-      },
-      "additionalProperties": true
-    },
-    "effect": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "relationship_axis_shift",
-            "thread_pressure_delta",
-            "obligation_status_change",
-            "fact_create",
-            "fact_invalidate",
-            "consequence_open",
-            "consequence_address",
-            "cast_change",
-            "location_change",
-            "mystery_progress"
-          ]
+        "branch_id": {
+          "type": ["string", "null"],
+          "pattern": "^BR-[0-9]{4}$"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false
+    },
+    "created_at_page": {
+      "type": ["string", "null"],
+      "pattern": "^PG-[0-9]{4}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "move_family": {
+      "type": "string",
+      "enum": [
+        "orient",
+        "world_pressure",
+        "pursuit",
+        "investigation",
+        "disclosure",
+        "negotiation",
+        "bond_shift",
+        "status_shift",
+        "conflict",
+        "evasion",
+        "protection",
+        "resource_exchange",
+        "transformation",
+        "ritual_protocol",
+        "decision",
+        "recovery"
+      ]
+    },
+    "preconditions": {
+      "type": "object",
+      "required": ["hard"],
+      "properties": {
+        "hard": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "soft": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "function", "instruction"],
+        "properties": {
+          "beat_id": { "type": "string", "minLength": 1 },
+          "function": {
+            "type": "string",
+            "enum": ["setup", "action", "pressure", "turn", "consequence", "exit"]
+          },
+          "instruction": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "effects": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "supersede": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "close": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "exit_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_family", "surface_hint"],
+        "properties": {
+          "action_family": {
+            "type": "string",
+            "enum": [
+              "move",
+              "evade",
+              "pursue",
+              "perceive",
+              "investigate",
+              "communicate",
+              "persuade",
+              "negotiate",
+              "bond",
+              "oppose",
+              "harm",
+              "protect",
+              "control",
+              "transfer",
+              "use",
+              "make_change",
+              "ritual_protocol",
+              "recover",
+              "wait",
+              "decide"
+            ]
+          },
+          "surface_hint": { "type": "string", "minLength": 1 },
+          "likely_effects": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "saliency": {
+      "type": "object",
+      "required": ["urgency", "cooldown_pages"],
+      "properties": {
+        "urgency": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "cooldown_pages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "mystery_policy": {
+      "type": "object",
+      "required": ["allowed_authority"],
+      "properties": {
+        "forbidden_resolutions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^M-[0-9]{4}$" }
+        },
+        "allowed_authority": {
+          "type": "string",
+          "enum": ["apparent", "branch_local_counterfactual", "canon_candidate", "none"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["origin"],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": ["bootstrap_seed", "manual_authoring", "author_batch", "audit_repair", "runtime_jit"]
+        }
+      },
+      "additionalProperties": false
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators/src/rules/` (delete five validators + rewrite one), `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, validator registry
-**Deps**: archive/tickets/SPEC23STOSTACON-001.md, SPEC23STOSTACON-002
+**Deps**: archive/tickets/SPEC23STOSTACON-001.md, archive/tickets/SPEC23STOSTACON-002.md
 
 ## Problem
 
@@ -145,10 +145,10 @@ After deletions, grep pipeline-wide for any residual reference: `grep -rnE "(arc
 
 ## Out of Scope
 
-- Schema rebuild — SPEC23STOSTACON-002 (this ticket's dependency).
+- Schema rebuild — archive/tickets/SPEC23STOSTACON-002.md (this ticket's dependency).
 - Contract amendment + §5 predicate canonical list — `archive/tickets/SPEC23STOSTACON-001.md` (this ticket's dependency; provides the audited PRED_TYPES list).
 - Skill prose updates for new predicate guidance — SPEC23STOSTACON-009.
-- Adding new validators (e.g., move_family conformance, action_family conformance) — out of scope; the closed enums are enforced at the JSON Schema layer per SPEC23STOSTACON-002.
+- Adding new validators (e.g., move_family conformance, action_family conformance) — out of scope; the closed enums are enforced at the JSON Schema layer per archive/tickets/SPEC23STOSTACON-002.md.
 - world-validate CLI surface changes beyond the validator-set update — the CLI auto-aggregates the validator set; no CLI code changes expected.
 
 ## Acceptance Criteria

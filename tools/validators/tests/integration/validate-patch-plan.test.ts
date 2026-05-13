@@ -292,16 +292,16 @@ test("validatePatchPlan accepts pending page-cycle pages after prose-state valid
 
 test("validatePatchPlan rejects Shape B storylet ops missing schema-required fields", async () => {
   await withTempRoot(async () => {
-    const missingMysterySafety = completeStoryletRecord();
-    delete missingMysterySafety.mystery_safety;
+    const missingMysteryPolicy = completeStoryletRecord();
+    delete missingMysteryPolicy.mystery_policy;
 
-    const result = await validatePatchPlan(storyletPlan(missingMysterySafety) as unknown as PatchPlanEnvelope);
+    const result = await validatePatchPlan(storyletPlan(missingMysteryPolicy) as unknown as PatchPlanEnvelope);
 
     assert.ok(result.verdicts.some(
       (verdict) =>
         verdict.validator === "record_schema_compliance" &&
         verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
-        verdict.message.includes("mystery_safety")
+        verdict.message.includes("mystery_policy")
     ));
   });
 });
@@ -426,7 +426,7 @@ function replaySafePagePlan() {
         story_id: "STORY-001",
         created_at_page: "PG-0002"
       }),
-      storyPatch("create_slt_record", "storylets", completeStoryletRecord()),
+      storyPatch("create_slt_record", "storylets", legacySceneCommitmentStoryletRecord()),
       storyPatch("create_se_record", "events", {
         id: "SE-0002",
         story_id: "STORY-001",
@@ -504,6 +504,65 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
 }
 
 function completeStoryletRecord(): Record<string, unknown> {
+  return {
+    id: "SLT-0001",
+    story_id: "STORY-001",
+    scope: {
+      visibility: "global_author_pool",
+      branch_id: null
+    },
+    created_at_page: null,
+    title: "Complete commitment block",
+    move_family: "protection",
+    preconditions: {
+      hard: [],
+      soft: []
+    },
+    beats: [
+      {
+        beat_id: "B1",
+        function: "setup",
+        instruction: "Establish the damaged gate and Mara's boundary."
+      },
+      {
+        beat_id: "B2",
+        function: "action",
+        instruction: "Offer practical help without forcing disclosure."
+      },
+      {
+        beat_id: "B3",
+        function: "exit",
+        instruction: "Close on the next concrete commitment."
+      }
+    ],
+    effects: {
+      create: [],
+      supersede: [],
+      close: []
+    },
+    exit_options: [
+      {
+        action_family: "communicate",
+        surface_hint: "Ask one bounded follow-up question.",
+        likely_effects: ["limited-disclosure"]
+      }
+    ],
+    saliency: {
+      urgency: "medium",
+      cooldown_pages: 0,
+      tags: ["gate-repair"]
+    },
+    mystery_policy: {
+      forbidden_resolutions: [],
+      allowed_authority: "apparent"
+    },
+    provenance: {
+      origin: "manual_authoring"
+    }
+  };
+}
+
+function legacySceneCommitmentStoryletRecord(): Record<string, unknown> {
   return yaml.load(
     readFileSync(path.join(FIXTURE_ROOT, "story-storylet-complete.yaml"), "utf8"),
     { schema: yaml.JSON_SCHEMA }

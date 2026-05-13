@@ -7,6 +7,10 @@
 **Blocks**: First production story-bundle authoring against the rebuilt skills (the contract/schema mismatches catalogued in Workstream 1 would otherwise reproduce drift on every committed SLT, BEL, and PG).
 **Status (2026-05-13)**: PROPOSED
 
+**Implementation notes (2026-05-13)**:
+- `SPEC23STOSTACON-001` completed the shared story-state contract and FOUNDATIONS lockstep amendments.
+- `SPEC23STOSTACON-002` completed the SLT JSON Schema rebuild in `tools/validators/src/schemas/story-storylet.schema.json`; that schema now enforces contract §4.4 (`move_family`, nested `preconditions`, `exit_options[].action_family`, `mystery_policy`, `scope.visibility`, `provenance.origin`) and rejects the old v2 scene-commitment shape. Remaining references below to old SLT schema values are historical intake context for the workstream decomposition unless a later ticket explicitly updates them.
+
 ## Problem Statement
 
 The shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` is the single source of truth for the seven Skill Category 2c story-pipeline skills' record schemas, predicate DSL, action-routing semantics, and hard-gate validation surface (per FOUNDATIONS §Story Bundles §5b). An external reassessment of the contract (reports/story-skills-taxonomies.md, ChatGPT-Pro deep-research output) identified twelve enum-layer and predicate-layer defects that would, if left in place, force authors to mislabel records and would leave engine-side state checks under-specified.
