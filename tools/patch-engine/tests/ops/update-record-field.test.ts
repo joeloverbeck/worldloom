@@ -8,9 +8,9 @@ import { assertOpError, assertYamlEquals, baseEnvelope, canonFact, createOp, cre
 
 function pgRecord(): Record<string, unknown> {
   return {
-    id: "PG-0001",
-    story_id: "STORY-0001",
-    prose_plan_path: "pages-prose-plans/PG-0001.md",
+    id: "PG-1",
+    story_id: "STORY-1",
+    prose_plan_path: "pages-prose-plans/PG-1.md",
     prose_path: null,
     prose_status: "pending",
     deferred_validation_trace: {
@@ -96,9 +96,9 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
   const record = pgRecord();
   const pgHash = seedRecord(
     world,
-    "alpha:PG-0001",
+    "alpha:PG-1",
     "page_record",
-    "stories/alpha/_source/pages/PG-0001.yaml",
+    "stories/alpha/_source/pages/PG-1.yaml",
     record,
     "alpha"
   );
@@ -109,7 +109,7 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
     target_world: env.target_world,
     expected_content_hash: pgHash,
     payload: {
-      target_record_id: "PG-0001",
+      target_record_id: "PG-1",
       field_path: ["prose_status"],
       operation: "set",
       new_value: "rendered"
@@ -123,7 +123,7 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
     target_world: env.target_world,
     expected_content_hash: pgHash,
     payload: {
-      target_record_id: "PG-0001",
+      target_record_id: "PG-1",
       field_path: ["deferred_validation_trace", "prose_critic_8_axis"],
       operation: "set",
       new_value: "PASS — no axes flagged"
@@ -136,7 +136,7 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
     target_world: env.target_world,
     expected_content_hash: pgHash,
     payload: {
-      target_record_id: "PG-0001",
+      target_record_id: "PG-1",
       field_path: ["state_snapshot", "arc_trace_emitted"],
       operation: "set",
       new_value: true
@@ -150,9 +150,9 @@ test("update_record_field accepts bare story-bundle ids and resolves the namespa
   const record = pgRecord();
   const pgHash = seedRecord(
     world,
-    "red-bunny:PG-0001",
+    "red-bunny:PG-1",
     "page_record",
-    "stories/red-bunny/_source/pages/PG-0001.yaml",
+    "stories/red-bunny/_source/pages/PG-1.yaml",
     record,
     "red-bunny"
   );
@@ -165,7 +165,7 @@ test("update_record_field accepts bare story-bundle ids and resolves the namespa
       target_world: env.target_world,
       expected_content_hash: pgHash,
       payload: {
-        target_record_id: "PG-0001",
+        target_record_id: "PG-1",
         field_path: ["prose_status"],
         operation: "set",
         new_value: "rendered"
@@ -182,9 +182,9 @@ test("update_record_field chains mutations on a story-bundle page across multipl
   const record = pgRecord();
   const pgHash = seedRecord(
     world,
-    "red-bunny:PG-0001",
+    "red-bunny:PG-1",
     "page_record",
-    "stories/red-bunny/_source/pages/PG-0001.yaml",
+    "stories/red-bunny/_source/pages/PG-1.yaml",
     record,
     "red-bunny"
   );
@@ -194,10 +194,10 @@ test("update_record_field chains mutations on a story-bundle page across multipl
       target_world: world.worldSlug,
       expected_content_hash: pgHash,
       payload: {
-        target_record_id: "PG-0001",
+        target_record_id: "PG-1",
         field_path: ["prose_path"],
         operation: "set",
-        new_value: "pages-prose/PG-0001.md"
+        new_value: "pages-prose/PG-1.md"
       }
     } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
     createOp({
@@ -205,7 +205,7 @@ test("update_record_field chains mutations on a story-bundle page across multipl
       target_world: world.worldSlug,
       expected_content_hash: pgHash,
       payload: {
-        target_record_id: "PG-0001",
+        target_record_id: "PG-1",
         field_path: ["prose_status"],
         operation: "set",
         new_value: "rendered"
@@ -216,7 +216,7 @@ test("update_record_field chains mutations on a story-bundle page across multipl
       target_world: world.worldSlug,
       expected_content_hash: pgHash,
       payload: {
-        target_record_id: "PG-0001",
+        target_record_id: "PG-1",
         field_path: ["deferred_validation_trace", "prose_ledger_consistency"],
         operation: "set",
         new_value: "PASS — rendered prose matches the ledger"
@@ -233,7 +233,7 @@ test("update_record_field chains mutations on a story-bundle page across multipl
   assert.equal(result.staged.length, 1);
   assertYamlEquals(result.staged[0]!, {
     ...record,
-    prose_path: "pages-prose/PG-0001.md",
+    prose_path: "pages-prose/PG-1.md",
     prose_status: "rendered",
     deferred_validation_trace: {
       prose_ledger_consistency: "PASS — rendered prose matches the ledger",
@@ -245,12 +245,12 @@ test("update_record_field chains mutations on a story-bundle page across multipl
 
 test("update_record_field still requires retcon attestation for unrelated PG field sets", async (t) => {
   const world = createTestWorld(t);
-  const record = { ...pgRecord(), branch_id: "BR-0001" };
+  const record = { ...pgRecord(), branch_id: "BR-1" };
   const pgHash = seedRecord(
     world,
-    "alpha:PG-0001",
+    "alpha:PG-1",
     "page_record",
-    "stories/alpha/_source/pages/PG-0001.yaml",
+    "stories/alpha/_source/pages/PG-1.yaml",
     record,
     "alpha"
   );
@@ -262,10 +262,10 @@ test("update_record_field still requires retcon attestation for unrelated PG fie
       target_world: env.target_world,
       expected_content_hash: pgHash,
       payload: {
-        target_record_id: "PG-0001",
+        target_record_id: "PG-1",
         field_path: ["branch_id"],
         operation: "set",
-        new_value: "BR-0002"
+        new_value: "BR-2"
       }
     } satisfies Extract<PatchOperation, { op: "update_record_field" }>), world.ctx),
     "retcon_attestation_required"

@@ -8,13 +8,13 @@
 
 ## Problem
 
-At intake, the renderer-facing body §10 / §11 / §12 of `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` surfaced engine-narrative vocabulary the external prose renderer could not directly act on. Sample (lines 427-471):
+At intake, the renderer-facing body §10 / §11 / §12 of `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-3.md` surfaced engine-narrative vocabulary the external prose renderer could not directly act on. Sample (lines 427-471):
 
 > §10 Open obligations:
 > - **Ane's safe-passage home (threat type)**. Open. **Salience 6, urgency 7**. Owner: Ane. **Possible payoff modes: literal fulfillment (she gets home safely), ironic reversal (the help that arrives produces its own threat), abandon with acknowledgment (the story acknowledges the safe-passage need without resolving it)**. The hazard atmosphere is the air she walks through to get home. **Not directly resolved this page; sits as background.**
 
 > §11 Active threads:
-> - **Jon and Ane: encounter and disposition (relationship, current pressure 8)**. The main thread. The bench encounter has commenced... **Pressure increased from 7 to 8 at PG-0002. This page is expected to compound it further (to 9)...**
+> - **Jon and Ane: encounter and disposition (relationship, current pressure 8)**. The main thread. The bench encounter has commenced... **Pressure increased from 7 to 8 at PG-2. This page is expected to compound it further (to 9)...**
 
 > §12 Pending consequences:
 > - None pending. **No consequence_address ops this turn.** The disclosure beat does not produce a **required_aftermath item** beyond what is absorbed by the newly-opened obligation to navigate the response register.
@@ -44,7 +44,7 @@ Before this ticket, §10 / §11 / §12 had the same conflation as completed `arc
 2. **page-cycle prompt-assembly directs the LLM author to translate, not inline** → codebase grep-proof: `grep -n 'translation\|engine field' .claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md` returns hits at the state-context block.
 3. **Self-containment contract preserves renderer context without full schema dumps** → codebase grep-proof/manual review: the template and bootstrap `plan_self_containment` wording allow canonical prose-direction translations for §10/§11/§12 while still rejecting bare unresolved IDs.
 4. **Validator gates continue to pass** → schema validation/manual contract review: `obligation_salience` (bootstrap), `consequence_persistence` (page-cycle), narrative-health gate weights continue to read atomic records / state_snapshot. A re-authored plan with prose-direction §10/§11/§12 body remains validator-compatible.
-5. **Known-case dry-run boundary** → not exercised. The live repo does not expose an executable PG-0004 re-authoring harness for this prose workflow; this layer is covered by the deviation below, with source contract review and stale-anchor grep as the truthful proof surface.
+5. **Known-case dry-run boundary** → not exercised. The live repo does not expose an executable PG-4 re-authoring harness for this prose workflow; this layer is covered by the deviation below, with source contract review and stale-anchor grep as the truthful proof surface.
 
 ## Landed Changes
 
@@ -84,7 +84,7 @@ Updated the prompt-assembly "state context" line to instruct the LLM author to a
 
 ### 5. `.claude/skills/branching-story-bootstrap/references/phase-7-root-page-plan.md`
 
-PG-0001 root-case had its own §10/§11/§12 inlining instruction. Added a root-case note: §10/§11/§12 contain only the initial bootstrap obligations / threads / consequences and use the same prose-direction translation rule.
+PG-1 root-case had its own §10/§11/§12 inlining instruction. Added a root-case note: §10/§11/§12 contain only the initial bootstrap obligations / threads / consequences and use the same prose-direction translation rule.
 
 ### 6. Same-seam self-containment wording
 
@@ -115,7 +115,7 @@ Updated the canonical template's top-level authoring rule, `branching-story-boot
 2. page-cycle phase-7 prompt-assembly state-context block reflects the translation rule.
 3. Bootstrap root phase-7 and `plan_self_containment` wording preserve the self-contained-plan invariant while allowing canonical prose-direction translations instead of full OBL / THR / CNSQ schema dumps.
 4. Existing validators (`obligation_salience`, `consequence_persistence`, narrative-health-metric weighting) remain unchanged and continue to read atomic records / `state_snapshot`; verified by manual contract review rather than a live re-authoring run.
-5. Skill dry-run on PG-0004 was not run; no executable skill dry-run harness is exposed for this prose workflow in the repo. The implemented proof is source contract review plus grep/stale-anchor proof over the edited skill/template/design surfaces.
+5. Skill dry-run on PG-4 was not run; no executable skill dry-run harness is exposed for this prose workflow in the repo. The implemented proof is source contract review plus grep/stale-anchor proof over the edited skill/template/design surfaces.
 
 ### Invariants
 
@@ -154,5 +154,5 @@ Updated the page-cycle and bootstrap Phase 7 prompt-assembly prose, bootstrap se
 
 ## Deviations
 
-- The drafted PG-0004 re-authoring dry-run and live Phase 9 validation were not run. The repo does not expose an executable dry-run harness for these prose workflow skills in this ticket's scope, and this documentation-only contract change is verified by source contract review plus grep/stale-anchor proof.
+- The drafted PG-4 re-authoring dry-run and live Phase 9 validation were not run. The repo does not expose an executable dry-run harness for these prose workflow skills in this ticket's scope, and this documentation-only contract change is verified by source contract review plus grep/stale-anchor proof.
 - Reassessment widened the same-seam file set to include bootstrap parent/self-containment wording and `docs/plans/2026-05-10-prose-rendering-out-of-skill-design.md`; those surfaces still stated or implied the old full-schema body view for §10 / §11 / §12.

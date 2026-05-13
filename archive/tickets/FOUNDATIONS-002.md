@@ -100,7 +100,7 @@ FOUNDATIONS-002 is implemented. The repo now has a single documented and executa
 - `cd tools/validators && npm test` passed: 182 tests.
 - `cd tools/world-index && npm test` passed: 78 tests.
 - `node tools/validators/dist/src/cli/world-validate.js animalia` passed with 0 verdicts.
-- `node tools/validators/dist/src/cli/world-validate.js erotica-world` failed with two pre-existing red-bunny predicate reference failures: missing `BEL-0001` from `SLT-0008` and missing `BEL-0003` from `SLT-0009`.
+- `node tools/validators/dist/src/cli/world-validate.js erotica-world` failed with two pre-existing red-bunny predicate reference failures: missing `BEL-1` from `SLT-8` and missing `BEL-3` from `SLT-9`.
 - Contract sweep passed: no fixed-width `\d{4}`, `\d{3}`, `[0-9]{4}`, or `[0-9]{3}` ID regex anchors remain in the owned docs/source/schema surfaces after final world-mcp cleanup.
 - Post-review quick-reference sweep repaired `docs/WORKFLOWS.md` stale `*-NNNN` examples to the FOUNDATIONS-002 `<integer>` convention.
 

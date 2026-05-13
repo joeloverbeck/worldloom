@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-page.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "prose_plan_path"],
+  "required": ["id", "story_id", "prose_plan_path", "plan", "state_hash"],
   "properties": {
     "id": { "type": "string", "pattern": "^PG-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
@@ -15,6 +15,29 @@
       "type": "string",
       "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
       "description": "Relative path to the comprehensive plan; always present after this rework."
+    },
+    "plan": {
+      "type": "object",
+      "required": ["path", "plan_hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
+          "description": "Shared story state contract §4.2 plan path."
+        },
+        "plan_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Shared story state contract §4.2 sha256 hash of the committed prose plan."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Shared story state contract §4.2 plan block."
+    },
+    "state_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Shared story state contract §4.2 sha256 hash of the committed page state."
     },
     "validation_trace": {
       "type": "object",

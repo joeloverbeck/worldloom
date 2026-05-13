@@ -10,7 +10,7 @@
 
 At intake, the `storylet_predicate_dsl_parsability` validator failed to resolve a same-envelope CNSQ reference from a storylet precondition. Reassessment found the pre-apply read surface already overlays patch-plan creates (`buildPreApplyReadSurface`), so most in-plan story records are visible through `ctx.index.query(record_type)`. The active defect is narrower: the predicate validator queries two stale node-type names, `story_consequence_record` and `story_relationship_record`, while the live index/pre-apply overlay emits `consequence_record` and `relationship_record_story`. That makes same-plan CNSQ/SREL records invisible to the validator's `activeRecordIds` set and causes false `predicate.unresolved_reference` failures.
 
-The branching-story-bootstrap session of 2026-05-13 hit this directly: `SLT-0004` (the "name the bruise on her arm aloud" storylet in the red-bunny bundle) included `{pred: "record_active", record: "CNSQ-0001"}` as a hard precondition — the CNSQ-0001 bruise consequence record was being created in the same patch envelope alongside the SLT. The validator rejected with `"SLT-0004: preconditions.hard[2].record references missing CNSQ-0001"`. The operator removed the precondition to ship the bundle; the disclosure-storylet now lacks the structural CNSQ-active guard that would block selection of the bruise-naming move when the bruise has already healed or been closed in a future page state.
+The branching-story-bootstrap session of 2026-05-13 hit this directly: `SLT-4` (the "name the bruise on her arm aloud" storylet in the red-bunny bundle) included `{pred: "record_active", record: "CNSQ-1"}` as a hard precondition — the CNSQ-1 bruise consequence record was being created in the same patch envelope alongside the SLT. The validator rejected with `"SLT-4: preconditions.hard[2].record references missing CNSQ-1"`. The operator removed the precondition to ship the bundle; the disclosure-storylet now lacks the structural CNSQ-active guard that would block selection of the bruise-naming move when the bruise has already healed or been closed in a future page state.
 
 The general pre-apply overlay already covers SLT/STINT/SF/BEL/STLOC/STOBJ/THR/OBL/story-local DA references when the validator asks for the live node type. This ticket fixes the stale CNSQ/SREL query buckets and keeps the wider audit of other validators' in-plan visibility out of scope.
 
@@ -50,8 +50,8 @@ In `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`, `loa
 
 The test surface now:
 
-- Builds a package integration pre-apply plan containing `create_cnsq_record` (CNSQ-0001) + `create_slt_record` (SLT-0001 with `{pred: 'record_active', record: 'CNSQ-0001'}` precondition), and asserts no CNSQ unresolved-reference verdict.
-- Builds a package integration pre-apply plan containing only `create_slt_record` referencing CNSQ-0099 (not in-plan, not on-disk), and asserts a `predicate.unresolved_reference` verdict.
+- Builds a package integration pre-apply plan containing `create_cnsq_record` (CNSQ-1) + `create_slt_record` (SLT-1 with `{pred: 'record_active', record: 'CNSQ-1'}` precondition), and asserts no CNSQ unresolved-reference verdict.
+- Builds a package integration pre-apply plan containing only `create_slt_record` referencing CNSQ-99 (not in-plan, not on-disk), and asserts a `predicate.unresolved_reference` verdict.
 - Uses live `consequence_record` / `relationship_record_story` fixtures in the rule-level full-world coverage.
 
 ### 3. Update validator docstring / code comment
@@ -66,7 +66,7 @@ An inline comment near `loadReferenceSets` explains that pre-apply in-plan visib
 
 ## Out of Scope
 
-- Re-emitting the already-committed `red-bunny` bundle's SLT-0004 to restore the `record_active(CNSQ-0001)` precondition (the bundle remains as-shipped; future bundles can use the precondition once the validator sees in-plan records).
+- Re-emitting the already-committed `red-bunny` bundle's SLT-4 to restore the `record_active(CNSQ-1)` precondition (the bundle remains as-shipped; future bundles can use the precondition once the validator sees in-plan records).
 - In-plan-visibility fixes for OTHER pre-apply validators (`cross_file_reference`, `state_snapshot_integrity`, etc.); those route to a separate follow-up ticket scoped to the wider in-plan-visibility audit.
 - Two-phase patch-engine commit (orthogonal architectural change; would be a much larger ticket).
 - Skill-prose updates encouraging operators to use `record_active` predicates against in-plan creates (route via `/skill-audit` after this lands).

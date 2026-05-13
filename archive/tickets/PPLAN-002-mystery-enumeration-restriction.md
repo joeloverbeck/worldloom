@@ -10,7 +10,7 @@
 
 The body of the page plan exists to brief the external prose renderer; the frontmatter exists to drive engine validators. At intake, both surfaces enumerated every mystery in `mysteries_in_play[]` even when the mystery was *"Not relevant to cast; declared for completeness."*
 
-At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` showed the redundant body shape:
+At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-3.md` showed the redundant body shape:
 - §7 (Mysteries in play) enumerates six mysteries including "Cause of the elevated prevalence of the female-passing intersex variant in this world" — explicitly annotated *"Not relevant to cast; declared for completeness"*.
 - §18 (DO NOT REVEAL) re-enumerates the same forbidden mysteries with the same prose.
 - §15-inlined storylet `execution_envelope.mystery_preservation.forbidden_resolutions[]` is a third surface where the same M-NNNN ids appear.
@@ -142,5 +142,5 @@ Implemented the engaged-mystery body filter across the active page-plan body con
 
 ## Deviations
 
-- Did not re-author PG-0004 or run a contrived finalize failure. The live repo does not expose an executable skill dry-run harness for these prose workflow skills in this ticket's scope; this documentation-only change is verified by source contract review and grep proofs. The finalize firewall remains unchanged because the edited surfaces are template/reference prose and the validator-bearing `frontmatter.forbidden_resolutions[]` contract is preserved.
+- Did not re-author PG-4 or run a contrived finalize failure. The live repo does not expose an executable skill dry-run harness for these prose workflow skills in this ticket's scope; this documentation-only change is verified by source contract review and grep proofs. The finalize firewall remains unchanged because the edited surfaces are template/reference prose and the validator-bearing `frontmatter.forbidden_resolutions[]` contract is preserved.
 - Historical design notes under `docs/plans/` still describe the older verbose plan shape. They are not active skill/template authority and were left untouched.

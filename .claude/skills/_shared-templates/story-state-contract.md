@@ -151,6 +151,23 @@ validation_trace:                      # * one entry per shared gate with PASS +
 
 `rendered_prose.path` and `receipt_path` are informational. They are not a lifecycle status. There is no `prose_status` field. There is no `state_delta_summary` field — `SE.state_delta` is authoritative. There is no `open_debt` field on the snapshot — open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`.
 
+#### 4.2a Deterministic PG hash computation
+
+Every `PG` record must carry final lowercase sha256 values before any `create_pg_record` patch plan is validated or submitted. Placeholder, uppercase, non-hex, missing, or stale hash values are hard-stop authoring errors; the skill must repair the draft in working memory before `mcp__worldloom__validate_patch_plan`.
+
+Compute `plan.plan_hash` first. It is sha256 over the exact UTF-8 bytes of the page plan body that will later be written to `pages-prose-plans/PG-<integer>.md`. Because the page plan is a direct-write artifact after patch submission (§10), the skill drafts the complete plan bytes in working memory, hashes those exact bytes, places the hash in `PG.plan.plan_hash`, and after patch success writes the same bytes to disk without reformatting.
+
+Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except:
+
+- exclude `state_hash` itself;
+- exclude `rendered_prose` entirely (`rendered_prose.path` and `rendered_prose.receipt_path` are mutable publication receipts, not fork state).
+
+All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.path`, `plan.plan_hash`, `emitted_choices`, and `validation_trace`.
+
+The state payload serialization is deterministic canonical JSON: objects serialized with keys sorted lexicographically at every depth, arrays kept in authored order, strings emitted as UTF-8 JSON strings, no insignificant whitespace, no comments, and no YAML anchors or aliases. Hash the resulting UTF-8 bytes with sha256 and encode as 64 lowercase hex characters.
+
+For root pages, compute both hashes after `PG-1`, the final page-plan bytes, emitted `CHC` records, and `PG-1.validation_trace` are finalized in working memory, then validate/submit the patch plan. For child pages, copy `state_hash_parent` exactly from the already-committed parent PG's `state_hash`, finalize the new PG and plan bytes, compute `plan.plan_hash`, compute `state_hash`, then validate/submit. If any later edit changes an included PG field or the page-plan bytes before submission, recompute the affected hash values before validation.
+
 ### 4.3 `SE` (~12 sub-paths)
 
 ```yaml

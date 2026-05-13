@@ -241,6 +241,23 @@ function applyMutationPatch(byId: Map<string, IndexedRecord>, patch: PatchOperat
     return current.node_id;
   }
 
+  if (patch.op === "repair_skipped_change_log_entry") {
+    const repaired = asPlainRecord(patch.payload.repaired_record);
+    const targetId = typeof repaired.change_id === "string" ? repaired.change_id : patch.payload.target_ch_id;
+    const current = byId.get(targetId);
+    byId.set(
+      targetId,
+      recordFromParsed(
+        patch.target_world,
+        "change_log_entry",
+        targetId,
+        `_source/change-log/${targetId}.yaml`,
+        repaired
+      )
+    );
+    return current?.node_id ?? targetId;
+  }
+
   if (patch.op === "append_touched_by_cf") {
     const current = byId.get(patch.payload.target_sec_id);
     if (!current) {

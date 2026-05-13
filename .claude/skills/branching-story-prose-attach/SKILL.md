@@ -134,7 +134,7 @@ Load into working memory:
 - Plan §5 (active cast + entity statuses) — load-bearing for `entity_status_consistency`.
 - Plan §7 (selected event + state delta) — load-bearing for `required_event_rendered` and `invented_structural_fact`.
 - Plan §8 (required beats) — supplements `required_event_rendered` check.
-- Plan §15 (frontmatter, including engine fields) — load-bearing for `engine_jargon_leak` (engine vocabulary may legitimately appear in §15 but NOT in prose §1-§14, §16-§19 except the verbatim-inlined §2 / §3).
+- Plan §15 (frontmatter, including engine fields) — load-bearing for `engine_jargon_leak` (engine vocabulary may legitimately appear in plan §15 but NOT in the rendered prose body).
 - `PG.state_snapshot.active_records` — the at-commit state the prose must respect.
 - If `run_craft_critic: true`, optional prior 1-2 prose pages from `pages-prose/<recent-N>.md` for continuity checks.
 
@@ -150,11 +150,13 @@ Compare:
 - `PG.plan.plan_hash` vs `computed_plan_hash`.
 - `PG.state_hash` (the at-commit value) — this is not recomputed; it is the authoritative state hash from page-plan commit.
 
-If `plan_hash` differs AND `accept_plan_drift: false`: record the drift in the receipt's `notes` field as `"plan_hash drift: PG.plan.plan_hash=<recorded> computed=<computed>"`; the verdict roll-up at Phase 5 will reflect the drift as a FAIL signal (typically via `required_event_rendered` or `invented_structural_fact` consequential failures).
+If `plan_hash` differs AND `accept_plan_drift: false`: record the drift in the receipt's `notes` field as `"plan_hash drift: PG.plan.plan_hash=<recorded> computed=<computed>"`. Drift is recorded in `notes` for audit-trail purposes; the verdict is exclusively driven by the 6 deterministic checks at Phase 3 (plus the optional craft critic). Drift's effect on the verdict, if any, manifests indirectly as `required_event_rendered` / `entity_status_consistency` / `invented_structural_fact` failures when the plan body actually changed in a way the prose now contradicts.
 
 If `plan_hash` differs AND `accept_plan_drift: true`: record drift in `notes` and continue.
 
 If both match: continue silently to Phase 3.
+
+**Placeholder subcase**: when `PG.plan.plan_hash` or `PG.state_hash` is a literal `PLACEHOLDER_TO_BE_COMPUTED*` string (bootstrap-origin, not edit-driven drift), record the placeholder verbatim in `notes`; the receipt's `state_hash_at_plan_time` will carry the placeholder transiently and is non-§4.5-compliant until VALENH-016 lands and the upstream record is repaired. Verdict is unaffected so long as the 6 deterministic checks pass against the current plan body.
 
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 
@@ -162,7 +164,7 @@ If both match: continue silently to Phase 3.
 
 Run the 6 deterministic checks defined in shared contract §4.5, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
 
-1. **`engine_jargon_leak`** (`PASS | WARN | FAIL`) — scan the prose body for engine-vocabulary tokens. The closed engine-vocabulary list (inline below) includes record-ID patterns and engine-domain terms. Engine vocabulary legitimately appears in plan §15 frontmatter and verbatim-inlined plan §2 / §3 / §19 — those are NOT scanned. Hits in prose §1-§19 body (excluding §2 / §3 / §19 verbatim blocks) are `WARN` if isolated (single occurrence), `FAIL` if pervasive (≥3 occurrences across different tokens).
+1. **`engine_jargon_leak`** (`PASS | WARN | FAIL`) — scan the prose body for engine-vocabulary tokens. The closed engine-vocabulary list (inline below) includes record-ID patterns and engine-domain terms. Engine vocabulary legitimately appears in plan §15 frontmatter and verbatim-inlined plan §2 / §3 / §19 — those are NOT scanned. Hits in the rendered prose body are `WARN` if isolated (single occurrence), `FAIL` if pervasive (≥3 occurrences across different tokens).
 
    **Closed engine-vocabulary list** (inline; promote to `.claude/skills/_shared-templates/engine-vocabulary.md` only if list grows beyond ~30 tokens OR another skill consumes it):
 
@@ -302,7 +304,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
 - **Skills do not chain.** Prose-attach does not invoke `branching-story-turn-cycle`, `story-fact-promotion-to-canon`, or `branching-story-health-audit`. When `repair_recommendation` is non-`none`, the receipt records the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure (MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames) from bootstrap and turn-cycle without adding its own deferred surfaces. The shared contract §4.5 receipt schema is already in place.
+- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields — until landed and bundles repaired, prose-attach against pre-VALENH-016 PG records encounters literal `PLACEHOLDER_TO_BE_COMPUTED*` strings; see Phase 2 §Hash drift check Placeholder subcase). The shared contract §4.5 receipt schema is already in place.
 
 ## Final Rule
 

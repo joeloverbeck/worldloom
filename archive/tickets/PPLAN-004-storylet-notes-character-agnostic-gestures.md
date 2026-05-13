@@ -8,7 +8,7 @@
 
 ## Problem
 
-At intake, `worlds/erotica-world/stories/red-bunny/_source/storylets/SLT-0012.yaml` `notes:` field (inlined into `pages-prose-plans/PG-0003.md` §15 lines 742-746) read:
+At intake, `worlds/erotica-world/stories/red-bunny/_source/storylets/SLT-12.yaml` `notes:` field (inlined into `pages-prose-plans/PG-3.md` §15 lines 742-746) read:
 
 > *"The confession arc. Something she does (a glance, a small question, **the way she pulls her sleeve down over the bruise**) pulls a single specific true disclosure out of Jon."*
 
@@ -23,7 +23,7 @@ Before this ticket, the storylet template (`.claude/skills/storylet-pool-authori
 
 ## Assumption Reassessment (2026-05-12)
 
-1. **Storylet `notes:` is rendered verbatim into the page plan.** Verified: `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md:44-46` (`[selected arc record — the full SLT-NNNN selected at Phase 4: arc_contract, dramatic_unit, beat_plan, execution_envelope, stop_policy.normal_exits, effect_model.variants[]]` — the full SLT record includes `notes:`); `pages-prose-plans/PG-0003.md:742-746` is the visible evidence. The `notes:` field is consumed by the plan-authoring LLM (which paraphrases it into declared_visible_affordances + §8 intentions + §19 beats) AND by the external prose renderer (via §15 verbatim inlining).
+1. **Storylet `notes:` is rendered verbatim into the page plan.** Verified: `.claude/skills/branching-story-page-cycle/references/phase-7-page-plan.md:44-46` (`[selected arc record — the full SLT-NNNN selected at Phase 4: arc_contract, dramatic_unit, beat_plan, execution_envelope, stop_policy.normal_exits, effect_model.variants[]]` — the full SLT record includes `notes:`); `pages-prose-plans/PG-3.md:742-746` is the visible evidence. The `notes:` field is consumed by the plan-authoring LLM (which paraphrases it into declared_visible_affordances + §8 intentions + §19 beats) AND by the external prose renderer (via §15 verbatim inlining).
 2. **The free-form `notes:` discipline gap is at the storylet-authoring layer, not at the page-plan layer.** Verified: `.claude/skills/storylet-pool-authoring/templates/storylet-record.yaml:271-273` documents `notes:` as free-form. No authoring rule restricts character-specific clothing detail. `.claude/skills/storylet-pool-authoring/references/phase-3-structured-drafting.md` is the structured-drafting reference and has no clothing-discipline section.
 3. **Storylet bindability is bimodal.** A storylet is either (a) generic/cast-agnostic — written for any cast member who fits role matchers (e.g., `actor: role:protagonist`, `target: role:recipient`), OR (b) cast-locked — explicitly bound to specific STENT ids in `arc_contract.actor`, `arc_contract.target`, or cast requirements. `visibility.allowed_branch_ids` narrows branch availability but is not by itself a cast identity guarantee unless the branch context fixes the cast member being referenced. The discipline this ticket adds: case (a) MUST use character-agnostic body language; case (b) MAY use character-specific clothing detail because the cast's Material Reality is known at authoring time.
 4. **Shared boundary under audit**: the `notes:` field of `storylet_record.yaml`, the storylet-pool-authoring drafting references, and the Phase 4 storylet-selection consumer in `branching-story-page-cycle`. The discipline rule lives at the storylet-authoring layer; the consumer (page-cycle) does not need to change.
@@ -41,7 +41,7 @@ Before this ticket, the storylet template (`.claude/skills/storylet-pool-authori
 1. **Storylet template's `notes:` comment names the discipline** → codebase grep-proof: `grep -n 'character-agnostic\|cast-locked\|sleeve' .claude/skills/storylet-pool-authoring/templates/storylet-record.yaml` returns hits in the `notes:` field's leading comment.
 2. **Phase 3 structured-drafting reference documents the discipline as a checklist item** → codebase grep-proof: `grep -n 'gestural\|body language\|clothing' .claude/skills/storylet-pool-authoring/references/phase-3-structured-drafting.md` returns the new discipline paragraph.
 3. **Skill-local contract review** → manual review of `storylet-pool-authoring` confirms the template, Phase 3 drafting reference, Phase 4/5 canon-safety check, and parent phase summary all carry the same forward authoring discipline. A real seed-mode dry-run is not the truthful proof surface for this ticket because `storylet-pool-authoring` requires live world/story context plus a HARD-GATE-backed approval/write flow; this implementation changes the skill contract only.
-4. **Historical audit pointer**: SLT-0012 of `worlds/erotica-world/stories/red-bunny` is the named historical case; the ticket does NOT re-author it, but does note that archived PPLAN-003's deterministic gate is the runtime catch for already-authored cases.
+4. **Historical audit pointer**: SLT-12 of `worlds/erotica-world/stories/red-bunny` is the named historical case; the ticket does NOT re-author it, but does note that archived PPLAN-003's deterministic gate is the runtime catch for already-authored cases.
 
 ## Landed Changes
 
@@ -51,7 +51,7 @@ The `notes:` field now carries the body-language and clothing discipline directl
 
 ### 2. Phase 3 structured drafting reference
 
-`phase-3-structured-drafting.md` now explains why `notes:` are load-bearing for downstream page planning, defines cast-agnostic versus cast-locked usage, gives pass/fail examples, and records the SLT-0012 / Ane Arrieta sleeve precedent as historical motivation.
+`phase-3-structured-drafting.md` now explains why `notes:` are load-bearing for downstream page planning, defines cast-agnostic versus cast-locked usage, gives pass/fail examples, and records the SLT-12 / Ane Arrieta sleeve precedent as historical motivation.
 
 ### 3. Phase 4/5 author-side check
 
@@ -75,7 +75,7 @@ The `notes:` field now carries the body-language and clothing discipline directl
 
 ## Out of Scope
 
-- Re-authoring SLT-0012 or any other existing storylet to retroactively comply. The discipline applies to storylets authored after this ticket lands.
+- Re-authoring SLT-12 or any other existing storylet to retroactively comply. The discipline applies to storylets authored after this ticket lands.
 - Adding a runtime gate at storylet submission. The discipline is authoring-time; runtime defense is archived PPLAN-003's clothing-consistency check at the consuming page-plan layer.
 - Cast-agnostic / cast-locked storylet visibility-flag changes. Existing `visibility.scope` and `visibility.allowed_branch_ids` semantics are unchanged; this ticket does not make branch allowlists a new cast-locking mechanism.
 

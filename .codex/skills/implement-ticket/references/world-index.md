@@ -26,6 +26,7 @@ Use these focused checks for `world-index`, index-backed build/sync/verify, atom
 - For sync or `file_versions` tests, confirm the mutation changes the exact tracked content hash. Avoid whitespace-only touches when parser or hash normalization may erase them; for semantic-neutral atomic YAML edits, a YAML comment touch can prove the reparse without changing record data.
 - When a command is expected to reject a world before build/sync, assert the rejection does not create or mutate `_index/world.db`, WAL/SHM files, or other derived artifacts unless the ticket explicitly owns that side effect.
 - When a live-world regression is optional but useful, keep it separate from portable acceptance: run the package-local or fixture proof first, then run the live-world build/sync, query the exact owned invariant from that rebuilt artifact, classify skipped-record or validator warnings, inspect ignored/private world status, and record any refreshed `_index` state as expected derived dirt when it is not source fallout.
+- If the drafted proof expects `worlds/<slug>/_index/world.db.skipped_records.log` to exist, re-check after a clean rebuild. A successful rebuild may remove the skipped-record log entirely. In that case, do not force a stale `rg` proof against a missing log; prove the repair with the clean build output plus direct SQLite checks against the rebuilt `world.db`, usually `nodes` for the expected indexed record and `validation_results` for absence of the repaired warning code/path.
 
 ## Closeout
 

@@ -63,6 +63,7 @@ export const OPERATION_KINDS = [
   "create_ent_record",
   "create_sec_record",
   "update_record_field",
+  "repair_skipped_change_log_entry",
   "remove_ch_affected_cf_ids",
   "append_extension",
   "append_touched_by_cf",
@@ -171,6 +172,14 @@ export type PatchOperation =
         operation: "set" | "append_list" | "append_text";
         new_value: unknown;
         retcon_attestation?: RetconAttestation;
+      }
+    >
+  | OperationBase<
+      "repair_skipped_change_log_entry",
+      {
+        target_ch_id: string;
+        repaired_record: ChangeLogEntry;
+        repair_reason: string;
       }
     >
   | OperationBase<"remove_ch_affected_cf_ids", { target_ch_id: string }>

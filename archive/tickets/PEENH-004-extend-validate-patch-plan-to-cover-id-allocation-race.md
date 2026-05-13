@@ -10,7 +10,7 @@
 
 At intake, Phase 11 of every patch-engine consumer skill (`branching-story-page-cycle`, `branching-story-bootstrap`, `canon-addition`, `create-base-world`, `character-generation`, `diegetic-artifact-generation`, `storylet-pool-authoring`) could receive `mcp__worldloom__validate_patch_plan(envelope)` `status: pass` for envelopes that the subsequent `submit_patch_plan` rejected with `id_allocation_race`. The operator-visible recovery cost per mismatch was: re-allocate the offending id-class via `mcp__worldloom__allocate_next_id`, re-edit the envelope (often at multiple sites because the wrong id appears in record body, target_file, expected_id_allocations, supersession references, and validation-trace narratives), re-validate, re-sign, and re-submit.
 
-Concrete session evidence (2026-05-04): during `branching-story-page-cycle` execution against `worlds/erotica-world/stories/red-bunny`, advancing PG-0003 → PG-0004 via CHC-0012, the operator constructed `expected_id_allocations: { ..., obl_ids: ["OBL-0014"], ... }` based on filesystem-counting (12 OBL files visible on disk: `OBL-0001.yaml`..`OBL-0012.yaml`; supersession chains OBL-0007→OBL-0010, OBL-0008→OBL-0011, OBL-0009→OBL-0012 leave no filename gaps, but the operator's mental count of "supersession-resolved logical state" produced an off-by-one when extrapolating to the next id). Validate-plan returned:
+Concrete session evidence (2026-05-04): during `branching-story-page-cycle` execution against `worlds/erotica-world/stories/red-bunny`, advancing PG-3 → PG-4 via CHC-12, the operator constructed `expected_id_allocations: { ..., obl_ids: ["OBL-14"], ... }` based on filesystem-counting (12 OBL files visible on disk: `OBL-1.yaml`..`OBL-12.yaml`; supersession chains OBL-7→OBL-10, OBL-8→OBL-11, OBL-9→OBL-12 leave no filename gaps, but the operator's mental count of "supersession-resolved logical state" produced an off-by-one when extrapolating to the next id). Validate-plan returned:
 
 ```json
 { "status": "pass", "verdicts": [], "validators_run": [/* 11 validators all pass */] }
@@ -22,11 +22,11 @@ Submit returned:
 {
   "ok": false,
   "code": "id_allocation_race",
-  "message": "obl_ids allocation race for story 'red-bunny': expected OBL-0014, current next id is OBL-0013."
+  "message": "obl_ids allocation race for story 'red-bunny': expected OBL-14, current next id is OBL-13."
 }
 ```
 
-The operator re-allocated via `mcp__worldloom__allocate_next_id(world_slug='erotica-world', id_class='OBL', story_slug='red-bunny')` (returned `OBL-0013`), edited the build script to rename OBL-0014 → OBL-0013 across 8 sites (record id, target_file, `expected_id_allocations.obl_ids`, supersession references in OBL/THR/SLT/SE/PG state_snapshot, validation_trace narratives), re-ran the build, re-validated (PASS), re-signed (envelope bytes had changed so HMAC re-binding was required), re-submitted (success).
+The operator re-allocated via `mcp__worldloom__allocate_next_id(world_slug='erotica-world', id_class='OBL', story_slug='red-bunny')` (returned `OBL-13`), edited the build script to rename OBL-14 → OBL-13 across 8 sites (record id, target_file, `expected_id_allocations.obl_ids`, supersession references in OBL/THR/SLT/SE/PG state_snapshot, validation_trace narratives), re-ran the build, re-validated (PASS), re-signed (envelope bytes had changed so HMAC re-binding was required), re-submitted (success).
 
 The page-cycle skill's prose was subsequently tightened (via the same session's `/skill-audit` follow-up implementation) to require per-class pre-allocation via `mcp__worldloom__allocate_next_id` for every id-class the envelope will populate (`SF` / `OBL` / `THR` / `SREL` / `STINT` / `SE` / `SLT` / `CHC` plus `PG` / `BR`), parallel to `branching-story-bootstrap`'s long-standing per-class pre-allocation discipline. Operator discipline correctly applied avoids the gap. **But the id_allocation_race check at validate-time would catch the case structurally — via the engine's own canonical next-id calculation — without depending on operator discipline.** This is the same shape as PEENH-003 (which made the engine error self-document a recovery path), but for an earlier surface: catch the mismatch BEFORE signing, not after submit.
 

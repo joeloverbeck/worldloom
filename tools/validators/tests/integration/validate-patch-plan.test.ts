@@ -383,6 +383,7 @@ function pagePlanWithBranchLeak() {
     expected_id_allocations: {},
     patches: [
       storyPatch("create_pg_record", "pages", {
+        ...validPageFields("PG-0002"),
         id: "PG-0002",
         story_id: "STORY-001",
         branch_path: ["PG-0001", "PG-0002"],
@@ -415,6 +416,7 @@ function pagePlanWithDanglingSnapshotReference() {
     expected_id_allocations: {},
     patches: [
       storyPatch("create_pg_record", "pages", {
+        ...validPageFields("PG-0002"),
         id: "PG-0002",
         story_id: "STORY-001",
         branch_path: ["PG-0001", "PG-0002"],
@@ -458,6 +460,7 @@ function replaySafePagePlan() {
         ]
       }),
       storyPatch("create_pg_record", "pages", {
+        ...validPageFields("PG-0002"),
         id: "PG-0002",
         story_id: "STORY-001",
         branch_path: ["PG-0002"],
@@ -499,6 +502,7 @@ function pendingChildAfterRenderedParentPlan() {
   const page = pagePatch.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
   page.id = "PG-0003";
+  Object.assign(page, validPageFields("PG-0003"));
   page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
   page.applied_event_ops = ["SE-0003"];
   stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
@@ -514,6 +518,17 @@ function storyPatch(op: string, sourceDir: string, record: Record<string, unknow
       story_slug: "marla-kern-seduction",
       record
     }
+  };
+}
+
+function validPageFields(id: string): Record<string, unknown> {
+  return {
+    prose_plan_path: `pages-prose-plans/${id}.md`,
+    plan: {
+      path: `pages-prose-plans/${id}.md`,
+      plan_hash: "0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    state_hash: "0000000000000000000000000000000000000000000000000000000000000002"
   };
 }
 

@@ -5,18 +5,18 @@
   "verdict": "ACCEPT",
   "originating_skill": "storylet-pool-authoring",
   "expected_id_allocations": {
-    "slt_ids": ["SLT-0049"]
+    "slt_ids": ["SLT-49"]
   },
   "patches": [
     {
       "op": "create_slt_record",
       "target_world": "erotica-world",
-      "target_file": "stories/red-bunny/_source/storylets/SLT-0049.yaml",
+      "target_file": "stories/red-bunny/_source/storylets/SLT-49.yaml",
       "payload": {
         "story_slug": "red-bunny",
         "record": {
-          "id": "SLT-0049",
-          "story_id": "STORY-0001",
+          "id": "SLT-49",
+          "story_id": "STORY-1",
           "title": "Missing mystery safety fixture",
           "shape": "relational_dynamics",
           "content_intensity": "mature",

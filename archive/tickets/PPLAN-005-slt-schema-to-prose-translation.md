@@ -8,7 +8,7 @@
 
 ## Problem
 
-At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-0003.md` §15 inlined the full SLT-0012 YAML record verbatim (lines 578-746, ~169 lines). The body content included engine-only fields the external prose renderer cannot act on:
+At intake, `worlds/erotica-world/stories/red-bunny/pages-prose-plans/PG-3.md` §15 inlined the full SLT-12 YAML record verbatim (lines 578-746, ~169 lines). The body content included engine-only fields the external prose renderer cannot act on:
 
 - `arc_contract.success_policy: contested`
 - `arc_contract.allowed_outcome_band: [succeeds, partially_succeeds, fails_with_consequence, backfires, accepted_with_limits, refused_without_break, partially_deflected]`
@@ -88,7 +88,7 @@ Also updated the "Body shape" §15 instruction to direct the author to the §15 
 Updated gate 13 (`arc_envelope_conformance`) and gate 18 (`plan_completeness_check`) rationale rows:
 
 - Gate 13: clarify that the gate reads `frontmatter.declared_intended_beats[]` (length against `arc.beat_plan.min_beats/max_beats`), `frontmatter.forbidden_resolutions[]`, and the chosen variant's `required_effects[]` from `frontmatter.required_effects[]`. The gate does NOT require the SLT body to be inlined in §15.
-- Gate 18: clarify that "every inlined record id resolves" requires the SLT id to appear in §15 and resolve against the index; it does NOT require the full SLT schema body. The §15 prose-direction translation MUST inline the SLT id (e.g., "SLT-0012 — Confess one thing about himself in answer to her") so the gate sees the resolvable reference.
+- Gate 18: clarify that "every inlined record id resolves" requires the SLT id to appear in §15 and resolve against the index; it does NOT require the full SLT schema body. The §15 prose-direction translation MUST inline the SLT id (e.g., "SLT-12 — Confess one thing about himself in answer to her") so the gate sees the resolvable reference.
 
 ### 4. `.claude/skills/branching-story-page-cycle/SKILL.md`
 
@@ -112,7 +112,7 @@ Brought the §15 prose-direction translation into the same body-cleanup posture 
 
 ## Out of Scope
 
-- Bootstrap PG-0001 §15-alt entry-pressure framing (unchanged — the root case omits §15 entirely).
+- Bootstrap PG-1 §15-alt entry-pressure framing (unchanged — the root case omits §15 entirely).
 - The SLT record schema at `worlds/<slug>/stories/<slug>/_source/storylets/SLT-NNNN.yaml` (unchanged — the SLT record continues to carry the full schema; only the page-plan body view of the SLT changes).
 - Re-authoring of existing rendered plans.
 - Storylet-pool-authoring `notes:` field discipline (handled by `archive/tickets/PPLAN-004-storylet-notes-character-agnostic-gestures.md`).
@@ -164,5 +164,5 @@ Same-seam parent and Layer 1 docs were updated so the page-cycle skill no longer
 
 ## Deviations
 
-- Did not re-author PG-0004 or run a live Phase 9 validation pass. The repo does not expose an executable dry-run harness for these prose workflow skills in this ticket's scope. This documentation-only contract change is verified by source contract review and grep proofs.
+- Did not re-author PG-4 or run a live Phase 9 validation pass. The repo does not expose an executable dry-run harness for these prose workflow skills in this ticket's scope. This documentation-only contract change is verified by source contract review and grep proofs.
 - Same-seam scope widened during reassessment to include `.claude/skills/branching-story-page-cycle/SKILL.md` and `phase-7-6-arc-trace-extraction.md`; both still described the old full-SLT-body assumption.
