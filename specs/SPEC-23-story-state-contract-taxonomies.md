@@ -10,6 +10,7 @@
 **Implementation notes (2026-05-13)**:
 - `SPEC23STOSTACON-001` completed the shared story-state contract and FOUNDATIONS lockstep amendments.
 - `SPEC23STOSTACON-002` completed the SLT JSON Schema rebuild in `tools/validators/src/schemas/story-storylet.schema.json`; that schema now enforces contract §4.4 (`move_family`, nested `preconditions`, `exit_options[].action_family`, `mystery_policy`, `scope.visibility`, `provenance.origin`) and rejects the old v2 scene-commitment shape. Remaining references below to old SLT schema values are historical intake context for the workstream decomposition unless a later ticket explicitly updates them.
+- `SPEC23STOSTACON-004` completed the BEL JSON Schema update in `tools/validators/src/schemas/story-belief.schema.json`; that schema now requires `belief_mode`, accepts `future_contingent`, accepts `factional` / `rumored`, and rejects retired `confidence` values such as `rumor` and `performative_lie`. Remaining references below to the old BEL schema are historical intake context unless a later ticket explicitly updates them.
 
 ## Problem Statement
 

@@ -8,6 +8,7 @@
     "created_at_page",
     "holder",
     "claim",
+    "belief_mode",
     "truth_relation",
     "confidence",
     "visibility",
@@ -27,14 +28,17 @@
       "pattern": "^(STENT-[0-9]{4}|group:[A-Za-z0-9 _:-]+|public|narrator)$"
     },
     "claim": { "type": "string", "minLength": 1 },
+    "belief_mode": {
+      "enum": ["knows", "believes", "suspects", "doubts", "denies", "reports", "claims", "deceives", "misremembers", "interprets"]
+    },
     "truth_relation": {
-      "enum": ["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual"]
+      "enum": ["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"]
     },
     "confidence": {
-      "enum": ["certain", "likely", "suspected", "rumor", "performative_lie"]
+      "enum": ["certain", "high", "medium", "low", "uncommitted"]
     },
     "visibility": {
-      "enum": ["private", "shared", "public", "concealed", "suppressed"]
+      "enum": ["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"]
     },
     "basis": {
       "type": "object",
