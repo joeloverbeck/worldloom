@@ -379,6 +379,26 @@ Before approving any major change, the system should be able to answer:
 
 ## Validation Rules
 
+### Rule Numbering and Enforcement Map
+
+The defined FOUNDATIONS Validation Rules are Rules 1-7, 11, and 12. The numbering gap is intentional and must be preserved in references; no workflow, skill, ticket, or spec may cite a FOUNDATIONS rule number whose meaning is not declared here.
+
+| Rule | Name | Enforcement surface |
+|---|---|---|
+| 1 | No Floating Facts | `tools/validators/src/rules/rule1-no-floating-facts.ts` (`rule1_no_floating_facts`) plus skill grounding review |
+| 2 | No Pure Cosmetics | `tools/validators/src/rules/rule2-no-pure-cosmetics.ts` (`rule2_no_pure_cosmetics`) plus skill integration review |
+| 3 | No Specialness Inflation | Judgment-only design review; no validator file |
+| 4 | No Globalization by Accident | `tools/validators/src/rules/rule4-no-globalization-by-accident.ts` (`rule4_no_globalization_by_accident`) plus scope review |
+| 5 | No Consequence Evasion | `tools/validators/src/rules/rule5-no-consequence-evasion.ts` (`rule5_no_consequence_evasion`) plus integration review |
+| 6 | No Silent Retcons | `tools/validators/src/rules/rule6-no-silent-retcons.ts` (`rule6_no_silent_retcons`) plus append-only canon/change-log review |
+| 7 | Preserve Mystery Deliberately | `tools/validators/src/rules/rule7-mystery-reserve-preservation.ts` (`rule7_mystery_reserve_preservation`) plus the story-pipeline mystery/invariant firewall gate |
+| 11 | No Spectator Castes by Accident | `tools/validators/src/rules/rule11-action-space.ts` (`rule11_action_space`) plus canon-addition Validation Test 11 judgment review |
+| 12 | No Single-Trace Truths | `tools/validators/src/rules/rule12-redundancy.ts` (`rule12_redundancy`) plus canon-addition Validation Test 12 judgment review |
+
+Rule 8 was proposed during SPEC-09 and rejected as a separate rule; its substance is folded into the §Core Principle "Default Reality" paragraph and Rule 6. Rule 9 (No Impossible Knowledge) and Rule 10 (No Premise-Collapsing Exceptions) are cross-reference notes, not standalone rules: Rule 9 is handled by character-generation Phase 7b and diegetic-artifact-generation Phase 7c distribution conformance checks, while Rule 10 is handled by canon-addition Phase 5 Diffusion Analysis, Phase 7 Counterfactual Pressure Test, and Validation Tests 3 and 8 on stabilizer concreteness. There is no Rule 13.
+
+`canon-addition`'s numbered Validation Tests are a distinct scheme from FOUNDATIONS Validation Rules: Test N is not Rule N. In particular, canon-addition Validation Test 13 (misrecognition probe) maps to §Acceptance Tests #9, not to any FOUNDATIONS rule.
+
 ### Rule 1: No Floating Facts
 No fact may exist without:
 - domain
@@ -436,14 +456,10 @@ When a canon fact introduces or depends on exceptional capability, it must name 
 
 Permissible leverage includes locality, secrecy, legitimacy, bureaucracy, numbers, ritual authority, domain expertise, access, timing, social trust, deniability, and infrastructural control.
 
-Rule 9 (No Impossible Knowledge) is handled by character-generation Phase 7b and diegetic-artifact-generation Phase 7c distribution conformance checks.
-
 ### Rule 12: No Single-Trace Truths
 Hard-canon core truths must leave traces in at least two distinct registers unless the truth is intentionally hidden and the hiding mechanism is itself canonized.
 
 Registers include law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, and other named in-world traces.
-
-Rule 10 (No Premise-Collapsing Exceptions) is handled by canon-addition Phase 5 Diffusion Analysis, Phase 7 Counterfactual Pressure Test, and Validation Tests 3 and 8 on stabilizer concreteness.
 
 ---
 

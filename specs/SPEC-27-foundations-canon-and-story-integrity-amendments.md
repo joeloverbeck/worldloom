@@ -58,6 +58,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D2 — Rule Numbering and Enforcement Map
 
+**Implementation note (2026-05-14, SPEC27FOUCAN-002).** D2 landed in `docs/FOUNDATIONS.md` §Validation Rules as an in-place Rule Numbering and Enforcement Map. The map declares Rules 1-7, 11, and 12; records the disposition of Rules 8, 9, 10, and 13; and distinguishes `canon-addition` Validation Tests from FOUNDATIONS Validation Rules. Remaining D2 prose below is historical intake context unless a later ticket explicitly owns further wording cleanup.
+
 **Current state.** `FOUNDATIONS.md` §Validation Rules has Rules 1–7, 11, 12; Rules 8/9/10/13 are absent or reference-only; the gap's rationale lives only in `archive/specs/SPEC-09`. `canon-addition`'s "Validation Tests" are a separate scheme colliding at 11–13.
 
 **Change.** Add a "Rule Numbering and Enforcement Map" subsection at the top of §Validation Rules stating:
