@@ -117,6 +117,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D8 — Mystery Accretion Discipline (story-scope, under Rule 7)
 
+**Implementation note (2026-05-15, SPEC27FOUCAN-008).** D8 landed the Mystery Accretion clause in `docs/FOUNDATIONS.md` §Story Bundles §5 and updated `branching-story-health-audit` Phase 2e to load whole-class Mystery Reserve context and report `mystery_accretion_resolved` findings when repeated `clue_added` / `narrowed` entries cumulatively resolve or overconstrain a Mystery Reserve entry. The check reuses `PG.state_snapshot.unresolved_mystery_claims[].status`; no `SLT` field or story-state schema field was added. Remaining D8 prose below is historical intake context unless a later ticket explicitly owns further enforcement changes.
+
 **Current state.** `PG.state_snapshot.unresolved_mystery_claims[].status` carries `clue_added` / `narrowed`, but nothing checks cumulative narrowing.
 
 **Change.** `FOUNDATIONS.md` §Story Bundles §5 Rule 7 paragraph gains a "Mystery Accretion" clause: story-pipeline skills must check *cumulative* narrowing of a Mystery Reserve entry across a branch's pages, not merely direct answer statements — repeated clues can resolve a mystery by accumulation. Implementation reuses the existing `unresolved_mystery_claims[].status` vocabulary; `branching-story-health-audit` Phase 2e gains a cumulative-narrowing check that walks a branch's page chain. No new `SLT` field is added.

@@ -605,6 +605,8 @@ Rule 5 (No Consequence Evasion) governs per-page consequence capacity. Every pag
 
 Rule 7 (Preserve Mystery Deliberately) governs story-local `unresolved_mystery_claims` (on `PG.state_snapshot`) and `mystery_policy.allowed_authority` (on commitment blocks) authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate. `SF.authority` uses the schema-backed story-fact authority enum from the shared story state contract: `branch_local`, `branch_local_counterfactual`, `canon_candidate`, and `canon_linked`; `canon_linked` is allowed only after canon acceptance and is backed by a parent `CF-<integer>` in `SF.derived_from`.
 
+**Mystery Accretion.** Story-pipeline skills must protect Mystery Reserve entries against cumulative narrowing across a branch, not only against a single direct answer statement. Repeated `PG.state_snapshot.unresolved_mystery_claims[].status: clue_added | narrowed` entries can collectively resolve, overconstrain, or collapse a mystery even when no individual page says the answer outright; `branching-story-health-audit` must walk the branch page chain and flag that accumulated narrowing against the Mystery Reserve firewall. This uses the existing `unresolved_mystery_claims[].status` vocabulary and does not add an `SLT` field.
+
 Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces such as `canon-addition`, `propose-new-canon-facts`, and `create-base-world`; they are not story-scope record validators by default.
 
 ### 5a. Commitment Blocks Are Causal Moves

@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `docs/WORKFLOWS.md`, `docs/MACHINE-FACING-LAYER.md` (cross-cutting doc reconciliation). No production code; runs package test lanes for verification.
-**Deps**: archive/tickets/SPEC27FOUCAN-001.md, archive/tickets/SPEC27FOUCAN-002.md, archive/tickets/SPEC27FOUCAN-003.md, archive/tickets/SPEC27FOUCAN-004.md, archive/tickets/SPEC27FOUCAN-005.md, archive/tickets/SPEC27FOUCAN-006.md, archive/tickets/SPEC27FOUCAN-007.md, SPEC27FOUCAN-008
+**Deps**: archive/tickets/SPEC27FOUCAN-001.md, archive/tickets/SPEC27FOUCAN-002.md, archive/tickets/SPEC27FOUCAN-003.md, archive/tickets/SPEC27FOUCAN-004.md, archive/tickets/SPEC27FOUCAN-005.md, archive/tickets/SPEC27FOUCAN-006.md, archive/tickets/SPEC27FOUCAN-007.md, archive/tickets/SPEC27FOUCAN-008.md
 
 ## Problem
 
@@ -13,7 +13,7 @@ SPEC-27's amendments span the CF schema (D1), FOUNDATIONS structure (D2), `canon
 ## Assumption Reassessment (2026-05-14)
 
 1. `tools/validators`, `tools/world-index`, `tools/patch-engine`, and `tools/world-mcp` each expose `npm run build` + `npm test` (confirmed via the SPEC-27 spec-to-tickets Step 2 command-surface scan). `docs/WORKFLOWS.md` cites "Test 13" and CF-status terminology; `docs/MACHINE-FACING-LAYER.md` documents the validator framework and CF-status vocabulary — both must be checked against D1's amended enum and D2's rule-numbering map.
-2. This ticket depends on `archive/tickets/SPEC27FOUCAN-001.md`, `archive/tickets/SPEC27FOUCAN-002.md`, `archive/tickets/SPEC27FOUCAN-003.md`, `archive/tickets/SPEC27FOUCAN-004.md`, `archive/tickets/SPEC27FOUCAN-005.md`, `archive/tickets/SPEC27FOUCAN-006.md`, `archive/tickets/SPEC27FOUCAN-007.md`, and SPEC27FOUCAN-008 having landed; it introduces no production code and exercises the surfaces those tickets produced. All eight `Deps` are tickets produced in this same decomposition run.
+2. This ticket depends on `archive/tickets/SPEC27FOUCAN-001.md`, `archive/tickets/SPEC27FOUCAN-002.md`, `archive/tickets/SPEC27FOUCAN-003.md`, `archive/tickets/SPEC27FOUCAN-004.md`, `archive/tickets/SPEC27FOUCAN-005.md`, `archive/tickets/SPEC27FOUCAN-006.md`, `archive/tickets/SPEC27FOUCAN-007.md`, and `archive/tickets/SPEC27FOUCAN-008.md` having landed; it introduces no production code and exercises the surfaces those tickets produced. All eight `Deps` are tickets produced in this same decomposition run.
 3. Shared boundary under audit: the full SPEC-27 amendment surface — the CF schema/type, the FOUNDATIONS §Validation Rules numbering, the story-pipeline contract + skills, and the two cross-cutting docs. This ticket verifies coherence across all of them; it owns no single deliverable's primary edit.
 4. FOUNDATIONS principle under audit: the reconciliation confirms every SPEC-27 amendment (D1-D8) landed without leaving the doc set internally inconsistent — the spec's §Verification D9 contract.
 
