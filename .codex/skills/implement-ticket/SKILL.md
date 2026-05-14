@@ -68,6 +68,7 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 - Explicit spec/doc references with status, implementation notes, counts, or current-state prose -> truth the same-seam reference before closeout, usually with a dated implementation note when broad row-by-row rewriting is out of scope.
 - Generated or ignored proof artifacts such as `dist/`, `_index/`, coverage output, or caches -> use `references/dirty-worktree-ledger.md` and package-specific ignored-artifact checks.
 - Post-proof prose-only closeout edits -> rerun `git diff --check` and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite.
+- Skill phase/check count drift -> when adding, removing, renaming, or reordering skill phases, gates, findings, or checks, grep nearby skill prose for numeric labels and old phase references such as `6 checks`, `7 sub-phases`, `Phase 2g`, or `Phase 9` before final proof. Update active operational labels; preserve old counts only when clearly marked historical.
 
 ## Always First
 

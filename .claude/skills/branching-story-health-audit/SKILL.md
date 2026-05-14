@@ -51,14 +51,15 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 7 sub-phases executed sequentially
+Phase 2 [structural; default]: 8 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
   ├─ 2d: Belief / visibility health
   ├─ 2e: Mystery / canon safety
   ├─ 2f: Continuation / terminal proof
-  └─ 2g: Causal dependency health
+  ├─ 2g: Causal dependency health
+  └─ 2h: Canon baseline drift
         |
         v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
@@ -107,7 +108,7 @@ All direct-write markdown. No patch-engine submissions — the audit is read-onl
 
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-- `docs/FOUNDATIONS.md` — §Story Bundles §5 / §5a / §5b / §6a govern the audit checks
+- `docs/FOUNDATIONS.md` — §Story Bundles §4b / §5 / §5a / §5b / §6a govern the audit checks
 - `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (audit reads against), §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
@@ -115,7 +116,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`; the latest `change_log_entry` in governing context is the current world-canon revision for §4b canon-baseline drift checks
 
 Bundle MUST exist. For `cross_story`, sibling bundles are enumerated at Pre-flight (zero siblings is legitimate and produces a no-op for Phase 4).
 
@@ -127,7 +128,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Parse `mode` argument — comma-separated list of `structural | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set.
 4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
-5. Load world canon context packet seeded with: every `M-<integer>` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification).
+5. Load world canon context packet seeded with: every `M-<integer>` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
 If any precondition fails, the skill aborts before Phase 1.
@@ -225,6 +226,16 @@ Apply the same `causal_dependency_threat_scan` sub-checks across replayed branch
 - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
 
 Repair routing: `choice_dependency_clobbered`, `affordance_dependency_clobbered`, and `obligation_counterparty_unavailable_without_transfer` use `repair_kind: turn_repair`. `slt_precondition_clobbered` uses `repair_kind: commitment_block` when a replacement block is needed, otherwise `turn_repair`.
+
+### Phase 2h: Canon baseline drift (per FOUNDATIONS §Story Bundles §4b)
+
+For every branch head and every page selected by `branch_path_filter`, compare `PG.state_snapshot.canon_revision` against the current world-canon revision loaded in Pre-flight. Classify each page's drift as exactly one of `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`.
+
+- `canon_baseline_missing` (ERROR): a post-D6 page snapshot lacks `canon_revision` even though the current world has a change-log revision. `repair_kind: turn_repair`.
+- `canon_baseline_requires_health_audit` (ERROR): canon changed after the page baseline and affected records cannot be proven irrelevant from loaded context. `repair_kind: health_audit`.
+- `canon_baseline_requires_repair_turn` (ERROR): changed canon contradicts a story-local active record, affordance, or open debt that a new turn would otherwise treat as current. `repair_kind: turn_repair`.
+- `canon_baseline_promotion_or_retcon_conflict` (ERROR): changed canon collides with a held `canon_candidate`, `canon_linked` story fact, or promotion queue entry. `repair_kind: promotion`.
+- `canon_baseline_grandfathered` (WARNING): the page remains valid as a committed historical branch state, but new turns must cite the grandfathered baseline classification before proceeding.
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
@@ -351,6 +362,10 @@ rsp_cards_emitted: N | 0
 
 (Phase 2g findings.)
 
+## Canon baseline drift
+
+(Phase 2h findings.)
+
 ## Prose health (if `prose` in modes)
 
 (Phase 3 findings.)
@@ -389,6 +404,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 - **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies.
 - **Rule 5 (No Consequence Evasion)** — Phase 2a (Choice Consequence Integrity replay) + Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: cosmetic accepted-choice findings + unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
+- **Canon Baseline Drift** — Phase 2h. Mechanism: page `state_snapshot.canon_revision` values are compared against the latest governing `change_log_entry`; stale baselines are classified and routed without rewriting committed pages.
 
 ## Record Schemas
 
@@ -414,6 +430,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | Canon Layers | Pre-flight, Phase 2e | World canon loaded via context packet; per-event canon-authority classification. |
 | Mystery Reserve | Pre-flight, Phase 2e | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Audit reads `PG` records as authoritative; never mutates them. Drift between prose and state is reported in findings, not in PG records. |
+| §Story Bundles §4b (Canon Baseline Drift) | Phase 2h | Audit compares page `state_snapshot.canon_revision` against current world canon and reports compatible / grandfathered / audit / repair / promotion-conflict classifications without mutating committed pages. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |

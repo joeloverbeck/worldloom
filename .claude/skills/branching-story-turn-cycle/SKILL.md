@@ -38,7 +38,7 @@ Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)`; parent prose policy verified.
 
-(b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
+(b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; parent-page canon-baseline drift classified per FOUNDATIONS §Story Bundles §4b; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
 (c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 6 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan, Choice Consequence Integrity).
 
@@ -137,14 +137,14 @@ Atomic-record writes route through `mcp__worldloom__submit_patch_plan`. Superses
 
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-- `docs/FOUNDATIONS.md` — §Story Bundles (especially §4a Plan-Authority Boundary, §5 / §5a / §5b, §6a Belief vs. Fact) governs this skill
+- `docs/FOUNDATIONS.md` — §Story Bundles (especially §4a Plan-Authority Boundary, §4b Canon Baseline Drift, §5 / §5a / §5b, §6a Belief vs. Fact) governs this skill
 - `.claude/skills/_shared-templates/story-state-contract.md` — shared schemas (§4), predicate DSL (§5), action routing (§6), eight hard gates (§7), page-plan minimum contract (§8), branching procedure (§9), shared write order (§10)
 - `reports/prose-quality-instructions.md` — canonical source for verbatim §2 / §3 / §19 of the page plan
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and `INDEX.md` — bundle root context
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml` — parent page; MUST exist
 - Parent's `state_snapshot.active_records` resolved to their `_source/<class>/*.yaml` files
 - Optional `pages-prose/<recent>.md` for §14 continuity (only when parent prose exists)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)`; the latest `change_log_entry` in governing context is the current world-canon revision for §4b drift comparison
 - `tools/world-mcp/dist/src/cli/compute-pg-hashes.js` — canonical CLI for deterministic PG hash computation per shared contract §4.2a "Tooling" subsection; consumed at Phase 9 step 2. Reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes — single source of truth across authoring and validation paths. Hand-rolling the canonical-JSON serializer is forbidden.
 
 The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `_source/pages/PG-<integer>.yaml` MUST NOT exist (collision aborts Pre-flight).
@@ -161,8 +161,9 @@ Before Phase 1:
 6. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
 7. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.prose_path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
 8. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
-9. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
-10. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
+9. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet. Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
+10. Compare `parent.state_snapshot.canon_revision` against the current world-canon revision and classify canon-baseline drift as exactly one of `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`. Abort before Phase 1 unless the classification is `compatible` or `grandfathered`; route the other classifications to `branching-story-health-audit`, a repair turn, or `story-fact-promotion-to-canon` / `canon-addition` as appropriate. Record the classification and cited CH ids in working memory for the page plan and `validation_trace.parent_snapshot_compatibility` rationale.
+11. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -327,7 +328,7 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `parent_page_id: <parent>`, `branch_id: <active or new>`, `turn_index: parent.turn_index + 1`.
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
-- Full `state_snapshot`: `active_records` (per-class lists including `BEL` and `STSTAT` keys); `entity_status` derived from active `STSTAT` records, one entry per active `STENT`; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
+- Full `state_snapshot`: `canon_revision` copied from the current world-canon revision loaded in Pre-flight; `active_records` (per-class lists including `BEL` and `STSTAT` keys); `entity_status` derived from active `STSTAT` records, one entry per active `STENT`; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
 - `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
 - `prose_plan_path: pages-prose-plans/PG-<integer>.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
 - `prose_path: null`, `prose_receipt_path: null`.
@@ -362,7 +363,7 @@ For every emitted `CHC`, populate `grounded_in.records` with at least one active
 Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one-line PASS rationale per gate:
 
 1. **input legality** — XOR action source enforced; chosen CHC belongs to parent and is not retired; bundle + parent exist.
-2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`.
+2. **parent snapshot compatibility** — `parent.state_hash` matches `PG-<integer>.state_hash_parent`; `parent.state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified as `compatible` or `grandfathered` before proceeding.
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
 5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
@@ -370,7 +371,7 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
-Plus 6 turn-cycle-additional checks (recorded in working memory):
+Plus 7 turn-cycle-additional checks (recorded in working memory):
 
 1. **Action source legality** — XOR enforced; chosen CHC not retired. When `manual_action_text` is the source, the action has been parsed against `STORY_KERNEL.md` `## Player Agency Contract`: agency surface, write-in envelope, and viewpoint limits all support the route or the route records the exact agency-contract reason it was blocked/held.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
@@ -382,6 +383,7 @@ Plus 6 turn-cycle-additional checks (recorded in working memory):
    - `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
    - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
 6. **Choice Consequence Integrity** (`cosmetic_accepted_choice`) — when the route is `accept` for a selected `CHC` or accepted write-in, reject the turn if `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the selected choice as rhetorical or expressive. `CHC.grounded_in` proves why a choice was available; it does not by itself prove that selecting the choice changed anything.
+7. **Canon Baseline Drift** (`canon_baseline_drift`) — reject silent continuation when the parent page's `state_snapshot.canon_revision` is older than the current world-canon revision and the drift classification is not `compatible` or `grandfathered`. `requires_health_audit` routes to `branching-story-health-audit`; `requires_repair_turn` routes to a repair turn before new assertions; `promotion_or_retcon_conflict` routes to `story-fact-promotion-to-canon` / `canon-addition` review.
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
@@ -447,6 +449,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Canon Layers | Pre-flight, Phase 5 | World canon layers loaded via context packet; story-bundle records carry story-local truths per FOUNDATIONS §Story Bundles §1. |
 | Mystery Reserve | Pre-flight, Phase 5, 9 | Whole-class Mystery Reserve loaded; Phase 5 classification; Phase 9 gate 3 enforces firewall. |
 | §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.prose_path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
+| §Story Bundles §4b (Canon Baseline Drift) | Pre-flight, Phase 6, 9 | Parent `state_snapshot.canon_revision` compared to the latest context-packet `change_log_entry`; new PG persists the current `canon_revision`; non-compatible drift routes to audit, repair, or promotion/retcon review. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `expected_witnesses` coverage for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; each relevant witness group gets a `BEL` create/supersession or a closed-set non-propagation rationale. `truth_relation` + `visibility` + `confidence` are consumed by the social-state firewall. |

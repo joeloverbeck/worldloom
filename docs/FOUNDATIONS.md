@@ -585,6 +585,14 @@ Story state is authoritative at page-plan commit. Rendered prose is a rendering 
 
 Page snapshots are the fork primitive. Any committed page is a valid parent for `branching-story-turn-cycle`, regardless of whether its prose has been rendered. There is no parallel "did the prose realize the planned arc" state engine — no ARC_TRACE class, no second state-transition pass. Prose deviating from plan is routed by `branching-story-prose-attach` as either a prose-quality issue (revise prose), a structural-fact issue (run a repair turn), or a canon-candidate (run promotion).
 
+### 4b. Canon Baseline Drift
+
+A committed story page is evaluated against the world-canon revision loaded at page-plan commit. `PG.state_snapshot.canon_revision` records that baseline as the latest governing `CH-<integer>` change-log id visible to the page-planning context, or `null` only when the world has no change-log entry to cite.
+
+Later world-canon changes do not silently rewrite committed story-bundle records. Before advancing from a parent page, story-pipeline skills must compare the parent page's recorded baseline against the current world-canon revision and classify drift as exactly one of: `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`.
+
+No story-pipeline skill may silently treat stale story-local assumptions as current world-valid truth. Compatible or grandfathered drift may proceed with the classification recorded in the new page plan or audit finding; drift that requires audit, repair, or promotion/retcon review must route to `branching-story-health-audit`, a repair turn, or `story-fact-promotion-to-canon` / `canon-addition` as appropriate before new world-valid assumptions are asserted.
+
 ### 5. Validation Rules At Story Scope
 
 Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_policy`, `provenance.origin`, `scope.visibility`, `preconditions.hard|soft` (in the closed predicate DSL), and `effects.create|supersede|close` (mirroring `SE.state_delta`) per the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4.4. The same load-bearing discipline applies across the landed story-state schemas: `STSTAT` carries replayable life / agency / location state for `entity_status`, `SE.resolution` grounds non-accept outcomes with result and player-visible feedback, `SF.authority` separates branch-local, counterfactual, candidate, and canon-linked facts, `OBL` / `CNSQ` `urgency` gives debt salience a uniform field, `CHC.grounded_in` makes choice grounding structurally checkable, and the closed predicate DSL includes actor-unbound existential predicates for social-state prefiltering without branch-local ID leakage.

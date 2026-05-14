@@ -98,6 +98,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D6 — Canon Baseline Drift (story-scope §4b) + phantom-feature correction
 
+**Implementation note (2026-05-15, SPEC27FOUCAN-006).** D6 landed the Canon Baseline Drift rule in `docs/FOUNDATIONS.md` §Story Bundles §4b, added `PG.state_snapshot.canon_revision` to the shared story-state contract and `story-page.schema.json`, updated `branching-story-turn-cycle` to persist and classify the baseline, added health-audit Phase 2h drift classification, reconciled `docs/CONTEXT-PACKET-CONTRACT.md`, and proved the schema/helper seam through `tools/validators` package tests. Remaining D6 prose below is historical intake context unless a later ticket explicitly owns further enforcement changes.
+
 **Current state.** `CONTEXT-PACKET-CONTRACT.md:246,258,264` describe a `canon_revision` baseline that the PG schema, story skills, and patch-engine ops never implemented.
 
 **Change.**
