@@ -60,7 +60,7 @@ Auxiliary story-bundle records:
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 16 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 12 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -132,11 +132,10 @@ state_snapshot:
     terminal_status: open | branch_pause | terminal_closed
     terminal_rationale: null | string
 plan:
-  path: pages-prose-plans/PG-<integer>.md*
   plan_hash: sha256*
-rendered_prose:
-  path: pages-prose/PG-<integer>.md | null  # default null
-  receipt_path: pages-prose-receipts/PG-<integer>.yaml | null   # default null
+prose_plan_path: pages-prose-plans/PG-<integer>.md*   # stable plan address; included in state_hash payload
+prose_path: pages-prose/PG-<integer>.md | null        # default null; excluded from state_hash payload
+prose_receipt_path: pages-prose-receipts/PG-<integer>.yaml | null   # default null; excluded from state_hash payload
 emitted_choices: [CHC-<integer>]*
 validation_trace:                      # * one entry per shared gate with PASS + one-line rationale
   input_legality: "PASS: <rationale>"
@@ -149,7 +148,7 @@ validation_trace:                      # * one entry per shared gate with PASS +
   canon_promotion_hold: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
 ```
 
-`rendered_prose.path` and `receipt_path` are informational. They are not a lifecycle status. There is no `prose_status` field. There is no `state_delta_summary` field — `SE.state_delta` is authoritative. There is no `open_debt` field on the snapshot — open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`.
+`prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
 #### 4.2a Deterministic PG hash computation
 
@@ -160,9 +159,12 @@ Compute `plan.plan_hash` first. It is sha256 over the exact UTF-8 bytes of the p
 Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except:
 
 - exclude `state_hash` itself;
-- exclude `rendered_prose` entirely (`rendered_prose.path` and `rendered_prose.receipt_path` are mutable publication receipts, not fork state).
+- exclude `prose_path` (mutable publication receipt);
+- exclude `prose_receipt_path` (mutable publication receipt).
 
-All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.path`, `plan.plan_hash`, `emitted_choices`, and `validation_trace`.
+All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.plan_hash`, `prose_plan_path`, `emitted_choices`, and `validation_trace`.
+
+Pre-SCAUD-001 PG records retain their original `state_hash` values, computed against the old nested prose-receipt payload. Those values are read as opaque strings; no re-hashing is performed. Post-SCAUD-001 PG records use the payload definition above. The `snapshot_replay_equality` validator must tolerate this discontinuity.
 
 The state payload serialization is deterministic canonical JSON: objects serialized with keys sorted lexicographically at every depth, arrays kept in authored order, strings emitted as UTF-8 JSON strings, no insignificant whitespace, no comments, and no YAML anchors or aliases. Hash the resulting UTF-8 bytes with sha256 and encode as 64 lowercase hex characters.
 
@@ -176,7 +178,7 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
   --pg   <path-to-pg-draft>.{yaml,json}
 ```
 
-The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included `rendered_prose` block) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
+The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication-receipt blocks) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
 ### 4.3 `SE` (~12 sub-paths)
 
@@ -291,6 +293,8 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 | `wait` | Hold, observe, delay, defer, maintain position, or let a condition mature. |
 | `decide` | Choose, commit, prioritize, accept, reject, or resolve between alternatives. |
 
+`attempt` is an `SE.outcome_route` per §6, not an `action_family`. `CHC` records carrying an action that may resolve through `outcome_route: attempt` use the action family describing the attempted action, such as `pursue`, `persuade`, or `harm`.
+
 ### 4.4b STENT role and SREL axis taxonomies
 
 `STENT.role_in_story` is a closed list field, not a scalar. A story-local entity may carry more than one role when that role is operationally useful.
@@ -329,7 +333,212 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 | `obligation` | Degree of duty, promise, role-bound responsibility, or expected performance. |
 | `hostility` | Degree of active antagonism, aggression, rivalry, contempt, or intent to harm. |
 
-### 4.5 Prose receipt
+### 4.5 Additional Story-Bundle Record Schemas
+
+The following classes share the same append-only rule from §3: committed records are not edited in place; later changes create a new record with `supersedes` when the class schema includes that field.
+
+#### 4.5.1 `STENT` (story-local entity)
+
+Mirrors a world-level `CHAR` dossier into the bundle for branch-local entity state, or defines a wholly story-local entity.
+
+```yaml
+id: STENT-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STENT-<integer> | null            # default null
+display_name: string*                          # cast roster label
+bound_char_id: CHAR-<integer> | null          # null only for wholly story-local entities
+role_in_story: [<role>]*                       # closed list per §4.4b; one or more
+```
+
+No `notes` field: authorial notes belong in the page plan or another load-bearing record.
+
+#### 4.5.2 `STINT` (intention)
+
+Tracks an entity's active goal-state at a page.
+
+```yaml
+id: STINT-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STINT-<integer> | null            # default null
+holder: STENT-<integer>*
+intent: string*                                # natural-language goal statement
+urgency: low | medium | high*
+expires_when: string*                          # natural-language supersession trigger
+```
+
+#### 4.5.3 `SF` (story-local fact)
+
+Records what is true in the branch. Use `BEL` for what a holder believes, claims, witnesses, suspects, or lies about.
+
+```yaml
+id: SF-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: SF-<integer> | null               # default null
+statement: string*                             # natural-language branch-local truth
+derived_from: [CF-<integer> | <story-local record id>]   # default []; non-empty for mirrored or derived facts
+```
+
+No `certainty`, `scope`, `who_knows`, `derived_from_cf`, `why_it_matters_at_opening`, or `trace_records` fields. CF mirrors and branch-derived facts both use `derived_from`.
+
+#### 4.5.4 `OBL` (obligation)
+
+Tracks promised, owed, or required behavior that constrains future choice.
+
+```yaml
+id: OBL-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: OBL-<integer> | null              # default null
+status: open | closed | escalated | abandoned | transferred*
+obligation_kind: string*                       # open vocabulary
+description: string*
+owed_by: STENT-<integer> | group:<name> | public | null*
+owed_to: STENT-<integer> | group:<name> | public | null*
+trigger_to_close: string*                      # natural-language supersession trigger
+```
+
+No `introduced_at_page` field; `created_at_page` is the only creation provenance.
+
+#### 4.5.5 `CNSQ` (consequence)
+
+Tracks a realized or pending effect from a prior event or state.
+
+```yaml
+id: CNSQ-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: CNSQ-<integer> | null             # default null
+status: pending | resolved | escalated | abandoned*
+consequence_kind: string*                      # open vocabulary
+description: string*
+resolves_when: string*                         # natural-language supersession trigger
+derived_from: [<record_id>]                    # default []; record ids that caused this consequence
+```
+
+#### 4.5.6 `THR` (thread)
+
+Tracks an active narrative tension across pages.
+
+```yaml
+id: THR-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: THR-<integer> | null              # default null
+status: active | resolved | escalated | abandoned*
+title: string*
+summary: string*
+urgency: low | medium | high*
+derived_from: [<record_id>]                    # default []
+```
+
+#### 4.5.7 `SREL` (relationship)
+
+Tracks a directed or symmetric relation between entities along a closed taxonomy axis.
+
+```yaml
+id: SREL-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: SREL-<integer> | null             # default null
+axis: <axis>*                                  # §4.4b closed enum
+participants: [STENT-<integer>]*              # exactly 2 participants
+direction: string*                             # "STENT-<from> -> STENT-<to>" | "bidirectional"
+value: none | trace | low | medium | high | extreme*
+valence: symmetric | asymmetric | bidirectional | adversarial*
+description: string*
+derived_from: [<record_id>]                    # default []
+```
+
+No `magnitude` or `trace_records` fields; use `value` and `derived_from`.
+
+#### 4.5.8 `STLOC` (story-local location)
+
+Tracks a spatial referent grounded in world canon or wholly story-local.
+
+```yaml
+id: STLOC-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STLOC-<integer> | null            # default null
+label: string*                                 # short display name
+description: string*                           # natural-language description
+bound_ent: ENT-<integer> | null               # null for wholly story-local locations
+```
+
+No `open_at_opening` field; active locations are open by virtue of page state.
+
+#### 4.5.9 `STOBJ` (story-local object)
+
+Tracks a movable or grounded object referenced by affordances or possession state.
+
+```yaml
+id: STOBJ-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STOBJ-<integer> | null            # default null
+label: string*                                 # short display name
+description: string*                           # natural-language description
+owner: STENT-<integer> | group:<name> | public | null*
+current_location: STLOC-<integer> | offstage | unknown | carried_by:STENT-<integer>*
+```
+
+#### 4.5.10 `DA` (story-local diegetic artifact)
+
+Tracks an in-story text or artifact whose authorship is diegetic.
+
+```yaml
+id: DA-<integer>*                              # story-local id; distinct from world-level DA
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: DA-<integer> | null               # default null
+title: string*                                 # display label
+author: STENT-<integer> | group:<name> | unknown | anonymous*
+genre: string*                                 # open vocabulary
+body: string*                                  # diegetic text content
+intended_audience: STENT-<integer> | group:<name> | public | self | none*
+circulation: private | factional | public | concealed | suppressed*
+truth_relation: true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent*
+derived_from: [<record_id>]                    # default []
+```
+
+#### 4.5.11 `BR` (branch)
+
+Tracks a causal lineage of pages. Branches fork; they do not supersede.
+
+```yaml
+id: BR-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+label: string*                                 # short display name
+description: string                            # optional free-form
+parent_branch_id: BR-<integer> | null*        # null only for root branch
+forked_at_page_id: PG-<integer> | null*       # null only for root branch
+root_page_id: PG-<integer>*                   # first page on this branch
+```
+
+#### 4.5.12 `CHC` (emitted choice)
+
+Tracks a page-emitted choice selectable by the player on the next turn-cycle invocation.
+
+```yaml
+id: CHC-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: CHC-<integer> | null              # default null
+surface_label: string*                         # short display label
+player_visible_intent: string*                 # natural-language statement of what the player commits to
+target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed enum
+likely_state_pressure: string*                 # natural-language pressure description
+associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
+success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
+```
+
+No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
+
+### 4.6 Prose receipt
 
 Stored at `pages-prose-receipts/PG-<integer>.yaml` (direct-write artifact; not an atomic `_source/` record).
 
@@ -485,7 +694,7 @@ Story-local resolution-like claims are classified into three authority levels:
 | Authority | Meaning | Promotion path |
 |---|---|---|
 | `apparent` | What appears to be true in the branch from the cast's epistemic position. May or may not match world canon. | No promotion. Treated as `BEL` if a holder is named. |
-| `branch_local_counterfactual` | What is true *only in this branch*; contradicts canon or another branch deliberately. | No promotion. Lives as `SF` with branch-scoped certainty. |
+| `branch_local_counterfactual` | What is true *only in this branch*; contradicts canon or another branch deliberately. | No promotion. Lives as `SF` with branch-scoped truth. |
 | `canon_candidate` | The branch asserts something that may be world-level truth and could be promoted to canon. | Pauses via §7 gate 8 until `story-fact-promotion-to-canon` runs and `canon-addition` adjudicates. |
 
 Mysteries with `status: forbidden` are never resolved by any authority level. Mysteries with `status: active | passive` may be resolved per the `future_resolution_safety` coupling in FOUNDATIONS §Canon Layers.

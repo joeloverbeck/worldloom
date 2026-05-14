@@ -22,6 +22,8 @@ A pure command substitution inside an unchanged gated sequence, such as replacin
 
 Running `validate_patch_plan`, `validate-patch-plan`, or an equivalent pre-apply validator only as downstream proof does not require the extra HARD-GATE read when the active ticket does not change validation behavior, schemas, gate order, approval-token semantics, pre-apply semantics, or another validation signal. Record the command as proof-only if the distinction affects reassessment or closeout.
 
+Story-record contract or skill-prescription edits do not require the extra HARD-GATE read merely because they rename, add, or remove authored record fields. Record `HARD-GATE read: not required` when reassessment proves the ticket does not change skill HARD-GATE wording, validator behavior, `validation_trace`, approval-token behavior, submit/validate flow, pre-apply behavior, or machine-enforced required-field checks. If the same schema change also touches one of those enforcement surfaces, read `docs/HARD-GATE-DISCIPLINE.md` before finalizing reassessment.
+
 Reassess first, then implement. Do not treat the ticket as mechanically executable until its assumptions match the current repo.
 
 ## Execution Map
@@ -45,6 +47,7 @@ Use this compact checklist so required references are not skipped:
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
 4. HARD-GATE / validation-signal changes: `docs/HARD-GATE-DISCIPLINE.md` when the ticket changes skill HARD-GATE wording, canon-write ordering, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill validation-gate rows, content-generating pre-flight input validation, parse-time consumer schema checks, handoff-artifact required-field validation, `validation_trace` semantics, or operator PASS/FAIL criteria.
    - Story-bundle JSON Schema changes under `tools/validators/src/schemas/story-*.schema.json` count as validation-signal changes when they are exercised by `record_schema_compliance` in pre-apply, full-world, or story-bundle validation lanes.
+   - Story-record contract or skill-prescription edits that do not alter gate wording, validator behavior, `validation_trace`, approval-token behavior, submit/validate flow, pre-apply behavior, or machine-enforced required-field checks may record `HARD-GATE read: not required`.
    - Existing validator `applies_to` / run-mode selector edits require the HARD-GATE read when they can affect `pre-apply`, `validate_patch_plan`, `submit_patch_plan`, or another gating path. If live reassessment proves the edit is strictly incremental/full-world non-gating, record `HARD-GATE read: not required` and name the unchanged pre-apply branch in `Assumption Reassessment`.
 5. Verification and closeout: `references/verification-closeout.md` before final proof and completed-ticket truthing.
 

@@ -25,7 +25,7 @@ arguments:
     description: "When intentionally forking into a named branch; otherwise the skill derives BR-<integer> from continuation-vs-fork detection"
     required: false
   - name: accept_parent_unrendered
-    description: "true | false; default: true. Setting false aborts Pre-flight when parent.rendered_prose.path is null. Default true honors FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."
+    description: "true | false; default: true. Setting false aborts Pre-flight when parent.prose_path is null. Default true honors FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."
     required: false
 ---
 
@@ -157,7 +157,7 @@ Before Phase 1:
 3. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
 4. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
 5. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
-6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.rendered_prose.path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
+6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.prose_path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
 7. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
 8. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
 9. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
@@ -166,7 +166,7 @@ If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Resolve the action
 
-If `chosen_choice_id` is supplied, load the `CHC` record; its `target_or_action_family`, `associated_commitment_block`, and `success_policy` (if any) drive the routing.
+If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `associated_commitment_block`, and `success_policy` (if any) drive the routing.
 
 If `manual_action_text` is supplied, parse it into a structured `proposed_action`:
 
@@ -258,7 +258,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 Classify every new resolution-like claim in the delta per shared contract §11:
 
 - `apparent` — what appears to be true from the cast's epistemic position; recorded on `BEL` records.
-- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped certainty.
+- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped truth.
 - `canon_candidate` — may be world-level truth; held for promotion via `story-fact-promotion-to-canon`.
 
 If the action would resolve any mystery with `status: forbidden`, abort before patch submission with a mystery-firewall error. If the action asserts a `canon_candidate` claim, set `outcome_route: promotion_hold` and ensure the state delta records ONLY the branch-local appearance; emit `SE.promotion_claims[]` so the user knows to invoke `story-fact-promotion-to-canon` after this turn lands.
@@ -289,9 +289,9 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
 - Full `state_snapshot`: `active_records` (per-class lists including `BEL` key); `entity_status` per active STENT; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
-- `plan.path: pages-prose-plans/PG-<integer>.md`, `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
-- `prose_plan_path: pages-prose-plans/PG-<integer>.md` (legacy top-level field; required by the engine's `create_pg_record` schema until the shared contract / engine schema reconciliation lands; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the authoritative required-field list).
-- `rendered_prose.path: null`, `rendered_prose.receipt_path: null`.
+- `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
+- `prose_plan_path: pages-prose-plans/PG-<integer>.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
+- `prose_path: null`, `prose_receipt_path: null`.
 - `validation_trace`: populated by Phase 9.
 
 The snapshot is the future fork point — complete enough to be a valid parent for any subsequent turn-cycle invocation regardless of whether its prose is ever rendered (per FOUNDATIONS §Story Bundles §4a).
@@ -314,7 +314,7 @@ Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit 
 
 The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
 
-Each `CHC` carries `surface_label`, `player_visible_intent`, `target_or_action_family`, `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), `success_policy` (only when `target_or_action_family == 'attempt'`).
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
 
 ## Phase 9: Validate
 
@@ -339,7 +339,7 @@ Plus 4 turn-cycle-additional checks (recorded in working memory):
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
 1. Confirm `PG-<integer>.state_hash_parent` is an exact copy of the committed parent PG's `state_hash`.
-2. Compute `PG-<integer>.plan.plan_hash` and `PG-<integer>.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-<integer>.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft) and the `state_hash` output onto `PG-<integer>.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself and `rendered_prose`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
+2. Compute `PG-<integer>.plan.plan_hash` and `PG-<integer>.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-<integer>.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft) and the `state_hash` output onto `PG-<integer>.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself, `prose_path`, and `prose_receipt_path`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
 3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
 If any gate, additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing.
@@ -399,7 +399,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 12 (No Single-Trace Truths) | N/A | Not applicable — story-bundle scope, not world canon. |
 | Canon Layers | Pre-flight, Phase 5 | World canon layers loaded via context packet; story-bundle records carry story-local truths per FOUNDATIONS §Story Bundles §1. |
 | Mystery Reserve | Pre-flight, Phase 5, 9 | Whole-class Mystery Reserve loaded; Phase 5 classification; Phase 9 gate 3 enforces firewall. |
-| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.rendered_prose.path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
+| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.prose_path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `BEL` records for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; `truth_relation` + `visibility` + `confidence` consumed by social-state firewall. |

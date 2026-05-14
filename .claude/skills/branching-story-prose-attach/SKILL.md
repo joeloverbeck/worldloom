@@ -35,7 +35,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `prose_hash` derived; hash drift check applied per `accept_plan_drift`; 6 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.5 (engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `prose_hash` derived; hash drift check applied per `accept_plan_drift`; 6 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -60,7 +60,7 @@ Phase 2: Hash drift check (computed vs recorded plan_hash + state_hash;
                            drift in receipt notes, never in PG)
         |
         v
-Phase 3: Deterministic checks (6 checks per shared contract §4.5)
+Phase 3: Deterministic checks (6 checks per shared contract §4.6)
         |
         v
 Phase 4: [optional] Craft critic (7 axes; only when run_craft_critic=true)
@@ -90,7 +90,7 @@ Phase 6: HARD-GATE fires → write receipt + update INDEX
 
 ## Output
 
-- `pages-prose-receipts/<page_id>.yaml` — Always (the receipt; direct-write YAML per shared contract §4.5)
+- `pages-prose-receipts/<page_id>.yaml` — Always (the receipt; direct-write YAML per shared contract §4.6)
 - Bundle `INDEX.md` — Always (updated with prose status + receipt verdict)
 - `SE-<integer>.yaml` — IF `emit_attach_event: true` (single-op patch plan via `create_se_record`)
 
@@ -101,7 +101,7 @@ Atomic-record writes (the optional `SE-<integer>`) route through `mcp__worldloom
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §4a (Plan-Authority Boundary), §5b (Schema-Minimalism), §9 (Prose Length Discipline) govern this skill
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4.5 receipt schema (canonical); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4.6 receipt schema (canonical); §7 hard gates (gate 3 redundantly enforced on rendered prose); §8 page plan minimum contract (the 19-section structure prose-attach reads)
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/<page_id>.yaml` — PG record; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose-plans/<page_id>.md` — comprehensive prose plan; MUST exist
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` — user-supplied rendered prose; MUST exist
@@ -156,13 +156,13 @@ If `plan_hash` differs AND `accept_plan_drift: true`: record drift in `notes` an
 
 If both match: continue silently to Phase 3.
 
-**Placeholder subcase**: when `PG.plan.plan_hash` or `PG.state_hash` is a literal `PLACEHOLDER_TO_BE_COMPUTED*` string (bootstrap-origin, not edit-driven drift), record the placeholder verbatim in `notes`; the receipt's `state_hash_at_plan_time` will carry the placeholder transiently and is non-§4.5-compliant until VALENH-016 lands and the upstream record is repaired. Verdict is unaffected so long as the 6 deterministic checks pass against the current plan body.
+**Placeholder subcase**: when `PG.plan.plan_hash` or `PG.state_hash` is a literal `PLACEHOLDER_TO_BE_COMPUTED*` string (bootstrap-origin, not edit-driven drift), record the placeholder verbatim in `notes`; the receipt's `state_hash_at_plan_time` will carry the placeholder transiently and is non-§4.6-compliant until VALENH-016 lands and the upstream record is repaired. Verdict is unaffected so long as the 6 deterministic checks pass against the current plan body.
 
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 
 ## Phase 3: Deterministic checks
 
-Run the 6 deterministic checks defined in shared contract §4.5, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
+Run the 6 deterministic checks defined in shared contract §4.6, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
 
 1. **`engine_jargon_leak`** (`PASS | WARN | FAIL`) — scan the prose body for engine-vocabulary tokens. The closed engine-vocabulary list (inline below) includes record-ID patterns and engine-domain terms. Engine vocabulary legitimately appears in plan §15 frontmatter and verbatim-inlined plan §2 / §3 / §19 — those are NOT scanned. Hits in the rendered prose body are `WARN` if isolated (single occurrence), `FAIL` if pervasive (≥3 occurrences across different tokens).
 
@@ -209,7 +209,7 @@ Roll up per-check verdicts to top-level `verdict`:
 - Otherwise any `WARN` → `verdict: WARN`
 - Otherwise → `verdict: PASS`
 
-Derive `repair_recommendation` per the shared contract §4.5 enum:
+Derive `repair_recommendation` per the shared contract §4.6 enum:
 
 | Condition | `repair_recommendation` |
 |---|---|
@@ -223,7 +223,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 
 ## Phase 6: Commit / Write — HARD-GATE fires
 
-1. Draft the receipt YAML per shared contract §4.5 schema:
+1. Draft the receipt YAML per shared contract §4.6 schema:
 
    ```yaml
    page_id: <page_id>
@@ -269,7 +269,7 @@ Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the e
 
 ## Record Schemas
 
-The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.5 (canonical). No skill-local templates — the shared contract is the canonical reference per sub-class (d) of skill-creator's template-derivation discipline.
+The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (canonical). No skill-local templates — the shared contract is the canonical reference per sub-class (d) of skill-creator's template-derivation discipline.
 
 ## FOUNDATIONS Alignment
 
@@ -287,7 +287,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 | Canon Layers | Pre-flight, Phase 1 | Plan §4 canon excerpts read as load-bearing reference for checks 5 and 6. |
 | Mystery Reserve | Pre-flight, Phase 1, 3 | Plan §11 `forbidden_resolutions[]` loaded; Phase 3 check 2 enforces firewall on rendered prose. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Prose-attach NEVER mutates `PG`; drift is recorded in receipt only; no ARC_TRACE emitted; the page snapshot remains the authoritative state. |
-| §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.5 (15 fields total; no extras). |
+| §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6 (15 fields total; no extras). |
 | §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references for entity-status-consistency checks but does not create or supersede BEL records. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
@@ -299,12 +299,12 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Never create ARC_TRACE.** The class is removed per the greenfield plan; the receipt's verdict + `repair_recommendation` are the audit-trail substitute.
 - **Never write rendered prose.** `pages-prose/<page_id>.md` is user-supplied; prose-attach reads it as input.
 - **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one `create_se_record` op with `event_kind: prose_attach`; never alters page state.
-- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.5. No nice-to-have fields.
+- **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.6. No nice-to-have fields.
 - **No word-count enforcement.** Craft critic axes are qualitative per FOUNDATIONS §Story Bundles §9. The receipt records no word counts.
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
 - **Skills do not chain.** Prose-attach does not invoke `branching-story-turn-cycle`, `story-fact-promotion-to-canon`, or `branching-story-health-audit`. When `repair_recommendation` is non-`none`, the receipt records the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields — until landed and bundles repaired, prose-attach against pre-VALENH-016 PG records encounters literal `PLACEHOLDER_TO_BE_COMPUTED*` strings; see Phase 2 §Hash drift check Placeholder subcase). The shared contract §4.5 receipt schema is already in place.
+- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields — until landed and bundles repaired, prose-attach against pre-VALENH-016 PG records encounters literal `PLACEHOLDER_TO_BE_COMPUTED*` strings; see Phase 2 §Hash drift check Placeholder subcase). The shared contract §4.6 receipt schema is already in place.
 
 ## Final Rule
 

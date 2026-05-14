@@ -188,7 +188,7 @@ story_seed:
 
 ## Phase 2: Mirror load-bearing world facts
 
-Create `SF` records for facts the opening state actually depends on. Each mirrored `SF` records: `derived_from_cf: CF-<integer>` (the world canon fact it mirrors), branch / story scope, certainty, who-knows-it cross-reference (linking to `BEL` if epistemic asymmetry exists), and a one-line `why_it_matters_at_opening` note.
+Create `SF` records for facts the opening state actually depends on. Each mirrored `SF` follows shared contract §4.5.3: `id`, `story_id`, `created_at_page`, `supersedes`, `statement`, and `derived_from`. For mirrored world facts, `derived_from` is a non-empty list containing the parent `CF-<integer>` ids. Record epistemic asymmetry with `BEL` records, not fact-side knowledge fields.
 
 Do NOT mirror broad world background. The mirror exists so the turn-cycle does not re-query the world index for facts already known to constrain opening choices.
 
@@ -246,10 +246,10 @@ Draft `PG-1` per shared contract §4.2:
 - `branch_path: ["PG-1"]` — the ordered list of pages in this branch from root to here; for the root page the list contains exactly the root id. Referenced from shared contract §4.4 as `PG.branch_path` (the basis for storylet `visible_branch_path_prefix` prefix checks); §4.2's PG schema enumeration omits explicit listing of the field but §4.4 treats it as canonical, and the `recursive_reference_closure` validator reads `parsed.branch_path` to determine in-branch eligibility for every story-local reference reachable from this page. Subsequent pages emitted by `branching-story-turn-cycle` extend the parent's `branch_path` by appending the new PG id.
 - `input.choice_id: null`, `input.manual_action_text: null`, `input.resolved_event_id: SE-1`
 - Full `state_snapshot` (active_records including the BEL key; entity_status per active STENT; visible_affordances with ordinal indices; unresolved_mystery_claims; continuation status)
-- `plan.path: pages-prose-plans/PG-1.md`, `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`
-- `prose_plan_path: pages-prose-plans/PG-1.md` (legacy top-level field; required by the engine's `create_pg_record` schema until the shared contract / engine schema reconciliation lands; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the authoritative required-field list).
+- `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`
+- `prose_plan_path: pages-prose-plans/PG-1.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
+- `prose_path: null`, `prose_receipt_path: null`
 - `state_hash`: final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
-- `rendered_prose.path: null`, `rendered_prose.receipt_path: null`
 - `validation_trace`: populated in Phase 9
 
 ## Phase 7: Author the root page plan
@@ -268,7 +268,7 @@ No word-count target anywhere in the plan. Engine jargon (record ids, gate names
 
 Emit 3-5 `CHC` records representing different commitments — not variants of the same wording. Sample different axes: action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire (at authorial discretion within the opening's plausibility envelope). Always emit a write-in slot.
 
-Each `CHC` carries: `surface_label`, `player_visible_intent`, `target_or_action_family` (using the shared contract §4.4a `action_family` taxonomy where an action family is needed), `likely_state_pressure` (which debts / beliefs the choice engages), `associated_commitment_block` (`SLT-<integer>` if known, else null — turn-cycle will JIT), `success_policy` (only when `target_or_action_family == 'attempt'`).
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` if known, else null — turn-cycle will JIT), and optional `success_policy` when a later `SE.outcome_route` resolves the choice through `attempt`.
 
 ## Phase 9: Validate
 
@@ -286,13 +286,13 @@ Run the 8 shared hard gates per `.claude/skills/_shared-templates/story-state-co
 Plus 4 bootstrap-additional checks (recorded in working memory; not on `PG.validation_trace`):
 
 1. **Cast resolution** — every `selected_cast[]` entry resolved to an existing CHAR dossier (covered by Pre-flight step 4; re-verified here).
-2. **No SF globalization** — every mirrored `SF` carries `derived_from_cf` and its branch / story scope does not widen the parent CF's geographic / temporal / social scope.
+2. **No SF globalization** — every mirrored `SF` carries parent CF ids in `derived_from`, and its branch-local statement does not widen the parent CF's geographic / temporal / social scope.
 3. **Root page plan self-containment** — the plan body contains all 19 sections including the verbatim §2 / §3 / §19, with no external-renderer-undefined references.
 4. **Continuation capacity** — at least one seed `SLT` is eligible at `PG-1` (`seed_commitment_blocks != 'none'`) OR the turn-cycle's JIT path is the planned continuation (`seed_commitment_blocks: 'none'`). Terminal root rejected as authoring error.
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
-1. Compute `PG-1.plan.plan_hash` and `PG-1.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-1.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-1.md` draft) and the `state_hash` output onto `PG-1.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself and `rendered_prose`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
+1. Compute `PG-1.plan.plan_hash` and `PG-1.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-1.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-1.md` draft) and the `state_hash` output onto `PG-1.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself, `prose_path`, and `prose_receipt_path`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
 2. Verify both values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
 If any gate, additional check, or hash check fails, abort before Phase 10 — write nothing.
@@ -312,7 +312,7 @@ If any gate, additional check, or hash check fails, abort before Phase 10 — wr
 ## Validation Rules This Skill Upholds
 
 - **Rule 1 (No Floating Facts)** — enforced at Phase 2 + Phase 7. Mechanism: every drafted record conforms to the shared contract §4 schemas (required fields per record class); Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
-- **Rule 4 (No Globalization by Accident)** — enforced at Phase 2 + Phase 9 bootstrap-additional check 2. Mechanism: each mirrored `SF` records `derived_from_cf` plus branch/story scope; the bootstrap-additional check rejects scope-widening (a regional CF cannot be mirrored as a globally-scoped `SF`).
+- **Rule 4 (No Globalization by Accident)** — enforced at Phase 2 + Phase 9 bootstrap-additional check 2. Mechanism: each mirrored `SF` records parent CF ids in `derived_from`; the bootstrap-additional check rejects scope-widening (a regional CF cannot be mirrored as a globally-scoped `SF`).
 - **Rule 5 (No Consequence Evasion)** — enforced at Phase 4 + Phase 9 gate 6. Mechanism: the good-debt-vs-bad-debt filter at Phase 4 rejects debt that does not change what a cast member can do; Phase 9 gate 6 requires continuation capacity (at least one eligible commitment block) or terminal proof (which is itself rejected at root).
 - **Rule 7 (Preserve Mystery Deliberately)** — enforced at Phase 1 + Phase 9 gate 3. Mechanism: `forbidden_mystery_resolutions` enumerated in the state seed during Phase 1 (drawn from the loaded Mystery Reserve); Phase 9 gate 3 (mystery / invariant firewall) verifies no forbidden `M` is resolved and no `mystery_policy.forbidden_resolutions` are breached by any drafted seed `SLT`.
 
@@ -336,7 +336,7 @@ The shared contract is the canonical schema reference. This skill does not dupli
 | Rule 1 (No Floating Facts) | Phase 2, 7 | Shared contract §4 record schemas; Phase 7 plan-grounding (gate 7). |
 | Rule 2 (No Pure Cosmetics) | N/A | Not applicable — bootstrap mirrors existing world canon; it does not introduce new species / rituals / technology / artifacts to world canon. Handoff to `canon-addition` when a story claim is promoted via `story-fact-promotion-to-canon`. |
 | Rule 3 (No Specialness Inflation) | N/A | Not applicable — same handoff as Rule 2; bootstrap does not add exceptional capabilities to world canon. |
-| Rule 4 (No Globalization by Accident) | Phase 2, 9 | Mirrored SF records carry `derived_from_cf` + branch / story scope; Phase 9 bootstrap-additional check 2 rejects scope-widening. |
+| Rule 4 (No Globalization by Accident) | Phase 2, 9 | Mirrored SF records carry parent CF ids in `derived_from`; Phase 9 bootstrap-additional check 2 rejects scope-widening. |
 | Rule 5 (No Consequence Evasion) | Phase 4, 9 | Good-debt-vs-bad-debt filter at Phase 4; Phase 9 gate 6 (consequence capacity / terminal proof). |
 | Rule 6 (No Silent Retcons) | N/A | Not applicable — bootstrap creates new story-bundle records; it does not mutate world canon. World canon mutation routes through `canon-addition` (the only Rule-6-enforcing skill). |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 1, 9 | `forbidden_mystery_resolutions` enumerated in state seed; Phase 9 gate 3 (mystery firewall). |
