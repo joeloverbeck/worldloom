@@ -240,11 +240,11 @@ For every life / agency / location change, supersede the affected entity's activ
 
 **Deaths and removals are first-class outcomes.** Do not protect "main characters" with out-of-world logic. When an entity dies, becomes incapacitated, or becomes unavailable, reconcile in the same delta:
 
-- Their open `STINT` (supersede to `abandoned` / `transferred`).
+- Their open `STINT` records — close each in `SE.state_delta.close`; for an intention transferred to another holder, create a replacement `STINT` with the new `holder` and `supersedes` linking the closed/replaced intention. `STINT` has no `status` or `derived_from` field.
 - `OBL` owed by or to them (supersede or close).
-- `SREL` (supersede; status becomes `severed` or `mourning` per context).
+- Affected `SREL` records — supersede by changing `axis` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field.
 - Witness `BEL` records (Phase 4 covers).
-- `STOBJ.controlled_by` they controlled (supersede).
+- Affected `STOBJ` records — supersede `owner` and/or `current_location` when death, capture, incapacity, or transfer changes custody. Do not use any separate control/custody field.
 - Future choice availability (Phase 9 gate 7 filters).
 
 ## Phase 4: Update belief and visibility state

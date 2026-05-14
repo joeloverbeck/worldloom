@@ -1,499 +1,679 @@
-## **Executive verdict**
+## **Executive position**
 
-Do **not** add act structure, dramatic-phase structure, midpoint logic, climax logic, or any global plot-shape optimizer. Your current direction is fundamentally correct: a branching story should be a **causal state machine with narrative rendering**, not a plot outline with choices stapled onto it.
+Your current story architecture is fundamentally right. I would **not** overhaul it. The important thing is that Worldloom has already rejected the two traps that usually wreck interactive fiction systems: dramatic act bookkeeping and centralized “optimal story” steering. The current model is a present-causal-state machine: page snapshots are fork points, `SLT` commitment blocks are causal moves rather than acts, action routing never silently rejects player input, story facts and beliefs are separate, and health audits replay actual state rather than judging whether the branch “fits the plot.” That aligns much better with interactive narrative research than an act model does.
 
-The strongest parts of your current design are the right ones: world canon outranks story state, story state outranks prose, page plans are authoritative, rendered prose is only a receipt, any committed `PG` snapshot can become a fork point, and every player action routes through world logic rather than being silently rejected. That is exactly the right family of design for internally consistent interactive fiction. Your contract already encodes this in its authority model, schema-minimalism doctrine, plan-authority boundary, branching/rewind procedure, six action routes, and eight shared hard gates.
+The proposal below is therefore **tightening, not replacing**: fix a few schema-reference inconsistencies, add explicit causal-threat checks, strengthen attempt/world-block feedback, improve witness/perception discipline, add non-act pressure timing, add story-sifting audits, and make commitment-block coverage more systematic.
 
-But I would **not** let production stories start yet. There are several blocking schema and pipeline mismatches that will become painful as soon as the first long branch appears. The biggest issue is not philosophy; it is that the now-settled `story-state-contract.md` and the sibling skill specs still disagree in important places. Fix that first. Then add two structural improvements: replayable entity status, and more expressive reusable predicates for author-pool commitment blocks.
+## **What the research says, stripped of act-structure baggage**
 
-The core proposal: keep the architecture, reject act structure permanently, and harden the story system around **causal replay, social-state propagation, obligation/consequence pressure, mystery authority, and branch-local truth**.
+Storylet-based systems are the closest research/implementation match to your `SLT` model. Kreminski and Wardrip-Fruin describe storylet systems as assembling playthroughs from discrete chunks whose availability depends on the current game state, with player and system co-assembling the story rather than following a fixed sequence. That is almost exactly what Worldloom’s commitment blocks are doing, except your version is more canon-disciplined. Yarn Spinner’s current storylet documentation similarly frames storylets as modular chunks selected by saliency from game state, which supports your local-selection approach rather than global act enforcement.
 
----
+Narrative planning research reinforces the need to track causal support, threats, and character intentionality. Riedl and Young’s IPOCL work argues that understandable narrative depends on logical causal progression and character believability, and their planner explicitly reasons about causal structure and intentions. Ware and Young’s CPOCL work is especially relevant because it treats conflict as something to preserve inside a causally sound plan rather than something to smooth away; that maps well to branches where valid player actions can destroy, threaten, or redirect prior obligations.
 
-## **What the outside research suggests**
+Interactive-narrative mediation research is useful, but only if you borrow the right part. “Accommodation” through replanning is valuable; forcing interventions to preserve a predetermined author path is not. The mediation model detects exceptional user actions and can respond by accommodation or intervention, but Worldloom should prefer accommodation/world-block/terminal/promotion-hold routes that preserve causal truth rather than covertly preserving a planned arc.
 
-The strongest external match for your architecture is not “branching plot”; it is **storylet / quality-based narrative plus causal state validation**. Emily Short describes storylets as small, robust, recombinable narrative units with prerequisites and effects, rather than a fixed branching tree; her quality-based narrative framing uses state variables to unlock content and select salient next material. That maps closely to your `SLT` commitment blocks, `PG` snapshots, visible affordances, preconditions, and effects.
+The research on agency also supports your “silent rejection is forbidden” rule. Interactive narrative aims for user actions to alter direction or outcome, not merely decorate a fixed plot. Wardrip-Fruin’s agency work warns that perceived agency collapses when the materials implied by the system are not actually usable by the player. Fendt et al. found that explicit acknowledgement and immediate feedback can support the illusion of agency even when the underlying structure is constrained, which strongly supports making every rejected, transformed, or failed action visibly consequential.
 
-The useful warning from quality-based systems is that not all state should collapse into generic “qualities.” Weather Factory’s critique of flat QBN resources is relevant: story systems need resources, relationships, capabilities, facts, and social states to remain distinct because they behave differently in narrative causality. Your current split into `SF`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, `STINT`, `STLOC`, `STOBJ`, and `DA` is therefore a strength, not excess complexity.
+Social simulation research supports your `BEL` / `SREL` / `STINT` direction, but not a full agent-simulation rewrite yet. Versu models autonomous social agents using reactive social practices that provide affordances without controlling agents, while Comme il Faut reduces social authoring burden through reusable social norms and interactions. Worldloom can capture most of the benefit by strengthening belief, relationship, intention, and witness logic before introducing autonomous NPC utility systems.
 
-The most relevant social-simulation precedent is *Comme il Faut* / *Prom Week*. Its authors identify the exact authoring problem you are trying to avoid: if every prior social choice must be hand-accounted for, the state space explodes; if the system limits choices too much, impact feels fake. Their solution was reusable, recombinable social norms and interactions that modify social state. This strongly supports keeping `BEL`, `SREL`, `STINT`, obligations, and consequences as first-class state rather than deriving everything from prose.
+Emergent narrative research points to a missing audit surface: story recognition or “story sifting.” Ryan, Mateas, and Wardrip-Fruin identify story recognition and story support as major design challenges for emergent narrative, because a simulation may produce meaningful event patterns that are invisible or unsupported unless the system can detect them. Felt and later story-sifting work treat the event chronicle as a searchable structure from which narratively meaningful sequences can be selected. This argues for a retrospective “what causal opportunities exist now?” audit mode, not a global drama manager.
 
-Narrative-planning research points in the same direction. Riedl and Young’s IPOCL work argues that understandable narrative requires both causal progression and believable character intentionality. That means every major story transition should be causally supported and every character action should be legible through intentions, beliefs, obligations, or pressure—not through “the plot needs this now.”
+The one thing to keep rejecting is centralized drama management. Roberts and Isbell define drama management as a coordinator that tracks narrative progress and directs responses toward a narrative or training goal, and they explicitly frame the tension between player autonomy and designer intent. That is exactly the back door by which act structure returns. Worldloom’s current “local salience plus hard gates” model is safer.
 
-Mimesis-style narrative mediation is also relevant, but mostly as a caution. Those systems compare user actions against causal links and either intervene or accommodate/replan when coherence is threatened. Your `accept | accommodate | attempt | world_block | promotion_hold | terminal` routing is the better version for your goals: it preserves player agency by responding inside the fiction instead of steering the player back toward a preplanned dramatic path.
+## **Current-state assessment**
 
-Modern LLM interactive-narrative work reinforces the same lesson. LLMs help interpret and render, but they need state scaffolding. Drama Llama frames storylets plus LLM generation as a way to combine structure with generativity, while SCORE emphasizes dynamic state tracking and retrieval because long-term coherence is a known weakness of LLM-only story generation. That validates your decision to make prose downstream of committed state, not the state engine itself.
+### **What is already strong**
 
-So the research-backed stance is: **storylets, social state, causal replay, affordance grounding, and local mediation are good; act structure and global drama-management optimization are wrong for this product.**
+The **plan-authority boundary** is excellent. Story state becomes authoritative at page-plan commit; rendered prose is a receipt surface, not a second state engine. That prevents prose drift from silently rewriting branch truth and makes every committed page a fork primitive.
 
----
+The **six-route action model** is also right: `accept`, `accommodate`, `attempt`, `world_block`, `promotion_hold`, and `terminal`. It is especially important that impossible actions still produce an `SE` record and a page plan. That is the correct alternative to both railroading and permissive nonsense.
 
-## **Current architecture: what is already right**
+The **commitment-block model** is directionally excellent. `SLT` records are state-gated causal moves with preconditions, effects, beats, exits, saliency, mystery policy, and provenance. They are explicitly not acts, arcs, or mini-stories.
 
-Your present contract has the correct high-level model:
+The **turn-cycle** already covers the hardest state changes: facts, beliefs, status, intentions, relationships, obligations, consequences, threads, locations, objects, artifacts, death, incapacity, and removal. Deaths and removals are first-class outcomes rather than protected by protagonist armor, which is exactly what an interactive system needs.
 
-1. **Authority layering is clean.** World canon, story state, and rendered prose are separate, with strict precedence. Prose cannot create state by accident.  
-2. **Page snapshots are the right fork primitive.** A branch can advance from any committed `PG`, rendered or not. This is essential for interactive branching because prose-rendering latency should not block state progression.  
-3. **Silent rejection is banned.** Every player action produces an event and a world-logic rationale, including impossible actions. This is one of the best design choices in the whole system. It lets the system say “no” diegetically without discarding player agency.  
-4. **The eight hard gates are the right kind of gates.** They test legality, parent compatibility, mystery/invariant safety, branch isolation, append-only deltas, consequence capacity, plan grounding, and canon-promotion holds. None of those are dramatic-act gates. They protect coherence, not plot shape.  
-5. **Commitment blocks are correctly framed as causal moves.** The skill explicitly says they are not acts, arcs, mini-stories, or plot rails. That should remain non-negotiable.  
-6. **The story-to-world promotion path is conceptually sound.** A branch can produce a canon candidate, but world canon mutation routes through proposal, canon adjudication, and closeout rather than letting a branch silently rewrite the world.  
-7. **The health audit is the right safety net.** Deterministic replay, branch isolation, debt health, belief/visibility checks, mystery/canon safety, and continuation/terminal proof are exactly the right retrospective checks for a system like this.
+The **health audit** is a serious advantage. It already checks replay, branch isolation, debt health, belief/visibility health, mystery/canon safety, and continuation/terminal proof. That makes the system repairable, not just generative.
 
-The architecture is not the problem. The problem is that some concrete schemas and sibling specs have not caught up with the settled contract.
+### **What is currently weak or under-specified**
 
----
+The current system tracks consequences well, but it does not yet explicitly detect **causal threats**: moments where a new event invalidates the dependency of an emitted choice, open obligation, pending consequence, active thread, or eligible commitment block.
 
-## **P0 fixes before production stories**
+The current system routes `attempt` and `world_block`, but the **result of an attempt** is not structurally explicit. It is inferable from state delta and prose plan, but not directly auditable.
 
-### **1. Run a full schema-drift cleanup across every story skill**
+The current belief model is strong, but **witness/perception discipline** still depends too much on skill prose. You require `BEL` updates for secrecy, betrayal, deception, violence, law, status, and public ritual, but there is no robust expected-witness validation pass yet.
 
-This is the highest-priority fix. Right now, the contract and the skills disagree in ways that will break validators, authoring, or replay.
+The audit has debt aging thresholds, but the storylet predicate system lacks a clean way to express **causal pressure maturation** without act timing.
 
-The settled contract uses unpadded integer IDs, `SLT.move_family`, `scope.visibility: global_author_pool | branch_prefix_scoped | branch_scoped`, `exit_options[].action_family`, `CHC.target_or_action_families`, `PG.prose_plan_path`, `PG.prose_path`, and `PG.prose_receipt_path`. But several skill specs still use older forms like `PG-0001`, `BR-0001`, `author_pool`, `purpose`, `exit_options[].intent`, singular `target_or_action_family`, `plan.path`, and `rendered_prose.path`. The contract also defines `BEL.confidence` as `certain | high | medium | low | uncommitted`, while some skill text still implies invalid values like “suspected,” “rumor,” or “performative_lie.”
+The health audit diagnoses structural breakage, but it does not yet do **story sifting**: detecting meaningful causal openings, recurring patterns, unresolved tensions, or payoff opportunities from the actual event chronicle.
 
-Fix this as a single mechanical pass:
+There are also a few concrete schema-reference slips that should be fixed before production.
 
-* Replace all padded examples with unpadded `<integer>` examples.  
-* Replace every old `SLT.purpose` reference with `SLT.move_family`.  
-* Replace every `author_pool` reference with `global_author_pool`.  
-* Replace old action-family examples like `attack | flee | hide | confess` with the contract taxonomy: `move`, `evade`, `pursue`, `perceive`, `investigate`, `communicate`, `persuade`, `negotiate`, `bond`, `oppose`, `harm`, `protect`, `control`, `transfer`, `use`, `make_change`, `ritual_protocol`, `recover`, `wait`, `decide`.  
-* Replace `plan.path` / `rendered_prose.path` / `rendered_prose.receipt_path` with `prose_plan_path` / `prose_path` / `prose_receipt_path`.  
-* Fix prose receipt references: the contract shows prose receipt in §4.6, while some sibling text refers to §4.5.  
-* Make validators reject legacy field names immediately.
+## **Proposal**
 
-This is not cosmetic. Until this is fixed, the system has two story schemas pretending to be one.
+### **P0 — Fix schema-reference inconsistencies before any production story**
 
-### **2. Make entity status replayable**
+These are not philosophical changes; they are correctness fixes.
 
-This is the biggest structural bug.
+First, the health-audit skill refers to `SREL` supersessions whose `basis` does not trace to an `SE` or `BEL`, but the shared `SREL` schema uses `derived_from`, not `basis`. Change the audit finding from `relationship_change_without_basis` to something like `relationship_change_without_derived_from_trace`, and validate `SREL.derived_from[]`.
 
-`PG.state_snapshot.entity_status` tracks each active entity’s `life`, `agency`, and `location`, and the predicate DSL includes `entity_status(...)`. But `SE.state_delta` only lists record IDs in `create`, `supersede`, and `close`. There is no committed record class that represents life/agency/location changes, and `STENT` itself does not contain status fields. Turn-cycle text says deaths, captivity, incapacity, and movement are first-class outcomes, but the current record model does not give replay a clean append-only object to apply.
+Second, the turn-cycle death/removal reconciliation says to supersede `STOBJ.controlled_by`, but the `STOBJ` schema has `owner` and `current_location`, not `controlled_by`. Change the skill language to “supersede affected `STOBJ.owner` and/or `STOBJ.current_location` records when death, capture, incapacity, or transfer changes custody.”
 
-Add a new story-state record class:
+Third, the turn-cycle says open `STINT` should be “superseded to abandoned/transferred,” but `STINT` has no `status` field. The clean correction is: close the abandoned `STINT`; create a replacement `STINT` for transferred intentions. Do not add `status` unless you later find that closed-record replay is not enough.
 
-id: STSTAT-<integer>*
+Fourth, the turn-cycle says `SREL` status becomes severed or mourning, but `SREL` has no `status`; it has `axis`, `value`, `valence`, `description`, and `derived_from`. Change this to “supersede relevant `SREL` records by changing `axis` / `value` / `valence` / `description` as appropriate.”
 
-story_id: STORY-<integer>*
+Fifth, harmonize root-record scope. Some skill text treats any record with `created_at_page != null` as branch-local, while commitment-block-authoring correctly allows root-of-tree records to be globally visible because they sit in every branch path. Define this in the shared contract:
 
-created_at_page: PG-<integer>*
+bundle_genesis_record:
 
-supersedes: STSTAT-<integer> | null
+ definition: >
 
-entity: STENT-<integer>*
+   A story-bundle record created at PG-1, where PG-1 is the root_page_id
 
-life: alive | dead | unknown*
+   of the root branch. Genesis records are visible to all branches unless
 
-agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown*
+   later superseded or closed.
 
-location: STLOC-<integer> | unknown | concealed | offstage*
+branch_local_record:
 
-derived_from: [SE-<integer> | <record_id>]
+ definition: >
 
-Then:
+   A record created after PG-1 whose created_at_page is not in the active
 
-* Add `STSTAT` to `PG.state_snapshot.active_records`.  
-* Define `PG.state_snapshot.entity_status` as a derived projection of active `STSTAT` records.  
-* Make `entity_status(...)` predicates read `STSTAT`.  
-* On death, captivity, unconsciousness, escape, concealment, or movement, supersede `STSTAT`.  
-* Make replay compute entity status from root + deltas, not from unexplained snapshot mutation.
+   branch_path or the visible_branch_path_prefix authorized for the selected
 
-This preserves append-only discipline, makes death/removal truly first-class, and gives audit a real causal chain.
+   block.
 
-### **3. Add explicit story-fact authority to `SF`**
+Then update branch-isolation gates and health-audit wording to use this definition instead of the crude `created_at_page != null` test. This matters because otherwise valid bootstrap seed blocks can be falsely flagged as illegal global-author-pool dependencies.
 
-The contract says story-local resolution-like claims can be `apparent`, `branch_local_counterfactual`, or `canon_candidate`, and says branch-local counterfactuals live as `SF`. But the `SF` schema has only `statement` and `derived_from`; there is no authority field. Closeout and promotion workflows assume authority exists, but the schema does not support it.
+### **P1 — Add a causal dependency threat scan**
 
-Add this to `SF`:
+This is the most important structural improvement.
 
-authority: branch_local | branch_local_counterfactual | canon_candidate | canon_linked*
+Narrative planning research treats causal links and threats as central to story coherence. Worldloom currently enforces grounding and append-only deltas, but it does not explicitly ask: “Did this new event destroy a dependency that some still-open future choice, obligation, consequence, thread, or storylet relies on?”
 
-Then make the rules explicit:
+Add a turn-cycle additional check:
 
-* `branch_local`: ordinary branch truth.  
-* `branch_local_counterfactual`: true only in this branch and not a world claim.  
-* `canon_candidate`: held for promotion; must be paired with `SE.promotion_claims[]`.  
-* `canon_linked`: story-local fact has been accepted into world canon and linked by closeout.
+causal_dependency_threat_scan: PASS | FAIL
 
-This is load-bearing because gate 8, promotion, closeout, and cross-story audits all need it.
+It should run after the state delta is drafted and before hashes are computed. It checks:
 
-### **4. Stop spreading promotion-closeout fields across unrelated schemas**
+choice_dependency_clobbered:
 
-`story-promotion-closeout` currently wants to supersede `SF`, `BEL`, `DA`, `STENT`, `SREL`, and `BR` records with fields like `promoted_to_cf`, `promoted_via_ch`, `promoted_via_pa`, `canon_limits`, `promotion_rejected`, `contested_authority`, and similar verdict metadata. Those fields are not in the shared contract schemas. If you add them ad hoc to every affected class, schema minimalism is gone.
+ severity: error
 
-Better: add one compact crosslink record class.
+ condition: >
 
-id: SCX-<integer>*
+   A record grounding an emitted CHC is closed/superseded/moved/invalidated,
 
-story_id: STORY-<integer>*
+   but the CHC remains emitted or player-visible.
 
-created_at_page: PG-<integer> | null
+slt_precondition_clobbered:
 
-promotion_id: SP-<integer>*
+ severity: warning | error
 
-verdict: accepted | accepted_with_limits | rejected | deferred*
+ condition: >
 
-source_records: [<record_id>]*
+   A high-salience open debt had an eligible SLT before this turn, but the
 
-linked_cf_ids: [CF-<integer>]
+   new delta destroys the SLT’s preconditions without closing, transferring,
 
-linked_ch_ids: [CH-<integer>]
+   or replacing the debt.
 
-linked_pa_ids: [PA-<integer>]
+affordance_dependency_clobbered:
 
-canon_limits: string | null
+ severity: error
 
-authority_after: canon_linked | branch_local_counterfactual | contested | pending*
+ condition: >
 
-notes: string | null
+   A visible affordance remains in PG.state_snapshot.visible_affordances
 
-Then closeout only needs to supersede the source `SF` when its `authority` changes. The verdict details live in `SCX`, not smeared across every story record class.
+   after its grounding STLOC/STOBJ/STENT is no longer active, accessible,
 
-This keeps the record model cleaner, makes promotion audits easier, and avoids invalid fields on `BEL`, `DA`, `STENT`, and `SREL`.
+   or located where the affordance says it is.
 
-### **5. Fix branch status handling**
+obligation_counterparty_unavailable_without_transfer:
 
-The contract says `BR` records track branch lineage and “branches fork; they do not supersede.” But closeout wants to supersede `BR` records to flag or archive contradictory same-story branches. That is a direct semantic conflict.
+ severity: error
 
-Do not overload `BR`. Add a branch-status record:
+ condition: >
 
-id: BRSTAT-<integer>*
+   An entity owing or receiving an open OBL becomes dead, captive,
 
-story_id: STORY-<integer>*
+   offstage, incapacitated, or otherwise unavailable, but the obligation
 
-created_at_page: PG-<integer> | null
+   is neither closed nor transferred.
 
-supersedes: BRSTAT-<integer> | null
+Add the same logic to health audit as a new structural subphase:
 
-branch_id: BR-<integer>*
+Phase 2g: Causal dependency health
 
-status: active | flagged | archived*
+This is not an act-structure feature. It does not ask where the story “should” go. It asks whether the current state still supports the obligations and choices it claims to support.
 
-reason: string*
+### **P1 — Add explicit `SE.resolution` for non-accept routes**
 
-derived_from: [SP-<integer> | SAU-<integer> | SE-<integer>]
+Right now `outcome_route: attempt` says success is uncertain, but the final result is encoded indirectly in `world_logic_rationale`, `SE.state_delta`, and the prose plan. That is too implicit for a system that wants to preserve agency.
 
-`BR` remains immutable lineage. `BRSTAT` tracks archive/flag state. This is cleaner and more consistent with append-only state.
+Add an optional block to `SE`, required when `outcome_route` is `attempt`, `accommodate`, or `world_block`:
 
----
+resolution:
 
-## **P1 improvements that will materially strengthen branching**
+ result: success | partial_success | failure | impossible | transformed | held_for_promotion
 
-### **6. Add urgency/salience to `OBL` and `CNSQ`**
+ reason_class: capability | opposition | resource_limit | world_invariant | knowledge_gap | social_block | chance | mixed | n_a
 
-The health audit talks about high-salience debt, ignored debt thresholds, and urgency-based severity. But `OBL` and `CNSQ` do not currently carry `urgency`; only `THR` and `SLT.saliency` do. That means audit either has to infer urgency from prose or treat all obligations/consequences equally.
+ player_visible_feedback: >
 
-Add:
+   One-sentence statement of what the player should be able to perceive
 
-urgency: low | medium | high*
+   about why the action resolved this way.
 
-tags: [string]
+Validation:
 
-to both `OBL` and `CNSQ`.
+route_resolution_consistency:
 
-This is a small change with a large payoff. It lets turn-cycle rank what matters now, lets audits detect ignored high-pressure debt, and lets commitment blocks target “urgent unresolved consequence” without act-structure logic.
+ accept:
 
-### **7. Add generic binding predicates for reusable author-pool blocks**
+   allowed_results: [success, null]
 
-Your current predicate DSL is good for branch-scoped exactness, but too weak for reusable global commitment blocks. A global author-pool `SLT` cannot reference branch-local records, so it needs typed generic conditions like “some open high-urgency obligation exists” or “some relationship has high resentment.” Right now it mostly has exact-ID predicates and `has_affordance(...)`. That will force too much runtime JIT and make the global author pool shallow.
+ attempt:
 
-Add deterministic existential predicates with bindings. For example:
+   allowed_results: [success, partial_success, failure]
 
-any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)
+ accommodate:
 
-any_consequence_pending(alias, kind?, urgency?, derived_from?)
+   allowed_results: [partial_success, transformed]
 
-any_thread_active(alias, tag?, urgency?)
+ world_block:
 
-any_relationship_axis(alias, axis, comparator, value, participant_role?)
+   allowed_results: [impossible, failure]
 
-any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)
+ promotion_hold:
 
-any_intention(alias, holder_role?, urgency?)
+   allowed_results: [held_for_promotion, null]
 
-any_accessible_object(alias, actor_role?, tag?)
+ terminal:
 
-Then let `SLT.effects` and `exit_options.likely_effects` refer to bound aliases:
+   allowed_results: [success, partial_success, failure, transformed, null]
+
+Then require page-plan §7 to include `resolution.player_visible_feedback`, and make prose-attach verify that the feedback is actually visible in prose. This is supported by agency research: users tolerate constraint far better when the system acknowledges their action and gives meaningful immediate feedback.
+
+### **P1 — Add a story-level agency contract to `STORY_KERNEL.md`**
+
+Do not put this into atomic state. Put it in `STORY_KERNEL.md`, because it is a story-level authorial contract.
+
+Add a required section:
+
+## Player Agency Contract
+
+- **Agency surface:** Which STENT record(s) the player primarily controls.
+
+- **Control style:** direct action, intent declaration, dialogue choice, tactical instruction, or mixed.
+
+- **Write-in envelope:** What kinds of manual actions are admissible.
+
+- **Impossible-action policy:** Impossible actions still produce a page via world_block.
+
+- **Consequence visibility promise:** How quickly the story should make transformed, failed, blocked, or partially successful actions perceptible.
+
+- **Viewpoint limits:** Whether the player can act on knowledge the viewpoint character lacks.
+
+Bootstrap should draft this. Turn-cycle should read it when parsing `manual_action_text`. Prose-attach should use it to flag prose that implies a broader or narrower agency surface than the story state permits.
+
+This keeps user agency explicit without inventing an act model.
+
+### **P1 — Strengthen witness and perception discipline**
+
+Your `BEL` model is already the right abstraction. The missing piece is an expected-witness pass.
+
+Do **not** add a full autonomous perception simulator yet. Add deterministic validation first.
+
+In turn-cycle Phase 4, compute:
+
+expected_witnesses:
+
+ direct:
+
+   - active STENT records at the event location with agency not unconscious/dead/incapacitated
+
+ indirect:
+
+   - public or factional holders when the event occurs through law, ritual, bureaucracy, artifact circulation, public violence, or visible environmental change
+
+ excluded:
+
+   - STENT records concealed, offstage, unconscious, socially barred, or lacking access
+
+Then require one of the following for each relevant witness group:
+
+BEL created/superseded:
+
+ - knows true event
+
+ - suspects unknown/partly_true event
+
+ - misremembers partly_true/false event
+
+ - reports rumor
+
+ - deceives with false claim
+
+or explicit non-propagation rationale:
+
+ - no witness
+
+ - witness incapacitated
+
+ - evidence concealed
+
+ - institution suppresses report
+
+ - event leaves no accessible trace
+
+This can initially live in the turn-cycle validation trace and health audit; no schema addition is required. If it becomes too hard to audit from derived state alone, then add a small optional `SE.perception` block later:
+
+perception:
+
+ apparent_to: [STENT-<integer> | group:<name> | public]
+
+ concealed_from: [STENT-<integer> | group:<name> | public]
+
+ evidence_left: [record_id]
+
+My recommendation: **do not add `SE.perception` yet**. First try the validation pass using `STSTAT.location`, event targets, active `BEL`, and active `DA` / `STOBJ` evidence. Schema-minimalism is worth protecting.
+
+### **P2 — Add non-act pressure timing through derived predicates**
+
+You already have `urgency` on `OBL`, `CNSQ`, `THR`, and `STINT`, and health audit flags high-urgency debt ignored beyond fixed page thresholds. That is good, but too coarse.
+
+Add predicate DSL support for age and urgency rather than adding act timers:
+
+record_age(<record_id | bound:<alias>>, >= | <= | == | !=, <integer_pages>)
+
+urgency_at_least(<record_id | bound:<alias>>, low | medium | high)
+
+These are derivable from `created_at_page`, `branch_path`, and existing `urgency`, so they preserve schema minimalism.
+
+Example `SLT` preconditions:
 
 preconditions:
 
  hard:
 
-   - any_obligation_open("debt", urgency=high, owed_by_role=player_proxy)
+   - any_consequence_pending(pending_fallout, urgency=high)
 
-effects:
+   - record_age(bound:pending_fallout, >=, 3)
 
- supersede:
+This allows pressure to mature causally: ignored debts escalate because they have been ignored, not because the story has reached Act II.
 
-   - bound:debt
+### **P2 — Add health-audit `sifting` mode**
 
-This is the single best way to make reusable commitment blocks powerful without turning them into plot rails. It also directly reflects the lesson from social-simulation systems: reusable interactions need typed social/world conditions, not one-off branch references.
+Add a new optional mode to `branching-story-health-audit`:
 
-### **8. Add explicit causal-support validation**
+mode: structural | prose | remediation | cross_story | sifting
 
-You already have plan grounding and append-only deltas, but the validators should become stricter about causal support.
+This mode should not report “errors” by default. It should report **opportunities** detected from the actual event chronicle.
 
-Every created or superseded `SF`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, `STSTAT`, `STOBJ`, and `DA` should cite a causal basis:
+Candidate sifting patterns:
 
-* `basis.source_event` for `BEL`.  
-* `derived_from` for `SF`, `CNSQ`, `THR`, `SREL`, `STSTAT`, `STOBJ`, and `DA`.  
-* `trigger_to_close` / `resolves_when` for closure conditions.  
-* `SE.state_delta` must include the changed record IDs.
+deception_ready_to_surface:
 
-Then add an audit check: **no active state without causal support**.
+ pattern: >
 
-This is the practical version of narrative-planning causal links. The point is not to generate a plan tree; the point is to ensure every state change has a reason the engine can replay and the reader can believe.
+   BEL.deceives exists, at least one witness BEL.suspects exists,
 
-### **9. Strengthen `CHC` grounding**
+   and evidence_left exists through STOBJ/DA/public consequence.
 
-Current `CHC` records have `surface_label`, `player_visible_intent`, action families, likely pressure, associated block, and optional success policy. That is close, but not quite enough to guarantee choices are grounded in what the player character can perceive and do. The hard gate says emitted choices must be grounded, but the `CHC` schema does not force a direct grounding link.
+relationship_reversal_available:
 
-Add one field:
+ pattern: >
 
-grounded_in:
+   SREL axis changed by two or more values across branch_path,
 
- records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer>]
+   but no bond_shift/status_shift recovery or confrontation block has followed.
 
- affordance_ordinals: [integer]
+debt_payoff_ready:
 
-This will prevent “cool choice button drift,” where a choice sounds good but is not actually available from the page state.
+ pattern: >
 
-This also supports agency. Mateas’s account of agency argues that player agency depends on a balance between available actions and meaningful formal constraints; a choice should be both materially available and narratively intelligible. Your system can encode that by tying every choice to affordances, beliefs, debts, or relationships.
+   OBL/CNSQ/THR high urgency, age >= threshold, eligible actors present,
 
-### **10. Add local salience scoring, not drama management**
+   and at least one affordance can engage it.
 
-Do not add a drama manager that optimizes toward a target curve. Search-based drama management was explicitly designed to avoid static branching while allowing unconstrained actions, but the authors also note scalability and story-dependence problems. That is the wrong direction for Worldloom, because it tempts the engine to steer toward a hidden ideal plot.
+blocked_action_repetition:
 
-But add **local salience scoring** for commitment-block ranking:
+ pattern: >
 
-score =
+   Same action_family receives world_block more than once without a
 
- urgency(open OBL/CNSQ/THR engaged)
+   newly visible explanation or alternative affordance.
 
-+ recency_penalty(if same move_family repeated)
+canon_candidate_pressure:
 
-+ intention_match
+ pattern: >
 
-+ relationship_pressure
+   canon_candidate or promotion_hold exists, but supporting prose or
 
-+ mystery_pressure
+   witness BEL chain is incomplete.
 
-+ affordance_specificity
+terminal_setup_available:
 
-+ player_choice_alignment
+ pattern: >
 
-Do not store this as story truth. Compute it during turn-cycle selection and optionally expose it in the validation trace. This helps the system choose the most causally alive next move without imposing plot shape.
+   high-salience debts are either resolved, transferred, or abandoned,
 
----
+   and remaining continuation blocks are low-salience only.
 
-## **P2 improvements for branch scale and long stories**
+Output these as `SAU` findings with severity `info` or a new label like `opportunity`. If remediation is requested, produce RSP cards.
 
-### **11. Add a derived branch pressure index**
+This is story-sifting, not drama management. It does not steer toward a predetermined climax; it surfaces patterns already present in state. That distinction matters. Story-sifting research is about detecting meaningful sequences or patterns from simulated chronicles, which is exactly what this audit mode should do.
 
-Long branching stories need quick answers like:
+### **P2 — Replace simple SLT coverage with a state-demand coverage matrix**
 
-* What debts are open on this branch?  
-* What mysteries were narrowed?  
-* Which canon candidates are pending?  
-* Which characters are dead, captive, missing, or estranged?  
-* Which branches contradict a newly promoted fact?
+Commitment-block-authoring already has coverage targets such as recovery, belief repair, movement, bond shift, consequence resolution, investigation, disclosure, opposition, negotiation, and fallback continuation. Good. But the current list is still hand-authored and slightly genre-shaped. Make it more state-driven.
 
-Do not make this canonical state. Make it a derived index, probably regenerated by `world-index build` or bundle audit:
+Add a generated coverage matrix to `commitment-block-authoring` and health audit:
 
-branch_pressure_index:
+coverage_matrix:
 
- branch_id: BR-<integer>
+ by_action_family:
 
- leaf_page: PG-<integer>
+   move: count
 
- open_obligations: [...]
+   evade: count
 
- pending_consequences: [...]
+   pursue: count
 
- active_threads: [...]
+   perceive: count
 
- high_pressure_relationships: [...]
+   investigate: count
 
- unresolved_mystery_claims: [...]
+   communicate: count
 
- canon_candidates: [...]
+   persuade: count
 
- terminal_status: open | branch_pause | terminal_closed
+   negotiate: count
 
-This will pay off when branch count grows.
+   bond: count
 
-### **12. Add a mystery-progress ledger or derived mystery trace**
+   oppose: count
 
-`PG.state_snapshot.unresolved_mystery_claims` is useful, but mystery progress will become hard to audit across many branches. You need to answer: “What exactly has this branch established about `M-7`, and by which events?” The current system can probably derive that from `PG`, `SE`, `BEL`, and `SF`, but only if the records are disciplined.
+   harm: count
 
-Either add a small `MCL` record:
+   protect: count
 
-id: MCL-<integer>*
+   control: count
 
-story_id: STORY-<integer>*
+   transfer: count
 
-created_at_page: PG-<integer>*
+   use: count
 
-mystery_id: M-<integer>*
+   make_change: count
 
-authority: apparent | branch_local_counterfactual | canon_candidate*
+   ritual_protocol: count
 
-movement: clue_added | narrowed | apparent_resolution | held_for_promotion*
+   recover: count
 
-source_records: [<record_id>]*
+   wait: count
 
-or make it a required derived audit section. I would start derived, then promote to a record only if audits become too expensive.
+   decide: count
 
-### **13. Add an optional semantic audit mode**
+ by_state_debt:
 
-Your default health audit should remain deterministic. That is correct. But for mature stories, add an optional `semantic` mode that does not mutate state and asks an LLM to look for:
+   open_obligation: count
 
-* emotional discontinuity,  
-* character motivation drift,  
-* repeated choice patterns,  
-* stale unresolved threads,  
-* prose-state mismatch that deterministic scans missed,  
-* “branch feels railroaded” symptoms.
+   pending_consequence: count
 
-Keep this separate from structural validity. The deterministic audit says whether the branch is legal. The semantic audit says whether it feels narratively alive.
+   active_thread: count
 
----
+   active_intention: count
 
-## **What I would explicitly reject**
+ by_social_state:
 
-### **Reject act structure permanently**
+   belief_change: count
 
-Act structure encodes future dramatic obligations. Interactive branching state wants present causal obligations. Those are different beasts. If the player kills the planned antagonist, confesses the secret early, abandons the quest, destroys the artifact, joins the enemy, or refuses the premise, an act structure either breaks or starts suppressing valid choices.
+   relationship_change: count
 
-Your system should ask:
+   public_visibility_change: count
 
-* What is true now?  
-* Who knows it?  
-* Who wants what?  
-* What debts remain?  
-* What consequences are pending?  
-* What affordances are visible?  
-* What mysteries are protected?  
-* What action is the player attempting?  
-* What does world logic allow?
+   secret_or_deception_handling: count
 
-It should never ask:
+ by_route_recovery:
 
-* Are we before or after the midpoint?  
-* Has the protagonist refused the call?  
-* Is this the climax?  
-* Does this choice preserve Act II?
+   attempt_failure_followup: count
 
-### **Reject global “optimal story” search**
+   world_block_followup: count
 
-A global drama manager is too likely to reintroduce railroading through the back door. Use local salience ranking and hard coherence gates instead.
+   accommodation_followup: count
 
-### **Reject prose as a state source**
+   terminal_setup: count
 
-Do not let rendered prose create state. Your plan/prose boundary is one of the best parts of the architecture. Keep prose-attach as a validator and receipt system, not a state transition workflow.
+Then add audit findings:
 
-### **Reject full autonomous-agent simulation for now**
+slt_pool_missing_route_recovery:
 
-Versu-like systems show the appeal of character files, genre files, beliefs, motivations, emotions, and autonomous social behavior, but full simulation is expensive and can generate noise. Your `STINT`, `BEL`, `SREL`, `OBL`, and `CNSQ` approach gives you the useful part without surrendering authorial control.
+ severity: warning
 
----
+ condition: >
 
-## **Concrete amendment plan**
+   The bundle has attempt/world_block/accommodate routes in recent history
 
-### **Amendment A — Contract/skill alignment pass**
+   but no eligible recovery/explanation/fallback block.
 
-Scope: `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, `story-promotion-closeout`.
+slt_pool_social_blind_spot:
 
-Change:
+ severity: warning
 
-* Replace all legacy field names.  
-* Replace old enums.  
-* Replace padded IDs in examples.  
-* Update prose receipt section references.  
-* Make the shared contract the single schema source.  
-* Add validator tests that fail on legacy fields.
+ condition: >
 
-Priority: **P0, before any production story.**
+   Active BEL/SREL records exist, but no eligible block can alter, expose,
 
-### **Amendment B — Replayable state records**
+   repair, or exploit belief/relationship state.
+
+slt_pool_debt_blind_spot:
+
+ severity: warning
+
+ condition: >
+
+   Open OBL/CNSQ/THR/STINT exists at medium/high urgency, but no block
+
+   can engage it.
+
+This will reduce overuse of runtime JIT blocks and make author-pool growth more intentional.
+
+### **P2 — Add prose-attach `choice_consequence_visibility`**
+
+Prose-attach currently validates engine-jargon leaks, forbidden mystery resolution, required event rendering, entity status, structural inventions, canon claims, and optional craft. Good. Add one more check:
+
+choice_consequence_visibility: PASS | WARN | FAIL
+
+Definition:
+
+PASS:
+
+ The prose makes the selected action, route, and immediate consequence
+
+ legible to a first-time reader.
+
+WARN:
+
+ The action occurred, but the causal consequence or route feedback is easy
+
+ to miss.
+
+FAIL:
+
+ The prose obscures, contradicts, or omits the consequence of the selected
+
+ action, especially for attempt, accommodate, world_block, promotion_hold,
+
+ or terminal routes.
+
+This pairs naturally with `SE.resolution.player_visible_feedback`.
+
+It is important because player agency is not just having choices. It is seeing that the system understood the choice and seeing why the world responded as it did.
+
+### **P3 — Do not add autonomous NPC agents yet**
+
+Versu and Comme il Faut are tempting here, but a full utility-based social simulation would be premature.
+
+Worldloom already has the key load-bearing ingredients: `STINT`, `BEL`, `SREL`, `OBL`, `CNSQ`, `THR`, saliency, and predicate-gated commitment blocks. Add stronger selection, witness, coverage, and sifting first.
+
+A future NPC initiative system can be layered as:
+
+NPC initiative = runtime_jit SLT selection
+
+ seeded by:
+
+   - active STINT urgency
+
+   - SREL axis pressure
+
+   - BEL truth_relation / visibility
+
+   - OBL owed_by / owed_to
+
+   - affordance_available_to(actor, action_family)
+
+But do not create a new agent architecture now. It will explode schema and validation burden before you know whether the current causal-state pipeline is insufficient.
+
+### **P3 — Do not store natural-language triggers as executable storylet logic**
+
+Drama Llama is interesting because it combines LLMs with storylets and lets authors define triggers in natural language, but the paper also motivates the hybrid approach by noting that pure LLM systems struggle with structurelessness and lack of pushback.
+
+For Worldloom, natural language can help **draft** predicates, but executable storylet eligibility should remain the closed predicate DSL. This is one of the best decisions in the current system. Store canonical trigger logic as predicates, not prose.
+
+## **Skill-by-skill amendment plan**
+
+### **`story-state-contract.md`**
+
+Amend minimally:
+
+1. Define `bundle_genesis_record` and `branch_local_record`.  
+2. Add optional `SE.resolution`, required for `attempt`, `accommodate`, and `world_block`.  
+3. Add predicate DSL forms:
+
+    record_age(record_id | bound:<alias>, comparator, integer_pages)  
+   urgency_at_least(record_id | bound:<alias>, low | medium | high)
+
+4. Add hard-gate note under plan grounding: emitted choices must not depend on clobbered records.  
+5. Add prose receipt field:
+
+    choice_consequence_visibility: PASS | WARN | FAIL
+
+### **`branching-story-bootstrap`**
+
+Add a `STORY_KERNEL.md` section for the Player Agency Contract. Keep it direct-write, not atomic state.
+
+Also update global-author-pool seed-block rules so they can lawfully reference genesis records but not later branch-local records.
+
+### **`branching-story-turn-cycle`**
 
 Add:
 
-* `STSTAT` for entity life/agency/location.  
-* `BRSTAT` for branch status.  
-* `SCX` for story-canon closeout links.  
-* `SF.authority`.
+1. `causal_dependency_threat_scan` as a turn-cycle-additional check.  
+2. `SE.resolution` drafting for `attempt`, `accommodate`, and `world_block`.  
+3. Expected-witness validation in Phase 4.  
+4. Schema wording fixes:  
+   * `STINT` abandonment = close old intention, optionally create transferred replacement.  
+   * `SREL` severance/mourning = supersede axis/value/valence/description.  
+   * `STOBJ.controlled_by` → `STOBJ.owner/current_location`.
 
-Update:
+The current turn-cycle is already the core engine. These changes make it auditable at the points where interactive stories usually break: failed attempts, invalidated dependencies, unseen consequences, and knowledge leaks.
 
-* `PG.state_snapshot.active_records`.  
-* Predicate DSL.  
-* Turn-cycle deltas.  
-* Health audit replay.  
-* Promotion/closeout.
+### **`commitment-block-authoring`**
 
-Priority: **P0.**
+Add the coverage matrix and require direct batches to cover at least:
 
-### **Amendment C — Debt salience**
+1. one debt-engagement block,  
+2. one social-state block,  
+3. one route-recovery block,  
+4. one affordance-changing block,  
+5. one fallback continuation block.
 
-Add `urgency` and `tags` to `OBL` and `CNSQ`.
+Also allow `record_age(...)` predicates in block preconditions so pressure can mature without act timing.
 
-Update:
+### **`branching-story-health-audit`**
 
-* Health audit debt thresholds.  
-* Commitment-block selection.  
-* Terminal proof requirements.  
-* Page-plan §10 open debt rendering.
+Add:
 
-Priority: **P1.**
+1. `Phase 2g: Causal dependency health`.  
+2. Optional `sifting` mode.  
+3. Schema wording fixes:  
+   * `SREL.basis` → `SREL.derived_from`.  
+   * branch-local detection uses `bundle_genesis_record` / `branch_local_record`, not just `created_at_page`.
 
-### **Amendment D — Predicate DSL v2**
+The existing health audit is already strong; this turns it from “find broken state” into “find broken state plus causal opportunities.”
 
-Add existential/binding predicates for reusable author-pool blocks.
+### **`branching-story-prose-attach`**
 
-Update:
+Add:
 
-* Commitment-block authoring.  
-* Turn-cycle SLT eligibility.  
-* Plan grounding.  
-* Health audit unactionable-debt checks.
+choice_consequence_visibility: PASS | WARN | FAIL
 
-Priority: **P1.**
+Tie this to `SE.resolution.player_visible_feedback`. A page that routes a player action to `world_block` but hides why it failed should not pass cleanly.
 
-### **Amendment E — Choice grounding**
+### **`story-fact-promotion-to-canon`**
 
-Add `CHC.grounded_in.records` and `CHC.grounded_in.affordance_ordinals`.
+No major structural change. The proposal package already does the right thing: branch truth is evidence, not world authority; forbidden mysteries abort; scope inflation is checked.
 
-Update:
+Possible small improvement: when a promotion candidate emerges from `SE.resolution.result: held_for_promotion`, include the resolution feedback in the proposal package’s evidence narrative.
 
-* Bootstrap first-choice generation.  
-* Turn-cycle choice generation.  
-* Gate 7 validation.  
-* Health audit dangling-choice checks.
+### **`story-promotion-closeout`**
 
-Priority: **P1.**
+No major structural change. Keep it ledger-first and append-only. After closeout, recommend—but do not automatically invoke—a health audit to catch branch-local contradictions introduced by the new canon-linked fact.
 
-### **Amendment F — Derived pressure indexes**
+## **Recommended implementation order**
 
-Add a generated branch pressure index and optional mystery trace.
+### **First pass: correctness hardening**
 
-Priority: **P2, after the first internal pilot story.**
+Do these before production stories:
 
----
+1. Fix schema-reference slips.  
+2. Define genesis-record vs branch-local-record semantics.  
+3. Add causal dependency threat scan.  
+4. Add `SE.resolution`.  
+5. Add prose-attach `choice_consequence_visibility`.
 
-## **Bottom line**
+This gives you the biggest reduction in future story corruption.
 
-The current architecture is the right architecture. It is much closer to storylets + social state + narrative mediation + causal replay than to a branching outline, and that is exactly where it should be.
+### **Second pass: better continuation quality**
 
-The changes I would make now are not a redesign. They are hardening moves:
+Then add:
 
-1. eliminate schema drift;  
-2. make entity status replayable;  
-3. represent branch/canon closeout without polluting unrelated schemas;  
-4. add explicit `SF.authority`;  
-5. give obligations/consequences urgency;  
-6. make reusable commitment blocks powerful through generic binding predicates;  
-7. ground every choice in concrete affordances and state.
+1. expected-witness validation,  
+2. `record_age` / `urgency_at_least` predicates,  
+3. SLT coverage matrix,  
+4. direct-batch coverage requirements.
 
-Do those before production stories. Otherwise the first serious branch will expose the same failure modes: non-replayable deaths/movement, invalid closeout fields, weak global storylets, and audits that talk about urgency or authority the schemas cannot actually represent.
+This reduces bland JIT blocks and missed consequences.
+
+### **Third pass: emergent opportunity support**
+
+Finally add:
+
+1. health-audit `sifting` mode,  
+2. opportunity-style RSP cards,  
+3. pattern library for deception, debt payoff, relationship reversal, repeated blocked action, and promotion evidence.
+
+This gives authors power without introducing a drama manager.
+
+## **Things I would explicitly not do**
+
+Do **not** add acts, act labels, midpoint logic, climax obligations, or “shape preservation.” Your own foundation document is correct: interactive branches need present causal obligations, not future dramatic obligations.
+
+Do **not** add a global drama manager. It will reintroduce railroading under a more technical name.
+
+Do **not** replace the predicate DSL with natural-language storylet triggers. Use LLMs to draft and critique predicates, but keep executable eligibility deterministic.
+
+Do **not** add full autonomous NPC simulation yet. Strengthen `BEL`, `SREL`, `STINT`, `OBL`, `CNSQ`, and `SLT` first.
+
+Do **not** make rendered prose authoritative. The plan-authority boundary is one of the best parts of the system.
+
+## **Final recommendation**
+
+Keep the architecture. It is already pointed at the right target: **a causal promise machine**, not a plot machine.
+
+The highest-value changes are small but sharp: fix schema wording, define genesis/global scope, add causal-threat detection, make non-accept outcomes structurally explicit, verify witness propagation, add pressure-age predicates, and give health audit a story-sifting mode. That will strengthen branching stories without ever asking whether the branch is “in Act II” or whether the player has broken the planned climax.
 
