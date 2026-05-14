@@ -380,10 +380,13 @@ story_id: STORY-<integer>*
 created_at_page: PG-<integer>*
 supersedes: SF-<integer> | null               # default null
 statement: string*                             # natural-language branch-local truth
+authority: branch_local | branch_local_counterfactual | canon_candidate | canon_linked*   # default branch_local
 derived_from: [CF-<integer> | <story-local record id>]   # default []; non-empty for mirrored or derived facts
 ```
 
 No `certainty`, `scope`, `who_knows`, `derived_from_cf`, `why_it_matters_at_opening`, or `trace_records` fields. CF mirrors and branch-derived facts both use `derived_from`.
+
+Use `branch_local` for ordinary story-local truths, `branch_local_counterfactual` for deliberately branch-only contradictions, `canon_candidate` for claims held for promotion, and `canon_linked` only after canon acceptance. A `canon_linked` `SF` must include at least one parent `CF-<integer>` in `derived_from`; no separate canon-link field exists.
 
 #### 4.5.4 `OBL` (obligation)
 
@@ -709,13 +712,14 @@ If patch submission succeeds but a direct-write artifact fails, the story `_sour
 
 ## 11. Mystery and Canon Authority
 
-Story-local resolution-like claims are classified into three authority levels:
+Story-local resolution-like claims are classified into four authority levels:
 
 | Authority | Meaning | Promotion path |
 |---|---|---|
 | `apparent` | What appears to be true in the branch from the cast's epistemic position. May or may not match world canon. | No promotion. Treated as `BEL` if a holder is named. |
 | `branch_local_counterfactual` | What is true *only in this branch*; contradicts canon or another branch deliberately. | No promotion. Lives as `SF` with branch-scoped truth. |
 | `canon_candidate` | The branch asserts something that may be world-level truth and could be promoted to canon. | Pauses via §7 gate 8 until `story-fact-promotion-to-canon` runs and `canon-addition` adjudicates. |
+| `canon_linked` | A prior story-local `SF` whose claim has been accepted into world canon. | Produced only by `story-promotion-closeout` after canon-addition acceptance; the parent CF id rides in `SF.derived_from`. |
 
 Mysteries with `status: forbidden` are never resolved by any authority level. Mysteries with `status: active | passive` may be resolved per the `future_resolution_safety` coupling in FOUNDATIONS §Canon Layers.
 

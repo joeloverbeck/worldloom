@@ -5,6 +5,7 @@ import { recordSchemaCompliance } from "../structural/record-schema-compliance.j
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
+import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
 import { rule2NoPureCosmetics } from "../rules/rule2-no-pure-cosmetics.js";
 import { rule4NoGlobalizationByAccident } from "../rules/rule4-no-globalization-by-accident.js";
@@ -23,6 +24,7 @@ export const structuralValidators: readonly Validator[] = [
   idUniqueness,
   crossFileReference,
   recordSchemaCompliance,
+  storyFactAuthority,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

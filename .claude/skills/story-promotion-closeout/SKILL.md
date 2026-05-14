@@ -132,7 +132,7 @@ All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/
 
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-- `docs/FOUNDATIONS.md` — §Story Bundles §11 (mystery and canon authority), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
+- `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
 - `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, BR, SE — all classes that may be superseded), §10 shared write order, §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `source_records` / `source_kind` / `branch_path` / `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
@@ -177,7 +177,7 @@ The verdict dictates the supersession pattern:
 
 The candidate is now world canon. Record the canon link in the closeout ledger. Supersede story-local source records only when an amended-schema field must change:
 
-- Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>` and any parent CF ids in `derived_from`. The CF / CH / PA verdict linkage itself lives in the closeout ledger.
+- Each `SF-<integer>` source MAY be superseded with the same class shape from shared contract §4.5.3, carrying `supersedes: SF-<integer>`, `authority: canon_linked`, and at least one parent CF id in `derived_from`. The broader CF / CH / PA verdict linkage lives in the closeout ledger; the parent CF id on the superseding SF is the schema-backed authority link.
 - Each implicated `BEL-<integer>` MAY be superseded with the §4.1 shape when `truth_relation`, `claim`, `basis`, or `consequences` must change to reflect the adjudicated canon outcome. The CF / CH / PA linkage lives in the closeout ledger.
 - For `source_kind: artifact_canonization`, supersede story-local `DA` only if a §4.5.10 field changes. World-level DA linkage is recorded in the closeout ledger.
 - For `source_kind: character_outcome`, supersede `STENT` only if a §4.5.1 field changes.
@@ -191,7 +191,7 @@ Same decision pattern as `accepted`, with canon-addition's restrictions recorded
 
 The candidate is NOT canon. Record the rejection in the closeout ledger. Supersede story-local source records only when their amended-schema fields must change to preserve the claim as branch-local:
 
-- Each `SF-<integer>` source MAY be superseded with `supersedes: <prior SF id>` and a revised `statement` / `derived_from` if the record itself needs to stop implying canon authority. The rejection linkage lives in the closeout ledger.
+- Each `SF-<integer>` source MAY be superseded with `supersedes: <prior SF id>` and revised `statement` / `authority` / `derived_from` values if the record itself needs to stop implying canon authority. Use `authority: branch_local` for ordinary retained branch truth or `branch_local_counterfactual` for deliberately branch-only contradictions. The rejection linkage lives in the closeout ledger.
 - Optionally a new `BEL-<integer>` marking the claim as `false | disputed | rumor` when the user's `notes` argument indicates the rejection should manifest in-story.
 - No CF / CH / PA links — no canon-addition outputs to cite.
 
@@ -330,7 +330,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 | Canon Layers | Phase 1 | Read linked CF records' `status` (5 layer values). |
 | Mystery Reserve | N/A at this skill | Story-fact-promotion-to-canon + canon-addition handled. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA / BR, NOT page records. |
-| §Story Bundles §11 (Mystery and Canon Authority) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |
+| §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |
 | Change Control Policy | Phase 1, Phase 3 gate 2 | Closeout reads canon-addition's CH Change Log Entry and cites it in the closeout ledger. |
 | Tooling Recommendation | Pre-flight | Linked canon-addition records loaded via direct file reads (CF / CH / PA paths); no `get_context_packet` retrieval needed since closeout works against direct record paths. |
 

@@ -4,13 +4,13 @@ Executable FOUNDATIONS Rules 1, 2, 4, 5, 6, 7, 11, and 12 plus story-scope predi
 
 **Design**: `../../archive/specs/SPEC-04-validator-framework.md`
 **Phase**: 2 Tier 1. CLI activation and the pre-apply engine/MCP entry point are present.
-**Status**: package scaffold, framework types, record-class JSON Schemas, the 9 structural validators, the 9 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
+**Status**: package scaffold, framework types, record-class JSON Schemas, the 10 structural validators, the 9 rule-derived validators, package-internal structural/rule registries, the `world-validate` CLI, and the public `validatePatchPlan` entry point are present.
 
 ## Schemas
 
 Static JSON Schemas live under `src/schemas/`. They cover the CF, CH, INV, M,
 OQ, ENT, SEC, PA frontmatter, CHAR frontmatter, DA frontmatter, and story-bundle
-atomic YAML record classes (STENT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
+atomic YAML record classes (STENT, STSTAT, SF, SE, OBL, CNSQ, THR, SREL, STINT, STLOC,
 STOBJ, BR, PG, CHC, SLT, BEL, and story-local DA). The PA schema validates YAML frontmatter parsed from
 `adjudications/PA-NNNN-*.md`; PA body prose is not schema-constrained.
 
@@ -34,6 +34,7 @@ Structural validators:
 - `id_uniqueness`
 - `cross_file_reference`
 - `record_schema_compliance`
+- `story_fact_authority`
 - `snapshot_replay_equality`
 - `recursive_reference_closure`
 - `state_snapshot_integrity`

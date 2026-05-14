@@ -117,7 +117,7 @@ Phase 10: HARD-GATE fires → atomic patch + markdown writes
 | `STSTAT-<integer>` (new or supersession) | `_source/status/STSTAT-<integer>.yaml` | IF life / agency / location changes; exactly one active status record per active `STENT` |
 | `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF identity mirror / role metadata changes; not for life / agency / location status |
 | `STINT-<integer>` (new or supersession) | `_source/intentions/STINT-<integer>.yaml` | IF intentions change this turn |
-| `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge |
+| `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge; every SF carries `authority` per shared contract §4.5.3 |
 | `BEL-<integer>` (new or supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF belief/visibility changes — **mandatory** for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual (Phase 4) |
 | `OBL-<integer>` (new or supersession) | `_source/obligations/OBL-<integer>.yaml` | IF obligations open / close / escalate |
 | `CNSQ-<integer>` | `_source/consequences/CNSQ-<integer>.yaml` | IF consequences fire |
@@ -261,8 +261,9 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 Classify every new resolution-like claim in the delta per shared contract §11:
 
 - `apparent` — what appears to be true from the cast's epistemic position; recorded on `BEL` records.
-- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped truth.
-- `canon_candidate` — may be world-level truth; held for promotion via `story-fact-promotion-to-canon`.
+- `branch_local` — ordinary branch-local truth; recorded on `SF`.
+- `branch_local_counterfactual` — true only in this branch; recorded on `SF.authority` with branch-scoped truth.
+- `canon_candidate` — may be world-level truth; recorded on `SF.authority` and held for promotion via `story-fact-promotion-to-canon`.
 
 If the action would resolve any mystery with `status: forbidden`, abort before patch submission with a mystery-firewall error. If the action asserts a `canon_candidate` claim, set `outcome_route: promotion_hold` and ensure the state delta records ONLY the branch-local appearance; emit `SE.promotion_claims[]` so the user knows to invoke `story-fact-promotion-to-canon` after this turn lands.
 

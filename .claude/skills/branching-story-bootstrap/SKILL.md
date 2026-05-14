@@ -189,7 +189,7 @@ story_seed:
 
 ## Phase 2: Mirror load-bearing world facts
 
-Create `SF` records for facts the opening state actually depends on. Each mirrored `SF` follows shared contract §4.5.3: `id`, `story_id`, `created_at_page`, `supersedes`, `statement`, and `derived_from`. For mirrored world facts, `derived_from` is a non-empty list containing the parent `CF-<integer>` ids. Record epistemic asymmetry with `BEL` records, not fact-side knowledge fields.
+Create `SF` records for facts the opening state actually depends on. Each mirrored `SF` follows shared contract §4.5.3: `id`, `story_id`, `created_at_page`, `supersedes`, `statement`, `authority`, and `derived_from`. For ordinary mirrored world facts, set `authority: branch_local` and keep `derived_from` as a non-empty list containing the parent `CF-<integer>` ids. Use `authority: branch_local_counterfactual` only for deliberate branch-local contradictions that must not be laundered into world canon, and `authority: canon_candidate` only when the opening state intentionally creates a held-for-promotion claim. Record epistemic asymmetry with `BEL` records, not fact-side knowledge fields.
 
 Do NOT mirror broad world background. The mirror exists so the turn-cycle does not re-query the world index for facts already known to constrain opening choices.
 

@@ -275,6 +275,32 @@ test("record_schema_compliance accepts complete storylet records", async () => {
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance enforces story fact authority", async () => {
+  const valid = storyFactRecord({
+    authority: "branch_local"
+  }, "SF-0001");
+  const missingAuthority = storyFactRecord({}, "SF-0002");
+  const invalidAuthority = storyFactRecord({
+    authority: "objective"
+  }, "SF-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingAuthority, invalidAuthority])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SF-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SF-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("authority")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SF-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
 test("record_schema_compliance accepts branch-prefix-scoped storylets with canonical nested prefix", async () => {
   const storylet = completeStorylet();
   storylet.scope = {
@@ -561,6 +587,17 @@ function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?
   return record("storylet_record", id, `stories/red-bunny/_source/storylets/${id}.yaml`, {
     ...parsed,
     id
+  });
+}
+
+function storyFactRecord(overrides: Record<string, unknown>, id: string) {
+  return record("story_fact_record", id, `stories/red-bunny/_source/facts/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    statement: "The gate is damaged.",
+    derived_from: [],
+    ...overrides
   });
 }
 

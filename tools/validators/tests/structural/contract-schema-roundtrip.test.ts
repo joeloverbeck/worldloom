@@ -38,8 +38,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["id", "story_id", "created_at_page", "supersedes", "holder", "intent", "urgency", "expires_when"]
   },
   "story-fact": {
-    required: ["id", "story_id", "created_at_page", "statement"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "derived_from"]
+    required: ["id", "story_id", "created_at_page", "statement", "authority"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "authority", "derived_from"]
   },
   "story-obligation": {
     required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"],
@@ -121,6 +121,7 @@ test("representative amended contract records validate against tightened schemas
       story_id: "STORY-001",
       created_at_page: "PG-0001",
       statement: "The gate is damaged.",
+      authority: "canon_linked",
       derived_from: ["CF-0001"]
     }),
     storyRecord("obligation_record", "OBL-0001", "obligations", {

@@ -393,6 +393,8 @@ function pagePlanWithBranchLeak() {
         id: "SF-0001",
         story_id: "STORY-001",
         created_at_page: "PG-0002",
+        statement: "The branch-local fact reaches a future event.",
+        authority: "branch_local",
         evidence: [{ event_id: "SE-0009" }]
       }),
       storyPatch("create_se_record", "events", {
