@@ -1,6 +1,6 @@
 # SPEC25STOCOHHAR-010: FOUNDATIONS.md amendments
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `docs/FOUNDATIONS.md` only (cross-cutting docs ticket; no production code).
@@ -8,7 +8,7 @@
 
 ## Problem
 
-SPEC-25's schema additions and a pre-existing doc-drift must be propagated into `docs/FOUNDATIONS.md`: §6 does not list `STSTAT`; §5's Rule-1 examples do not reflect the new load-bearing story-bundle fields; and §9 still references the archived SPEC-19/20 `arc.beat_plan` / `cadence_policy` scene-commitment-arc vocabulary that no longer exists anywhere in the landed pipeline. This is a cross-cutting docs ticket that lands once the implementation tickets it references have shipped.
+At intake, SPEC-25's schema additions and a pre-existing doc-drift still needed propagation into `docs/FOUNDATIONS.md`: §6 did not list `STSTAT`; §5's Rule-1 examples did not reflect the new load-bearing story-bundle fields; and §9 still referenced the archived SPEC-19/20 `arc.beat_plan` / `cadence_policy` scene-commitment-arc vocabulary that no longer exists anywhere in the landed pipeline. This cross-cutting docs ticket landed after the implementation tickets it references had shipped.
 
 ## Assumption Reassessment (2026-05-14)
 
@@ -30,19 +30,19 @@ SPEC-25's schema additions and a pre-existing doc-drift must be propagated into 
 3. §9 contains no `arc.beat_plan` or `cadence_policy` reference -> grep-proof: `grep -nE "arc\.beat_plan|cadence_policy|max_arcs_without" docs/FOUNDATIONS.md` returns no matches.
 4. §9's reworded structural-pacing prose matches the landed contract -> FOUNDATIONS alignment check against `.claude/skills/_shared-templates/story-state-contract.md` §4.4 (`SLT` `beats: 1-5`, no `arc` field).
 
-## What to Change
+## Landed Changes
 
 ### 1. §6 Story-Bundle ID Classes
 
-Add `STSTAT` to the per-bundle records list.
+Added `STSTAT` to the per-bundle records list.
 
 ### 2. §5 / §5b Validation Rules + Schema-Minimalism
 
-Extend §5's Rule-1 story-bundle-schema-field examples to reflect the new load-bearing fields: `STSTAT` life / agency / location, `SF.authority`, `OBL` / `CNSQ` `urgency`, `CHC.grounded_in`, and the DSL v2 existential predicates. Confirm §5b still names the shared story state contract as the authoritative schema source; make no other §5b text change.
+Extended §5's Rule-1 story-bundle-schema-field examples to reflect the new load-bearing fields: `STSTAT` life / agency / location, `SF.authority`, `OBL` / `CNSQ` `urgency`, `CHC.grounded_in`, and the DSL v2 existential predicates. Confirmed §5b still names the shared story state contract as the authoritative schema source; no §5b text change was needed.
 
 ### 3. §9 Prose Length Discipline At Story Scope
 
-Remove the stale `arc.beat_plan.min_beats` / `max_beats` and `STORY_KERNEL.cadence_policy.max_arcs_without_menu_soft` / `max_arcs_without_player_commitment_soft` references. Reword the structural-pacing prose to reference the landed contract §4.4 `SLT` `beats: 1-5` list. Keep the §9 anti-word-count discipline (no word-count targets / floors / ceilings on rendered prose) fully intact — only the stale structural-pacing vocabulary is reconciled.
+Removed the stale `arc.beat_plan.min_beats` / `max_beats` and `STORY_KERNEL.cadence_policy.max_arcs_without_menu_soft` / `max_arcs_without_player_commitment_soft` references. Reworded the structural-pacing prose to reference the landed contract §4.4 `SLT` `beats: 1-5` list. Kept the §9 anti-word-count discipline (no word-count targets / floors / ceilings on rendered prose) intact.
 
 ## Files to Touch
 
@@ -75,5 +75,34 @@ None — documentation-only ticket; verification is command-based and existing p
 
 ### Commands
 
-1. `grep -nE "STSTAT|arc\.beat_plan|cadence_policy|max_arcs_without" docs/FOUNDATIONS.md`
-2. Manual review of §5 / §5b / §6 / §9 against SPEC-25 D7 and `.claude/skills/_shared-templates/story-state-contract.md` §4.4.
+1. `grep -n "STSTAT" docs/FOUNDATIONS.md`
+2. `grep -nE "arc\.beat_plan|cadence_policy|max_arcs_without" docs/FOUNDATIONS.md`
+3. Positive field-anchor review:
+   ```bash
+   rg -n 'SF\.authority|OBL` / `CNSQ` `urgency|CHC\.grounded_in|actor-unbound existential predicates|SLT\.beats' docs/FOUNDATIONS.md
+   ```
+4. Manual review of §5 / §5b / §6 / §9 against SPEC-25 D7 and `.claude/skills/_shared-templates/story-state-contract.md` §4.4.
+
+## Outcome
+
+Completed on 2026-05-14.
+
+`docs/FOUNDATIONS.md` now reflects the landed SPEC-25 story-state contract: §5 names the load-bearing `STSTAT`, `SF.authority`, `OBL` / `CNSQ` `urgency`, `CHC.grounded_in`, and DSL v2 predicate surfaces; §6 includes `STSTAT` in the per-bundle record class list; and §9 references `SLT.beats` / page-plan structural pacing instead of the archived scene-commitment-arc vocabulary.
+
+No production code, schema, validator, skill, or world-content file changed.
+
+## Verification Result
+
+1. `grep -n "STSTAT" docs/FOUNDATIONS.md` — PASS; `STSTAT` appears in §5 and §6.
+2. `grep -nE "arc\.beat_plan|cadence_policy|max_arcs_without" docs/FOUNDATIONS.md` — PASS; returned no matches.
+3. Positive field-anchor review — PASS; §5 names the new load-bearing fields/predicates and §9 references `SLT.beats`.
+   ```bash
+   rg -n 'SF\.authority|OBL` / `CNSQ` `urgency|CHC\.grounded_in|actor-unbound existential predicates|SLT\.beats' docs/FOUNDATIONS.md
+   ```
+4. Manual review against `specs/SPEC-25-story-coherence-hardening.md` D7 and `.claude/skills/_shared-templates/story-state-contract.md` §3 / §4.4 / §4.5.3 / §4.5.4 / §4.5.5 / §4.5.12 / §4.5.13 / §5 — PASS.
+5. `git diff --check` — PASS.
+
+## Deviations
+
+- The user-supplied `spcs/SPEC-25*` shorthand was resolved to the live `specs/SPEC-25-story-coherence-hardening.md` path.
+- `docs/HARD-GATE-DISCIPLINE.md` was not required because this ticket changed only FOUNDATIONS prose and did not alter validator behavior, approval-token behavior, pre-apply behavior, submit/validate flow, skill HARD-GATE wording, or world-canon mutation ordering.

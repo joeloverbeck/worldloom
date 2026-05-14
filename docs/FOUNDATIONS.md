@@ -563,7 +563,7 @@ Page snapshots are the fork primitive. Any committed page is a valid parent for 
 
 ### 5. Validation Rules At Story Scope
 
-Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_policy`, `provenance.origin`, `scope.visibility`, `preconditions.hard|soft` (in the closed predicate DSL), and `effects.create|supersede|close` (mirroring `SE.state_delta`) per the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4.4.
+Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_policy`, `provenance.origin`, `scope.visibility`, `preconditions.hard|soft` (in the closed predicate DSL), and `effects.create|supersede|close` (mirroring `SE.state_delta`) per the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4.4. The same load-bearing discipline applies across the landed story-state schemas: `STSTAT` carries replayable life / agency / location state for `entity_status`, `SF.authority` separates branch-local, counterfactual, candidate, and canon-linked facts, `OBL` / `CNSQ` `urgency` gives debt salience a uniform field, `CHC.grounded_in` makes choice grounding structurally checkable, and the closed predicate DSL includes actor-unbound existential predicates for social-state prefiltering without branch-local ID leakage.
 
 Rule 4 (No Globalization by Accident) governs story-scope branch isolation. Global author-pool storylets must not reference branch-local record IDs whose `created_at_page` is non-null.
 
@@ -595,7 +595,7 @@ The story engine is a present-causal-state machine. It tracks what is true now a
 
 ### 6. Story-Bundle ID Classes
 
-Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
+Story-bundle architecture uses world-scoped, story-bundle-scoped, and sub-audit-scoped ID classes. `STORY-<integer>` is per-world. Per-bundle records include STENT, STSTAT, SF, BEL, SE, OBL, CNSQ, THR, SREL, STINT, STLOC, STOBJ, BR, PG, CHC, SLT, and SLB. Per-bundle audit and promotion records include SAU and SP, with RSP scoped under a specific SAU audit. All of these classes use the unpadded natural-integer format defined in §Canonical Storage Layer.
 
 Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=...)`; RSP allocation also includes `audit_id`. The allocator is the same machine-facing allocation surface used for world-canon classes.
 
@@ -619,9 +619,9 @@ Story-bundle deletion is permitted at the bundle level. Within a retained bundle
 
 ### 9. Prose Length Discipline At Story Scope
 
-Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, ceilings, ranges, or budgets on rendered prose. Pacing is expressed structurally — beat counts (`arc.beat_plan.min_beats`, `max_beats`), arc-unit cadence (`STORY_KERNEL.cadence_policy.max_arcs_without_menu_soft`, `max_arcs_without_player_commitment_soft`), and the storylet's beat plan — never as a per-page or per-arc word quota. Length follows content: the prose is as long as the beats, the cast's reactions, and the natural close-where-the-next-commitment-becomes-available require, and not a sentence sooner or later.
+Story-pipeline LLM-facing surfaces must not impose word-count targets, floors, ceilings, ranges, or budgets on rendered prose. Pacing is expressed structurally through the selected commitment block's `SLT.beats` list (1-5 beats per block), the page plan's intended beats, and the natural close-where-the-next-commitment-becomes-available — never as a per-page or per-arc word quota. Length follows content: the prose is as long as the beats, the cast's reactions, and the chosen stopping point require, and not a sentence sooner or later.
 
-**Why**: word-count quotas at the LLM-facing surface produced empirically observed prose-padding (the LLM extending scenes to reach the floor) and prose-truncation (the LLM compressing scenes to fit the ceiling) pathologies. Commit `b28aead` (2026-05-06) removed the word-per-page guidelines from the page-render instructions on that basis; the archived SPEC-20 §H reassessment (2026-05-07) dropped `default_min_words_between_menus`, `preferred_words_per_arc`, and `max_words_without_player_commitment_soft` from `cadence_policy` for the same reason.
+**Why**: word-count quotas at the LLM-facing surface produced empirically observed prose-padding (the LLM extending scenes to reach the floor) and prose-truncation (the LLM compressing scenes to fit the ceiling) pathologies. Commit `b28aead` (2026-05-06) removed the word-per-page guidelines from the page-render instructions on that basis; the archived SPEC-20 §H reassessment (2026-05-07) dropped the old per-bundle word-target fields for the same reason.
 
 **Scope**: this discipline applies to LLM-facing prompts in the story-pipeline skills (Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`) — `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`. The Prose Craft Contract is hosted at `reports/prose-quality-instructions.md` §Prose Craft Contract and inlined verbatim as page-plan §3 per `.claude/skills/_shared-templates/story-state-contract.md` §8.
 
