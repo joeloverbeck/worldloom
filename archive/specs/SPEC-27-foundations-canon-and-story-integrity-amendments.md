@@ -2,13 +2,13 @@
 
 # SPEC-27: FOUNDATIONS Amendments — Canon Schema Correctness, Rule-Numbering Map, and Story-Integrity Hardening
 
-**Status**: DRAFT
+**Status**: COMPLETED
 **Supersedes**: nothing. Additive amendment of `docs/FOUNDATIONS.md` plus the schema / validator / MCP / skill surfaces those amendments cascade into.
-**Source**: triage of `reports/worldloom_foundations_amendment_proposal.md` — an external review (ChatGPT-Pro) of `docs/FOUNDATIONS.md` conducted against the `docs/` set only, with **no codebase access**. The proposal offered 12 numbered amendments; each was reassessed against the actual schemas, validators, MCP layer, and skills. The full per-amendment triage is recorded at `docs/triage/2026-05-14-foundations-amendment-proposal-triage.md`.
+**Source**: triage of `archive/reports/worldloom_foundations_amendment_proposal.md` — an external review (ChatGPT-Pro) of `docs/FOUNDATIONS.md` conducted against the `docs/` set only, with **no codebase access**. The proposal offered 12 numbered amendments; each was reassessed against the actual schemas, validators, MCP layer, and skills. The full per-amendment triage is recorded at `docs/triage/2026-05-14-foundations-amendment-proposal-triage.md`.
 
 ## Problem Statement
 
-`docs/FOUNDATIONS.md` was amended organically across SPEC-09 through SPEC-26 and has accumulated internal inconsistencies and undocumented decisions. An external reviewer, fed only the `docs/` set, produced `reports/worldloom_foundations_amendment_proposal.md` proposing 12 amendments. Because the reviewer could not see the codebase, its *diagnoses* are largely accurate but its *prescriptions* over-build — several proposed amendments duplicate validator-enforced mechanisms that already exist, and several proposed *fixes* invent fields (`mystery_links[]`) or shapes (a structured-object `required_world_updates`) that contradict what the codebase enforces.
+`docs/FOUNDATIONS.md` was amended organically across SPEC-09 through SPEC-26 and has accumulated internal inconsistencies and undocumented decisions. An external reviewer, fed only the `docs/` set, produced `archive/reports/worldloom_foundations_amendment_proposal.md` proposing 12 amendments. Because the reviewer could not see the codebase, its *diagnoses* are largely accurate but its *prescriptions* over-build — several proposed amendments duplicate validator-enforced mechanisms that already exist, and several proposed *fixes* invent fields (`mystery_links[]`) or shapes (a structured-object `required_world_updates`) that contradict what the codebase enforces.
 
 Reassessment against the codebase recalibrates the proposal to **nine accepted deliverables** (D1–D9), grouped: D1–D4 are world-canon schema / documentation correctness; D5–D9 are story-scope integrity hardening. Four proposed amendments are rejected outright (see §Out of Scope), and one proposed sub-part — minting a new "Rule 13" — is rejected as duplicative of already-shipped SPEC-18 machinery.
 
@@ -125,6 +125,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D9 — Integration capstone
 
+**Implementation note (2026-05-15, SPEC27FOUCAN-009).** D9 landed the capstone reconciliation in `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md`, archived as `archive/tickets/SPEC27FOUCAN-009.md`. The final proof ran `tools/validators` and `tools/world-index` package lanes, classified the remaining `mystery_reserve` hits as legitimate Mystery Reserve record-class / validator / vocabulary / context-packet / historical references, and found no current CF `required_world_updates` retired-filename residue. Remaining D9 prose below is historical intake context unless a later ticket explicitly owns broader cleanup.
+
 A final reconciliation pass: run the `tools/validators` and affected `tools/` package test lanes, run a cross-skill stale-vocabulary sweep for `mystery_reserve` (as a CF status) and retired-`.md`-filename residues, and confirm `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` reflect the amended CF status enum and the rule-numbering map.
 
 ## Deliverables
@@ -179,3 +181,11 @@ A final reconciliation pass: run the `tools/validators` and affected `tools/` pa
 - **D3 classification granularity is deliberately under-specified.** The spec mandates a canonization-time acknowledgment step but leaves the exact classification vocabulary to ticket-time judgment, to avoid re-introducing the reviewer's over-built six-state taxonomy. Ticket authoring should pick the minimum set of distinctions `continuity-audit` Phase 4k already keys on.
 - **D5 / D7 enforcement depth.** The spec defines the FOUNDATIONS clauses and the contract gates; whether `branching-story-health-audit` enforcement is a full structural-replay sub-phase or a lighter prose check is a ticket-time decision, consistent with how SPEC-26 D4/D5 were scoped.
 - **Whether D4 should also touch the two `CLAUDE.md` files.** D4 strengthens `HARD-GATE-DISCIPLINE.md`; the `CLAUDE.md` "bare PASS = FAIL" note is consistent with the strengthening but not identical. Ticket authoring should decide whether to also amend the `CLAUDE.md` note or leave it as the weaker-but-not-contradictory summary.
+
+## Outcome
+
+Completed on 2026-05-15. SPEC-27 was decomposed into `SPEC27FOUCAN-001` through `SPEC27FOUCAN-009`, all of which are archived under `archive/tickets/`. The accepted deliverables landed the CF status and `required_world_updates` corrections, the FOUNDATIONS Rule Numbering and Enforcement Map, silence-semantics canonization discipline, authority-cited HARD-GATE rationale wording, story-scope choice consequence integrity, canon baseline drift, observer-firewall move-generation discipline, mystery-accretion discipline, and the final cross-cutting documentation/test capstone.
+
+Deviations from the intake proposal were intentional and are recorded in this spec: the reviewer-proposed `integration_chain`, structured-object `required_world_updates`, `mystery_links[]`, and new Rule 13 were rejected or replaced by the live repo's existing schema, validator, and skill contracts.
+
+Verification was completed through the individual archived tickets. The final capstone (`archive/tickets/SPEC27FOUCAN-009.md`) ran `tools/validators` and `tools/world-index` package lanes, classified remaining `mystery_reserve` references as legitimate non-CF-status vocabulary, and confirmed no current CF `required_world_updates` retired-filename residue remains.

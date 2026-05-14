@@ -1,10 +1,10 @@
 # Triage: FOUNDATIONS Amendment Proposal (2026-05-14)
 
-**Source**: `reports/worldloom_foundations_amendment_proposal.md` — external review (ChatGPT-Pro) of `docs/FOUNDATIONS.md`, conducted against the `docs/` set only, **no codebase access**. 12 numbered amendments proposed.
+**Source**: `archive/reports/worldloom_foundations_amendment_proposal.md` — external review (ChatGPT-Pro) of `docs/FOUNDATIONS.md`, conducted against the `docs/` set only, **no codebase access**. 12 numbered amendments proposed.
 
 **Method**: each amendment reassessed against the actual schemas, validators, MCP layer, and skills via four parallel codebase-verification passes. The reviewer's diagnoses are largely accurate; its prescriptions over-build (several duplicate validator-enforced mechanisms; some proposed *fixes* invent fields/shapes that contradict working code).
 
-**Deliverable**: `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` — one umbrella spec, 9 deliverables (D1–D9). No `specs/IMPLEMENTATION-ORDER.md` update (only archived versions exist).
+**Deliverable**: `archive/specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` — one umbrella spec, 9 deliverables (D1–D9). No `specs/IMPLEMENTATION-ORDER.md` update (only archived versions exist).
 
 ## Accepted → SPEC-27
 

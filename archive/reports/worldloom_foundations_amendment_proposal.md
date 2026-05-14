@@ -1,5 +1,6 @@
 # Proposal: Amendments to `FOUNDATIONS.md` for Canon Propagation and Branching Interactive Story Robustness
 
+**Status**: COMPLETED
 **Prepared for:** Worldloom / Claude Code skill architecture  
 **Target file:** `docs/FOUNDATIONS.md`  
 **Date:** 2026-05-14  
@@ -607,3 +608,9 @@ The review used the uploaded Worldloom documents and research / implementation r
 - Truth-maintenance / reason-maintenance research.
 - Transmedia worldbuilding and hyperdiegesis theory.
 - Comparable tools: Twine, ink, Yarn Spinner, and articy:draft.
+
+## Outcome
+
+Completed on 2026-05-15 as an exploited source report. Its recommendations were triaged into `docs/triage/2026-05-14-foundations-amendment-proposal-triage.md`, then formalized and implemented through `archive/specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` and the archived `SPEC27FOUCAN-001` through `SPEC27FOUCAN-009` ticket family.
+
+The report remains preserved as provenance for the external review. Its proposed amendments are not current authority; `docs/FOUNDATIONS.md`, the SPEC-27 archive record, and the landed ticket closeouts are authoritative for the accepted, rejected, and modified outcomes.
