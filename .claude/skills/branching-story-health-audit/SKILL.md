@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 6 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 7 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,13 +51,14 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 6 sub-phases executed sequentially
+Phase 2 [structural; default]: 7 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
   ├─ 2d: Belief / visibility health
   ├─ 2e: Mystery / canon safety
-  └─ 2f: Continuation / terminal proof
+  ├─ 2f: Continuation / terminal proof
+  └─ 2g: Causal dependency health
         |
         v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
@@ -212,6 +213,17 @@ For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 - `terminal_without_rationale` — `terminal_rationale` is empty or doesn't name how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved. WARNING; `repair_kind: branch_flag`.
 - `orphan_debt_at_terminal` — debts open in the leaf snapshot but not referenced by `terminal_rationale`. WARNING; `repair_kind: branch_flag`.
 
+### Phase 2g: Causal dependency health
+
+Apply the same `causal_dependency_threat_scan` sub-checks across replayed branch state that `branching-story-turn-cycle` Phase 9 applies before a page commits:
+
+- `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
+- `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.
+- `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
+- `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
+
+Repair routing: `choice_dependency_clobbered`, `affordance_dependency_clobbered`, and `obligation_counterparty_unavailable_without_transfer` use `repair_kind: turn_repair`. `slt_precondition_clobbered` uses `repair_kind: commitment_block` when a replacement block is needed, otherwise `turn_repair`.
+
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
 For each `PG-<integer>` in the scoped branches:
@@ -333,6 +345,10 @@ rsp_cards_emitted: N | 0
 
 (Phase 2f findings.)
 
+## Causal dependency health
+
+(Phase 2g findings.)
+
 ## Prose health (if `prose` in modes)
 
 (Phase 3 findings.)
@@ -369,7 +385,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 - **Rule 1 (No Floating Facts)** — Phase 2a (replay events). Mechanism: replay verifies every record referenced in `state_snapshot.active_records` corresponds to a real record file; missing references surface as `snapshot_replay_mismatch` findings.
 - **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies.
-- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof). Mechanism: unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings.
+- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
 
 ## Record Schemas
@@ -388,7 +404,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | Rule 2 (No Pure Cosmetics) | N/A | Story-bundle scope. World-canon principle. |
 | Rule 3 (No Specialness Inflation) | N/A | Same as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 2b | Branch-isolation enforcement (4 finding types). |
-| Rule 5 (No Consequence Evasion) | Phase 2c, 2f | Debt-health + continuation-or-terminal-proof findings. |
+| Rule 5 (No Consequence Evasion) | Phase 2c, 2f, 2g | Debt-health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Audit reads only; emits no canon changes. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks (4 finding types). |
 | Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |

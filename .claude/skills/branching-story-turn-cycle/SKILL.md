@@ -40,7 +40,7 @@ Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/
 
 (b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
-(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 4 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale).
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 5 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan).
 
 (d) The user has explicitly approved the deliverable summary (branch label, resolved outcome route, state delta inventory by class, commitment block used, page plan structural preview, emitted choices list, any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation).
 
@@ -81,7 +81,7 @@ Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 4 turn-cycle-additional;
+Phase 9: Validate against shared 8 hard gates + 5 turn-cycle-additional;
   compute final PG hashes per shared contract §4.2a
         |
         v
@@ -356,12 +356,17 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
-Plus 4 turn-cycle-additional checks (recorded in working memory):
+Plus 5 turn-cycle-additional checks (recorded in working memory):
 
 1. **Action source legality** — XOR enforced; chosen CHC not retired.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
 3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual produces at least one BEL create or supersession.
 4. **Write-in world-logic rationale** — when `manual_action_text` is the action source, `SE.world_logic_rationale` is non-empty and explains the route (silent rejection forbidden).
+5. **Causal dependency threat scan** (`causal_dependency_threat_scan`) — after the state delta, next snapshot, visible affordances, and emitted choices are drafted, but before final PG hashes are computed, verify that the delta did not clobber dependencies that still survive in the committed page:
+   - `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
+   - `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.
+   - `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
+   - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
@@ -369,7 +374,7 @@ After all gates and additional checks pass, compute final PG hashes per shared c
 2. Compute `PG-<integer>.plan.plan_hash` and `PG-<integer>.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-<integer>.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft) and the `state_hash` output onto `PG-<integer>.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself, `prose_path`, and `prose_receipt_path`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
 3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
-If any gate, additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing.
+If any gate, ERROR-severity additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing. WARNING-severity additional checks must be recorded in the deliverable summary and either resolved before approval or explicitly accepted by the user as known story-health debt.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
@@ -404,7 +409,7 @@ Only the page plan requires long-form language generation. All other state work 
 
 - **Rule 1 (No Floating Facts)** — Phase 3 + Phase 7. Mechanism: every drafted record conforms to shared contract §4 schemas; Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
 - **Rule 4 (No Globalization by Accident)** — Phase 5 + Phase 9 gate 4. Mechanism: Phase 5 canon-authority classification keeps branch-local truth from leaking world-wide (`branch_local_counterfactual` vs. `canon_candidate`); Phase 9 gate 4 branch isolation rejects sibling-branch records.
-- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure).
+- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6 + Phase 9 additional check 5. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure); `causal_dependency_threat_scan` rejects choices, affordances, obligations, and high-salience debt paths whose dependencies were clobbered by the drafted delta.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 5 + Phase 9 gate 3. Mechanism: Phase 5 classifies claims and rejects forbidden mystery resolution; Phase 9 gate 3 mystery firewall verifies no forbidden `M-<integer>` is resolved and no selected SLT's `mystery_policy.forbidden_resolutions` is breached.
 
 ## Record Schemas
@@ -419,7 +424,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 2 (No Pure Cosmetics) | N/A | Not applicable — turn-cycle mutates branch-local story state; world canon is not touched. Handoff to `canon-addition` via `story-fact-promotion-to-canon` when a story claim promotes. |
 | Rule 3 (No Specialness Inflation) | N/A | Not applicable — same handoff as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 5, 9 | Phase 5 canon-authority classification; Phase 9 gate 4 branch isolation. |
-| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof. |
+| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof; Phase 9 additional `causal_dependency_threat_scan` for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Not applicable — turn-cycle mutates story-bundle scope, not world canon. World canon retcon routes through `canon-addition`. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 5, 9 | Phase 5 forbidden-mystery rejection; Phase 9 gate 3 mystery firewall. |
 | Rule 11 (No Spectator Castes) | N/A | Not applicable — Rule 11 governs new exceptional capabilities at world canon. |
