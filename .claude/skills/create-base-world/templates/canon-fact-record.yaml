@@ -26,7 +26,7 @@
 
 id: CF-<integer>                                # canonical fact ID, monotonic within this world
 title: ""                                  # short human label
-status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
+status: hard_canon                         # hard_canon | derived_canon | soft_canon | contested_canon
 type: ""                                   # common enum: capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
                                            # additional values from FOUNDATIONS.md §Ontology Categories are permitted: historical_process | text_tradition | hazard | craft
                                            # (draw verbatim from FOUNDATIONS so ledger-wide grep discovery works uniformly)

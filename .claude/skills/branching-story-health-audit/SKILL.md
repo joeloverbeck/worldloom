@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 7 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 8 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,14 +51,15 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 7 sub-phases executed sequentially
+Phase 2 [structural; default]: 8 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
   ├─ 2d: Belief / visibility health
   ├─ 2e: Mystery / canon safety
   ├─ 2f: Continuation / terminal proof
-  └─ 2g: Causal dependency health
+  ├─ 2g: Causal dependency health
+  └─ 2h: Canon baseline drift
         |
         v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
@@ -107,7 +108,7 @@ All direct-write markdown. No patch-engine submissions — the audit is read-onl
 
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-- `docs/FOUNDATIONS.md` — §Story Bundles §5 / §5a / §5b / §6a govern the audit checks
+- `docs/FOUNDATIONS.md` — §Story Bundles §4b / §5 / §5a / §5b / §6a govern the audit checks
 - `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (audit reads against), §5 closed predicate DSL, §7 eight hard gates, §9 branching procedure, §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
@@ -115,7 +116,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`; the latest `change_log_entry` in governing context is the current world-canon revision for §4b canon-baseline drift checks
 
 Bundle MUST exist. For `cross_story`, sibling bundles are enumerated at Pre-flight (zero siblings is legitimate and produces a no-op for Phase 4).
 
@@ -127,7 +128,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
 3. Parse `mode` argument — comma-separated list of `structural | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set.
 4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
-5. Load world canon context packet seeded with: every `M-<integer>` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification).
+5. Load world canon context packet seeded with: every `M-<integer>` (whole-class for forbidden-resolution and cumulative-accretion checks in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification). Extract the current world-canon revision from the latest `change_log_entry` in the context packet (`CH-<integer>`, or `null` only if no change log exists).
 6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
 If any precondition fails, the skill aborts before Phase 1.
@@ -147,7 +148,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Six sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Seven sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -158,6 +159,7 @@ For each scoped branch:
 3. For each page, apply the corresponding `SE.state_delta` to the running snapshot (create / supersede / close primitives).
 4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`. The replay includes `entity_status` through the active `STSTAT` projection enforced by `snapshot_replay_equality`; no separate hand-authored `entity_status` block is trusted.
 5. Divergence → `snapshot_replay_mismatch` finding, `severity: error`, `repair_kind: branch_flag` (replay corruption is not auto-repairable).
+6. Apply Choice Consequence Integrity to each replayed accepted `CHC` selection or accepted write-in: if its `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the choice as rhetorical or expressive, emit `cosmetic_accepted_choice`, `severity: error`, `repair_kind: turn_repair`.
 
 When replaying repair events, distinguish `system_repair` (engine-initiated repair such as schema-gate recovery) from `audit_repair` (audit-finding-driven repair). The old undifferentiated value is not a valid current-contract event kind.
 
@@ -186,7 +188,7 @@ Flag:
 - `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_derived_from_trace` — `SREL` supersessions whose `derived_from` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
-- `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's active `STSTAT`-derived status + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
+- `observer_firewall_violation` — emitted `CHC` records or selected `SLT` actor-bindings whose intent, target, precondition match, or planned move relies on information unavailable to the acting entity. Valid access routes include active `BEL`, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism recorded in the plan. WARNING; `repair_kind: turn_repair`.
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
 When a choice or selected `SLT` is grounded through a binding-predicate storylet, audit the resolved binding rather than the literal `bound:<alias>` token. For example, a block with `any_relationship_axis(trust_edge, trust, <=, low, primary_actor)` and `effects.supersede: [bound:trust_edge]` is plan-grounded only if the leaf snapshot has a matching active `SREL`; a block with `any_belief(public_belief, public, knows, true, public)` and `likely_effects: [bound:public_belief]` is grounded only if the matching active `BEL` exists and satisfies the filters.
@@ -196,6 +198,7 @@ When a choice or selected `SLT` is grounded through a binding-predicate storylet
 Flag:
 
 - `forbidden_mystery_resolved` — any mystery with `status: forbidden` resolved by an `SE.state_delta`. ERROR; `repair_kind: branch_flag` (forbidden mysteries cannot be resolved by any path — the branch may need to be archived).
+- `mystery_accretion_resolved` — cumulative narrowing / mystery accretion: walking a branch's `PG` page chain shows repeated `PG.state_snapshot.unresolved_mystery_claims[]` entries for the same `M-<integer>` with `status: clue_added | narrowed` that collectively answer the unknown, collapse the allowed answer space, contradict the Mystery Reserve entry's forbidden answers, or leave no live "what remains unknown" discipline even though no single page directly states the answer. ERROR when the accretion resolves a forbidden mystery or violates a forbidden-answer constraint; otherwise WARNING with `repair_kind: promotion` when the branch has effectively produced a canon-candidate answer that must pause for adjudication instead of continuing as unresolved.
 - `counterfactual_promoted_to_canon` — a `branch_local_counterfactual`-authority `SF` record treated as `world_level: true` in any downstream effect. ERROR; `repair_kind: branch_flag`.
 - `canon_candidate_not_promoted` — a `canon_candidate`-authority `SE.promotion_claims[]` entry that didn't pause the bundle (no subsequent `story-fact-promotion-to-canon` invocation found in the audit window). WARNING; `repair_kind: promotion` (the candidate may still be a deliberate hold).
 - `promotion_lacks_evidence` — promotion claims with rendered evidence required but missing rendered prose. WARNING; `repair_kind: prose_revision` (render the page first, then re-run promotion).
@@ -224,6 +227,16 @@ Apply the same `causal_dependency_threat_scan` sub-checks across replayed branch
 - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
 
 Repair routing: `choice_dependency_clobbered`, `affordance_dependency_clobbered`, and `obligation_counterparty_unavailable_without_transfer` use `repair_kind: turn_repair`. `slt_precondition_clobbered` uses `repair_kind: commitment_block` when a replacement block is needed, otherwise `turn_repair`.
+
+### Phase 2h: Canon baseline drift (per FOUNDATIONS §Story Bundles §4b)
+
+For every branch head and every page selected by `branch_path_filter`, compare `PG.state_snapshot.canon_revision` against the current world-canon revision loaded in Pre-flight. Classify each page's drift as exactly one of `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`.
+
+- `canon_baseline_missing` (ERROR): a post-D6 page snapshot lacks `canon_revision` even though the current world has a change-log revision. `repair_kind: turn_repair`.
+- `canon_baseline_requires_health_audit` (ERROR): canon changed after the page baseline and affected records cannot be proven irrelevant from loaded context. `repair_kind: health_audit`.
+- `canon_baseline_requires_repair_turn` (ERROR): changed canon contradicts a story-local active record, affordance, or open debt that a new turn would otherwise treat as current. `repair_kind: turn_repair`.
+- `canon_baseline_promotion_or_retcon_conflict` (ERROR): changed canon collides with a held `canon_candidate`, `canon_linked` story fact, or promotion queue entry. `repair_kind: promotion`.
+- `canon_baseline_grandfathered` (WARNING): the page remains valid as a committed historical branch state, but new turns must cite the grandfathered baseline classification before proceeding.
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
@@ -350,6 +363,10 @@ rsp_cards_emitted: N | 0
 
 (Phase 2g findings.)
 
+## Canon baseline drift
+
+(Phase 2h findings.)
+
 ## Prose health (if `prose` in modes)
 
 (Phase 3 findings.)
@@ -386,8 +403,10 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 - **Rule 1 (No Floating Facts)** — Phase 2a (replay events). Mechanism: replay verifies every record referenced in `state_snapshot.active_records` corresponds to a real record file; missing references surface as `snapshot_replay_mismatch` findings.
 - **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies.
-- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
-- **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
+- **Rule 5 (No Consequence Evasion)** — Phase 2a (Choice Consequence Integrity replay) + Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: cosmetic accepted-choice findings + unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
+- **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + cumulative mystery-accretion + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
+- **Canon Baseline Drift** — Phase 2h. Mechanism: page `state_snapshot.canon_revision` values are compared against the latest governing `change_log_entry`; stale baselines are classified and routed without rewriting committed pages.
+- **Information / Observer Firewall** — Phase 2d. Mechanism: emitted choices and selected `SLT` actor-bindings are checked against actor-available knowledge and recorded access routes.
 
 ## Record Schemas
 
@@ -405,17 +424,19 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | Rule 2 (No Pure Cosmetics) | N/A | Story-bundle scope. World-canon principle. |
 | Rule 3 (No Specialness Inflation) | N/A | Same as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 2b | Branch-isolation enforcement (4 finding types). |
-| Rule 5 (No Consequence Evasion) | Phase 2c, 2f, 2g | Debt-health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies. |
+| Rule 5 (No Consequence Evasion) | Phase 2a, 2c, 2f, 2g | Choice Consequence Integrity replay findings + debt-health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Audit reads only; emits no canon changes. |
-| Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks (4 finding types). |
+| Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks (5 finding types). |
 | Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |
 | Rule 12 (No Single-Trace Truths) | N/A | World-canon-only principle. |
 | Canon Layers | Pre-flight, Phase 2e | World canon loaded via context packet; per-event canon-authority classification. |
-| Mystery Reserve | Pre-flight, Phase 2e | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
+| Mystery Reserve | Pre-flight, Phase 2e | Whole-class Mystery Reserve loaded; forbidden-status firewall plus cumulative-accretion review. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Audit reads `PG` records as authoritative; never mutates them. Drift between prose and state is reported in findings, not in PG records. |
+| §Story Bundles §4b (Canon Baseline Drift) | Phase 2h | Audit compares page `state_snapshot.canon_revision` against current world canon and reports compatible / grandfathered / audit / repair / promotion-conflict classifications without mutating committed pages. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |
+| §Story Bundles §6b (Information / Observer Firewall) | Phase 2d | Audit reports emitted choices and selected `SLT` actor-bindings that rely on unavailable actor knowledge without a valid recorded access route. |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |

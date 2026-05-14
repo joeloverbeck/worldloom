@@ -117,10 +117,10 @@ No axis-(a) entries (proposal carries empty `derived_from_cfs`); no axis-(b) ent
 
 ```
 patch_plan = [
-  create_cf_record(CF-0047, full YAML — primary type: artifact, hazard sub-aspect, status: hard_canon, scope.geographic: regional, distribution.why_not_universal: 4-stabilizer chain, domains_affected: [magic, religion, law, daily_routine, kinship, status_signaling, mobility, economy], required_world_updates: [SEC-MTS-..., SEC-INS-..., SEC-ELF-..., SEC-TML-..., SEC-GEO-..., OQ-0007], source_basis.derived_from: []),
+  create_cf_record(CF-0047, full YAML — primary type: artifact, hazard sub-aspect, status: hard_canon, scope.geographic: regional, distribution.why_not_universal: 4-stabilizer chain, domains_affected: [magic, religion, law, daily_routine, kinship, status_signaling, mobility, economy], required_world_updates: [MAGIC_OR_TECH_SYSTEMS, INSTITUTIONS, EVERYDAY_LIFE, TIMELINE, GEOGRAPHY], source_basis.derived_from: []),
   create_ch_record(CH-0012, change_type: addition, affected_fact_ids: [CF-0047, CF-0023]),
   // bidirectional pointer for each touched section: extend CF's required_world_updates BEFORE touched_by_cf
-  update_record_field(CF-0047, 'required_world_updates' → +SEC-MTS-XXX),
+  update_record_field(CF-0047, 'required_world_updates' → +MAGIC_OR_TECH_SYSTEMS),
   append_touched_by_cf(SEC-MTS-XXX, CF-0047),
   append_extension(SEC-MTS-XXX, "Relic-effect system: source, access, training, cost, reliability, failure states..."),
   // ... repeated for SEC-INS, SEC-ELF, SEC-TML, SEC-GEO, OQ-0003 (PRESSURED extension), OQ-0007 (NEW)

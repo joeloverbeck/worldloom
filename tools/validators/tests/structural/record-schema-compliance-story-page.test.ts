@@ -32,6 +32,7 @@ function validPagePayload(): Record<string, unknown> {
     },
     state_hash: "0000000000000000000000000000000000000000000000000000000000000002",
     state_snapshot: {
+      canon_revision: "CH-0001",
       entity_status: {
         "STENT-0001": {
           life: "alive",
@@ -202,6 +203,19 @@ test("record_schema_compliance rejects PG records with invalid mystery claim sta
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.enum" &&
     verdict.message.includes("/state_snapshot/unresolved_mystery_claims/0/status")
+  )));
+});
+
+test("record_schema_compliance rejects PG records with invalid canon revision values", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as Record<string, unknown>;
+  stateSnapshot.canon_revision = "CF-0001";
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/state_snapshot/canon_revision")
   )));
 });
 

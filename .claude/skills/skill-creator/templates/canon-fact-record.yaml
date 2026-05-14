@@ -14,7 +14,7 @@
 
 id: CF-<integer>                                # canonical fact ID, monotonic
 title: ""                                  # short human label
-status: hard_canon                         # hard_canon | soft_canon | contested_canon | mystery_reserve
+status: hard_canon                         # hard_canon | derived_canon | soft_canon | contested_canon
 type: ""                                   # capability | artifact | law | belief | event | institution | species | ritual | taboo | technology | resource_distribution | hidden_truth | local_anomaly | metaphysical_rule
 statement: >
   Natural-language statement of the fact. One paragraph maximum.
@@ -50,11 +50,11 @@ costs_and_limits: []                       # stabilizers preventing universaliza
 
 visible_consequences: []                   # ordinary-life signals this fact produces — Rule 5 (No Consequence Evasion)
 
-required_world_updates: []                 # list of world files that must be updated if this fact is accepted
-  # - INSTITUTIONS.md
-  # - ECONOMY_AND_RESOURCES.md
-  # - EVERYDAY_LIFE.md
-  # - TIMELINE.md
+required_world_updates: []                 # UPPER_SNAKE SEC file classes that must be updated if this fact is accepted
+  # - INSTITUTIONS
+  # - ECONOMY_AND_RESOURCES
+  # - EVERYDAY_LIFE
+  # - TIMELINE
 
 source_basis:
   direct_user_approval: false              # set true once user explicitly accepts this fact

@@ -112,3 +112,11 @@ test("state snapshot replay applies cast, location, inventory, and canon sync op
   assert.deepEqual(result.objects_in_scope, ["STOBJ-0001", "STOBJ-0003", "STOBJ-0002"]);
   assert.equal(result.canon_revision, "CH-0002");
 });
+
+test("state snapshot replay applies canon sync change_id fallback", () => {
+  const result = replayStateSnapshot(parentSnapshot, [
+    { op_type: "canon_sync", input_records: [], output_records: [], deterministic_payload: { change_id: "CH-0003" } }
+  ], new Map());
+
+  assert.equal(result.canon_revision, "CH-0003");
+});

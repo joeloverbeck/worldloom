@@ -35,7 +35,7 @@ claim_visibility:
 # ====================================================================================
 candidate:
   title: <short descriptive title>
-  status: hard_canon | soft_canon | contested_canon | mystery_reserve
+  status: hard_canon | derived_canon | soft_canon | contested_canon
   type: capability | artifact | law | belief | event | institution | species | <etc>
   statement: >
     <natural-language statement of the fact>
@@ -54,7 +54,7 @@ candidate:
     why_not_universal: [<reason>]
   costs_and_limits: [<limit>]
   visible_consequences: [<consequence>]
-  required_world_updates: [<file or domain>]
+  required_world_updates: [<UPPER_SNAKE SEC file class>]
   contradiction_risk:
     hard: true | false
     soft: true | false

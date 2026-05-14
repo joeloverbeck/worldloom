@@ -280,6 +280,7 @@ function applyInventoryChange(snapshot: StateSnapshot, op: StoryEventOp): void {
 
 function applyCanonSync(snapshot: StateSnapshot, op: StoryEventOp): void {
   const payload = deterministicPayload(op);
+  // Canon baseline drift is now a first-class PG.state_snapshot field.
   const revision = stringValue(payload.canon_revision) ?? stringValue(payload.change_id);
   if (revision !== undefined) {
     snapshot.canon_revision = revision;

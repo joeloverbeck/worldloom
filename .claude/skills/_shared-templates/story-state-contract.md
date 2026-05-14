@@ -101,6 +101,7 @@ input:
 state_hash_parent: null | sha256       # null only for PG-1
 state_hash: sha256*
 state_snapshot:
+  canon_revision: CH-<integer> | null  # latest governing world-canon change-log id loaded at page-plan commit; null only when no CH exists
   active_records:                      # *
     STENT: [STENT-<integer>]
     STINT: [STINT-<integer>]
@@ -151,6 +152,8 @@ validation_trace:                      # * one entry per shared gate with PASS +
 ```
 
 `prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
+
+`state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the page-planning context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
 
 Branch-scope vocabulary:
 
@@ -648,6 +651,8 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 
 `has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief(holder, BEL-<integer>)`) so plan-time grounding is actor-specific.
 
+**Information / Observer Firewall.** At move-generation time, every selected `SLT` actor-binding and every emitted `CHC` must be grounded in information available to the acting entity. Valid access routes include the actor's active `BEL` records, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference from known facts, surveillance, institutional channel, magic/tech, or another canonically valid mechanism named in the plan. A `BEL` or `DA` may ground a move only when the actor can access it; narrator-only knowledge, hidden branch state, and facts known only to another actor cannot license that actor's move unless a valid access route is recorded.
+
 An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
 ## 6. Action Routing
@@ -665,6 +670,8 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 
 **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route and a page plan that dramatizes the outcome. A skill that drops a player action without producing a page is broken.
 
+**Choice Consequence Integrity.** An accepted `CHC` selection or accepted write-in must not be cosmetic-only. At page-plan commit, it must produce at least one grounded consequence: a non-empty `SE.state_delta`, a new / superseded / closed story-bundle record, a changed visibility or affordance state, or a recorded failure / refusal / block that is itself the consequence. A purely rhetorical or expressive choice is lawful only when the parent page plan explicitly marked that choice as rhetorical before selection.
+
 `outcome_route: world_block` is still the routing value for impossible actions. It no longer pairs with the retired event-kind value named `world_block`; the `SE.event_kind` records the event source (`selected_choice`, `write_in_attempt`, `system_repair`, or `audit_repair`) while the route records the impossibility.
 
 ## 7. Eight Shared Hard Gates
@@ -674,12 +681,12 @@ Every state-changing skill validates against these eight gates at page-plan comm
 | # | Gate | Checks |
 |---|---|---|
 | 1 | input legality | Exactly one source action (chosen CHC or write-in). Parent page exists and belongs to the named story bundle. The chosen CHC, if any, was emitted by the parent page and not retired. |
-| 2 | parent snapshot compatibility | The loaded parent snapshot's `state_hash` matches `PG.state_hash_parent`. |
+| 2 | parent snapshot compatibility | The loaded parent snapshot's `state_hash` matches `PG.state_hash_parent`. The parent `state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified before proceeding. |
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |
 | 5 | append-only delta | All changes in `SE.state_delta` are creates / supersessions / closes. No in-place mutation of a prior record. |
-| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. |
-| 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. |
+| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. Choice Consequence Integrity also applies here: accepted choices and accepted write-ins must produce a grounded consequence unless the parent page plan marked the choice as rhetorical. |
+| 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. Observer Firewall also applies here: selected `SLT` actor-bindings, emitted choices, and character actions must rely only on information available to the acting entity or record a valid access route. |
 | 8 | canon promotion hold | If `SE.outcome_route == promotion_hold` or any `promotion_claims[].authority == canon_candidate`, the world-level truth is held for promotion (not asserted in this page's state delta as if already canon). Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. |
 
 A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-engine-only writes to `worlds/<slug>/stories/<story-slug>/_source/<class>/*.yaml`, so a malformed plan is rejected at the patch engine before any record lands.

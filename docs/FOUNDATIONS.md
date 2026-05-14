@@ -23,6 +23,8 @@ Every canon fact must live somewhere inside that model.
 
 **Default Reality.** Silence is not permission to invent a supposedly long-standing truth later as if it had always been modeled. When a previously-unmodeled area is first canonized, the change must acknowledge that prior silence and route through Rule 6: no silent retcons. The world may grow, but growth must say what was newly modeled, what was already implied, and what remains deliberately unknown.
 
+**Silence Semantics.** Canonization-time silence classification is an acknowledgment discipline, not a Canon Fact schema field. When a proposed CF touches a domain no prior CF covered, classify the prior state in the adjudication record as one of: previously unmodeled, already implied by named canon, default-baseline reality now being changed or specified, or deliberately unknown / Mystery Reserve-adjacent. The accepted CF records the result as a one-line note or `source_basis` rationale; if the domain was not previously silent, the adjudication records the reason instead. This preserves Rule 6 auditability without treating absence as evidence that a long-standing truth was always canon.
+
 ---
 
 ## Canon Layers
@@ -271,7 +273,7 @@ Use this record format for every accepted canon fact.
 ```yaml
 id: CF-2
 title: Raiders can reprogram robots
-status: hard_canon | soft_canon | contested_canon | mystery_reserve
+status: hard_canon | derived_canon | soft_canon | contested_canon
 type: capability | artifact | law | belief | event | institution | species | etc
 statement: >
   Natural-language statement of the fact.
@@ -310,10 +312,10 @@ visible_consequences:
   - settlements fear scavenged automatons
   - black market in override modules exists
 required_world_updates:
-  - INSTITUTIONS.md
-  - ECONOMY_AND_RESOURCES.md
-  - EVERYDAY_LIFE.md
-  - TIMELINE.md
+  - INSTITUTIONS
+  - ECONOMY_AND_RESOURCES
+  - EVERYDAY_LIFE
+  - TIMELINE
 source_basis:
   direct_user_approval: true
   derived_from:
@@ -350,6 +352,8 @@ exception_governance:
   n_a: "Structural-institutional fact; no exception axis."
 ```
 
+Mystery Reserve entries are first-class `M-<integer>` records, not a Canon Fact `status` value. Relate a CF to an `M` record through `source_basis`, change-log entries, or extension mechanisms; do not encode Mystery Reserve as a CF status. `required_world_updates` uses bare UPPER_SNAKE SEC file-class names (`GEOGRAPHY`, `PEOPLES_AND_SPECIES`, `INSTITUTIONS`, `ECONOMY_AND_RESOURCES`, `MAGIC_OR_TECH_SYSTEMS`, `EVERYDAY_LIFE`, `TIMELINE`), not retired root markdown filenames.
+
 The optional `pre_figured_by[]` field, when present in machine-readable Canon Fact Records, accepts CF ids only and records CF-to-CF foreshadowing: an earlier accepted CF that hinted at the later commitment before it was canonized. Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references.
 
 *Genesis-world rule.* New worlds adopt the full schema from `CF-1`. Existing worlds honor the append-only ledger — historical CFs predating a schema extension remain valid; new CFs appended after a schema extension meet the current schema.
@@ -376,6 +380,26 @@ Before approving any major change, the system should be able to answer:
 ---
 
 ## Validation Rules
+
+### Rule Numbering and Enforcement Map
+
+The defined FOUNDATIONS Validation Rules are Rules 1-7, 11, and 12. The numbering gap is intentional and must be preserved in references; no workflow, skill, ticket, or spec may cite a FOUNDATIONS rule number whose meaning is not declared here.
+
+| Rule | Name | Enforcement surface |
+|---|---|---|
+| 1 | No Floating Facts | `tools/validators/src/rules/rule1-no-floating-facts.ts` (`rule1_no_floating_facts`) plus skill grounding review |
+| 2 | No Pure Cosmetics | `tools/validators/src/rules/rule2-no-pure-cosmetics.ts` (`rule2_no_pure_cosmetics`) plus skill integration review |
+| 3 | No Specialness Inflation | Judgment-only design review; no validator file |
+| 4 | No Globalization by Accident | `tools/validators/src/rules/rule4-no-globalization-by-accident.ts` (`rule4_no_globalization_by_accident`) plus scope review |
+| 5 | No Consequence Evasion | `tools/validators/src/rules/rule5-no-consequence-evasion.ts` (`rule5_no_consequence_evasion`) plus integration review |
+| 6 | No Silent Retcons | `tools/validators/src/rules/rule6-no-silent-retcons.ts` (`rule6_no_silent_retcons`) plus append-only canon/change-log review |
+| 7 | Preserve Mystery Deliberately | `tools/validators/src/rules/rule7-mystery-reserve-preservation.ts` (`rule7_mystery_reserve_preservation`) plus the story-pipeline mystery/invariant firewall gate |
+| 11 | No Spectator Castes by Accident | `tools/validators/src/rules/rule11-action-space.ts` (`rule11_action_space`) plus canon-addition Validation Test 11 judgment review |
+| 12 | No Single-Trace Truths | `tools/validators/src/rules/rule12-redundancy.ts` (`rule12_redundancy`) plus canon-addition Validation Test 12 judgment review |
+
+Rule 8 was proposed during SPEC-09 and rejected as a separate rule; its substance is folded into the §Core Principle "Default Reality" paragraph and Rule 6. Rule 9 (No Impossible Knowledge) and Rule 10 (No Premise-Collapsing Exceptions) are cross-reference notes, not standalone rules: Rule 9 is handled by character-generation Phase 7b and diegetic-artifact-generation Phase 7c distribution conformance checks, while Rule 10 is handled by canon-addition Phase 5 Diffusion Analysis, Phase 7 Counterfactual Pressure Test, and Validation Tests 3 and 8 on stabilizer concreteness. There is no Rule 13.
+
+`canon-addition`'s numbered Validation Tests are a distinct scheme from FOUNDATIONS Validation Rules: Test N is not Rule N. In particular, canon-addition Validation Test 13 (misrecognition probe) maps to §Acceptance Tests #9, not to any FOUNDATIONS rule.
 
 ### Rule 1: No Floating Facts
 No fact may exist without:
@@ -434,14 +458,10 @@ When a canon fact introduces or depends on exceptional capability, it must name 
 
 Permissible leverage includes locality, secrecy, legitimacy, bureaucracy, numbers, ritual authority, domain expertise, access, timing, social trust, deniability, and infrastructural control.
 
-Rule 9 (No Impossible Knowledge) is handled by character-generation Phase 7b and diegetic-artifact-generation Phase 7c distribution conformance checks.
-
 ### Rule 12: No Single-Trace Truths
 Hard-canon core truths must leave traces in at least two distinct registers unless the truth is intentionally hidden and the hiding mechanism is itself canonized.
 
 Registers include law, ritual, architecture, slang, ledgers, funerary practice, landscape, bodily scars, supply chains, songs, maps, educational customs, bureaucratic forms, and other named in-world traces.
-
-Rule 10 (No Premise-Collapsing Exceptions) is handled by canon-addition Phase 5 Diffusion Analysis, Phase 7 Counterfactual Pressure Test, and Validation Tests 3 and 8 on stabilizer concreteness.
 
 ---
 
@@ -475,6 +495,8 @@ Every approved change must:
 
 No change is complete until downstream files are updated.
 
+The Change Log Entry (`CH-<integer>`) record schema operationalizes this policy with affected facts, downstream updates, Mystery Reserve effect, retcon checks, and latent-burden tracking.
+
 ---
 
 ## Tooling Recommendation
@@ -490,6 +512,8 @@ They should always receive — directly or via the documented context-packet + t
 - mystery reserve entries touching the same domain
 
 This is non-negotiable. The context-packet API (`mcp__worldloom__get_context_packet`) is the machine-facing mechanism for delivering this set with completeness guarantees, complemented by targeted retrieval (`mcp__worldloom__get_record`, `mcp__worldloom__get_records`, `mcp__worldloom__get_record_field`, `mcp__worldloom__get_records_field`, `mcp__worldloom__get_persisted_packet_slice`) for full bodies, field projections, or persisted-packet slices of the load-bearing nodes the packet identifies; see [docs/CONTEXT-PACKET-CONTRACT.md](/home/joeloverbeck/projects/worldloom/docs/CONTEXT-PACKET-CONTRACT.md) for the documented pattern, but those guarantees only hold when the underlying authoring surfaces are explicit and truthful as well (for example: canonical entity declarations and scoped-reference blocks on authority-bearing records); raw file reads alone cannot enforce the contract.
+
+HARD-GATE PASS/FAIL rationales follow the authority-cited discipline in [docs/HARD-GATE-DISCIPLINE.md](/home/joeloverbeck/projects/worldloom/docs/HARD-GATE-DISCIPLINE.md): a validation judgment must cite the record id, packet layer, validator result, retrieved field, or named loaded authority it rests on, not model memory or impression alone.
 
 **Whole-class enumeration is a legitimate primary loading pattern.** For skills whose validation discipline tests a candidate against every record of a class — the `emergent-pressure-events` Phase 6 firewalls (every INV record at Phase 6a; every Mystery Reserve entry at Phase 6b) and the `continuity-audit` cross-checks — whole-class enumeration via `mcp__worldloom__list_records(world_slug, record_type, include_full_body=true)` is a recognized primary loading branch of the "directly or via context-packet" permission above. The "touching the same domain" mystery-reserve scoping in the bullet list applies to skills with domain-bounded firewall surfaces; whole-class scoping applies to skills whose firewall is class-bounded by their own Canon Safety Check commitments. The load shape is the skill's choice, named explicitly in its FOUNDATIONS Alignment table and governed by its Canon Safety Check discipline.
 
@@ -561,6 +585,14 @@ Story state is authoritative at page-plan commit. Rendered prose is a rendering 
 
 Page snapshots are the fork primitive. Any committed page is a valid parent for `branching-story-turn-cycle`, regardless of whether its prose has been rendered. There is no parallel "did the prose realize the planned arc" state engine — no ARC_TRACE class, no second state-transition pass. Prose deviating from plan is routed by `branching-story-prose-attach` as either a prose-quality issue (revise prose), a structural-fact issue (run a repair turn), or a canon-candidate (run promotion).
 
+### 4b. Canon Baseline Drift
+
+A committed story page is evaluated against the world-canon revision loaded at page-plan commit. `PG.state_snapshot.canon_revision` records that baseline as the latest governing `CH-<integer>` change-log id visible to the page-planning context, or `null` only when the world has no change-log entry to cite.
+
+Later world-canon changes do not silently rewrite committed story-bundle records. Before advancing from a parent page, story-pipeline skills must compare the parent page's recorded baseline against the current world-canon revision and classify drift as exactly one of: `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`.
+
+No story-pipeline skill may silently treat stale story-local assumptions as current world-valid truth. Compatible or grandfathered drift may proceed with the classification recorded in the new page plan or audit finding; drift that requires audit, repair, or promotion/retcon review must route to `branching-story-health-audit`, a repair turn, or `story-fact-promotion-to-canon` / `canon-addition` as appropriate before new world-valid assumptions are asserted.
+
 ### 5. Validation Rules At Story Scope
 
 Rule 1 (No Floating Facts) governs story-bundle record schemas. For example, SLT records require `mystery_policy`, `provenance.origin`, `scope.visibility`, `preconditions.hard|soft` (in the closed predicate DSL), and `effects.create|supersede|close` (mirroring `SE.state_delta`) per the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4.4. The same load-bearing discipline applies across the landed story-state schemas: `STSTAT` carries replayable life / agency / location state for `entity_status`, `SE.resolution` grounds non-accept outcomes with result and player-visible feedback, `SF.authority` separates branch-local, counterfactual, candidate, and canon-linked facts, `OBL` / `CNSQ` `urgency` gives debt salience a uniform field, `CHC.grounded_in` makes choice grounding structurally checkable, and the closed predicate DSL includes actor-unbound existential predicates for social-state prefiltering without branch-local ID leakage.
@@ -569,7 +601,11 @@ Rule 4 (No Globalization by Accident) governs story-scope branch isolation. Glob
 
 Rule 5 (No Consequence Evasion) governs per-page consequence capacity. Every page must leave at least one continuation storylet eligible.
 
+**Choice Consequence Integrity.** No accepted player choice or accepted write-in may be cosmetic-only. Every committed `CHC` selection or accepted write-in must produce at least one grounded consequence: a non-empty `SE.state_delta`; a new, superseded, or closed story-bundle record; a changed visibility or affordance state; or a recorded failure, refusal, or block that is itself a consequence. Purely rhetorical or expressive choice variants are permitted only when the page plan explicitly marks them as rhetorical before selection.
+
 Rule 7 (Preserve Mystery Deliberately) governs story-local `unresolved_mystery_claims` (on `PG.state_snapshot`) and `mystery_policy.allowed_authority` (on commitment blocks) authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate. `SF.authority` uses the schema-backed story-fact authority enum from the shared story state contract: `branch_local`, `branch_local_counterfactual`, `canon_candidate`, and `canon_linked`; `canon_linked` is allowed only after canon acceptance and is backed by a parent `CF-<integer>` in `SF.derived_from`.
+
+**Mystery Accretion.** Story-pipeline skills must protect Mystery Reserve entries against cumulative narrowing across a branch, not only against a single direct answer statement. Repeated `PG.state_snapshot.unresolved_mystery_claims[].status: clue_added | narrowed` entries can collectively resolve, overconstrain, or collapse a mystery even when no individual page says the answer outright; `branching-story-health-audit` must walk the branch page chain and flag that accumulated narrowing against the Mystery Reserve firewall. This uses the existing `unresolved_mystery_claims[].status` vocabulary and does not add an `SLT` field.
 
 Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces such as `canon-addition`, `propose-new-canon-facts`, and `create-base-world`; they are not story-scope record validators by default.
 
@@ -604,6 +640,12 @@ Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class
 `SF` records what is true in the branch; `BEL` records what a holder believes, claims, witnesses, suspects, denies, or is deceived about. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
 
 `BEL.belief_mode` separates sincerity / epistemic stance from confidence. `BEL.truth_relation` (`true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent`) distinguishes belief from truth. `BEL.visibility` (`private | shared | factional | public | rumored | concealed | suppressed`) is consumed by the social-state firewall. Schemas live in `.claude/skills/_shared-templates/story-state-contract.md` §4.1 (BEL) and §4 generally (every other story-bundle record class).
+
+### 6b. Information / Observer Firewall
+
+Storylet selection, emitted choices, and character actions must not rely on information unavailable to the acting entity. Before selecting an `SLT`, binding an actor to a move, emitting a `CHC`, or resolving a character action, story-pipeline skills must confirm that the actor's active `BEL` state, page-state affordances, accessible artifacts, direct observation, testimony, documents, inference, surveillance, institutional channels, magic/tech, or another canonically valid mechanism gives that actor an access route to the load-bearing information.
+
+This firewall governs move and choice generation. The existing `expected_witnesses` mechanism in `branching-story-turn-cycle` Phase 4 governs the post-event propagation side: who comes to know, suspect, misunderstand, or report what happened after the event.
 
 ### 7. Story-Pipeline Skill Category
 

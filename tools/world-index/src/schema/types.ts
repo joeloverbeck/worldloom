@@ -109,9 +109,9 @@ export type EdgeType = (typeof EDGE_TYPES)[number];
 
 export type CanonFactStatus =
   | "hard_canon"
+  | "derived_canon"
   | "soft_canon"
-  | "contested_canon"
-  | "mystery_reserve";
+  | "contested_canon";
 
 export type CanonScopeGeographic = "local" | "regional" | "global" | "cosmic";
 export type CanonScopeTemporal = "ancient" | "historical" | "current" | "future" | "cyclical";
