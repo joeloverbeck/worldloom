@@ -129,6 +129,7 @@ function collectIdAllocationRaceFailures(
 
   const storyAllocations: Array<[keyof IdAllocations, string, RegExp, number, boolean]> = [
     ["stent_ids", "STENT", /^STENT-(\d+)$/, 1, false],
+    ["ststat_ids", "STSTAT", /^STSTAT-(\d+)$/, 1, false],
     ["sf_ids", "SF", /^SF-(\d+)$/, 1, false],
     ["se_ids", "SE", /^SE-(\d+)$/, 1, false],
     ["obl_ids", "OBL", /^OBL-(\d+)$/, 1, false],

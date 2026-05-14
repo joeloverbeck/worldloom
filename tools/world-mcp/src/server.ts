@@ -240,6 +240,7 @@ export const ID_CLASSES = [
   "BR",
   "CHC",
   "STENT",
+  "STSTAT",
   "M",
   "ONT",
   "CAU",

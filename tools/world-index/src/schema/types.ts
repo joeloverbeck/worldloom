@@ -24,6 +24,7 @@ export const NODE_TYPES = [
   "retcon_proposal_card",
   "audit_record",
   "story_entity_record",
+  "story_status_record",
   "belief_record",
   "story_fact_record",
   "story_event_record",

@@ -81,6 +81,32 @@ test("listRecords returns story-bundle records scoped by story_slug", async () =
   }
 });
 
+test("listRecords returns story status records scoped by story_slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "story_status_record",
+        story_slug: STORY_FIXTURE_SLUG,
+        include_full_body: true
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.total, 1);
+    assert.deepEqual(result.records.map((record) => record.record_id), ["STSTAT-0001"]);
+    const record = result.records[0] as { body?: Record<string, unknown> };
+    assert.equal(record.body?.record_kind, "story_status_record");
+    assert.equal(record.body?.life, "alive");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
 test("listRecords requires story_slug for story-bundle record types", async () => {
   const root = createTempRepoRoot();
 

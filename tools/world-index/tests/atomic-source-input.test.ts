@@ -223,6 +223,56 @@ test("build indexes valid story intention records without creating a skip log", 
   }
 });
 
+test("build indexes valid story status records", () => {
+  const root = createAtomicRepoRoot();
+
+  try {
+    const statusDirectory = path.join(
+      root,
+      "worlds",
+      "atomic-world",
+      "stories",
+      "harborwatch",
+      "_source",
+      "status"
+    );
+    mkdirSync(statusDirectory, { recursive: true });
+    writeFileSync(
+      path.join(statusDirectory, "STSTAT-0001.yaml"),
+      [
+        "id: STSTAT-0001",
+        "story_id: STORY-0001",
+        "created_at_page: PG-0001",
+        "entity: STENT-0001",
+        "life: alive",
+        "agency: free",
+        "location: STLOC-0001",
+        ""
+      ].join("\n"),
+      "utf8"
+    );
+
+    assert.equal(build(root, "atomic-world", { quiet: true }), 0);
+
+    const db = new Database(path.join(root, "worlds", "atomic-world", "_index", "world.db"), {
+      readonly: true
+    });
+    try {
+      const validNode = db
+        .prepare("SELECT node_id, node_type FROM nodes WHERE node_id = 'harborwatch:STSTAT-0001'")
+        .get() as { node_id: string; node_type: string };
+      assert.deepEqual(validNode, {
+        node_id: "harborwatch:STSTAT-0001",
+        node_type: "story_status_record"
+      });
+    } finally {
+      db.close();
+    }
+  } finally {
+    cleanup(root);
+  }
+});
+
 test("build rejects worlds without recognized SPEC-13 atomic source records", () => {
   const root = createLegacyRepoRoot();
 

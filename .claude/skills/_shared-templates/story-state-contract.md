@@ -29,6 +29,7 @@ Core page-cycle state records:
 | Class | Purpose |
 |---|---|
 | `STENT` | Story-local entity mirror or story-local entity. |
+| `STSTAT` | Story-local entity life / agency / location status. |
 | `STINT` | Intention held by an entity. |
 | `SF` | Branch / story-local fact (what is true in the branch). |
 | `BEL` | Belief, knowledge, suspicion, public claim, lie, witness memory, or misconception (what a holder believes about the world). |
@@ -60,7 +61,7 @@ Auxiliary story-bundle records:
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 16 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 12 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 17 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 13 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -537,6 +538,24 @@ success_policy: string                         # optional; only present when the
 ```
 
 No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
+
+#### 4.5.13 `STSTAT` (story-local entity status)
+
+Tracks the active life / agency / location state for one story-local entity. `PG.state_snapshot.entity_status` becomes replayable once later validators derive that projection from active `STSTAT` records.
+
+```yaml
+id: STSTAT-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STSTAT-<integer> | null            # default null
+entity: STENT-<integer>*
+life: alive | dead | unknown*
+agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown*
+location: STLOC-<integer> | unknown | concealed | offstage*
+derived_from: [SE-<integer> | <record_id>]     # default []
+```
+
+No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on `STENT`.
 
 ### 4.6 Prose receipt
 

@@ -66,6 +66,7 @@ const ATOMIC_DIRS = new Map<string, AtomicRecordSpec>([
 ]);
 const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["entities", recordSpec("story_entity_record", "id", "^STENT-[0-9]+$")],
+  ["status", recordSpec("story_status_record", "id", "^STSTAT-[0-9]+$")],
   ["beliefs", recordSpec("belief_record", "id", "^BEL-[0-9]+$")],
   ["facts", recordSpec("story_fact_record", "id", "^SF-[0-9]+$")],
   ["events", recordSpec("story_event_record", "id", "^SE-[0-9]+$")],
@@ -85,7 +86,7 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
 ]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
-const STORY_REF_REGEX = /\b(STENT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|ARCTRACE|DA)-[A-Za-z0-9-]+\b/g;
+const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|ARCTRACE|DA)-[A-Za-z0-9-]+\b/g;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 

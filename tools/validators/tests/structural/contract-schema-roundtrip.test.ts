@@ -29,6 +29,10 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     required: ["id", "story_id", "created_at_page", "display_name", "role_in_story"],
     properties: ["id", "story_id", "created_at_page", "supersedes", "display_name", "bound_char_id", "role_in_story"]
   },
+  "story-status": {
+    required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "entity", "life", "agency", "location", "derived_from"]
+  },
   "story-intention": {
     required: ["id", "story_id", "created_at_page", "holder", "intent", "urgency", "expires_when"],
     properties: ["id", "story_id", "created_at_page", "supersedes", "holder", "intent", "urgency", "expires_when"]
@@ -92,6 +96,16 @@ test("representative amended contract records validate against tightened schemas
       created_at_page: "PG-0001",
       display_name: "Mara",
       role_in_story: ["primary_actor"]
+    }),
+    storyRecord("story_status_record", "STSTAT-0001", "status", {
+      id: "STSTAT-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      entity: "STENT-0001",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-0001",
+      derived_from: ["SE-0001"]
     }),
     storyRecord("intention_record", "STINT-0001", "intentions", {
       id: "STINT-0001",

@@ -27,7 +27,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 3. Classify the ticket and load only the focused reference docs needed for that class. For validator, JSON Schema, or schema-discovery tickets that project schema metadata, resolve `$ref` chains, or expose schema-derived fields through package tools, load `references/validator-schema-migrations.md` before reassessment edits.
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits. If the reassessment will edit the ticket before any source edit, issue the pre-edit checkpoint before that ticket edit.
 5. State the owned implementation slice to the user, then make minimal edits.
-6. Run the narrowest truthful proof first, then any required broader package/workflow gate. If a package ticket deletes or renames source/test files and the proof lane runs compiled output, clean or check stale compiled artifacts before the first broad package test.
+6. Run the narrowest truthful proof first, then any required broader package/workflow gate. If a package ticket deletes or renames source/test files and the proof lane runs compiled output, clean or check stale compiled artifacts before the first broad package test. If a package test script consumes compiled output and does not build itself, rebuild after any source/test edit before rerunning that test script.
 7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. If post-proof edits are ticket prose only and do not change package/source/test contracts, rerun hygiene and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite. During closeout, explicitly re-check the active ticket's `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, and `Deviations` against the landed diff and commands.
 
 ### Mandatory References By Phase
@@ -289,7 +289,7 @@ Update the active ticket before finishing:
 - `Acceptance Criteria` / `Test Plan` if the real proof surface changed
 - `## Outcome`
 - `## Verification Result`
-- optional `## Deviations`
+- `## Deviations` when reassessment, scope, proof, or verification behavior changed; omit only when no deviations occurred
 
 Then run the closeout hard stops from the focused references:
 

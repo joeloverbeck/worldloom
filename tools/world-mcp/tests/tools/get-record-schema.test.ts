@@ -22,6 +22,7 @@ const EXPECTED_SCHEMA_IDS: Record<SupportedRecordSchemaNodeType, string> = {
   adjudication_record: "https://worldloom.local/schemas/adjudication-frontmatter.schema.json",
   extension_entry: "https://worldloom.local/schemas/extension-entry.schema.json",
   story_entity_record: "https://worldloom.local/schemas/story-entity.schema.json",
+  story_status_record: "https://worldloom.local/schemas/story-status.schema.json",
   story_fact_record: "https://worldloom.local/schemas/story-fact.schema.json",
   story_event_record: "https://worldloom.local/schemas/story-event.schema.json",
   obligation_record: "https://worldloom.local/schemas/story-obligation.schema.json",
@@ -52,6 +53,7 @@ const EXPECTED_SOURCE_PATHS: Record<SupportedRecordSchemaNodeType, string> = {
   adjudication_record: "tools/validators/src/schemas/adjudication-frontmatter.schema.json",
   extension_entry: "tools/validators/src/schemas/_shared/extension-entry.schema.json",
   story_entity_record: "tools/validators/src/schemas/story-entity.schema.json",
+  story_status_record: "tools/validators/src/schemas/story-status.schema.json",
   story_fact_record: "tools/validators/src/schemas/story-fact.schema.json",
   story_event_record: "tools/validators/src/schemas/story-event.schema.json",
   obligation_record: "tools/validators/src/schemas/story-obligation.schema.json",
@@ -161,12 +163,14 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
   const page = await getRecordSchema({ node_type: "page_record" });
   const belief = await getRecordSchema({ node_type: "belief_record" });
   const branch = await getRecordSchema({ node_type: "branch_record" });
+  const status = await getRecordSchema({ node_type: "story_status_record" });
 
   assert.ok(!("code" in storylet));
   assert.ok(!("code" in storyFact));
   assert.ok(!("code" in page));
   assert.ok(!("code" in belief));
   assert.ok(!("code" in branch));
+  assert.ok(!("code" in status));
 
   assert.equal(storylet.schema.additionalProperties, false);
   const storyletProperties = storylet.schema.properties as Record<
@@ -199,6 +203,16 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     "consequences"
   ]);
   assert.equal(branch.schema.$id, "https://worldloom.local/schemas/story-branch.schema.json");
+  assert.equal(status.schema.$id, "https://worldloom.local/schemas/story-status.schema.json");
+  assert.deepEqual(status.required_fields, [
+    "id",
+    "story_id",
+    "created_at_page",
+    "entity",
+    "life",
+    "agency",
+    "location"
+  ]);
 });
 
 test("getRecordSchema exposes post-reset choice carrier fields", async () => {

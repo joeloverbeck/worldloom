@@ -9,6 +9,7 @@ const TIER_ONE = new Set<PatchOperation["op"]>([
   "create_ent_record",
   "create_sec_record",
   "create_stent_record",
+  "create_ststat_record",
   "create_sf_record",
   "create_se_record",
   "create_obl_record",

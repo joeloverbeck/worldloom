@@ -43,6 +43,7 @@ export const ID_CLASS_FORMATS = {
   BR: { width: 1, zeroPad: false, regex: /^BR-(\d+)$/ },
   CHC: { width: 1, zeroPad: false, regex: /^CHC-(\d+)$/ },
   STENT: { width: 1, zeroPad: false, regex: /^STENT-(\d+)$/ },
+  STSTAT: { width: 1, zeroPad: false, regex: /^STSTAT-(\d+)$/ },
   M: { width: 1, zeroPad: false, regex: /^M-(\d+)$/ },
   ONT: { width: 1, zeroPad: false, regex: /^ONT-(\d+)$/ },
   CAU: { width: 1, zeroPad: false, regex: /^CAU-(\d+)$/ },
@@ -96,6 +97,7 @@ const STORY_SCOPED_ID_CLASS_DIRECTORIES = {
   BR: "branches",
   CHC: "choices",
   STENT: "entities",
+  STSTAT: "status",
   DA: "artifacts"
 } as const satisfies Partial<Record<IdClass, string>>;
 
