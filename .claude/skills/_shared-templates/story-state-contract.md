@@ -152,6 +152,11 @@ validation_trace:                      # * one entry per shared gate with PASS +
 
 `prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
+Branch-scope vocabulary:
+
+- `bundle_genesis_record`: a story-bundle record whose `created_at_page` is `PG-1`, where `PG-1` is the `root_page_id` of the root branch. Genesis records sit in every branch's `branch_path` and are visible to all branches unless later superseded or closed.
+- `branch_local_record`: a record created after `PG-1` whose `created_at_page` is not in the active `branch_path`, or, for an `SLT`, not in the `visible_branch_path_prefix` authorized for that block.
+
 #### 4.2a Deterministic PG hash computation
 
 Every `PG` record must carry final lowercase sha256 values before any `create_pg_record` patch plan is validated or submitted. Placeholder, uppercase, non-hex, missing, or stale hash values are hard-stop authoring errors; the skill must repair the draft in working memory before `mcp__worldloom__validate_patch_plan`.
