@@ -46,17 +46,15 @@ test("sha256OfUtf8 hashes raw UTF-8 and does not NFC-normalize like sha256Hex", 
   assert.notEqual(sha256OfUtf8(decomposed), sha256Hex(decomposed));
 });
 
-test("computePgStateHash excludes state_hash and rendered_prose but keeps all other fields", () => {
+test("computePgStateHash excludes state_hash and prose receipt fields but keeps all other fields", () => {
   const pgRecord = {
     id: "PG-2",
     story_id: "STORY-1",
     state_hash: "stale",
-    rendered_prose: {
-      path: "pages-prose/PG-2.md",
-      receipt_path: "pages-prose-receipts/PG-2.yaml"
-    },
+    prose_plan_path: "pages-prose-plans/PG-2.md",
+    prose_path: "pages-prose/PG-2.md",
+    prose_receipt_path: "pages-prose-receipts/PG-2.yaml",
     plan: {
-      path: "pages-prose-plans/PG-2.md",
       plan_hash: "abc123"
     },
     validation_trace: {
@@ -68,9 +66,9 @@ test("computePgStateHash excludes state_hash and rendered_prose but keeps all ot
   const expectedPayload = {
     id: "PG-2",
     plan: {
-      path: "pages-prose-plans/PG-2.md",
       plan_hash: "abc123"
     },
+    prose_plan_path: "pages-prose-plans/PG-2.md",
     story_id: "STORY-1",
     validation_trace: {
       branch_isolation: "PASS: checked",
@@ -87,10 +85,8 @@ test("computePgStateHash excludes state_hash and rendered_prose but keeps all ot
     computePgStateHash({
       ...pgRecord,
       state_hash: "different",
-      rendered_prose: {
-        path: "pages-prose/PG-2-revised.md",
-        receipt_path: null
-      }
+      prose_path: "pages-prose/PG-2-revised.md",
+      prose_receipt_path: null
     }),
     computePgStateHash(pgRecord)
   );

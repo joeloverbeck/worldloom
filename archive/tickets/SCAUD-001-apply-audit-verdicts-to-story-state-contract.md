@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — modifies `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-prose-attach/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, `.claude/skills/story-promotion-closeout/SKILL.md`, `docs/FOUNDATIONS.md`, `specs/SPEC-24-story-state-contract-property-audit.md`, and dependency wording in `tickets/SCAUD-002-cleanup-red-bunny-drifted-records.md` / `tickets/SCAUD-003-tighten-json-validator-schemas.md`.
+**Engine Changes**: Yes — modifies `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-prose-attach/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, `.claude/skills/story-promotion-closeout/SKILL.md`, `docs/FOUNDATIONS.md`, `archive/specs/SPEC-24-story-state-contract-property-audit.md`, and dependency wording in `tickets/SCAUD-002-cleanup-red-bunny-drifted-records.md` / `tickets/SCAUD-003-tighten-json-validator-schemas.md`.
 **Deps**: SPEC-24
 
 ## Problem
@@ -12,7 +12,7 @@ At intake, the story-state contract at `.claude/skills/_shared-templates/story-s
 
 ## Assumption Reassessment (2026-05-14)
 
-1. SPEC-24 lives at `specs/SPEC-24-story-state-contract-property-audit.md` with full per-class audit verdict tables, the R3 PG reconciliation, and amended §4 YAML schema blocks for all 16 classes. The amended schemas are the literal text to be copied into `story-state-contract.md` §4 (modulo §4 numbering reconciliation per SPEC-24 §Risks).
+1. SPEC-24 now lives at `archive/specs/SPEC-24-story-state-contract-property-audit.md` with full per-class audit verdict tables, the R3 PG reconciliation, and amended §4 YAML schema blocks for all 16 classes. At SCAUD-001 implementation time it lived under `specs/`; the amended schemas were the literal text copied into `story-state-contract.md` §4 (modulo §4 numbering reconciliation per SPEC-24 §Risks).
 2. `story-state-contract.md` today carries §4.1 BEL, §4.2 PG, §4.3 SE, §4.4 SLT, §4.4a action_family taxonomy, §4.4b STENT/SREL taxonomies, §4.5 prose receipt. SPEC-24 §Risks flags the numbering collision with proposed §4.5a-§4.5p — this ticket resolves the numbering as: renumber the prose receipt to §4.6, use §4.1 BEL → §4.2 PG → §4.3 SE → §4.4 SLT (+ §4.4a / §4.4b) → §4.5 per-class container with §4.5.1 through §4.5.12 sub-sections for the 12 newly-defined classes (STENT, STINT, SF, OBL, CNSQ, THR, SREL, STLOC, STOBJ, DA, BR, CHC). Already-defined classes (BEL/PG/SE/SLT) keep their §4.1-§4.4 numbering; their re-audit under SPEC-24 produces edits to PG §4.2 (R3 reconciliation) and no edits to BEL/SE/SLT.
 3. The shared boundary under audit is `story-state-contract.md` §4 (the canonical record-schema source) AND every SKILL.md that prescribes or reads affected record fields. `docs/FOUNDATIONS.md` §Story Bundles §5b was same-seam because it still described only five schema classes; it now points at all story-bundle record schemas. `docs/MACHINE-FACING-LAYER.md` was inspected and did not document old per-op CHC/PG payload fields.
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) is the motivating principle. The amended contract makes §5b structurally enforceable for the 12 previously-undefined classes and for the PG R3 reconciliation.
@@ -118,7 +118,7 @@ If this doc documents `describe_envelope_schema` per-op shapes against the old c
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (re-check claim-source field reads)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify supersession-marker semantics so non-schema closeout metadata stays in ledger/INDEX surfaces)
 - `docs/FOUNDATIONS.md` (modify §Story Bundles §5b to point at all story-bundle record schemas, not only the five original schemas)
-- `specs/SPEC-24-story-state-contract-property-audit.md` (modify SCAUD-001 status, numbering, proof, and `plan.path` resolution)
+- `archive/specs/SPEC-24-story-state-contract-property-audit.md` (modified SCAUD-001 status, numbering, proof, and `plan.path` resolution; archived after SPEC-24 completion)
 - `tickets/SCAUD-002-cleanup-red-bunny-drifted-records.md` (modify dependent PG-3 shape to match collapsed `plan`)
 - `tickets/SCAUD-003-tighten-json-validator-schemas.md` (modify dependent schema guidance to treat collapsed `plan.path` as resolved)
 - `docs/MACHINE-FACING-LAYER.md` (inspected; no old per-op shape wording found)

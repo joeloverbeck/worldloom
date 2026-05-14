@@ -169,8 +169,14 @@ test("validatePatchPlan accepts append_story_diegetic_artifact_record through pr
             record: {
               id: "DA-1",
               story_id: "STORY-1",
-              supersedes: "DA-0000",
-              linked_world_da: "DA-0042"
+              created_at_page: "PG-1",
+              title: "Ledger Fragment",
+              author: "STENT-1",
+              genre: "letter",
+              body: "A copied fragment points back to the harbor ledgers.",
+              intended_audience: "STENT-1",
+              circulation: "private",
+              truth_relation: "partly_true"
             }
           }
         }

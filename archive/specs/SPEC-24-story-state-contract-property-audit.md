@@ -2,9 +2,9 @@
 
 # SPEC-24: Story State Contract — Per-Property Audit and §4 Amendment
 
-**Status**: IMPLEMENTED-IN-CONTRACT (SCAUD-001 landed; SCAUD-002 superseded — red-bunny removed and re-bootstrapped instead of remediated; SCAUD-003 remains active)
+**Status**: COMPLETED
 **Supersedes**: portions of archived SPEC-23 (story-state-contract-taxonomies) where the §4 schema enumeration was incomplete.
-**Companion tickets**: SCAUD-001 (apply verdicts — completed), SCAUD-002 (red-bunny cleanup — superseded; the bundle is removed and re-bootstrapped from zero rather than remediated in place), SCAUD-003 (validator strengthening — deferred; unblocked once red-bunny removal eliminated its only remaining dependency).
+**Companion tickets**: SCAUD-001 (apply verdicts — completed), SCAUD-002 (red-bunny cleanup — superseded; the bundle is removed and re-bootstrapped from zero rather than remediated in place), SCAUD-003 (validator strengthening — completed and archived at `archive/tickets/SCAUD-003-tighten-json-validator-schemas.md`).
 
 ## Problem Statement
 
@@ -18,13 +18,13 @@ A third layer of drift exists between the contract and the validators: contract 
 
 The contract's own §2 Schema-Minimalism Doctrine commits to keeping every field load-bearing — "directly consumed by a validation gate, a replay primitive, a predicate, a fork operation, or recorded audit-trail discipline." That doctrine is currently being silently violated for 12 of 16 record classes because there is no §4 schema to enforce it against, and for at least one class (`CHC`) the violation is structural: even the validator schema permits `additionalProperties: true`, so author-discretion fills the gap and the gap fills with whatever the authoring session produces.
 
-This spec audits every property of every record class against a five-criterion load-bearing rubric, produces verdicts (`keep` / `rename` / `replace` / `drop` / `promote` / `reconcile`), and writes the resulting §4 amendment shape inline so that SCAUD-001 can mechanically apply it. The one currently-affected user bundle (red-bunny) carried only 2 pages, so rather than supersession-cleanup via the patch engine (originally scoped as SCAUD-002), the bundle is removed and re-bootstrapped from zero against the amended contract. SCAUD-003 (deferred) tightens the 13 minimal JSON schemas to match the amended contract.
+This spec audits every property of every record class against a five-criterion load-bearing rubric, produces verdicts (`keep` / `rename` / `replace` / `drop` / `promote` / `reconcile`), and writes the resulting §4 amendment shape inline so that SCAUD-001 can mechanically apply it. The one currently-affected user bundle (red-bunny) carried only 2 pages, so rather than supersession-cleanup via the patch engine (originally scoped as SCAUD-002), the bundle is removed and re-bootstrapped from zero against the amended contract. SCAUD-003 tightened the 13 minimal JSON schemas to match the amended contract.
 
 ### Key design decisions
 
 - **Considered methodology-only spec; chose verdicts-in-spec** because verdict-drift between methodology and implementation is the exact pathology motivating this work. Author-discretion at implementation time is what produced the current drift; the spec must own the verdicts.
 - **Considered separate triage doc; chose single umbrella spec** because the audit decisions ARE the spec content, not adjacent triage. The triage file at `docs/triage/` carries only the deliverable index and verdict summary, not the audit tables themselves.
-- **Considered tightening JSON schemas in-spec; chose deferred ticket (SCAUD-003)** because the contract is the canonical source and the validator-side mechanism follows the canon. SCAUD-001 lands the contract; SCAUD-003 lands the mechanism that enforces it. Doing both in one ticket would couple two distinct review surfaces.
+- **Considered tightening JSON schemas in-spec; chose separate ticket (SCAUD-003)** because the contract is the canonical source and the validator-side mechanism follows the canon. SCAUD-001 landed the contract; SCAUD-003 landed the mechanism that enforces it. Doing both in one ticket would have coupled two distinct review surfaces.
 - **Considered preserving all duplicate fields for backward compatibility; chose append-only-supersession cleanup** because Hook 3 already forbids in-place mutation of `_source/*.yaml` records. Tolerance of duplicates encourages future drift and inflates retrieval-time tokens with no payoff.
 - **Considered re-auditing already-defined classes (BEL/PG/SE/SLT); chose yes** because PG's dead-write `rendered_prose:` block survives only via a re-audit blind spot. The audit treats every class equally regardless of current contract coverage.
 - **Considered promoting `target_or_action_families` (plural) as the canonical CHC action-family field; chose yes** because plural list semantics align with the precedent set by `PG.visible_affordances[].action_families` (which is already plural in contract §4.2) and richer authorial signal is structurally superior to the singular form even though only the singular form is currently validator-enforced.
@@ -36,7 +36,7 @@ A per-property audit of all 16 story-bundle record classes against a five-criter
 Implementation tickets execute mechanically against the verdicts:
 - SCAUD-001 rewrites `story-state-contract.md` §4 and updates skill SKILL.md prescriptions to match.
 - SCAUD-002 (superseded) was to clean red-bunny by superseding drifted CHC and OBL records; with only 2 pages in the bundle, red-bunny is instead removed and re-bootstrapped from zero against the amended contract.
-- SCAUD-003 (deferred) tightens 13 JSON schemas + 3 strict-schema re-audits.
+- SCAUD-003 tightened 13 JSON schemas + 3 strict-schema re-audits.
 
 ## Audit Methodology
 
@@ -903,9 +903,9 @@ Three artifacts result from this spec:
 
 1. **Amended `story-state-contract.md` §4** — SCAUD-001 rewrote §4 to incorporate all 16 per-class schemas. Sub-numbering: §4.1 BEL stays, §4.2 PG stays (with R3 reconciliation applied), §4.3 SE stays, §4.4 SLT stays, §4.4a / §4.4b taxonomies stay, §4.5 is the container for the 12 additional classes as §4.5.1 through §4.5.12, and the prose receipt moved to §4.6. SCAUD-001 also updated the §4 preamble paragraph to reflect coverage of all 16 classes.
 
-2. **Removed red-bunny bundle** — the one drifted user bundle carried only 2 pages, so rather than the supersession-cleanup originally scoped as SCAUD-002 (an `audit_repair` SE superseding CHC-1..8 and OBL-1 plus a new PG snapshot), the bundle is removed and re-bootstrapped from zero against the amended contract. The re-bootstrap is a local operation on a gitignored, per-user bundle (`worlds/` is gitignored per CLAUDE.md); SCAUD-003 should land first so the re-bootstrapped bundle is born under the tightened validators.
+2. **Removed red-bunny bundle** — the one drifted user bundle carried only 2 pages, so rather than the supersession-cleanup originally scoped as SCAUD-002 (an `audit_repair` SE superseding CHC-1..8 and OBL-1 plus a new PG snapshot), the bundle is removed and re-bootstrapped from zero against the amended contract. The re-bootstrap is a local operation on a gitignored, per-user bundle (`worlds/` is gitignored per CLAUDE.md); SCAUD-003 has landed first so the re-bootstrapped bundle can be born under the tightened validators.
 
-3. **Tightened JSON validator schemas** — SCAUD-003 (deferred) updates 13 minimal `tools/validators/src/schemas/story-*.schema.json` files to enforce the amended contract, removes `additionalProperties: true` where the audit allows, re-audits the 3 strict schemas, and updates the validator tests.
+3. **Tightened JSON validator schemas** — SCAUD-003 updated 13 minimal `tools/validators/src/schemas/story-*.schema.json` files to enforce the amended contract, removed `additionalProperties: true` where the audit allows, re-audited the 3 strict schemas, updated validator tests, and archived at `archive/tickets/SCAUD-003-tighten-json-validator-schemas.md`.
 
 ## FOUNDATIONS Alignment
 
@@ -931,9 +931,9 @@ Acceptance is proven by the following surfaces:
 
 3. **Red-bunny removal proof** — the drifted `worlds/erotica-world/stories/red-bunny/` bundle no longer exists; the first bundle re-bootstrapped against the amended contract is the empirical conformance check. `branching-story-health-audit` in structural mode on that re-bootstrapped bundle returns clean.
 
-4. **Validator-enforcement proof** (deferred to SCAUD-003) — Submitting a patch plan containing any dropped field for any record class fails validation with a typed `record_schema_compliance` error citing the dropped field by name. The test for this is added in SCAUD-003.
+4. **Validator-enforcement proof** — SCAUD-003 added positive and negative `record_schema_compliance` coverage plus MCP schema/pre-apply fixtures for the tightened story schemas.
 
-5. **Round-trip proof** (deferred to SCAUD-003) — Every §4 schema example in the amended contract validates against the corresponding JSON schema after SCAUD-003 lands. Test fixture in `tools/validators/src/__tests__/contract-schema-roundtrip.test.ts` (new).
+5. **Round-trip / field-set proof** — SCAUD-003 added `tools/validators/tests/structural/contract-schema-roundtrip.test.ts`, which asserts the amended field sets for all 16 story record classes and validates representative amended records against the JSON schemas.
 
 ## Risks & Open Questions
 
@@ -959,3 +959,11 @@ Acceptance is proven by the following surfaces:
 - **New record classes.** The audit covers the 16 classes currently inventoried in contract §3; introducing new classes is a separate amendment.
 - **Migration tooling for hypothetical multi-bundle worlds.** If a user has additional drifted bundles, they remove-and-re-bootstrap or run a supersession-cleanup pass against each manually; bulk migration is not in scope.
 - **Reformatting `story-state-contract.md` for general readability.** SCAUD-001 makes surgical §4 amendments; broader stylistic changes are out of scope.
+
+## Outcome (2026-05-14)
+
+Completed. SCAUD-001 landed the amended story-state contract and skill prescriptions; SCAUD-002 was superseded by removing/re-bootstrapping the thin red-bunny bundle instead of remediating it in place; SCAUD-003 landed validator enforcement for the amended field sets and was archived at `archive/tickets/SCAUD-003-tighten-json-validator-schemas.md`.
+
+Deviations from the original plan: red-bunny was not supersession-cleaned through SCAUD-002 because the bundle was only two pages and user-local/gitignored. The validator roundtrip proof landed as an explicit all-class field-set guard plus representative amended-record validation rather than a parser over a standalone contract file.
+
+Verification: SCAUD-003 closeout recorded passing package proof for `tools/validators` (188 tests), `tools/world-index` (83 tests), `tools/world-mcp` (359 tests), plus `git diff --check`. This spec is archived after those companion deliverables completed.

@@ -35,16 +35,41 @@ test("record_schema_compliance accepts contract-canonical choices without COMTAX
   assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance accepts choices carrying legacy COMTAX overlay fields", async () => {
+test("record_schema_compliance rejects choices carrying legacy COMTAX overlay fields", async () => {
   const result = await recordSchemaCompliance.run({}, context([choiceRecord(legacyComtaxChoice())]));
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.additionalProperties"));
+});
+
+test("record_schema_compliance rejects singular choice action-family field", async () => {
+  const result = await recordSchemaCompliance.run({}, context([choiceRecord({
+    ...completeChoice(),
+    target_or_action_families: undefined,
+    target_or_action_family: "communicate"
+  })]));
+
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.required"));
+  assert.ok(result.some((verdict) => verdict.code === "record_schema_compliance.additionalProperties"));
+});
+
+test("record_schema_compliance accepts multi-family contract-canonical choices", async () => {
+  const result = await recordSchemaCompliance.run({}, context([choiceRecord({
+    ...completeChoice(),
+    target_or_action_families: ["communicate", "bond"]
+  })]));
 
   assert.deepEqual(result, []);
 });
 
 test("record_schema_compliance rejects choices missing universal required fields", async () => {
+  const missingStoryId = completeChoice();
+  delete missingStoryId.story_id;
+  const missingId = completeChoice();
+  delete missingId.id;
+
   const result = await recordSchemaCompliance.run({}, context([
-    rawChoiceRecord({ id: "CHC-0002", surface_label: "Wait" }, "CHC-0002"),
-    rawChoiceRecord({ story_id: "STORY-1", surface_label: "Wait" }, "CHC-0003")
+    rawChoiceRecord(missingStoryId, "CHC-0002"),
+    rawChoiceRecord(missingId, "CHC-0003")
   ]));
 
   assert.equal(result.filter((verdict) => verdict.code === "record_schema_compliance.required").length, 2);
@@ -58,9 +83,10 @@ function completeChoice(): Record<string, unknown> {
   return {
     id: "CHC-1",
     story_id: "STORY-1",
+    created_at_page: "PG-1",
     surface_label: "Offer careful help",
     player_visible_intent: "Approach without pressure and offer practical help.",
-    target_or_action_family: "communicate",
+    target_or_action_families: ["communicate"],
     likely_state_pressure: "trust and obligation",
     associated_commitment_block: "SLT-1"
   };

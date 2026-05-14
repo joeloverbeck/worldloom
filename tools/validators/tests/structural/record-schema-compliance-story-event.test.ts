@@ -65,7 +65,15 @@ function validEvent(overrides: Record<string, unknown> = {}): Record<string, unk
     story_id: "STORY-001",
     event_kind: "selected_choice",
     created_at_page: "PG-0001",
-    ops: [],
+    parent_page_id: null,
+    actor: "STENT-0001",
+    outcome_route: "accept",
+    world_logic_rationale: "The branch state permits this event.",
+    state_delta: {
+      create: [],
+      supersede: [],
+      close: []
+    },
     ...overrides
   };
 }

@@ -77,12 +77,11 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
         "id: PG-2",
         "story_id: STORY-1",
         "state_hash: placeholder",
+        "prose_plan_path: pages-prose-plans/PG-2.md",
+        "prose_path: pages-prose/PG-2.md",
+        "prose_receipt_path: null",
         "plan:",
-        "  path: pages-prose-plans/PG-2.md",
         "  plan_hash: placeholder",
-        "rendered_prose:",
-        "  path: pages-prose/PG-2.md",
-        "  receipt_path: null",
         "validation_trace:",
         "  input_legality: 'PASS: checked'",
         "  branch_isolation: 'PASS: checked'",
@@ -99,13 +98,11 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
       id: "PG-2",
       story_id: "STORY-1",
       state_hash: "placeholder",
+      prose_plan_path: "pages-prose-plans/PG-2.md",
+      prose_path: "pages-prose/PG-2.md",
+      prose_receipt_path: null,
       plan: {
-        path: "pages-prose-plans/PG-2.md",
         plan_hash: expectedPlanHash
-      },
-      rendered_prose: {
-        path: "pages-prose/PG-2.md",
-        receipt_path: null
       },
       validation_trace: {
         input_legality: "PASS: checked",

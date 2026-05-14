@@ -14,10 +14,20 @@ function validPagePayload(): Record<string, unknown> {
   return {
     id: "PG-0001",
     story_id: "STORY-001",
+    branch_id: "BR-0001",
+    parent_page_id: null,
+    branch_path: ["PG-0001"],
+    turn_index: 0,
+    input: {
+      choice_id: null,
+      manual_action_text: null,
+      resolved_event_id: "SE-0001"
+    },
+    state_hash_parent: null,
     prose_path: null,
+    prose_receipt_path: null,
     prose_plan_path: "pages-prose-plans/PG-0001.md",
     plan: {
-      path: "pages-prose-plans/PG-0001.md",
       plan_hash: "0000000000000000000000000000000000000000000000000000000000000001"
     },
     state_hash: "0000000000000000000000000000000000000000000000000000000000000002",
@@ -50,6 +60,10 @@ function validPagePayload(): Record<string, unknown> {
           action_families: ["move", "evade"]
         }
       ]
+    },
+    emitted_choices: [],
+    validation_trace: {
+      input_legality: "PASS: checked"
     }
   };
 }

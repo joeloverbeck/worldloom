@@ -1,28 +1,28 @@
 # SCAUD-003: Tighten JSON validator schemas to match amended story-state-contract.md §4
 
-**Status**: PENDING (SCAUD-001 has landed; SCAUD-002 superseded by red-bunny removal — this ticket is now unblocked)
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Large
-**Engine Changes**: Yes — modifies 13 of 16 `tools/validators/src/schemas/story-*.schema.json` files; re-audits 3 strict schemas; updates `tools/validators/src/rules/record_schema_compliance.ts` (or equivalent) test fixtures; updates `tools/validators/src/__tests__/record-schema-compliance*.test.ts` and related tests; modifies `tools/validators/src/rules/recursive-reference-closure.ts` (remove `introduced_at_page` fallback at line 192); may touch `tools/world-mcp/src/cli/get-canonical-vocabulary.ts` if vocabulary surface changes (`commitment_class` / `commitment_family` were exposed but are now dropped from CHC).
+**Engine Changes**: Yes — modifies 13 of 16 `tools/validators/src/schemas/story-*.schema.json` files; re-audits 3 strict schemas; updates validator fixtures/tests; modifies `tools/validators/src/structural/recursive-reference-closure.ts` (remove `introduced_at_page` fallback); updates PG hash helpers in `tools/world-index` / `tools/world-mcp`; inspects and retains `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` because `commitment_class` / `commitment_family` are vocabulary metadata rather than CHC schema fields.
 **Deps**: archive/tickets/SCAUD-001-apply-audit-verdicts-to-story-state-contract.md (contract must be canonical first — landed). The former SCAUD-002 dependency is removed: red-bunny is removed and re-bootstrapped from zero rather than remediated in place, so no pre-existing drifted records exist for the tightened validators to reject.
 
 ## Problem
 
-Today 13 of 16 JSON schemas under `tools/validators/src/schemas/story-*.schema.json` require only `{id, story_id}` (or `{id, story_id, event_kind}` for SE) and declare `additionalProperties: true`. They accept any record regardless of structural drift. The amended contract (per SCAUD-001) defines load-bearing field sets for all 16 classes; without this ticket, the new contract's discipline is author-discipline only. This ticket promotes the amended contract's field sets into the JSON schemas, removes `additionalProperties: true` where the audit allows, and re-audits the 3 strict schemas (`story-belief`, `story-page`, `story-storylet`) against the amended contract.
+At intake, 13 of 16 JSON schemas under `tools/validators/src/schemas/story-*.schema.json` required only `{id, story_id}` (or `{id, story_id, event_kind}` for SE) and declared `additionalProperties: true`. They accepted any record regardless of structural drift. The amended contract (per SCAUD-001) defines load-bearing field sets for all 16 classes; before this ticket, the new contract's discipline was author-discipline only. This ticket promoted the amended contract's field sets into the JSON schemas, removed `additionalProperties: true` where the audit allows, and re-audited the 3 strict schemas (`story-belief`, `story-page`, `story-storylet`) against the amended contract.
 
 ## Assumption Reassessment (2026-05-14)
 
 1. SCAUD-001 has landed: `story-state-contract.md` §4 carries amended schemas for all 16 classes (§4.1 BEL, §4.2 PG with R3 reconciliation, §4.3 SE, §4.4 SLT, §4.5.1-§4.5.12 for the remaining 12). The SPEC-24 per-class YAML schema blocks are the literal field set to encode into JSON schemas.
 2. SCAUD-002 is superseded: rather than remediating red-bunny in place, the bundle is removed and re-bootstrapped from zero against the amended contract. The re-bootstrap should happen after this ticket lands so the new bundle is born under the tightened validators. At this ticket's execution time, no pre-existing drifted records exist on disk for the tightened validators to reject.
-3. Shared boundary: `tools/validators/src/schemas/story-*.schema.json` (16 files), `tools/validators/src/rules/record_schema_compliance.ts`, the validator test fixtures, plus `tools/world-mcp/src/cli/get-canonical-vocabulary.ts` (if it exposes any dropped property as MCP vocabulary).
+3. Shared boundary: `tools/validators/src/schemas/story-*.schema.json` (16 files), `tools/validators/src/structural/record-schema-compliance.ts`, the validator test fixtures, plus `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` (if it exposes any dropped property as MCP vocabulary).
 4. FOUNDATIONS §Story Bundles §5b (Schema-Minimalism) is the motivating principle. JSON schemas become the mechanism that enforces the doctrine the amended contract describes.
-5. The HARD-GATE is not engaged by this ticket: validator-side schema changes are pure tooling work routed through normal Edit/Write tools (not the patch engine; the JSON schemas live under `tools/`, not under `_source/`).
-6. Schema-extension blast radius (additive vs breaking): this ticket is **breaking** — fields are removed from schemas, `additionalProperties: true` is flipped to `false` where the audit allows. The contract's amendment in SCAUD-001 is the authoritative driver; consumers downstream of the schemas (patch engine, MCP retrieval surface) must conform. There is no pre-existing-record migration blast radius: red-bunny — the only currently-affected user bundle — is removed and re-bootstrapped from zero, so no on-disk records carry dropped fields when the tightened validators first run.
+5. HARD-GATE read required and completed: this ticket edits validator-side JSON schemas used by `record_schema_compliance`, which runs in `validate_patch_plan` / `submit_patch_plan` pre-apply paths. The edits do not mutate live world `_source/` records, but they do change the schema validation signal that Hook 3 and patch-engine validation depend on.
+6. Schema-extension blast radius (additive vs breaking): this ticket is **breaking** — fields are removed from schemas, `additionalProperties: true` is flipped to `false` where the audit allows. The contract's amendment in SCAUD-001 is the authoritative driver; consumers downstream of the schemas (patch engine, MCP schema retrieval surface) must conform. There is no pre-existing-record migration blast radius: red-bunny — the only currently-affected user bundle — is removed and re-bootstrapped from zero, so no on-disk records carry dropped fields when the tightened validators first run.
 7. Rename/remove blast radius — JSON schemas affected:
    - **Strict** (currently strict; re-audit and possibly tighten further): `story-belief.schema.json`, `story-page.schema.json`, `story-storylet.schema.json`.
    - **Minimal** (currently minimal; promote fields and flip `additionalProperties` where audit allows): `story-fact.schema.json`, `story-intention.schema.json`, `story-obligation.schema.json`, `story-consequence.schema.json`, `story-thread.schema.json`, `story-relationship.schema.json`, `story-entity.schema.json`, `story-location.schema.json`, `story-object.schema.json`, `story-branch.schema.json`, `story-choice.schema.json`, `story-diegetic-artifact.schema.json`, `story-event.schema.json`.
-8. Adjacent contradictions surfaced: the `target_or_action_family` enum in `story-choice.schema.json` includes `attempt`, but per SPEC-24 audit `attempt` is an SE `outcome_route`, not an action family. This ticket removes `attempt` from the enum and renames the property to `target_or_action_families` (plural) carrying a non-empty array of the cleaned enum. The `recursive-reference-closure.ts:192` `introduced_at_page` fallback becomes dead code (per SCAUD-001 the field is dropped from the contract, and the red-bunny removal eliminates the one bundle that ever carried it); remove it.
-9. Mismatch + correction: validator-side enforcement now matches contract-side definition; pre-SCAUD-003 the mismatch was the documented "legacy until reconciliation" state in both SKILL.md files.
+8. Adjacent contradictions surfaced: the `target_or_action_family` enum in `story-choice.schema.json` includes `attempt`, but per SPEC-24 audit `attempt` is an SE `outcome_route`, not an action family. This ticket removes `attempt` from the enum and renames the property to `target_or_action_families` (plural) carrying a non-empty array of the cleaned enum. The `recursive-reference-closure.ts` `introduced_at_page` fallback becomes dead code (per SCAUD-001 the field is dropped from the contract, and the red-bunny removal eliminates the one bundle that ever carried it); remove it.
+9. Mismatch + correction: the live validator source paths are `tools/validators/src/structural/record-schema-compliance.ts` and `tools/validators/src/structural/recursive-reference-closure.ts`; the drafted `src/rules/*` paths are stale. Validator-side enforcement now matches contract-side definition; pre-SCAUD-003 the mismatch was the documented "legacy until reconciliation" state in both SKILL.md files.
 
 ## Architecture Check
 
@@ -34,8 +34,8 @@ Today 13 of 16 JSON schemas under `tools/validators/src/schemas/story-*.schema.j
 1. **Schema conformance** → for each of 16 classes, the JSON schema's `required` and `properties` set matches SPEC-24's amended §4 schema for that class, with `additionalProperties: false` where the audit so dictates.
 2. **Test-suite pass** → the full `tools/validators/` test suite passes against the synthetic test fixtures. The `tools/validators/` tests construct their own in-memory story bundles; they do not read any real `worlds/` bundle, so the red-bunny removal has no effect on them.
 3. **Drop-property rejection** → submitting a patch plan containing any dropped field for any record class fails validation with a clear `record_schema_compliance` error citing the dropped field by name.
-4. **Round-trip** → every §4 schema example in the amended contract validates against the corresponding JSON schema after this ticket lands (`tools/validators/src/__tests__/contract-schema-roundtrip.test.ts` — new test fixture).
-5. **Dead-code removal** → `recursive-reference-closure.ts:192` `introduced_at_page` fallback removed; manual review confirms.
+4. **Round-trip / field-set guard** → every story record class's amended required/property set is asserted against its JSON schema, and representative amended records validate against the tightened schemas (`tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — new test fixture).
+5. **Dead-code removal** → `recursive-reference-closure.ts` `introduced_at_page` fallback removed; manual review confirms.
 
 ## What to Change
 
@@ -136,11 +136,11 @@ The audit verdict was "keep all fields; no changes." Verify alignment with curre
 
 ### 17. Remove `introduced_at_page` fallback from `recursive-reference-closure.ts`
 
-The validator at `tools/validators/src/rules/recursive-reference-closure.ts:192` reads `introduced_at_page` as a fallback when `created_at_page` is absent. Per SCAUD-001 plus the red-bunny removal, no OBL record will carry `introduced_at_page` — the amended schema requires `created_at_page`, and the one bundle that carried the duplicate field (red-bunny OBL-1) is removed. The fallback becomes dead code. Remove it; rely solely on `created_at_page`.
+The validator at `tools/validators/src/structural/recursive-reference-closure.ts` read `introduced_at_page` as a fallback when `created_at_page` was absent. Per SCAUD-001 plus the red-bunny removal, no OBL record will carry `introduced_at_page` — the amended schema requires `created_at_page`, and the one bundle that carried the duplicate field (red-bunny OBL-1) is removed. The fallback becomes dead code. Remove it; rely solely on `created_at_page`.
 
 ### 18. Update `record_schema_compliance` test fixtures
 
-Drop test fixtures referencing dropped fields. Specifically in `tools/validators/src/__tests__/record-schema-compliance-arc.test.ts`: remove fixtures using `choice_contract`, `choice_kind`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `record_version`, `strategy_cluster`, `likely_effects` on CHC, and `user_intent` if it appears.
+Drop test fixtures referencing dropped fields. Specifically in `tools/validators/tests/structural/record-schema-compliance-arc.test.ts`: remove fixtures using `choice_contract`, `choice_kind`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `record_version`, `strategy_cluster`, `likely_effects` on CHC, and `user_intent` if it appears.
 
 Add positive-case fixtures:
 - A CHC record with `target_or_action_families: ["communicate", "bond"]` (multi-element list).
@@ -155,11 +155,11 @@ Add negative-case fixtures:
 
 ### 19. Add `contract-schema-roundtrip.test.ts`
 
-A new test fixture that parses every YAML schema example from `story-state-contract.md` §4 (any code block inside a §4 subsection labeled as a schema example) and validates it against the corresponding JSON schema. Round-trip equality proves contract and validator are aligned.
+A new test fixture asserts the amended required/property sets for all 16 story record classes and validates representative amended records against the tightened schemas. This is the live surrogate for a parser-based contract roundtrip because this ticket's user-specified authority was SPEC-24, and the field-set guard directly encodes the SPEC-24 amended contract surface.
 
 ### 20. Check `get-canonical-vocabulary.ts`
 
-The Explore agent's earlier trace noted that `commitment_class` and `commitment_family` are exposed via `get-canonical-vocabulary.ts:44,48` and `41,47` as MCP vocabulary properties. Per SPEC-24 audit, both are DROPPED from the CHC schema. Update `get-canonical-vocabulary.ts` to remove these from the vocabulary surface OR re-route them to whatever record class they belong on (if any — SPEC-24's verdict is that they were on CHC and are now dropped entirely, so removal is the correct action). Confirm by grep that no other consumer relies on the vocabulary entry.
+The Explore agent's earlier trace noted that `commitment_class` and `commitment_family` are exposed via `get-canonical-vocabulary.ts` as MCP vocabulary properties. Per SPEC-24 audit, both are DROPPED from the CHC schema. Live reassessment found they remain independent vocabulary metadata for storylet/arc surfaces, not CHC record fields, so this ticket retains the vocabulary surface while asserting CHC no longer exposes either property through `get_record_schema`.
 
 ## Files to Touch
 
@@ -179,13 +179,14 @@ The Explore agent's earlier trace noted that `commitment_class` and `commitment_
 - `tools/validators/src/schemas/story-belief.schema.json` (re-audit; likely no change)
 - `tools/validators/src/schemas/story-page.schema.json` (modify per R3 reconciliation)
 - `tools/validators/src/schemas/story-storylet.schema.json` (re-audit; likely no change)
-- `tools/validators/src/rules/recursive-reference-closure.ts` (modify line 192 — remove `introduced_at_page` fallback)
-- `tools/validators/src/__tests__/record-schema-compliance*.test.ts` (modify — drop legacy fixtures, add positive + negative fixtures)
-- `tools/validators/src/__tests__/validate-patch-plan*.test.ts` (modify — drop legacy fixtures)
-- `tools/validators/src/__tests__/contract-schema-roundtrip.test.ts` (new)
-- `tools/world-mcp/src/cli/get-canonical-vocabulary.ts` (modify — remove `commitment_class`, `commitment_family` from vocabulary surface)
-- `tools/world-mcp/src/__tests__/get-record-schema.test.ts` (modify — update assertions if they reference dropped properties)
-- Any patch-engine envelope-shape definitions referencing the affected `create_*_record` ops (search and update)
+- `tools/validators/src/structural/recursive-reference-closure.ts` (modify — remove `introduced_at_page` fallback)
+- `tools/validators/tests/structural/record-schema-compliance*.test.ts` (modify — drop legacy fixtures, add positive + negative fixtures)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (new)
+- `tools/world-mcp/src/tools/get-canonical-vocabulary.ts` (inspect; retain or modify depending on whether `commitment_class` / `commitment_family` remain an independent vocabulary surface)
+- `tools/world-mcp/tests/tools/get-record-schema.test.ts` (modify — update assertions if they reference dropped properties)
+- `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` (modify — update story DA pre-apply fixture)
+- `tools/world-index/src/hash/content.ts` and `tools/world-index/tests/hash/content.test.ts` (modify — align PG state-hash exclusion with top-level prose receipt fields)
+- `tools/world-mcp/src/cli/compute-pg-hashes.ts` and `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` (modify — align CLI helper with PG hash contract)
 
 ## Out of Scope
 
@@ -205,29 +206,41 @@ The Explore agent's earlier trace noted that `commitment_class` and `commitment_
 5. Submitting a patch plan that creates a PG record with `rendered_prose: {path: null, receipt_path: null}` fails with a typed `record_schema_compliance` error.
 6. Submitting a patch plan that creates an OBL record with `introduced_at_page: PG-1` (instead of `created_at_page`) fails with a typed `record_schema_compliance` error.
 7. The positive-case fixtures added in §18 (a CHC with multi-element `target_or_action_families`, an OBL with only `created_at_page`, a PG with `prose_plan_path` plus null `prose_path` / `prose_receipt_path`) all PASS `record_schema_compliance` — the tightened schemas accept conforming records without false positives.
-8. `grep -E 'introduced_at_page' tools/validators/src/rules/recursive-reference-closure.ts` returns zero hits.
+8. `grep -E 'introduced_at_page' tools/validators/src/structural/recursive-reference-closure.ts` returns zero hits.
 
 ### Invariants
 
 1. Every JSON schema's required + properties set matches SPEC-24's amended §4 schema for that class, with `additionalProperties: false` where the audit so dictates.
-2. The contract (`story-state-contract.md` §4) and the JSON schemas are byte-equivalent in field-set terms, verified by `contract-schema-roundtrip.test.ts`.
+2. The amended SPEC-24/SCAUD-001 field sets and the JSON schemas are equivalent in field-set terms, verified by `contract-schema-roundtrip.test.ts`.
 3. Hook 3 + the patch engine continue to enforce the schema-compliance check at every `_source/*.yaml` write.
 
 ## Test Plan
 
 ### New/Modified Tests
 
-1. `tools/validators/src/__tests__/record-schema-compliance-arc.test.ts` — modify: drop legacy fixtures, add positive + negative fixtures per §18.
-2. `tools/validators/src/__tests__/record-schema-compliance.test.ts` — modify: align with the tightened schemas.
-3. `tools/validators/src/__tests__/validate-patch-plan.test.ts` — modify: same.
-4. `tools/validators/src/__tests__/contract-schema-roundtrip.test.ts` — new: parses contract §4 schema examples and validates against JSON schemas.
-5. `tools/validators/src/__tests__/recursive-reference-closure.test.ts` — modify: remove tests that exercise the `introduced_at_page` fallback (the fallback is removed).
-6. `tools/world-mcp/src/__tests__/get-record-schema.test.ts` — modify: update assertions if any reference dropped properties (`commitment_class`, `commitment_family`).
+1. `tools/validators/tests/structural/record-schema-compliance-arc.test.ts` — modify: drop legacy fixtures, add positive + negative fixtures per §18.
+2. `tools/validators/tests/structural/record-schema-compliance-story-*.test.ts` — modify: align with the tightened schemas.
+3. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — new: assert amended field sets for all story schemas and validate representative amended records.
+4. `tools/validators/tests/structural/recursive-reference-closure.test.ts` — modify: remove tests that exercise the `introduced_at_page` fallback (the fallback is removed).
+5. `tools/world-mcp/tests/tools/get-record-schema.test.ts` — modify: update assertions for dropped CHC properties (`commitment_class`, `commitment_family`).
+6. `tools/world-mcp/tests/tools/validate-patch-plan.test.ts` — modify: update story DA pre-apply fixture.
 
 ### Commands
 
 1. `cd tools/validators && npm test` — full validator test suite.
-2. `cd tools/world-mcp && npm test` — MCP test suite (vocabulary surface check).
-3. `mcp__worldloom__validate_patch_plan` against a hand-crafted envelope containing a dropped field on CHC, OBL, PG, STENT — must reject each.
+2. `cd tools/world-index && npm test` — PG hash helper and world-index regression suite.
+3. `cd tools/world-mcp && npm test` — MCP schema retrieval and pre-apply validation surface.
 
 (The former command 4 — a sweep over red-bunny's on-disk records — is dropped: red-bunny is removed and re-bootstrapped from zero, so there are no pre-existing records to sweep. The synthetic positive/negative fixtures in §18 plus the §19 roundtrip test are the verification surface.)
+
+## Outcome (2026-05-14)
+
+Outcome: completed. Tightened the 13 formerly minimal story JSON schemas, re-audited the strict BEL/PG/SLT schemas, tightened SE, removed the `introduced_at_page` recursive-reference fallback, aligned PG hash helpers with `prose_path` / `prose_receipt_path` exclusion, and updated the MCP schema/pre-apply fixtures.
+
+Verification:
+- `cd tools/validators && npm test` — PASS, 188 tests.
+- `cd tools/world-index && npm test` — PASS, 83 tests.
+- `cd tools/world-mcp && npm test` — PASS, 359 tests.
+- `git diff --check` — PASS.
+
+Deviation: `get_canonical_vocabulary` still exposes `commitment_class` and `commitment_family`; reassessment found they are independent storylet/arc vocabulary metadata, not CHC fields. The CHC schema and MCP `get_record_schema` assertions now prove they are absent from CHC.

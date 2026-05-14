@@ -16,10 +16,10 @@ Independent of the structural causes, the actual CHC-1..4 records in red-bunny c
 
 ## Accepted (3 deliverables; SCAUD-002 superseded post-triage — see below)
 
-- **`specs/SPEC-24-story-state-contract-property-audit.md`** — Umbrella spec; full per-class audit verdict tables for all 16 record classes; R3 PG reconciliation; amended §4 YAML schemas; FOUNDATIONS alignment; verification. Substantial. — *Rationale: User explicitly asked for "every structural file type" to be triaged; verdicts must live in spec authority to prevent recurrence.*
+- **`archive/specs/SPEC-24-story-state-contract-property-audit.md`** — Umbrella spec; full per-class audit verdict tables for all 16 record classes; R3 PG reconciliation; amended §4 YAML schemas; FOUNDATIONS alignment; verification. Completed and archived after SCAUD-001 and SCAUD-003 landed. — *Rationale: User explicitly asked for "every structural file type" to be triaged; verdicts must live in spec authority to prevent recurrence.*
 - **`archive/tickets/SCAUD-001-apply-audit-verdicts-to-story-state-contract.md`** — Applies the spec's amended §4 to `story-state-contract.md`; updates all 7 affected SKILL.md files; resolves §4 numbering. — *Rationale: Mechanical application of spec verdicts to canonical contract; required before any new bundle authors against the amended schema.*
 - **`tickets/SCAUD-002-cleanup-red-bunny-drifted-records.md`** — **SUPERSEDED post-triage (2026-05-14); ticket file deleted** — see §Post-triage revision below. Was: a single `audit_repair` SE superseding CHC-1..8 and OBL-1 with conforming replacements via the patch engine, plus a new audit_repair PG snapshot and bundle INDEX.md update. Red-bunny carried only 2 pages, so it is removed and re-bootstrapped from zero rather than remediated in place.
-- **`tickets/SCAUD-003-tighten-json-validator-schemas.md`** — Promotes amended §4 field sets into 13 minimal JSON schemas; re-audits 3 strict schemas; removes `introduced_at_page` fallback from `recursive-reference-closure.ts`; updates validator tests; adds contract-schema roundtrip test. Deferred until SCAUD-001 lands (done); the former SCAUD-002 dependency was removed by the post-triage revision, so SCAUD-003 is now unblocked. — *Rationale: User selected ticket-only-deferred (Q4 recommended); validator alignment is mechanism following the canon, not coupled to it.*
+- **`archive/tickets/SCAUD-003-tighten-json-validator-schemas.md`** — Promoted amended §4 field sets into 13 minimal JSON schemas; re-audited 3 strict schemas; removed `introduced_at_page` fallback from `recursive-reference-closure.ts`; updated validator tests; added contract-schema roundtrip test. Completed after SCAUD-001 landed; the former SCAUD-002 dependency was removed by the post-triage revision, so no red-bunny remediation blocker remained. — *Rationale: User selected ticket-only-deferred (Q4 recommended); validator alignment is mechanism following the canon, not coupled to it.*
 
 ## Dismissed
 
@@ -34,7 +34,7 @@ Independent of the structural causes, the actual CHC-1..4 records in red-bunny c
 
 - **PG state_hash continuity across R3 reconciliation** — SPEC-24 §Risks recommends tolerance + documentation note (not backfill). SCAUD-001 implementer confirms during execution.
 - **Action-family enum bug**: `attempt` listed as an action_family in `story-choice.schema.json` but is structurally an SE `outcome_route`. Removed in SCAUD-001 (contract) and SCAUD-003 (validator).
-- **`commitment_class` / `commitment_family` MCP vocabulary surface** — currently exposed via `get-canonical-vocabulary.ts:44,48` but DROPPED from CHC schema; removed from vocabulary surface in SCAUD-003 §20.
+- **`commitment_class` / `commitment_family` MCP vocabulary surface** — exposed via `get-canonical-vocabulary.ts` but dropped from the CHC record schema. SCAUD-003 retained the vocabulary surface as independent storylet/arc metadata and added CHC schema assertions proving the fields are absent from CHC.
 - **`DA` (story-local diegetic artifact) class has no wild evidence** — SPEC-24 §4.5.10 derived from skill prescription only; first author empirically validates.
 
 ## Post-triage revision (2026-05-14)
@@ -42,9 +42,9 @@ Independent of the structural causes, the actual CHC-1..4 records in red-bunny c
 A follow-up brainstorm the same day superseded **SCAUD-002**. The remediation ticket would have generated a full `audit_repair` turn (SE + CHC-9..16 + OBL-2 + new PG snapshot + page plan + INDEX updates) just to launder a bundle with only 2 pages. Instead, red-bunny is **removed and re-bootstrapped from zero** against the amended contract — a local operation on a gitignored, per-user bundle. Consequences applied to the deliverable set:
 
 - `tickets/SCAUD-002-...md` deleted (obsolete; no records left to clean).
-- `tickets/SCAUD-003-...md` reconciled: the SCAUD-002 dependency is dropped, so SCAUD-003 is unblocked once SCAUD-001 lands (done); red-bunny-specific verification/acceptance items are replaced by synthetic-fixture checks.
-- `specs/SPEC-24-...md` reconciled: status/companion lines, Deliverable 2, Verification item 3, Risks, the FOUNDATIONS §Story Bundles §3 row, and the per-class Migration notes' active SCAUD-002 claims updated; descriptive audit evidence preserved.
-- **Sequencing**: SCAUD-003 should land *before* the user re-bootstraps red-bunny, so the fresh bundle is born under the tightened (`additionalProperties: false`) validators and cannot re-drift.
+- `archive/tickets/SCAUD-003-tighten-json-validator-schemas.md` completed: the SCAUD-002 dependency was dropped, and red-bunny-specific verification/acceptance items were replaced by synthetic-fixture checks.
+- `archive/specs/SPEC-24-story-state-contract-property-audit.md` reconciled: status/companion lines, Deliverable 2, Verification item 3, Risks, the FOUNDATIONS §Story Bundles §3 row, and the per-class Migration notes' active SCAUD-002 claims updated; descriptive audit evidence preserved.
+- **Sequencing**: SCAUD-003 has landed before the user re-bootstraps red-bunny, so the fresh bundle can be born under the tightened (`additionalProperties: false`) validators and cannot re-drift.
 
 ## Cross-references
 

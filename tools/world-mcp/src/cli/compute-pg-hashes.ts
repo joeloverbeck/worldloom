@@ -20,8 +20,8 @@ patch plan is validated or submitted, per the story state contract §4.2a:
                will be written to pages-prose-plans/PG-<integer>.md.
   state_hash = sha256 over the deterministic canonical JSON serialization of
                the PG fork-state payload (the full PG record except state_hash
-               itself and the rendered_prose block, which is a mutable
-               publication receipt).
+               itself, prose_path, and prose_receipt_path, which are mutable
+               publication receipt fields).
 
 Story-pipeline skills that author a PG record (branching-story-bootstrap
 Phase 7, branching-story-turn-cycle Phase 9) MUST use this CLI to produce

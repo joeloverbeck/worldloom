@@ -28,12 +28,18 @@ test("record_schema_compliance rejects non-canonical SREL axis values", async ()
   ));
 });
 
-test("record_schema_compliance keeps SREL axis optional", async () => {
+test("record_schema_compliance requires SREL axis", async () => {
+  const parsed = validRelationship();
+  delete parsed.axis;
+
   const result = await recordSchemaCompliance.run({}, context([
-    relationshipRecord(validRelationship())
+    relationshipRecord(parsed)
   ]));
 
-  assert.deepEqual(result, []);
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("'axis'")
+  ));
 });
 
 function relationshipRecord(parsed: Record<string, unknown>) {
@@ -47,6 +53,13 @@ function validRelationship(overrides: Record<string, unknown> = {}): Record<stri
   return {
     id: "SREL-0001",
     story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    axis: "trust",
+    participants: ["STENT-0001", "STENT-0002"],
+    direction: "bidirectional",
+    value: "medium",
+    valence: "bidirectional",
+    description: "They trust each other enough to act.",
     ...overrides
   };
 }
