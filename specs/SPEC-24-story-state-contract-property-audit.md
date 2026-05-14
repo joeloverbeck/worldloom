@@ -2,9 +2,9 @@
 
 # SPEC-24: Story State Contract — Per-Property Audit and §4 Amendment
 
-**Status**: IMPLEMENTED-IN-CONTRACT (SCAUD-001 landed; SCAUD-002/SCAUD-003 remain active)
+**Status**: IMPLEMENTED-IN-CONTRACT (SCAUD-001 landed; SCAUD-002 superseded — red-bunny removed and re-bootstrapped instead of remediated; SCAUD-003 remains active)
 **Supersedes**: portions of archived SPEC-23 (story-state-contract-taxonomies) where the §4 schema enumeration was incomplete.
-**Companion tickets**: SCAUD-001 (apply verdicts — completed), SCAUD-002 (red-bunny cleanup), SCAUD-003 (validator strengthening, deferred).
+**Companion tickets**: SCAUD-001 (apply verdicts — completed), SCAUD-002 (red-bunny cleanup — superseded; the bundle is removed and re-bootstrapped from zero rather than remediated in place), SCAUD-003 (validator strengthening — deferred; unblocked once red-bunny removal eliminated its only remaining dependency).
 
 ## Problem Statement
 
@@ -18,7 +18,7 @@ A third layer of drift exists between the contract and the validators: contract 
 
 The contract's own §2 Schema-Minimalism Doctrine commits to keeping every field load-bearing — "directly consumed by a validation gate, a replay primitive, a predicate, a fork operation, or recorded audit-trail discipline." That doctrine is currently being silently violated for 12 of 16 record classes because there is no §4 schema to enforce it against, and for at least one class (`CHC`) the violation is structural: even the validator schema permits `additionalProperties: true`, so author-discretion fills the gap and the gap fills with whatever the authoring session produces.
 
-This spec audits every property of every record class against a five-criterion load-bearing rubric, produces verdicts (`keep` / `rename` / `replace` / `drop` / `promote` / `reconcile`), and writes the resulting §4 amendment shape inline so that SCAUD-001 can mechanically apply it. SCAUD-002 cleans the one currently-affected user bundle (red-bunny) by superseding the drifted records via the patch engine. SCAUD-003 (deferred) tightens the 13 minimal JSON schemas to match the amended contract.
+This spec audits every property of every record class against a five-criterion load-bearing rubric, produces verdicts (`keep` / `rename` / `replace` / `drop` / `promote` / `reconcile`), and writes the resulting §4 amendment shape inline so that SCAUD-001 can mechanically apply it. The one currently-affected user bundle (red-bunny) carried only 2 pages, so rather than supersession-cleanup via the patch engine (originally scoped as SCAUD-002), the bundle is removed and re-bootstrapped from zero against the amended contract. SCAUD-003 (deferred) tightens the 13 minimal JSON schemas to match the amended contract.
 
 ### Key design decisions
 
@@ -35,7 +35,7 @@ A per-property audit of all 16 story-bundle record classes against a five-criter
 
 Implementation tickets execute mechanically against the verdicts:
 - SCAUD-001 rewrites `story-state-contract.md` §4 and updates skill SKILL.md prescriptions to match.
-- SCAUD-002 cleans red-bunny by superseding drifted CHC and OBL records.
+- SCAUD-002 (superseded) was to clean red-bunny by superseding drifted CHC and OBL records; with only 2 pages in the bundle, red-bunny is instead removed and re-bootstrapped from zero against the amended contract.
 - SCAUD-003 (deferred) tightens 13 JSON schemas + 3 strict-schema re-audits.
 
 ## Audit Methodology
@@ -136,7 +136,7 @@ role_in_story: [<role>]*                       # closed list per §4.4b; one or 
 
 #### (d) Migration notes
 
-Red-bunny STENT-1, STENT-2, STENT-3 carry `notes` (free-form prose). These are dropped on next supersession (SCAUD-002 does not include STENT cleanup unless a downstream consumer of STENT changes, which it does not). The drift is tolerated for the existing records; new STENT records authored after SCAUD-001 lands must omit `notes`.
+Red-bunny STENT-1, STENT-2, STENT-3 carry `notes` (free-form prose), drifting from the amended schema. With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed; the re-bootstrapped bundle conforms by construction (STENT records authored after SCAUD-001 omit `notes`).
 
 ---
 
@@ -242,7 +242,7 @@ derived_from: [CF-<integer> | <story-local record id>]   # default []; non-empty
 
 #### (d) Migration notes
 
-Red-bunny SF-1..8 (bootstrap) carry the dropped fields (`certainty`, `scope.*`, `who_knows`, `why_it_matters_at_opening`); SF-9 (turn-cycle) carries `derived_from: []` and `trace_records`. Both forms drift from the amended schema. Cleanup is **out of scope** for SCAUD-002 (SF cleanup would expand the ticket significantly without engaging any current consumer); new SF records authored after SCAUD-001 lands must conform.
+Red-bunny SF-1..8 (bootstrap) carry the dropped fields (`certainty`, `scope.*`, `who_knows`, `why_it_matters_at_opening`); SF-9 (turn-cycle) carries `derived_from: []` and `trace_records`. Both forms drift from the amended schema. With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed; new SF records authored after SCAUD-001 conform by construction.
 
 ---
 
@@ -322,7 +322,7 @@ Unchanged from current §4.3. Same numbering note as §4.5d above.
 | `id` | 1, 3, 4, 5 | patch ops; predicate `obligation_open` (§5); replay | keep | unchanged |
 | `story_id` | 1, 5 | patch ops | keep | unchanged |
 | `created_at_page` | 1, 4, 5 | branch-scope check; replay; supersession provenance | **keep** (this is the canonical form) | promote required |
-| `introduced_at_page` | 1 (fallback only) | `recursive-reference-closure.ts:192` reads it WHEN `created_at_page` is absent | **rename → drop** | the validator fallback exists ONLY because earlier authoring sessions emitted `introduced_at_page` instead of `created_at_page`. With the amended schema requiring `created_at_page`, the fallback becomes dead code; SCAUD-003 removes it. The duplicate-field on OBL-1 collapses to `created_at_page` via supersession (SCAUD-002). |
+| `introduced_at_page` | 1 (fallback only) | `recursive-reference-closure.ts:192` reads it WHEN `created_at_page` is absent | **rename → drop** | the validator fallback exists ONLY because earlier authoring sessions emitted `introduced_at_page` instead of `created_at_page`. With the amended schema requiring `created_at_page`, the fallback becomes dead code; SCAUD-003 removes it. The duplicate-field on OBL-1 disappears with the red-bunny removal; the re-bootstrapped bundle's OBL records carry only `created_at_page`. |
 | `supersedes` | 1, 5 | §3 discipline | keep | promote nullable default null |
 | `status` | 2, 3, 4 | predicate `obligation_open` (open iff `status: open`); replay | keep | promote required enum `open | closed | escalated | abandoned | transferred` |
 | `obligation_kind` | 2, 5 | bootstrap Phase 4 prescription; INDEX.md categorization | keep | promote required free-form string (open vocabulary; not a closed enum because obligation kinds vary by world) |
@@ -348,7 +348,7 @@ trigger_to_close: string*                      # natural-language supersession t
 
 #### (d) Migration notes
 
-Red-bunny OBL-1 carries both `created_at_page: PG-1` and `introduced_at_page: PG-1` (identical values). SCAUD-002 supersedes OBL-1 with OBL-2 carrying only `created_at_page`. SCAUD-003 removes the `introduced_at_page` fallback from `recursive-reference-closure.ts:192` once SCAUD-002 has landed (no remaining record relies on the fallback).
+Red-bunny OBL-1 carries both `created_at_page: PG-1` and `introduced_at_page: PG-1` (identical values). With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed. SCAUD-003 removes the `introduced_at_page` fallback from `recursive-reference-closure.ts:192`: with red-bunny gone, no record relies on the fallback, so it is unconditionally dead code.
 
 ---
 
@@ -400,7 +400,7 @@ derived_from: [<record_id>]                    # default []; record ids that cau
 
 #### (d) Migration notes
 
-Red-bunny CNSQ-1 and CNSQ-2 carry `trace_records` (turn-cycle convention). SCAUD-002 does not include CNSQ cleanup (low value); new records after SCAUD-001 use `derived_from`.
+Red-bunny CNSQ-1 and CNSQ-2 carry `trace_records` (turn-cycle convention). With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed; new records after SCAUD-001 use `derived_from`.
 
 ---
 
@@ -452,7 +452,7 @@ derived_from: [<record_id>]                    # default []
 
 #### (d) Migration notes
 
-Red-bunny THR-1..3 carry `trace_records`. Out of scope for SCAUD-002; new records use `derived_from`.
+Red-bunny THR-1..3 carry `trace_records`. With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed; new records use `derived_from`.
 
 ---
 
@@ -511,7 +511,7 @@ derived_from: [<record_id>]                    # default []
 
 #### (d) Migration notes
 
-Red-bunny SREL-1, SREL-2 carry `magnitude: extreme` (matches new `value` enum semantically) and `trace_records`. Migration on next supersession; not in SCAUD-002 scope.
+Red-bunny SREL-1, SREL-2 carry `magnitude: extreme` (matches new `value` enum semantically) and `trace_records`. With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed.
 
 ---
 
@@ -560,7 +560,7 @@ bound_ent: ENT-<integer> | null               # null for wholly story-local loca
 
 #### (d) Migration notes
 
-Red-bunny STLOC-1, STLOC-2 carry `open_at_opening: true`. Out of scope for SCAUD-002; new records omit the field.
+Red-bunny STLOC-1, STLOC-2 carry `open_at_opening: true`. With red-bunny removed and re-bootstrapped from zero, no record cleanup is needed; new records omit the field.
 
 ---
 
@@ -800,9 +800,9 @@ The current §4.2a clause "exclude `rendered_prose` entirely" is replaced by "ex
 
 #### (e) Migration notes
 
-Red-bunny PG-1 and PG-2 carry both `rendered_prose: {path: null, receipt_path: null}` AND `prose_plan_path: ...` AND `prose_path: null`. The amended schema drops `rendered_prose:`. SCAUD-002 writes the new PG snapshot (audit_repair PG) using the amended shape; PG-1 and PG-2 are left as-is (Hook 3 forbids in-place edit; their drift is tolerated because the dropped fields are inert and the validator accepts additional properties via `additionalProperties: true` on the PG schema's top-level).
+Red-bunny PG-1 and PG-2 carry both `rendered_prose: {path: null, receipt_path: null}` AND `prose_plan_path: ...` AND `prose_path: null`. The amended schema drops `rendered_prose:`. With red-bunny removed and re-bootstrapped from zero, no PG cleanup is needed; the re-bootstrapped bundle's PG records use the amended shape from PG-1.
 
-Important: state-hash recomputation. Because the amended §4.2a hash-payload changes (excluding `rendered_prose`, but it was already absent semantically — null/null), the state_hash values for PG-1 and PG-2 are computed against the OLD payload definition. **For backward-compatibility within red-bunny, no recomputation is required** — the new PG snapshot from SCAUD-002 uses the new payload definition, and the parent_hash chain remains consistent because PG-1's state_hash is read as a string and copied into the new PG's `state_hash_parent` regardless of how it was computed. New bundles authored post-SCAUD-001 use the new payload definition from PG-1.
+Important: state-hash recomputation. The amended §4.2a hash-payload changes the exclusion list, so the question of state_hash continuity across the reconciliation only arises for pre-existing PG records. With red-bunny removed, no pre-existing PG records survive — the re-bootstrapped bundle computes every state_hash against the new payload definition from PG-1, so the parent-hash chain is internally consistent by construction.
 
 ---
 
@@ -846,7 +846,7 @@ Important: state-hash recomputation. Because the amended §4.2a hash-payload cha
 | `likely_state_pressure` | 1, 2 | schema validator; skill prescription (both Phase 8) | keep | promote required free-form string |
 | `associated_commitment_block` | 1, 2, 4 | schema validator; skill prescription; turn-cycle Phase 2 (block selection priority) | keep | promote required nullable `SLT-<integer> | null` |
 | `success_policy` | 1, 2 | schema validator; skill prescription (only when `target_or_action_families` includes `attempt` family — but `attempt` is a SE outcome_route, not an action_family; this is a current contract bug: the `target_or_action_family` enum includes `attempt` mistakenly. Audit verdict: REMOVE `attempt` from the action_family enum since it's not an action family per §4.4a, and instead promote `success_policy` to required only when the resolving SE outcome_route is `attempt`) | keep with semantic fix | promote optional free-form string; conditional-required at SE-resolution time, not at CHC-emit time |
-| `choice_kind`, `choice_contract`, `choice_worthiness.*`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity.*`, `likely_effects`, `record_version`, `strategy_cluster` | none | bootstrap SKILL.md line 358 explicitly forbids `record_version`; the rest appear only in test fixtures (`record-schema-compliance-arc.test.ts`); two — `commitment_class` and `commitment_family` — surface via `get-canonical-vocabulary.ts` but only as MCP vocabulary metadata, not as record requirements | **drop all** | full legacy debris removal; SCAUD-002 supersedes the affected CHC-1..4 records |
+| `choice_kind`, `choice_contract`, `choice_worthiness.*`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity.*`, `likely_effects`, `record_version`, `strategy_cluster` | none | bootstrap SKILL.md line 358 explicitly forbids `record_version`; the rest appear only in test fixtures (`record-schema-compliance-arc.test.ts`); two — `commitment_class` and `commitment_family` — surface via `get-canonical-vocabulary.ts` but only as MCP vocabulary metadata, not as record requirements | **drop all** | full legacy debris removal; the affected CHC-1..4 records disappear with the red-bunny removal, and the re-bootstrapped bundle's CHC records omit all of them |
 
 #### (c) Amended §4.5o CHC schema
 
@@ -869,7 +869,7 @@ Red-bunny CHC-1..8 ALL drift from the amended schema:
 - CHC-1..4 (bootstrap) carry all 10+ dropped fields plus the plural `target_or_action_families` (which is the canonical form post-amendment — a happy accident that lined up with the audit verdict).
 - CHC-5..8 (turn-cycle) carry the dropped `emitted_by_page` and `emitted_at_branch`, plus the singular `target_or_action_family` (now replaced by the plural form).
 
-SCAUD-002 supersedes all 8 records (the audit_repair SE creates CHC-9..16 with the amended shape, each carrying `supersedes: CHC-<n>`). The original 8 files remain on disk per §3 append-only discipline.
+With red-bunny removed and re-bootstrapped from zero, all 8 drifted records disappear; the re-bootstrapped bundle's CHC records use the amended shape by construction.
 
 #### (e) Action-family enum fix
 
@@ -903,7 +903,7 @@ Three artifacts result from this spec:
 
 1. **Amended `story-state-contract.md` §4** — SCAUD-001 rewrote §4 to incorporate all 16 per-class schemas. Sub-numbering: §4.1 BEL stays, §4.2 PG stays (with R3 reconciliation applied), §4.3 SE stays, §4.4 SLT stays, §4.4a / §4.4b taxonomies stay, §4.5 is the container for the 12 additional classes as §4.5.1 through §4.5.12, and the prose receipt moved to §4.6. SCAUD-001 also updated the §4 preamble paragraph to reflect coverage of all 16 classes.
 
-2. **Cleaned red-bunny records** — SCAUD-002 issues an `audit_repair` SE that supersedes CHC-1..8 and OBL-1 with new records conforming to the amended schemas. New PG snapshot (PG-3, audit_repair) reflects the rewritten active_records set.
+2. **Removed red-bunny bundle** — the one drifted user bundle carried only 2 pages, so rather than the supersession-cleanup originally scoped as SCAUD-002 (an `audit_repair` SE superseding CHC-1..8 and OBL-1 plus a new PG snapshot), the bundle is removed and re-bootstrapped from zero against the amended contract. The re-bootstrap is a local operation on a gitignored, per-user bundle (`worlds/` is gitignored per CLAUDE.md); SCAUD-003 should land first so the re-bootstrapped bundle is born under the tightened validators.
 
 3. **Tightened JSON validator schemas** — SCAUD-003 (deferred) updates 13 minimal `tools/validators/src/schemas/story-*.schema.json` files to enforce the amended contract, removes `additionalProperties: true` where the audit allows, re-audits the 3 strict schemas, and updates the validator tests.
 
@@ -918,7 +918,7 @@ Three artifacts result from this spec:
 | Rule 6 (No Silent Retcons) | N/A | Story-bundle scope only; world canon untouched. The audit does not modify any CF / CH / INV / M / OQ / ENT / SEC record. |
 | Rule 7 (Preserve Mystery Deliberately) | N/A | Audit does not touch mystery-firewall fields on PG / SE / SLT — those are already strict per current §4. |
 | Canon Layers | N/A | Spec operates entirely below the world-canon boundary; promotion path (`story-fact-promotion-to-canon` → `canon-addition`) is unaffected. |
-| §Story Bundles §3 (Append-Only / Supersession Discipline) | aligns | SCAUD-002 cleanup routes through supersession via patch engine, not in-place edit. Hook 3 structurally enforces. |
+| §Story Bundles §3 (Append-Only / Supersession Discipline) | aligns | The amended §4 schemas respect §3: any future drift in a committed bundle is corrected by supersession via the patch engine, not in-place edit (Hook 3 structurally enforces). Red-bunny itself is removed rather than superseded — lawful because it is a gitignored, per-user working bundle that was never committed canon, not an exception to §3. |
 | §Story Bundles §4a (Plan-Authority Boundary) | aligns | PG §4.2 reconciliation drops the dead `rendered_prose:` block but preserves the page-snapshot-as-fork-primitive semantics; `prose_plan_path` becomes the canonical plan address; `prose_path` and `prose_receipt_path` remain nullable until prose attaches. |
 
 ## Verification
@@ -929,7 +929,7 @@ Acceptance is proven by the following surfaces:
 
 2. **Skill-spec sweep** — Pipeline-wide grep across current story-skill operational prescriptions must show no stale emission or read guidance for retired fields. Legitimate negative guardrail wording and unrelated fields with the same spelling (for example `SLT.exit_options[].likely_effects` or `BEL.confidence` prose) are manually classified rather than forced to zero.
 
-3. **Red-bunny cleanup proof** — `branching-story-health-audit` on red-bunny in structural mode returns clean post-SCAUD-002. Plus: `grep -lE '(record_version|target_or_action_family:|choice_contract|introduced_at_page|rendered_prose)' worlds/erotica-world/stories/red-bunny/_source/**/*.yaml` returns only the superseded (now-historical) files, none of the active records.
+3. **Red-bunny removal proof** — the drifted `worlds/erotica-world/stories/red-bunny/` bundle no longer exists; the first bundle re-bootstrapped against the amended contract is the empirical conformance check. `branching-story-health-audit` in structural mode on that re-bootstrapped bundle returns clean.
 
 4. **Validator-enforcement proof** (deferred to SCAUD-003) — Submitting a patch plan containing any dropped field for any record class fails validation with a typed `record_schema_compliance` error citing the dropped field by name. The test for this is added in SCAUD-003.
 
@@ -939,7 +939,7 @@ Acceptance is proven by the following surfaces:
 
 - **(resolved by SCAUD-001) PG state_hash continuity across the R3 reconciliation.** The amended §4.2a hash-payload changes the exclusion list. Existing PG records were hashed against the old definition. SCAUD-001 landed the tolerance/documentation approach: pre-SCAUD-001 PG records retain their original state_hash as opaque strings; new PG records authored post-SCAUD-001 use the new payload definition.
 
-- **(pragmatic) `target_or_action_family` singular → plural replacement on CHC-5..8 in red-bunny.** SCAUD-002 supersedes these records to use the plural form. This is mechanically straightforward but expands SCAUD-002's record count from 5 to 9 supersessions. Confirmed in spec scope.
+- **(resolved by red-bunny removal) `target_or_action_family` singular → plural replacement on CHC-5..8.** Originally a (pragmatic) risk: SCAUD-002 would have superseded red-bunny's CHC-5..8 to the plural form, expanding its record count from 5 to 9 supersessions. With red-bunny removed and re-bootstrapped from zero, no supersession is needed — the re-bootstrapped CHC records use the plural form by construction.
 
 - **(structural) `DA` class has no wild evidence.** The §4.5l schema is derived from skill prescription only. First diegetic-artifact author in any story bundle will validate the schema empirically. If the audit's DA verdicts turn out to be wrong, an amendment ticket follows.
 
@@ -947,7 +947,7 @@ Acceptance is proven by the following surfaces:
 
 - **(pragmatic) Skill SKILL.md updates in SCAUD-001 scope.** Updating both `branching-story-bootstrap` and `branching-story-turn-cycle` Phase 8 (CHC field set), Phase 6 (PG field set), and Phase 3 (SF field set) is non-trivial. The ticket needs to enumerate every site that mentions a dropped or renamed field. Site enumeration is performed at ticket-authoring time per Step 5 sub-rule 4 of the brainstorm skill.
 
-- **(structural) Once the contract changes, any pre-existing bundle in any user's `worlds/` becomes drifted by definition.** Per CLAUDE.md, `worlds/` content is gitignored and per-user; the spec assumes the only currently-affected user-bundle is red-bunny. If a user has additional bundles, they re-run SCAUD-002 manually with the bundle slug substituted; bulk migration is out of scope.
+- **(structural) Once the contract changes, any pre-existing bundle in any user's `worlds/` becomes drifted by definition.** Per CLAUDE.md, `worlds/` content is gitignored and per-user; the spec assumes the only currently-affected user-bundle is red-bunny, which is removed and re-bootstrapped from zero. If a user has additional bundles, they either remove-and-re-bootstrap (for thin bundles) or run a supersession-cleanup pass manually with the bundle slug substituted; bulk migration is out of scope.
 
 - **(resolved by SCAUD-001) The contract numbering question.** SCAUD-001 kept §4.1 BEL, §4.2 PG, §4.3 SE, §4.4 SLT, §4.4a action_family, and §4.4b STENT/SREL taxonomies; added §4.5 as the container for the 12 additional classes (§4.5.1 through §4.5.12); and moved the prose receipt to §4.6.
 
@@ -957,5 +957,5 @@ Acceptance is proven by the following surfaces:
 - **Bundles other than red-bunny.** Per CLAUDE.md `worlds/` content is per-user and gitignored; the spec assumes red-bunny is the only currently-affected bundle for this user.
 - **Skill behavior changes beyond field-set conformance.** The Phase structures of `branching-story-bootstrap` and `branching-story-turn-cycle` remain unchanged; only the property prescriptions they emit (Phase 8 CHC, Phase 6 PG, Phase 3 SF, Phase 4 OBL/CNSQ/THR) are updated.
 - **New record classes.** The audit covers the 16 classes currently inventoried in contract §3; introducing new classes is a separate amendment.
-- **Migration tooling for hypothetical multi-bundle worlds.** If a user has additional drifted bundles, they run SCAUD-002 against each manually; bulk migration is not in scope.
+- **Migration tooling for hypothetical multi-bundle worlds.** If a user has additional drifted bundles, they remove-and-re-bootstrap or run a supersession-cleanup pass against each manually; bulk migration is not in scope.
 - **Reformatting `story-state-contract.md` for general readability.** SCAUD-001 makes surgical §4 amendments; broader stylistic changes are out of scope.
