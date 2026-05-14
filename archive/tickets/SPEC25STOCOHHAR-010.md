@@ -99,10 +99,10 @@ No production code, schema, validator, skill, or world-content file changed.
    ```bash
    rg -n 'SF\.authority|OBL` / `CNSQ` `urgency|CHC\.grounded_in|actor-unbound existential predicates|SLT\.beats' docs/FOUNDATIONS.md
    ```
-4. Manual review against `specs/SPEC-25-story-coherence-hardening.md` D7 and `.claude/skills/_shared-templates/story-state-contract.md` §3 / §4.4 / §4.5.3 / §4.5.4 / §4.5.5 / §4.5.12 / §4.5.13 / §5 — PASS.
+4. Manual review against `archive/specs/SPEC-25-story-coherence-hardening.md` D7 and `.claude/skills/_shared-templates/story-state-contract.md` §3 / §4.4 / §4.5.3 / §4.5.4 / §4.5.5 / §4.5.12 / §4.5.13 / §5 — PASS.
 5. `git diff --check` — PASS.
 
 ## Deviations
 
-- The user-supplied `spcs/SPEC-25*` shorthand was resolved to the live `specs/SPEC-25-story-coherence-hardening.md` path.
+- The user-supplied `spcs/SPEC-25*` shorthand was resolved to the live `archive/specs/SPEC-25-story-coherence-hardening.md` path.
 - `docs/HARD-GATE-DISCIPLINE.md` was not required because this ticket changed only FOUNDATIONS prose and did not alter validator behavior, approval-token behavior, pre-apply behavior, submit/validate flow, skill HARD-GATE wording, or world-canon mutation ordering.

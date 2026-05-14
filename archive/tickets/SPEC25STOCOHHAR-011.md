@@ -45,7 +45,7 @@ SPEC-25's implementation note and D4 risk entry now state that SPEC25STOCOHHAR-0
 ## Files to Touch
 
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify)
 - `archive/tickets/SPEC25STOCOHHAR-011.md` (modify — closeout/archive handoff)
 
 ## Out of Scope
@@ -60,7 +60,7 @@ SPEC-25's implementation note and D4 risk entry now state that SPEC25STOCOHHAR-0
 
 1. `grep -nE "bound:|any_obligation_open|any_consequence_pending|any_thread_active|any_relationship_axis|any_belief|any_intention" .claude/skills/branching-story-bootstrap/SKILL.md`
 2. Manual review: Phase 5 seed-block authoring uses predicate DSL v2 without weakening branch-isolation wording.
-3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" specs/SPEC-25-story-coherence-hardening.md`
+3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" archive/specs/SPEC-25-story-coherence-hardening.md`
 
 ### Invariants
 
@@ -77,8 +77,8 @@ None — skill-prose ticket; verification is grep-proof plus manual review again
 
 1. `grep -nE "bound:|any_obligation_open|any_consequence_pending|any_thread_active|any_relationship_axis|any_belief|any_intention" .claude/skills/branching-story-bootstrap/SKILL.md`
 2. Manual review of Phase 5 against `.claude/skills/_shared-templates/story-state-contract.md` §4.4 / §5 and FOUNDATIONS Rule 4.
-3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" specs/SPEC-25-story-coherence-hardening.md`
-4. `git diff --check -- .claude/skills/branching-story-bootstrap/SKILL.md specs/SPEC-25-story-coherence-hardening.md`
+3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" archive/specs/SPEC-25-story-coherence-hardening.md`
+4. `git diff --check -- .claude/skills/branching-story-bootstrap/SKILL.md archive/specs/SPEC-25-story-coherence-hardening.md`
 5. `awk '/[[:blank:]]$/ { print FILENAME ":" FNR ": trailing whitespace"; bad=1 } END { exit bad }' archive/tickets/SPEC25STOCOHHAR-011.md`
 6. No broader package or workflow command applies; this is a skill-prose ticket and predicate parsability remains covered by the validator tests landed in archive/tickets/SPEC25STOCOHHAR-006.md.
 
@@ -94,8 +94,8 @@ Updated SPEC-25's implementation note and D4 risk entry so the spec no longer de
 
 1. `grep -nE "bound:|any_obligation_open|any_consequence_pending|any_thread_active|any_relationship_axis|any_belief|any_intention" .claude/skills/branching-story-bootstrap/SKILL.md` — PASS; Phase 5 names all six existential predicates and the `bound:<alias>` discipline.
 2. Manual review — PASS; Phase 5 keeps `global_author_pool` branch-isolation wording intact and aligns with `.claude/skills/_shared-templates/story-state-contract.md` §4.4 / §5 plus FOUNDATIONS Rule 4.
-3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" specs/SPEC-25-story-coherence-hardening.md` — PASS; SPEC-25 records the landed bootstrap slice.
-4. `git diff --check -- .claude/skills/branching-story-bootstrap/SKILL.md specs/SPEC-25-story-coherence-hardening.md` — PASS; tracked edited skill/spec surfaces had no whitespace errors.
+3. `grep -nE "SPEC25STOCOHHAR-011 landed|bootstrap by SPEC25STOCOHHAR-011" archive/specs/SPEC-25-story-coherence-hardening.md` — PASS; SPEC-25 records the landed bootstrap slice.
+4. `git diff --check -- .claude/skills/branching-story-bootstrap/SKILL.md archive/specs/SPEC-25-story-coherence-hardening.md` — PASS; tracked edited skill/spec surfaces had no whitespace errors.
 5. `awk '/[[:blank:]]$/ { print FILENAME ":" FNR ": trailing whitespace"; bad=1 } END { exit bad }' archive/tickets/SPEC25STOCOHHAR-011.md` — PASS; the untracked archived ticket file had no trailing whitespace after the plain-`mv` archive handoff.
 
 ## Deviations

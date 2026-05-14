@@ -57,7 +57,7 @@ Created `archive/tickets/SPEC25STOCOHHAR-011.md` for `branching-story-bootstrap`
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
 - `archive/tickets/SPEC25STOCOHHAR-011.md` (new — bootstrap seed-block follow-up, later completed/archived)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note and D4 risk note)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note and D4 risk note)
 
 ## Out of Scope
 
@@ -96,7 +96,7 @@ Completed on 2026-05-14.
 
 Implemented predicate DSL v2 operational guidance in the three D4-enumerated skills. `commitment-block-authoring` now teaches `direct_batch` and `audit_repair` to use all six existential predicates plus `bound:<alias>` effects. `branching-story-turn-cycle` now documents deterministic bind-first / select-second / instantiate-third alias resolution and treats instantiated `bound:<alias>` targets as concrete `SE.state_delta` targets. `branching-story-health-audit` now evaluates binding-predicate storylets for unactionable debt, plan grounding, and continuation checks by resolving aliases against the current leaf snapshot.
 
-Created `archive/tickets/SPEC25STOCOHHAR-011.md` for the separately verified bootstrap seed-block gap, and updated `specs/SPEC-25-story-coherence-hardening.md` so the implementation note and D4 risk note no longer say all D4 skill integration remains unresolved.
+Created `archive/tickets/SPEC25STOCOHHAR-011.md` for the separately verified bootstrap seed-block gap, and updated `archive/specs/SPEC-25-story-coherence-hardening.md` so the implementation note and D4 risk note no longer say all D4 skill integration remains unresolved.
 
 ## Verification Result
 

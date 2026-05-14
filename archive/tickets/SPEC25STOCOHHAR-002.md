@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — modifies `tools/validators/src/_helpers/state-snapshot-replay.ts`, `tools/validators/src/structural/snapshot-replay-equality.ts`, `tools/validators/src/structural/state-snapshot-integrity.ts`, `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`; amends `.claude/skills/_shared-templates/story-state-contract.md` (§4.2, §5) and `specs/SPEC-25-story-coherence-hardening.md`.
+**Engine Changes**: Yes — modifies `tools/validators/src/_helpers/state-snapshot-replay.ts`, `tools/validators/src/structural/snapshot-replay-equality.ts`, `tools/validators/src/structural/state-snapshot-integrity.ts`, `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`; amends `.claude/skills/_shared-templates/story-state-contract.md` (§4.2, §5) and `archive/specs/SPEC-25-story-coherence-hardening.md`.
 **Deps**: archive/tickets/SPEC25STOCOHHAR-001.md
 
 ## Problem
@@ -61,7 +61,7 @@ Added `STSTAT` to the state-snapshot-integrity story-local ID regex and to the `
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify — §4.2, §5)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note for completed D1 validator/contract slice)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note for completed D1 validator/contract slice)
 - `tools/validators/src/_helpers/state-snapshot-replay.ts` (modify — `ACTIVE_RECORDS_CLASSES`)
 - `tools/validators/src/structural/snapshot-replay-equality.ts` (modify — `runNewSchemaReplay`)
 - `tools/validators/src/structural/state-snapshot-integrity.ts` (modify — story-local ID coverage for active `STSTAT`)

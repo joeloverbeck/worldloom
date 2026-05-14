@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — modifies `.claude/skills/story-promotion-closeout/SKILL.md`, `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, and `specs/SPEC-25-story-coherence-hardening.md` only; no schema, MCP, or validator change.
+**Engine Changes**: Yes — modifies `.claude/skills/story-promotion-closeout/SKILL.md`, `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, and `archive/specs/SPEC-25-story-coherence-hardening.md` only; no schema, MCP, or validator change.
 **Deps**: None
 
 ## Problem
@@ -18,7 +18,7 @@ At intake, `story-promotion-closeout` SKILL.md referenced "supersede a `BR`" in 
 4. FOUNDATIONS Rule 6 (No Silent Retcons): restated before trusting the spec — this is a retcon of skill behavior, removing a documented-but-impossible code path. Retcon justification: the BR-supersession path was never executable (`BR` has no `supersedes` field; the contract forbids branch supersession), so striking it removes dead instructions and aligns the skill with the §4.5.11 schema and the "branches fork; they do not supersede" contract statement. New behavior: branch disposition under `flag` / `archive` is recorded in the closeout ledger and `INDEX.md` (and per-world `stories/INDEX.md` for `archive`) — a path the skill already supports.
 5. Rename / removal blast radius (FOUNDATIONS Rule 6 enforcement — confirming the removal is fully scoped): grepping the pipeline for `create_br_record` in a closeout / supersession context — only `story-promotion-closeout` uses it for supersession; `branching-story-bootstrap`, `branching-story-turn-cycle`, and the patch engine use `create_br_record` for branch creation / *forking*, which is unaffected. No schema, MCP, or validator surface references BR-supersession.
 6. HARD-GATE read: `docs/HARD-GATE-DISCIPLINE.md` confirms story-bundle `_source` record writes are engine-routed and approval-gated. This ticket does not weaken the gate; it narrows the closeout skill's patch-plan vocabulary so branch disposition cannot allocate or submit a non-schema BR supersession.
-7. Explicit SPEC-25 reference check: D6 in `specs/SPEC-25-story-coherence-hardening.md` is the governing implementation slice. The spec's D6 verification/status wording must be updated after the skill prose lands so it no longer reads as a still-open current-state defect.
+7. Explicit SPEC-25 reference check: D6 in `archive/specs/SPEC-25-story-coherence-hardening.md` is the governing implementation slice. The spec's D6 verification/status wording must be updated after the skill prose lands so it no longer reads as a still-open current-state defect.
 8. Cross-skill same-seam consumer check: `.claude/skills/story-fact-promotion-to-canon/SKILL.md` has one handoff sentence saying `story-promotion-closeout` may supersede `BR` records after adjudication. That sentence is the upstream recommendation for this same closeout contract, so this ticket owns narrowing it to SF / BEL / DA / STENT / SREL and ledger / INDEX branch disposition.
 
 ## Architecture Check
@@ -63,7 +63,7 @@ Updated `story-fact-promotion-to-canon`'s no-post-adjudication-closeout handoff 
 
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify)
 
 ## Out of Scope
 
@@ -79,7 +79,7 @@ Updated `story-fact-promotion-to-canon`'s no-post-adjudication-closeout handoff 
 2. Manual review: the Phase 2 `flag` / `archive` bullets describe ledger / `INDEX.md`-only branch disposition with no supersession path.
 3. `grep -rn "create_br_record" .claude/skills/` — branch creation / forking usage remains; `story-promotion-closeout` has none.
 4. ``grep -rnE 'BR-<integer> \(supersession\)|supersede a `BR`|branch supersessions|branch supersession|SF / BEL / DA / STENT / SREL / BR|SF/BEL/STENT/SREL/DA/BR|BR records that the canon-addition outcome implicates' .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md`` returns no matches.
-5. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' specs/SPEC-25-story-coherence-hardening.md`` shows the D6 current-state note and no stale active verification claim.
+5. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' archive/specs/SPEC-25-story-coherence-hardening.md`` shows the D6 current-state note and no stale active verification claim.
 
 ### Invariants
 
@@ -97,7 +97,7 @@ None — skill-prose ticket (no automated test files change); verification is gr
 1. ``grep -nE 'supersede a `BR`|BR-<integer>.*supersession|branch supersession|branch supersessions|create_br_record|SF/BEL/STENT/SREL/DA/BR|branch-handling count|all classes that may be superseded' .claude/skills/story-promotion-closeout/SKILL.md``
 2. `grep -rn "create_br_record" .claude/skills/`
 3. ``grep -rnE 'BR-<integer> \(supersession\)|supersede a `BR`|branch supersessions|branch supersession|SF / BEL / DA / STENT / SREL / BR|SF/BEL/STENT/SREL/DA/BR|BR records that the canon-addition outcome implicates' .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md``
-4. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' specs/SPEC-25-story-coherence-hardening.md``
+4. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' archive/specs/SPEC-25-story-coherence-hardening.md``
 5. A grep-proof is the correct verification boundary — this is a skill-prose deletion plus same-seam spec truthing with no schema, MCP, or validator surface, and FOUNDATIONS Rule 6 attribution lives in this ticket's Assumption Reassessment item 4.
 
 ## Outcome
@@ -112,7 +112,7 @@ Completed on 2026-05-14:
 2. `grep -n "create_br_record" .claude/skills/story-promotion-closeout/SKILL.md` -> no matches.
 3. ``grep -rnE 'BR-<integer> \(supersession\)|supersede a `BR`|branch supersessions|branch supersession|SF / BEL / DA / STENT / SREL / BR|SF/BEL/STENT/SREL/DA/BR|BR records that the canon-addition outcome implicates' .claude/skills/story-promotion-closeout/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md`` -> no matches.
 4. `grep -rn "create_br_record" .claude/skills/` -> only `branching-story-bootstrap` branch creation and `branching-story-turn-cycle` fork usage remain; `story-promotion-closeout` has none.
-5. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' specs/SPEC-25-story-coherence-hardening.md`` -> shows the implementation note, landed D6 skill note, and landed D6 verification row.
+5. ``grep -nE 'SPEC25STOCOHHAR-009 landed|D6.*landed|no remaining "supersede a `BR`"' archive/specs/SPEC-25-story-coherence-hardening.md`` -> shows the implementation note, landed D6 skill note, and landed D6 verification row.
 6. Manual review of `story-promotion-closeout` Phase 2 / Phase 5 confirms branch disposition is ledger / INDEX-only and closeout patch plans cannot include a BR record op.
 
 ## Deviations

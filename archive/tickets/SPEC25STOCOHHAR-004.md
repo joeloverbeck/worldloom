@@ -71,7 +71,7 @@ Added `story_fact_authority`: an `SF` with `authority: canon_linked` must carry 
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify)
 - `docs/FOUNDATIONS.md` (modify — same-seam Story Bundles authority wording)
 - `tools/validators/README.md` (modify — validator inventory)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
 
 ## Out of Scope
 
@@ -121,4 +121,4 @@ Completed. `SF.authority` is now required in the shared story contract and `stor
 
 1. The drafted skill dry-run was replaced with manual contract review plus package validator proof because this repo has no executable story-skill dry-run harness.
 2. `docs/HARD-GATE-DISCIPLINE.md` was read because the new structural validator participates in pre-apply validation signals for story-bundle patch plans.
-3. Same-seam closeout added `docs/FOUNDATIONS.md`, `tools/validators/README.md`, `specs/SPEC-25-story-coherence-hardening.md`, registry expectation tests, and CLI selector expectation tests to the owned file set.
+3. Same-seam closeout added `docs/FOUNDATIONS.md`, `tools/validators/README.md`, `archive/specs/SPEC-25-story-coherence-hardening.md`, registry expectation tests, and CLI selector expectation tests to the owned file set.

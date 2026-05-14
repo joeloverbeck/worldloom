@@ -61,7 +61,7 @@ Extended `tools/validators/src/structural/recursive-reference-closure.ts` as the
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — D5 implementation note / risk truthing)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — D5 implementation note / risk truthing)
 
 ## Out of Scope
 
@@ -112,5 +112,5 @@ The story-pipeline skills now instruct bootstrap and turn-cycle emitters to popu
 ## Deviations
 
 - The drafted skill dry-run was replaced with manual skill-contract review plus grep-proof because no executable story-skill dry-run runner is exposed in this Codex session.
-- `docs/FOUNDATIONS.md` still has SPEC-25 D7-owned story-bundle amendments pending; this ticket truthed only the D5 implementation note in `specs/SPEC-25-story-coherence-hardening.md`.
+- `docs/FOUNDATIONS.md` still has SPEC-25 D7-owned story-bundle amendments pending; this ticket truthed only the D5 implementation note in `archive/specs/SPEC-25-story-coherence-hardening.md`.
 - `tools/validators/dist/` was refreshed by `npm run test`; it is ignored generated output, not a tracked source edit.

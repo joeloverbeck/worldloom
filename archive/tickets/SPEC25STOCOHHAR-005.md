@@ -62,7 +62,7 @@ Added `urgency` (enum `low` / `medium` / `high`) to `properties` and `required` 
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
 
 ## Out of Scope
 
@@ -108,7 +108,7 @@ Implemented D3. `OBL` and `CNSQ` now require `urgency: low | medium | high` in t
 
 Updated the story-skill prose so bootstrap and turn-cycle set `urgency` on every emitted `OBL` / `CNSQ`, health-audit Gate 6 reads debt salience from record `urgency`, page-plan §10 surfaces urgency for open debts, and commitment-block authoring preserves urgency for downstream SPEC25STOCOHHAR-006 existential-predicate filtering.
 
-Updated `specs/SPEC-25-story-coherence-hardening.md` with a dated implementation note marking D3 as landed.
+Updated `archive/specs/SPEC-25-story-coherence-hardening.md` with a dated implementation note marking D3 as landed.
 
 ## Verification Result
 

@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Large
-**Engine Changes**: Yes — modifies `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, `tools/validators/src/schemas/story-storylet.schema.json`, `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`; amends `.claude/skills/_shared-templates/story-state-contract.md` (§4.4 / §5), validator tests, and `specs/SPEC-25-story-coherence-hardening.md`.
+**Engine Changes**: Yes — modifies `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, `tools/validators/src/schemas/story-storylet.schema.json`, `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`; amends `.claude/skills/_shared-templates/story-state-contract.md` (§4.4 / §5), validator tests, and `archive/specs/SPEC-25-story-coherence-hardening.md`.
 **Deps**: archive/tickets/SPEC25STOCOHHAR-002.md, archive/tickets/SPEC25STOCOHHAR-005.md
 
 ## Problem
@@ -59,7 +59,7 @@ Parsed and validated the six new predicates (argument enums: `urgency` against `
 - `tools/validators/tests/rules/rule_storylet_predicate_dsl_parsability.test.ts` (modify — new predicates, binding, scope restriction)
 - `tools/validators/tests/structural/record-schema-compliance.test.ts` (modify — storylet effect-reference schema coverage)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — current-contract storylet fixture)
-- `specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
+- `archive/specs/SPEC-25-story-coherence-hardening.md` (modify — implementation note)
 
 ## Out of Scope
 
