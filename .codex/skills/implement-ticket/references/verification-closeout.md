@@ -29,6 +29,7 @@ For cross-skill or cross-artifact tickets, map each distinct invariant to a dist
 - For positive grep proofs that use broad literals such as `placeholder`, `fallback`, `legacy`, `computed`, or `future`, inspect incidental hits before recording the command as proof. Classify legitimate unrelated hits in `## Verification Result` or narrow the pattern/path list so the proof demonstrates the owned invariant rather than a coincidental word match.
 - When searching for markdown or code literals that contain shell-active characters such as backticks, wrap the pattern in single quotes or escape those characters before running `grep`, `rg`, or similar commands. Do not let the shell execute a literal from the proof pattern.
 - For stale-anchor sweeps that include markdown code spans, first check whether the pattern contains backticks, `$`, pipes, parentheses, or other shell-active characters. Use a single-quoted literal pattern, escape the active characters, or split the search into simpler safe patterns; do not use double quotes. Example: `rg -n 'No \`foo\` entry' ticket.md`.
+- When recording proof commands in ticket prose, preserve Markdown readability as well as shell safety. If the command text itself contains backticks or markdown code spans, record it in a fenced code block or a double-backtick inline span instead of a single-backtick span, then re-read the rendered source text or run a focused text scan so malformed command spans do not survive closeout.
 - If a stale-anchor sweep fails because the shell interpreted the search pattern, rerun it immediately with split, single-quoted literal patterns before treating the sweep as complete. Do not record the failed shell-shape command as proof.
 - For inline `node -e` proof probes that contain regexes or backslashes, prefer a single-quoted shell string and escaped JavaScript string literals for the regex body. If the probe fails with no meaningful stdout/stderr, rerun it in a shell-safe shape before treating the failure as behavior evidence.
 - For negative stale-anchor sweeps, prefer the exact old phrase or command fragment over a broad positive phrase. When the active ticket records the sweep in `## Verification Result`, do not count that newly written proof prose as a stale hit unless you are intentionally checking the ticket text itself.
@@ -117,6 +118,7 @@ Before finishing, re-read the ticket and make it truthful:
 For long tickets, use this expedited stale-anchor pass before final response:
 
 - Before running stale-anchor sweep commands, inspect each literal for markdown code spans, backticks, `$`, pipes, parentheses, or other shell-active characters. Use single-quoted literals, split safer patterns, or escape the active characters before the command reaches the shell.
+- Commands recorded in the ticket use Markdown-safe formatting: fenced code blocks or double-backtick inline spans when the command contains backticks.
 - `Status`: final state, not intended state.
 - `Problem`: fixed defects are labelled as intake or pre-ticket evidence.
 - `Files to Touch`: exact landed file set, including same-seam docs/tests discovered during reassessment.

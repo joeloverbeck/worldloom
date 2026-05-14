@@ -1,6 +1,6 @@
 ---
 name: story-promotion-closeout
-description: "Use when closing a story promotion after canon-addition has adjudicated the proposal package. Records the verdict in a closeout ledger and, only when the verdict changes story-local state, supersedes affected SF/BEL/STENT/SREL/DA/BR records using the amended shared schemas. Produces: optional superseding story records via patch engine + SP-<integer>-closeout.md ledger + bundle INDEX.md update + conditional per-world stories/INDEX.md update on archive + optional SE-<integer> closeout event. Mutates: only worlds/<world_slug>/stories/<story_slug>/ plus optionally worlds/<world_slug>/stories/INDEX.md when same_story_branch_handling: archive."
+description: "Use when closing a story promotion after canon-addition has adjudicated the proposal package. Records the verdict in a closeout ledger and, only when the verdict changes story-local state, supersedes affected SF/BEL/STENT/SREL/DA records using the amended shared schemas. Produces: optional superseding story records via patch engine + SP-<integer>-closeout.md ledger + bundle INDEX.md update + conditional per-world stories/INDEX.md update on archive + optional SE-<integer> closeout event. Mutates: only worlds/<world_slug>/stories/<story_slug>/ plus optionally worlds/<world_slug>/stories/INDEX.md when same_story_branch_handling: archive."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -120,7 +120,6 @@ Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
 | `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF `source_kind: character_outcome` AND verdict accepted-flavored |
 | `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF `source_kind: relationship_or_institutional_outcome` AND verdict accepted-flavored |
 | `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF `source_kind: artifact_canonization` AND verdict accepted-flavored (uses `append_story_diegetic_artifact_record`) |
-| `BR-<integer>` (supersession) | `_source/branches/BR-<integer>.yaml` | IF branch handling requires an amended-schema branch replacement; otherwise branch disposition is ledger/INDEX-only |
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | IF `emit_closeout_event: true` (single record with `event_kind: promotion_closeout`) |
 | `SP-<integer>-closeout.md` | `story-promotions/SP-<integer>-closeout.md` | Always (closeout ledger; companion to original SP-<integer>.md which stays unchanged) |
 | Bundle `INDEX.md` | `INDEX.md` | Always (updated last) |
@@ -133,7 +132,7 @@ All patch-engine submissions target story-bundle scope; ZERO ops target `worlds/
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
 - `docs/FOUNDATIONS.md` — §Story Bundles §5 (story-scope authority discipline), §Canon Layers (linked CF status references), Rule 6 (Change Log Entry — canon-addition wrote it; closeout reads + cites it)
-- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, BR, SE — all classes that may be superseded), §10 shared write order, §11 mystery and canon authority
+- `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, SE — closeout output classes; BR — read-only branch lineage), §10 shared write order, §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `source_records` / `source_kind` / `branch_path` / `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
 - `worlds/<world_slug>/_source/canon/CF-<integer>.yaml` (each linked CF) — read-only world-canon reference
@@ -153,7 +152,7 @@ Before Phase 1:
 4. Validate `canon_addition_verdict`: must be one of `accepted | accepted_with_limits | rejected | deferred`. On accepted-flavored verdicts, validate that `linked_cf_ids`, `linked_ch_ids`, `linked_pa_ids` are all supplied + non-empty.
 5. On accepted-flavored verdicts: verify each `linked_cf_ids` entry resolves to `worlds/<world_slug>/_source/canon/CF-<integer>.yaml`; each `linked_ch_ids` entry resolves to `worlds/<world_slug>/_source/change-log/CH-<integer>.yaml`; each `linked_pa_ids` entry resolves to a `worlds/<world_slug>/adjudications/PA-<integer>-*.md` file. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
 6. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)`:
-   - One id per superseding record (count determined by source_records inventory + branch-handling count).
+   - One id per superseding record (count determined by source_records inventory only; branch handling is ledger / INDEX-only).
    - One `SE-<integer>` when `emit_closeout_event: true`.
 7. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting.
 
@@ -201,9 +200,9 @@ Canon-addition didn't decide either way. No supersessions by default. Closeout r
 
 ### Branch-handling (per `same_story_branch_handling`)
 
-- `flag`: record each affected branch in the closeout ledger and bundle INDEX; supersede a `BR` only if an existing §4.5.11 field such as `description` must change.
-- `archive`: record the archival disposition in the closeout ledger and per-world stories INDEX; supersede a `BR` only if an existing §4.5.11 field such as `description` must change.
-- `none`: no branch supersessions.
+- `flag`: record each affected branch in the closeout ledger and bundle INDEX; BR records remain unchanged.
+- `archive`: record the archival disposition in the closeout ledger and per-world stories INDEX; BR records remain unchanged.
+- `none`: no branch disposition changes.
 
 ## Phase 3: Validate
 
@@ -273,7 +272,7 @@ The original `SP-<integer>.md` ledger stays unchanged as the historical proposal
 
 ## Phase 5: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record` (via PEENH-007 inheritance — now landed), `create_stent_record`, `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), `create_br_record` (for branch supersessions), and optionally `create_se_record` (when `emit_closeout_event: true`). Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record` (via PEENH-007 inheritance — now landed), `create_stent_record`, `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), and optionally `create_se_record` (when `emit_closeout_event: true`). Branch disposition is recorded in the closeout ledger / INDEX surfaces, not as a `BR` record operation. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
 
 2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance` (BEL via VALENH-011 inheritance).
 
@@ -310,7 +309,8 @@ Rules 1 / 2 / 3 / 5 / 11 / 12 enforced upstream by `canon-addition` at adjudicat
 
 All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
-- `SF` (§4), `BEL` (§4.1), `STENT`, `SREL`, `DA`, `BR`, `SE` (§4.3) — record classes that may be superseded.
+- `SF` (§4), `BEL` (§4.1), `STENT`, `SREL`, `DA`, `SE` (§4.3) — record classes that may be superseded or emitted by closeout.
+- `BR` (§4.5.11) — read-only for same-story branch disposition; branches fork rather than replace prior branch records.
 
 The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's template (sub-class (b) authored from scratch; no per-skill `templates/` directory needed — the ledger is structurally simple and inline format suffices).
 
@@ -329,7 +329,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 | Rule 12 (No Single-Trace Truths) | N/A at this skill | Canon-addition enforced. |
 | Canon Layers | Phase 1 | Read linked CF records' `status` (5 layer values). |
 | Mystery Reserve | N/A at this skill | Story-fact-promotion-to-canon + canon-addition handled. |
-| §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA / BR, NOT page records. |
+| §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA, NOT branch or page records. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |
 | Change Control Policy | Phase 1, Phase 3 gate 2 | Closeout reads canon-addition's CH Change Log Entry and cites it in the closeout ledger. |
 | Tooling Recommendation | Pre-flight | Linked canon-addition records loaded via direct file reads (CF / CH / PA paths); no `get_context_packet` retrieval needed since closeout works against direct record paths. |
