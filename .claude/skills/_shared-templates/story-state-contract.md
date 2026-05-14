@@ -113,7 +113,8 @@ state_snapshot:
     STLOC: [STLOC-<integer>]
     STOBJ: [STOBJ-<integer>]
     DA: [DA-<integer>]
-  entity_status:                       # * one entry per active STENT
+    STSTAT: [STSTAT-<integer>]
+  entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
       agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown
@@ -541,7 +542,7 @@ No `target_or_action_family` singular field, `choice_contract`, `choice_worthine
 
 #### 4.5.13 `STSTAT` (story-local entity status)
 
-Tracks the active life / agency / location state for one story-local entity. `PG.state_snapshot.entity_status` becomes replayable once later validators derive that projection from active `STSTAT` records.
+Tracks the active life / agency / location state for one story-local entity. `PG.state_snapshot.entity_status` is a derived projection from active `STSTAT` records and is replay-checked with `state_snapshot.active_records`.
 
 ```yaml
 id: STSTAT-<integer>*
@@ -594,14 +595,14 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 |---|---|---|
 | `fact_true(SF-<integer>)` | Branch-local fact must be currently active. | turn-cycle eligibility |
 | `belief(holder, claim, mode?, confidence_floor?)` | Belief must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall |
-| `entity_status(STENT-<integer>, field, value)` | `field` is one of `life | agency | location`. | turn-cycle eligibility |
+| `entity_status(STENT-<integer>, field, value)` | Resolves against active `STSTAT` records; `field` is one of `life | agency | location`. | turn-cycle eligibility |
 | `relationship_axis(SREL-<integer>, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
 | `obligation_open(OBL-<integer>)` | Obligation must be in an open state. | turn-cycle eligibility |
 | `consequence_pending(CNSQ-<integer>)` | Consequence must be pending (unresolved). | turn-cycle eligibility |
 | `thread_active(THR-<integer>)` | Thread must be active. | turn-cycle eligibility |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
-| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA ids. | turn-cycle eligibility |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
 | `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |

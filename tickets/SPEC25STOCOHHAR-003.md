@@ -4,19 +4,19 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies four story-pipeline skills (`branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-health-audit`, `branching-story-prose-attach`); no tool / schema change.
-**Deps**: archive/tickets/SPEC25STOCOHHAR-001.md, SPEC25STOCOHHAR-002
+**Deps**: archive/tickets/SPEC25STOCOHHAR-001.md, archive/tickets/SPEC25STOCOHHAR-002.md
 
 ## Problem
 
-With the `STSTAT` record class defined (SPEC25STOCOHHAR-001) and replay-enforced (SPEC25STOCOHHAR-002), the four story-pipeline skills that produce or consume page snapshots must emit `STSTAT` records and stop authoring `entity_status` directly. Until they do, the new replay enforcement has nothing to verify against — the machine layer is live but unused by the skills.
+With the `STSTAT` record class defined (archive/tickets/SPEC25STOCOHHAR-001.md) and replay-enforced (archive/tickets/SPEC25STOCOHHAR-002.md), the four story-pipeline skills that produce or consume page snapshots must emit `STSTAT` records and stop authoring `entity_status` directly. Until they do, the new replay enforcement has nothing to verify against — the machine layer is live but unused by the skills.
 
 ## Assumption Reassessment (2026-05-14)
 
 1. `branching-story-bootstrap` builds `PG-1` and seeds the initial cast; `branching-story-turn-cycle` advances pages and currently authors `entity_status` directly; `branching-story-health-audit`'s structural sub-phase relies on `snapshot_replay_equality`; `branching-story-prose-attach`'s `entity_status_consistency` deterministic check reads "plan §5 entity statuses" and `STENT.entity_status` (`branching-story-prose-attach/SKILL.md:134`, `:180`). All four are Skill Category 2c per FOUNDATIONS §Story Bundles §7.
-2. SPEC-25 D1 §Skills prescribes the four skill changes (bootstrap emits one `STSTAT` per active `STENT` at `PG-1`; turn-cycle supersedes `STSTAT` on status change and includes ids in `SE.state_delta`; health-audit replay now covers `entity_status`; prose-attach's `entity_status_consistency` reads the `STSTAT`-derived projection). This work depends on the class existing (SPEC25STOCOHHAR-001) and the replay derivation landing (SPEC25STOCOHHAR-002).
-3. Cross-skill boundary under audit: the `PG.state_snapshot` schema (shared story state contract §4.2, as amended by SPEC25STOCOHHAR-002) and the `entity_status`-derived-projection contract — shared across all four skills that read or write page snapshots.
+2. SPEC-25 D1 §Skills prescribes the four skill changes (bootstrap emits one `STSTAT` per active `STENT` at `PG-1`; turn-cycle supersedes `STSTAT` on status change and includes ids in `SE.state_delta`; health-audit replay now covers `entity_status`; prose-attach's `entity_status_consistency` reads the `STSTAT`-derived projection). This work depends on the class existing (archive/tickets/SPEC25STOCOHHAR-001.md) and the replay derivation landing (archive/tickets/SPEC25STOCOHHAR-002.md).
+3. Cross-skill boundary under audit: the `PG.state_snapshot` schema (shared story state contract §4.2, as amended by archive/tickets/SPEC25STOCOHHAR-002.md) and the `entity_status`-derived-projection contract — shared across all four skills that read or write page snapshots.
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary): the page snapshot remains the fork primitive; emitting one `STSTAT` per active `STENT` keeps every committed page replayable from any committed parent.
-5. Rename awareness: SPEC25STOCOHHAR-002 renames the `entity_status` predicate argument `axis`→`field`. `branching-story-prose-attach` SKILL.md:173 lists `entity_status(` as an engine-jargon-leak literal — that literal names the predicate, not its argument, so the rename requires no prose-attach literal-list edit. No skill-side rename fallout.
+5. Rename awareness: archive/tickets/SPEC25STOCOHHAR-002.md renames the `entity_status` predicate argument `axis`→`field`. `branching-story-prose-attach` SKILL.md:173 lists `entity_status(` as an engine-jargon-leak literal — that literal names the predicate, not its argument, so the rename requires no prose-attach literal-list edit. No skill-side rename fallout.
 
 ## Architecture Check
 
@@ -58,7 +58,7 @@ Update the `entity_status_consistency` receipt-check description so it reads the
 ## Out of Scope
 
 - The `STSTAT` schema / machine layer — archive/tickets/SPEC25STOCOHHAR-001.md.
-- The replay validator logic (`snapshot_replay_equality`, `ACTIVE_RECORDS_CLASSES`) — SPEC25STOCOHHAR-002.
+- The replay validator logic (`snapshot_replay_equality`, `ACTIVE_RECORDS_CLASSES`) — archive/tickets/SPEC25STOCOHHAR-002.md.
 - Any change to the `entity_status_consistency` *algorithm* beyond pointing it at the derived projection.
 - `SF.authority`, `OBL` / `CNSQ` `urgency`, predicate DSL v2, `CHC.grounded_in` — separate deliverables.
 
@@ -79,10 +79,10 @@ Update the `entity_status_consistency` receipt-check description so it reads the
 
 ### New/Modified Tests
 
-None — skill-prose ticket (no automated test files change); verification is skill dry-run + grep-proof, and the strengthened structural-replay coverage that backs this ticket is the `snapshot-replay-equality` test added in SPEC25STOCOHHAR-002, named in Assumption Reassessment item 3.
+None — skill-prose ticket (no automated test files change); verification is skill dry-run + grep-proof, and the strengthened structural-replay coverage that backs this ticket is the `snapshot-replay-equality` test added in archive/tickets/SPEC25STOCOHHAR-002.md, named in Assumption Reassessment item 3.
 
 ### Commands
 
 1. Skill dry-run of `branching-story-bootstrap` and `branching-story-turn-cycle` (invoke via the `Skill` tool, inspect emitted plans / patch plans, do not commit).
 2. `grep -rn "entity_status" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md`
-3. Skill dry-runs are the correct verification boundary — story-pipeline skills have no unit-test harness; the structural correctness of the emitted `STSTAT` records is covered by SPEC25STOCOHHAR-001's and SPEC25STOCOHHAR-002's validator tests.
+3. Skill dry-runs are the correct verification boundary — story-pipeline skills have no unit-test harness; the structural correctness of the emitted `STSTAT` records is covered by archive/tickets/SPEC25STOCOHHAR-001.md and archive/tickets/SPEC25STOCOHHAR-002.md validator tests.

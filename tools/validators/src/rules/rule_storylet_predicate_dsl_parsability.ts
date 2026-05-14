@@ -35,7 +35,7 @@ const STORY_ID_PATTERNS = {
   artifact: /^DA-\d+$/,
   intention: /^STINT-\d+$/
 } as const;
-const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA)-\d+$/;
+const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
 
 type RefKind = keyof typeof STORY_ID_PATTERNS;
 
@@ -50,6 +50,7 @@ interface ReferenceSets {
   locations: Map<string, Set<string>>;
   objects: Map<string, Set<string>>;
   artifacts: Map<string, Set<string>>;
+  statuses: Map<string, Set<string>>;
   intentions: Map<string, Set<string>>;
 }
 
@@ -123,6 +124,7 @@ async function loadReferenceSets(ctx: Context): Promise<ReferenceSets> {
     locations: await query("story_location_record"),
     objects: await query("story_object_record"),
     artifacts: await query("story_diegetic_artifact_record"),
+    statuses: await query("story_status_record"),
     intentions: await query("intention_record")
   };
 }
@@ -183,7 +185,7 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
       return;
     case "entity_status":
       requireActorRef(state, value.entity, `${path}.entity`);
-      requireEnum(state, value.axis, ENTITY_STATUS_AXES, `${path}.axis`);
+      requireEnum(state, value.field, ENTITY_STATUS_AXES, `${path}.field`);
       requirePresent(state, value.value, `${path}.value`);
       return;
     case "relationship_axis":
@@ -297,7 +299,8 @@ function activeRecordIds(state: ValidationState): Set<string> {
     ...idsFor(state.refs.relationships, state.record),
     ...idsFor(state.refs.locations, state.record),
     ...idsFor(state.refs.objects, state.record),
-    ...idsFor(state.refs.artifacts, state.record)
+    ...idsFor(state.refs.artifacts, state.record),
+    ...idsFor(state.refs.statuses, state.record)
   ]);
 }
 

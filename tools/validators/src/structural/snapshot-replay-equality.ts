@@ -178,9 +178,9 @@ function pageId(parsed: Record<string, unknown>): string {
 }
 
 // New-schema (story state contract §4.3) replay: SE.state_delta against parent's
-// state_snapshot.active_records. Workflow-stamped fields (visible_affordances,
-// entity_status, unresolved_mystery_claims, continuation) are not reconstructible
-// from state_delta alone and are intentionally not compared here.
+// state_snapshot.active_records. entity_status is derived from the replayed
+// active STSTAT set; only genuinely page-local workflow-stamped fields
+// (visible_affordances, unresolved_mystery_claims, continuation) are excluded.
 function runNewSchemaReplay(
   page: IndexedRecord,
   parsed: Record<string, unknown>,
@@ -220,6 +220,7 @@ function runNewSchemaReplay(
   const parentSnapshot = asPlainRecord(parent.state_snapshot);
   const parentActive = asPlainRecord(parentSnapshot.active_records) as Record<string, readonly string[]>;
   const expectedActive = replayActiveRecords(parentActive, delta);
+  const expectedEntityStatus = deriveEntityStatus(expectedActive.STSTAT, byId);
 
   const gotSnapshot = asPlainRecord(parsed.state_snapshot);
   const gotActive = asPlainRecord(gotSnapshot.active_records);
@@ -240,6 +241,14 @@ function runNewSchemaReplay(
         got: gotList
       });
     }
+  }
+  const gotEntityStatus = asPlainRecord(gotSnapshot.entity_status);
+  if (canonicalJsonStringify(expectedEntityStatus) !== canonicalJsonStringify(gotEntityStatus)) {
+    drifts.push({
+      field: "entity_status",
+      expected: expectedEntityStatus,
+      got: gotEntityStatus
+    });
   }
 
   const verdicts: Verdict[] = [];
@@ -279,4 +288,26 @@ function runNewSchemaReplay(
   }
 
   return verdicts;
+}
+
+function deriveEntityStatus(
+  activeStatusIds: readonly string[],
+  byId: ReadonlyMap<string, Record<string, unknown>>
+): Record<string, { life: string; agency: string; location: string }> {
+  const statusByEntity: Record<string, { life: string; agency: string; location: string }> = {};
+  for (const statusId of activeStatusIds) {
+    const statusRecord = byId.get(statusId);
+    if (statusRecord === undefined) {
+      continue;
+    }
+    const entity = stringValue(statusRecord.entity);
+    const life = stringValue(statusRecord.life);
+    const agency = stringValue(statusRecord.agency);
+    const location = stringValue(statusRecord.location);
+    if (entity === undefined || life === undefined || agency === undefined || location === undefined) {
+      continue;
+    }
+    statusByEntity[entity] = { life, agency, location };
+  }
+  return statusByEntity;
 }

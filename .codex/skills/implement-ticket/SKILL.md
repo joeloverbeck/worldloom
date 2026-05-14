@@ -103,7 +103,7 @@ For package/tool tickets, do the compact package checkpoint in `references/packa
 
 If a package/tool ticket also owns a live engine-routed `_source` repair after the package change lands, keep the primary classification as package/tool and apply the mixed-route rule in `references/ticket-classification.md`.
 
-If the ticket changes a validator, JSON Schema, schema-discovery consumer, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks. Schema-discovery consumers include package tools that expose schema metadata, traverse JSON Schema `$ref`s, or project required fields and referenced schemas even when the ticket does not edit a JSON Schema file directly. A capstone that only reads current validator registry/count/matrix state as one witness does not need this reference unless it changes that validator/schema contract or uses validator-matrix classification as an acceptance owner.
+If the ticket changes a validator, JSON Schema, schema-discovery consumer, hybrid frontmatter parser, validation registry, grandfathering/waiver matcher, live-corpus validator baseline, or validator-package capstone / verification-matrix coverage, also load `references/validator-schema-migrations.md` from this skill directory and apply its focused reassessment, verification, and closeout checks.
 
 For staged validator/schema/parser details, prefer `references/validator-schema-migrations.md` as the detailed authority and keep this top-level workflow as the routing checklist.
 

@@ -6,6 +6,8 @@
 **Supersedes**: nothing. Additive hardening of the SPEC-23 / SPEC-24 story-state contract.
 **Source**: triage of `reports/story-related-upgrades.md` (ChatGPT-Pro external review), reassessed against the landed story pipeline.
 
+**Implementation note (2026-05-14)**: SPEC25STOCOHHAR-001 landed the `STSTAT` machine layer. SPEC25STOCOHHAR-002 landed the D1 validator/contract replay slice: `PG.state_snapshot.active_records` includes `STSTAT`, `entity_status` is replay-checked as a projection from active `STSTAT`, and the closed predicate DSL uses `entity_status(..., field, value)`. The D1 story-pipeline skill emission/consumption changes remain owned by SPEC25STOCOHHAR-003.
+
 ## Problem Statement
 
 The story-skill family was recently rebuilt as a branching causal state machine — no act structure, internally coherent under any player choice — with all structural schemas explicitly declared in `.claude/skills/_shared-templates/story-state-contract.md` and enforced by the MCP retrieval surface and the `tools/validators/` JSON schemas (SPEC-23, SPEC-24). There are **zero production story bundles**, so every change here is a pure greenfield schema edit with no migration or retrofit cost.

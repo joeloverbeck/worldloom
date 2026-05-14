@@ -79,7 +79,7 @@ export const CONFIDENCE_LEVELS = ["certain", "high", "medium", "low", "uncommitt
 export const PREDICATE_ARG_SCHEMAS = {
   fact_true: { required: ["fact"] },
   belief: { required: ["holder", "claim"] },
-  entity_status: { required: ["entity", "axis", "value"] },
+  entity_status: { required: ["entity", "field", "value"] },
   relationship_axis: { required: ["from", "to", "axis"] },
   obligation_open: { required: ["obligation"] },
   consequence_pending: { required: ["consequence"] },

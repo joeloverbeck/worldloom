@@ -66,7 +66,7 @@ function createIndexedStoryWorld(): string {
   const insert = db.prepare(
     "INSERT INTO nodes (node_id, world_slug, story_slug, file_path, node_type, body) VALUES (?, 'clean', ?, ?, ?, ?)"
   );
-  insertStoryRecords(insert, "alpha", "SLT-0001", { pred: "entity_status", entity: "STENT-0001", axis: "agency", value: "free" });
+  insertStoryRecords(insert, "alpha", "SLT-0001", { pred: "entity_status", entity: "STENT-0001", field: "agency", value: "free" });
   insertStoryRecords(insert, "beta", "SLT-0002", { pred: "phase_of_moon", value: "waning" });
   db.close();
 
