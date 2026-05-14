@@ -1,6 +1,6 @@
 ---
 name: branching-story-turn-cycle
-description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-<integer>.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STSTAT/STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-<integer>.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -114,7 +114,8 @@ Phase 10: HARD-GATE fires → atomic patch + markdown writes
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | Always (the causal tick) |
 | `PG-<integer>` | `_source/pages/PG-<integer>.yaml` | Always |
 | `BR-<integer>` | `_source/branches/BR-<integer>.yaml` | IF fork (parent is non-leaf OR `force_branch_id` set) |
-| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF entity status changes (life / agency / location) |
+| `STSTAT-<integer>` (new or supersession) | `_source/status/STSTAT-<integer>.yaml` | IF life / agency / location changes; exactly one active status record per active `STENT` |
+| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF identity mirror / role metadata changes; not for life / agency / location status |
 | `STINT-<integer>` (new or supersession) | `_source/intentions/STINT-<integer>.yaml` | IF intentions change this turn |
 | `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge |
 | `BEL-<integer>` (new or supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF belief/visibility changes — **mandatory** for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual (Phase 4) |
@@ -219,17 +220,19 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 
 - Create new facts (`SF`) or beliefs (`BEL`).
 - Supersede beliefs when truth-relation or visibility changes (every public discovery, betrayal, lie, or confession produces at least one `BEL` create or supersession in this phase or Phase 4 per FOUNDATIONS §6a).
-- Change entity status (life / agency / location) via `STENT` supersession — death, incapacity, absence, injury, capture, escape are first-class.
+- Change entity status (life / agency / location) via `STSTAT` supersession — death, incapacity, absence, injury, capture, escape are first-class.
 - Update intentions (`STINT` supersession).
 - Update relationships (`SREL` supersession).
 - Open / close / escalate obligations (`OBL` supersession or new).
 - Create consequences (`CNSQ` new).
 - Advance or close threads (`THR` supersession).
-- Move entities or objects (`STENT.entity_status.location` supersession; `STOBJ` supersession).
+- Move entities or objects (`STSTAT.location` supersession for entity movement; `STOBJ` supersession for object movement).
 - Create or alter story-local artifacts (`DA` new or supersession).
 - Mark the branch terminal (set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale`).
 
-Supersession is file-level append-only per shared contract §3 — a new record file (e.g., `SREL-<integer>+1.yaml`) carries `supersedes: SREL-<integer>` in its YAML body. The existing `create_*_record` patch ops handle this.
+Supersession is file-level append-only per shared contract §3 — a new record file (e.g., a new `SREL-<integer>.yaml` or `STSTAT-<integer>.yaml`) carries `supersedes: <prior-id>` in its YAML body. The existing `create_*_record` patch ops handle this.
+
+For every life / agency / location change, supersede the affected entity's active `STSTAT` record and include both the superseded id and the new `STSTAT` id in `SE.state_delta` (`supersede` and `create`, respectively). Do not encode those status changes by superseding `STENT`; `STENT` remains stable identity / role metadata. Recompute `PG.state_snapshot.entity_status` from the resulting active `STSTAT` set.
 
 **Deaths and removals are first-class outcomes.** Do not protect "main characters" with out-of-world logic. When an entity dies, becomes incapacitated, or becomes unavailable, reconcile in the same delta:
 
@@ -288,7 +291,7 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `parent_page_id: <parent>`, `branch_id: <active or new>`, `turn_index: parent.turn_index + 1`.
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
-- Full `state_snapshot`: `active_records` (per-class lists including `BEL` key); `entity_status` per active STENT; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
+- Full `state_snapshot`: `active_records` (per-class lists including `BEL` and `STSTAT` keys); `entity_status` derived from active `STSTAT` records, one entry per active `STENT`; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
 - `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
 - `prose_plan_path: pages-prose-plans/PG-<integer>.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
 - `prose_path: null`, `prose_receipt_path: null`.
@@ -346,7 +349,7 @@ If any gate, additional check, parent-hash copy check, or new-hash check fails, 
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record`. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (including `create_ststat_record` for entity life / agency / location status; each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record`. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
 2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run exercises `record_schema_compliance` for BEL and PG; placeholder or malformed PG hashes must not reach this step.
 3. Present the complete deliverable summary to the user:
    - Branch label (continuation of `BR-<integer>` or fork into new `BR-<integer>`).
