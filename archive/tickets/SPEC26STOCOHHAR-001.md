@@ -52,7 +52,7 @@ Re-ran the Step 2 sweep after edits; `controlled_by`, `relationship_change_witho
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
 - `archive/tickets/SPEC26STOCOHHAR-001.md` (modify after archival)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify)
 
 ## Out of Scope
 
@@ -99,4 +99,4 @@ SPEC-26 D1 and this ticket were also truthed to the live STINT schema: replaceme
 
 ## Deviations
 
-The drafted SPEC-26/ticket replacement wording for transferred `STINT` records used `derived_from`, but live reassessment proved `STINT` has no such field. The landed wording uses `supersedes` instead, and `specs/SPEC-26-story-coherence-hardening-ii.md` now records that D1 correction.
+The drafted SPEC-26/ticket replacement wording for transferred `STINT` records used `derived_from`, but live reassessment proved `STINT` has no such field. The landed wording uses `supersedes` instead, and `archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records that D1 correction.

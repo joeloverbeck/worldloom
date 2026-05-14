@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md` (shared contract), `branching-story-health-audit` and `commitment-block-authoring` skill prose, plus a SPEC-26 implementation note in `specs/SPEC-26-story-coherence-hardening-ii.md`. `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts` was inspected but not modified.
+**Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md` (shared contract), `branching-story-health-audit` and `commitment-block-authoring` skill prose, plus a SPEC-26 implementation note in `archive/specs/SPEC-26-story-coherence-hardening-ii.md`. `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts` was inspected but not modified.
 **Deps**: None
 
 ## Problem
@@ -18,7 +18,7 @@ At intake, branch-locality was tested two incompatible ways. `branching-story-he
 4. FOUNDATIONS principle under audit: Rule 4 (No Globalization by Accident), expressed at story scope by FOUNDATIONS §Story Bundles §5, still requires global author-pool storylets not to reference branch-local records. `docs/FOUNDATIONS.md` §5 still carries the old wording; SPEC26STOCOHHAR-009 (D8) owns that FOUNDATIONS reconciliation. This ticket sharpened the contract + skill boundary without loosening the rule.
 5. Mismatch + correction: before this ticket, `branching-story-health-audit`'s "`created_at_page` is non-null" test contradicted `commitment-block-authoring`'s correct root-of-tree handling. Correction landed — `bundle_genesis_record` / `branch_local_record` are defined once in the contract; both skills reference that definition; the health-audit test now references `branch_local_record`.
 6. Implementation check: `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts` has no built-in branch-locality calculation to align. Its only scope check is `requireExistentialScope`, which restricts existential predicates to `global_author_pool` / `branch_prefix_scoped`; it does not inspect `created_at_page`, `branch_path`, or `visible_branch_path_prefix`.
-7. User-supplied SPEC-26 reference check: added a dated D2 implementation note to `specs/SPEC-26-story-coherence-hardening-ii.md`; remaining D2 problem/verifier prose in the spec is historical intake context until archival. `docs/FOUNDATIONS.md` remains intentionally stale here because SPEC26STOCOHHAR-009 owns D8.
+7. User-supplied SPEC-26 reference check: added a dated D2 implementation note to `archive/specs/SPEC-26-story-coherence-hardening-ii.md`; remaining D2 problem/verifier prose in the spec is historical intake context until archival. `docs/FOUNDATIONS.md` remains intentionally stale here because SPEC26STOCOHHAR-009 owns D8.
 
 ## Architecture Check
 
@@ -54,14 +54,14 @@ Inspected `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts
 
 ### 5. SPEC-26 note
 
-Added a dated D2 implementation note to `specs/SPEC-26-story-coherence-hardening-ii.md` because the user explicitly supplied the SPEC-26 reference for this run.
+Added a dated D2 implementation note to `archive/specs/SPEC-26-story-coherence-hardening-ii.md` because the user explicitly supplied the SPEC-26 reference for this run.
 
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D2 implementation note)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D2 implementation note)
 - `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts` (inspected only; no edit because it does not encode branch-locality)
 
 ## Out of Scope

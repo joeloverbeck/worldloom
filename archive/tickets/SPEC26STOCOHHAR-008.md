@@ -13,7 +13,7 @@ At intake, the player's agency surface was implicit. `branching-story-turn-cycle
 ## Assumption Reassessment (2026-05-14)
 
 1. At intake, verified against the current codebase at SPEC-26 Step 2: `branching-story-turn-cycle/SKILL.md` Phase 9 additional check 1 was "Action source legality"; its pre-flight already loaded `STORY_KERNEL.md`, but the check did not read the Player Agency Contract. `branching-story-bootstrap/SKILL.md` wrote `STORY_KERNEL.md` (confirmed — it was in the bootstrap write set) but did not enumerate the sections it placed there. `branching-story-prose-attach/SKILL.md` ran `choice_consequence_visibility` and `entity_status_consistency`, but did not load or cross-reference `STORY_KERNEL.md`.
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D7: the `## Player Agency Contract` section carries three load-bearing bullets — **Agency surface** (which `STENT` record(s) the player primarily controls), **Write-in envelope** (what kinds of manual actions are admissible), **Viewpoint limits** (whether the player may act on knowledge the viewpoint character lacks). The report's other three bullets (control style, impossible-action policy, consequence-visibility promise) are dropped — they restate `FOUNDATIONS.md` or are authorial taste with no consumer.
+2. Verified against `archive/specs/SPEC-26-story-coherence-hardening-ii.md` D7: the `## Player Agency Contract` section carries three load-bearing bullets — **Agency surface** (which `STENT` record(s) the player primarily controls), **Write-in envelope** (what kinds of manual actions are admissible), **Viewpoint limits** (whether the player may act on knowledge the viewpoint character lacks). The report's other three bullets (control style, impossible-action policy, consequence-visibility promise) are dropped — they restate `FOUNDATIONS.md` or are authorial taste with no consumer.
 3. Cross-skill / cross-artifact boundary under audit: the `STORY_KERNEL.md` Player Agency Contract section, authored by `branching-story-bootstrap`, read by `branching-story-turn-cycle` Phase 9 check 1 (as a routing input) and `branching-story-prose-attach` (as a cross-reference for `entity_status_consistency` and the new `choice_consequence_visibility` check). `STORY_KERNEL.md` is a primary-authored direct-write markdown surface (FOUNDATIONS §Story Bundles §4 / §2) — not an atomic `_source/*.yaml` record — so no schema or patch-engine surface is involved.
 4. HARD-GATE / gate-validation surface (per `tickets/README.md` check 9): this ticket makes `branching-story-turn-cycle` Phase 9 additional check 1 (action-source legality) *read* the Player Agency Contract — Phase 9 is the validation phase preceding the Phase 10 HARD-GATE. Confirmed: the change supplies check 1 a stable routing input (agency surface + viewpoint limits) that it previously inferred; it does not weaken the check, touch gate 3 (mystery/invariant firewall), resolve any `forbidden`-status mystery, or alter HARD-GATE ordering. The Mystery Reserve firewall is unchanged.
 5. Mismatch + correction: `branching-story-bootstrap` writes `STORY_KERNEL.md` but does not enumerate its sections, so there is no contract for what the file must contain — the Player Agency Contract has nowhere defined to live, check 1's routing input is unspecified, and prose-attach has no loaded contract to compare against. Correction — bootstrap gains an explicit `STORY_KERNEL.md` section enumeration that includes the required `## Player Agency Contract` section; turn-cycle check 1 reads it; prose-attach loads and cross-references it.
@@ -47,14 +47,14 @@ At intake, the player's agency surface was implicit. `branching-story-turn-cycle
 
 ### 4. SPEC-26 status note
 
-`specs/SPEC-26-story-coherence-hardening-ii.md` now records D7 as landed by this ticket and treats remaining D7 current-state problem statements as historical intake evidence.
+`archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records D7 as landed by this ticket and treats remaining D7 current-state problem statements as historical intake evidence.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D7 implementation note)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D7 implementation note)
 
 ## Out of Scope
 
@@ -86,7 +86,7 @@ At intake, the player's agency surface was implicit. `branching-story-turn-cycle
 1. `grep -rn 'Player Agency Contract' .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md`
 2. `grep -nE 'STORY_KERNEL.md|Agency surface|Write-in envelope|Viewpoint limits' .claude/skills/branching-story-bootstrap/SKILL.md` (confirms the section enumeration + the three bullets)
 3. `grep -rnE 'Player Agency Contract|manual_action_text|choice_consequence_visibility|entity_status_consistency' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md`
-4. `grep -n 'D7 landed' specs/SPEC-26-story-coherence-hardening-ii.md`
+4. `grep -n 'D7 landed' archive/specs/SPEC-26-story-coherence-hardening-ii.md`
 5. A grep-plus-manual-review boundary is correct: `STORY_KERNEL.md` is a markdown surface with no schema validator, and no executable story-skill dry-runner is available in this Codex session.
 
 ## Outcome
@@ -95,16 +95,16 @@ Completion date: 2026-05-14.
 
 `branching-story-bootstrap` now defines the `STORY_KERNEL.md` section set and requires `## Player Agency Contract` with Agency surface, Write-in envelope, and Viewpoint limits. `branching-story-turn-cycle` now loads that contract and uses it as the explicit routing input for `manual_action_text` action-source legality. `branching-story-prose-attach` now loads the same contract and cross-references it during `choice_consequence_visibility` and `entity_status_consistency`.
 
-`specs/SPEC-26-story-coherence-hardening-ii.md` now records that D7 landed through this ticket; remaining D7 problem/deliverable prose is historical intake context unless a later ticket reopens it.
+`archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records that D7 landed through this ticket; remaining D7 problem/deliverable prose is historical intake context unless a later ticket reopens it.
 
 ## Verification Result
 
 1. `grep -rn 'Player Agency Contract' .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md` — passed; bootstrap defines the required section, turn-cycle loads and reads it, and prose-attach loads/cross-references it.
 2. `grep -nE 'STORY_KERNEL.md|Agency surface|Write-in envelope|Viewpoint limits' .claude/skills/branching-story-bootstrap/SKILL.md` — passed; the section enumeration and three required bullets are present.
 3. `grep -rnE 'Player Agency Contract|manual_action_text|choice_consequence_visibility|entity_status_consistency' .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md` — passed; turn-cycle and prose-attach contain the consumer-side references.
-4. `grep -n 'D7 landed' specs/SPEC-26-story-coherence-hardening-ii.md` — passed; SPEC-26 has the D7 implementation note.
+4. `grep -n 'D7 landed' archive/specs/SPEC-26-story-coherence-hardening-ii.md` — passed; SPEC-26 has the D7 implementation note.
 
 ## Deviations
 
 1. The drafted skill dry-run was replaced with manual contract review plus grep proof because no executable story-skill dry-runner is available in this Codex session. This is the truthful proof surface for skill-prose direct-write markdown contract changes.
-2. `specs/SPEC-26-story-coherence-hardening-ii.md` was added to the file set because the user explicitly supplied `specs/SPEC-26*` as the reference and the same-seam D7 status note would otherwise remain stale.
+2. `archive/specs/SPEC-26-story-coherence-hardening-ii.md` was added to the file set because the user explicitly supplied `specs/SPEC-26*` as the reference and the same-seam D7 status note would otherwise remain stale.

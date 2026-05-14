@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Medium
-**Engine Changes**: Yes — `branching-story-prose-attach` skill prose, `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (prose-receipt schema), and `specs/SPEC-26-story-coherence-hardening-ii.md` status note.
+**Engine Changes**: Yes — `branching-story-prose-attach` skill prose, `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (prose-receipt schema), and `archive/specs/SPEC-26-story-coherence-hardening-ii.md` status note.
 **Deps**: archive/tickets/SPEC26STOCOHHAR-003.md
 
 ## Problem
@@ -13,7 +13,7 @@ At intake, `branching-story-prose-attach` ran 6 deterministic checks but none ve
 ## Assumption Reassessment (2026-05-14)
 
 1. At intake, verified against the current codebase at SPEC-26 Step 2: `branching-story-prose-attach/SKILL.md` defined exactly 6 deterministic checks — `engine_jargon_leak`, `forbidden_mystery_resolution`, `required_event_rendered`, `entity_status_consistency`, `invented_structural_fact`, `canon_claim_without_authority` — plus a roll-up `verdict` block and a `repair_recommendation` ladder. The skill cross-referenced `.claude/skills/_shared-templates/story-state-contract.md` §4.6 with the stale "6 deterministic checks" count.
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D3: `choice_consequence_visibility` is `PASS | WARN | FAIL` — `PASS` = prose makes the selected action, route, and immediate consequence legible to a first-time reader; `WARN` = the action occurred but the consequence/route feedback is easy to miss; `FAIL` = prose obscures, contradicts, or omits the consequence (especially for `attempt`/`accommodate`/`world_block`/`promotion_hold`/`terminal` routes). It verifies the prose realizes `SE.resolution.player_visible_feedback`.
+2. Verified against `archive/specs/SPEC-26-story-coherence-hardening-ii.md` D3: `choice_consequence_visibility` is `PASS | WARN | FAIL` — `PASS` = prose makes the selected action, route, and immediate consequence legible to a first-time reader; `WARN` = the action occurred but the consequence/route feedback is easy to miss; `FAIL` = prose obscures, contradicts, or omits the consequence (especially for `attempt`/`accommodate`/`world_block`/`promotion_hold`/`terminal` routes). It verifies the prose realizes `SE.resolution.player_visible_feedback`.
 3. Cross-skill / cross-artifact boundary under audit: the prose-receipt check set, owned jointly by `branching-story-prose-attach/SKILL.md` (the check definitions, verdict roll-up, repair ladder) and `story-state-contract.md` §4.6 (the prose-receipt direct-write artifact schema). The new check also depends on the `SE.resolution.player_visible_feedback` field from `archive/tickets/SPEC26STOCOHHAR-003.md` — hence the `Deps`.
 4. FOUNDATIONS principle under audit: §Story Bundles §4a (Plan-Authority Boundary) — `choice_consequence_visibility` is a prose-receipt check, a rendering-of-state validation, not a second state engine. It reads the committed `SE.resolution` and the rendered prose; it does not mutate page state. This keeps prose-attach within its mandate (validate the rendering; never re-author state).
 5. HARD-GATE / Canon Safety surface (per `tickets/README.md` check 9): this ticket adds a sibling check next to `forbidden_mystery_resolution` (the Rule 7 redundant prose-side guard). The enforcement surfaces touched are the prose-attach 6→7 check suite, the roll-up `verdict` block, and the `repair_recommendation` ladder. `docs/HARD-GATE-DISCIPLINE.md` was read on 2026-05-14; confirmed: `choice_consequence_visibility` reads `SE.resolution` and the prose only; it does not relax, reorder, or bypass `forbidden_mystery_resolution`, and it adds no new path that could resolve a `forbidden`-status mystery — the Mystery Reserve firewall is unchanged.
@@ -49,7 +49,7 @@ The roll-up `verdict` block now includes `choice_consequence_visibility`, and th
 
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify)
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify — §4.6)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — add D3 completion note for the prose-attach half)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — add D3 completion note for the prose-attach half)
 
 ## Out of Scope
 
@@ -88,7 +88,7 @@ Completion date: 2026-05-14.
 
 `branching-story-prose-attach` now runs seven deterministic checks. The new `choice_consequence_visibility` check reads plan §7 `SE.resolution.player_visible_feedback` and verifies the rendered prose makes the selected action, route, and immediate consequence legible. The shared prose-receipt schema now carries the matching `checks.choice_consequence_visibility` field and explicit seven-check count. `choice_consequence_visibility: FAIL` routes to `revise_prose`, preserving the Plan-Authority Boundary and leaving `forbidden_mystery_resolution` unchanged.
 
-`specs/SPEC-26-story-coherence-hardening-ii.md` now records that both halves of D3 are landed; remaining D3 problem/deliverable prose is historical intake context unless a later SPEC-26 ticket reopens it.
+`archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records that both halves of D3 are landed; remaining D3 problem/deliverable prose is historical intake context unless a later SPEC-26 ticket reopens it.
 
 ## Verification Result
 

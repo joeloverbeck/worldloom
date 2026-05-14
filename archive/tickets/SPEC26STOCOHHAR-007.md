@@ -13,7 +13,7 @@ At intake, `branching-story-health-audit` hard-coded debt-aging thresholds (`ign
 ## Assumption Reassessment (2026-05-14)
 
 1. Verified against the current codebase at SPEC-26 Step 2: at intake, `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` defined `PRED_TYPES` and `PREDICATE_ARG_SCHEMAS`, closed by `as const satisfies Record<(typeof PRED_TYPES)[number], { required: readonly string[] }>` — so adding a `PRED_TYPES` member structurally required a matching `PREDICATE_ARG_SCHEMAS` entry. `rule_storylet_predicate_dsl_parsability.ts` already parsed and validated the closed DSL and already carried alias-binding + author-pool/branch-prefix scope checks from SPEC-25 D4. `commitment-block-authoring/SKILL.md` carried the predicate-DSL discipline list. `record_age` did not exist at intake; it is now present in the grammar and parser.
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D6 and `story-state-contract.md` §5 (closed predicate DSL): `record_age(<record_id | bound:<alias>>, >= | <= | == | !=, <integer_pages>)` is derived from the record's `created_at_page` and the evaluating page's position in `branch_path` — the `>= | <= | == | !=` comparator set matches the existing `any_relationship_axis` comparator vocabulary. The `bound:<alias>` first-argument form reuses the alias-binding infrastructure landed by SPEC-25 D4. `urgency_at_least` remains explicitly NOT added (SPEC-26 §Out of Scope — redundant with the existential predicates' `urgency?` filter).
+2. Verified against `archive/specs/SPEC-26-story-coherence-hardening-ii.md` D6 and `story-state-contract.md` §5 (closed predicate DSL): `record_age(<record_id | bound:<alias>>, >= | <= | == | !=, <integer_pages>)` is derived from the record's `created_at_page` and the evaluating page's position in `branch_path` — the `>= | <= | == | !=` comparator set matches the existing `any_relationship_axis` comparator vocabulary. The `bound:<alias>` first-argument form reuses the alias-binding infrastructure landed by SPEC-25 D4. `urgency_at_least` remains explicitly NOT added (SPEC-26 §Out of Scope — redundant with the existential predicates' `urgency?` filter).
 3. Cross-skill / cross-artifact boundary under audit: the closed predicate DSL grammar, owned jointly by `story-state-contract.md` §5 (the human-facing grammar) and `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts` + `rule_storylet_predicate_dsl_parsability.ts` (the executable grammar + parser). Consumers: `commitment-block-authoring` (authors `preconditions.hard`/`preconditions.soft`) and `branching-story-turn-cycle` Phase 2 (evaluates `SLT` eligibility). All four surfaces now carry `record_age` consistently.
 4. FOUNDATIONS principle under audit: §Story Bundles §5a / §5c (Commitment Blocks Are Causal Moves / Present Causal State, Not Narrative Shape) — `record_age` is a *present-causal-state* predicate: "how long has this record been open" is a fact about the current state, derivable from `created_at_page` + `branch_path`, not a future dramatic obligation. It lets pressure escalate *because it has been ignored*, not *because the story reached Act II* — the distinction §5c protects. It adds no `arc_contract` / `dramatic_unit` / act-timer surface.
 
@@ -53,7 +53,7 @@ In `branching-story-turn-cycle/SKILL.md` Phase 2, `SLT` eligibility evaluates `r
 
 ### 6. SPEC-26 — status note
 
-In `specs/SPEC-26-story-coherence-hardening-ii.md`, added the D6 implementation note so the explicit reference records this slice as landed and preserves remaining D6 problem prose as historical intake evidence.
+In `archive/specs/SPEC-26-story-coherence-hardening-ii.md`, added the D6 implementation note so the explicit reference records this slice as landed and preserves remaining D6 problem prose as historical intake evidence.
 
 ## Files to Touch
 
@@ -63,7 +63,7 @@ In `specs/SPEC-26-story-coherence-hardening-ii.md`, added the D6 implementation 
 - `tools/validators/tests/rules/rule_storylet_predicate_dsl_parsability.test.ts` (modify)
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D6 implementation note)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D6 implementation note)
 
 ## Out of Scope
 
@@ -111,5 +111,5 @@ The explicit SPEC-26 reference now has a D6 implementation note and keeps remain
 
 ## Deviations
 
-- Added `specs/SPEC-26-story-coherence-hardening-ii.md` to the touched file set for explicit-reference truthing; implementation scope otherwise matched the ticket.
+- Added `archive/specs/SPEC-26-story-coherence-hardening-ii.md` to the touched file set for explicit-reference truthing; implementation scope otherwise matched the ticket.
 - `tools/validators/dist/` was refreshed by the package build/test lane and remains an ignored generated artifact, not a tracked source edit.

@@ -1,5 +1,7 @@
 ## **Executive position**
 
+**Status**: COMPLETED
+
 Your current story architecture is fundamentally right. I would **not** overhaul it. The important thing is that Worldloom has already rejected the two traps that usually wreck interactive fiction systems: dramatic act bookkeeping and centralized “optimal story” steering. The current model is a present-causal-state machine: page snapshots are fork points, `SLT` commitment blocks are causal moves rather than acts, action routing never silently rejects player input, story facts and beliefs are separate, and health audits replay actual state rather than judging whether the branch “fits the plot.” That aligns much better with interactive narrative research than an act model does.
 
 The proposal below is therefore **tightening, not replacing**: fix a few schema-reference inconsistencies, add explicit causal-threat checks, strengthen attempt/world-block feedback, improve witness/perception discipline, add non-act pressure timing, add story-sifting audits, and make commitment-block coverage more systematic.
@@ -677,3 +679,12 @@ Keep the architecture. It is already pointed at the right target: **a causal pro
 
 The highest-value changes are small but sharp: fix schema wording, define genesis/global scope, add causal-threat detection, make non-accept outcomes structurally explicit, verify witness propagation, add pressure-age predicates, and give health audit a story-sifting mode. That will strengthen branching stories without ever asking whether the branch is “in Act II” or whether the player has broken the planned climax.
 
+## Outcome
+
+Completed / exploited on 2026-05-14.
+
+This report was consumed by `archive/specs/SPEC-26-story-coherence-hardening-ii.md`, then SPEC-26 landed through archived tickets `SPEC26STOCOHHAR-001` through `SPEC26STOCOHHAR-010`. The implemented subset fixed schema-reference drift, added branch-scope vocabulary, added `SE.resolution`, added causal-dependency and expected-witness skill checks, added the `record_age` predicate, added the Player Agency Contract workflow surface, reconciled `docs/FOUNDATIONS.md`, and completed the final contract/schema plus cross-skill stale-vocabulary capstone.
+
+The unimplemented recommendations were intentionally rejected or left outside SPEC-26: health-audit sifting, the SLT coverage matrix, `urgency_at_least`, `SE.perception`, act-structure/drama-manager ideas, natural-language storylet triggers, autonomous NPC simulation, and prose-as-authoritative-state.
+
+Verification is recorded in `archive/tickets/SPEC26STOCOHHAR-010.md`: `tools/validators` passed its package test lane, focused contract/schema/predicate tests covered `SE.resolution` and `record_age`, and the cross-skill stale-vocabulary sweep returned no operational hits.

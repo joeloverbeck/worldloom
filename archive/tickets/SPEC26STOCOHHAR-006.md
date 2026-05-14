@@ -13,11 +13,11 @@ At intake, `branching-story-turn-cycle` Phase 4 was mandatory for events involvi
 ## Assumption Reassessment (2026-05-14)
 
 1. Verified against the current codebase at implementation intake: `branching-story-turn-cycle/SKILL.md` Phase 4 instructed drafting `BEL` records for public/witnessed/hidden/deceptive events and was "mandatory for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual"; at intake it stated that "Phase 9 turn-cycle-additional check 3 verifies coverage". Phase 9 additional check 3 was "belief / visibility coverage". `branching-story-health-audit/SKILL.md` Phase 2d was "Belief / visibility health (per FOUNDATIONS §Story Bundles §6a)".
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D5: the expected-witness computation runs over `STSTAT.location`, event targets, active `BEL`, and active `DA` / `STOBJ` evidence — all post-SPEC-25 existing state, so **no schema change**. Witness groups: **direct** (active `STENT` at the event location per active `STSTAT`, with `agency` not unconscious/dead/incapacitated), **indirect** (public/factional holders when the event occurs through law, ritual, bureaucracy, artifact circulation, public violence, or visible environmental change), **excluded** (`STENT` concealed/offstage/unconscious/socially-barred/lacking-access). Each relevant group requires a created/superseded `BEL` (`knows`/`suspects`/`misremembers`/`reports`/`deceives`) OR an explicit non-propagation rationale (no witness / witness incapacitated / evidence concealed / institution suppresses report / event leaves no accessible trace).
+2. Verified against `archive/specs/SPEC-26-story-coherence-hardening-ii.md` D5: the expected-witness computation runs over `STSTAT.location`, event targets, active `BEL`, and active `DA` / `STOBJ` evidence — all post-SPEC-25 existing state, so **no schema change**. Witness groups: **direct** (active `STENT` at the event location per active `STSTAT`, with `agency` not unconscious/dead/incapacitated), **indirect** (public/factional holders when the event occurs through law, ritual, bureaucracy, artifact circulation, public violence, or visible environmental change), **excluded** (`STENT` concealed/offstage/unconscious/socially-barred/lacking-access). Each relevant group requires a created/superseded `BEL` (`knows`/`suspects`/`misremembers`/`reports`/`deceives`) OR an explicit non-propagation rationale (no witness / witness incapacitated / evidence concealed / institution suppresses report / event leaves no accessible trace).
 3. Cross-skill / cross-artifact boundary under audit: the belief-propagation invariant shared between `branching-story-turn-cycle` Phase 4 (the computation + drafting), Phase 9 additional check 3 (turn-time coverage enforcement), and `branching-story-health-audit` Phase 2d (audit-time replay enforcement). All three consume the same already-landed substrate (`STSTAT`, `BEL`, `DA`, `STOBJ`); the expected-witness definition must be stated once and referenced consistently so turn-time and audit-time verdicts agree.
 4. FOUNDATIONS principle under audit: §Story Bundles §6a (Belief vs. Fact) — `SF` records what is true; `BEL` records what a holder believes/witnesses/suspects/denies. The witness firewall depends on `BEL` records being *complete*, not merely *present*: a witnessed event with no `BEL` for a conscious bystander leaves a silent knowledge gap that breaks the lies/secrets/betrayals coherence §6a exists to protect. The strengthened check makes "coverage" mean structural completeness.
 5. HARD-GATE / gate-validation surface (per `tickets/README.md` check 9): this ticket strengthens `branching-story-turn-cycle` Phase 9 additional check 3 — a check in the validation phase preceding the Phase 10 HARD-GATE — and adds to health-audit Phase 2d. Confirmed: the expected-witness pass concerns `BEL` completeness only; it does not touch gate 3 (the mystery/invariant firewall), does not resolve any `forbidden`-status mystery, and does not reorder the 8 shared hard gates. The Mystery Reserve firewall and HARD-GATE semantics are unchanged.
-6. Mismatch + correction: the drafted ticket cited brittle line numbers from SPEC-26 Step 2 and listed only the two skill files. Current implementation treats line numbers as historical intake evidence and adds `specs/SPEC-26-story-coherence-hardening-ii.md` to closeout truthing so D5's current-state problem is historicalized after the skill changes land.
+6. Mismatch + correction: the drafted ticket cited brittle line numbers from SPEC-26 Step 2 and listed only the two skill files. Current implementation treats line numbers as historical intake evidence and adds `archive/specs/SPEC-26-story-coherence-hardening-ii.md` to closeout truthing so D5's current-state problem is historicalized after the skill changes land.
 
 ## Architecture Check
 
@@ -47,13 +47,13 @@ In `branching-story-health-audit/SKILL.md` Phase 2d, the new `expected_witness_c
 
 ### 4. SPEC-26 closeout note
 
-`specs/SPEC-26-story-coherence-hardening-ii.md` now records that D5 landed through this ticket and labels remaining D5 current-state problem statements as historical intake evidence unless a later SPEC-26 ticket reopens them.
+`archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records that D5 landed through this ticket and labels remaining D5 current-state problem statements as historical intake evidence unless a later SPEC-26 ticket reopens them.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D5 implementation note only)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — D5 implementation note only)
 
 ## Out of Scope
 
@@ -98,7 +98,7 @@ Completed. `branching-story-turn-cycle` now computes `expected_witnesses` in Pha
 2. `grep -n 'Belief / visibility coverage' .claude/skills/branching-story-turn-cycle/SKILL.md` — passed; returned Phase 9 additional check 3 with the expected-witness-completeness requirement.
 3. `grep -n 'expected_witness_completeness\|expected-witness completeness' .claude/skills/branching-story-health-audit/SKILL.md` — passed; returned the Phase 2d replay finding and the alignment-table reference.
 4. Manual dry-run review — passed: by inspection, a public-violence event with a conscious in-location `STENT` and no matching `BEL` or closed-set rationale triggers `expected_witness_completeness`; adding a valid non-propagation rationale such as `evidence_concealed` clears that finding without schema or validator changes.
-5. `grep -n 'D5 landed\|expected_witnesses\|expected_witness_completeness' specs/SPEC-26-story-coherence-hardening-ii.md` — passed; returned the D5 implementation note and historical D5 deliverable references.
+5. `grep -n 'D5 landed\|expected_witnesses\|expected_witness_completeness' archive/specs/SPEC-26-story-coherence-hardening-ii.md` — passed; returned the D5 implementation note and historical D5 deliverable references.
 6. `git diff --check` — passed.
 
 ## Deviations

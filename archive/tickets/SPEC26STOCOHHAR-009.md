@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: Yes — `docs/FOUNDATIONS.md` (the project-wide design contract) and `specs/SPEC-26-story-coherence-hardening-ii.md` (same-seam implementation note). No code or skill change.
+**Engine Changes**: Yes — `docs/FOUNDATIONS.md` (the project-wide design contract) and `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (same-seam implementation note). No code or skill change.
 **Deps**: archive/tickets/SPEC26STOCOHHAR-002.md, archive/tickets/SPEC26STOCOHHAR-003.md, archive/tickets/SPEC26STOCOHHAR-005.md
 
 ## Problem
@@ -13,11 +13,11 @@ At intake, `docs/FOUNDATIONS.md` §Story Bundles was stale against the landed st
 ## Assumption Reassessment (2026-05-14)
 
 1. At intake, verified against `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c: the load-bearing story-state field examples did not name `SE.resolution`, the branch-isolation paragraph carried the crude "`created_at_page` is non-null" formulation, and §5c did not yet state the causal-dependency threat scan as the Rule 5 engine-scope expression.
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D8: D8 had three parts — (a) extend §5's Rule-1 examples to include `SE.resolution`; (b) reference the `bundle_genesis_record` / `branch_local_record` vocabulary in the §5 branch-isolation discussion; (c) decide whether to note in §5c that the D4 causal-dependency threat scan is the schema-/engine-scope expression of Rule 5 at story scope. The Deps (`archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / `archive/tickets/SPEC26STOCOHHAR-005.md`) are the tickets that landed the vocabulary, the `SE.resolution` field, and the threat scan respectively; D8 reconciled FOUNDATIONS to *their landed state*.
+2. Verified against `archive/specs/SPEC-26-story-coherence-hardening-ii.md` D8: D8 had three parts — (a) extend §5's Rule-1 examples to include `SE.resolution`; (b) reference the `bundle_genesis_record` / `branch_local_record` vocabulary in the §5 branch-isolation discussion; (c) decide whether to note in §5c that the D4 causal-dependency threat scan is the schema-/engine-scope expression of Rule 5 at story scope. The Deps (`archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / `archive/tickets/SPEC26STOCOHHAR-005.md`) are the tickets that landed the vocabulary, the `SE.resolution` field, and the threat scan respectively; D8 reconciled FOUNDATIONS to *their landed state*.
 3. Cross-skill / cross-artifact boundary under audit: `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c is the project-wide design contract; the shared surface is the §5 example list and branch-isolation phrasing, which must agree with `.claude/skills/_shared-templates/story-state-contract.md` (the story-record schema authority per §5b). This ticket changed `FOUNDATIONS.md` and added a same-seam SPEC-26 D8 implementation note; the contract and skills were landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / `archive/tickets/SPEC26STOCOHHAR-005.md`.
 4. FOUNDATIONS principle under audit: Rule 1 (No Floating Facts) — §5 enumerates Rule-1-required story-bundle schema fields as examples; `SE.resolution` is a Rule-1 grounding field (it grounds a non-accept outcome's result and player-visible consequence), so its absence from the §5 example list is a documentation gap this ticket closes. Rule 4 (No Globalization by Accident) — the §5 branch-isolation discussion governs Rule 4 at story scope; aligning its vocabulary with the contract's `branch_local_record` definition keeps the FOUNDATIONS text and the contract using one vocabulary.
 5. HARD-GATE / Canon Safety surface (per `tickets/README.md` check 9): `docs/FOUNDATIONS.md` is the design contract that *defines* the Mystery Reserve firewall (Rule 7, line 426) and the Canon Layers. Confirmed: this ticket's edits are confined to §Story Bundles §5 (Rule-1 examples + branch-isolation vocabulary) and the §5c causal-threat-scan note — it does NOT touch Rule 7, the Mystery Reserve definition, the HARD-GATE discipline, or any Canon Safety Check definition. The firewall is unchanged; the edits are additive documentation reconciliation.
-6. Same-seam explicit spec reference: the user supplied `specs/SPEC-26*` as authority. The live spec already has dated D2/D3/D4 implementation notes and D8 still states the intended FOUNDATIONS reconciliation. This ticket therefore also owns adding a dated D8 implementation note to `specs/SPEC-26-story-coherence-hardening-ii.md`; broad row-by-row rewriting of historical deliverable/proof text remains out of scope.
+6. Same-seam explicit spec reference: the user supplied `specs/SPEC-26*` as authority. The live spec already has dated D2/D3/D4 implementation notes and D8 still states the intended FOUNDATIONS reconciliation. This ticket therefore also owns adding a dated D8 implementation note to `archive/specs/SPEC-26-story-coherence-hardening-ii.md`; broad row-by-row rewriting of historical deliverable/proof text remains out of scope.
 
 ## Architecture Check
 
@@ -47,19 +47,19 @@ In §5c, the SPEC26STOCOHHAR-005 causal-dependency threat scan is now stated as 
 
 ### 4. SPEC-26 status note
 
-`specs/SPEC-26-story-coherence-hardening-ii.md` now has a dated D8 implementation note. The rest of the SPEC-26 deliverable/proof text remains historical planning context.
+`archive/specs/SPEC-26-story-coherence-hardening-ii.md` now has a dated D8 implementation note. The rest of the SPEC-26 deliverable/proof text remains historical planning context.
 
 ## Files to Touch
 
 - `docs/FOUNDATIONS.md` (modify — §Story Bundles §5 and §5c only)
-- `specs/SPEC-26-story-coherence-hardening-ii.md` (modify — dated D8 implementation note only)
+- `archive/specs/SPEC-26-story-coherence-hardening-ii.md` (modify — dated D8 implementation note only)
 
 ## Out of Scope
 
 - Any change to FOUNDATIONS §Rule 7, the Mystery Reserve definition, the Canon Layers, the HARD-GATE discipline, or the Canon Fact Record Schema — this ticket is confined to §Story Bundles §5 / §5c.
 - The contract definitions, the `SE.resolution` schema, and the causal-threat scan themselves — landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / `archive/tickets/SPEC26STOCOHHAR-005.md` respectively.
 - Re-wording §5's Rule 4 / Rule 5 / Rule 7 story-scope statements beyond the branch-isolation vocabulary alignment.
-- Broad rewriting of `specs/SPEC-26-story-coherence-hardening-ii.md` historical deliverable, verification, and risk prose; a dated implementation note is sufficient because this is a large proposal spec with already-labelled historical current-state sections.
+- Broad rewriting of `archive/specs/SPEC-26-story-coherence-hardening-ii.md` historical deliverable, verification, and risk prose; a dated implementation note is sufficient because this is a large proposal spec with already-labelled historical current-state sections.
 
 ## Acceptance Criteria
 
@@ -67,7 +67,7 @@ In §5c, the SPEC26STOCOHHAR-005 causal-dependency threat scan is now stated as 
 
 1. `grep -n 'SE.resolution' docs/FOUNDATIONS.md` returns the §Story Bundles §5 Rule-1 example reference.
 2. `grep -n 'bundle_genesis_record\|branch_local_record' docs/FOUNDATIONS.md` returns the §5 branch-isolation reference; `grep -n 'created_at_page.*non-null\|created_at_page.*is non-null' docs/FOUNDATIONS.md` returns no matches.
-3. `git diff docs/FOUNDATIONS.md specs/SPEC-26-story-coherence-hardening-ii.md` shows FOUNDATIONS changes confined to the §Story Bundles §5 / §5c line range and the spec change confined to a dated D8 implementation note — no FOUNDATIONS hunk touches Rule 7, the Mystery Reserve section, or the HARD-GATE/Canon Safety sections.
+3. `git diff docs/FOUNDATIONS.md archive/specs/SPEC-26-story-coherence-hardening-ii.md` shows FOUNDATIONS changes confined to the §Story Bundles §5 / §5c line range and the spec change confined to a dated D8 implementation note — no FOUNDATIONS hunk touches Rule 7, the Mystery Reserve section, or the HARD-GATE/Canon Safety sections.
 
 ### Invariants
 
@@ -84,18 +84,18 @@ In §5c, the SPEC26STOCOHHAR-005 causal-dependency threat scan is now stated as 
 
 1. `grep -nE 'SE.resolution|bundle_genesis_record|branch_local_record' docs/FOUNDATIONS.md`
 2. `grep -nE 'created_at_page.*non-null' docs/FOUNDATIONS.md` (must return no matches)
-3. `git diff docs/FOUNDATIONS.md specs/SPEC-26-story-coherence-hardening-ii.md` — the diff-scope review is the correct verification boundary for the firewall-untouched invariant and the spec-note-only invariant; a grep alone cannot prove the *absence* of changes to Rule 7 / Canon Safety sections, but a scoped diff can.
+3. `git diff docs/FOUNDATIONS.md archive/specs/SPEC-26-story-coherence-hardening-ii.md` — the diff-scope review is the correct verification boundary for the firewall-untouched invariant and the spec-note-only invariant; a grep alone cannot prove the *absence* of changes to Rule 7 / Canon Safety sections, but a scoped diff can.
 
 ## Outcome
 
-Completed. `docs/FOUNDATIONS.md` §Story Bundles §5 now names `SE.resolution` in the Rule-1 load-bearing-field examples and uses `branch_local_record` / `bundle_genesis_record` for global-author-pool branch isolation. §5c now names the causal-dependency threat scan as the engine-scope expression of Rule 5. `specs/SPEC-26-story-coherence-hardening-ii.md` now records D8 as landed.
+Completed. `docs/FOUNDATIONS.md` §Story Bundles §5 now names `SE.resolution` in the Rule-1 load-bearing-field examples and uses `branch_local_record` / `bundle_genesis_record` for global-author-pool branch isolation. §5c now names the causal-dependency threat scan as the engine-scope expression of Rule 5. `archive/specs/SPEC-26-story-coherence-hardening-ii.md` now records D8 as landed.
 
 ## Verification Result
 
-1. `grep -nE 'SE\.resolution|bundle_genesis_record|branch_local_record|causal-dependency threat scan' docs/FOUNDATIONS.md specs/SPEC-26-story-coherence-hardening-ii.md` returned the updated FOUNDATIONS §5 / §5c lines and the new SPEC-26 D8 implementation note.
+1. `grep -nE 'SE\.resolution|bundle_genesis_record|branch_local_record|causal-dependency threat scan' docs/FOUNDATIONS.md archive/specs/SPEC-26-story-coherence-hardening-ii.md` returned the updated FOUNDATIONS §5 / §5c lines and the new SPEC-26 D8 implementation note.
 2. `grep -nE 'created_at_page.*non-null' docs/FOUNDATIONS.md` returned no matches; the no-match exit code was the expected success signal for removing the crude branch-locality formulation from FOUNDATIONS.
-3. `git diff docs/FOUNDATIONS.md specs/SPEC-26-story-coherence-hardening-ii.md` showed FOUNDATIONS changes confined to §Story Bundles §5 / §5c and the spec change confined to the dated D8 implementation note. No hunk touched Rule 7, the Mystery Reserve definition, Canon Layers, HARD-GATE discipline, or Canon Safety sections.
+3. `git diff docs/FOUNDATIONS.md archive/specs/SPEC-26-story-coherence-hardening-ii.md` showed FOUNDATIONS changes confined to §Story Bundles §5 / §5c and the spec change confined to the dated D8 implementation note. No hunk touched Rule 7, the Mystery Reserve definition, Canon Layers, HARD-GATE discipline, or Canon Safety sections.
 
 ## Deviations
 
-1. The explicit user-supplied SPEC-26 reference made the same-seam implementation note part of closeout. The original ticket file set listed only `docs/FOUNDATIONS.md`; reassessment added `specs/SPEC-26-story-coherence-hardening-ii.md` as a spec-note-only touched file.
+1. The explicit user-supplied SPEC-26 reference made the same-seam implementation note part of closeout. The original ticket file set listed only `docs/FOUNDATIONS.md`; reassessment added `archive/specs/SPEC-26-story-coherence-hardening-ii.md` as a spec-note-only touched file.
