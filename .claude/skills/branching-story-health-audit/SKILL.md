@@ -182,6 +182,7 @@ For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots, rea
 
 Flag:
 
+- `expected_witness_completeness` — events involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual whose computed expected witness groups are not covered by a `BEL` create/supersession or a recorded non-propagation rationale. Compute `direct` witnesses from active `STENT` records at the event location per active `STSTAT.location`, excluding unconscious/dead/incapacitated/unavailable entities; compute `indirect` witnesses from public or factional holders reached through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or accessible `DA` / `STOBJ` evidence; treat concealed, offstage, unconscious, socially barred, or access-lacking entities as `excluded`. Valid non-propagation rationales are `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, and `event_leaves_no_accessible_trace`. WARNING; `repair_kind: turn_repair`.
 - `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_derived_from_trace` — `SREL` supersessions whose `derived_from` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
@@ -414,7 +415,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Audit reads `PG` records as authoritative; never mutates them. Drift between prose and state is reported in findings, not in PG records. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
-| §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (5 finding types). |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |

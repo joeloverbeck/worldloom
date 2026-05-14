@@ -263,6 +263,12 @@ For every life / agency / location change, supersede the affected entity's activ
 
 For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL` records per shared contract §4.1 + FOUNDATIONS §Story Bundles §6a:
 
+- First compute `expected_witnesses` for the event:
+  - `direct`: active `STENT` records at the event location per active `STSTAT.location`, excluding entities whose active `STSTAT.agency` is unconscious, dead, incapacitated, or otherwise unavailable.
+  - `indirect`: public or factional holders who would receive the event through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or other accessible evidence (`DA` / `STOBJ` / location-state traces).
+  - `excluded`: `STENT` records that are concealed, offstage, unconscious, socially barred, lacking access, or otherwise unable to perceive or receive the event.
+- For every relevant direct or indirect witness group, account for propagation with either a created/superseded `BEL` or an explicit non-propagation rationale from this closed set: `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`.
+- Record non-propagation rationales in the event's authoring notes and carry the load-bearing rationale into `SE.world_logic_rationale` or the Phase 9 check-3 rationale so `branching-story-health-audit` can replay the coverage decision.
 - Who knows (`belief_mode: knows`, `truth_relation: true`, `visibility: shared` or `public`, `confidence: certain`).
 - Who suspects (`belief_mode: suspects`, `truth_relation: unknown`, `confidence: medium | low`).
 - Who misunderstands (`truth_relation: partly_true | false`, `confidence: certain`).
@@ -270,7 +276,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 - What rumor or lie may spread (additional `BEL` with `belief_mode: reports`, `visibility: rumored`; or `belief_mode: deceives` when the holder knows the claim is false but presents it as true).
 - What choices are now constrained (`consequences.constrains_choices[]` linking to upcoming `CHC`).
 
-**This phase is mandatory** for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual. Phase 9 turn-cycle-additional check 3 verifies coverage.
+**This phase is mandatory** for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual. Phase 9 turn-cycle-additional check 3 verifies expected-witness completeness, not mere `BEL` presence.
 
 ## Phase 5: Check mystery and canon authority
 
@@ -360,7 +366,7 @@ Plus 5 turn-cycle-additional checks (recorded in working memory):
 
 1. **Action source legality** — XOR enforced; chosen CHC not retired.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
-3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual produces at least one BEL create or supersession.
+3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual has complete `expected_witnesses` coverage: each relevant direct or indirect witness group from Phase 4 is accounted for by a created/superseded `BEL` (`knows`, `suspects`, `misremembers`, `reports`, or `deceives`) or by a recorded non-propagation rationale from the closed set (`no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`). Mere existence of some `BEL` record is not sufficient.
 4. **Write-in world-logic rationale** — when `manual_action_text` is the action source, `SE.world_logic_rationale` is non-empty and explains the route (silent rejection forbidden).
 5. **Causal dependency threat scan** (`causal_dependency_threat_scan`) — after the state delta, next snapshot, visible affordances, and emitted choices are drafted, but before final PG hashes are computed, verify that the delta did not clobber dependencies that still survive in the committed page:
    - `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
@@ -434,7 +440,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.prose_path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
-| §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `BEL` records for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; `truth_relation` + `visibility` + `confidence` consumed by social-state firewall. |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `expected_witnesses` coverage for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; each relevant witness group gets a `BEL` create/supersession or a closed-set non-propagation rationale. `truth_relation` + `visibility` + `confidence` are consumed by the social-state firewall. |
 | Change Control Policy | N/A | Not applicable — canon-reading skill emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 
