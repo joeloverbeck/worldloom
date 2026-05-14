@@ -540,6 +540,9 @@ player_visible_intent: string*                 # natural-language statement of w
 target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed enum
 likely_state_pressure: string*                 # natural-language pressure description
 associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
+grounded_in:
+  records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer>]*  # non-empty; active records grounding this choice
+  affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
 

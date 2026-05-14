@@ -275,7 +275,9 @@ No word-count target anywhere in the plan. Engine jargon (record ids, gate names
 
 Emit 3-5 `CHC` records representing different commitments — not variants of the same wording. Sample different axes: action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire (at authorial discretion within the opening's plausibility envelope). Always emit a write-in slot.
 
-Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` if known, else null — turn-cycle will JIT), and optional `success_policy` when a later `SE.outcome_route` resolves the choice through `attempt`.
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` if known, else null — turn-cycle will JIT), `grounded_in`, and optional `success_policy` when a later `SE.outcome_route` resolves the choice through `attempt`.
+
+For every emitted `CHC`, populate `grounded_in.records` with at least one active record id from the drafted `PG-1.state_snapshot.active_records` that makes the choice available or meaningful (for example the actor `STENT`, location `STLOC`, relevant `STOBJ`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, or story-local `DA`). When the choice directly exposes one or more visible affordances, also populate `grounded_in.affordance_ordinals` with the corresponding `PG-1.state_snapshot.visible_affordances[].ordinal` values. Do not use `target_or_action_families` alone as grounding evidence.
 
 ## Phase 9: Validate
 
@@ -287,7 +289,7 @@ Run the 8 shared hard gates per `.claude/skills/_shared-templates/story-state-co
 4. **branch isolation** — no sibling-branch state in `state_snapshot.active_records`; no seed SLT references branch-local records (none exist at bootstrap).
 5. **append-only delta** — `SE-1.state_delta` is creates-only; no supersessions or closes at root.
 6. **consequence capacity or terminal proof** — at least one eligible commitment block (seed or JIT-able); terminal root rejected as authoring error.
-7. **plan grounding** — every visible affordance, every required beat, every emitted CHC is grounded in active records or world canon.
+7. **plan grounding** — every visible affordance, every required beat, every emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to `PG-1.state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to `PG-1.state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — `NOT_APPLICABLE: bootstrap does not assert canon-level truths at root; no SE.promotion_claims drafted`.
 
 Plus 4 bootstrap-additional checks (recorded in working memory; not on `PG.validation_trace`):

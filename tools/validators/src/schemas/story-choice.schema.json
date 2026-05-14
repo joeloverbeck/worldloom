@@ -10,7 +10,8 @@
     "player_visible_intent",
     "target_or_action_families",
     "likely_state_pressure",
-    "associated_commitment_block"
+    "associated_commitment_block",
+    "grounded_in"
   ],
   "properties": {
     "id": { "type": "string", "pattern": "^CHC-[0-9]+$" },
@@ -52,6 +53,25 @@
     "associated_commitment_block": {
       "type": ["string", "null"],
       "pattern": "^SLT-[0-9]+$"
+    },
+    "grounded_in": {
+      "type": "object",
+      "required": ["records"],
+      "properties": {
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(STENT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA)-[0-9]+$"
+          }
+        },
+        "affordance_ordinals": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "additionalProperties": false
     },
     "success_policy": { "type": "string", "minLength": 1 }
   },

@@ -167,7 +167,7 @@ Flag:
 - `branch_isolation_leak` — records in a branch's `state_snapshot.active_records` whose `created_at_page` belongs to a sibling branch. ERROR; `repair_kind: branch_flag`.
 - `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
 - `plan_state_reference_dangling` — page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot. ERROR; `repair_kind: prose_revision` (the plan body needs revision OR a repair turn must add the missing state).
-- `choice_state_reference_dangling` — emitted `CHC` records whose action-family list requires records not in the page's active snapshot. ERROR; `repair_kind: turn_repair`.
+- `choice_state_reference_dangling` — emitted `CHC` records whose `grounded_in.records[]` cite records not in the emitting page's active snapshot, or whose `grounded_in.affordance_ordinals[]` cite visible-affordance ordinals not present on that page. ERROR; `repair_kind: turn_repair`.
 
 ### Phase 2c: Debt health
 

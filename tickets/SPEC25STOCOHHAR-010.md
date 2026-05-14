@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `docs/FOUNDATIONS.md` only (cross-cutting docs ticket; no production code).
-**Deps**: archive/tickets/SPEC25STOCOHHAR-001.md, archive/tickets/SPEC25STOCOHHAR-004.md, archive/tickets/SPEC25STOCOHHAR-005.md, archive/tickets/SPEC25STOCOHHAR-006.md, SPEC25STOCOHHAR-008
+**Deps**: archive/tickets/SPEC25STOCOHHAR-001.md, archive/tickets/SPEC25STOCOHHAR-004.md, archive/tickets/SPEC25STOCOHHAR-005.md, archive/tickets/SPEC25STOCOHHAR-006.md, archive/tickets/SPEC25STOCOHHAR-008.md
 
 ## Problem
 

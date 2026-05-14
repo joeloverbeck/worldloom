@@ -61,6 +61,44 @@ test("record_schema_compliance accepts multi-family contract-canonical choices",
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance requires choice grounding records", async () => {
+  const missingGrounding = completeChoice();
+  delete missingGrounding.grounded_in;
+  const missingGroundingRecords = {
+    ...completeChoice(),
+    grounded_in: {
+      affordance_ordinals: [0]
+    }
+  };
+  const emptyGroundingRecords = {
+    ...completeChoice(),
+    grounded_in: {
+      records: []
+    }
+  };
+
+  const result = await recordSchemaCompliance.run({}, context([
+    choiceRecord(missingGrounding, "CHC-0005"),
+    choiceRecord(missingGroundingRecords, "CHC-0006"),
+    choiceRecord(emptyGroundingRecords, "CHC-0007")
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CHC-0005" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("grounded_in")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CHC-0006" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("records")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CHC-0007" &&
+    verdict.code === "record_schema_compliance.minItems"
+  ));
+});
+
 test("record_schema_compliance rejects choices missing universal required fields", async () => {
   const missingStoryId = completeChoice();
   delete missingStoryId.story_id;
@@ -88,7 +126,11 @@ function completeChoice(): Record<string, unknown> {
     player_visible_intent: "Approach without pressure and offer practical help.",
     target_or_action_families: ["communicate"],
     likely_state_pressure: "trust and obligation",
-    associated_commitment_block: "SLT-1"
+    associated_commitment_block: "SLT-1",
+    grounded_in: {
+      records: ["STENT-1"],
+      affordance_ordinals: [0]
+    }
   };
 }
 

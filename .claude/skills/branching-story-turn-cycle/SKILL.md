@@ -322,7 +322,9 @@ Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit 
 
 The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
 
-Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), `grounded_in`, and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
+
+For every emitted `CHC`, populate `grounded_in.records` with at least one active record id from the new `PG-<integer>.state_snapshot.active_records` that makes the choice available or meaningful (for example the actor `STENT`, location `STLOC`, relevant `STOBJ`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, or story-local `DA`). When the choice directly exposes one or more visible affordances, also populate `grounded_in.affordance_ordinals` with the corresponding `PG-<integer>.state_snapshot.visible_affordances[].ordinal` values. Do not use `target_or_action_families` alone as grounding evidence.
 
 ## Phase 9: Validate
 
@@ -334,7 +336,7 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
 5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
 6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure. High-salience debt is determined from `urgency` on active `OBL`, `CNSQ`, `THR`, and `STINT` records.
-7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon.
+7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
 Plus 4 turn-cycle-additional checks (recorded in working memory):
