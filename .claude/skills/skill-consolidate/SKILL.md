@@ -111,6 +111,8 @@ For each pattern:
 3. **Break dense paragraphs** into focused bullets or numbered steps
 4. **Record** the restructuring for the diff summary
 
+**Within a list item**: when the wall-of-text is itself a numbered- or bulleted-list item, markdown headings (`###`) are unavailable — adding them would break the enclosing list. Achieve the same tiered structure with a lead summary line (or short paragraph) followed by nested bold-led bullets, so the restructure does not disturb the list's numbering.
+
 ---
 
 ### Step 5: Decision Path Clarification
@@ -151,7 +153,7 @@ Write the consolidated file in-place at the path resolved in Step 1 — `<skill-
 
 **Tool preference**: Use the Edit tool with targeted `old_string` / `new_string` pairs for surgical consolidations (the common case — most consolidations remove redundancies and restructure specific regions while leaving the bulk of the file unchanged). Reserve the Write tool for full rewrites where the file structure changes wholesale (uncommon — typically only when consolidation amounts to extraction-style restructuring parallel to skill-extract-references workflows). Edit calls preserve unaltered regions byte-for-byte and reduce the risk of accidentally dropping content that Step 8's sampled spot-check might miss; full Write rewrites require reconstructing every line from memory and concentrate that risk into a single tool call.
 
-**Major-rewrite preserve list**: For major rewrites (≥50 lines being restructured wholesale, e.g., entire ASCII diagrams, full sections collapsed), enumerate the distinctive terms / load-bearing phrases from the source block as an explicit preserve list BEFORE writing the new version. Step 8's spot-check grep then verifies each item; the pre-write enumeration prevents drops rather than detecting them.
+**Major-rewrite preserve list**: For major rewrites — defined as either (a) ≥50 lines being restructured wholesale (e.g., entire ASCII diagrams, full sections collapsed), OR (b) any source block carrying ≥~8 distinct instructions being restructured, regardless of line count (a dense mega-bullet — one or a few "lines" packing many instructions, the characteristic shape of heavily-audited skills — is the common low-line-count / high-instruction-count case) — enumerate the distinctive terms / load-bearing phrases from the source block as an explicit preserve list BEFORE writing the new version. Step 8's spot-check grep then verifies each item; the pre-write enumeration prevents drops rather than detecting them.
 
 The rewritten file must:
 1. **Preserve frontmatter exactly** — do not modify name, description, arguments, or any YAML field
@@ -163,7 +165,7 @@ The rewritten file must:
 
 ### Step 8: Spot-Check Preservation
 
-After writing, spot-check 3-5 unique instructions from the original (preferring instructions from different sections) to confirm each survives in the consolidated output. Prefer `Grep` with an alternation pattern of distinctive phrases over re-reading — one call can verify several unique instructions at once. For restructured passages (e.g., a paragraph broken into bullets), grep a distinctive phrase from each element to confirm per-element preservation. If any instruction was lost, restore it before presenting the diff summary.
+After writing, spot-check 3-5 unique instructions from the original (preferring instructions from different sections) to confirm each survives in the consolidated output. Prefer `Grep` with an alternation pattern of distinctive phrases over re-reading — one call can verify several unique instructions at once. Inspect the alternation grep's matched lines per-phrase (e.g., `grep -n`), not merely its match count — an aggregate `-c` count can mask a dropped phrase (another phrase matching an extra line yields the same total) and does not satisfy the per-element preservation check. For restructured passages (e.g., a paragraph broken into bullets), grep a distinctive phrase from each element to confirm per-element preservation. If any instruction was lost, restore it before presenting the diff summary.
 
 Also verify frontmatter byte-identical: re-read the frontmatter from the rewritten file and confirm every YAML field (name, description, arguments, user-invocable, and any others) matches the original character-for-character. Any difference fails the preservation check and must be repaired before Step 9.
 
@@ -201,7 +203,7 @@ After writing, present a structured summary in the conversation:
 [Notable observations not captured elsewhere — gaps not filled (per No Scope Expansion guardrail), residual redundancies retained by judgment, structural trade-offs, candidates for a future consolidation pass.]
 ```
 
-**Cross-reference Hygiene counts**: This category counts both (a) repairs of broken or obsolete cross-references and (b) new cross-references added when factoring out a shared reference per Step 5 §Cross-reference hygiene. A factor-out edit that introduces a "see §X" pointer to replace inlined content counts as one Cross-reference Hygiene entry — it is the visible cost of the factor-out, not a free byproduct. Counting only repairs (omitting added forward-references) understates the diff surface and breaks audit-trail reconstructibility for future consolidation passes.
+**Cross-reference Hygiene counts**: This category counts both (a) repairs of broken or obsolete cross-references and (b) new cross-references added when factoring out a shared reference per Step 5 §Cross-reference hygiene. A factor-out edit that introduces a "see §X" pointer to replace inlined content counts as one Cross-reference Hygiene entry — it is the visible cost of the factor-out, not a free byproduct. Counting only repairs (omitting added forward-references) understates the diff surface and breaks audit-trail reconstructibility for future consolidation passes. Cross-reference Hygiene is an edit-counting axis, not a cluster-classification axis: a factor-out reported under Redundancies Merged (or Topics Regrouped) STILL contributes its introduced pointer to the Cross-reference Hygiene count. The "descriptive, not exclusive" rule in Step 3 governs cluster-category overlap (Redundancies Merged vs. Topics Regrouped) only — it does not exempt the edit-counting categories.
 
 Categories with 0 findings: include the heading with `(0)` and a one-line note explaining why the category didn't apply (preserves audit trail showing the category was considered, not skipped).
 
