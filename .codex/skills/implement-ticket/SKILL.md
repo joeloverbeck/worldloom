@@ -127,7 +127,7 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 13. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 14. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-15. Before the first file edit, including ticket-only reassessment edits, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
+15. Before the first file edit, including ticket-only reassessment edits, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether same-family sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
 
 Compact checkpoint shape:
 
@@ -136,10 +136,10 @@ Pre-edit checkpoint:
 - Repo: <active repo root>
 - Ticket: <resolved ticket path>
 - Instructions: <AGENTS.md path>
-- Sibling hits: <none | diagnostic-only paths excluded>
+- Sibling-repo hits: <none | diagnostic-only paths excluded>
 - Classification: <primary class + discrepancy class if any>
 - Owner boundary: <authoritative implementation seam>
-- Sibling scope: <absorbed | excluded | left untouched>
+- Same-family scope: <absorbed | excluded | left untouched>
 - HARD-GATE read: <yes | no | not required>
 ```
 
@@ -208,6 +208,8 @@ Examples:
 
 If the discovered fallout crosses into high-trust world canon or other canon-mutating cleanup, do not widen a package/tool/docs ticket into direct source cleanup just to make a broad gate green. When the current ticket can close truthfully by preserving visible failures, documenting the baseline, and creating a bounded follow-up for canon-addition-equivalent cleanup or an explicit grandfather policy, keep the active implementation on its original non-canon seam and create/update that follow-up instead.
 
+When an explicit spec, dependency, or ticket names a sibling surface, live repo verification proves that surface is real but outside the active ticket's owner boundary, and the active ticket cannot close honestly without preserving the remaining gap, create or name a bounded follow-up ticket before closeout. Record why the surface is excluded from the active ticket in `Assumption Reassessment`, `Out of Scope`, `## Deviations`, or the final response; do not leave the residual work as an unnamed aside.
+
 ### 3. Extract the real implementation slice
 
 Before editing code or docs, name the actual owned delta. This may be part of the single pre-edit checkpoint from §1 when the same update covers both repo identity and implementation boundary:
@@ -236,6 +238,7 @@ For shared schemas, templates, or cross-skill contracts, inspect consumers befor
 For skill tickets, verify:
 
 - If this check adds templates, examples, references, a parent `SKILL.md`, or same-seam docs/specs to the owned file set, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
+- If the user supplied an explicit spec/doc reference for a skill-prose ticket, inspect that reference for current-state, status, risk, or handoff notes about the owned skill seam before editing. When those notes would become stale after the skill change, add the spec/doc to `Files to Touch`, proof surface, and acceptance text during reassessment rather than discovering the same-seam truthing only at closeout.
 - Before editing, run a compact skill-local file inventory such as `rg --files <skill-dir>` and inspect any `templates/`, `references/`, and `examples/` whose emitted fields, phase names, source-kind enums, prompt labels, command fragments, or handoff artifacts overlap the ticket.
 - For cross-skill sweeps rather than one target skill, use `rg` to identify active hits first, group them by skill family and surface type (`SKILL.md`, `references/`, `templates/`, `examples/`), inspect representative parent/template/reference files per hit family, and classify `examples/` separately as active contract, historical provenance, or out-of-scope. Then run the exact stale-anchor grep that proves the owned contract, plus any broader manual-classification sweep needed for remaining legitimate examples.
 - When editing skill templates or examples that emit enum-like, vocabulary, or mapping-coupled values, verify sample values against the live vocabulary, schema, or mapping authority before closeout. Do not trust plausible labels in examples when the repo has a canonical enum or class-to-family map.
@@ -304,6 +307,7 @@ Then run the closeout hard stops from the focused references:
 - For cross-artifact contract tickets, after the broad package/workflow proof passes, run a final contract-literal sweep over the owned docs, source, schemas, tests, and package README/example surfaces before ticket closeout. If the sweep finds same-seam source/test/docs hits, patch them, rerun the affected proof, then update `## Verification Result` and `## Deviations`.
 - If the ticket adds, removes, or reorders columns in markdown tables, manually verify the header row, separator row, and representative data/example rows have matching column counts. `git diff --check` does not catch semantic table arity mismatches.
 - Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited code, docs, tickets, or skill files. Use `references/verification-closeout.md` for untracked-file coverage, `git add -N` cleanup, and sandbox retry details.
+- If any owned or closeout-edited file is untracked, do not record plain `git diff --check` as covering that file unless it was made visible to the diff with `git add -N` and the intent-to-add entry was cleaned afterward. Otherwise run and record an explicit equivalent whitespace check over the untracked file, then refresh `git status --short` so the final ledger still classifies it correctly.
 
 If the ticket's premise was disproved, keep it as a truthful rejection or not-implemented record instead of forcing a fake completion.
 
