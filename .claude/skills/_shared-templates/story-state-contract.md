@@ -225,13 +225,13 @@ beats:                                 # * 1-5 beats per block
     function: setup | action | pressure | turn | consequence | exit   # *
     instruction: >                     # * prose-facing beat instruction, no engine jargon
 effects:                               # mirrors SE.state_delta
-  create: [record_id]
-  supersede: [record_id]
-  close: [record_id]
+  create: [record_id | bound:<alias>]
+  supersede: [record_id | bound:<alias>]
+  close: [record_id | bound:<alias>]
 exit_options:                          # *
   - action_family: <action_family>*    # see §4.4a shared taxonomy
     surface_hint: string*
-    likely_effects: [<short label>]
+    likely_effects: [record_id | bound:<alias>]
 saliency:
   urgency: low | medium | high*
   cooldown_pages: 0*
@@ -270,7 +270,7 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 
 ### 4.4a Shared `action_family` taxonomy
 
-`action_family` is the shared coarse taxonomy used by `PG.visible_affordances[].action_families` and `SLT.exit_options[].action_family`. Per-affordance `surface_hint: string` and `likely_effects: [<label>]` carry local specificity.
+`action_family` is the shared coarse taxonomy used by `PG.visible_affordances[].action_families` and `SLT.exit_options[].action_family`. Per-affordance `surface_hint: string` carries local specificity; `likely_effects` names record ids or `bound:<alias>` targets.
 
 | Value | Operational definition |
 |---|---|
@@ -605,6 +605,12 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `obligation_open(OBL-<integer>)` | Obligation must be in an open state. | turn-cycle eligibility |
 | `consequence_pending(CNSQ-<integer>)` | Consequence must be pending (unresolved). | turn-cycle eligibility |
 | `thread_active(THR-<integer>)` | Thread must be active. | turn-cycle eligibility |
+| `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)` | Actor-unbound existential predicate over open `OBL` records; role filters use §4.4b role values. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_consequence_pending(alias, kind?, urgency?, derived_from?)` | Actor-unbound existential predicate over pending `CNSQ` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_thread_active(alias, tag?, urgency?)` | Actor-unbound existential predicate over active `THR` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_relationship_axis(alias, axis, comparator, value, participant_role?)` | Actor-unbound existential predicate over active `SREL` records; comparator is one of `>= | <= | == | !=`; role filters use §4.4b role values. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)` | Actor-unbound existential predicate over active `BEL` records using `belief_mode`, `truth_relation`, and `visibility` filters. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_intention(alias, holder_role?, urgency?)` | Actor-unbound existential predicate over active `STINT` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
 | `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
@@ -614,7 +620,9 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `affordance_available_to(STENT-<integer>, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
 
-`has_affordance(<action_family>)` is valid only for author-pool prefiltering when an actor is not yet bound. Branch-execution eligibility checks use `affordance_available_to(<actor>, <family>)` so plan-time grounding is actor-specific.
+`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief(holder, BEL-<integer>)`) so plan-time grounding is actor-specific.
+
+An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
 ## 6. Action Routing
 

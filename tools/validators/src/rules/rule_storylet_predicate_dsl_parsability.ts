@@ -17,7 +17,26 @@ const ACTION_FAMILY_SET = new Set<string>(ACTION_FAMILIES);
 const BELIEF_MODE_SET = new Set<string>(BELIEF_MODES);
 const CONFIDENCE_LEVEL_SET = new Set<string>(CONFIDENCE_LEVELS);
 const ENTITY_STATUS_AXES = new Set(["life", "agency", "location"]);
+const URGENCY_LEVELS = new Set(["low", "medium", "high"]);
+const STORY_ROLES = new Set([
+  "viewpoint",
+  "player_proxy",
+  "primary_actor",
+  "opposing_actor",
+  "allied_actor",
+  "authority",
+  "dependent",
+  "witness",
+  "information_source",
+  "pressure_source",
+  "social_bridge",
+  "background"
+]);
+const TRUTH_RELATIONS = new Set(["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"]);
+const BELIEF_VISIBILITIES = new Set(["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"]);
+const RELATIONSHIP_COMPARATORS = new Set([">=", "<=", "==", "!="]);
 
+const ALIAS = /^[a-z][a-z0-9_-]*$/;
 const ROLE_REF = /^role:[a-z][a-z0-9_-]*$/;
 const OPEN_LABEL = /^[a-z][a-z0-9_:-]*$/;
 // FOUNDATIONS-002 mandates unpadded natural-integer suffixes (e.g. STENT-1, not STENT-0001).
@@ -36,6 +55,8 @@ const STORY_ID_PATTERNS = {
   intention: /^STINT-\d+$/
 } as const;
 const RECORD_ACTIVE_PATTERN = /^(?:STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
+const DERIVED_FROM_PATTERN = /^(?:SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|STSTAT)-\d+$/;
+const BOUND_EFFECT_PATTERN = /^bound:([a-z][a-z0-9_-]*)$/;
 
 type RefKind = keyof typeof STORY_ID_PATTERNS;
 
@@ -83,8 +104,10 @@ export const storyletPredicateDslParsability: Validator = {
         addFailure(state, "predicate.expected_object", "preconditions must be an object with hard and optional soft lists", "preconditions");
         continue;
       }
-      validatePredicateList(state, preconditions.hard, "preconditions.hard");
-      validatePredicateList(state, preconditions.soft, "preconditions.soft");
+      const boundAliases = new Set<string>();
+      validatePredicateList(state, preconditions.hard, "preconditions.hard", boundAliases);
+      validatePredicateList(state, preconditions.soft, "preconditions.soft", boundAliases);
+      validateBoundEffectReferences(state, parsed, boundAliases);
     }
 
     return verdicts;
@@ -137,7 +160,7 @@ function queryStoryScoped(ctx: Context, record_type: string): Promise<IndexedRec
   });
 }
 
-function validatePredicateList(state: ValidationState, value: unknown, path: string): void {
+function validatePredicateList(state: ValidationState, value: unknown, path: string, boundAliases: Set<string>): void {
   if (value === undefined || value === null) {
     if (path === "preconditions.hard") {
       addFailure(state, "predicate.expected_list", `${path} must be a list of predicate objects`, path);
@@ -148,10 +171,10 @@ function validatePredicateList(state: ValidationState, value: unknown, path: str
     addFailure(state, "predicate.expected_list", `${path} must be a list of predicate objects`, path);
     return;
   }
-  value.forEach((entry, index) => validatePredicate(state, entry, `${path}[${index}]`, 0));
+  value.forEach((entry, index) => validatePredicate(state, entry, `${path}[${index}]`, 0, boundAliases));
 }
 
-function validatePredicate(state: ValidationState, value: unknown, path: string, depth: number): void {
+function validatePredicate(state: ValidationState, value: unknown, path: string, depth: number, boundAliases: Set<string>): void {
   if (depth > MAX_DEPTH) {
     addFailure(state, "predicate.recursion_depth", `${path} exceeds predicate recursion depth ${MAX_DEPTH}`, path);
     return;
@@ -203,6 +226,49 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
     case "thread_active":
       requireStoryRef(state, value.thread, "thread", idsFor(state.refs.threads, state.record), `${path}.thread`);
       return;
+    case "any_obligation_open":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalOpenLabel(state, value.kind, `${path}.kind`);
+      requireOptionalEnum(state, value.urgency, URGENCY_LEVELS, `${path}.urgency`);
+      requireOptionalRole(state, value.owed_by_role, `${path}.owed_by_role`);
+      requireOptionalRole(state, value.owed_to_role, `${path}.owed_to_role`);
+      return;
+    case "any_consequence_pending":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalOpenLabel(state, value.kind, `${path}.kind`);
+      requireOptionalEnum(state, value.urgency, URGENCY_LEVELS, `${path}.urgency`);
+      requireOptionalPattern(state, value.derived_from, DERIVED_FROM_PATTERN, `${path}.derived_from`, "a story event or story record id");
+      return;
+    case "any_thread_active":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalOpenLabel(state, value.tag, `${path}.tag`);
+      requireOptionalEnum(state, value.urgency, URGENCY_LEVELS, `${path}.urgency`);
+      return;
+    case "any_relationship_axis":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireEnum(state, value.axis, RELATIONSHIP_AXIS_SET, `${path}.axis`);
+      requireEnum(state, value.comparator, RELATIONSHIP_COMPARATORS, `${path}.comparator`);
+      requirePresent(state, value.value, `${path}.value`);
+      requireOptionalRole(state, value.participant_role, `${path}.participant_role`);
+      return;
+    case "any_belief":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalRole(state, value.holder_role, `${path}.holder_role`);
+      requireOptionalEnum(state, value.mode, BELIEF_MODE_SET, `${path}.mode`);
+      requireOptionalEnum(state, value.truth_relation, TRUTH_RELATIONS, `${path}.truth_relation`);
+      requireOptionalEnum(state, value.visibility, BELIEF_VISIBILITIES, `${path}.visibility`);
+      return;
+    case "any_intention":
+      requireExistentialScope(state, value.pred, path);
+      requireAlias(state, value.alias, `${path}.alias`, boundAliases);
+      requireOptionalRole(state, value.holder_role, `${path}.holder_role`);
+      requireOptionalEnum(state, value.urgency, URGENCY_LEVELS, `${path}.urgency`);
+      return;
     case "location":
       requireActorRef(state, value.entity, `${path}.entity`);
       requireLocationRef(state, value.location, `${path}.location`);
@@ -229,21 +295,68 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
       requireEnum(state, value.action_family, ACTION_FAMILY_SET, `${path}.action_family`);
       return;
     case "not":
-      validatePredicate(state, value.predicate, `${path}.predicate`, depth + 1);
+      validatePredicate(state, value.predicate, `${path}.predicate`, depth + 1, boundAliases);
       return;
     case "all":
     case "any":
-      validateNestedPredicates(state, value.predicates, `${path}.predicates`, depth);
+      validateNestedPredicates(state, value.predicates, `${path}.predicates`, depth, boundAliases);
       return;
   }
 }
 
-function validateNestedPredicates(state: ValidationState, value: unknown, path: string, depth: number): void {
+function validateNestedPredicates(state: ValidationState, value: unknown, path: string, depth: number, boundAliases: Set<string>): void {
   if (!Array.isArray(value)) {
     addFailure(state, "predicate.expected_list", `${path} must be a list`, path);
     return;
   }
-  value.forEach((entry, index) => validatePredicate(state, entry, `${path}[${index}]`, depth + 1));
+  value.forEach((entry, index) => validatePredicate(state, entry, `${path}[${index}]`, depth + 1, boundAliases));
+}
+
+function validateBoundEffectReferences(state: ValidationState, parsed: Record<string, unknown>, boundAliases: Set<string>): void {
+  const effects = asPlainRecord(parsed.effects);
+  for (const field of ["create", "supersede", "close"] as const) {
+    validateBoundReferencesInList(state, effects[field], `effects.${field}`, boundAliases);
+  }
+
+  const exitOptions = parsed.exit_options;
+  if (Array.isArray(exitOptions)) {
+    exitOptions.forEach((option, index) => {
+      const record = asPlainRecord(option);
+      validateBoundReferencesInList(state, record.likely_effects, `exit_options[${index}].likely_effects`, boundAliases);
+    });
+  }
+}
+
+function validateBoundReferencesInList(state: ValidationState, value: unknown, path: string, boundAliases: Set<string>): void {
+  if (!Array.isArray(value)) {
+    return;
+  }
+  value.forEach((entry, index) => {
+    if (typeof entry !== "string") {
+      return;
+    }
+    const match = BOUND_EFFECT_PATTERN.exec(entry);
+    if (match && !boundAliases.has(match[1]!)) {
+      addFailure(state, "predicate.unbound_alias", `${path}[${index}] references ${entry} with no matching binding precondition`, `${path}[${index}]`);
+    }
+  });
+}
+
+function requireExistentialScope(state: ValidationState, pred: unknown, path: string): void {
+  const parsed = asPlainRecord(state.record.parsed);
+  const scope = asPlainRecord(parsed.scope);
+  const visibility = typeof scope.visibility === "string" ? scope.visibility : "";
+  if (visibility !== "global_author_pool" && visibility !== "branch_prefix_scoped") {
+    addFailure(state, "predicate.invalid_scope", `${path} uses ${String(pred)} outside global_author_pool or branch_prefix_scoped scope`, `${path}.pred`);
+  }
+}
+
+function requireAlias(state: ValidationState, value: unknown, path: string, boundAliases: Set<string>): void {
+  if (typeof value !== "string" || !ALIAS.test(value)) {
+    addFailure(state, "predicate.invalid_alias", `${path} must be a lower-case alias`, path);
+    return;
+  }
+  boundAliases.add(value);
 }
 
 function requireActorRef(state: ValidationState, value: unknown, path: string): void {
@@ -310,9 +423,39 @@ function requireOpenLabel(state: ValidationState, value: unknown, path: string):
   }
 }
 
+function requireOptionalOpenLabel(state: ValidationState, value: unknown, path: string): void {
+  if (value === undefined || value === null) {
+    return;
+  }
+  requireOpenLabel(state, value, path);
+}
+
 function requireEnum(state: ValidationState, value: unknown, allowed: ReadonlySet<string>, path: string): void {
   if (typeof value !== "string" || !allowed.has(value)) {
     addFailure(state, "predicate.invalid_enum", `${path} must be one of ${[...allowed].join(", ")}`, path);
+  }
+}
+
+function requireOptionalEnum(state: ValidationState, value: unknown, allowed: ReadonlySet<string>, path: string): void {
+  if (value === undefined || value === null) {
+    return;
+  }
+  requireEnum(state, value, allowed, path);
+}
+
+function requireOptionalRole(state: ValidationState, value: unknown, path: string): void {
+  if (value === undefined || value === null) {
+    return;
+  }
+  requireEnum(state, value, STORY_ROLES, path);
+}
+
+function requireOptionalPattern(state: ValidationState, value: unknown, pattern: RegExp, path: string, expected: string): void {
+  if (value === undefined || value === null) {
+    return;
+  }
+  if (typeof value !== "string" || !pattern.test(value)) {
+    addFailure(state, "predicate.invalid_reference", `${path} must be ${expected}`, path);
   }
 }
 

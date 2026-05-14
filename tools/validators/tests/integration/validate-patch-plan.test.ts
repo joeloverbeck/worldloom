@@ -575,7 +575,7 @@ function completeStoryletRecord(): Record<string, unknown> {
       {
         action_family: "communicate",
         surface_hint: "Ask one bounded follow-up question.",
-        likely_effects: ["limited-disclosure"]
+        likely_effects: ["OBL-0001"]
       }
     ],
     saliency: {

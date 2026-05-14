@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — modifies `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-health-audit`; conditionally amends `.claude/skills/_shared-templates/story-state-contract.md` (§5 resolution-order prose only, per SPEC-25 §Risks). No tool / schema change.
-**Deps**: SPEC25STOCOHHAR-006
+**Deps**: archive/tickets/SPEC25STOCOHHAR-006.md
 
 ## Problem
 

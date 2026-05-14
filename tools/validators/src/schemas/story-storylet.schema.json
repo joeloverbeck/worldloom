@@ -146,9 +146,9 @@
     "effects": {
       "type": "object",
       "properties": {
-        "create": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-        "supersede": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-        "close": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        "create": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } },
+        "supersede": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } },
+        "close": { "type": "array", "items": { "$ref": "#/$defs/effectReference" } }
       },
       "additionalProperties": false
     },
@@ -186,7 +186,7 @@
           "surface_hint": { "type": "string", "minLength": 1 },
           "likely_effects": {
             "type": "array",
-            "items": { "type": "string", "minLength": 1 }
+            "items": { "$ref": "#/$defs/effectReference" }
           }
         },
         "additionalProperties": false
@@ -236,6 +236,12 @@
         }
       },
       "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "effectReference": {
+      "type": "string",
+      "pattern": "^(?:bound:[a-z][a-z0-9_-]*|[A-Z]+-[0-9]+)$"
     }
   },
   "additionalProperties": false

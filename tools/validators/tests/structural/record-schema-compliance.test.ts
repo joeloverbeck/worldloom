@@ -369,6 +369,45 @@ test("record_schema_compliance accepts branch-prefix-scoped storylets with canon
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance accepts storylet bound effect references and rejects prose labels", async () => {
+  const validBoundEffects = completeStorylet();
+  validBoundEffects.effects = {
+    create: ["bound:new_debt"],
+    supersede: ["OBL-0001"],
+    close: ["bound:old_thread"]
+  };
+  validBoundEffects.exit_options = [
+    {
+      action_family: "communicate",
+      surface_hint: "Ask one bounded follow-up question.",
+      likely_effects: ["bound:new_debt", "CNSQ-0001"]
+    }
+  ];
+
+  const invalidLabel = completeStorylet();
+  invalidLabel.exit_options = [
+    {
+      action_family: "communicate",
+      surface_hint: "Ask one bounded follow-up question.",
+      likely_effects: ["limited-disclosure"]
+    }
+  ];
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(validBoundEffects, "SLT-0015"),
+      storyletRecord(invalidLabel, "SLT-0016")
+    ])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SLT-0015"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SLT-0016" &&
+    verdict.message.includes("/exit_options/0/likely_effects/0")
+  ));
+});
+
 test("record_schema_compliance rejects malformed branch-prefix-scoped storylet prefix fields", async () => {
   const missingPrefix = completeStorylet();
   missingPrefix.scope = {
@@ -617,7 +656,7 @@ function completeStorylet(): Record<string, unknown> {
       {
         action_family: "communicate",
         surface_hint: "Ask one bounded follow-up question.",
-        likely_effects: ["limited-disclosure"]
+        likely_effects: ["OBL-0001"]
       }
     ],
     saliency: {
