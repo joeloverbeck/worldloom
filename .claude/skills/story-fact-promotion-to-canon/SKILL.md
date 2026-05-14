@@ -22,7 +22,7 @@ arguments:
     description: "List of PG-<integer> ids whose rendered prose constitutes evidence. Required-prose source kinds: story_fact, mystery_resolution, character_outcome, artifact_canonization, relationship_or_institutional_outcome. Optional for other_branch_claim."
     required: true
   - name: desired_canon_status
-    description: "hard_canon | soft_canon | contested_canon | mystery_reserve. Default: derive from source_kind."
+    description: "hard_canon | derived_canon | soft_canon | contested_canon. Default: derive from source_kind."
     required: false
   - name: scope_argument
     description: "Natural-language rationale for the promotion's geographic / temporal / social scope (consumed by Phase 3 scope-inflation check)."
@@ -101,7 +101,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 ### Optional
 
-- `desired_canon_status` — enum — `hard_canon | soft_canon | contested_canon | mystery_reserve`. Default: derive from source_kind.
+- `desired_canon_status` — enum — `hard_canon | derived_canon | soft_canon | contested_canon`. Default: derive from source_kind.
 - `scope_argument` — string — rationale for the candidate's scope (consumed by Phase 3)
 - `contradiction_preference` — enum — `flag | archive_same_story_branches | leave_counterfactual`. Default `flag`.
 
@@ -171,7 +171,7 @@ Produce a candidate matching FOUNDATIONS §Canon Fact Record Schema strictly. Th
 ```yaml
 candidate:
   title: <short descriptive title>
-  status: hard_canon | soft_canon | contested_canon | mystery_reserve
+  status: hard_canon | derived_canon | soft_canon | contested_canon
   type: capability | artifact | law | belief | event | institution | species | <etc per CF schema enum>
   statement: >
     <natural-language statement of the fact>
@@ -190,7 +190,7 @@ candidate:
     why_not_universal: [<reason>]
   costs_and_limits: [<limit>]
   visible_consequences: [<consequence>]
-  required_world_updates: [<file or domain>]
+  required_world_updates: [<UPPER_SNAKE SEC file class>]
   contradiction_risk:
     hard: true | false
     soft: true | false

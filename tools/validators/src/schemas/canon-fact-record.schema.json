@@ -23,7 +23,7 @@
     "title": { "type": "string", "minLength": 1 },
     "status": {
       "type": "string",
-      "enum": ["hard_canon", "soft_canon", "contested_canon", "mystery_reserve"]
+      "enum": ["hard_canon", "derived_canon", "soft_canon", "contested_canon"]
     },
     "type": { "type": "string", "minLength": 1 },
     "statement": { "type": "string", "minLength": 1 },

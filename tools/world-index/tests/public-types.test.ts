@@ -75,7 +75,9 @@ type _EntityEdgeTypeMatchesTuple = Assert<
 type _ScopedEdgeTypeMatchesTuple = Assert<
   IsEqual<ScopedEdgeType, (typeof SCOPED_EDGE_TYPES)[number]>
 >;
-type _CanonFactStatusIsString = Assert<CanonFactStatus extends string ? true : false>;
+type _CanonFactStatusMatchesContract = Assert<
+  IsEqual<CanonFactStatus, "hard_canon" | "derived_canon" | "soft_canon" | "contested_canon">
+>;
 type _CanonScopeGeographicIsString = Assert<CanonScopeGeographic extends string ? true : false>;
 type _CanonScopeTemporalIsString = Assert<CanonScopeTemporal extends string ? true : false>;
 type _CanonScopeSocialIsString = Assert<CanonScopeSocial extends string ? true : false>;

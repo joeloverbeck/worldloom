@@ -68,6 +68,30 @@ test("record_schema_compliance accepts change logs with affected_fact_ids only",
   assert.equal(result.length, 0);
 });
 
+test("record_schema_compliance accepts derived_canon and rejects mystery_reserve CF status", async () => {
+  const accepted = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+    ...validCf,
+    status: "derived_canon"
+  });
+  const rejected = record("canon_fact_record", "CF-0002", "_source/canon/CF-0002.yaml", {
+    ...validCf,
+    id: "CF-0002",
+    status: "mystery_reserve"
+  });
+
+  const result = await recordSchemaCompliance.run({}, context([accepted, rejected]));
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CF-0001"));
+  assert.ok(
+    result.some(
+      (verdict) =>
+        verdict.location.node_id === "CF-0002" &&
+        verdict.code === "record_schema_compliance.enum" &&
+        verdict.message.includes("/status")
+    )
+  );
+});
+
 test("record_schema_compliance rejects removed affected_cf_ids alias on change logs", async () => {
   const result = await recordSchemaCompliance.run(
     {},

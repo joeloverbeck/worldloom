@@ -36,7 +36,7 @@ report without the subdirectory is not. Direct-`Edit` is allowed for these files
 ---
 id: RP-<integer>                                 # monotonic across all RP-<integer> cards globally in this world
 title: ""                                   # short human label; same naming conventions as CF title
-proposed_status: hard_canon                 # hard_canon | soft_canon | contested_canon | mystery_reserve | unchanged
+proposed_status: hard_canon                 # hard_canon | derived_canon | soft_canon | contested_canon | unchanged
                                             # (if different from target CF's current status, this retcon is a
                                             # re-classification — typically retcon_type: B or C)
                                             # `unchanged` means "same status as target CF" — use for Type A
@@ -93,12 +93,12 @@ costs_and_limits: []                        # stabilizers — Rule 3 (No Special
 
 visible_consequences: []                    # ordinary-life signals — Rule 5 (No Consequence Evasion)
 
-required_world_updates: []                  # SEC record IDs that must be updated if canon-addition accepts this
+required_world_updates: []                  # UPPER_SNAKE SEC file classes that must be updated if canon-addition accepts this
                                             # retcon. canon-addition's patch plan extends both the originating
                                             # CF's required_world_updates AND each target SEC's touched_by_cf[]
                                             # bidirectionally per SPEC-14.
-  # - SEC-INS-007
-  # - SEC-ELF-012
+  # - INSTITUTIONS
+  # - EVERYDAY_LIFE
 
 source_basis:
   direct_user_approval: false               # set true at Phase 13 after HARD-GATE approval (means "user kept
