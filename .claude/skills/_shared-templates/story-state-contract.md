@@ -639,6 +639,7 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
 | `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
+| `record_age(<record_id \| bound:<alias>>, >= \| <= \| == \| !=, <integer_pages>)` | Derived age check over the record's `created_at_page` and the evaluating page's position in `branch_path`; `bound:<alias>` may reference a same-block existential match. | turn-cycle eligibility, debt-pressure maturation |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
 | `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
