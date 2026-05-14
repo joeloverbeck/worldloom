@@ -64,7 +64,7 @@ test("deleted legacy story skills are not required by current capstone coverage"
   }
 
   const foundations = readRepoFile("docs/FOUNDATIONS.md");
-  assert.match(foundations, /Per-bundle records include STENT, SF, BEL, SE/);
+  assert.match(foundations, /Per-bundle records include STENT, STSTAT, SF, BEL, SE/);
   assert.match(foundations, /No ARC_TRACE class/);
 
   const storyStateContract = readRepoFile(".claude/skills/_shared-templates/story-state-contract.md");

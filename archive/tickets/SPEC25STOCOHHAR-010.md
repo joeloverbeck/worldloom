@@ -104,5 +104,5 @@ No production code, schema, validator, skill, or world-content file changed.
 
 ## Deviations
 
-- The user-supplied `spcs/SPEC-25*` shorthand was resolved to the live `archive/specs/SPEC-25-story-coherence-hardening.md` path.
+- The user-supplied `spcs/SPEC-25*` shorthand was resolved to the SPEC-25 story-coherence spec path, now archived at `archive/specs/SPEC-25-story-coherence-hardening.md`.
 - `docs/HARD-GATE-DISCIPLINE.md` was not required because this ticket changed only FOUNDATIONS prose and did not alter validator behavior, approval-token behavior, pre-apply behavior, submit/validate flow, skill HARD-GATE wording, or world-canon mutation ordering.
