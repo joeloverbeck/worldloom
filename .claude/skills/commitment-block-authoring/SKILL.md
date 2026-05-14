@@ -123,7 +123,7 @@ Before Phase 1:
    - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `move_family`.
    - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-<integer>` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
-6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / threads (for `direct_batch` gap diagnosis weighting).
+6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / consequences / threads with `urgency` (for `direct_batch` gap diagnosis weighting).
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -144,6 +144,7 @@ If any precondition fails, the skill aborts before Phase 1.
 11. Negotiation / resource-exchange block
 
 Identify which coverage targets are absent or under-represented in the current pool. If a `focus` hint was supplied, weight gap diagnosis toward the named focus area (the Phase 4 diversity gate still enforces minimum spread regardless).
+When SPEC25STOCOHHAR-006 predicate DSL v2 is available, prefer existential social-state predicates with `urgency?` filters such as `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)` and `any_consequence_pending(alias, kind?, urgency?, derived_from?)` for global-pool blocks that address high-salience debts without naming branch-local record ids.
 
 Output: a list of `target_count` planned blocks, each with a `move_family` value from the 16-value enum (per shared contract §4.4 SLT schema) and a brief draft scope (preconditions sketch, beat outline, effects shape).
 

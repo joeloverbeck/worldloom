@@ -403,6 +403,7 @@ description: string*
 owed_by: STENT-<integer> | group:<name> | public | null*
 owed_to: STENT-<integer> | group:<name> | public | null*
 trigger_to_close: string*                      # natural-language supersession trigger
+urgency: low | medium | high*
 ```
 
 No `introduced_at_page` field; `created_at_page` is the only creation provenance.
@@ -419,6 +420,7 @@ supersedes: CNSQ-<integer> | null             # default null
 status: pending | resolved | escalated | abandoned*
 consequence_kind: string*                      # open vocabulary
 description: string*
+urgency: low | medium | high*
 resolves_when: string*                         # natural-language supersession trigger
 derived_from: [<record_id>]                    # default []; record ids that caused this consequence
 ```
@@ -642,7 +644,7 @@ Every state-changing skill validates against these eight gates at page-plan comm
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |
 | 5 | append-only delta | All changes in `SE.state_delta` are creates / supersessions / closes. No in-place mutation of a prior record. |
-| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. |
+| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. |
 | 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. |
 | 8 | canon promotion hold | If `SE.outcome_route == promotion_hold` or any `promotion_claims[].authority == canon_candidate`, the world-level truth is held for promotion (not asserted in this page's state delta as if already canon). Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. |
 
@@ -663,7 +665,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 7 | Selected event and state delta | `SE` |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
-| 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR` |
+| 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
 | 12 | Stopping point | from commitment block + author judgment |
 | 13 | Next choices to foreshadow or make available | emitted `CHC[]` |

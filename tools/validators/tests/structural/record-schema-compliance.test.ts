@@ -301,6 +301,58 @@ test("record_schema_compliance enforces story fact authority", async () => {
   ));
 });
 
+test("record_schema_compliance enforces story obligation urgency", async () => {
+  const valid = storyObligationRecord({
+    urgency: "high"
+  }, "OBL-0001");
+  const missingUrgency = storyObligationRecord({}, "OBL-0002");
+  const invalidUrgency = storyObligationRecord({
+    urgency: "immediate"
+  }, "OBL-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingUrgency, invalidUrgency])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "OBL-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "OBL-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("urgency")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "OBL-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
+test("record_schema_compliance enforces story consequence urgency", async () => {
+  const valid = storyConsequenceRecord({
+    urgency: "medium"
+  }, "CNSQ-0001");
+  const missingUrgency = storyConsequenceRecord({}, "CNSQ-0002");
+  const invalidUrgency = storyConsequenceRecord({
+    urgency: "eventual"
+  }, "CNSQ-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingUrgency, invalidUrgency])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CNSQ-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CNSQ-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("urgency")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CNSQ-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
 test("record_schema_compliance accepts branch-prefix-scoped storylets with canonical nested prefix", async () => {
   const storylet = completeStorylet();
   storylet.scope = {
@@ -597,6 +649,35 @@ function storyFactRecord(overrides: Record<string, unknown>, id: string) {
     created_at_page: "PG-0001",
     statement: "The gate is damaged.",
     derived_from: [],
+    ...overrides
+  });
+}
+
+function storyObligationRecord(overrides: Record<string, unknown>, id: string) {
+  return record("obligation_record", id, `stories/red-bunny/_source/obligations/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    status: "open",
+    obligation_kind: "promise",
+    description: "Mara owes Ren a guarded answer.",
+    owed_by: "STENT-0001",
+    owed_to: "STENT-0002",
+    trigger_to_close: "Mara gives Ren a truthful answer or transfers the debt.",
+    ...overrides
+  });
+}
+
+function storyConsequenceRecord(overrides: Record<string, unknown>, id: string) {
+  return record("consequence_record", id, `stories/red-bunny/_source/consequences/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    status: "pending",
+    consequence_kind: "public_pressure",
+    description: "The public accusation will alter how witnesses respond.",
+    resolves_when: "The accusation is answered or displaced by stronger evidence.",
+    derived_from: ["SE-0001"],
     ...overrides
   });
 }

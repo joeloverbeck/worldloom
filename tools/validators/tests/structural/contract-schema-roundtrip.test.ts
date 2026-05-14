@@ -42,12 +42,12 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "authority", "derived_from"]
   },
   "story-obligation": {
-    required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"]
+    required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"]
   },
   "story-consequence": {
-    required: ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "resolves_when", "derived_from"]
+    required: ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when", "urgency"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "urgency", "resolves_when", "derived_from"]
   },
   "story-thread": {
     required: ["id", "story_id", "created_at_page", "status", "title", "summary", "urgency"],
@@ -133,7 +133,8 @@ test("representative amended contract records validate against tightened schemas
       description: "Mara promised to fix the gate.",
       owed_by: "STENT-0001",
       owed_to: "public",
-      trigger_to_close: "The gate is fixed."
+      trigger_to_close: "The gate is fixed.",
+      urgency: "high"
     }),
     storyRecord("consequence_record", "CNSQ-0001", "consequences", {
       id: "CNSQ-0001",
@@ -142,6 +143,7 @@ test("representative amended contract records validate against tightened schemas
       status: "pending",
       consequence_kind: "danger",
       description: "The broken gate leaves the alley exposed.",
+      urgency: "high",
       resolves_when: "The gate is fixed.",
       derived_from: ["SE-0001"]
     }),

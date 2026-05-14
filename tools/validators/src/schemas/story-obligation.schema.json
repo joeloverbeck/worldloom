@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-obligation.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"],
+  "required": ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"],
   "properties": {
     "id": { "type": "string", "pattern": "^OBL-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
@@ -13,7 +13,8 @@
     "description": { "type": "string", "minLength": 1 },
     "owed_by": { "type": ["string", "null"], "pattern": "^(STENT-[0-9]+|group:[A-Za-z0-9 _:-]+|public)$" },
     "owed_to": { "type": ["string", "null"], "pattern": "^(STENT-[0-9]+|group:[A-Za-z0-9 _:-]+|public)$" },
-    "trigger_to_close": { "type": "string", "minLength": 1 }
+    "trigger_to_close": { "type": "string", "minLength": 1 },
+    "urgency": { "type": "string", "enum": ["low", "medium", "high"] }
   },
   "additionalProperties": false
 }

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-consequence.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when"],
+  "required": ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when", "urgency"],
   "properties": {
     "id": { "type": "string", "pattern": "^CNSQ-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
@@ -11,6 +11,7 @@
     "status": { "type": "string", "enum": ["pending", "resolved", "escalated", "abandoned"] },
     "consequence_kind": { "type": "string", "minLength": 1 },
     "description": { "type": "string", "minLength": 1 },
+    "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
     "resolves_when": { "type": "string", "minLength": 1 },
     "derived_from": {
       "type": "array",

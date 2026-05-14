@@ -171,9 +171,9 @@ Flag:
 
 ### Phase 2c: Debt health
 
-For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots:
+For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots, read debt salience from the record's required `urgency` field:
 
-- `unactionable_debt` — no eligible author-pool SLT block's preconditions are satisfiable against the debt + leaf state. Severity scales with `saliency.urgency`: HIGH → WARNING; MEDIUM → WARNING; LOW → INFO. `repair_kind: commitment_block` (the bundle needs a new block addressing this debt).
+- `unactionable_debt` — no eligible author-pool SLT block's preconditions are satisfiable against the debt + leaf state. Severity scales with record `urgency`: HIGH → WARNING; MEDIUM → WARNING; LOW → INFO. `repair_kind: commitment_block` (the bundle needs a new block addressing this debt).
 - `invalidated_debt` — the debt's preconditions have been broken upstream (entity death / location move / belief shift that should have closed the debt). WARNING; `repair_kind: turn_repair` (a repair turn closes or transfers the debt).
 - `ignored_debt_beyond_urgency` — HIGH-urgency debt has been ignored for >5 pages; MEDIUM-urgency for >10 pages. WARNING; `repair_kind: commitment_block` (urgent debt needs payoff path).
 
@@ -181,7 +181,7 @@ For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots:
 
 Flag:
 
-- `public_consequence_without_witness` — `CNSQ` records with high social-impact tags and no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
+- `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_basis` — `SREL` supersessions whose `basis` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
 - `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's active `STSTAT`-derived status + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.

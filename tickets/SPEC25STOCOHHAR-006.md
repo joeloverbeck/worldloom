@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — modifies `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`, `tools/validators/src/schemas/story-storylet.schema.json`, `tools/validators/src/rules/rule_storylet_predicate_dsl_parsability.ts`; amends `.claude/skills/_shared-templates/story-state-contract.md` (§5).
-**Deps**: archive/tickets/SPEC25STOCOHHAR-002.md, SPEC25STOCOHHAR-005
+**Deps**: archive/tickets/SPEC25STOCOHHAR-002.md, archive/tickets/SPEC25STOCOHHAR-005.md
 
 ## Problem
 
@@ -17,7 +17,7 @@ The closed predicate DSL's only actor-unbound predicate is `has_affordance`; eve
 3. Cross-artifact boundary under audit: the predicate DSL grammar — `predicate-dsl-grammar.ts` (`PRED_TYPES`, `PREDICATE_ARG_SCHEMAS`) ↔ `rule_storylet_predicate_dsl_parsability.ts` (parser) ↔ contract §5 — plus the `story-storylet.schema.json` `effects` surface. `predicate-dsl-grammar.ts` is also touched by archive/tickets/SPEC25STOCOHHAR-002.md (the `entity_status` `axis`→`field` reconcile), hence the Dep on archive/tickets/SPEC25STOCOHHAR-002.md to serialize the shared-file edits.
 4. FOUNDATIONS Rule 4 (No Globalization by Accident) + §Story Bundles §5 branch-isolation: restated before trusting the spec — the six predicates are actor-unbound and reference no branch-local record IDs whose `created_at_page` is non-null. `bound:<alias>` is resolved at block-selection time against current branch state, so a global-pool block stays branch-isolated. Gate 4 still rejects exact branch-local IDs in global-pool blocks; this ticket broadens expressive reach without weakening that firewall.
 5. Schema extension: `story-storylet.schema.json` is extended — `effects.{create|supersede|close}` items and `exit_options[].likely_effects` items may now be a `bound:<alias>` token in addition to a record id. Consumers — `rule_storylet_predicate_dsl_parsability.ts`, `commitment-block-authoring`, `branching-story-turn-cycle` (the latter two in SPEC25STOCOHHAR-007). The extension is additive: a `bound:<alias>` token is a new accepted string form; existing record-id strings still validate.
-6. Dependency: the `urgency?` argument on `any_obligation_open` / `any_consequence_pending` is only meaningful once `OBL` / `CNSQ` carry an `urgency` field — hence the Dep on SPEC25STOCOHHAR-005.
+6. Dependency: the `urgency?` argument on `any_obligation_open` / `any_consequence_pending` is only meaningful once `OBL` / `CNSQ` carry an `urgency` field — hence the Dep on archive/tickets/SPEC25STOCOHHAR-005.md.
 
 ## Architecture Check
 

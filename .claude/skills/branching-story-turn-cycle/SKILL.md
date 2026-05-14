@@ -223,8 +223,8 @@ Apply exactly one causal delta from parent snapshot. The delta may:
 - Change entity status (life / agency / location) via `STSTAT` supersession — death, incapacity, absence, injury, capture, escape are first-class.
 - Update intentions (`STINT` supersession).
 - Update relationships (`SREL` supersession).
-- Open / close / escalate obligations (`OBL` supersession or new).
-- Create consequences (`CNSQ` new).
+- Open / close / escalate obligations (`OBL` supersession or new), always setting `urgency` on the emitted record.
+- Create consequences (`CNSQ` new), always setting `urgency` on the emitted record.
 - Advance or close threads (`THR` supersession).
 - Move entities or objects (`STSTAT.location` supersession for entity movement; `STOBJ` supersession for object movement).
 - Create or alter story-local artifacts (`DA` new or supersession).
@@ -308,7 +308,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
-Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` that must be honored; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
+Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
 
 The plan must not expose engine jargon to prose. Engine terms confined to §15 frontmatter only. No word-count targets (per FOUNDATIONS §Story Bundles §9).
 
@@ -329,7 +329,7 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
 5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
-6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure.
+6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure. High-salience debt is determined from `urgency` on active `OBL`, `CNSQ`, `THR`, and `STINT` records.
 7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
