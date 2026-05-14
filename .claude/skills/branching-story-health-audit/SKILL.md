@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 7 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 8 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health, 2h canon baseline drift) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -188,7 +188,7 @@ Flag:
 - `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_derived_from_trace` — `SREL` supersessions whose `derived_from` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
-- `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's active `STSTAT`-derived status + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
+- `observer_firewall_violation` — emitted `CHC` records or selected `SLT` actor-bindings whose intent, target, precondition match, or planned move relies on information unavailable to the acting entity. Valid access routes include active `BEL`, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism recorded in the plan. WARNING; `repair_kind: turn_repair`.
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
 When a choice or selected `SLT` is grounded through a binding-predicate storylet, audit the resolved binding rather than the literal `bound:<alias>` token. For example, a block with `any_relationship_axis(trust_edge, trust, <=, low, primary_actor)` and `effects.supersede: [bound:trust_edge]` is plan-grounded only if the leaf snapshot has a matching active `SREL`; a block with `any_belief(public_belief, public, knows, true, public)` and `likely_effects: [bound:public_belief]` is grounded only if the matching active `BEL` exists and satisfies the filters.
@@ -405,6 +405,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 - **Rule 5 (No Consequence Evasion)** — Phase 2a (Choice Consequence Integrity replay) + Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: cosmetic accepted-choice findings + unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
 - **Canon Baseline Drift** — Phase 2h. Mechanism: page `state_snapshot.canon_revision` values are compared against the latest governing `change_log_entry`; stale baselines are classified and routed without rewriting committed pages.
+- **Information / Observer Firewall** — Phase 2d. Mechanism: emitted choices and selected `SLT` actor-bindings are checked against actor-available knowledge and recorded access routes.
 
 ## Record Schemas
 
@@ -434,6 +435,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |
+| §Story Bundles §6b (Information / Observer Firewall) | Phase 2d | Audit reports emitted choices and selected `SLT` actor-bindings that rely on unavailable actor knowledge without a valid recorded access route. |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |

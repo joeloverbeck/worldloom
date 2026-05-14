@@ -639,6 +639,12 @@ Allocation routes through `mcp__worldloom__allocate_next_id(world_slug, id_class
 
 `BEL.belief_mode` separates sincerity / epistemic stance from confidence. `BEL.truth_relation` (`true | false | partly_true | unknown | contested | branch_counterfactual | future_contingent`) distinguishes belief from truth. `BEL.visibility` (`private | shared | factional | public | rumored | concealed | suppressed`) is consumed by the social-state firewall. Schemas live in `.claude/skills/_shared-templates/story-state-contract.md` §4.1 (BEL) and §4 generally (every other story-bundle record class).
 
+### 6b. Information / Observer Firewall
+
+Storylet selection, emitted choices, and character actions must not rely on information unavailable to the acting entity. Before selecting an `SLT`, binding an actor to a move, emitting a `CHC`, or resolving a character action, story-pipeline skills must confirm that the actor's active `BEL` state, page-state affordances, accessible artifacts, direct observation, testimony, documents, inference, surveillance, institutional channels, magic/tech, or another canonically valid mechanism gives that actor an access route to the load-bearing information.
+
+This firewall governs move and choice generation. The existing `expected_witnesses` mechanism in `branching-story-turn-cycle` Phase 4 governs the post-event propagation side: who comes to know, suspect, misunderstand, or report what happened after the event.
+
 ### 7. Story-Pipeline Skill Category
 
 The seven story-pipeline skills constitute Skill Category 2c per `.claude/skills/skill-audit/references/cross-skill-consistency.md`: `branching-story-bootstrap`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, and `story-promotion-closeout`.

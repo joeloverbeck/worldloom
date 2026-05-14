@@ -109,6 +109,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D7 — Information / Observer Firewall on move generation (story-scope §6b)
 
+**Implementation note (2026-05-15, SPEC27FOUCAN-007).** D7 landed the Information / Observer Firewall rule in `docs/FOUNDATIONS.md` §Story Bundles §6b, added move-generation access-route discipline to `.claude/skills/_shared-templates/story-state-contract.md` §5 / §7, updated `branching-story-turn-cycle` to apply the firewall during `SLT` selection, action resolution, and `CHC` emission, and updated `branching-story-health-audit` Phase 2d to report `observer_firewall_violation` findings. Remaining D7 prose below is historical intake context unless a later ticket explicitly owns further enforcement changes.
+
 **Current state.** `expected_witnesses` covers belief *propagation* after events; nothing gates `CHC` emission or `SLT` actor-binding against the acting entity's own `BEL` state.
 
 **Change.** `FOUNDATIONS.md` §Story Bundles gains §6b "Information / Observer Firewall", scoped narrowly to move/choice **generation**: a storylet selection, an emitted choice, or a character action must not rely on information unavailable to the acting entity unless the plan records a valid access route (direct observation, testimony, document, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism). The clause explicitly notes that the existing `expected_witnesses` mechanism already covers the post-event belief-propagation side. The shared story-state contract gates `CHC` emission and `SLT` actor-binding accordingly; `branching-story-turn-cycle` and `branching-story-health-audit` enforce/audit it.
