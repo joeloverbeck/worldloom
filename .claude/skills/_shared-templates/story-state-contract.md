@@ -604,6 +604,7 @@ checks:
   engine_jargon_leak: PASS | WARN | FAIL
   forbidden_mystery_resolution: PASS | FAIL
   required_event_rendered: PASS | WARN | FAIL
+  choice_consequence_visibility: PASS | WARN | FAIL
   entity_status_consistency: PASS | WARN | FAIL
   invented_structural_fact: PASS | WARN | FAIL
   canon_claim_without_authority: PASS | FAIL
@@ -611,6 +612,8 @@ checks:
 notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
+
+The `checks` mapping contains seven deterministic prose/state checks plus the optional `craft_critic` result. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
 
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
 

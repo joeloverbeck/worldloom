@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `branching-story-bootstrap`, `branching-story-turn-cycle`, and `branching-story-prose-attach` skill prose. No schema, MCP, or validator change.
-**Deps**: SPEC26STOCOHHAR-004
+**Deps**: archive/tickets/SPEC26STOCOHHAR-004.md
 
 ## Problem
 
@@ -27,7 +27,7 @@ The player's agency surface is implicit. `branching-story-turn-cycle`'s Phase 9 
 
 1. bootstrap authors the section -> skill dry-run: `branching-story-bootstrap` emits a `STORY_KERNEL.md` containing a `## Player Agency Contract` section with the three bullets, and its `STORY_KERNEL.md` section enumeration lists that section.
 2. turn-cycle check 1 reads the contract -> codebase grep-proof: `branching-story-turn-cycle/SKILL.md` Phase 9 additional check 1 prose references reading the Player Agency Contract when parsing `manual_action_text`.
-3. prose-attach cross-references the contract -> codebase grep-proof: `branching-story-prose-attach/SKILL.md` references the Player Agency Contract from `entity_status_consistency` and the `choice_consequence_visibility` check (the latter created by SPEC26STOCOHHAR-004, hence the `Deps`).
+3. prose-attach cross-references the contract -> codebase grep-proof: `branching-story-prose-attach/SKILL.md` references the Player Agency Contract from `entity_status_consistency` and the `choice_consequence_visibility` check (the latter created by `archive/tickets/SPEC26STOCOHHAR-004.md`, hence the `Deps`).
 4. (Single-layer not applicable — this is a cross-skill ticket; the three layers map the authoring invariant, the routing-input invariant, and the prose-validation cross-reference invariant to distinct proof surfaces.)
 
 ## What to Change
@@ -42,7 +42,7 @@ In `branching-story-turn-cycle/SKILL.md`, Phase 9 additional check 1 (action-sou
 
 ### 3. prose-attach — cross-reference the contract
 
-In `branching-story-prose-attach/SKILL.md`, cross-reference the Player Agency Contract when running `entity_status_consistency` and the `choice_consequence_visibility` check (from SPEC26STOCOHHAR-004), to flag prose implying a broader or narrower agency surface than the contract permits.
+In `branching-story-prose-attach/SKILL.md`, cross-reference the Player Agency Contract when running `entity_status_consistency` and the `choice_consequence_visibility` check (from `archive/tickets/SPEC26STOCOHHAR-004.md`), to flag prose implying a broader or narrower agency surface than the contract permits.
 
 ## Files to Touch
 
@@ -54,7 +54,7 @@ In `branching-story-prose-attach/SKILL.md`, cross-reference the Player Agency Co
 
 - The three dropped bullets (control style, impossible-action policy, consequence-visibility promise) — explicitly out of scope per SPEC-26 D7.
 - Any atomic `_source/*.yaml` record schema — `STORY_KERNEL.md` is a primary-authored markdown surface, not an atomic record.
-- The `choice_consequence_visibility` check itself — created by SPEC26STOCOHHAR-004; this ticket only adds the Agency Contract cross-reference to it.
+- The `choice_consequence_visibility` check itself — created by `archive/tickets/SPEC26STOCOHHAR-004.md`; this ticket only adds the Agency Contract cross-reference to it.
 
 ## Acceptance Criteria
 
