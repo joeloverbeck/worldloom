@@ -44,7 +44,7 @@ Do NOT write any of `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md`, 
 
 (a) Pre-flight Check has completed: world resolved, story-slug collision-free against `worlds/<world_slug>/stories/<story_slug>/`, all ids allocated via `mcp__worldloom__allocate_next_id`, context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_bootstrap', ...)`, and the canonical prose-quality sources (`docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `reports/prose-quality-instructions.md`) are loaded.
 
-(b) Phases 1-9 have completed in working memory: state seed normalized; one `STSTAT` per active `STENT` plus SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / (optional SLT) seed records drafted; `SE-1` drafted; `PG-1` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-1.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; 3-5 `CHC` records drafted.
+(b) Phases 1-9 have completed in working memory: state seed normalized; one `STSTAT` per active `STENT` plus SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / (optional DA) / (optional SLT) seed records drafted; `SE-1` drafted; `PG-1` drafted with full `state_snapshot` and `validation_trace`; `STORY_KERNEL.md` drafted with the required section set including `## Player Agency Contract`; `pages-prose-plans/PG-1.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; 3-5 `CHC` records drafted.
 
 (c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-1.validation_trace`, plus the 4 bootstrap-additional checks (cast resolution to existing CHAR dossiers; no mirrored SF globalizes its parent CF scope; root page plan is self-contained per shared contract §8; continuation capacity satisfied — at least one eligible seed SLT or a planned runtime JIT path; terminal root rejected as authoring error).
 
@@ -140,6 +140,24 @@ Atomic story-bundle records (via `mcp__worldloom__submit_patch_plan`) + direct-w
 | Per-world stories INDEX | `worlds/<world_slug>/stories/INDEX.md` | Always (first-run create; append thereafter) |
 
 Bootstrap does NOT write `pages-prose/PG-1.md` (rendered prose is supplied externally) and does NOT write any prose receipt.
+
+## STORY_KERNEL.md Section Contract
+
+Draft `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` as the bundle's compact primary-authored story contract. It MUST contain these sections, in this order unless the user explicitly approves a clearer order for the specific bundle:
+
+1. `# <Story Title>`
+2. `## Story Identity` — world slug, story slug, `STORY-<integer>`, root branch, root page, premise summary, POV, tone, and content intensity.
+3. `## Player Agency Contract` — exactly these three bullets:
+   - **Agency surface** — which `STENT` record(s) the player primarily controls.
+   - **Write-in envelope** — what kinds of manual actions are admissible.
+   - **Viewpoint limits** — whether the player may act on knowledge the viewpoint character lacks.
+4. `## Cast and Roles` — active `STENT` ids, parent `CHAR` ids, display names, and `role_in_story` values.
+5. `## Opening Situation` — the public situation, private/contested knowledge labels, initial location, and opening pressure.
+6. `## Canon Grounding` — the load-bearing parent-world canon excerpts and mirrored `SF` ids the opening depends on.
+7. `## Protected Mystery and Invariant Boundaries` — forbidden mystery resolutions and invariant constraints that Phase 9 gate 3 must preserve.
+8. `## Initial Continuation Contract` — expected first hinge, emitted choice surface, and seed/JIT continuation posture.
+
+The `## Player Agency Contract` is load-bearing. Downstream `branching-story-turn-cycle` uses it as the stable routing input for write-in action-source legality, and `branching-story-prose-attach` uses it to flag rendered prose that implies a broader or narrower player agency surface than the bundle permits.
 
 ## World-State Prerequisites
 

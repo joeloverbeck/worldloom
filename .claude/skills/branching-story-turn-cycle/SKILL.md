@@ -13,10 +13,10 @@ arguments:
     description: "PG-<integer>; any committed page in the bundle. Continuation is implicit when parent is the active branch leaf; fork is implicit when parent is any non-leaf page or a sibling-branch leaf."
     required: true
   - name: chosen_choice_id
-    description: "CHC-<integer> emitted by parent_page_id. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 4)."
+    description: "CHC-<integer> emitted by parent_page_id. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 5)."
     required: false
   - name: manual_action_text
-    description: "Natural-language player write-in. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 4)."
+    description: "Natural-language player write-in. Exactly one of chosen_choice_id / manual_action_text must be supplied (XOR enforced at Pre-flight step 5)."
     required: false
   - name: execution_mode
     description: "authoring | interactive_runtime | batch; default: authoring"
@@ -36,11 +36,11 @@ Advance a branching-story bundle by one causal tick from any committed parent pa
 <HARD-GATE>
 Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/stories/<story_slug>/INDEX.md`, AND do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, until:
 
-(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)`; parent prose policy verified.
+(a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; parent page loaded from `_source/pages/<parent_page_id>.yaml`; XOR action source verified (exactly one of `chosen_choice_id` / `manual_action_text` non-null; chosen CHC belongs to parent and is not retired); continuation-vs-fork detected; ids allocated via `mcp__worldloom__allocate_next_id`; context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', ...)`; parent prose policy verified.
 
 (b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
-(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 4 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale).
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 5 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan).
 
 (d) The user has explicitly approved the deliverable summary (branch label, resolved outcome route, state delta inventory by class, commitment block used, page plan structural preview, emitted choices list, any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation).
 
@@ -81,7 +81,7 @@ Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 4 turn-cycle-additional;
+Phase 9: Validate against shared 8 hard gates + 5 turn-cycle-additional;
   compute final PG hashes per shared contract §4.2a
         |
         v
@@ -155,13 +155,14 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, and `reports/prose-quality-instructions.md` into working context. Abort with clear missing-file error on any unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if the directory does not exist or is missing `STORY_KERNEL.md` / `_source/`.
-3. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
-4. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
-5. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
-6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.prose_path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
-7. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
-8. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
-9. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
+3. Load `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` and its `## Player Agency Contract` section. Abort with agency-contract-missing error if the section is absent or does not name the agency surface, write-in envelope, and viewpoint limits.
+4. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
+5. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
+6. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
+7. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.prose_path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
+8. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
+9. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
+10. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -181,6 +182,12 @@ proposed_action:
   implied_claims: [<short label>]
 ```
 
+The `## Player Agency Contract` is a required routing input for `manual_action_text`. Parse the action against:
+
+- **Agency surface** — the actor must be the controlled `STENT` or a permitted multi-entity/proxy action named by the contract.
+- **Write-in envelope** — the action family and method must fit the bundle's admissible manual-action categories; out-of-envelope actions route to `world_block` or `promotion_hold` as appropriate, never silent rejection.
+- **Viewpoint limits** — private knowledge not available to the viewpoint character can guide a write-in only when the contract explicitly permits player-over-character knowledge.
+
 Route to exactly one of six outcomes per shared contract §6:
 
 - `accept` — the action can happen as stated given current state + world canon.
@@ -189,6 +196,18 @@ Route to exactly one of six outcomes per shared contract §6:
 - `world_block` — the action is impossible in the current world/state; the page dramatizes the failed attempt or the impossibility itself.
 - `promotion_hold` — the action asserts a world-level truth or canon mystery resolution; pauses for `story-fact-promotion-to-canon`. The state delta records ONLY the branch-local appearance, not the canon claim as already true.
 - `terminal` — the action coherently closes the branch.
+
+Draft `SE.resolution` before leaving Phase 1:
+
+- Required for `attempt`, `accommodate`, and `world_block`.
+- `attempt` uses `result: success | partial_success | failure`.
+- `accommodate` uses `result: partial_success | transformed`.
+- `world_block` uses `result: impossible | failure`.
+- `promotion_hold` may omit `resolution`, or use `result: held_for_promotion` when the page should explicitly surface that the result is held for promotion.
+- `terminal` may omit `resolution`, or use `result: success | partial_success | failure | transformed` when the closure needs explicit consequence feedback.
+- `accept` omits `resolution`.
+
+When `resolution` is present, set `player_visible_feedback` to one sentence naming what the player should be able to perceive about why the action resolved this way. Do not add `reason_class`; the route, result, rationale, and state delta are sufficient.
 
 **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route plus a page plan that dramatizes the outcome.
 
@@ -200,6 +219,7 @@ Filter the bundle's `SLT` records for eligibility against the parent snapshot:
 - `scope.visibility: global_author_pool` blocks are universally eligible (subject to predicates); `scope.visibility: branch_prefix_scoped` blocks are eligible when `scope.branch_id` is in the active branch's lineage; `scope.visibility: branch_scoped` blocks are eligible only when `scope.branch_id` matches the active or new branch.
 - For action grounding, prefer `affordance_available_to(<actor>, <action_family>)`; `has_affordance(<action_family>)` is only an actor-agnostic author-pool prefilter when the actor is not yet bound.
 - Resolve predicate DSL v2 existential predicates (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`) against the parent snapshot before ranking. Each satisfied existential predicate binds its `alias` to the matched active record for this selection only. The match must satisfy every supplied filter (`kind`, `urgency`, role, axis/comparator/value, belief mode, truth relation, or visibility); if multiple records match, retain all bindings for ranking and choose the concrete binding with the selected block.
+- Evaluate `record_age(<record_id | bound:<alias>>, comparator, pages)` by deriving the matched record's age from its `created_at_page` position in the parent page's `branch_path` through the evaluating page. Use it only as present causal state: pressure can mature because a record has remained open across pages, never because the story reached an act or dramatic timer.
 - `saliency.cooldown_pages` permits use.
 - `mystery_policy.forbidden_resolutions` does not include any mystery the resolved action would resolve.
 - `mystery_policy.allowed_authority` is compatible with `outcome_route`.
@@ -240,17 +260,23 @@ For every life / agency / location change, supersede the affected entity's activ
 
 **Deaths and removals are first-class outcomes.** Do not protect "main characters" with out-of-world logic. When an entity dies, becomes incapacitated, or becomes unavailable, reconcile in the same delta:
 
-- Their open `STINT` (supersede to `abandoned` / `transferred`).
+- Their open `STINT` records — close each in `SE.state_delta.close`; for an intention transferred to another holder, create a replacement `STINT` with the new `holder` and `supersedes` linking the closed/replaced intention. `STINT` has no `status` or `derived_from` field.
 - `OBL` owed by or to them (supersede or close).
-- `SREL` (supersede; status becomes `severed` or `mourning` per context).
+- Affected `SREL` records — supersede by changing `axis` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field.
 - Witness `BEL` records (Phase 4 covers).
-- `STOBJ.controlled_by` they controlled (supersede).
+- Affected `STOBJ` records — supersede `owner` and/or `current_location` when death, capture, incapacity, or transfer changes custody. Do not use any separate control/custody field.
 - Future choice availability (Phase 9 gate 7 filters).
 
 ## Phase 4: Update belief and visibility state
 
 For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL` records per shared contract §4.1 + FOUNDATIONS §Story Bundles §6a:
 
+- First compute `expected_witnesses` for the event:
+  - `direct`: active `STENT` records at the event location per active `STSTAT.location`, excluding entities whose active `STSTAT.agency` is unconscious, dead, incapacitated, or otherwise unavailable.
+  - `indirect`: public or factional holders who would receive the event through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or other accessible evidence (`DA` / `STOBJ` / location-state traces).
+  - `excluded`: `STENT` records that are concealed, offstage, unconscious, socially barred, lacking access, or otherwise unable to perceive or receive the event.
+- For every relevant direct or indirect witness group, account for propagation with either a created/superseded `BEL` or an explicit non-propagation rationale from this closed set: `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`.
+- Record non-propagation rationales in the event's authoring notes and carry the load-bearing rationale into `SE.world_logic_rationale` or the Phase 9 check-3 rationale so `branching-story-health-audit` can replay the coverage decision.
 - Who knows (`belief_mode: knows`, `truth_relation: true`, `visibility: shared` or `public`, `confidence: certain`).
 - Who suspects (`belief_mode: suspects`, `truth_relation: unknown`, `confidence: medium | low`).
 - Who misunderstands (`truth_relation: partly_true | false`, `confidence: certain`).
@@ -258,7 +284,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 - What rumor or lie may spread (additional `BEL` with `belief_mode: reports`, `visibility: rumored`; or `belief_mode: deceives` when the holder knows the claim is false but presents it as true).
 - What choices are now constrained (`consequences.constrains_choices[]` linking to upcoming `CHC`).
 
-**This phase is mandatory** for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual. Phase 9 turn-cycle-additional check 3 verifies coverage.
+**This phase is mandatory** for any action involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual. Phase 9 turn-cycle-additional check 3 verifies expected-witness completeness, not mere `BEL` presence.
 
 ## Phase 5: Check mystery and canon authority
 
@@ -281,6 +307,9 @@ event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
 actor: STENT-<integer> | system | unknown
 targets: [<record id>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal
+resolution:
+  result: success | partial_success | failure | impossible | transformed | held_for_promotion
+  player_visible_feedback: <one-sentence player-legible consequence feedback>
 world_logic_rationale: <why this route follows from current state + world canon>
 state_delta:
   create: [<every record id created this turn>]
@@ -290,6 +319,8 @@ promotion_claims:
   - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
+
+`resolution` follows the shared contract §4.3 route table: required for `attempt` / `accommodate` / `world_block`, absent for `accept`, and optional for `promotion_hold` / `terminal` when an explicit held-or-terminal result must be visible.
 
 Draft `PG-<integer>` per shared contract §4.2:
 
@@ -312,7 +343,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
-Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
+Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale` + `resolution.player_visible_feedback` for non-accept routes); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
 
 The plan must not expose engine jargon to prose. Engine terms confined to §15 frontmatter only. No word-count targets (per FOUNDATIONS §Story Bundles §9).
 
@@ -339,12 +370,17 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
-Plus 4 turn-cycle-additional checks (recorded in working memory):
+Plus 5 turn-cycle-additional checks (recorded in working memory):
 
-1. **Action source legality** — XOR enforced; chosen CHC not retired.
+1. **Action source legality** — XOR enforced; chosen CHC not retired. When `manual_action_text` is the source, the action has been parsed against `STORY_KERNEL.md` `## Player Agency Contract`: agency surface, write-in envelope, and viewpoint limits all support the route or the route records the exact agency-contract reason it was blocked/held.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
-3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual produces at least one BEL create or supersession.
+3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual has complete `expected_witnesses` coverage: each relevant direct or indirect witness group from Phase 4 is accounted for by a created/superseded `BEL` (`knows`, `suspects`, `misremembers`, `reports`, or `deceives`) or by a recorded non-propagation rationale from the closed set (`no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`). Mere existence of some `BEL` record is not sufficient.
 4. **Write-in world-logic rationale** — when `manual_action_text` is the action source, `SE.world_logic_rationale` is non-empty and explains the route (silent rejection forbidden).
+5. **Causal dependency threat scan** (`causal_dependency_threat_scan`) — after the state delta, next snapshot, visible affordances, and emitted choices are drafted, but before final PG hashes are computed, verify that the delta did not clobber dependencies that still survive in the committed page:
+   - `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
+   - `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.
+   - `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
+   - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
@@ -352,7 +388,7 @@ After all gates and additional checks pass, compute final PG hashes per shared c
 2. Compute `PG-<integer>.plan.plan_hash` and `PG-<integer>.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-<integer>.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft) and the `state_hash` output onto `PG-<integer>.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself, `prose_path`, and `prose_receipt_path`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
 3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
-If any gate, additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing.
+If any gate, ERROR-severity additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing. WARNING-severity additional checks must be recorded in the deliverable summary and either resolved before approval or explicitly accepted by the user as known story-health debt.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
@@ -387,7 +423,7 @@ Only the page plan requires long-form language generation. All other state work 
 
 - **Rule 1 (No Floating Facts)** — Phase 3 + Phase 7. Mechanism: every drafted record conforms to shared contract §4 schemas; Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
 - **Rule 4 (No Globalization by Accident)** — Phase 5 + Phase 9 gate 4. Mechanism: Phase 5 canon-authority classification keeps branch-local truth from leaking world-wide (`branch_local_counterfactual` vs. `canon_candidate`); Phase 9 gate 4 branch isolation rejects sibling-branch records.
-- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure).
+- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6 + Phase 9 additional check 5. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure); `causal_dependency_threat_scan` rejects choices, affordances, obligations, and high-salience debt paths whose dependencies were clobbered by the drafted delta.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 5 + Phase 9 gate 3. Mechanism: Phase 5 classifies claims and rejects forbidden mystery resolution; Phase 9 gate 3 mystery firewall verifies no forbidden `M-<integer>` is resolved and no selected SLT's `mystery_policy.forbidden_resolutions` is breached.
 
 ## Record Schemas
@@ -402,7 +438,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 2 (No Pure Cosmetics) | N/A | Not applicable — turn-cycle mutates branch-local story state; world canon is not touched. Handoff to `canon-addition` via `story-fact-promotion-to-canon` when a story claim promotes. |
 | Rule 3 (No Specialness Inflation) | N/A | Not applicable — same handoff as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 5, 9 | Phase 5 canon-authority classification; Phase 9 gate 4 branch isolation. |
-| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof. |
+| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof; Phase 9 additional `causal_dependency_threat_scan` for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Not applicable — turn-cycle mutates story-bundle scope, not world canon. World canon retcon routes through `canon-addition`. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 5, 9 | Phase 5 forbidden-mystery rejection; Phase 9 gate 3 mystery firewall. |
 | Rule 11 (No Spectator Castes) | N/A | Not applicable — Rule 11 governs new exceptional capabilities at world canon. |
@@ -412,7 +448,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.prose_path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
-| §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `BEL` records for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; `truth_relation` + `visibility` + `confidence` consumed by social-state firewall. |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `expected_witnesses` coverage for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; each relevant witness group gets a `BEL` create/supersession or a closed-set non-propagation rationale. `truth_relation` + `visibility` + `confidence` are consumed by the social-state firewall. |
 | Change Control Policy | N/A | Not applicable — canon-reading skill emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 

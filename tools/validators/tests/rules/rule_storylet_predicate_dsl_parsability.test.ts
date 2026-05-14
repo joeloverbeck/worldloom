@@ -27,6 +27,7 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
           { pred: "location", entity: "STENT-0001", location: "STLOC-0001" },
           { pred: "has_affordance", action_family: "communicate" },
           { pred: "record_active", record: "STSTAT-0001" },
+          { pred: "record_age", record: "bound:pending_fallout", comparator: ">=", pages: 3 },
           { pred: "intention_active", intention: "STINT-0001" },
           { pred: "object_accessible", entity: "STENT-0001", object: "STOBJ-0001" },
           { pred: "artifact_accessible", entity: "STENT-0001", artifact: "DA-0001" },
@@ -55,6 +56,30 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
   ])));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("storylet predicate DSL rejects malformed record_age comparators and page counts", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-0007", {
+      scope: { visibility: "global_author_pool", branch_id: null },
+      preconditions: {
+        hard: [
+          { pred: "any_consequence_pending", alias: "pending_fallout", kind: "danger", urgency: "medium" },
+          { pred: "record_age", record: "bound:pending_fallout", comparator: ">", pages: 3 },
+          { pred: "record_age", record: "bound:pending_fallout", comparator: ">=", pages: "three" }
+        ]
+      }
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[1].comparator")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_integer" &&
+    verdict.message.includes("preconditions.hard[2].pages")
+  ));
 });
 
 test("storylet predicate DSL rejects bound effect aliases with no binding precondition", async () => {

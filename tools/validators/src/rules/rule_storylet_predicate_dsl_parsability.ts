@@ -35,6 +35,7 @@ const STORY_ROLES = new Set([
 const TRUTH_RELATIONS = new Set(["true", "false", "partly_true", "unknown", "contested", "branch_counterfactual", "future_contingent"]);
 const BELIEF_VISIBILITIES = new Set(["private", "shared", "factional", "public", "rumored", "concealed", "suppressed"]);
 const RELATIONSHIP_COMPARATORS = new Set([">=", "<=", "==", "!="]);
+const RECORD_AGE_COMPARATORS = new Set([">=", "<=", "==", "!="]);
 
 const ALIAS = /^[a-z][a-z0-9_-]*$/;
 const ROLE_REF = /^role:[a-z][a-z0-9_-]*$/;
@@ -105,6 +106,8 @@ export const storyletPredicateDslParsability: Validator = {
         continue;
       }
       const boundAliases = new Set<string>();
+      collectPredicateListAliases(preconditions.hard, boundAliases);
+      collectPredicateListAliases(preconditions.soft, boundAliases);
       validatePredicateList(state, preconditions.hard, "preconditions.hard", boundAliases);
       validatePredicateList(state, preconditions.soft, "preconditions.soft", boundAliases);
       validateBoundEffectReferences(state, parsed, boundAliases);
@@ -279,6 +282,11 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
     case "record_active":
       requireActiveRecordRef(state, value.record, `${path}.record`);
       return;
+    case "record_age":
+      requireActiveRecordOrBoundAlias(state, value.record, boundAliases, `${path}.record`);
+      requireEnum(state, value.comparator, RECORD_AGE_COMPARATORS, `${path}.comparator`);
+      requireIntegerPages(state, value.pages, `${path}.pages`);
+      return;
     case "intention_active":
       requireStoryRef(state, value.intention, "intention", idsFor(state.refs.intentions, state.record), `${path}.intention`);
       return;
@@ -310,6 +318,35 @@ function validateNestedPredicates(state: ValidationState, value: unknown, path: 
     return;
   }
   value.forEach((entry, index) => validatePredicate(state, entry, `${path}[${index}]`, depth + 1, boundAliases));
+}
+
+function collectPredicateListAliases(value: unknown, boundAliases: Set<string>): void {
+  if (!Array.isArray(value)) {
+    return;
+  }
+  for (const entry of value) {
+    collectPredicateAliases(entry, boundAliases, 0);
+  }
+}
+
+function collectPredicateAliases(value: unknown, boundAliases: Set<string>, depth: number): void {
+  if (depth > MAX_DEPTH || !isRecord(value) || typeof value.pred !== "string") {
+    return;
+  }
+
+  if (value.pred.startsWith("any_") && typeof value.alias === "string" && ALIAS.test(value.alias)) {
+    boundAliases.add(value.alias);
+  }
+
+  if (value.pred === "not") {
+    collectPredicateAliases(value.predicate, boundAliases, depth + 1);
+    return;
+  }
+  if ((value.pred === "all" || value.pred === "any") && Array.isArray(value.predicates)) {
+    for (const entry of value.predicates) {
+      collectPredicateAliases(entry, boundAliases, depth + 1);
+    }
+  }
 }
 
 function validateBoundEffectReferences(state: ValidationState, parsed: Record<string, unknown>, boundAliases: Set<string>): void {
@@ -400,6 +437,19 @@ function requireActiveRecordRef(state: ValidationState, value: unknown, path: st
   }
 }
 
+function requireActiveRecordOrBoundAlias(state: ValidationState, value: unknown, boundAliases: ReadonlySet<string>, path: string): void {
+  if (typeof value === "string") {
+    const match = BOUND_EFFECT_PATTERN.exec(value);
+    if (match) {
+      if (!boundAliases.has(match[1]!)) {
+        addFailure(state, "predicate.unbound_alias", `${path} references ${value} with no matching binding precondition`, path);
+      }
+      return;
+    }
+  }
+  requireActiveRecordRef(state, value, path);
+}
+
 function activeRecordIds(state: ValidationState): Set<string> {
   return new Set([
     ...idsFor(state.refs.entities, state.record),
@@ -462,6 +512,12 @@ function requireOptionalPattern(state: ValidationState, value: unknown, pattern:
 function requirePresent(state: ValidationState, value: unknown, path: string): void {
   if (value === undefined || value === null) {
     addFailure(state, "predicate.missing_field", `${path} is required`, path);
+  }
+}
+
+function requireIntegerPages(state: ValidationState, value: unknown, path: string): void {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+    addFailure(state, "predicate.invalid_integer", `${path} must be a non-negative integer page count`, path);
   }
 }
 

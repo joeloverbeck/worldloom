@@ -152,6 +152,11 @@ validation_trace:                      # * one entry per shared gate with PASS +
 
 `prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
+Branch-scope vocabulary:
+
+- `bundle_genesis_record`: a story-bundle record whose `created_at_page` is `PG-1`, where `PG-1` is the `root_page_id` of the root branch. Genesis records sit in every branch's `branch_path` and are visible to all branches unless later superseded or closed.
+- `branch_local_record`: a record created after `PG-1` whose `created_at_page` is not in the active `branch_path`, or, for an `SLT`, not in the `visible_branch_path_prefix` authorized for that block.
+
 #### 4.2a Deterministic PG hash computation
 
 Every `PG` record must carry final lowercase sha256 values before any `create_pg_record` patch plan is validated or submitted. Placeholder, uppercase, non-hex, missing, or stale hash values are hard-stop authoring errors; the skill must repair the draft in working memory before `mcp__worldloom__validate_patch_plan`.
@@ -193,6 +198,9 @@ event_kind: story_start | selected_choice | write_in_attempt | system_repair | a
 actor: STENT-<integer> | system | unknown   # *
 targets: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
+resolution:
+  result: success | partial_success | failure | impossible | transformed | held_for_promotion
+  player_visible_feedback: >          # * one-sentence player-legible consequence feedback
 world_logic_rationale: >               # * natural-language justification of why this route follows from world canon + branch state
 state_delta:
   create: [record_id]
@@ -204,6 +212,17 @@ promotion_claims:
 ```
 
 `world_logic_rationale` is required (no silent rejection — see §6). There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
+
+`resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
+
+| `outcome_route` | Allowed `resolution.result` |
+|---|---|
+| `accept` | `resolution` absent |
+| `attempt` | `success`, `partial_success`, `failure` |
+| `accommodate` | `partial_success`, `transformed` |
+| `world_block` | `impossible`, `failure` |
+| `promotion_hold` | `resolution` absent or `held_for_promotion` |
+| `terminal` | `resolution` absent, `success`, `partial_success`, `failure`, `transformed` |
 
 ### 4.4 `SLT` commitment block (~18 sub-paths)
 
@@ -585,6 +604,7 @@ checks:
   engine_jargon_leak: PASS | WARN | FAIL
   forbidden_mystery_resolution: PASS | FAIL
   required_event_rendered: PASS | WARN | FAIL
+  choice_consequence_visibility: PASS | WARN | FAIL
   entity_status_consistency: PASS | WARN | FAIL
   invented_structural_fact: PASS | WARN | FAIL
   canon_claim_without_authority: PASS | FAIL
@@ -592,6 +612,8 @@ checks:
 notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
+
+The `checks` mapping contains seven deterministic prose/state checks plus the optional `craft_critic` result. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
 
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
 
@@ -617,6 +639,7 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
 | `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
+| `record_age(<record_id \| bound:<alias>>, >= \| <= \| == \| !=, <integer_pages>)` | Derived age check over the record's `created_at_page` and the evaluating page's position in `branch_path`; `bound:<alias>` may reference a same-block existential match. | turn-cycle eligibility, debt-pressure maturation |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
 | `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
@@ -690,6 +713,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
 
 The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter only.
+
+For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
 
 The plan must not include word-count targets, floors, ceilings, ranges, or budgets. Pacing is expressed structurally through beats and stop conditions. See FOUNDATIONS §Story Bundles §9.
 

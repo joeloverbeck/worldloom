@@ -32,7 +32,7 @@ Do NOT write `audits/SAU-<integer>-<YYYY-MM-DD>.md`, any `audits/SAU-<integer>/r
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `SAU` id allocated via `mcp__worldloom__allocate_next_id`; world canon context packet loaded via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', ...)`; for `cross_story` mode, sibling bundles in `worlds/<world_slug>/stories/` enumerated.
 
-(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 6 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
+(b) Phases 1-6 have completed in working memory: branch tree built from `_source/branches/` + `_source/pages/` (Phase 1); 7 structural sub-phases (2a replay, 2b branch isolation, 2c debt health, 2d belief / visibility health, 2e mystery / canon safety, 2f continuation / terminal proof, 2g causal dependency health) executed when `structural` in mode (default); prose checks executed when `prose` in mode; cross-story contradiction scan executed when `cross_story` in mode; `RSP-<integer>` cards drafted when `remediation` in mode OR `emit_remediation_requests: true`; SAU report drafted with severity-filtered findings table.
 
 (c) The user has explicitly approved the deliverable summary (audit path, modes run, severity breakdown, top-5 highest-severity findings one-line each, RSP card count + per-card `repair_kind` summary, recommended next-step sibling per `repair_kind` cluster).
 
@@ -51,13 +51,14 @@ Phase 1: Scope branches (build tree from BR + PG; apply
                          branch_path_filter)
         |
         v
-Phase 2 [structural; default]: 6 sub-phases executed sequentially
+Phase 2 [structural; default]: 7 sub-phases executed sequentially
   ├─ 2a: Replay events (snapshot hash comparison)
   ├─ 2b: Branch isolation
   ├─ 2c: Debt health
   ├─ 2d: Belief / visibility health
   ├─ 2e: Mystery / canon safety
-  └─ 2f: Continuation / terminal proof
+  ├─ 2f: Continuation / terminal proof
+  └─ 2g: Causal dependency health
         |
         v
 Phase 3 [conditional on `prose` in mode]: Prose checks (5 finding
@@ -165,7 +166,7 @@ When replaying repair events, distinguish `system_repair` (engine-initiated repa
 Flag:
 
 - `branch_isolation_leak` — records in a branch's `state_snapshot.active_records` whose `created_at_page` belongs to a sibling branch. ERROR; `repair_kind: branch_flag`.
-- `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
+- `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing a `branch_local_record` per the shared story-state contract §4.2 branch-scope vocabulary. ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
 - `plan_state_reference_dangling` — page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot. ERROR; `repair_kind: prose_revision` (the plan body needs revision OR a repair turn must add the missing state).
 - `choice_state_reference_dangling` — emitted `CHC` records whose `grounded_in.records[]` cite records not in the emitting page's active snapshot, or whose `grounded_in.affordance_ordinals[]` cite visible-affordance ordinals not present on that page. ERROR; `repair_kind: turn_repair`.
 
@@ -181,9 +182,10 @@ For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots, rea
 
 Flag:
 
+- `expected_witness_completeness` — events involving secrecy, betrayal, deception, violence, sex, law, status, or public ritual whose computed expected witness groups are not covered by a `BEL` create/supersession or a recorded non-propagation rationale. Compute `direct` witnesses from active `STENT` records at the event location per active `STSTAT.location`, excluding unconscious/dead/incapacitated/unavailable entities; compute `indirect` witnesses from public or factional holders reached through law, ritual, bureaucracy, artifact circulation, public violence, visible environmental change, or accessible `DA` / `STOBJ` evidence; treat concealed, offstage, unconscious, socially barred, or access-lacking entities as `excluded`. Valid non-propagation rationales are `no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, and `event_leaves_no_accessible_trace`. WARNING; `repair_kind: turn_repair`.
 - `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
-- `relationship_change_without_basis` — `SREL` supersessions whose `basis` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
+- `relationship_change_without_derived_from_trace` — `SREL` supersessions whose `derived_from` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
 - `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's active `STSTAT`-derived status + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
@@ -211,6 +213,17 @@ For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 
 - `terminal_without_rationale` — `terminal_rationale` is empty or doesn't name how high-salience debts were closed, abandoned, inherited, or intentionally left unresolved. WARNING; `repair_kind: branch_flag`.
 - `orphan_debt_at_terminal` — debts open in the leaf snapshot but not referenced by `terminal_rationale`. WARNING; `repair_kind: branch_flag`.
+
+### Phase 2g: Causal dependency health
+
+Apply the same `causal_dependency_threat_scan` sub-checks across replayed branch state that `branching-story-turn-cycle` Phase 9 applies before a page commits:
+
+- `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
+- `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.
+- `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
+- `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
+
+Repair routing: `choice_dependency_clobbered`, `affordance_dependency_clobbered`, and `obligation_counterparty_unavailable_without_transfer` use `repair_kind: turn_repair`. `slt_precondition_clobbered` uses `repair_kind: commitment_block` when a replacement block is needed, otherwise `turn_repair`.
 
 ## Phase 3: Prose checks (conditional on `prose` in `mode`)
 
@@ -333,6 +346,10 @@ rsp_cards_emitted: N | 0
 
 (Phase 2f findings.)
 
+## Causal dependency health
+
+(Phase 2g findings.)
+
 ## Prose health (if `prose` in modes)
 
 (Phase 3 findings.)
@@ -369,7 +386,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 - **Rule 1 (No Floating Facts)** — Phase 2a (replay events). Mechanism: replay verifies every record referenced in `state_snapshot.active_records` corresponds to a real record file; missing references surface as `snapshot_replay_mismatch` findings.
 - **Rule 4 (No Globalization by Accident)** — Phase 2b (branch isolation). Mechanism: flags sibling-branch records leaking into a branch's snapshot; flags author-pool blocks with branch-local dependencies.
-- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof). Mechanism: unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings.
+- **Rule 5 (No Consequence Evasion)** — Phase 2c (debt health) + Phase 2f (continuation / terminal proof) + Phase 2g (causal dependency health). Mechanism: unactionable / invalidated / ignored debt findings + terminal-without-rationale + orphan-debt-at-terminal findings + clobbered CHC / affordance / OBL / SLT dependency findings.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 2e (mystery / canon safety). Mechanism: forbidden-mystery-resolution + counterfactual-promotion-to-canon + canon-candidate-without-promotion-hold checks against whole-class Mystery Reserve loaded at Pre-flight.
 
 ## Record Schemas
@@ -388,7 +405,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | Rule 2 (No Pure Cosmetics) | N/A | Story-bundle scope. World-canon principle. |
 | Rule 3 (No Specialness Inflation) | N/A | Same as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 2b | Branch-isolation enforcement (4 finding types). |
-| Rule 5 (No Consequence Evasion) | Phase 2c, 2f | Debt-health + continuation-or-terminal-proof findings. |
+| Rule 5 (No Consequence Evasion) | Phase 2c, 2f, 2g | Debt-health + continuation-or-terminal-proof findings + causal dependency findings for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Audit reads only; emits no canon changes. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 2e | Mystery / canon safety checks (4 finding types). |
 | Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |
@@ -398,7 +415,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Audit reads `PG` records as authoritative; never mutates them. Drift between prose and state is reported in findings, not in PG records. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
-| §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (5 finding types). |
+| §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |

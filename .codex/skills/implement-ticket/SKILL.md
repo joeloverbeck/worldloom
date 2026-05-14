@@ -45,6 +45,28 @@ Use this compact checklist so required references are not skipped:
 
 Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples, package-specific edge cases, or checklist expansions here unless they are required to choose the correct reference; otherwise keep the detailed guidance in `references/`.
 
+### Quick Routing Index
+
+Use this index to jump to the detailed reference without adding more one-off rules here:
+
+- Schema, JSON Schema, validator, live-corpus, exact field-set, or capstone work -> `references/validator-schema-migrations.md`.
+- Package, CLI, package docs/examples, generated `dist/`, ignored artifact, or package proof work -> `references/package-tooling.md`.
+- Cross-skill / shared-contract / explicit spec-reference truthing -> `references/reassessment-checks.md` plus `references/mismatch-handling.md`.
+- Prose-skill proof substitution when no executable runner exists -> `references/ticket-classification.md` for classification, then `references/verification-closeout.md` for manual-review + grep proof.
+- Post-proof ticket closeout, explicit reference-spec notes, broad-vs-focused proof, or checked grep/manual-review reruns -> `references/verification-closeout.md`.
+- Dirty worktree, same-file ownership, or ignored generated artifact ledger -> `references/dirty-worktree-ledger.md`.
+- HARD-GATE-facing validation signals or canon/story `_source` mutation gates -> `docs/HARD-GATE-DISCIPLINE.md` and, when subtle, `references/hard-gate-read-triage.md`.
+
+### High-Risk Closeout Traps
+
+Use this compact index during closeout so common proof/story drifts do not hide in the larger references:
+
+- Stale source citations or line numbers in the ticket -> `references/verification-closeout.md` ticket closeout rules.
+- Negative grep / no-hit acceptance commands -> record an explicit success-on-no-match command, or clearly label the nonzero no-match result as the expected proof signal.
+- Explicit spec/doc references with status, implementation notes, counts, or current-state prose -> truth the same-seam reference before closeout, usually with a dated implementation note when broad row-by-row rewriting is out of scope.
+- Generated or ignored proof artifacts such as `dist/`, `_index/`, coverage output, or caches -> use `references/dirty-worktree-ledger.md` and package-specific ignored-artifact checks.
+- Post-proof prose-only closeout edits -> rerun `git diff --check` and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite.
+
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.
@@ -94,6 +116,8 @@ Use the classification to choose which repo surfaces must be read and which veri
 If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
 
 If the shared contract changes repo-wide workflow terminology, ID formats, gate names, command shapes, machine-facing conventions, or other quick-reference language, decide during intake whether `docs/WORKFLOWS.md` is in scope. If it is in scope, include it in the early stale-anchor sweep before source edits. If it is out of scope, record the exclusion and rationale in `Assumption Reassessment` before editing so closeout does not discover the boundary late.
+
+If the user supplied an explicit spec/doc reference and that reference has current-state prose, deliverable status, implementation notes, proof commands, counts, or risk summaries for the ticket's owned seam, decide before source edits whether the reference needs a same-seam truthing note/update or an explicit exclusion. For package/tool, validator, schema, and cross-artifact tickets, add the reference to `Files to Touch`, proof surface, and acceptance text during reassessment when the implementation will make that reference stale; use a dated implementation note for large proposal specs where broad rewriting would exceed the active ticket.
 
 If the primary class is `docs-only / contract-truthing` or `skill rewrite or skill-local behavior` but the strongest proof is a read-only package handler, CLI, or compiled artifact probe, keep the implementation boundary on docs/skills and apply only the relevant package-proof hygiene from `references/package-tooling.md` and `references/verification-closeout.md`. Do not widen the ticket into package code changes just because the proof route exercises a package artifact.
 
@@ -305,6 +329,7 @@ Then run the closeout hard stops from the focused references:
 - If the ticket changed a shared contract, proof fixture, same-seam doc, or authoritative registry, re-check the corresponding same-seam consumers before finishing.
 - If the ticket changed repo-wide workflow terminology, ID formats, gate names, command shapes, machine-facing conventions, or other quick-reference contract language, include `docs/WORKFLOWS.md` in the same-seam stale-anchor sweep or explicitly record why it is out of scope.
 - For cross-artifact contract tickets, after the broad package/workflow proof passes, run a final contract-literal sweep over the owned docs, source, schemas, tests, and package README/example surfaces before ticket closeout. If the sweep finds same-seam source/test/docs hits, patch them, rerun the affected proof, then update `## Verification Result` and `## Deviations`.
+- For no-hit grep acceptance, prefer an explicit success-on-no-match shape such as `if grep -R 'needle' paths; then exit 1; fi` or `! grep -R 'needle' paths`. If the actual proof is a plain `grep` that exits nonzero because there are no matches, record that nonzero no-match result clearly as the expected proof signal.
 - If the ticket adds, removes, or reorders columns in markdown tables, manually verify the header row, separator row, and representative data/example rows have matching column counts. `git diff --check` does not catch semantic table arity mismatches.
 - Run `git diff --check` or an equivalent whitespace/patch hygiene check before final response when the ticket edited code, docs, tickets, or skill files. Use `references/verification-closeout.md` for untracked-file coverage, `git add -N` cleanup, and sandbox retry details.
 - If any owned or closeout-edited file is untracked, do not record plain `git diff --check` as covering that file unless it was made visible to the diff with `git add -N` and the intent-to-add entry was cleaned afterward. Otherwise run and record an explicit equivalent whitespace check over the untracked file, then refresh `git status --short` so the final ledger still classifies it correctly.
