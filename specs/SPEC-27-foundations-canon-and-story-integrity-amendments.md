@@ -70,6 +70,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D3 — Silence Semantics enforced at canonization time
 
+**Implementation note (2026-05-14, SPEC27FOUCAN-003).** D3 landed the Silence Semantics paragraph in `docs/FOUNDATIONS.md` §Core Principle and the matching `canon-addition` Phase 0 prior-silence acknowledgment requirement across `SKILL.md` and the Phase 0 / PA body-shape references. Remaining D3 prose below is historical intake context unless a later ticket explicitly owns further enforcement changes.
+
 **Current state.** The "Default Reality" obligation is stated at `FOUNDATIONS.md:24` but enforced only post-hoc by `continuity-audit` Phase 4k; `canon-addition` does not classify prior silence.
 
 **Change.**

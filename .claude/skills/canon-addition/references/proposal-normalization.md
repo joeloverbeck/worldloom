@@ -36,6 +36,23 @@ Phase 0 conceptual labels feed a single `type` value in the new CF record (`_sou
 
 Both types make `epistemic_profile` engine-required (operator MUST populate substantively rather than emit `n_a`); the n_a-rationale escape hatch fails `record_schema_compliance` for these types. Use the standard `institution` / `belief` / etc. types when the misrecognition layer is incidental rather than structural — an institution with mostly-symmetric public knowledge does NOT need `institution_with_secrecy` typing.
 
+## Prior-Silence Acknowledgment
+
+Ask: *Does this proposed CF's `domains_affected` introduce a domain that no prior CF covered?*
+
+Classify the prior state using the lightweight FOUNDATIONS §Core Principle Silence Semantics distinctions:
+
+1. `previously_unmodeled` — no prior CF covered this domain; the accepted CF must acknowledge that this is first canonization of the area.
+2. `already_implied` — named prior CFs or hard canon already implied the domain; cite the parent CF ids or canon anchors.
+3. `default_baseline` — the proposal changes or specifies an assumed baseline-reality posture; name what was baseline and what is now being specified.
+4. `deliberately_unknown` — the domain touches an open question or Mystery Reserve-adjacent unknown; do not treat prior silence as permission to resolve it.
+
+If the classification is `previously_unmodeled`, record a one-line prior-silence acknowledgment in the accepted CF's `notes` or `source_basis`, using clear language such as "previously unmodeled", "previously silent", or "first canonization of <domain>". If the classification is any other value, record `prior_silence: not previously silent` with the rationale in the PA `body_markdown` `## Phase 0 — Proposal Normalization, Prior-Silence, and Misrecognition Probe` sub-section.
+
+This step is an acknowledgment requirement only. It does not add a CF schema field, does not by itself block a proposal that supplies the acknowledgment, and does not change `continuity-audit` Phase 4k's post-hoc Silent-Area Canonization backstop.
+
+**FOUNDATIONS cross-ref**: §Core Principle (`Default Reality`, `Silence Semantics`); Rule 6 (No Silent Retcons).
+
 ## Misrecognition Probe
 
 Ask: *Does this fact have a public misrecognition layer? What does the broader world believe vs. what is canon-true?*
@@ -45,7 +62,7 @@ If yes, capture the layer in both surfaces:
 1. Set `truth_scope.diegetic_status` per the FOUNDATIONS enum: `objective | believed | disputed | propagandistic | legendary`.
 2. Populate at least one `epistemic_profile.distortion_vectors[]` entry (named actors who systematically misrepresent the fact) OR `epistemic_profile.knowledge_exclusions[]` entry (groups deliberately kept ignorant).
 
-If no, record `misrecognition_probe: NONE` in the PA `body_markdown` `## Phase 0 — Proposal Normalization and Misrecognition Probe` sub-section with a one-line rationale, such as "this fact is a pure geographic distribution; no observation-perspective asymmetry."
+If no, record `misrecognition_probe: NONE` in the PA `body_markdown` `## Phase 0 — Proposal Normalization, Prior-Silence, and Misrecognition Probe` sub-section with a one-line rationale, such as "this fact is a pure geographic distribution; no observation-perspective asymmetry."
 
 The probe captures both directions: presence and explicit absence-with-rationale. Many facts are symmetric across observation perspectives; the probe makes that symmetry an explicit decision rather than an unexamined default.
 

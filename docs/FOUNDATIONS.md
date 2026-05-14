@@ -23,6 +23,8 @@ Every canon fact must live somewhere inside that model.
 
 **Default Reality.** Silence is not permission to invent a supposedly long-standing truth later as if it had always been modeled. When a previously-unmodeled area is first canonized, the change must acknowledge that prior silence and route through Rule 6: no silent retcons. The world may grow, but growth must say what was newly modeled, what was already implied, and what remains deliberately unknown.
 
+**Silence Semantics.** Canonization-time silence classification is an acknowledgment discipline, not a Canon Fact schema field. When a proposed CF touches a domain no prior CF covered, classify the prior state in the adjudication record as one of: previously unmodeled, already implied by named canon, default-baseline reality now being changed or specified, or deliberately unknown / Mystery Reserve-adjacent. The accepted CF records the result as a one-line note or `source_basis` rationale; if the domain was not previously silent, the adjudication records the reason instead. This preserves Rule 6 auditability without treating absence as evidence that a long-standing truth was always canon.
+
 ---
 
 ## Canon Layers
