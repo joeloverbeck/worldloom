@@ -45,6 +45,18 @@ Use this compact checklist so required references are not skipped:
 
 Keep this top-level skill as the routing and hard-stop contract. When adding narrow package, proof, generated-artifact, fixture, or closeout guidance, put the detailed rule in the focused reference file above and leave `SKILL.md` as a pointer plus any true hard stop. Do not add one-off examples, package-specific edge cases, or checklist expansions here unless they are required to choose the correct reference; otherwise keep the detailed guidance in `references/`.
 
+### Quick Routing Index
+
+Use this index to jump to the detailed reference without adding more one-off rules here:
+
+- Schema, JSON Schema, validator, live-corpus, exact field-set, or capstone work -> `references/validator-schema-migrations.md`.
+- Package, CLI, package docs/examples, generated `dist/`, ignored artifact, or package proof work -> `references/package-tooling.md`.
+- Cross-skill / shared-contract / explicit spec-reference truthing -> `references/reassessment-checks.md` plus `references/mismatch-handling.md`.
+- Prose-skill proof substitution when no executable runner exists -> `references/ticket-classification.md` for classification, then `references/verification-closeout.md` for manual-review + grep proof.
+- Post-proof ticket closeout, explicit reference-spec notes, broad-vs-focused proof, or checked grep/manual-review reruns -> `references/verification-closeout.md`.
+- Dirty worktree, same-file ownership, or ignored generated artifact ledger -> `references/dirty-worktree-ledger.md`.
+- HARD-GATE-facing validation signals or canon/story `_source` mutation gates -> `docs/HARD-GATE-DISCIPLINE.md` and, when subtle, `references/hard-gate-read-triage.md`.
+
 ## Always First
 
 - Resolve the exact live ticket path before trusting ticket wording.

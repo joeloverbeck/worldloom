@@ -52,6 +52,78 @@ test("record_schema_compliance requires SE event_kind", async () => {
   ));
 });
 
+test("record_schema_compliance accepts attempt SE resolution", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      outcome_route: "attempt",
+      resolution: {
+        result: "partial_success",
+        player_visible_feedback: "The player can tell the lock yielded only halfway."
+      }
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance requires resolution on non-accept routes that need it", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({ outcome_route: "attempt" }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("'resolution'")
+  ));
+});
+
+test("record_schema_compliance rejects route-inconsistent resolution results", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      outcome_route: "world_block",
+      resolution: {
+        result: "success",
+        player_visible_feedback: "The player can tell the door opens despite being sealed."
+      }
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.enum" &&
+    verdict.message.includes("/resolution/result")
+  ));
+});
+
+test("record_schema_compliance accepts accept route with resolution absent", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({ outcome_route: "accept" }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts conformant SE resolution shape for every route", async () => {
+  const cases: Array<[string, Record<string, unknown>]> = [
+    ["accept", {}],
+    ["attempt", resolution("success")],
+    ["accommodate", resolution("transformed")],
+    ["world_block", resolution("impossible")],
+    ["promotion_hold", resolution("held_for_promotion")],
+    ["terminal", resolution("failure")]
+  ];
+
+  for (const [outcomeRoute, routeResolution] of cases) {
+    const result = await recordSchemaCompliance.run({}, context([
+      eventRecord(validEvent({
+        outcome_route: outcomeRoute,
+        ...routeResolution
+      }))
+    ]));
+
+    assert.deepEqual(result, [], outcomeRoute);
+  }
+});
+
 function eventRecord(parsed: Record<string, unknown>) {
   return {
     ...record("story_event_record", "test-story:SE-0001", FILE_PATH, parsed),
@@ -75,5 +147,14 @@ function validEvent(overrides: Record<string, unknown> = {}): Record<string, unk
       close: []
     },
     ...overrides
+  };
+}
+
+function resolution(result: string): Record<string, unknown> {
+  return {
+    resolution: {
+      result,
+      player_visible_feedback: "The player can tell how the route resolved."
+    }
   };
 }

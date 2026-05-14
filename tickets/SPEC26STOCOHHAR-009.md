@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `docs/FOUNDATIONS.md` (the project-wide design contract). No code or skill change.
-**Deps**: archive/tickets/SPEC26STOCOHHAR-002.md, SPEC26STOCOHHAR-003, SPEC26STOCOHHAR-005
+**Deps**: archive/tickets/SPEC26STOCOHHAR-002.md, archive/tickets/SPEC26STOCOHHAR-003.md, SPEC26STOCOHHAR-005
 
 ## Problem
 
@@ -13,8 +13,8 @@
 ## Assumption Reassessment (2026-05-14)
 
 1. Verified against the current `docs/FOUNDATIONS.md` (read in full at SPEC-26 Step 1): §Story Bundles §5 ("Validation Rules At Story Scope", line 564) enumerates load-bearing story-state fields — "`STSTAT` carries replayable life / agency / location state ... `SF.authority` separates ... `OBL` / `CNSQ` `urgency` ... `CHC.grounded_in` ..." (line 566) — and does NOT name `SE.resolution`. §5 line 568 carries the crude "`created_at_page` is non-null" branch-isolation formulation. §5c ("Present Causal State, Not Narrative Shape", line 588) is the engine-scope statement of the no-act-structure principle.
-2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D8: D8 has three parts — (a) extend §5's Rule-1 examples to include `SE.resolution`; (b) reference the `bundle_genesis_record` / `branch_local_record` vocabulary in the §5 branch-isolation discussion; (c) optionally note in §5c that the D4 causal-dependency threat scan is the schema-/engine-scope expression of Rule 5 at story scope ("no new text is required if §5c already reads cleanly; confirm at implementation"). The Deps (`archive/tickets/SPEC26STOCOHHAR-002.md` / SPEC26STOCOHHAR-003 / SPEC26STOCOHHAR-005) are the tickets that land the vocabulary, the `SE.resolution` field, and the threat scan respectively — D8 reconciles FOUNDATIONS to *their landed state*, so they must complete first.
-3. Cross-skill / cross-artifact boundary under audit: `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c is the project-wide design contract; the shared surface is the §5 example list and branch-isolation phrasing, which must agree with `.claude/skills/_shared-templates/story-state-contract.md` (the story-record schema authority per §5b). This ticket changes only `FOUNDATIONS.md`; the contract and skills are landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / SPEC26STOCOHHAR-003 / SPEC26STOCOHHAR-005.
+2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D8: D8 has three parts — (a) extend §5's Rule-1 examples to include `SE.resolution`; (b) reference the `bundle_genesis_record` / `branch_local_record` vocabulary in the §5 branch-isolation discussion; (c) optionally note in §5c that the D4 causal-dependency threat scan is the schema-/engine-scope expression of Rule 5 at story scope ("no new text is required if §5c already reads cleanly; confirm at implementation"). The Deps (`archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / SPEC26STOCOHHAR-005) are the tickets that land the vocabulary, the `SE.resolution` field, and the threat scan respectively — D8 reconciles FOUNDATIONS to *their landed state*, so they must complete first.
+3. Cross-skill / cross-artifact boundary under audit: `docs/FOUNDATIONS.md` §Story Bundles §5 / §5c is the project-wide design contract; the shared surface is the §5 example list and branch-isolation phrasing, which must agree with `.claude/skills/_shared-templates/story-state-contract.md` (the story-record schema authority per §5b). This ticket changes only `FOUNDATIONS.md`; the contract and skills are landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / SPEC26STOCOHHAR-005.
 4. FOUNDATIONS principle under audit: Rule 1 (No Floating Facts) — §5 enumerates Rule-1-required story-bundle schema fields as examples; `SE.resolution` is a Rule-1 grounding field (it grounds a non-accept outcome's result and player-visible consequence), so its absence from the §5 example list is a documentation gap this ticket closes. Rule 4 (No Globalization by Accident) — the §5 branch-isolation discussion governs Rule 4 at story scope; aligning its vocabulary with the contract's `branch_local_record` definition keeps the FOUNDATIONS text and the contract using one vocabulary.
 5. HARD-GATE / Canon Safety surface (per `tickets/README.md` check 9): `docs/FOUNDATIONS.md` is the design contract that *defines* the Mystery Reserve firewall (Rule 7, line 426) and the Canon Layers. Confirmed: this ticket's edits are confined to §Story Bundles §5 (Rule-1 examples + branch-isolation vocabulary) and the optional §5c note — it does NOT touch Rule 7, the Mystery Reserve definition, the HARD-GATE discipline, or any Canon Safety Check definition. The firewall is unchanged; the edits are additive documentation reconciliation.
 
@@ -51,7 +51,7 @@ In §5c, optionally note that the SPEC26STOCOHHAR-005 causal-dependency threat s
 ## Out of Scope
 
 - Any change to FOUNDATIONS §Rule 7, the Mystery Reserve definition, the Canon Layers, the HARD-GATE discipline, or the Canon Fact Record Schema — this ticket is confined to §Story Bundles §5 / §5c.
-- The contract definitions, the `SE.resolution` schema, and the causal-threat scan themselves — landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / SPEC26STOCOHHAR-003 / SPEC26STOCOHHAR-005 respectively.
+- The contract definitions, the `SE.resolution` schema, and the causal-threat scan themselves — landed by `archive/tickets/SPEC26STOCOHHAR-002.md` / `archive/tickets/SPEC26STOCOHHAR-003.md` / SPEC26STOCOHHAR-005 respectively.
 - Re-wording §5's Rule 4 / Rule 5 / Rule 7 story-scope statements beyond the branch-isolation vocabulary alignment.
 
 ## Acceptance Criteria

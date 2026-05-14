@@ -190,6 +190,18 @@ Route to exactly one of six outcomes per shared contract §6:
 - `promotion_hold` — the action asserts a world-level truth or canon mystery resolution; pauses for `story-fact-promotion-to-canon`. The state delta records ONLY the branch-local appearance, not the canon claim as already true.
 - `terminal` — the action coherently closes the branch.
 
+Draft `SE.resolution` before leaving Phase 1:
+
+- Required for `attempt`, `accommodate`, and `world_block`.
+- `attempt` uses `result: success | partial_success | failure`.
+- `accommodate` uses `result: partial_success | transformed`.
+- `world_block` uses `result: impossible | failure`.
+- `promotion_hold` may omit `resolution`, or use `result: held_for_promotion` when the page should explicitly surface that the result is held for promotion.
+- `terminal` may omit `resolution`, or use `result: success | partial_success | failure | transformed` when the closure needs explicit consequence feedback.
+- `accept` omits `resolution`.
+
+When `resolution` is present, set `player_visible_feedback` to one sentence naming what the player should be able to perceive about why the action resolved this way. Do not add `reason_class`; the route, result, rationale, and state delta are sufficient.
+
 **Silent rejection is forbidden.** Every action — including impossible ones — produces an `SE` record with `world_logic_rationale` explaining the route plus a page plan that dramatizes the outcome.
 
 ## Phase 2: Select or JIT-create a commitment block
@@ -281,6 +293,9 @@ event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
 actor: STENT-<integer> | system | unknown
 targets: [<record id>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal
+resolution:
+  result: success | partial_success | failure | impossible | transformed | held_for_promotion
+  player_visible_feedback: <one-sentence player-legible consequence feedback>
 world_logic_rationale: <why this route follows from current state + world canon>
 state_delta:
   create: [<every record id created this turn>]
@@ -290,6 +305,8 @@ promotion_claims:
   - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
+
+`resolution` follows the shared contract §4.3 route table: required for `attempt` / `accommodate` / `world_block`, absent for `accept`, and optional for `promotion_hold` / `terminal` when an explicit held-or-terminal result must be visible.
 
 Draft `PG-<integer>` per shared contract §4.2:
 
@@ -312,7 +329,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
-Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
+Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale` + `resolution.player_visible_feedback` for non-accept routes); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
 
 The plan must not expose engine jargon to prose. Engine terms confined to §15 frontmatter only. No word-count targets (per FOUNDATIONS §Story Bundles §9).
 

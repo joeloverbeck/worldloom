@@ -158,6 +158,7 @@ Load into working memory:
 - The source records named in `source_record_ids` (per the source-kind-to-record-class mapping in §Inputs).
 - The `SE-<integer>` events that authored or modified each source record (traverse `_source/events/SE-*.yaml` for events whose `state_delta.create / supersede` references any source record).
 - The `BEL-<integer>` records showing who knows / believes / witnesses the claim — load every BEL whose `consequences.opens[]` or `basis.source_event` references any authoring `SE`.
+- Any authoring `SE.resolution.player_visible_feedback` where `resolution.result == held_for_promotion`; carry this into the proposal evidence narrative so canon-addition reviewers can see what the player was told at the hold point.
 - The `branch_path` `BR-<integer>.yaml` record + sibling branch summaries (for Phase 5 downstream impact on same-story contradictory branches).
 - Rendered prose at `pages-prose/<page_id>.md` and receipts at `pages-prose-receipts/<page_id>.yaml` for each `supporting_page_ids` entry.
 - Whole-class Mystery Reserve and whole-class INV (loaded at Pre-flight) for Phase 4 firewall.
@@ -294,6 +295,9 @@ branch_path: <branch_path>
 supporting_pages: [<supporting_page_ids>]
 authoring_events: [SE-<integer> ids]
 belief_witnesses: [BEL-<integer> ids]
+resolution_feedback_evidence:
+  - event_id: SE-<integer>
+    player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
 claim_visibility:
   who_holds_belief: [STENT-<integer> | group:<name> | public]
   belief_truth_relations: [<truth_relation per BEL>]

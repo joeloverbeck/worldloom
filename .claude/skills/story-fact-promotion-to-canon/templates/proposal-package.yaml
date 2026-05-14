@@ -21,6 +21,10 @@ branch_path: BR-<integer>
 supporting_pages: [PG-<integer> ids]
 authoring_events: [SE-<integer> ids]
 belief_witnesses: [BEL-<integer> ids]
+resolution_feedback_evidence:
+  - event_id: SE-<integer>
+    player_visible_feedback: >
+      <copied from SE.resolution.player_visible_feedback when resolution.result == held_for_promotion>
 
 claim_visibility:
   who_holds_belief: [STENT-<integer> | group:<name> | public]

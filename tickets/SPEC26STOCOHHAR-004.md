@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Medium
 **Engine Changes**: Yes — `branching-story-prose-attach` skill prose and `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (prose-receipt schema).
-**Deps**: SPEC26STOCOHHAR-003
+**Deps**: archive/tickets/SPEC26STOCOHHAR-003.md
 
 ## Problem
 
@@ -14,7 +14,7 @@
 
 1. Verified against the current codebase at SPEC-26 Step 2: `branching-story-prose-attach/SKILL.md` defines exactly 6 deterministic checks — `engine_jargon_leak`, `forbidden_mystery_resolution`, `required_event_rendered`, `entity_status_consistency`, `invented_structural_fact`, `canon_claim_without_authority` (lines 167–184) — plus a roll-up `verdict` block (lines 240–245) and a `repair_recommendation` ladder (lines 218–220). The skill cross-references `.claude/skills/_shared-templates/story-state-contract.md` §4.6 ("6 deterministic checks complete per ... §4.6", line 38).
 2. Verified against `specs/SPEC-26-story-coherence-hardening-ii.md` D3: `choice_consequence_visibility` is `PASS | WARN | FAIL` — `PASS` = prose makes the selected action, route, and immediate consequence legible to a first-time reader; `WARN` = the action occurred but the consequence/route feedback is easy to miss; `FAIL` = prose obscures, contradicts, or omits the consequence (especially for `attempt`/`accommodate`/`world_block`/`promotion_hold`/`terminal` routes). It verifies the prose realizes `SE.resolution.player_visible_feedback`.
-3. Cross-skill / cross-artifact boundary under audit: the prose-receipt check set, owned jointly by `branching-story-prose-attach/SKILL.md` (the check definitions, verdict roll-up, repair ladder) and `story-state-contract.md` §4.6 (the prose-receipt direct-write artifact schema). The new check also depends on the `SE.resolution.player_visible_feedback` field from SPEC26STOCOHHAR-003 — hence the `Deps`.
+3. Cross-skill / cross-artifact boundary under audit: the prose-receipt check set, owned jointly by `branching-story-prose-attach/SKILL.md` (the check definitions, verdict roll-up, repair ladder) and `story-state-contract.md` §4.6 (the prose-receipt direct-write artifact schema). The new check also depends on the `SE.resolution.player_visible_feedback` field from `archive/tickets/SPEC26STOCOHHAR-003.md` — hence the `Deps`.
 4. FOUNDATIONS principle under audit: §Story Bundles §4a (Plan-Authority Boundary) — `choice_consequence_visibility` is a prose-receipt check, a rendering-of-state validation, not a second state engine. It reads the committed `SE.resolution` and the rendered prose; it does not mutate page state. This keeps prose-attach within its mandate (validate the rendering; never re-author state).
 5. HARD-GATE / Canon Safety surface (per `tickets/README.md` check 9): this ticket adds a sibling check next to `forbidden_mystery_resolution` (the Rule 7 redundant prose-side guard). The enforcement surfaces touched are the prose-attach 6→7 check suite, the roll-up `verdict` block, and the `repair_recommendation` ladder. Confirmed: `choice_consequence_visibility` reads `SE.resolution` and the prose only; it does not relax, reorder, or bypass `forbidden_mystery_resolution`, and it adds no new path that could resolve a `forbidden`-status mystery — the Mystery Reserve firewall is unchanged.
 6. Output-schema extension (per `tickets/_TEMPLATE.md` menu item 6): the schema extended is the prose-receipt direct-write artifact at `story-state-contract.md` §4.6 (the `pages-prose-receipts/PG-<integer>.yaml` schema). The extension is additive — a new `choice_consequence_visibility: PASS | WARN | FAIL` field joins the existing six check results. Consumers: the roll-up `verdict` derivation in `branching-story-prose-attach`, and human reviewers reading the receipt; no breaking change to existing receipt readers (a new field with a deterministic value).
@@ -52,7 +52,7 @@ In `story-state-contract.md` §4.6 (prose receipt), change "6 deterministic chec
 
 ## Out of Scope
 
-- The `SE.resolution` schema/contract/validator/emitter work — that is SPEC26STOCOHHAR-003, on which this ticket depends.
+- The `SE.resolution` schema/contract/validator/emitter work — that is `archive/tickets/SPEC26STOCOHHAR-003.md`, on which this ticket depends.
 - Cross-referencing the Player Agency Contract from `choice_consequence_visibility` — that wiring is owned by SPEC26STOCOHHAR-008 (D7).
 - Any change to the six existing prose-attach checks' names or semantics.
 

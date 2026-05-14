@@ -198,6 +198,9 @@ event_kind: story_start | selected_choice | write_in_attempt | system_repair | a
 actor: STENT-<integer> | system | unknown   # *
 targets: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer>]
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
+resolution:
+  result: success | partial_success | failure | impossible | transformed | held_for_promotion
+  player_visible_feedback: >          # * one-sentence player-legible consequence feedback
 world_logic_rationale: >               # * natural-language justification of why this route follows from world canon + branch state
 state_delta:
   create: [record_id]
@@ -209,6 +212,17 @@ promotion_claims:
 ```
 
 `world_logic_rationale` is required (no silent rejection — see §6). There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
+
+`resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
+
+| `outcome_route` | Allowed `resolution.result` |
+|---|---|
+| `accept` | `resolution` absent |
+| `attempt` | `success`, `partial_success`, `failure` |
+| `accommodate` | `partial_success`, `transformed` |
+| `world_block` | `impossible`, `failure` |
+| `promotion_hold` | `resolution` absent or `held_for_promotion` |
+| `terminal` | `resolution` absent, `success`, `partial_success`, `failure`, `transformed` |
 
 ### 4.4 `SLT` commitment block (~18 sub-paths)
 
@@ -695,6 +709,8 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 **§2, §3, and §19 are inlined verbatim on every page plan.** This is operationally load-bearing: the external prose renderer has no cross-plan state — every page render is a cold context. Compacting these sections on subsequent pages would force the user to manually re-paste the canonical content on every render, defeating the self-contained-plan contract. Skills must not propose compacting these sections across pages.
 
 The plan must not expose engine jargon to prose. Engine terms (record ids, gate names) may appear in §15 frontmatter only.
+
+For non-accept routes, §7 must include `SE.resolution.player_visible_feedback` so the prose renderer has the player-legible outcome receipt it must realize. For `accept`, §7 carries the selected event, route, rationale, and state delta without a `resolution` block.
 
 The plan must not include word-count targets, floors, ceilings, ranges, or budgets. Pacing is expressed structurally through beats and stop conditions. See FOUNDATIONS §Story Bundles §9.
 
