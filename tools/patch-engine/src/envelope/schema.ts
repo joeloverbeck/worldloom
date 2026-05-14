@@ -24,6 +24,7 @@ export interface IdAllocations {
   char_ids?: string[];
   da_ids?: string[];
   stent_ids?: string[];
+  ststat_ids?: string[];
   sf_ids?: string[];
   se_ids?: string[];
   obl_ids?: string[];
@@ -72,6 +73,7 @@ export const OPERATION_KINDS = [
   "append_character_record",
   "append_diegetic_artifact_record",
   "create_stent_record",
+  "create_ststat_record",
   "create_sf_record",
   "create_se_record",
   "create_obl_record",
@@ -209,6 +211,7 @@ export type PatchOperation =
       { da_record: DiegeticArtifactFrontmatter; body_markdown: string; filename: string }
     >
   | OperationBase<"create_stent_record", StoryRecordPayload>
+  | OperationBase<"create_ststat_record", StoryRecordPayload>
   | OperationBase<"create_sf_record", StoryRecordPayload>
   | OperationBase<"create_se_record", StoryRecordPayload>
   | OperationBase<"create_obl_record", StoryRecordPayload>

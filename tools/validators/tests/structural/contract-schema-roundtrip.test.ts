@@ -29,21 +29,25 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     required: ["id", "story_id", "created_at_page", "display_name", "role_in_story"],
     properties: ["id", "story_id", "created_at_page", "supersedes", "display_name", "bound_char_id", "role_in_story"]
   },
+  "story-status": {
+    required: ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "entity", "life", "agency", "location", "derived_from"]
+  },
   "story-intention": {
     required: ["id", "story_id", "created_at_page", "holder", "intent", "urgency", "expires_when"],
     properties: ["id", "story_id", "created_at_page", "supersedes", "holder", "intent", "urgency", "expires_when"]
   },
   "story-fact": {
-    required: ["id", "story_id", "created_at_page", "statement"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "derived_from"]
+    required: ["id", "story_id", "created_at_page", "statement", "authority"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "statement", "authority", "derived_from"]
   },
   "story-obligation": {
-    required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close"]
+    required: ["id", "story_id", "created_at_page", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "obligation_kind", "description", "owed_by", "owed_to", "trigger_to_close", "urgency"]
   },
   "story-consequence": {
-    required: ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "resolves_when", "derived_from"]
+    required: ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when", "urgency"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "status", "consequence_kind", "description", "urgency", "resolves_when", "derived_from"]
   },
   "story-thread": {
     required: ["id", "story_id", "created_at_page", "status", "title", "summary", "urgency"],
@@ -70,8 +74,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["id", "story_id", "created_at_page", "label", "description", "parent_branch_id", "forked_at_page_id", "root_page_id"]
   },
   "story-choice": {
-    required: ["id", "story_id", "created_at_page", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block"],
-    properties: ["id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "success_policy"]
+    required: ["id", "story_id", "created_at_page", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in"],
+    properties: ["id", "story_id", "created_at_page", "supersedes", "surface_label", "player_visible_intent", "target_or_action_families", "likely_state_pressure", "associated_commitment_block", "grounded_in", "success_policy"]
   }
 };
 
@@ -93,6 +97,16 @@ test("representative amended contract records validate against tightened schemas
       display_name: "Mara",
       role_in_story: ["primary_actor"]
     }),
+    storyRecord("story_status_record", "STSTAT-0001", "status", {
+      id: "STSTAT-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      entity: "STENT-0001",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-0001",
+      derived_from: ["SE-0001"]
+    }),
     storyRecord("intention_record", "STINT-0001", "intentions", {
       id: "STINT-0001",
       story_id: "STORY-001",
@@ -107,6 +121,7 @@ test("representative amended contract records validate against tightened schemas
       story_id: "STORY-001",
       created_at_page: "PG-0001",
       statement: "The gate is damaged.",
+      authority: "canon_linked",
       derived_from: ["CF-0001"]
     }),
     storyRecord("obligation_record", "OBL-0001", "obligations", {
@@ -118,7 +133,8 @@ test("representative amended contract records validate against tightened schemas
       description: "Mara promised to fix the gate.",
       owed_by: "STENT-0001",
       owed_to: "public",
-      trigger_to_close: "The gate is fixed."
+      trigger_to_close: "The gate is fixed.",
+      urgency: "high"
     }),
     storyRecord("consequence_record", "CNSQ-0001", "consequences", {
       id: "CNSQ-0001",
@@ -127,6 +143,7 @@ test("representative amended contract records validate against tightened schemas
       status: "pending",
       consequence_kind: "danger",
       description: "The broken gate leaves the alley exposed.",
+      urgency: "high",
       resolves_when: "The gate is fixed.",
       derived_from: ["SE-0001"]
     }),
@@ -197,7 +214,11 @@ test("representative amended contract records validate against tightened schemas
       player_visible_intent: "Repair the gate before anyone comes through.",
       target_or_action_families: ["make_change", "protect"],
       likely_state_pressure: "safety and obligation",
-      associated_commitment_block: null
+      associated_commitment_block: null,
+      grounded_in: {
+        records: ["STENT-0001", "STLOC-0001"],
+        affordance_ordinals: [0]
+      }
     })
   ];
 

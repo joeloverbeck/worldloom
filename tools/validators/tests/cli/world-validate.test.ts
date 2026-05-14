@@ -177,6 +177,7 @@ test("world-validate --since narrows selector applicability from the world's git
     "id_uniqueness",
     "cross_file_reference",
     "record_schema_compliance",
+    "story_fact_authority",
     "rule7_mystery_reserve_preservation"
   ]);
 });

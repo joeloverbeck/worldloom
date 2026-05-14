@@ -8,34 +8,103 @@ import { context, record } from "../structural/helpers.js";
 test("storylet predicate DSL accepts nested preconditions and every contract predicate form", async () => {
   const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
     storyletRecord("SLT-0001", {
+      scope: { visibility: "global_author_pool", branch_id: null },
       preconditions: {
         hard: [
           { pred: "fact_true", fact: "SF-0001" },
           { pred: "belief", holder: "STENT-0001", claim: "BEL-0001", mode: "believes", confidence_floor: "medium" },
-          { pred: "entity_status", entity: "STENT-0001", axis: "agency", value: "free" },
+          { pred: "entity_status", entity: "STENT-0001", field: "agency", value: "free" },
           { pred: "relationship_axis", from: "role:protagonist", to: "STENT-0002", axis: "trust", value: "high" },
           { pred: "obligation_open", obligation: "OBL-0001" },
           { pred: "consequence_pending", consequence: "CNSQ-0001" },
           { pred: "thread_active", thread: "THR-0001" },
+          { pred: "any_obligation_open", alias: "urgent_debt", kind: "promise", urgency: "high", owed_by_role: "primary_actor", owed_to_role: "dependent" },
+          { pred: "any_consequence_pending", alias: "pending_fallout", kind: "danger", urgency: "medium", derived_from: "SE-0001" },
+          { pred: "any_thread_active", alias: "active_thread", tag: "gate_repair", urgency: "low" },
+          { pred: "any_relationship_axis", alias: "trust_edge", axis: "trust", comparator: ">=", value: "medium", participant_role: "allied_actor" },
+          { pred: "any_belief", alias: "public_belief", holder_role: "witness", mode: "believes", truth_relation: "contested", visibility: "public" },
+          { pred: "any_intention", alias: "open_intent", holder_role: "primary_actor", urgency: "high" },
           { pred: "location", entity: "STENT-0001", location: "STLOC-0001" },
           { pred: "has_affordance", action_family: "communicate" },
-          { pred: "record_active", record: "SREL-0001" },
+          { pred: "record_active", record: "STSTAT-0001" },
           { pred: "intention_active", intention: "STINT-0001" },
           { pred: "object_accessible", entity: "STENT-0001", object: "STOBJ-0001" },
           { pred: "artifact_accessible", entity: "STENT-0001", artifact: "DA-0001" },
           { pred: "affordance_available_to", entity: "STENT-0001", action_family: "protect" },
-          { pred: "not", predicate: { pred: "entity_status", entity: "role:protagonist", axis: "life", value: "dead" } },
+          { pred: "not", predicate: { pred: "entity_status", entity: "role:protagonist", field: "life", value: "dead" } },
           { pred: "all", predicates: [{ pred: "thread_active", thread: "THR-0001" }] },
           { pred: "any", predicates: [{ pred: "has_affordance", action_family: "wait" }] }
         ],
         soft: [
           { pred: "affordance_available_to", entity: "role:protagonist", action_family: "investigate" }
         ]
-      }
+      },
+      effects: {
+        create: ["bound:pending_fallout"],
+        supersede: ["bound:urgent_debt"],
+        close: ["bound:active_thread"]
+      },
+      exit_options: [
+        {
+          action_family: "communicate",
+          surface_hint: "Name the consequence.",
+          likely_effects: ["bound:trust_edge", "bound:public_belief", "bound:open_intent"]
+        }
+      ]
     })
   ])));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("storylet predicate DSL rejects bound effect aliases with no binding precondition", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-0005", {
+      scope: { visibility: "global_author_pool", branch_id: null },
+      preconditions: {
+        hard: [
+          { pred: "has_affordance", action_family: "communicate" }
+        ]
+      },
+      effects: {
+        supersede: ["bound:missing_debt"]
+      },
+      exit_options: [
+        {
+          action_family: "communicate",
+          surface_hint: "Ask after the debt.",
+          likely_effects: ["bound:missing_consequence"]
+        }
+      ]
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.unbound_alias" &&
+    verdict.message.includes("effects.supersede[0]")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.unbound_alias" &&
+    verdict.message.includes("exit_options[0].likely_effects[0]")
+  ));
+});
+
+test("storylet predicate DSL rejects existential predicates in branch-scoped execution blocks", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-0006", {
+      scope: { visibility: "branch_scoped", branch_id: "BR-0001" },
+      preconditions: {
+        hard: [
+          { pred: "any_obligation_open", alias: "debt" }
+        ]
+      }
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_scope" &&
+    verdict.message.includes("global_author_pool or branch_prefix_scoped")
+  ));
 });
 
 test("storylet predicate DSL rejects unknown pred, prose, invalid enum, invalid refs, malformed nested shape, and deep recursion", async () => {
@@ -66,9 +135,26 @@ test("storylet predicate DSL rejects unknown pred, prose, invalid enum, invalid 
   assert.match(verdicts.find((verdict) => verdict.code === "predicate.unknown_pred")?.message ?? "", /SLT-0002/);
 });
 
+test("storylet predicate DSL rejects legacy entity_status axis argument", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-0003", {
+      preconditions: {
+        hard: [
+          { pred: "entity_status", entity: "STENT-0001", axis: "agency", value: "free" }
+        ]
+      }
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.invalid_enum" &&
+    verdict.message.includes("preconditions.hard[0].field")
+  ));
+});
+
 test("storylet predicate DSL rejects missing nested hard list", async () => {
   const verdicts = await storyletPredicateDslParsability.run(null, context([
-    storyletRecord("SLT-0003", { preconditions: { soft: [] } })
+    storyletRecord("SLT-0004", { preconditions: { soft: [] } })
   ]));
 
   assert.ok(verdicts.some((verdict) => verdict.code === "predicate.expected_list"));
@@ -128,7 +214,8 @@ function validReferenceRecords(): IndexedRecord[] {
     record("intention_record", "marla:STINT-0001", "stories/marla/_source/intentions/STINT-0001.yaml", { id: "STINT-0001" }),
     record("story_location_record", "marla:STLOC-0001", "stories/marla/_source/locations/STLOC-0001.yaml", { id: "STLOC-0001" }),
     record("story_object_record", "marla:STOBJ-0001", "stories/marla/_source/objects/STOBJ-0001.yaml", { id: "STOBJ-0001" }),
-    record("story_diegetic_artifact_record", "marla:DA-0001", "stories/marla/_source/artifacts/DA-0001.yaml", { id: "DA-0001" })
+    record("story_diegetic_artifact_record", "marla:DA-0001", "stories/marla/_source/artifacts/DA-0001.yaml", { id: "DA-0001" }),
+    record("story_status_record", "marla:STSTAT-0001", "stories/marla/_source/status/STSTAT-0001.yaml", { id: "STSTAT-0001" })
   ];
 }
 
@@ -137,7 +224,7 @@ function storyletRecord(id: string, parsed: Record<string, unknown>): IndexedRec
 }
 
 function nestedNot(depth: number): Record<string, unknown> {
-  let predicate: Record<string, unknown> = { pred: "entity_status", entity: "role:protagonist", axis: "life", value: "alive" };
+  let predicate: Record<string, unknown> = { pred: "entity_status", entity: "role:protagonist", field: "life", value: "alive" };
   for (let index = 0; index < depth; index += 1) {
     predicate = { pred: "not", predicate };
   }

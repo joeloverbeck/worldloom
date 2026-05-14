@@ -72,6 +72,32 @@ test("describeEnvelopeSchema exposes create_bel_record wrapper schema", async ()
   assert.equal(payload.properties?.record?.properties?.id?.pattern, "^BEL-[0-9]+$");
 });
 
+test("describeEnvelopeSchema exposes create_ststat_record wrapper schema", async () => {
+  const manifest = await describeEnvelopeSchema({ op_kind: "create_ststat_record" });
+
+  assert.equal(manifest.delivery_status, "inline");
+  assert.deepEqual(Object.keys(manifest.op_schemas), ["create_ststat_record"]);
+
+  const schema = manifest.op_schemas.create_ststat_record!;
+  const properties = schema.properties as Record<string, unknown>;
+  assert.deepEqual(properties.op, { const: "create_ststat_record" });
+
+  const payload = properties.payload as {
+    required?: string[];
+    properties?: {
+      story_slug?: { pattern?: string };
+      record?: { $ref?: string };
+    };
+  };
+  assert.deepEqual(payload.required, ["story_slug", "record"]);
+  assert.equal(payload.properties?.story_slug?.pattern, "^[a-z0-9-]+$");
+  assert.equal(payload.properties?.record?.$ref, "https://worldloom.local/schemas/story-status.schema.json");
+  assert.equal(
+    manifest.referenced_schemas["https://worldloom.local/schemas/story-status.schema.json"]?.$id,
+    "https://worldloom.local/schemas/story-status.schema.json"
+  );
+});
+
 test("describeEnvelopeSchema filters to one op kind and exposes CF payload schema", async () => {
   const manifest = await describeEnvelopeSchema({ op_kind: "create_cf_record" });
 

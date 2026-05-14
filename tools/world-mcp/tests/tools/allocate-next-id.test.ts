@@ -68,6 +68,7 @@ const STORY_CLASS_CASES: Array<{
   { idClass: "BR", subdir: "branches", fileName: "BR-0007.yaml", expected: "BR-8" },
   { idClass: "CHC", subdir: "choices", fileName: "CHC-0007.yaml", expected: "CHC-8" },
   { idClass: "STENT", subdir: "entities", fileName: "STENT-0007.yaml", expected: "STENT-8" },
+  { idClass: "STSTAT", subdir: "status", fileName: "STSTAT-0007.yaml", expected: "STSTAT-8" },
   { idClass: "DA", subdir: "artifacts", fileName: "DA-0007.yaml", expected: "DA-8" }
 ];
 
@@ -336,6 +337,9 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     const beliefResult = await withRepoRoot(root, () =>
       allocateNextId({ world_slug: "seeded", id_class: "BEL", story_slug: "empty-story" })
     );
+    const statusResult = await withRepoRoot(root, () =>
+      allocateNextId({ world_slug: "seeded", id_class: "STSTAT", story_slug: "empty-story" })
+    );
 
     assert.ok(!("code" in pageResult));
     assert.ok(!("code" in stintResult));
@@ -343,12 +347,14 @@ test("allocateNextId returns first-run story-scoped ids", async () => {
     assert.ok(!("code" in sauResult));
     assert.ok(!("code" in spResult));
     assert.ok(!("code" in beliefResult));
+    assert.ok(!("code" in statusResult));
     assert.equal(pageResult.next_id, "PG-1");
     assert.equal(stintResult.next_id, "STINT-1");
     assert.equal(slbResult.next_id, "SLB-1");
     assert.equal(sauResult.next_id, "SAU-1");
     assert.equal(spResult.next_id, "SP-1");
     assert.equal(beliefResult.next_id, "BEL-1");
+    assert.equal(statusResult.next_id, "STSTAT-1");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -723,7 +729,7 @@ test("allocateNextId rejects cross-scope world_slug and id_class combinations", 
   }
 });
 
-test("allocateNextId exposes all 49 id classes with canonical unpadded formats", () => {
+test("allocateNextId exposes all 50 id classes with canonical unpadded formats", () => {
   assert.deepEqual(Object.keys(ID_CLASS_FORMATS), [
     "CF",
     "CH",
@@ -759,6 +765,7 @@ test("allocateNextId exposes all 49 id classes with canonical unpadded formats",
     "BR",
     "CHC",
     "STENT",
+    "STSTAT",
     "M",
     "ONT",
     "CAU",
@@ -775,12 +782,14 @@ test("allocateNextId exposes all 49 id classes with canonical unpadded formats",
     "SEC-PAS",
     "SEC-TML"
   ]);
-  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 49);
+  assert.equal(Object.keys(ID_CLASS_FORMATS).length, 50);
   assert.equal(ID_CLASS_FORMATS.M.zeroPad, false);
   assert.equal(ID_CLASS_FORMATS.STORY.zeroPad, false);
   assert.match("STORY-8", ID_CLASS_FORMATS.STORY.regex);
   assert.equal(ID_CLASS_FORMATS.BEL.zeroPad, false);
   assert.match("BEL-8", ID_CLASS_FORMATS.BEL.regex);
+  assert.equal(ID_CLASS_FORMATS.STSTAT.zeroPad, false);
+  assert.match("STSTAT-8", ID_CLASS_FORMATS.STSTAT.regex);
   assert.equal(ID_CLASS_FORMATS.PG.zeroPad, false);
   assert.match("PG-8", ID_CLASS_FORMATS.PG.regex);
   assert.match("STINT-8", ID_CLASS_FORMATS.STINT.regex);

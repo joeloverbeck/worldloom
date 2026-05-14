@@ -73,6 +73,44 @@ test("create_bel_record writes BEL YAML under the story _source tree", async (t)
   assertYamlEquals(staged, op.payload.record);
 });
 
+test("create_ststat_record writes STSTAT YAML under the story _source status tree", async (t) => {
+  const world = createTestWorld(t);
+  const env = baseEnvelope({ ststat_ids: ["STSTAT-0001"] });
+  const op = {
+    op: "create_ststat_record",
+    target_world: env.target_world,
+    payload: {
+      story_slug: "marla-kern-seduction",
+      record: {
+        id: "STSTAT-0001",
+        story_id: "STORY-0001",
+        created_at_page: "PG-0001",
+        entity: "STENT-0001",
+        life: "alive",
+        agency: "free",
+        location: "STLOC-0001"
+      }
+    }
+  } satisfies Extract<PatchOperation, { op: "create_ststat_record" }>;
+
+  const staged = await stageCreateStoryRecord(env, op, world.ctx);
+
+  assert.equal(
+    staged.target_file_path,
+    path.join(
+      world.worldRoot,
+      "worlds",
+      world.worldSlug,
+      "stories",
+      "marla-kern-seduction",
+      "_source",
+      "status",
+      "STSTAT-0001.yaml"
+    )
+  );
+  assertYamlEquals(staged, op.payload.record);
+});
+
 test("create_slt_record rejects missing story-scoped id allocation", async (t) => {
   const world = createTestWorld(t);
   const env = baseEnvelope();

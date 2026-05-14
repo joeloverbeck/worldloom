@@ -82,6 +82,23 @@ export function buildStoryBundleWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: storyNodeId(STORY_FIXTURE_SLUG, "STSTAT-0001"),
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        file_path: storyPath(STORY_FIXTURE_SLUG, "status", "STSTAT-0001.yaml"),
+        node_type: "story_status_record",
+        body: [
+          "id: STSTAT-0001",
+          "story_id: STORY-0001",
+          "created_at_page: PG-0001",
+          "entity: STENT-0002",
+          "life: alive",
+          "agency: free",
+          "location: STLOC-0001",
+          ""
+        ].join("\n")
+      },
+      {
         node_id: storyNodeId(STORY_FIXTURE_SLUG, "SE-0001"),
         world_slug: STORY_FIXTURE_WORLD,
         story_slug: STORY_FIXTURE_SLUG,

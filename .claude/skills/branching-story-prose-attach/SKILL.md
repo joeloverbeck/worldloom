@@ -131,7 +131,7 @@ Load into working memory:
 - The rendered prose body from `pages-prose/<page_id>.md`.
 - The forbidden-mystery list from plan §11 `forbidden_resolutions[]`.
 - Plan §4 (world-canon excerpts) — load-bearing reference for `canon_claim_without_authority` and `invented_structural_fact` checks.
-- Plan §5 (active cast + entity statuses) — load-bearing for `entity_status_consistency`.
+- Plan §5 (active cast + entity statuses) — load-bearing for `entity_status_consistency`; these statuses are the `STSTAT`-derived projection from `PG.state_snapshot`, not an independently-authored block.
 - Plan §7 (selected event + state delta) — load-bearing for `required_event_rendered` and `invented_structural_fact`.
 - Plan §8 (required beats) — supplements `required_event_rendered` check.
 - Plan §15 (frontmatter, including engine fields) — load-bearing for `engine_jargon_leak` (engine vocabulary may legitimately appear in plan §15 but NOT in the rendered prose body).
@@ -177,7 +177,7 @@ Run the 6 deterministic checks defined in shared contract §4.6, each producing 
 
 3. **`required_event_rendered`** (`PASS | WARN | FAIL`) — verify plan §7 (selected event + outcome_route) is dramatized in the prose. If the event is implied but ambiguous (the reader could miss it on first read), `WARN`. If absent or actively contradicted, `FAIL`. Verification scans for plan §8 beat keywords + plan §7 actor / target references appearing in the prose body.
 
-4. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y) are `FAIL`.
+4. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses, which are the derived projection of active `STSTAT` records on `PG.state_snapshot`. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y) are `FAIL`.
 
 5. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`. Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. Structural inventions that would change cast capability / location / faction alignment are `FAIL` and route to `repair_recommendation: run_turn_cycle_repair`.
 
@@ -191,7 +191,7 @@ When `true`, run a 7-axis qualitative critic over the prose; produce a `PASS | W
 
 1. **Point-of-view stability** — does the POV stay close to plan §15 frontmatter POV declaration (e.g., close-third / first-person)?
 2. **Sensory grounding** — does the prose anchor in concrete sensory detail rather than abstraction?
-3. **Character interiority** — does the prose surface active cast's interior states per `STENT.entity_status` + active `STINT` + active `BEL`?
+3. **Character interiority** — does the prose surface active cast's interior states per the active `STSTAT`-derived status projection + active `STINT` + active `BEL`?
 4. **Rhythm / repetition** — does the prose vary sentence rhythm and avoid mechanical repetition?
 5. **Dialogue clarity** — does dialogue advance the scene and stay legible per speaker?
 6. **Continuity with recent prose** — when prior 1-2 prose pages are available, does this page maintain tonal continuity?
@@ -288,7 +288,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 | Mystery Reserve | Pre-flight, Phase 1, 3 | Plan §11 `forbidden_resolutions[]` loaded; Phase 3 check 2 enforces firewall on rendered prose. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Prose-attach NEVER mutates `PG`; drift is recorded in receipt only; no ARC_TRACE emitted; the page snapshot remains the authoritative state. |
 | §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6 (15 fields total; no extras). |
-| §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references for entity-status-consistency checks but does not create or supersede BEL records. |
+| §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references alongside the `STSTAT`-derived status projection for entity-status-consistency checks but does not create or supersede BEL or STSTAT records. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
 | Tooling Recommendation | N/A | No world-canon retrieval needed — plan body inlines all load-bearing canon per shared contract §8. |

@@ -128,7 +128,7 @@ All direct-write. No patch-engine submissions to world scope. **No world-canon w
 
 Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendation):
 
-- `docs/FOUNDATIONS.md` — §Canon Layers (candidate status enum), §Canon Fact Record Schema (parity target for Phase 2 candidate), §Story Bundles §11 (mystery and canon authority), Rules 1-7 + 11-12 (canon-addition enforces; this skill's candidate must respect them)
+- `docs/FOUNDATIONS.md` — §Canon Layers (candidate status enum), §Canon Fact Record Schema (parity target for Phase 2 candidate), §Story Bundles §5 (story-scope authority discipline), Rules 1-7 + 11-12 (canon-addition enforces; this skill's candidate must respect them)
 - `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (BEL §4.1, PG §4.2, SE §4.3 — read as evidence), §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
@@ -215,7 +215,7 @@ candidate:
 
 For each source record, verify the candidate's `scope` does not over-promote. Five sub-checks:
 
-1. **Branch-local-counterfactual cap** — if any source `SF` carries `branch_local_counterfactual` authority, the candidate cannot exceed `contested_canon` status. Hard-canon promotion of counterfactuals → FAIL.
+1. **Branch-local-counterfactual cap** — if any source `SF.authority == branch_local_counterfactual`, the candidate cannot exceed `contested_canon` status. Hard-canon promotion of counterfactuals → FAIL. Valid `SF.authority` values are `branch_local`, `branch_local_counterfactual`, `canon_candidate`, and `canon_linked`; this phase treats `canon_linked` sources as already backed by parent CF ids in `SF.derived_from`.
 2. **Scope-widening rationale** — if candidate's `scope.geographic` / `scope.temporal` / `scope.social` exceeds the source records' actual scope, `scope_argument` must be supplied. Widening without rationale → FAIL.
 3. **Trace-count sufficiency (Rule 12 anticipation)** — when `desired_canon_status: hard_canon`, the supporting prose must demonstrate the claim across at least 2 distinct registers (per Rule 12). Single-trace hard-canon → FLAG (canon-addition will enforce at adjudication; this skill flags potential failure).
 4. **Inter-branch contradiction risk** — populate `candidate.contradiction_risk.hard` and `contradiction_risk.soft` per Phase 5 cross-branch enumeration.
@@ -245,7 +245,7 @@ Reject conditions:
 
 1. **Forbidden mystery resolution** — any mystery with `status: forbidden` whose effect would be resolved by accepting this candidate. `firewall_verdict: ABORT` (no proposal written; Phase 5+ skipped).
 2. **Accidental resolution of unrelated mystery** — the candidate's `statement` / `domains_affected` / `visible_consequences` would resolve a mystery the user didn't explicitly intend to resolve. `firewall_verdict: REQUIRES_USER_ACCEPTANCE` (flag at Phase 7).
-3. **Branch-local counterfactual presented as objective canon** — if any source `SF` carries `branch_local_counterfactual` authority, reject unless `desired_canon_status: contested_canon`. `firewall_verdict: ABORT`.
+3. **Branch-local counterfactual presented as objective canon** — if any source `SF.authority == branch_local_counterfactual`, reject unless `desired_canon_status: contested_canon`. `firewall_verdict: ABORT`.
 4. **Source_kind mismatch** — e.g., a `story_fact` source_kind whose effect would resolve a mystery should be `mystery_resolution`. `firewall_verdict: REQUIRES_USER_ACCEPTANCE` with recommended source_kind change.
 
 Produce a structured `mystery_firewall_report`:
@@ -365,7 +365,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 | Mystery Reserve | Pre-flight, Phase 4 | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
 | Canon Fact Record Schema | Phase 2, 6 | Candidate strictly matches FOUNDATIONS §Canon Fact Record Schema. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Skill reads `PG` records as authoritative state; never mutates. |
-| §Story Bundles §11 (Mystery and Canon Authority) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
+| §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
 | Change Control Policy | N/A at this skill | Canon-addition writes the Change Log Entry. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 
@@ -376,7 +376,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
 - **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in `source_basis.story_branch` + `source_basis.story_evidence`, NEVER in `source_basis.derived_from` (which is reserved for parent CF references — world authority).
 - **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
-- **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL / BR records that the canon-addition outcome implicates).
+- **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
 - **Known integration debt**:

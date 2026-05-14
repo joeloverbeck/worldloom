@@ -85,6 +85,7 @@ test("story-bundle markdown paths are recognized as indexable closed inventory",
   try {
     for (const relativeFilePath of [
       "stories/foo/STORY_KERNEL.md",
+      "stories/foo/_source/status/STSTAT-0001.yaml",
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
       "stories/foo/storylet-batches/SLB-0001.md",
@@ -106,6 +107,7 @@ test("story-bundle markdown paths are recognized as indexable closed inventory",
 
     for (const expected of [
       "stories/foo/STORY_KERNEL.md",
+      "stories/foo/_source/status/STSTAT-0001.yaml",
       "stories/foo/pages-prose/PG-0001.md",
       "stories/foo/pages-prose-plans/PG-0001.md",
       "stories/foo/storylet-batches/SLB-0001.md",

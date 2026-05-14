@@ -26,6 +26,7 @@ Check:
 - HARD-GATE semantics, if present
 - references/templates/examples used by the skill
 - sibling-skill interop named in docs or specs
+- if acceptance names skill dry-runs, first verify that an executable runner/tool is actually available in the current agent context; if not, patch acceptance to manual contract review plus grep/stale-anchor proof before source edits, and record the unavailable runner in `Assumption Reassessment` / `## Deviations`
 - if acceptance relies on positive grep-count proof commands over the skill or templates, dry-run or manually validate the exact command shape before source edits; patch stale counts, alternation, anchoring, or aggregation before implementation
 - if acceptance relies on negative grep or stale-anchor removal, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 
@@ -64,6 +65,7 @@ Check:
 - consumers
 - doc references
 - whether the change is additive-only or breaking
+- if acceptance names skill dry-runs for prose workflow skills such as `.claude/skills/<slug>/`, first verify that an executable runner/tool is actually available in the current agent context; if not, patch acceptance to manual contract review plus grep/stale-anchor proof before source edits, and record the unavailable runner in `Assumption Reassessment` / `## Deviations`
 - if acceptance relies on positive grep-count proof commands across the shared surface, dry-run or manually validate the exact command shape before source edits; confirm the count proves the intended producer/consumer invariant rather than a coincidental subset
 - if acceptance relies on negative grep or stale-anchor removal across consumers, run the exact drafted grep before edits and classify hits as stale, legitimate, excluded sibling-scope, or too-broad proof; if the pattern mixes stale anchors with legitimate hits, patch the acceptance/proof surface before source edits per `references/verification-closeout.md`
 

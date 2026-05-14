@@ -55,6 +55,7 @@ const ID_ALLOCATION_KEYS = [
   "char_ids",
   "da_ids",
   "stent_ids",
+  "ststat_ids",
   "sf_ids",
   "se_ids",
   "obl_ids",
@@ -84,6 +85,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   char_record: "character-frontmatter.schema.json",
   da_record: "diegetic-artifact-frontmatter.schema.json",
   story_entity_record: "story-entity.schema.json",
+  story_status_record: "story-status.schema.json",
   story_fact_record: "story-fact.schema.json",
   story_event_record: "story-event.schema.json",
   story_obligation_record: "story-obligation.schema.json",
@@ -392,6 +394,8 @@ function operationSchema(kind: OperationKind): JsonObject {
       });
     case "create_stent_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_entity_record"));
+    case "create_ststat_record":
+      return baseOperationProperties(kind, storyPayloadWithRecord("story_status_record"));
     case "create_sf_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_fact_record"));
     case "create_se_record":

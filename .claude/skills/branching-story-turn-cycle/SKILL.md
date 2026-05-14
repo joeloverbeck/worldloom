@@ -1,6 +1,6 @@
 ---
 name: branching-story-turn-cycle
-description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-<integer>.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
+description: "Use when advancing a branching-story bundle by one causal tick from any parent page — continuation or fork. Produces: one SE event + new/superseding story-bundle records (STSTAT/STENT/STINT/SF/BEL/OBL/CNSQ/THR/SREL/STLOC/STOBJ/DA as needed) + optional new BR (fork) + new PG with full state snapshot + optional JIT SLT + 0-5 new CHC + pages-prose-plans/PG-<integer>.md + bundle INDEX.md update. Mutates: only worlds/<world_slug>/stories/<story_slug>/."
 user-invocable: true
 arguments:
   - name: world_slug
@@ -114,9 +114,10 @@ Phase 10: HARD-GATE fires → atomic patch + markdown writes
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | Always (the causal tick) |
 | `PG-<integer>` | `_source/pages/PG-<integer>.yaml` | Always |
 | `BR-<integer>` | `_source/branches/BR-<integer>.yaml` | IF fork (parent is non-leaf OR `force_branch_id` set) |
-| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF entity status changes (life / agency / location) |
+| `STSTAT-<integer>` (new or supersession) | `_source/status/STSTAT-<integer>.yaml` | IF life / agency / location changes; exactly one active status record per active `STENT` |
+| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF identity mirror / role metadata changes; not for life / agency / location status |
 | `STINT-<integer>` (new or supersession) | `_source/intentions/STINT-<integer>.yaml` | IF intentions change this turn |
-| `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge |
+| `SF-<integer>` | `_source/facts/SF-<integer>.yaml` | IF new branch-local facts emerge; every SF carries `authority` per shared contract §4.5.3 |
 | `BEL-<integer>` (new or supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF belief/visibility changes — **mandatory** for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual (Phase 4) |
 | `OBL-<integer>` (new or supersession) | `_source/obligations/OBL-<integer>.yaml` | IF obligations open / close / escalate |
 | `CNSQ-<integer>` | `_source/consequences/CNSQ-<integer>.yaml` | IF consequences fire |
@@ -198,17 +199,20 @@ Filter the bundle's `SLT` records for eligibility against the parent snapshot:
 - All `preconditions.hard` predicates evaluate true (per shared contract §5 closed predicate DSL).
 - `scope.visibility: global_author_pool` blocks are universally eligible (subject to predicates); `scope.visibility: branch_prefix_scoped` blocks are eligible when `scope.branch_id` is in the active branch's lineage; `scope.visibility: branch_scoped` blocks are eligible only when `scope.branch_id` matches the active or new branch.
 - For action grounding, prefer `affordance_available_to(<actor>, <action_family>)`; `has_affordance(<action_family>)` is only an actor-agnostic author-pool prefilter when the actor is not yet bound.
+- Resolve predicate DSL v2 existential predicates (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`) against the parent snapshot before ranking. Each satisfied existential predicate binds its `alias` to the matched active record for this selection only. The match must satisfy every supplied filter (`kind`, `urgency`, role, axis/comparator/value, belief mode, truth relation, or visibility); if multiple records match, retain all bindings for ranking and choose the concrete binding with the selected block.
 - `saliency.cooldown_pages` permits use.
 - `mystery_policy.forbidden_resolutions` does not include any mystery the resolved action would resolve.
 - `mystery_policy.allowed_authority` is compatible with `outcome_route`.
 
 Rank eligible blocks by: (1) `move_family` × `action_family` match; (2) `saliency.urgency` (high > medium > low); (3) coverage of `target_records`; (4) diversity (avoid repeating the most-recently-used `move_family` on this branch).
 
+**Alias-binding resolution order**: bind first, select second, instantiate third. During eligibility, evaluate every hard precondition and build the candidate alias-binding set. During ranking/selection, choose one concrete binding set for the selected `SLT`. Before Phase 3 drafts the `SE.state_delta`, replace every `bound:<alias>` in the selected block's `effects.create`, `effects.supersede`, `effects.close`, and `exit_options[].likely_effects` with the bound record id from that chosen set. If any `bound:<alias>` lacks a same-`SLT` binding, the block is invalid and cannot be selected; do not defer alias resolution to prose planning or approval time.
+
 If no eligible block exists, create one branch-scoped JIT block:
 
 - `scope.visibility: branch_scoped`, `scope.branch_id: <active or new branch>`, `created_at_page: <new PG id>`, `provenance.origin: runtime_jit`.
 - 1–5 beats authored from the action + current state.
-- Predicates reference only records active in the parent snapshot.
+- Predicates reference only records active in the parent snapshot. JIT blocks are branch-scoped, so use exact-ID predicates rather than predicate DSL v2 existential author-pool prefilters.
 - `mystery_policy` honors the firewall.
 
 Avoid pre-emptive JIT creation. If a flexible author-pool block fits with slight reframing, prefer that block. JIT blocks follow FOUNDATIONS §Story Bundles §5a (commitment blocks are causal moves, not dramatic acts or arcs) — no `arc_contract` / `dramatic_unit` / `execution_envelope` / `stop_policy` / shape discriminators.
@@ -217,19 +221,22 @@ Avoid pre-emptive JIT creation. If a flexible author-pool block fits with slight
 
 Apply exactly one causal delta from parent snapshot. The delta may:
 
+- Honor the selected `SLT`'s instantiated effects: after Phase 2's bind-then-instantiate step, any former `bound:<alias>` targets are concrete record ids and must be treated like exact effect targets in `SE.state_delta`.
 - Create new facts (`SF`) or beliefs (`BEL`).
 - Supersede beliefs when truth-relation or visibility changes (every public discovery, betrayal, lie, or confession produces at least one `BEL` create or supersession in this phase or Phase 4 per FOUNDATIONS §6a).
-- Change entity status (life / agency / location) via `STENT` supersession — death, incapacity, absence, injury, capture, escape are first-class.
+- Change entity status (life / agency / location) via `STSTAT` supersession — death, incapacity, absence, injury, capture, escape are first-class.
 - Update intentions (`STINT` supersession).
 - Update relationships (`SREL` supersession).
-- Open / close / escalate obligations (`OBL` supersession or new).
-- Create consequences (`CNSQ` new).
+- Open / close / escalate obligations (`OBL` supersession or new), always setting `urgency` on the emitted record.
+- Create consequences (`CNSQ` new), always setting `urgency` on the emitted record.
 - Advance or close threads (`THR` supersession).
-- Move entities or objects (`STENT.entity_status.location` supersession; `STOBJ` supersession).
+- Move entities or objects (`STSTAT.location` supersession for entity movement; `STOBJ` supersession for object movement).
 - Create or alter story-local artifacts (`DA` new or supersession).
 - Mark the branch terminal (set `PG-<integer>.state_snapshot.continuation.terminal_status: terminal_closed` with `terminal_rationale`).
 
-Supersession is file-level append-only per shared contract §3 — a new record file (e.g., `SREL-<integer>+1.yaml`) carries `supersedes: SREL-<integer>` in its YAML body. The existing `create_*_record` patch ops handle this.
+Supersession is file-level append-only per shared contract §3 — a new record file (e.g., a new `SREL-<integer>.yaml` or `STSTAT-<integer>.yaml`) carries `supersedes: <prior-id>` in its YAML body. The existing `create_*_record` patch ops handle this.
+
+For every life / agency / location change, supersede the affected entity's active `STSTAT` record and include both the superseded id and the new `STSTAT` id in `SE.state_delta` (`supersede` and `create`, respectively). Do not encode those status changes by superseding `STENT`; `STENT` remains stable identity / role metadata. Recompute `PG.state_snapshot.entity_status` from the resulting active `STSTAT` set.
 
 **Deaths and removals are first-class outcomes.** Do not protect "main characters" with out-of-world logic. When an entity dies, becomes incapacitated, or becomes unavailable, reconcile in the same delta:
 
@@ -258,8 +265,9 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 Classify every new resolution-like claim in the delta per shared contract §11:
 
 - `apparent` — what appears to be true from the cast's epistemic position; recorded on `BEL` records.
-- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped truth.
-- `canon_candidate` — may be world-level truth; held for promotion via `story-fact-promotion-to-canon`.
+- `branch_local` — ordinary branch-local truth; recorded on `SF`.
+- `branch_local_counterfactual` — true only in this branch; recorded on `SF.authority` with branch-scoped truth.
+- `canon_candidate` — may be world-level truth; recorded on `SF.authority` and held for promotion via `story-fact-promotion-to-canon`.
 
 If the action would resolve any mystery with `status: forbidden`, abort before patch submission with a mystery-firewall error. If the action asserts a `canon_candidate` claim, set `outcome_route: promotion_hold` and ensure the state delta records ONLY the branch-local appearance; emit `SE.promotion_claims[]` so the user knows to invoke `story-fact-promotion-to-canon` after this turn lands.
 
@@ -288,7 +296,7 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `parent_page_id: <parent>`, `branch_id: <active or new>`, `turn_index: parent.turn_index + 1`.
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
-- Full `state_snapshot`: `active_records` (per-class lists including `BEL` key); `entity_status` per active STENT; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
+- Full `state_snapshot`: `active_records` (per-class lists including `BEL` and `STSTAT` keys); `entity_status` derived from active `STSTAT` records, one entry per active `STENT`; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
 - `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
 - `prose_plan_path: pages-prose-plans/PG-<integer>.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
 - `prose_path: null`, `prose_receipt_path: null`.
@@ -304,7 +312,7 @@ The drafted plan bytes are the future direct-write artifact. Keep the complete U
 
 **§2 (Content Policy), §3 (Prose Craft Contract), and §19 (Render-Time Instruction Template) are inlined verbatim from `reports/prose-quality-instructions.md`.** Operationally load-bearing — external prose renderer has no cross-plan state; every page render is cold context. Compacting these sections would defeat the self-contained-plan contract.
 
-Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` that must be honored; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
+Turn-cycle-specific section content: §1 inlines a short `STORY_KERNEL.md` excerpt; §4 inlines world-canon excerpts directly relevant to this turn's action; §5 enumerates active cast and entity statuses **as of this turn** (including any deaths, captures, or status changes from Phase 3); §6 names current location and grounded affordances; §7 dramatizes the resolved event (the chosen CHC or write-in interpretation + the `outcome_route` + the `world_logic_rationale`); §8 names the required beats from the selected or JIT commitment block; §9 names load-bearing relationships and beliefs AFTER Phase 4 updates; §10 lists open `OBL` / `CNSQ` / `THR` with `urgency` so debts that must be honored are visible to the prose renderer; §11 names forbidden mystery resolutions; §12 names the intended stopping point; §13 previews emitted choices (or marks terminal); §14 (optional) inlines recent rendered prose continuity from `pages-prose/<recent>.md` when available.
 
 The plan must not expose engine jargon to prose. Engine terms confined to §15 frontmatter only. No word-count targets (per FOUNDATIONS §Story Bundles §9).
 
@@ -314,7 +322,9 @@ Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit 
 
 The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
 
-Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), `grounded_in`, and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
+
+For every emitted `CHC`, populate `grounded_in.records` with at least one active record id from the new `PG-<integer>.state_snapshot.active_records` that makes the choice available or meaningful (for example the actor `STENT`, location `STLOC`, relevant `STOBJ`, `BEL`, `OBL`, `CNSQ`, `THR`, `SREL`, or story-local `DA`). When the choice directly exposes one or more visible affordances, also populate `grounded_in.affordance_ordinals` with the corresponding `PG-<integer>.state_snapshot.visible_affordances[].ordinal` values. Do not use `target_or_action_families` alone as grounding evidence.
 
 ## Phase 9: Validate
 
@@ -325,8 +335,8 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; INV honored; selected SLT's `mystery_policy.forbidden_resolutions` respected.
 4. **branch isolation** — no sibling-branch records in new snapshot's `active_records`; no author-pool SLT references branch-local record ids.
 5. **append-only delta** — all changes in `SE.state_delta` are creates / supersessions / closes; supersession is a new record file (no in-place mutation of structural fields).
-6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure.
-7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon.
+6. **consequence capacity or terminal proof** — at least one eligible SLT (author-pool or JIT-able) OR `terminal_closed` with `terminal_rationale` covering high-salience debt closure. High-salience debt is determined from `urgency` on active `OBL`, `CNSQ`, `THR`, and `STINT` records.
+7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
 Plus 4 turn-cycle-additional checks (recorded in working memory):
@@ -346,7 +356,7 @@ If any gate, additional check, parent-hash copy check, or new-hash check fails, 
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record`. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (including `create_ststat_record` for entity life / agency / location status; each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record`. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
 2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run exercises `record_schema_compliance` for BEL and PG; placeholder or malformed PG hashes must not reach this step.
 3. Present the complete deliverable summary to the user:
    - Branch label (continuation of `BR-<integer>` or fork into new `BR-<integer>`).

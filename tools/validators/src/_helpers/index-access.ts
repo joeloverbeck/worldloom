@@ -166,6 +166,7 @@ function recordForCreatePatch(worldSlug: string, patch: PatchOperation): Indexed
 
 const STORY_CREATE_OPS: Readonly<Record<string, { nodeType: string; sourceDir: string }>> = {
   create_stent_record: { nodeType: "story_entity_record", sourceDir: "entities" },
+  create_ststat_record: { nodeType: "story_status_record", sourceDir: "status" },
   create_sf_record: { nodeType: "story_fact_record", sourceDir: "facts" },
   create_se_record: { nodeType: "story_event_record", sourceDir: "events" },
   create_obl_record: { nodeType: "obligation_record", sourceDir: "obligations" },

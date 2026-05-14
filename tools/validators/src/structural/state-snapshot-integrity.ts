@@ -7,7 +7,7 @@ import {
   stringValue
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
+const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG)-\d+$/;
 
 const ARRAY_FIELDS = [
   "objective_facts",

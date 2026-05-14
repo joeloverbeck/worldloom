@@ -102,6 +102,38 @@ test("snapshot_replay_equality replays new-schema SE state_delta active_records"
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality derives entity_status from active STSTAT records", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), {
+    "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" }
+  });
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality reports entity_status drift from active STSTAT records", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), {
+    "STENT-0001": { life: "alive", agency: "free", location: "STLOC-0001" }
+  });
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
+  assert.ok(drift);
+  assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
+    {
+      field: "entity_status",
+      expected: { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } },
+      got: { "STENT-0001": { life: "alive", agency: "free", location: "STLOC-0001" } }
+    }
+  ]);
+});
+
 test("snapshot_replay_equality reports new-schema active_records class drift", async () => {
   const childPage = newSchemaChildPage({
     ...newSchemaExpectedActiveRecords(),
@@ -283,16 +315,40 @@ function newSchemaRecords(childPage: Record<string, unknown>) {
       id: "SE-0002",
       story_id: "STORY-001",
       state_delta: {
-        create: ["SF-0002", "OBL-0002", "CHC-0002"],
-        supersede: ["STINT-0001", "THR-0001"],
+        create: ["SF-0002", "OBL-0002", "CHC-0002", "STSTAT-0002"],
+        supersede: ["STINT-0001", "THR-0001", "STSTAT-0001"],
         close: ["BEL-0001"]
       }
+    }),
+    record("story_status_record", "test-story:STSTAT-0001", "stories/test-story/_source/status/STSTAT-0001.yaml", {
+      id: "STSTAT-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      entity: "STENT-0001",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-0001",
+      derived_from: ["SE-0001"]
+    }),
+    record("story_status_record", "test-story:STSTAT-0002", "stories/test-story/_source/status/STSTAT-0002.yaml", {
+      id: "STSTAT-0002",
+      story_id: "STORY-001",
+      created_at_page: "PG-0002",
+      supersedes: "STSTAT-0001",
+      entity: "STENT-0001",
+      life: "dead",
+      agency: "dead",
+      location: "STLOC-0001",
+      derived_from: ["SE-0002"]
     }),
     record("page_record", "test-story:PG-0002", "stories/test-story/_source/pages/PG-0002.yaml", childPage)
   ];
 }
 
-function newSchemaChildPage(activeRecords: Record<string, readonly string[]>): Record<string, unknown> {
+function newSchemaChildPage(
+  activeRecords: Record<string, readonly string[]>,
+  entityStatus: Record<string, unknown> = { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } }
+): Record<string, unknown> {
   const page: Record<string, unknown> = {
     id: "PG-0002",
     story_id: "STORY-001",
@@ -302,7 +358,7 @@ function newSchemaChildPage(activeRecords: Record<string, readonly string[]>): R
     state_snapshot: {
       active_records: activeRecords,
       visible_affordances: ["CHC-0002"],
-      entity_status: { "STENT-0001": "present" },
+      entity_status: entityStatus,
       unresolved_mystery_claims: [],
       continuation: { next_storylets: ["SLT-0002"] }
     },
@@ -333,7 +389,8 @@ function newSchemaParentActiveRecords(): Record<string, string[]> {
     SREL: [],
     STLOC: ["STLOC-0001"],
     STOBJ: [],
-    DA: []
+    DA: [],
+    STSTAT: ["STSTAT-0001"]
   };
 }
 
@@ -349,6 +406,7 @@ function newSchemaExpectedActiveRecords(): Record<string, string[]> {
     SREL: [],
     STLOC: ["STLOC-0001"],
     STOBJ: [],
-    DA: []
+    DA: [],
+    STSTAT: ["STSTAT-0002"]
   };
 }

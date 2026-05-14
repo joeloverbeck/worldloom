@@ -112,6 +112,7 @@ function stagedRecordMetadata(patch: PatchOperation): { nodeId: string; nodeType
     case "create_sec_record":
       return { nodeId: patch.payload.sec_record.id, nodeType: "section" };
     case "create_stent_record":
+    case "create_ststat_record":
     case "create_sf_record":
     case "create_se_record":
     case "create_obl_record":
@@ -151,7 +152,7 @@ const STORY_BUNDLE_NODE_TYPE_BY_PREFIX: Readonly<Record<string, string>> = Objec
 );
 
 const STORY_BUNDLE_ID_PATTERN =
-  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|BEL|DA)-\d+$/;
+  /^(?:[a-z0-9-]+:)?(PG|SE|SF|OBL|CNSQ|THR|SREL|STINT|SLT|STLOC|STOBJ|BR|CHC|STENT|STSTAT|BEL|DA)-\d+$/;
 
 function metadataForTargetRecordId(recordId: string): { nodeId: string; nodeType: string } | null {
   if (/^CF-\d+$/.test(recordId)) {
@@ -229,6 +230,7 @@ function stageOne(
     case "append_diegetic_artifact_record":
       return stageAppendDiegeticArtifactRecord(envelope, patch, ctx);
     case "create_stent_record":
+    case "create_ststat_record":
     case "create_sf_record":
     case "create_se_record":
     case "create_obl_record":

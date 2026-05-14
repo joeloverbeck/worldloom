@@ -20,6 +20,7 @@ interface StoryRecordSpec {
 
 export type StoryRecordOperationKind =
   | "create_stent_record"
+  | "create_ststat_record"
   | "create_sf_record"
   | "create_se_record"
   | "create_obl_record"
@@ -42,6 +43,7 @@ type StoryRecordOperation = Extract<PatchOperation, { op: StoryRecordOperationKi
 
 const STORY_RECORD_OPERATION_KINDS: readonly StoryRecordOperationKind[] = [
   "create_stent_record",
+  "create_ststat_record",
   "create_sf_record",
   "create_se_record",
   "create_obl_record",
@@ -68,6 +70,13 @@ export const STORY_RECORD_SPECS: Readonly<Record<StoryRecordOperationKind, Story
     nodeType: "story_entity_record",
     prefix: "STENT",
     sourceDir: "entities"
+  },
+  create_ststat_record: {
+    allocationKey: "ststat_ids",
+    idPattern: /^STSTAT-\d+$/,
+    nodeType: "story_status_record",
+    prefix: "STSTAT",
+    sourceDir: "status"
   },
   create_sf_record: {
     allocationKey: "sf_ids",

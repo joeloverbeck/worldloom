@@ -29,6 +29,7 @@ Core page-cycle state records:
 | Class | Purpose |
 |---|---|
 | `STENT` | Story-local entity mirror or story-local entity. |
+| `STSTAT` | Story-local entity life / agency / location status. |
 | `STINT` | Intention held by an entity. |
 | `SF` | Branch / story-local fact (what is true in the branch). |
 | `BEL` | Belief, knowledge, suspicion, public claim, lie, witness memory, or misconception (what a holder believes about the world). |
@@ -60,7 +61,7 @@ Auxiliary story-bundle records:
 
 ## 4. Record Schemas
 
-Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 16 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 12 additional classes, and §4.6 covers the prose receipt direct-write artifact.
+Required fields are marked `*`. Fields not listed are not part of the schema. All YAML strings supporting natural language remain free-form unless an enum is named. All 17 story-bundle record classes listed in §3 have field schemas defined below: §4.1-§4.4 cover the four classes with pre-existing closed schemas, §4.5 covers the 13 additional classes, and §4.6 covers the prose receipt direct-write artifact.
 
 ### 4.1 `BEL` (13 fields)
 
@@ -112,7 +113,8 @@ state_snapshot:
     STLOC: [STLOC-<integer>]
     STOBJ: [STOBJ-<integer>]
     DA: [DA-<integer>]
-  entity_status:                       # * one entry per active STENT
+    STSTAT: [STSTAT-<integer>]
+  entity_status:                       # * derived projection of active STSTAT; one entry per active STENT
     STENT-<integer>:
       life: alive | dead | unknown
       agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown
@@ -223,13 +225,13 @@ beats:                                 # * 1-5 beats per block
     function: setup | action | pressure | turn | consequence | exit   # *
     instruction: >                     # * prose-facing beat instruction, no engine jargon
 effects:                               # mirrors SE.state_delta
-  create: [record_id]
-  supersede: [record_id]
-  close: [record_id]
+  create: [record_id | bound:<alias>]
+  supersede: [record_id | bound:<alias>]
+  close: [record_id | bound:<alias>]
 exit_options:                          # *
   - action_family: <action_family>*    # see §4.4a shared taxonomy
     surface_hint: string*
-    likely_effects: [<short label>]
+    likely_effects: [record_id | bound:<alias>]
 saliency:
   urgency: low | medium | high*
   cooldown_pages: 0*
@@ -268,7 +270,7 @@ Commitment blocks are reusable causal moves, not dramatic acts, arcs, mini-stori
 
 ### 4.4a Shared `action_family` taxonomy
 
-`action_family` is the shared coarse taxonomy used by `PG.visible_affordances[].action_families` and `SLT.exit_options[].action_family`. Per-affordance `surface_hint: string` and `likely_effects: [<label>]` carry local specificity.
+`action_family` is the shared coarse taxonomy used by `PG.visible_affordances[].action_families` and `SLT.exit_options[].action_family`. Per-affordance `surface_hint: string` carries local specificity; `likely_effects` names record ids or `bound:<alias>` targets.
 
 | Value | Operational definition |
 |---|---|
@@ -378,10 +380,13 @@ story_id: STORY-<integer>*
 created_at_page: PG-<integer>*
 supersedes: SF-<integer> | null               # default null
 statement: string*                             # natural-language branch-local truth
+authority: branch_local | branch_local_counterfactual | canon_candidate | canon_linked*   # default branch_local
 derived_from: [CF-<integer> | <story-local record id>]   # default []; non-empty for mirrored or derived facts
 ```
 
 No `certainty`, `scope`, `who_knows`, `derived_from_cf`, `why_it_matters_at_opening`, or `trace_records` fields. CF mirrors and branch-derived facts both use `derived_from`.
+
+Use `branch_local` for ordinary story-local truths, `branch_local_counterfactual` for deliberately branch-only contradictions, `canon_candidate` for claims held for promotion, and `canon_linked` only after canon acceptance. A `canon_linked` `SF` must include at least one parent `CF-<integer>` in `derived_from`; no separate canon-link field exists.
 
 #### 4.5.4 `OBL` (obligation)
 
@@ -398,6 +403,7 @@ description: string*
 owed_by: STENT-<integer> | group:<name> | public | null*
 owed_to: STENT-<integer> | group:<name> | public | null*
 trigger_to_close: string*                      # natural-language supersession trigger
+urgency: low | medium | high*
 ```
 
 No `introduced_at_page` field; `created_at_page` is the only creation provenance.
@@ -414,6 +420,7 @@ supersedes: CNSQ-<integer> | null             # default null
 status: pending | resolved | escalated | abandoned*
 consequence_kind: string*                      # open vocabulary
 description: string*
+urgency: low | medium | high*
 resolves_when: string*                         # natural-language supersession trigger
 derived_from: [<record_id>]                    # default []; record ids that caused this consequence
 ```
@@ -533,10 +540,31 @@ player_visible_intent: string*                 # natural-language statement of w
 target_or_action_families: [<action_family>]*  # non-empty list; §4.4a closed enum
 likely_state_pressure: string*                 # natural-language pressure description
 associated_commitment_block: SLT-<integer> | null*   # SLT id if known, null if turn-cycle will JIT
+grounded_in:
+  records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | BEL-<integer> | OBL-<integer> | CNSQ-<integer> | THR-<integer> | SREL-<integer> | DA-<integer>]*  # non-empty; active records grounding this choice
+  affordance_ordinals: [integer]               # optional; ordinals from PG.state_snapshot.visible_affordances
 success_policy: string                         # optional; only present when the resolving SE.outcome_route is `attempt`
 ```
 
 No `target_or_action_family` singular field, `choice_contract`, `choice_worthiness`, `commitment_class`, `commitment_detail`, `commitment_family`, `continuation_capacity`, `likely_effects`, `record_version`, `strategy_cluster`, `emitted_at_branch`, or `emitted_by_page` fields.
+
+#### 4.5.13 `STSTAT` (story-local entity status)
+
+Tracks the active life / agency / location state for one story-local entity. `PG.state_snapshot.entity_status` is a derived projection from active `STSTAT` records and is replay-checked with `state_snapshot.active_records`.
+
+```yaml
+id: STSTAT-<integer>*
+story_id: STORY-<integer>*
+created_at_page: PG-<integer>*
+supersedes: STSTAT-<integer> | null            # default null
+entity: STENT-<integer>*
+life: alive | dead | unknown*
+agency: free | constrained | coerced | captive | incapacitated | unconscious | dead | unknown*
+location: STLOC-<integer> | unknown | concealed | offstage*
+derived_from: [SE-<integer> | <record_id>]     # default []
+```
+
+No `display_name`, `role_in_story`, or `bound_char_id` fields: identity stays on `STENT`.
 
 ### 4.6 Prose receipt
 
@@ -575,21 +603,29 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 |---|---|---|
 | `fact_true(SF-<integer>)` | Branch-local fact must be currently active. | turn-cycle eligibility |
 | `belief(holder, claim, mode?, confidence_floor?)` | Belief must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall |
-| `entity_status(STENT-<integer>, field, value)` | `field` is one of `life | agency | location`. | turn-cycle eligibility |
+| `entity_status(STENT-<integer>, field, value)` | Resolves against active `STSTAT` records; `field` is one of `life | agency | location`. | turn-cycle eligibility |
 | `relationship_axis(SREL-<integer>, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
 | `obligation_open(OBL-<integer>)` | Obligation must be in an open state. | turn-cycle eligibility |
 | `consequence_pending(CNSQ-<integer>)` | Consequence must be pending (unresolved). | turn-cycle eligibility |
 | `thread_active(THR-<integer>)` | Thread must be active. | turn-cycle eligibility |
+| `any_obligation_open(alias, kind?, urgency?, owed_by_role?, owed_to_role?)` | Actor-unbound existential predicate over open `OBL` records; role filters use §4.4b role values. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_consequence_pending(alias, kind?, urgency?, derived_from?)` | Actor-unbound existential predicate over pending `CNSQ` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_thread_active(alias, tag?, urgency?)` | Actor-unbound existential predicate over active `THR` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_relationship_axis(alias, axis, comparator, value, participant_role?)` | Actor-unbound existential predicate over active `SREL` records; comparator is one of `>= | <= | == | !=`; role filters use §4.4b role values. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_belief(alias, holder_role?, mode?, truth_relation?, visibility?)` | Actor-unbound existential predicate over active `BEL` records using `belief_mode`, `truth_relation`, and `visibility` filters. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
+| `any_intention(alias, holder_role?, urgency?)` | Actor-unbound existential predicate over active `STINT` records. Binds `alias` to the matched record. | author-pool / branch-prefix prefiltering |
 | `location(STENT-<integer>, STLOC-<integer>)` | Entity must currently be at location. | turn-cycle eligibility |
 | `has_affordance(<action_family>)` | The current page's `visible_affordances` must include an affordance whose `action_families` contain the named family. | turn-cycle eligibility, plan grounding |
-| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA ids. | turn-cycle eligibility |
+| `record_active(<record_id>)` | Named record must be active in the current `PG.state_snapshot`; accepts STENT / STINT / SF / BEL / OBL / CNSQ / THR / SREL / STLOC / STOBJ / DA / STSTAT ids. | turn-cycle eligibility |
 | `intention_active(STINT-<integer>)` | Named intention must be currently active. | turn-cycle eligibility |
 | `object_accessible(STENT-<integer>, STOBJ-<integer>)` | Entity must have page-state access to the named object. | turn-cycle eligibility, plan grounding |
 | `artifact_accessible(STENT-<integer>, DA-<integer>)` | Entity must have access to the named story-local diegetic artifact. | turn-cycle eligibility, plan grounding |
 | `affordance_available_to(STENT-<integer>, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
 
-`has_affordance(<action_family>)` is valid only for author-pool prefiltering when an actor is not yet bound. Branch-execution eligibility checks use `affordance_available_to(<actor>, <family>)` so plan-time grounding is actor-specific.
+`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief(holder, BEL-<integer>)`) so plan-time grounding is actor-specific.
+
+An existential predicate binds its `alias` to the matched active record during block selection. `SLT.effects.create`, `SLT.effects.supersede`, `SLT.effects.close`, and `SLT.exit_options[].likely_effects` may reference that matched record as `bound:<alias>`. Every `bound:<alias>` reference must resolve to an alias bound by a hard or soft precondition on the same `SLT`.
 
 ## 6. Action Routing
 
@@ -619,7 +655,7 @@ Every state-changing skill validates against these eight gates at page-plan comm
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |
 | 5 | append-only delta | All changes in `SE.state_delta` are creates / supersessions / closes. No in-place mutation of a prior record. |
-| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. |
+| 6 | consequence capacity or terminal proof | The new page has at least one eligible commitment block OR `state_snapshot.continuation.terminal_status` is `branch_pause` / `terminal_closed` with a rationale that names how high-salience debts were closed, abandoned, or inherited. Debt salience reads `urgency` uniformly on active `OBL`, `CNSQ`, `THR`, and `STINT` records. |
 | 7 | plan grounding | Every declared affordance, every required beat from the chosen commitment block, and every CHC emitted by this page is grounded in `state_snapshot.active_records` or world canon. |
 | 8 | canon promotion hold | If `SE.outcome_route == promotion_hold` or any `promotion_claims[].authority == canon_candidate`, the world-level truth is held for promotion (not asserted in this page's state delta as if already canon). Marked `NOT_APPLICABLE` with rationale when no canon claim is in play. |
 
@@ -640,7 +676,7 @@ A skill that bypasses any gate is broken. Hook 3 structurally enforces patch-eng
 | 7 | Selected event and state delta | `SE` |
 | 8 | Required beats from the commitment block | selected `SLT.beats` |
 | 9 | Relationship and belief context | active `SREL`, `BEL` |
-| 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR` |
+| 10 | Open obligations, consequences, threads | active `OBL`, `CNSQ`, `THR`, including each record's `urgency` |
 | 11 | Forbidden mystery resolutions | `mystery_policy.forbidden_resolutions` |
 | 12 | Stopping point | from commitment block + author judgment |
 | 13 | Next choices to foreshadow or make available | emitted `CHC[]` |
@@ -689,13 +725,14 @@ If patch submission succeeds but a direct-write artifact fails, the story `_sour
 
 ## 11. Mystery and Canon Authority
 
-Story-local resolution-like claims are classified into three authority levels:
+Story-local resolution-like claims are classified into four authority levels:
 
 | Authority | Meaning | Promotion path |
 |---|---|---|
 | `apparent` | What appears to be true in the branch from the cast's epistemic position. May or may not match world canon. | No promotion. Treated as `BEL` if a holder is named. |
 | `branch_local_counterfactual` | What is true *only in this branch*; contradicts canon or another branch deliberately. | No promotion. Lives as `SF` with branch-scoped truth. |
 | `canon_candidate` | The branch asserts something that may be world-level truth and could be promoted to canon. | Pauses via §7 gate 8 until `story-fact-promotion-to-canon` runs and `canon-addition` adjudicates. |
+| `canon_linked` | A prior story-local `SF` whose claim has been accepted into world canon. | Produced only by `story-promotion-closeout` after canon-addition acceptance; the parent CF id rides in `SF.derived_from`. |
 
 Mysteries with `status: forbidden` are never resolved by any authority level. Mysteries with `status: active | passive` may be resolved per the `future_resolution_safety` coupling in FOUNDATIONS §Canon Layers.
 

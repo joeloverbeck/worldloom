@@ -2,13 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-fact.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "created_at_page", "statement"],
+  "required": ["id", "story_id", "created_at_page", "statement", "authority"],
   "properties": {
     "id": { "type": "string", "pattern": "^SF-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
     "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
     "supersedes": { "type": ["string", "null"], "pattern": "^SF-[0-9]+$" },
     "statement": { "type": "string", "minLength": 1 },
+    "authority": {
+      "type": "string",
+      "enum": ["branch_local", "branch_local_counterfactual", "canon_candidate", "canon_linked"]
+    },
     "derived_from": {
       "type": "array",
       "items": {

@@ -111,7 +111,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/BR-*.yaml` — branch tree
 - `worlds/<world_slug>/stories/<story_slug>/_source/pages/PG-*.yaml` — page snapshots
 - `worlds/<world_slug>/stories/<story_slug>/_source/events/SE-*.yaml` — event deltas
-- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STINT, STLOC, STOBJ, DA, SLT, CHC)
+- `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml` — every other record class read per Phase 2 sub-phase needs (SF, BEL, OBL, CNSQ, THR, SREL, STENT, STSTAT, STINT, STLOC, STOBJ, DA, SLT, CHC)
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — Phase 3 prose checks (conditional on `prose` in mode)
 - `worlds/<world_slug>/stories/<sibling_story_slug>/_source/` — Phase 4 cross-story checks (conditional on `cross_story` in mode); may be empty if this is the only bundle in the world
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='branching_story_health_audit', seed_nodes=<every M-<integer> with status:forbidden + every INV + active cast STENTs + parent CFs for the bundle's mirrored SF records>, token_budget=<default>)`
@@ -155,7 +155,7 @@ For each scoped branch:
 1. Load the root page's `state_snapshot`.
 2. Walk the page chain in branch order.
 3. For each page, apply the corresponding `SE.state_delta` to the running snapshot (create / supersede / close primitives).
-4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`.
+4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`. The replay includes `entity_status` through the active `STSTAT` projection enforced by `snapshot_replay_equality`; no separate hand-authored `entity_status` block is trusted.
 5. Divergence → `snapshot_replay_mismatch` finding, `severity: error`, `repair_kind: branch_flag` (replay corruption is not auto-repairable).
 
 When replaying repair events, distinguish `system_repair` (engine-initiated repair such as schema-gate recovery) from `audit_repair` (audit-finding-driven repair). The old undifferentiated value is not a valid current-contract event kind.
@@ -167,13 +167,13 @@ Flag:
 - `branch_isolation_leak` — records in a branch's `state_snapshot.active_records` whose `created_at_page` belongs to a sibling branch. ERROR; `repair_kind: branch_flag`.
 - `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
 - `plan_state_reference_dangling` — page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot. ERROR; `repair_kind: prose_revision` (the plan body needs revision OR a repair turn must add the missing state).
-- `choice_state_reference_dangling` — emitted `CHC` records whose action-family list requires records not in the page's active snapshot. ERROR; `repair_kind: turn_repair`.
+- `choice_state_reference_dangling` — emitted `CHC` records whose `grounded_in.records[]` cite records not in the emitting page's active snapshot, or whose `grounded_in.affordance_ordinals[]` cite visible-affordance ordinals not present on that page. ERROR; `repair_kind: turn_repair`.
 
 ### Phase 2c: Debt health
 
-For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots:
+For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots, read debt salience from the record's required `urgency` field:
 
-- `unactionable_debt` — no eligible author-pool SLT block's preconditions are satisfiable against the debt + leaf state. Severity scales with `saliency.urgency`: HIGH → WARNING; MEDIUM → WARNING; LOW → INFO. `repair_kind: commitment_block` (the bundle needs a new block addressing this debt).
+- `unactionable_debt` — no eligible author-pool SLT block's preconditions are satisfiable against the debt + leaf state. Treat predicate DSL v2 existential predicates as actionable when the leaf state has a matching active record: `any_obligation_open` can match an open `OBL`, `any_consequence_pending` can match a pending `CNSQ`, and `any_thread_active` can match an active `THR`, with `urgency`, kind/tag, and role/derived-from filters applied. If the matching block references the matched record through `bound:<alias>` in `effects` / `likely_effects`, count it as actionable only when that alias is bound by a same-`SLT` precondition. Severity scales with record `urgency`: HIGH → WARNING; MEDIUM → WARNING; LOW → INFO. `repair_kind: commitment_block` (the bundle needs a new block addressing this debt).
 - `invalidated_debt` — the debt's preconditions have been broken upstream (entity death / location move / belief shift that should have closed the debt). WARNING; `repair_kind: turn_repair` (a repair turn closes or transfers the debt).
 - `ignored_debt_beyond_urgency` — HIGH-urgency debt has been ignored for >5 pages; MEDIUM-urgency for >10 pages. WARNING; `repair_kind: commitment_block` (urgent debt needs payoff path).
 
@@ -181,11 +181,13 @@ For each open `OBL` / `CNSQ` / `THR` in the scoped branches' leaf snapshots:
 
 Flag:
 
-- `public_consequence_without_witness` — `CNSQ` records with high social-impact tags and no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
+- `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_basis` — `SREL` supersessions whose `basis` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
-- `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's `STENT.entity_status` + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
+- `choice_relies_on_unestablished_knowledge` — `CHC` records whose `player_visible_intent` requires the actor's active `STSTAT`-derived status + active `BEL` to support knowledge the prior page didn't establish. WARNING; `repair_kind: turn_repair`.
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
+
+When a choice or selected `SLT` is grounded through a binding-predicate storylet, audit the resolved binding rather than the literal `bound:<alias>` token. For example, a block with `any_relationship_axis(trust_edge, trust, <=, low, primary_actor)` and `effects.supersede: [bound:trust_edge]` is plan-grounded only if the leaf snapshot has a matching active `SREL`; a block with `any_belief(public_belief, public, knows, true, public)` and `likely_effects: [bound:public_belief]` is grounded only if the matching active `BEL` exists and satisfies the filters.
 
 ### Phase 2e: Mystery / canon safety (per FOUNDATIONS Rule 7 + shared contract §11)
 
@@ -202,7 +204,7 @@ ERROR-severity findings here indicate actively-broken canon discipline.
 
 For each non-terminal leaf page:
 
-- `unactionable_leaf` — no eligible author-pool or JIT-eligible `SLT` against the page's `state_snapshot`. ERROR; `repair_kind: commitment_block`.
+- `unactionable_leaf` — no eligible author-pool or JIT-eligible `SLT` against the page's `state_snapshot`. Author-pool eligibility uses the same bind-then-instantiate discipline as `branching-story-turn-cycle`: existential predicates (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`) must bind their aliases against active records before any `bound:<alias>` effect reference is considered satisfiable. ERROR; `repair_kind: commitment_block`.
 - `leaf_without_choices` — the page emits zero `CHC` records but `continuation.terminal_status: open`. ERROR; `repair_kind: turn_repair`.
 
 For each terminal leaf (`continuation.terminal_status: terminal_closed`):

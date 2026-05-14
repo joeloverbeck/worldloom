@@ -275,6 +275,84 @@ test("record_schema_compliance accepts complete storylet records", async () => {
   assert.deepEqual(result, []);
 });
 
+test("record_schema_compliance enforces story fact authority", async () => {
+  const valid = storyFactRecord({
+    authority: "branch_local"
+  }, "SF-0001");
+  const missingAuthority = storyFactRecord({}, "SF-0002");
+  const invalidAuthority = storyFactRecord({
+    authority: "objective"
+  }, "SF-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingAuthority, invalidAuthority])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SF-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SF-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("authority")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SF-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
+test("record_schema_compliance enforces story obligation urgency", async () => {
+  const valid = storyObligationRecord({
+    urgency: "high"
+  }, "OBL-0001");
+  const missingUrgency = storyObligationRecord({}, "OBL-0002");
+  const invalidUrgency = storyObligationRecord({
+    urgency: "immediate"
+  }, "OBL-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingUrgency, invalidUrgency])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "OBL-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "OBL-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("urgency")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "OBL-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
+test("record_schema_compliance enforces story consequence urgency", async () => {
+  const valid = storyConsequenceRecord({
+    urgency: "medium"
+  }, "CNSQ-0001");
+  const missingUrgency = storyConsequenceRecord({}, "CNSQ-0002");
+  const invalidUrgency = storyConsequenceRecord({
+    urgency: "eventual"
+  }, "CNSQ-0003");
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([valid, missingUrgency, invalidUrgency])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CNSQ-0001"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CNSQ-0002" &&
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("urgency")
+  ));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "CNSQ-0003" &&
+    verdict.code === "record_schema_compliance.enum"
+  ));
+});
+
 test("record_schema_compliance accepts branch-prefix-scoped storylets with canonical nested prefix", async () => {
   const storylet = completeStorylet();
   storylet.scope = {
@@ -289,6 +367,45 @@ test("record_schema_compliance accepts branch-prefix-scoped storylets with canon
   );
 
   assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance accepts storylet bound effect references and rejects prose labels", async () => {
+  const validBoundEffects = completeStorylet();
+  validBoundEffects.effects = {
+    create: ["bound:new_debt"],
+    supersede: ["OBL-0001"],
+    close: ["bound:old_thread"]
+  };
+  validBoundEffects.exit_options = [
+    {
+      action_family: "communicate",
+      surface_hint: "Ask one bounded follow-up question.",
+      likely_effects: ["bound:new_debt", "CNSQ-0001"]
+    }
+  ];
+
+  const invalidLabel = completeStorylet();
+  invalidLabel.exit_options = [
+    {
+      action_family: "communicate",
+      surface_hint: "Ask one bounded follow-up question.",
+      likely_effects: ["limited-disclosure"]
+    }
+  ];
+
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      storyletRecord(validBoundEffects, "SLT-0015"),
+      storyletRecord(invalidLabel, "SLT-0016")
+    ])
+  );
+
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SLT-0015"));
+  assert.ok(result.some((verdict) =>
+    verdict.location.node_id === "SLT-0016" &&
+    verdict.message.includes("/exit_options/0/likely_effects/0")
+  ));
 });
 
 test("record_schema_compliance rejects malformed branch-prefix-scoped storylet prefix fields", async () => {
@@ -539,7 +656,7 @@ function completeStorylet(): Record<string, unknown> {
       {
         action_family: "communicate",
         surface_hint: "Ask one bounded follow-up question.",
-        likely_effects: ["limited-disclosure"]
+        likely_effects: ["OBL-0001"]
       }
     ],
     saliency: {
@@ -561,6 +678,46 @@ function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?
   return record("storylet_record", id, `stories/red-bunny/_source/storylets/${id}.yaml`, {
     ...parsed,
     id
+  });
+}
+
+function storyFactRecord(overrides: Record<string, unknown>, id: string) {
+  return record("story_fact_record", id, `stories/red-bunny/_source/facts/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    statement: "The gate is damaged.",
+    derived_from: [],
+    ...overrides
+  });
+}
+
+function storyObligationRecord(overrides: Record<string, unknown>, id: string) {
+  return record("obligation_record", id, `stories/red-bunny/_source/obligations/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    status: "open",
+    obligation_kind: "promise",
+    description: "Mara owes Ren a guarded answer.",
+    owed_by: "STENT-0001",
+    owed_to: "STENT-0002",
+    trigger_to_close: "Mara gives Ren a truthful answer or transfers the debt.",
+    ...overrides
+  });
+}
+
+function storyConsequenceRecord(overrides: Record<string, unknown>, id: string) {
+  return record("consequence_record", id, `stories/red-bunny/_source/consequences/${id}.yaml`, {
+    id,
+    story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    status: "pending",
+    consequence_kind: "public_pressure",
+    description: "The public accusation will alter how witnesses respond.",
+    resolves_when: "The accusation is answered or displaced by stronger evidence.",
+    derived_from: ["SE-0001"],
+    ...overrides
   });
 }
 

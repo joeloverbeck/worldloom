@@ -386,13 +386,22 @@ test("recursive_reference_closure fails for missing emitted_choices page peers",
 test("recursive_reference_closure follows emitted choice effect graphs from page peers", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      emitted_choices: ["CHC-0001"]
+      emitted_choices: ["CHC-0001"],
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          STENT: ["STENT-0001"]
+        }
+      }
     },
     extra: [
       storyRecord("choice_record", "CHC-0001", "choices", {
         id: "CHC-0001",
         story_id: "STORY-001",
         created_at_page: "PG-0002",
+        grounded_in: {
+          records: ["STENT-0001"]
+        },
         uses_fact: "SF-0099"
       }),
       storyRecord("story_fact_record", "SF-0099", "facts", {
@@ -414,6 +423,129 @@ test("recursive_reference_closure follows emitted choice effect graphs from page
     referenced_file: "stories/test-story/_source/facts/SF-0099.yaml",
     referenced_node_id: "test-story:SF-0099",
     created_at_page: "PG-0099"
+  });
+});
+
+test("recursive_reference_closure accepts choices grounded in active records and visible affordances", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-0001"],
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          STENT: ["STENT-0001"],
+          STLOC: ["STLOC-0001"],
+          STOBJ: ["STOBJ-0001"]
+        },
+        visible_affordances: [
+          {
+            ordinal: 0,
+            label: "door to the alley",
+            grounded_in: ["STLOC-0001", "STOBJ-0001"],
+            available_to: ["STENT-0001"],
+            action_families: ["move"]
+          }
+        ]
+      }
+    },
+    extra: [
+      storyRecord("choice_record", "CHC-0001", "choices", {
+        id: "CHC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        grounded_in: {
+          records: ["STENT-0001", "STLOC-0001"],
+          affordance_ordinals: [0]
+        }
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("recursive_reference_closure fails choices grounded in inactive records", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-0001"],
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          STENT: ["STENT-0001"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("choice_record", "CHC-0001", "choices", {
+        id: "CHC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        grounded_in: {
+          records: ["OBL-0001"]
+        }
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.choice_grounding_missing_active_record");
+  assert.ok(missing);
+  assert.deepEqual(missing.detail, {
+    page_id: "PG-0002",
+    choice_id: "CHC-0001",
+    reference_id: "OBL-0001",
+    reference_path: "emitted_choices[0].grounded_in.records[0]"
+  });
+});
+
+test("recursive_reference_closure fails choices grounded in absent affordance ordinals", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      emitted_choices: ["CHC-0001"],
+      state_snapshot: {
+        ...stateSnapshot,
+        active_records: {
+          STENT: ["STENT-0001"]
+        },
+        visible_affordances: [
+          {
+            ordinal: 0,
+            label: "door to the alley",
+            grounded_in: ["STLOC-0001"],
+            available_to: ["STENT-0001"],
+            action_families: ["move"]
+          }
+        ]
+      }
+    },
+    extra: [
+      storyRecord("choice_record", "CHC-0001", "choices", {
+        id: "CHC-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        grounded_in: {
+          records: ["STENT-0001"],
+          affordance_ordinals: [3]
+        }
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.choice_grounding_missing_affordance");
+  assert.ok(missing);
+  assert.deepEqual(missing.detail, {
+    page_id: "PG-0002",
+    choice_id: "CHC-0001",
+    affordance_ordinal: 3,
+    reference_path: "emitted_choices[0].grounded_in.affordance_ordinals[0]"
   });
 });
 

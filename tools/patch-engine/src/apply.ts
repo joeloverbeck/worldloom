@@ -272,6 +272,7 @@ function collectNewNodes(patches: PatchOperation[]): NewNodeReceipt[] {
       case "create_sec_record":
         return [{ node_id: String(patch.payload.sec_record.id), node_type: "section", file_path: "" }];
       case "create_stent_record":
+      case "create_ststat_record":
       case "create_sf_record":
       case "create_se_record":
       case "create_obl_record":

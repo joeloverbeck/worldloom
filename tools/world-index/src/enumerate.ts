@@ -40,6 +40,7 @@ const ATOMIC_SOURCE_DIRECTORIES = new Set([
 ]);
 const STORY_SOURCE_DIRECTORIES = new Set([
   "entities",
+  "status",
   "facts",
   "events",
   "obligations",

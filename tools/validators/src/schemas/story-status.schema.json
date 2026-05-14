@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://worldloom.local/schemas/story-status.schema.json",
+  "type": "object",
+  "required": ["id", "story_id", "created_at_page", "entity", "life", "agency", "location"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^STSTAT-[0-9]+$" },
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STSTAT-[0-9]+$" },
+    "entity": { "type": "string", "pattern": "^STENT-[0-9]+$" },
+    "life": { "type": "string", "enum": ["alive", "dead", "unknown"] },
+    "agency": {
+      "type": "string",
+      "enum": [
+        "free",
+        "constrained",
+        "coerced",
+        "captive",
+        "incapacitated",
+        "unconscious",
+        "dead",
+        "unknown"
+      ]
+    },
+    "location": {
+      "type": "string",
+      "pattern": "^(STLOC-[0-9]+|unknown|concealed|offstage)$"
+    },
+    "derived_from": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^(SE-[0-9]+|[A-Z]+[A-Z0-9]*-[0-9]+)$" }
+    }
+  },
+  "additionalProperties": false
+}

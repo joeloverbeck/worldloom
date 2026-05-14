@@ -36,6 +36,8 @@ export const recursiveReferenceClosure: Validator = {
       const branchPath = stringArray(parsed.branch_path);
       const branchPathSet = new Set(branchPath);
       const maps = recordMapForStory(records, page.story_slug ?? null);
+      const activeRecordIds = activeRecordSet(parsed);
+      const visibleAffordanceOrdinals = visibleAffordanceOrdinalSet(parsed);
       const roots = pageClosureRoots(parsed);
       const visited = new Set<string>();
       const stack = roots.map((reference) => ({ ...reference, via: reference.path }));
@@ -73,6 +75,16 @@ export const recursiveReferenceClosure: Validator = {
             path: nested.path,
             via: nested.path
           });
+        }
+      }
+
+      for (const choiceRef of stringArray(parsed.emitted_choices).map((id, index) => ({ id, index }))) {
+        const choice = maps.byId.get(choiceRef.id);
+        if (choice === undefined) {
+          continue;
+        }
+        for (const verdict of choiceGroundingVerdicts(page, choice, choiceRef.index, activeRecordIds, visibleAffordanceOrdinals)) {
+          verdicts.push(verdict);
         }
       }
     }
@@ -140,6 +152,63 @@ function pageClosureRoots(page: Record<string, unknown>): StoryReference[] {
     ...storyLocalReferences(page.applied_event_ops, "applied_event_ops"),
     ...storyLocalReferences(page.emitted_choices, "emitted_choices")
   ];
+}
+
+function activeRecordSet(page: Record<string, unknown>): Set<string> {
+  const activeRecords = asPlainRecord(asPlainRecord(page.state_snapshot).active_records);
+  const ids = new Set<string>();
+  for (const value of Object.values(activeRecords)) {
+    for (const id of stringArray(value)) {
+      ids.add(id);
+    }
+  }
+  return ids;
+}
+
+function visibleAffordanceOrdinalSet(page: Record<string, unknown>): Set<number> {
+  const affordances = asPlainRecord(page.state_snapshot).visible_affordances;
+  if (!Array.isArray(affordances)) {
+    return new Set();
+  }
+  const ordinals = new Set<number>();
+  for (const affordance of affordances) {
+    const ordinal = asPlainRecord(affordance).ordinal;
+    if (typeof ordinal === "number" && Number.isInteger(ordinal)) {
+      ordinals.add(ordinal);
+    }
+  }
+  return ordinals;
+}
+
+function choiceGroundingVerdicts(
+  page: IndexedRecord,
+  choice: IndexedRecord,
+  choiceIndex: number,
+  activeRecordIds: ReadonlySet<string>,
+  visibleAffordanceOrdinals: ReadonlySet<number>
+): Verdict[] {
+  const choiceRecord = asPlainRecord(choice.parsed);
+  const groundedIn = asPlainRecord(choiceRecord.grounded_in);
+  const records = stringArray(groundedIn.records);
+  const ordinals = Array.isArray(groundedIn.affordance_ordinals)
+    ? groundedIn.affordance_ordinals.filter((value): value is number => typeof value === "number" && Number.isInteger(value))
+    : [];
+  const choicePath = `emitted_choices[${choiceIndex}].grounded_in`;
+  const verdicts: Verdict[] = [];
+
+  for (const [index, id] of records.entries()) {
+    if (!activeRecordIds.has(id)) {
+      verdicts.push(ungroundedRecord(page, choice, id, `${choicePath}.records[${index}]`));
+    }
+  }
+
+  for (const [index, ordinal] of ordinals.entries()) {
+    if (!visibleAffordanceOrdinals.has(ordinal)) {
+      verdicts.push(ungroundedAffordanceOrdinal(page, choice, ordinal, `${choicePath}.affordance_ordinals[${index}]`));
+    }
+  }
+
+  return verdicts;
 }
 
 function collectStoryLocalReferences(value: unknown, path: string, references: StoryReference[]): void {
@@ -272,8 +341,46 @@ function branchLeak(
   };
 }
 
+function ungroundedRecord(page: IndexedRecord, choice: IndexedRecord, referenceId: string, referencePath: string): Verdict {
+  return {
+    validator: "recursive_reference_closure",
+    severity: "fail",
+    code: "recursive_reference_closure.choice_grounding_missing_active_record",
+    message: `${pageId(page)} emits ${choiceId(choice)} grounded in ${referenceId}, but that record is not active on the emitting page`,
+    location: locationFor(choice),
+    detail: {
+      page_id: pageId(page),
+      choice_id: choiceId(choice),
+      reference_id: referenceId,
+      reference_path: referencePath
+    },
+    suggested_fix: `Ground ${choiceId(choice)} in records present in ${pageId(page)}.state_snapshot.active_records or remove the stale grounding reference.`
+  };
+}
+
+function ungroundedAffordanceOrdinal(page: IndexedRecord, choice: IndexedRecord, ordinal: number, referencePath: string): Verdict {
+  return {
+    validator: "recursive_reference_closure",
+    severity: "fail",
+    code: "recursive_reference_closure.choice_grounding_missing_affordance",
+    message: `${pageId(page)} emits ${choiceId(choice)} grounded in affordance ordinal ${ordinal}, but that ordinal is not visible on the emitting page`,
+    location: locationFor(choice),
+    detail: {
+      page_id: pageId(page),
+      choice_id: choiceId(choice),
+      affordance_ordinal: ordinal,
+      reference_path: referencePath
+    },
+    suggested_fix: `Ground ${choiceId(choice)} in ordinals present in ${pageId(page)}.state_snapshot.visible_affordances or remove the stale affordance grounding reference.`
+  };
+}
+
 function pageId(page: IndexedRecord): string {
   return stringValue(asPlainRecord(page.parsed).id) ?? page.node_id;
+}
+
+function choiceId(choice: IndexedRecord): string {
+  return stringValue(asPlainRecord(choice.parsed).id) ?? choice.node_id;
 }
 
 function formatCreatedAtPage(value: string | null | undefined): string {
