@@ -80,6 +80,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D4 — Authority-cited HARD-GATE rationales
 
+**Implementation note (2026-05-14, SPEC27FOUCAN-004).** D4 landed the authority-cited HARD-GATE rationale rule in `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 and added the matching pointer in `docs/FOUNDATIONS.md` §Tooling Recommendation. Remaining D4 prose below is historical intake context unless a later ticket explicitly owns broader skill-local or `CLAUDE.md` wording cleanup.
+
 **Current state.** `HARD-GATE-DISCIPLINE.md:11` and both `CLAUDE.md` files require a non-empty one-line rationale; neither requires it to cite an authority record. `canon-addition` Phase 14a already practices the stronger discipline skill-locally.
 
 **Change.** `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 is strengthened: a canon-safety HARD-GATE PASS / FAIL rationale must cite the record ids, packet layer, validator result, or retrieved field that supports the judgment; a rationale resting only on model memory or prose impression is treated as FAIL. `FOUNDATIONS.md` §Tooling Recommendation gains a one-line pointer to this discipline. This generalizes and codifies `canon-addition`'s existing Phase 14a practice; it does not invent a new mechanism.

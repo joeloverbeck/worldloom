@@ -1,14 +1,14 @@
 # SPEC27FOUCAN-004: Authority-cited HARD-GATE rationales
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `docs/HARD-GATE-DISCIPLINE.md`, `docs/FOUNDATIONS.md` (§Tooling Recommendation).
+**Engine Changes**: Yes — `docs/HARD-GATE-DISCIPLINE.md`, `docs/FOUNDATIONS.md` (§Tooling Recommendation), `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` (D4 implementation note).
 **Deps**: None
 
 ## Problem
 
-`docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 and both `CLAUDE.md` files require each validation test to record PASS with a one-line rationale and treat a bare "PASS" as FAIL — but neither requires the rationale to cite the record id, validator result, or packet layer it rests on. `canon-addition` Phase 14a already practices the stronger discipline (cite the named mechanical validator + cite phase findings) skill-locally; it is not generalized, so "PASS because it seems consistent" can creep back in elsewhere.
+At intake, `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 and both `CLAUDE.md` files required each validation test to record PASS with a one-line rationale and treat a bare "PASS" as FAIL — but neither required the rationale to cite the record id, validator result, or packet layer it rests on. `canon-addition` Phase 14a already practiced the stronger discipline (cite the named mechanical validator + cite phase findings) skill-locally; this ticket generalized that discipline in `docs/HARD-GATE-DISCIPLINE.md` and added the matching `docs/FOUNDATIONS.md` pointer.
 
 ## Assumption Reassessment (2026-05-14)
 
@@ -17,6 +17,7 @@
 3. Shared boundary under audit: the HARD-GATE PASS/FAIL rationale convention, which every canon-mutating and content-generating skill instantiates. Strengthening it in `HARD-GATE-DISCIPLINE.md` generalizes `canon-addition`'s existing skill-local practice; no sibling skill's HARD-GATE block is edited by this ticket.
 4. FOUNDATIONS principle under audit: §Tooling Recommendation ("LLM agents should never operate on prose alone"). Requiring authority-cited rationales aligns the gate discipline with the machine-facing retrieval model — the citation names the loaded authority.
 5. Enforcement surface touched: `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 (the HARD-GATE rationale convention). The change raises the rationale bar; it does not alter canon-write ordering and does not weaken the Mystery Reserve firewall.
+6. User-supplied reference `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` contains current-state D4 prose for this exact seam, so this ticket owns a dated D4 implementation note there. The remaining D4 prose stays as historical intake context, consistent with prior D1-D3 notes in the same spec.
 
 ## Architecture Check
 
@@ -29,20 +30,25 @@
 2. `docs/FOUNDATIONS.md` §Tooling Recommendation carries a one-line pointer to the strengthened discipline -> FOUNDATIONS alignment check.
 3. Cross-artifact boundary: the change spans `HARD-GATE-DISCIPLINE.md` (primary) and `FOUNDATIONS.md` §Tooling Recommendation (pointer) — both must name the discipline consistently -> codebase grep-proof.
 
-## What to Change
+## Landed Changes
 
 ### 1. Strengthen HARD-GATE-DISCIPLINE.md step 3
 
-- In `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3, add: a canon-safety HARD-GATE PASS/FAIL rationale must cite the record ids, packet layer, validator result, or retrieved field that supports the judgment; a rationale resting only on model memory or prose impression is treated as FAIL.
+- `docs/HARD-GATE-DISCIPLINE.md` execution-pattern step 3 now requires an authority-cited one-line rationale. It names record id, packet layer, validator result, retrieved field, or named loaded authority as valid support, and treats bare PASS plus model-memory-only or impression-only rationales as FAIL.
 
 ### 2. FOUNDATIONS §Tooling Recommendation pointer
 
-- In `docs/FOUNDATIONS.md` §Tooling Recommendation, add a one-line pointer to the strengthened authority-cited-rationale discipline in `docs/HARD-GATE-DISCIPLINE.md`.
+- `docs/FOUNDATIONS.md` §Tooling Recommendation now points to the strengthened authority-cited-rationale discipline in `docs/HARD-GATE-DISCIPLINE.md`.
+
+### 3. SPEC-27 D4 note
+
+- `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` D4 now has a dated implementation note for `SPEC27FOUCAN-004`.
 
 ## Files to Touch
 
 - `docs/HARD-GATE-DISCIPLINE.md` (modify)
 - `docs/FOUNDATIONS.md` (modify)
+- `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` (modify)
 
 ## Out of Scope
 
@@ -54,8 +60,8 @@
 ### Tests That Must Pass
 
 1. `docs/HARD-GATE-DISCIPLINE.md` step 3 requires authority-cited rationales; a bare or impression-only rationale is documented as FAIL.
-2. `grep -n "authority-cited\|cite the record" docs/HARD-GATE-DISCIPLINE.md` returns the strengthened text.
-3. `grep -n "authority-cited\|HARD-GATE-DISCIPLINE" docs/FOUNDATIONS.md` returns the §Tooling Recommendation pointer.
+2. `grep -n "authority-cited" docs/HARD-GATE-DISCIPLINE.md docs/FOUNDATIONS.md specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` returns the strengthened text and the D4 spec note.
+3. `grep -n "cite the record" docs/HARD-GATE-DISCIPLINE.md` returns the step 3 authority-citation requirement.
 
 ### Invariants
 
@@ -70,5 +76,24 @@
 
 ### Commands
 
-1. `grep -n "authority-cited" docs/HARD-GATE-DISCIPLINE.md docs/FOUNDATIONS.md`
-2. `git diff --stat docs/` — confirm only `HARD-GATE-DISCIPLINE.md` and `FOUNDATIONS.md` changed; no `CLAUDE.md`.
+1. `grep -n "authority-cited" docs/HARD-GATE-DISCIPLINE.md docs/FOUNDATIONS.md specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md`
+2. `grep -n "cite the record" docs/HARD-GATE-DISCIPLINE.md`
+3. `git diff --stat docs/ specs/ archive/tickets/SPEC27FOUCAN-004.md` — confirm the owned docs/spec/ticket set after archival.
+4. `git diff --check`
+
+## Outcome
+
+Completed. `docs/HARD-GATE-DISCIPLINE.md` now makes authority-cited rationales the general HARD-GATE PASS/FAIL convention, `docs/FOUNDATIONS.md` points Tooling Recommendation readers to that convention, and `specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` records D4 as landed.
+
+Outcome amended: 2026-05-14 — post-archive review updated the path-sensitive diff-stat proof command from the active ticket path to this archived ticket path.
+
+## Verification Result
+
+1. `grep -n "authority-cited" docs/HARD-GATE-DISCIPLINE.md docs/FOUNDATIONS.md specs/SPEC-27-foundations-canon-and-story-integrity-amendments.md` — PASS; returned the strengthened HARD-GATE step, FOUNDATIONS pointer, and SPEC-27 D4 note.
+2. `grep -n "cite the record" docs/HARD-GATE-DISCIPLINE.md` — PASS; returned the step 3 sentence requiring the rationale to cite record id / packet layer / validator result / retrieved field / named loaded authority.
+3. `git diff --stat docs/ specs/ archive/tickets/SPEC27FOUCAN-004.md` — PASS; showed only the owned docs, spec, and archived ticket.
+4. `git diff --check` — PASS.
+
+## Deviations
+
+- The user-supplied `specs/SPEC-27*` reference had same-seam current-state D4 prose, so this run added a dated implementation note to the spec and updated `Files to Touch` accordingly. No individual skill HARD-GATE blocks or `CLAUDE.md` files were edited.
