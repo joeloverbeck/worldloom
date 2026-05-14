@@ -593,6 +593,8 @@ Rule 4 (No Globalization by Accident) governs story-scope branch isolation. Glob
 
 Rule 5 (No Consequence Evasion) governs per-page consequence capacity. Every page must leave at least one continuation storylet eligible.
 
+**Choice Consequence Integrity.** No accepted player choice or accepted write-in may be cosmetic-only. Every committed `CHC` selection or accepted write-in must produce at least one grounded consequence: a non-empty `SE.state_delta`; a new, superseded, or closed story-bundle record; a changed visibility or affordance state; or a recorded failure, refusal, or block that is itself a consequence. Purely rhetorical or expressive choice variants are permitted only when the page plan explicitly marks them as rhetorical before selection.
+
 Rule 7 (Preserve Mystery Deliberately) governs story-local `unresolved_mystery_claims` (on `PG.state_snapshot`) and `mystery_policy.allowed_authority` (on commitment blocks) authority discipline: `apparent`, `branch_local_counterfactual`, and `canon_candidate` claims remain separate. `SF.authority` uses the schema-backed story-fact authority enum from the shared story state contract: `branch_local`, `branch_local_counterfactual`, `canon_candidate`, and `canon_linked`; `canon_linked` is allowed only after canon acceptance and is backed by a parent `CF-<integer>` in `SF.derived_from`.
 
 Rules 2 / 3 / 6 / 11 / 12 govern world-canon-mutation surfaces such as `canon-addition`, `propose-new-canon-facts`, and `create-base-world`; they are not story-scope record validators by default.

@@ -88,6 +88,8 @@ Nine deliverables. D1–D4 touch world-canon schema, FOUNDATIONS documentation, 
 
 ### D5 — Choice Consequence Integrity (story-scope Rule 5)
 
+**Implementation note (2026-05-14, SPEC27FOUCAN-005).** D5 landed the Choice Consequence Integrity clause in `docs/FOUNDATIONS.md` §Story Bundles §5, the matching action-routing and gate-6 hard-gate language in `.claude/skills/_shared-templates/story-state-contract.md`, and the corresponding turn-cycle Phase 9 / health-audit replay checks. Remaining D5 prose below is historical intake context unless a later ticket explicitly owns further enforcement changes.
+
 **Current state.** Empty `SE.state_delta` is explicitly legal; `CHC.grounded_in` is an availability anchor, not a consequence guarantee.
 
 **Change.**
