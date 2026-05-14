@@ -40,6 +40,20 @@ Check:
 - config/schema fallout
 - whether verification should include a real command run
 
+### Mixed package plus engine-routed world repair
+
+Use this sub-route when a package/tool ticket also includes a live `_source` repair that becomes possible only after the package change lands, such as a patch-engine operation enhancement followed by a one-record maintenance repair.
+
+Keep the primary classification as `tool or script implementation`, then also apply the world-content safeguards for the repair phase:
+
+- read `docs/HARD-GATE-DISCIPLINE.md` before preparing or submitting the live repair plan
+- load `references/patch-engine-codex-fallback.md` if `mcp__worldloom__submit_patch_plan` is unavailable or the run uses the world-mcp CLI path
+- keep source edits and repair-plan submission sequential: prove/build the package change first, then validate and submit the live repair through the engine
+- present the validated repair plan and wait for explicit user approval before signing/submitting
+- classify the repair as `semantic canon mutation` or `schema or maintenance migration` in `Assumption Reassessment` / closeout
+- verify the engine receipt, direct on-disk `_source` record state, and any synced `_index/` artifact directly because `worlds/<slug>/` content may be gitignored
+- keep tracked package/source/test edits separate from ignored/private world-content changes in the dirty-worktree ledger
+
 ## cross-skill or cross-artifact contract
 
 Use when a ticket changes a shared template, schema, doc contract, or handoff between tools and skills.

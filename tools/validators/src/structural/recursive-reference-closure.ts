@@ -188,9 +188,6 @@ function referenceBranchPageFor(target: IndexedRecord, record: Record<string, un
   if (createdAtPage !== undefined) {
     return createdAtPage;
   }
-  if (target.node_type === "obligation_record") {
-    return stringValue(record.introduced_at_page);
-  }
   return undefined;
 }
 

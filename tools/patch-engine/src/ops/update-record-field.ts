@@ -1,4 +1,5 @@
 import type { PatchOperation, PatchPlanEnvelope, RetconAttestation } from "../envelope/schema.js";
+import { computePgStateHash } from "@worldloom/world-index/hash/content";
 import {
   loadExistingRecord,
   PatchEngineOpError,
@@ -48,7 +49,8 @@ async function stageUpdate(
 
   if (
     !isFreelyAppendable(fieldPath, op.payload.operation) &&
-    !isProseFinalizeTransition(fieldPath, op.payload.operation)
+    !isProseFinalizeTransition(fieldPath, op.payload.operation) &&
+    !isSelfConsistentStateHashRepair(loaded.record, op, targetRecordId)
   ) {
     const attestation = op.retcon_attestation ?? op.payload.retcon_attestation;
     validateRetconAttestation(op.op, targetRecordId, fieldPath, attestation);
@@ -184,17 +186,39 @@ function isFreelyAppendable(
   );
 }
 
+function isSelfConsistentStateHashRepair(
+  record: Record<string, unknown>,
+  op: UpdateRecordFieldOperation,
+  targetRecordId: string
+): boolean {
+  const { field_path: fieldPath, operation, new_value: newValue } = op.payload;
+  if (
+    !/^PG-\d+$/.test(targetRecordId) ||
+    operation !== "set" ||
+    fieldPath.length !== 1 ||
+    fieldPath[0] !== "state_hash" ||
+    typeof newValue !== "string"
+  ) {
+    return false;
+  }
+
+  const recordAfterUpdate = cloneRecord(record);
+  applyFieldOperation(recordAfterUpdate, op, targetRecordId);
+  return computePgStateHash(recordAfterUpdate) === newValue;
+}
+
 function validateRetconAttestation(
   opKind: "update_record_field",
   targetRecordId: string,
   fieldPath: string[],
   attestation: RetconAttestation | undefined
 ): void {
+  const requiresStoryEvent = isStoryBundleRecordId(targetRecordId);
   if (
     !attestation ||
     !RETCON_TYPES.has(attestation.retcon_type) ||
-    !/^CH-\d+$/.test(attestation.originating_ch) ||
-    attestation.rationale.trim().length === 0
+    attestation.rationale.trim().length === 0 ||
+    !hasCorrectOriginatingReference(attestation, requiresStoryEvent)
   ) {
     throw new PatchEngineOpError({
       code: "retcon_attestation_required",
@@ -203,6 +227,26 @@ function validateRetconAttestation(
       record_id: targetRecordId
     });
   }
+}
+
+function hasCorrectOriginatingReference(attestation: RetconAttestation, requiresStoryEvent: boolean): boolean {
+  const hasOriginatingCh = attestation.originating_ch !== undefined;
+  const hasOriginatingSe = attestation.originating_se !== undefined;
+  if (hasOriginatingCh === hasOriginatingSe) {
+    return false;
+  }
+  if (requiresStoryEvent) {
+    return typeof attestation.originating_se === "string" && /^SE-\d+$/.test(attestation.originating_se);
+  }
+  return typeof attestation.originating_ch === "string" && /^CH-\d+$/.test(attestation.originating_ch);
+}
+
+function isStoryBundleRecordId(targetRecordId: string): boolean {
+  return /^(PG|SE|STENT|STINT|SF|BEL|OBL|CNSQ|THR|SREL|STLOC|STOBJ|CHC|SLT|BR|DA)-\d+$/.test(targetRecordId);
+}
+
+function cloneRecord(record: Record<string, unknown>): Record<string, unknown> {
+  return JSON.parse(JSON.stringify(record)) as Record<string, unknown>;
 }
 
 function appendText(current: string, value: unknown): string {

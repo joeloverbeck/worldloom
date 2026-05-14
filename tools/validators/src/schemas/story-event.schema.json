@@ -2,11 +2,24 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-event.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "event_kind"],
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "parent_page_id",
+    "event_kind",
+    "actor",
+    "outcome_route",
+    "world_logic_rationale",
+    "state_delta"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^SE-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "parent_page_id": { "type": ["string", "null"], "pattern": "^PG-[0-9]+$" },
     "event_kind": {
+      "type": "string",
       "enum": [
         "story_start",
         "selected_choice",
@@ -16,7 +29,48 @@
         "prose_attach",
         "promotion_closeout"
       ]
+    },
+    "actor": { "type": "string", "pattern": "^(STENT-[0-9]+|system|unknown)$" },
+    "targets": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ)-[0-9]+$" }
+    },
+    "outcome_route": {
+      "type": "string",
+      "enum": ["accept", "accommodate", "attempt", "world_block", "promotion_hold", "terminal"]
+    },
+    "world_logic_rationale": { "type": "string", "minLength": 1 },
+    "state_delta": {
+      "type": "object",
+      "required": ["create", "supersede", "close"],
+      "properties": {
+        "create": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+        },
+        "supersede": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+        },
+        "close": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "promotion_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_record", "authority"],
+        "properties": {
+          "source_record": { "type": "string", "pattern": "^(SF|BEL|DA|STENT)-[0-9]+$" },
+          "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] }
+        },
+        "additionalProperties": false
+      }
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

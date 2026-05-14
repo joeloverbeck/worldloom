@@ -69,6 +69,8 @@ Invoke both patch-plan CLIs from the project root or active git worktree root (t
 
 `validate-patch-plan` prints the same status object as `mcp__worldloom__validate_patch_plan`, including `validators_run[]`: `pass` exits 0 on stdout; `fail` and `skipped` exit 1 on stderr. When a malformed envelope has multiple shape errors, `skipped.details.field` names the first offending path and `skipped.details.additional_errors[]` lists the remaining invalid-input errors. `submit-patch-plan` prints the same `PatchReceipt` / error family as `mcp__worldloom__submit_patch_plan`; it requires a signed approval token file.
 
+The patch-plan CLIs also serve as a fresh-process workaround for the stale-validators-bundle case documented in `docs/MACHINE-FACING-LAYER.md`: when the running MCP server holds a pre-rebuild `@worldloom/validators` bundle in memory and a full session restart is not immediately available, invoke the corresponding CLI directly. Same handler wiring, same validation status object, same `PatchReceipt` / error family.
+
 ## Configuration
 
 Registered via `.mcp.json`. See `archive/specs/SPEC-02-retrieval-mcp-server.md` §`.mcp.json` (example).

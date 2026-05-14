@@ -106,9 +106,13 @@ test("describeEnvelopeSchema exposes update and hybrid operation payloads", asyn
   assert.equal(updateManifest.delivery_status, "inline");
   const updateProperties = updateManifest.op_schemas.update_record_field!.properties as Record<string, unknown>;
   const updatePayload = updateProperties.payload as {
-    properties?: Record<string, { enum?: string[] }>;
+    properties?: Record<string, { enum?: string[]; oneOf?: unknown[]; properties?: Record<string, { pattern?: string }> }>;
   };
   assert.deepEqual(updatePayload.properties?.operation?.enum, ["set", "append_list", "append_text"]);
+  const retconAttestation = updatePayload.properties?.retcon_attestation;
+  assert.equal(retconAttestation?.properties?.originating_ch?.pattern, "^CH-[0-9]+$");
+  assert.equal(retconAttestation?.properties?.originating_se?.pattern, "^SE-[0-9]+$");
+  assert.equal(retconAttestation?.oneOf?.length, 2);
 
   const repairManifest = await describeEnvelopeSchema({ op_kind: "repair_skipped_change_log_entry" });
   assert.equal(repairManifest.delivery_status, "inline");

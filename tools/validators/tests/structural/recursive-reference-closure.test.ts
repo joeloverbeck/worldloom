@@ -76,50 +76,6 @@ test("recursive_reference_closure fails for sibling-branch leakage at nested dep
   });
 });
 
-test("recursive_reference_closure accepts legacy obligations with introduced_at_page", async () => {
-  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
-    obligationOverrides: {
-      created_at_page: undefined,
-      introduced_at_page: "PG-0001"
-    },
-    extra: [
-      storyRecord("page_record", "PG-0001", "pages", {
-        id: "PG-0001",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001"],
-        state_snapshot: {}
-      })
-    ]
-  }), {
-    run_mode: "pre-apply",
-    patch_plan: patchPlan()
-  }));
-
-  assert.deepEqual(verdicts, []);
-});
-
-test("recursive_reference_closure rejects legacy obligations introduced outside the branch", async () => {
-  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
-    obligationOverrides: {
-      created_at_page: undefined,
-      introduced_at_page: "PG-0099"
-    }
-  }), {
-    run_mode: "pre-apply",
-    patch_plan: patchPlan()
-  }));
-
-  const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
-  assert.ok(leak);
-  assert.deepEqual(leak.detail, {
-    reference_id: "OBL-0001",
-    reference_path: "state_snapshot.obligations_open[0]",
-    referenced_file: "stories/test-story/_source/obligations/OBL-0001.yaml",
-    referenced_node_id: "test-story:OBL-0001",
-    created_at_page: "PG-0099"
-  });
-});
-
 test("recursive_reference_closure allows global author-pool storylets", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
@@ -231,7 +187,6 @@ test("recursive_reference_closure rejects branch-scoped storylets with null crea
 test("recursive_reference_closure passes for same-branch PG references", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      introduced_at_page: "PG-0001",
       reviewed_at_page: "PG-0002"
     },
     extra: [
@@ -253,7 +208,7 @@ test("recursive_reference_closure passes for same-branch PG references", async (
 test("recursive_reference_closure fails for sibling-branch PG references", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      introduced_at_page: "PG-0099"
+      reviewed_at_page: "PG-0099"
     },
     extra: [
       storyRecord("page_record", "PG-0099", "pages", {
@@ -272,7 +227,7 @@ test("recursive_reference_closure fails for sibling-branch PG references", async
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
     reference_id: "PG-0099",
-    reference_path: "state_snapshot.obligations_open[0].introduced_at_page",
+    reference_path: "state_snapshot.obligations_open[0].reviewed_at_page",
     referenced_file: "stories/test-story/_source/pages/PG-0099.yaml",
     referenced_node_id: "test-story:PG-0099",
     created_at_page: "PG-0099"

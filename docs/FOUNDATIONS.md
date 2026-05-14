@@ -581,9 +581,9 @@ The schema (per `.claude/skills/_shared-templates/story-state-contract.md` §4.4
 
 ### 5b. Schema-Minimalism At Story Scope
 
-Every field in every story-bundle record schema (`BEL`, `PG`, `SE`, `SLT`, prose receipt) must be load-bearing — directly consumed by a validation gate, a replay primitive, a predicate, a fork operation, or recorded audit-trail discipline. Nice-to-have fields are dropped, because each field costs LLM tokens to author at every record and to read at every retrieval.
+Every field in every story-bundle record schema must be load-bearing — directly consumed by a validation gate, a replay primitive, a predicate, a fork operation, or recorded audit-trail discipline. Nice-to-have fields are dropped, because each field costs LLM tokens to author at every record and to read at every retrieval.
 
-The canonical field lists for the five core story-bundle schemas live in the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4. That contract is authoritative for story-record schemas; skills must not add fields to those schemas without amending the contract first.
+The canonical field lists for all story-bundle record schemas live in the shared story state contract at `.claude/skills/_shared-templates/story-state-contract.md` §4. That contract is authoritative for story-record schemas; skills must not add fields to those schemas without amending the contract first.
 
 ### 6. Story-Bundle ID Classes
 

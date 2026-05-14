@@ -1,7 +1,12 @@
+import { canonicalJsonStringify, computePgStateHash } from "@worldloom/world-index/hash/content";
+
 import type { Context, IndexedRecord, Validator, Verdict } from "../framework/types.js";
 import {
+  ACTIVE_RECORDS_CLASSES,
   SnapshotReplayError,
+  replayActiveRecords,
   replayStateSnapshot,
+  type StateDelta,
   type StateSnapshot,
   type StoryEventOp
 } from "../_helpers/state-snapshot-replay.js";
@@ -36,6 +41,16 @@ export const snapshotReplayEquality: Validator = {
       const parent = recordMap.byId.get(parentPageId);
       if (parent === undefined) {
         verdicts.push(fail(page, "snapshot_replay_equality.parent_missing", `${pageId(parsed)} cites missing parent_page_id ${parentPageId}`));
+        continue;
+      }
+
+      // Schema discrimination: legacy pages carry applied_event_ops + SE.ops with
+      // op_type vocabulary; new-schema pages (story state contract §4.3) carry
+      // input.resolved_event_id + SE.state_delta.{create,supersede,close}, and
+      // their state_snapshot.active_records is the replay surface. The two
+      // schemas are mutually exclusive in their event-link shape.
+      if (parsed.applied_event_ops === undefined) {
+        verdicts.push(...runNewSchemaReplay(page, parsed, parent, recordMap.byId));
         continue;
       }
 
@@ -144,7 +159,7 @@ function snapshotDrifts(expected: StateSnapshot, got: StateSnapshot): Array<{ fi
   const fields = [...new Set([...Object.keys(expected), ...Object.keys(got)])].sort();
   return fields
     .filter((field) => !POST_REPLAY_STAMPED_FIELDS.has(field))
-    .filter((field) => stableJson(expected[field]) !== stableJson(got[field]))
+    .filter((field) => canonicalJsonStringify(expected[field]) !== canonicalJsonStringify(got[field]))
     .map((field) => ({ field, expected: expected[field], got: got[field] }));
 }
 
@@ -162,20 +177,106 @@ function pageId(parsed: Record<string, unknown>): string {
   return stringValue(parsed.id) ?? "<unknown page>";
 }
 
-function stableJson(value: unknown): string {
-  return JSON.stringify(sortJson(value));
-}
+// New-schema (story state contract §4.3) replay: SE.state_delta against parent's
+// state_snapshot.active_records. Workflow-stamped fields (visible_affordances,
+// entity_status, unresolved_mystery_claims, continuation) are not reconstructible
+// from state_delta alone and are intentionally not compared here.
+function runNewSchemaReplay(
+  page: IndexedRecord,
+  parsed: Record<string, unknown>,
+  parent: Record<string, unknown>,
+  byId: ReadonlyMap<string, Record<string, unknown>>
+): Verdict[] {
+  const input = asPlainRecord(parsed.input);
+  const resolvedEventId = stringValue(input.resolved_event_id);
+  if (resolvedEventId === undefined) {
+    return [
+      fail(
+        page,
+        "snapshot_replay_equality.event_missing",
+        `${pageId(parsed)} lacks both applied_event_ops (legacy) and input.resolved_event_id (new schema); no event is bound for replay.`
+      )
+    ];
+  }
 
-function sortJson(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(sortJson);
+  const event = byId.get(resolvedEventId);
+  if (event === undefined) {
+    return [
+      fail(
+        page,
+        "snapshot_replay_equality.event_missing",
+        `${pageId(parsed)} input.resolved_event_id ${resolvedEventId} is not present in story records.`
+      )
+    ];
   }
-  if (typeof value === "object" && value !== null) {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .sort(([left], [right]) => left.localeCompare(right, "en-US"))
-        .map(([key, nested]) => [key, sortJson(nested)])
-    );
+
+  const stateDelta = asPlainRecord(event.state_delta);
+  const delta: StateDelta = {
+    create: stringArray(stateDelta.create),
+    supersede: stringArray(stateDelta.supersede),
+    close: stringArray(stateDelta.close)
+  };
+
+  const parentSnapshot = asPlainRecord(parent.state_snapshot);
+  const parentActive = asPlainRecord(parentSnapshot.active_records) as Record<string, readonly string[]>;
+  const expectedActive = replayActiveRecords(parentActive, delta);
+
+  const gotSnapshot = asPlainRecord(parsed.state_snapshot);
+  const gotActive = asPlainRecord(gotSnapshot.active_records);
+
+  const drifts: Array<{ field: string; expected: unknown; got: unknown }> = [];
+  for (const cls of ACTIVE_RECORDS_CLASSES) {
+    const expectedList = expectedActive[cls];
+    const gotListRaw = gotActive[cls];
+    const gotList = Array.isArray(gotListRaw)
+      ? gotListRaw.filter((item): item is string => typeof item === "string")
+      : [];
+    const expectedSorted = [...expectedList].sort();
+    const gotSorted = [...gotList].sort();
+    if (canonicalJsonStringify(expectedSorted) !== canonicalJsonStringify(gotSorted)) {
+      drifts.push({
+        field: `active_records.${cls}`,
+        expected: expectedList,
+        got: gotList
+      });
+    }
   }
-  return value;
+
+  const verdicts: Verdict[] = [];
+  if (drifts.length > 0) {
+    verdicts.push({
+      validator: "snapshot_replay_equality",
+      severity: "fail",
+      code: "snapshot_replay_equality.snapshot_drift",
+      message: `${pageId(parsed)} state_snapshot.active_records does not match parent.active_records + SE.state_delta`,
+      location: locationFor(page),
+      detail: { drifts },
+      suggested_fix: `Recompute ${pageId(parsed)} state_snapshot.active_records by applying ${resolvedEventId}.state_delta (create/supersede/close) to the parent page's active_records.`
+    });
+  }
+
+  // state_hash equality: re-derive the canonical hash from the on-disk record
+  // and compare against the stored state_hash. Catches authoring errors where
+  // the skill computed the hash against a slightly-different draft (truncated
+  // strings in validation_trace, missing fields, locale-sensitive key order)
+  // before submitting. Shared canonical-JSON helpers from
+  // @worldloom/world-index/hash/content are the same utilities the
+  // compute-pg-hashes CLI uses, so authoring-time and validation-time hashes
+  // are byte-identical by construction.
+  const declaredStateHash = stringValue(parsed.state_hash);
+  if (declaredStateHash !== undefined) {
+    const recomputed = computePgStateHash(parsed);
+    if (recomputed !== declaredStateHash) {
+      verdicts.push({
+        validator: "snapshot_replay_equality",
+        severity: "fail",
+        code: "snapshot_replay_equality.state_hash_mismatch",
+        message: `${pageId(parsed)} state_hash ${declaredStateHash} does not match the canonical sha256 of its fork-state payload (${recomputed}); the authoring skill computed the hash against a draft that differed from the submitted record.`,
+        location: locationFor(page),
+        suggested_fix: `Recompute ${pageId(parsed)} state_hash using tools/world-mcp/dist/src/cli/compute-pg-hashes.js against the final draft bytes (page plan + PG record) and re-stamp the value before validation.`
+      });
+    }
+  }
+
+  return verdicts;
 }

@@ -2,48 +2,45 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-page.schema.json",
   "type": "object",
-  "required": ["id", "story_id", "prose_plan_path", "plan", "state_hash"],
+  "required": [
+    "id",
+    "story_id",
+    "branch_id",
+    "parent_page_id",
+    "branch_path",
+    "turn_index",
+    "input",
+    "state_hash_parent",
+    "state_hash",
+    "state_snapshot",
+    "plan",
+    "prose_plan_path",
+    "emitted_choices",
+    "validation_trace"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^PG-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
-    "prose_path": {
-      "type": ["string", "null"],
-      "pattern": "^pages-prose/PG-[0-9]+\\.md$",
-      "description": "Relative path to rendered prose; null until prose is attached via branching-story-prose-attach."
+    "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" },
+    "parent_page_id": { "type": ["string", "null"], "pattern": "^PG-[0-9]+$" },
+    "branch_path": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^PG-[0-9]+$" }
     },
-    "prose_plan_path": {
-      "type": "string",
-      "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
-      "description": "Relative path to the comprehensive plan; always present after this rework."
-    },
-    "plan": {
+    "turn_index": { "type": "integer", "minimum": 0 },
+    "input": {
       "type": "object",
-      "required": ["path", "plan_hash"],
+      "required": ["choice_id", "manual_action_text", "resolved_event_id"],
       "properties": {
-        "path": {
-          "type": "string",
-          "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
-          "description": "Shared story state contract §4.2 plan path."
-        },
-        "plan_hash": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$",
-          "description": "Shared story state contract §4.2 sha256 hash of the committed prose plan."
-        }
+        "choice_id": { "type": ["string", "null"], "pattern": "^CHC-[0-9]+$" },
+        "manual_action_text": { "type": ["string", "null"], "minLength": 1 },
+        "resolved_event_id": { "type": "string", "pattern": "^SE-[0-9]+$" }
       },
-      "additionalProperties": false,
-      "description": "Shared story state contract §4.2 plan block."
+      "additionalProperties": false
     },
-    "state_hash": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$",
-      "description": "Shared story state contract §4.2 sha256 hash of the committed page state."
-    },
-    "validation_trace": {
-      "type": "object",
-      "additionalProperties": true,
-      "description": "One PASS-with-rationale entry per shared hard gate."
-    },
+    "state_hash_parent": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "state_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "state_snapshot": {
       "type": "object",
       "properties": {
@@ -53,16 +50,12 @@
             "type": "object",
             "required": ["life", "agency", "location"],
             "properties": {
-              "life": {
-                "enum": ["alive", "dead", "unknown"]
-              },
-              "agency": {
-                "enum": ["free", "constrained", "coerced", "captive", "incapacitated", "unconscious", "dead", "unknown"]
-              },
+              "life": { "type": "string", "enum": ["alive", "dead", "unknown"] },
+              "agency": { "type": "string", "enum": ["free", "constrained", "coerced", "captive", "incapacitated", "unconscious", "dead", "unknown"] },
               "location": {
                 "oneOf": [
                   { "type": "string", "pattern": "^STLOC-[0-9]+$" },
-                  { "enum": ["unknown", "concealed", "offstage"] }
+                  { "type": "string", "enum": ["unknown", "concealed", "offstage"] }
                 ]
               }
             },
@@ -75,18 +68,11 @@
             "type": "object",
             "required": ["mystery_id", "authority", "status"],
             "properties": {
-              "mystery_id": {
-                "type": "string",
-                "pattern": "^M-[0-9]+$"
-              },
-              "authority": {
-                "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"]
-              },
-              "status": {
-                "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"]
-              }
+              "mystery_id": { "type": "string", "pattern": "^M-[0-9]+$" },
+              "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] },
+              "status": { "type": "string", "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"] }
             },
-            "additionalProperties": true
+            "additionalProperties": false
           }
         },
         "visible_affordances": {
@@ -95,31 +81,21 @@
             "type": "object",
             "required": ["ordinal", "label", "grounded_in", "available_to", "action_families"],
             "properties": {
-              "ordinal": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "label": {
-                "type": "string",
-                "minLength": 1
-              },
+              "ordinal": { "type": "integer", "minimum": 0 },
+              "label": { "type": "string", "minLength": 1 },
               "grounded_in": {
                 "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^(STLOC|STOBJ)-[0-9]+$"
-                }
+                "items": { "type": "string", "pattern": "^(STLOC|STOBJ)-[0-9]+$" }
               },
               "available_to": {
                 "type": "array",
-                "items": {
-                  "type": "string",
-                  "pattern": "^STENT-[0-9]+$"
-                }
+                "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
               },
               "action_families": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
+                  "type": "string",
                   "enum": [
                     "move",
                     "evade",
@@ -145,12 +121,57 @@
                 }
               }
             },
-            "additionalProperties": true
+            "additionalProperties": false
           }
+        },
+        "continuation": {
+          "type": "object",
+          "properties": {
+            "has_eligible_commitment_block": { "type": "boolean" },
+            "terminal_status": { "type": "string", "enum": ["open", "branch_pause", "terminal_closed"] },
+            "terminal_rationale": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": true
+    },
+    "plan": {
+      "type": "object",
+      "required": ["plan_hash"],
+      "properties": {
+        "plan_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Shared story state contract §4.2 sha256 hash of the committed prose plan."
+        }
+      },
+      "additionalProperties": false
+    },
+    "prose_plan_path": {
+      "type": "string",
+      "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
+      "description": "Canonical top-level address of the page plan."
+    },
+    "prose_path": {
+      "type": ["string", "null"],
+      "pattern": "^pages-prose/PG-[0-9]+\\.md$",
+      "description": "Relative path to rendered prose; null until prose is attached."
+    },
+    "prose_receipt_path": {
+      "type": ["string", "null"],
+      "pattern": "^pages-prose-receipts/PG-[0-9]+\\.yaml$",
+      "description": "Relative path to the prose receipt; null until prose is attached."
+    },
+    "emitted_choices": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^CHC-[0-9]+$" }
+    },
+    "validation_trace": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "One PASS-with-rationale entry per shared hard gate."
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

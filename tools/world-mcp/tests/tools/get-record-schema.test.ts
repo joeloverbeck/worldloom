@@ -206,10 +206,20 @@ test("getRecordSchema exposes post-reset choice carrier fields", async () => {
 
   assert.ok(!("code" in choice));
   const properties = choice.schema.properties as Record<string, unknown>;
-  assert.deepEqual(choice.required_fields, ["id", "story_id"]);
+  assert.deepEqual(choice.required_fields, [
+    "id",
+    "story_id",
+    "created_at_page",
+    "surface_label",
+    "player_visible_intent",
+    "target_or_action_families",
+    "likely_state_pressure",
+    "associated_commitment_block"
+  ]);
   assert.ok(properties.surface_label);
   assert.ok(properties.player_visible_intent);
-  assert.ok(properties.target_or_action_family);
+  assert.ok(properties.target_or_action_families);
+  assert.equal(properties.target_or_action_family, undefined);
   assert.ok(properties.likely_state_pressure);
   assert.ok(properties.associated_commitment_block);
   assert.ok(properties.success_policy);

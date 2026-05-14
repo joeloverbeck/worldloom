@@ -25,12 +25,18 @@ test("record_schema_compliance rejects non-canonical STENT role_in_story values"
   ));
 });
 
-test("record_schema_compliance keeps STENT role_in_story optional", async () => {
+test("record_schema_compliance requires STENT role_in_story", async () => {
+  const parsed = validEntity();
+  delete parsed.role_in_story;
+
   const result = await recordSchemaCompliance.run({}, context([
-    entityRecord(validEntity())
+    entityRecord(parsed)
   ]));
 
-  assert.deepEqual(result, []);
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("'role_in_story'")
+  ));
 });
 
 function entityRecord(parsed: Record<string, unknown>) {
@@ -44,6 +50,9 @@ function validEntity(overrides: Record<string, unknown> = {}): Record<string, un
   return {
     id: "STENT-0001",
     story_id: "STORY-001",
+    created_at_page: "PG-0001",
+    display_name: "Mara",
+    role_in_story: ["primary_actor"],
     ...overrides
   };
 }

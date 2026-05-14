@@ -127,7 +127,7 @@ Before Phase 1:
 3. Parse `mode` argument — comma-separated list of `structural | prose | remediation | cross_story`; default to `structural` if absent. Validate every named mode is in the valid set.
 4. Allocate `SAU` id via `mcp__worldloom__allocate_next_id(world_slug, 'SAU', story_slug=<story_slug>)`. **`RSP` ids are allocated at Phase 5 per-finding** via `mcp__worldloom__allocate_next_id(world_slug, 'RSP', story_slug=<story_slug>, audit_id='SAU-<integer>')` — deferred-allocation pattern, since the count of fixable findings is unknown until phases complete.
 5. Load world canon context packet seeded with: every `M-<integer>` with `status: forbidden` (whole-class for per-event firewall in Phase 2e), every `INV` record (whole-class for invariant verification in Phase 2e), active cast `STENT` ids (for Phase 2d belief / visibility checks), and parent `CF` records for any `SF` records in the bundle (for Phase 2e canon-authority classification).
-6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by `derived_from_cf`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
+6. If `cross_story` in `mode`: enumerate `worlds/<world_slug>/stories/*/` directories; for each sibling bundle, load its `_source/` record-index sufficient for Phase 4 contradiction checks (mirrored `SF` records keyed by CF ids in `derived_from`, `SE.promotion_claims[]` queue, terminal-closure inherited-debt notes).
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -167,7 +167,7 @@ Flag:
 - `branch_isolation_leak` — records in a branch's `state_snapshot.active_records` whose `created_at_page` belongs to a sibling branch. ERROR; `repair_kind: branch_flag`.
 - `global_author_pool_branch_dependency` — global-author-pool `SLT` records (`scope.visibility: global_author_pool`) with preconditions referencing branch-local records (records whose `created_at_page` is non-null). ERROR; `repair_kind: commitment_block` (the SLT needs rework into a branch-scoped block).
 - `plan_state_reference_dangling` — page-plan references in `pages-prose-plans/PG-*.md` to records that don't exist in the page's active snapshot. ERROR; `repair_kind: prose_revision` (the plan body needs revision OR a repair turn must add the missing state).
-- `choice_state_reference_dangling` — emitted `CHC` records whose `target_or_action_family` requires records not in the page's active snapshot. ERROR; `repair_kind: turn_repair`.
+- `choice_state_reference_dangling` — emitted `CHC` records whose action-family list requires records not in the page's active snapshot. ERROR; `repair_kind: turn_repair`.
 
 ### Phase 2c: Debt health
 
@@ -214,8 +214,8 @@ For each terminal leaf (`continuation.terminal_status: terminal_closed`):
 
 For each `PG-<integer>` in the scoped branches:
 
-- `missing_prose_file` — `PG.rendered_prose.path` is set but the file is absent. WARNING; `repair_kind: prose_revision`.
-- `missing_prose_receipt` — prose has been rendered (file exists, `PG.rendered_prose.path` non-null) but no `pages-prose-receipts/PG-<integer>.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
+- `missing_prose_file` — `PG.prose_path` is set but the file is absent. WARNING; `repair_kind: prose_revision`.
+- `missing_prose_receipt` — prose has been rendered (file exists, `PG.prose_path` non-null) but no `pages-prose-receipts/PG-<integer>.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
 - `prose_receipt_failed` — receipt's `verdict: FAIL`. Severity from receipt's `repair_recommendation`: FAIL with `run_story_fact_promotion_to_canon` → ERROR + `repair_kind: promotion`; FAIL with `run_turn_cycle_repair` → ERROR + `repair_kind: turn_repair`; FAIL with `revise_prose` → WARNING + `repair_kind: prose_revision`.
 - `unrepaired_prose_invention` — receipt's `checks.invented_structural_fact: FAIL` flag persists with no subsequent repair turn. WARNING; `repair_kind: turn_repair`.
 - `state_change_unrendered` — receipt's `checks.required_event_rendered: WARN | FAIL`. WARNING; `repair_kind: prose_revision`.
@@ -224,7 +224,7 @@ For each `PG-<integer>` in the scoped branches:
 
 For each sibling bundle in `worlds/<world_slug>/stories/`:
 
-- `cross_story_mirrored_fact_contradiction` — sibling's mirrored `SF` records contradict this bundle's mirrored `SF` records on the same `derived_from_cf`. WARNING; `repair_kind: branch_flag` (bundles can legitimately interpret canon differently; the audit flags but doesn't propose repair).
+- `cross_story_mirrored_fact_contradiction` — sibling's mirrored `SF` records contradict this bundle's mirrored `SF` records on the same parent CF id in `derived_from`. WARNING; `repair_kind: branch_flag` (bundles can legitimately interpret canon differently; the audit flags but doesn't propose repair).
 - `cross_story_promotion_contradiction` — sibling's `SE.promotion_claims[]` and this bundle's `SE.promotion_claims[]` both claim canon-candidate authority on contradictory `SF` content. ERROR; `repair_kind: promotion` (one or both candidates must be retracted or revised before any can promote).
 - `cross_story_inherited_debt_mismatch` — sibling's terminal closures inherit debts that exist in this bundle as still-open. INFO; `repair_kind: branch_flag`.
 

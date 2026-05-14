@@ -2,10 +2,15 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-location.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": ["id", "story_id", "created_at_page", "label", "description"],
   "properties": {
     "id": { "type": "string", "pattern": "^STLOC-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STLOC-[0-9]+$" },
+    "label": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "bound_ent": { "type": ["string", "null"], "pattern": "^ENT-[0-9]+$" }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

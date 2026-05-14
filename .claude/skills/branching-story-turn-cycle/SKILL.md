@@ -25,7 +25,7 @@ arguments:
     description: "When intentionally forking into a named branch; otherwise the skill derives BR-<integer> from continuation-vs-fork detection"
     required: false
   - name: accept_parent_unrendered
-    description: "true | false; default: true. Setting false aborts Pre-flight when parent.rendered_prose.path is null. Default true honors FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."
+    description: "true | false; default: true. Setting false aborts Pre-flight when parent.prose_path is null. Default true honors FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary)."
     required: false
 ---
 
@@ -144,6 +144,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - Parent's `state_snapshot.active_records` resolved to their `_source/<class>/*.yaml` files
 - Optional `pages-prose/<recent>.md` for §14 continuity (only when parent prose exists)
 - World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_turn_cycle', seed_nodes=<active cast + active location + parent's unresolved mystery claims>, token_budget=<default>)`
+- `tools/world-mcp/dist/src/cli/compute-pg-hashes.js` — canonical CLI for deterministic PG hash computation per shared contract §4.2a "Tooling" subsection; consumed at Phase 9 step 2. Reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes — single source of truth across authoring and validation paths. Hand-rolling the canonical-JSON serializer is forbidden.
 
 The bundle MUST exist (non-bootstrap variant); parent page MUST exist; the new `_source/pages/PG-<integer>.yaml` MUST NOT exist (collision aborts Pre-flight).
 
@@ -156,8 +157,8 @@ Before Phase 1:
 3. Load `worlds/<world_slug>/stories/<story_slug>/_source/pages/<parent_page_id>.yaml`. Abort with parent-not-found error if missing.
 4. Verify XOR action source: exactly one of `chosen_choice_id` / `manual_action_text` non-null. If `chosen_choice_id` supplied, verify the CHC exists, was emitted by `parent_page_id`, and is not retired. Abort with action-source error on any failure.
 5. Detect continuation vs fork: continuation when `parent_page_id` is the active leaf of `parent.branch_id` and no `force_branch_id` is set; fork otherwise. Allocate a new `BR-<integer>` via `mcp__worldloom__allocate_next_id(world_slug, 'BR', story_slug=<story_slug>)` for forks.
-6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.rendered_prose.path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
-7. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known. The `BEL` id class lands via MCPENH-040 — see Guardrails §Known integration debt.
+6. Verify parent prose policy: if `accept_parent_unrendered: false` and `parent.prose_path` is null, abort with parent-unrendered error. Default `true` bypasses the check.
+7. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)` for: `SE`, `PG`, optional `BR`, candidate ids per record class (lazily on first use), `CHC` ids in Phase 8 after the page stop-point is known.
 8. Load parent's `state_snapshot.active_records` into working state. Load optional parent + grandparent `pages-prose/*.md` if available for §14 continuity. Load whole-class Mystery Reserve and Invariants via context packet.
 9. Verify the new `_source/pages/PG-<integer>.yaml` does NOT already exist (defensive against a stale allocator state). Abort on collision.
 
@@ -165,7 +166,7 @@ If any precondition fails, the skill aborts before Phase 1.
 
 ## Phase 1: Resolve the action
 
-If `chosen_choice_id` is supplied, load the `CHC` record; its `target_or_action_family`, `associated_commitment_block`, and `success_policy` (if any) drive the routing.
+If `chosen_choice_id` is supplied, load the `CHC` record; its action-family list, `associated_commitment_block`, and `success_policy` (if any) drive the routing.
 
 If `manual_action_text` is supplied, parse it into a structured `proposed_action`:
 
@@ -257,7 +258,7 @@ For every public, witnessed, hidden, or deceptive event in the delta, draft `BEL
 Classify every new resolution-like claim in the delta per shared contract §11:
 
 - `apparent` — what appears to be true from the cast's epistemic position; recorded on `BEL` records.
-- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped certainty.
+- `branch_local_counterfactual` — true only in this branch; recorded on `SF` with branch-scoped truth.
 - `canon_candidate` — may be world-level truth; held for promotion via `story-fact-promotion-to-canon`.
 
 If the action would resolve any mystery with `status: forbidden`, abort before patch submission with a mystery-firewall error. If the action asserts a `canon_candidate` claim, set `outcome_route: promotion_hold` and ensure the state delta records ONLY the branch-local appearance; emit `SE.promotion_claims[]` so the user knows to invoke `story-fact-promotion-to-canon` after this turn lands.
@@ -288,8 +289,9 @@ Draft `PG-<integer>` per shared contract §4.2:
 - `input.choice_id` OR `input.manual_action_text` (exactly one non-null), `input.resolved_event_id: SE-<integer>`.
 - `state_hash_parent: parent.state_hash` copied exactly from the already-committed parent PG; `state_hash` is the final sha256 computed per shared contract §4.2a after `plan.plan_hash` and `validation_trace` are finalized.
 - Full `state_snapshot`: `active_records` (per-class lists including `BEL` key); `entity_status` per active STENT; `visible_affordances` recomputed for the new location/context; `unresolved_mystery_claims` updated; `continuation` (`has_eligible_commitment_block`, `terminal_status`, `terminal_rationale`).
-- `plan.path: pages-prose-plans/PG-<integer>.md`, `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
-- `rendered_prose.path: null`, `rendered_prose.receipt_path: null`.
+- `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`.
+- `prose_plan_path: pages-prose-plans/PG-<integer>.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
+- `prose_path: null`, `prose_receipt_path: null`.
 - `validation_trace`: populated by Phase 9.
 
 The snapshot is the future fork point — complete enough to be a valid parent for any subsequent turn-cycle invocation regardless of whether its prose is ever rendered (per FOUNDATIONS §Story Bundles §4a).
@@ -312,7 +314,7 @@ Emit 3–5 `CHC` records if the new page stops at a real commitment hinge. Emit 
 
 The next choice set should include different axes (action vs restraint, truth vs deception, intimacy vs distance, risk vs safety, public vs private, duty vs desire). Always allow a write-in slot unless the branch is terminal.
 
-Each `CHC` carries `surface_label`, `player_visible_intent`, `target_or_action_family`, `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), `success_policy` (only when `target_or_action_family == 'attempt'`).
+Each `CHC` carries the shared contract §4.5.12 shape: `id`, `story_id`, `created_at_page`, `supersedes`, `surface_label`, `player_visible_intent`, `target_or_action_families` (a non-empty list using the §4.4a `action_family` taxonomy), `likely_state_pressure`, `associated_commitment_block` (`SLT-<integer>` or null — turn-cycle will JIT next turn if null), and optional `success_policy` when this choice later resolves through `outcome_route: attempt`.
 
 ## Phase 9: Validate
 
@@ -337,16 +339,15 @@ Plus 4 turn-cycle-additional checks (recorded in working memory):
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
 1. Confirm `PG-<integer>.state_hash_parent` is an exact copy of the committed parent PG's `state_hash`.
-2. Compute `PG-<integer>.plan.plan_hash` from the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft.
-3. Compute `PG-<integer>.state_hash` from the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself and `rendered_prose`.
-4. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
+2. Compute `PG-<integer>.plan.plan_hash` and `PG-<integer>.state_hash` via the canonical CLI at `tools/world-mcp/dist/src/cli/compute-pg-hashes.js --plan <plan-path> --pg <pg-draft-path>` per shared contract §4.2a "Tooling" subsection. The CLI emits `{plan_hash, state_hash}` as JSON to stdout: stamp the `plan_hash` output onto `PG-<integer>.plan.plan_hash` (covering the exact UTF-8 bytes of the finalized `pages-prose-plans/PG-<integer>.md` draft) and the `state_hash` output onto `PG-<integer>.state_hash` (covering the deterministic canonical JSON fork-state payload after `plan.plan_hash` and `validation_trace` are final, excluding only `state_hash` itself, `prose_path`, and `prose_receipt_path`). Hand-rolling the canonical-JSON serializer is forbidden — the CLI reuses the shared `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` helpers exported from `@worldloom/world-index/hash/content` that the validator's `snapshot_replay_equality` consumes, so authoring-time and validation-time hashes are byte-identical by construction. Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`.
+3. Verify both new hash values are 64-character lowercase hex sha256 strings. Missing, placeholder, uppercase, non-hex, or stale values are hard-stop authoring errors before Phase 10.
 
 If any gate, additional check, parent-hash copy check, or new-hash check fails, abort before Phase 10 — write nothing.
 
 ## Phase 10: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record` (PEENH-007 lands the op). Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
-2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run exercises `record_schema_compliance` for BEL (VALENH-011 lands the BEL schema entry) and PG; placeholder or malformed PG hashes must not reach this step.
+1. Build the patch plan covering every record drafted in Phases 1-8 as a single envelope. Operations include `create_se_record`, `create_pg_record` (always), `create_br_record` (if fork), `create_*_record` for every changed record class (each new file carrying `supersedes:` in its YAML body when applicable — supersession is file-level append-only per shared contract §3, using the existing `create_*_record` ops), `create_chc_record` per emission, `create_slt_record` if Phase 2 created a JIT block. BEL writes via `create_bel_record`. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. This run exercises `record_schema_compliance` for BEL and PG; placeholder or malformed PG hashes must not reach this step.
 3. Present the complete deliverable summary to the user:
    - Branch label (continuation of `BR-<integer>` or fork into new `BR-<integer>`).
    - Resolved outcome route (`accept` / `accommodate` / `attempt` / `world_block` / `promotion_hold` / `terminal`).
@@ -356,8 +357,8 @@ If any gate, additional check, parent-hash copy check, or new-hash check fails, 
    - Emitted choices list (or terminal rationale).
    - Any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation.
 4. **HARD-GATE fires** — wait for explicit user approval. Auto Mode does not override.
-5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: turn-cycle envelopes vary widely (a tight continuation may be 10-20KB; a large supersession-heavy turn may exceed 50KB); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan.
-6. On patch success: write `pages-prose-plans/PG-<integer>.md` using the exact bytes hashed into `PG-<integer>.plan.plan_hash` → update bundle `INDEX.md` (per shared contract §10 write order).
+5. On approval: persist the patch plan envelope as JSON (e.g., `/tmp/<plan-id>.json`), invoke the canonical signer to issue the `approval_token` (`node tools/world-mcp/dist/src/cli/sign-approval-token.js <plan-path>` — see `docs/HARD-GATE-DISCIPLINE.md` §Issuing a token), then call `mcp__worldloom__submit_patch_plan(plan, approval_token)` with the same envelope object and the issued token. Approval tokens are single-use, plan-bound, default-20-minute-expiry. **Submit-path selection by envelope size**: turn-cycle envelopes vary widely (a tight continuation may be 10-20KB; a large supersession-heavy turn may exceed 50KB); for envelopes >50KB submit via the CLI path instead: `node tools/world-mcp/dist/src/cli/submit-patch-plan.js <plan-path> <token-path>` (persist the signed token to a text file first). The CLI path is functionally equivalent — same engine code, same `PatchReceipt`, same failure-mode codes — but bypasses MCP transport size constraints; see `docs/HARD-GATE-DISCIPLINE.md` §Validating and submitting the plan. The CLI path also serves as the fresh-process escape valve when the running MCP server holds a pre-rebuild `@worldloom/validators` bundle in memory and a full Claude Code session restart is not immediately available; in that case, switch to the CLI submit path regardless of envelope size (see `docs/MACHINE-FACING-LAYER.md` §troubleshooting matrix).
+6. On patch success: write `pages-prose-plans/PG-<integer>.md` using the exact bytes hashed into `PG-<integer>.plan.plan_hash` → update bundle `INDEX.md` (per shared contract §10 write order). Specifically: append a Pages-table row for the new PG; append rows to Story-Local Facts / Story-Local Beliefs / other relevant tables for any new SF / BEL / etc. records; add a new `## Emitted Choices at PG-<integer>` section listing the new CHC menu; add a new `## Validation Trace on PG-<integer>` section per the shared eight hard gates. The convention is defined by `branching-story-bootstrap` at first-run; turn-cycle inherits and extends it.
 7. Report page path + record inventory to the user. If `promotion_claims[]` were emitted, surface the recommended next step (invoke `story-fact-promotion-to-canon` with the new `SE-<integer>` as evidence). Do NOT `git commit`.
 
 **Failure behavior**: patch fail → write nothing; surface failed gate. Patch success + markdown fail → story-bundle `_source/` authoritative; surface partial-failure; no silent retry. Terminal page without `terminal_rationale` → authoring error, abort before patch.
@@ -398,7 +399,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 12 (No Single-Trace Truths) | N/A | Not applicable — story-bundle scope, not world canon. |
 | Canon Layers | Pre-flight, Phase 5 | World canon layers loaded via context packet; story-bundle records carry story-local truths per FOUNDATIONS §Story Bundles §1. |
 | Mystery Reserve | Pre-flight, Phase 5, 9 | Whole-class Mystery Reserve loaded; Phase 5 classification; Phase 9 gate 3 enforces firewall. |
-| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.rendered_prose.path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
+| §Story Bundles §4a (Plan-Authority Boundary) | Pre-flight, Phase 6, 10 | `accept_parent_unrendered: true` default; PG-<integer>.prose_path null at commit; no ARC_TRACE emitted; the new PG is the next fork primitive. |
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `BEL` records for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; `truth_relation` + `visibility` + `confidence` consumed by social-state firewall. |
@@ -416,10 +417,6 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 - **No word-count targets** anywhere in the plan (per FOUNDATIONS §Story Bundles §9). Pacing is expressed structurally via beats and stop conditions.
 - **Skills do not chain.** Turn-cycle never invokes `branching-story-prose-attach`, `commitment-block-authoring`, `branching-story-health-audit`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. When `promotion_claims[]` are emitted, turn-cycle surfaces the recommendation; the user separately invokes `story-fact-promotion-to-canon` with the new `SE-<integer>` as evidence.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-040** — Register `BEL` id class in `tools/world-mcp/src/tools/allocate-next-id.ts`; drop `ARCTRACE` registration. Lands as a rebuilt-family prerequisite per bootstrap's Shape C rollout. Turn-cycle's Pre-flight step 7 depends on this for `BEL` allocation.
-  - **PEENH-007** — Add `create_bel_record` operation to `tools/patch-engine/src/envelope/schema.ts`. Ships alongside the rebuilt family. Turn-cycle's Phase 10 submits `create_bel_record` ops.
-  - **VALENH-011** — Register `BEL` in `record_schema_compliance` and structural validators; drop ARC_TRACE-related validators. Ships alongside the rebuilt family. Turn-cycle's Phase 10 dry-run exercises the BEL validator.
 
 ## Final Rule
 

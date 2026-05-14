@@ -2,10 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-consequence.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": ["id", "story_id", "created_at_page", "status", "consequence_kind", "description", "resolves_when"],
   "properties": {
     "id": { "type": "string", "pattern": "^CNSQ-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" }
+    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^CNSQ-[0-9]+$" },
+    "status": { "type": "string", "enum": ["pending", "resolved", "escalated", "abandoned"] },
+    "consequence_kind": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "resolves_when": { "type": "string", "minLength": 1 },
+    "derived_from": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^(CF|STENT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$" }
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

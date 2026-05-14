@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { computePgStateHash } from "@worldloom/world-index/hash/content";
+
 import type { PatchOperation } from "../../src/envelope/schema.js";
 import { stageAllOps } from "../../src/commit/temp-file.js";
 import { stageUpdateRecordField } from "../../src/ops/update-record-field.js";
@@ -266,6 +268,123 @@ test("update_record_field still requires retcon attestation for unrelated PG fie
         field_path: ["branch_id"],
         operation: "set",
         new_value: "BR-2"
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>), world.ctx),
+    "retcon_attestation_required"
+  );
+});
+
+test("update_record_field accepts SE-attested story-bundle structural field repairs", async (t) => {
+  const world = createTestWorld(t);
+  const record = { ...pgRecord(), branch_id: "BR-1" };
+  const pgHash = seedRecord(
+    world,
+    "alpha:PG-1",
+    "page_record",
+    "stories/alpha/_source/pages/PG-1.yaml",
+    record,
+    "alpha"
+  );
+  const env = baseEnvelope();
+
+  const staged = await stageUpdateRecordField(
+    env,
+    createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-1",
+        field_path: ["branch_id"],
+        operation: "set",
+        new_value: "BR-2",
+        retcon_attestation: {
+          retcon_type: "A",
+          originating_se: "SE-1",
+          rationale: "Story-event authorized story-bundle repair."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    world.ctx
+  );
+
+  assertYamlEquals(staged, { ...record, branch_id: "BR-2" });
+});
+
+test("update_record_field rejects originating_se for world-canon retcons", async (t) => {
+  const world = createTestWorld(t);
+  const { cfHash } = seedStandardRecords(world);
+  const env = baseEnvelope();
+
+  await assertOpError(
+    () => stageUpdateRecordField(env, createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: cfHash,
+      payload: {
+        target_record_id: "CF-0001",
+        field_path: ["statement"],
+        operation: "set",
+        new_value: "Changed.",
+        retcon_attestation: {
+          retcon_type: "A",
+          originating_se: "SE-1",
+          rationale: "Story-event references must not authorize world-canon retcons."
+        }
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>), world.ctx),
+    "retcon_attestation_required"
+  );
+});
+
+test("update_record_field repairs PG state_hash only when the new hash is self-consistent", async (t) => {
+  const world = createTestWorld(t);
+  const record = {
+    ...pgRecord(),
+    state_hash_parent: "0".repeat(64),
+    state_hash: "1".repeat(64),
+    input: { resolved_event_id: "SE-1" },
+    plan: { path: "pages-prose-plans/PG-1.md", plan_hash: "2".repeat(64) }
+  };
+  const pgHash = seedRecord(
+    world,
+    "alpha:PG-1",
+    "page_record",
+    "stories/alpha/_source/pages/PG-1.yaml",
+    record,
+    "alpha"
+  );
+  const env = baseEnvelope();
+  const expectedStateHash = computePgStateHash(record);
+
+  const staged = await stageUpdateRecordField(
+    env,
+    createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-1",
+        field_path: ["state_hash"],
+        operation: "set",
+        new_value: expectedStateHash
+      }
+    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
+    world.ctx
+  );
+
+  assertYamlEquals(staged, { ...record, state_hash: expectedStateHash });
+
+  await assertOpError(
+    () => stageUpdateRecordField(env, createOp({
+      op: "update_record_field",
+      target_world: env.target_world,
+      expected_content_hash: pgHash,
+      payload: {
+        target_record_id: "PG-1",
+        field_path: ["state_hash"],
+        operation: "set",
+        new_value: "3".repeat(64)
       }
     } satisfies Extract<PatchOperation, { op: "update_record_field" }>), world.ctx),
     "retcon_attestation_required"

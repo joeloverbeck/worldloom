@@ -2,37 +2,51 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://worldloom.local/schemas/story-choice.schema.json",
   "type": "object",
-  "required": ["id", "story_id"],
+  "required": [
+    "id",
+    "story_id",
+    "created_at_page",
+    "surface_label",
+    "player_visible_intent",
+    "target_or_action_families",
+    "likely_state_pressure",
+    "associated_commitment_block"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^CHC-[0-9]+$" },
     "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^CHC-[0-9]+$" },
     "surface_label": { "type": "string", "minLength": 1 },
     "player_visible_intent": { "type": "string", "minLength": 1 },
-    "target_or_action_family": {
-      "type": "string",
-      "enum": [
-        "move",
-        "evade",
-        "pursue",
-        "perceive",
-        "investigate",
-        "communicate",
-        "persuade",
-        "negotiate",
-        "bond",
-        "oppose",
-        "harm",
-        "protect",
-        "control",
-        "transfer",
-        "use",
-        "make_change",
-        "ritual_protocol",
-        "recover",
-        "wait",
-        "decide",
-        "attempt"
-      ]
+    "target_or_action_families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "move",
+          "evade",
+          "pursue",
+          "perceive",
+          "investigate",
+          "communicate",
+          "persuade",
+          "negotiate",
+          "bond",
+          "oppose",
+          "harm",
+          "protect",
+          "control",
+          "transfer",
+          "use",
+          "make_change",
+          "ritual_protocol",
+          "recover",
+          "wait",
+          "decide"
+        ]
+      }
     },
     "likely_state_pressure": { "type": "string", "minLength": 1 },
     "associated_commitment_block": {
@@ -41,5 +55,5 @@
     },
     "success_policy": { "type": "string", "minLength": 1 }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
