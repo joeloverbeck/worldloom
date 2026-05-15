@@ -26,6 +26,20 @@ export interface GetContextPacketArgs {
   node_classes?: NodeType[];
 }
 
+const STORY_LOCAL_SEED_NODE_PATTERN =
+  /^(?:(?:[a-z0-9-]+):)?(?:SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STENT|STSTAT|STLOC|STOBJ|BR|PG|CHC|SLT|SLB|SAU|SP|RSP)-\d+$/;
+const STORY_LOCAL_SEED_NODE_WARNING = "story_local_seed_nodes_ignored";
+
+function storyLocalSeedNodeWarnings(args: GetContextPacketArgs): string[] {
+  if (!isStoryPipelineTaskType(args.task_type)) {
+    return [];
+  }
+
+  return args.seed_nodes.some((seedNode) => STORY_LOCAL_SEED_NODE_PATTERN.test(seedNode))
+    ? [STORY_LOCAL_SEED_NODE_WARNING]
+    : [];
+}
+
 function assertValidArgs(args: GetContextPacketArgs): void {
   if (args.world_slug.trim().length === 0) {
     throw new Error("world_slug must be non-empty.");
@@ -69,7 +83,7 @@ async function getContextPacketImpl(
 ): Promise<ContextPacket | McpError> {
   assertValidArgs(args);
 
-  return assembleContextPacket({
+  const result = await assembleContextPacket({
     task_type: args.task_type,
     world_slug: args.world_slug,
     ...(args.story_slug === undefined ? {} : { story_slug: args.story_slug }),
@@ -78,6 +92,14 @@ async function getContextPacketImpl(
     delivery_mode: args.delivery_mode ?? DEFAULT_DELIVERY_MODE,
     ...(args.node_classes === undefined ? {} : { node_classes: args.node_classes })
   });
+
+  if (!("code" in result)) {
+    result.task_header.warnings = [
+      ...new Set([...result.task_header.warnings, ...storyLocalSeedNodeWarnings(args)])
+    ];
+  }
+
+  return result;
 }
 
 export const getContextPacket = withIndexFreshnessGuard(getContextPacketImpl);

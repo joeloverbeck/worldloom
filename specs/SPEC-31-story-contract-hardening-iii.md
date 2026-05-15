@@ -656,6 +656,8 @@ The table muddles "governing firewall load" (M) with "source record" (SF/BEL). C
 
 ### D14 — Clarify story-local retrieval vs. packet seed nodes (P2)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-014` landed this deliverable. `docs/CONTEXT-PACKET-CONTRACT.md` now makes story-pipeline `seed_nodes` world-scope, `docs/MACHINE-FACING-LAYER.md` cross-references that routing rule, the three named story skills route story-local records through `story_slug` scoped retrieval instead of world-scope seeds, and `tools/world-mcp` emits `task_header.warnings: ["story_local_seed_nodes_ignored"]` when a story-pipeline packet request still supplies story-local seed ids. The original problem/change text below is historical intake context.
+
 **Problem**: `seed_nodes` is world-record-oriented in `get_context_packet` semantics, but story-pipeline skills sometimes describe `seed_nodes` containing story-local ids. Story-local records are delivered through `story_slug` + `story_bundle_context` or via explicit `get_records(record_ids, story_slug=...)`. Mixing scopes risks under-delivered packets when story-local ids are passed as world seed nodes.
 
 **Change**:

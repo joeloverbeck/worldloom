@@ -6,6 +6,7 @@ import { getContextPacket } from "../../src/tools/get-context-packet";
 import { createTempRepoRoot, destroyTempRepoRoot, withRepoRoot } from "./_shared";
 import {
   buildStoryBundleWorld,
+  storyNodeId,
   STORY_FIXTURE_SLUG,
   STORY_FIXTURE_WORLD
 } from "./story-bundle-fixture";
@@ -84,6 +85,29 @@ test("getContextPacket treats story_bootstrap story_slug as a target slug", asyn
     assert.ok(!("code" in result), "story_bootstrap should return a packet");
     assert.equal(result.task_header.story_slug, "new-target-story");
     assert.equal(result.story_bundle_context, null);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket warns when story-pipeline seed_nodes contain story-local ids", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_turn_cycle",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: STORY_FIXTURE_SLUG,
+        seed_nodes: [storyNodeId(STORY_FIXTURE_SLUG, "SF-0001")],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_turn_cycle should return a packet");
+    assert.deepEqual(result.task_header.warnings, ["story_local_seed_nodes_ignored"]);
   } finally {
     destroyTempRepoRoot(root);
   }

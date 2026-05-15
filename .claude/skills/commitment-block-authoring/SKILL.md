@@ -108,7 +108,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` — bundle root context
 - `worlds/<world_slug>/stories/<story_slug>/_source/storylets/SLT-*.yaml` — current SLT pool (`direct_batch` only; may be empty post-bootstrap if `seed_commitment_blocks: none`)
 - `worlds/<world_slug>/stories/<story_slug>/audits/<audit_id>-*.md` + `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md` — source audit + RSP cards (`audit_repair` only; abort with audit-not-found or rsp-not-found error if any reference missing)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', seed_nodes=<active cast + Mystery Reserve forbidden-status entries + open obligations / threads in the bundle>, token_budget=<default>)` — MCPENH-041 lands the `commitment_block_authoring` task_type rename
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='commitment_block_authoring', story_slug=<story_slug>, seed_nodes=<Mystery Reserve forbidden-status entries + world INV records + other world-scope canon anchors>, token_budget=<default>)`. Load active cast and open obligations / threads in the bundle through `story_slug` + `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`; do not pass story-local ids in world-scope `seed_nodes`.
 
 The bundle MUST exist (non-bootstrap variant); for `audit_repair`, the audit + all named RSP cards MUST exist. For `direct_batch`, the current SLT pool MAY be empty (post-bootstrap with `seed_commitment_blocks: none`).
 
@@ -123,7 +123,7 @@ Before Phase 1:
    - `direct_batch`: scan `_source/storylets/` for every `SLT-*.yaml`; load each into a current-pool inventory keyed by `move_family`.
    - `audit_repair`: load `audits/<audit_id>-*.md` (verify exists); for each `RSP-<integer>` in `finding_ids`, load `audits/<audit_id>/remediation-storylet-proposals/RSP-*.md`. Abort with rsp-not-found error on any missing card.
 5. Allocate ids: one `SLT` per planned block (`target_count` for `direct_batch`; `len(finding_ids)` for `audit_repair` — actual usage may be fewer if Phase 1 skips RSP cards) via `mcp__worldloom__allocate_next_id(world_slug, 'SLT', story_slug=<story_slug>)`. Allocate one `SLB` id for the batch manifest.
-6. Load world canon context packet seeded with active cast STENT ids, every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and the bundle's currently-open obligations / consequences / threads with `urgency` (for `direct_batch` gap diagnosis weighting).
+6. Load story-local context first via `story_slug` scoped retrieval: active cast `STENT` ids and the bundle's currently-open obligations / consequences / threads with `urgency` (for `direct_batch` gap diagnosis weighting) come from `story_bundle_context` or targeted `mcp__worldloom__get_records` / `mcp__worldloom__list_records`. Then load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: every Mystery Reserve `M-<integer>` with `status: forbidden` (loaded whole-class for per-block firewall), every world INV record (loaded whole-class for invariant verification), and any other world-canon anchors needed by the batch.
 
 If any precondition fails, the skill aborts before Phase 1.
 

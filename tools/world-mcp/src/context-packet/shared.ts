@@ -167,6 +167,7 @@ export interface ContextPacket {
       allocated: number;
     };
     seed_nodes: string[];
+    warnings: string[];
     full_body_classes_delivered: NodeType[];
     harness_ceiling_chars: number;
     envelope_overhead_reserve_chars: number;

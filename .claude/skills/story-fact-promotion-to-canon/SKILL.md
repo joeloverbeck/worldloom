@@ -133,7 +133,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — for each `supporting_page_ids` entry (required for prose-evidence source kinds)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', seed_nodes=<source_record_ids + every M-<integer> whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', story_slug=<story_slug>, seed_nodes=<every M-<integer> whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`. Load `source_record_ids` and related authoring `SE` / witness `BEL` records through targeted `mcp__worldloom__get_records(record_ids=<ids>, story_slug=<story_slug>)` or direct story-bundle reads allowed by the current workflow; do not pass story-local ids in world-scope `seed_nodes`.
 
 The bundle MUST exist (non-bootstrap variant); source records MUST exist and trace to `branch_path`; supporting prose MUST exist for required-prose source kinds. Receipt `verdict: PASS | WARN` is acceptable at Pre-flight; `verdict: FAIL` requires explicit user acceptance at Phase 7.
 
@@ -147,7 +147,7 @@ Before Phase 1:
 4. Resolve supporting pages: for each `PG-<integer>` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
 5. Resolve branch: load `_source/branches/<branch_path>.yaml`. Verify every source record's branch lineage traces to `branch_path` (a `story_fact` source cannot be promoted from a branch that didn't author it). Abort with branch-mismatch error on any failure.
 6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
-7. Load world canon context packet seeded with: source record ids + whole-class Mystery Reserve (for Phase 4 firewall) + whole-class INV (for invariant check) + parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
+7. Load `source_record_ids`, related authoring `SE` events, and witness `BEL` records through `story_slug` scoped targeted retrieval (or direct story-bundle reads allowed by the current workflow). Load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: whole-class Mystery Reserve (for Phase 4 firewall), whole-class INV (for invariant check), and parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
 
 If any precondition fails, the skill aborts before Phase 1.
 
