@@ -1,6 +1,6 @@
 # SPEC32STOCONHAR-001: Sharpen eight-gates scope wording
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: None (docs-only; sharpens shared story-state contract §7 opening + FOUNDATIONS Rule 7 firewall paragraph)
@@ -71,7 +71,7 @@ Replace the existing firewall paragraph at `docs/FOUNDATIONS.md:462` — current
 2. `grep -n "Non-PG story skills" .claude/skills/_shared-templates/story-state-contract.md` returns a match enumerating the five non-PG skills.
 3. `grep -n "For PG-authoring state changes" docs/FOUNDATIONS.md` returns a match in the rewritten Rule 7 firewall paragraph.
 4. `grep -nE "every state-changing skill validates against these eight gates" .claude/skills/_shared-templates/story-state-contract.md` returns no matches (the old over-broad wording is gone).
-5. The existing tools/validators test suite still passes (`npm --prefix tools/validators test`) — no test currently asserts the literal contract §7 opening, so this is a regression check rather than a pass-on-rewrite proof.
+5. The existing tools/validators test suite still passes from the package cwd (`cd tools/validators && npm test`) — no test currently asserts the literal contract §7 opening, so this is a regression check rather than a pass-on-rewrite proof.
 
 ### Invariants
 
@@ -90,4 +90,24 @@ Replace the existing firewall paragraph at `docs/FOUNDATIONS.md:462` — current
 1. `grep -n "Every PG-authoring story skill" .claude/skills/_shared-templates/story-state-contract.md`
 2. `grep -n "For PG-authoring state changes" docs/FOUNDATIONS.md`
 3. `grep -nE "every state-changing skill validates against these eight gates" .claude/skills/_shared-templates/story-state-contract.md` (must return no matches)
-4. `npm --prefix tools/validators test` (regression check; no behavior change expected)
+4. `cd tools/validators && npm test` (regression check; no behavior change expected)
+
+## Outcome
+
+Completed: 2026-05-16.
+
+The shared story-state contract §7 opening now scopes the eight shared hard gates to PG-authoring story skills (`branching-story-bootstrap` and `branching-story-turn-cycle`) and explicitly says non-PG story skills preserve the same invariants through skill-local validation phases and HARD-GATE discipline. `docs/FOUNDATIONS.md` Rule 7 now mirrors that boundary by naming gate 3 as the authoritative plan-time firewall for PG-authoring state changes and classifying non-PG enforcement as skill-local.
+
+No gate labels, gate ordering, `PG.validation_trace.gates[]` structure, approval behavior, or validator behavior changed.
+
+## Verification Result
+
+1. `grep -n "Every PG-authoring story skill" .claude/skills/_shared-templates/story-state-contract.md` — passed at line 766.
+2. `grep -n "Non-PG story skills" .claude/skills/_shared-templates/story-state-contract.md` — passed at line 766.
+3. `grep -n "For PG-authoring state changes" docs/FOUNDATIONS.md` — passed at line 462.
+4. `grep -nE "every state-changing skill validates against these eight gates" .claude/skills/_shared-templates/story-state-contract.md` — returned no matches, which is the expected proof that the old over-broad wording is gone.
+5. `cd tools/validators && npm test` — passed, 269/269 tests.
+
+## Deviations
+
+- Replaced the drafted root-cwd regression command `npm --prefix tools/validators test` with `cd tools/validators && npm test`. The drafted command built successfully but ran the compiled CLI tests with `process.cwd()` at the repo root, causing the tests to look for `dist/src/cli/world-validate.js` at the repo root. Running from the package cwd matches the CLI tests' current path assumptions and passed.

@@ -28,7 +28,7 @@ Adding a `denial_patterns` field to the Mystery Reserve schema is explicitly rej
 2. `get_firewall_content` MCP tool at `tools/world-mcp/src/tools/get-firewall-content.ts` confirmed to project `title / status / unknowns / common_interpretations / disallowed_cheap_answers` per the `FirewallContent` interface (lines 14–20). Repo-wide grep for `denial_patterns` returns matches only in this skill and the archived brainstorm.
 3. Cross-skill / cross-artifact boundary: prose-attach Phase 3 deterministic checks consume firewall fields from the M record via either `get_firewall_content` or page-plan inlining. The shared boundary is the Mystery Reserve schema (whose fields are stable post-SPEC-13) and the page-plan §11 contract (which already names `forbidden_resolutions[]`). This ticket touches one skill's check definition; no schema change, no sibling skill change.
 4. FOUNDATIONS §Story Bundles §5b Schema-Minimalism at line 628 governs this ticket: rather than adding a `denial_patterns` field whose only consumer would be this single deterministic check, the corrected wording derives patterns from existing firewall fields (`disallowed_cheap_answers[]` + `unknowns[]` + plan §11 `forbidden_resolutions[]`) that already have multiple consumers (skill-internal firewall use; health-audit cross-reference; page-plan §11 inlining). The principle "no fields without mechanical consumers" cited in SPEC-32 §Key design decisions D1 maps to §Schema-Minimalism here, NOT to Rule 5 (No Consequence Evasion), per Step 2 Issue 3 disposition.
-5. This ticket touches the Mystery Reserve firewall enforcement surface — specifically `branching-story-prose-attach` Phase 3 deterministic check 3 (`forbidden_mystery_resolution`), which is a redundant downstream guard on rendered prose (consistent with FOUNDATIONS Rule 7 firewall paragraph + SPEC32STOCONHAR-001's sharpened wording). The proposed change rewrites the check's pattern-source (from undocumented `denial_patterns` to existing `disallowed_cheap_answers[]` + `unknowns[]` + plan §11) but preserves its semantic role: forbidden-status `M-<integer>` is NEVER resolved at this check site. The change strengthens the firewall (the check is now implementable; it was un-implementable as written) without elevating it to a second authoritative gate.
+5. This ticket touches the Mystery Reserve firewall enforcement surface — specifically `branching-story-prose-attach` Phase 3 deterministic check 3 (`forbidden_mystery_resolution`), which is a redundant downstream guard on rendered prose (consistent with FOUNDATIONS Rule 7 firewall paragraph + `archive/tickets/SPEC32STOCONHAR-001.md`'s sharpened wording). The proposed change rewrites the check's pattern-source (from undocumented `denial_patterns` to existing `disallowed_cheap_answers[]` + `unknowns[]` + plan §11) but preserves its semantic role: forbidden-status `M-<integer>` is NEVER resolved at this check site. The change strengthens the firewall (the check is now implementable; it was un-implementable as written) without elevating it to a second authoritative gate.
 
 ## Architecture Check
 
@@ -72,7 +72,7 @@ with:
 - `archive/brainstorming/branching-story-prose-attach.md` — historical record; the live skill is the canonical source.
 - New validator-fixture directories under `tools/validators/tests/fixtures/branching-story-prose-attach/` — no per-skill subdirectory convention exists in `tools/validators/tests/fixtures/` (the directory is flat with 8 top-level files; no `branching-story-prose-attach/` subdirectory). The `forbidden_mystery_resolution` check is a skill-level deterministic check, not a structural validator. Per Step 2 Issue 2 disposition: verification is grep-proof; future dry-run on a real story bundle will confirm runtime behavior.
 - Other Phase 3 deterministic checks (`hash_integrity`, `invented_structural_fact`, etc.) — only check 3 is rewritten.
-- FOUNDATIONS.md edits — §Story Bundles §5b Schema-Minimalism already encodes the principle; SPEC32STOCONHAR-001 addresses the related Rule 7 firewall paragraph.
+- FOUNDATIONS.md edits — §Story Bundles §5b Schema-Minimalism already encodes the principle; `archive/tickets/SPEC32STOCONHAR-001.md` addresses the related Rule 7 firewall paragraph.
 
 ## Acceptance Criteria
 
@@ -91,7 +91,7 @@ with:
 1. Mystery Reserve schema is unchanged; `denial_patterns` is not added.
 2. Receipt output format (`forbidden_mystery_resolution: PASS | FAIL` per contract §4.6) is unchanged.
 3. Forbidden-status `M-<integer>` is NEVER resolved at this check site, consistent with FOUNDATIONS Rule 7 (firewall enforcement).
-4. The deterministic check's authority is preserved as a redundant downstream guard on rendered prose, not a second authoritative state-transition gate (consistent with SPEC32STOCONHAR-001's sharpened wording for Rule 7).
+4. The deterministic check's authority is preserved as a redundant downstream guard on rendered prose, not a second authoritative state-transition gate (consistent with `archive/tickets/SPEC32STOCONHAR-001.md`'s sharpened wording for Rule 7).
 
 ## Test Plan
 

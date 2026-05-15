@@ -763,7 +763,7 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 
 ## 7. Eight Shared Hard Gates
 
-Every state-changing skill validates against these eight gates at page-plan commit. Each gate's pass entry on `PG.validation_trace` requires a one-line rationale (per CLAUDE.md "PASS entries require a one-line rationale").
+Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these eight hard gates at page-plan commit; gate results are recorded in `PG.validation_trace.gates[]`, and each gate's pass entry requires a one-line rationale (per CLAUDE.md "PASS entries require a one-line rationale"). Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
 
 | # | Gate | Checks |
 |---|---|---|
