@@ -68,7 +68,9 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 - Broad negative grep commands over docs, specs, skills, or templates -> run the exact drafted command during reassessment, classify legitimate/historical hits, and narrow the proof before editing when a zero-hit sweep would catch explanatory or retired-root references.
 - Explicit spec/doc references with status, implementation notes, counts, or current-state prose -> truth the same-seam reference before closeout, usually with a dated implementation note when broad row-by-row rewriting is out of scope.
 - Generated or ignored proof artifacts such as `dist/`, `_index/`, coverage output, or caches -> use `references/dirty-worktree-ledger.md` and package-specific ignored-artifact checks.
+- Untracked owned ticket/spec/skill/doc files -> plain `git diff --check` is not enough; use temporary `git add -N` with cleanup or an explicit whitespace check over the exact untracked files, then refresh status.
 - Post-proof prose-only closeout edits -> rerun `git diff --check` and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite.
+- Proof-surface substitutions such as replacing an unavailable `skill dry-run` with manual review + grep -> sweep the active ticket for old proof labels (`dry-run`, `skill dry-run`) and old command fragments before final response.
 - Skill phase/check count drift -> when adding, removing, renaming, or reordering skill phases, gates, findings, or checks, grep nearby skill prose for numeric labels and old phase references such as `6 checks`, `7 sub-phases`, `Phase 2g`, or `Phase 9` before final proof. Update active operational labels; preserve old counts only when clearly marked historical.
 
 ## Always First

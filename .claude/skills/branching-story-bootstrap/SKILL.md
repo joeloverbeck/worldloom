@@ -294,6 +294,7 @@ Draft `PG-1` per shared contract §4.2:
 - `parent_page_id: null`, `state_hash_parent: null`, `turn_index: 0`
 - `branch_path: ["PG-1"]` — the ordered list of pages in this branch from root to here; for the root page the list contains exactly the root id. Referenced from shared contract §4.4 as `PG.branch_path` (the basis for storylet `visible_branch_path_prefix` prefix checks); §4.2's PG schema enumeration omits explicit listing of the field but §4.4 treats it as canonical, and the `recursive_reference_closure` validator reads `parsed.branch_path` to determine in-branch eligibility for every story-local reference reachable from this page. Subsequent pages emitted by `branching-story-turn-cycle` extend the parent's `branch_path` by appending the new PG id.
 - `input.choice_id: null`, `input.manual_action_text: null`, `input.resolved_event_id: SE-1`
+  - This both-null input pair is lawful only for PG-1 because `SE-1.event_kind: story_start`; per shared contract §4.2 input legality, all non-`story_start` pages must name exactly one source action (`choice_id` or `manual_action_text`).
 - Full `state_snapshot` (active_records including the BEL and STSTAT keys; `entity_status` derived from active `STSTAT` records, one entry per active `STENT`; visible_affordances with ordinal indices; unresolved_mystery_claims; continuation status)
 - `plan.plan_hash: <final sha256 computed per shared contract §4.2a after the page plan bytes are finalized>`
 - `prose_plan_path: pages-prose-plans/PG-1.md` (canonical top-level plan address; see `mcp__worldloom__describe_envelope_schema(op_kind='create_pg_record')` for the current machine-readable op shape).
@@ -325,7 +326,7 @@ For every emitted `CHC`, populate `grounded_in.records` with at least one active
 
 Run the 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 against the drafted records. Populate `PG-1.validation_trace` with one-line PASS rationale per gate:
 
-1. **input legality** — story_start has no parent page; required arguments present.
+1. **input legality** — `story_start` has no parent page and uses the shared contract §4.2 PG-1 carve-out: `choice_id: null`, `manual_action_text: null`, `resolved_event_id: SE-1`.
 2. **parent snapshot compatibility** — no parent snapshot; `state_hash_parent: null` matches.
 3. **mystery / invariant firewall** — no forbidden `M-<integer>` resolved; no INV violated; `forbidden_mystery_resolutions` properly enumerated in state seed.
 4. **branch isolation** — no sibling-branch state in `state_snapshot.active_records`; no seed SLT references branch-local records (none exist at bootstrap).

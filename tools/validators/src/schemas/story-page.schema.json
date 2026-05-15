@@ -31,6 +31,7 @@
     "turn_index": { "type": "integer", "minimum": 0 },
     "input": {
       "type": "object",
+      "description": "Exactly-one legality is enforced by state_snapshot_integrity conditional on the resolved event kind, with a carve-out for event_kind: story_start.",
       "required": ["choice_id", "manual_action_text", "resolved_event_id"],
       "properties": {
         "choice_id": { "type": ["string", "null"], "pattern": "^CHC-[0-9]+$" },

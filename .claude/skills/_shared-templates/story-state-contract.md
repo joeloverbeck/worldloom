@@ -97,7 +97,13 @@ parent_page_id: PG-<integer> | null         # * null only for PG-1
 branch_path: [PG-<integer>]*           # * ordered list of pages from root to here on this branch; for root page (PG-1) contains exactly [PG-1]; turn-cycle extends the parent page's branch_path by appending the new PG id. Referenced from §4.4 SLT.scope.visible_branch_path_prefix as the canonical prefix source; read by recursive_reference_closure to authorize in-branch references.
 turn_index: 0*
 input:
-  choice_id: CHC-<integer> | null           # exactly one of choice_id / manual_action_text is non-null
+  # Input legality:
+  # - If resolved_event.event_kind == story_start (i.e., parent_page_id == null, only PG-1):
+  #     choice_id == null
+  #     manual_action_text == null
+  # - Otherwise:
+  #     exactly one of choice_id / manual_action_text is non-null
+  choice_id: CHC-<integer> | null
   manual_action_text: null | string
   resolved_event_id: SE-<integer>*
 state_hash_parent: null | sha256       # null only for PG-1
@@ -690,7 +696,7 @@ Every state-changing skill validates against these eight gates at page-plan comm
 
 | # | Gate | Checks |
 |---|---|---|
-| 1 | input legality | Exactly one source action (chosen CHC or write-in). Parent page exists and belongs to the named story bundle. The chosen CHC, if any, was emitted by the parent page and not retired. |
+| 1 | input legality | Exactly one source action (chosen CHC or write-in) UNLESS the resolved event is `story_start`. Parent page exists and belongs to the named story bundle UNLESS the resolved event is `story_start` (PG-1). The chosen CHC, if any, was emitted by the parent page and not retired. |
 | 2 | parent snapshot compatibility | The loaded parent snapshot's `state_hash` matches `PG.state_hash_parent`. The parent `state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified before proceeding. |
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |

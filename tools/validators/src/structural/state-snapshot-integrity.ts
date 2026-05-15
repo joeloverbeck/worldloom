@@ -54,6 +54,11 @@ export const stateSnapshotIntegrity: Validator = {
       const maps = recordMapForStory(records, page.story_slug ?? null);
       const activeRecords = asPlainRecord(snapshot.active_records);
 
+      const inputLegalityViolation = validateInputLegality(page, parsed, pageLabel, maps);
+      if (inputLegalityViolation !== undefined) {
+        verdicts.push(inputLegalityViolation);
+      }
+
       if (Object.keys(activeRecords).length > 0) {
         for (const [recordClass, ids] of Object.entries(activeRecords)) {
           if (!Array.isArray(ids)) {
@@ -147,6 +152,44 @@ function storyLocalReferences(value: unknown, basePath: string): StoryReference[
   return references;
 }
 
+function validateInputLegality(
+  page: IndexedRecord,
+  parsed: Record<string, unknown>,
+  pageLabel: string,
+  maps: RecordMaps
+): Verdict | undefined {
+  const input = asPlainRecord(parsed.input);
+  const choiceId = input.choice_id;
+  const manualActionText = input.manual_action_text;
+  const resolvedEventId = stringValue(input.resolved_event_id);
+
+  if (resolvedEventId === undefined) {
+    return inputLegalityViolation(page, pageLabel, "<missing>", "<missing>", choiceId, manualActionText);
+  }
+
+  const resolvedEvent = maps.byId.get(resolvedEventId);
+  const resolvedEventKind = stringValue(asPlainRecord(resolvedEvent?.parsed).event_kind);
+  if (resolvedEvent === undefined || resolvedEventKind === undefined) {
+    return inputLegalityViolation(page, pageLabel, resolvedEventId, "<unresolved>", choiceId, manualActionText);
+  }
+
+  const hasChoice = choiceId !== null && choiceId !== undefined;
+  const hasManualAction = manualActionText !== null && manualActionText !== undefined;
+
+  if (resolvedEventKind === "story_start") {
+    if (!hasChoice && !hasManualAction) {
+      return undefined;
+    }
+    return inputLegalityViolation(page, pageLabel, resolvedEventId, resolvedEventKind, choiceId, manualActionText);
+  }
+
+  if (hasChoice !== hasManualAction) {
+    return undefined;
+  }
+
+  return inputLegalityViolation(page, pageLabel, resolvedEventId, resolvedEventKind, choiceId, manualActionText);
+}
+
 function collectStoryLocalReferences(value: unknown, path: string, references: StoryReference[]): void {
   if (typeof value === "string") {
     if (STORY_LOCAL_ID.test(value)) {
@@ -197,6 +240,38 @@ function danglingReference(page: IndexedRecord, pageLabel: string, reference: St
     },
     suggested_fix: `Create ${reference.id} in the same story scope or remove it from ${reference.path}.`
   };
+}
+
+function inputLegalityViolation(
+  page: IndexedRecord,
+  pageLabel: string,
+  resolvedEventId: string,
+  eventKind: string,
+  choiceId: unknown,
+  manualActionText: unknown
+): Verdict {
+  return {
+    validator: "state_snapshot_integrity",
+    severity: "fail",
+    code: "state_snapshot_integrity.pg_input_legality_violation",
+    message: `${pageLabel} input legality violation for resolved event ${resolvedEventId} (${eventKind}): choice_id=${formatInputState(choiceId)}, manual_action_text=${formatInputState(manualActionText)}`,
+    location: locationFor(page),
+    detail: {
+      page_id: pageLabel,
+      resolved_event_id: resolvedEventId,
+      event_kind: eventKind,
+      choice_id: choiceId ?? null,
+      manual_action_text: manualActionText ?? null
+    },
+    suggested_fix: "Follow shared story state contract §4.2 input legality: story_start pages use both-null input fields; all other pages use exactly one source action."
+  };
+}
+
+function formatInputState(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "null";
+  }
+  return JSON.stringify(value);
 }
 
 function pageId(page: Record<string, unknown>): string {
