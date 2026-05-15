@@ -82,6 +82,8 @@ The `access_route` enum aligns with the routes FOUNDATIONS §6b already enumerat
 
 ### D4 — count and citation cascade cleanup (intake P0.6)
 
+**Implementation note (2026-05-15, SPEC28STOCONHAR-004).** D4 is landed. `branching-story-turn-cycle/SKILL.md` now states 7 turn-cycle-additional checks everywhere the Phase 9 count is operationally summarized. `branching-story-health-audit/SKILL.md` now states eight structural sub-phases and cites the prose receipt at `§4.6`. Remaining D4 intake wording below is historical context for why the ticket existed.
+
 **Current state.** `branching-story-turn-cycle` HARD-GATE says "the 6 turn-cycle-additional checks" while Phase 9 enumerates seven (SPEC-27 D6 added "Canon Baseline Drift"). `branching-story-health-audit` says "Seven sub-phases run in sequence" while its process flow lists eight (2a–2h; SPEC-27 D6 added 2h "canon baseline drift"). `branching-story-health-audit` cites the prose receipt as `§4.5`; `story-state-contract.md` defines it at `§4.6`.
 
 **Change.** Update turn-cycle's HARD-GATE to "7 turn-cycle-additional checks"; update health-audit's "Seven sub-phases" to "Eight sub-phases"; correct the health-audit `§4.5` prose-receipt citation to `§4.6`. The sweep also reconciles any count reference affected by D1's seven-to-eight deterministic-check bump in `branching-story-prose-attach`. This deliverable is documentation-only — no schema or behavior change — but it closes SPEC-27 D6's incomplete cascade and prevents skill/validator drift.

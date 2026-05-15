@@ -148,7 +148,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Seven sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Eight sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -412,7 +412,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
-- `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.5) — the audit reads these record types.
+- `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.6) — the audit reads these record types.
 
 The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_source/` records). Their shapes are defined inline in this skill's Phase 5 (RSP) and Phase 6 (SAU) templates.
 

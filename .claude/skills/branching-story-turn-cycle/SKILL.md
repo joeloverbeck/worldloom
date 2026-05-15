@@ -40,7 +40,7 @@ Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/
 
 (b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; parent-page canon-baseline drift classified per FOUNDATIONS §Story Bundles §4b; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
-(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 6 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan, Choice Consequence Integrity).
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 7 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan, Choice Consequence Integrity, Canon Baseline Drift).
 
 (d) The user has explicitly approved the deliverable summary (branch label, resolved outcome route, state delta inventory by class, commitment block used, page plan structural preview, emitted choices list, any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation).
 
@@ -81,7 +81,7 @@ Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 6 turn-cycle-additional;
+Phase 9: Validate against shared 8 hard gates + 7 turn-cycle-additional;
   compute final PG hashes per shared contract §4.2a
         |
         v
