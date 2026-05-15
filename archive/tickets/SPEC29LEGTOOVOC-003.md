@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `tools/validators/tests/structural/record-schema-compliance-arc.test.ts` and `tools/validators/tests/fixtures/story-storylet-complete.yaml` deleted; `tools/patch-engine/src/ops/update-record-field.ts` drops three legacy field-path branches; `tools/patch-engine/tests/ops/update-record-field.test.ts` drops the same stale ARC field-path fixture/assertions; `tools/patch-engine/tests/integration/create-bel-record.test.ts` loses one sub-test; `tools/hooks/tests/hook3-guard-direct-edit.test.ts` swaps an ARCTRACE-0001 path for another story-source path; `specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` gets a same-seam implementation note.
+**Engine Changes**: Yes — `tools/validators/tests/structural/record-schema-compliance-arc.test.ts` and `tools/validators/tests/fixtures/story-storylet-complete.yaml` deleted; `tools/patch-engine/src/ops/update-record-field.ts` drops three legacy field-path branches; `tools/patch-engine/tests/ops/update-record-field.test.ts` drops the same stale ARC field-path fixture/assertions; `tools/patch-engine/tests/integration/create-bel-record.test.ts` loses one sub-test; `tools/hooks/tests/hook3-guard-direct-edit.test.ts` swaps an ARCTRACE-0001 path for another story-source path; `archive/specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` gets a same-seam implementation note.
 **Deps**: None
 
 ## Problem
@@ -75,7 +75,7 @@ Per SPEC-29 §"Key design decisions": these sentinel surfaces are retired becaus
 - `tools/patch-engine/tests/ops/update-record-field.test.ts` (modify)
 - `tools/patch-engine/tests/integration/create-bel-record.test.ts` (modify)
 - `tools/hooks/tests/hook3-guard-direct-edit.test.ts` (modify)
-- `specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` (modify same-seam implementation note)
+- `archive/specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` (modify same-seam implementation note)
 
 ## Out of Scope
 

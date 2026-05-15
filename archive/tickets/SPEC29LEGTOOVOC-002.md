@@ -99,7 +99,7 @@ Per SPEC-29 §"Key design decisions": the legacy-rejection sentinel tests are re
 - `tools/world-mcp/tests/tools/describe-capabilities.test.ts` (modify)
 - `tools/world-mcp/tests/server/dispatch.test.ts` (modify)
 - `tools/world-mcp/tests/tools/allocate-next-id.test.ts` (modify)
-- `specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` (modify)
+- `archive/specs/SPEC-29-legacy-tools-vocabulary-cleanup.md` (modify same-seam implementation note)
 
 ## Out of Scope
 

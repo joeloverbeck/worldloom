@@ -13,9 +13,9 @@ world-index init <world-slug>            # initialize an empty schema-applied wo
 world-index build <world-slug>           # full rebuild
 world-index sync <world-slug> [--quiet]  # incremental; --quiet suppresses per-record skip warnings
 world-index inspect <node-id>            # JSON dump of a single node
-world-index render <world-slug> --story <story-slug> [--arc-traces]
+world-index render <world-slug> --story <story-slug>
                                          # merged markdown view of indexed story-bundle records;
-                                         # ARC_TRACE records are opt-in
+                                         # story-bundle records are rendered in stable indexed order
 world-index stats <world-slug>           # counts by node_type; file freshness
 world-index verify <world-slug>          # re-parse disk-backed indexed files; skip synthetic atomic logical rows; flag drift
 ```
@@ -33,9 +33,9 @@ See `archive/specs/SPEC-01-world-index.md` §Deliverables §Package location.
 
 ## Public contract entry
 
-`@worldloom/world-index/public/types` is a narrow public contract surface for `tools/world-mcp/`. It re-exports schema types, enum constants, ARC_TRACE index row shape, the current index version, and the atomic logical-file list so retrieval tooling can typecheck SQLite rows and share lifecycle constants against the exact world-index contract.
+`@worldloom/world-index/public/types` is a narrow public contract surface for `tools/world-mcp/`. It re-exports schema types, enum constants, the current index version, and the atomic logical-file list so retrieval tooling can typecheck SQLite rows and share lifecycle constants against the exact world-index contract.
 
-`@worldloom/world-index/public/canonical-vocabularies` is the shared canonical vocabulary surface for validator and MCP consumers. It exports the canonical domain list, adjudication verdict enum, mystery status enum, mystery resolution-safety enum, expanded scene-commitment taxonomy values (`commitment_family`, closed base `commitment_class`, `COMMITMENT_CLASS_TO_FAMILY`, and `commitmentFamilyForClass`), recommended starter `arc_archetype` labels, `narrative_point`, `strong_axis`, `strong_outcome`, `stop_predicate`, and small pure helpers. `commitment_class` remains the closed base routing key; later `commitment_detail` values are the open story-specific layer. `arc_archetype` is an orienting pattern library rather than an exhaustive validation enum; story-specific labels may appear in records when justified by the storylet instructions. It does not expose a query library or broader programmatic read surface.
+`@worldloom/world-index/public/canonical-vocabularies` is the shared canonical vocabulary surface for validator and MCP consumers. It exports `CANONICAL_DOMAINS`, `VERDICT_ENUM`, `MYSTERY_STATUS_ENUM`, `MYSTERY_RESOLUTION_SAFETY_ENUM`, `INVARIANT_CATEGORY_VALUES`, `ENTITY_KIND_VALUES`, `SEC_FILE_CLASS_VALUES`, `CHANGE_TYPE_VALUES`, `REVISION_DIFFICULTY_VALUES`, and the `CF_TYPE_*` values and coupling sets. It also exports small pure helpers for canonical-domain checks and mystery-resolution-safety coupling. It does not expose a query library or broader programmatic read surface.
 
 ## Output location per world
 
