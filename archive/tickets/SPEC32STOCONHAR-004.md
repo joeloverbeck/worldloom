@@ -55,7 +55,7 @@ with live MCP retrieval wording:
 ## Files to Touch
 
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify — FOUNDATIONS Alignment Tooling Recommendation row at line 357)
-- `specs/SPEC-32-story-contract-hardening-iv.md` (modify — D3 implementation note)
+- `archive/specs/SPEC-32-story-contract-hardening-iv.md` (modify — D3 implementation note)
 
 ## Out of Scope
 
@@ -73,7 +73,7 @@ with live MCP retrieval wording:
 2. `! grep -n "direct file reads" .claude/skills/story-promotion-closeout/SKILL.md`
 3. `grep -nE "Linked canon-addition records are loaded read-only through" .claude/skills/story-promotion-closeout/SKILL.md` returns a match in the rewritten alignment row.
 4. `grep -n "see Pre-flight step 5" .claude/skills/story-promotion-closeout/SKILL.md` returns a match in the rewritten alignment row (cross-reference to the Pre-flight code path).
-5. `grep -n "SPEC32STOCONHAR-004" specs/SPEC-32-story-contract-hardening-iv.md` returns the D3 implementation note.
+5. `grep -n "SPEC32STOCONHAR-004" archive/specs/SPEC-32-story-contract-hardening-iv.md` returns the D3 implementation note.
 
 ### Invariants
 
@@ -92,7 +92,7 @@ with live MCP retrieval wording:
 1. `grep -n "direct file reads" .claude/skills/story-promotion-closeout/SKILL.md` (must return no matches)
 2. `grep -n "mcp__worldloom__get_records" .claude/skills/story-promotion-closeout/SKILL.md` (must return matches at Pre-flight AND alignment row)
 3. `grep -nE "Linked canon-addition records are loaded read-only" .claude/skills/story-promotion-closeout/SKILL.md` (confirms rewritten row landed)
-4. `grep -n "SPEC32STOCONHAR-004" specs/SPEC-32-story-contract-hardening-iv.md` (confirms the originating spec records D3 as landed)
+4. `grep -n "SPEC32STOCONHAR-004" archive/specs/SPEC-32-story-contract-hardening-iv.md` (confirms the originating spec records D3 as landed)
 
 ## Outcome
 
@@ -106,8 +106,8 @@ Commands run on 2026-05-16:
 2. `! grep -n "direct file reads" .claude/skills/story-promotion-closeout/SKILL.md` — passed; no stale phrase remains in the live closeout skill.
 3. `grep -nE "Linked canon-addition records are loaded read-only" .claude/skills/story-promotion-closeout/SKILL.md` — returned the rewritten alignment row.
 4. `grep -n "see Pre-flight step 5" .claude/skills/story-promotion-closeout/SKILL.md` — returned the rewritten alignment row cross-reference.
-5. `grep -n "SPEC32STOCONHAR-004" specs/SPEC-32-story-contract-hardening-iv.md` — returned the D3 implementation note.
-6. `git diff --check -- .claude/skills/story-promotion-closeout/SKILL.md specs/SPEC-32-story-contract-hardening-iv.md archive/tickets/SPEC32STOCONHAR-004.md` — passed.
+5. `grep -n "SPEC32STOCONHAR-004" archive/specs/SPEC-32-story-contract-hardening-iv.md` — returned the D3 implementation note.
+6. `git diff --check -- .claude/skills/story-promotion-closeout/SKILL.md archive/specs/SPEC-32-story-contract-hardening-iv.md archive/tickets/SPEC32STOCONHAR-004.md` — passed.
 
 ## Deviations
 

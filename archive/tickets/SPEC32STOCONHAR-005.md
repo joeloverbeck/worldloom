@@ -70,12 +70,12 @@ Updated the same skill's FOUNDATIONS Alignment Rule 7 and Mystery Reserve rows s
 
 ### 3. Added SPEC-32 implementation note
 
-Added a D1 implementation note to `specs/SPEC-32-story-contract-hardening-iv.md` documenting the landed narrow boundary and the accepted proof surface.
+Added a D1 implementation note to `archive/specs/SPEC-32-story-contract-hardening-iv.md` documenting the landed narrow boundary and the accepted proof surface.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify — Phase 3 deterministic check 3 at line 185)
-- `specs/SPEC-32-story-contract-hardening-iv.md` (modify — D1 implementation note)
+- `archive/specs/SPEC-32-story-contract-hardening-iv.md` (modify — D1 implementation note)
 
 ## Out of Scope
 
@@ -123,7 +123,7 @@ Completed: 2026-05-16.
 
 `branching-story-prose-attach` Phase 3 check 3 now derives `forbidden_mystery_resolution` patterns from fields that exist in the current Mystery Reserve / firewall retrieval contract: `get_firewall_content`, `disallowed_cheap_answers[]`, `unknowns[]`, and page-plan §11. Direct matches to `disallowed_cheap_answers[]` fail the receipt; cumulative semantic narrowing is recorded in `notes[]` and routed to `branching-story-health-audit` rather than being treated as a deterministic direct-answer match.
 
-The same skill's Rule 7 and Mystery Reserve alignment rows now match the landed check paragraph, including the corrected Phase 3 check number. `specs/SPEC-32-story-contract-hardening-iv.md` received a D1 implementation note so the remaining proposal text about validator fixtures is explicitly historical intake context.
+The same skill's Rule 7 and Mystery Reserve alignment rows now match the landed check paragraph, including the corrected Phase 3 check number. `archive/specs/SPEC-32-story-contract-hardening-iv.md` received a D1 implementation note so the remaining proposal text about validator fixtures is explicitly historical intake context.
 
 No Mystery Reserve schema field was added, no receipt output field changed, and no validator fixture was created.
 
@@ -134,7 +134,7 @@ No Mystery Reserve schema field was added, no receipt output field changed, and 
 3. `grep -nE "case-insensitive substring match" .claude/skills/branching-story-prose-attach/SKILL.md` — passed at the rewritten check paragraph.
 4. `grep -n "branching-story-health-audit" .claude/skills/branching-story-prose-attach/SKILL.md` — passed at the rewritten cumulative-narrowing handoff and the existing non-chaining guardrail.
 5. `rg -n 'Phase 3 check 2|deterministic regex scan of rendered prose against plan §11' .claude/skills/branching-story-prose-attach/SKILL.md` — returned no matches, the expected no-hit proof that the same-file stale alignment rows were corrected.
-6. `git diff --check -- .claude/skills/branching-story-prose-attach/SKILL.md archive/tickets/SPEC32STOCONHAR-005.md specs/SPEC-32-story-contract-hardening-iv.md` — passed.
+6. `git diff --check -- .claude/skills/branching-story-prose-attach/SKILL.md archive/tickets/SPEC32STOCONHAR-005.md archive/specs/SPEC-32-story-contract-hardening-iv.md` — passed.
 7. `npm test` from `tools/validators/` — passed, 269/269 tests before later prose-only closeout edits; the affected grep and hygiene checks were rerun after those prose edits.
 
 ## Deviations

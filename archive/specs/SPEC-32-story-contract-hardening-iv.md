@@ -2,7 +2,7 @@
 
 # SPEC-32 — Story Contract Hardening IV
 
-**Status**: PROPOSED
+**Status**: COMPLETED
 **Date**: 2026-05-15
 **Supersedes**: none (extends `archive/specs/SPEC-31-story-contract-hardening-iii.md` D10 and D14 — see §Cross-iteration context)
 **Companion triage**: `docs/triage/2026-05-15-story-related-improvements-sixth-iteration-triage.md`
@@ -448,3 +448,13 @@ Per-deliverable verification commands and acceptance criteria are listed in each
 - **D3 fixture coverage from SPEC-31 D10** — same as above for the closeout `linked_record_not_found` fixture.
 - **D6 reconciliation outcomes per ticket ID** — the implementation work depends on inspecting the named code surfaces. The five-ID list is exhaustive of what's currently referenced, but the per-ID verdict is implementation-time work; the spec cannot pre-determine the verdicts without performing the inspection.
 - **F6 / D5 wording specificity** — the proposed replacement text enumerates the five non-PG skills by name and the eight invariants by name. If a new story skill is added in the future, the contract §7 text must be updated. Alternative: phrase the contract abstractly ("PG-authoring skills" vs "other state-changing story skills") without enumeration. The enumerated form is preferred for now because the seven-skill set is canonical per FOUNDATIONS §Skill Categories and unlikely to change.
+
+## Outcome
+
+Completed: 2026-05-16.
+
+SPEC-32 landed through archived tickets `archive/tickets/SPEC32STOCONHAR-001.md` through `archive/tickets/SPEC32STOCONHAR-006.md`. The implementation completed the intended story-contract hardening as a set of narrow skill/doc/proof updates: eight-gates scope wording, post-write plan-hash verification, story-local seed resolution, closeout retrieval wording, prose-attach Mystery Reserve firewall wording, and cross-skill integration-debt reconciliation.
+
+Deviations from the proposal are recorded in the per-deliverable implementation notes above. In summary, several drafted validator-fixture ideas stayed historical because the live proof surface was skill prose plus existing package tests, D4 used the existing `compute-pg-hashes` CLI test instead of new validator fixtures, and D6 found all five integration-debt IDs already landed in code and truthed the skill notes accordingly.
+
+Verification completed through the archived ticket proof surfaces and final archival sweeps: no active tickets remain for this spec, D6's active-ticket references were repaired to archived paths, and final archive hygiene was run before moving this spec to `archive/specs/`.

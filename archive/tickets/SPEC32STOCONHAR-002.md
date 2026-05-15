@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — shared story-state contract §10 (new step 5a), `branching-story-bootstrap` Phase 10, `branching-story-turn-cycle` Phase 10, `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` (test extension), `specs/SPEC-32-story-contract-hardening-iv.md` (D4 implementation note)
+**Engine Changes**: Yes — shared story-state contract §10 (new step 5a), `branching-story-bootstrap` Phase 10, `branching-story-turn-cycle` Phase 10, `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` (test extension), `archive/specs/SPEC-32-story-contract-hardening-iv.md` (D4 implementation note)
 **Deps**: None
 
 ## Problem
@@ -24,7 +24,7 @@ Affected sites:
 3. Cross-skill / cross-artifact boundary: the shared story-state contract §10 is the canonical write-order spec; bootstrap Phase 10 and turn-cycle Phase 10 must remain in sync with it. This ticket edits all three surfaces in one batch to keep them consistent.
 4. FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary) — line 590-594: *"Story state is authoritative at page-plan commit. Rendered prose is a rendering of that state, not a second state engine. A `PG` record is real the moment the patch engine accepts the page-cycle plan."* The post-write re-hash discipline protects this boundary by ensuring the committed `PG.plan.plan_hash` continues to prove the disk state; if the disk drifts, the PG record remains authoritative and the disk is reconciled to it (never the other way around). Also FOUNDATIONS §HARD-GATE discipline (`docs/FOUNDATIONS.md:524` Tooling Recommendation cross-references `docs/HARD-GATE-DISCIPLINE.md`) — direct-artifact partial-failure handling routes the mismatch through the same authority-cited PASS/FAIL surface used elsewhere in the pipeline.
 5. This ticket touches HARD-GATE-adjacent semantics: it classifies a new failure mode (post-write hash mismatch) as a direct-artifact partial failure per `docs/HARD-GATE-DISCIPLINE.md`, blocks the bundle `INDEX.md` update on detection, and routes recovery through file repair to the already-approved bytes (not through PG re-submission, which would require a fresh approval token). Mystery Reserve firewall is unaffected — gate 3 of the eight hard gates already fired at Phase 9; this ticket adds a structural check, not a content gate.
-6. Active SPEC-32 D4 still drafted validator fixture directories as the proof surface. Live reassessment and implementation used the existing `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` integration point instead, so `specs/SPEC-32-story-contract-hardening-iv.md` now carries a dated D4 implementation note identifying the landed proof surface and preserving the validator-fixture paragraphs as historical intake context.
+6. Active SPEC-32 D4 still drafted validator fixture directories as the proof surface. Live reassessment and implementation used the existing `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` integration point instead, so `archive/specs/SPEC-32-story-contract-hardening-iv.md` now carries a dated D4 implementation note identifying the landed proof surface and preserving the validator-fixture paragraphs as historical intake context.
 
 ## Architecture Check
 
@@ -75,7 +75,7 @@ In `.claude/skills/branching-story-turn-cycle/SKILL.md` Phase 10, the parallel i
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — Phase 10 insertion before `INDEX.md` update)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — Phase 10 insertion before `INDEX.md` update)
 - `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` (modify — append the post-write-mismatch test case)
-- `specs/SPEC-32-story-contract-hardening-iv.md` (modify — D4 implementation note truthing the proof surface)
+- `archive/specs/SPEC-32-story-contract-hardening-iv.md` (modify — D4 implementation note truthing the proof surface)
 
 ## Out of Scope
 
@@ -122,7 +122,7 @@ What changed:
 - `.claude/skills/_shared-templates/story-state-contract.md` §10 now has step 5a between direct-markdown artifact writes and `INDEX.md` updates.
 - `branching-story-bootstrap` Phase 10 and `branching-story-turn-cycle` Phase 10 now write the page-plan markdown, re-run `compute-pg-hashes` with `--pg`, compare the emitted `plan_hash` to the committed `PG.plan.plan_hash`, and block `INDEX.md` updates on mismatch.
 - `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts` now includes a post-write drift test that computes hash A, mutates the plan file bytes, recomputes hash B, and asserts the hashes differ.
-- `specs/SPEC-32-story-contract-hardening-iv.md` D4 now has a dated implementation note identifying the landed proof surface and preserving the earlier validator-fixture text as historical intake context.
+- `archive/specs/SPEC-32-story-contract-hardening-iv.md` D4 now has a dated implementation note identifying the landed proof surface and preserving the earlier validator-fixture text as historical intake context.
 
 ## Verification Result
 
@@ -133,7 +133,7 @@ Commands run:
 - `grep -nEi "post-write plan-hash verification" .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md`: matched all three surfaces.
 - `grep -n "5a\\. Post-write plan-hash verification" .claude/skills/_shared-templates/story-state-contract.md`: matched shared contract §10 step 5a.
 - `grep -nE "compute-pg-hashes\\.js --plan [^ ]+ --pg" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md`: matched both Phase 10 post-write verification commands and existing Phase 9 hash-computation commands.
-- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md tools/world-mcp/tests/cli/compute-pg-hashes.test.ts archive/tickets/SPEC32STOCONHAR-002.md specs/SPEC-32-story-contract-hardening-iv.md`: passed.
+- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md tools/world-mcp/tests/cli/compute-pg-hashes.test.ts archive/tickets/SPEC32STOCONHAR-002.md archive/specs/SPEC-32-story-contract-hardening-iv.md`: passed.
 
 Manual review:
 - `docs/HARD-GATE-DISCIPLINE.md` confirms story-bundle direct markdown artifacts remain direct-write surfaces, and direct-artifact write failures after successful patch submission must be surfaced rather than silently retried.

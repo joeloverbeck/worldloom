@@ -88,7 +88,7 @@ The adjudication table above is the implementation log. The companion triage at 
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify — Guardrails §Known integration debt)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify — Guardrails §Known integration debt)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify — Guardrails §Known integration debt)
-- `specs/SPEC-32-story-contract-hardening-iv.md` (modify — D6 implementation note)
+- `archive/specs/SPEC-32-story-contract-hardening-iv.md` (modify — D6 implementation note)
 - `archive/tickets/SPEC32STOCONHAR-006.md` (modify — closeout and corrected live-scope record)
 
 ## Out of Scope
@@ -139,8 +139,8 @@ Reconciled the cross-skill integration-debt notes for MCPENH-040, MCPENH-041, PE
 
 1. `grep -nE "MCPENH-(040|041)|PEENH-(007|008)|VALENH-011" .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md` — passed; every Known integration debt hit now carries a `Now landed` verdict with evidence. The command also surfaced two current operational mentions outside the debt section (`commitment-block-authoring` pre-flight and `story-promotion-closeout` Phase 5), both already point to landed inherited behavior.
 2. `grep -nE "MCPENH-(040|041)|PEENH-(007|008)|VALENH-011" .claude/skills/branching-story-bootstrap/SKILL.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-prose-attach/SKILL.md` — returned only `branching-story-prose-attach`'s "No deferred-integration tickets named by this skill" inherited-infrastructure note; no Known integration debt section exists in those three skills.
-3. `grep -rn "MCPENH\\|PEENH\\|VALENH" docs/ specs/` — returned historical/supporting references in `docs/MACHINE-FACING-LAYER.md`, `docs/FOUNDATIONS.md`, triage docs, and this active spec. `specs/SPEC-32-story-contract-hardening-iv.md` was updated with a D6 implementation note; remaining D6 prose is historical intake context.
-4. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md specs/SPEC-32-story-contract-hardening-iv.md archive/tickets/SPEC32STOCONHAR-006.md` — passed.
+3. `grep -rn "MCPENH\\|PEENH\\|VALENH" docs/ specs/` — returned historical/supporting references in `docs/MACHINE-FACING-LAYER.md`, `docs/FOUNDATIONS.md`, triage docs, and this active spec. `archive/specs/SPEC-32-story-contract-hardening-iv.md` was updated with a D6 implementation note; remaining D6 prose is historical intake context.
+4. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md .claude/skills/commitment-block-authoring/SKILL.md .claude/skills/story-fact-promotion-to-canon/SKILL.md .claude/skills/story-promotion-closeout/SKILL.md archive/specs/SPEC-32-story-contract-hardening-iv.md archive/tickets/SPEC32STOCONHAR-006.md` — passed.
 
 ## Deviations
 
