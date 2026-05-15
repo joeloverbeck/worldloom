@@ -21,6 +21,8 @@
 
 > **Implementation note (2026-05-15)**: D6 landed via `archive/tickets/SPEC30STOCONHAR-007.md`. `.claude/skills/commitment-block-authoring/SKILL.md` now replaces the literal-effects-only Phase 4 belief-or-relationship coverage rule with a three-form OR over `effects.*`, `exit_options[].likely_effects`, and `preconditions.hard | soft` containing `any_belief(...)` / `any_relationship_axis(...)`; runtime consequences remain authoritative in `SE.state_delta`. Remaining D6 prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D7 landed via `archive/tickets/SPEC30STOCONHAR-008.md`. `tools/validators` now registers `choice_set_noncollapse`, exposes it as a named `world-validate --story <story-slug> --rules=choice_set_noncollapse` selector, and tests commit-time collapse/error plus rhetorical warning behavior. `branching-story-turn-cycle` Phase 9 now treats `choice_set_collapse` as an ERROR page-commit gate, while `branching-story-health-audit` Phase 2a replays historical menus as `choice_set_collapse_observed`. Remaining D7 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement

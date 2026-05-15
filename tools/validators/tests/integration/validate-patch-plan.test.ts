@@ -89,6 +89,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
+    const choiceSetExecution = result.executions.find(
+      (execution) => execution.name === "choice_set_noncollapse"
+    );
+    assert.equal(choiceSetExecution?.status, "skipped");
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
@@ -106,6 +110,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
     for (const execution of result.executions.filter(
       (row) =>
         row !== storyletExecution &&
+        row !== choiceSetExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution

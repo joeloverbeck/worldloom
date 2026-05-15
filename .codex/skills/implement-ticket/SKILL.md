@@ -74,6 +74,7 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 - Broad wrapper red but focused compiled proof green -> use `references/verification-closeout.md` to record baseline, direct-file diagnostics, focused proof, and deviation without forcing a synthetic full-suite green.
 - Proof-surface substitutions such as replacing an unavailable `skill dry-run` with manual review + grep -> sweep the active ticket for old proof labels (`dry-run`, `skill dry-run`) and old command fragments before final response.
 - Skill phase/check count drift -> when adding, removing, renaming, or reordering skill phases, gates, findings, or checks, grep nearby skill prose for numeric labels and old phase references such as `6 checks`, `7 sub-phases`, `Phase 2g`, or `Phase 9` before final proof. Update active operational labels; preserve old counts only when clearly marked historical.
+- Stale ticket/spec phase references -> when a ticket or spec names a phase/check as implementation authority, verify the live phase/check label before source edits and closeout even if the active change does not rename phases.
 
 ## Always First
 
@@ -201,6 +202,8 @@ For non-trivial tickets, load `references/reassessment-checks.md` after classifi
 For engine-only canon writes where `mcp__worldloom__submit_patch_plan` is unavailable in the Codex toolset, load `references/patch-engine-codex-fallback.md` and use the local patch-engine fallback only if it preserves the same source-write boundary. Do not direct-edit `_source/*.yaml` as a convenience fallback.
 
 Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
+
+Before any reassessment edit to the ticket itself, emit the pre-edit checkpoint from §1.15.
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 
