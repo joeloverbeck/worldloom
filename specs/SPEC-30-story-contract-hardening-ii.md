@@ -23,6 +23,8 @@
 
 > **Implementation note (2026-05-15)**: D7 landed via `archive/tickets/SPEC30STOCONHAR-008.md`. `tools/validators` now registers `choice_set_noncollapse`, exposes it as a named `world-validate --story <story-slug> --rules=choice_set_noncollapse` selector, and tests commit-time collapse/error plus rhetorical warning behavior. `branching-story-turn-cycle` Phase 9 now treats `choice_set_collapse` as an ERROR page-commit gate, while `branching-story-health-audit` Phase 2a replays historical menus as `choice_set_collapse_observed`. Remaining D7 prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D10 landed via `archive/tickets/SPEC30STOCONHAR-009.md`. Shared contract §4.5.7 and `story-relationship.schema.json` now require structured `SREL.direction: { kind, from, to }`, with conditional endpoint legality; `recursive_reference_closure` now proves closure over `direction.from` / `direction.to`; bootstrap and turn-cycle skill prose show the structured authored form. The D10 world-index and MCP rendering bullets remain future follow-up material because the live repo has no SREL edge extraction or context-packet SREL rendering surface to update.
+
 ---
 
 ## Problem Statement

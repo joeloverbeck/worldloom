@@ -140,6 +140,8 @@ Before final response for a package/tool ticket, inspect adjacent same-package u
 - package-local usage snippets or command examples
 - scripts that document or wrap the changed command/API
 
+Before grepping optional package docs, examples, or wrapper-script paths, resolve the paths that actually exist in the checkout with `rg --files`, `test -e`, or an explicit existing-path list. Omit missing optional paths from proof commands and record them as absent or not applicable so a noisy `No such file or directory` exit is not mistaken for contract evidence.
+
 If the ticket adds or changes a user-facing CLI, workflow command, machine-layer command surface, error code behavior, recovery behavior, audit field, or troubleshooting semantics, also inspect repo-level quick-reference and troubleshooting docs that users rely on for invocation or diagnosis, especially `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` when they mention the command, tool, error, or recovery path. Treat stale same-seam command status, flags, examples, planned/present wording, or recovery instructions as closeout fallout unless a later ticket explicitly owns that docs update.
 
 If same-seam docs, skill references, package READMEs, examples, or troubleshooting files were already dirty before the ticket and also need package-owned edits, classify the changed hunks before closeout. Keep pre-existing user work separate from ticket-owned public-surface updates in the final dirty-worktree ledger instead of attributing the whole file to the active ticket.

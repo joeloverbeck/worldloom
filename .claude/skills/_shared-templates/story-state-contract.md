@@ -501,12 +501,17 @@ created_at_page: PG-<integer>*
 supersedes: SREL-<integer> | null             # default null
 axis: <axis>*                                  # §4.4b closed enum
 participants: [STENT-<integer>]*              # exactly 2 participants
-direction: string*                             # "STENT-<from> -> STENT-<to>" | "bidirectional"
+direction:
+  kind: directed | bidirectional*              # directed names an ordered relation; bidirectional is mutual
+  from: STENT-<integer> | null*                # required when kind == directed; null when bidirectional
+  to: STENT-<integer> | null*                  # required when kind == directed; null when bidirectional
 value: none | trace | low | medium | high | extreme*
 valence: symmetric | asymmetric | bidirectional | adversarial*
 description: string*
 derived_from: [<record_id>]                    # default []
 ```
+
+If `direction.kind: directed`, both `direction.from` and `direction.to` MUST be non-null and reference STENT records in the bundle. If `direction.kind: bidirectional`, both endpoints MUST be null; the mutual participants are documented in `participants[]`.
 
 No `magnitude` or `trace_records` fields; use `value` and `derived_from`.
 

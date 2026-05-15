@@ -252,7 +252,19 @@ For every active cast-member `STENT`, create exactly one initial `STSTAT` record
 
 ## Phase 4: Create initial debts
 
-Create 1–3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` records only when they constrain a choice, demand response, track promise / risk / threat / cost, or create a future consequence if ignored. Every `OBL`, `CNSQ`, and `THR` record must set `urgency: low | medium | high` so later debt-salience checks can rank them uniformly. Create `SREL` records for relationships that constrain opening choice.
+Create 1–3 `THR` records tracking the opening pressure. Create `OBL` / `CNSQ` records only when they constrain a choice, demand response, track promise / risk / threat / cost, or create a future consequence if ignored. Every `OBL`, `CNSQ`, and `THR` record must set `urgency: low | medium | high` so later debt-salience checks can rank them uniformly. Create `SREL` records for relationships that constrain opening choice. Each `SREL.direction` uses the structured form from shared contract §4.5.7: `kind: directed` requires non-null `from` and `to` STENT ids, while `kind: bidirectional` requires `from: null` and `to: null`.
+
+```yaml
+direction:
+  kind: directed
+  from: STENT-1
+  to: STENT-2
+
+direction:
+  kind: bidirectional
+  from: null
+  to: null
+```
 
 **Good debt** changes what a cast member can actually do at the opening. **Bad debt** restates the premise, names a theme, encodes an act structure, or predicts a future plot beat. Do not create bad debt.
 

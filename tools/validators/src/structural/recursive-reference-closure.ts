@@ -233,6 +233,7 @@ function collectStoryLocalReferences(value: unknown, path: string, references: S
     if (NON_EDGE_FIELDS.has(key)) {
       continue;
     }
+    // Structured SREL.direction.from/to are ordinary nested values and must remain closure roots.
     if (STORY_LOCAL_ID.test(key)) {
       references.push({ id: key, path: `${path}.${key}` });
     }

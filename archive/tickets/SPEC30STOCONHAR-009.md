@@ -1,21 +1,21 @@
 # SPEC30STOCONHAR-009: `SREL.direction` Structured Form (Hard Cutover, Trimmed)
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — contract §4.5.7, `story-relationship.schema.json`, `recursive-reference-closure.ts` + test, bootstrap + turn-cycle skill prose (world-index parse layer + MCP context-packet rendering trimmed to no-op per Step 2 disposition)
+**Engine Changes**: Yes — contract §4.5.7, `story-relationship.schema.json`, `recursive-reference-closure.ts` + tests, bootstrap + turn-cycle skill prose, and SPEC-30 implementation note (world-index parse layer + MCP context-packet rendering trimmed to no-op per Step 2 disposition)
 **Deps**: None
 
 ## Problem
 
-`tools/validators/src/schemas/story-relationship.schema.json:36` defines `direction: type: string, minLength: 1` with two example formats in the comment but no enforcement. Free-string semantics are fragile for validators: SPEC30STOCONHAR-010 (motivation grounding) wants to match an SREL by actor (`from`/`to`) but cannot do so against an unstructured string. Pre-production is the lowest-cost migration moment — zero `_source/relationships/*.yaml` story bundle records exist anywhere in the repo (verified via `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returning empty). This ticket lands the hard cutover.
+At intake, `tools/validators/src/schemas/story-relationship.schema.json` defined `direction: type: string, minLength: 1` with two example formats in the shared contract but no enforcement. Free-string semantics were fragile for validators: SPEC30STOCONHAR-010 (motivation grounding) wants to match an SREL by actor (`from`/`to`) but cannot do so against an unstructured string. Pre-production was the lowest-cost migration moment — zero `_source/relationships/*.yaml` story bundle records exist anywhere in the repo (verified via `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returning empty). This ticket landed the hard cutover.
 
 **Scope trim vs. spec D10 as written**: spec items 5 (world-index SREL edge extraction in `tools/world-index/src/parse/semantic.ts`) and 6 (MCP SREL direction rendering in `tools/world-mcp/src/context-packet/story-bundle-context.ts`) reference surfaces that do not currently exist. `parse/semantic.ts` (292 lines) handles only canon-level CF/CH/M attribution edges; SREL records are stored as opaque YAML via `parse/atomic.ts`. `parse/structured-edges.ts` extracts edges only for `diegetic_artifact_record` / `proposal_batch` / `proposal_card` / `character_proposal_card`. `story-bundle-context.ts` (371 lines) has zero SREL/relationship/direction references. Per the user disposition at SPEC-30 decomposition time, items 5+6 are trimmed to no-op (the schema/validator/contract changes are the load-bearing hard cutover; net-new SREL edge extraction and context-packet rendering are a follow-up if needed).
 
 ## Assumption Reassessment (2026-05-15)
 
-1. Verified `_shared-templates/story-state-contract.md:486` carries `direction: string*` with the comment `# "STENT-<from> -> STENT-<to>" | "bidirectional"` exactly as the spec asserts.
-2. Verified `tools/validators/src/schemas/story-relationship.schema.json:36` carries `direction: { type: string, minLength: 1 }` with `required: [..., direction, ...]` at line 5.
+1. Historical intake: `_shared-templates/story-state-contract.md` carried `direction: string*` with the comment `# "STENT-<from> -> STENT-<to>" | "bidirectional"` exactly as the spec asserted. Landed state: §4.5.7 now uses structured `direction.kind/from/to`.
+2. Historical intake: `tools/validators/src/schemas/story-relationship.schema.json` carried `direction: { type: string, minLength: 1 }` with `required: [..., direction, ...]`. Landed state: `direction` is now a required object with `kind`, `from`, and `to` plus conditional endpoint legality.
 3. Verified `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returns ZERO matches — no production story bundle has any SREL record to migrate. Hard cutover is lawful per spec key design decisions.
 4. Verified `tools/world-index/src/parse/semantic.ts` (292 lines) handles only CF / CH / M / DA / CHAR / PR / BATCH / NCP / NCB / AU / RP edges — no SREL handling. `tools/world-index/src/parse/atomic.ts:76` registers SREL records as `relationship_record_story` but does not parse `direction`. `tools/world-index/src/parse/structured-edges.ts` extracts edges only for `diegetic_artifact_record` / `proposal_batch` / `proposal_card` / `character_proposal_card` — no SREL. Conclusion: there is no existing "free string SREL edge extraction" to update; spec D10 item 5 is no-op.
 5. Verified `tools/world-mcp/src/context-packet/story-bundle-context.ts` (371 lines) has zero `SREL` / `relationship` / `direction` matches — no existing rendering. Conclusion: spec D10 item 6 is no-op.
@@ -24,6 +24,8 @@
 8. HARD-GATE / Mystery Reserve firewall verification: this ticket modifies the SREL JSON schema (a `record_schema_compliance` surface) and the closure validator. It does NOT touch Mystery Reserve firewall logic.
 9. Schema extension classification: this IS a schema extension AND a breaking change to the `direction` field shape. Per FOUNDATIONS extension rules, breaking changes are lawful only when no consumer is affected — verified by the zero-bundles count above. Consumers: `record_schema_compliance` validator (updated by virtue of the JSON schema swap), `recursive-reference-closure` (updated here), bootstrap + turn-cycle authoring (updated here).
 10. Adjacent contradictions classification: spec items 5+6 reference absent code. Classified as **required consequence of the spec itself being aspirational about those surfaces**; trimmed to no-op per user disposition. Net-new SREL edge extraction in world-index and net-new SREL direction rendering in MCP context-packet are documented as cross-spec follow-ups (separate follow-up spec if needed; not part of this ticket).
+11. Package public-surface check: `tools/validators/README.md` lists SREL only as a covered story-bundle record class and has no direction-shape example to update. Repo docs hits in `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` are generic SREL retrieval/workflow references, not same-seam `direction` contract prose.
+12. Explicit SPEC-30 reference truthing: `specs/SPEC-30-story-contract-hardening-ii.md` received a dated D10 implementation note. The old D10 item bullets remain historical spec context; the note records that world-index/MCP rendering bullets are follow-up material because the live repo has no current SREL parsing/rendering surface.
 
 ## Architecture Check
 
@@ -38,11 +40,11 @@
 4. Skill prose sync → codebase grep-proof: SREL-authoring examples in bootstrap + turn-cycle use the structured form.
 5. No production migration → codebase grep-proof: `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returns ZERO matches at acceptance time (re-verify).
 
-## What to Change
+## Landed Changes
 
 ### 1. Contract §4.5.7
 
-In `.claude/skills/_shared-templates/story-state-contract.md` §4.5.7 (around line 486), replace `direction: string*` (with the example-formats comment) with the structured form:
+In `.claude/skills/_shared-templates/story-state-contract.md` §4.5.7, replaced `direction: string*` (with the example-formats comment) with the structured form:
 
 ```yaml
 direction:
@@ -51,11 +53,11 @@ direction:
   to: STENT-<integer> | null           # required when kind == directed; null when bidirectional
 ```
 
-Add the legality rule prose: *"if `kind: directed`, both `from` and `to` MUST be non-null and reference STENT records in the bundle; if `kind: bidirectional`, both `from` and `to` MUST be null (the relationship is mutual; participants are documented in the `participants[]` field)."*
+Added legality rule prose: if `kind: directed`, both `from` and `to` MUST be non-null and reference STENT records in the bundle; if `kind: bidirectional`, both endpoints MUST be null and mutual participants are documented in `participants[]`.
 
 ### 2. JSON schema
 
-In `tools/validators/src/schemas/story-relationship.schema.json:36`, replace the string `direction` with an object schema:
+In `tools/validators/src/schemas/story-relationship.schema.json`, replaced the string `direction` with an object schema:
 
 ```json
 "direction": {
@@ -82,11 +84,11 @@ In `tools/validators/src/schemas/story-relationship.schema.json:36`, replace the
 
 ### 3. Validator closure check
 
-In `tools/validators/src/structural/recursive-reference-closure.ts`, ensure the `storyLocalReferences` collector walks into `direction.from` and `direction.to` of SREL records. The existing collector traverses object values recursively (`collectStoryLocalReferences` at `:214-240`) and matches `^STENT-\d+$` via the `STORY_LOCAL_ID` regex at `:11`; verify by adding a test case. Modify the collector only if the test reveals a gap.
+In `tools/validators/src/structural/recursive-reference-closure.ts`, the existing recursive collector already walked into `direction.from` and `direction.to`; this run added a clarifying comment and tests proving both clean and missing-endpoint behavior.
 
 ### 4. Skill prose updates
 
-In `.claude/skills/branching-story-bootstrap/SKILL.md` and `.claude/skills/branching-story-turn-cycle/SKILL.md`, update every SREL-authoring example and prose reference to use the structured form. Authoring examples should show both `kind: directed` (with `from`/`to`) and `kind: bidirectional` (with `from: null, to: null`) cases.
+In `.claude/skills/branching-story-bootstrap/SKILL.md` and `.claude/skills/branching-story-turn-cycle/SKILL.md`, updated SREL-authoring prose to use the structured form. Authoring examples now show both `kind: directed` (with `from`/`to`) and `kind: bidirectional` (with `from: null, to: null`) cases.
 
 ### 5. World-index parse layer (item 5) — explicitly no-op
 
@@ -96,16 +98,21 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-index/src/parse/`. 
 
 Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-packet/story-bundle-context.ts`. The context packet does not currently render SREL `direction`; net-new rendering using the structured form is a cross-spec follow-up tracked in the Step 6 summary.
 
+### 7. SPEC-30 implementation note
+
+Added a dated D10 implementation note to `specs/SPEC-30-story-contract-hardening-ii.md` so the explicit spec reference records the landed schema/validator/skill contract and the trimmed world-index/MCP follow-up boundary.
+
 ## Files to Touch
 
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify — §4.5.7 schema + legality rule)
 - `tools/validators/src/schemas/story-relationship.schema.json` (modify — `direction` object schema)
-- `tools/validators/src/structural/recursive-reference-closure.ts` (modify — verify collector traversal; add comment naming `direction.from`/`direction.to` as closure roots if logic untouched)
+- `tools/validators/src/structural/recursive-reference-closure.ts` (modify — added comment naming `direction.from`/`direction.to` as closure roots; traversal logic already handled nested values)
 - `tools/validators/tests/structural/recursive-reference-closure.test.ts` (modify — new test cases for SREL `direction.from`/`direction.to` closure)
 - `tools/validators/tests/structural/record-schema-compliance-story-relationship.test.ts` (modify — schema-admission cases for the structured form)
-- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — update SREL fixture(s) to the new structured form if covered)
+- `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — updated representative SREL fixture to the new structured form)
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — SREL-authoring prose + examples)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — SREL-authoring prose + examples)
+- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D10 implementation note)
 
 ## Out of Scope
 
@@ -134,7 +141,7 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-pac
 
 1. `tools/validators/tests/structural/record-schema-compliance-story-relationship.test.ts` — new cases: directed-valid, bidirectional-valid, directed-with-null-from (error), directed-with-null-to (error), bidirectional-with-from (error), bidirectional-with-to (error).
 2. `tools/validators/tests/structural/recursive-reference-closure.test.ts` — new case: SREL `direction.from: STENT-1, direction.to: STENT-3` resolves cleanly when both STENTs exist; missing STENT-3 emits `missing_record`.
-3. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — update SREL fixture(s) to the new structured form if covered.
+3. `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` — updated the representative SREL fixture to the new structured form.
 
 ### Commands
 
@@ -142,3 +149,23 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-pac
 2. `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` (re-verify zero bundles pre-merge)
 3. `grep -nE "kind: directed|kind: bidirectional" .claude/skills/_shared-templates/story-state-contract.md`
 4. The full validator `test` command is the correct boundary because three structural test files share the SREL schema and closure surface.
+
+## Outcome
+
+Completed. `SREL.direction` is now a structured object in the shared contract and JSON schema; validator tests cover valid directed/bidirectional forms and four illegal endpoint combinations. `recursive_reference_closure` now has explicit proof that `direction.from` / `direction.to` participate in story-local closure, including missing-STENT failure. Bootstrap and turn-cycle authoring prose now show the structured form, and SPEC-30 carries a D10 implementation note documenting the trimmed world-index/MCP boundary.
+
+## Verification Result
+
+1. Baseline before edits: from `tools/validators`, `npm run test` passed (`238` tests).
+2. `npm run build` from `tools/validators` passed after schema/source edits.
+3. Focused compiled proof passed: `node --test dist/tests/structural/record-schema-compliance-story-relationship.test.js dist/tests/structural/recursive-reference-closure.test.js dist/tests/structural/contract-schema-roundtrip.test.js` (`32` tests).
+4. Final full package proof passed: from `tools/validators`, `npm run test` (`242` tests).
+5. `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returned zero matches.
+6. `grep -nE "kind: directed|kind: bidirectional" .claude/skills/_shared-templates/story-state-contract.md` returned the structured §4.5.7 hits.
+7. Same-seam stale-shape sweep over active contract/source/test/skill surfaces found no remaining `direction: "bidirectional"` / `direction: string` current-contract hits; remaining old-shape hits are historical intake/spec/ticket text.
+8. `git diff --check` passed.
+
+## Deviations
+
+1. The `recursive-reference-closure.ts` implementation did not need traversal logic changes; the existing recursive object walker already follows `direction.from` and `direction.to`. This run added a clarifying comment and explicit tests instead.
+2. `specs/SPEC-30-story-contract-hardening-ii.md` keeps the old D10 deliverable bullets as historical proposal text. The new implementation note is the current authority for the landed boundary and records world-index/MCP rendering as follow-up material.

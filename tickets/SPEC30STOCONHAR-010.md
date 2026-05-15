@@ -4,7 +4,7 @@
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `branching-story-turn-cycle/SKILL.md` action-validation phase + `branching-story-health-audit/SKILL.md` Phase 2 (no schema change)
-**Deps**: SPEC30STOCONHAR-009
+**Deps**: archive/tickets/SPEC30STOCONHAR-009.md
 
 ## Problem
 
@@ -13,7 +13,7 @@ No current rule requires non-system character actions to be grounded in active S
 ## Assumption Reassessment (2026-05-15)
 
 1. Verified `_shared-templates/story-state-contract.md:214` requires `SE.world_logic_rationale` as a non-empty natural-language justification ("required (no silent rejection — see §6)"). The existing surface is the right vehicle for grounding citations; no schema field is added.
-2. Verified `branching-story-turn-cycle/SKILL.md` has an action-validation phase that the new rule extends. SREL matching by actor depends on SPEC30STOCONHAR-009's structured `direction.from` / `direction.to` (Deps explicit).
+2. Verified `branching-story-turn-cycle/SKILL.md` has an action-validation phase that the new rule extends. SREL matching by actor depends on `archive/tickets/SPEC30STOCONHAR-009.md`'s structured `direction.from` / `direction.to` (Deps explicit).
 3. Verified `branching-story-health-audit/SKILL.md` Phase 2 has multiple replay sub-checks (2a-2h); the new finding `motivation_ungrounded` (severity: warning) is a natural extension of Phase 2a (replay events) or a new Phase 2 sub-section adjacent to it.
 4. Cross-skill / cross-artifact boundary under audit: the rule spans turn-cycle (prose enforcement) + health-audit (replay flag). Both surfaces read from `SE.world_logic_rationale` (existing field).
 5. FOUNDATIONS principle under audit: §6b Information / Observer Firewall extends to motive grounding per spec FOUNDATIONS Alignment row. §Story Bundles intentionality contract is the prose discipline. Rule 4 (No Capability Creep): no new field added; the rule rides on existing surface. Rule 6 (No Silent Retcons): the rule extension is cited explicitly under §What to Change; not silent.
@@ -43,7 +43,7 @@ In `.claude/skills/branching-story-turn-cycle/SKILL.md` (an appropriate action-v
 - An `STINT-<integer>` held by the actor.
 - A `BEL-<integer>` held by the actor with relevant content.
 - An `OBL-<integer>` / `CNSQ-<integer>` / `THR-<integer>` involving the actor.
-- An `SREL-<integer>` whose `direction.from` or `direction.to` includes the actor (now structured per SPEC30STOCONHAR-009) or whose `participants[]` includes the actor.
+- An `SREL-<integer>` whose `direction.from` or `direction.to` includes the actor (now structured per `archive/tickets/SPEC30STOCONHAR-009.md`) or whose `participants[]` includes the actor.
 - An immediate physical affordance available to the actor at the page location.
 
 Document the citation form (e.g., "actor STENT-1 acts on STINT-3 because ...") and the audit-side warning severity so authors understand the rule is observability-first.

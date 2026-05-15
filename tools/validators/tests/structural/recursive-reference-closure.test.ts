@@ -406,6 +406,84 @@ test("recursive_reference_closure resolves promotion claim STSTAT and SREL sourc
   assert.deepEqual(verdicts, []);
 });
 
+test("recursive_reference_closure resolves SREL direction endpoints", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      state_snapshot: {
+        active_records: {
+          SREL: ["SREL-0001"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("relationship_record_story", "SREL-0001", "relationships", {
+        id: "SREL-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        direction: {
+          kind: "directed",
+          from: "STENT-0001",
+          to: "STENT-0003"
+        }
+      }),
+      storyRecord("story_entity_record", "STENT-0001", "entities", {
+        id: "STENT-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0001"
+      }),
+      storyRecord("story_entity_record", "STENT-0003", "entities", {
+        id: "STENT-0003",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002"
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("recursive_reference_closure fails for missing SREL direction endpoints", async () => {
+  const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
+    pageOverrides: {
+      state_snapshot: {
+        active_records: {
+          SREL: ["SREL-0001"]
+        }
+      }
+    },
+    extra: [
+      storyRecord("relationship_record_story", "SREL-0001", "relationships", {
+        id: "SREL-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0002",
+        direction: {
+          kind: "directed",
+          from: "STENT-0001",
+          to: "STENT-0003"
+        }
+      }),
+      storyRecord("story_entity_record", "STENT-0001", "entities", {
+        id: "STENT-0001",
+        story_id: "STORY-001",
+        created_at_page: "PG-0001"
+      })
+    ]
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.missing_record");
+  assert.ok(missing);
+  assert.deepEqual(missing.detail, {
+    reference_id: "STENT-0003",
+    reference_path: "state_snapshot.active_records.SREL[0].direction.to"
+  });
+});
+
 test("recursive_reference_closure fails for missing promotion claim STSTAT source records", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {

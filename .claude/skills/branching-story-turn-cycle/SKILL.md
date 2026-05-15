@@ -264,7 +264,19 @@ For every life / agency / location change, supersede the affected entity's activ
 
 - Their open `STINT` records — close each in `SE.state_delta.close`; for an intention transferred to another holder, create a replacement `STINT` with the new `holder` and `supersedes` linking the closed/replaced intention. `STINT` has no `status` or `derived_from` field.
 - `OBL` owed by or to them (supersede or close).
-- Affected `SREL` records — supersede by changing `axis` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field.
+- Affected `SREL` records — supersede by changing `axis` / `direction` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field. `SREL.direction` uses shared contract §4.5.7's structured form: `kind: directed` requires non-null `from` and `to` STENT ids, while `kind: bidirectional` requires `from: null` and `to: null`.
+
+```yaml
+direction:
+  kind: directed
+  from: STENT-1
+  to: STENT-2
+
+direction:
+  kind: bidirectional
+  from: null
+  to: null
+```
 - Witness `BEL` records (Phase 4 covers).
 - Affected `STOBJ` records — supersede `owner` and/or `current_location` when death, capture, incapacity, or transfer changes custody. Do not use any separate control/custody field.
 - Future choice availability (Phase 9 gate 7 filters).
