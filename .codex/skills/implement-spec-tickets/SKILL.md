@@ -270,19 +270,21 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 3. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
 4. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
 5. Confirm the original `specs/` path no longer exists.
-6. Sweep active tickets, docs, and specs for stale active-spec path references. Repair actionable references to the archived path; leave historical references only when clearly harmless.
+6. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
 7. Run hygiene over the spec archive move and reference repairs.
 8. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
 9. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
 
 ## Branch And Push
 
-After the final archive commit:
+After the final archive commit and any required final state-file persistence commit:
 
 1. Refresh `git status --short`. Stop if uncommitted owned changes remain.
 2. Create a new branch from the current HEAD with a concise family name derived from the spec id or filename, for example `spec-31-story-contract-hardening`.
 3. Push the new branch to the configured remote.
 4. Report the branch name, pushed remote, commits created by the harness, archived spec path, archived ticket paths, and any follow-up tickets left active.
+
+If branch creation or push fails because Codex cannot write the git ref in the sandbox, cannot resolve the remote host, or otherwise hits a clear sandbox/network restriction, rerun the same branch/push command with the required approval or escalation. Record both the first failure and the successful retry, or the remaining blocker if escalation still fails.
 
 Do not create or push a branch if the implementation loop stopped blocked or if the worktree still contains unapproved dirty paths.
 
