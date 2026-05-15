@@ -13,7 +13,6 @@ function pgRecord(): Record<string, unknown> {
     id: "PG-1",
     story_id: "STORY-1",
     prose_plan_path: "pages-prose-plans/PG-1.md",
-    prose_path: null,
     prose_status: "pending",
     deferred_validation_trace: {
       prose_ledger_consistency: "DEFERRED — awaiting prose render",
@@ -180,17 +179,6 @@ test("update_record_field chains mutations on a story-bundle page across multipl
       expected_content_hash: pgHash,
       payload: {
         target_record_id: "PG-1",
-        field_path: ["prose_path"],
-        operation: "set",
-        new_value: "pages-prose/PG-1.md"
-      }
-    } satisfies Extract<PatchOperation, { op: "update_record_field" }>),
-    createOp({
-      op: "update_record_field",
-      target_world: world.worldSlug,
-      expected_content_hash: pgHash,
-      payload: {
-        target_record_id: "PG-1",
         field_path: ["prose_status"],
         operation: "set",
         new_value: "rendered"
@@ -218,7 +206,6 @@ test("update_record_field chains mutations on a story-bundle page across multipl
   assert.equal(result.staged.length, 1);
   assertYamlEquals(result.staged[0]!, {
     ...record,
-    prose_path: "pages-prose/PG-1.md",
     prose_status: "rendered",
     deferred_validation_trace: {
       prose_ledger_consistency: "PASS — rendered prose matches the ledger",

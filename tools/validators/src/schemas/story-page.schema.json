@@ -160,16 +160,6 @@
       "pattern": "^pages-prose-plans/PG-[0-9]+\\.md$",
       "description": "Canonical top-level address of the page plan."
     },
-    "prose_path": {
-      "type": ["string", "null"],
-      "pattern": "^pages-prose/PG-[0-9]+\\.md$",
-      "description": "Relative path to rendered prose; null until prose is attached."
-    },
-    "prose_receipt_path": {
-      "type": ["string", "null"],
-      "pattern": "^pages-prose-receipts/PG-[0-9]+\\.yaml$",
-      "description": "Relative path to the prose receipt; null until prose is attached."
-    },
     "emitted_choices": {
       "type": "array",
       "items": { "type": "string", "pattern": "^CHC-[0-9]+$" }

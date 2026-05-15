@@ -17,6 +17,7 @@ task_header:
     allocated: 9800
   seed_nodes:
     - CHAR-2
+  warnings: []
   full_body_classes_delivered: []
   harness_ceiling_chars: 60000
   envelope_overhead_reserve_chars: 4000
@@ -65,6 +66,7 @@ Describes the invocation context:
 - packet version
 - requested versus allocated budget
 - seed nodes
+- warnings, additive non-fatal diagnostics about request-shape issues
 - `full_body_classes_delivered`, the live node classes that actually received `full_body` after budget allocation
 - `harness_ceiling_chars`, the gross serialized-response character ceiling used for this request
 - `envelope_overhead_reserve_chars`, the reserved margin for MCP response-envelope overhead outside the packet body
@@ -133,6 +135,16 @@ This layer carries:
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
 - per-mystery `PG.state_snapshot.unresolved_mystery_claims[]` evidence chains, including page id, authority, status, and `evidence_records[]`
 
+For story turn-cycle and story health-audit consumers, the latest
+`change_log_entry` delivered in governing context is a drift trigger, not the
+complete drift-classification evidence. When a page baseline is stale, callers
+must retrieve every CH entry newer than `PG.state_snapshot.canon_revision` with
+`mcp__worldloom__get_records(record_ids=<CH window>, world_slug=<world_slug>)`,
+then follow each CH `affected_fact_ids[]` entry through
+`mcp__worldloom__find_sections_touched_by(cf_id)` or equivalent targeted
+retrieval to enumerate affected SEC / M / INV records via `touched_by_cf[]`
+back-pointers.
+
 ### 7. Impact surfaces
 
 Advisory downstream consequence surfaces.
@@ -142,6 +154,7 @@ This layer remains optional and trim-first under budget pressure. It exists to h
 ## Assembly Discipline
 
 - Prefer exact ids, structured edges, and explicit scoped references before lexical expansion.
+- For story-pipeline task types (`story_bootstrap`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, `story_fact_promotion_to_canon`), `seed_nodes` should preferentially name world-canon or hybrid world records (CF / CH / M / OQ / INV / ENT / SEC / CHAR / world-scope DA / PA). Story-bundle records are supplied through `story_slug` and `story_bundle_context`; when exact story-local records are needed, use `get_records(record_ids, story_slug=<story_slug>)` or `list_records(record_type, story_slug=<story_slug>)`. Do not rely on world-scope `seed_nodes` expansion for story-local ids. If a story-pipeline request supplies story-local ids in `seed_nodes`, the packet returns `task_header.warnings: ["story_local_seed_nodes_ignored"]` so the caller can reroute through scoped targeted retrieval.
 - Preserve the distinction between `local_authority`, `exact_record_links`, and `scoped_local_context`; they are separate completeness classes, not synonyms.
 - Establish locality before governing background, and establish governing background before advisory impact surfaces.
 - If `local_authority` cannot fit inside budget, return structured insufficiency code `packet_incomplete_required_classes` instead of silently dropping required locality. The other content layers are droppable under budget pressure (see §Budget Enforcement) — completeness insufficiency now triggers only when even seed-local authority overflows the requested budget.
@@ -221,6 +234,7 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `propose_new_canon_facts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
+| `story_bootstrap` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `story_turn_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `commitment_block_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `branching_story_health_audit` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |

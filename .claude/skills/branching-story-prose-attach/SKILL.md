@@ -147,7 +147,7 @@ Load into working memory:
 Compute fresh hashes:
 
 - `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash`, `prose_path`, and `prose_receipt_path` from the payload.
+- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash` from the payload.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check
@@ -190,7 +190,21 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
 6. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses, which are the derived projection of active `STSTAT` records on `PG.state_snapshot`, and does not grant player-facing agency that conflicts with the `## Player Agency Contract`. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat, and non-controlled `STENT` records should not read as player-controlled unless the agency surface permits it. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y, or prose assigns control outside the Player Agency Contract) are `FAIL`.
 
-7. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`. Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. Structural inventions that would change cast capability / location / faction alignment are `FAIL` and route to `repair_recommendation: run_turn_cycle_repair`.
+7. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`.
+
+   `invented_structural_fact` has deterministic and judgment-assisted subchecks.
+
+   Deterministic FAIL cases (regex or state-projection-driven):
+   - prose contradicts active STSTAT life/agency/location (for example, a dead actor speaks; a located actor appears in a different STLOC; an incapacitated actor performs a complex action);
+   - prose asserts a named record id or canon-fact id absent from the plan's §4 / §7 / state snapshot;
+   - prose states a mystery resolution that the plan's §11 marks as forbidden.
+
+   Judgment-assisted WARN/FAIL cases (semantic):
+   - implied faction alignment shifts not present in the plan;
+   - new capability or magical/technological affordance not present in the plan's §4 or active state;
+   - institutional rule or law invoked but not present in active canon (CF / INV) or plan §4.
+
+   Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. The roll-up `invented_structural_fact` receipt field records the worst verdict across both sub-categories. Judgment-assisted findings are flagged in `notes` so the user can review and decide on `revise_prose` vs. `run_turn_cycle_repair` vs. canon-promotion.
 
 8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `PG.SE.promotion_claims[]` evidence is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 
@@ -269,7 +283,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 4. On approval:
    - Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
    - Update bundle `INDEX.md` to reflect prose status + receipt verdict.
-   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach`; the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
+   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
@@ -312,7 +326,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Never mutate the `PG` record.** Plan-authority boundary per FOUNDATIONS §Story Bundles §4a. Drift, missing required events, and prose inventions are recorded in the receipt's `notes` and `checks` fields; they NEVER write to the page record.
 - **Never create ARC_TRACE.** The class is removed per the greenfield plan; the receipt's verdict + `repair_recommendation` are the audit-trail substitute.
 - **Never write rendered prose.** `pages-prose/<page_id>.md` is user-supplied; prose-attach reads it as input.
-- **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one `create_se_record` op with `event_kind: prose_attach`; never alters page state.
+- **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one §4.3a-conformant `create_se_record` op with `event_kind: prose_attach`; never alters page state.
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.6. No nice-to-have fields.
 - **No word-count enforcement.** Craft critic axes are qualitative per FOUNDATIONS §Story Bundles §9. The receipt records no word counts.
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.

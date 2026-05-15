@@ -111,6 +111,7 @@ const ATOMIC_RECORD_ID_PATTERN =
   /^(?:(?:CF|CH|M|OQ|ENT)-\d+|(?:ONT|CAU|DIS|SOC|AES)-\d+|SEC-(?:ELF|INS|MTS|GEO|ECR|PAS|TML)-\d+)$/;
 
 const HYBRID_RECORD_ID_PATTERN = /^(?:CHAR|DA|PA)-\d+$/;
+const STORY_DIEGETIC_ARTIFACT_ID_PATTERN = /^DA-\d+$/;
 
 const STORY_MARKDOWN_NODE_TYPES: readonly StoryBundleNodeType[] = [
   "storylet_batch_manifest",
@@ -185,7 +186,10 @@ function findRecordRow(
   }
 
   try {
-    if (storySlug !== undefined && isStoryBundleRecordId(recordId)) {
+    if (
+      storySlug !== undefined &&
+      (isStoryBundleRecordId(recordId) || STORY_DIEGETIC_ARTIFACT_ID_PATTERN.test(recordId))
+    ) {
       return opened.db
         .prepare(
           `
@@ -617,9 +621,12 @@ async function getRecordImpl(args: GetRecordArgs): Promise<GetRecordResponse | M
     return idError;
   }
 
-  const isHybrid = HYBRID_RECORD_ID_PATTERN.test(args.record_id);
+  const isStoryScopedDiegeticArtifact =
+    args.story_slug !== undefined && STORY_DIEGETIC_ARTIFACT_ID_PATTERN.test(args.record_id);
 
-  const isStoryBundleRecord = isStoryBundleRecordId(args.record_id);
+  const isHybrid = HYBRID_RECORD_ID_PATTERN.test(args.record_id) && !isStoryScopedDiegeticArtifact;
+
+  const isStoryBundleRecord = isStoryBundleRecordId(args.record_id) || isStoryScopedDiegeticArtifact;
 
   if (args.section_path !== undefined && isHybrid && isStoryBundleRecord) {
     return createMcpError(

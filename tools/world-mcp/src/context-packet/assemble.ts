@@ -80,6 +80,7 @@ function makeEmptyPacket(args: {
         allocated: 0
       },
       seed_nodes: uniqueStrings(args.seedNodes),
+      warnings: [],
       full_body_classes_delivered: [],
       harness_ceiling_chars: args.harnessCeilingChars,
       envelope_overhead_reserve_chars: ENVELOPE_OVERHEAD_RESERVE_CHARS,

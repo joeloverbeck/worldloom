@@ -13,7 +13,7 @@ arguments:
     description: "One of: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim. Changes required evidence, not workflow shape."
     required: true
   - name: source_record_ids
-    description: "List of record ids constituting the candidate (e.g., [SF-42] for story_fact; [M-3] for mystery_resolution; [STENT-7] for character_outcome)."
+    description: "List of record ids constituting the candidate (e.g., [SF-42] for story_fact or mystery_resolution; [STENT-7] for character_outcome). M records are governing firewall context and are not user-supplied source_record_ids."
     required: true
   - name: branch_path
     description: "BR-<integer> of the branch where the claim is established. Every source record's lineage must trace to branch_path."
@@ -110,7 +110,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 | source_kind | Required source_record class(es) | Permitted supporting source records | Prose evidence |
 |---|---|---|---|
 | `story_fact` | `SF-<integer>` | authoring `SE`, witness `BEL` | Required |
-| `mystery_resolution` | `M-<integer>` for Mystery Reserve audit; SE `promotion_claims[].source_record` cites `SF-<integer>` or `BEL-<integer>` | resolving `SE`, pre-resolution `BEL` chain | Required |
+| `mystery_resolution` | `SF-<integer>` or `BEL-<integer>` that states the apparent, held, or candidate resolution | resolving `SE`, pre-resolution `BEL` chain, relevant `PG.state_snapshot.unresolved_mystery_claims[].evidence_records[]` | Required; M records are governing firewall load (auto-loaded from world context, not user-supplied as `source_record_ids`) |
 | `character_outcome` | `STENT-<integer>` | `STSTAT-<integer>` supersession-chain evidence showing the outcome's accumulation; STENT alone is sufficient when no status record carries load-bearing evidence | Required |
 | `artifact_canonization` | `DA-<integer>` (story-local) | authoring `SE` | Required |
 | `relationship_or_institutional_outcome` | `SREL-<integer>` | `BEL-<integer>`, `SF-<integer>`, supersession chain, supporting events | Required |
@@ -118,7 +118,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 ## Output
 
-- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (pre-acceptance CF-shaped candidate package; consumed by `canon-addition`, which strips promotion-only evidence fields and sets accepted-CF approval provenance if it accepts the proposal)
+- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (pre-acceptance proposal package with a CF-shaped `candidate:` block and top-level `proposal_evidence:` audit trail; consumed by `canon-addition`, which copies only `candidate:` into the accepted CF payload and sets accepted-CF approval provenance if it accepts the proposal)
 - `story-promotions/SP-<integer>.md` — Always (human-readable ledger pointing at YAML package)
 - Bundle `INDEX.md` — Always (updated last)
 
@@ -133,7 +133,7 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` — source records per `source_record_ids` + authoring `SE` events + witness `BEL` records (resolved by following `consequences.opens[]` and `basis.source_event` chains)
 - `worlds/<world_slug>/stories/<story_slug>/_source/branches/<branch_path>.yaml` — branch lineage verification
 - `worlds/<world_slug>/stories/<story_slug>/pages-prose/<page_id>.md` + `pages-prose-receipts/<page_id>.yaml` — for each `supporting_page_ids` entry (required for prose-evidence source kinds)
-- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', seed_nodes=<source_record_ids + every M-<integer> whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`
+- World canon context packet via `mcp__worldloom__get_context_packet(world_slug, task_type='story_fact_promotion_to_canon', story_slug=<story_slug>, seed_nodes=<every M-<integer> whole-class for firewall + every INV whole-class + parent CFs of mirrored SF sources>, token_budget=<default>)`. Load `source_record_ids` and related authoring `SE` / witness `BEL` records through targeted `mcp__worldloom__get_records(record_ids=<ids>, story_slug=<story_slug>)` or direct story-bundle reads allowed by the current workflow; do not pass story-local ids in world-scope `seed_nodes`.
 
 The bundle MUST exist (non-bootstrap variant); source records MUST exist and trace to `branch_path`; supporting prose MUST exist for required-prose source kinds. Receipt `verdict: PASS | WARN` is acceptable at Pre-flight; `verdict: FAIL` requires explicit user acceptance at Phase 7.
 
@@ -143,11 +143,11 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
-3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). Abort with source-not-found or source-kind-mismatch error on any miss.
+3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). When `source_kind: mystery_resolution`, every `source_record_ids` entry MUST be `SF-<integer>` or `BEL-<integer>`; `M-<integer>` records are auto-loaded as governing firewall context and are not lawful source records. Abort with source-not-found, source-kind-mismatch, or `source_kind_record_class_mismatch` on any miss.
 4. Resolve supporting pages: for each `PG-<integer>` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
 5. Resolve branch: load `_source/branches/<branch_path>.yaml`. Verify every source record's branch lineage traces to `branch_path` (a `story_fact` source cannot be promoted from a branch that didn't author it). Abort with branch-mismatch error on any failure.
 6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
-7. Load world canon context packet seeded with: source record ids + whole-class Mystery Reserve (for Phase 4 firewall) + whole-class INV (for invariant check) + parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
+7. Load `source_record_ids`, related authoring `SE` events, and witness `BEL` records through `story_slug` scoped targeted retrieval (or direct story-bundle reads allowed by the current workflow). Load the world canon context packet with `story_slug=<story_slug>` and world-scope seeds only: whole-class Mystery Reserve (for Phase 4 firewall), whole-class INV (for invariant check), and parent CFs of any mirrored `SF` sources (for Phase 2 candidate's `source_basis.derived_from`).
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -197,20 +197,9 @@ candidate:
   source_basis:
     direct_user_approval: false   # pre-acceptance package only; canon-addition sets accepted CF records to true after its own HARD-GATE
     derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; never null or branch ids
-    story_branch: <branch_path>
-    story_evidence:
-      source_records: [<source_record_ids>]
-      supporting_pages: [<supporting_page_ids>]
-      authoring_events: [SE-<integer> ids]
-      belief_witnesses: [BEL-<integer> ids]
-  promotion_provenance:
-    story_slug: <story_slug>
-    source_kind: <source_kind>
-    branch_path: <branch_path>
-    rationale: <natural-language explanation of why this branch-local claim should become world canon>
 ```
 
-**Branch provenance lives in `source_basis.story_branch` + `source_basis.story_evidence` + `promotion_provenance` — NEVER in `source_basis.derived_from`** (which is reserved for parent CF references — world authority). The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
+**Branch provenance lives in top-level `proposal_evidence`, NEVER inside `candidate.source_basis` or `candidate.promotion_provenance`.** `candidate.source_basis.derived_from` is reserved for parent CF references — world authority. The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
 
 ## Phase 3: Scope-inflation check (FOUNDATIONS Rule 4)
 
@@ -242,6 +231,8 @@ scope_inflation_report:
 
 ## Phase 4: Mystery firewall (FOUNDATIONS Rule 7 + shared contract §11)
 
+Mystery Reserve (`M-<integer>`) records are loaded from world canon context as whole-class governing firewall context. They are NOT user-supplied through `source_record_ids`; for `source_kind: mystery_resolution`, those ids are branch evidence records (`SF` / `BEL`) that state the apparent, held, or candidate resolution.
+
 Reject conditions:
 
 1. **Forbidden mystery resolution** — any mystery with `status: forbidden` whose effect would be resolved by accepting this candidate. `firewall_verdict: ABORT` (no proposal written; Phase 5+ skipped).
@@ -253,7 +244,7 @@ Produce a structured `mystery_firewall_report`:
 
 ```yaml
 mystery_firewall_report:
-  mysteries_scanned: <count of M-<integer> records loaded
+  mysteries_scanned: <count of M-<integer> records loaded>
   forbidden_resolution_attempts: [M-<integer>, if any]
   accidental_resolution_warnings: [M-<integer>, if any]
   counterfactual_promotion_attempts: [<source SF id, if any>]
@@ -290,18 +281,22 @@ Combine Phase 1-5 outputs into the full `SP-<integer>-proposal-package.yaml` sha
 promotion_id: SP-<integer>
 story_slug: <story_slug>
 source_kind: <source_kind>
-source_records: [<source_record_ids>]
-branch_path: <branch_path>
-supporting_pages: [<supporting_page_ids>]
-authoring_events: [SE-<integer> ids]
-belief_witnesses: [BEL-<integer> ids]
-resolution_feedback_evidence:
-  - event_id: SE-<integer>
-    player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
-claim_visibility:
-  who_holds_belief: [STENT-<integer> | group:<name> | public]
-  belief_truth_relations: [<truth_relation per BEL>]
 candidate: <Phase 2 CF-shaped candidate>
+proposal_evidence:
+  story_branch: BR-<integer>
+  source_kind: <source_kind>
+  source_records: [<source_record_ids>]
+  supporting_pages: [<supporting_page_ids>]
+  authoring_events: [SE-<integer> ids]
+  belief_witnesses: [BEL-<integer> ids]
+  rendered_prose_receipts: [pages-prose-receipts/PG-<integer>.yaml]
+  resolution_feedback_evidence:
+    - event_id: SE-<integer>
+      player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
+  claim_visibility:
+    who_holds_belief: [STENT-<integer> | group:<name> | public]
+    belief_truth_relations: [<truth_relation per BEL>]
+  rationale: <natural-language explanation of why this branch-local claim should become world canon>
 scope_inflation_report: <Phase 3 report>
 mystery_firewall_report: <Phase 4 report>
 downstream_impact_report: <Phase 5 report>
@@ -348,7 +343,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 
 ## Record Schemas
 
-- `templates/proposal-package.yaml` — CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition` at parse time.
+- `templates/proposal-package.yaml` — proposal package with a CF-shaped `candidate:` block and top-level `proposal_evidence:` audit trail; consumed by `canon-addition` at parse time.
 - `templates/story-promotion-ledger.md` — human-readable ledger entry pointing at the YAML package.
 - Read schemas: shared contract §4 (BEL §4.1, PG §4.2, SE §4.3) + FOUNDATIONS §Canon Fact Record Schema (the candidate's target).
 
@@ -356,7 +351,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 
 | Principle | Phase | Mechanism |
 |---|---|---|
-| Rule 1 (No Floating Facts) | N/A at this skill | Canon-addition enforces on the candidate at adjudication time (required CF-schema fields). |
+| Rule 1 (No Floating Facts) | Phase 2, 6 | The proposal keeps `candidate:` CF-shaped and moves branch evidence into top-level `proposal_evidence`; canon-addition enforces the accepted CF at adjudication time. |
 | Rule 2 (No Pure Cosmetics) | N/A at this skill | Canon-addition enforces. |
 | Rule 3 (No Specialness Inflation) | N/A at this skill | Canon-addition enforces. |
 | Rule 4 (No Globalization by Accident) | Phase 3 | Scope-inflation check on candidate scope. |
@@ -367,7 +362,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 | Rule 12 (No Single-Trace Truths) | Phase 3 (anticipation) + N/A | Phase 3 trace_count flagging anticipates the rule; canon-addition enforces at adjudication. |
 | Canon Layers | Pre-flight, Phase 2 | Candidate's `status` field selects layer. |
 | Mystery Reserve | Pre-flight, Phase 4 | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
-| Canon Fact Record Schema | Phase 2, 6 | Candidate strictly matches FOUNDATIONS §Canon Fact Record Schema. |
+| Canon Fact Record Schema | Phase 2, 6 | `candidate:` carries only CF fields; branch-local proposal evidence stays outside the candidate. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Skill reads `PG` records as authoritative state; never mutates. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
 | Change Control Policy | N/A at this skill | Canon-addition writes the Change Log Entry. |
@@ -378,7 +373,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. This skill writes ONLY to `worlds/<world_slug>/stories/<story_slug>/story-promotions/` + bundle `INDEX.md`. No patch-engine submissions to world scope.
 - **Output is NOT canon until canon-addition adjudicates.** The proposal package is a CANDIDATE. The skill explicitly instructs the user to invoke canon-addition separately. No automatic chaining; no implicit acceptance.
 - **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
-- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in `source_basis.story_branch` + `source_basis.story_evidence`, NEVER in `source_basis.derived_from` (which is reserved for parent CF references — world authority).
+- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in top-level `proposal_evidence`, NEVER in `candidate.source_basis` or `source_basis.derived_from` (which is reserved for parent CF references — world authority).
 - **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.

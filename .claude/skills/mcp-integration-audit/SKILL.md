@@ -276,6 +276,14 @@ After the parallel batch returns, verify every ticket file was created. If any W
 
 **Numbering-continuity check after every Write**: for each ticket file at `tickets/<NAMESPACE>-NNN.md`, run `awk '/^## Assumption Reassessment/,/^## Architecture Check/' tickets/<NAMESPACE>-NNN.md | grep -oE '^[0-9]+'` (numbers extracted by grep alone — no awk field-split needed; this avoids the harness-substitution risk that affects `$1`-style references in skill body text when a positional namespace argument is bound) and verify the output is a strictly sequential integer sequence (`1 2 3 ...`). Any gap (e.g., `1 2 3 4 6 7` or `1 2 3 4 6 7 8`) is malformed — the Step 3 Select → Rewrite → Verify sequence's step (2) was not applied. Fix the offending ticket via Edit before advancing to Phase 8. This post-Write check is the structural backstop parallel to spec-to-tickets Step 6.2(b); the composition-time worked example at Step 3 is the prevention.
 
+**Conditional menu-item completeness check after every Write** (semantic sub-check; not satisfied by the numbering-continuity grep above): for each ticket, scan its body (Problem, Architecture Check, What to Change, Files to Touch, Acceptance Criteria) for content that triggers a `tickets/_TEMPLATE.md` conditional menu item, and verify the corresponding item is present in Assumption Reassessment:
+   - FOUNDATIONS principle / Validation Rule cited or motivated → template item 4 (FOUNDATIONS principle restatement) must be present.
+   - HARD-GATE / canon-write ordering / Canon Safety Check surface touched → template item 5 must be present.
+   - Existing output schema extended (CF / CH / proposal package / character dossier / DA / story-bundle record) → template item 6 must be present.
+   - Skill / tool / hook / validator / schema field renamed or removed → template item 7 (rename/remove blast radius) must be present.
+   - Reassessment exposes adjacent contradictions → template item 8 must be present (when applicable).
+For each absent-but-applicable conditional item, edit the ticket via Edit before advancing to Phase 8. The numbering-continuity grep catches gaps but not omissions of applicable conditional items — a ticket with sequential numbering 1 2 3 passes the grep even when its body explicitly motivates a FOUNDATIONS principle that template item 4 should restate. This check is the structural backstop parallel to spec-to-tickets Step 6.2(c); the composition-time Select → Rewrite → Verify sequence at Step 3 is the prevention.
+
 ## Phase 8: Final Summary
 
 After all writes succeed:

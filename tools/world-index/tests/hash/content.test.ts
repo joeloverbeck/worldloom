@@ -46,14 +46,12 @@ test("sha256OfUtf8 hashes raw UTF-8 and does not NFC-normalize like sha256Hex", 
   assert.notEqual(sha256OfUtf8(decomposed), sha256Hex(decomposed));
 });
 
-test("computePgStateHash excludes state_hash and prose receipt fields but keeps all other fields", () => {
+test("computePgStateHash excludes state_hash but keeps all other PG fields", () => {
   const pgRecord = {
     id: "PG-2",
     story_id: "STORY-1",
     state_hash: "stale",
     prose_plan_path: "pages-prose-plans/PG-2.md",
-    prose_path: "pages-prose/PG-2.md",
-    prose_receipt_path: "pages-prose-receipts/PG-2.yaml",
     plan: {
       plan_hash: "abc123"
     },
@@ -84,9 +82,15 @@ test("computePgStateHash excludes state_hash and prose receipt fields but keeps 
   assert.equal(
     computePgStateHash({
       ...pgRecord,
-      state_hash: "different",
-      prose_path: "pages-prose/PG-2-revised.md",
-      prose_receipt_path: null
+      state_hash: "different"
+    }),
+    computePgStateHash(pgRecord)
+  );
+
+  assert.notEqual(
+    computePgStateHash({
+      ...pgRecord,
+      retired_field: "changes the payload"
     }),
     computePgStateHash(pgRecord)
   );

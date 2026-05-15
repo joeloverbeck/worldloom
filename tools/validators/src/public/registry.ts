@@ -1,9 +1,14 @@
+import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
+import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
+import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
+import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -26,10 +31,15 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   storyFactAuthority,
+  auditOnlySeShape,
+  sltCreatedAtPageOriginConsistency,
+  canonDriftClassificationEvidence,
+  expectedWitnessCoverage,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
   touchedByCfCompleteness,
+  proposalPackageShape,
   modificationHistoryRetrofit
 ];
 

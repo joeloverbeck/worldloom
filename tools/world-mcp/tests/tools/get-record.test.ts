@@ -251,6 +251,15 @@ test("getRecord returns invalid_input for unsupported record id shapes", async (
     assert.ok("code" in result);
     assert.equal(result.code, "invalid_input");
     assert.equal(result.details?.field, "record_id");
+
+    const arcTrace = await withRepoRoot(root, () =>
+      getRecord({ record_id: "ARC_TRACE-1", world_slug: "seeded", story_slug: "opening-bells" })
+    );
+
+    assert.ok("code" in arcTrace);
+    assert.equal(arcTrace.code, "invalid_input");
+    assert.equal(arcTrace.details?.field, "record_id");
+    assert.doesNotMatch(String(arcTrace.details?.expected), /ARC_TRACE|ARCTRACE/);
   } finally {
     destroyTempRepoRoot(root);
   }

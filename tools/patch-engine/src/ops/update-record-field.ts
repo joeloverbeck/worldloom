@@ -151,7 +151,7 @@ function isProseFinalizeTransition(
     return false;
   }
   if (fieldPath.length === 1) {
-    return fieldPath[0] === "prose_path" || fieldPath[0] === "prose_status";
+    return fieldPath[0] === "prose_status";
   }
   if (fieldPath.length === 2 && fieldPath[0] === "deferred_validation_trace") {
     return (

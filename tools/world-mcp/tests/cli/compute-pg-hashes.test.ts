@@ -78,8 +78,6 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
         "story_id: STORY-1",
         "state_hash: placeholder",
         "prose_plan_path: pages-prose-plans/PG-2.md",
-        "prose_path: pages-prose/PG-2.md",
-        "prose_receipt_path: null",
         "plan:",
         "  plan_hash: placeholder",
         "validation_trace:",
@@ -99,8 +97,6 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
       story_id: "STORY-1",
       state_hash: "placeholder",
       prose_plan_path: "pages-prose-plans/PG-2.md",
-      prose_path: "pages-prose/PG-2.md",
-      prose_receipt_path: null,
       plan: {
         plan_hash: expectedPlanHash
       },

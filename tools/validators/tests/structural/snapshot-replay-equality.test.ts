@@ -102,6 +102,28 @@ test("snapshot_replay_equality replays new-schema SE state_delta active_records"
   assert.deepEqual(verdicts, []);
 });
 
+test("snapshot_replay_equality ignores audit-only SE records that are not page inputs", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords());
+  const verdicts = await snapshotReplayEquality.run(undefined, context([
+    ...newSchemaRecords(childPage),
+    record("story_event_record", "test-story:SE-0003", "stories/test-story/_source/events/SE-0003.yaml", {
+      id: "SE-0003",
+      story_id: "STORY-001",
+      event_kind: "prose_attach",
+      state_delta: {
+        create: [],
+        supersede: [],
+        close: []
+      }
+    })
+  ], {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
 test("snapshot_replay_equality derives entity_status from active STSTAT records", async () => {
   const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), {
     "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" }

@@ -106,6 +106,26 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "state_snapshot_integrity"
     );
     assert.equal(snapshotIntegrityExecution?.status, "skipped");
+    const auditOnlyExecution = result.executions.find(
+      (execution) => execution.name === "audit_only_se_shape"
+    );
+    assert.equal(auditOnlyExecution?.status, "skipped");
+    const sltCreatedAtPageExecution = result.executions.find(
+      (execution) => execution.name === "slt_created_at_page_origin_consistency"
+    );
+    assert.equal(sltCreatedAtPageExecution?.status, "skipped");
+    const canonDriftEvidenceExecution = result.executions.find(
+      (execution) => execution.name === "canon_drift_classification_evidence"
+    );
+    assert.equal(canonDriftEvidenceExecution?.status, "skipped");
+    const expectedWitnessExecution = result.executions.find(
+      (execution) => execution.name === "expected_witness_coverage"
+    );
+    assert.equal(expectedWitnessExecution?.status, "skipped");
+    const proposalPackageExecution = result.executions.find(
+      (execution) => execution.name === "proposal_package_shape"
+    );
+    assert.equal(proposalPackageExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -113,7 +133,12 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== choiceSetExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
-        row !== snapshotIntegrityExecution
+        row !== snapshotIntegrityExecution &&
+        row !== auditOnlyExecution &&
+        row !== sltCreatedAtPageExecution &&
+        row !== canonDriftEvidenceExecution &&
+        row !== expectedWitnessExecution &&
+        row !== proposalPackageExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

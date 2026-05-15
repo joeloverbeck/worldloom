@@ -336,7 +336,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_record",
-    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, DA-<integer>, PA-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer> or SLT-<integer>. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
+    "get_record: Fetch a record's content with content_hash and file_path. Supports atomic records (CF-<integer>, CH-<integer>, INV-*, M-<integer>, OQ-<integer>, ENT-<integer>, SEC-*-<integer>) returning parsed YAML, hybrid records (CHAR-<integer>, world-level DA-<integer>, PA-<integer>) returning parsed frontmatter plus body sections, and story-bundle records when story_slug is supplied for bundle-scoped ids such as PG-<integer>, story-local DA-<integer>, or SLT-<integer>. ARC_TRACE is not a valid record class. Optional section_path projects parsed atomic/story records with dotted paths; for hybrid records it projects 'frontmatter', 'body', 'frontmatter.<key>', or 'body.<section>'. Oversized unprojected hybrid responses persist full JSON under the tool-results directory and return a bounded delivery_status='oversize_with_projection_suggestions' response plus suggested_section_paths.",
     getRecordInputSchema,
     async (args) => getRecord(args as unknown as Parameters<typeof getRecord>[0])
   );
@@ -386,7 +386,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug and return story_bundle_context populated from indexed story-bundle records plus STORY_KERNEL.md frontmatter; world-canon task types return story_bundle_context: null.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter. World-canon task types return story_bundle_context: null.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }

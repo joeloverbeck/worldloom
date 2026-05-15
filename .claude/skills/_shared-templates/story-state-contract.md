@@ -57,7 +57,7 @@ Auxiliary story-bundle records:
 
 `SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
 
-**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `-NNNN` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
+**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `<CLASS>-<integer>` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
 
 ## 4. Record Schemas
 
@@ -146,8 +146,6 @@ state_snapshot:
 plan:
   plan_hash: sha256*
 prose_plan_path: pages-prose-plans/PG-<integer>.md*   # stable plan address; included in state_hash payload
-prose_path: pages-prose/PG-<integer>.md | null        # default null; excluded from state_hash payload
-prose_receipt_path: pages-prose-receipts/PG-<integer>.yaml | null   # default null; excluded from state_hash payload
 emitted_choices: [CHC-<integer>]*
 validation_trace:                      # * one entry per shared gate with PASS + one-line rationale
   input_legality: "PASS: <rationale>"
@@ -160,9 +158,25 @@ validation_trace:                      # * one entry per shared gate with PASS +
   canon_promotion_hold: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
 ```
 
-`prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
+Rendered prose and prose receipts are publication artifacts discovered by deterministic paths: `pages-prose/PG-<integer>.md` and `pages-prose-receipts/PG-<integer>.yaml`. They are not page-state fields and are not included in `PG`. `INDEX.md` may render publication status for human navigation; `PG` remains the authoritative fork-state record.
+
+There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
 `state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the page-planning context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
+
+When `parent.state_snapshot.canon_revision != current_world_canon_revision`,
+drift classification MUST retrieve every CH entry newer than the parent
+baseline before classifying compatibility. Each CH names
+`affected_fact_ids: [CF-<integer>]`; affected M / INV / SEC records are
+discovered by traversing from each CF id through `touched_by_cf[]`
+back-pointers on SEC / M / INV records, using
+`mcp__worldloom__find_sections_touched_by(cf_id)` or equivalent targeted
+retrieval. The latest CH from the context packet is only the trigger for drift
+detection; the CH window and CF graph reverse lookup are the evidence for
+classification. A `compatible` or `grandfathered` classification over a window
+of two or more intervening CH entries MUST cite at least one specific CH id from
+the window in `validation_trace.parent_snapshot_compatibility` or the
+page-producing SE rationale.
 
 Branch-scope vocabulary:
 
@@ -175,11 +189,7 @@ Every `PG` record must carry final lowercase sha256 values before any `create_pg
 
 Compute `plan.plan_hash` first. It is sha256 over the exact UTF-8 bytes of the page plan body that will later be written to `pages-prose-plans/PG-<integer>.md`. Because the page plan is a direct-write artifact after patch submission (§10), the skill drafts the complete plan bytes in working memory, hashes those exact bytes, places the hash in `PG.plan.plan_hash`, and after patch success writes the same bytes to disk without reformatting.
 
-Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except:
-
-- exclude `state_hash` itself;
-- exclude `prose_path` (mutable publication receipt);
-- exclude `prose_receipt_path` (mutable publication receipt).
+Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except `state_hash` itself. Rendered prose and prose receipts are not PG fields and therefore are not hash inputs.
 
 All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.plan_hash`, `prose_plan_path`, `emitted_choices`, and `validation_trace`.
 
@@ -197,7 +207,7 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
   --pg   <path-to-pg-draft>.{yaml,json}
 ```
 
-The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication-receipt blocks) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
+The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication artifacts) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
 ### 4.3 `SE` (~15 sub-paths)
 
@@ -241,6 +251,20 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 
 `world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
+When an expected witness group receives no `BEL` create/supersession, the
+rationale MUST include a parseable non-propagation tag inside
+`SE.world_logic_rationale`:
+
+```text
+non_propagation:<reason>(group=<label>, records=[<record_ids>])
+```
+
+Valid `<reason>` values are `no_witness`, `witness_incapacitated`,
+`evidence_concealed`, `institution_suppresses_report`, and
+`event_leaves_no_accessible_trace`. The tag is carried inside
+`world_logic_rationale` to avoid adding a schema field, but it is mechanically
+consumed by turn-cycle validation and health-audit replay.
+
 There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
 
 `resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
@@ -254,6 +278,29 @@ There is no `input_surface` block on SE; the PG record's `input.resolved_event_i
 | `promotion_hold` | `resolution` absent or `held_for_promotion` |
 | `terminal` | `resolution` absent, `success`, `partial_success`, `failure`, `transformed` |
 
+#### 4.3a Audit-only SE events
+
+`event_kind: prose_attach` and `event_kind: promotion_closeout` are audit-only
+event records. They do NOT produce a page, do NOT appear in any
+`PG.input.resolved_event_id`, and do NOT alter branch snapshots.
+
+Required shape:
+- `commitment.selected_slt_id: null`
+- `commitment.selection_source: none`
+- `commitment.alias_bindings: {}`
+- `outcome_route: accept`
+- `resolution` absent
+- `state_delta.create: []`
+- `state_delta.supersede: []`
+- `state_delta.close: []`
+- `promotion_claims: []`
+- `parent_page_id` names the page whose prose or promotion closeout is being
+  audited; null only when the bundle has no relevant page anchor.
+
+`snapshot_replay_equality` ignores audit-only SE records except as ledger
+evidence. Health-audit's structural-replay phases (2a, 2c, 2d) treat
+audit-only SEs as no-op walkable events that do not alter cumulative state.
+
 ### 4.4 `SLT` commitment block (~18 sub-paths)
 
 ```yaml
@@ -263,7 +310,7 @@ scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
   branch_id: BR-<integer> | null            # * null only for global_author_pool
   visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
-created_at_page: PG-<integer> | null        # null only for global_author_pool
+created_at_page: PG-<integer> | null        # required for provenance.origin: runtime_jit; nullable for page-independent authoring origins
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
@@ -291,6 +338,13 @@ mystery_policy:
 provenance:
   origin: bootstrap_seed | manual_authoring | author_batch | audit_repair | runtime_jit   # *
 ```
+
+`created_at_page` is provenance for page-local creation, not branch scope. For
+`provenance.origin: runtime_jit`, it MUST name the page whose turn created the
+block. For `bootstrap_seed`, `author_batch`, `manual_authoring`, and
+`audit_repair`, it MAY be null when the block is authored outside a page turn.
+Branch legality is determined by `scope.visibility`, `scope.branch_id`, and
+`scope.visible_branch_path_prefix`, not by `created_at_page`.
 
 `move_family` values:
 

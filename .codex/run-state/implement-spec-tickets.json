@@ -1,0 +1,14 @@
+{
+  "originating_spec": null,
+  "archived_spec": "archive/specs/SPEC-31-story-contract-hardening-iii.md",
+  "last_ticket": "archive/tickets/SPEC31STOCONHAR-014.md",
+  "last_result": "spec_archived",
+  "last_work_commit": "1af00cc",
+  "last_state_commit": "self",
+  "next_target": null,
+  "queue": [],
+  "blocked": false,
+  "blocker": null,
+  "dirty_state": "clean tracked worktree; expected ignored artifacts visible under .claude/settings.local.json, briefs/, tools/world-mcp/{.secret,dist,node_modules}, world-proposals/, worlds/animalia/, and worlds/erotica-world/",
+  "updated_at": "2026-05-15"
+}
