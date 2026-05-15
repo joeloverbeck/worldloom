@@ -21,7 +21,7 @@ With `evidence_records[]` landed on `unresolved_mystery_claims[]` (`archive/tick
 7. At intake, `.claude/skills/branching-story-health-audit/SKILL.md` already had a generic `mystery_accretion_resolved` finding in Phase 2e, but it did not name the `evidence_records[]` chain, threshold/status-escalation overflow rule, or `mystery_accretion_overflow` code required by this ticket. This ticket replaced that prose in place; it did not add an executable validator.
 8. Package proof baseline: from `tools/world-mcp`, pre-edit `npm test` builds successfully but exits red because `dist/tests/context-packet/erotica-world-fits.test.js` expects `packet_incomplete_required_classes` while the local gitignored erotica-world index returns `index_version_mismatch`. The active acceptance boundary is therefore `npm run build` plus the focused compiled context-packet test file; the broad package wrapper remains contextual baseline noise unless the owned focused lane fails.
 9. Health-audit proof substitution: no executable skill dry-run runner is present in the repo for `.claude/skills/branching-story-health-audit/SKILL.md`; verification is manual review of Phase 2e plus grep proof for the new finding code/heading.
-10. Same-seam docs/spec truthing: `docs/CONTEXT-PACKET-CONTRACT.md` enumerates `story_bundle_context` contents and `specs/SPEC-30-story-contract-hardening-ii.md` had a D5 note from before ticket 006 landed. Both were updated. `tools/world-mcp/README.md` mentions story-bundle context at a high level without enumerating this field shape, so no README edit was required.
+10. Same-seam docs/spec truthing: `docs/CONTEXT-PACKET-CONTRACT.md` enumerates `story_bundle_context` contents and `archive/specs/SPEC-30-story-contract-hardening-ii.md` had a D5 note from before ticket 006 landed. Both were updated. `tools/world-mcp/README.md` mentions story-bundle context at a high level without enumerating this field shape, so no README edit was required.
 
 ## Architecture Check
 
@@ -63,7 +63,7 @@ The finding lives alongside Phase 2e's existing mystery-firewall findings so rev
 - `tools/world-mcp/tests/context-packet/story-bundle-context.test.ts` (modify — new test case asserting per-mystery `evidence_records` surfacing)
 - `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify — fixture PG snapshot with `unresolved_mystery_claims[].evidence_records[]`)
 - `docs/CONTEXT-PACKET-CONTRACT.md` (modify — story-bundle context contents list)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — implementation note for ticket 006)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — implementation note for ticket 006)
 
 ## Out of Scope
 

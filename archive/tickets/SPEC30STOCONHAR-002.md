@@ -16,7 +16,7 @@ At intake, `.claude/skills/branching-story-bootstrap/SKILL.md:295` said "§4.2's
 2. Verified `_shared-templates/story-state-contract.md:97` carries `branch_path: [PG-<integer>]*` as an explicit field on the §4.2 PG schema, with a cross-reference comment to §4.4 already noting the storylet `visible_branch_path_prefix` linkage and the `recursive_reference_closure` authorization rule.
 3. Cross-skill / cross-artifact boundary under audit: the bootstrap prose authoritatively references the shared contract §4.2. At intake, the stale wording was the only active-skill instance of bootstrap claiming the contract omitted a field that the contract in fact includes; after the edit, `grep -rn "§4.2's PG schema enumeration omits" .claude/skills/` returns zero active-skill matches.
 4. FOUNDATIONS principle under audit: Rule 6 (No Silent Retcons) at the documentation surface — before this ticket, bootstrap prose claiming the contract omitted a field it includes was a docs-level retcon hazard for future authors (who would assume the contract was silent on `branch_path` membership and improvise).
-5. Explicit SPEC-30 reference checked per invocation: `specs/SPEC-30-story-contract-hardening-ii.md` carries D2 as active draft prose. Because this ticket lands D2 without rewriting the broader draft spec, closeout adds a dated implementation note near the spec header and treats remaining D2 section prose as historical context unless a later ticket owns a full spec rewrite.
+5. Explicit SPEC-30 reference checked per invocation: `archive/specs/SPEC-30-story-contract-hardening-ii.md` carried D2 as active draft prose at implementation time. Because this ticket landed D2 without rewriting the broader draft spec, closeout added a dated implementation note near the spec header and treated remaining D2 section prose as historical context unless a later ticket owned a full spec rewrite.
 
 ## Architecture Check
 
@@ -37,12 +37,12 @@ In `.claude/skills/branching-story-bootstrap/SKILL.md` around line 295, replaced
 
 ### 2. SPEC-30 D2 implementation note
 
-Added a 2026-05-15 implementation note near the top of `specs/SPEC-30-story-contract-hardening-ii.md` stating that D2 landed via this ticket and that remaining D2 prose is historical specification context unless contradicted by the note.
+Added a 2026-05-15 implementation note near the top of `archive/specs/SPEC-30-story-contract-hardening-ii.md` stating that D2 landed via this ticket and that remaining D2 prose is historical specification context unless contradicted by the note.
 
 ## Files to Touch
 
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — one-bullet correction at ~line 295)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — dated implementation note for D2 closeout)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — dated implementation note for D2 closeout)
 
 ## Out of Scope
 
@@ -84,9 +84,9 @@ Completed. Bootstrap Phase 6 now describes `PG.branch_path` as required by share
 
 1. `grep -rn "§4.2's PG schema enumeration omits" .claude/skills/` returned zero matches, proving the stale bootstrap/skill wording was removed from active skills.
 2. `grep -n "Required by §4.2 of the shared contract" .claude/skills/branching-story-bootstrap/SKILL.md` returned exactly one hit at the corrected `branch_path` bullet.
-3. Manual review confirmed `specs/SPEC-30-story-contract-hardening-ii.md` carries a dated D2 implementation note and that the remaining D2 prose is explicitly historical under that note.
+3. Manual review confirmed `archive/specs/SPEC-30-story-contract-hardening-ii.md` carries a dated D2 implementation note and that the remaining D2 prose is explicitly historical under that note.
 
 ## Deviations
 
-1. The user supplied `specs/SPEC-30*` as an explicit authority, so this run added `specs/SPEC-30-story-contract-hardening-ii.md` to the touched file set for a dated implementation note. The original ticket listed only the bootstrap skill file.
+1. The user supplied `specs/SPEC-30*` as an explicit authority, so this run added `archive/specs/SPEC-30-story-contract-hardening-ii.md` to the touched file set for a dated implementation note. The original ticket listed only the bootstrap skill file.
 2. The accepted stale-wording removal proof remains scoped to `.claude/skills/`. The old phrase remains in this completed ticket and in SPEC-30 D2 as labelled historical intake/specification context.

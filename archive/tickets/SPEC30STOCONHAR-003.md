@@ -82,7 +82,7 @@ The current-contract sweep over `.claude/skills`, `tools/validators/src`, and `t
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify — line ~206 sentence + any other refs)
 - `.claude/skills/commitment-block-authoring/references/` (not present in live checkout; no edit)
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify — line ~182 predicate-DSL terms list)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D3 implementation note only; remaining deliverable prose remains historical spec context)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D3 implementation note only; remaining deliverable prose remains historical spec context)
 
 ## Out of Scope
 
@@ -138,5 +138,5 @@ Added the SPEC-30 D3 implementation note so the explicit reference spec reflects
 ## Deviations
 
 1. The drafted root-launched `npm --prefix tools/validators run test` command was corrected because the package's compiled CLI tests derive paths from `process.cwd()`. The accepted broad proof is package-root `npm run test` from `tools/validators`.
-2. The drafted repo-wide zero-hit `belief(` grep was narrowed to current operational contract surfaces. A broad repo discovery grep still finds historical mentions in `archive/`, `reports/`, `specs/SPEC-30-story-contract-hardening-ii.md`, and this completed ticket's intake evidence. Those are historical/provenance surfaces, not current authoring or validator guidance.
+2. The drafted repo-wide zero-hit `belief(` grep was narrowed to current operational contract surfaces. A broad repo discovery grep still finds historical mentions in `archive/`, `reports/`, `archive/specs/SPEC-30-story-contract-hardening-ii.md`, and this completed ticket's intake evidence. Those are historical/provenance surfaces, not current authoring or validator guidance.
 3. The drafted `.claude/skills/commitment-block-authoring/references/` surface does not exist in the live checkout; no reference file was edited.

@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/commitment-block-authoring/SKILL.md` + `specs/SPEC-30-story-contract-hardening-ii.md` implementation note (no schema change)
+**Engine Changes**: Yes — `.claude/skills/commitment-block-authoring/SKILL.md` + `archive/specs/SPEC-30-story-contract-hardening-ii.md` implementation note (no schema change)
 **Deps**: None
 
 ## Problem
@@ -21,7 +21,7 @@ At intake, `.claude/skills/commitment-block-authoring/SKILL.md` said `effects.cr
 7. Schema extension classification: NOT a schema extension; this is a rule rewrite. SLT schema unchanged.
 8. Live reference sweep correction: `.claude/skills/commitment-block-authoring/references/` does not exist in this checkout, so the reference-sweep proof is limited to the parent `SKILL.md`; no missing reference file is an implementation blocker.
 9. Proof-surface correction: this repo has no executable skill runner or test harness for `.claude/skills/commitment-block-authoring`; the intended dry-run cases are verified by manual contract review against the rewritten Phase 4 OR, plus focused grep proof. No validator/tool surface is touched.
-10. Explicit spec-reference truthing: `specs/SPEC-30-story-contract-hardening-ii.md` is an active draft with implementation notes for landed D1-D5 follow-ups. This ticket adds the corresponding D6 note rather than rewriting historical D6 proposal prose.
+10. Explicit spec-reference truthing: `archive/specs/SPEC-30-story-contract-hardening-ii.md` was an active draft with implementation notes for landed D1-D5 follow-ups at implementation time. This ticket added the corresponding D6 note rather than rewriting historical D6 proposal prose.
 
 ## Architecture Check
 
@@ -58,7 +58,7 @@ Searched `.claude/skills/commitment-block-authoring/SKILL.md` for the literal-ef
 ## Files to Touch
 
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify — Phase 4 check 3 rewrite + sibling-audit note)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D6 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D6 implementation note)
 
 ## Out of Scope
 
@@ -98,14 +98,14 @@ Searched `.claude/skills/commitment-block-authoring/SKILL.md` for the literal-ef
 
 ## Outcome
 
-Completed. `.claude/skills/commitment-block-authoring/SKILL.md` now lets Phase 4 belief-or-relationship coverage pass through literal effects, `exit_options[].likely_effects`, or `any_belief(...)` / `any_relationship_axis(...)` predicates, while keeping `SE.state_delta` authoritative for runtime consequences. The skill also records that the other Phase 4 checks do not inspect literal effects, and `specs/SPEC-30-story-contract-hardening-ii.md` now has a D6 implementation note.
+Completed. `.claude/skills/commitment-block-authoring/SKILL.md` now lets Phase 4 belief-or-relationship coverage pass through literal effects, `exit_options[].likely_effects`, or `any_belief(...)` / `any_relationship_axis(...)` predicates, while keeping `SE.state_delta` authoritative for runtime consequences. The skill also records that the other Phase 4 checks do not inspect literal effects, and `archive/specs/SPEC-30-story-contract-hardening-ii.md` now has a D6 implementation note.
 
 ## Verification Result
 
 1. `grep -nE "three-form OR|any_belief|any_relationship_axis|intent surface" .claude/skills/commitment-block-authoring/SKILL.md` — PASS; returned the new Phase 4 three-form OR and intent-surface wording.
 2. `! grep -n "literal effects field" .claude/skills/commitment-block-authoring/SKILL.md` — PASS; the old absolute claim is gone from the active skill.
 3. `test ! -d .claude/skills/commitment-block-authoring/references` — PASS; there is no references subtree to update.
-4. `grep -n "D6 landed" specs/SPEC-30-story-contract-hardening-ii.md` — PASS; returned the new D6 implementation note.
+4. `grep -n "D6 landed" archive/specs/SPEC-30-story-contract-hardening-ii.md` — PASS; returned the new D6 implementation note.
 5. Manual contract review — PASS; the rewritten OR covers the `any_belief(...)` precondition case and the `exit_options[].likely_effects: [BEL-3]` case while preserving failure for batches with no literal effects, no likely effects, and no qualifying belief/relationship predicate.
 
 ## Deviations

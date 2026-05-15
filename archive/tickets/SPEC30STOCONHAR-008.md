@@ -22,7 +22,7 @@ At intake, `branching-story-health-audit/SKILL.md:163` Choice Consequence Integr
 8. Existing test directory `tools/validators/tests/rules/` is where the new validator's test file lands (per the established layout: tests live under `tests/`, not co-located).
 9. Adjacent contradictions: the audit-time finding code is named `choice_set_collapse_observed` (audit replay) vs. the validator's `choice_set_collapse` (commit-time) to keep the two surfaces distinguishable in audit reports — neither is silently aliased.
 10. Reassessment widened the same validator-registry seam to include live inventory/count and selector surfaces: `tools/validators/README.md` currently says 9 rule-derived validators, `tools/validators/tests/integration/spec04-verification.test.ts` asserts the exact registry counts/list, `tools/validators/src/cli/_helpers.ts` exposes named rule selectors only for `storylet_predicate_dsl_parsability`, and `docs/WORKFLOWS.md` names the story-bundle CLI selector surface. The new non-numbered story-bundle validator must move those current package/doc surfaces with the registry append.
-11. Explicit SPEC-30 reference check: `specs/SPEC-30-story-contract-hardening-ii.md` still lists D7 as draft/current work. Closeout must add a dated D7 implementation note near the existing D1-D6 notes, rather than rewriting the historical D7 deliverable prose.
+11. Explicit SPEC-30 reference check: `archive/specs/SPEC-30-story-contract-hardening-ii.md` still listed D7 as draft/current work at implementation time. Closeout had to add a dated D7 implementation note near the existing D1-D6 notes, rather than rewriting the historical D7 deliverable prose.
 
 ## Architecture Check
 
@@ -95,7 +95,7 @@ In `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2a, added audit-
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — Phase 9 prose adds gate citation + rhetorical-marking convention)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify — Phase 2 prose adds audit-time replay finding `choice_set_collapse_observed`)
 - `tools/validators/tests/rules/registry.test.ts` (modify — update count assertion to include the new validator if the test asserts an exact count)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — dated D7 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — dated D7 implementation note)
 
 ## Out of Scope
 

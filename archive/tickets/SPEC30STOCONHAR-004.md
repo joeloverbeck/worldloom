@@ -80,7 +80,7 @@ In `.claude/skills/story-promotion-closeout/SKILL.md`, added a supersession row 
 
 ### 8. SPEC-30 implementation note
 
-Added a dated D4 implementation note to `specs/SPEC-30-story-contract-hardening-ii.md`, leaving the original D4 prose as historical specification context.
+Added a dated D4 implementation note to `archive/specs/SPEC-30-story-contract-hardening-ii.md`, leaving the original D4 prose as historical specification context.
 
 ## Files to Touch
 
@@ -91,7 +91,7 @@ Added a dated D4 implementation note to `specs/SPEC-30-story-contract-hardening-
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify — per-kind table)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — SE drafting template enum)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify — STSTAT supersession note)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D4 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D4 implementation note)
 
 ## Out of Scope
 

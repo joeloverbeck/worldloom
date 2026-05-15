@@ -56,7 +56,7 @@ In `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2d Belief / visi
 
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — Phase 6 Motivation Grounding prose + Phase 9 additional check/count sync)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify — Phase 2d prose adds `motivation_ungrounded`)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D8 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D8 implementation note)
 
 ## Out of Scope
 

@@ -2,7 +2,7 @@
 
 # SPEC-30 — Story Contract Hardening II
 
-**Status**: Draft
+**Status**: COMPLETED
 **Date**: 2026-05-15
 **Supersedes**: none (extends `archive/specs/SPEC-28-story-contract-hardening.md` which shipped D1–D7 on 2026-05-13)
 **Companion triage**: `docs/triage/2026-05-15-story-related-improvements-fourth-iteration-triage.md`
@@ -26,6 +26,8 @@
 > **Implementation note (2026-05-15)**: D10 landed via `archive/tickets/SPEC30STOCONHAR-009.md`. Shared contract §4.5.7 and `story-relationship.schema.json` now require structured `SREL.direction: { kind, from, to }`, with conditional endpoint legality; `recursive_reference_closure` now proves closure over `direction.from` / `direction.to`; bootstrap and turn-cycle skill prose show the structured authored form. The D10 world-index and MCP rendering bullets remain future follow-up material because the live repo has no SREL edge extraction or context-packet SREL rendering surface to update.
 
 > **Implementation note (2026-05-15)**: D8 landed via `archive/tickets/SPEC30STOCONHAR-010.md`. `branching-story-turn-cycle` now requires Motivation Grounding in `SE.world_logic_rationale` for non-system character actions, citing active STINT, actor-held BEL, actor-involving OBL/CNSQ/THR/SREL, or immediate physical affordance; Phase 9 now has 9 turn-cycle-additional checks. `branching-story-health-audit` Phase 2d now reports `motivation_ungrounded` as a warning-only audit signal. No schema, validator, patch-plan, approval-token, or canon-mutation surface changed; remaining D8 prose below is historical specification context unless contradicted by this note.
+
+> **Implementation note (2026-05-15)**: D9 landed via `archive/tickets/SPEC30STOCONHAR-011.md`. `branching-story-turn-cycle` now requires Selection Rationale in `SE.world_logic_rationale` when a selected `SLT` outranks eligible equal-or-higher-salience competitors; Phase 9 now has 10 turn-cycle-additional checks. `branching-story-health-audit` Phase 2c now reports `saliency_starvation` as a warning over `N=3` consecutive pages when high-urgency `OBL` / `CNSQ` / `THR` / `STINT` records remain open while lower-urgency blocks are selected without rationale. No schema, validator, patch-plan, approval-token, or canon-mutation surface changed; remaining D9 prose below is historical specification context unless contradicted by this note.
 
 ---
 
@@ -376,3 +378,28 @@ The motivating production-readiness window: zero production stories exist yet �
 - New `STPRAC` social-practice record class (item 13) — deferral confirmed.
 - `STINT.target_records` structured target list (item 14) — deferral confirmed; D8 (motivation grounding) provides the audit surface that would surface need for target_records if it ever arose.
 - Any change to canon-mutating skills, world-canon `_source/` records, or `docs/FOUNDATIONS.md` text. (D5 cites `docs/FOUNDATIONS.md:616` Mystery Accretion as the authority being operationalized; the FOUNDATIONS rule itself is not modified.)
+
+---
+
+## Outcome
+
+Completed: 2026-05-15.
+
+SPEC-30's owned deliverables landed through `archive/tickets/SPEC30STOCONHAR-001.md` through `archive/tickets/SPEC30STOCONHAR-011.md`:
+
+- D1-D5 hardened PG input legality, branch-path bootstrap prose, predicate DSL belief semantics, promotion source records, and mystery-evidence lineage.
+- D5 consumer follow-up D6, D7, D8, D9, and D10 landed the health-audit/MCP consumer side, SLT effects-diversity rule, choice-set noncollapse gate, motivation grounding, saliency selection rationale, `saliency_starvation`, and structured `SREL.direction`.
+- The spec's implementation notes at the top of this file are the authoritative landed-state summary; the detailed deliverable prose remains historical proposal context unless contradicted by those notes.
+
+Deviations from the original draft:
+
+- D5 split into implementation plus consumer follow-up (`SPEC30STOCONHAR-006`) before the spec was considered complete.
+- D10 intentionally left world-index SREL edge extraction and MCP context-packet SREL rendering as future follow-up material because the live repo has no such SREL surface to update.
+- D9 remained prose-only by design; a structured `SE.commitment.selection_rationale` field remains deferred unless production story audits prove prose matching too fuzzy.
+- Storylet-pool linter and story-sift recap remain out of scope for separate follow-up specs, as documented above.
+
+Verification results:
+
+- Active same-family ticket scan found no remaining `tickets/SPEC30STOCONHAR-*.md` files; all SPEC-30 implementation tickets are archived.
+- The final D9 proof passed before this spec archival: grep proof found `Selection Rationale`, `saliency_starvation`, `N=3`, `selection_rationale`, and `10 turn-cycle-additional` on the live skill/spec surfaces.
+- `git diff --check` passed before the spec archive move.

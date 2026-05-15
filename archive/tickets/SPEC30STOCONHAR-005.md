@@ -70,7 +70,7 @@ At intake, `_shared-templates/story-state-contract.md` recorded `unresolved_myst
 - `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify — new test case for `evidence_records` replay equality)
 - `tools/validators/tests/_helpers/state-snapshot-replay.test.ts` (modify — new test case verifying helper projects `evidence_records` correctly across a parent→child chain)
 - `tools/validators/tests/structural/record-schema-compliance-story-page.test.ts` (modify — schema admission/rejection coverage for `evidence_records`)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D5 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D5 implementation note)
 
 ## Out of Scope
 

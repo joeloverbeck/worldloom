@@ -25,7 +25,7 @@ At intake, `tools/validators/src/schemas/story-relationship.schema.json` defined
 9. Schema extension classification: this IS a schema extension AND a breaking change to the `direction` field shape. Per FOUNDATIONS extension rules, breaking changes are lawful only when no consumer is affected — verified by the zero-bundles count above. Consumers: `record_schema_compliance` validator (updated by virtue of the JSON schema swap), `recursive-reference-closure` (updated here), bootstrap + turn-cycle authoring (updated here).
 10. Adjacent contradictions classification: spec items 5+6 reference absent code. Classified as **required consequence of the spec itself being aspirational about those surfaces**; trimmed to no-op per user disposition. Net-new SREL edge extraction in world-index and net-new SREL direction rendering in MCP context-packet are documented as cross-spec follow-ups (separate follow-up spec if needed; not part of this ticket).
 11. Package public-surface check: `tools/validators/README.md` lists SREL only as a covered story-bundle record class and has no direction-shape example to update. Repo docs hits in `docs/WORKFLOWS.md` and `docs/MACHINE-FACING-LAYER.md` are generic SREL retrieval/workflow references, not same-seam `direction` contract prose.
-12. Explicit SPEC-30 reference truthing: `specs/SPEC-30-story-contract-hardening-ii.md` received a dated D10 implementation note. The old D10 item bullets remain historical spec context; the note records that world-index/MCP rendering bullets are follow-up material because the live repo has no current SREL parsing/rendering surface.
+12. Explicit SPEC-30 reference truthing: `archive/specs/SPEC-30-story-contract-hardening-ii.md` received a dated D10 implementation note. The old D10 item bullets remain historical spec context; the note records that world-index/MCP rendering bullets are follow-up material because the live repo has no current SREL parsing/rendering surface.
 
 ## Architecture Check
 
@@ -100,7 +100,7 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-pac
 
 ### 7. SPEC-30 implementation note
 
-Added a dated D10 implementation note to `specs/SPEC-30-story-contract-hardening-ii.md` so the explicit spec reference records the landed schema/validator/skill contract and the trimmed world-index/MCP follow-up boundary.
+Added a dated D10 implementation note to `archive/specs/SPEC-30-story-contract-hardening-ii.md` so the explicit spec reference records the landed schema/validator/skill contract and the trimmed world-index/MCP follow-up boundary.
 
 ## Files to Touch
 
@@ -112,7 +112,7 @@ Added a dated D10 implementation note to `specs/SPEC-30-story-contract-hardening
 - `tools/validators/tests/structural/contract-schema-roundtrip.test.ts` (modify — updated representative SREL fixture to the new structured form)
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — SREL-authoring prose + examples)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — SREL-authoring prose + examples)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D10 implementation note)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D10 implementation note)
 
 ## Out of Scope
 
@@ -168,4 +168,4 @@ Completed. `SREL.direction` is now a structured object in the shared contract an
 ## Deviations
 
 1. The `recursive-reference-closure.ts` implementation did not need traversal logic changes; the existing recursive object walker already follows `direction.from` and `direction.to`. This run added a clarifying comment and explicit tests instead.
-2. `specs/SPEC-30-story-contract-hardening-ii.md` keeps the old D10 deliverable bullets as historical proposal text. The new implementation note is the current authority for the landed boundary and records world-index/MCP rendering as follow-up material.
+2. `archive/specs/SPEC-30-story-contract-hardening-ii.md` keeps the old D10 deliverable bullets as historical proposal text. The new implementation note is the current authority for the landed boundary and records world-index/MCP rendering as follow-up material.

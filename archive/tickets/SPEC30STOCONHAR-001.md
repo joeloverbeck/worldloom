@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `_shared-templates/story-state-contract.md` §4.2 + §Gates table, `tools/validators/src/schemas/story-page.schema.json`, `tools/validators/src/structural/state-snapshot-integrity.ts`, `.claude/skills/branching-story-bootstrap/SKILL.md` Phase 6/9, `specs/SPEC-30-story-contract-hardening-ii.md` D1 note
-**Deps**: `specs/SPEC-30-story-contract-hardening-ii.md` (D1 authority supplied by user)
+**Engine Changes**: Yes — `_shared-templates/story-state-contract.md` §4.2 + §Gates table, `tools/validators/src/schemas/story-page.schema.json`, `tools/validators/src/structural/state-snapshot-integrity.ts`, `.claude/skills/branching-story-bootstrap/SKILL.md` Phase 6/9, `archive/specs/SPEC-30-story-contract-hardening-ii.md` D1 note
+**Deps**: `archive/specs/SPEC-30-story-contract-hardening-ii.md` (D1 authority supplied by user)
 
 ## Problem
 
@@ -74,7 +74,7 @@ Gate 1 now reads: *"Exactly one source action (chosen CHC or write-in) UNLESS th
 - `tools/validators/src/structural/state-snapshot-integrity.ts` (modify — add `state_snapshot_integrity.pg_input_legality_violation` check)
 - `tools/validators/tests/structural/state-snapshot-integrity.test.ts` (modify — add three new test cases)
 - `.claude/skills/branching-story-bootstrap/SKILL.md` (modify — Phase 6 prose adds carve-out citation)
-- `specs/SPEC-30-story-contract-hardening-ii.md` (modify — D1 implementation note + corrected test path/severity wording)
+- `archive/specs/SPEC-30-story-contract-hardening-ii.md` (modify — D1 implementation note + corrected test path/severity wording)
 
 ## Out of Scope
 
