@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md`; `specs/SPEC-31-story-contract-hardening-iii.md`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md`; `archive/specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `branching-story-health-audit/SKILL.md:206` referenced `M-record's ac
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified at intake**: health-audit `:206` referenced `accretion_policy.max_clues`; FOUNDATIONS Mystery Reserve schema (lines 77-95) did not define this field; M-record schemas under `tools/validators/src/schemas/` did not define it either.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D9 specifies the conditional form; §Approach documents that adding the field would violate §5b (no fields without mechanical consumers).
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D9 specifies the conditional form; §Approach documents that adding the field would violate §5b (no fields without mechanical consumers).
 3. **Cross-skill / cross-artifact boundary under audit**: health-audit Phase 2e ↔ Mystery Reserve schema. The wording change keeps the audit deterministic where the schema supports it; falls back to judgment-assisted where no validator-backed field exists.
 4. **FOUNDATIONS principle under audit (restated)**: Rule 7 (Preserve Mystery Deliberately) — the firewall must remain deterministic where structural evidence exists; collective-answer judgment is acknowledged as judgment-assisted when no policy field backs it.
 5. **Verification boundary correction**: the drafted health-audit dry-run proof is not executable in the current repo; `.claude/skills/branching-story-health-audit/SKILL.md` is prose workflow guidance without a runnable skill harness. This ticket uses manual contract review plus focused grep/stale-anchor proof over the edited skill, SPEC-31, and current operational surfaces.
@@ -59,7 +59,7 @@ Confirmed no current operational skill/template/tool/schema surface references `
 ## Files to Touch
 
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify — Phase 2e `mystery_accretion_overflow`)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D9 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D9 implementation note)
 
 ## Out of Scope
 
@@ -86,7 +86,7 @@ Confirmed no current operational skill/template/tool/schema surface references `
 
 ### Commands
 
-1. `rg -n "accretion_policy\\.max_clues|accretion_policy|schema-backed progression|validator-backed accretion-policy|skill dry-run|dry-run" archive/tickets/SPEC31STOCONHAR-009.md .claude/skills/branching-story-health-audit/SKILL.md specs/SPEC-31-story-contract-hardening-iii.md docs tools .claude/skills` → classify remaining hits as current operational conditional wording, historical intake/spec/triage text, or unrelated dry-run terminology.
+1. `rg -n "accretion_policy\\.max_clues|accretion_policy|schema-backed progression|validator-backed accretion-policy|skill dry-run|dry-run" archive/tickets/SPEC31STOCONHAR-009.md .claude/skills/branching-story-health-audit/SKILL.md archive/specs/SPEC-31-story-contract-hardening-iii.md docs tools .claude/skills` → classify remaining hits as current operational conditional wording, historical intake/spec/triage text, or unrelated dry-run terminology.
 2. Manual contract review of `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2e.
 
 ## Outcome
@@ -95,9 +95,9 @@ Completed 2026-05-15. Health-audit Phase 2e now separates three enforcement mode
 
 ## Verification Result
 
-1. `rg -n "accretion_policy\\.max_clues|accretion_policy|schema-backed progression|validator-backed accretion-policy|skill dry-run|dry-run" archive/tickets/SPEC31STOCONHAR-009.md .claude/skills/branching-story-health-audit/SKILL.md specs/SPEC-31-story-contract-hardening-iii.md docs tools .claude/skills` — confirmed the current operational hit is `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2e's conditional wording; remaining SPEC-31/ticket/triage hits are historical intake, conditional proof prose, or unrelated dry-run terminology in other skills.
+1. `rg -n "accretion_policy\\.max_clues|accretion_policy|schema-backed progression|validator-backed accretion-policy|skill dry-run|dry-run" archive/tickets/SPEC31STOCONHAR-009.md .claude/skills/branching-story-health-audit/SKILL.md archive/specs/SPEC-31-story-contract-hardening-iii.md docs tools .claude/skills` — confirmed the current operational hit is `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2e's conditional wording; remaining SPEC-31/ticket/triage hits are historical intake, conditional proof prose, or unrelated dry-run terminology in other skills.
 2. Manual review of `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2e — confirmed current M records without an accretion policy enforce schema-backed progression, and future validator-backed accretion-policy fields would be enforced deterministically.
-3. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md specs/SPEC-31-story-contract-hardening-iii.md archive/tickets/SPEC31STOCONHAR-009.md` — passed.
+3. `git diff --check -- .claude/skills/branching-story-health-audit/SKILL.md archive/specs/SPEC-31-story-contract-hardening-iii.md archive/tickets/SPEC31STOCONHAR-009.md` — passed.
 
 ## Deviations
 

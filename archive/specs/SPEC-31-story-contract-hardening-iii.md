@@ -2,7 +2,7 @@
 
 # SPEC-31 — Story Contract Hardening III
 
-**Status**: PROPOSED
+**Status**: COMPLETED
 **Date**: 2026-05-15
 **Supersedes**: none (extends `archive/specs/SPEC-28-story-contract-hardening.md` D1–D7 and `archive/specs/SPEC-30-story-contract-hardening-ii.md` D1–D10)
 **Companion triage**: `docs/triage/2026-05-15-story-related-improvements-fifth-iteration-triage.md`
@@ -761,3 +761,13 @@ Recommended implementation order, paralleling the report's own P0 → P1 → P2 
 14. D14 (story-local seed_nodes clarity).
 
 Each deliverable is independent enough to land as its own ticket; phases group by risk severity, not interdependence. The implementer may parallelize within a phase.
+
+## Outcome
+
+Completed: 2026-05-15
+
+SPEC-31 landed as fourteen ticket-sized slices, `SPEC31STOCONHAR-001` through `SPEC31STOCONHAR-014`, all archived under `archive/tickets/`. The work hardened story-record lifecycle contracts, story-pipeline retrieval routing, validator coverage, story-skill prose, and `tools/world-mcp` / `tools/validators` surfaces for the fifth story-related review iteration.
+
+Notable deviations from the initial proposal were recorded in the archived tickets. The largest recurring deviation was proof-shape correction: several drafted verification commands were replaced with package-local `npm` or direct compiled-test lanes, and historical SPEC prose was left as intake context behind dated implementation notes instead of being rewritten wholesale.
+
+Verification was performed per ticket and recorded in each archived ticket's `## Verification Result`. The final ticket-family state was additionally checked by confirming no active `tickets/*.md` remain for SPEC-31 before this spec archive.

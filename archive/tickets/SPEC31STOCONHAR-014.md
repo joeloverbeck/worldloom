@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Medium
-**Engine Changes**: Yes — `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `specs/SPEC-31-story-contract-hardening-iii.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, `.claude/skills/commitment-block-authoring/SKILL.md`, `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, `tools/world-mcp/src/context-packet/assemble.ts`, `tools/world-mcp/src/context-packet/shared.ts`, `tools/world-mcp/src/tools/get-context-packet.ts`, `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Engine Changes**: Yes — `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `archive/specs/SPEC-31-story-contract-hardening-iii.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, `.claude/skills/commitment-block-authoring/SKILL.md`, `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, `tools/world-mcp/src/context-packet/assemble.ts`, `tools/world-mcp/src/context-packet/shared.ts`, `tools/world-mcp/src/tools/get-context-packet.ts`, `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `seed_nodes` was world-record-oriented in `get_context_packet` semant
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: `docs/CONTEXT-PACKET-CONTRACT.md` and `docs/MACHINE-FACING-LAYER.md` document the story-pipeline packet scope; `tools/world-mcp/src/tools/get-context-packet.ts` delegates packet assembly without currently surfacing story-local seed misuse warnings.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D14 specifies the clarification + skill audit.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D14 specifies the clarification + skill audit.
 3. **Cross-skill / cross-artifact boundary under audit**: 2 governing docs + 3 story-pipeline skill pre-flights + MCP server warning surface.
 4. **FOUNDATIONS principle under audit (restated)**: §Tooling Recommendation — context-packet completeness guarantees depend on correct scope routing; story-local records cannot be expected via world-scope seed expansion.
 5. **Pre-flight audit result**: the three named skills currently mix world-canon and story-local ids in `seed_nodes` prose (`STENT`, `OBL`, `THR`, `SF`, and source story ids). This ticket owns rewriting those pre-flight instructions to keep world-canon ids in `seed_nodes` and load story-local ids through `story_slug` + targeted `get_records` / `list_records`.
@@ -65,7 +65,7 @@ The implementation emits a warning in the packet response (`task_header.warnings
 
 - `docs/CONTEXT-PACKET-CONTRACT.md` (modify)
 - `docs/MACHINE-FACING-LAYER.md` (modify — `:76`)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D14 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D14 implementation note)
 - `.claude/skills/branching-story-health-audit/SKILL.md` (modify — pre-flight)
 - `.claude/skills/commitment-block-authoring/SKILL.md` (modify — pre-flight)
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify — pre-flight)

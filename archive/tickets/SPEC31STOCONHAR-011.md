@@ -13,7 +13,7 @@ At intake, `story-fact-promotion-to-canon/SKILL.md:113` muddled "governing firew
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: skill `:113,:146,:256` confirmed; contract `:236` `promotion_claims[].source_record` enum is `SF | BEL`.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D11 specifies the clarification.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D11 specifies the clarification.
 3. **Cross-skill / cross-artifact boundary under audit**: promotion skill source-kind mapping ↔ proposal package validator (`proposal_package_shape.ts` created in 006). This ticket extends 006's validator with a `mystery_resolution`-specific check.
 4. **FOUNDATIONS principle under audit (restated)**: Rule 7 (Preserve Mystery Deliberately) — `M` records are governing firewall load, not branch evidence; promoting a mystery requires SF/BEL evidence from the branch, not the M itself.
 5. **Package command corrected**: the repo has no root pnpm workspace; validator proof uses package-local `npm run build`, `node --test dist/tests/structural/proposal-package-shape.test.js`, and `npm test` from `tools/validators`.
@@ -61,7 +61,7 @@ Added a check: when `source_kind == mystery_resolution`, every `source_record` i
 - `.claude/skills/story-fact-promotion-to-canon/SKILL.md` (modify — `:113`, `:146`, `:256`)
 - `tools/validators/src/structural/proposal-package-shape.ts` (modify — extend the rule created in 006)
 - `tools/validators/tests/structural/proposal-package-shape.test.ts` (modify — new fixtures)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D11 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D11 implementation note)
 
 ## Out of Scope
 

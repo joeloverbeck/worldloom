@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, new `tools/validators/src/structural/expected-witness-coverage.ts`, `tools/validators/src/public/registry.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ The closed enum of 5 non-propagation reasons exists at `branching-story-turn-cyc
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: turn-cycle `:292-293`, health-audit `:190`, SE schema `:89` (`world_logic_rationale: {type: string, minLength: 1}`) all verified.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D7 specifies the tag format and validator.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D7 specifies the tag format and validator.
 3. **Cross-skill / cross-artifact boundary under audit**: SE schema's `world_logic_rationale` field (consumer-side) + contract §4.3 SE block (spec) + 2 skills (turn-cycle emits; health-audit replays).
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §5b (Schema-Minimalism) — adding a structured `non_propagation` array to SE would proliferate schema; reusing the existing `world_logic_rationale` string with a parseable tag convention preserves §5b. Distinct from FOUNDATIONS Rule 5.
 5. **Validator scope corrected against live schema**: `SE` has no structured `expected_witnesses` field, so a package validator cannot independently compute "uncovered witness group" from the event record alone. The landed validator will enforce the parseable mini-format, warn on malformed `non_propagation:` tags, and fail legacy closed-set non-propagation prose (`no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`) when it is not carried as a parseable tag. Turn-cycle and health-audit remain the surfaces that compute which groups require coverage.
@@ -80,7 +80,7 @@ Registered in `tools/validators/src/public/registry.ts`.
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — validator counts)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — pre-apply skip expectation)
 - `tools/validators/README.md` (modify — structural validator inventory/count)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — dated D7 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — dated D7 implementation note)
 
 ## Out of Scope
 
@@ -121,7 +121,7 @@ The validators package now registers `expected_witness_coverage`, with focused t
 
 ## Verification Result
 
-- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md specs/SPEC-31-story-contract-hardening-iii.md tools/validators/src/structural/expected-witness-coverage.ts tools/validators/src/public/registry.ts tools/validators/tests/structural/expected-witness-coverage.test.ts tools/validators/tests/structural/registry.test.ts tools/validators/tests/integration/spec04-verification.test.ts tools/validators/tests/integration/validate-patch-plan.test.ts tools/validators/README.md archive/tickets/SPEC31STOCONHAR-007.md` — passed.
+- `git diff --check -- .claude/skills/_shared-templates/story-state-contract.md .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md archive/specs/SPEC-31-story-contract-hardening-iii.md tools/validators/src/structural/expected-witness-coverage.ts tools/validators/src/public/registry.ts tools/validators/tests/structural/expected-witness-coverage.test.ts tools/validators/tests/structural/registry.test.ts tools/validators/tests/integration/spec04-verification.test.ts tools/validators/tests/integration/validate-patch-plan.test.ts tools/validators/README.md archive/tickets/SPEC31STOCONHAR-007.md` — passed.
 - From `tools/validators`: `npm test -- --test-name-pattern=expected_witness_coverage` — passed after the package script rebuilt `dist/`; wrapper executed the full compiled suite with 262 passing tests.
 - `grep -n "non_propagation:" .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` — found the turn-cycle authoring/check guidance and health-audit replay guidance.
 

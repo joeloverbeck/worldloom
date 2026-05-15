@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/commitment-block-authoring/SKILL.md`, new `tools/validators/src/structural/slt-created-at-page-origin-consistency.ts`, `tools/validators/src/public/registry.ts`, validator registry/readme/tests, and same-seam SPEC-31 status note
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, contract `.claude/skills/_shared-templates/story-state-contract.md` d
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: live contract §4.4 still carried the scope-keyed `created_at_page` comment, and commitment-block-authoring Phase 2 still carried the `null for both modes` comment before this ticket.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D3 specifies the origin-keyed rule explicitly.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D3 specifies the origin-keyed rule explicitly.
 3. **Cross-skill / cross-artifact boundary under audit**: contract §4.4 SLT schema + commitment-block-authoring authorship guidance + validators structural registry. Turn-cycle already had the runtime-JIT sentence at `branching-story-turn-cycle/SKILL.md` Phase 2 (`created_at_page: <new PG id>`, `provenance.origin: runtime_jit`), so no turn-cycle edit was required.
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §5b (Schema-Minimalism) — the `created_at_page` field is load-bearing for provenance (page-local creation tracking), not for branch legality. The reformulation keeps the field load-bearing while removing the contradiction.
 5. **HARD-GATE / validation-signal check**: read `docs/HARD-GATE-DISCIPLINE.md` because the new structural validator participates in `full-world`, `incremental`, and `pre-apply` validation. The validator is fail-closed for `create_slt_record` patch plans and skipped for unrelated pre-apply plans.
@@ -84,7 +84,7 @@ Update the validators README, structural registry expected list, SPEC-04 validat
 - `tools/validators/tests/integration/spec04-verification.test.ts` (modify — validator counts)
 - `tools/validators/tests/integration/validate-patch-plan.test.ts` (modify — clean pre-apply skip expectation)
 - `tools/validators/README.md` (modify — structural validator inventory)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D3 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D3 implementation note)
 
 ## Out of Scope
 

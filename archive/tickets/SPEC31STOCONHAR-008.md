@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, `docs/CONTEXT-PACKET-CONTRACT.md`, new `tools/validators/src/structural/canon-drift-classification-evidence.ts`, `tools/validators/src/public/registry.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -15,7 +15,7 @@ Drift classification compares parent baseline to current world-canon revision (l
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: turn-cycle `:164-165`, health-audit `:131,:238`, change-log-entry schema field list confirmed. CH schema has `affected_fact_ids: [CF-N]` only.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D8 specifies CH-window retrieval; §Risks acknowledged the CH "affects" field-naming open question.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D8 specifies CH-window retrieval; §Risks acknowledged the CH "affects" field-naming open question.
 3. **Cross-skill / cross-artifact boundary under audit**: CH record schema (consumer-side) + 2 skills (turn-cycle drift trigger; health-audit Phase 2h drift evidence) + MCP `find_sections_touched_by` retrieval surface + new validator.
 4. **FOUNDATIONS principle under audit (restated)**: Rule 6 (No Silent Retcons) — drift classification cannot deem a page `compatible` against current canon without citing the intervening CH evidence; the audit trail requires the CH window to make the classification reproducible.
 5. **Mismatch + correction**: spec D8 said "follow each CH's `affects: [<CF | M | INV | SEC ids>]`" — the actual schema is `affected_fact_ids: [CF-N]` only. The corrected lookup path is a 2-step graph traversal via `touched_by_cf[]` back-pointers. Documented in §What to Change.

@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, new `tools/validators/src/structural/audit-only-se-shape.ts`, `tools/validators/src/public/registry.ts`, validators package tests/docs, `.claude/skills/branching-story-prose-attach/SKILL.md`, `.claude/skills/story-promotion-closeout/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `.claude/skills/_shared-templates/story-state-contract.md` §4.3 enum
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: `tools/validators/src/schemas/story-event.schema.json:30-31,126-127` confirmed `prose_attach` / `promotion_closeout` in the event_kind enum with a reserved conditional branch. Existing structural validators directory (`tools/validators/src/structural/`) does not contain `audit-only-se-shape.ts` — confirmed new file.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D2 fully specifies the audit-only SE shape (empty delta, no PG.input, replay-ignored, parent_page_id rules). No discrepancies with the codebase or contract.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D2 fully specifies the audit-only SE shape (empty delta, no PG.input, replay-ignored, parent_page_id rules). No discrepancies with the codebase or contract.
 3. **Cross-skill / cross-artifact boundary under audit**: SE schema + contract §4.3 + 3 skills that emit or consume audit-only SEs (prose-attach for `prose_attach`; closeout for `promotion_closeout`; health-audit for Phase 2a replay). The new validator `audit_only_se_shape` is the structural enforcement; replay's existing skip path needs verification, not modification.
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §5b (Schema-Minimalism) — audit-only SEs already have schema-reserved enum slots and conditional branches; this ticket fills the load-bearing semantics that justify those slots.
 5. **HARD-GATE / canon-write impact**: none. Audit-only SEs are story-bundle-scope records; they record audit events for prose-attach and promotion-closeout but introduce no world-canon write surface. Mystery Reserve firewall unaffected.

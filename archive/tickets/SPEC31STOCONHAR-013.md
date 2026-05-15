@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/story-promotion-closeout/SKILL.md`, `specs/SPEC-31-story-contract-hardening-iii.md`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Engine Changes**: Yes — `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/story-promotion-closeout/SKILL.md`, `archive/specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -16,7 +16,7 @@ At intake, three documentation drift sites surfaced:
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: all three sites confirmed at quoted lines. FOUNDATIONS `:552` documents the unpadded natural-integer convention (FOUNDATIONS-002).
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D13 specifies the three fixes.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D13 specifies the three fixes.
 3. **Cross-skill / cross-artifact boundary under audit**: documentation surface across 3 files; no semantic shift, only wording.
 4. **Renames/removes blast radius** (template item 7): grep for padded ID forms (`-NNNN`, `<CLASS>-0\d+`) across active story skills/shared templates → confirm no current operational examples remain post-edit.
 5. **Proof narrowing**: intake grep found an unrelated, legitimate `.claude/skills/propose-new-worlds-from-preferences/templates/proposal-card.md` note that FOUNDATIONS defines five Canon Layers. This ticket owns the incorrect CF `status` wording in `story-promotion-closeout`, so the "five layer" proof is scoped to that closeout status claim rather than all `.claude/skills/`.
@@ -59,7 +59,7 @@ Confirmed no other padded ID forms (`<CLASS>-\d{4,}`) exist in active story skil
 - `.claude/skills/_shared-templates/story-state-contract.md` (modify — `:60`)
 - `.claude/skills/branching-story-turn-cycle/SKILL.md` (modify — `:402`)
 - `.claude/skills/story-promotion-closeout/SKILL.md` (modify — `:353`)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D13 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D13 implementation note)
 
 ## Out of Scope
 

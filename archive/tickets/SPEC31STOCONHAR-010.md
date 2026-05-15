@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/story-promotion-closeout/SKILL.md` (MCP `get_records` PA hybrid support remains out of scope per spec)
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `story-promotion-closeout/SKILL.md` instructed raw filesystem reads o
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: closeout `:140-141,:155,:167` confirmed raw `_source/` filesystem reads at intake. `tools/world-mcp/src/tools/get-records.ts` does not currently support hybrid PA records (confirmed at codebase validation; spec §Out of Scope acknowledged the gap with fallback to per-PA `get_record`).
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D10 reframes severity to P2; spec §Out of Scope flags PA hybrid retrieval as a follow-up.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D10 reframes severity to P2; spec §Out of Scope flags PA hybrid retrieval as a follow-up.
 3. **Cross-skill / cross-artifact boundary under audit**: closeout (consumer) ↔ MCP retrieval surface. The skill change is prose-only; the MCP server's PA retrieval shape is not modified here.
 4. **FOUNDATIONS principle under audit (restated)**: §Tooling Recommendation — every canon-reading skill should route through MCP for retrieval-contract consistency.
 5. **Reassessment correction**: the live closeout `<HARD-GATE>` also names raw CF / CH / PA path verification as the pre-flight prerequisite. Because that gate text is active operational guidance, this ticket owns updating the gate summary to MCP retrieval wording while preserving the same abort-before-write behavior.

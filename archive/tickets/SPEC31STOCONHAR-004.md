@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `docs/CONTEXT-PACKET-CONTRACT.md`, `docs/MACHINE-FACING-LAYER.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `tools/world-mcp/src/server.ts`, `tools/world-mcp/README.md`, `tools/world-mcp/tests/tools/get-context-packet.story-pipeline.test.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -18,7 +18,7 @@ The bundle does not exist at bootstrap; the contract is correct. This ticket ali
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified against the live repo**: `docs/CONTEXT-PACKET-CONTRACT.md` already states that `story_bootstrap` uses `story_slug` as the target slug and returns `story_bundle_context: null`; `tools/world-mcp/src/context-packet/assemble.ts` already excludes `story_bootstrap` from bundle-context loading; `tools/world-mcp/src/tools/get-context-packet.ts` already requires `story_slug` for every story-pipeline task type. Remaining stale surfaces are the full-body candidate table, `docs/MACHINE-FACING-LAYER.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `tools/world-mcp/src/server.ts` capability text, `tools/world-mcp/README.md`, and focused test coverage for the `story_bootstrap` missing-`story_slug` rejection.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D4 specifies the standardization explicitly.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D4 specifies the standardization explicitly.
 3. **Cross-skill / cross-artifact boundary under audit**: MCP server `get_context_packet` task-type handler ↔ bootstrap skill ↔ two governing docs. The MCP server may need to short-circuit its bundle-lookup path for `story_bootstrap` (the bundle doesn't yet exist; the slug is a target identifier).
 4. **FOUNDATIONS principle under audit (restated)**: §Tooling Recommendation — "LLM agents should never operate on prose alone ... the context-packet API is the machine-facing mechanism for delivering this set with completeness guarantees." The 3-way drift breaks completeness guarantees for bootstrap because the skill's call shape disagrees with both contract documents on what is supplied vs. returned. Standardization restores the contract.
 5. **HARD-GATE read not required**: this ticket changes read-only context-packet retrieval semantics and caller documentation; it does not alter canon mutation, approval tokens, validator gate results, or Mystery Reserve enforcement.

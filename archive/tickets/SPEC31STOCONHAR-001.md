@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `tools/validators/src/schemas/story-page.schema.json`, `tools/world-mcp/src/cli/compute-pg-hashes.ts`, `tools/world-index/src/hash/content.ts`, `tools/patch-engine/src/ops/update-record-field.ts`, `.claude/skills/_shared-templates/story-state-contract.md`, `.claude/skills/branching-story-bootstrap/SKILL.md`, `.claude/skills/branching-story-turn-cycle/SKILL.md`, `.claude/skills/branching-story-prose-attach/SKILL.md`, `.claude/skills/branching-story-health-audit/SKILL.md`, package tests under `tools/{validators,world-index,world-mcp,patch-engine}/tests/`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -19,7 +19,7 @@ At intake, the hash payload already excluded both fields, so fork-replay safety 
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: `tools/validators/src/schemas/story-page.schema.json:163,168` confirmed both fields present in PG schema. `tools/world-mcp/src/cli/compute-pg-hashes.ts` and `tools/world-index/src/hash/content.ts:44,63,71,74` confirmed `canonicalJsonStringify` / `computePgStateHash` / `computePlanHash` exports as the hash helpers the skills reference. `branching-story-bootstrap/SKILL.md:313`, `branching-story-turn-cycle/SKILL.md:373,162`, `branching-story-prose-attach/SKILL.md:31,150`, `branching-story-health-audit/SKILL.md:250-251` all verified at quoted lines.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §Deliverable D1 + §Verification §Phase 1 + §Migration impact at D1's end (test-fixture hash recomputation) are the authoritative scope. No discrepancies with the codebase.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §Deliverable D1 + §Verification §Phase 1 + §Migration impact at D1's end (test-fixture hash recomputation) are the authoritative scope. No discrepancies with the codebase.
 3. **Cross-skill / cross-artifact boundary under audit**: the PG-record schema (`story-page.schema.json` + contract §4.2/§4.2a) is the shared boundary; four story-pipeline skills (bootstrap / turn-cycle / prose-attach / health-audit) plus two tooling modules (`compute-pg-hashes.ts` + `content.ts`) plus the validator (`record-schema-compliance.ts`) all consume it. The retcon eliminates two fields from the schema and removes their two consumer-side checks; nothing else on the schema changes.
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §5b (Schema-Minimalism — "every field in every story-bundle record schema must be load-bearing") motivates this ticket. The two fields are currently NOT load-bearing — they exist but are written as `null` and never updated, so the two consumer checks (`missing_prose_file`, `accept_parent_unrendered: false`) actually read stale state. Deletion restores the §5b invariant. Distinct from FOUNDATIONS Rule 5 (No Consequence Evasion); the spec's §FOUNDATIONS Alignment table mislabeled this as "Rule 5" — corrected here.
 5. **HARD-GATE / canon-write impact**: none. PG records are story-bundle scope (Hook 3 blocks raw writes to `worlds/<slug>/stories/<slug>/_source/`); this ticket modifies the schema definition but does not weaken any write-time enforcement. Mystery Reserve firewall is unaffected.

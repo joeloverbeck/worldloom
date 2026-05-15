@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Large
 **Engine Changes**: Yes — `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, `.claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml`, `.claude/skills/canon-addition/SKILL.md`, new `tools/validators/src/structural/proposal-package-shape.ts`, `tools/validators/src/public/registry.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -15,7 +15,7 @@ The template at `.claude/skills/story-fact-promotion-to-canon/templates/proposal
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: At intake, `story-fact-promotion-to-canon/SKILL.md` and `.claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml` contained `candidate.source_basis.story_branch`, `candidate.source_basis.story_evidence`, and `candidate.promotion_provenance`. This ticket removed those fields from the current producer/template shape and replaced them with top-level `proposal_evidence`.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D6 specifies the restructure. Validator file `tools/validators/src/structural/proposal-package-shape.ts` does NOT currently exist — confirmed new file. The live registry path is `tools/validators/src/public/registry.ts`, not the spec's older `tools/validators/src/registry.ts` shorthand.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D6 specifies the restructure. Validator file `tools/validators/src/structural/proposal-package-shape.ts` does NOT currently exist — confirmed new file. The live registry path is `tools/validators/src/public/registry.ts`, not the spec's older `tools/validators/src/registry.ts` shorthand.
 3. **Cross-skill / cross-artifact boundary under audit**: promotion skill (producer) ↔ proposal-package.yaml template (schema) ↔ canon-addition (consumer). Canon-addition must update its consumption to read `candidate` as pure CF body and `proposal_evidence` as top-level audit trail.
 4. **FOUNDATIONS principle under audit (restated)**: Rule 1 (No Floating Facts) — the CF candidate must conform to the CF schema; promotion-only fields contaminate the schema-compliance check. Splitting into pure-candidate + proposal_evidence preserves schema compliance.
 5. **Schema extension impact**: the proposal-package YAML template is the schema for proposal packages. The restructure REMOVES fields from `candidate:` and REORGANIZES them under a new top-level `proposal_evidence:` wrapper. Canon-addition is the consumer; its parsing logic must be updated to read the new shape. No production proposal packages exist anywhere (no story bundles, no completed promotions).

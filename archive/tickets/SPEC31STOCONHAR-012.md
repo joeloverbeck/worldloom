@@ -3,8 +3,8 @@
 **Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
-**Engine Changes**: Yes — `.claude/skills/branching-story-prose-attach/SKILL.md`; spec truthing in `specs/SPEC-31-story-contract-hardening-iii.md`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`
+**Engine Changes**: Yes — `.claude/skills/branching-story-prose-attach/SKILL.md`; spec truthing in `archive/specs/SPEC-31-story-contract-hardening-iii.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `branching-story-prose-attach/SKILL.md` Phase 3 partially distinguish
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified**: prose-attach `:193` confirmed at quoted location.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D12 specifies the explicit split.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D12 specifies the explicit split.
 3. **Cross-skill / cross-artifact boundary under audit**: prose-attach Phase 3 check ↔ receipt schema (`pages-prose-receipts/PG-<integer>.yaml`). No structured schema change; the `invented_structural_fact` field's value semantics are clarified.
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §6b (Information / Observer Firewall) — invented structural facts that violate the firewall must be deterministic FAILs; semantic inventions (alignment, capability, institutional rule) are judgment-assisted because regex cannot reliably detect them.
 5. **HARD-GATE read**: `docs/HARD-GATE-DISCIPLINE.md` was read because this ticket changes validation-signal wording in a content-generating skill. The change preserves the existing HARD-GATE approval boundary and write routing; it clarifies how Phase 3 classifies prose defects before the Phase 6 approval/write step.
@@ -66,7 +66,7 @@ If the prose-attach receipt schema does not already carry a `subcategory: determ
 ## Files to Touch
 
 - `.claude/skills/branching-story-prose-attach/SKILL.md` (modify — `:193` area)
-- `specs/SPEC-31-story-contract-hardening-iii.md` (modify — D12 implementation note)
+- `archive/specs/SPEC-31-story-contract-hardening-iii.md` (modify — D12 implementation note)
 
 ## Out of Scope
 

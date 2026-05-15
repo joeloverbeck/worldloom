@@ -4,7 +4,7 @@
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `docs/MACHINE-FACING-LAYER.md`, `tools/world-mcp`, `tools/patch-engine/src/ops/shared.ts`
-**Deps**: `specs/SPEC-31-story-contract-hardening-iii.md`, `archive/specs/SPEC-29-legacy-tools-vocabulary-cleanup.md`
+**Deps**: `archive/specs/SPEC-31-story-contract-hardening-iii.md`, `archive/specs/SPEC-29-legacy-tools-vocabulary-cleanup.md`
 
 ## Problem
 
@@ -13,7 +13,7 @@ At intake, `docs/MACHINE-FACING-LAYER.md:67` still listed `ARCTRACE` among story
 ## Assumption Reassessment (2026-05-15)
 
 1. **Codebase symbols verified at intake**: `docs/MACHINE-FACING-LAYER.md:67` listed ARCTRACE in the story-bundle id-class enumeration; FOUNDATIONS `:594` ("No ARC_TRACE class") confirmed the contradiction.
-2. **Spec assumptions verified**: `specs/SPEC-31-story-contract-hardening-iii.md` §D5 specifies removal + DA scope explicit.
+2. **Spec assumptions verified**: `archive/specs/SPEC-31-story-contract-hardening-iii.md` §D5 specifies removal + DA scope explicit.
 3. **Cross-skill / cross-artifact boundary under audit**: documentation surface (MACHINE-FACING-LAYER) + MCP server retrieval surface (`get_record.ts`). The server did not accept `ARCTRACE` / `ARC_TRACE`; `validateRecordId` returned the package-standard `invalid_input` error for `ARC_TRACE-1`. The live gap was DA scope routing: `get_record(DA-*, story_slug=...)` queried `story_slug IS NULL` and therefore resolved world-level DA instead of story-local `story_diegetic_artifact_record` rows.
 4. **FOUNDATIONS principle under audit (restated)**: §Story Bundles §4a (Plan-Authority Boundary) — "There is no parallel 'did the prose realize the planned arc' state engine — no ARC_TRACE class, no second state-transition pass." MACHINE-FACING-LAYER `:67`'s ARCTRACE listing contradicted this principle by treating ARC_TRACE as a valid retrieval id class. Removal restores §4a consistency across all surfaces.
 5. **Renames/removes blast radius** (template item 7): grep for `ARCTRACE` and `ARC_TRACE` across `.claude/skills/*/SKILL.md`, `docs/`, `tools/`, and `specs/` found one active-code residue in `tools/patch-engine/src/ops/shared.ts`; this ticket removed it. Remaining hits are rejection statements, active SPEC-31/ticket documentation, historical triage/planning context, or the new `get_record` invalid-input test.
