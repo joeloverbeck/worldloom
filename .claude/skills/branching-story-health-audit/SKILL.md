@@ -235,7 +235,18 @@ Repair routing: `choice_dependency_clobbered`, `affordance_dependency_clobbered`
 
 ### Phase 2h: Canon baseline drift (per FOUNDATIONS §Story Bundles §4b)
 
-For every branch head and every page selected by `branch_path_filter`, compare `PG.state_snapshot.canon_revision` against the current world-canon revision loaded in Pre-flight. Classify each page's drift as exactly one of `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict`.
+For every branch head and every page selected by `branch_path_filter`, compare
+`PG.state_snapshot.canon_revision` against the current world-canon revision
+loaded in Pre-flight. If the baseline is stale, load every intervening CH record
+and follow each CH `affected_fact_ids[]` entry through
+`mcp__worldloom__find_sections_touched_by(cf_id)` or equivalent targeted
+retrieval to enumerate touched SEC / M / INV records before classifying drift.
+The latest CH is only the drift trigger; the CH window plus CF reverse-lookup
+evidence is the classification basis. Classify each page's drift as exactly one
+of `compatible`, `grandfathered`, `requires_health_audit`,
+`requires_repair_turn`, or `promotion_or_retcon_conflict`, and cite at least one
+specific CH id in the finding rationale when a stale baseline is classified as
+`compatible` or `grandfathered`.
 
 - `canon_baseline_missing` (ERROR): a post-D6 page snapshot lacks `canon_revision` even though the current world has a change-log revision. `repair_kind: turn_repair`.
 - `canon_baseline_requires_health_audit` (ERROR): canon changed after the page baseline and affected records cannot be proven irrelevant from loaded context. `repair_kind: health_audit`.

@@ -114,6 +114,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "slt_created_at_page_origin_consistency"
     );
     assert.equal(sltCreatedAtPageExecution?.status, "skipped");
+    const canonDriftEvidenceExecution = result.executions.find(
+      (execution) => execution.name === "canon_drift_classification_evidence"
+    );
+    assert.equal(canonDriftEvidenceExecution?.status, "skipped");
     const expectedWitnessExecution = result.executions.find(
       (execution) => execution.name === "expected_witness_coverage"
     );
@@ -132,6 +136,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== snapshotIntegrityExecution &&
         row !== auditOnlyExecution &&
         row !== sltCreatedAtPageExecution &&
+        row !== canonDriftEvidenceExecution &&
         row !== expectedWitnessExecution &&
         row !== proposalPackageExecution
     )) {

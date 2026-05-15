@@ -1,4 +1,5 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
+import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
@@ -32,6 +33,7 @@ export const structuralValidators: readonly Validator[] = [
   storyFactAuthority,
   auditOnlySeShape,
   sltCreatedAtPageOriginConsistency,
+  canonDriftClassificationEvidence,
   expectedWitnessCoverage,
   snapshotReplayEquality,
   recursiveReferenceClosure,

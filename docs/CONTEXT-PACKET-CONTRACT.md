@@ -133,6 +133,16 @@ This layer carries:
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
 - per-mystery `PG.state_snapshot.unresolved_mystery_claims[]` evidence chains, including page id, authority, status, and `evidence_records[]`
 
+For story turn-cycle and story health-audit consumers, the latest
+`change_log_entry` delivered in governing context is a drift trigger, not the
+complete drift-classification evidence. When a page baseline is stale, callers
+must retrieve every CH entry newer than `PG.state_snapshot.canon_revision` with
+`mcp__worldloom__get_records(record_ids=<CH window>, world_slug=<world_slug>)`,
+then follow each CH `affected_fact_ids[]` entry through
+`mcp__worldloom__find_sections_touched_by(cf_id)` or equivalent targeted
+retrieval to enumerate affected SEC / M / INV records via `touched_by_cf[]`
+back-pointers.
+
 ### 7. Impact surfaces
 
 Advisory downstream consequence surfaces.

@@ -164,6 +164,20 @@ There is no nested rendered-prose block, no `prose_status` field, no `state_delt
 
 `state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the page-planning context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
 
+When `parent.state_snapshot.canon_revision != current_world_canon_revision`,
+drift classification MUST retrieve every CH entry newer than the parent
+baseline before classifying compatibility. Each CH names
+`affected_fact_ids: [CF-<integer>]`; affected M / INV / SEC records are
+discovered by traversing from each CF id through `touched_by_cf[]`
+back-pointers on SEC / M / INV records, using
+`mcp__worldloom__find_sections_touched_by(cf_id)` or equivalent targeted
+retrieval. The latest CH from the context packet is only the trigger for drift
+detection; the CH window and CF graph reverse lookup are the evidence for
+classification. A `compatible` or `grandfathered` classification over a window
+of two or more intervening CH entries MUST cite at least one specific CH id from
+the window in `validation_trace.parent_snapshot_compatibility` or the
+page-producing SE rationale.
+
 Branch-scope vocabulary:
 
 - `bundle_genesis_record`: a story-bundle record whose `created_at_page` is `PG-1`, where `PG-1` is the `root_page_id` of the root branch. Genesis records sit in every branch's `branch_path` and are visible to all branches unless later superseded or closed.
