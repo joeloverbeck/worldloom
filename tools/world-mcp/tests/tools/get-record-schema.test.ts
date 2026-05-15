@@ -234,13 +234,9 @@ test("getRecordSchema exposes post-reset choice carrier fields", async () => {
   assert.ok(properties.surface_label);
   assert.ok(properties.player_visible_intent);
   assert.ok(properties.target_or_action_families);
-  assert.equal(properties.target_or_action_family, undefined);
   assert.ok(properties.likely_state_pressure);
   assert.ok(properties.associated_commitment_block);
   assert.ok(properties.success_policy);
-  assert.equal(properties.commitment_family, undefined);
-  assert.equal(properties.commitment_class, undefined);
-  assert.equal(properties.commitment_detail, undefined);
 });
 
 test("getRecordSchema returns an empty referenced schema map when the schema has no refs", async () => {

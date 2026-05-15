@@ -4,25 +4,17 @@ import path from "node:path";
 import test from "node:test";
 
 import {
-  ARC_ARCHETYPES,
   CANONICAL_DOMAINS,
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
   CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
   CF_TYPE_VALUES,
   CHANGE_TYPE_VALUES,
-  COMMITMENT_CLASS_TO_FAMILY,
-  COMMITMENT_CLASSES,
-  COMMITMENT_FAMILIES,
   ENTITY_KIND_VALUES,
   INVARIANT_CATEGORY_VALUES,
   MYSTERY_RESOLUTION_SAFETY_ENUM,
   MYSTERY_STATUS_ENUM,
-  NARRATIVE_POINTS,
   REVISION_DIFFICULTY_VALUES,
   SEC_FILE_CLASS_VALUES,
-  STOP_PREDICATES,
-  STRONG_AXES,
-  STRONG_OUTCOMES,
   VERDICT_ENUM
 } from "@worldloom/world-index/public/canonical-vocabularies";
 
@@ -181,37 +173,6 @@ test("getCanonicalVocabulary returns canon fact types and conditional block coup
   );
 });
 
-test("getCanonicalVocabulary returns scene-commitment taxonomy and arc vocabularies", async () => {
-  const expected = [
-    { class: "commitment_family", values: COMMITMENT_FAMILIES, length: 16 },
-    { class: "commitment_class", values: COMMITMENT_CLASSES, length: 81 },
-    { class: "arc_archetype", values: ARC_ARCHETYPES, length: 20 },
-    { class: "narrative_point", values: NARRATIVE_POINTS, length: 5 },
-    { class: "strong_axis", values: STRONG_AXES, length: 8 },
-    { class: "strong_outcome", values: STRONG_OUTCOMES, length: 8 },
-    { class: "stop_predicate", values: STOP_PREDICATES, length: 19 }
-  ] as const;
-
-  for (const vocabulary of expected) {
-    const result = await getCanonicalVocabulary({ class: vocabulary.class });
-
-    assert.ok(!("code" in result));
-    assert.deepEqual(result.canonical_values, [...vocabulary.values]);
-    assert.equal(result.canonical_values.length, vocabulary.length);
-  }
-
-  const classes = await getCanonicalVocabulary({ class: "commitment_class" });
-  assert.ok(!("code" in classes));
-  assert.deepEqual(classes.coupling, {
-    field: "commitment_family",
-    rule: "Every closed commitment_class maps to exactly one closed commitment_family. Future commitment_detail values are open story-specific labels and are not part of this vocabulary."
-  });
-  assert.deepEqual(
-    classes.per_value_family,
-    COMMITMENT_CLASSES.map((value) => ({ value, family: COMMITMENT_CLASS_TO_FAMILY[value] }))
-  );
-});
-
 test("getCanonicalVocabulary rejects unsupported vocabulary classes", async () => {
   const result = await getCanonicalVocabulary({ class: "not_real" as never });
 
@@ -228,13 +189,6 @@ test("getCanonicalVocabulary rejects unsupported vocabulary classes", async () =
     "change_type",
     "mystery_reserve_effect",
     "revision_difficulty",
-    "cf_type",
-    "commitment_family",
-    "commitment_class",
-    "arc_archetype",
-    "narrative_point",
-    "strong_axis",
-    "strong_outcome",
-    "stop_predicate"
+    "cf_type"
   ]);
 });

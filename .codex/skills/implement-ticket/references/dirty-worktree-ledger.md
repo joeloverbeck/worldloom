@@ -18,6 +18,8 @@ Refresh the ledger before final response using both `git status --short` and any
 
 When the worktree has unrelated dirt, use full `git status --short` for ownership discovery, then use path-scoped `git diff -- <owned paths>` and `git diff --stat -- <owned paths>` for the active ticket's change summary once owned paths are known. Keep unrelated dirty paths in the ledger, but do not let broad diff/stat output inflate the active ticket's file list.
 
+If `git status --short` collapses an untracked directory that overlaps the active ticket, spec family, or shared contract, expand it to exact paths before closeout. Use `git status --short --untracked-files=all <dir>` or `rg --files <dir>` to distinguish the active ticket file from sibling tickets/specs that were only read, then classify each path separately in the ledger.
+
 ## Final Response Template
 
 Use a compact ledger in the final response when the worktree was dirty or ignored artifacts matter:

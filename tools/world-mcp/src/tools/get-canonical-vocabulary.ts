@@ -2,25 +2,17 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import {
-  ARC_ARCHETYPES,
   CANONICAL_DOMAINS,
   CF_TYPE_EPISTEMIC_PROFILE_REQUIRED,
   CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED,
   CF_TYPE_VALUES,
   CHANGE_TYPE_VALUES,
-  COMMITMENT_CLASS_TO_FAMILY,
-  COMMITMENT_CLASSES,
-  COMMITMENT_FAMILIES,
   ENTITY_KIND_VALUES,
   INVARIANT_CATEGORY_VALUES,
   MYSTERY_RESOLUTION_SAFETY_ENUM,
   MYSTERY_STATUS_ENUM,
-  NARRATIVE_POINTS,
   REVISION_DIFFICULTY_VALUES,
   SEC_FILE_CLASS_VALUES,
-  STOP_PREDICATES,
-  STRONG_AXES,
-  STRONG_OUTCOMES,
   VERDICT_ENUM
 } from "@worldloom/world-index/public/canonical-vocabularies";
 
@@ -37,14 +29,7 @@ export const VOCABULARY_CLASSES = [
   "change_type",
   "mystery_reserve_effect",
   "revision_difficulty",
-  "cf_type",
-  "commitment_family",
-  "commitment_class",
-  "arc_archetype",
-  "narrative_point",
-  "strong_axis",
-  "strong_outcome",
-  "stop_predicate"
+  "cf_type"
 ] as const;
 
 export type VocabularyClass = (typeof VOCABULARY_CLASSES)[number];
@@ -180,29 +165,5 @@ export async function getCanonicalVocabulary(
           requires_exception_governance: (CF_TYPE_EXCEPTION_GOVERNANCE_REQUIRED as readonly string[]).includes(value)
         }))
       };
-    case "commitment_family":
-      return { canonical_values: [...COMMITMENT_FAMILIES] };
-    case "commitment_class":
-      return {
-        canonical_values: [...COMMITMENT_CLASSES],
-        coupling: {
-          field: "commitment_family",
-          rule: "Every closed commitment_class maps to exactly one closed commitment_family. Future commitment_detail values are open story-specific labels and are not part of this vocabulary."
-        },
-        per_value_family: COMMITMENT_CLASSES.map((value) => ({
-          value,
-          family: COMMITMENT_CLASS_TO_FAMILY[value]
-        }))
-      };
-    case "arc_archetype":
-      return { canonical_values: [...ARC_ARCHETYPES] };
-    case "narrative_point":
-      return { canonical_values: [...NARRATIVE_POINTS] };
-    case "strong_axis":
-      return { canonical_values: [...STRONG_AXES] };
-    case "strong_outcome":
-      return { canonical_values: [...STRONG_OUTCOMES] };
-    case "stop_predicate":
-      return { canonical_values: [...STOP_PREDICATES] };
   }
 }
