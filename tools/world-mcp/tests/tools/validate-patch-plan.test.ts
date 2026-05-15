@@ -120,7 +120,9 @@ test("validatePatchPlan accepts create_bel_record through pre-apply validation",
               confidence: "low",
               visibility: "private",
               basis: {
-                source_event: "SE-1"
+                source_event: "SE-1",
+                access_route: "testimony",
+                access_records: ["STENT-1", "SE-1"]
               },
               consequences: {
                 opens: [],

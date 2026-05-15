@@ -42,9 +42,28 @@
     },
     "basis": {
       "type": "object",
-      "required": ["source_event"],
+      "required": ["source_event", "access_route"],
       "properties": {
-        "source_event": { "type": "string", "pattern": "^SE-[0-9]+$" }
+        "source_event": { "type": "string", "pattern": "^SE-[0-9]+$" },
+        "access_route": {
+          "enum": [
+            "direct_observation",
+            "testimony",
+            "document",
+            "object_trace",
+            "location_trace",
+            "inference",
+            "surveillance",
+            "institutional_channel",
+            "magic_tech",
+            "rumor",
+            "authorial_initialization"
+          ]
+        },
+        "access_records": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ|DA|BEL|SF|SE)-[0-9]+$" }
+        }
       },
       "additionalProperties": false
     },

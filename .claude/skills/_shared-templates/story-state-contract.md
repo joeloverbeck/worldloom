@@ -78,12 +78,14 @@ confidence: certain | high | medium | low | uncommitted   # *
 visibility: private | shared | factional | public | rumored | concealed | suppressed   # *
 basis:
   source_event: SE-<integer>*               # the event that established this belief
+  access_route: direct_observation | testimony | document | object_trace | location_trace | inference | surveillance | institutional_channel | magic_tech | rumor | authorial_initialization*
+  access_records: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer> | DA-<integer> | BEL-<integer> | SF-<integer> | SE-<integer>]
 consequences:
   opens: [OBL-<integer> | THR-<integer> | CNSQ-<integer>]
   constrains_choices: [CHC-<integer>]
 ```
 
-The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor — other provenance refinements (`witnessed_page`, `told_by`, `inferred_from`) are not retained at this layer.
+The `belief_mode` field separates sincerity / epistemic stance from `confidence`, which is only the holder's subjective certainty axis. The `truth_relation` field distinguishes belief from truth; the `visibility` field is consumed by the social-state firewall. `basis.source_event` is the strongest replay anchor. `basis.access_route` records how the holder gained access to the belief, and `basis.access_records` cites the enabling story records when the route depends on a witness, location, object, artifact, prior belief, story fact, or event. `branching-story-health-audit` Phase 2d consumes these fields when reporting `observer_firewall_violation` findings, so the §6b observer firewall remains auditable after the turn lands.
 
 ### 4.2 `PG` (~22 sub-paths)
 

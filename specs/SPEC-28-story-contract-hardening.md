@@ -67,6 +67,8 @@ Rules: `selection_source: none` (and therefore `selected_slt_id: null`) exactly 
 
 ### D3 — `BEL.basis` access routes: make the §6b observer firewall auditable (intake P0.3)
 
+**Implementation note (2026-05-15, SPEC28STOCONHAR-003).** D3 is landed. `BEL.basis` now carries required `access_route` and optional `access_records` fields in the shared story-state contract and `story-belief` JSON schema; validator and validate-patch-plan fixtures use the current shape; `branching-story-turn-cycle` records the route while authoring `BEL`; and `branching-story-health-audit` Phase 2d reads the recorded route for `observer_firewall_violation` review. Remaining current-state wording below is historical intake context for why the ticket existed.
+
 **Current state.** SPEC-27 D7 added the §6b observer firewall gating move/choice generation against the acting entity's `BEL` state, but `BEL.basis` records only `source_event`, and `story-state-contract.md:85-86` explicitly states the access-route refinements "are not retained at this layer." `branching-story-health-audit` Phase 2d must therefore re-derive each belief's access route from prose/plans/notes.
 
 **Change.** `story-state-contract.md` §4.1 (`BEL`) amends `basis`:

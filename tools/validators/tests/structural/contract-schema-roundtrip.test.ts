@@ -86,6 +86,16 @@ test("story schemas expose the amended contract field sets", () => {
     assert.deepEqual(schema.required, expected.required, schemaName);
     assert.deepEqual(Object.keys(schema.properties), expected.properties, schemaName);
   }
+
+  const beliefSchema = readSchema("story-belief");
+  const basis = beliefSchema.properties.basis as {
+    required: string[];
+    properties: Record<string, unknown>;
+    additionalProperties: unknown;
+  };
+  assert.equal(basis.additionalProperties, false);
+  assert.deepEqual(basis.required, ["source_event", "access_route"]);
+  assert.deepEqual(Object.keys(basis.properties), ["source_event", "access_route", "access_records"]);
 });
 
 test("representative amended contract records validate against tightened schemas", async () => {
@@ -218,6 +228,26 @@ test("representative amended contract records validate against tightened schemas
         create: ["SF-0001"],
         supersede: [],
         close: []
+      }
+    }),
+    storyRecord("belief_record", "BEL-0001", "beliefs", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      holder: "STENT-0001",
+      claim: "Mara knows the gate is damaged.",
+      belief_mode: "knows",
+      truth_relation: "true",
+      confidence: "certain",
+      visibility: "shared",
+      basis: {
+        source_event: "SE-0001",
+        access_route: "direct_observation",
+        access_records: ["STENT-0001", "SE-0001"]
+      },
+      consequences: {
+        opens: [],
+        constrains_choices: []
       }
     }),
     storyRecord("branch_record", "BR-0001", "branches", {
