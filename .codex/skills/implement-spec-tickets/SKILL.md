@@ -235,6 +235,8 @@ Harness handoff:
 - Required next invocation: $implement-spec-tickets <spec> <next-target-if-any>
 ```
 
+For an intentional reset-boundary stop between non-follow-up tickets, this `Harness handoff` is the required interim report; reserve the full `Final Report` checklist for blocked or final-family exits.
+
 Then prefer one of these reset paths:
 
 - If Codex exposes context compaction or the user can issue `/new`, request it before starting the next ticket.
