@@ -39,7 +39,6 @@ test("getContextPacket returns story_bundle_context for each story-pipeline task
     buildStoryBundleWorld(root);
 
     for (const taskType of [
-      "story_bootstrap",
       "story_turn_cycle",
       "commitment_block_authoring",
       "branching_story_health_audit",
@@ -59,6 +58,30 @@ test("getContextPacket returns story_bundle_context for each story-pipeline task
       assert.equal(result.story_bundle_context?.story_slug, STORY_FIXTURE_SLUG);
       assert.equal(result.story_bundle_context?.storylet_pool_summary.total, 1);
     }
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("getContextPacket treats story_bootstrap story_slug as a target slug", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      getContextPacket({
+        task_type: "story_bootstrap",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: "new-target-story",
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result), "story_bootstrap should return a packet");
+    assert.equal(result.task_header.story_slug, "new-target-story");
+    assert.equal(result.story_bundle_context, null);
   } finally {
     destroyTempRepoRoot(root);
   }

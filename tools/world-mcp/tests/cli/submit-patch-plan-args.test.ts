@@ -1,12 +1,10 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..", "..", "..");
-const CLI_SCRIPT = path.join(REPO_ROOT, "tools", "world-mcp", "dist", "src", "cli", "submit-patch-plan.js");
+import { runSubmitPatchPlanCli } from "../../src/cli/submit-patch-plan";
 
 interface RunResult {
   status: number | null;
@@ -14,53 +12,51 @@ interface RunResult {
   stderr: string;
 }
 
-function runCli(args: string[]): RunResult {
-  const child = spawnSync("node", [CLI_SCRIPT, ...args], {
-    encoding: "utf8"
-  });
-  return {
-    status: child.status,
-    stdout: child.stdout,
-    stderr: child.stderr
-  };
-}
-
 function makeTmpDir(): string {
   return mkdtempSync(path.join(os.tmpdir(), "world-mcp-cli-args-"));
 }
 
-test("cli-submit-patch-plan-args: --help prints usage to stdout and exits 0", () => {
-  const result = runCli(["--help"]);
+async function runCli(args: string[]): Promise<RunResult> {
+  const result = await runSubmitPatchPlanCli(args);
+  return {
+    status: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr
+  };
+}
+
+test("cli-submit-patch-plan-args: --help prints usage to stdout and exits 0", async () => {
+  const result = await runCli(["--help"]);
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Usage: submit-patch-plan/);
   assert.equal(result.stderr, "");
 });
 
-test("cli-submit-patch-plan-args: missing <plan-path> prints error and exits 2", () => {
-  const result = runCli([]);
+test("cli-submit-patch-plan-args: missing <plan-path> prints error and exits 2", async () => {
+  const result = await runCli([]);
 
   assert.equal(result.status, 2);
   assert.match(result.stderr, /<plan-path> is required/);
   assert.equal(result.stdout, "");
 });
 
-test("cli-submit-patch-plan-args: missing <token-path> prints error and exits 2", () => {
-  const result = runCli(["/tmp/some-plan.json"]);
+test("cli-submit-patch-plan-args: missing <token-path> prints error and exits 2", async () => {
+  const result = await runCli(["/tmp/some-plan.json"]);
 
   assert.equal(result.status, 2);
   assert.match(result.stderr, /<token-path> is required/);
   assert.equal(result.stdout, "");
 });
 
-test("cli-submit-patch-plan-args: nonexistent plan file exits 1 with ENOENT-derived message on stderr", () => {
+test("cli-submit-patch-plan-args: nonexistent plan file exits 1 with ENOENT-derived message on stderr", async () => {
   const tmp = makeTmpDir();
   try {
     const tokenPath = path.join(tmp, "token.txt");
     writeFileSync(tokenPath, "fake-token", "utf8");
 
     const planPath = path.join(tmp, "definitely-missing.json");
-    const result = runCli([planPath, tokenPath]);
+    const result = await runCli([planPath, tokenPath]);
 
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
@@ -71,14 +67,14 @@ test("cli-submit-patch-plan-args: nonexistent plan file exits 1 with ENOENT-deri
   }
 });
 
-test("cli-submit-patch-plan-args: nonexistent token file exits 1 with ENOENT-derived message on stderr", () => {
+test("cli-submit-patch-plan-args: nonexistent token file exits 1 with ENOENT-derived message on stderr", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = path.join(tmp, "plan.json");
     writeFileSync(planPath, JSON.stringify({ plan_id: "p", target_world: "w", patches: [{}] }), "utf8");
 
     const tokenPath = path.join(tmp, "definitely-missing.txt");
-    const result = runCli([planPath, tokenPath]);
+    const result = await runCli([planPath, tokenPath]);
 
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
@@ -89,7 +85,7 @@ test("cli-submit-patch-plan-args: nonexistent token file exits 1 with ENOENT-der
   }
 });
 
-test("cli-submit-patch-plan-args: malformed JSON in plan file exits 1 with parse-error message on stderr", () => {
+test("cli-submit-patch-plan-args: malformed JSON in plan file exits 1 with parse-error message on stderr", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = path.join(tmp, "plan.json");
@@ -97,7 +93,7 @@ test("cli-submit-patch-plan-args: malformed JSON in plan file exits 1 with parse
     const tokenPath = path.join(tmp, "token.txt");
     writeFileSync(tokenPath, "fake-token", "utf8");
 
-    const result = runCli([planPath, tokenPath]);
+    const result = await runCli([planPath, tokenPath]);
 
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
@@ -107,7 +103,7 @@ test("cli-submit-patch-plan-args: malformed JSON in plan file exits 1 with parse
   }
 });
 
-test("cli-submit-patch-plan-args: empty token file exits 1 with empty-token message on stderr", () => {
+test("cli-submit-patch-plan-args: empty token file exits 1 with empty-token message on stderr", async () => {
   const tmp = makeTmpDir();
   try {
     const planPath = path.join(tmp, "plan.json");
@@ -127,7 +123,7 @@ test("cli-submit-patch-plan-args: empty token file exits 1 with empty-token mess
     const tokenPath = path.join(tmp, "token.txt");
     writeFileSync(tokenPath, "   \n\t\n", "utf8");
 
-    const result = runCli([planPath, tokenPath]);
+    const result = await runCli([planPath, tokenPath]);
 
     assert.equal(result.status, 1);
     assert.equal(result.stdout, "");
