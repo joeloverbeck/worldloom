@@ -71,6 +71,12 @@ On resume after `/new`, read this state file first, then verify every important 
 - `last_state_commit` is either `null` / `"none"`, `"self"`, or reachable from `HEAD`
 - `git status --short` matches or safely supersedes `dirty_state`
 
+After resume validation, state the checked fields compactly before invoking a child skill, for example:
+
+```text
+Resume validation checked: spec, next_target, queue, last_work_commit, last_state_commit, dirty_state.
+```
+
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
 
 If the only conflict is stale `dirty_state` text and live `git status --short` proves the tracked worktree is clean or safely supersedes the old classification, state the stale classification explicitly and refresh it in the next state-file update. Do not create a pre-work state-only commit solely to correct stale dirt text when target selection, queue validity, ownership classification, and archival readiness are unaffected.
@@ -136,6 +142,8 @@ Child skill audit:
 ```
 
 If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue. When `Findings` is `0 issues, 0 improvements, 0 features`, include a concrete one-line `Evidence basis` naming the observed session surfaces checked, such as reassessment, proof substitution, closeout, archival handoff, state persistence, or reset behavior. Keep this to one line; do not expand a zero-finding audit into the full child-skill report template.
+
+For zero-finding harness-internal audits, a focused evidence check against the just-exercised child-skill surfaces is sufficient; do not generate the full child audit report unless a finding, blocker, or material follow-up decision exists.
 
 For harness-internal child phases, this compact block is the required visible report. Apply the child skill's evidence standards, guardrails, and edit rules, but do not emit the child skill's full report template unless the phase blocks, creates material follow-up decisions that need the full structure, or the extra detail is necessary for a truthful handoff.
 
