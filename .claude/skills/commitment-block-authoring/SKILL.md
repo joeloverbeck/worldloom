@@ -211,7 +211,7 @@ provenance:
 
 **Schema-minimalism discipline** (per FOUNDATIONS §Story Bundles §5b): every field on the block conforms to the shared contract §4.4 schema. **NO** `arc_contract`, `dramatic_unit`, `execution_envelope`, nested `effect_model`, `stop_policy`, `record_version` discriminator above `1`, or `shape:` discriminator. The block is a causal move, not a dramatic-act surrogate.
 
-**Effects-field convention**: `effects.create`, `effects.supersede`, and `effects.close` MAY be left empty (`[]`) when the block's effect-shape is contextual at runtime — matching bootstrap practice for `SLT-1..SLT-10` in any bootstrapped bundle. Populate `effects.{create,supersede,close}` with concrete record IDs or `bound:<alias>` references when the block's intent mandates a specific delta the author-time template is willing to commit to (e.g., a negotiation block that always supersedes the matched attention `SREL` as `bound:trust_edge`). Phase 4 check 3 (belief-or-relationship coverage) tests the literal `effects` field, not intent expressed in beats — so any block intended to satisfy that check must populate `effects.create`, `effects.supersede`, or `effects.close` with a concrete `BEL` / `SREL` reference or a `bound:<alias>` whose existential predicate matches `BEL` / `SREL`.
+**Effects-field convention**: `effects.create`, `effects.supersede`, and `effects.close` MAY be left empty (`[]`) when the block's effect-shape is contextual at runtime — matching bootstrap practice for `SLT-1..SLT-10` in any bootstrapped bundle. Populate `effects.{create,supersede,close}` with concrete record IDs or `bound:<alias>` references when the block's intent mandates a specific delta the author-time template is willing to commit to (e.g., a negotiation block that always supersedes the matched attention `SREL` as `bound:trust_edge`). Phase 4 check 3 (belief-or-relationship coverage) uses the three-form OR described below, so a block may satisfy the check through literal effects, `exit_options[].likely_effects`, or belief / relationship existential predicates without inventing fake author-time effects.
 
 ## Phase 3: Per-block validation
 
@@ -239,8 +239,14 @@ For `direct_batch`, verify across the surviving blocks:
 
 1. **Move-family diversity** — at least 3 distinct `move_family` values across the batch.
 2. **Recovery coverage** — at least 1 block has `move_family: recovery`. The bundle needs recovery coverage so that violence, betrayal, sex, and death outcomes route to graceful follow-up.
-3. **Belief-or-relationship coverage** — at least 1 block has `effects.create`, `effects.supersede`, or `effects.close` containing a `BEL-<integer>` / `SREL-<integer>` reference or a `bound:<alias>` whose same-block existential predicate matches `BEL` / `SREL` (for example `any_belief` or `any_relationship_axis`). Intent expressed only in beats or `exit_options.likely_effects` does NOT satisfy this check — the engine's batch-diversity test is on the literal effects field. For `supersede` / `close` targets, the referenced record must be established active by the block's `preconditions.hard` (per Phase 3 gate 5 effect legality). The social-state engine needs ongoing pool support per FOUNDATIONS §Story Bundles §6a.
+3. **Belief-or-relationship coverage** — at least 1 block satisfies the three-form OR below. The social-state engine needs ongoing pool support per FOUNDATIONS §Story Bundles §6a.
+   - Literal effects form: `effects.create`, `effects.supersede`, or `effects.close` contains a `BEL-<integer>` / `SREL-<integer>` reference or a `bound:<alias>` whose same-block existential predicate matches `BEL` / `SREL` (for example `any_belief` or `any_relationship_axis`). For `supersede` / `close` targets, the referenced record must be established active by the block's `preconditions.hard` (per Phase 3 gate 5 effect legality).
+   - Exit-preview form: `exit_options[].likely_effects` contains a `BEL-<integer>` / `SREL-<integer>` reference or a `bound:<alias>` whose same-block existential predicate matches `BEL` / `SREL`.
+   - Predicate-intent form: `preconditions.hard` or `preconditions.soft` includes `any_belief(...)` or `any_relationship_axis(...)`.
+   Actual runtime consequences remain authoritative in `SE.state_delta` — the batch-diversity check verifies *intent surface*, not pre-authored effects.
 4. **No branch-local dependencies in global-author-pool blocks** — re-verifies Phase 3 gate 3 at batch scope.
+
+Checks 1 (move-family diversity), 2 (recovery coverage), and 4 (no branch-local dependencies) do not inspect literal `effects` entries, so the three-form OR applies only to check 3.
 
 If any batch-level check fails, regenerate the affected blocks (loop to Phase 2 for replacements) OR shrink the batch to the diversity-compliant subset. Surface the regeneration / shrink decision in the Phase 6 deliverable summary.
 

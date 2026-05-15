@@ -19,6 +19,8 @@
 
 > **Implementation note (2026-05-15)**: D5 consumer follow-up `archive/tickets/SPEC30STOCONHAR-006.md` landed the read/consume side. `branching-story-health-audit` Phase 2e now prescribes `mystery_accretion_overflow` using ordered `evidence_records[]` chains and status progression; `tools/world-mcp` story-bundle context packets now surface per-mystery evidence chains from PG snapshots. Remaining D5 consumer prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D6 landed via `archive/tickets/SPEC30STOCONHAR-007.md`. `.claude/skills/commitment-block-authoring/SKILL.md` now replaces the literal-effects-only Phase 4 belief-or-relationship coverage rule with a three-form OR over `effects.*`, `exit_options[].likely_effects`, and `preconditions.hard | soft` containing `any_belief(...)` / `any_relationship_axis(...)`; runtime consequences remain authoritative in `SE.state_delta`. Remaining D6 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement
