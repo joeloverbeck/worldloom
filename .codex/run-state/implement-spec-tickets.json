@@ -1,14 +1,20 @@
 {
-  "originating_spec": null,
-  "archived_spec": "archive/specs/SPEC-31-story-contract-hardening-iii.md",
-  "last_ticket": "archive/tickets/SPEC31STOCONHAR-014.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "1af00cc",
+  "originating_spec": "specs/SPEC-32-story-contract-hardening-iv.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC32STOCONHAR-001.md",
+  "last_result": "completed_archived",
+  "last_work_commit": "61b65c9",
   "last_state_commit": "self",
-  "next_target": null,
-  "queue": [],
+  "next_target": "tickets/SPEC32STOCONHAR-002.md",
+  "queue": [
+    "tickets/SPEC32STOCONHAR-002.md",
+    "tickets/SPEC32STOCONHAR-003.md",
+    "tickets/SPEC32STOCONHAR-004.md",
+    "tickets/SPEC32STOCONHAR-005.md",
+    "tickets/SPEC32STOCONHAR-006.md"
+  ],
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree; expected ignored artifacts visible under .claude/settings.local.json, briefs/, tools/world-mcp/{.secret,dist,node_modules}, world-proposals/, worlds/animalia/, and worlds/erotica-world/",
-  "updated_at": "2026-05-15"
+  "dirty_state": "clean tracked worktree except this state file; expected ignored artifacts under tools/validators/dist/ and tools/validators/node_modules/",
+  "updated_at": "2026-05-16"
 }
