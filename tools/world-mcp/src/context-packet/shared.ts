@@ -96,13 +96,13 @@ export interface ContextPacketStoryBundleContext {
   storylet_pool_summary: {
     total: number;
     visibility_filtered_count: number;
-    by_shape: Record<string, number>;
-    by_content_intensity: Record<string, number>;
+    by_move_family: Record<string, number>;
+    by_urgency: Record<string, number>;
     visible_records: Array<{
       id: string;
       title: string;
-      shape: string;
-      content_intensity: string;
+      move_family: string;
+      urgency: string;
       visibility_scope: string;
     }>;
   };

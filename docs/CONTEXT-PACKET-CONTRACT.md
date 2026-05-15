@@ -122,11 +122,11 @@ This layer carries:
 
 The indexed story-bundle state required by story-pipeline task types.
 
-This layer is `null` for world-canon task types. For `story_bootstrap`, `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter.
+This layer is `null` for world-canon task types. For `story_turn_cycle`, `commitment_block_authoring`, `branching_story_health_audit`, and `story_fact_promotion_to_canon`, callers must supply `story_slug`; the layer is then populated from indexed story-bundle records plus `STORY_KERNEL.md` frontmatter. For `story_bootstrap`, callers supply `story_slug` as the target slug before the bundle exists; `story_bundle_context` is `null`, so the packet is world-canon-only.
 
 This layer carries:
 
-- storylet pool totals, shape/intensity counts, and capped visible storylet records
+- storylet pool totals, `move_family` distribution, `saliency.urgency` counts, and capped visible storylet records
 - open obligations
 - active / pressured / critical / dormant threads
 - the longest active branch path and recent page metadata along that path

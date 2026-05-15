@@ -31,14 +31,18 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
     assert.ok(result.story_bundle_context !== null);
     assert.equal(result.story_bundle_context.story_slug, STORY_FIXTURE_SLUG);
     assert.equal(result.story_bundle_context.storylet_pool_summary.total, 1);
-    assert.equal(result.story_bundle_context.storylet_pool_summary.by_shape.choice, 1);
-    assert.equal(
-      result.story_bundle_context.storylet_pool_summary.by_content_intensity.quiet,
-      1
-    );
+    assert.equal(result.story_bundle_context.storylet_pool_summary.by_move_family.decision, 1);
+    assert.equal(result.story_bundle_context.storylet_pool_summary.by_urgency.high, 1);
     assert.deepEqual(
       result.story_bundle_context.storylet_pool_summary.visible_records.map((record) => record.id),
       ["SLT-0021"]
+    );
+    assert.deepEqual(
+      result.story_bundle_context.storylet_pool_summary.visible_records.map((record) => [
+        record.move_family,
+        record.urgency
+      ]),
+      [["decision", "high"]]
     );
     assert.deepEqual(
       result.story_bundle_context.open_obligations.map((obligation) => obligation.id),
@@ -90,6 +94,30 @@ test("world-canon context packets expose a null story_bundle_context", async () 
 
     assert.ok(!("code" in result));
     assert.equal(result.task_header.story_slug, null);
+    assert.equal(result.story_bundle_context, null);
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("story_bootstrap uses story_slug as a target slug without story-bundle context", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildStoryBundleWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      assembleContextPacket({
+        task_type: "story_bootstrap",
+        world_slug: STORY_FIXTURE_WORLD,
+        story_slug: "new-target-story",
+        seed_nodes: ["entity:marla-kern"],
+        token_budget: 18000
+      })
+    );
+
+    assert.ok(!("code" in result));
+    assert.equal(result.task_header.story_slug, "new-target-story");
     assert.equal(result.story_bundle_context, null);
   } finally {
     destroyTempRepoRoot(root);
