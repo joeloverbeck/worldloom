@@ -272,6 +272,8 @@ The bundle does not yet exist at bootstrap time, so the contract's "story_bundle
 
 ### D5 — Remove `ARCTRACE`; disambiguate story-local `DA` (P1)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-005` landed this deliverable. `docs/MACHINE-FACING-LAYER.md`, `tools/world-mcp/README.md`, and `tools/world-mcp` registered capability prose now distinguish world-level hybrid `DA` from story-local `DA` scoped by `story_slug`; `get_record` routes scoped `DA-*` ids to `story_diegetic_artifact_record` rows; and the remaining active-code `ARCTRACE` allowance in `tools/patch-engine/src/ops/shared.ts` was removed. The original problem/change text below is historical intake context.
+
 **Problem**: `docs/MACHINE-FACING-LAYER.md:67` still lists `ARCTRACE` among story-bundle id classes for `get_record`. FOUNDATIONS §Story Bundles §4a explicitly rejects ARC_TRACE; SPEC-29 (legacy tools vocabulary cleanup) was supposed to purge ARC machinery but missed this surface. Additionally, the line treats `DA` as both world-level (in the atomic-id list) and story-local (implicitly, via `story_slug`) without disambiguation.
 
 **Change**:
