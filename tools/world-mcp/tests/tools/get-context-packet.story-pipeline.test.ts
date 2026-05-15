@@ -16,17 +16,19 @@ test("getContextPacket requires story_slug for story-pipeline task types", async
   try {
     buildStoryBundleWorld(root);
 
-    await assert.rejects(
-      () =>
-        withRepoRoot(root, () =>
-          getContextPacket({
-            task_type: "commitment_block_authoring",
-            world_slug: STORY_FIXTURE_WORLD,
-            seed_nodes: ["entity:marla-kern"]
-          })
-        ),
-      /story_slug is required/
-    );
+    for (const taskType of ["story_bootstrap", "commitment_block_authoring"] as const) {
+      await assert.rejects(
+        () =>
+          withRepoRoot(root, () =>
+            getContextPacket({
+              task_type: taskType,
+              world_slug: STORY_FIXTURE_WORLD,
+              seed_nodes: ["entity:marla-kern"]
+            })
+          ),
+        /story_slug is required/
+      );
+    }
   } finally {
     destroyTempRepoRoot(root);
   }

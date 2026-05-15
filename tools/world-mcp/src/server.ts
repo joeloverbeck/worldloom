@@ -386,7 +386,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "get_context_packet",
-    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug and return story_bundle_context populated from indexed story-bundle records plus STORY_KERNEL.md frontmatter; world-canon task types return story_bundle_context: null.",
+    "Assemble a bounded context packet for a retrieval task. Story-pipeline task types require story_slug. story_bootstrap treats it as the target bundle slug and returns story_bundle_context: null; other story-pipeline task types populate story_bundle_context from indexed story-bundle records plus STORY_KERNEL.md frontmatter. World-canon task types return story_bundle_context: null.",
     getContextPacketInputSchema,
     async (args) => getContextPacket(args as unknown as Parameters<typeof getContextPacket>[0]),
     { task_type: TASK_TYPES, delivery_mode: DELIVERY_MODES, node_classes: NODE_TYPES }

@@ -221,6 +221,7 @@ Full bodies are considered only for `local_authority`, `governing_world_context`
 | `propose_new_canon_facts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `propose_new_characters` | `canon_fact_record`, `invariant`, `section` records whose `file_class` is `PEOPLES_AND_SPECIES` |
 | `canon_facts_from_diegetic_artifacts` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `diegetic_artifact_record` |
+| `story_bootstrap` | `canon_fact_record`, `invariant`, `mystery_reserve_entry`, `open_question_entry` |
 | `story_turn_cycle` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `commitment_block_authoring` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
 | `branching_story_health_audit` | `canon_fact_record`, `invariant`, `mystery_reserve_entry` |
