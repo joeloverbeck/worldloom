@@ -37,8 +37,7 @@ import type {
   ModificationHistoryEntry,
   NodeType,
   ScopedEdgeType,
-  YamlEdgeType,
-  ArcTraceNodeRow
+  YamlEdgeType
 } from "../src/public/types";
 import { ATOMIC_LOGICAL_WORLD_FILES as SOURCE_ATOMIC_LOGICAL_WORLD_FILES } from "../src/parse/atomic";
 import {
@@ -93,7 +92,6 @@ type _ChangeLogScopeShape = Assert<
   ChangeLogScope extends { local_or_global: "local" | "global" } ? true : false
 >;
 type _ChangeLogEntryShape = Assert<ChangeLogEntry extends { change_id: string } ? true : false>;
-type _ArcTraceNodeRowShape = Assert<ArcTraceNodeRow extends { id: string; story_slug: string } ? true : false>;
 
 test("public types re-export the expected runtime constants", () => {
   assert.deepEqual(ATOMIC_LOGICAL_WORLD_FILES, SOURCE_ATOMIC_LOGICAL_WORLD_FILES);

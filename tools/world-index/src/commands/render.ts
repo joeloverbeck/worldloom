@@ -11,7 +11,7 @@ interface StoryRenderRow {
 export function render(
   worldRoot: string,
   worldSlug: string,
-  options: { storySlug?: string; arcTraces?: boolean }
+  options: { storySlug?: string }
 ): number {
   if (!options.storySlug) {
     console.error("render requires --story <story-slug> in this build.");
@@ -32,11 +32,10 @@ export function render(
           FROM nodes
           WHERE world_slug = ?
             AND story_slug = ?
-            AND (? = 1 OR node_type != 'arc_trace_node')
           ORDER BY file_path, node_id
         `
       )
-      .all(worldSlug, options.storySlug, options.arcTraces === true ? 1 : 0) as StoryRenderRow[];
+      .all(worldSlug, options.storySlug) as StoryRenderRow[];
 
     if (rows.length === 0) {
       console.error(`No indexed story-bundle records found for '${worldSlug}/${options.storySlug}'.`);
