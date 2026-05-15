@@ -551,6 +551,8 @@ A `record_schema_compliance` check on `candidate:` alone would reject these fiel
 
 ### D11 — Clarify `mystery_resolution` source-record mapping (P2, reclassified from report's P1)
 
+**Implementation note (2026-05-15)**: SPEC31STOCONHAR-011 landed this deliverable. `story-fact-promotion-to-canon` now treats `mystery_resolution` user-supplied source records as branch evidence (`SF-<integer>` or `BEL-<integer>`) and states that `M` records are auto-loaded whole-class governing firewall context, not `source_record_ids`. `proposal_package_shape` now rejects `mystery_resolution` `proposal_evidence.source_records[]` entries that are not `SF` or `BEL`, including `M-*`, with `mystery_resolution_source_record_misclass`. The drafted skill dry-run proof below remains historical; live proof used package-local validators tests plus direct skill contract review.
+
 **Problem**: `story-fact-promotion-to-canon/SKILL.md:113`:
 ```
 | `mystery_resolution` | `M-<integer>` for Mystery Reserve audit; SE `promotion_claims[].source_record` cites `SF-<integer>` or `BEL-<integer>` | ...

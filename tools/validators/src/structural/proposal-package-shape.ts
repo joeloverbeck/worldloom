@@ -38,6 +38,16 @@ export const proposalPackageShape: Validator = {
 
       if (!isPlainRecord(packageRecord.proposal_evidence)) {
         verdicts.push(verdict(proposal.path, "proposal_package_evidence_missing", "Proposal package must include top-level proposal_evidence."));
+      } else if (packageRecord.source_kind === "mystery_resolution") {
+        const proposalEvidence = asPlainRecord(packageRecord.proposal_evidence);
+        const sourceRecords = Array.isArray(proposalEvidence.source_records)
+          ? proposalEvidence.source_records
+          : [];
+        for (const sourceRecord of sourceRecords) {
+          if (typeof sourceRecord !== "string" || !/^(SF|BEL)-\d+$/.test(sourceRecord)) {
+            verdicts.push(mysteryResolutionSourceMisclass(proposal.path, sourceRecord));
+          }
+        }
       }
 
       for (const key of Object.keys(candidate)) {
@@ -127,6 +137,14 @@ function candidateImpurity(file: string, fieldPath: string): Verdict {
   );
 }
 
+function mysteryResolutionSourceMisclass(file: string, sourceRecord: unknown): Verdict {
+  return verdict(
+    file,
+    "mystery_resolution_source_record_misclass",
+    `mystery_resolution proposal_evidence.source_records entries must be SF-<integer> or BEL-<integer>; found ${formatValue(sourceRecord)}.`
+  );
+}
+
 function verdict(file: string, code: string, message: string): Verdict {
   return {
     validator: "proposal_package_shape",
@@ -136,6 +154,10 @@ function verdict(file: string, code: string, message: string): Verdict {
     location: { file },
     suggested_fix: "Keep the proposal candidate CF-shaped and move branch-local evidence into top-level proposal_evidence."
   };
+}
+
+function formatValue(value: unknown): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function loadCanonFactFields(): ReadonlySet<string> {

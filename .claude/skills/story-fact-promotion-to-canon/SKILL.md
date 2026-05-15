@@ -13,7 +13,7 @@ arguments:
     description: "One of: story_fact | mystery_resolution | character_outcome | artifact_canonization | relationship_or_institutional_outcome | other_branch_claim. Changes required evidence, not workflow shape."
     required: true
   - name: source_record_ids
-    description: "List of record ids constituting the candidate (e.g., [SF-42] for story_fact; [M-3] for mystery_resolution; [STENT-7] for character_outcome)."
+    description: "List of record ids constituting the candidate (e.g., [SF-42] for story_fact or mystery_resolution; [STENT-7] for character_outcome). M records are governing firewall context and are not user-supplied source_record_ids."
     required: true
   - name: branch_path
     description: "BR-<integer> of the branch where the claim is established. Every source record's lineage must trace to branch_path."
@@ -110,7 +110,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 | source_kind | Required source_record class(es) | Permitted supporting source records | Prose evidence |
 |---|---|---|---|
 | `story_fact` | `SF-<integer>` | authoring `SE`, witness `BEL` | Required |
-| `mystery_resolution` | `M-<integer>` for Mystery Reserve audit; SE `promotion_claims[].source_record` cites `SF-<integer>` or `BEL-<integer>` | resolving `SE`, pre-resolution `BEL` chain | Required |
+| `mystery_resolution` | `SF-<integer>` or `BEL-<integer>` that states the apparent, held, or candidate resolution | resolving `SE`, pre-resolution `BEL` chain, relevant `PG.state_snapshot.unresolved_mystery_claims[].evidence_records[]` | Required; M records are governing firewall load (auto-loaded from world context, not user-supplied as `source_record_ids`) |
 | `character_outcome` | `STENT-<integer>` | `STSTAT-<integer>` supersession-chain evidence showing the outcome's accumulation; STENT alone is sufficient when no status record carries load-bearing evidence | Required |
 | `artifact_canonization` | `DA-<integer>` (story-local) | authoring `SE` | Required |
 | `relationship_or_institutional_outcome` | `SREL-<integer>` | `BEL-<integer>`, `SF-<integer>`, supersession chain, supporting events | Required |
@@ -143,7 +143,7 @@ Before Phase 1:
 
 1. Load `docs/FOUNDATIONS.md` and `.claude/skills/_shared-templates/story-state-contract.md` into working context. Abort with clear missing-file error on unreadable path.
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found error if missing.
-3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). Abort with source-not-found or source-kind-mismatch error on any miss.
+3. Resolve source records: for each id in `source_record_ids`, load the corresponding `_source/<class>/<id>.yaml`. Verify source-kind-to-record-class mapping (per the table in §Inputs). When `source_kind: mystery_resolution`, every `source_record_ids` entry MUST be `SF-<integer>` or `BEL-<integer>`; `M-<integer>` records are auto-loaded as governing firewall context and are not lawful source records. Abort with source-not-found, source-kind-mismatch, or `source_kind_record_class_mismatch` on any miss.
 4. Resolve supporting pages: for each `PG-<integer>` in `supporting_page_ids`, load the page record AND `pages-prose/<page_id>.md` (rendered prose) AND `pages-prose-receipts/<page_id>.yaml` (prose receipt). Abort with missing-prose error if rendered prose is absent for a required-prose source_kind. Accept `verdict: PASS | WARN`; flag `verdict: FAIL` for Phase 7 user acceptance.
 5. Resolve branch: load `_source/branches/<branch_path>.yaml`. Verify every source record's branch lineage traces to `branch_path` (a `story_fact` source cannot be promoted from a branch that didn't author it). Abort with branch-mismatch error on any failure.
 6. Allocate `SP-<integer>` id via `mcp__worldloom__allocate_next_id(world_slug, 'SP', story_slug=<story_slug>)`.
@@ -231,6 +231,8 @@ scope_inflation_report:
 
 ## Phase 4: Mystery firewall (FOUNDATIONS Rule 7 + shared contract §11)
 
+Mystery Reserve (`M-<integer>`) records are loaded from world canon context as whole-class governing firewall context. They are NOT user-supplied through `source_record_ids`; for `source_kind: mystery_resolution`, those ids are branch evidence records (`SF` / `BEL`) that state the apparent, held, or candidate resolution.
+
 Reject conditions:
 
 1. **Forbidden mystery resolution** — any mystery with `status: forbidden` whose effect would be resolved by accepting this candidate. `firewall_verdict: ABORT` (no proposal written; Phase 5+ skipped).
@@ -242,7 +244,7 @@ Produce a structured `mystery_firewall_report`:
 
 ```yaml
 mystery_firewall_report:
-  mysteries_scanned: <count of M-<integer> records loaded
+  mysteries_scanned: <count of M-<integer> records loaded>
   forbidden_resolution_attempts: [M-<integer>, if any]
   accidental_resolution_warnings: [M-<integer>, if any]
   counterfactual_promotion_attempts: [<source SF id, if any>]

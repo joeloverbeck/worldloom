@@ -77,6 +77,78 @@ proposal_evidence:
   assert.deepEqual(verdicts, []);
 });
 
+test("proposal_package_shape accepts mystery_resolution SF and BEL source records", async () => {
+  const verdicts = await proposalPackageShape.run(
+    inputFile(`
+promotion_id: SP-1
+story_slug: test-story
+source_kind: mystery_resolution
+candidate:
+  title: Branch mystery claim
+  status: contested_canon
+  type: event
+  statement: A branch-local mystery claim.
+  scope: { geographic: local, temporal: current, social: public }
+  truth_scope: { world_level: false, diegetic_status: disputed }
+  domains_affected: [history]
+  required_world_updates: [TIMELINE]
+  contradiction_risk: { hard: false, soft: true }
+  source_basis:
+    direct_user_approval: false
+    derived_from: []
+proposal_evidence:
+  story_branch: BR-1
+  source_kind: mystery_resolution
+  source_records: [SF-1, BEL-1]
+  supporting_pages: [PG-1]
+  authoring_events: [SE-1]
+  belief_witnesses: [BEL-1]
+  rendered_prose_receipts: [pages-prose-receipts/PG-1.yaml]
+  rationale: Branch evidence supports the proposal.
+`),
+    context([])
+  );
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("proposal_package_shape rejects mystery_resolution M source records", async () => {
+  const verdicts = await proposalPackageShape.run(
+    inputFile(`
+promotion_id: SP-1
+story_slug: test-story
+source_kind: mystery_resolution
+candidate:
+  title: Branch mystery claim
+  status: contested_canon
+  type: event
+  statement: A branch-local mystery claim.
+  scope: { geographic: local, temporal: current, social: public }
+  truth_scope: { world_level: false, diegetic_status: disputed }
+  domains_affected: [history]
+  required_world_updates: [TIMELINE]
+  contradiction_risk: { hard: false, soft: true }
+  source_basis:
+    direct_user_approval: false
+    derived_from: []
+proposal_evidence:
+  story_branch: BR-1
+  source_kind: mystery_resolution
+  source_records: [M-3]
+  supporting_pages: [PG-1]
+  authoring_events: [SE-1]
+  belief_witnesses: [BEL-1]
+  rendered_prose_receipts: [pages-prose-receipts/PG-1.yaml]
+  rationale: Branch evidence supports the proposal.
+`),
+    context([])
+  );
+
+  assert.equal(verdicts.length, 1);
+  assert.equal(verdicts[0]?.code, "mystery_resolution_source_record_misclass");
+  assert.match(verdicts[0]?.message ?? "", /M-3/);
+});
+
 test("proposal_package_shape requires top-level proposal_evidence", async () => {
   const verdicts = await proposalPackageShape.run(
     inputFile(`
