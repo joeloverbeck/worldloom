@@ -216,6 +216,8 @@ If the state file itself changes after the work commit, either:
 - amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
 - commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
 
+Before creating a state-file-only commit, re-read the staged JSON or run `git diff --cached -- .codex/run-state/implement-spec-tickets.json` and confirm `last_state_commit` is already `"self"`. The actual state-only commit sha belongs in the printed handoff's `State commit` line, not inside the JSON.
+
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
 
 Then print a short handoff in the conversation that mirrors the state file:
