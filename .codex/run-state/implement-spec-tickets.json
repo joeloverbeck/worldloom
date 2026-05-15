@@ -1,0 +1,27 @@
+{
+  "originating_spec": "specs/SPEC-31-story-contract-hardening-iii.md",
+  "archived_spec": null,
+  "last_ticket": "archive/tickets/SPEC31STOCONHAR-001.md",
+  "last_result": "completed_archived",
+  "last_commit": "7e3b2100be12eaac0ec772959cb898abc2eaee32",
+  "next_target": "tickets/SPEC31STOCONHAR-002.md",
+  "queue": [
+    "tickets/SPEC31STOCONHAR-002.md",
+    "tickets/SPEC31STOCONHAR-003.md",
+    "tickets/SPEC31STOCONHAR-004.md",
+    "tickets/SPEC31STOCONHAR-005.md",
+    "tickets/SPEC31STOCONHAR-006.md",
+    "tickets/SPEC31STOCONHAR-007.md",
+    "tickets/SPEC31STOCONHAR-008.md",
+    "tickets/SPEC31STOCONHAR-009.md",
+    "tickets/SPEC31STOCONHAR-010.md",
+    "tickets/SPEC31STOCONHAR-011.md",
+    "tickets/SPEC31STOCONHAR-012.md",
+    "tickets/SPEC31STOCONHAR-013.md",
+    "tickets/SPEC31STOCONHAR-014.md"
+  ],
+  "blocked": false,
+  "blocker": null,
+  "dirty_state": "owned ticket-family edits plus unrelated dirty .claude/skills/mcp-integration-audit/SKILL.md .claude/skills/reassess-spec/SKILL.md .claude/skills/spec-to-tickets/SKILL.md",
+  "updated_at": "2026-05-15"
+}

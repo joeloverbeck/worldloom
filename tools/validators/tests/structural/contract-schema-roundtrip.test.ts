@@ -15,7 +15,7 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
   },
   "story-page": {
     required: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "emitted_choices", "validation_trace"],
-    properties: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "prose_path", "prose_receipt_path", "emitted_choices", "validation_trace"]
+    properties: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "emitted_choices", "validation_trace"]
   },
   "story-event": {
     required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "commitment", "outcome_route", "world_logic_rationale", "state_delta"],

@@ -147,7 +147,7 @@ Load into working memory:
 Compute fresh hashes:
 
 - `computed_plan_hash`: sha256 over the plan file's bytes.
-- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash`, `prose_path`, and `prose_receipt_path` from the payload.
+- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash` from the payload.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
 ## Phase 2: Hash integrity check

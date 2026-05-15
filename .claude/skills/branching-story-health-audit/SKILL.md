@@ -247,8 +247,8 @@ For every branch head and every page selected by `branch_path_filter`, compare `
 
 For each `PG-<integer>` in the scoped branches:
 
-- `missing_prose_file` — `PG.prose_path` is set but the file is absent. WARNING; `repair_kind: prose_revision`.
-- `missing_prose_receipt` — prose has been rendered (file exists, `PG.prose_path` non-null) but no `pages-prose-receipts/PG-<integer>.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
+- `missing_prose_file` — expected `pages-prose/PG-<integer>.md` is absent for a committed page. INFO when absent without a forcing signal; WARNING when paired with an outstanding promotion requiring prose evidence. `repair_kind: prose_revision`.
+- `missing_prose_receipt` — `pages-prose/PG-<integer>.md` exists but no `pages-prose-receipts/PG-<integer>.yaml` exists. INFO; `repair_kind: prose_revision` (re-run `branching-story-prose-attach`).
 - `prose_receipt_failed` — receipt's `verdict: FAIL`. Severity from receipt's `repair_recommendation`: FAIL with `run_story_fact_promotion_to_canon` → ERROR + `repair_kind: promotion`; FAIL with `run_turn_cycle_repair` → ERROR + `repair_kind: turn_repair`; FAIL with `revise_prose` → WARNING + `repair_kind: prose_revision`.
 - `unrepaired_prose_invention` — receipt's `checks.invented_structural_fact: FAIL` flag persists with no subsequent repair turn. WARNING; `repair_kind: turn_repair`.
 - `state_change_unrendered` — receipt's `checks.required_event_rendered: WARN | FAIL`. WARNING; `repair_kind: prose_revision`.

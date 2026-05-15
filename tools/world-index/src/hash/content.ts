@@ -51,13 +51,10 @@ export function sha256OfUtf8(input: string | Buffer): string {
 }
 
 // State-hash fork-state payload per story state contract §4.2a: include the
-// complete PG mapping except state_hash (the field being computed) and the
-// mutable prose publication receipt fields. All other PG fields are included
-// verbatim before canonicalization.
+// complete PG mapping except state_hash (the field being computed). Rendered
+// prose and prose receipts are publication artifacts, not PG fields.
 const PG_STATE_HASH_EXCLUDED_FIELDS: ReadonlySet<string> = new Set([
-  "state_hash",
-  "prose_path",
-  "prose_receipt_path"
+  "state_hash"
 ]);
 
 export function computePgStateHash(pgRecord: Record<string, unknown>): string {

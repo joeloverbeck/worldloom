@@ -146,8 +146,6 @@ state_snapshot:
 plan:
   plan_hash: sha256*
 prose_plan_path: pages-prose-plans/PG-<integer>.md*   # stable plan address; included in state_hash payload
-prose_path: pages-prose/PG-<integer>.md | null        # default null; excluded from state_hash payload
-prose_receipt_path: pages-prose-receipts/PG-<integer>.yaml | null   # default null; excluded from state_hash payload
 emitted_choices: [CHC-<integer>]*
 validation_trace:                      # * one entry per shared gate with PASS + one-line rationale
   input_legality: "PASS: <rationale>"
@@ -160,7 +158,9 @@ validation_trace:                      # * one entry per shared gate with PASS +
   canon_promotion_hold: "PASS: <rationale>" | "NOT_APPLICABLE: <rationale>"
 ```
 
-`prose_path` and `prose_receipt_path` are informational publication receipts. They are not lifecycle status. There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
+Rendered prose and prose receipts are publication artifacts discovered by deterministic paths: `pages-prose/PG-<integer>.md` and `pages-prose-receipts/PG-<integer>.yaml`. They are not page-state fields and are not included in `PG`. `INDEX.md` may render publication status for human navigation; `PG` remains the authoritative fork-state record.
+
+There is no nested rendered-prose block, no `prose_status` field, no `state_delta_summary` field (`SE.state_delta` is authoritative), and no `open_debt` field on the snapshot (open obligations / consequences / threads are derived from `state_snapshot.active_records.OBL / CNSQ / THR`).
 
 `state_snapshot.canon_revision` is the page's world-canon baseline. It records the latest governing `CH-<integer>` visible to the page-planning context at commit time, or `null` only for worlds with no change-log entry. A child page must compare the parent snapshot's `canon_revision` against the current world-canon revision at turn start and classify drift as `compatible`, `grandfathered`, `requires_health_audit`, `requires_repair_turn`, or `promotion_or_retcon_conflict` before treating parent story-local assumptions as current world-valid truth.
 
@@ -175,11 +175,7 @@ Every `PG` record must carry final lowercase sha256 values before any `create_pg
 
 Compute `plan.plan_hash` first. It is sha256 over the exact UTF-8 bytes of the page plan body that will later be written to `pages-prose-plans/PG-<integer>.md`. Because the page plan is a direct-write artifact after patch submission (§10), the skill drafts the complete plan bytes in working memory, hashes those exact bytes, places the hash in `PG.plan.plan_hash`, and after patch success writes the same bytes to disk without reformatting.
 
-Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except:
-
-- exclude `state_hash` itself;
-- exclude `prose_path` (mutable publication receipt);
-- exclude `prose_receipt_path` (mutable publication receipt).
+Compute `state_hash` second from the PG fork-state payload after `plan.plan_hash` is final. The fork-state payload is the complete PG mapping except `state_hash` itself. Rendered prose and prose receipts are not PG fields and therefore are not hash inputs.
 
 All other PG fields are included, including `id`, `story_id`, `branch_id`, `parent_page_id`, `branch_path`, `turn_index`, `input`, `state_hash_parent`, `state_snapshot`, `plan.plan_hash`, `prose_plan_path`, `emitted_choices`, and `validation_trace`.
 
@@ -197,7 +193,7 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
   --pg   <path-to-pg-draft>.{yaml,json}
 ```
 
-The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication-receipt blocks) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
+The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication artifacts) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
 ### 4.3 `SE` (~15 sub-paths)
 

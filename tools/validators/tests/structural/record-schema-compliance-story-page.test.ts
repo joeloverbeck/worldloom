@@ -24,8 +24,6 @@ function validPagePayload(): Record<string, unknown> {
       resolved_event_id: "SE-0001"
     },
     state_hash_parent: null,
-    prose_path: null,
-    prose_receipt_path: null,
     prose_plan_path: "pages-prose-plans/PG-0001.md",
     plan: {
       plan_hash: "0000000000000000000000000000000000000000000000000000000000000001"
@@ -70,19 +68,34 @@ function validPagePayload(): Record<string, unknown> {
   };
 }
 
-test("record_schema_compliance accepts a PG record with null prose_path and contract-shaped snapshot blocks", async () => {
+test("record_schema_compliance accepts a PG record with contract-shaped snapshot blocks", async () => {
   const result = await recordSchemaCompliance.run({}, context([pageRecord(validPagePayload())]));
 
   assert.deepEqual(result, []);
 });
 
-test("record_schema_compliance accepts a rendered PG record with a string prose_path", async () => {
+test("record_schema_compliance rejects a PG record with retired prose_path", async () => {
   const parsed = validPagePayload();
   parsed.prose_path = "pages-prose/PG-0001.md";
 
   const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
 
-  assert.deepEqual(result, []);
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.additionalProperties" &&
+    verdict.message.includes("must NOT have additional properties")
+  )));
+});
+
+test("record_schema_compliance rejects a PG record with retired prose_receipt_path", async () => {
+  const parsed = validPagePayload();
+  parsed.prose_receipt_path = "pages-prose-receipts/PG-0001.yaml";
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.additionalProperties" &&
+    verdict.message.includes("must NOT have additional properties")
+  )));
 });
 
 test("record_schema_compliance rejects PG records missing prose_plan_path", async () => {
@@ -153,18 +166,6 @@ test("record_schema_compliance rejects PG records with a prose_plan_path that vi
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.pattern" &&
     verdict.message.includes("/prose_plan_path")
-  )));
-});
-
-test("record_schema_compliance rejects PG records with a prose_path string that violates the pattern", async () => {
-  const parsed = validPagePayload();
-  parsed.prose_path = "pages-prose-plans/PG-0001.md";
-
-  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
-
-  assert.ok(result.some((verdict) => (
-    verdict.code === "record_schema_compliance.pattern" &&
-    verdict.message.includes("/prose_path")
   )));
 });
 
