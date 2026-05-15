@@ -190,7 +190,21 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
 6. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses, which are the derived projection of active `STSTAT` records on `PG.state_snapshot`, and does not grant player-facing agency that conflicts with the `## Player Agency Contract`. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat, and non-controlled `STENT` records should not read as player-controlled unless the agency surface permits it. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y, or prose assigns control outside the Player Agency Contract) are `FAIL`.
 
-7. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`. Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. Structural inventions that would change cast capability / location / faction alignment are `FAIL` and route to `repair_recommendation: run_turn_cycle_repair`.
+7. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`.
+
+   `invented_structural_fact` has deterministic and judgment-assisted subchecks.
+
+   Deterministic FAIL cases (regex or state-projection-driven):
+   - prose contradicts active STSTAT life/agency/location (for example, a dead actor speaks; a located actor appears in a different STLOC; an incapacitated actor performs a complex action);
+   - prose asserts a named record id or canon-fact id absent from the plan's §4 / §7 / state snapshot;
+   - prose states a mystery resolution that the plan's §11 marks as forbidden.
+
+   Judgment-assisted WARN/FAIL cases (semantic):
+   - implied faction alignment shifts not present in the plan;
+   - new capability or magical/technological affordance not present in the plan's §4 or active state;
+   - institutional rule or law invoked but not present in active canon (CF / INV) or plan §4.
+
+   Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. The roll-up `invented_structural_fact` receipt field records the worst verdict across both sub-categories. Judgment-assisted findings are flagged in `notes` so the user can review and decide on `revise_prose` vs. `run_turn_cycle_repair` vs. canon-promotion.
 
 8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `PG.SE.promotion_claims[]` evidence is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 

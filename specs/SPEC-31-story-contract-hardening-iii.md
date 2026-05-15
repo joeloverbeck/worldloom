@@ -582,6 +582,8 @@ The table muddles "governing firewall load" (M) with "source record" (SF/BEL). C
 
 ### D12 — Split deterministic vs. judgment-assisted prose invention (P2)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-012` landed this deliverable. `branching-story-prose-attach` Phase 3 now splits `invented_structural_fact` into deterministic FAIL cases (state-projection / regex-backed contradictions, absent record ids, forbidden mystery resolutions) and judgment-assisted WARN/FAIL cases (faction alignment, new capabilities, institutional rules), with judgment-assisted findings flagged in receipt `notes`. The original dry-run proof below remains historical; live proof used manual contract review plus focused grep because there is no executable prose-attach runner in the repo surface.
+
 **Problem**: `branching-story-prose-attach/SKILL.md:193` partially distinguishes deterministic and judgment-assisted cases for `invented_structural_fact`, but the current wording overstates determinism. Some structural inventions (implied faction alignment, new capability, institutional rule not present in the plan) require semantic judgment — regex patterns cannot catch them.
 
 **Change**:
