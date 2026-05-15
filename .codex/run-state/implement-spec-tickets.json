@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-31-story-contract-hardening-iii.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC31STOCONHAR-005.md",
+  "last_ticket": "archive/tickets/SPEC31STOCONHAR-006.md",
   "last_result": "completed_archived",
-  "last_work_commit": "ebd8cf5",
+  "last_work_commit": "412d573",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC31STOCONHAR-006.md",
+  "next_target": "tickets/SPEC31STOCONHAR-007.md",
   "queue": [
-    "tickets/SPEC31STOCONHAR-006.md",
     "tickets/SPEC31STOCONHAR-007.md",
     "tickets/SPEC31STOCONHAR-008.md",
     "tickets/SPEC31STOCONHAR-009.md",
@@ -19,6 +18,6 @@
   ],
   "blocked": false,
   "blocker": null,
-  "dirty_state": "unrelated dirty: .codex/skills/implement-spec-tickets/SKILL.md; expected ignored artifacts: tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/, worlds/erotica-world/",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts: tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-index/dist/, tools/world-index/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, tools/world-mcp/node_modules/, worlds/erotica-world/",
   "updated_at": "2026-05-15"
 }
