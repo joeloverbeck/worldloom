@@ -367,11 +367,11 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 - **Skills do not chain.** Closeout never invokes `canon-addition` (already ran), `story-fact-promotion-to-canon` (already ran), or any other sibling. The user invokes closeout separately after canon-addition adjudicates.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
 - **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — Phase 2 supersedes BEL records during accepted-flavored verdicts. Inherited from bootstrap's Shape C rollout.
-  - **PEENH-007** (`create_bel_record` patch op) — Phase 2 + Phase 5 submit BEL supersession ops. **Now landed** (verified during this skill's gap-filler infrastructure audit; the op is present in `tools/patch-engine/src/envelope/schema.ts`).
-  - **VALENH-011** (BEL `record_schema_compliance`) — Phase 5 dry-run exercises BEL validator on each BEL supersession.
-  - **PEENH-008** — Phase 2 + Phase 5 submit DA supersession ops for `source_kind: artifact_canonization` accepted-flavored verdicts. Closeout uses the existing story-local DA op `append_story_diegetic_artifact_record`, which writes `DA-<integer>` records under `_source/artifacts/` and consumes `expected_id_allocations.story_da_ids`.
-  - **MCPENH-041** (task_type rename) — does NOT affect this skill; closeout does not use `get_context_packet` retrieval.
+  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 2 supersedes BEL records during accepted-flavored verdicts.
+  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). Phase 2 + Phase 5 submit BEL supersession ops.
+  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 5 dry-run exercises BEL validator on each BEL supersession.
+  - **PEENH-008** (story-local DA supersession op for `source_kind: artifact_canonization`) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `append_story_diegetic_artifact_record` and `story_da_ids` are listed; `tools/patch-engine/src/ops/create-story-record.ts` maps the op to `_source/artifacts/`). Phase 2 + Phase 5 use the existing story-local DA op.
+  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: rebuilt story-pipeline task types are registered in `TASK_TYPES`). Closeout does not use `get_context_packet` retrieval, so the rename has no closeout caller impact.
 
 ## What is intentionally NOT in this skill
 

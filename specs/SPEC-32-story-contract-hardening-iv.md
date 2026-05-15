@@ -351,6 +351,8 @@ This is a wording sharpening only — no behavioral change, no schema change, no
 
 ### D6 — Cross-skill integration-debt-note reconciliation pass (P2, intake F7)
 
+**Implementation note (2026-05-16)**: `archive/tickets/SPEC32STOCONHAR-006.md` landed D6 by adjudicating all five named IDs as landed against live code surfaces and updating the affected `Known integration debt` sections with concrete `Now landed` evidence. Live reassessment also found `commitment-block-authoring` already carried inherited MCPENH-040 / PEENH-007 / VALENH-011 entries in addition to MCPENH-041, so those same-seam entries were included in the reconciliation. The remaining detailed D6 prose below is historical intake context unless a later ticket reopens integration-debt notes.
+
 **Problem**: Four of the seven story-pipeline skills carry "Known integration debt" sections referencing MCPENH / PEENH / VALENH ticket IDs:
 
 - `.claude/skills/branching-story-health-audit/SKILL.md` — references MCPENH-040, PEENH-007, VALENH-011, MCPENH-041.
