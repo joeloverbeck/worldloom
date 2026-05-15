@@ -168,6 +168,8 @@ SPEC-31 D14 landed the MCP-server-side defense: when story-local IDs are passed 
 
 ### D3 — Fix closeout FOUNDATIONS Alignment retrieval residue (P1, intake F4 / A3; follow-on to SPEC-31 D10)
 
+**Implementation note (2026-05-16)**: `archive/tickets/SPEC32STOCONHAR-004.md` landed this cleanup by replacing the stale `story-promotion-closeout` FOUNDATIONS Alignment Tooling Recommendation row with MCP retrieval wording that matches Pre-flight step 5. The accepted proof surface is grep/manual review of the live SKILL.md; the optional validator-fixture idea below remains historical intake context because this is a skill-prose pre-flight contract, not a structural-validator surface.
+
 **Problem**: `.claude/skills/story-promotion-closeout/SKILL.md` contains two passages whose retrieval semantics contradict:
 
 - Pre-flight (`:48` HARD-GATE list, `:154` Pre-flight step 5): "linked CF / CH / PA records existence-verified through MCP retrieval" — invokes `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>)` and `mcp__worldloom__get_record(record_id=<linked_pa_id>)`.

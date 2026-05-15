@@ -354,7 +354,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA, NOT branch or page records. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |
 | Change Control Policy | Phase 1, Phase 3 gate 2 | Closeout reads canon-addition's CH Change Log Entry and cites it in the closeout ledger. |
-| Tooling Recommendation | Pre-flight | Linked canon-addition records loaded via direct file reads (CF / CH / PA paths); no `get_context_packet` retrieval needed since closeout works against direct record paths. |
+| Tooling Recommendation | Pre-flight | Linked canon-addition records are loaded read-only through `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` and per-PA `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)`. No `get_context_packet` retrieval is needed because the accepted-output ids are known. Direct filesystem reads of `_source/canon/`, `_source/change-log/`, or `adjudications/` are not used for linked-output verification (see Pre-flight step 5). |
 
 ## Guardrails
 
