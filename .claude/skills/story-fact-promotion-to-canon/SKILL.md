@@ -118,7 +118,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 ## Output
 
-- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (pre-acceptance CF-shaped candidate package; consumed by `canon-addition`, which strips promotion-only evidence fields and sets accepted-CF approval provenance if it accepts the proposal)
+- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (pre-acceptance proposal package with a CF-shaped `candidate:` block and top-level `proposal_evidence:` audit trail; consumed by `canon-addition`, which copies only `candidate:` into the accepted CF payload and sets accepted-CF approval provenance if it accepts the proposal)
 - `story-promotions/SP-<integer>.md` — Always (human-readable ledger pointing at YAML package)
 - Bundle `INDEX.md` — Always (updated last)
 
@@ -197,20 +197,9 @@ candidate:
   source_basis:
     direct_user_approval: false   # pre-acceptance package only; canon-addition sets accepted CF records to true after its own HARD-GATE
     derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; never null or branch ids
-    story_branch: <branch_path>
-    story_evidence:
-      source_records: [<source_record_ids>]
-      supporting_pages: [<supporting_page_ids>]
-      authoring_events: [SE-<integer> ids]
-      belief_witnesses: [BEL-<integer> ids]
-  promotion_provenance:
-    story_slug: <story_slug>
-    source_kind: <source_kind>
-    branch_path: <branch_path>
-    rationale: <natural-language explanation of why this branch-local claim should become world canon>
 ```
 
-**Branch provenance lives in `source_basis.story_branch` + `source_basis.story_evidence` + `promotion_provenance` — NEVER in `source_basis.derived_from`** (which is reserved for parent CF references — world authority). The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
+**Branch provenance lives in top-level `proposal_evidence`, NEVER inside `candidate.source_basis` or `candidate.promotion_provenance`.** `candidate.source_basis.derived_from` is reserved for parent CF references — world authority. The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
 
 ## Phase 3: Scope-inflation check (FOUNDATIONS Rule 4)
 
@@ -290,18 +279,22 @@ Combine Phase 1-5 outputs into the full `SP-<integer>-proposal-package.yaml` sha
 promotion_id: SP-<integer>
 story_slug: <story_slug>
 source_kind: <source_kind>
-source_records: [<source_record_ids>]
-branch_path: <branch_path>
-supporting_pages: [<supporting_page_ids>]
-authoring_events: [SE-<integer> ids]
-belief_witnesses: [BEL-<integer> ids]
-resolution_feedback_evidence:
-  - event_id: SE-<integer>
-    player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
-claim_visibility:
-  who_holds_belief: [STENT-<integer> | group:<name> | public]
-  belief_truth_relations: [<truth_relation per BEL>]
 candidate: <Phase 2 CF-shaped candidate>
+proposal_evidence:
+  story_branch: BR-<integer>
+  source_kind: <source_kind>
+  source_records: [<source_record_ids>]
+  supporting_pages: [<supporting_page_ids>]
+  authoring_events: [SE-<integer> ids]
+  belief_witnesses: [BEL-<integer> ids]
+  rendered_prose_receipts: [pages-prose-receipts/PG-<integer>.yaml]
+  resolution_feedback_evidence:
+    - event_id: SE-<integer>
+      player_visible_feedback: <copied from SE.resolution.player_visible_feedback when result == held_for_promotion>
+  claim_visibility:
+    who_holds_belief: [STENT-<integer> | group:<name> | public]
+    belief_truth_relations: [<truth_relation per BEL>]
+  rationale: <natural-language explanation of why this branch-local claim should become world canon>
 scope_inflation_report: <Phase 3 report>
 mystery_firewall_report: <Phase 4 report>
 downstream_impact_report: <Phase 5 report>
@@ -348,7 +341,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 
 ## Record Schemas
 
-- `templates/proposal-package.yaml` — CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition` at parse time.
+- `templates/proposal-package.yaml` — proposal package with a CF-shaped `candidate:` block and top-level `proposal_evidence:` audit trail; consumed by `canon-addition` at parse time.
 - `templates/story-promotion-ledger.md` — human-readable ledger entry pointing at the YAML package.
 - Read schemas: shared contract §4 (BEL §4.1, PG §4.2, SE §4.3) + FOUNDATIONS §Canon Fact Record Schema (the candidate's target).
 
@@ -356,7 +349,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 
 | Principle | Phase | Mechanism |
 |---|---|---|
-| Rule 1 (No Floating Facts) | N/A at this skill | Canon-addition enforces on the candidate at adjudication time (required CF-schema fields). |
+| Rule 1 (No Floating Facts) | Phase 2, 6 | The proposal keeps `candidate:` CF-shaped and moves branch evidence into top-level `proposal_evidence`; canon-addition enforces the accepted CF at adjudication time. |
 | Rule 2 (No Pure Cosmetics) | N/A at this skill | Canon-addition enforces. |
 | Rule 3 (No Specialness Inflation) | N/A at this skill | Canon-addition enforces. |
 | Rule 4 (No Globalization by Accident) | Phase 3 | Scope-inflation check on candidate scope. |
@@ -367,7 +360,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 | Rule 12 (No Single-Trace Truths) | Phase 3 (anticipation) + N/A | Phase 3 trace_count flagging anticipates the rule; canon-addition enforces at adjudication. |
 | Canon Layers | Pre-flight, Phase 2 | Candidate's `status` field selects layer. |
 | Mystery Reserve | Pre-flight, Phase 4 | Whole-class Mystery Reserve loaded; forbidden-status firewall. |
-| Canon Fact Record Schema | Phase 2, 6 | Candidate strictly matches FOUNDATIONS §Canon Fact Record Schema. |
+| Canon Fact Record Schema | Phase 2, 6 | `candidate:` carries only CF fields; branch-local proposal evidence stays outside the candidate. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Skill reads `PG` records as authoritative state; never mutates. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2, 4 | Canon-candidate authority discipline + forbidden-mystery firewall. |
 | Change Control Policy | N/A at this skill | Canon-addition writes the Change Log Entry. |
@@ -378,7 +371,7 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **Never write world-level canon.** Hook 3 blocks raw `Edit` / `Write` on `worlds/<slug>/_source/<world-subdir>/*.yaml`. This skill writes ONLY to `worlds/<world_slug>/stories/<story_slug>/story-promotions/` + bundle `INDEX.md`. No patch-engine submissions to world scope.
 - **Output is NOT canon until canon-addition adjudicates.** The proposal package is a CANDIDATE. The skill explicitly instructs the user to invoke canon-addition separately. No automatic chaining; no implicit acceptance.
 - **Forbidden mysteries cannot be promoted.** Phase 4 ABORT-on-forbidden-resolution. The skill REFUSES to write a proposal package whose candidate would resolve a forbidden mystery.
-- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in `source_basis.story_branch` + `source_basis.story_evidence`, NEVER in `source_basis.derived_from` (which is reserved for parent CF references — world authority).
+- **Branch-local truth is evidence, not authority.** Phase 2 keeps branch provenance in top-level `proposal_evidence`, NEVER in `candidate.source_basis` or `source_basis.derived_from` (which is reserved for parent CF references — world authority).
 - **HARD-GATE is absolute.** Always show the proposal to the user. No execution-mode bypass; no Auto Mode override. Phase 7 always pauses for explicit user approval. World-canon promotion is too high-stakes for automation.
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.

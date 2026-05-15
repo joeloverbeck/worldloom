@@ -4,7 +4,7 @@
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/story-fact-promotion-to-canon/SKILL.md`, `tools/validators/src/structural/proposal-package-shape.ts` (extend)
-**Deps**: SPEC31STOCONHAR-006
+**Deps**: `archive/tickets/SPEC31STOCONHAR-006.md`
 
 ## Problem
 
@@ -50,7 +50,7 @@ Fix the malformed YAML at `:256`:
 mysteries_scanned: <count of M-<integer> records loaded>
 ```
 
-### 4. Validator extension (`tools/validators/src/structural/proposal-package-shape.ts` created by SPEC31STOCONHAR-006)
+### 4. Validator extension (`tools/validators/src/structural/proposal-package-shape.ts` created by `archive/tickets/SPEC31STOCONHAR-006.md`)
 
 Add a check: when `source_kind == mystery_resolution`, every `source_record` in `proposal_evidence.source_records[]` is `SF` or `BEL`, not `M`. Emit `mystery_resolution_source_record_misclass` (severity: fail) on violation.
 

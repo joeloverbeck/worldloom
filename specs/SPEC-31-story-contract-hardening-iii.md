@@ -307,6 +307,8 @@ The bundle does not yet exist at bootstrap time, so the contract's "story_bundle
 
 ### D6 — Split CF-shaped candidate from `proposal_evidence` (P1)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-006` landed this deliverable. Story-promotion proposal packages now keep `candidate:` CF-field-shaped and move branch-local evidence into top-level `proposal_evidence:`; `canon-addition` consumes only `candidate:` for accepted CF payloads and preserves `proposal_evidence` as audit context. `tools/validators` now registers `proposal_package_shape` with focused coverage for impure candidate rejection, clean split acceptance, required top-level evidence, registry inventory, and pre-apply skip behavior. The original problem/change text below is historical intake context for D6.
+
 **Problem**: `story-fact-promotion-to-canon/SKILL.md:169` declares the candidate "matches FOUNDATIONS §Canon Fact Record Schema strictly", but `:197-210` embeds promotion-only fields inside `candidate:`:
 ```yaml
 candidate:

@@ -2,6 +2,7 @@ import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
+import { proposalPackageShape } from "../structural/proposal-package-shape.js";
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
@@ -34,6 +35,7 @@ export const structuralValidators: readonly Validator[] = [
   recursiveReferenceClosure,
   stateSnapshotIntegrity,
   touchedByCfCompleteness,
+  proposalPackageShape,
   modificationHistoryRetrofit
 ];
 
