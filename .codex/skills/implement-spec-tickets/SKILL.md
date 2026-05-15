@@ -49,7 +49,8 @@ Keep the file small and machine-readable. Update it after intake, after every it
   "archived_spec": null,
   "last_ticket": "tickets/SPEC31EXAMPLE-001.md",
   "last_result": "completed_archived",
-  "last_commit": "abc1234",
+  "last_work_commit": "abc1234",
+  "last_state_commit": "def5678",
   "next_target": "tickets/SPEC31EXAMPLE-002.md",
   "queue": [
     "tickets/SPEC31EXAMPLE-002.md"
@@ -66,10 +67,13 @@ On resume after `/new`, read this state file first, then verify every important 
 - `originating_spec` still exists unless `archived_spec` is set
 - `next_target` exists and is still active, unless the next action is final spec archival
 - queued ticket paths still exist and still belong to the originating spec family
-- `last_commit` is reachable from `HEAD`
+- `last_work_commit` is reachable from `HEAD`
+- `last_state_commit` is either `null` / `"none"` or reachable from `HEAD`
 - `git status --short` matches or safely supersedes `dirty_state`
 
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
+
+`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` means the commit, if any, that exists only to persist the updated harness state file after the work commit. Do not overload one field for both meanings. If the state file is amended into the same work commit, set both fields to the same sha and record that in the handoff.
 
 ## Intake
 
@@ -117,6 +121,18 @@ Then apply every audit suggestion that is specific, evidence-backed, and compati
 
 Reject or defer only suggestions that are clearly wrong, speculative, duplicate already-live guidance, or would weaken Worldloom's hard gates, canon discipline, or ticket truthing.
 
+Before applying or rejecting suggestions, print a compact visible audit result for the child-skill phase:
+
+```text
+Child skill audit:
+- Target skill: .codex/skills/implement-ticket
+- Findings: <N issues, N improvements, N features>
+- Apply: <specific suggestions to patch, or "none">
+- Reject/defer: <specific suggestions and reason, or "none">
+```
+
+If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue.
+
 After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .codex/skills/implement-ticket`.
 
 ### 3. Review Completed Tickets
@@ -141,6 +157,8 @@ $skill-audit .codex/skills/post-ticket-review
 
 Apply every sound, evidence-backed suggestion under the same rules as the `implement-ticket` audit. Rerun focused hygiene over changed post-review skill files.
 
+Before applying or rejecting suggestions, print the same compact visible child-audit result block for `.codex/skills/post-ticket-review`, even when there are no findings or no applicable suggestions.
+
 Put the review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket.
 
 ### 5. Commit The Iteration
@@ -157,16 +175,26 @@ If nothing changed after an iteration, do not create an empty commit. Record tha
 
 ### 6. Persist State And Prepare Context Reset
 
-After each iteration commit, update `.codex/run-state/implement-spec-tickets.json` before context compaction or a fresh-session restart. Include:
+After each iteration work commit, update `.codex/run-state/implement-spec-tickets.json` before context compaction or a fresh-session restart. Include:
 
 - originating spec path or archived spec path
 - last ticket processed and result
-- last commit sha, or `"none"` if no commit was created
+- `last_work_commit`: the ticket iteration work commit sha, or `"none"` if no work commit was created
+- `last_state_commit`: the state-file-only commit sha when the state update is committed separately, the same sha as `last_work_commit` when amended into the work commit, or `"none"` when the state file remains intentionally uncommitted
 - next target, or `"final_spec_archive"` / `"blocked"`
 - remaining queue
 - blocker summary when blocked
 - dirty-state classification
 - `updated_at`
+
+Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. Classify them as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
+
+If the state file itself changes after the work commit, either:
+
+- amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
+- commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to the state-only commit.
+
+Do not create a chain of state-only commits just to update the previous state-only commit sha. One state-only commit per iteration is enough; if exact current `HEAD` matters, use `last_state_commit`.
 
 Then print a short handoff in the conversation that mirrors the state file:
 
@@ -174,7 +202,8 @@ Then print a short handoff in the conversation that mirrors the state file:
 Harness handoff:
 - Originating spec: <active or archived path>
 - Last ticket processed: <ticket id and result>
-- Last commit: <sha or "none">
+- Work commit: <sha or "none">
+- State commit: <sha or "none" | same as work commit>
 - Next target: <follow-up ticket path | next queued ticket path | final spec archive | blocked>
 - Queue: <remaining active ticket paths>
 - Dirty state: <clean | owned/unrelated paths still present>
