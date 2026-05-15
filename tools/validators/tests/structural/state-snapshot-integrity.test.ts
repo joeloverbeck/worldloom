@@ -13,16 +13,91 @@ test("state_snapshot_integrity passes for a complete page snapshot", async () =>
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity accepts PG-1 null inputs for story_start", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: {
+      id: "PG-0001",
+      story_id: "STORY-001",
+      input: {
+        choice_id: null,
+        manual_action_text: null,
+        resolved_event_id: "SE-0001"
+      },
+      state_snapshot: completeStateSnapshot()
+    },
+    eventKind: "story_start",
+    pageId: "PG-0001"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan("PG-0001")
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity rejects non-null choice input for story_start", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: {
+      id: "PG-0001",
+      story_id: "STORY-001",
+      input: {
+        choice_id: "CHC-0001",
+        manual_action_text: null,
+        resolved_event_id: "SE-0001"
+      },
+      state_snapshot: completeStateSnapshot()
+    },
+    eventKind: "story_start",
+    pageId: "PG-0001"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan("PG-0001")
+  }));
+
+  assertPgInputLegalityViolation(verdicts, "PG-0001", "SE-0001", "story_start");
+});
+
+test("state_snapshot_integrity rejects missing source input for non-story_start events", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageRecord: {
+      id: "PG-0002",
+      story_id: "STORY-001",
+      input: {
+        choice_id: null,
+        manual_action_text: null,
+        resolved_event_id: "SE-0001"
+      },
+      state_snapshot: completeStateSnapshot()
+    },
+    eventKind: "selected_choice"
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assertPgInputLegalityViolation(verdicts, "PG-0002", "SE-0001", "selected_choice");
+});
+
 test("state_snapshot_integrity accepts active_records BEL references", async () => {
   const verdicts = await stateSnapshotIntegrity.run(undefined, context([
     storyRecord("page_record", "PG-0002", "pages", {
       id: "PG-0002",
       story_id: "STORY-001",
+      input: {
+        choice_id: "CHC-0001",
+        manual_action_text: null,
+        resolved_event_id: "SE-0001"
+      },
       state_snapshot: {
         active_records: {
           BEL: ["BEL-0001"]
         }
       }
+    }),
+    storyRecord("story_event_record", "SE-0001", "events", {
+      id: "SE-0001",
+      story_id: "STORY-001",
+      event_kind: "selected_choice"
     }),
     storyRecord("belief_record", "BEL-0001", "beliefs", {
       id: "BEL-0001",
@@ -35,6 +110,102 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
   }));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity requires evidence_records for narrowing mystery claims", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "narrowed",
+          evidence_records: []
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const required = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.mystery_evidence_required");
+  assert.ok(required);
+  assert.deepEqual(required.detail, {
+    page_id: "PG-0002",
+    mystery_id: "M-0001",
+    status: "narrowed",
+    field: "state_snapshot.unresolved_mystery_claims[0].evidence_records"
+  });
+});
+
+test("state_snapshot_integrity allows preserved mystery claims without evidence_records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "preserved",
+          evidence_records: []
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity resolves story-local mystery evidence records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "clue_added",
+          evidence_records: ["SF-0001", "BEL-0001", "DA-0001", "SE-0001"]
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity rejects missing story-local mystery evidence records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "clue_added",
+          evidence_records: ["SF-9999"]
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const dangling = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.dangling_reference");
+  assert.ok(dangling);
+  assert.deepEqual(dangling.detail, {
+    reference_id: "SF-9999",
+    reference_path: "state_snapshot.unresolved_mystery_claims[0].evidence_records[0]"
+  });
 });
 
 test("state_snapshot_integrity fails when required fields are missing", async () => {
@@ -118,14 +289,28 @@ test("state_snapshot_integrity skips envelopes without PG creates", () => {
 });
 
 function records(options: {
+  pageRecord?: Record<string, unknown>;
   pageSnapshot?: Record<string, unknown>;
   includeFact?: boolean;
+  eventKind?: string;
+  pageId?: string;
 } = {}) {
+  const pageId = options.pageId ?? "PG-0002";
   return [
-    storyRecord("page_record", "PG-0002", "pages", {
-      id: "PG-0002",
+    storyRecord("page_record", pageId, "pages", options.pageRecord ?? {
+      id: pageId,
       story_id: "STORY-001",
+      input: {
+        choice_id: "CHC-0001",
+        manual_action_text: null,
+        resolved_event_id: "SE-0001"
+      },
       state_snapshot: options.pageSnapshot ?? completeStateSnapshot()
+    }),
+    storyRecord("story_event_record", "SE-0001", "events", {
+      id: "SE-0001",
+      story_id: "STORY-001",
+      event_kind: options.eventKind ?? "selected_choice"
     }),
     ...(options.includeFact === false ? [] : [
       storyRecord("story_fact_record", "SF-0001", "facts", {
@@ -134,6 +319,16 @@ function records(options: {
         created_at_page: "PG-0001"
       })
     ]),
+    storyRecord("belief_record", "BEL-0001", "beliefs", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
+    storyRecord("story_diegetic_artifact_record", "DA-0001", "artifacts", {
+      id: "DA-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
     storyRecord("story_location_record", "STLOC-0001", "locations", {
       id: "STLOC-0001",
       story_id: "STORY-001",
@@ -216,21 +411,39 @@ function storyRecord(
   };
 }
 
-function patchPlan() {
+function assertPgInputLegalityViolation(
+  verdicts: readonly { code: string; detail?: unknown }[],
+  pageId: string,
+  resolvedEventId: string,
+  eventKind: string
+) {
+  const violation = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.pg_input_legality_violation");
+
+  assert.ok(violation);
+  assert.deepEqual(violation.detail, {
+    page_id: pageId,
+    resolved_event_id: resolvedEventId,
+    event_kind: eventKind,
+    choice_id: eventKind === "story_start" ? "CHC-0001" : null,
+    manual_action_text: null
+  });
+}
+
+function patchPlan(pageId = "PG-0002") {
   return {
     plan_id: "plan-state-snapshot-integrity",
     target_world: "test",
     approval_token: "placeholder",
     verdict: "page_cycle_accept",
     originating_skill: "branching-story-page-cycle",
-    expected_id_allocations: { pg_ids: ["PG-0002"] },
+    expected_id_allocations: { pg_ids: [pageId] },
     patches: [
       {
         op: "create_pg_record" as const,
         target_world: "test",
         payload: {
           story_slug: "test-story",
-          record: { id: "PG-0002", story_id: "STORY-001" }
+          record: { id: pageId, story_id: "STORY-001" }
         }
       }
     ]

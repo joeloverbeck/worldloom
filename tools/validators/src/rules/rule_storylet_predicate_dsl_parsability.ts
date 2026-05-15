@@ -199,9 +199,9 @@ function validatePredicate(state: ValidationState, value: unknown, path: string,
     case "fact_true":
       requireStoryRef(state, value.fact, "fact", idsFor(state.refs.facts, state.record), `${path}.fact`);
       return;
-    case "belief":
+    case "belief_record":
       requireActorRef(state, value.holder, `${path}.holder`);
-      requireStoryRef(state, value.claim, "belief", idsFor(state.refs.beliefs, state.record), `${path}.claim`);
+      requireBeliefRecordRef(state, value.belief_id, idsFor(state.refs.beliefs, state.record), `${path}.belief_id`);
       if ("mode" in value) {
         requireEnum(state, value.mode, BELIEF_MODE_SET, `${path}.mode`);
       }
@@ -419,6 +419,16 @@ function requireStoryRef(
 ): void {
   if (typeof value !== "string" || !STORY_ID_PATTERNS[kind].test(value)) {
     addFailure(state, "predicate.invalid_reference", `${path} must be a ${kind} record id`, path);
+    return;
+  }
+  if (!knownIds.has(value)) {
+    addFailure(state, "predicate.unresolved_reference", `${path} references missing ${value}`, path);
+  }
+}
+
+function requireBeliefRecordRef(state: ValidationState, value: unknown, knownIds: Set<string>, path: string): void {
+  if (typeof value !== "string" || !STORY_ID_PATTERNS.belief.test(value)) {
+    addFailure(state, "belief_record_argument_invalid", `${path} must be a BEL-<integer> record id`, path);
     return;
   }
   if (!knownIds.has(value)) {

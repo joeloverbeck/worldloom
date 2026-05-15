@@ -161,6 +161,14 @@ export function buildStoryBundleWorld(root: string): void {
           "content_intensity: quiet",
           "created_at: '2026-05-03T10:00:00Z'",
           "summary: Loft opening page.",
+          "state_snapshot:",
+          "  unresolved_mystery_claims:",
+          "    - mystery_id: M-0001",
+          "      authority: apparent",
+          "      status: clue_added",
+          "      evidence_records:",
+          "        - SF-0001",
+          "        - SE-0001",
           ""
         ].join("\n")
       },

@@ -8,7 +8,8 @@ import {
   stringValue
 } from "./utils.js";
 
-const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
+// Includes STSTAT and SREL because SE.promotion_claims[].source_record can cite them.
+const STORY_LOCAL_ID = /^(?:STENT|STSTAT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|SLT|CHC|BR|PG)-\d+$/;
 const PAGE_ID = /^PG-\d{4}$/;
 const NON_EDGE_FIELDS = new Set([
   "id",
@@ -232,6 +233,7 @@ function collectStoryLocalReferences(value: unknown, path: string, references: S
     if (NON_EDGE_FIELDS.has(key)) {
       continue;
     }
+    // Structured SREL.direction.from/to are ordinary nested values and must remain closure roots.
     if (STORY_LOCAL_ID.test(key)) {
       references.push({ id: key, path: `${path}.${key}` });
     }

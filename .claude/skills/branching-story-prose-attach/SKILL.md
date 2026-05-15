@@ -179,7 +179,7 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
    - Record-ID patterns: `PG-\d+`, `SE-\d+`, `BEL-\d+`, `SF-\d+`, `STENT-\d+`, `STINT-\d+`, `OBL-\d+`, `CNSQ-\d+`, `THR-\d+`, `SREL-\d+`, `STLOC-\d+`, `STOBJ-\d+`, `DA-\d+`, `BR-\d+`, `CHC-\d+`, `SLT-\d+`, `STORY-\d+`
    - Gate names (literal): `input legality`, `parent snapshot compatibility`, `mystery firewall`, `branch isolation`, `append-only delta`, `consequence capacity`, `plan grounding`, `canon promotion hold`
-   - Predicate-DSL terms (literal): `fact_true(`, `belief(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
+   - Predicate-DSL terms (literal): `fact_true(`, `belief_record(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `any_belief(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
 
 3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — regex-scan the prose for surface-level resolutions of any mystery in plan §11 `forbidden_resolutions[]`. Use deterministic patterns derived from each mystery's `denial_patterns` (per the world's Mystery Reserve record format). Any pattern match is `FAIL` and routes to `repair_recommendation: revise_prose`.

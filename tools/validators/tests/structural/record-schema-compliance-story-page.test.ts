@@ -49,7 +49,8 @@ function validPagePayload(): Record<string, unknown> {
         {
           mystery_id: "M-0001",
           authority: "apparent",
-          status: "clue_added"
+          status: "clue_added",
+          evidence_records: ["SF-0001"]
         }
       ],
       visible_affordances: [
@@ -203,6 +204,28 @@ test("record_schema_compliance rejects PG records with invalid mystery claim sta
   assert.ok(result.some((verdict) => (
     verdict.code === "record_schema_compliance.enum" &&
     verdict.message.includes("/state_snapshot/unresolved_mystery_claims/0/status")
+  )));
+});
+
+test("record_schema_compliance accepts mystery claim evidence_records", async () => {
+  const parsed = validPagePayload();
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects malformed mystery claim evidence_records", async () => {
+  const parsed = validPagePayload();
+  const stateSnapshot = parsed.state_snapshot as Record<string, unknown>;
+  const claims = stateSnapshot.unresolved_mystery_claims as Record<string, unknown>[];
+  claims[0]!.evidence_records = ["STENT-0001"];
+
+  const result = await recordSchemaCompliance.run({}, context([pageRecord(parsed)]));
+
+  assert.ok(result.some((verdict) => (
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/state_snapshot/unresolved_mystery_claims/0/evidence_records/0")
   )));
 });
 

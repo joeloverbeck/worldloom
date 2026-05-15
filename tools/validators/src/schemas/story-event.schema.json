@@ -112,7 +112,7 @@
         "type": "object",
         "required": ["source_record", "authority"],
         "properties": {
-          "source_record": { "type": "string", "pattern": "^(SF|BEL|DA|STENT)-[0-9]+$" },
+          "source_record": { "type": "string", "pattern": "^(SF|BEL|DA|STENT|STSTAT|SREL)-[0-9]+$" },
           "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] }
         },
         "additionalProperties": false

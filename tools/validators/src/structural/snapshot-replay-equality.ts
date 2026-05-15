@@ -4,6 +4,7 @@ import type { Context, IndexedRecord, Validator, Verdict } from "../framework/ty
 import {
   ACTIVE_RECORDS_CLASSES,
   SnapshotReplayError,
+  replayUnresolvedMysteryClaims,
   replayActiveRecords,
   replayStateSnapshot,
   type StateDelta,
@@ -179,8 +180,11 @@ function pageId(parsed: Record<string, unknown>): string {
 
 // New-schema (story state contract §4.3) replay: SE.state_delta against parent's
 // state_snapshot.active_records. entity_status is derived from the replayed
-// active STSTAT set; only genuinely page-local workflow-stamped fields
-// (visible_affordances, unresolved_mystery_claims, continuation) are excluded.
+// active STSTAT set; unresolved_mystery_claims are compared on
+// (mystery_id, authority, status, evidence_records) lineage while in-page
+// derivation beyond those fields remains page-local. Only genuinely
+// page-local workflow-stamped fields (visible_affordances, continuation) are
+// excluded.
 function runNewSchemaReplay(
   page: IndexedRecord,
   parsed: Record<string, unknown>,
@@ -221,8 +225,13 @@ function runNewSchemaReplay(
   const parentActive = asPlainRecord(parentSnapshot.active_records) as Record<string, readonly string[]>;
   const expectedActive = replayActiveRecords(parentActive, delta);
   const expectedEntityStatus = deriveEntityStatus(expectedActive.STSTAT, byId);
-
   const gotSnapshot = asPlainRecord(parsed.state_snapshot);
+  const mysteryClaimsReplay = replayUnresolvedMysteryClaims(
+    parentSnapshot.unresolved_mystery_claims,
+    gotSnapshot.unresolved_mystery_claims,
+    mysteryEvidenceRecordsForEvent(resolvedEventId, delta)
+  );
+
   const gotActive = asPlainRecord(gotSnapshot.active_records);
 
   const drifts: Array<{ field: string; expected: unknown; got: unknown }> = [];
@@ -250,6 +259,7 @@ function runNewSchemaReplay(
       got: gotEntityStatus
     });
   }
+  drifts.push(...mysteryClaimsReplay.drifts);
 
   const verdicts: Verdict[] = [];
   if (drifts.length > 0) {
@@ -288,6 +298,16 @@ function runNewSchemaReplay(
   }
 
   return verdicts;
+}
+
+function mysteryEvidenceRecordsForEvent(resolvedEventId: string, delta: StateDelta): string[] {
+  const evidenceIds = new Set<string>([resolvedEventId]);
+  for (const id of delta.create ?? []) {
+    if (/^(?:SF|BEL|DA|SE)-[0-9]+$/.test(id)) {
+      evidenceIds.add(id);
+    }
+  }
+  return [...evidenceIds];
 }
 
 function deriveEntityStatus(

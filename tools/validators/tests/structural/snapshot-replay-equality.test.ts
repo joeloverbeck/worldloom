@@ -164,6 +164,70 @@ test("snapshot_replay_equality reports new-schema canonical state_hash mismatche
   assert.ok(verdicts.some((verdict) => verdict.code === "snapshot_replay_equality.state_hash_mismatch"));
 });
 
+test("snapshot_replay_equality accepts accumulated mystery evidence from the resolved event", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), undefined, [
+    {
+      mystery_id: "M-0001",
+      authority: "apparent",
+      status: "clue_added",
+      evidence_records: ["SF-0001", "SF-0002"]
+    }
+  ]);
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage, [
+    {
+      mystery_id: "M-0001",
+      authority: "apparent",
+      status: "preserved",
+      evidence_records: ["SF-0001"]
+    }
+  ]), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("snapshot_replay_equality reports mystery evidence drift", async () => {
+  const childPage = newSchemaChildPage(newSchemaExpectedActiveRecords(), undefined, [
+    {
+      mystery_id: "M-0001",
+      authority: "apparent",
+      status: "clue_added",
+      evidence_records: ["SF-0001", "SF-0003"]
+    }
+  ]);
+  const verdicts = await snapshotReplayEquality.run(undefined, context(newSchemaRecords(childPage, [
+    {
+      mystery_id: "M-0001",
+      authority: "apparent",
+      status: "preserved",
+      evidence_records: ["SF-0001"]
+    }
+  ]), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const drift = verdicts.find((verdict) => verdict.code === "snapshot_replay_equality.snapshot_drift");
+  assert.ok(drift);
+  assert.deepEqual((drift.detail as { drifts: unknown[] }).drifts, [
+    {
+      field: "unresolved_mystery_claims.M-0001.status",
+      expected: { authority: "apparent", status: "preserved" },
+      got: { authority: "apparent", status: "clue_added" }
+    },
+    {
+      field: "unresolved_mystery_claims.M-0001.evidence_records",
+      expected: {
+        inherited: ["SF-0001"],
+        event_evidence_records: ["SE-0002", "SF-0002"]
+      },
+      got: ["SF-0001", "SF-0003"]
+    }
+  ]);
+});
+
 test("snapshot_replay_equality emits field-level drift details", async () => {
   const drifted = { ...nextSnapshot, obligations_open: ["OBL-0001"] };
   const verdicts = await snapshotReplayEquality.run(undefined, context(recordsFor(drifted, "hash-next"), {
@@ -303,12 +367,18 @@ function patchPlan() {
   };
 }
 
-function newSchemaRecords(childPage: Record<string, unknown>) {
+function newSchemaRecords(
+  childPage: Record<string, unknown>,
+  parentMysteryClaims: readonly Record<string, unknown>[] = []
+) {
   return [
     record("page_record", "test-story:PG-0001", "stories/test-story/_source/pages/PG-0001.yaml", {
       id: "PG-0001",
       story_id: "STORY-001",
-      state_snapshot: { active_records: newSchemaParentActiveRecords() },
+      state_snapshot: {
+        active_records: newSchemaParentActiveRecords(),
+        unresolved_mystery_claims: parentMysteryClaims
+      },
       state_hash: "0".repeat(64)
     }),
     record("story_event_record", "test-story:SE-0002", "stories/test-story/_source/events/SE-0002.yaml", {
@@ -347,7 +417,8 @@ function newSchemaRecords(childPage: Record<string, unknown>) {
 
 function newSchemaChildPage(
   activeRecords: Record<string, readonly string[]>,
-  entityStatus: Record<string, unknown> = { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } }
+  entityStatus: Record<string, unknown> = { "STENT-0001": { life: "dead", agency: "dead", location: "STLOC-0001" } },
+  mysteryClaims: readonly Record<string, unknown>[] = []
 ): Record<string, unknown> {
   const page: Record<string, unknown> = {
     id: "PG-0002",
@@ -359,7 +430,7 @@ function newSchemaChildPage(
       active_records: activeRecords,
       visible_affordances: ["CHC-0002"],
       entity_status: entityStatus,
-      unresolved_mystery_claims: [],
+      unresolved_mystery_claims: mysteryClaims,
       continuation: { next_storylets: ["SLT-0002"] }
     },
     plan: {

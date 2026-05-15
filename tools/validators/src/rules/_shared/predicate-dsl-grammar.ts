@@ -3,7 +3,7 @@
 
 export const PRED_TYPES = [
   "fact_true",
-  "belief",
+  "belief_record",
   "entity_status",
   "relationship_axis",
   "obligation_open",
@@ -85,7 +85,7 @@ export const CONFIDENCE_LEVELS = ["certain", "high", "medium", "low", "uncommitt
 
 export const PREDICATE_ARG_SCHEMAS = {
   fact_true: { required: ["fact"] },
-  belief: { required: ["holder", "claim"] },
+  belief_record: { required: ["holder", "belief_id"] },
   entity_status: { required: ["entity", "field", "value"] },
   relationship_axis: { required: ["from", "to", "axis"] },
   obligation_open: { required: ["obligation"] },

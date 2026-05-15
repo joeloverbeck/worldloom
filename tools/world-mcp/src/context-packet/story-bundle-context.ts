@@ -32,6 +32,13 @@ interface PageRecord {
   summary?: string;
 }
 
+interface MysteryClaimEvidence {
+  page_id: string;
+  authority: string;
+  status: string;
+  evidence_records: string[];
+}
+
 const ACTIVE_THREAD_STATUSES = new Set(["active", "pressured", "critical", "dormant"]);
 const MAX_VISIBLE_STORYLETS = 50;
 const MAX_RECENT_BRANCH_PAGES = 10;
@@ -315,6 +322,46 @@ function buildMysteriesInPlay(frontmatter: Record<string, unknown>): ContextPack
   }));
 }
 
+function buildMysteryEvidenceChains(
+  rows: StoryNodeRow[]
+): ContextPacketStoryBundleContext["mystery_evidence_chains"] {
+  const claimsByMystery = new Map<string, MysteryClaimEvidence[]>();
+
+  for (const row of rows) {
+    const record = parseYamlRecord(row);
+    const pageId = asString(record.id, authoredId(row));
+    const stateSnapshot =
+      typeof record.state_snapshot === "object" &&
+      record.state_snapshot !== null &&
+      !Array.isArray(record.state_snapshot)
+        ? (record.state_snapshot as Record<string, unknown>)
+        : {};
+
+    for (const claim of arrayOfObjects(stateSnapshot.unresolved_mystery_claims)) {
+      const mysteryId = asString(claim.mystery_id);
+      if (mysteryId.length === 0) {
+        continue;
+      }
+
+      const claims = claimsByMystery.get(mysteryId) ?? [];
+      claims.push({
+        page_id: pageId,
+        authority: asString(claim.authority),
+        status: asString(claim.status),
+        evidence_records: asStringArray(claim.evidence_records)
+      });
+      claimsByMystery.set(mysteryId, claims);
+    }
+  }
+
+  return [...claimsByMystery.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([mystery_id, claims]) => ({
+      mystery_id,
+      claims
+    }));
+}
+
 function buildCastBindList(frontmatter: Record<string, unknown>): ContextPacketStoryBundleContext["cast_bind_list"] {
   return arrayOfObjects(frontmatter.cast_bind_list).map((entry) => ({
     char_id: asNullableString(entry.char_id),
@@ -365,6 +412,7 @@ export function buildStoryBundleContext(
     recent_pages_along_longest_active_branch:
       branchContext.recent_pages_along_longest_active_branch,
     mysteries_in_play: buildMysteriesInPlay(frontmatter),
+    mystery_evidence_chains: buildMysteryEvidenceChains(pageRows),
     cast_bind_list: buildCastBindList(frontmatter),
     invariants_acknowledged: asStringArray(frontmatter.invariants_acknowledged)
   };

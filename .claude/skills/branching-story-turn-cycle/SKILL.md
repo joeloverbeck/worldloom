@@ -40,7 +40,7 @@ Do NOT write `pages-prose-plans/PG-<integer>.md` or update `worlds/<world_slug>/
 
 (b) Phases 1-9 have completed in working memory: action resolved to exactly one of six outcome routes (`accept | accommodate | attempt | world_block | promotion_hold | terminal`); commitment block selected from the author pool OR a branch-scoped JIT block created; state delta drafted (creates / supersessions via new record files carrying `supersedes:`); mandatory BEL updates drafted per FOUNDATIONS §Story Bundles §6a; parent-page canon-baseline drift classified per FOUNDATIONS §Story Bundles §4b; mystery and canon authority classified per shared contract §11; `SE-<integer>` and `PG-<integer>` drafted with full `state_snapshot` and `validation_trace`; `pages-prose-plans/PG-<integer>.md` drafted with all 19 sections including verbatim §2 / §3 / §19 inlined from `reports/prose-quality-instructions.md`; next `CHC` records drafted (3-5 for commitment-hinge stop; 1 for continue-or-pause; 0 for terminal).
 
-(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 7 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, causal dependency threat scan, Choice Consequence Integrity, Canon Baseline Drift).
+(c) Phase 9 has validated all 8 shared hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 with a one-line PASS rationale per gate on `PG-<integer>.validation_trace`, plus the 10 turn-cycle-additional checks (action source legality, entity death/incapacity reconciliation, belief/visibility coverage, write-in world-logic rationale, Selection Rationale, Motivation Grounding, causal dependency threat scan, choice-set noncollapse, Choice Consequence Integrity, Canon Baseline Drift).
 
 (d) The user has explicitly approved the deliverable summary (branch label, resolved outcome route, state delta inventory by class, commitment block used, page plan structural preview, emitted choices list, any `SE.promotion_claims[]` requiring a follow-up `story-fact-promotion-to-canon` invocation).
 
@@ -81,7 +81,7 @@ Phase 7: Author page plan → pages-prose-plans/PG-<integer>.md (in memory)
 Phase 8: Generate next choices → CHC records (in memory; 0 for terminal)
         |
         v
-Phase 9: Validate against shared 8 hard gates + 7 turn-cycle-additional;
+Phase 9: Validate against shared 8 hard gates + 10 turn-cycle-additional;
   compute final PG hashes per shared contract §4.2a
         |
         v
@@ -264,7 +264,19 @@ For every life / agency / location change, supersede the affected entity's activ
 
 - Their open `STINT` records — close each in `SE.state_delta.close`; for an intention transferred to another holder, create a replacement `STINT` with the new `holder` and `supersedes` linking the closed/replaced intention. `STINT` has no `status` or `derived_from` field.
 - `OBL` owed by or to them (supersede or close).
-- Affected `SREL` records — supersede by changing `axis` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field.
+- Affected `SREL` records — supersede by changing `axis` / `direction` / `value` / `valence` / `description` as the death/incapacity warrants. `SREL` has no `status` field. `SREL.direction` uses shared contract §4.5.7's structured form: `kind: directed` requires non-null `from` and `to` STENT ids, while `kind: bidirectional` requires `from: null` and `to: null`.
+
+```yaml
+direction:
+  kind: directed
+  from: STENT-1
+  to: STENT-2
+
+direction:
+  kind: bidirectional
+  from: null
+  to: null
+```
 - Witness `BEL` records (Phase 4 covers).
 - Affected `STOBJ` records — supersede `owner` and/or `current_location` when death, capture, incapacity, or transfer changes custody. Do not use any separate control/custody field.
 - Future choice availability (Phase 9 gate 7 filters).
@@ -324,13 +336,31 @@ state_delta:
   supersede: [<every record id that received a supersession>]
   close: [<every record id closed this turn>]
 promotion_claims:
-  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
 
 `resolution` follows the shared contract §4.3 route table: required for `attempt` / `accommodate` / `world_block`, absent for `accept`, and optional for `promotion_hold` / `terminal` when an explicit held-or-terminal result must be visible.
 
 `commitment` is required on every emitted event. For turn-cycle events, `selected_slt_id` names the chosen author-pool or JIT `SLT`, `selection_source` records whether the block came from the chosen `CHC`, the author pool, runtime JIT creation, system repair, or audit repair, and `alias_bindings` records the concrete record id chosen for every `bound:<alias>` used by the selected block. Do not duplicate actor or target bindings inside `commitment`; `SE.actor` and `SE.targets` remain authoritative for those bindings.
+
+### Selection Rationale
+
+When `selected_slt_id` was chosen over one or more eligible competing blocks of equal-or-higher local salience, `SE.world_logic_rationale` MUST include a selection-rationale clause naming the selected block, at least one outranked competing block, and the reason the selected block won. Example: `selected SLT-12 over SLT-7 because SLT-7's obligation_open(OBL-3) predicate failed in the current visibility state.` When selection is uncontested because only one block was eligible, no selection-rationale clause is required.
+
+Prose-only by current design; if audit-time prose matching proves too fuzzy after first production stories, the rationale gets promoted to a structured `SE.commitment.selection_rationale` field in a follow-up spec.
+
+### Motivation Grounding
+
+For every non-system character action, `SE.world_logic_rationale` MUST cite at least one active motivation or affordance source that belongs to, involves, or is immediately available to the acting `STENT`:
+
+- an `STINT-<integer>` held by the actor;
+- a `BEL-<integer>` held by the actor with relevant content;
+- an `OBL-<integer>`, `CNSQ-<integer>`, or `THR-<integer>` involving the actor;
+- an `SREL-<integer>` whose structured `direction.from` or `direction.to` includes the actor, or whose `participants[]` includes the actor for bidirectional/mutual relationships;
+- an immediate physical affordance available to the actor at the page location.
+
+Citation form is prose inside `world_logic_rationale`, for example: `STENT-1 acts on STINT-3 because ...`, `BEL-4 lets STENT-1 infer ...`, or `SREL-2.direction.from includes STENT-1, so ...`. System events (`story_start`, `system_repair`, `audit_repair`, `prose_attach`, `promotion_closeout`) are exempt. If no textual grounding source is cited for a non-system character action, `branching-story-health-audit` reports `motivation_ungrounded` as a WARNING audit signal, not a commit-blocking validator error.
 
 Draft `PG-<integer>` per shared contract §4.2:
 
@@ -369,6 +399,8 @@ For every emitted `CHC`, populate `grounded_in.records` with at least one active
 
 For every emitted `CHC`, apply the Information / Observer Firewall: the `player_visible_intent`, likely pressure, and any associated commitment block must be grounded in information the acting entity can possess from active `BEL`, direct observation, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, or another recorded access route. Do not emit a choice that lets an actor exploit a secret, hidden state, or another actor's private knowledge unless the access route is named in the plan and grounded in active records or world canon. When the turn creates or supersedes `BEL` records to make that information available, retain the same route in `BEL.basis.access_route` and cite the enabling records in `BEL.basis.access_records`.
 
+Before hashes are computed, run the `choice_set_noncollapse` validator against the drafted `PG` + emitted `CHC` set. The page commit fails when `choice_set_collapse` fires: a non-terminal page with more than one emitted choice must have at least two choices that differ materially in `target_or_action_families`, `grounded_in.records`, `associated_commitment_block`, or `likely_state_pressure`, unless at least two intentionally expressive variants are marked in the page plan as rhetorical or expressive. Use a line such as `Rhetorical choices: CHC-0003, CHC-0004 are expressive variants; they intentionally share the same material axes.` so the prose marker names the exact CHC ids before validation.
+
 ## Phase 9: Validate
 
 Run the 8 shared hard gates per shared contract §7 against the drafted records. Populate `PG-<integer>.validation_trace` with one-line PASS rationale per gate:
@@ -382,19 +414,22 @@ Run the 8 shared hard gates per shared contract §7 against the drafted records.
 7. **plan grounding** — every declared affordance / required beat / emitted CHC is grounded in active records or world canon; each emitted `CHC.grounded_in.records[]` resolves to the new page's `state_snapshot.active_records`, and each `grounded_in.affordance_ordinals[]` resolves to the new page's `state_snapshot.visible_affordances[].ordinal`. The Information / Observer Firewall is satisfied: selected `SLT` actor-bindings, character actions, and emitted choices rely only on information available to the acting entity or record a valid access route.
 8. **canon promotion hold** — if `outcome_route == promotion_hold` or any `SE.promotion_claims[].authority == canon_candidate`, the state delta records only the branch-local appearance. Marked `NOT_APPLICABLE` with rationale when no canon claim is in play.
 
-Plus 7 turn-cycle-additional checks (recorded in working memory):
+Plus 10 turn-cycle-additional checks (recorded in working memory):
 
 1. **Action source legality** — XOR enforced; chosen CHC not retired. When `manual_action_text` is the source, the action has been parsed against `STORY_KERNEL.md` `## Player Agency Contract`: agency surface, write-in envelope, and viewpoint limits all support the route or the route records the exact agency-contract reason it was blocked/held.
 2. **Entity death / incapacity reconciliation** — when Phase 3 applied death/incapacity, the open intentions / obligations / relationships / object-controlled / belief-witness consequences are in the same delta.
 3. **Belief / visibility coverage** — every action involving secrecy / betrayal / deception / violence / sex / law / status / public ritual has complete `expected_witnesses` coverage: each relevant direct or indirect witness group from Phase 4 is accounted for by a created/superseded `BEL` (`knows`, `suspects`, `misremembers`, `reports`, or `deceives`) or by a recorded non-propagation rationale from the closed set (`no_witness`, `witness_incapacitated`, `evidence_concealed`, `institution_suppresses_report`, `event_leaves_no_accessible_trace`). Mere existence of some `BEL` record is not sufficient.
 4. **Write-in world-logic rationale** — when `manual_action_text` is the action source, `SE.world_logic_rationale` is non-empty and explains the route (silent rejection forbidden).
-5. **Causal dependency threat scan** (`causal_dependency_threat_scan`) — after the state delta, next snapshot, visible affordances, and emitted choices are drafted, but before final PG hashes are computed, verify that the delta did not clobber dependencies that still survive in the committed page:
+5. **Selection Rationale** — when `SE.commitment.selected_slt_id` was chosen over one or more eligible competing `SLT` blocks of equal-or-higher local salience, `SE.world_logic_rationale` names the selected block, at least one outranked block, and why the selected block won. Uncontested single-eligible-block selection is exempt. Missing prose-rationale citations are known story-health debt that `branching-story-health-audit` surfaces as `saliency_starvation` (WARNING), not a validator error.
+6. **Motivation Grounding** — for every non-system character action, `SE.world_logic_rationale` cites at least one active `STINT`, actor-held `BEL`, actor-involving `OBL` / `CNSQ` / `THR`, actor-matching `SREL.direction.from` / `SREL.direction.to` or `participants[]`, or immediate physical affordance available to the actor. Missing prose-grounding citations are known story-health debt that `branching-story-health-audit` surfaces as `motivation_ungrounded` (WARNING), not a validator error.
+7. **Causal dependency threat scan** (`causal_dependency_threat_scan`) — after the state delta, next snapshot, visible affordances, and emitted choices are drafted, but before final PG hashes are computed, verify that the delta did not clobber dependencies that still survive in the committed page:
    - `choice_dependency_clobbered` (ERROR): a record in any emitted `CHC.grounded_in.records[]` is closed, superseded, moved, or invalidated by this turn while the `CHC` remains emitted or player-visible.
    - `affordance_dependency_clobbered` (ERROR): a `PG.state_snapshot.visible_affordances` entry remains after its grounding `STLOC`, `STOBJ`, or `STENT` is no longer active, accessible, or located where the affordance asserts.
    - `obligation_counterparty_unavailable_without_transfer` (ERROR): an entity owing or owed an open `OBL` becomes unavailable per its active `STSTAT` (dead, captive, offstage, incapacitated, or otherwise unable to participate) while the `OBL` is neither closed nor transferred.
    - `slt_precondition_clobbered` (WARNING): a high-salience open debt had an eligible author-pool `SLT` before this turn, but the new delta destroys that `SLT`'s preconditions without closing, transferring, or replacing the debt.
-6. **Choice Consequence Integrity** (`cosmetic_accepted_choice`) — when the route is `accept` for a selected `CHC` or accepted write-in, reject the turn if `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the selected choice as rhetorical or expressive. `CHC.grounded_in` proves why a choice was available; it does not by itself prove that selecting the choice changed anything.
-7. **Canon Baseline Drift** (`canon_baseline_drift`) — reject silent continuation when the parent page's `state_snapshot.canon_revision` is older than the current world-canon revision and the drift classification is not `compatible` or `grandfathered`. `requires_health_audit` routes to `branching-story-health-audit`; `requires_repair_turn` routes to a repair turn before new assertions; `promotion_or_retcon_conflict` routes to `story-fact-promotion-to-canon` / `canon-addition` review.
+8. **Choice-set noncollapse** (`choice_set_noncollapse`) — run the validator over the drafted non-terminal `PG` and emitted `CHC` set. ERROR `choice_set_collapse` rejects a page whose choices all share the same `target_or_action_families`, `grounded_in.records`, `associated_commitment_block`, and `likely_state_pressure`, unless the page plan explicitly marks at least two named CHCs as rhetorical or expressive variants. WARNING `choice_set_rhetorical_unmarked` means an identical unmarked pair exists beside a materially distinct choice; resolve it or surface it in the deliverable summary as known story-health debt before approval.
+9. **Choice Consequence Integrity** (`cosmetic_accepted_choice`) — when the route is `accept` for a selected `CHC` or accepted write-in, reject the turn if `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the selected choice as rhetorical or expressive. `CHC.grounded_in` proves why a choice was available; it does not by itself prove that selecting the choice changed anything.
+10. **Canon Baseline Drift** (`canon_baseline_drift`) — reject silent continuation when the parent page's `state_snapshot.canon_revision` is older than the current world-canon revision and the drift classification is not `compatible` or `grandfathered`. `requires_health_audit` routes to `branching-story-health-audit`; `requires_repair_turn` routes to a repair turn before new assertions; `promotion_or_retcon_conflict` routes to `story-fact-promotion-to-canon` / `canon-addition` review.
 
 After all gates and additional checks pass, compute final PG hashes per shared contract §4.2a:
 
@@ -437,7 +472,7 @@ Only the page plan requires long-form language generation. All other state work 
 
 - **Rule 1 (No Floating Facts)** — Phase 3 + Phase 7. Mechanism: every drafted record conforms to shared contract §4 schemas; Phase 9 gate 7 (plan grounding) requires every declared affordance / required beat / emitted CHC to be grounded in active records or world canon.
 - **Rule 4 (No Globalization by Accident)** — Phase 5 + Phase 9 gate 4. Mechanism: Phase 5 canon-authority classification keeps branch-local truth from leaking world-wide (`branch_local_counterfactual` vs. `canon_candidate`); Phase 9 gate 4 branch isolation rejects sibling-branch records.
-- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6 + Phase 9 additional checks 5 and 6. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure) and Choice Consequence Integrity for accepted choices; `causal_dependency_threat_scan` rejects choices, affordances, obligations, and high-salience debt paths whose dependencies were clobbered by the drafted delta.
+- **Rule 5 (No Consequence Evasion)** — Phase 3 + Phase 9 gate 6 + Phase 9 saliency-rationale, causal-dependency, and choice-consequence checks. Mechanism: Phase 3 death/incapacity reconciliation propagates second-order effects in the same delta; Phase 9 gate 6 requires continuation capacity (eligible SLT) or terminal proof (rationale naming high-salience debt closure), Selection Rationale explains why equal-or-higher-salience eligible blocks lost, and Choice Consequence Integrity for accepted choices; `causal_dependency_threat_scan` rejects choices, affordances, obligations, and high-salience debt paths whose dependencies were clobbered by the drafted delta.
 - **Rule 7 (Preserve Mystery Deliberately)** — Phase 5 + Phase 9 gate 3. Mechanism: Phase 5 classifies claims and rejects forbidden mystery resolution; Phase 9 gate 3 mystery firewall verifies no forbidden `M-<integer>` is resolved and no selected SLT's `mystery_policy.forbidden_resolutions` is breached.
 
 ## Record Schemas
@@ -452,7 +487,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | Rule 2 (No Pure Cosmetics) | N/A | Not applicable — turn-cycle mutates branch-local story state; world canon is not touched. Handoff to `canon-addition` via `story-fact-promotion-to-canon` when a story claim promotes. |
 | Rule 3 (No Specialness Inflation) | N/A | Not applicable — same handoff as Rule 2. |
 | Rule 4 (No Globalization by Accident) | Phase 5, 9 | Phase 5 canon-authority classification; Phase 9 gate 4 branch isolation. |
-| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof plus Choice Consequence Integrity; Phase 9 additional `causal_dependency_threat_scan` for clobbered CHC / affordance / OBL / SLT dependencies. |
+| Rule 5 (No Consequence Evasion) | Phase 3, 9 | Phase 3 death/incapacity reconciliation; Phase 9 gate 6 continuation or terminal proof; Phase 9 Selection Rationale, Choice Consequence Integrity, and `causal_dependency_threat_scan` for clobbered CHC / affordance / OBL / SLT dependencies. |
 | Rule 6 (No Silent Retcons) | N/A | Not applicable — turn-cycle mutates story-bundle scope, not world canon. World canon retcon routes through `canon-addition`. |
 | Rule 7 (Preserve Mystery Deliberately) | Phase 5, 9 | Phase 5 forbidden-mystery rejection; Phase 9 gate 3 mystery firewall. |
 | Rule 11 (No Spectator Castes) | N/A | Not applicable — Rule 11 governs new exceptional capabilities at world canon. |
@@ -464,7 +499,7 @@ All record schemas referenced by this skill live in `.claude/skills/_shared-temp
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2 | Selected or JIT SLT records follow §4.4 schema discipline; JIT blocks have 1-5 beats and minimal effects; no `arc_contract` / `dramatic_unit` / `stop_policy` / shape discriminators. |
 | §Story Bundles §5b (Schema-Minimalism) | All record-drafting phases | Every drafted record conforms to shared contract §4 schemas; supersession is file-level append-only via `supersedes:` field, no new patch op. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 4 | Mandatory `expected_witnesses` coverage for actions involving secrecy / betrayal / deception / violence / sex / law / status / public ritual; each relevant witness group gets a `BEL` create/supersession or a closed-set non-propagation rationale. `truth_relation` + `visibility` + `confidence` are consumed by the social-state firewall. |
-| §Story Bundles §6b (Information / Observer Firewall) | Phase 2, 4, 8, 9 | Selected `SLT` actor-bindings, character actions, emitted `CHC` choices, and newly authored `BEL` records must rely only on information available to the acting entity, or record a valid access route through belief, observation, artifact/document access, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism. Phase 4 retains that route in `BEL.basis.access_route` / `BEL.basis.access_records` for health-audit replay. |
+| §Story Bundles §6b (Information / Observer Firewall) | Phase 2, 4, 6, 8, 9 | Selected `SLT` actor-bindings, character actions, emitted `CHC` choices, and newly authored `BEL` records must rely only on information available to the acting entity, or record a valid access route through belief, observation, artifact/document access, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism. Phase 6 records non-system character motivation grounding in `SE.world_logic_rationale`; Phase 4 retains knowledge-access routes in `BEL.basis.access_route` / `BEL.basis.access_records` for health-audit replay. |
 | Change Control Policy | N/A | Not applicable — canon-reading skill emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
 

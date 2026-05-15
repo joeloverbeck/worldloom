@@ -97,7 +97,13 @@ parent_page_id: PG-<integer> | null         # * null only for PG-1
 branch_path: [PG-<integer>]*           # * ordered list of pages from root to here on this branch; for root page (PG-1) contains exactly [PG-1]; turn-cycle extends the parent page's branch_path by appending the new PG id. Referenced from §4.4 SLT.scope.visible_branch_path_prefix as the canonical prefix source; read by recursive_reference_closure to authorize in-branch references.
 turn_index: 0*
 input:
-  choice_id: CHC-<integer> | null           # exactly one of choice_id / manual_action_text is non-null
+  # Input legality:
+  # - If resolved_event.event_kind == story_start (i.e., parent_page_id == null, only PG-1):
+  #     choice_id == null
+  #     manual_action_text == null
+  # - Otherwise:
+  #     exactly one of choice_id / manual_action_text is non-null
+  choice_id: CHC-<integer> | null
   manual_action_text: null | string
   resolved_event_id: SE-<integer>*
 state_hash_parent: null | sha256       # null only for PG-1
@@ -132,6 +138,7 @@ state_snapshot:
     - mystery_id: M-<integer>
       authority: apparent | branch_local_counterfactual | canon_candidate
       status: preserved | clue_added | narrowed | apparent_resolution | held_for_promotion
+      evidence_records: [SF-<integer> | BEL-<integer> | DA-<integer> | SE-<integer>]  # defaults to []; MUST be non-empty for clue_added, narrowed, apparent_resolution, or held_for_promotion; every id MUST resolve to a story-local record in this bundle
   continuation:                        # *
     has_eligible_commitment_block: true | false
     terminal_status: open | branch_pause | terminal_closed
@@ -217,9 +224,20 @@ state_delta:
   supersede: [record_id]
   close: [record_id]
 promotion_claims:
-  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
+
+Per-source-kind `promotion_claims[].source_record` requirements:
+
+| source_kind | Required | Permitted supporting |
+|---|---|---|
+| `story_fact` | SF | none |
+| `mystery_resolution` | SF or BEL | none |
+| `character_outcome` | STENT | STSTAT as supersession-chain evidence; STENT alone is sufficient |
+| `artifact_canonization` | DA | none |
+| `relationship_or_institutional_outcome` | SREL | BEL, SF |
+| `other_branch_claim` | any `promotion_claims[].source_record` class | none |
 
 `world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
@@ -483,12 +501,17 @@ created_at_page: PG-<integer>*
 supersedes: SREL-<integer> | null             # default null
 axis: <axis>*                                  # §4.4b closed enum
 participants: [STENT-<integer>]*              # exactly 2 participants
-direction: string*                             # "STENT-<from> -> STENT-<to>" | "bidirectional"
+direction:
+  kind: directed | bidirectional*              # directed names an ordered relation; bidirectional is mutual
+  from: STENT-<integer> | null*                # required when kind == directed; null when bidirectional
+  to: STENT-<integer> | null*                  # required when kind == directed; null when bidirectional
 value: none | trace | low | medium | high | extreme*
 valence: symmetric | asymmetric | bidirectional | adversarial*
 description: string*
 derived_from: [<record_id>]                    # default []
 ```
+
+If `direction.kind: directed`, both `direction.from` and `direction.to` MUST be non-null and reference STENT records in the bundle. If `direction.kind: bidirectional`, both endpoints MUST be null; the mutual participants are documented in `participants[]`.
 
 No `magnitude` or `trace_records` fields; use `value` and `derived_from`.
 
@@ -637,7 +660,7 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | Predicate | Shape | Consumed by |
 |---|---|---|
 | `fact_true(SF-<integer>)` | Branch-local fact must be currently active. | turn-cycle eligibility |
-| `belief(holder, claim, mode?, confidence_floor?)` | Belief must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall |
+| `belief_record(holder, BEL-<integer>, mode?, confidence_floor?)` | Actor-specific BEL grounding must be held with the optional `belief_mode` and at least the named confidence. | turn-cycle eligibility, social-state firewall (actor-specific BEL grounding) |
 | `entity_status(STENT-<integer>, field, value)` | Resolves against active `STSTAT` records; `field` is one of `life | agency | location`. | turn-cycle eligibility |
 | `relationship_axis(SREL-<integer>, axis, comparator, value)` | Comparator is one of `>= | <= | == | !=`. | turn-cycle eligibility |
 | `obligation_open(OBL-<integer>)` | Obligation must be in an open state. | turn-cycle eligibility |
@@ -659,7 +682,7 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 | `affordance_available_to(STENT-<integer>, <action_family>)` | Actor-specific affordance grounding must exist for the named action family. | turn-cycle eligibility, plan grounding |
 | `all[…]`, `any[…]`, `not[…]` | Boolean composition. | combinator |
 
-`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief(holder, BEL-<integer>)`) so plan-time grounding is actor-specific.
+`has_affordance(<action_family>)` and the `any_*` existential predicates are valid only for `global_author_pool` and `branch_prefix_scoped` prefiltering when an actor is not yet bound. Branch-execution eligibility checks use exact-ID predicates (for example `affordance_available_to(<actor>, <family>)`, `obligation_open(OBL-<integer>)`, or `belief_record(holder, BEL-<integer>)`) so plan-time grounding is actor-specific. Free-claim string matching is not a lawful predicate; the only belief-family predicates are `belief_record` (exact BEL-id) and `any_belief` (existential alias-binding).
 
 **Information / Observer Firewall.** At move-generation time, every selected `SLT` actor-binding and every emitted `CHC` must be grounded in information available to the acting entity. Valid access routes include the actor's active `BEL` records, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference from known facts, surveillance, institutional channel, magic/tech, or another canonically valid mechanism named in the plan. A `BEL` or `DA` may ground a move only when the actor can access it; narrator-only knowledge, hidden branch state, and facts known only to another actor cannot license that actor's move unless a valid access route is recorded.
 
@@ -690,7 +713,7 @@ Every state-changing skill validates against these eight gates at page-plan comm
 
 | # | Gate | Checks |
 |---|---|---|
-| 1 | input legality | Exactly one source action (chosen CHC or write-in). Parent page exists and belongs to the named story bundle. The chosen CHC, if any, was emitted by the parent page and not retired. |
+| 1 | input legality | Exactly one source action (chosen CHC or write-in) UNLESS the resolved event is `story_start`. Parent page exists and belongs to the named story bundle UNLESS the resolved event is `story_start` (PG-1). The chosen CHC, if any, was emitted by the parent page and not retired. |
 | 2 | parent snapshot compatibility | The loaded parent snapshot's `state_hash` matches `PG.state_hash_parent`. The parent `state_snapshot.canon_revision` has been compared against the current world-canon revision and canon-baseline drift is classified before proceeding. |
 | 3 | mystery / invariant firewall | No `M-<integer>` with `status: forbidden` is resolved. No INV record is violated. `mystery_policy.forbidden_resolutions` of the selected commitment block is respected. |
 | 4 | branch isolation | No record from a sibling branch appears in this page's `state_snapshot.active_records`. No author-pool commitment block references branch-local record ids. |

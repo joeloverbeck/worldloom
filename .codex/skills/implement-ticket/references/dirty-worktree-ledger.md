@@ -76,6 +76,8 @@ When externally appeared edits or untracked files share a ticket prefix, numbere
 
 Do not silently attribute same-family sibling work to the active ticket just because it appeared during the run.
 
+When same-family tickets, specs, reports, or triage files are untracked, compare the initial and final exact path lists before closeout. Classify paths that appear only at the end as `externally appeared same-family` or as `pre-existing collapsed directory contents` when the initial status collapsed a whole untracked directory. Do this before final wording so newly visible sibling tickets are not accidentally described as active-ticket owned work.
+
 ## Ignored Artifacts
 
 For package/tool tickets, run an ignored-aware targeted status check for affected package directories before the first package command likely to create ignored artifacts and again before final response. Classify `node_modules/`, `dist/`, coverage output, caches, compiled tests, secret files, and rebuilt indexes as pre-existing, expected generated artifacts, cleaned state, or unexpected fallout.

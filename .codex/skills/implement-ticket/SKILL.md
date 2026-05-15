@@ -28,7 +28,7 @@ Use this as the default path, then apply the detailed rules below when the ticke
 4. Reassess ticket claims against the live repo; patch low-risk factual drift before code edits. If the reassessment will edit the ticket before any source edit, issue the pre-edit checkpoint before that ticket edit.
 5. State the owned implementation slice to the user, then make minimal edits.
 6. Run the narrowest truthful proof first, then any required broader package/workflow gate. If a package ticket deletes or renames source/test files and the proof lane runs compiled output, clean or check stale compiled artifacts before the first broad package test. If a package test script consumes compiled output and does not build itself, rebuild after any source/test edit before rerunning that test script.
-7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. If post-proof edits are ticket prose only and do not change package/source/test contracts, rerun hygiene and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite. During closeout, explicitly re-check the active ticket's `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, and `Deviations` against the landed diff and commands. If the user supplied an explicit spec/doc reference, re-check current-state/status notes in that reference for same-seam stale claims before final proof; update them or record why they are historical/out of scope.
+7. Close out the ticket text, rerun final proof if closeout changed a checked contract, refresh dirty/ignored-artifact state, and report exactly what changed. If post-proof edits are ticket prose only and do not change package/source/test contracts, rerun hygiene and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite. If any source, schema, test, fixture, generated artifact, or proof-surface file changes after closeout sections have been drafted, restart closeout truthing: re-check `Status`, `Verification Layers`, `Files to Touch`, `New/Modified Tests`, `Commands`, `Outcome`, `Verification Result`, `Deviations`, proof counts, and stale command fragments against the final diff and commands. If the user supplied an explicit spec/doc reference, re-check current-state/status notes in that reference for same-seam stale claims before final proof; update them or record why they are historical/out of scope.
 
 ### Mandatory References By Phase
 
@@ -38,6 +38,7 @@ Use this compact checklist so required references are not skipped:
 2. Reassessment: `references/reassessment-checks.md` for non-trivial tickets, plus `references/mismatch-handling.md`.
 3. Class-specific: `references/package-tooling.md`, `references/validator-schema-migrations.md`, `references/world-index.md`, or `references/patch-engine-codex-fallback.md` when the classification or proof surface calls for them.
 4. HARD-GATE / validation-signal changes: `docs/HARD-GATE-DISCIPLINE.md` and, for borderline cases, `references/hard-gate-read-triage.md` when the ticket changes skill HARD-GATE wording, canon-write ordering, patch-plan operation vocabulary in a HARD-GATE skill, Mystery Reserve firewall enforcement/gate behavior, approval-token behavior, `validate_patch_plan`, `submit_patch_plan`, pre-apply validation, content-generating skill validation-gate rows, content-generating pre-flight input validation, parse-time consumer schema checks, handoff-artifact required-field validation, `validation_trace` semantics, or operator PASS/FAIL criteria.
+   - Any planned edit inside an existing `<HARD-GATE>` block must load `references/hard-gate-read-triage.md` before the pre-edit checkpoint decides `HARD-GATE read: not required`. If the edit changes what must pass, when approval fires, what counts as failure, or what the operator must approve, read `docs/HARD-GATE-DISCIPLINE.md` and record `HARD-GATE read: yes`.
    - Story-bundle JSON Schema changes under `tools/validators/src/schemas/story-*.schema.json` count as validation-signal changes when they are exercised by `record_schema_compliance` in pre-apply, full-world, or story-bundle validation lanes.
    - Canon/world record JSON Schema changes under `tools/validators/src/schemas/` count as validation-signal changes when they are exercised by `record_schema_compliance`, pre-apply, or other validator gate lanes.
    - Patch-engine operation allowlists, retcon-attestation bypass logic, prose-finalize transition exceptions, and other operation behavior that can affect `validate_patch_plan` / `submit_patch_plan` semantics count as HARD-GATE-facing validation-signal changes even when the run does not submit a patch plan.
@@ -58,6 +59,7 @@ Use this index to jump to the detailed reference without adding more one-off rul
 - Post-proof ticket closeout, explicit reference-spec notes, broad-vs-focused proof, or checked grep/manual-review reruns -> `references/verification-closeout.md`.
 - Dirty worktree, same-file ownership, or ignored generated artifact ledger -> `references/dirty-worktree-ledger.md`.
 - HARD-GATE-facing validation signals or canon/story `_source` mutation gates -> `docs/HARD-GATE-DISCIPLINE.md` and, when subtle, `references/hard-gate-read-triage.md`.
+- Planned edits inside an existing `<HARD-GATE>` block -> `references/hard-gate-read-triage.md` before recording `HARD-GATE read: not required`; escalate to `docs/HARD-GATE-DISCIPLINE.md` when triage says the edit changes gate semantics.
 
 ### High-Risk Closeout Traps
 
@@ -65,11 +67,16 @@ Use this compact index during closeout so common proof/story drifts do not hide 
 
 - Stale source citations or line numbers in the ticket -> `references/verification-closeout.md` ticket closeout rules.
 - Negative grep / no-hit acceptance commands -> record an explicit success-on-no-match command, or clearly label the nonzero no-match result as the expected proof signal.
-- Broad negative grep commands over docs, specs, skills, or templates -> run the exact drafted command during reassessment, classify legitimate/historical hits, and narrow the proof before editing when a zero-hit sweep would catch explanatory or retired-root references.
+- Broad negative grep or stale-token sweeps over docs, specs, skills, templates, archives, reports, or tickets -> use `references/verification-closeout.md` to run the exact command safely, classify legitimate/historical hits, and split current-contract zero proof from broader discovery classification before closeout.
 - Explicit spec/doc references with status, implementation notes, counts, or current-state prose -> truth the same-seam reference before closeout, usually with a dated implementation note when broad row-by-row rewriting is out of scope.
 - Generated or ignored proof artifacts such as `dist/`, `_index/`, coverage output, or caches -> use `references/dirty-worktree-ledger.md` and package-specific ignored-artifact checks.
+- Untracked owned ticket/spec/skill/doc files -> plain `git diff --check` is not enough; use temporary `git add -N` with cleanup or an explicit whitespace check over the exact untracked files, then refresh status.
 - Post-proof prose-only closeout edits -> rerun `git diff --check` and any affected checked grep/manual-review proof instead of reflexively rerunning the broad package suite.
+- Post-closeout non-prose edits -> restart closeout truthing before final response; update the ticket's landed file set, test list, proof commands/results, proof counts, stale command fragments, and deviations before accepting the rerun proof.
+- Broad wrapper red but focused compiled proof green -> use `references/verification-closeout.md` to record baseline, direct-file diagnostics, focused proof, and deviation without forcing a synthetic full-suite green.
+- Proof-surface substitutions such as replacing an unavailable `skill dry-run` with manual review + grep -> sweep the active ticket for old proof labels (`dry-run`, `skill dry-run`) and old command fragments before final response.
 - Skill phase/check count drift -> when adding, removing, renaming, or reordering skill phases, gates, findings, or checks, grep nearby skill prose for numeric labels and old phase references such as `6 checks`, `7 sub-phases`, `Phase 2g`, or `Phase 9` before final proof. Update active operational labels; preserve old counts only when clearly marked historical.
+- Stale ticket/spec phase references -> when a ticket or spec names a phase/check as implementation authority, verify the live phase/check label before source edits and closeout even if the active change does not rename phases.
 
 ## Always First
 
@@ -120,7 +127,7 @@ Use the classification to choose which repo surfaces must be read and which veri
 
 If one primary class also changes a real shared contract, keep the primary classification but also apply the consumer and verification checks from `cross-skill or cross-artifact contract`.
 
-When a schema field, record-shape contract, or shared artifact vocabulary changes and producer templates/examples can emit that shape, run an early producer-surface inventory before source edits. Use `rg` to find active skill templates, examples, checked fixtures, package examples, and docs snippets that emit or describe the field; classify hits as accepted-record/current contract, pre-acceptance proposal/draft, historical/archive, rejection-test, or out-of-scope. If current-contract or proof fixtures must move with the schema, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
+When a schema field, record-shape contract, or shared artifact vocabulary changes and producer templates/examples can emit that shape, run an early producer-surface inventory before source edits. Use `rg` to find active skill templates, embedded code/YAML blocks inside `SKILL.md` files, examples, checked fixtures, package examples, and docs snippets that emit or describe the field; classify hits as accepted-record/current contract, pre-acceptance proposal/draft, historical/archive, rejection-test, or out-of-scope. If current-contract or proof fixtures must move with the schema, patch the active ticket's `Files to Touch`, proof surface, and acceptance text before editing those files.
 
 If the shared contract changes repo-wide workflow terminology, ID formats, gate names, command shapes, machine-facing conventions, or other quick-reference language, decide during intake whether `docs/WORKFLOWS.md` is in scope. If it is in scope, include it in the early stale-anchor sweep before source edits. If it is out of scope, record the exclusion and rationale in `Assumption Reassessment` before editing so closeout does not discover the boundary late.
 
@@ -158,7 +165,7 @@ For package/tool user-facing surfaces, validator/audit/live-corpus surfaces, and
 12. Snapshot the worktree with `git status --short` before coding and keep unrelated paths out of ticket fallout unless the ticket truly owns them.
 13. If dirty files overlap the active seam, inspect their diffs and any sibling ticket/archive move state before coding so same-seam in-flight work is classified truthfully.
 14. If the ticket lives under a worktree path, treat that worktree root as the repo root for all reads and writes.
-15. Before the first file edit, including ticket-only reassessment edits, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether same-family sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals or canon-mutation gates.
+15. Before the first file edit, including ticket-only reassessment edits, state a single pre-edit checkpoint covering repo identity and implementation boundary: active repo root, active ticket path, instruction source (`AGENTS.md` path), whether any sibling-repo hits were found and excluded as diagnostic-only, ticket classification / discrepancy class, authoritative owner boundary, whether same-family sibling scope is absorbed, excluded, or left untouched, and whether `docs/HARD-GATE-DISCIPLINE.md` was required/read (`yes`, `no`, or `not required`) when the ticket touches validation signals, canon-mutation gates, or text inside a `<HARD-GATE>` block. If the owned edit touches a `<HARD-GATE>` block but reassessment concludes the full HARD-GATE read is not required, load `references/hard-gate-read-triage.md` first and name the preserved gate behavior in the checkpoint or `Assumption Reassessment`.
 
 Compact checkpoint shape:
 
@@ -197,6 +204,8 @@ For non-trivial tickets, load `references/reassessment-checks.md` after classifi
 For engine-only canon writes where `mcp__worldloom__submit_patch_plan` is unavailable in the Codex toolset, load `references/patch-engine-codex-fallback.md` and use the local patch-engine fallback only if it preserves the same source-write boundary. Do not direct-edit `_source/*.yaml` as a convenience fallback.
 
 Load `references/mismatch-handling.md` from this skill directory (`.codex/skills/implement-ticket/references/`).
+
+Before any reassessment edit to the ticket itself, emit the pre-edit checkpoint from §1.15.
 
 Low-risk factual drift should be corrected directly in the ticket during reassessment. Architectural ambiguity, scope growth, or contradictory ownership requires a short 1-3-1 escalation to the user.
 

@@ -42,6 +42,80 @@ test("record_schema_compliance requires SREL axis", async () => {
   ));
 });
 
+test("record_schema_compliance accepts structured SREL direction variants", async () => {
+  const cases: Record<string, unknown>[] = [
+    {
+      direction: {
+        kind: "directed",
+        from: "STENT-0001",
+        to: "STENT-0002"
+      }
+    },
+    {
+      direction: {
+        kind: "bidirectional",
+        from: null,
+        to: null
+      }
+    }
+  ];
+
+  for (const overrides of cases) {
+    const result = await recordSchemaCompliance.run({}, context([
+      relationshipRecord(validRelationship(overrides))
+    ]));
+
+    assert.deepEqual(result, [], JSON.stringify(overrides));
+  }
+});
+
+test("record_schema_compliance rejects illegal structured SREL direction variants", async () => {
+  const cases: Record<string, unknown>[] = [
+    {
+      direction: {
+        kind: "directed",
+        from: null,
+        to: "STENT-0002"
+      }
+    },
+    {
+      direction: {
+        kind: "directed",
+        from: "STENT-0001",
+        to: null
+      }
+    },
+    {
+      direction: {
+        kind: "bidirectional",
+        from: "STENT-0001",
+        to: null
+      }
+    },
+    {
+      direction: {
+        kind: "bidirectional",
+        from: null,
+        to: "STENT-0002"
+      }
+    }
+  ];
+
+  for (const overrides of cases) {
+    const result = await recordSchemaCompliance.run({}, context([
+      relationshipRecord(validRelationship(overrides))
+    ]));
+
+    assert.ok(
+      result.some((verdict) =>
+        verdict.code === "record_schema_compliance.type" &&
+        verdict.message.includes("/direction")
+      ),
+      JSON.stringify({ overrides, result })
+    );
+  }
+});
+
 function relationshipRecord(parsed: Record<string, unknown>) {
   return {
     ...record("relationship_record_story", "test-story:SREL-0001", FILE_PATH, parsed),
@@ -56,7 +130,11 @@ function validRelationship(overrides: Record<string, unknown> = {}): Record<stri
     created_at_page: "PG-0001",
     axis: "trust",
     participants: ["STENT-0001", "STENT-0002"],
-    direction: "bidirectional",
+    direction: {
+      kind: "bidirectional",
+      from: null,
+      to: null
+    },
     value: "medium",
     valence: "bidirectional",
     description: "They trust each other enough to act.",

@@ -173,7 +173,11 @@ test("representative amended contract records validate against tightened schemas
       created_at_page: "PG-0001",
       axis: "trust",
       participants: ["STENT-0001", "STENT-0002"],
-      direction: "bidirectional",
+      direction: {
+        kind: "bidirectional",
+        from: null,
+        to: null
+      },
       value: "trace",
       valence: "bidirectional",
       description: "They have a little trust."

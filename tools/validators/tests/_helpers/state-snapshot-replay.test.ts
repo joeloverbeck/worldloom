@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { replayStateSnapshot } from "../../src/_helpers/state-snapshot-replay.js";
+import {
+  projectUnresolvedMysteryClaims,
+  replayStateSnapshot,
+  replayUnresolvedMysteryClaims
+} from "../../src/_helpers/state-snapshot-replay.js";
 
 const parentSnapshot = {
   canon_revision: "CH-0001",
@@ -119,4 +123,38 @@ test("state snapshot replay applies canon sync change_id fallback", () => {
   ], new Map());
 
   assert.equal(result.canon_revision, "CH-0003");
+});
+
+test("mystery claim projection defaults omitted evidence_records to an empty list", () => {
+  assert.deepEqual(projectUnresolvedMysteryClaims([
+    { mystery_id: "M-0001", authority: "apparent", status: "preserved" }
+  ]), [
+    { mystery_id: "M-0001", authority: "apparent", status: "preserved", evidence_records: [] }
+  ]);
+});
+
+test("mystery claim replay preserves inherited evidence and accepts event additions", () => {
+  const result = replayUnresolvedMysteryClaims(
+    [{ mystery_id: "M-0001", authority: "apparent", status: "preserved", evidence_records: ["SF-0001"] }],
+    [{ mystery_id: "M-0001", authority: "apparent", status: "clue_added", evidence_records: ["SF-0001", "SE-0002"] }],
+    ["SE-0002"]
+  );
+
+  assert.deepEqual(result.drifts, []);
+});
+
+test("mystery claim replay rejects status changes without event evidence", () => {
+  const result = replayUnresolvedMysteryClaims(
+    [{ mystery_id: "M-0001", authority: "apparent", status: "preserved", evidence_records: ["SF-0001"] }],
+    [{ mystery_id: "M-0001", authority: "apparent", status: "narrowed", evidence_records: ["SF-0001"] }],
+    ["SE-0002"]
+  );
+
+  assert.deepEqual(result.drifts, [
+    {
+      field: "unresolved_mystery_claims.M-0001.status",
+      expected: { authority: "apparent", status: "preserved" },
+      got: { authority: "apparent", status: "narrowed" }
+    }
+  ]);
 });

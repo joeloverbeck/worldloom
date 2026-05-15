@@ -33,7 +33,42 @@
       "maxItems": 2,
       "items": { "type": "string", "pattern": "^STENT-[0-9]+$" }
     },
-    "direction": { "type": "string", "minLength": 1 },
+    "direction": {
+      "type": "object",
+      "required": ["kind", "from", "to"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["directed", "bidirectional"] },
+        "from": { "type": ["string", "null"], "pattern": "^STENT-[0-9]+$" },
+        "to": { "type": ["string", "null"], "pattern": "^STENT-[0-9]+$" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "directed" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "const": "bidirectional" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "from": { "type": "null" },
+              "to": { "type": "null" }
+            }
+          }
+        }
+      ]
+    },
     "value": { "type": "string", "enum": ["none", "trace", "low", "medium", "high", "extreme"] },
     "valence": { "type": "string", "enum": ["symmetric", "asymmetric", "bidirectional", "adversarial"] },
     "description": { "type": "string", "minLength": 1 },
