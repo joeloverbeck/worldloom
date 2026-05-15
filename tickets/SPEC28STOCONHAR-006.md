@@ -52,7 +52,7 @@ Update the `SP-<integer>-closeout.md` ledger schema description (inline in `stor
 
 - Story-state-contract.md amendments — D6 does not change any source-record schema; it changes the closeout's gate semantics.
 - Other phases of `story-promotion-closeout` (the verdict-recording phase, the per-world stories/INDEX.md archival on accepted-flavored verdicts, etc.).
-- The story-fact-promotion-to-canon side — SPEC28STOCONHAR-005 (SPEC-28 D5).
+- The story-fact-promotion-to-canon side — `archive/tickets/SPEC28STOCONHAR-005.md` (SPEC-28 D5).
 - Adding a JSON-schema validator for `SP-<integer>-closeout.md` — the ledger is a markdown artifact; D6 documents the schema inline without introducing a JSON-schema counterpart.
 
 ## Acceptance Criteria

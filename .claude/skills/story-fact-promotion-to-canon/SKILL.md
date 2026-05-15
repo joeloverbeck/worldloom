@@ -195,8 +195,8 @@ candidate:
     hard: true | false
     soft: true | false
   source_basis:
-    direct_user_approval: false   # set true after Phase 7 HARD-GATE approval
-    derived_from: [<parent CF id if mirrored, or null if novel>]
+    direct_user_approval: false   # stays false in this skill; Phase 7 approves proposal creation, not canon acceptance
+    derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; never null or branch ids
     story_branch: <branch_path>
     story_evidence:
       source_records: [<source_record_ids>]
