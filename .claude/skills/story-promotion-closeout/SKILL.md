@@ -45,7 +45,7 @@ Close a story promotion after canon-addition has adjudicated — record the verd
 <HARD-GATE>
 Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-closeout.md`, update bundle `INDEX.md`, or update per-world `stories/INDEX.md`, until:
 
-(a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified at `worlds/<world_slug>/_source/canon/`, `worlds/<world_slug>/_source/change-log/`, `worlds/<world_slug>/adjudications/`; source records loaded from the proposal package inventory; optional SE id allocated.
+(a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified through MCP retrieval; source records loaded from the proposal package inventory; optional SE id allocated.
 
 (b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `source_records` inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
 
@@ -61,8 +61,8 @@ This gate is authoritative under Auto Mode or any other autonomous-execution con
 ```
 Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle +
   SP-<integer>-proposal-package.yaml + SP-<integer>.md ledger; verify verdict-
-  linked CF / CH / PA records exist; load source_records inventory +
-  optional SE id)
+  linked CF / CH / PA records exist through MCP retrieval; load source_records
+  inventory + optional SE id)
         |
         v
 Phase 1: Load promotion package + canon-addition verdict context
@@ -137,12 +137,11 @@ Before this skill acts, it MUST receive (per FOUNDATIONS §Tooling Recommendatio
 - `.claude/skills/_shared-templates/story-state-contract.md` — §4 record schemas (SF, BEL, STENT, SREL, DA, SE — closeout output classes; BR — read-only branch lineage), §10 shared write order, §11 mystery and canon authority
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-proposal-package.yaml` — source of truth for the promotion's `source_records` / `source_kind` / `branch_path` / `contradiction_preference` / `downstream_impact_report`
 - `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>.md` — original ledger (read-only; cross-referenced in closeout ledger)
-- `worlds/<world_slug>/_source/canon/CF-<integer>.yaml` (each linked CF) — read-only world-canon reference
-- `worlds/<world_slug>/_source/change-log/CH-<integer>.yaml` (each linked CH) — read-only Change Log Entry citation for Rule 6 audit-trail
-- `worlds/<world_slug>/adjudications/PA-<integer>-*.md` (each linked PA) — read-only adjudication record
+- `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)` — read-only linked CF and CH records for world-canon reference and Rule 6 audit-trail citation
+- `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)` for each linked PA — read-only adjudication record lookup until hybrid PA batch retrieval is available in `get_records`
 - `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<record-id>.yaml` for each source record from the proposal package
 
-The bundle MUST exist; SP-<integer> proposal package + ledger MUST exist; on accepted-flavored verdicts, every linked CF / CH / PA MUST exist (Pre-flight aborts with linked-record-not-found error otherwise — this prevents recording a fake canon-addition outcome).
+The bundle MUST exist; SP-<integer> proposal package + ledger MUST exist; on accepted-flavored verdicts, every linked CF / CH / PA MUST resolve through MCP retrieval (Pre-flight aborts with linked-record-not-found error otherwise — this prevents recording a fake canon-addition outcome).
 
 ## Pre-flight Check
 
@@ -152,7 +151,7 @@ Before Phase 1:
 2. Resolve `worlds/<world_slug>/stories/<story_slug>/`. Abort with bundle-not-found on miss.
 3. Load `story-promotions/SP-<integer>-proposal-package.yaml` and `story-promotions/SP-<integer>.md`. Verify the package's `promotion_id` matches the `promotion_id` argument. Abort with promotion-not-found or promotion-id-mismatch error on miss.
 4. Validate `canon_addition_verdict`: must be one of `accepted | accepted_with_limits | rejected | deferred`. On accepted-flavored verdicts, validate that `linked_cf_ids`, `linked_ch_ids`, `linked_pa_ids` are all supplied + non-empty.
-5. On accepted-flavored verdicts: verify each `linked_cf_ids` entry resolves to `worlds/<world_slug>/_source/canon/CF-<integer>.yaml`; each `linked_ch_ids` entry resolves to `worlds/<world_slug>/_source/change-log/CH-<integer>.yaml`; each `linked_pa_ids` entry resolves to a `worlds/<world_slug>/adjudications/PA-<integer>-*.md` file. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
+5. On accepted-flavored verdicts: verify each `linked_cf_ids` and `linked_ch_ids` entry resolves through `mcp__worldloom__get_records(record_ids=<linked_cf_ids + linked_ch_ids>, world_slug=<world_slug>)`; verify each `linked_pa_ids` entry resolves through per-PA `mcp__worldloom__get_record(record_id=<linked_pa_id>, world_slug=<world_slug>)`. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
 6. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting and disposition classification.
 7. Allocate one `SE-<integer>` when `emit_closeout_event: true`.
 
@@ -164,7 +163,7 @@ Load into working memory:
 
 - The `SP-<integer>-proposal-package.yaml` (per Pre-flight step 3).
 - The original `SP-<integer>.md` ledger (for cross-reference in the closeout ledger).
-- On accepted-flavored verdicts: each linked CF record (`worlds/<world_slug>/_source/canon/CF-<integer>.yaml`) + each linked CH record + each linked PA record. **Read-only** — closeout cites these in superseding story-local records but does NOT modify them.
+- On accepted-flavored verdicts: each linked CF / CH record loaded through `mcp__worldloom__get_records(...)` plus each linked PA record loaded through per-PA `mcp__worldloom__get_record(...)`. **Read-only** — closeout cites these in superseding story-local records but does NOT modify them.
 - All source records from the proposal package: SF / BEL / STENT / SREL / DA per source_kind.
 - The branches in `affected_branch_ids` (for Phase 2 branch-handling decisions).
 
@@ -220,7 +219,7 @@ Run 6 validation gates BEFORE patch submission:
 
 1. **No world-canon mutation attempted** — every op in the patch plan targets `worlds/<world_slug>/stories/<story_slug>/_source/<class>/*.yaml`; ZERO ops target `worlds/<world_slug>/_source/<world-subdir>/*.yaml`. Hook 3 enforces structurally; this gate verifies before submission as defense-in-depth.
 
-2. **Accepted-flavored links reference actual canon-addition outputs** — re-verify Pre-flight step 5 (each `linked_cf_ids` / `linked_ch_ids` / `linked_pa_ids` entry resolves to a real file).
+2. **Accepted-flavored links reference actual canon-addition outputs** — re-verify Pre-flight step 5 (each `linked_cf_ids` / `linked_ch_ids` / `linked_pa_ids` entry resolves through MCP retrieval).
 
 3. **Branch-handling actions only affect same-story branches** — when `same_story_branch_handling ∈ {flag, archive}`, every branch in `affected_branch_ids` MUST exist in this bundle's `_source/branches/`. Cross-story branch modifications are forbidden.
 

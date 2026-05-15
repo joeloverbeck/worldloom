@@ -514,6 +514,8 @@ A `record_schema_compliance` check on `candidate:` alone would reject these fiel
 
 ### D10 — Closeout uses MCP retrieval for linked world records (P2, reclassified from report's P1)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-010` landed this deliverable as the narrow closeout-skill rewrite. Accepted-flavored linked CF / CH verification now routes through `mcp__worldloom__get_records(...)`; linked PA verification uses per-PA `mcp__worldloom__get_record(...)` while PA hybrid batch retrieval remains a follow-up/out-of-scope MCP enhancement. The original problem/change text below is historical intake context.
+
 **Problem**: `story-promotion-closeout/SKILL.md:140-141, 155, 167` instructs raw filesystem reads of `worlds/<slug>/_source/canon/CF-<integer>.yaml`, `_source/change-log/CH-<integer>.yaml`, and `adjudications/PA-<integer>-*.md`. Every other canon-reading skill goes through MCP. The reads are read-only and Hook 3 only blocks writes, so this is safe in practice — but inconsistent.
 
 **Change**:
