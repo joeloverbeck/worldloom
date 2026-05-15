@@ -47,6 +47,8 @@ Deliverables are grouped by severity (P1 → P2). Each is self-contained and can
 
 ### D1 — Replace `denial_patterns` with firewall-field-derived patterns in prose-attach (P1, intake F2 / A1)
 
+**Implementation note (2026-05-16)**: `archive/tickets/SPEC32STOCONHAR-005.md` landed the live skill-prose correction by replacing the undocumented `denial_patterns` source in `branching-story-prose-attach` Phase 3 check 3 with firewall-field-derived matching from `get_firewall_content`, `disallowed_cheap_answers[]`, `unknowns[]`, and page-plan §11. The same skill's Rule 7 and Mystery Reserve alignment rows were kept consistent. The accepted proof surface is grep/manual review of the live SKILL.md plus the existing validators package regression check; the validator-fixture directories drafted below remain historical intake context unless a later testing-hardening ticket introduces a structural-validator integration point for this skill-local deterministic check.
+
 **Problem**: `.claude/skills/branching-story-prose-attach/SKILL.md:185` (Phase 3 deterministic check 3) says:
 
 > 3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — regex-scan the prose for surface-level resolutions of any mystery in plan §11 `forbidden_resolutions[]`. Use deterministic patterns derived from each mystery's `denial_patterns` (per the world's Mystery Reserve record format). Any pattern match is `FAIL` and routes to `repair_recommendation: revise_prose`.
