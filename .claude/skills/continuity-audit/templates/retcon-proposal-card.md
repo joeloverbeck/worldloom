@@ -101,9 +101,9 @@ required_world_updates: []                  # UPPER_SNAKE SEC file classes that 
   # - EVERYDAY_LIFE
 
 source_basis:
-  direct_user_approval: false               # set true at Phase 13 after HARD-GATE approval (means "user kept
-                                            # this card in the audit's recommendations" — NOT "canon-addition
-                                            # has accepted this retcon")
+  direct_user_approval: false               # pre-acceptance proposal only; continuity-audit approval keeps
+                                            # this card in the audit's recommendations, not world canon.
+                                            # canon-addition sets accepted CF records to true after its own HARD-GATE.
   derived_from:                             # parent CF ids this retcon modifies (usually matches target_cf_ids)
     - CF-<integer>
 

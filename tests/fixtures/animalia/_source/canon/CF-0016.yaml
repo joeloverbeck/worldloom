@@ -34,7 +34,7 @@ required_world_updates:
   - EVERYDAY_LIFE
   - TIMELINE
 source_basis:
-  direct_user_approval: false
+  direct_user_approval: true
   derived_from:
     - CF-0001
     - CF-0010

@@ -1,15 +1,14 @@
 # Proposal package — story-fact-promotion-to-canon
 #
-# Parity intent: this template's `candidate:` block preserves FOUNDATIONS §Canon Fact Record Schema
-# byte-for-byte so canon-addition can field-copy at parse time (sub-class (a) of skill-creator's
-# template-derivation discipline). The wrapping envelope (promotion_id, story_slug, source_kind,
-# evidence sets, scope_inflation_report, mystery_firewall_report, downstream_impact_report,
-# contradiction_preference, user_decision) is promotion-specific and does NOT pollute CF parity.
+# Parity intent: this template's `candidate:` block is a pre-acceptance CF-shaped package
+# matching the accepted CF fields closely enough for canon-addition to normalize. It is
+# not a persisted Canon Fact Record: canon-addition strips promotion-only evidence fields
+# and sets accepted-CF approval provenance only after its own HARD-GATE.
 #
 # Named consumer: canon-addition's parse-time CF-schema requirement (FOUNDATIONS §Canon Fact Record Schema).
-# Future maintainers: when FOUNDATIONS §Canon Fact Record Schema gains a field, mirror it inside `candidate:`
-# here so canon-addition's parsing stays clean. Do NOT add candidate fields not present in FOUNDATIONS;
-# do NOT remove candidate fields present in FOUNDATIONS.
+# Future maintainers: when FOUNDATIONS §Canon Fact Record Schema gains an accepted-CF field,
+# either mirror it inside `candidate:` or document the canon-addition normalization step.
+# Do NOT treat this proposal package's Phase 7 approval as canon acceptance.
 
 promotion_id: SP-<integer>
 story_slug: <story_slug>
@@ -59,7 +58,7 @@ candidate:
     hard: true | false
     soft: true | false
   source_basis:
-    direct_user_approval: false   # stays false in this skill; Phase 7 approves proposal creation, not canon acceptance
+    direct_user_approval: false   # pre-acceptance package only; canon-addition sets accepted CF records to true after its own HARD-GATE
     derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; never null or branch ids
     story_branch: <branch_path>
     story_evidence:

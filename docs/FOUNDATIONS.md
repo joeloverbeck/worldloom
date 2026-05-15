@@ -352,6 +352,14 @@ exception_governance:
   n_a: "Structural-institutional fact; no exception axis."
 ```
 
+`source_basis.direct_user_approval` is accepted-CF provenance, not a proposal-side
+approval switch. In a persisted Canon Fact Record it is required and must be
+`true`, meaning the fact has passed `canon-addition` adjudication, explicit
+HARD-GATE approval, approval-token issuance, and patch-engine submission.
+Pre-acceptance proposal packages may carry a CF-shaped candidate with
+`direct_user_approval: false`; `canon-addition` must not copy that value into
+the accepted CF record.
+
 Mystery Reserve entries are first-class `M-<integer>` records, not a Canon Fact `status` value. Relate a CF to an `M` record through `source_basis`, change-log entries, or extension mechanisms; do not encode Mystery Reserve as a CF status. `required_world_updates` uses bare UPPER_SNAKE SEC file-class names (`GEOGRAPHY`, `PEOPLES_AND_SPECIES`, `INSTITUTIONS`, `ECONOMY_AND_RESOURCES`, `MAGIC_OR_TECH_SYSTEMS`, `EVERYDAY_LIFE`, `TIMELINE`), not retired root markdown filenames.
 
 The optional `pre_figured_by[]` field, when present in machine-readable Canon Fact Records, accepts CF ids only and records CF-to-CF foreshadowing: an earlier accepted CF that hinted at the later commitment before it was canonized. Diegetic-artifact or character pre-figurement belongs in `source_basis.derived_from` alongside any contributing CF parents, preserving Rule 6 audit-trail routing without widening `pre_figured_by` beyond CF references.

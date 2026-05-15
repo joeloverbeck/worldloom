@@ -118,7 +118,7 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 ## Output
 
-- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (CF-shaped candidate package; sub-class (a) parity with FOUNDATIONS §Canon Fact Record Schema; consumed by `canon-addition`)
+- `story-promotions/SP-<integer>-proposal-package.yaml` — Always (pre-acceptance CF-shaped candidate package; consumed by `canon-addition`, which strips promotion-only evidence fields and sets accepted-CF approval provenance if it accepts the proposal)
 - `story-promotions/SP-<integer>.md` — Always (human-readable ledger pointing at YAML package)
 - Bundle `INDEX.md` — Always (updated last)
 
@@ -195,7 +195,7 @@ candidate:
     hard: true | false
     soft: true | false
   source_basis:
-    direct_user_approval: false   # stays false in this skill; Phase 7 approves proposal creation, not canon acceptance
+    direct_user_approval: false   # pre-acceptance package only; canon-addition sets accepted CF records to true after its own HARD-GATE
     derived_from: []              # novel candidate; mirrored candidate uses [<parent CF id>]; never null or branch ids
     story_branch: <branch_path>
     story_evidence:
@@ -210,7 +210,7 @@ candidate:
     rationale: <natural-language explanation of why this branch-local claim should become world canon>
 ```
 
-**Branch provenance lives in `source_basis.story_branch` + `source_basis.story_evidence` + `promotion_provenance` — NEVER in `source_basis.derived_from`** (which is reserved for parent CF references — world authority). The branch is evidence, not authority.
+**Branch provenance lives in `source_basis.story_branch` + `source_basis.story_evidence` + `promotion_provenance` — NEVER in `source_basis.derived_from`** (which is reserved for parent CF references — world authority). The branch is evidence, not authority. The package is not an accepted Canon Fact Record: `direct_user_approval` stays `false` until `canon-addition` accepts the proposal through its own HARD-GATE and emits a `create_cf_record` payload with `true`.
 
 ## Phase 3: Scope-inflation check (FOUNDATIONS Rule 4)
 

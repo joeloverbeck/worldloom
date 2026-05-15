@@ -92,6 +92,27 @@ test("record_schema_compliance accepts derived_canon and rejects mystery_reserve
   );
 });
 
+test("record_schema_compliance rejects accepted CFs without direct user approval provenance", async () => {
+  const result = await recordSchemaCompliance.run(
+    {},
+    context([
+      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+        ...validCf,
+        source_basis: { direct_user_approval: false, derived_from: [] }
+      })
+    ])
+  );
+
+  assert.ok(
+    result.some(
+      (verdict) =>
+        verdict.location.node_id === "CF-0001" &&
+        verdict.code === "record_schema_compliance.const" &&
+        verdict.message.includes("/source_basis/direct_user_approval")
+    )
+  );
+});
+
 test("record_schema_compliance rejects removed affected_cf_ids alias on change logs", async () => {
   const result = await recordSchemaCompliance.run(
     {},

@@ -18,7 +18,7 @@ domains_affected:
 required_world_updates:
   - INSTITUTIONS.md
 source_basis:
-  direct_user_approval: false
+  direct_user_approval: true
   derived_from:
     - CF-0001
 modification_history:

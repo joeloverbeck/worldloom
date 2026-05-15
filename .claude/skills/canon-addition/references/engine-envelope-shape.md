@@ -314,6 +314,12 @@ A complete `create_cf_record` op for a new soft-canon CF:
 }
 ```
 
+`source_basis.direct_user_approval` is always `true` in `create_cf_record`
+payloads. The validator treats any other value as a schema failure because this
+operation creates an accepted Canon Fact Record after `canon-addition` approval,
+approval-token issuance, and patch-engine submission. Pre-acceptance proposal
+packages may carry `false`; accepted CF records may not.
+
 Note: `required_world_updates` lists ONLY SEC file classes (per §7). The CH record's `downstream_updates[]` covers any invariant extensions, mystery-reserve entries, open-question entries, and other non-SEC mutations.
 
 A complete `append_adjudication_record` op for the PA:

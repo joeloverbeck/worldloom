@@ -57,7 +57,7 @@ required_world_updates: []                 # UPPER_SNAKE SEC file classes that m
   # - TIMELINE
 
 source_basis:
-  direct_user_approval: false              # set true once user explicitly accepts this fact
+  direct_user_approval: true               # accepted CF record; proposal/draft packages stay false until canon-addition accepts them
   derived_from: []                         # list of parent CF ids if this is derived canon
 
 contradiction_risk:
