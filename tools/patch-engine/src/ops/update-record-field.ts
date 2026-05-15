@@ -153,13 +153,9 @@ function isProseFinalizeTransition(
   if (fieldPath.length === 1) {
     return fieldPath[0] === "prose_path" || fieldPath[0] === "prose_status";
   }
-  if (fieldPath.length === 2 && fieldPath[0] === "state_snapshot") {
-    return fieldPath[1] === "arc_trace_emitted" || fieldPath[1] === "arc_trace_id";
-  }
   if (fieldPath.length === 2 && fieldPath[0] === "deferred_validation_trace") {
     return (
       fieldPath[1] === "prose_ledger_consistency" ||
-      fieldPath[1] === "arc_trace_evidence_alignment" ||
       fieldPath[1] === "prose_critic_8_axis"
     );
   }

@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: No new code surfaces; three documentation files updated to reflect the surface retirements landed in `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004.
-**Deps**: archive/tickets/SPEC29LEGTOOVOC-001.md, archive/tickets/SPEC29LEGTOOVOC-002.md, SPEC29LEGTOOVOC-003, SPEC29LEGTOOVOC-004
+**Engine Changes**: No new code surfaces; three documentation files updated to reflect the surface retirements landed in `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, `archive/tickets/SPEC29LEGTOOVOC-003.md`, and SPEC29LEGTOOVOC-004.
+**Deps**: archive/tickets/SPEC29LEGTOOVOC-001.md, archive/tickets/SPEC29LEGTOOVOC-002.md, archive/tickets/SPEC29LEGTOOVOC-003.md, SPEC29LEGTOOVOC-004
 
 ## Problem
 
@@ -60,7 +60,7 @@ Two locations:
 
 ## Out of Scope
 
-- Source code changes (vocabulary, arc_trace_record, schema, parser, indexer) — those are `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004 (prerequisites per Deps).
+- Source code changes (vocabulary, arc_trace_record, schema, parser, indexer) — those are `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, `archive/tickets/SPEC29LEGTOOVOC-003.md`, and SPEC29LEGTOOVOC-004 (prerequisites per Deps).
 - `.claude/skills/_shared-templates/story-state-contract.md` §4.4 / §5a prohibition text — retained per SPEC-29 §6 (design contract documenting what the SLT schema rejects).
 - Archive prose (`archive/tickets/SCAUD-003*`, `archive/plans/2026-05-13*`, `archive/reports/streamlined-story-pipelines/*`) — historical record, not maintained.
 - `docs/triage/*` files — historical record of triage decisions; not maintained.
@@ -78,7 +78,7 @@ Two locations:
 
 ### Invariants
 
-1. Documentation parity: the three docs surfaces match the MCP / index / vocabulary surfaces shipped by `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004.
+1. Documentation parity: the three docs surfaces match the MCP / index / vocabulary surfaces shipped by `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, `archive/tickets/SPEC29LEGTOOVOC-003.md`, and SPEC29LEGTOOVOC-004.
 2. Cross-cutting docs landing atomically post-implementation prevents any review window during which docs advertise a retired surface.
 
 ## Test Plan

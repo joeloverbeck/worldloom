@@ -17,12 +17,7 @@ function pgRecord(): Record<string, unknown> {
     prose_status: "pending",
     deferred_validation_trace: {
       prose_ledger_consistency: "DEFERRED — awaiting prose render",
-      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
       prose_critic_8_axis: "DEFERRED — awaiting prose render"
-    },
-    state_snapshot: {
-      arc_trace_emitted: false,
-      arc_trace_id: null
     }
   };
 }
@@ -133,18 +128,6 @@ test("update_record_field sets PG prose-finalize transitional fields without ret
   } satisfies Extract<PatchOperation, { op: "update_record_field" }>);
   await stageUpdateRecordField(env, setNestedGate, world.ctx);
 
-  const setArcTraceFlag = createOp({
-    op: "update_record_field",
-    target_world: env.target_world,
-    expected_content_hash: pgHash,
-    payload: {
-      target_record_id: "PG-1",
-      field_path: ["state_snapshot", "arc_trace_emitted"],
-      operation: "set",
-      new_value: true
-    }
-  } satisfies Extract<PatchOperation, { op: "update_record_field" }>);
-  await stageUpdateRecordField(env, setArcTraceFlag, world.ctx);
 });
 
 test("update_record_field accepts bare story-bundle ids and resolves the namespaced indexed record", async (t) => {
@@ -239,7 +222,6 @@ test("update_record_field chains mutations on a story-bundle page across multipl
     prose_status: "rendered",
     deferred_validation_trace: {
       prose_ledger_consistency: "PASS — rendered prose matches the ledger",
-      arc_trace_evidence_alignment: "DEFERRED — awaiting prose render",
       prose_critic_8_axis: "DEFERRED — awaiting prose render"
     }
   });
