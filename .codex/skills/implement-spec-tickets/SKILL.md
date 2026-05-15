@@ -73,6 +73,8 @@ On resume after `/new`, read this state file first, then verify every important 
 
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
 
+If the only conflict is stale `dirty_state` text and live `git status --short` proves the tracked worktree is clean or safely supersedes the old classification, state the stale classification explicitly and refresh it in the next state-file update. Do not create a pre-work state-only commit solely to correct stale dirt text when target selection, queue validity, ownership classification, and archival readiness are unaffected.
+
 `last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
 
 ## Intake
@@ -134,6 +136,8 @@ Child skill audit:
 
 If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue.
 
+For harness-internal child phases, this compact block is the required visible report. Apply the child skill's evidence standards, guardrails, and edit rules, but do not emit the child skill's full report template unless the phase blocks, creates material follow-up decisions that need the full structure, or the extra detail is necessary for a truthful handoff.
+
 After editing the skill, rerun a focused hygiene check over changed skill files, usually `git diff --check -- .codex/skills/implement-ticket`.
 
 ### 3. Review Completed Tickets
@@ -159,6 +163,8 @@ Post-ticket review:
 ```
 
 If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
+
+For harness-internal review phases, this compact block is the required visible report. Apply the child skill's closeout truthing, archival, dependency-repair, and follow-up rules, but do not emit the full `post-ticket-review` report template unless archival blocks, a user decision is required, or the fuller structure is needed to make the handoff truthful.
 
 ### 4. Audit Post-Ticket Review When It Changes Handoff Surfaces
 
