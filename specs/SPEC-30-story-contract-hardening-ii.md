@@ -13,6 +13,8 @@
 
 > **Implementation note (2026-05-15)**: D3 landed via `archive/tickets/SPEC30STOCONHAR-003.md`. Shared contract §5 now uses `belief_record(holder, BEL-<integer>, mode?, confidence_floor?)` for actor-specific BEL grounding and keeps `any_belief(...)` for existential alias-binding; the validator grammar/parser reject legacy `belief(...)` as `unknown_predicate` and reject non-BEL second arguments with `belief_record_argument_invalid`. Remaining D3 prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D4 landed via `archive/tickets/SPEC30STOCONHAR-004.md`. Shared contract §4.3 and `story-event.schema.json` now admit `STSTAT` and `SREL` in `promotion_claims[].source_record`; `recursive_reference_closure` resolves both classes from SE promotion claims; `story-fact-promotion-to-canon`, `branching-story-turn-cycle`, and `story-promotion-closeout` now describe the widened STENT/STSTAT/SREL promotion source discipline. Remaining D4 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement

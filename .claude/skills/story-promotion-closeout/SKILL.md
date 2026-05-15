@@ -119,6 +119,7 @@ Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
 | `SF-<integer>` (supersession) | `_source/facts/SF-<integer>.yaml` | IF a source SF needs an amended-schema update (`source_record_dispositions[SF-<integer>] = superseded`) |
 | `BEL-<integer>` (supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF a source BEL needs an amended-schema update to `truth_relation`, `claim`, `basis`, or `consequences` (`source_record_dispositions[BEL-<integer>] = superseded`) |
 | `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF a source STENT needs an amended-schema update (`source_record_dispositions[STENT-<integer>] = superseded`) |
+| `STSTAT-<integer>` (supersession) | `_source/status/STSTAT-<integer>.yaml` | IF a source STSTAT in the promotion's source-record set needs an amended-schema update after becoming canon-linked, such as character-outcome supersession-chain evidence (`source_record_dispositions[STSTAT-<integer>] = superseded`) |
 | `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF a source SREL needs an amended-schema update (`source_record_dispositions[SREL-<integer>] = superseded`) |
 | `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF a source DA needs an amended-schema update (`source_record_dispositions[DA-<integer>] = superseded`; uses `append_story_diegetic_artifact_record`) |
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | IF `emit_closeout_event: true` (single record with `event_kind: promotion_closeout`) |

@@ -107,14 +107,14 @@ Phase 7: HARD-GATE fires → write SP-<integer>-proposal-package.yaml
 
 ### Source-kind record-class mapping
 
-| source_kind | Required source_record class(es) | Prose evidence |
-|---|---|---|
-| `story_fact` | `SF-<integer>` (plus authoring `SE` + witness `BEL`) | Required |
-| `mystery_resolution` | `M-<integer>` (plus resolving `SE` + pre-resolution `BEL` chain) | Required |
-| `character_outcome` | `STENT-<integer>` (plus the supersession chain showing the outcome) | Required |
-| `artifact_canonization` | `DA-<integer>` (story-local; plus authoring `SE`) | Required |
-| `relationship_or_institutional_outcome` | `SREL-<integer>` (plus supersession chain + supporting events) | Required |
-| `other_branch_claim` | user-supplied records | Optional |
+| source_kind | Required source_record class(es) | Permitted supporting source records | Prose evidence |
+|---|---|---|---|
+| `story_fact` | `SF-<integer>` | authoring `SE`, witness `BEL` | Required |
+| `mystery_resolution` | `M-<integer>` for Mystery Reserve audit; SE `promotion_claims[].source_record` cites `SF-<integer>` or `BEL-<integer>` | resolving `SE`, pre-resolution `BEL` chain | Required |
+| `character_outcome` | `STENT-<integer>` | `STSTAT-<integer>` supersession-chain evidence showing the outcome's accumulation; STENT alone is sufficient when no status record carries load-bearing evidence | Required |
+| `artifact_canonization` | `DA-<integer>` (story-local) | authoring `SE` | Required |
+| `relationship_or_institutional_outcome` | `SREL-<integer>` | `BEL-<integer>`, `SF-<integer>`, supersession chain, supporting events | Required |
+| `other_branch_claim` | user-supplied records from the lawful `promotion_claims[].source_record` classes | none | Optional |
 
 ## Output
 

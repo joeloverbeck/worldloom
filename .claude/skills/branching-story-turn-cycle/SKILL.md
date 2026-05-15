@@ -324,7 +324,7 @@ state_delta:
   supersede: [<every record id that received a supersession>]
   close: [<every record id closed this turn>]
 promotion_claims:
-  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
 

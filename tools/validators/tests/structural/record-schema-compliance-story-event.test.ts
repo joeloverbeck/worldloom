@@ -176,6 +176,23 @@ test("record_schema_compliance accepts conformant SE resolution shape for every 
   }
 });
 
+test("record_schema_compliance accepts STSTAT and SREL promotion claim source records", async () => {
+  for (const sourceRecord of ["STSTAT-0003", "SREL-0002"]) {
+    const result = await recordSchemaCompliance.run({}, context([
+      eventRecord(validEvent({
+        promotion_claims: [
+          {
+            source_record: sourceRecord,
+            authority: "canon_candidate"
+          }
+        ]
+      }))
+    ]));
+
+    assert.deepEqual(result, [], sourceRecord);
+  }
+});
+
 function eventRecord(parsed: Record<string, unknown>) {
   return {
     ...record("story_event_record", "test-story:SE-0001", FILE_PATH, parsed),

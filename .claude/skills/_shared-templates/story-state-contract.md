@@ -223,9 +223,20 @@ state_delta:
   supersede: [record_id]
   close: [record_id]
 promotion_claims:
-  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer>
+  - source_record: SF-<integer> | BEL-<integer> | DA-<integer> | STENT-<integer> | STSTAT-<integer> | SREL-<integer>
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
+
+Per-source-kind `promotion_claims[].source_record` requirements:
+
+| source_kind | Required | Permitted supporting |
+|---|---|---|
+| `story_fact` | SF | none |
+| `mystery_resolution` | SF or BEL | none |
+| `character_outcome` | STENT | STSTAT as supersession-chain evidence; STENT alone is sufficient |
+| `artifact_canonization` | DA | none |
+| `relationship_or_institutional_outcome` | SREL | BEL, SF |
+| `other_branch_claim` | any `promotion_claims[].source_record` class | none |
 
 `world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
