@@ -130,11 +130,12 @@ Before applying or rejecting suggestions, print a compact visible audit result f
 Child skill audit:
 - Target skill: .codex/skills/implement-ticket
 - Findings: <N issues, N improvements, N features>
+- Evidence basis: <one-line session evidence checked, especially when Findings is 0>
 - Apply: <specific suggestions to patch, or "none">
 - Reject/defer: <specific suggestions and reason, or "none">
 ```
 
-If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue.
+If the audit has no findings or no applicable suggestions, still print the block with `Apply: none` and continue. When `Findings` is `0 issues, 0 improvements, 0 features`, include a concrete one-line `Evidence basis` naming the observed session surfaces checked, such as reassessment, proof substitution, closeout, archival handoff, state persistence, or reset behavior. Keep this to one line; do not expand a zero-finding audit into the full child-skill report template.
 
 For harness-internal child phases, this compact block is the required visible report. Apply the child skill's evidence standards, guardrails, and edit rules, but do not emit the child skill's full report template unless the phase blocks, creates material follow-up decisions that need the full structure, or the extra detail is necessary for a truthful handoff.
 
