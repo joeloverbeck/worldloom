@@ -3,8 +3,8 @@
 **Status**: PENDING
 **Priority**: MEDIUM
 **Effort**: Small
-**Engine Changes**: No new code surfaces; three documentation files updated to reflect the surface retirements landed in archive/tickets/SPEC29LEGTOOVOC-001.md / SPEC29LEGTOOVOC-002 / SPEC29LEGTOOVOC-003 / SPEC29LEGTOOVOC-004.
-**Deps**: archive/tickets/SPEC29LEGTOOVOC-001.md, SPEC29LEGTOOVOC-002, SPEC29LEGTOOVOC-003, SPEC29LEGTOOVOC-004
+**Engine Changes**: No new code surfaces; three documentation files updated to reflect the surface retirements landed in `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004.
+**Deps**: archive/tickets/SPEC29LEGTOOVOC-001.md, archive/tickets/SPEC29LEGTOOVOC-002.md, SPEC29LEGTOOVOC-003, SPEC29LEGTOOVOC-004
 
 ## Problem
 
@@ -17,7 +17,7 @@ Three documentation files carry references to the seven retired vocabulary class
 
 1. **Codebase reality**: each named line/row was verified at codebase validation 2026-05-15. The three documentation files are markdown prose; no machine consumer parses them as structured data (per SPEC-29 §Risks point 3: "Confirm at ticket time that the file's read pattern is just-prose"; verified by grep — no `.ts` file in `tools/` reads any of the three docs files programmatically).
 2. **Spec/docs reality**: SPEC-29 §5 names only `docs/MACHINE-FACING-LAYER.md:80` (the `get_canonical_vocabulary` row), `tools/world-mcp/README.md`, and `tools/world-index/README.md`. Issue 4 from /spec-to-tickets Step 2 (2026-05-15) surfaced the additional `list_records` row references in `docs/MACHINE-FACING-LAYER.md` and `tools/world-mcp/README.md:19`, and the `--arc-traces` CLI flag mention in `tools/world-index/README.md:16`; all dispositioned **expand-scope-in-place**.
-3. **Shared boundary under audit**: documentation prose ↔ MCP surface. Post-implementation, docs must match the surfaces in `tools/world-mcp/src/tools/list-records.ts`, `tools/world-mcp/src/tools/get-canonical-vocabulary.ts`, and `tools/world-index/src/cli.ts` — verified by grep-proof at acceptance time. Per /spec-to-tickets §Cross-Cutting Docs Ticket Shape, `Deps` lists every upstream implementation ticket because each docs surface references a distinct implementation surface independently (no transitive-head dependency suffices — the `list_records` row references record types touched by SPEC29LEGTOOVOC-002 + SPEC29LEGTOOVOC-004; the `get_canonical_vocabulary` row references classes touched by `archive/tickets/SPEC29LEGTOOVOC-001.md`; the `--arc-traces` CLI flag is touched by SPEC29LEGTOOVOC-004; the canonical-vocabularies export prose references types touched by `archive/tickets/SPEC29LEGTOOVOC-001.md`).
+3. **Shared boundary under audit**: documentation prose ↔ MCP surface. Post-implementation, docs must match the surfaces in `tools/world-mcp/src/tools/list-records.ts`, `tools/world-mcp/src/tools/get-canonical-vocabulary.ts`, and `tools/world-index/src/cli.ts` — verified by grep-proof at acceptance time. Per /spec-to-tickets §Cross-Cutting Docs Ticket Shape, `Deps` lists every upstream implementation ticket because each docs surface references a distinct implementation surface independently (no transitive-head dependency suffices — the `list_records` row references record types touched by `archive/tickets/SPEC29LEGTOOVOC-002.md` + SPEC29LEGTOOVOC-004; the `get_canonical_vocabulary` row references classes touched by `archive/tickets/SPEC29LEGTOOVOC-001.md`; the `--arc-traces` CLI flag is touched by SPEC29LEGTOOVOC-004; the canonical-vocabularies export prose references types touched by `archive/tickets/SPEC29LEGTOOVOC-001.md`).
 4. **Documentation-only scope (per /spec-to-tickets §Cross-Cutting Docs Ticket Shape)**: this ticket touches markdown docs only — no production code, no tests. Acceptance is verified through grep-proofs against post-implementation state.
 
 ## Architecture Check
@@ -37,7 +37,7 @@ Three documentation files carry references to the seven retired vocabulary class
 ### 1. Update `docs/MACHINE-FACING-LAYER.md`
 
 Two rows in the MCP-tools table:
-- **`list_records` row**: drop `arc_trace_record` from the story-bundle record-type enumeration (the comma-separated list currently includes 21 types; post-edit, 20 types — verify the enumeration matches `tools/world-mcp/src/tools/list-records.ts:SUPPORTED_LIST_RECORD_TYPES` post-SPEC29LEGTOOVOC-002). Remove "ARC_TRACE audit loads" from the prose example that lists bulk-sweep use cases ("Use full-body mode for deliberate whole-class sweeps such as every invariant, every Mystery Reserve firewall block, ARC_TRACE audit loads, or structured hybrid registry enumeration"); substitute another representative bulk-sweep example or simplify the prose to omit the third item.
+- **`list_records` row**: drop `arc_trace_record` from the story-bundle record-type enumeration (the comma-separated list currently includes 21 types; post-edit, 20 types — verify the enumeration matches `tools/world-mcp/src/tools/list-records.ts:SUPPORTED_LIST_RECORD_TYPES` after `archive/tickets/SPEC29LEGTOOVOC-002.md`). Remove "ARC_TRACE audit loads" from the prose example that lists bulk-sweep use cases ("Use full-body mode for deliberate whole-class sweeps such as every invariant, every Mystery Reserve firewall block, ARC_TRACE audit loads, or structured hybrid registry enumeration"); substitute another representative bulk-sweep example or simplify the prose to omit the third item.
 - **`get_canonical_vocabulary` row (L80)**: drop the seven retired class names from the enumeration ("Current classes are `domain`, ..., `cf_type`, `commitment_family`, `commitment_class`, `arc_archetype`, `narrative_point`, `strong_axis`, `strong_outcome`, and `stop_predicate`."); the resulting enumeration is 11 classes ending with `cf_type`. Remove the per-class prose explanations ("`commitment_family` returns the closed 16-family routing layer..." through "`arc_archetype` returns the recommended starter library..."). Keep the `mystery_reserve_effect` and `cf_type` conditional-block prose.
 
 ### 2. Update `tools/world-mcp/README.md`
@@ -60,7 +60,7 @@ Two locations:
 
 ## Out of Scope
 
-- Source code changes (vocabulary, arc_trace_record, schema, parser, indexer) — those are `archive/tickets/SPEC29LEGTOOVOC-001.md` plus SPEC29LEGTOOVOC-002 through SPEC29LEGTOOVOC-004 (prerequisites per Deps).
+- Source code changes (vocabulary, arc_trace_record, schema, parser, indexer) — those are `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004 (prerequisites per Deps).
 - `.claude/skills/_shared-templates/story-state-contract.md` §4.4 / §5a prohibition text — retained per SPEC-29 §6 (design contract documenting what the SLT schema rejects).
 - Archive prose (`archive/tickets/SCAUD-003*`, `archive/plans/2026-05-13*`, `archive/reports/streamlined-story-pipelines/*`) — historical record, not maintained.
 - `docs/triage/*` files — historical record of triage decisions; not maintained.
@@ -78,7 +78,7 @@ Two locations:
 
 ### Invariants
 
-1. Documentation parity: the three docs surfaces match the MCP / index / vocabulary surfaces shipped by `archive/tickets/SPEC29LEGTOOVOC-001.md` plus SPEC29LEGTOOVOC-002 through SPEC29LEGTOOVOC-004.
+1. Documentation parity: the three docs surfaces match the MCP / index / vocabulary surfaces shipped by `archive/tickets/SPEC29LEGTOOVOC-001.md`, `archive/tickets/SPEC29LEGTOOVOC-002.md`, SPEC29LEGTOOVOC-003, and SPEC29LEGTOOVOC-004.
 2. Cross-cutting docs landing atomically post-implementation prevents any review window during which docs advertise a retired surface.
 
 ## Test Plan

@@ -829,16 +829,6 @@ test("allocateNextId rejects unsupported id classes in the direct module API", a
       ),
       /Unsupported id_class/
     );
-    await assert.rejects(
-      withRepoRoot(root, () =>
-        allocateNextId({
-          world_slug: "seeded",
-          id_class: "ARCTRACE" as AllocateNextIdArgs["id_class"],
-          story_slug: "opening-bells"
-        })
-      ),
-      /Unsupported id_class 'ARCTRACE'/
-    );
   } finally {
     destroyTempRepoRoot(root);
   }

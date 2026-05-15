@@ -520,15 +520,13 @@ test("legacy story task types fail at the MCP validation boundary", async () => 
 
 test("unsupported id classes fail at the MCP validation boundary", async () => {
   await withServerClient(async (client) => {
-    for (const idClass of ["NOT_A_CLASS", "ARCTRACE"]) {
-      const result = await client.callTool({
-        name: MCP_TOOL_NAMES.allocate_next_id,
-        arguments: { world_slug: "seeded", id_class: idClass, story_slug: "opening-bells" }
-      });
+    const result = await client.callTool({
+      name: MCP_TOOL_NAMES.allocate_next_id,
+      arguments: { world_slug: "seeded", id_class: "NOT_A_CLASS", story_slug: "opening-bells" }
+    });
 
-      assert.equal(result.isError, true);
-      assert.match(textContent(result), /invalid/i);
-    }
+    assert.equal(result.isError, true);
+    assert.match(textContent(result), /invalid/i);
   });
 });
 

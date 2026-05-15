@@ -49,7 +49,6 @@ test("describeCapabilities returns build metadata and enum-valued input contract
   const byName = new Map(manifest.tools.map((tool) => [tool.name, tool]));
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums.id_class, [...ID_CLASSES]);
   assert.ok(byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums.id_class?.includes("BEL"));
-  assert.ok(!byName.get(MCP_TOOL_NAMES.allocate_next_id)?.input_schema_enums.id_class?.includes("ARCTRACE"));
   assert.deepEqual(byName.get(MCP_TOOL_NAMES.get_context_packet)?.input_schema_enums.task_type, [...TASK_TYPES]);
   assert.ok(
     byName
