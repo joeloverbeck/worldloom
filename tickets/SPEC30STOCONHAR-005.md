@@ -81,7 +81,7 @@ In `tools/validators/src/structural/state-snapshot-integrity.ts`, add two new ch
 ### Tests That Must Pass
 
 1. `npm --prefix tools/validators run build` succeeds.
-2. `npm --prefix tools/validators run test` — all validator tests pass including the new evidence-records cases across state-snapshot-integrity, snapshot-replay-equality, and state-snapshot-replay helper.
+2. From `tools/validators`, `npm run test` — all validator tests pass including the new evidence-records cases across state-snapshot-integrity, snapshot-replay-equality, and state-snapshot-replay helper.
 3. `grep -n "evidence_records" tools/validators/src/schemas/story-page.schema.json` returns the new array property hit.
 4. `grep -n "mystery_evidence_required" tools/validators/src/structural/state-snapshot-integrity.ts` returns the new check.
 
@@ -101,6 +101,6 @@ In `tools/validators/src/structural/state-snapshot-integrity.ts`, add two new ch
 
 ### Commands
 
-1. `npm --prefix tools/validators run build && npm --prefix tools/validators run test`
+1. From `tools/validators`: `npm run test`
 2. `grep -n "evidence_records" tools/validators/src/schemas/story-page.schema.json .claude/skills/_shared-templates/story-state-contract.md`
 3. The full validator `test` command is the correct boundary because three validator surfaces are touched simultaneously (helper, replay-equality, integrity).

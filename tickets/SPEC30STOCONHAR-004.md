@@ -93,7 +93,7 @@ In `.claude/skills/story-promotion-closeout/SKILL.md` (the supersession table ar
 ### Tests That Must Pass
 
 1. `npm --prefix tools/validators run build` succeeds.
-2. `npm --prefix tools/validators run test` — all validator tests pass including new STSTAT/SREL `source_record` cases in `recursive-reference-closure` and `record-schema-compliance` for story-event records.
+2. From `tools/validators`, `npm run test` — all validator tests pass including new STSTAT/SREL `source_record` cases in `recursive-reference-closure` and `record-schema-compliance` for story-event records.
 3. `grep -nE "STSTAT|SREL" tools/validators/src/schemas/story-event.schema.json` returns the widened pattern hit.
 4. `grep -n "source_record:" .claude/skills/_shared-templates/story-state-contract.md` shows the widened enum line.
 
@@ -111,6 +111,6 @@ In `.claude/skills/story-promotion-closeout/SKILL.md` (the supersession table ar
 
 ### Commands
 
-1. `npm --prefix tools/validators run build && npm --prefix tools/validators run test`
+1. From `tools/validators`: `npm run test`
 2. `grep -nE "STSTAT-|SREL-" tools/validators/src/schemas/story-event.schema.json`
 3. The full validator `test` command is the correct boundary because the schema change cascades through `record_schema_compliance` and `recursive_reference_closure` in the same run.

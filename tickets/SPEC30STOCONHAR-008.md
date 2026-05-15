@@ -94,7 +94,7 @@ In `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2 (an appropriat
 ### Tests That Must Pass
 
 1. `npm --prefix tools/validators run build` succeeds.
-2. `npm --prefix tools/validators run test` — all validator tests pass including the six new `rule_choice_set_noncollapse` cases and the updated registry-count assertion.
+2. From `tools/validators`, `npm run test` — all validator tests pass including the six new `rule_choice_set_noncollapse` cases and the updated registry-count assertion.
 3. `grep -n "ruleChoiceSetNoncollapse" tools/validators/src/public/registry.ts` returns both the import line and the array-append line.
 4. `grep -n "choice_set_collapse" .claude/skills/branching-story-turn-cycle/SKILL.md` returns the Phase 7 gate citation.
 5. `grep -n "choice_set_collapse_observed" .claude/skills/branching-story-health-audit/SKILL.md` returns the Phase 2 audit-time finding code.
@@ -114,6 +114,6 @@ In `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2 (an appropriat
 
 ### Commands
 
-1. `npm --prefix tools/validators run build && npm --prefix tools/validators run test`
+1. From `tools/validators`: `npm run test`
 2. `grep -nE "choice_set_collapse|choice_set_collapse_observed|ruleChoiceSetNoncollapse" tools/validators/src/ .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md`
 3. The full `tools/validators` `test` command is the correct boundary because the new validator + registry append are exercised together by `tests/rules/registry.test.ts`.

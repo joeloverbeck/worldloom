@@ -11,6 +11,8 @@
 
 > **Implementation note (2026-05-15)**: D2 landed via `archive/tickets/SPEC30STOCONHAR-002.md`. `.claude/skills/branching-story-bootstrap/SKILL.md` now states that `branch_path` is required by shared contract §4.2 and that §4.4 documents the `SLT.scope.visible_branch_path_prefix` / `recursive_reference_closure` linkage; remaining D2 prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D3 landed via `archive/tickets/SPEC30STOCONHAR-003.md`. Shared contract §5 now uses `belief_record(holder, BEL-<integer>, mode?, confidence_floor?)` for actor-specific BEL grounding and keeps `any_belief(...)` for existential alias-binding; the validator grammar/parser reject legacy `belief(...)` as `unknown_predicate` and reject non-BEL second arguments with `belief_record_argument_invalid`. Remaining D3 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement

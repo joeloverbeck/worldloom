@@ -119,7 +119,7 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-pac
 ### Tests That Must Pass
 
 1. `npm --prefix tools/validators run build` succeeds.
-2. `npm --prefix tools/validators run test` — all validator tests pass including SREL structured-direction admission, the four schema-error cases (directed-with-null-from, directed-with-null-to, bidirectional-with-from, bidirectional-with-to), and closure walks over `direction.from` / `direction.to`.
+2. From `tools/validators`, `npm run test` — all validator tests pass including SREL structured-direction admission, the four schema-error cases (directed-with-null-from, directed-with-null-to, bidirectional-with-from, bidirectional-with-to), and closure walks over `direction.from` / `direction.to`.
 3. `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` returns ZERO matches (re-verify pre-merge that no production bundle landed mid-flow).
 4. `grep -nE "kind: directed|kind: bidirectional" .claude/skills/_shared-templates/story-state-contract.md` returns hits in §4.5.7.
 
@@ -138,7 +138,7 @@ Per Step 2 Issue D10-A disposition, no edits in `tools/world-mcp/src/context-pac
 
 ### Commands
 
-1. `npm --prefix tools/validators run build && npm --prefix tools/validators run test`
+1. From `tools/validators`: `npm run test`
 2. `find worlds/ -path '*/_source/relationships/*' -name '*.yaml'` (re-verify zero bundles pre-merge)
 3. `grep -nE "kind: directed|kind: bidirectional" .claude/skills/_shared-templates/story-state-contract.md`
 4. The full validator `test` command is the correct boundary because three structural test files share the SREL schema and closure surface.

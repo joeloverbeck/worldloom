@@ -12,7 +12,7 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
       preconditions: {
         hard: [
           { pred: "fact_true", fact: "SF-0001" },
-          { pred: "belief", holder: "STENT-0001", claim: "BEL-0001", mode: "believes", confidence_floor: "medium" },
+          { pred: "belief_record", holder: "STENT-0001", belief_id: "BEL-0001", mode: "believes", confidence_floor: "medium" },
           { pred: "entity_status", entity: "STENT-0001", field: "agency", value: "free" },
           { pred: "relationship_axis", from: "role:protagonist", to: "STENT-0002", axis: "trust", value: "high" },
           { pred: "obligation_open", obligation: "OBL-0001" },
@@ -56,6 +56,40 @@ test("storylet predicate DSL accepts nested preconditions and every contract pre
   ])));
 
   assert.deepEqual(verdicts, []);
+});
+
+test("storylet predicate DSL rejects legacy belief predicate and free-claim belief_record argument", async () => {
+  const verdicts = await storyletPredicateDslParsability.run(null, context(validReferenceRecords().concat([
+    storyletRecord("SLT-0008", {
+      scope: { visibility: "global_author_pool", branch_id: null },
+      preconditions: {
+        hard: [
+          { pred: "belief", holder: "STENT-0001", belief_id: "BEL-0001" },
+          { pred: "belief_record", holder: "STENT-0001", belief_id: "the king is dead" },
+          { pred: "any_belief", alias: "public_belief", mode: "knows" }
+        ]
+      },
+      exit_options: [
+        {
+          action_family: "communicate",
+          surface_hint: "Name the belief.",
+          likely_effects: ["bound:public_belief"]
+        }
+      ]
+    })
+  ])));
+
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "predicate.unknown_pred" &&
+    verdict.message.includes("preconditions.hard[0]")
+  ));
+  assert.ok(verdicts.some((verdict) =>
+    verdict.code === "belief_record_argument_invalid" &&
+    verdict.message.includes("preconditions.hard[1].belief_id")
+  ));
+  assert.ok(!verdicts.some((verdict) =>
+    verdict.message.includes("preconditions.hard[2]")
+  ));
 });
 
 test("storylet predicate DSL rejects malformed record_age comparators and page counts", async () => {
