@@ -56,30 +56,6 @@ test("create_bel_record validates and submits through the story-record patch-eng
   assert.deepEqual(YAML.parse(fs.readFileSync(writtenPath, "utf8")), patch.payload.record);
 });
 
-test("create_arc_trace_record is rejected by envelope validation", () => {
-  const envelope = {
-    ...baseEnvelope({}),
-    patches: [
-      createOp({
-        op: "create_arc_trace_record",
-        target_world: "minimal-world",
-        target_file: "stories/red-bunny/_source/arc-traces/ARCTRACE-0001.yaml",
-        payload: {
-          story_slug: "red-bunny",
-          record: { id: "ARCTRACE-0001" }
-        }
-      } as unknown as PatchOperation)
-    ]
-  };
-
-  const result = validateEnvelopeShape(envelope);
-
-  assert.deepEqual(result, {
-    ok: false,
-    errors: ["patches[0].op must be a supported operation kind"]
-  });
-});
-
 function createBelPatch(
   worldSlug: string,
   storySlug: string,

@@ -12,15 +12,7 @@ import {
   YAML_EDGE_TYPES
 } from "../src/public/types";
 import {
-  ARC_ARCHETYPES,
   CANONICAL_DOMAINS,
-  COMMITMENT_CLASS_TO_FAMILY,
-  COMMITMENT_CLASSES,
-  COMMITMENT_FAMILIES,
-  NARRATIVE_POINTS,
-  STOP_PREDICATES,
-  STRONG_AXES,
-  STRONG_OUTCOMES,
   VERDICT_ENUM
 } from "../src/public/canonical-vocabularies";
 import type {
@@ -45,8 +37,7 @@ import type {
   ModificationHistoryEntry,
   NodeType,
   ScopedEdgeType,
-  YamlEdgeType,
-  ArcTraceNodeRow
+  YamlEdgeType
 } from "../src/public/types";
 import { ATOMIC_LOGICAL_WORLD_FILES as SOURCE_ATOMIC_LOGICAL_WORLD_FILES } from "../src/parse/atomic";
 import {
@@ -101,7 +92,6 @@ type _ChangeLogScopeShape = Assert<
   ChangeLogScope extends { local_or_global: "local" | "global" } ? true : false
 >;
 type _ChangeLogEntryShape = Assert<ChangeLogEntry extends { change_id: string } ? true : false>;
-type _ArcTraceNodeRowShape = Assert<ArcTraceNodeRow extends { id: string; story_slug: string } ? true : false>;
 
 test("public types re-export the expected runtime constants", () => {
   assert.deepEqual(ATOMIC_LOGICAL_WORLD_FILES, SOURCE_ATOMIC_LOGICAL_WORLD_FILES);
@@ -135,60 +125,7 @@ test("package self-import resolves without import-time IO", () => {
     assert.equal(publicTypes.SCOPED_EDGE_TYPES, SCOPED_EDGE_TYPES);
     assert.equal(canonicalVocabularies.CANONICAL_DOMAINS, CANONICAL_DOMAINS);
     assert.equal(canonicalVocabularies.VERDICT_ENUM, VERDICT_ENUM);
-    assert.equal(canonicalVocabularies.COMMITMENT_FAMILIES, COMMITMENT_FAMILIES);
-    assert.equal(canonicalVocabularies.COMMITMENT_CLASSES, COMMITMENT_CLASSES);
-    assert.equal(canonicalVocabularies.COMMITMENT_CLASS_TO_FAMILY, COMMITMENT_CLASS_TO_FAMILY);
-    assert.equal(canonicalVocabularies.commitmentFamilyForClass("perform_false_identity"), "secrecy_deception");
-    assert.equal(canonicalVocabularies.ARC_ARCHETYPES, ARC_ARCHETYPES);
-    assert.equal(canonicalVocabularies.NARRATIVE_POINTS, NARRATIVE_POINTS);
-    assert.equal(canonicalVocabularies.STRONG_AXES, STRONG_AXES);
-    assert.equal(canonicalVocabularies.STRONG_OUTCOMES, STRONG_OUTCOMES);
-    assert.equal(canonicalVocabularies.STOP_PREDICATES, STOP_PREDICATES);
   } finally {
     fs.statSync = originalStatSync;
   }
-});
-
-test("commitment taxonomy exposes families, expanded classes, and total class-family mapping", () => {
-  const previousCommitmentClasses = [
-    "stay_available_without_pressure",
-    "offer_practical_help",
-    "ask_one_bounded_question",
-    "withdraw_without_abandoning",
-    "confess_one_thing",
-    "accept_offered_help",
-    "refuse_with_grace",
-    "escalate_to_confrontation",
-    "conceal_under_pressure",
-    "seek_third_party",
-    "change_venue",
-    "make_public_commitment",
-    "private_betrayal",
-    "bear_witness",
-    "release_pressure",
-    "tighten_pressure",
-    "defer_decision",
-    "force_disclosure",
-    "mirror_acknowledgment",
-    "intimacy_advance"
-  ];
-
-  assert.equal(COMMITMENT_FAMILIES.length, 16);
-  assert.equal(COMMITMENT_CLASSES.length, 81);
-
-  for (const value of previousCommitmentClasses) {
-    assert.ok(COMMITMENT_CLASSES.includes(value as (typeof COMMITMENT_CLASSES)[number]));
-  }
-
-  assert.equal(new Set(COMMITMENT_CLASSES).size, COMMITMENT_CLASSES.length);
-  assert.equal(new Set(COMMITMENT_FAMILIES).size, COMMITMENT_FAMILIES.length);
-  assert.deepEqual(Object.keys(COMMITMENT_CLASS_TO_FAMILY).sort(), [...COMMITMENT_CLASSES].sort());
-
-  for (const family of Object.values(COMMITMENT_CLASS_TO_FAMILY)) {
-    assert.ok(COMMITMENT_FAMILIES.includes(family));
-  }
-
-  assert.equal(COMMITMENT_CLASS_TO_FAMILY.heal_or_tend, "care_help_protection");
-  assert.equal(COMMITMENT_CLASS_TO_FAMILY.perform_false_identity, "secrecy_deception");
-  assert.equal(COMMITMENT_CLASS_TO_FAMILY.conduct_ritual, "intimacy_performance_ritual");
 });

@@ -3,7 +3,7 @@
 **Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Medium
-**Engine Changes**: Yes — `branching-story-bootstrap` skill SKILL.md (STORY_KERNEL.md contract gained a frontmatter block); `docs/CONTEXT-PACKET-CONTRACT.md` §6 (dropped stale "shape/intensity counts" line; clarified `story_bootstrap` task-type behavior); `tools/world-mcp` story-bundle context assembly/payload shape (replaced retired storylet-pool `shape` / `content_intensity` summary fields with current `move_family` / `saliency.urgency` fields, and kept `story_bootstrap` world-canon-only); `specs/SPEC-28-story-contract-hardening.md` D7 implementation note.
+**Engine Changes**: Yes — `branching-story-bootstrap` skill SKILL.md (STORY_KERNEL.md contract gained a frontmatter block); `docs/CONTEXT-PACKET-CONTRACT.md` §6 (dropped stale "shape/intensity counts" line; clarified `story_bootstrap` task-type behavior); `tools/world-mcp` story-bundle context assembly/payload shape (replaced retired storylet-pool `shape` / `content_intensity` summary fields with current `move_family` / `saliency.urgency` fields, and kept `story_bootstrap` world-canon-only); `archive/specs/SPEC-28-story-contract-hardening.md` D7 implementation note.
 **Deps**: None
 
 ## Problem
@@ -74,7 +74,7 @@ The contract now clarifies the `story_bootstrap` task-type behavior: because the
 
 ### 3. Truthed the explicit SPEC-28 reference
 
-`specs/SPEC-28-story-contract-hardening.md` now has a 2026-05-15 D7 implementation note naming the landed frontmatter contract, `story_bootstrap` clarification, and same-seam MCP payload update.
+`archive/specs/SPEC-28-story-contract-hardening.md` now has a 2026-05-15 D7 implementation note naming the landed frontmatter contract, `story_bootstrap` clarification, and same-seam MCP payload update.
 
 ## Files to Touch
 
@@ -86,7 +86,7 @@ The contract now clarifies the `story_bootstrap` task-type behavior: because the
 - `tools/world-mcp/tests/context-packet/story-bundle-context.test.ts` (modify)
 - `tools/world-mcp/tests/context-packet/story-bundle-budget.test.ts` (modify)
 - `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify)
-- `specs/SPEC-28-story-contract-hardening.md` (modify)
+- `archive/specs/SPEC-28-story-contract-hardening.md` (modify; archived during post-ticket review after all D1-D7 tickets were complete)
 
 ## Out of Scope
 
@@ -130,7 +130,7 @@ The contract now clarifies the `story_bootstrap` task-type behavior: because the
 
 ## Outcome
 
-D7 is implemented. `branching-story-bootstrap` now emits a machine-read `STORY_KERNEL.md` frontmatter contract before the human markdown sections, `docs/CONTEXT-PACKET-CONTRACT.md` §6 now reflects the bootstrap target-slug / empty-bundle behavior, and `tools/world-mcp` story-bundle context summaries now expose current SLT `move_family` / `saliency.urgency` fields while leaving `story_bootstrap` world-canon-only. The explicit SPEC-28 reference has a dated implementation note for the landed D7 seam.
+D7 is implemented. `branching-story-bootstrap` now emits a machine-read `STORY_KERNEL.md` frontmatter contract before the human markdown sections, `docs/CONTEXT-PACKET-CONTRACT.md` §6 now reflects the bootstrap target-slug / empty-bundle behavior, and `tools/world-mcp` story-bundle context summaries now expose current SLT `move_family` / `saliency.urgency` fields while leaving `story_bootstrap` world-canon-only. The explicit SPEC-28 reference has a dated implementation note for the landed D7 seam; post-ticket review marked the completed SPEC-28 spec complete and archived it after confirming all seven SPEC28STOCONHAR tickets were archived.
 
 ## Verification Result
 

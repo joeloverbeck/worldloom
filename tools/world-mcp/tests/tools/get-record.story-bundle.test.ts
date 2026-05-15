@@ -51,67 +51,6 @@ test("getRecord rejects bundle-scoped ids without story_slug", async () => {
   }
 });
 
-test("getRecord resolves ARC_TRACE records and supports parsed section_path projection", async () => {
-  const root = createTempRepoRoot();
-
-  try {
-    buildStoryBundleWorld(root);
-
-    const full = await withRepoRoot(root, () =>
-      getRecord({
-        record_id: "ARCTRACE-0001",
-        world_slug: "seeded",
-        story_slug: STORY_FIXTURE_SLUG
-      })
-    );
-    const projected = await withRepoRoot(root, () =>
-      getRecord({
-        record_id: "ARCTRACE-0001",
-        world_slug: "seeded",
-        story_slug: STORY_FIXTURE_SLUG,
-        section_path: "effect_evidence"
-      })
-    );
-    const nested = await withRepoRoot(root, () =>
-      getRecord({
-        record_id: "ARCTRACE-0001",
-        world_slug: "seeded",
-        story_slug: STORY_FIXTURE_SLUG,
-        section_path: "semantic_critic_verdict.status"
-      })
-    );
-    const missingStorySlug = await withRepoRoot(root, () =>
-      getRecord({ record_id: "ARCTRACE-0001", world_slug: "seeded" })
-    );
-
-    assert.ok("record" in full);
-    assert.equal(full.record.record_kind, "arc_trace_node");
-    assert.equal(full.record.id, "ARCTRACE-0001");
-    assert.equal(full.file_path, "stories/opening-bells/_source/arc-traces/ARCTRACE-0001.yaml");
-
-    assert.ok("value" in projected);
-    assert.deepEqual(projected.value, [
-      {
-        effect_ref: 0,
-        realized: "true",
-        evidence_span: {
-          start: 61,
-          end: 75
-        }
-      }
-    ]);
-
-    assert.ok("value" in nested);
-    assert.equal(nested.value, "pass");
-
-    assert.ok("code" in missingStorySlug);
-    assert.equal(missingStorySlug.code, "invalid_input");
-    assert.match(missingStorySlug.message, /story_slug required/);
-  } finally {
-    destroyTempRepoRoot(root);
-  }
-});
-
 test("getRecordField and batch retrieval support story_slug", async () => {
   const root = createTempRepoRoot();
 
@@ -135,15 +74,15 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
     const fields = await withRepoRoot(root, () =>
       getRecordsField({
-        record_ids: ["SLT-0021", "PG-0001", "ARCTRACE-0001"],
-        field_path: ["semantic_critic_verdict", "status"],
+        record_ids: ["SLT-0021", "PG-0001"],
+        field_path: ["id"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
       })
     );
     const ids = await withRepoRoot(root, () =>
       getRecordsField({
-        record_ids: ["SLT-0021", "PG-0001", "ARCTRACE-0001"],
+        record_ids: ["SLT-0021", "PG-0001"],
         field_path: ["id"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
@@ -160,13 +99,13 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     assert.ok(!("code" in fields));
     assert.deepEqual(
       fields.records.map((entry) => (entry.found ? entry.field_value : undefined)),
-      [undefined, undefined, "pass"]
+      ["SLT-0021", "PG-0001"]
     );
 
     assert.ok(!("code" in ids));
     assert.deepEqual(
       ids.records.map((entry) => (entry.found ? entry.field_value : undefined)),
-      ["SLT-0021", "PG-0001", "ARCTRACE-0001"]
+      ["SLT-0021", "PG-0001"]
     );
   } finally {
     destroyTempRepoRoot(root);

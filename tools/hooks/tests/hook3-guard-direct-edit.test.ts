@@ -99,7 +99,7 @@ test("hook3 blocks story-bundle _source YAML but allows bundle markdown surfaces
     assert.match(blocked.stdout, /"permissionDecision":"deny"/);
     assert.match(blocked.stdout, /stories\/marla-kern-seduction\/_source\/storylets\/SLT-0001.yaml/);
 
-    const blockedArcTrace = runCompiledHook(
+    const blockedStorylet = runCompiledHook(
       "hook3-guard-direct-edit.js",
       {
         hook_event_name: "PreToolUse",
@@ -113,17 +113,17 @@ test("hook3 blocks story-bundle _source YAML but allows bundle markdown surfaces
             "stories",
             "marla-kern-seduction",
             "_source",
-            "arc-traces",
-            "ARCTRACE-0001.yaml"
+            "storylets",
+            "SLT-0002.yaml"
           )
         )
       },
       { cwd: root, projectDir: root }
     );
 
-    assert.equal(blockedArcTrace.status, 0, blockedArcTrace.stderr);
-    assert.match(blockedArcTrace.stdout, /"permissionDecision":"deny"/);
-    assert.match(blockedArcTrace.stdout, /stories\/marla-kern-seduction\/_source\/arc-traces\/ARCTRACE-0001.yaml/);
+    assert.equal(blockedStorylet.status, 0, blockedStorylet.stderr);
+    assert.match(blockedStorylet.stdout, /"permissionDecision":"deny"/);
+    assert.match(blockedStorylet.stdout, /stories\/marla-kern-seduction\/_source\/storylets\/SLT-0002.yaml/);
 
     for (const allowedPath of [
       path.join(root, "worlds", "animalia", "stories", "marla-kern-seduction", "INDEX.md"),

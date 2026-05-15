@@ -307,30 +307,6 @@ test("validatePatchPlan preserves additional envelope-shape errors on skipped re
   );
 });
 
-test("validatePatchPlan rejects retired create_arc_trace_record before validator delegation", async () => {
-  const plan = buildValidPatchPlan();
-  plan.patches = [
-    {
-      op: "create_arc_trace_record",
-      target_world: "seeded",
-      target_file: "stories/marla-kern-seduction/_source/arc-traces/ARCTRACE-0001.yaml",
-      payload: {
-        story_slug: "marla-kern-seduction",
-        record: { id: "ARCTRACE-0001" }
-      }
-    }
-  ] as unknown as ReturnType<typeof buildValidPatchPlan>["patches"];
-
-  const result = await validatePatchPlan({ patch_plan: plan });
-
-  assert.deepEqual(result, {
-    status: "skipped",
-    reason: "patch_plan.patches[0].op must be a supported operation kind.",
-    verdicts: [],
-    validators_run: []
-  });
-});
-
 function assertValidatorRunEntries(
   entries: Array<{ validator_name: string; status: string; duration_ms: number; detail?: string }>
 ): void {

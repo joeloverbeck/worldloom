@@ -89,7 +89,6 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "storylet_predicate_dsl_parsability"
     );
     assert.equal(storyletExecution?.status, "skipped");
-    assert.ok(!result.executions.some((execution) => execution.name === "narrative_point_classification"));
     assert.ok(!result.executions.some((execution) => execution.name === "arc_envelope_conformance"));
     const snapshotReplayExecution = result.executions.find(
       (execution) => execution.name === "snapshot_replay_equality"
@@ -472,8 +471,7 @@ function replaySafePagePlan() {
           ...completeStateSnapshot(),
           canon_revision: null,
           current_location: "STLOC-0001",
-          applied_effect_variant: "partial-repair",
-          narrative_point_classification: "CONTINUE_ARC"
+          applied_effect_variant: "partial-repair"
         }
       })
     ]
@@ -485,7 +483,6 @@ function pendingProsePagePlan() {
   const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
   const page = pagePatch?.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
-  stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
 
@@ -507,7 +504,6 @@ function pendingChildAfterRenderedParentPlan() {
   Object.assign(page, validPageFields("PG-0003"));
   page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
   page.applied_event_ops = ["SE-0003"];
-  stateSnapshot.narrative_point_classification = "NATURAL_COMMITMENT_HINGE";
   return plan;
 }
 

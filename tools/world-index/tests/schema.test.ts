@@ -79,15 +79,6 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         [
           "anchor_checksums",
           "approval_tokens_consumed",
-          "arc_trace_describes_page",
-          "arc_trace_node",
-          "arc_trace_node_fts",
-          "arc_trace_node_fts_config",
-          "arc_trace_node_fts_data",
-          "arc_trace_node_fts_docsize",
-          "arc_trace_node_fts_idx",
-          "arc_trace_observes_action_by",
-          "arc_trace_realizes_arc",
           "edges",
           "entities",
           "entity_aliases",
@@ -115,9 +106,6 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
       assert.deepEqual(
         indexes.map(({ name }) => name),
         [
-          "idx_arc_trace_arc",
-          "idx_arc_trace_page",
-          "idx_arc_trace_story",
           "idx_edges_source",
           "idx_edges_story",
           "idx_edges_target",
@@ -146,14 +134,7 @@ test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () 
         .all() as Array<{ name: string }>;
       assert.deepEqual(
         triggers.map(({ name }) => name),
-        [
-          "arc_trace_node_ad",
-          "arc_trace_node_ai",
-          "arc_trace_node_au",
-          "nodes_ad",
-          "nodes_ai",
-          "nodes_au"
-        ]
+        ["nodes_ad", "nodes_ai", "nodes_au"]
       );
 
       const nodeColumns = db.pragma("table_info(nodes)") as Array<{ name: string }>;
@@ -237,14 +218,13 @@ test("openIndex upgrades a version-1 index to the current schema version", () =>
             SELECT name
             FROM sqlite_master
             WHERE type = 'table'
-              AND name IN ('approval_tokens_consumed', 'arc_trace_node', 'scoped_references', 'scoped_reference_aliases')
+              AND name IN ('approval_tokens_consumed', 'scoped_references', 'scoped_reference_aliases')
             ORDER BY name
           `
         )
         .all() as Array<{ name: string }>;
       assert.deepEqual(tables.map(({ name }) => name), [
         "approval_tokens_consumed",
-        "arc_trace_node",
         "scoped_reference_aliases",
         "scoped_references"
       ]);

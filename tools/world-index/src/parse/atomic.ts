@@ -81,12 +81,11 @@ const STORY_DIRS = new Map<string, AtomicRecordSpec>([
   ["pages", recordSpec("page_record", "id", "^PG-[0-9]+$")],
   ["choices", recordSpec("choice_record", "id", "^CHC-[0-9]+$")],
   ["storylets", recordSpec("storylet_record", "id", "^SLT-[0-9]+$")],
-  ["arc-traces", recordSpec("arc_trace_node", "id", "^ARCTRACE-[0-9]+$")],
   ["artifacts", recordSpec("story_diegetic_artifact_record", "id", "^DA-[0-9]+$")]
 ]);
 
 const STRUCTURED_ID_REGEX = /\b(CF|CH|M)-\d+\b/g;
-const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|ARCTRACE|DA)-[A-Za-z0-9-]+\b/g;
+const STORY_REF_REGEX = /\b(STENT|STSTAT|SF|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|BR|PG|CHC|SLT|DA)-[A-Za-z0-9-]+\b/g;
 
 export type AtomicSkipReason = "missing_id_field" | "schema_pattern_mismatch";
 
@@ -598,14 +597,6 @@ function edgesForStoryRecord(node: NodeRow, record: Record<string, unknown>, sto
   if (node.node_type === "thread_record") {
     for (const target of stringArrayField(record, "obligations")) {
       pushStoryRef("thread_obligation", target);
-    }
-  }
-
-  if (node.node_type === "arc_trace_node") {
-    pushStoryRef("arc_trace_describes_page", stringField(record, "created_at_page"));
-    pushStoryRef("arc_trace_realizes_arc", stringField(record, "arc_realized"));
-    for (const actorId of storyRefsInField(record, "observed_actions", "STENT")) {
-      pushStoryRef("arc_trace_observes_action_by", actorId);
     }
   }
 

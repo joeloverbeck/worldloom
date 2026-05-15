@@ -25,14 +25,14 @@ test("node and edge type registries match the spec counts and contain no duplica
   const nodeTypes: readonly NodeType[] = NODE_TYPES;
   const edgeTypes: readonly EdgeType[] = EDGE_TYPES;
 
-  assert.equal(nodeTypes.length, 43);
+  assert.equal(nodeTypes.length, 42);
   assert.equal(new Set(nodeTypes).size, nodeTypes.length);
 
   assert.equal(YAML_EDGE_TYPES.length, 10);
   assert.equal(ATTRIBUTION_EDGE_TYPES.length, 2);
   assert.equal(ENTITY_EDGE_TYPES.length, 1);
   assert.equal(SCOPED_EDGE_TYPES.length, 2);
-  assert.equal(STORY_EDGE_TYPES.length, 14);
-  assert.equal(edgeTypes.length, 29);
+  assert.equal(STORY_EDGE_TYPES.length, 11);
+  assert.equal(edgeTypes.length, 26);
   assert.equal(new Set(edgeTypes).size, edgeTypes.length);
 });
