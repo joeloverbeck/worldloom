@@ -9,6 +9,8 @@
 
 > **Implementation note (2026-05-15)**: D1 landed via `archive/tickets/SPEC30STOCONHAR-001.md`. The implementation chose the preferred validator-layer enforcement path: `story-page.schema.json` remains permissive for nullable `input.choice_id` / `input.manual_action_text`, while `state_snapshot_integrity` resolves `input.resolved_event_id` to the SE `event_kind` and emits `state_snapshot_integrity.pg_input_legality_violation` (`severity: fail`) for illegal combinations. The live test file is `tools/validators/tests/structural/state-snapshot-integrity.test.ts`; remaining D1 prose below is historical specification context unless contradicted by this note.
 
+> **Implementation note (2026-05-15)**: D2 landed via `archive/tickets/SPEC30STOCONHAR-002.md`. `.claude/skills/branching-story-bootstrap/SKILL.md` now states that `branch_path` is required by shared contract §4.2 and that §4.4 documents the `SLT.scope.visible_branch_path_prefix` / `recursive_reference_closure` linkage; remaining D2 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement
