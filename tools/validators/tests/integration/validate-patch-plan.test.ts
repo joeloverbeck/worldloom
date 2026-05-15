@@ -114,6 +114,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "slt_created_at_page_origin_consistency"
     );
     assert.equal(sltCreatedAtPageExecution?.status, "skipped");
+    const expectedWitnessExecution = result.executions.find(
+      (execution) => execution.name === "expected_witness_coverage"
+    );
+    assert.equal(expectedWitnessExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
       (execution) => execution.name === "proposal_package_shape"
     );
@@ -128,6 +132,7 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== snapshotIntegrityExecution &&
         row !== auditOnlyExecution &&
         row !== sltCreatedAtPageExecution &&
+        row !== expectedWitnessExecution &&
         row !== proposalPackageExecution
     )) {
       assert.equal(execution.status, "pass");

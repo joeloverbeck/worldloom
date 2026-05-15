@@ -1,5 +1,6 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
+import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
 import { proposalPackageShape } from "../structural/proposal-package-shape.js";
@@ -31,6 +32,7 @@ export const structuralValidators: readonly Validator[] = [
   storyFactAuthority,
   auditOnlySeShape,
   sltCreatedAtPageOriginConsistency,
+  expectedWitnessCoverage,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

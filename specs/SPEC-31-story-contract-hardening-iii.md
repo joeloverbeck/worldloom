@@ -389,6 +389,8 @@ A `record_schema_compliance` check on `candidate:` alone would reject these fiel
 
 ### D7 — Parseable non-propagation tags inside `SE.world_logic_rationale` (P1)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-007` narrowed the validator portion to the live `SE` schema boundary. Because `SE` has no structured `expected_witnesses` field, turn-cycle and health-audit compute which witness groups require coverage, while `expected_witness_coverage` enforces the parseable `non_propagation:<reason>(group=<label>, records=[<record_ids>])` mini-format and rejects legacy closed-set non-propagation prose that is not tagged. The original problem/change text below is historical intake context for D7.
+
 **Problem**: The closed enum of 5 non-propagation reasons exists at `branching-story-turn-cycle/SKILL.md:292` and `branching-story-health-audit/SKILL.md:190`, but `branching-story-turn-cycle/SKILL.md:293` says rationales are recorded in "authoring notes and carry the load-bearing rationale into `SE.world_logic_rationale`" — free-form. Health-audit Phase 2d cannot deterministically replay coverage decisions because the rationale lives in unstructured prose.
 
 **Change**:

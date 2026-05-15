@@ -237,6 +237,20 @@ Per-source-kind `promotion_claims[].source_record` requirements:
 
 `world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
 
+When an expected witness group receives no `BEL` create/supersession, the
+rationale MUST include a parseable non-propagation tag inside
+`SE.world_logic_rationale`:
+
+```text
+non_propagation:<reason>(group=<label>, records=[<record_ids>])
+```
+
+Valid `<reason>` values are `no_witness`, `witness_incapacitated`,
+`evidence_concealed`, `institution_suppresses_report`, and
+`event_leaves_no_accessible_trace`. The tag is carried inside
+`world_logic_rationale` to avoid adding a schema field, but it is mechanically
+consumed by turn-cycle validation and health-audit replay.
+
 There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
 
 `resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
