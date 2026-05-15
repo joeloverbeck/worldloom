@@ -61,6 +61,19 @@ test("story-pipeline context packets include indexed story-bundle context", asyn
       result.story_bundle_context.mysteries_in_play.map((mystery) => mystery.m_id),
       ["M-0001"]
     );
+    assert.deepEqual(result.story_bundle_context.mystery_evidence_chains, [
+      {
+        mystery_id: "M-0001",
+        claims: [
+          {
+            page_id: "PG-0001",
+            authority: "apparent",
+            status: "clue_added",
+            evidence_records: ["SF-0001", "SE-0001"]
+          }
+        ]
+      }
+    ]);
     assert.deepEqual(
       result.story_bundle_context.cast_bind_list.map((entry) => entry.stent_id),
       ["STENT-0002"]

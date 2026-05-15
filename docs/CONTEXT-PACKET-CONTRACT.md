@@ -131,6 +131,7 @@ This layer carries:
 - active / pressured / critical / dormant threads
 - the longest active branch path and recent page metadata along that path
 - `STORY_KERNEL.md` `mysteries_in_play`, `cast_bind_list`, and `invariants_acknowledged`
+- per-mystery `PG.state_snapshot.unresolved_mystery_claims[]` evidence chains, including page id, authority, status, and `evidence_records[]`
 
 ### 7. Impact surfaces
 

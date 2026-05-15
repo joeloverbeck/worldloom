@@ -139,6 +139,15 @@ export interface ContextPacketStoryBundleContext {
     future_resolution_safety: string;
     domain_overlap: string;
   }>;
+  mystery_evidence_chains: Array<{
+    mystery_id: string;
+    claims: Array<{
+      page_id: string;
+      authority: string;
+      status: string;
+      evidence_records: string[];
+    }>;
+  }>;
   cast_bind_list: Array<{
     char_id: string | null;
     stent_id: string;
