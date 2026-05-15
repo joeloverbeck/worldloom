@@ -459,7 +459,7 @@ All canon changes must be logged with justification.
 Unknowns must be chosen, bounded, and tracked.
 They must not be side effects of weak design memory.
 
-**Mystery firewall enforcement.** The firewall is a single plan-time gate — gate 3 (mystery / invariant firewall) of the shared eight hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7 — in every state-changing story-pipeline skill. The deterministic forbidden-mystery-resolution check inside `branching-story-prose-attach` is a redundant downstream guard on rendered prose, not a second authoritative gate. Forbidden-status `M` is NEVER resolved at either site.
+**Mystery firewall enforcement.** For PG-authoring state changes (`branching-story-bootstrap`, `branching-story-turn-cycle`), the authoritative plan-time firewall is gate 3 (mystery / invariant firewall) of the shared eight hard gates per `.claude/skills/_shared-templates/story-state-contract.md` §7. Non-PG story skills enforce the same firewall through their own named validation phases; the deterministic `forbidden_mystery_resolution` check inside `branching-story-prose-attach` is a redundant downstream guard on rendered prose, not a second authoritative state-transition gate. Forbidden-status `M` is NEVER resolved at either site.
 
 ### Rule 11: No Spectator Castes by Accident
 When a canon fact introduces or depends on exceptional capability, it must name at least three forms of leverage that remain available to ordinary or mid-tier actors.

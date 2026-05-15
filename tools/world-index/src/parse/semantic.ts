@@ -221,6 +221,7 @@ function resolveAttributionSourceNode(htmlNode: Html, proseNodes: NodeRow[]): No
   const priority = new Map<string, number>([
     ["subsection", 3],
     ["bullet_cluster", 2],
+    ["narrative_section", 1],
     ["section", 1]
   ]);
 

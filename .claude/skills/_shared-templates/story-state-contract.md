@@ -763,7 +763,7 @@ When a player selects a `CHC` or supplies a write-in, the turn-cycle resolves it
 
 ## 7. Eight Shared Hard Gates
 
-Every state-changing skill validates against these eight gates at page-plan commit. Each gate's pass entry on `PG.validation_trace` requires a one-line rationale (per CLAUDE.md "PASS entries require a one-line rationale").
+Every PG-authoring story skill (`branching-story-bootstrap` and `branching-story-turn-cycle`) validates these eight hard gates at page-plan commit; gate results are recorded in `PG.validation_trace.gates[]`, and each gate's pass entry requires a one-line rationale (per CLAUDE.md "PASS entries require a one-line rationale"). Gate FAIL produces a direct-artifact partial failure under HARD-GATE discipline (see `docs/HARD-GATE-DISCIPLINE.md`). Non-PG story skills (`branching-story-prose-attach`, `branching-story-health-audit`, `commitment-block-authoring`, `story-fact-promotion-to-canon`, `story-promotion-closeout`) preserve the same invariants — branch isolation, Mystery Reserve firewall, observer firewall, schema compliance, replay consistency, choice-set non-collapse, motivation grounding, terminal proof — through their own skill-local validation phases and HARD-GATE discipline. When non-PG skills emit audit-only SE records, §4.3a applies.
 
 | # | Gate | Checks |
 |---|---|---|
@@ -835,6 +835,7 @@ Every state-changing skill follows this order at commit:
 3. Obtain approval token when execution mode requires it.
 4. Submit patch plan via `mcp__worldloom__submit_patch_plan`.
 5. Write direct-markdown artifacts: page plan (`pages-prose-plans/PG-<integer>.md`), story kernel updates, receipts, manifests.
+5a. Post-write plan-hash verification. Immediately re-read the bytes of `pages-prose-plans/PG-<integer>.md` and recompute its `plan_hash` using the canonical helper at `tools/world-mcp/src/cli/compute-pg-hashes.ts` (CLI: `compute-pg-hashes --plan <plan-md-path> --pg <pg-record-path>`). The recomputed `plan_hash` MUST equal the committed `PG.plan.plan_hash` (the value the patch plan accepted in step 4) before step 6 runs. If the values differ, this is a direct-artifact partial failure per `docs/HARD-GATE-DISCIPLINE.md`: do not update `INDEX.md`; surface the mismatch with both the committed and recomputed hashes; repair the file to the already-approved bytes or re-run approval with the corrected bytes. The step 4 patch plan and its committed PG record are unchanged; the disk state is being reconciled to them.
 6. Update bundle `INDEX.md` last.
 7. Update per-world `stories/INDEX.md` only when story visibility changed (new bundle, archived bundle).
 

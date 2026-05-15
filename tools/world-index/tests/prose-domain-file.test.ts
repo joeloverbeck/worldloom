@@ -23,6 +23,47 @@ test("mandatory top-level world files emit one stable domain-file node", () => {
   assert.equal(domainFileNode.file_path, "INSTITUTIONS.md");
 });
 
+test("WORLD_KERNEL H2 spans emit narrative_section nodes", () => {
+  const source = [
+    "# World Kernel",
+    "",
+    "## Genre Contract",
+    "",
+    "A tide-locked archipelago where fresh water shapes power.",
+    "",
+    "## Chronotope",
+    "",
+    "Harbor time and seasonal fog govern travel."
+  ].join("\n");
+  const { tree, lines } = parseMarkdown(source);
+  const nodes = extractProseNodes(tree, lines, "WORLD_KERNEL.md", "animalia");
+
+  const spans = nodes.filter((node) => node.heading_path !== "WORLD_KERNEL.md");
+
+  assert.deepEqual(
+    spans.map((node) => [node.node_id, node.node_type, node.file_path]),
+    [
+      ["animalia:WORLD_KERNEL.md:Genre Contract:0", "narrative_section", "WORLD_KERNEL.md"],
+      ["animalia:WORLD_KERNEL.md:Chronotope:0", "narrative_section", "WORLD_KERNEL.md"]
+    ]
+  );
+});
+
+test("retired root-file H2 spans do not emit atomic node types through prose parsing", () => {
+  const source = ["# Retired File", "", "## Legacy Heading", "", "Legacy prose."].join("\n");
+
+  for (const relativePath of ["MYSTERY_RESERVE.md", "OPEN_QUESTIONS.md", "INVARIANTS.md"]) {
+    const { tree, lines } = parseMarkdown(source);
+    const nodes = extractProseNodes(tree, lines, relativePath, "animalia");
+    const spans = nodes.filter((node) => node.heading_path !== relativePath);
+
+    assert.deepEqual(
+      spans.map((node) => [node.node_id, node.node_type, node.file_path]),
+      [[`animalia:${relativePath}:Legacy Heading:0`, "section", relativePath]]
+    );
+  }
+});
+
 test("required_world_update resolves mandatory filenames to domain-file nodes and leaves missing files unresolved", () => {
   const source = [
     "## Canon Fact Records",

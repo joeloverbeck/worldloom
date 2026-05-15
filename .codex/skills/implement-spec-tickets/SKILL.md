@@ -224,6 +224,8 @@ If the state file itself changes after the work commit, either:
 - amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
 - commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
 
+When committing the state file separately with `last_state_commit: "self"`, write `dirty_state` as the expected state after that state-only commit succeeds. Do not record transient dirt for `.codex/run-state/implement-spec-tickets.json` itself unless intentionally leaving the state file uncommitted.
+
 Before creating a state-file-only commit, re-read the staged JSON or run `git diff --cached -- .codex/run-state/implement-spec-tickets.json` and confirm `last_state_commit` is already `"self"`. The actual state-only commit sha belongs in the printed handoff's `State commit` line, not inside the JSON.
 
 Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
@@ -270,19 +272,21 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 3. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
 4. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
 5. Confirm the original `specs/` path no longer exists.
-6. Sweep active tickets, docs, and specs for stale active-spec path references. Repair actionable references to the archived path; leave historical references only when clearly harmless.
+6. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
 7. Run hygiene over the spec archive move and reference repairs.
 8. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
 9. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
 
 ## Branch And Push
 
-After the final archive commit:
+After the final archive commit and any required final state-file persistence commit:
 
 1. Refresh `git status --short`. Stop if uncommitted owned changes remain.
 2. Create a new branch from the current HEAD with a concise family name derived from the spec id or filename, for example `spec-31-story-contract-hardening`.
 3. Push the new branch to the configured remote.
 4. Report the branch name, pushed remote, commits created by the harness, archived spec path, archived ticket paths, and any follow-up tickets left active.
+
+If branch creation or push fails because Codex cannot write the git ref in the sandbox, cannot resolve the remote host, or otherwise hits a clear sandbox/network restriction, rerun the same branch/push command with the required approval or escalation. Record both the first failure and the successful retry, or the remaining blocker if escalation still fails.
 
 Do not create or push a branch if the implementation loop stopped blocked or if the worktree still contains unapproved dirty paths.
 

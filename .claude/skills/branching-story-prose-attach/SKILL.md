@@ -182,7 +182,11 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
    - Predicate-DSL terms (literal): `fact_true(`, `belief_record(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `any_belief(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
 
-3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — regex-scan the prose for surface-level resolutions of any mystery in plan §11 `forbidden_resolutions[]`. Use deterministic patterns derived from each mystery's `denial_patterns` (per the world's Mystery Reserve record format). Any pattern match is `FAIL` and routes to `repair_recommendation: revise_prose`.
+3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — retrieve firewall fields for every `M-<integer>` named in plan §11 via `mcp__worldloom__get_firewall_content(world_slug, m_ids=<plan §11 ids>)`, unless the page plan already inlines the same fields. Derive deterministic patterns from `disallowed_cheap_answers[]` (each entry is a forbidden resolution string and is compared by case-insensitive substring match) and from `unknowns[]` collapsed to plan §11 `forbidden_resolutions[]` (each entry names a protected question whose surface-level resolution is forbidden).
+
+   Any direct assertion matching a `disallowed_cheap_answers[]` entry is `FAIL` and routes to `repair_recommendation: revise_prose`. Cumulative semantic narrowing of a protected `unknowns[]` entry that does not match a `disallowed_cheap_answers[]` string is recorded as a judgment-assisted note in `notes[]` and routed to `branching-story-health-audit` mystery-accretion review (see Phase 2e); do not fail the receipt for cumulative narrowing alone.
+
+   Do not reference undocumented Mystery Reserve fields; the check uses only firewall fields exposed by `get_firewall_content` or already inlined into the page plan.
 
 4. **`required_event_rendered`** (`PASS | WARN | FAIL`) — verify plan §7 (selected event + outcome_route) is dramatized in the prose. If the event is implied but ambiguous (the reader could miss it on first read), `WARN`. If absent or actively contradicted, `FAIL`. Verification scans for plan §8 beat keywords + plan §7 actor / target references appearing in the prose body.
 
@@ -291,7 +295,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 
 ## Validation Rules This Skill Upholds
 
-- **Rule 7 (Preserve Mystery Deliberately)** — enforced at Phase 3 check 2 (`forbidden_mystery_resolution`). Mechanism: deterministic regex scan of rendered prose against plan §11 `forbidden_resolutions[]`. Any hit is `FAIL`, locking publication when `strict: true`.
+- **Rule 7 (Preserve Mystery Deliberately)** — enforced at Phase 3 check 3 (`forbidden_mystery_resolution`). Mechanism: deterministic scan of rendered prose against firewall fields retrieved via `get_firewall_content` or already inlined into plan §11. Direct assertions matching `disallowed_cheap_answers[]` are `FAIL`; cumulative semantic narrowing of protected `unknowns[]` is recorded for health-audit review. Forbidden-status `M-<integer>` is not resolved here.
 
 Rules 1 / 4 / 5 are upstream-enforced at bootstrap and turn-cycle Phase 9 (the eight shared hard gates). Prose-attach is a downstream validator over rendered prose; it confirms prose respects state, not the inverse.
 
@@ -309,11 +313,11 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 | Rule 4 (No Globalization by Accident) | N/A | Upstream-enforced at bootstrap / turn-cycle Phase 9 gate 4 (branch isolation). |
 | Rule 5 (No Consequence Evasion) | N/A | Upstream-enforced at bootstrap / turn-cycle Phase 9 gate 6. |
 | Rule 6 (No Silent Retcons) | N/A | Prose-attach does not mutate canon; world-canon retcon routes through `canon-addition`. |
-| Rule 7 (Preserve Mystery Deliberately) | Phase 3 check 2 | Deterministic forbidden-mystery-resolution scan on rendered prose. |
+| Rule 7 (Preserve Mystery Deliberately) | Phase 3 check 3 | Deterministic forbidden-mystery-resolution scan on rendered prose using firewall fields from `get_firewall_content` or plan §11. |
 | Rule 11 (No Spectator Castes) | N/A | World-canon-only principle. |
 | Rule 12 (No Single-Trace Truths) | N/A | World-canon-only principle. |
 | Canon Layers | Pre-flight, Phase 1 | Plan §4 canon excerpts read as load-bearing reference for checks 5 and 6. |
-| Mystery Reserve | Pre-flight, Phase 1, 3 | Plan §11 `forbidden_resolutions[]` loaded; Phase 3 check 2 enforces firewall on rendered prose. |
+| Mystery Reserve | Pre-flight, Phase 1, 3 | Plan §11 `forbidden_resolutions[]` loaded; Phase 3 check 3 enforces the rendered-prose firewall from existing Mystery Reserve fields. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Prose-attach NEVER mutates `PG`; drift is recorded in receipt only; no ARC_TRACE emitted; the page snapshot remains the authoritative state. |
 | §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6; no extras beyond the canonical receipt schema. |
 | §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references alongside the `STSTAT`-derived status projection for entity-status-consistency checks but does not create or supersede BEL or STSTAT records. |

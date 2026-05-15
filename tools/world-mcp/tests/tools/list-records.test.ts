@@ -229,6 +229,13 @@ function buildSeededRecordWorld(root: string): void {
         ].join("\n")
       },
       {
+        node_id: "seeded:WORLD_KERNEL.md:Kernel:0",
+        world_slug: "seeded",
+        file_path: "WORLD_KERNEL.md",
+        node_type: "narrative_section",
+        body: "The kernel is primary-authored narrative prose, not atomic SEC YAML."
+      },
+      {
         node_id: "SEC-ELF-001",
         world_slug: "seeded",
         file_path: "_source/everyday-life/SEC-ELF-001.yaml",
@@ -298,6 +305,31 @@ test("listRecords returns every record for a requested atomic record type", asyn
     const record = result.records[0] as Record<string, unknown> | undefined;
     assert.equal(record?.record_kind, "invariant");
     assert.equal(record?.title, "Embodied sentience");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords section_record excludes WORLD_KERNEL narrative sections", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({ world_slug: "seeded", record_type: "section_record", include_full_body: true })
+    );
+
+    assert.ok("records" in result);
+    assert.equal(result.total, 1);
+    assert.deepEqual(
+      result.records.map((record) => record.record_id),
+      ["SEC-ELF-001"]
+    );
+    assert.deepEqual(
+      result.records.map((record) => (record as FullBodyTestRecord).file_path),
+      ["_source/everyday-life/SEC-ELF-001.yaml"]
+    );
   } finally {
     destroyTempRepoRoot(root);
   }

@@ -114,3 +114,49 @@ test("cli-compute-pg-hashes: computes plan_hash and state_hash from a YAML PG dr
     rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("cli-compute-pg-hashes: post-write re-hash detects plan-file drift", async () => {
+  const tmp = makeTmpDir();
+  try {
+    const cleanPlanBody = "Final page plan bytes.\nDo not normalize.\n";
+    const driftedPlanBody = "Final page plan bytes.\nDo not normalize.\nPost-write drift.\n";
+    const planPath = writeText(tmp, "PG-2.md", cleanPlanBody);
+    const pgPath = writeText(
+      tmp,
+      "PG-2.yaml",
+      [
+        "id: PG-2",
+        "story_id: STORY-1",
+        "state_hash: placeholder",
+        "prose_plan_path: pages-prose-plans/PG-2.md",
+        "plan:",
+        "  plan_hash: placeholder",
+        "validation_trace:",
+        "  input_legality: 'PASS: checked'",
+        "  branch_isolation: 'PASS: checked'",
+        ""
+      ].join("\n")
+    );
+
+    const clean = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);
+    assert.equal(clean.exitCode, 0);
+    assert.equal(clean.stderr, "");
+    const cleanOutput = JSON.parse(clean.stdout) as { plan_hash: string; state_hash: string };
+    const committedPlanHash = cleanOutput.plan_hash;
+
+    writeFileSync(planPath, driftedPlanBody, "utf8");
+
+    const drifted = await runComputePgHashesCli(["--plan", planPath, "--pg", pgPath]);
+    assert.equal(drifted.exitCode, 0);
+    assert.equal(drifted.stderr, "");
+    const driftedOutput = JSON.parse(drifted.stdout) as { plan_hash: string; state_hash: string };
+
+    assert.notEqual(
+      driftedOutput.plan_hash,
+      committedPlanHash,
+      "post-write drift must produce a different plan_hash"
+    );
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});

@@ -17,7 +17,7 @@ test("packet v2 populates locality-first classes before advisory impact surfaces
           world_slug: "seeded",
           file_path: "WORLD_KERNEL.md",
           heading_path: "Kernel",
-          node_type: "section",
+          node_type: "narrative_section",
           body: "Kernel"
         },
         {

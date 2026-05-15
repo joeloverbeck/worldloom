@@ -95,7 +95,7 @@ function findAuthorityParentIds(
 
     if (
       seedRow.heading_path === null &&
-      !["section", "subsection", "bullet_cluster"].includes(seedRow.node_type)
+      !["section", "narrative_section", "subsection", "bullet_cluster"].includes(seedRow.node_type)
     ) {
       continue;
     }

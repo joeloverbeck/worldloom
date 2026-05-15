@@ -253,7 +253,9 @@ function findContainingHeadingSpan(
 ): SpanDefinition | null {
   const candidates = spans.filter(
     (span) =>
-      (span.nodeType === "section" || span.nodeType === "subsection") &&
+      (span.nodeType === "section" ||
+        span.nodeType === "narrative_section" ||
+        span.nodeType === "subsection") &&
       span.lineStart <= lineStart &&
       span.lineEnd >= lineEnd
   );
@@ -275,20 +277,12 @@ function nodeTypeForHeading(
   depth: number,
   headingText: string
 ): NodeType | null {
-  if (relativeFilePath === "MYSTERY_RESERVE.md" && depth === 2) {
-    return "mystery_reserve_entry";
-  }
-
-  if (relativeFilePath === "OPEN_QUESTIONS.md" && depth === 2) {
-    return "open_question_entry";
-  }
-
-  if (relativeFilePath === "INVARIANTS.md" && depth === 2) {
-    return "invariant";
-  }
-
   if (relativeFilePath === "ONTOLOGY.md" && depth === 2) {
     return "ontology_category";
+  }
+
+  if (relativeFilePath === "WORLD_KERNEL.md" && depth === 2) {
+    return "narrative_section";
   }
 
   if (depth === 2) {
