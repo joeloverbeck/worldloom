@@ -1,16 +1,14 @@
 {
   "originating_spec": "specs/SPEC-32-story-contract-hardening-iv.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC32STOCONHAR-005.md",
+  "last_ticket": "archive/tickets/SPEC32STOCONHAR-006.md",
   "last_result": "completed_archived",
-  "last_work_commit": "7561633",
+  "last_work_commit": "a95c913",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC32STOCONHAR-006.md",
-  "queue": [
-    "tickets/SPEC32STOCONHAR-006.md"
-  ],
+  "next_target": "final_spec_archive",
+  "queue": [],
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree; expected ignored artifacts under tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
+  "dirty_state": "clean tracked worktree; expected ignored artifacts under tools/patch-engine/dist/, tools/patch-engine/node_modules/, tools/validators/dist/, tools/validators/node_modules/, tools/world-mcp/.secret, tools/world-mcp/dist/, and tools/world-mcp/node_modules/",
   "updated_at": "2026-05-16"
 }
