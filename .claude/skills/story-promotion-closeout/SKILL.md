@@ -349,7 +349,7 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 | Rule 7 (Preserve Mystery Deliberately) | N/A at this skill | Story-fact-promotion-to-canon's firewall ran at proposal time + canon-addition re-checked at adjudication. Closeout's Phase 3 gate 2 verifies linked records exist (defense against fake-verdict invocations). |
 | Rule 11 (No Spectator Castes) | N/A at this skill | Canon-addition enforced. |
 | Rule 12 (No Single-Trace Truths) | N/A at this skill | Canon-addition enforced. |
-| Canon Layers | Phase 1 | Read linked CF records' `status` (5 layer values). |
+| Canon Layers | Phase 1 | Read linked CF records' `status` values (`hard_canon`, `derived_canon`, `soft_canon`, `contested_canon`). Mystery Reserve entries are separate `M-<integer>` records, not CF status values. |
 | Mystery Reserve | N/A at this skill | Story-fact-promotion-to-canon + canon-addition handled. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Closeout reads `PG` records as authoritative; never mutates them. Supersessions affect SF / BEL / STENT / SREL / DA, NOT branch or page records. |
 | §Story Bundles §5 (Validation Rules At Story Scope) | Phase 2 | On accepted verdicts, the closeout ledger records the canon link; story-local records are superseded only through amended-schema fields when their branch-local state changes. |

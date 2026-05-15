@@ -624,6 +624,8 @@ The table muddles "governing firewall load" (M) with "source record" (SF/BEL). C
 
 ### D13 — Clean stale ID/status wording (P2)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-013` landed this deliverable. Active story skills and shared templates now use unpadded `<CLASS>-<integer>` examples, and `story-promotion-closeout` names the four CF `status` values while treating Mystery Reserve entries as separate `M-<integer>` records. The original problem/change text below is historical intake context for D13.
+
 **Problem**: Three documentation drift sites surface during verification:
 - `_shared-templates/story-state-contract.md:60`: "next `-NNNN` id" — padded format conflicts with FOUNDATIONS-002 unpadded ID convention.
 - `branching-story-turn-cycle/SKILL.md:402`: example `CHC-0003`, `CHC-0004` — padded.

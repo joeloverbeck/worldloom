@@ -57,7 +57,7 @@ Auxiliary story-bundle records:
 
 `SF` records what *is* true in the branch. `BEL` records what a holder *believes / claims / witnesses / lies about*. The two classes are kept separate so that lies, secrets, betrayals, witness asymmetry, and contested public claims remain coherent without inventing plot rails.
 
-**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `-NNNN` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
+**Append-only / supersession discipline.** Once a record is committed it is not edited in place. Changes are expressed by writing a new record (next `<CLASS>-<integer>` id) whose `supersedes` field names the prior record. The patch engine enforces this at the file level for `_source/<class>/*.yaml`.
 
 ## 4. Record Schemas
 
