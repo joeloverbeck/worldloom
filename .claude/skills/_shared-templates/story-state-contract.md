@@ -250,6 +250,29 @@ There is no `input_surface` block on SE; the PG record's `input.resolved_event_i
 | `promotion_hold` | `resolution` absent or `held_for_promotion` |
 | `terminal` | `resolution` absent, `success`, `partial_success`, `failure`, `transformed` |
 
+#### 4.3a Audit-only SE events
+
+`event_kind: prose_attach` and `event_kind: promotion_closeout` are audit-only
+event records. They do NOT produce a page, do NOT appear in any
+`PG.input.resolved_event_id`, and do NOT alter branch snapshots.
+
+Required shape:
+- `commitment.selected_slt_id: null`
+- `commitment.selection_source: none`
+- `commitment.alias_bindings: {}`
+- `outcome_route: accept`
+- `resolution` absent
+- `state_delta.create: []`
+- `state_delta.supersede: []`
+- `state_delta.close: []`
+- `promotion_claims: []`
+- `parent_page_id` names the page whose prose or promotion closeout is being
+  audited; null only when the bundle has no relevant page anchor.
+
+`snapshot_replay_equality` ignores audit-only SE records except as ledger
+evidence. Health-audit's structural-replay phases (2a, 2c, 2d) treat
+audit-only SEs as no-op walkable events that do not alter cumulative state.
+
 ### 4.4 `SLT` commitment block (~18 sub-paths)
 
 ```yaml

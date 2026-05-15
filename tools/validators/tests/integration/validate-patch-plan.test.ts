@@ -106,6 +106,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "state_snapshot_integrity"
     );
     assert.equal(snapshotIntegrityExecution?.status, "skipped");
+    const auditOnlyExecution = result.executions.find(
+      (execution) => execution.name === "audit_only_se_shape"
+    );
+    assert.equal(auditOnlyExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -113,7 +117,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== choiceSetExecution &&
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
-        row !== snapshotIntegrityExecution
+        row !== snapshotIntegrityExecution &&
+        row !== auditOnlyExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

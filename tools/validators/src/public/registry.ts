@@ -1,3 +1,4 @@
+import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { modificationHistoryRetrofit } from "../structural/modification-history-retrofit.js";
@@ -26,6 +27,7 @@ export const structuralValidators: readonly Validator[] = [
   crossFileReference,
   recordSchemaCompliance,
   storyFactAuthority,
+  auditOnlySeShape,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

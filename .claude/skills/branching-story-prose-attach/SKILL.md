@@ -269,7 +269,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
 4. On approval:
    - Write `pages-prose-receipts/<page_id>.yaml` (direct write, not patch-engine routed — the receipt is not a `_source/` record).
    - Update bundle `INDEX.md` to reflect prose status + receipt verdict.
-   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach`; the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
+   - If `emit_attach_event: true`: build a single-op patch envelope with `create_se_record` for `event_kind: prose_attach` conforming to story-state contract §4.3a (audit-only SE events); the op requires a `target_file` field (`worlds/<world_slug>/stories/<story_slug>/_source/events/SE-<integer>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind='create_se_record')` for the machine-readable shape; dry-run validate via `mcp__worldloom__validate_patch_plan`; obtain patch approval token; submit via `mcp__worldloom__submit_patch_plan`.
 
 5. Report receipt path + verdict + `repair_recommendation` to the user. If `repair_recommendation` is non-`none`, surface the named lawful repair path (revise prose, invoke `branching-story-turn-cycle` with repair-action semantics, or invoke `story-fact-promotion-to-canon` with the asserted canon claim). Do NOT `git commit`.
 
@@ -312,7 +312,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Never mutate the `PG` record.** Plan-authority boundary per FOUNDATIONS §Story Bundles §4a. Drift, missing required events, and prose inventions are recorded in the receipt's `notes` and `checks` fields; they NEVER write to the page record.
 - **Never create ARC_TRACE.** The class is removed per the greenfield plan; the receipt's verdict + `repair_recommendation` are the audit-trail substitute.
 - **Never write rendered prose.** `pages-prose/<page_id>.md` is user-supplied; prose-attach reads it as input.
-- **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one `create_se_record` op with `event_kind: prose_attach`; never alters page state.
+- **`emit_attach_event` is the ONLY way prose-attach mutates atomic story-bundle records.** Opt-in. Default off. When enabled, emits exactly one §4.3a-conformant `create_se_record` op with `event_kind: prose_attach`; never alters page state.
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Receipt schema conforms strictly to §4.6. No nice-to-have fields.
 - **No word-count enforcement.** Craft critic axes are qualitative per FOUNDATIONS §Story Bundles §9. The receipt records no word counts.
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
