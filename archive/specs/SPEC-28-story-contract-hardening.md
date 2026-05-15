@@ -2,7 +2,7 @@
 
 # SPEC-28: Story Contract Hardening — Pre-Production Schema and Skill-Contract Fixes
 
-**Status**: DRAFT — produced 2026-05-15; not yet reassessed against the codebase or decomposed into tickets.
+**Status**: COMPLETED — produced, decomposed, implemented, and archived 2026-05-15.
 **Supersedes**: nothing. Additive hardening of the shared story-state contract plus the story-pipeline skill surfaces and the context-packet contract.
 **Source**: triage of `reports/story-related-improvements-third-iteration.md` — a "third iteration" external review (ChatGPT-Pro) of the branching-story system, conducted against `docs/FOUNDATIONS.md`, the seven story-pipeline skills, and `.claude/skills/_shared-templates/` only — with **no access to `tools/`, `docs/HARD-GATE-DISCIPLINE.md`, or `docs/CONTEXT-PACKET-CONTRACT.md`**. The report offered 10 P0, 5 P1, and 1 P2 items; each was reassessed against the working tree. The full per-item triage is recorded at `docs/triage/2026-05-15-story-related-improvements-triage.md`.
 
@@ -175,3 +175,18 @@ The `access_route` enum aligns with the routes FOUNDATIONS §6b already enumerat
 - **D7 dual-surface sync.** The STORY_KERNEL.md frontmatter `cast_bind_list` duplicates information in the `## Cast and Roles` markdown section. The bootstrap skill must declare the frontmatter authoritative for machine retrieval and the section its human rendering, with an explicit sync note — the same dual-surface discipline the CF templates carry.
 - **D7 rebase against SPEC-27.** `docs/CONTEXT-PACKET-CONTRACT.md` was edited by SPEC-27 D6 (the `canon_revision` phantom-feature correction) in a different section; ticket authoring should rebase D7's §6 edits against the post-SPEC-27 file state.
 - **Greenfield enabling fact.** Zero production story bundles exist (SPEC-24 removed the red-bunny test bundle), so D1–D3's schema amendments carry no migration cost. This is why "now, before the first production story" is the correct time — every §Out of Scope rejection is structural, not a migration-cost softening.
+
+## Outcome
+
+Completed on 2026-05-15. SPEC-28 was decomposed into seven implementation tickets, all now archived:
+`archive/tickets/SPEC28STOCONHAR-001.md`,
+`archive/tickets/SPEC28STOCONHAR-002.md`,
+`archive/tickets/SPEC28STOCONHAR-003.md`,
+`archive/tickets/SPEC28STOCONHAR-004.md`,
+`archive/tickets/SPEC28STOCONHAR-005.md`,
+`archive/tickets/SPEC28STOCONHAR-006.md`, and
+`archive/tickets/SPEC28STOCONHAR-007.md`.
+
+D1-D7 landed the story contract hardening described above: prose-attach hash drift is verdict-driving, `SE.commitment` and `BEL.basis` are schema-backed and consumed, story skill counts/citations are reconciled, promotion and closeout contracts no longer carry the stale approval/supersession wording, and story context packets now align with the bootstrap `STORY_KERNEL.md` frontmatter plus current storylet-pool vocabulary.
+
+Verification is recorded in the archived tickets. The final D7 review reran the focused `tools/world-mcp` build and context-packet tests and confirmed the old active ticket path had no remaining live references before this completed spec was archived.

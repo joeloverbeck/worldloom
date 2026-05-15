@@ -2,7 +2,7 @@
 
 **Date**: 2026-05-15
 **Source**: `reports/story-related-improvements-third-iteration.md` — external review (ChatGPT-Pro) of the branching-story system, fed `docs/FOUNDATIONS.md` + the seven story-pipeline skills + `.claude/skills/_shared-templates/`, with no access to `tools/`, `docs/HARD-GATE-DISCIPLINE.md`, or `docs/CONTEXT-PACKET-CONTRACT.md`. 16 evaluated items (10 P0, 5 P1, 1 P2).
-**Outcome**: 7 accepted → `specs/SPEC-28-story-contract-hardening.md`; 9 dismissed; 3 follow-ups noted.
+**Outcome**: 7 accepted → `archive/specs/SPEC-28-story-contract-hardening.md`; 9 dismissed; 3 follow-ups noted.
 **Verification**: every intake claim was re-checked against the working tree (two rounds, ~9 agent passes + exact-match search). The report's *diagnoses* are sound; its *categorization* is not — it re-proposed a concern SPEC-27 shipped the same day, miscategorized two feature-additions as P0 bugs, and built a "purge" task on a misread greenfield rebuild.
 
 ## Accepted → SPEC-28 (D1–D7)
