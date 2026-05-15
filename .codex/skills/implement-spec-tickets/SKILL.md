@@ -73,7 +73,7 @@ On resume after `/new`, read this state file first, then verify every important 
 
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
 
-`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha.
+`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
 
 ## Intake
 
@@ -148,9 +148,9 @@ Use the live `post-ticket-review` skill exactly. The child skill owns closeout t
 
 If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
 
-### 4. Audit Post-Ticket Review When It Creates Follow-Up Work
+### 4. Audit Post-Ticket Review When It Changes Handoff Surfaces
 
-If `post-ticket-review` creates or materially updates a follow-up ticket, run:
+If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
 
 ```text
 $skill-audit .codex/skills/post-ticket-review
@@ -160,7 +160,7 @@ Apply every sound, evidence-backed suggestion under the same rules as the `imple
 
 Before applying or rejecting suggestions, print the same compact visible child-audit result block for `.codex/skills/post-ticket-review`, even when there are no findings or no applicable suggestions.
 
-Put the review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket.
+Put any review-created follow-up ticket at the front of the queue, ahead of the original lexical next ticket. If review only truthed a spec, ticket dependency, or current contract doc and created no follow-up, keep the existing queue order.
 
 ### 5. Commit The Iteration
 
@@ -207,7 +207,7 @@ Harness handoff:
 - State commit: <sha or "none" | same as work commit>
 - Next target: <follow-up ticket path | next queued ticket path | final spec archive | blocked>
 - Queue: <remaining active ticket paths>
-- Dirty state: <clean | owned/unrelated paths still present>
+- Dirty state: <clean | expected ignored artifacts | owned/unrelated paths still present>
 - State file: .codex/run-state/implement-spec-tickets.json
 - Required next invocation: $implement-spec-tickets <spec> <next-target-if-any>
 ```
