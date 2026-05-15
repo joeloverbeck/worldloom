@@ -211,6 +211,8 @@ FOUNDATIONS.md §Tooling Recommendation requires MCP retrieval for story-pipelin
 
 ### D4 — Add post-write plan-hash verification in bootstrap and turn-cycle (P1, intake F5 / A4)
 
+**Implementation note (2026-05-16)**: `archive/tickets/SPEC32STOCONHAR-002.md` landed the D4 contract through shared story-state contract §10 step 5a, matching Phase 10 prose in `branching-story-bootstrap` and `branching-story-turn-cycle`, and `tools/world-mcp/tests/cli/compute-pg-hashes.test.ts`. The codebase-aligned proof surface is the existing `compute-pg-hashes` CLI test, not the validator fixture directories drafted below; the fixture references remain historical intake context unless a later testing-hardening ticket introduces a validator integration point for skill prose.
+
 **Problem**: The PG record's `plan.plan_hash` is computed over the future page-plan bytes during Phase 9 (validation) and committed when the patch plan is accepted (Phase 10). The page-plan markdown is then written directly to `pages-prose-plans/PG-<integer>.md`. The shared write order at `.claude/skills/_shared-templates/story-state-contract.md` §10 specifies:
 
 > 1. Build patch plan for story-bundle _source/<class>/*.yaml records
