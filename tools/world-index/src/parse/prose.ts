@@ -253,7 +253,9 @@ function findContainingHeadingSpan(
 ): SpanDefinition | null {
   const candidates = spans.filter(
     (span) =>
-      (span.nodeType === "section" || span.nodeType === "subsection") &&
+      (span.nodeType === "section" ||
+        span.nodeType === "narrative_section" ||
+        span.nodeType === "subsection") &&
       span.lineStart <= lineStart &&
       span.lineEnd >= lineEnd
   );
@@ -289,6 +291,10 @@ function nodeTypeForHeading(
 
   if (relativeFilePath === "ONTOLOGY.md" && depth === 2) {
     return "ontology_category";
+  }
+
+  if (relativeFilePath === "WORLD_KERNEL.md" && depth === 2) {
+    return "narrative_section";
   }
 
   if (depth === 2) {

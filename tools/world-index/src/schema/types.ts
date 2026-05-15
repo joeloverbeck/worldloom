@@ -13,6 +13,7 @@ export const NODE_TYPES = [
   "invariant",
   "ontology_category",
   "section",
+  "narrative_section",
   "subsection",
   "bullet_cluster",
   "character_record",

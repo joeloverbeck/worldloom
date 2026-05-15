@@ -1,0 +1,2 @@
+-- Schema version 5 updates parser-emitted node_type vocabulary only.
+-- No SQLite DDL changes are required.

@@ -94,6 +94,7 @@ const MENTION_EVIDENCE_SOURCE_NODE_TYPES = new Set([
   "character_proposal_card",
   "diegetic_artifact_record",
   "section",
+  "narrative_section",
   "subsection",
   "bullet_cluster",
   "mystery_reserve_entry",

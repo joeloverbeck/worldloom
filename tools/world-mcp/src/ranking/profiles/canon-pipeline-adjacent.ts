@@ -11,6 +11,7 @@ export const proposeNewCanonFactsRankingProfile: RankingWeights = {
     change_log_entry: 0.9,
     domain_file: 0.8,
     section: 0.8,
+    narrative_section: 0.8,
     named_entity: 0.9
   },
   edge_type_boost: {
@@ -31,7 +32,8 @@ export const proposeNewCharactersRankingProfile: RankingWeights = {
     diegetic_artifact_record: 1.15,
     adjudication_record: 1.1,
     named_entity: 1.25,
-    section: 0.75
+    section: 0.75,
+    narrative_section: 0.75
   },
   edge_type_boost: {
     mentions_entity: 14,
@@ -49,6 +51,7 @@ export const proposeNewWorldsFromPreferencesRankingProfile: RankingWeights = {
     mystery_reserve_entry: 1.3,
     domain_file: 1.05,
     section: 1.05,
+    narrative_section: 1.05,
     ontology_category: 1.1,
     named_entity: 0.85,
     canon_fact_record: 0.95
@@ -71,7 +74,8 @@ export const canonFactsFromDiegeticArtifactsRankingProfile: RankingWeights = {
     diegetic_artifact_record: 1.35,
     character_record: 1.0,
     named_entity: 1.15,
-    section: 0.9
+    section: 0.9,
+    narrative_section: 0.9
   },
   edge_type_boost: {
     references_record: 14,
@@ -91,6 +95,7 @@ export const emergentPressureEventsRankingProfile: RankingWeights = {
     canon_fact_record: 1.3,
     change_log_entry: 1.25,
     section: 1.15,
+    narrative_section: 1.15,
     domain_file: 1.0,
     open_question_entry: 0.7,
     named_entity: 0.85
@@ -114,6 +119,7 @@ export const storyBootstrapRankingProfile: RankingWeights = {
     invariant: 1.35,
     canon_fact_record: 1.25,
     section: 1.15,
+    narrative_section: 1.15,
     domain_file: 1.05,
     named_entity: 1.2,
     character_record: 1.15,
@@ -139,6 +145,7 @@ export const storyTurnCycleRankingProfile: RankingWeights = {
     mystery_reserve_entry: 1.25,
     named_entity: 1.25,
     section: 1.1,
+    narrative_section: 1.1,
     domain_file: 1.0,
     change_log_entry: 1.05,
     character_record: 0.95
@@ -164,6 +171,7 @@ export const commitmentBlockAuthoringRankingProfile: RankingWeights = {
     mystery_reserve_entry: 1.3,
     named_entity: 1.3,
     section: 1.1,
+    narrative_section: 1.1,
     domain_file: 1.0,
     character_record: 1.0,
     change_log_entry: 0.9
@@ -189,6 +197,7 @@ export const branchingStoryHealthAuditRankingProfile: RankingWeights = {
     mystery_reserve_entry: 1.3,
     named_entity: 1.25,
     section: 1.05,
+    narrative_section: 1.05,
     domain_file: 1.0,
     change_log_entry: 1.15
   },
@@ -215,6 +224,7 @@ export const storyFactPromotionToCanonRankingProfile: RankingWeights = {
     named_entity: 1.25,
     change_log_entry: 1.15,
     section: 1.0,
+    narrative_section: 1.0,
     domain_file: 0.95
   },
   recency_of_modification_bonus: 14,

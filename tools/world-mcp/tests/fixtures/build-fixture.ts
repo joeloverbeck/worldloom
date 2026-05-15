@@ -98,7 +98,7 @@ export function buildSpec02Fixture(root: string, worldSlug = SPEC02_FIXTURE_WORL
         world_slug: worldSlug,
         file_path: "WORLD_KERNEL.md",
         heading_path: "Kernel",
-        node_type: "section",
+        node_type: "narrative_section",
         body: "The world is a tide-locked archipelago ruled by scarce fresh water."
       },
       {
