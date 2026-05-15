@@ -604,6 +604,7 @@ checked_at: iso8601*
 strict: true | false*
 verdict: PASS | WARN | FAIL*
 checks:
+  hash_integrity: PASS | WARN | FAIL
   engine_jargon_leak: PASS | WARN | FAIL
   forbidden_mystery_resolution: PASS | FAIL
   required_event_rendered: PASS | WARN | FAIL
@@ -616,7 +617,7 @@ notes: [<string>]
 repair_recommendation: none | revise_prose | run_turn_cycle_repair | run_story_fact_promotion_to_canon
 ```
 
-The `checks` mapping contains seven deterministic prose/state checks plus the optional `craft_critic` result. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
+The `checks` mapping contains eight deterministic prose/state checks plus the optional `craft_critic` result. `hash_integrity` is `PASS` when the recorded `PG.plan.plan_hash` and `PG.state_hash` are lowercase sha256-shaped and match the recomputed plan/state hashes, `WARN` when drift is accepted because `accept_plan_drift=true`, and `FAIL` when drift is not accepted or either PG hash field is missing, placeholder, or non-sha256. `choice_consequence_visibility` verifies that rendered prose realizes `SE.resolution.player_visible_feedback`; it does not mutate `PG` state or re-author the selected event.
 
 A failed receipt blocks publication only if the attaching skill ran with `strict=true`. **A receipt never mutates `PG` state.**
 
