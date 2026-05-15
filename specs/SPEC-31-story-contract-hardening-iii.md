@@ -475,6 +475,8 @@ A `record_schema_compliance` check on `candidate:` alone would reject these fiel
 
 ### D9 — Make mystery accretion policy conditional (P1, reclassified from report's P2)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-009` landed this deliverable. Health-audit Phase 2e now treats `mystery_accretion_overflow` as conditional: validator-backed accretion policy is enforced deterministically if a future M record exposes one, while today's M records use schema-backed status progression plus judgment-assisted collective-answer review. The original problem/change text below is historical intake context for D9.
+
 **Problem**: `branching-story-health-audit/SKILL.md:206` references `M-record's accretion_policy.max_clues / equivalent limit`, but FOUNDATIONS Mystery Reserve schema defines only known/unknown/forbidden-answer/future-resolution fields. The `accretion_policy` field does not exist. The "/ equivalent limit" wording was a hedge, but the broken reference compounds when an implementer reads Phase 2e and looks for the field.
 
 **Change**:
