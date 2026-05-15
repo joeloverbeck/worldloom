@@ -45,13 +45,13 @@ Close a story promotion after canon-addition has adjudicated — record the verd
 <HARD-GATE>
 Do NOT submit any patch plan to `mcp__worldloom__submit_patch_plan`, write `worlds/<world_slug>/stories/<story_slug>/story-promotions/SP-<integer>-closeout.md`, update bundle `INDEX.md`, or update per-world `stories/INDEX.md`, until:
 
-(a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified at `worlds/<world_slug>/_source/canon/`, `worlds/<world_slug>/_source/change-log/`, `worlds/<world_slug>/adjudications/`; supersession ids allocated per source_records count + optional SE id allocated.
+(a) Pre-flight Check has completed: bundle resolved; `SP-<integer>-proposal-package.yaml` + `SP-<integer>.md` ledger loaded and `promotion_id` verified; canon-addition verdict + accepted-flavored linked CF / CH / PA records existence-verified at `worlds/<world_slug>/_source/canon/`, `worlds/<world_slug>/_source/change-log/`, `worlds/<world_slug>/adjudications/`; source records loaded from the proposal package inventory; optional SE id allocated.
 
-(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; supersession count matches proposal package source_records inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
+(b) Phases 1-4 have completed in working memory: verdict context loaded with linked CF / CH / PA cross-references (Phase 1); story-local effects determined per verdict-specific supersession pattern and supersession ids allocated only for records that actually need new story-state records (Phase 2); 6-gate Phase 3 validation passed (no world-canon mutation; linked-records exist; branch-handling same-story; supersedes pattern verified; rejected preserves history; `source_record_dispositions` completeness matches proposal package `source_records` inventory); `SP-<integer>-closeout.md` ledger drafted (Phase 4).
 
 (c) Phase 3 validation passed across all 6 gates.
 
-(d) The user has explicitly approved the deliverable summary (verdict + linked-records inventory; per-source-record supersession plan; branch-handling actions per `affected_branch_ids`; optional SE event preview; closeout ledger preview).
+(d) The user has explicitly approved the deliverable summary (verdict + linked-records inventory; per-source-record disposition plan; branch-handling actions per `affected_branch_ids`; optional SE event preview; closeout ledger preview).
 
 This gate is authoritative under Auto Mode or any other autonomous-execution context — invoking this skill does not constitute approval of the deliverable summary.
 </HARD-GATE>
@@ -61,7 +61,7 @@ This gate is authoritative under Auto Mode or any other autonomous-execution con
 ```
 Pre-flight Check (load FOUNDATIONS + shared contract; resolve bundle +
   SP-<integer>-proposal-package.yaml + SP-<integer>.md ledger; verify verdict-
-  linked CF / CH / PA records exist; allocate supersession ids +
+  linked CF / CH / PA records exist; load source_records inventory +
   optional SE id)
         |
         v
@@ -70,12 +70,13 @@ Phase 1: Load promotion package + canon-addition verdict context
         |
         v
 Phase 2: Determine story-local effects per verdict
-                                   (verdict-specific supersession pattern)
+                                   (verdict-specific supersession pattern +
+                                    disposition map)
         |
         v
 Phase 3: Validate (6 gates: no world canon mutation; linked-records
                   exist; branch-handling same-story; supersedes used;
-                  rejected preserves history; supersession count matches)
+                  rejected preserves history; disposition completeness)
         |
         v
 Phase 4: Author SP-<integer>-closeout.md ledger
@@ -115,11 +116,11 @@ Phase 5: HARD-GATE fires → patch (create_*_record per supersession +
 
 | Class | File path | Created when |
 |---|---|---|
-| `SF-<integer>` (supersession) | `_source/facts/SF-<integer>.yaml` | IF verdict ∈ {accepted, accepted_with_limits, rejected} AND proposal contains SF source records |
-| `BEL-<integer>` (supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF belief witnesses need an amended-schema update to `truth_relation`, `claim`, `basis`, or `consequences` |
-| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF `source_kind: character_outcome` AND verdict accepted-flavored |
-| `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF `source_kind: relationship_or_institutional_outcome` AND verdict accepted-flavored |
-| `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF `source_kind: artifact_canonization` AND verdict accepted-flavored (uses `append_story_diegetic_artifact_record`) |
+| `SF-<integer>` (supersession) | `_source/facts/SF-<integer>.yaml` | IF a source SF needs an amended-schema update (`source_record_dispositions[SF-<integer>] = superseded`) |
+| `BEL-<integer>` (supersession) | `_source/beliefs/BEL-<integer>.yaml` | IF a source BEL needs an amended-schema update to `truth_relation`, `claim`, `basis`, or `consequences` (`source_record_dispositions[BEL-<integer>] = superseded`) |
+| `STENT-<integer>` (supersession) | `_source/entities/STENT-<integer>.yaml` | IF a source STENT needs an amended-schema update (`source_record_dispositions[STENT-<integer>] = superseded`) |
+| `SREL-<integer>` (supersession) | `_source/relationships/SREL-<integer>.yaml` | IF a source SREL needs an amended-schema update (`source_record_dispositions[SREL-<integer>] = superseded`) |
+| `DA-<integer>` (supersession) | `_source/artifacts/DA-<integer>.yaml` | IF a source DA needs an amended-schema update (`source_record_dispositions[DA-<integer>] = superseded`; uses `append_story_diegetic_artifact_record`) |
 | `SE-<integer>` | `_source/events/SE-<integer>.yaml` | IF `emit_closeout_event: true` (single record with `event_kind: promotion_closeout`) |
 | `SP-<integer>-closeout.md` | `story-promotions/SP-<integer>-closeout.md` | Always (closeout ledger; companion to original SP-<integer>.md which stays unchanged) |
 | Bundle `INDEX.md` | `INDEX.md` | Always (updated last) |
@@ -151,10 +152,8 @@ Before Phase 1:
 3. Load `story-promotions/SP-<integer>-proposal-package.yaml` and `story-promotions/SP-<integer>.md`. Verify the package's `promotion_id` matches the `promotion_id` argument. Abort with promotion-not-found or promotion-id-mismatch error on miss.
 4. Validate `canon_addition_verdict`: must be one of `accepted | accepted_with_limits | rejected | deferred`. On accepted-flavored verdicts, validate that `linked_cf_ids`, `linked_ch_ids`, `linked_pa_ids` are all supplied + non-empty.
 5. On accepted-flavored verdicts: verify each `linked_cf_ids` entry resolves to `worlds/<world_slug>/_source/canon/CF-<integer>.yaml`; each `linked_ch_ids` entry resolves to `worlds/<world_slug>/_source/change-log/CH-<integer>.yaml`; each `linked_pa_ids` entry resolves to a `worlds/<world_slug>/adjudications/PA-<integer>-*.md` file. Abort with linked-record-not-found error on any miss — this is the primary defense against fake-verdict invocations.
-6. Allocate ids via `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)`:
-   - One id per superseding record (count determined by source_records inventory only; branch handling is ledger / INDEX-only).
-   - One `SE-<integer>` when `emit_closeout_event: true`.
-7. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting.
+6. Load all source records from the proposal package's `source_records[]` for Phase 2 supersession drafting and disposition classification.
+7. Allocate one `SE-<integer>` when `emit_closeout_event: true`.
 
 If any precondition fails, the skill aborts before Phase 1.
 
@@ -204,6 +203,16 @@ Canon-addition didn't decide either way. No supersessions by default. Closeout r
 - `archive`: record the archival disposition in the closeout ledger and per-world stories INDEX; BR records remain unchanged.
 - `none`: no branch disposition changes.
 
+### Source-record disposition map
+
+Phase 2 MUST draft a `source_record_dispositions:` map whose key set exactly equals the proposal package's `source_records[]` inventory. Each source record receives exactly one closed-enum disposition:
+
+- `superseded` — a new story-local record is drafted because an amended-schema field actually changes. Allocate the replacement id for this record through `mcp__worldloom__allocate_next_id(world_slug, id_class, story_slug=<story_slug>)`.
+- `ledger_only` — the verdict / canon link / rejection / deferral is recorded in the closeout ledger only; no story-local source record changes.
+- `unchanged_no_schema_field_changed` — the source record remains unchanged because no amended-schema field needs an update.
+
+Use `superseded` only when Phase 2 has a concrete replacement record carrying `supersedes: <prior-id>`. Use `ledger_only` for audit-trail facts that belong in `SP-<integer>-closeout.md` rather than in a story-record schema. Use `unchanged_no_schema_field_changed` when the source record's current schema fields already remain truthful after the verdict.
+
 ## Phase 3: Validate
 
 Run 6 validation gates BEFORE patch submission:
@@ -218,7 +227,7 @@ Run 6 validation gates BEFORE patch submission:
 
 5. **Rejected outcomes preserve branch-local history** — on `rejected`, source records are either left intact with the rejection recorded in the closeout ledger, or superseded through amended-schema fields when the story-local state itself must change. The original `SF` / `BEL` / etc. remain on disk.
 
-6. **Verdict-driven supersession count matches the proposal package's source_records inventory** — every source record gets a corresponding supersession (or non-supersession on `deferred`). Missing supersessions for accepted-flavored verdicts indicate the closeout is incomplete; abort.
+6. **Source-record disposition completeness matches the proposal package's source_records inventory** — the `source_record_dispositions:` map's key set MUST exactly equal the proposal package's `source_records[]` set, with no missing or extraneous entries. Every value MUST be one of `superseded | ledger_only | unchanged_no_schema_field_changed`. Any `superseded` entry MUST correspond to a drafted replacement story record carrying `supersedes: <prior-id>`; any non-superseded entry MUST NOT have a replacement record. Abort on mismatch.
 
 ## Phase 4: Author SP-<integer>-closeout.md ledger
 
@@ -253,6 +262,19 @@ closed_at: <iso8601 date>
 
 <Per superseding record: prior id → new id, plus ledger-only canon links / rejection / deferral notes>
 
+## Source record dispositions
+
+```yaml
+source_record_dispositions:
+  SF-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+  BEL-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+  DA-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+  STENT-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+  SREL-<integer>: superseded | ledger_only | unchanged_no_schema_field_changed
+```
+
+The map is required. Its key set must exactly match the proposal package's `source_records[]` inventory. `superseded` means a new story-local record was written because an amended-schema field changed; `ledger_only` means the verdict or canon link is recorded only in this closeout ledger; `unchanged_no_schema_field_changed` means the source record remains unchanged because no amended-schema field needed updating.
+
 ## Branch handling
 
 <Per branch in affected_branch_ids: prior status → new status (flagged / archived / unchanged)>
@@ -279,7 +301,7 @@ The original `SP-<integer>.md` ledger stays unchanged as the historical proposal
 3. Present the complete deliverable summary to the user:
    - `SP-<integer>` id + verdict.
    - Linked canon-addition outputs (CF / CH / PA records cited with one-line summaries).
-   - Per-source-record supersession plan (prior id → new id when state changes; ledger-only when no amended-schema field changes).
+   - Per-source-record disposition plan (prior id → new id for `superseded`; `ledger_only` or `unchanged_no_schema_field_changed` when no amended-schema field changes).
    - Branch-handling actions per `affected_branch_ids` (flag / archive / none).
    - Optional SE event preview.
    - Closeout ledger preview.

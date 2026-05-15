@@ -35,7 +35,7 @@ Do NOT write `pages-prose-receipts/<page_id>.yaml`, update `worlds/<world_slug>/
 
 (a) Pre-flight Check has completed: bundle resolved at `worlds/<world_slug>/stories/<story_slug>/`; `STORY_KERNEL.md` loaded, including `## Player Agency Contract`; page loaded from `_source/pages/<page_id>.yaml`; plan + prose pair verified at `pages-prose-plans/<page_id>.md` + `pages-prose/<page_id>.md`; `pages-prose-receipts/` directory present (idempotent `mkdir -p` if absent); `SE` id allocated via `mcp__worldloom__allocate_next_id` only when `emit_attach_event: true`.
 
-(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `prose_hash` derived; hash drift check applied per `accept_plan_drift`; 7 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
+(b) Phases 1-5 have completed in working memory: plan body + prose body + PG record + `STORY_KERNEL.md` Player Agency Contract + forbidden mysteries (from plan §11) loaded; computed `plan_hash` + `state_hash` + `prose_hash` derived; `hash_integrity` check applied per `accept_plan_drift`; 8 deterministic checks complete per `.claude/skills/_shared-templates/story-state-contract.md` §4.6 (hash_integrity, engine_jargon_leak, forbidden_mystery_resolution, required_event_rendered, choice_consequence_visibility, entity_status_consistency, invented_structural_fact, canon_claim_without_authority); optional craft critic complete (7 axes) only when `run_craft_critic: true`; roll-up `verdict` (PASS | WARN | FAIL) derived; `repair_recommendation` derived per the four-outcome ladder.
 
 (c) The user has explicitly approved the deliverable summary (receipt path, per-check verdict table, roll-up verdict, repair_recommendation, strict-mode publication-blocking decision if applicable, optional SE-<integer> id + patch op preview when `emit_attach_event: true`).
 
@@ -57,12 +57,13 @@ Phase 1: Pair plan + page + prose (load PG, STORY_KERNEL.md Player Agency
                                    compute fresh hashes)
         |
         v
-Phase 2: Hash drift check (computed vs recorded plan_hash + state_hash;
-                           fail unless accept_plan_drift=true; record
-                           drift in receipt notes, never in PG)
+Phase 2: Hash integrity check (computed vs recorded plan_hash + state_hash;
+                               hash_integrity FAIL unless
+                               accept_plan_drift=true; record drift in
+                               receipt notes, never in PG)
         |
         v
-Phase 3: Deterministic checks (7 checks per shared contract §4.6)
+Phase 3: Deterministic checks (8 checks per shared contract §4.6)
         |
         v
 Phase 4: [optional] Craft critic (7 axes; only when run_craft_critic=true)
@@ -146,30 +147,33 @@ Load into working memory:
 Compute fresh hashes:
 
 - `computed_plan_hash`: sha256 over the plan file's bytes.
+- `computed_state_hash`: sha256 over the loaded PG record per shared contract §4.2a, excluding `state_hash`, `prose_path`, and `prose_receipt_path` from the payload.
 - `computed_prose_hash`: sha256 over the prose file's bytes.
 
-## Phase 2: Hash drift check
+## Phase 2: Hash integrity check
 
 Compare:
 
 - `PG.plan.plan_hash` vs `computed_plan_hash`.
-- `PG.state_hash` (the at-commit value) — this is not recomputed; it is the authoritative state hash from page-plan commit.
+- `PG.state_hash` vs `computed_state_hash`.
 
-If `plan_hash` differs AND `accept_plan_drift: false`: record the drift in the receipt's `notes` field as `"plan_hash drift: PG.plan.plan_hash=<recorded> computed=<computed>"`. Drift is recorded in `notes` for audit-trail purposes; the verdict is exclusively driven by the 7 deterministic checks at Phase 3 (plus the optional craft critic). Drift's effect on the verdict, if any, manifests indirectly as `required_event_rendered` / `choice_consequence_visibility` / `entity_status_consistency` / `invented_structural_fact` failures when the plan body actually changed in a way the prose now contradicts.
+If both recorded hash fields are lowercase sha256-shaped and both match their computed values: set `checks.hash_integrity: PASS`.
 
-If `plan_hash` differs AND `accept_plan_drift: true`: record drift in `notes` and continue.
+If either hash differs AND `accept_plan_drift: false`: set `checks.hash_integrity: FAIL` and record the drift in the receipt's `notes` field, e.g. `"plan_hash drift: PG.plan.plan_hash=<recorded> computed=<computed>"` and/or `"state_hash drift: PG.state_hash=<recorded> computed=<computed>"`. The mismatch is verdict-driving through `hash_integrity: FAIL`.
 
-If both match: continue silently to Phase 3.
+If either hash differs AND `accept_plan_drift: true`: set `checks.hash_integrity: WARN`, record the drift in `notes`, and continue. The warning is still visible in the roll-up verdict.
 
-**Placeholder subcase**: when `PG.plan.plan_hash` or `PG.state_hash` is a literal `PLACEHOLDER_TO_BE_COMPUTED*` string (bootstrap-origin, not edit-driven drift), record the placeholder verbatim in `notes`; the receipt's `state_hash_at_plan_time` will carry the placeholder transiently and is non-§4.6-compliant until VALENH-016 lands and the upstream record is repaired. Verdict is unaffected so long as the 7 deterministic checks pass against the current plan body.
+If either `PG.plan.plan_hash` or `PG.state_hash` is missing, placeholder (`PLACEHOLDER_TO_BE_COMPUTED*`), or non-sha256-shaped: set `checks.hash_integrity: FAIL` regardless of `accept_plan_drift`. The receipt records the invalid value in `notes`; the repair path is upstream PG repair, not silent acceptance.
 
 **Drift is recorded in the receipt, NEVER in the `PG` record.** The PG is committed state per FOUNDATIONS §Story Bundles §4a (Plan-Authority Boundary).
 
 ## Phase 3: Deterministic checks
 
-Run the 7 deterministic checks defined in shared contract §4.6, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
+Run the 8 deterministic checks defined in shared contract §4.6, each producing `PASS | WARN | FAIL` (or `PASS | FAIL` where the schema names only two states):
 
-1. **`engine_jargon_leak`** (`PASS | WARN | FAIL`) — scan the prose body for engine-vocabulary tokens. The closed engine-vocabulary list (inline below) includes record-ID patterns and engine-domain terms. Engine vocabulary legitimately appears in plan §15 frontmatter and verbatim-inlined plan §2 / §3 / §19 — those are NOT scanned. Hits in the rendered prose body are `WARN` if isolated (single occurrence), `FAIL` if pervasive (≥3 occurrences across different tokens).
+1. **`hash_integrity`** (`PASS | WARN | FAIL`) — produced by Phase 2. It is verdict-driving: `FAIL` forces the receipt `verdict: FAIL`; `WARN` contributes to `verdict: WARN`.
+
+2. **`engine_jargon_leak`** (`PASS | WARN | FAIL`) — scan the prose body for engine-vocabulary tokens. The closed engine-vocabulary list (inline below) includes record-ID patterns and engine-domain terms. Engine vocabulary legitimately appears in plan §15 frontmatter and verbatim-inlined plan §2 / §3 / §19 — those are NOT scanned. Hits in the rendered prose body are `WARN` if isolated (single occurrence), `FAIL` if pervasive (≥3 occurrences across different tokens).
 
    **Closed engine-vocabulary list** (inline; promote to `.claude/skills/_shared-templates/engine-vocabulary.md` only if list grows beyond ~30 tokens OR another skill consumes it):
 
@@ -178,17 +182,17 @@ Run the 7 deterministic checks defined in shared contract §4.6, each producing 
    - Predicate-DSL terms (literal): `fact_true(`, `belief(`, `entity_status(`, `relationship_axis(`, `obligation_open(`, `consequence_pending(`, `thread_active(`, `location(`, `has_affordance(`, `all[`, `any[`, `not[`
    - Routing terms in engine register: `outcome_route`, `state_delta`, `promotion_claims`, `validation_trace`, `state_snapshot`, `forbidden_resolutions`, `truth_relation`, `branch_local_counterfactual`, `canon_candidate`
 
-2. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — regex-scan the prose for surface-level resolutions of any mystery in plan §11 `forbidden_resolutions[]`. Use deterministic patterns derived from each mystery's `denial_patterns` (per the world's Mystery Reserve record format). Any pattern match is `FAIL` and routes to `repair_recommendation: revise_prose`.
+3. **`forbidden_mystery_resolution`** (`PASS | FAIL`) — regex-scan the prose for surface-level resolutions of any mystery in plan §11 `forbidden_resolutions[]`. Use deterministic patterns derived from each mystery's `denial_patterns` (per the world's Mystery Reserve record format). Any pattern match is `FAIL` and routes to `repair_recommendation: revise_prose`.
 
-3. **`required_event_rendered`** (`PASS | WARN | FAIL`) — verify plan §7 (selected event + outcome_route) is dramatized in the prose. If the event is implied but ambiguous (the reader could miss it on first read), `WARN`. If absent or actively contradicted, `FAIL`. Verification scans for plan §8 beat keywords + plan §7 actor / target references appearing in the prose body.
+4. **`required_event_rendered`** (`PASS | WARN | FAIL`) — verify plan §7 (selected event + outcome_route) is dramatized in the prose. If the event is implied but ambiguous (the reader could miss it on first read), `WARN`. If absent or actively contradicted, `FAIL`. Verification scans for plan §8 beat keywords + plan §7 actor / target references appearing in the prose body.
 
-4. **`choice_consequence_visibility`** (`PASS | WARN | FAIL`) — verify the prose realizes `SE.resolution.player_visible_feedback` from plan §7 and stays within `STORY_KERNEL.md` `## Player Agency Contract`. `PASS` means the selected action, route, and immediate consequence are legible to a first-time reader and do not imply player control outside the agency surface / write-in envelope / viewpoint limits. `WARN` means the action occurred but the route outcome, consequence feedback, or agency boundary is easy to miss. `FAIL` means the prose obscures, contradicts, or omits the consequence, or implies a broader/narrower agency surface than the contract permits, especially for `attempt`, `accommodate`, `world_block`, `promotion_hold`, or `terminal` routes. For `accept` routes with no `resolution`, pass this check when the selected event and consequence remain legible under `required_event_rendered` and the agency implication remains within the contract.
+5. **`choice_consequence_visibility`** (`PASS | WARN | FAIL`) — verify the prose realizes `SE.resolution.player_visible_feedback` from plan §7 and stays within `STORY_KERNEL.md` `## Player Agency Contract`. `PASS` means the selected action, route, and immediate consequence are legible to a first-time reader and do not imply player control outside the agency surface / write-in envelope / viewpoint limits. `WARN` means the action occurred but the route outcome, consequence feedback, or agency boundary is easy to miss. `FAIL` means the prose obscures, contradicts, or omits the consequence, or implies a broader/narrower agency surface than the contract permits, especially for `attempt`, `accommodate`, `world_block`, `promotion_hold`, or `terminal` routes. For `accept` routes with no `resolution`, pass this check when the selected event and consequence remain legible under `required_event_rendered` and the agency implication remains within the contract.
 
-5. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses, which are the derived projection of active `STSTAT` records on `PG.state_snapshot`, and does not grant player-facing agency that conflicts with the `## Player Agency Contract`. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat, and non-controlled `STENT` records should not read as player-controlled unless the agency surface permits it. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y, or prose assigns control outside the Player Agency Contract) are `FAIL`.
+6. **`entity_status_consistency`** (`PASS | WARN | FAIL`) — verify the prose does not contradict plan §5 entity statuses, which are the derived projection of active `STSTAT` records on `PG.state_snapshot`, and does not grant player-facing agency that conflicts with the `## Player Agency Contract`. Pattern: dead characters should not speak, incapacitated characters should not act with full agency, characters in location X should not appear in location Y mid-page without a transition beat, and non-controlled `STENT` records should not read as player-controlled unless the agency surface permits it. Soft contradictions (e.g., a character's emotional state nuanced beyond §5's life/agency/location declarations) are `WARN`; hard contradictions (dead character speaks, location-X character takes action at location-Y, or prose assigns control outside the Player Agency Contract) are `FAIL`.
 
-6. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`. Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. Structural inventions that would change cast capability / location / faction alignment are `FAIL` and route to `repair_recommendation: run_turn_cycle_repair`.
+7. **`invented_structural_fact`** (`PASS | WARN | FAIL`) — scan prose for statements that would introduce a structural fact not present in plan §4 (canon excerpts), §5 (cast statuses), §7 (selected event), or `PG.state_snapshot`. Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. Structural inventions that would change cast capability / location / faction alignment are `FAIL` and route to `repair_recommendation: run_turn_cycle_repair`.
 
-7. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `PG.SE.promotion_claims[]` evidence is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
+8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `PG.SE.promotion_claims[]` evidence is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 
 ## Phase 4: Optional craft critic
 
@@ -245,6 +249,7 @@ If multiple FAIL conditions co-occur, prefer the most-severe repair (`run_story_
    strict: <input strict flag>
    verdict: PASS | WARN | FAIL
    checks:
+     hash_integrity: PASS | WARN | FAIL
      engine_jargon_leak: PASS | WARN | FAIL
      forbidden_mystery_resolution: PASS | FAIL
      required_event_rendered: PASS | WARN | FAIL
@@ -296,7 +301,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 | Canon Layers | Pre-flight, Phase 1 | Plan §4 canon excerpts read as load-bearing reference for checks 5 and 6. |
 | Mystery Reserve | Pre-flight, Phase 1, 3 | Plan §11 `forbidden_resolutions[]` loaded; Phase 3 check 2 enforces firewall on rendered prose. |
 | §Story Bundles §4a (Plan-Authority Boundary) | All phases | Prose-attach NEVER mutates `PG`; drift is recorded in receipt only; no ARC_TRACE emitted; the page snapshot remains the authoritative state. |
-| §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6 (15 fields total; no extras). |
+| §Story Bundles §5b (Schema-Minimalism) | Phase 6 | Receipt schema conforms strictly to shared contract §4.6; no extras beyond the canonical receipt schema. |
 | §Story Bundles §6a (Belief vs. Fact) | N/A | Prose-attach reads `PG.state_snapshot.active_records.BEL` references alongside the `STSTAT`-derived status projection for entity-status-consistency checks but does not create or supersede BEL or STSTAT records. |
 | §Story Bundles §9 (Prose Length Discipline) | Phase 4 craft critic | Craft critic uses 7 qualitative axes; no word-count enforcement. |
 | Change Control Policy | N/A | Canon-reading skill emits no Change Log Entries. |
@@ -313,7 +318,7 @@ The prose receipt schema lives in `.claude/skills/_shared-templates/story-state-
 - **Silent acceptance forbidden for structural inventions.** Every `invented_structural_fact: FAIL` or `canon_claim_without_authority: FAIL` routes through `repair_recommendation` to one of three lawful repair paths: `revise_prose`, `run_turn_cycle_repair`, `run_story_fact_promotion_to_canon`.
 - **Skills do not chain.** Prose-attach does not invoke `branching-story-turn-cycle`, `story-fact-promotion-to-canon`, or `branching-story-health-audit`. When `repair_recommendation` is non-`none`, the receipt records the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields — until landed and bundles repaired, prose-attach against pre-VALENH-016 PG records encounters literal `PLACEHOLDER_TO_BE_COMPUTED*` strings; see Phase 2 §Hash drift check Placeholder subcase). The shared contract §4.6 receipt schema is already in place.
+- **No deferred-integration tickets named by this skill** — prose-attach is structurally simple. It inherits the rebuilt-family infrastructure from bootstrap and turn-cycle without adding its own deferred surfaces: MCPENH-040 BEL allocator, PEENH-007 `create_bel_record`, VALENH-011 BEL validator, MCPENH-041 task-type renames, and VALENH-016 (story-page.schema.json requires `plan_hash` + `state_hash` as sha256-shaped fields; prose-attach now treats missing, placeholder, or non-sha256 PG hash fields as `hash_integrity: FAIL`). The shared contract §4.6 receipt schema is already in place.
 
 ## Final Rule
 

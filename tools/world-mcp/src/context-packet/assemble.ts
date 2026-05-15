@@ -408,7 +408,9 @@ export async function assembleContextPacket(args: {
       recordProjection
     );
     packet.story_bundle_context =
-      isStoryPipelineTaskType(args.task_type) && args.story_slug !== undefined
+      isStoryPipelineTaskType(args.task_type) &&
+      args.task_type !== "story_bootstrap" &&
+      args.story_slug !== undefined
         ? buildStoryBundleContext(opened.db, args.world_slug, args.story_slug)
         : null;
     packet.impact_surfaces = await buildImpactSurfaces(

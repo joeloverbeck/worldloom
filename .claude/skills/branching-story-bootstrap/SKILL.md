@@ -143,7 +143,29 @@ Bootstrap does NOT write `pages-prose/PG-1.md` (rendered prose is supplied exter
 
 ## STORY_KERNEL.md Section Contract
 
-Draft `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` as the bundle's compact primary-authored story contract. It MUST contain these sections, in this order unless the user explicitly approves a clearer order for the specific bundle:
+Draft `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` as the bundle's compact primary-authored story contract. It MUST begin with a YAML frontmatter block carrying the machine-read fields consumed by `tools/world-mcp/src/context-packet/story-bundle-context.ts`, followed by these sections in this order unless the user explicitly approves a clearer order for the specific bundle:
+
+```yaml
+---
+story_id: STORY-<integer>
+story_slug: <story_slug>
+root_branch_id: BR-1
+root_page_id: PG-1
+cast_bind_list:
+  - char_id: CHAR-<integer> | null
+    stent_id: STENT-<integer>
+    role_in_story: [<role_in_story values>]
+player_agency_surface:
+  - STENT-<integer>
+mysteries_in_play:
+  - m_id: M-<integer>
+    status: <unresolved_mystery_claims.status value>
+    future_resolution_safety: <safety label>
+    domain_overlap: <domain or "none">
+invariants_acknowledged:
+  - <invariant id or label>
+---
+```
 
 1. `# <Story Title>`
 2. `## Story Identity` — world slug, story slug, `STORY-<integer>`, root branch, root page, premise summary, POV, tone, and content intensity.
@@ -158,6 +180,8 @@ Draft `worlds/<world_slug>/stories/<story_slug>/STORY_KERNEL.md` as the bundle's
 8. `## Initial Continuation Contract` — expected first hinge, emitted choice surface, and seed/JIT continuation posture.
 
 The `## Player Agency Contract` is load-bearing. Downstream `branching-story-turn-cycle` uses it as the stable routing input for write-in action-source legality, and `branching-story-prose-attach` uses it to flag rendered prose that implies a broader or narrower player agency surface than the bundle permits.
+
+The frontmatter is authoritative for machine retrieval. Keep `cast_bind_list` in sync with `## Cast and Roles`, and keep `mysteries_in_play` / `invariants_acknowledged` in sync with `## Protected Mystery and Invariant Boundaries`; those markdown sections are the human rendering of the same data.
 
 ## World-State Prerequisites
 

@@ -88,7 +88,7 @@ required_world_updates: []                 # canonical file-class names of every
   # - TIMELINE
 
 source_basis:
-  direct_user_approval: false              # set true once user explicitly accepts this fact at the Phase 10 HARD-GATE
+  direct_user_approval: true               # accepted base-world CF; written only after Phase 10 HARD-GATE approval
   derived_from: []                         # list of parent CF ids if this is derived canon
 
 contradiction_risk:

@@ -99,7 +99,9 @@ function validBelief(): Record<string, unknown> {
     confidence: "medium",
     visibility: "private",
     basis: {
-      source_event: "SE-0001"
+      source_event: "SE-0001",
+      access_route: "direct_observation",
+      access_records: ["STENT-0001", "SE-0001"]
     },
     consequences: {
       opens: ["THR-0001"],

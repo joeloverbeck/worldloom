@@ -81,6 +81,8 @@ Start with:
 - directly relevant docs, templates, skills, hooks, tools, or validators named by the ticket
 - the verification commands or review surfaces used for closeout
 
+If the completed ticket cites an explicit spec or doc reference, inspect that reference for same-seam current-state, implementation-note, proof, or status prose that the completed work made stale. Truth same-seam reference prose before archival, or record why the remaining wording is historical or outside the reviewed ticket boundary.
+
 Broaden only when the implementation crosses an important shared boundary:
 - shared ticket or output schema
 - cross-skill contract

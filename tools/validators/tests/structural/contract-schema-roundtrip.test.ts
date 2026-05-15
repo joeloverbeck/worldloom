@@ -18,8 +18,8 @@ const EXPECTED_FIELD_SETS: Record<string, { required: string[]; properties: stri
     properties: ["id", "story_id", "branch_id", "parent_page_id", "branch_path", "turn_index", "input", "state_hash_parent", "state_hash", "state_snapshot", "plan", "prose_plan_path", "prose_path", "prose_receipt_path", "emitted_choices", "validation_trace"]
   },
   "story-event": {
-    required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "outcome_route", "world_logic_rationale", "state_delta"],
-    properties: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "outcome_route", "resolution", "world_logic_rationale", "state_delta", "promotion_claims"]
+    required: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "commitment", "outcome_route", "world_logic_rationale", "state_delta"],
+    properties: ["id", "story_id", "created_at_page", "parent_page_id", "event_kind", "actor", "targets", "commitment", "outcome_route", "resolution", "world_logic_rationale", "state_delta", "promotion_claims"]
   },
   "story-storylet": {
     required: ["id", "story_id", "scope", "title", "move_family", "preconditions", "beats", "exit_options", "saliency", "mystery_policy", "provenance"],
@@ -86,6 +86,16 @@ test("story schemas expose the amended contract field sets", () => {
     assert.deepEqual(schema.required, expected.required, schemaName);
     assert.deepEqual(Object.keys(schema.properties), expected.properties, schemaName);
   }
+
+  const beliefSchema = readSchema("story-belief");
+  const basis = beliefSchema.properties.basis as {
+    required: string[];
+    properties: Record<string, unknown>;
+    additionalProperties: unknown;
+  };
+  assert.equal(basis.additionalProperties, false);
+  assert.deepEqual(basis.required, ["source_event", "access_route"]);
+  assert.deepEqual(Object.keys(basis.properties), ["source_event", "access_route", "access_records"]);
 });
 
 test("representative amended contract records validate against tightened schemas", async () => {
@@ -196,6 +206,49 @@ test("representative amended contract records validate against tightened schemas
       intended_audience: "public",
       circulation: "public",
       truth_relation: "true"
+    }),
+    storyRecord("story_event_record", "SE-0001", "events", {
+      id: "SE-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      parent_page_id: null,
+      event_kind: "selected_choice",
+      actor: "STENT-0001",
+      commitment: {
+        selected_slt_id: "SLT-0001",
+        selection_source: "author_pool",
+        alias_bindings: {
+          actor: "STENT-0001",
+          debt: "OBL-0001"
+        }
+      },
+      outcome_route: "accept",
+      world_logic_rationale: "The selected commitment block is available in the current branch state.",
+      state_delta: {
+        create: ["SF-0001"],
+        supersede: [],
+        close: []
+      }
+    }),
+    storyRecord("belief_record", "BEL-0001", "beliefs", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001",
+      holder: "STENT-0001",
+      claim: "Mara knows the gate is damaged.",
+      belief_mode: "knows",
+      truth_relation: "true",
+      confidence: "certain",
+      visibility: "shared",
+      basis: {
+        source_event: "SE-0001",
+        access_route: "direct_observation",
+        access_records: ["STENT-0001", "SE-0001"]
+      },
+      consequences: {
+        opens: [],
+        constrains_choices: []
+      }
     }),
     storyRecord("branch_record", "BR-0001", "branches", {
       id: "BR-0001",

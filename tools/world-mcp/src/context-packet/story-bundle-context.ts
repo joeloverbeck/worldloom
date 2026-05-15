@@ -150,36 +150,36 @@ function visibilityScope(record: Record<string, unknown>): string {
 }
 
 function buildStoryletPoolSummary(rows: StoryNodeRow[]): ContextPacketStoryBundleContext["storylet_pool_summary"] {
-  const byShape: Record<string, number> = {};
-  const byContentIntensity: Record<string, number> = {};
+  const byMoveFamily: Record<string, number> = {};
+  const byUrgency: Record<string, number> = {};
 
   const visibleRecords = rows.slice(0, MAX_VISIBLE_STORYLETS).map((row) => {
     const record = parseYamlRecord(row);
-    const shape = asString(record.shape ?? record.storylet_shape, "unspecified");
-    const contentIntensity = asString(record.content_intensity, "unspecified");
-    incrementCounter(byShape, shape);
-    incrementCounter(byContentIntensity, contentIntensity);
+    const moveFamily = asString(record.move_family, "unspecified");
+    const urgency = readNestedString(record, ["saliency", "urgency"]) ?? "unspecified";
+    incrementCounter(byMoveFamily, moveFamily);
+    incrementCounter(byUrgency, urgency);
 
     return {
       id: asString(record.id, authoredId(row)),
       title: asString(record.title, asString(record.summary, authoredId(row))),
-      shape,
-      content_intensity: contentIntensity,
+      move_family: moveFamily,
+      urgency,
       visibility_scope: visibilityScope(record)
     };
   });
 
   for (const row of rows.slice(MAX_VISIBLE_STORYLETS)) {
     const record = parseYamlRecord(row);
-    incrementCounter(byShape, asString(record.shape ?? record.storylet_shape, "unspecified"));
-    incrementCounter(byContentIntensity, asString(record.content_intensity, "unspecified"));
+    incrementCounter(byMoveFamily, asString(record.move_family, "unspecified"));
+    incrementCounter(byUrgency, readNestedString(record, ["saliency", "urgency"]) ?? "unspecified");
   }
 
   return {
     total: rows.length,
     visibility_filtered_count: visibleRecords.length,
-    by_shape: byShape,
-    by_content_intensity: byContentIntensity,
+    by_move_family: byMoveFamily,
+    by_urgency: byUrgency,
     visible_records: visibleRecords
   };
 }

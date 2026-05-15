@@ -50,9 +50,15 @@ function addLargeStoryletPool(root: string): void {
       const body = [
         `id: ${id}`,
         `title: Large Pool Storylet ${index}`,
-        "shape: beat",
-        "content_intensity: quiet",
-        "visibility_scope: global_author_pool",
+        "move_family: decision",
+        "scope:",
+        "  visibility: global_author_pool",
+        "  branch_id: null",
+        "saliency:",
+        "  urgency: medium",
+        "  cooldown_pages: 0",
+        "  tags:",
+        "    - pool",
         ""
       ].join("\n");
       insert.run(

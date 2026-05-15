@@ -148,7 +148,7 @@ Output: a scoped branch list + per-branch metadata used by Phases 2-4.
 
 ## Phase 2: Structural checks (mandatory when `structural` in `mode`; default)
 
-Seven sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
+Eight sub-phases run in sequence. Findings accumulate into a shared in-memory pool with severity (`error | warning | info`), branch scope (`branch_id` or `cross_branch`), record references, and pre-assigned `repair_kind` (for Phase 5 RSP drafting).
 
 ### Phase 2a: Replay events
 
@@ -157,9 +157,10 @@ For each scoped branch:
 1. Load the root page's `state_snapshot`.
 2. Walk the page chain in branch order.
 3. For each page, apply the corresponding `SE.state_delta` to the running snapshot (create / supersede / close primitives).
-4. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`. The replay includes `entity_status` through the active `STSTAT` projection enforced by `snapshot_replay_equality`; no separate hand-authored `entity_status` block is trusted.
-5. Divergence → `snapshot_replay_mismatch` finding, `severity: error`, `repair_kind: branch_flag` (replay corruption is not auto-repairable).
-6. Apply Choice Consequence Integrity to each replayed accepted `CHC` selection or accepted write-in: if its `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the choice as rhetorical or expressive, emit `cosmetic_accepted_choice`, `severity: error`, `repair_kind: turn_repair`.
+4. Read `SE.commitment.selected_slt_id`, `SE.commitment.selection_source`, and `SE.commitment.alias_bindings` to explain which causal move fired and which predicate-DSL aliases were bound before the delta applied. For `event_kind: story_start | prose_attach | promotion_closeout`, require `selection_source: none` and `selected_slt_id: null`; all other replayed events must name the selected or generated `SLT`.
+5. Compute the running snapshot's hash (sha256 over canonicalized YAML) and compare to `PG.state_hash`. The replay includes `entity_status` through the active `STSTAT` projection enforced by `snapshot_replay_equality`; no separate hand-authored `entity_status` block is trusted.
+6. Divergence → `snapshot_replay_mismatch` finding, `severity: error`, `repair_kind: branch_flag` (replay corruption is not auto-repairable).
+7. Apply Choice Consequence Integrity to each replayed accepted `CHC` selection or accepted write-in: if its `SE.state_delta.create`, `SE.state_delta.supersede`, and `SE.state_delta.close` are all empty, no story-bundle record is created / superseded / closed, no visibility or affordance state changes, and the parent page plan did not explicitly mark the choice as rhetorical or expressive, emit `cosmetic_accepted_choice`, `severity: error`, `repair_kind: turn_repair`.
 
 When replaying repair events, distinguish `system_repair` (engine-initiated repair such as schema-gate recovery) from `audit_repair` (audit-finding-driven repair). The old undifferentiated value is not a valid current-contract event kind.
 
@@ -188,7 +189,7 @@ Flag:
 - `public_consequence_without_witness` — high-urgency public-impact `CNSQ` records with no `BEL.visibility: public | shared` records anchoring them. WARNING; `repair_kind: turn_repair`.
 - `secret_publicly_known_without_event` — `BEL.holder: public` records derived from secret actions (events with `outcome_route: accommodate` involving deception) without a corresponding revealing event. WARNING; `repair_kind: turn_repair`.
 - `relationship_change_without_derived_from_trace` — `SREL` supersessions whose `derived_from` doesn't trace to an `SE` or `BEL`. WARNING; `repair_kind: turn_repair`.
-- `observer_firewall_violation` — emitted `CHC` records or selected `SLT` actor-bindings whose intent, target, precondition match, or planned move relies on information unavailable to the acting entity. Valid access routes include active `BEL`, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, or another canonically valid mechanism recorded in the plan. WARNING; `repair_kind: turn_repair`.
+- `observer_firewall_violation` — emitted `CHC` records or selected `SLT` actor-bindings whose intent, target, precondition match, or planned move relies on information unavailable to the acting entity. For selected `SLT` audit, read `SE.commitment.selected_slt_id` to identify the causal move, `SE.actor` for the acting entity, and `SE.commitment.alias_bindings` for resolved `bound:<alias>` records before checking access. Read active `BEL.basis.access_route` and `BEL.basis.access_records` for the recorded route and enabling records instead of re-deriving the route from prose, plans, or notes. Valid access routes include active `BEL`, direct observation from active location/status, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, rumor, authorial initialization at bundle genesis, or another canonically valid mechanism recorded in the plan. WARNING; `repair_kind: turn_repair`.
 - `lie_promoted_silently` — `BEL` records with `truth_relation: false, belief_mode: deceives` that become accepted-as-true (`SF` records derived from them without a `branch_local_counterfactual` authority marker). ERROR; `repair_kind: turn_repair`.
 
 When a choice or selected `SLT` is grounded through a binding-predicate storylet, audit the resolved binding rather than the literal `bound:<alias>` token. For example, a block with `any_relationship_axis(trust_edge, trust, <=, low, primary_actor)` and `effects.supersede: [bound:trust_edge]` is plan-grounded only if the leaf snapshot has a matching active `SREL`; a block with `any_belief(public_belief, public, knows, true, public)` and `likely_effects: [bound:public_belief]` is grounded only if the matching active `BEL` exists and satisfies the filters.
@@ -412,7 +413,7 @@ Apply `severity_threshold` to filter the findings table and per-phase sections. 
 
 All record schemas referenced by this skill live in `.claude/skills/_shared-templates/story-state-contract.md`:
 
-- `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.5) — the audit reads these record types.
+- `PG` (§4.2), `SE` (§4.3), `SLT` (§4.4), `BEL` (§4.1), prose receipt (§4.6) — the audit reads these record types.
 
 The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_source/` records). Their shapes are defined inline in this skill's Phase 5 (RSP) and Phase 6 (SAU) templates.
 
@@ -436,7 +437,7 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 | §Story Bundles §5a (Commitment Blocks Are Causal Moves) | Phase 2b, 2c | Author-pool `SLT` records validated for branch-local-dependency leaks; debt-block eligibility matching enforces commitment-blocks-as-moves. |
 | §Story Bundles §5b (Schema-Minimalism) | N/A | Audit reads records; does not draft schema-bearing records. |
 | §Story Bundles §6a (Belief vs. Fact) | Phase 2d | Belief / visibility health checks (6 finding types, including expected-witness completeness). |
-| §Story Bundles §6b (Information / Observer Firewall) | Phase 2d | Audit reports emitted choices and selected `SLT` actor-bindings that rely on unavailable actor knowledge without a valid recorded access route. |
+| §Story Bundles §6b (Information / Observer Firewall) | Phase 2d | Audit reports emitted choices and selected `SLT` actor-bindings that rely on unavailable actor knowledge without a valid recorded access route; it reads `BEL.basis.access_route` and `BEL.basis.access_records` for post-hoc route evidence. |
 | §Story Bundles §9 (Prose Length Discipline) | N/A | Audit reports no word-count metrics. |
 | Change Control Policy | N/A | Audit emits no Change Log Entries. |
 | Tooling Recommendation | Pre-flight | World canon retrieval via `mcp__worldloom__get_context_packet`. |
