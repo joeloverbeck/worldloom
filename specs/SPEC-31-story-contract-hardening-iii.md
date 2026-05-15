@@ -168,6 +168,8 @@ Without specification, an audit-only event could corrupt replay if treated as pa
 
 ### D3 — Fix `SLT.created_at_page` origin/scope rule (P1)
 
+**Implementation note (2026-05-15)**: `SPEC31STOCONHAR-003` landed this deliverable. The operational contract now uses the origin-keyed `created_at_page` rule, commitment-block-authoring validates its authoring origins, and `tools/validators` registers `slt_created_at_page_origin_consistency`. The original problem/change text below is historical intake context for D3.
+
 **Problem**: Contract `_shared-templates/story-state-contract.md:266`:
 ```yaml
 created_at_page: PG-<integer> | null        # null only for global_author_pool

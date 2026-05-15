@@ -5,6 +5,7 @@ import { modificationHistoryRetrofit } from "../structural/modification-history-
 import { recordSchemaCompliance } from "../structural/record-schema-compliance.js";
 import { recursiveReferenceClosure } from "../structural/recursive-reference-closure.js";
 import { snapshotReplayEquality } from "../structural/snapshot-replay-equality.js";
+import { sltCreatedAtPageOriginConsistency } from "../structural/slt-created-at-page-origin-consistency.js";
 import { stateSnapshotIntegrity } from "../structural/state-snapshot-integrity.js";
 import { storyFactAuthority } from "../structural/story-fact-authority.js";
 import { rule1NoFloatingFacts } from "../rules/rule1-no-floating-facts.js";
@@ -28,6 +29,7 @@ export const structuralValidators: readonly Validator[] = [
   recordSchemaCompliance,
   storyFactAuthority,
   auditOnlySeShape,
+  sltCreatedAtPageOriginConsistency,
   snapshotReplayEquality,
   recursiveReferenceClosure,
   stateSnapshotIntegrity,

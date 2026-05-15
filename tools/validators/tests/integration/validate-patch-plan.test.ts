@@ -110,6 +110,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "audit_only_se_shape"
     );
     assert.equal(auditOnlyExecution?.status, "skipped");
+    const sltCreatedAtPageExecution = result.executions.find(
+      (execution) => execution.name === "slt_created_at_page_origin_consistency"
+    );
+    assert.equal(sltCreatedAtPageExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -118,7 +122,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== snapshotReplayExecution &&
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution &&
-        row !== auditOnlyExecution
+        row !== auditOnlyExecution &&
+        row !== sltCreatedAtPageExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");

@@ -282,7 +282,7 @@ scope:
   visibility: global_author_pool | branch_prefix_scoped | branch_scoped   # *
   branch_id: BR-<integer> | null            # * null only for global_author_pool
   visible_branch_path_prefix: [PG-<integer>] # * branch_prefix_scoped only; non-empty ordered prefix of PG.branch_path
-created_at_page: PG-<integer> | null        # null only for global_author_pool
+created_at_page: PG-<integer> | null        # required for provenance.origin: runtime_jit; nullable for page-independent authoring origins
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
@@ -310,6 +310,13 @@ mystery_policy:
 provenance:
   origin: bootstrap_seed | manual_authoring | author_batch | audit_repair | runtime_jit   # *
 ```
+
+`created_at_page` is provenance for page-local creation, not branch scope. For
+`provenance.origin: runtime_jit`, it MUST name the page whose turn created the
+block. For `bootstrap_seed`, `author_batch`, `manual_authoring`, and
+`audit_repair`, it MAY be null when the block is authored outside a page turn.
+Branch legality is determined by `scope.visibility`, `scope.branch_id`, and
+`scope.visible_branch_path_prefix`, not by `created_at_page`.
 
 `move_family` values:
 
