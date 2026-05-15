@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-31-story-contract-hardening-iii.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC31STOCONHAR-009.md",
+  "last_ticket": "archive/tickets/SPEC31STOCONHAR-010.md",
   "last_result": "completed_archived",
-  "last_work_commit": "be576db",
+  "last_work_commit": "77f7dbb",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC31STOCONHAR-010.md",
+  "next_target": "tickets/SPEC31STOCONHAR-011.md",
   "queue": [
-    "tickets/SPEC31STOCONHAR-010.md",
     "tickets/SPEC31STOCONHAR-011.md",
     "tickets/SPEC31STOCONHAR-012.md",
     "tickets/SPEC31STOCONHAR-013.md",
