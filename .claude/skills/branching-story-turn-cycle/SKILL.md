@@ -222,7 +222,7 @@ Filter the bundle's `SLT` records for eligibility against the parent snapshot:
 - Resolve predicate DSL v2 existential predicates (`any_obligation_open`, `any_consequence_pending`, `any_thread_active`, `any_relationship_axis`, `any_belief`, `any_intention`) against the parent snapshot before ranking. Each satisfied existential predicate binds its `alias` to the matched active record for this selection only. The match must satisfy every supplied filter (`kind`, `urgency`, role, axis/comparator/value, belief mode, truth relation, or visibility); if multiple records match, retain all bindings for ranking and choose the concrete binding with the selected block.
 - Apply the Information / Observer Firewall before selecting the block: the proposed actor-binding and move may rely only on information available to the acting entity through active `BEL`, direct observation, accessible `DA` / `STOBJ` evidence, testimony, document access, inference, surveillance, institutional channel, magic/tech, or another recorded access route. If the block's target, precondition match, or planned beat depends on narrator-only knowledge or knowledge held only by another actor, the block is ineligible unless the plan records a valid access route for the acting entity.
 - Evaluate `record_age(<record_id | bound:<alias>>, comparator, pages)` by deriving the matched record's age from its `created_at_page` position in the parent page's `branch_path` through the evaluating page. Use it only as present causal state: pressure can mature because a record has remained open across pages, never because the story reached an act or dramatic timer.
-- `saliency.cooldown_pages` permits use.
+- Enforce `saliency.cooldown_pages`: scan prior pages in the active `PG.branch_path`, read each page's resolved `SE.commitment.selected_slt_id`, and reject an `SLT` whose last firing is within its `saliency.cooldown_pages` window of the current page. `cooldown_pages: 0` means no cooldown rejection.
 - `mystery_policy.forbidden_resolutions` does not include any mystery the resolved action would resolve.
 - `mystery_policy.allowed_authority` is compatible with `outcome_route`.
 
@@ -308,6 +308,11 @@ id: SE-<integer>
 event_kind: selected_choice | write_in_attempt | system_repair | audit_repair
 actor: STENT-<integer> | system | unknown
 targets: [<record id>]
+commitment:
+  selected_slt_id: SLT-<integer>
+  selection_source: emitted_choice | author_pool | runtime_jit | system_repair | audit_repair
+  alias_bindings:
+    <alias>: <record id>
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal
 resolution:
   result: success | partial_success | failure | impossible | transformed | held_for_promotion
@@ -323,6 +328,8 @@ promotion_claims:
 ```
 
 `resolution` follows the shared contract §4.3 route table: required for `attempt` / `accommodate` / `world_block`, absent for `accept`, and optional for `promotion_hold` / `terminal` when an explicit held-or-terminal result must be visible.
+
+`commitment` is required on every emitted event. For turn-cycle events, `selected_slt_id` names the chosen author-pool or JIT `SLT`, `selection_source` records whether the block came from the chosen `CHC`, the author pool, runtime JIT creation, system repair, or audit repair, and `alias_bindings` records the concrete record id chosen for every `bound:<alias>` used by the selected block. Do not duplicate actor or target bindings inside `commitment`; `SE.actor` and `SE.targets` remain authoritative for those bindings.
 
 Draft `PG-<integer>` per shared contract §4.2:
 

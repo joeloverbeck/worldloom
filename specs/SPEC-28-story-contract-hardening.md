@@ -47,6 +47,8 @@ Seven deliverables. D1–D3 amend `.claude/skills/_shared-templates/story-state-
 
 ### D2 — `SE.commitment`: record the selected `SLT` and its bindings (intake P0.2)
 
+**Implementation note (2026-05-15, SPEC28STOCONHAR-002).** D2 is landed. The live `story-state-contract.md` §4.3 and `tools/validators/src/schemas/story-event.schema.json` now require `SE.commitment` with `selected_slt_id`, `selection_source`, and `alias_bindings`; `branching-story-turn-cycle` Phase 2 enforces `SLT.saliency.cooldown_pages` by scanning prior `SE.commitment.selected_slt_id` along `PG.branch_path`; `branching-story-health-audit` replay and observer-firewall checks consume `SE.commitment`. Remaining D2 intake wording below is historical context for why the ticket existed.
+
 **Current state.** `branching-story-turn-cycle` selects an `SLT`, resolves its predicate-DSL aliases, binds an actor, applies effects, and writes a `PG` — but `SE` (§4.3) has no field for the selected `SLT` or the resolved binding map, and `PG` does not either. `SLT.saliency.cooldown_pages` is consequently a dead field: turn-cycle Phase 2 says it "permits use" with no enforcement, because nothing records which `SLT` fired on which page.
 
 **Change.** `story-state-contract.md` §4.3 (`SE`) gains a `commitment:` block:

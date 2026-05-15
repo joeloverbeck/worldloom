@@ -18,7 +18,10 @@ const VALID_EVENT_KINDS = [
 test("record_schema_compliance accepts every contract SE event_kind value", async () => {
   for (const eventKind of VALID_EVENT_KINDS) {
     const result = await recordSchemaCompliance.run({}, context([
-      eventRecord(validEvent({ event_kind: eventKind }))
+      eventRecord(validEvent({
+        event_kind: eventKind,
+        commitment: commitmentForEventKind(eventKind)
+      }))
     ]));
 
     assert.deepEqual(result, [], eventKind);
@@ -49,6 +52,55 @@ test("record_schema_compliance requires SE event_kind", async () => {
   assert.ok(result.some((verdict) =>
     verdict.code === "record_schema_compliance.required" &&
     verdict.message.includes("'event_kind'")
+  ));
+});
+
+test("record_schema_compliance requires SE commitment", async () => {
+  const parsed = validEvent();
+  delete parsed.commitment;
+
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(parsed)
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.required" &&
+    verdict.message.includes("'commitment'")
+  ));
+});
+
+test("record_schema_compliance accepts selected-choice SE commitment bindings", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      commitment: {
+        selected_slt_id: "SLT-0007",
+        selection_source: "author_pool",
+        alias_bindings: {
+          debt: "OBL-0001",
+          witness: "STENT-0002"
+        }
+      }
+    }))
+  ]));
+
+  assert.deepEqual(result, []);
+});
+
+test("record_schema_compliance rejects none source with selected SLT", async () => {
+  const result = await recordSchemaCompliance.run({}, context([
+    eventRecord(validEvent({
+      event_kind: "story_start",
+      commitment: {
+        selected_slt_id: "SLT-0001",
+        selection_source: "none",
+        alias_bindings: {}
+      }
+    }))
+  ]));
+
+  assert.ok(result.some((verdict) =>
+    verdict.code === "record_schema_compliance.type" &&
+    verdict.message.includes("/commitment/selected_slt_id")
   ));
 });
 
@@ -139,6 +191,13 @@ function validEvent(overrides: Record<string, unknown> = {}): Record<string, unk
     created_at_page: "PG-0001",
     parent_page_id: null,
     actor: "STENT-0001",
+    commitment: {
+      selected_slt_id: "SLT-0001",
+      selection_source: "emitted_choice",
+      alias_bindings: {
+        actor: "STENT-0001"
+      }
+    },
     outcome_route: "accept",
     world_logic_rationale: "The branch state permits this event.",
     state_delta: {
@@ -155,6 +214,30 @@ function resolution(result: string): Record<string, unknown> {
     resolution: {
       result,
       player_visible_feedback: "The player can tell how the route resolved."
+    }
+  };
+}
+
+function commitmentForEventKind(eventKind: string): Record<string, unknown> {
+  if (["story_start", "prose_attach", "promotion_closeout"].includes(eventKind)) {
+    return {
+      selected_slt_id: null,
+      selection_source: "none",
+      alias_bindings: {}
+    };
+  }
+
+  return {
+    selected_slt_id: "SLT-0001",
+    selection_source: eventKind === "system_repair"
+      ? "system_repair"
+      : eventKind === "audit_repair"
+        ? "audit_repair"
+        : eventKind === "write_in_attempt"
+          ? "runtime_jit"
+          : "emitted_choice",
+    alias_bindings: {
+      actor: "STENT-0001"
     }
   };
 }

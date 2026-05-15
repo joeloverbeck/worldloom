@@ -190,7 +190,7 @@ node tools/world-mcp/dist/src/cli/compute-pg-hashes.js \
 
 The CLI emits `{plan_hash, state_hash}` as JSON to stdout (exit 0 on success). Pass a draft PG record that contains placeholder values for both hashes (or omits them entirely); the CLI ignores the input's `state_hash` field and overwrites the input's `plan.plan_hash` in the canonical payload with the value computed from `--plan`, so a single CLI invocation yields the pair the skill stamps onto the final record. Hand-rolling the canonical-JSON serializer is a known source of drift bugs (truncated strings, locale-sensitive sort orders, accidentally-included publication-receipt blocks) and is forbidden; if the CLI does not fit a workflow, the workflow is incomplete — open a CLI-extension ticket before bypassing it.
 
-### 4.3 `SE` (~12 sub-paths)
+### 4.3 `SE` (~15 sub-paths)
 
 ```yaml
 id: SE-<integer>*
@@ -200,6 +200,11 @@ parent_page_id: PG-<integer> | null         # * null only for SE-1
 event_kind: story_start | selected_choice | write_in_attempt | system_repair | audit_repair | prose_attach | promotion_closeout   # *
 actor: STENT-<integer> | system | unknown   # *
 targets: [STENT-<integer> | STLOC-<integer> | STOBJ-<integer>]
+commitment:
+  selected_slt_id: SLT-<integer> | null   # * null iff selection_source is none
+  selection_source: emitted_choice | author_pool | runtime_jit | system_repair | audit_repair | none   # *
+  alias_bindings:
+    <alias>: <record_id>
 outcome_route: accept | accommodate | attempt | world_block | promotion_hold | terminal   # *
 resolution:
   result: success | partial_success | failure | impossible | transformed | held_for_promotion
@@ -214,7 +219,9 @@ promotion_claims:
     authority: apparent | branch_local_counterfactual | canon_candidate
 ```
 
-`world_logic_rationale` is required (no silent rejection — see §6). There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
+`world_logic_rationale` is required (no silent rejection — see §6). `commitment` records which causal move produced the event and the concrete predicate-DSL alias bindings selected for that move. `selection_source: none` and `selected_slt_id: null` are used exactly for `event_kind: story_start | prose_attach | promotion_closeout`; all other event kinds name the selected or generated `SLT`. Every `bound:<alias>` referenced by the selected block's preconditions, effects, or likely effects must appear in `alias_bindings` with the concrete record id used for this event. Actor and target binding stay in the existing `actor` and `targets` fields — do not duplicate them under `commitment`.
+
+There is no `input_surface` block on SE; the PG record's `input.resolved_event_id` is the authoritative PG-to-SE link. There is no `state_delta.no_change` list — absence from `create / supersede / close` is the no-change signal. There is no `required_action` on promotion claims — `authority == canon_candidate` implies `run_story_fact_promotion_to_canon`.
 
 `resolution` makes non-accept outcomes structurally auditable. It is required when `outcome_route` is `attempt`, `accommodate`, or `world_block`; it is absent for `accept`; it is optional for `promotion_hold` and `terminal` subject to the route consistency table below. `player_visible_feedback` is the one-sentence statement of what the player should be able to perceive about why the action resolved this way. It is consumed by page-plan §7, prose-attach, and promotion evidence review; do not add a `reason_class` field.
 

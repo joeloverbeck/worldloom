@@ -9,6 +9,7 @@
     "parent_page_id",
     "event_kind",
     "actor",
+    "commitment",
     "outcome_route",
     "world_logic_rationale",
     "state_delta"
@@ -34,6 +35,40 @@
     "targets": {
       "type": "array",
       "items": { "type": "string", "pattern": "^(STENT|STLOC|STOBJ)-[0-9]+$" }
+    },
+    "commitment": {
+      "type": "object",
+      "required": ["selected_slt_id", "selection_source", "alias_bindings"],
+      "properties": {
+        "selected_slt_id": { "type": ["string", "null"], "pattern": "^SLT-[0-9]+$" },
+        "selection_source": {
+          "type": "string",
+          "enum": ["emitted_choice", "author_pool", "runtime_jit", "system_repair", "audit_repair", "none"]
+        },
+        "alias_bindings": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_-]*$" },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^(STENT|STSTAT|STINT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STLOC|STOBJ|DA|BR|PG|CHC|SLT)-[0-9]+$"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "selection_source": { "const": "none" } },
+            "required": ["selection_source"]
+          },
+          "then": {
+            "properties": { "selected_slt_id": { "type": "null" } }
+          },
+          "else": {
+            "properties": { "selected_slt_id": { "type": "string", "pattern": "^SLT-[0-9]+$" } }
+          }
+        }
+      ]
     },
     "outcome_route": {
       "type": "string",
@@ -86,6 +121,34 @@
   },
   "additionalProperties": false,
   "allOf": [
+    {
+      "if": {
+        "properties": { "event_kind": { "enum": ["story_start", "prose_attach", "promotion_closeout"] } },
+        "required": ["event_kind"]
+      },
+      "then": {
+        "properties": {
+          "commitment": {
+            "type": "object",
+            "properties": {
+              "selected_slt_id": { "type": "null" },
+              "selection_source": { "const": "none" }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "commitment": {
+            "type": "object",
+            "properties": {
+              "selected_slt_id": { "type": "string", "pattern": "^SLT-[0-9]+$" },
+              "selection_source": { "enum": ["emitted_choice", "author_pool", "runtime_jit", "system_repair", "audit_repair"] }
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": { "outcome_route": { "const": "accept" } },
