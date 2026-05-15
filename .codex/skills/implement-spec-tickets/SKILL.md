@@ -68,12 +68,12 @@ On resume after `/new`, read this state file first, then verify every important 
 - `next_target` exists and is still active, unless the next action is final spec archival
 - queued ticket paths still exist and still belong to the originating spec family
 - `last_work_commit` is reachable from `HEAD`
-- `last_state_commit` is either `null` / `"none"` or reachable from `HEAD`
+- `last_state_commit` is either `null` / `"none"`, `"self"`, or reachable from `HEAD`
 - `git status --short` matches or safely supersedes `dirty_state`
 
 If the state file conflicts with the live repo, trust the live repo and patch the state file before continuing. If the conflict changes the next target or archival readiness, state that explicitly before invoking a child skill.
 
-`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` means the commit, if any, that exists only to persist the updated harness state file after the work commit. Do not overload one field for both meanings. If the state file is amended into the same work commit, set both fields to the same sha and record that in the handoff.
+`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha.
 
 ## Intake
 
@@ -83,12 +83,13 @@ If the state file conflicts with the live repo, trust the live repo and patch th
    - ticket/spec family state for the active run
    - existing user work that the run must not absorb silently
    - unrelated noise
-4. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
-5. Resolve the first ticket:
+4. If `.codex/run-state/implement-spec-tickets.json` already exists, read and validate it even on a normal first invocation. If it conflicts with live repo state, trust the live repo and refresh the state file before invoking child skills.
+5. If unrelated dirty paths exist and the invocation expects this harness to stage and commit all uncommitted files, stop and ask whether those paths should be included in the harness commits. Do not silently commit unrelated user work.
+6. Resolve the first ticket:
    - if `ticket_path` is supplied, resolve it to exactly one active ticket under `tickets/`
    - otherwise inspect active `tickets/*.md`, choose the first ticket in lexical order whose filename, `Deps`, problem statement, or explicit spec reference ties it to the originating spec, and state the selection
-6. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
-7. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
+7. Build the initial pending queue from active tickets that clearly belong to the same originating spec family. Keep the queue lexical and append-only; do not jump ahead of a follow-up created by the current iteration.
+8. Write or refresh `.codex/run-state/implement-spec-tickets.json` with the resolved spec, initial target, initial queue, dirty-state classification, and `blocked: false`.
 
 ## Loop
 
@@ -180,7 +181,7 @@ After each iteration work commit, update `.codex/run-state/implement-spec-ticket
 - originating spec path or archived spec path
 - last ticket processed and result
 - `last_work_commit`: the ticket iteration work commit sha, or `"none"` if no work commit was created
-- `last_state_commit`: the state-file-only commit sha when the state update is committed separately, the same sha as `last_work_commit` when amended into the work commit, or `"none"` when the state file remains intentionally uncommitted
+- `last_state_commit`: `"self"` when the state update is committed separately as a state-file-only commit, the same sha as `last_work_commit` when amended into the work commit, or `"none"` when the state file remains intentionally uncommitted
 - next target, or `"final_spec_archive"` / `"blocked"`
 - remaining queue
 - blocker summary when blocked
@@ -192,9 +193,9 @@ Normalize `dirty_state` after committing owned paths: refresh `git status --shor
 If the state file itself changes after the work commit, either:
 
 - amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
-- commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to the state-only commit.
+- commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
 
-Do not create a chain of state-only commits just to update the previous state-only commit sha. One state-only commit per iteration is enough; if exact current `HEAD` matters, use `last_state_commit`.
+Do not create a chain of state-only commits just to update the previous state-only commit sha. A commit cannot embed its own final sha without changing that sha again, so do not try to make `last_state_commit` self-referential. One state-only commit per iteration is enough; if exact current `HEAD` matters, use the handoff's `State commit` line.
 
 Then print a short handoff in the conversation that mirrors the state file:
 
