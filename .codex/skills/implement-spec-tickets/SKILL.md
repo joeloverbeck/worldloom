@@ -146,6 +146,18 @@ $post-ticket-review <completed-ticket>
 
 Use the live `post-ticket-review` skill exactly. The child skill owns closeout truthing, archival, dependency/path repairs, and follow-up ticket creation.
 
+After the review phase, print a compact visible review result:
+
+```text
+Post-ticket review:
+- Target ticket: <ticket path or archived path>
+- Archival status: <archived | already archived | blocked>
+- Closeout truthing: <validated unchanged | factually corrected | blocked>
+- Reference sweep: <paths repaired or "no stale active-path refs found">
+- Follow-ups: <created/updated ticket paths or "none">
+- Verification: <rerun proof command/result or why rerun was not needed>
+```
+
 If `post-ticket-review` blocks archival because same-seam work remains, put the active ticket back at the front of the queue and continue through `implement-ticket` unless the review says a user decision is required. Do not archive a blocked ticket.
 
 ### 4. Audit Post-Ticket Review When It Changes Handoff Surfaces
@@ -172,6 +184,8 @@ Before committing:
 4. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 5. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening.
 
+When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
+
 If nothing changed after an iteration, do not create an empty commit. Record that there was no commit for that iteration and why.
 
 ### 6. Persist State And Prepare Context Reset
@@ -188,7 +202,7 @@ After each iteration work commit, update `.codex/run-state/implement-spec-ticket
 - dirty-state classification
 - `updated_at`
 
-Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. Classify them as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
+Normalize `dirty_state` after committing owned paths: refresh `git status --short` and record only remaining uncommitted paths. When package/tool commands ran, or prior state already names ignored artifacts, also refresh package-scoped ignored-aware status such as `git status --short --ignored <affected-package-dirs>` before writing `dirty_state`. Classify remaining paths as `unrelated dirty`, `expected ignored artifacts`, or `blocked owned leftovers`. Do not leave stale phrases such as `owned ticket-family edits` after those owned edits have already been committed. If blocked owned leftovers remain, set `next_target: "blocked"` and describe the blocker.
 
 If the state file itself changes after the work commit, either:
 
