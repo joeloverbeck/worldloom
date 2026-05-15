@@ -138,6 +138,7 @@ state_snapshot:
     - mystery_id: M-<integer>
       authority: apparent | branch_local_counterfactual | canon_candidate
       status: preserved | clue_added | narrowed | apparent_resolution | held_for_promotion
+      evidence_records: [SF-<integer> | BEL-<integer> | DA-<integer> | SE-<integer>]  # defaults to []; MUST be non-empty for clue_added, narrowed, apparent_resolution, or held_for_promotion; every id MUST resolve to a story-local record in this bundle
   continuation:                        # *
     has_eligible_commitment_block: true | false
     terminal_status: open | branch_pause | terminal_closed

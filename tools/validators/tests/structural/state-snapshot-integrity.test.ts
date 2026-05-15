@@ -112,6 +112,102 @@ test("state_snapshot_integrity accepts active_records BEL references", async () 
   assert.deepEqual(verdicts, []);
 });
 
+test("state_snapshot_integrity requires evidence_records for narrowing mystery claims", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "narrowed",
+          evidence_records: []
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const required = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.mystery_evidence_required");
+  assert.ok(required);
+  assert.deepEqual(required.detail, {
+    page_id: "PG-0002",
+    mystery_id: "M-0001",
+    status: "narrowed",
+    field: "state_snapshot.unresolved_mystery_claims[0].evidence_records"
+  });
+});
+
+test("state_snapshot_integrity allows preserved mystery claims without evidence_records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "preserved",
+          evidence_records: []
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity resolves story-local mystery evidence records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "clue_added",
+          evidence_records: ["SF-0001", "BEL-0001", "DA-0001", "SE-0001"]
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  assert.deepEqual(verdicts, []);
+});
+
+test("state_snapshot_integrity rejects missing story-local mystery evidence records", async () => {
+  const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({
+    pageSnapshot: {
+      ...completeStateSnapshot(),
+      unresolved_mystery_claims: [
+        {
+          mystery_id: "M-0001",
+          authority: "apparent",
+          status: "clue_added",
+          evidence_records: ["SF-9999"]
+        }
+      ]
+    }
+  }), {
+    run_mode: "pre-apply",
+    patch_plan: patchPlan()
+  }));
+
+  const dangling = verdicts.find((verdict) => verdict.code === "state_snapshot_integrity.dangling_reference");
+  assert.ok(dangling);
+  assert.deepEqual(dangling.detail, {
+    reference_id: "SF-9999",
+    reference_path: "state_snapshot.unresolved_mystery_claims[0].evidence_records[0]"
+  });
+});
+
 test("state_snapshot_integrity fails when required fields are missing", async () => {
   const { current_location: _currentLocation, entity_status: _entityStatus, ...snapshot } = completeStateSnapshot();
   const verdicts = await stateSnapshotIntegrity.run(undefined, context(records({ pageSnapshot: snapshot }), {
@@ -223,6 +319,16 @@ function records(options: {
         created_at_page: "PG-0001"
       })
     ]),
+    storyRecord("belief_record", "BEL-0001", "beliefs", {
+      id: "BEL-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
+    storyRecord("story_diegetic_artifact_record", "DA-0001", "artifacts", {
+      id: "DA-0001",
+      story_id: "STORY-001",
+      created_at_page: "PG-0001"
+    }),
     storyRecord("story_location_record", "STLOC-0001", "locations", {
       id: "STLOC-0001",
       story_id: "STORY-001",

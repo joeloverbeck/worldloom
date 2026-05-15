@@ -4,17 +4,17 @@
 **Priority**: HIGH
 **Effort**: Medium
 **Engine Changes**: Yes — `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2 sub-check + `tools/world-mcp/src/context-packet/story-bundle-context.ts` (+ `shared.ts` type extension if needed)
-**Deps**: SPEC30STOCONHAR-005
+**Deps**: archive/tickets/SPEC30STOCONHAR-005.md
 
 ## Problem
 
-With `evidence_records[]` landed on `unresolved_mystery_claims[]` (SPEC30STOCONHAR-005), the §Mystery Accretion rule at `docs/FOUNDATIONS.md:616` becomes deterministically auditable. This ticket lands the two consumers: (a) `branching-story-health-audit` Phase 2 Mystery-Accretion sub-check walking the branch page chain and flagging `mystery_accretion_overflow` when the cumulative evidence count or status escalation exceeds the M-record's policy, and (b) `tools/world-mcp/src/context-packet/story-bundle-context.ts` surfacing per-mystery `evidence_records` cross-references in story-bundle context-packet assembly so retrieval consumers see the accretion chain alongside the mystery claim.
+With `evidence_records[]` landed on `unresolved_mystery_claims[]` (`archive/tickets/SPEC30STOCONHAR-005.md`), the §Mystery Accretion rule at `docs/FOUNDATIONS.md:616` becomes deterministically auditable. This ticket lands the two consumers: (a) `branching-story-health-audit` Phase 2 Mystery-Accretion sub-check walking the branch page chain and flagging `mystery_accretion_overflow` when the cumulative evidence count or status escalation exceeds the M-record's policy, and (b) `tools/world-mcp/src/context-packet/story-bundle-context.ts` surfacing per-mystery `evidence_records` cross-references in story-bundle context-packet assembly so retrieval consumers see the accretion chain alongside the mystery claim.
 
 ## Assumption Reassessment (2026-05-15)
 
 1. Verified `branching-story-health-audit/SKILL.md` has a Phase 2 with multiple sub-checks (2a Replay events, 2b Branch isolation, 2c Debt health, 2d Belief/visibility, 2e Mystery/canon safety, 2f Continuation/terminal proof, 2g Causal dependency, 2h Canon baseline drift). Mystery-Accretion is a natural extension of Phase 2e (Mystery / canon safety per FOUNDATIONS Rule 7 + shared contract §11).
 2. Verified `tools/world-mcp/src/context-packet/story-bundle-context.ts` (371 lines) assembles story-bundle context summaries from indexed story records. It does not currently reference `unresolved_mystery_claims` or `evidence_records`; this ticket adds the new surface. The existing test file is `tools/world-mcp/tests/context-packet/story-bundle-context.test.ts`.
-3. Cross-skill / cross-artifact boundary under audit: this ticket's two surfaces (audit + MCP) consume the new `evidence_records` field landed by ticket 005. Without 005's contract+schema+validator changes, both consumers have nothing to read; `Deps: SPEC30STOCONHAR-005` is explicit.
+3. Cross-skill / cross-artifact boundary under audit: this ticket's two surfaces (audit + MCP) consume the new `evidence_records` field landed by ticket 005. Without 005's contract+schema+validator changes, both consumers have nothing to read; `Deps: archive/tickets/SPEC30STOCONHAR-005.md` is explicit.
 4. FOUNDATIONS principle under audit: Rule 7 (Preserve Mystery Deliberately) — the audit's `mystery_accretion_overflow` finding is the operationalization of FOUNDATIONS:616. The audit surface must NOT auto-resolve an M record; it must only flag cumulative-narrowing patterns. Severity is `error` for forbidden-resolution patterns and `warning` for soft accretion overflow per the M-record's policy.
 5. HARD-GATE / Mystery Reserve firewall verification: this ticket adds a health-audit-only finding; the audit never mutates story state per skill contract. The Mystery Reserve firewall semantics are unchanged.
 6. Schema extension classification: NOT a CF / Change Log / proposal-card / dossier / artifact schema extension; this is consumer-side reading of the `evidence_records` field landed in 005. The MCP context-packet surface may extend its TypeScript type (`ContextPacketStoryBundleContext` or sibling) to include per-mystery cross-references; the existing schema for the context packet is internal to `tools/world-mcp/`.

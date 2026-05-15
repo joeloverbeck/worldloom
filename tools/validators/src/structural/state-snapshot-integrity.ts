@@ -8,6 +8,13 @@ import {
 } from "./utils.js";
 
 const STORY_LOCAL_ID = /^(?:STENT|SF|BEL|SE|OBL|CNSQ|THR|SREL|STINT|STLOC|STOBJ|DA|STSTAT|SLT|CHC|BR|PG)-\d+$/;
+const MYSTERY_EVIDENCE_ID = /^(?:SF|BEL|DA|SE)-\d+$/;
+const MYSTERY_EVIDENCE_REQUIRED_STATUSES = new Set([
+  "clue_added",
+  "narrowed",
+  "apparent_resolution",
+  "held_for_promotion"
+]);
 
 const ARRAY_FIELDS = [
   "objective_facts",
@@ -58,6 +65,7 @@ export const stateSnapshotIntegrity: Validator = {
       if (inputLegalityViolation !== undefined) {
         verdicts.push(inputLegalityViolation);
       }
+      verdicts.push(...validateMysteryEvidence(page, snapshot, pageLabel, maps));
 
       if (Object.keys(activeRecords).length > 0) {
         for (const [recordClass, ids] of Object.entries(activeRecords)) {
@@ -208,11 +216,47 @@ function collectStoryLocalReferences(value: unknown, path: string, references: S
   }
 
   for (const [key, nested] of Object.entries(value)) {
+    if (key === "evidence_records" && path.includes("unresolved_mystery_claims")) {
+      continue;
+    }
     if (STORY_LOCAL_ID.test(key)) {
       references.push({ id: key, path: `${path}.${key}` });
     }
     collectStoryLocalReferences(nested, `${path}.${key}`, references);
   }
+}
+
+function validateMysteryEvidence(
+  page: IndexedRecord,
+  snapshot: Record<string, unknown>,
+  pageLabel: string,
+  maps: RecordMaps
+): Verdict[] {
+  const verdicts: Verdict[] = [];
+  const claims = Array.isArray(snapshot.unresolved_mystery_claims) ? snapshot.unresolved_mystery_claims : [];
+  claims.forEach((claimValue, claimIndex) => {
+    const claim = asPlainRecord(claimValue);
+    const status = stringValue(claim.status);
+    const evidenceRecords = Array.isArray(claim.evidence_records)
+      ? claim.evidence_records.filter((id): id is string => typeof id === "string")
+      : [];
+    const path = `state_snapshot.unresolved_mystery_claims[${claimIndex}].evidence_records`;
+
+    if (status !== undefined && MYSTERY_EVIDENCE_REQUIRED_STATUSES.has(status) && evidenceRecords.length === 0) {
+      verdicts.push(mysteryEvidenceRequired(page, pageLabel, claim, status, path));
+    }
+
+    evidenceRecords.forEach((id, evidenceIndex) => {
+      if (!MYSTERY_EVIDENCE_ID.test(id) || maps.byId.has(id)) {
+        return;
+      }
+      verdicts.push(danglingReference(page, pageLabel, {
+        id,
+        path: `${path}[${evidenceIndex}]`
+      }));
+    });
+  });
+  return verdicts;
 }
 
 function missingOrMalformed(page: IndexedRecord, pageLabel: string, field: string, reason: string): Verdict {
@@ -264,6 +308,29 @@ function inputLegalityViolation(
       manual_action_text: manualActionText ?? null
     },
     suggested_fix: "Follow shared story state contract §4.2 input legality: story_start pages use both-null input fields; all other pages use exactly one source action."
+  };
+}
+
+function mysteryEvidenceRequired(
+  page: IndexedRecord,
+  pageLabel: string,
+  claim: Record<string, unknown>,
+  status: string,
+  field: string
+): Verdict {
+  return {
+    validator: "state_snapshot_integrity",
+    severity: "fail",
+    code: "state_snapshot_integrity.mystery_evidence_required",
+    message: `${pageLabel} unresolved_mystery_claims entry for ${stringValue(claim.mystery_id) ?? "<unknown mystery>"} has status ${status} but no evidence_records`,
+    location: locationFor(page),
+    detail: {
+      page_id: pageLabel,
+      mystery_id: stringValue(claim.mystery_id) ?? null,
+      status,
+      field
+    },
+    suggested_fix: "Populate evidence_records with the story-local SF/BEL/DA/SE ids that caused this mystery claim to narrow, or use status: preserved when no evidence was added."
   };
 }
 

@@ -28,6 +28,13 @@ export interface StateDelta {
   close?: readonly string[];
 }
 
+export interface MysteryClaimProjection {
+  mystery_id: string;
+  authority: string;
+  status: string;
+  evidence_records: string[];
+}
+
 export function activeRecordsClassOf(id: string): ActiveRecordsClass | null {
   const match = id.match(/^([A-Z]+)-[0-9]+$/);
   if (match === null) {
@@ -69,6 +76,87 @@ export function replayActiveRecords(
   }
 
   return next;
+}
+
+export function projectUnresolvedMysteryClaims(value: unknown): MysteryClaimProjection[] {
+  return unknownArray(value)
+    .map(plainRecord)
+    .map((claim): MysteryClaimProjection | null => {
+      const mysteryId = stringValue(claim.mystery_id);
+      const authority = stringValue(claim.authority);
+      const status = stringValue(claim.status);
+      if (mysteryId === undefined || authority === undefined || status === undefined) {
+        return null;
+      }
+      return {
+        mystery_id: mysteryId,
+        authority,
+        status,
+        evidence_records: stringArray(claim.evidence_records)
+      };
+    })
+    .filter((claim): claim is MysteryClaimProjection => claim !== null)
+    .sort(compareMysteryClaims);
+}
+
+export function replayUnresolvedMysteryClaims(
+  parentClaims: unknown,
+  childClaims: unknown,
+  eventEvidenceRecords: readonly string[]
+): { projected: MysteryClaimProjection[]; drifts: Array<{ field: string; expected: unknown; got: unknown }> } {
+  const parent = projectUnresolvedMysteryClaims(parentClaims);
+  const child = projectUnresolvedMysteryClaims(childClaims);
+  const allowedAdditions = new Set(eventEvidenceRecords);
+  const drifts: Array<{ field: string; expected: unknown; got: unknown }> = [];
+
+  for (const parentClaim of parent) {
+    const childClaim = child.find((candidate) => candidate.mystery_id === parentClaim.mystery_id);
+    if (childClaim === undefined) {
+      drifts.push({
+        field: `unresolved_mystery_claims.${parentClaim.mystery_id}`,
+        expected: parentClaim,
+        got: null
+      });
+      continue;
+    }
+
+    const missingParentEvidence = parentClaim.evidence_records.filter((id) => !childClaim.evidence_records.includes(id));
+    if (missingParentEvidence.length > 0) {
+      drifts.push({
+        field: `unresolved_mystery_claims.${parentClaim.mystery_id}.evidence_records`,
+        expected: parentClaim.evidence_records,
+        got: childClaim.evidence_records
+      });
+    }
+
+    const parentEvidence = new Set(parentClaim.evidence_records);
+    const hasEventAddition = childClaim.evidence_records.some((id) => !parentEvidence.has(id) && allowedAdditions.has(id));
+    if (!hasEventAddition && (childClaim.authority !== parentClaim.authority || childClaim.status !== parentClaim.status)) {
+      drifts.push({
+        field: `unresolved_mystery_claims.${parentClaim.mystery_id}.status`,
+        expected: { authority: parentClaim.authority, status: parentClaim.status },
+        got: { authority: childClaim.authority, status: childClaim.status }
+      });
+    }
+  }
+
+  for (const childClaim of child) {
+    const parentClaim = parent.find((candidate) => candidate.mystery_id === childClaim.mystery_id);
+    const parentEvidence = new Set(parentClaim?.evidence_records ?? []);
+    const unauthorizedEvidence = childClaim.evidence_records.filter((id) => !parentEvidence.has(id) && !allowedAdditions.has(id));
+    if (unauthorizedEvidence.length > 0) {
+      drifts.push({
+        field: `unresolved_mystery_claims.${childClaim.mystery_id}.evidence_records`,
+        expected: {
+          inherited: parentClaim?.evidence_records ?? [],
+          event_evidence_records: [...allowedAdditions].sort()
+        },
+        got: childClaim.evidence_records
+      });
+    }
+  }
+
+  return { projected: child, drifts };
 }
 
 export class SnapshotReplayError extends Error {
@@ -399,4 +487,14 @@ function unique(values: readonly string[]): string[] {
 
 function cloneRecord<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function unknownArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function compareMysteryClaims(left: MysteryClaimProjection, right: MysteryClaimProjection): number {
+  return left.mystery_id.localeCompare(right.mystery_id) ||
+    left.authority.localeCompare(right.authority) ||
+    left.status.localeCompare(right.status);
 }

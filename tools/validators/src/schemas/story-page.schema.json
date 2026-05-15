@@ -72,7 +72,12 @@
             "properties": {
               "mystery_id": { "type": "string", "pattern": "^M-[0-9]+$" },
               "authority": { "type": "string", "enum": ["apparent", "branch_local_counterfactual", "canon_candidate"] },
-              "status": { "type": "string", "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"] }
+              "status": { "type": "string", "enum": ["preserved", "clue_added", "narrowed", "apparent_resolution", "held_for_promotion"] },
+              "evidence_records": {
+                "type": "array",
+                "default": [],
+                "items": { "type": "string", "pattern": "^(SF|BEL|DA|SE)-[0-9]+$" }
+              }
             },
             "additionalProperties": false
           }
