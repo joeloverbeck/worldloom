@@ -25,6 +25,8 @@
 
 > **Implementation note (2026-05-15)**: D10 landed via `archive/tickets/SPEC30STOCONHAR-009.md`. Shared contract §4.5.7 and `story-relationship.schema.json` now require structured `SREL.direction: { kind, from, to }`, with conditional endpoint legality; `recursive_reference_closure` now proves closure over `direction.from` / `direction.to`; bootstrap and turn-cycle skill prose show the structured authored form. The D10 world-index and MCP rendering bullets remain future follow-up material because the live repo has no SREL edge extraction or context-packet SREL rendering surface to update.
 
+> **Implementation note (2026-05-15)**: D8 landed via `archive/tickets/SPEC30STOCONHAR-010.md`. `branching-story-turn-cycle` now requires Motivation Grounding in `SE.world_logic_rationale` for non-system character actions, citing active STINT, actor-held BEL, actor-involving OBL/CNSQ/THR/SREL, or immediate physical affordance; Phase 9 now has 9 turn-cycle-additional checks. `branching-story-health-audit` Phase 2d now reports `motivation_ungrounded` as a warning-only audit signal. No schema, validator, patch-plan, approval-token, or canon-mutation surface changed; remaining D8 prose below is historical specification context unless contradicted by this note.
+
 ---
 
 ## Problem Statement
