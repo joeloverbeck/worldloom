@@ -61,7 +61,7 @@ Implementer must read the full file and apply at both occurrences — the line n
 - The `get_firewall_content` MCP tool implementation — already exists and is unchanged.
 - Phase 3 check 3 logic — already correctly performs conditional retrieval; not modified.
 - The shared `_shared-templates/persisted-packet-recovery.md` template — created by SPEC33STOPIPSEV-006 (this ticket's dependency); not modified here.
-- Other prose-attach SKILL.md sections (Phase 3 check 8 promotion-claims, Phase 6 write order) — covered by SPEC33STOPIPSEV-002 (D2) and SPEC33STOPIPSEV-003 (D3). Same-file co-location: this ticket's two edit sites (line 114, ~line 326) are independent of D2's line 213 and D3's Phase 6 block.
+- Other prose-attach SKILL.md sections (Phase 3 check 8 promotion-claims, Phase 6 write order) — covered by archive/tickets/SPEC33STOPIPSEV-002.md (D2) and SPEC33STOPIPSEV-003 (D3). Same-file co-location: this ticket's two edit sites (line 114, ~line 326) are independent of D2's line 213 and D3's Phase 6 block.
 
 ## Acceptance Criteria
 

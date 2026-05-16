@@ -210,7 +210,7 @@ Run the 8 deterministic checks defined in shared contract §4.6, each producing 
 
    Decorative inventions (a minor object name, a weather detail, an unmentioned NPC's name) are `WARN`. The roll-up `invented_structural_fact` receipt field records the worst verdict across both sub-categories. Judgment-assisted findings are flagged in `notes` so the user can review and decide on `revise_prose` vs. `run_turn_cycle_repair` vs. canon-promotion.
 
-8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `PG.SE.promotion_claims[]` evidence is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
+8. **`canon_claim_without_authority`** (`PASS | FAIL`) — scan prose for assertions that would make a world-level canon claim absent from plan §4. Examples: asserting a historical date that plan §4 does not list; stating a metaphysical rule (e.g., "magic is fundamentally entropic") that plan §4 does not include; declaring a faction's secret identity that plan §4 leaves to Mystery Reserve. Any such assertion without corresponding `SE.promotion_claims[]` evidence on the resolving event (loaded via `PG.input.resolved_event_id`) is `FAIL` and routes to `repair_recommendation: run_story_fact_promotion_to_canon`.
 
 ## Phase 4: Optional craft critic
 

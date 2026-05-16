@@ -56,7 +56,7 @@ In `.claude/skills/branching-story-prose-attach/SKILL.md` Phase 6 (Commit / Writ
 
 ## Out of Scope
 
-- Other prose-attach SKILL.md sections (Phase 3 check 8 promotion-claims path, FOUNDATIONS Alignment row, retrieval wording) — covered by SPEC33STOPIPSEV-002 (D2) and SPEC33STOPIPSEV-008 (D8).
+- Other prose-attach SKILL.md sections (Phase 3 check 8 promotion-claims path, FOUNDATIONS Alignment row, retrieval wording) — covered by archive/tickets/SPEC33STOPIPSEV-002.md (D2) and SPEC33STOPIPSEV-008 (D8).
 - Shared write order §10 itself — already canonical; this ticket only updates the skill to conform.
 - `event_kind: prose_attach` classification at §4.3a — unchanged; audit-only relaxes replay semantics, not write order.
 - Patch-engine `create_se_record` op — already implemented; no engine changes required.
