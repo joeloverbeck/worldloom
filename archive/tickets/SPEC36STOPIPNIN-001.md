@@ -1,6 +1,6 @@
 # SPEC36STOPIPNIN-001: Replace archive citation in validators README
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: LOW
 **Effort**: Small
 **Engine Changes**: None
@@ -8,11 +8,11 @@
 
 ## Problem
 
-`tools/validators/README.md:5` cites `**Design**: ../../archive/specs/SPEC-04-validator-framework.md` without a historical caveat. The ninth-iteration audit (`reports/story-related-improvements-ninth-iteration.md` §WL-N9-P2-004) flags that current docs citing archive paths as design authority can resurrect stale specs in reader memory. SPEC-35 D9 set the precedent for archive-citation cleanup with the historical-note marker convention; this ticket extends the same discipline to the validators README.
+At intake, `tools/validators/README.md:5` cited `**Design**: ../../archive/specs/SPEC-04-validator-framework.md` without a historical caveat. The ninth-iteration audit (`reports/story-related-improvements-ninth-iteration.md` §WL-N9-P2-004) flagged that current docs citing archive paths as design authority can resurrect stale specs in reader memory. SPEC-35 D9 set the precedent for archive-citation cleanup with the historical-note marker convention; this ticket extends the same discipline to the validators README.
 
 ## Assumption Reassessment (2026-05-16)
 
-1. `tools/validators/README.md:5` currently reads `**Design**: \`../../archive/specs/SPEC-04-validator-framework.md\`` with no historical caveat — verified by direct read of the file's first 20 lines. The archived spec at `archive/specs/SPEC-04-validator-framework.md` is a completed historical record, not the current design authority.
+1. At intake, `tools/validators/README.md:5` read `**Design**: \`../../archive/specs/SPEC-04-validator-framework.md\`` with no historical caveat — verified by direct read of the file's first 20 lines. The archived spec at `archive/specs/SPEC-04-validator-framework.md` is a completed historical record, not the current design authority.
 2. `specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md` §D4 specifies the exact replacement text (`**Current authority**:` + 4 named current docs + a `Historical note:` paragraph). The SPEC-35 D9 precedent (`archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` §D9) used the `(historical reference — superseded by <current authority>)` marker convention for the same problem in `docs/FOUNDATIONS.md`; this ticket adapts the convention for a README file by promoting it to a paragraph-level `Historical note:` instead of an inline parenthetical.
 3. Cross-artifact boundary under audit: the validators README is the docs-side surface that orients readers to current authority for the validators package; the archived SPEC-04 is the historical-record-side surface that documents what was implemented. The fix preserves both by retaining the archive path under an explicit historical caveat while routing readers to current authorities.
 4. FOUNDATIONS principle: §Read Discipline (current-source-over-archived) — the canonical authority for current behavior lives at `docs/FOUNDATIONS.md` + `.claude/skills/_shared-templates/story-state-contract.md` + `docs/MACHINE-FACING-LAYER.md` + current validator source under `tools/validators/src/`, not at archived spec files. The README must orient readers to those current sources.
@@ -30,9 +30,9 @@
 
 ## What to Change
 
-### 1. Replace the archive-citation line in `tools/validators/README.md`
+### 1. Replaced the archive-citation line in `tools/validators/README.md`
 
-Replace line 5 (the `**Design**:` line) with the exact replacement block specified in SPEC-36 §D4:
+Replaced line 5 (the `**Design**:` line) with the exact replacement block specified in SPEC-36 §D4:
 
 - Remove: `**Design**: \`../../archive/specs/SPEC-04-validator-framework.md\``
 - Insert (replacement block):
@@ -42,7 +42,7 @@ Replace line 5 (the `**Design**:` line) with the exact replacement block specifi
 
 Preserve the surrounding `**Phase**:` and `**Status**:` lines unchanged.
 
-## Files to Touch
+## Files Touched
 
 - `tools/validators/README.md` (modify)
 
@@ -76,3 +76,20 @@ Preserve the surrounding `**Phase**:` and `**Status**:` lines unchanged.
 1. `grep -n 'archive/specs/' tools/validators/README.md` — confirm any remaining archive references carry the historical caveat.
 2. `grep -A2 'Current authority' tools/validators/README.md` — confirm the replacement block is present and lists the four current authorities.
 3. Narrower verification suffices because the change is one paragraph in one docs file; no build / test pipeline depends on README content.
+
+## Outcome
+
+Completed: 2026-05-16
+
+`tools/validators/README.md` now opens with a `**Current authority**:` block naming `docs/FOUNDATIONS.md`, `.claude/skills/_shared-templates/story-state-contract.md`, `docs/MACHINE-FACING-LAYER.md`, and `tools/validators/src/`. The archived SPEC-04 path remains only in a paragraph-level historical note that says it is archived prior art and not current design authority.
+
+## Verification Result
+
+1. `grep -n 'archive/specs/' tools/validators/README.md` — passed; the only remaining hit is the historical-note line with "archived prior art only" and "not current design authority".
+2. `grep -A2 'Current authority' tools/validators/README.md` — passed; the replacement block lists the four current authorities and the historical note.
+3. `test -f docs/FOUNDATIONS.md && test -f .claude/skills/_shared-templates/story-state-contract.md && test -f docs/MACHINE-FACING-LAYER.md && test -d tools/validators/src` — passed.
+4. `git diff --check -- tools/validators/README.md archive/tickets/SPEC36STOPIPNIN-001.md .codex/run-state/implement-spec-tickets.json` — passed after archival path repair.
+
+## Deviations
+
+None. This remained a one-file documentation authority correction plus ticket/harness closeout.
