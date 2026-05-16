@@ -88,6 +88,7 @@ const RECORD_SCHEMA_BY_PAYLOAD_KEY = {
   story_status_record: "story-status.schema.json",
   story_fact_record: "story-fact.schema.json",
   story_event_record: "story-event.schema.json",
+  belief_record: "story-belief.schema.json",
   story_obligation_record: "story-obligation.schema.json",
   story_consequence_record: "story-consequence.schema.json",
   story_thread_record: "story-thread.schema.json",
@@ -423,7 +424,7 @@ function operationSchema(kind: OperationKind): JsonObject {
     case "create_slt_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("storylet_record"));
     case "create_bel_record":
-      return baseOperationProperties(kind, storyPayloadWithGenericRecord("^BEL-[0-9]+$"));
+      return baseOperationProperties(kind, storyPayloadWithRecord("belief_record"));
     case "append_story_diegetic_artifact_record":
       return baseOperationProperties(kind, storyPayloadWithRecord("story_diegetic_artifact_record"));
   }
