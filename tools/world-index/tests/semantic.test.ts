@@ -100,6 +100,45 @@ test("semantic extraction emits typed YAML edges and attribution edges without d
   assert.deepEqual(parseIssues.map((issue) => issue.code).sort(), ["malformed_attribution_target"]);
 });
 
+test("semantic extraction emits a firewall_for edge for every CF in a multi-target firewall list", () => {
+  const filePath = "/tmp/worlds/animalia/_source/mystery-reserve/M-1.yaml";
+  const body = `id: M-1
+title: Test mystery
+firewall:
+  - CF-1
+  - CF-2
+  - CF-3
+`;
+  const { tree, lines } = parseMarkdown("");
+
+  const yamlNodes: NodeRow[] = [
+    {
+      node_id: "M-1",
+      world_slug: "animalia",
+      file_path: filePath,
+      heading_path: "M-1",
+      byte_start: 0,
+      byte_end: 0,
+      line_start: 1,
+      line_end: 6,
+      node_type: "mystery_reserve_entry",
+      body,
+      content_hash: contentHashForProse(body),
+      anchor_checksum: contentHashForProse(body),
+      summary: null,
+      created_at_index_version: CURRENT_INDEX_VERSION
+    }
+  ];
+
+  const { edges } = extractSemanticEdges(tree, lines, filePath, "animalia", yamlNodes, []);
+
+  const firewallTargets = edges
+    .filter((edge) => edge.edge_type === "firewall_for" && edge.source_node_id === "M-1")
+    .map((edge) => edge.target_unresolved_ref ?? edge.target_node_id)
+    .sort();
+  assert.deepEqual(firewallTargets, ["CF-1", "CF-2", "CF-3"]);
+});
+
 test("semantic extraction preserves YAML-derived edges for recovery-parsed Canon Fact records", () => {
   const source = `## Canon Fact Records
 

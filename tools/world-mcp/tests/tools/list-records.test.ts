@@ -380,7 +380,51 @@ test("listRecords rejects unknown atomic projection fields for non-empty record 
     assert.equal(result.code, "invalid_input");
     assert.equal(result.details?.field, "fields");
     assert.deepEqual(result.details?.unknown_projection_keys, ["nonexistent_field"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, [
+      "break_conditions",
+      "category",
+      "examples",
+      "extensions",
+      "id",
+      "non_examples",
+      "rationale",
+      "record_id",
+      "record_kind",
+      "revision_difficulty",
+      "statement",
+      "title"
+    ]);
     assert.equal(result.details?.record_type, "invariant_record");
+  } finally {
+    destroyTempRepoRoot(root);
+  }
+});
+
+test("listRecords returns empty accepted projection keys for empty atomic result sets", async () => {
+  const root = createTempRepoRoot();
+
+  try {
+    buildSeededRecordWorld(root);
+
+    const result = await withRepoRoot(root, () =>
+      listRecords({
+        world_slug: "seeded",
+        record_type: "open_question_record",
+        filters: { id: "OQ-99999" },
+        fields: ["question_summary"]
+      })
+    );
+
+    assert.ok("code" in result);
+    assert.equal(result.code, "invalid_input");
+    assert.equal(result.details?.field, "fields");
+    assert.deepEqual(result.details?.unknown_projection_keys, ["question_summary"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, []);
+    assert.match(
+      String(result.details?.note),
+      /Empty result set: accepted projection keys cannot be derived/
+    );
+    assert.equal(result.details?.record_type, "open_question_record");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -677,6 +721,13 @@ test("listRecords rejects unknown hybrid projection fields against metadata wrap
     assert.equal(result.code, "invalid_input");
     assert.equal(result.details?.field, "fields");
     assert.deepEqual(result.details?.unknown_projection_keys, ["frontmatter.character_id"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, [
+      "content_hash",
+      "file_path",
+      "record_id",
+      "record_kind",
+      "title"
+    ]);
     assert.equal(result.details?.record_type, "character_record");
   } finally {
     destroyTempRepoRoot(root);
@@ -700,6 +751,13 @@ test("listRecords rejects partially invalid hybrid projection fields", async () 
     assert.ok("code" in result);
     assert.equal(result.code, "invalid_input");
     assert.deepEqual(result.details?.unknown_projection_keys, ["frontmatter.slug"]);
+    assert.deepEqual(result.details?.accepted_projection_keys, [
+      "content_hash",
+      "file_path",
+      "record_id",
+      "record_kind",
+      "title"
+    ]);
   } finally {
     destroyTempRepoRoot(root);
   }

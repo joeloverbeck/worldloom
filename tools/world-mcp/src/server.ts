@@ -360,7 +360,7 @@ export function createServer(): McpServer {
   );
   registerToolWithCapability(
     "list_records",
-    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Fields are validated against response-shape top-level keys and unknown fields return invalid_input; include_full_body returns full bodies and ignores fields. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
+    "list_records: Return indexed records of a supported atomic, hybrid, or story-bundle record type, with optional server-side filters by parsed body field path, field projection, or include_full_body metadata/body records. Filters accept scalar exact matches or array any-of matches, including dotted paths such as {shape: ['routine_disruption', 'reflection_dilemma'], content_intensity: ['mature', 'tame'], 'visibility.scope': 'global_author_pool'}. Fields are validated against response-shape top-level keys and unknown fields return invalid_input with accepted_projection_keys; include_full_body returns full bodies and ignores fields. Story-bundle record types require story_slug; bundle-scoped IDs are unique within (world_slug, story_slug).",
     listRecordsInputSchema,
     async (args) => listRecords(args as unknown as Parameters<typeof listRecords>[0]),
     { record_type: SUPPORTED_LIST_RECORD_TYPES }

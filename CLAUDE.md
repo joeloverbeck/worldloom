@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repo Is
 
-Worldloom is a **prose-and-YAML worldbuilding pipeline**, not a software project. There is no build, lint, or test runner — the "code" is the skills in `.claude/skills/` and the content they produce under `worlds/<world-slug>/`. Every workflow runs through Claude Code skills; invoke them via the `Skill` tool (or `/<slug>` slash command). Output is files on disk — read them to verify.
+Worldloom is a **prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer**. The pipeline is the skills in `.claude/skills/` (invoked via the `Skill` tool or `/<slug>` slash command); the machine layer lives under `tools/<package>/`, each shipping its own `npm run build` / `npm test`. Skill output is files on disk — read them to verify.
 
 ## Authoritative Source of Truth
 

@@ -2,10 +2,11 @@
 
 ## What This Repo Is
 
-Worldloom is a prose-and-YAML worldbuilding pipeline, not a conventional software project. There is no build, lint, or test runner. The important artifacts are:
+Worldloom is a prose-and-YAML worldbuilding pipeline backed by a TypeScript tools layer under `tools/` (each package ships its own `npm run build` / `npm test`). The important artifacts are:
 
 - repository workflow definitions under `.claude/skills/`
 - durable project rules under `docs/`
+- machine-facing tools under `tools/` (world-index, world-mcp, patch-engine, validators, hooks)
 - generated world content under `worlds/<world-slug>/`
 
 `briefs/` and `worlds/` content is user-local and gitignored; the repo mainly versions the pipeline and its contracts.
