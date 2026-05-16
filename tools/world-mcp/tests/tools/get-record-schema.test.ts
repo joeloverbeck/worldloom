@@ -177,7 +177,7 @@ test("getRecordSchema returns story-bundle schemas from validator sources", asyn
     string,
     { enum?: string[]; pattern?: string; properties?: Record<string, unknown> }
   >;
-  assert.equal(storyletProperties.id?.pattern, "^SLT-[0-9]+$");
+  assert.equal(storyletProperties.id?.pattern, "^SLT-(0|[1-9][0-9]*)$");
   assert.ok(storyletProperties.move_family?.enum?.includes("investigation"));
   assert.ok(storyletProperties.exit_options);
   assert.equal(storylet.source_path, "tools/validators/src/schemas/story-storylet.schema.json");

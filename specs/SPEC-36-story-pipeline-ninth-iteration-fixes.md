@@ -232,7 +232,9 @@ Deliverables grouped by severity (P1 → P2). Each is self-contained and can lan
 
 2. **Drop the report's "build metadata recency" sub-item**. The auditor's Amendment E mentions checking that "build metadata/ref is present and recent enough for deployment check". "Recent enough" cannot be operationalized in CI without a deployment-stamp comparison that goes beyond source-level testing. Source-level tests confirm the surface; runtime parity remains a tenth-iteration carry-over (see §Risks & Open Questions).
 
-3. **No changes to `tools/world-mcp/src/server.ts` or `tools/world-mcp/src/tools/`**. The new test consumes existing exports; no production-code changes.
+3. **No handler/tool implementation changes intended**. The new test consumes existing exports. Reassessment may truth small same-seam capability-metadata ordering drift if the parity test exposes it; `tools/world-mcp/src/tools/` remains out of scope.
+
+**Implementation note (2026-05-17 / SPEC36STOPIPNIN-003)**: D5 landed `tools/world-mcp/tests/server/capability-parity.test.ts` with source-level parity checks for `describe_capabilities`, `describe_envelope_schema`, and the validators registry. Reassessment corrected the drafted uniform `payload.properties.record.$ref` assertion to the live operation-specific payload schema shape, fixed a real `describe_capabilities` ordering drift in `tools/world-mcp/src/server.ts` by ordering the capability list via `MCP_TOOL_ORDER`, and truthed the `get_record_schema` storylet regex expectation in `tools/world-mcp/tests/tools/get-record-schema.test.ts` to SPEC-36 D3's unpadded id contract.
 
 **FOUNDATIONS alignment**: §Machine-Facing Layer (capability and schema-discovery currency — source-level parity is a prerequisite for any runtime parity check).
 
