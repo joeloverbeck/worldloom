@@ -26,7 +26,7 @@ Multiple skills cite ticket IDs (PEENH-007, PEENH-008, MCPENH-040, MCPENH-041, V
 3. **Specs/docs cross-reference**: SPEC-33 §D9 names the canonical fix (archived-ticket links per option a); the 5 archived ticket paths exist for every cited ID, so options (b) and (c) are not needed.
 4. **Cross-skill boundary**: the shared boundary under audit is the integration-debt note convention across the 4 consuming skills. Each skill's "Known integration debt" block (typically a short bulleted list naming MCPENH-* / PEENH-* / VALENH-* IDs as "Now landed") must be converted to link each ID to its archived ticket path.
 5. **FOUNDATIONS principle restatement**: §Canonical Storage Layer (audit-trail discipline — claims must link to verification artifacts). Today's prose grounds each claim in "verified at `tools/X`" — a real codebase path — but the auditor wants archived-ticket links because the codebase path could be renamed/refactored while the archived ticket remains a stable historical record.
-6. **Same-file co-location with 004 and 005**: this ticket touches `story-promotion-closeout/SKILL.md` at line 297 (inline PEENH-007 citation in Phase 5 op list prose) and lines 370-374 (Known integration debt block). Per SPEC33STOPIPSEV-005's Out of Scope note, **005 must land first** because 005's Phase 5 op list change adds `create_ststat_record` to the op enumeration at line 297; this ticket's line 297 edit (replace "PEENH-007 inheritance — now landed" with "per archive/tickets/PEENH-007-...md") then applies to the modified line. Verified ordering captured in Test Plan command sequencing.
+6. **Same-file co-location with 004 and 005**: this ticket touches `story-promotion-closeout/SKILL.md` at line 297 (inline PEENH-007 citation in Phase 5 op list prose) and lines 370-374 (Known integration debt block). Per `archive/tickets/SPEC33STOPIPSEV-005.md`'s Out of Scope note, **005 must land first** because 005's Phase 5 op list change adds `create_ststat_record` to the op enumeration at line 297; this ticket's line 297 edit (replace "PEENH-007 inheritance — now landed" with "per archive/tickets/PEENH-007-...md") then applies to the modified line. Verified ordering captured in Test Plan command sequencing.
 
 ## Architecture Check
 
@@ -70,7 +70,7 @@ In `.claude/skills/story-fact-promotion-to-canon/SKILL.md` lines 382-385, apply 
 
 Two distinct edit shapes in closeout:
 
-**(a) Line 297 inline citation in Phase 5 op list prose** (post-SPEC33STOPIPSEV-005 line numbering may differ; locate by content):
+**(a) Line 297 inline citation in Phase 5 op list prose** (post-`archive/tickets/SPEC33STOPIPSEV-005.md` line numbering may differ; locate by content):
 
 Replace the inline phrase:
 ```
@@ -105,7 +105,7 @@ Confirm every remaining match is immediately followed by `per archive/tickets/<f
 - The 5 archived ticket files (`archive/tickets/MCPENH-040-*.md`, `MCPENH-041-*.md`, `PEENH-007-*.md`, `PEENH-008-*.md`, `VALENH-011-*.md`) — already exist; not modified.
 - The 3 consuming skills with zero "now landed" claims (`bootstrap`, `turn-cycle`, `prose-attach`) — not modified.
 - Runtime `describe_capabilities` checks (option c in SPEC-33 §D9 — heavier discipline) — deferred per SPEC-33's key design decision; archived-ticket links are sufficient under current trust conditions.
-- Other closeout SKILL.md changes (proposal-package paths, STSTAT propagation) — proposal-package paths are covered by archive/tickets/SPEC33STOPIPSEV-004.md (D4), and STSTAT propagation is covered by SPEC33STOPIPSEV-005 (D5). Same-file co-location: this ticket's line 297 edit must land AFTER 005's Phase 5 op list expansion.
+- Other closeout SKILL.md changes (proposal-package paths, STSTAT propagation) — proposal-package paths are covered by archive/tickets/SPEC33STOPIPSEV-004.md (D4), and STSTAT propagation is covered by `archive/tickets/SPEC33STOPIPSEV-005.md` (D5). Same-file co-location: this ticket's line 297 edit must land AFTER 005's Phase 5 op list expansion.
 
 ## Acceptance Criteria
 

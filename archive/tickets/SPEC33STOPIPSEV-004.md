@@ -85,7 +85,7 @@ Every `source_records` / `branch_path` / proposal-package `source_kind` match is
 ## Out of Scope
 
 - The proposal-package YAML schema itself at `story-fact-promotion-to-canon/SKILL.md` Phase 6 — already canonical and authoritative; not modified.
-- Other closeout SKILL.md changes (STSTAT propagation, "now landed" provenance) — covered by SPEC33STOPIPSEV-005 (D5) and SPEC33STOPIPSEV-009 (D9). Same-file co-location requires landing-order awareness with 005 (which touches Phase 5 op list line 297 region) and 009 (which touches line 297 inline PEENH-007 citation).
+- Other closeout SKILL.md changes (STSTAT propagation, "now landed" provenance) — covered by `archive/tickets/SPEC33STOPIPSEV-005.md` (D5) and SPEC33STOPIPSEV-009 (D9). Same-file co-location requires landing-order awareness with 005 (which touches Phase 5 op list line 297 region) and 009 (which touches line 297 inline PEENH-007 citation).
 - Patch-engine ops — no engine changes required.
 
 ## Acceptance Criteria

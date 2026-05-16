@@ -224,6 +224,8 @@ Closeout would fail to find `source_records[]` at the top level and silently mar
 
 The patch engine already implements `create_ststat_record` (verified at `tools/patch-engine/src/envelope/schema.ts:76` in `OPERATION_KINDS`, and the dispatch in `tools/patch-engine/src/ops/create-story-record.ts`). The gap is purely skill-prose propagation.
 
+**Implementation note (2026-05-16, archive/tickets/SPEC33STOPIPSEV-005.md)**: landed in `.claude/skills/story-promotion-closeout/SKILL.md`. Closeout now lists STSTAT in World-State Prerequisites, adds the character-outcome STSTAT supersession condition, includes `STSTAT-<integer>` in the closeout ledger disposition template, and enumerates `create_ststat_record` in Phase 5 when a source STSTAT in `proposal_evidence.source_records[]` needs amended-schema supersession. The patch-engine implementation remained unchanged.
+
 **Change**:
 
 1. **World-State Prerequisites** (add STSTAT to the schema-list line):
