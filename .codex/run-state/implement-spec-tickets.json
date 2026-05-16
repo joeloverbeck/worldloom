@@ -1,13 +1,12 @@
 {
   "originating_spec": "specs/SPEC-33-story-pipeline-seventh-iteration-fixes.md",
   "archived_spec": null,
-  "last_ticket": "archive/tickets/SPEC33STOPIPSEV-003.md",
+  "last_ticket": "archive/tickets/SPEC33STOPIPSEV-004.md",
   "last_result": "completed_archived",
-  "last_work_commit": "518916b",
+  "last_work_commit": "fbd5942",
   "last_state_commit": "self",
-  "next_target": "tickets/SPEC33STOPIPSEV-004.md",
+  "next_target": "tickets/SPEC33STOPIPSEV-005.md",
   "queue": [
-    "tickets/SPEC33STOPIPSEV-004.md",
     "tickets/SPEC33STOPIPSEV-005.md",
     "tickets/SPEC33STOPIPSEV-006.md",
     "tickets/SPEC33STOPIPSEV-007.md",
