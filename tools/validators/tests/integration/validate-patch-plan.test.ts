@@ -130,6 +130,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "validation_trace_shape_compliance"
     );
     assert.equal(validationTraceExecution?.status, "skipped");
+    const branchIsolationExecution = result.executions.find(
+      (execution) => execution.name === "branch_isolation"
+    );
+    assert.equal(branchIsolationExecution?.status, "skipped");
 
     for (const execution of result.executions.filter(
       (row) =>
@@ -143,7 +147,8 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== canonDriftEvidenceExecution &&
         row !== expectedWitnessExecution &&
         row !== proposalPackageExecution &&
-        row !== validationTraceExecution
+        row !== validationTraceExecution &&
+        row !== branchIsolationExecution
     )) {
       assert.equal(execution.status, "pass");
       assert.equal(typeof execution.name, "string");
