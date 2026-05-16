@@ -31,7 +31,7 @@ test("world-validate --story scopes storylet predicate validation to one bundle"
   assert.equal(unscoped.status, 1, unscoped.stderr + unscoped.stdout);
   const unscopedRun = JSON.parse(unscoped.stdout) as { verdicts: Array<{ code: string; message: string }> };
   assert.equal(unscopedRun.verdicts[0]?.code, "predicate.unknown_pred");
-  assert.match(unscopedRun.verdicts[0]?.message ?? "", /SLT-0002/);
+  assert.match(unscopedRun.verdicts[0]?.message ?? "", /SLT-2/);
 });
 
 function createIndexedStoryWorld(): string {
@@ -66,8 +66,8 @@ function createIndexedStoryWorld(): string {
   const insert = db.prepare(
     "INSERT INTO nodes (node_id, world_slug, story_slug, file_path, node_type, body) VALUES (?, 'clean', ?, ?, ?, ?)"
   );
-  insertStoryRecords(insert, "alpha", "SLT-0001", { pred: "entity_status", entity: "STENT-0001", field: "agency", value: "free" });
-  insertStoryRecords(insert, "beta", "SLT-0002", { pred: "phase_of_moon", value: "waning" });
+  insertStoryRecords(insert, "alpha", "SLT-1", { pred: "entity_status", entity: "STENT-1", field: "agency", value: "free" });
+  insertStoryRecords(insert, "beta", "SLT-2", { pred: "phase_of_moon", value: "waning" });
   db.close();
 
   writeFileSync(path.join(world, ".keep"), "", "utf8");
@@ -82,7 +82,7 @@ function insertStoryRecords(
 ): void {
   const basePath = `stories/${storySlug}/_source`;
   for (const [nodeType, id, subdir, parsed] of [
-    ["story_entity_record", "STENT-0001", "entities", { id: "STENT-0001" }],
+    ["story_entity_record", "STENT-1", "entities", { id: "STENT-1" }],
     ["storylet_record", storyletId, "storylets", { id: storyletId, preconditions: { hard: [predicate] } }]
   ] as const) {
     insert.run(`${storySlug}:${id}`, storySlug, `${basePath}/${subdir}/${id}.yaml`, nodeType, yaml.dump(parsed));

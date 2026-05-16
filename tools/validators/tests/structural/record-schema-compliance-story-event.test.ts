@@ -4,7 +4,7 @@ import test from "node:test";
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record } from "./helpers.js";
 
-const FILE_PATH = "stories/test-story/_source/events/SE-0001.yaml";
+const FILE_PATH = "stories/test-story/_source/events/SE-1.yaml";
 const VALID_EVENT_KINDS = [
   "story_start",
   "selected_choice",
@@ -73,11 +73,11 @@ test("record_schema_compliance accepts selected-choice SE commitment bindings", 
   const result = await recordSchemaCompliance.run({}, context([
     eventRecord(validEvent({
       commitment: {
-        selected_slt_id: "SLT-0007",
+        selected_slt_id: "SLT-7",
         selection_source: "author_pool",
         alias_bindings: {
-          debt: "OBL-0001",
-          witness: "STENT-0002"
+          debt: "OBL-1",
+          witness: "STENT-2"
         }
       }
     }))
@@ -91,7 +91,7 @@ test("record_schema_compliance rejects none source with selected SLT", async () 
     eventRecord(validEvent({
       event_kind: "story_start",
       commitment: {
-        selected_slt_id: "SLT-0001",
+        selected_slt_id: "SLT-1",
         selection_source: "none",
         alias_bindings: {}
       }
@@ -177,7 +177,7 @@ test("record_schema_compliance accepts conformant SE resolution shape for every 
 });
 
 test("record_schema_compliance accepts STSTAT and SREL promotion claim source records", async () => {
-  for (const sourceRecord of ["STSTAT-0003", "SREL-0002"]) {
+  for (const sourceRecord of ["STSTAT-3", "SREL-2"]) {
     const result = await recordSchemaCompliance.run({}, context([
       eventRecord(validEvent({
         promotion_claims: [
@@ -195,24 +195,24 @@ test("record_schema_compliance accepts STSTAT and SREL promotion claim source re
 
 function eventRecord(parsed: Record<string, unknown>) {
   return {
-    ...record("story_event_record", "test-story:SE-0001", FILE_PATH, parsed),
+    ...record("story_event_record", "test-story:SE-1", FILE_PATH, parsed),
     story_slug: "test-story"
   };
 }
 
 function validEvent(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    id: "SE-0001",
-    story_id: "STORY-001",
+    id: "SE-1",
+    story_id: "STORY-1",
     event_kind: "selected_choice",
-    created_at_page: "PG-0001",
+    created_at_page: "PG-1",
     parent_page_id: null,
-    actor: "STENT-0001",
+    actor: "STENT-1",
     commitment: {
-      selected_slt_id: "SLT-0001",
+      selected_slt_id: "SLT-1",
       selection_source: "emitted_choice",
       alias_bindings: {
-        actor: "STENT-0001"
+        actor: "STENT-1"
       }
     },
     outcome_route: "accept",
@@ -245,7 +245,7 @@ function commitmentForEventKind(eventKind: string): Record<string, unknown> {
   }
 
   return {
-    selected_slt_id: "SLT-0001",
+    selected_slt_id: "SLT-1",
     selection_source: eventKind === "system_repair"
       ? "system_repair"
       : eventKind === "audit_repair"
@@ -254,7 +254,7 @@ function commitmentForEventKind(eventKind: string): Record<string, unknown> {
           ? "runtime_jit"
           : "emitted_choice",
     alias_bindings: {
-      actor: "STENT-0001"
+      actor: "STENT-1"
     }
   };
 }

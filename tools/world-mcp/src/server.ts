@@ -77,6 +77,13 @@ function isMcpError(result: unknown): result is McpError {
   );
 }
 
+function orderCapabilitiesByToolOrder(capabilities: readonly ToolCapability[]): ToolCapability[] {
+  const byName = new Map(capabilities.map((capability) => [capability.name, capability]));
+  return MCP_TOOL_ORDER.map((name) => byName.get(name)).filter(
+    (capability): capability is ToolCapability => capability !== undefined
+  );
+}
+
 const searchNodesInputSchema = z.object({
   query: z.string().min(1),
   filters: z
@@ -468,7 +475,7 @@ export function createServer(): McpServer {
     describeEnvelopeCapability.input_schema_enums
   );
 
-  const describedTools = [...registeredCapabilities, describeCapability];
+  const describedTools = orderCapabilitiesByToolOrder([...registeredCapabilities, describeCapability]);
   const buildInfo = createBuildInfo(describedTools);
   registerWrappedTool(
     server,

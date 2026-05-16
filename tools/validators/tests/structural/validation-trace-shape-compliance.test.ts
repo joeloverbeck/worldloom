@@ -18,7 +18,7 @@ const VALIDATION_TRACE = {
 test("validation_trace_shape_compliance accepts the flat eight-gate mapping", async () => {
   const verdicts = await validationTraceShapeCompliance.run(
     undefined,
-    context([pageRecord("PG-0001", VALIDATION_TRACE)])
+    context([pageRecord("PG-1", VALIDATION_TRACE)])
   );
 
   assert.deepEqual(verdicts, []);
@@ -28,7 +28,7 @@ test("validation_trace_shape_compliance rejects a gates array", async () => {
   const verdicts = await validationTraceShapeCompliance.run(
     undefined,
     context([
-      pageRecord("PG-0001", {
+      pageRecord("PG-1", {
         gates: Object.entries(VALIDATION_TRACE).map(([gate, result]) => ({ gate, result }))
       })
     ])
@@ -42,7 +42,7 @@ test("validation_trace_shape_compliance rejects extraneous keys", async () => {
   const verdicts = await validationTraceShapeCompliance.run(
     undefined,
     context([
-      pageRecord("PG-0001", {
+      pageRecord("PG-1", {
         ...VALIDATION_TRACE,
         gates: []
       })
@@ -57,7 +57,7 @@ test("validation_trace_shape_compliance rejects missing gate keys", async () => 
 
   const verdicts = await validationTraceShapeCompliance.run(
     undefined,
-    context([pageRecord("PG-0001", incompleteTrace)])
+    context([pageRecord("PG-1", incompleteTrace)])
   );
 
   assert.ok(verdicts.some((verdict) => JSON.stringify(verdict.detail).includes("plan_grounding")));
@@ -78,8 +78,8 @@ function pageRecord(id: string, validationTrace: unknown) {
   return {
     ...record("page_record", `test-story:${id}`, `stories/test-story/_source/pages/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
-      branch_id: "BR-0001",
+      story_id: "STORY-1",
+      branch_id: "BR-1",
       parent_page_id: null,
       validation_trace: validationTrace
     }),
@@ -95,6 +95,6 @@ function patchPlan(op: "create_pg_record" | "create_se_record") {
     verdict: "story_audit",
     originating_skill: "test",
     expected_id_allocations: {},
-    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-0001" } } }]
+    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-1" } } }]
   };
 }

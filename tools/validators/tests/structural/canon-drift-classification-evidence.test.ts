@@ -8,10 +8,10 @@ test("canon_drift_classification_evidence warns when compatible drift lacks CH-w
   const verdicts = await canonDriftClassificationEvidence.run(
     undefined,
     context([
-      change("CH-0001"),
-      change("CH-0002"),
-      change("CH-0003"),
-      page("PG-0002", {
+      change("CH-1"),
+      change("CH-2"),
+      change("CH-3"),
+      page("PG-2", {
         parent_snapshot_compatibility: "PASS: compatible with current canon; no relevant changes."
       })
     ])
@@ -26,12 +26,12 @@ test("canon_drift_classification_evidence accepts compatible drift with CH-windo
   const verdicts = await canonDriftClassificationEvidence.run(
     undefined,
     context([
-      change("CH-0001"),
-      change("CH-0002"),
-      change("CH-0003"),
-      page("PG-0002", {
+      change("CH-1"),
+      change("CH-2"),
+      change("CH-3"),
+      page("PG-2", {
         parent_snapshot_compatibility:
-          "PASS: compatible after reviewing CH-0002 and CH-0003; affected facts do not touch active state."
+          "PASS: compatible after reviewing CH-2 and CH-3; affected facts do not touch active state."
       })
     ])
   );
@@ -43,11 +43,11 @@ test("canon_drift_classification_evidence accepts event-rationale CH-window cita
   const verdicts = await canonDriftClassificationEvidence.run(
     undefined,
     context([
-      change("CH-0001"),
-      change("CH-0002"),
-      change("CH-0003"),
-      event("SE-0002", "Drift classified compatible after CH-0002 review."),
-      page("PG-0002", {
+      change("CH-1"),
+      change("CH-2"),
+      change("CH-3"),
+      event("SE-2", "Drift classified compatible after CH-2 review."),
+      page("PG-2", {
         parent_snapshot_compatibility: "PASS: compatible with current canon."
       })
     ])
@@ -60,9 +60,9 @@ test("canon_drift_classification_evidence ignores one-CH drift windows", async (
   const verdicts = await canonDriftClassificationEvidence.run(
     undefined,
     context([
-      change("CH-0001"),
-      change("CH-0002"),
-      page("PG-0002", {
+      change("CH-1"),
+      change("CH-2"),
+      page("PG-2", {
         parent_snapshot_compatibility: "PASS: compatible with current canon."
       })
     ])
@@ -79,7 +79,7 @@ test("canon_drift_classification_evidence is pre-apply scoped to create_pg_recor
 function change(id: string) {
   return record("change_log_entry", id, `_source/change-log/${id}.yaml`, {
     change_id: id,
-    affected_fact_ids: ["CF-0001"]
+    affected_fact_ids: ["CF-1"]
   });
 }
 
@@ -97,8 +97,8 @@ function page(id: string, validationTrace: Record<string, string>) {
   return {
     ...record("page_record", `test-story:${id}`, `stories/test-story/_source/pages/${id}.yaml`, {
       id,
-      input: { resolved_event_id: "SE-0002" },
-      state_snapshot: { canon_revision: "CH-0001" },
+      input: { resolved_event_id: "SE-2" },
+      state_snapshot: { canon_revision: "CH-1" },
       validation_trace: validationTrace
     }),
     story_slug: "test-story"
@@ -113,6 +113,6 @@ function patchPlan(op: "create_pg_record" | "create_se_record") {
     verdict: "story_turn",
     originating_skill: "test",
     expected_id_allocations: {},
-    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-0002" } } }]
+    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "PG-2" } } }]
   };
 }

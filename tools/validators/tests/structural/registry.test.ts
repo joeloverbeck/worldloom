@@ -16,6 +16,8 @@ test("structural registry omits the retired adjudication Discovery validator", (
       "branch_isolation",
       "observer_firewall",
       "audit_only_se_shape",
+      "causal_dependency_threat_scan",
+      "expected_witness_coverage",
       "slt_created_at_page_origin_consistency",
       "canon_baseline_drift",
       "canon_drift_classification_evidence",

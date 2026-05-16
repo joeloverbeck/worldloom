@@ -14,10 +14,10 @@
     "grounded_in"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^CHC-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
-    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
-    "supersedes": { "type": ["string", "null"], "pattern": "^CHC-[0-9]+$" },
+    "id": { "type": "string", "pattern": "^CHC-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^CHC-(0|[1-9][0-9]*)$" },
     "surface_label": { "type": "string", "minLength": 1 },
     "player_visible_intent": { "type": "string", "minLength": 1 },
     "target_or_action_families": {
@@ -52,7 +52,7 @@
     "likely_state_pressure": { "type": "string", "minLength": 1 },
     "associated_commitment_block": {
       "type": ["string", "null"],
-      "pattern": "^SLT-[0-9]+$"
+      "pattern": "^SLT-(0|[1-9][0-9]*)$"
     },
     "grounded_in": {
       "type": "object",
@@ -63,7 +63,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(STENT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA)-[0-9]+$"
+            "pattern": "^(STENT|STLOC|STOBJ|BEL|OBL|CNSQ|THR|SREL|DA)-(0|[1-9][0-9]*)$"
           }
         },
         "affordance_ordinals": {

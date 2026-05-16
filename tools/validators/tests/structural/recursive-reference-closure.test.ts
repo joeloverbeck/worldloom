@@ -5,11 +5,11 @@ import { recursiveReferenceClosure } from "../../src/structural/recursive-refere
 import { context, record } from "./helpers.js";
 
 const stateSnapshot = {
-  objective_facts: ["SF-0002"],
-  obligations_open: ["OBL-0001"],
-  current_location: "STLOC-0001",
+  objective_facts: ["SF-2"],
+  obligations_open: ["OBL-1"],
+  current_location: "STLOC-1",
   inventory_by_entity: {
-    "STENT-0001": ["STOBJ-0001"]
+    "STENT-1": ["STOBJ-1"]
   }
 };
 
@@ -27,15 +27,15 @@ test("recursive_reference_closure accepts BEL records in active_records", async 
     pageOverrides: {
       state_snapshot: {
         active_records: {
-          BEL: ["BEL-0001"]
+          BEL: ["BEL-1"]
         }
       }
     },
     extra: [
-      storyRecord("belief_record", "BEL-0001", "beliefs", {
-        id: "BEL-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0001"
+      storyRecord("belief_record", "BEL-1", "beliefs", {
+        id: "BEL-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1"
       })
     ]
   }), {
@@ -49,14 +49,14 @@ test("recursive_reference_closure accepts BEL records in active_records", async 
 test("recursive_reference_closure fails for sibling-branch leakage at nested depth", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     factOverrides: {
-      evidence: [{ event_id: "SE-0009" }]
+      evidence: [{ event_id: "SE-9" }]
     },
     extra: [
-      storyRecord("story_event_record", "SE-0009", "events", {
-        id: "SE-0009",
-        story_id: "STORY-001",
+      storyRecord("story_event_record", "SE-9", "events", {
+        id: "SE-9",
+        story_id: "STORY-1",
         event_kind: "selected_choice",
-        created_at_page: "PG-0099",
+        created_at_page: "PG-99",
         ops: []
       })
     ]
@@ -68,23 +68,23 @@ test("recursive_reference_closure fails for sibling-branch leakage at nested dep
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SE-0009",
+    reference_id: "SE-9",
     reference_path: "state_snapshot.obligations_open[0].dependent_facts[0].evidence[0].event_id",
-    referenced_file: "stories/test-story/_source/events/SE-0009.yaml",
-    referenced_node_id: "test-story:SE-0009",
-    created_at_page: "PG-0099"
+    referenced_file: "stories/test-story/_source/events/SE-9.yaml",
+    referenced_node_id: "test-story:SE-9",
+    created_at_page: "PG-99"
   });
 });
 
 test("recursive_reference_closure allows global author-pool storylets", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0001"] }
+      coverage_cache: { compatible_storylets: ["SLT-1"] }
     },
     extra: [
-      storyRecord("storylet_record", "SLT-0001", "storylets", {
-        id: "SLT-0001",
-        story_id: "STORY-001",
+      storyRecord("storylet_record", "SLT-1", "storylets", {
+        id: "SLT-1",
+        story_id: "STORY-1",
         scope: { visibility: "global_author_pool", branch_id: null },
         created_at_page: null,
         provenance: { origin: "bootstrap_seed" }
@@ -101,10 +101,10 @@ test("recursive_reference_closure allows global author-pool storylets", async ()
 test("recursive_reference_closure allows null-created branch-prefix-scoped storylets with a canonical prefix", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0002"] }
+      coverage_cache: { compatible_storylets: ["SLT-2"] }
     },
     extra: [
-      branchPrefixStorylet("SLT-0002", ["PG-0001"])
+      branchPrefixStorylet("SLT-2", ["PG-1"])
     ]
   }), {
     run_mode: "pre-apply",
@@ -117,10 +117,10 @@ test("recursive_reference_closure allows null-created branch-prefix-scoped story
 test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with sibling prefixes", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0002"] }
+      coverage_cache: { compatible_storylets: ["SLT-2"] }
     },
     extra: [
-      branchPrefixStorylet("SLT-0002", ["PG-0099"])
+      branchPrefixStorylet("SLT-2", ["PG-99"])
     ]
   }), {
     run_mode: "pre-apply",
@@ -130,19 +130,19 @@ test("recursive_reference_closure rejects null-created branch-prefix-scoped stor
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SLT-0002",
+    reference_id: "SLT-2",
     reference_path: "state_snapshot.obligations_open[0].coverage_cache.compatible_storylets[0]",
-    referenced_file: "stories/test-story/_source/storylets/SLT-0002.yaml",
-    referenced_node_id: "test-story:SLT-0002",
+    referenced_file: "stories/test-story/_source/storylets/SLT-2.yaml",
+    referenced_node_id: "test-story:SLT-2",
     created_at_page: null
   });
 });
 
 test("recursive_reference_closure rejects null-created branch-prefix-scoped storylets with malformed prefixes", async () => {
-  const malformedValues: unknown[] = [undefined, [], ["PG-0002"], ["PG-0001", "bad"]];
+  const malformedValues: unknown[] = [undefined, [], ["PG-2"], ["PG-1", "bad"]];
 
   for (const [index, visible_branch_path_prefix] of malformedValues.entries()) {
-    const storyletId = `SLT-001${index}`;
+    const storyletId = `SLT-1${index}`;
     const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
       obligationOverrides: {
         coverage_cache: { compatible_storylets: [storyletId] }
@@ -165,13 +165,13 @@ test("recursive_reference_closure rejects null-created branch-prefix-scoped stor
 test("recursive_reference_closure rejects branch-scoped storylets with null created_at_page", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      coverage_cache: { compatible_storylets: ["SLT-0003"] }
+      coverage_cache: { compatible_storylets: ["SLT-3"] }
     },
     extra: [
-      storyRecord("storylet_record", "SLT-0003", "storylets", {
-        id: "SLT-0003",
-        story_id: "STORY-001",
-        scope: { visibility: "branch_scoped", branch_id: "BR-0001" },
+      storyRecord("storylet_record", "SLT-3", "storylets", {
+        id: "SLT-3",
+        story_id: "STORY-1",
+        scope: { visibility: "branch_scoped", branch_id: "BR-1" },
         created_at_page: null,
         provenance: { origin: "runtime_jit" }
       })
@@ -187,13 +187,13 @@ test("recursive_reference_closure rejects branch-scoped storylets with null crea
 test("recursive_reference_closure passes for same-branch PG references", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      reviewed_at_page: "PG-0002"
+      reviewed_at_page: "PG-2"
     },
     extra: [
-      storyRecord("page_record", "PG-0001", "pages", {
-        id: "PG-0001",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001"],
+      storyRecord("page_record", "PG-1", "pages", {
+        id: "PG-1",
+        story_id: "STORY-1",
+        branch_path: ["PG-1"],
         state_snapshot: {}
       })
     ]
@@ -208,13 +208,13 @@ test("recursive_reference_closure passes for same-branch PG references", async (
 test("recursive_reference_closure fails for sibling-branch PG references", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     obligationOverrides: {
-      reviewed_at_page: "PG-0099"
+      reviewed_at_page: "PG-99"
     },
     extra: [
-      storyRecord("page_record", "PG-0099", "pages", {
-        id: "PG-0099",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001", "PG-0099"],
+      storyRecord("page_record", "PG-99", "pages", {
+        id: "PG-99",
+        story_id: "STORY-1",
+        branch_path: ["PG-1", "PG-99"],
         state_snapshot: {}
       })
     ]
@@ -226,13 +226,13 @@ test("recursive_reference_closure fails for sibling-branch PG references", async
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "PG-0099",
+    reference_id: "PG-99",
     reference_path: "state_snapshot.obligations_open[0].reviewed_at_page",
-    referenced_file: "stories/test-story/_source/pages/PG-0099.yaml",
-    referenced_node_id: "test-story:PG-0099",
-    created_at_page: "PG-0099"
+    referenced_file: "stories/test-story/_source/pages/PG-99.yaml",
+    referenced_node_id: "test-story:PG-99",
+    created_at_page: "PG-99"
   });
-  assert.equal(leak.suggested_fix, "Replace PG-0099 with a page in this branch's branch_path.");
+  assert.equal(leak.suggested_fix, "Replace PG-99 with a page in this branch's branch_path.");
 });
 
 test("recursive_reference_closure passes for PG references with no created_at_page field", async () => {
@@ -240,21 +240,21 @@ test("recursive_reference_closure passes for PG references with no created_at_pa
     pageOverrides: {
       state_snapshot: {
         ...stateSnapshot,
-        relationships_current: ["SREL-0001"]
+        relationships_current: ["SREL-1"]
       }
     },
     extra: [
-      storyRecord("page_record", "PG-0001", "pages", {
-        id: "PG-0001",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001"],
+      storyRecord("page_record", "PG-1", "pages", {
+        id: "PG-1",
+        story_id: "STORY-1",
+        branch_path: ["PG-1"],
         state_snapshot: {}
       }),
-      storyRecord("relationship_record_story", "SREL-0001", "relationships", {
-        id: "SREL-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
-        last_meaningful_interaction: "PG-0001"
+      storyRecord("relationship_record_story", "SREL-1", "relationships", {
+        id: "SREL-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
+        last_meaningful_interaction: "PG-1"
       })
     ]
   }), {
@@ -269,11 +269,11 @@ test("recursive_reference_closure ignores world-level artifact ids", async () =>
   const verdicts = await recursiveReferenceClosure.run(undefined, context([
     ...records({
       factOverrides: {
-        evidence: [{ artifact_id: "DA-0001" }]
+        evidence: [{ artifact_id: "DA-1" }]
       }
     }),
-    record("diegetic_artifact_record", "DA-0001", "diegetic-artifacts/DA-0001.md", {
-      id: "DA-0001",
+    record("diegetic_artifact_record", "DA-1", "diegetic-artifacts/DA-1.md", {
+      id: "DA-1",
       title: "World artifact"
     })
   ], {
@@ -295,7 +295,7 @@ test("recursive_reference_closure fails for missing referenced records", async (
   }));
 
   assert.ok(verdicts.some((verdict) => verdict.code === "recursive_reference_closure.missing_record"));
-  assert.equal(verdicts[0]?.message, "PG-0002 reaches missing story-local record SF-9999 via state_snapshot.obligations_open[0].dependent_facts[0]");
+  assert.equal(verdicts[0]?.message, "PG-2 reaches missing story-local record SF-9999 via state_snapshot.obligations_open[0].dependent_facts[0]");
 });
 
 test("recursive_reference_closure skips envelopes without PG creates", () => {
@@ -309,15 +309,15 @@ test("recursive_reference_closure fails for sibling input.choice_id page peers",
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
       input: {
-        choice_id: "CHC-0099",
-        resolved_event_id: "SE-0002"
+        choice_id: "CHC-99",
+        resolved_event_id: "SE-2"
       }
     },
     extra: [
-      storyRecord("choice_record", "CHC-0099", "choices", {
-        id: "CHC-0099",
-        story_id: "STORY-001",
-        created_at_page: "PG-0099"
+      storyRecord("choice_record", "CHC-99", "choices", {
+        id: "CHC-99",
+        story_id: "STORY-1",
+        created_at_page: "PG-99"
       })
     ]
   }), {
@@ -328,25 +328,25 @@ test("recursive_reference_closure fails for sibling input.choice_id page peers",
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "CHC-0099",
+    reference_id: "CHC-99",
     reference_path: "input.choice_id",
-    referenced_file: "stories/test-story/_source/choices/CHC-0099.yaml",
-    referenced_node_id: "test-story:CHC-0099",
-    created_at_page: "PG-0099"
+    referenced_file: "stories/test-story/_source/choices/CHC-99.yaml",
+    referenced_node_id: "test-story:CHC-99",
+    created_at_page: "PG-99"
   });
 });
 
 test("recursive_reference_closure fails for sibling applied_event_ops page peers", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      applied_event_ops: ["SE-0099"]
+      applied_event_ops: ["SE-99"]
     },
     extra: [
-      storyRecord("story_event_record", "SE-0099", "events", {
-        id: "SE-0099",
-        story_id: "STORY-001",
+      storyRecord("story_event_record", "SE-99", "events", {
+        id: "SE-99",
+        story_id: "STORY-1",
         event_kind: "selected_choice",
-        created_at_page: "PG-0099",
+        created_at_page: "PG-99",
         ops: []
       })
     ]
@@ -358,45 +358,45 @@ test("recursive_reference_closure fails for sibling applied_event_ops page peers
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SE-0099",
+    reference_id: "SE-99",
     reference_path: "applied_event_ops[0]",
-    referenced_file: "stories/test-story/_source/events/SE-0099.yaml",
-    referenced_node_id: "test-story:SE-0099",
-    created_at_page: "PG-0099"
+    referenced_file: "stories/test-story/_source/events/SE-99.yaml",
+    referenced_node_id: "test-story:SE-99",
+    created_at_page: "PG-99"
   });
 });
 
 test("recursive_reference_closure resolves promotion claim STSTAT and SREL source records", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      applied_event_ops: ["SE-0003"]
+      applied_event_ops: ["SE-3"]
     },
     extra: [
-      storyRecord("story_event_record", "SE-0003", "events", {
-        id: "SE-0003",
-        story_id: "STORY-001",
+      storyRecord("story_event_record", "SE-3", "events", {
+        id: "SE-3",
+        story_id: "STORY-1",
         event_kind: "promotion_closeout",
-        created_at_page: "PG-0002",
+        created_at_page: "PG-2",
         promotion_claims: [
           {
-            source_record: "STSTAT-0003",
+            source_record: "STSTAT-3",
             authority: "canon_candidate"
           },
           {
-            source_record: "SREL-0002",
+            source_record: "SREL-2",
             authority: "canon_candidate"
           }
         ]
       }),
-      storyRecord("story_status_record", "STSTAT-0003", "status", {
-        id: "STSTAT-0003",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002"
+      storyRecord("story_status_record", "STSTAT-3", "status", {
+        id: "STSTAT-3",
+        story_id: "STORY-1",
+        created_at_page: "PG-2"
       }),
-      storyRecord("relationship_record_story", "SREL-0002", "relationships", {
-        id: "SREL-0002",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002"
+      storyRecord("relationship_record_story", "SREL-2", "relationships", {
+        id: "SREL-2",
+        story_id: "STORY-1",
+        created_at_page: "PG-2"
       })
     ]
   }), {
@@ -412,30 +412,30 @@ test("recursive_reference_closure resolves SREL direction endpoints", async () =
     pageOverrides: {
       state_snapshot: {
         active_records: {
-          SREL: ["SREL-0001"]
+          SREL: ["SREL-1"]
         }
       }
     },
     extra: [
-      storyRecord("relationship_record_story", "SREL-0001", "relationships", {
-        id: "SREL-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("relationship_record_story", "SREL-1", "relationships", {
+        id: "SREL-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         direction: {
           kind: "directed",
-          from: "STENT-0001",
-          to: "STENT-0003"
+          from: "STENT-1",
+          to: "STENT-3"
         }
       }),
-      storyRecord("story_entity_record", "STENT-0001", "entities", {
-        id: "STENT-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0001"
+      storyRecord("story_entity_record", "STENT-1", "entities", {
+        id: "STENT-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1"
       }),
-      storyRecord("story_entity_record", "STENT-0003", "entities", {
-        id: "STENT-0003",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002"
+      storyRecord("story_entity_record", "STENT-3", "entities", {
+        id: "STENT-3",
+        story_id: "STORY-1",
+        created_at_page: "PG-2"
       })
     ]
   }), {
@@ -451,25 +451,25 @@ test("recursive_reference_closure fails for missing SREL direction endpoints", a
     pageOverrides: {
       state_snapshot: {
         active_records: {
-          SREL: ["SREL-0001"]
+          SREL: ["SREL-1"]
         }
       }
     },
     extra: [
-      storyRecord("relationship_record_story", "SREL-0001", "relationships", {
-        id: "SREL-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("relationship_record_story", "SREL-1", "relationships", {
+        id: "SREL-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         direction: {
           kind: "directed",
-          from: "STENT-0001",
-          to: "STENT-0003"
+          from: "STENT-1",
+          to: "STENT-3"
         }
       }),
-      storyRecord("story_entity_record", "STENT-0001", "entities", {
-        id: "STENT-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0001"
+      storyRecord("story_entity_record", "STENT-1", "entities", {
+        id: "STENT-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-1"
       })
     ]
   }), {
@@ -480,7 +480,7 @@ test("recursive_reference_closure fails for missing SREL direction endpoints", a
   const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.missing_record");
   assert.ok(missing);
   assert.deepEqual(missing.detail, {
-    reference_id: "STENT-0003",
+    reference_id: "STENT-3",
     reference_path: "state_snapshot.active_records.SREL[0].direction.to"
   });
 });
@@ -488,17 +488,17 @@ test("recursive_reference_closure fails for missing SREL direction endpoints", a
 test("recursive_reference_closure fails for missing promotion claim STSTAT source records", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      applied_event_ops: ["SE-0003"]
+      applied_event_ops: ["SE-3"]
     },
     extra: [
-      storyRecord("story_event_record", "SE-0003", "events", {
-        id: "SE-0003",
-        story_id: "STORY-001",
+      storyRecord("story_event_record", "SE-3", "events", {
+        id: "SE-3",
+        story_id: "STORY-1",
         event_kind: "promotion_closeout",
-        created_at_page: "PG-0002",
+        created_at_page: "PG-2",
         promotion_claims: [
           {
-            source_record: "STSTAT-0009",
+            source_record: "STSTAT-9",
             authority: "canon_candidate"
           }
         ]
@@ -512,7 +512,7 @@ test("recursive_reference_closure fails for missing promotion claim STSTAT sourc
   const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.missing_record");
   assert.ok(missing);
   assert.deepEqual(missing.detail, {
-    reference_id: "STSTAT-0009",
+    reference_id: "STSTAT-9",
     reference_path: "applied_event_ops[0].promotion_claims[0].source_record"
   });
 });
@@ -538,28 +538,28 @@ test("recursive_reference_closure fails for missing emitted_choices page peers",
 test("recursive_reference_closure follows emitted choice effect graphs from page peers", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      emitted_choices: ["CHC-0001"],
+      emitted_choices: ["CHC-1"],
       state_snapshot: {
         ...stateSnapshot,
         active_records: {
-          STENT: ["STENT-0001"]
+          STENT: ["STENT-1"]
         }
       }
     },
     extra: [
-      storyRecord("choice_record", "CHC-0001", "choices", {
-        id: "CHC-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("choice_record", "CHC-1", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         grounded_in: {
-          records: ["STENT-0001"]
+          records: ["STENT-1"]
         },
-        uses_fact: "SF-0099"
+        uses_fact: "SF-99"
       }),
-      storyRecord("story_fact_record", "SF-0099", "facts", {
-        id: "SF-0099",
-        story_id: "STORY-001",
-        created_at_page: "PG-0099"
+      storyRecord("story_fact_record", "SF-99", "facts", {
+        id: "SF-99",
+        story_id: "STORY-1",
+        created_at_page: "PG-99"
       })
     ]
   }), {
@@ -570,43 +570,43 @@ test("recursive_reference_closure follows emitted choice effect graphs from page
   const leak = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.branch_leak");
   assert.ok(leak);
   assert.deepEqual(leak.detail, {
-    reference_id: "SF-0099",
+    reference_id: "SF-99",
     reference_path: "emitted_choices[0].uses_fact",
-    referenced_file: "stories/test-story/_source/facts/SF-0099.yaml",
-    referenced_node_id: "test-story:SF-0099",
-    created_at_page: "PG-0099"
+    referenced_file: "stories/test-story/_source/facts/SF-99.yaml",
+    referenced_node_id: "test-story:SF-99",
+    created_at_page: "PG-99"
   });
 });
 
 test("recursive_reference_closure accepts choices grounded in active records and visible affordances", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      emitted_choices: ["CHC-0001"],
+      emitted_choices: ["CHC-1"],
       state_snapshot: {
         ...stateSnapshot,
         active_records: {
-          STENT: ["STENT-0001"],
-          STLOC: ["STLOC-0001"],
-          STOBJ: ["STOBJ-0001"]
+          STENT: ["STENT-1"],
+          STLOC: ["STLOC-1"],
+          STOBJ: ["STOBJ-1"]
         },
         visible_affordances: [
           {
             ordinal: 0,
             label: "door to the alley",
-            grounded_in: ["STLOC-0001", "STOBJ-0001"],
-            available_to: ["STENT-0001"],
+            grounded_in: ["STLOC-1", "STOBJ-1"],
+            available_to: ["STENT-1"],
             action_families: ["move"]
           }
         ]
       }
     },
     extra: [
-      storyRecord("choice_record", "CHC-0001", "choices", {
-        id: "CHC-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("choice_record", "CHC-1", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         grounded_in: {
-          records: ["STENT-0001", "STLOC-0001"],
+          records: ["STENT-1", "STLOC-1"],
           affordance_ordinals: [0]
         }
       })
@@ -622,21 +622,21 @@ test("recursive_reference_closure accepts choices grounded in active records and
 test("recursive_reference_closure fails choices grounded in inactive records", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      emitted_choices: ["CHC-0001"],
+      emitted_choices: ["CHC-1"],
       state_snapshot: {
         ...stateSnapshot,
         active_records: {
-          STENT: ["STENT-0001"]
+          STENT: ["STENT-1"]
         }
       }
     },
     extra: [
-      storyRecord("choice_record", "CHC-0001", "choices", {
-        id: "CHC-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("choice_record", "CHC-1", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         grounded_in: {
-          records: ["OBL-0001"]
+          records: ["OBL-1"]
         }
       })
     ]
@@ -648,9 +648,9 @@ test("recursive_reference_closure fails choices grounded in inactive records", a
   const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.choice_grounding_missing_active_record");
   assert.ok(missing);
   assert.deepEqual(missing.detail, {
-    page_id: "PG-0002",
-    choice_id: "CHC-0001",
-    reference_id: "OBL-0001",
+    page_id: "PG-2",
+    choice_id: "CHC-1",
+    reference_id: "OBL-1",
     reference_path: "emitted_choices[0].grounded_in.records[0]"
   });
 });
@@ -658,30 +658,30 @@ test("recursive_reference_closure fails choices grounded in inactive records", a
 test("recursive_reference_closure fails choices grounded in absent affordance ordinals", async () => {
   const verdicts = await recursiveReferenceClosure.run(undefined, context(records({
     pageOverrides: {
-      emitted_choices: ["CHC-0001"],
+      emitted_choices: ["CHC-1"],
       state_snapshot: {
         ...stateSnapshot,
         active_records: {
-          STENT: ["STENT-0001"]
+          STENT: ["STENT-1"]
         },
         visible_affordances: [
           {
             ordinal: 0,
             label: "door to the alley",
-            grounded_in: ["STLOC-0001"],
-            available_to: ["STENT-0001"],
+            grounded_in: ["STLOC-1"],
+            available_to: ["STENT-1"],
             action_families: ["move"]
           }
         ]
       }
     },
     extra: [
-      storyRecord("choice_record", "CHC-0001", "choices", {
-        id: "CHC-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+      storyRecord("choice_record", "CHC-1", "choices", {
+        id: "CHC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         grounded_in: {
-          records: ["STENT-0001"],
+          records: ["STENT-1"],
           affordance_ordinals: [3]
         }
       })
@@ -694,8 +694,8 @@ test("recursive_reference_closure fails choices grounded in absent affordance or
   const missing = verdicts.find((verdict) => verdict.code === "recursive_reference_closure.choice_grounding_missing_affordance");
   assert.ok(missing);
   assert.deepEqual(missing.detail, {
-    page_id: "PG-0002",
-    choice_id: "CHC-0001",
+    page_id: "PG-2",
+    choice_id: "CHC-1",
     affordance_ordinal: 3,
     reference_path: "emitted_choices[0].grounded_in.affordance_ordinals[0]"
   });
@@ -708,41 +708,41 @@ function records(options: {
   extra?: ReturnType<typeof storyRecord>[];
 } = {}) {
   return [
-    storyRecord("page_record", "PG-0002", "pages", {
-      id: "PG-0002",
-      story_id: "STORY-001",
-      branch_path: ["PG-0001", "PG-0002"],
+    storyRecord("page_record", "PG-2", "pages", {
+      id: "PG-2",
+      story_id: "STORY-1",
+      branch_path: ["PG-1", "PG-2"],
       state_snapshot: stateSnapshot,
-      created_at_page: "PG-0002",
+      created_at_page: "PG-2",
       ...options.pageOverrides
     }),
-    storyRecord("story_fact_record", "SF-0002", "facts", {
-      id: "SF-0002",
-      story_id: "STORY-001",
-      created_at_page: "PG-0002",
+    storyRecord("story_fact_record", "SF-2", "facts", {
+      id: "SF-2",
+      story_id: "STORY-1",
+      created_at_page: "PG-2",
       ...options.factOverrides
     }),
-    storyRecord("obligation_record", "OBL-0001", "obligations", {
-      id: "OBL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001",
-      dependent_facts: ["SF-0002"],
+    storyRecord("obligation_record", "OBL-1", "obligations", {
+      id: "OBL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      dependent_facts: ["SF-2"],
       ...options.obligationOverrides
     }),
-    storyRecord("story_location_record", "STLOC-0001", "locations", {
-      id: "STLOC-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001"
+    storyRecord("story_location_record", "STLOC-1", "locations", {
+      id: "STLOC-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1"
     }),
-    storyRecord("story_entity_record", "STENT-0001", "entities", {
-      id: "STENT-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001"
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1"
     }),
-    storyRecord("story_object_record", "STOBJ-0001", "objects", {
-      id: "STOBJ-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0002"
+    storyRecord("story_object_record", "STOBJ-1", "objects", {
+      id: "STOBJ-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-2"
     }),
     ...(options.extra ?? [])
   ];
@@ -763,10 +763,10 @@ function storyRecord(
 function branchPrefixStorylet(id: string, visible_branch_path_prefix?: unknown) {
   return storyRecord("storylet_record", id, "storylets", {
     id,
-    story_id: "STORY-001",
+    story_id: "STORY-1",
     scope: {
       visibility: "branch_prefix_scoped",
-      branch_id: "BR-0001",
+      branch_id: "BR-1",
       ...(visible_branch_path_prefix === undefined ? {} : { visible_branch_path_prefix })
     },
     created_at_page: null,
@@ -781,14 +781,14 @@ function patchPlan() {
     approval_token: "placeholder",
     verdict: "page_cycle_accept",
     originating_skill: "branching-story-page-cycle",
-    expected_id_allocations: { pg_ids: ["PG-0002"] },
+    expected_id_allocations: { pg_ids: ["PG-2"] },
     patches: [
       {
         op: "create_pg_record" as const,
         target_world: "test",
         payload: {
           story_slug: "test-story",
-          record: { id: "PG-0002", story_id: "STORY-001" }
+          record: { id: "PG-2", story_id: "STORY-1" }
         }
       }
     ]

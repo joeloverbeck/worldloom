@@ -18,7 +18,7 @@ const governedCapability = {
 };
 
 test("rule11_action_space accepts three permissible leverage forms in notes", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...governedCapability,
     notes: "Rule 11 leverage: locality, secrecy, legitimacy"
   });
@@ -29,7 +29,7 @@ test("rule11_action_space accepts three permissible leverage forms in notes", as
 });
 
 test("rule11_action_space fails governed capability with fewer than three leverage forms", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...governedCapability,
     notes: "Rule 11 leverage: locality, access"
   });
@@ -41,7 +41,7 @@ test("rule11_action_space fails governed capability with fewer than three levera
 });
 
 test("rule11_action_space does not infer leverage from unlabeled notes prose", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...governedCapability,
     notes: "Locality, secrecy, and legitimacy appear in surrounding prose, but no explicit Rule 11 list is declared."
   });
@@ -53,7 +53,7 @@ test("rule11_action_space does not infer leverage from unlabeled notes prose", a
 });
 
 test("rule11_action_space fails invalid leverage enum entries", async () => {
-  const cf = cfRecord("CF-0001", {
+  const cf = cfRecord("CF-1", {
     ...governedCapability,
     notes: "Rule 11 leverage: locality, protagonist luck, social trust"
   });
@@ -67,12 +67,12 @@ test("rule11_action_space fails invalid leverage enum entries", async () => {
 });
 
 test("rule11_action_space ignores n_a exception governance and historical missing blocks", async () => {
-  const notApplicable = cfRecord("CF-0001", {
+  const notApplicable = cfRecord("CF-1", {
     ...completeCf,
     type: "capability",
     exception_governance: { n_a: "Structural capability placeholder with no exception axis." }
   });
-  const historical = cfRecord("CF-0002", { ...completeCf, type: "capability" });
+  const historical = cfRecord("CF-2", { ...completeCf, type: "capability" });
 
   const result = await rule11ActionSpace.run({}, testContext([notApplicable, historical]));
 

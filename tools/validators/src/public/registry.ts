@@ -2,7 +2,9 @@ import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
 import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
+import { causalDependencyThreatScan } from "../structural/causal-dependency-threat-scan.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
+import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
 import { nonPropagationTagShape } from "../structural/non-propagation-tag-shape.js";
 import { idUniqueness } from "../structural/id-uniqueness.js";
 import { liePromotedSilently } from "../structural/lie-promoted-silently.js";
@@ -40,6 +42,8 @@ export const structuralValidators: readonly Validator[] = [
   branchIsolation,
   observerFirewall,
   auditOnlySeShape,
+  causalDependencyThreatScan,
+  expectedWitnessCoverage,
   sltCreatedAtPageOriginConsistency,
   canonBaselineDrift,
   canonDriftClassificationEvidence,

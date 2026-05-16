@@ -30,7 +30,7 @@ export function context(records: IndexedRecord[], overrides: Partial<Context> = 
 }
 
 export const validCf = {
-  id: "CF-0001",
+  id: "CF-1",
   title: "Fact",
   status: "hard_canon",
   type: "institution",
@@ -53,5 +53,5 @@ export const validSection = {
   heading_level: 2,
   body: "Section body.",
   extensions: [],
-  touched_by_cf: ["CF-0001"]
+  touched_by_cf: ["CF-1"]
 };

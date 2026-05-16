@@ -128,6 +128,7 @@ Use the live `implement-ticket` skill exactly. The child skill owns reassessment
 If implementation ends blocked:
 
 - if a concrete follow-up ticket was created or named as the next owner, put that follow-up at the front of the queue and continue the loop
+- if reassessment proves the current ticket is blocked only by existing active prerequisite tickets, truth the current ticket's `Deps` / reassessment / queue notes as needed, move those prerequisite tickets ahead of it, commit the retarget plus state update, print a harness handoff, and resume at the first prerequisite after the reset boundary
 - if no follow-up exists, stop the harness and report the blocker, current ticket, proof gap, and next required action
 
 ### 2. Audit And Apply Implement-Ticket Suggestions
@@ -195,7 +196,7 @@ If compaction, interruption, or resume recovery prevents this compact review blo
 
 If `post-ticket-review` creates or materially updates a follow-up ticket, active spec, active ticket dependency, or current contract doc, run:
 
-Archive-path and dependency repairs in active specs or active sibling tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
+Archive-path and dependency repairs in active specs, active sibling tickets, or same-family archived tickets count as material handoff updates for this trigger, even when the repairs are mechanical.
 
 ```text
 $skill-audit .codex/skills/post-ticket-review
@@ -214,7 +215,7 @@ Before committing:
 1. Refresh `git status --short`.
 2. Inspect `git diff --cached --name-status` before staging owned paths. If pre-existing staged entries are unrelated to the current iteration, unstage those paths or stop for approval before committing; path-scoped `git add` will not protect the commit from unrelated entries already in the index.
 3. Verify all dirty paths are either owned by this iteration, previously approved for inclusion, or generated/ignored artifacts that should remain unstaged.
-4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files.
+4. Run `git diff --check` or the child skills' stronger equivalent over tracked and newly created owned files. If owned files are newly untracked, plain `git diff --check` will not inspect their content; cover each new file with `git diff --check --no-index /dev/null <path>` or temporary `git add -N <path>` plus cleanup before final status.
 5. Stage only approved owned paths plus any pre-existing dirty paths the user explicitly allowed this harness to include.
 6. Re-run `git diff --cached --name-status` after staging and confirm every staged path is owned by this iteration, explicitly approved, or intentional same-family state needed for the queue/handoff.
 7. Commit with a message that names the ticket id and whether the iteration included implementation, review/archive, follow-up creation, and skill hardening. Prefer a concise truthful shape such as `SPEC35STOPIPEIG-001 implement and archive observer firewall fix`. Mention `follow-up` or `skill hardening` only when the committed iteration actually created or updated a follow-up ticket or changed a skill.
@@ -293,13 +294,14 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 
 1. Re-read the originating spec.
 2. Confirm no active `tickets/*.md` still names the spec as active implementation work.
-3. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
-4. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
-5. Confirm the original `specs/` path no longer exists.
-6. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
-7. Run hygiene over the spec archive move and reference repairs.
-8. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
-9. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. Record the final proof results in `## Outcome` so the archived spec is self-contained.
+4. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
+5. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
+6. Confirm the original `specs/` path no longer exists.
+7. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
+8. Run hygiene over the spec archive move and reference repairs.
+9. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
+10. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
 
 If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
 
@@ -311,6 +313,8 @@ After the final archive commit and any required final state-file persistence com
 2. Create a new branch from the current HEAD with a concise family name derived from the spec id or filename, for example `spec-31-story-contract-hardening`.
 3. Push the new branch to the configured remote.
 4. Report the branch name, pushed remote, commits created by the harness, archived spec path, archived ticket paths, and any follow-up tickets left active.
+
+This branch step labels the already-committed final `HEAD`. If preserving the starting local branch pointer matters for the repository, create or switch to the family branch before the first harness commit instead of waiting until finalization. Otherwise, creating the branch here is acceptable but the original local branch may already contain the harness commits.
 
 If branch creation or push fails because Codex cannot write the git ref in the sandbox, cannot resolve the remote host, or otherwise hits a clear sandbox/network restriction, rerun the same branch/push command with the required approval or escalation. Record both the first failure and the successful retry, or the remaining blocker if escalation still fails.
 

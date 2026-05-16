@@ -126,18 +126,18 @@ function createSpec34Repo(worldSlug: string, records: FixtureRecord[]): string {
 function passRecords(): FixtureRecord[] {
   const records = commonRecords();
   records.push(
-    branch("BR-0001", null, "PG-0001"),
-    branch("BR-0002", "BR-0001", "PG-0002"),
-    entity("STENT-0001", "PG-0001", "Runner"),
-    storylet("SLT-0001"),
-    event("SE-0001", "PG-0001", "story_start", "system", null),
-    event("SE-0002", "PG-0002", "selected_choice", "STENT-0001", "SLT-0001", "Drift classification compatible after reviewing CH-0003 only."),
-    belief("BEL-0001", "PG-0001", "STENT-0001", "true", "private", ["SF-0001"]),
-    fact("SF-0001", "PG-0001", "branch_local", ["CF-0001"]),
-    fact("SF-0002", "PG-0002", "branch_local", ["BEL-0001"]),
-    choice("CHC-0001", "PG-0001", ["BEL-0001"]),
-    page("PG-0001", "BR-0001", null, "SE-0001", "CHC-0001", ["PG-0001"], ["SF-0001"], "compatible after reviewing CH-0002 and CH-0003"),
-    page("PG-0002", "BR-0002", "PG-0001", "SE-0002", "CHC-0001", ["PG-0001", "PG-0002"], ["SF-0001", "SF-0002"], "compatible after reviewing CH-0002 and CH-0003")
+    branch("BR-1", null, "PG-1"),
+    branch("BR-2", "BR-1", "PG-2"),
+    entity("STENT-1", "PG-1", "Runner"),
+    storylet("SLT-1"),
+    event("SE-1", "PG-1", "story_start", "system", null),
+    event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
+    belief("BEL-1", "PG-1", "STENT-1", "true", "private", ["SF-1"]),
+    fact("SF-1", "PG-1", "branch_local", ["CF-1"]),
+    fact("SF-2", "PG-2", "branch_local", ["BEL-1"]),
+    choice("CHC-1", "PG-1", ["BEL-1"]),
+    page("PG-1", "BR-1", null, "SE-1", "CHC-1", ["PG-1"], ["SF-1"], "compatible after reviewing CH-2 and CH-3"),
+    page("PG-2", "BR-2", "PG-1", "SE-2", "CHC-1", ["PG-1", "PG-2"], ["SF-1", "SF-2"], "compatible after reviewing CH-2 and CH-3")
   );
   return records;
 }
@@ -145,36 +145,36 @@ function passRecords(): FixtureRecord[] {
 function failRecords(): FixtureRecord[] {
   const records = commonRecords();
   records.push(
-    branch("BR-0001", null, "PG-0001"),
-    branch("BR-0002", "BR-0001", "PG-0002"),
-    branch("BR-0003", "BR-0001", "PG-0003"),
-    entity("STENT-0001", "PG-0001", "Borrower"),
-    entity("STENT-0002", "PG-0001", "Keeper"),
-    storylet("SLT-0001"),
-    event("SE-0001", "PG-0001", "story_start", "system", null),
-    event("SE-0002", "PG-0002", "selected_choice", "STENT-0001", "SLT-0001", "Drift classification compatible after reviewing CH-0003 only."),
-    belief("BEL-0001", "PG-0001", "STENT-0001", "true", "private", ["SF-0001"]),
-    belief("BEL-0002", "PG-0001", "STENT-0002", "true", "private", []),
-    belief("BEL-0003", "PG-0001", "STENT-0001", "false", "private", []),
-    fact("SF-0001", "PG-0001", "branch_local", ["CF-0001"]),
-    fact("SF-0003", "PG-0003", "branch_local", []),
-    fact("SF-0004", "PG-0002", "branch_local", ["BEL-0003"]),
-    fact("SF-0005", "PG-0002", "branch_local", ["CF-0001"]),
-    choice("CHC-0001", "PG-0001", ["BEL-0002"]),
-    page("PG-0001", "BR-0001", null, "SE-0001", "CHC-0001", ["PG-0001"], ["SF-0001"], "compatible after reviewing CH-0002 and CH-0003"),
-    page("PG-0002", "BR-0002", "PG-0001", "SE-0002", "CHC-0001", ["PG-0001", "PG-0002"], ["SF-0003", "SF-0004", "SF-0005"], "compatible after reviewing CH-0003"),
-    page("PG-0003", "BR-0003", "PG-0001", "SE-0001", null, ["PG-0001", "PG-0003"], ["SF-0003"], "compatible after reviewing CH-0002 and CH-0003")
+    branch("BR-1", null, "PG-1"),
+    branch("BR-2", "BR-1", "PG-2"),
+    branch("BR-3", "BR-1", "PG-3"),
+    entity("STENT-1", "PG-1", "Borrower"),
+    entity("STENT-2", "PG-1", "Keeper"),
+    storylet("SLT-1"),
+    event("SE-1", "PG-1", "story_start", "system", null),
+    event("SE-2", "PG-2", "selected_choice", "STENT-1", "SLT-1", "Drift classification compatible after reviewing CH-3 only."),
+    belief("BEL-1", "PG-1", "STENT-1", "true", "private", ["SF-1"]),
+    belief("BEL-2", "PG-1", "STENT-2", "true", "private", []),
+    belief("BEL-3", "PG-1", "STENT-1", "false", "private", []),
+    fact("SF-1", "PG-1", "branch_local", ["CF-1"]),
+    fact("SF-3", "PG-3", "branch_local", []),
+    fact("SF-4", "PG-2", "branch_local", ["BEL-3"]),
+    fact("SF-5", "PG-2", "branch_local", ["CF-1"]),
+    choice("CHC-1", "PG-1", ["BEL-2"]),
+    page("PG-1", "BR-1", null, "SE-1", "CHC-1", ["PG-1"], ["SF-1"], "compatible after reviewing CH-2 and CH-3"),
+    page("PG-2", "BR-2", "PG-1", "SE-2", "CHC-1", ["PG-1", "PG-2"], ["SF-3", "SF-4", "SF-5"], "compatible after reviewing CH-3"),
+    page("PG-3", "BR-3", "PG-1", "SE-1", null, ["PG-1", "PG-3"], ["SF-3"], "compatible after reviewing CH-2 and CH-3")
   );
   return records;
 }
 
 function commonRecords(): FixtureRecord[] {
   return [
-    worldRecord("CF-0001", "_source/canon/CF-0001.yaml", "canon_fact_record", validCanonFact()),
+    worldRecord("CF-1", "_source/canon/CF-1.yaml", "canon_fact_record", validCanonFact()),
     worldRecord("SEC-INS-001", "_source/institutions/SEC-INS-001.yaml", "section", validSection()),
-    worldRecord("CH-0001", "_source/change-log/CH-0001.yaml", "change_log_entry", change("CH-0001", [])),
-    worldRecord("CH-0002", "_source/change-log/CH-0002.yaml", "change_log_entry", change("CH-0002", ["CF-0001"])),
-    worldRecord("CH-0003", "_source/change-log/CH-0003.yaml", "change_log_entry", change("CH-0003", []))
+    worldRecord("CH-1", "_source/change-log/CH-1.yaml", "change_log_entry", change("CH-1", [])),
+    worldRecord("CH-2", "_source/change-log/CH-2.yaml", "change_log_entry", change("CH-2", ["CF-1"])),
+    worldRecord("CH-3", "_source/change-log/CH-3.yaml", "change_log_entry", change("CH-3", []))
   ];
 }
 
@@ -205,11 +205,11 @@ function change(changeId: string, affectedFactIds: string[]): Record<string, unk
 function branch(id: string, parentBranchId: string | null, rootPageId: string): FixtureRecord {
   return storyRecord("branch_record", id, "branches", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: rootPageId,
     label: id,
     parent_branch_id: parentBranchId,
-    forked_at_page_id: parentBranchId === null ? null : "PG-0001",
+    forked_at_page_id: parentBranchId === null ? null : "PG-1",
     root_page_id: rootPageId
   });
 }
@@ -217,7 +217,7 @@ function branch(id: string, parentBranchId: string | null, rootPageId: string): 
 function entity(id: string, createdAtPage: string, displayName: string): FixtureRecord {
   return storyRecord("story_entity_record", id, "entities", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: createdAtPage,
     display_name: displayName,
     role_in_story: ["primary_actor"]
@@ -227,7 +227,7 @@ function entity(id: string, createdAtPage: string, displayName: string): Fixture
 function storylet(id: string): FixtureRecord {
   return storyRecord("storylet_record", id, "storylets", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     scope: { visibility: "global_author_pool", branch_id: null },
     created_at_page: null,
     title: "Choose",
@@ -248,13 +248,13 @@ function event(
   eventKind: "story_start" | "selected_choice",
   actor: string,
   selectedStorylet: string | null,
-  rationale = `Drift classification compatible after reviewing CH-0002 and CH-0003 for ${id}.`
+  rationale = `Drift classification compatible after reviewing CH-2 and CH-3 for ${id}.`
 ): FixtureRecord {
   return storyRecord("story_event_record", id, "events", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: createdAtPage,
-    parent_page_id: eventKind === "story_start" ? null : "PG-0001",
+    parent_page_id: eventKind === "story_start" ? null : "PG-1",
     event_kind: eventKind,
     actor,
     commitment: {
@@ -279,7 +279,7 @@ function belief(
 ): FixtureRecord {
   return storyRecord("belief_record", id, "beliefs", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: createdAtPage,
     holder,
     claim: `${id} claim`,
@@ -288,7 +288,7 @@ function belief(
     confidence: "high",
     visibility,
     basis: {
-      source_event: "SE-0001",
+      source_event: "SE-1",
       access_route: "authorial_initialization",
       access_records: accessRecords
     },
@@ -299,7 +299,7 @@ function belief(
 function fact(id: string, createdAtPage: string, authority: string, derivedFrom: string[]): FixtureRecord {
   return storyRecord("story_fact_record", id, "facts", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: createdAtPage,
     statement: `${id} statement`,
     authority,
@@ -310,13 +310,13 @@ function fact(id: string, createdAtPage: string, authority: string, derivedFrom:
 function choice(id: string, createdAtPage: string, groundedRecords: string[]): FixtureRecord {
   return storyRecord("choice_record", id, "choices", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     created_at_page: createdAtPage,
     surface_label: "Proceed",
     player_visible_intent: "Proceed with the known option.",
     target_or_action_families: ["decide"],
     likely_state_pressure: "A decision is made.",
-    associated_commitment_block: "SLT-0001",
+    associated_commitment_block: "SLT-1",
     grounded_in: { records: groundedRecords, affordance_ordinals: [] },
     success_policy: "Accept the choice."
   });
@@ -334,11 +334,11 @@ function page(
 ): FixtureRecord {
   return storyRecord("page_record", id, "pages", {
     id,
-    story_id: "STORY-0001",
+    story_id: "STORY-1",
     branch_id: branchId,
     parent_page_id: parentPageId,
     branch_path: branchPath,
-    turn_index: id === "PG-0001" ? 0 : 1,
+    turn_index: id === "PG-1" ? 0 : 1,
     input: {
       choice_id: choiceId,
       manual_action_text: null,
@@ -347,7 +347,7 @@ function page(
     state_hash_parent: null,
     state_hash: "a".repeat(64),
     state_snapshot: {
-      canon_revision: "CH-0001",
+      canon_revision: "CH-1",
       active_records: { SF: activeFacts },
       entity_status: {},
       unresolved_mystery_claims: [],
@@ -372,7 +372,7 @@ function page(
 
 function validCanonFact(): Record<string, unknown> {
   return {
-    id: "CF-0001",
+    id: "CF-1",
     title: "Grounded Institution",
     status: "hard_canon",
     type: "institution",
@@ -405,6 +405,6 @@ function validSection(): Record<string, unknown> {
     heading_level: 2,
     body: "The ward office keeps public records.",
     extensions: [],
-    touched_by_cf: ["CF-0001"]
+    touched_by_cf: ["CF-1"]
   };
 }

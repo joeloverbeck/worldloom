@@ -6,8 +6,8 @@ import { rule2NoPureCosmetics } from "../../src/rules/rule2-no-pure-cosmetics.js
 import { cfRecord, completeCf, testContext } from "./helpers.js";
 
 test("rule2_no_pure_cosmetics catches empty and non-canonical domains", async () => {
-  const empty = cfRecord("CF-0001", { ...completeCf, domains_affected: [] });
-  const invalid = cfRecord("CF-0002", { ...completeCf, domains_affected: ["sparkle"] });
+  const empty = cfRecord("CF-1", { ...completeCf, domains_affected: [] });
+  const invalid = cfRecord("CF-2", { ...completeCf, domains_affected: ["sparkle"] });
 
   const result = await rule2NoPureCosmetics.run({}, testContext([empty, invalid]));
 
@@ -18,10 +18,10 @@ test("rule2_no_pure_cosmetics catches empty and non-canonical domains", async ()
 });
 
 test("rule2_no_pure_cosmetics accepts FOUNDATIONS concern domains", async () => {
-  const technology = cfRecord("CF-0001", { ...completeCf, domains_affected: ["technology"] });
-  const geography = cfRecord("CF-0002", { ...completeCf, domains_affected: ["geography"] });
-  const institutions = cfRecord("CF-0003", { ...completeCf, domains_affected: ["institutions"] });
-  const everydayLife = cfRecord("CF-0004", { ...completeCf, domains_affected: ["everyday_life"] });
+  const technology = cfRecord("CF-1", { ...completeCf, domains_affected: ["technology"] });
+  const geography = cfRecord("CF-2", { ...completeCf, domains_affected: ["geography"] });
+  const institutions = cfRecord("CF-3", { ...completeCf, domains_affected: ["institutions"] });
+  const everydayLife = cfRecord("CF-4", { ...completeCf, domains_affected: ["everyday_life"] });
 
   const result = await rule2NoPureCosmetics.run({}, testContext([technology, geography, institutions, everydayLife]));
 

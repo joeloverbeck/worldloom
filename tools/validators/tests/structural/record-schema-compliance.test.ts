@@ -56,11 +56,11 @@ test("record_schema_compliance accepts change logs with affected_fact_ids only",
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      record("change_log_entry", "CH-0001", "_source/change-log/CH-0001.yaml", {
-        change_id: "CH-0001",
+      record("change_log_entry", "CH-1", "_source/change-log/CH-1.yaml", {
+        change_id: "CH-1",
         date: "2026-05-03",
         change_type: "addition",
-        affected_fact_ids: ["CF-0001"]
+        affected_fact_ids: ["CF-1"]
       })
     ])
   );
@@ -69,23 +69,23 @@ test("record_schema_compliance accepts change logs with affected_fact_ids only",
 });
 
 test("record_schema_compliance accepts derived_canon and rejects mystery_reserve CF status", async () => {
-  const accepted = record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+  const accepted = record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
     ...validCf,
     status: "derived_canon"
   });
-  const rejected = record("canon_fact_record", "CF-0002", "_source/canon/CF-0002.yaml", {
+  const rejected = record("canon_fact_record", "CF-2", "_source/canon/CF-2.yaml", {
     ...validCf,
-    id: "CF-0002",
+    id: "CF-2",
     status: "mystery_reserve"
   });
 
   const result = await recordSchemaCompliance.run({}, context([accepted, rejected]));
 
-  assert.ok(!result.some((verdict) => verdict.location.node_id === "CF-0001"));
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CF-1"));
   assert.ok(
     result.some(
       (verdict) =>
-        verdict.location.node_id === "CF-0002" &&
+        verdict.location.node_id === "CF-2" &&
         verdict.code === "record_schema_compliance.enum" &&
         verdict.message.includes("/status")
     )
@@ -96,7 +96,7 @@ test("record_schema_compliance rejects accepted CFs without direct user approval
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+      record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
         ...validCf,
         source_basis: { direct_user_approval: false, derived_from: [] }
       })
@@ -106,7 +106,7 @@ test("record_schema_compliance rejects accepted CFs without direct user approval
   assert.ok(
     result.some(
       (verdict) =>
-        verdict.location.node_id === "CF-0001" &&
+        verdict.location.node_id === "CF-1" &&
         verdict.code === "record_schema_compliance.const" &&
         verdict.message.includes("/source_basis/direct_user_approval")
     )
@@ -117,11 +117,11 @@ test("record_schema_compliance rejects removed affected_cf_ids alias on change l
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      record("change_log_entry", "CH-0001", "_source/change-log/CH-0001.yaml", {
-        change_id: "CH-0001",
+      record("change_log_entry", "CH-1", "_source/change-log/CH-1.yaml", {
+        change_id: "CH-1",
         date: "2026-05-03",
         change_type: "addition",
-        affected_cf_ids: ["CF-0001"]
+        affected_cf_ids: ["CF-1"]
       })
     ])
   );
@@ -144,9 +144,9 @@ test("record_schema_compliance validates adjudication frontmatter", async () => 
             "mystery_reserve_touched: []",
             "invariants_touched: []",
             "cf_records_touched:",
-            "  - CF-0001",
+            "  - CF-1",
             "open_questions_touched: []",
-            "change_id: CH-0001",
+            "change_id: CH-1",
             "originating_skill: canon-addition",
             "---",
             "# PA-0001",
@@ -156,7 +156,7 @@ test("record_schema_compliance validates adjudication frontmatter", async () => 
         }
       ]
     },
-    context([record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)])
+    context([record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", validCf)])
   );
 
   assert.equal(result.length, 0);
@@ -177,14 +177,14 @@ test("record_schema_compliance rejects legacy adjudication body-only Discovery b
             "- verdict: accept",
             "- mystery_reserve_touched: none",
             "- invariants_touched: none",
-            "- cf_records_touched: CF-0001",
+            "- cf_records_touched: CF-1",
             "- open_questions_touched: none",
-            "- change_id: CH-0001"
+            "- change_id: CH-1"
           ].join("\n")
         }
       ]
     },
-    context([record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)])
+    context([record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", validCf)])
   );
 
   assert.equal(result.length, 8);
@@ -196,10 +196,10 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped
     {
       files: [
         {
-          path: "diegetic-artifacts/DA-0001-test.md",
+          path: "diegetic-artifacts/DA-1-test.md",
           content: [
             "---",
-            "artifact_id: DA-0001",
+            "artifact_id: DA-1",
             "slug: test-artifact",
             "title: Test Artifact",
             "artifact_type: report",
@@ -225,7 +225,7 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with scoped
             "world_consistency: {}",
             "source_basis: {}",
             "---",
-            "# DA-0001",
+            "# DA-1",
             "",
             "Body prose."
           ].join("\n")
@@ -243,7 +243,7 @@ test("record_schema_compliance accepts diegetic-artifact frontmatter with explic
     {
       files: [
         {
-          path: "diegetic-artifacts/DA-0003-test.md",
+          path: "diegetic-artifacts/DA-3-test.md",
           content: readFixture("diegetic-artifact-with-new-fields.md")
         }
       ]
@@ -260,7 +260,7 @@ test("record_schema_compliance rejects diegetic-artifact world_relation entries 
     {
       files: [
         {
-          path: "diegetic-artifacts/DA-0004-test.md",
+          path: "diegetic-artifacts/DA-4-test.md",
           content: fixture
         }
       ]
@@ -276,10 +276,10 @@ test("record_schema_compliance rejects diegetic-artifact scoped_references entri
     {
       files: [
         {
-          path: "diegetic-artifacts/DA-0002-test.md",
+          path: "diegetic-artifacts/DA-2-test.md",
           content: [
             "---",
-            "artifact_id: DA-0002",
+            "artifact_id: DA-2",
             "slug: bad-artifact",
             "title: Bad Artifact",
             "artifact_type: report",
@@ -298,7 +298,7 @@ test("record_schema_compliance rejects diegetic-artifact scoped_references entri
             "world_consistency: {}",
             "source_basis: {}",
             "---",
-            "# DA-0002",
+            "# DA-2",
             "",
             "Body prose."
           ].join("\n")
@@ -323,25 +323,25 @@ test("record_schema_compliance accepts complete storylet records", async () => {
 test("record_schema_compliance enforces story fact authority", async () => {
   const valid = storyFactRecord({
     authority: "branch_local"
-  }, "SF-0001");
-  const missingAuthority = storyFactRecord({}, "SF-0002");
+  }, "SF-1");
+  const missingAuthority = storyFactRecord({}, "SF-2");
   const invalidAuthority = storyFactRecord({
     authority: "objective"
-  }, "SF-0003");
+  }, "SF-3");
 
   const result = await recordSchemaCompliance.run(
     {},
     context([valid, missingAuthority, invalidAuthority])
   );
 
-  assert.ok(!result.some((verdict) => verdict.location.node_id === "SF-0001"));
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SF-1"));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "SF-0002" &&
+    verdict.location.node_id === "SF-2" &&
     verdict.code === "record_schema_compliance.required" &&
     verdict.message.includes("authority")
   ));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "SF-0003" &&
+    verdict.location.node_id === "SF-3" &&
     verdict.code === "record_schema_compliance.enum"
   ));
 });
@@ -349,25 +349,25 @@ test("record_schema_compliance enforces story fact authority", async () => {
 test("record_schema_compliance enforces story obligation urgency", async () => {
   const valid = storyObligationRecord({
     urgency: "high"
-  }, "OBL-0001");
-  const missingUrgency = storyObligationRecord({}, "OBL-0002");
+  }, "OBL-1");
+  const missingUrgency = storyObligationRecord({}, "OBL-2");
   const invalidUrgency = storyObligationRecord({
     urgency: "immediate"
-  }, "OBL-0003");
+  }, "OBL-3");
 
   const result = await recordSchemaCompliance.run(
     {},
     context([valid, missingUrgency, invalidUrgency])
   );
 
-  assert.ok(!result.some((verdict) => verdict.location.node_id === "OBL-0001"));
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "OBL-1"));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "OBL-0002" &&
+    verdict.location.node_id === "OBL-2" &&
     verdict.code === "record_schema_compliance.required" &&
     verdict.message.includes("urgency")
   ));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "OBL-0003" &&
+    verdict.location.node_id === "OBL-3" &&
     verdict.code === "record_schema_compliance.enum"
   ));
 });
@@ -375,25 +375,25 @@ test("record_schema_compliance enforces story obligation urgency", async () => {
 test("record_schema_compliance enforces story consequence urgency", async () => {
   const valid = storyConsequenceRecord({
     urgency: "medium"
-  }, "CNSQ-0001");
-  const missingUrgency = storyConsequenceRecord({}, "CNSQ-0002");
+  }, "CNSQ-1");
+  const missingUrgency = storyConsequenceRecord({}, "CNSQ-2");
   const invalidUrgency = storyConsequenceRecord({
     urgency: "eventual"
-  }, "CNSQ-0003");
+  }, "CNSQ-3");
 
   const result = await recordSchemaCompliance.run(
     {},
     context([valid, missingUrgency, invalidUrgency])
   );
 
-  assert.ok(!result.some((verdict) => verdict.location.node_id === "CNSQ-0001"));
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "CNSQ-1"));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "CNSQ-0002" &&
+    verdict.location.node_id === "CNSQ-2" &&
     verdict.code === "record_schema_compliance.required" &&
     verdict.message.includes("urgency")
   ));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "CNSQ-0003" &&
+    verdict.location.node_id === "CNSQ-3" &&
     verdict.code === "record_schema_compliance.enum"
   ));
 });
@@ -402,8 +402,8 @@ test("record_schema_compliance accepts branch-prefix-scoped storylets with canon
   const storylet = completeStorylet();
   storylet.scope = {
     visibility: "branch_prefix_scoped",
-    branch_id: "BR-0001",
-    visible_branch_path_prefix: ["PG-0001"]
+    branch_id: "BR-1",
+    visible_branch_path_prefix: ["PG-1"]
   };
 
   const result = await recordSchemaCompliance.run(
@@ -418,14 +418,14 @@ test("record_schema_compliance accepts storylet bound effect references and reje
   const validBoundEffects = completeStorylet();
   validBoundEffects.effects = {
     create: ["bound:new_debt"],
-    supersede: ["OBL-0001"],
+    supersede: ["OBL-1"],
     close: ["bound:old_thread"]
   };
   validBoundEffects.exit_options = [
     {
       action_family: "communicate",
       surface_hint: "Ask one bounded follow-up question.",
-      likely_effects: ["bound:new_debt", "CNSQ-0001"]
+      likely_effects: ["bound:new_debt", "CNSQ-1"]
     }
   ];
 
@@ -441,14 +441,14 @@ test("record_schema_compliance accepts storylet bound effect references and reje
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(validBoundEffects, "SLT-0015"),
-      storyletRecord(invalidLabel, "SLT-0016")
+      storyletRecord(validBoundEffects, "SLT-15"),
+      storyletRecord(invalidLabel, "SLT-16")
     ])
   );
 
-  assert.ok(!result.some((verdict) => verdict.location.node_id === "SLT-0015"));
+  assert.ok(!result.some((verdict) => verdict.location.node_id === "SLT-15"));
   assert.ok(result.some((verdict) =>
-    verdict.location.node_id === "SLT-0016" &&
+    verdict.location.node_id === "SLT-16" &&
     verdict.message.includes("/exit_options/0/likely_effects/0")
   ));
 });
@@ -457,41 +457,41 @@ test("record_schema_compliance rejects malformed branch-prefix-scoped storylet p
   const missingPrefix = completeStorylet();
   missingPrefix.scope = {
     visibility: "branch_prefix_scoped",
-    branch_id: "BR-0001"
+    branch_id: "BR-1"
   };
 
   const emptyPrefix = completeStorylet();
   emptyPrefix.scope = {
     visibility: "branch_prefix_scoped",
-    branch_id: "BR-0001",
+    branch_id: "BR-1",
     visible_branch_path_prefix: []
   };
 
   const legacyTopLevelPrefix = completeStorylet();
   legacyTopLevelPrefix.scope = {
     visibility: "branch_prefix_scoped",
-    branch_id: "BR-0001",
-    visible_branch_path_prefix: ["PG-0001"]
+    branch_id: "BR-1",
+    visible_branch_path_prefix: ["PG-1"]
   };
-  legacyTopLevelPrefix.visible_branch_path_prefix = ["PG-0001"];
+  legacyTopLevelPrefix.visible_branch_path_prefix = ["PG-1"];
 
   const globalWithPrefix = completeStorylet();
-  (globalWithPrefix.scope as Record<string, unknown>).visible_branch_path_prefix = ["PG-0001"];
+  (globalWithPrefix.scope as Record<string, unknown>).visible_branch_path_prefix = ["PG-1"];
 
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(missingPrefix, "SLT-0011"),
-      storyletRecord(emptyPrefix, "SLT-0012"),
-      storyletRecord(legacyTopLevelPrefix, "SLT-0013"),
-      storyletRecord(globalWithPrefix, "SLT-0014")
+      storyletRecord(missingPrefix, "SLT-11"),
+      storyletRecord(emptyPrefix, "SLT-12"),
+      storyletRecord(legacyTopLevelPrefix, "SLT-13"),
+      storyletRecord(globalWithPrefix, "SLT-14")
     ])
   );
 
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0011" && verdict.code === "record_schema_compliance.required"));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0012" && verdict.message.includes("/scope/visible_branch_path_prefix")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0013" && verdict.code === "record_schema_compliance.additionalProperties"));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0014" && verdict.message.includes("/scope")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-11" && verdict.code === "record_schema_compliance.required"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-12" && verdict.message.includes("/scope/visible_branch_path_prefix")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-13" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-14" && verdict.message.includes("/scope")));
 });
 
 test("record_schema_compliance rejects storylets missing required structural fields", async () => {
@@ -524,9 +524,9 @@ test("record_schema_compliance rejects storylet nested required-field omissions"
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(provenanceMissingOrigin, "SLT-0002"),
-      storyletRecord(scopeMissingVisibility, "SLT-0003"),
-      storyletRecord(beatMissingTarget, "SLT-0004")
+      storyletRecord(provenanceMissingOrigin, "SLT-2"),
+      storyletRecord(scopeMissingVisibility, "SLT-3"),
+      storyletRecord(beatMissingTarget, "SLT-4")
     ])
   );
 
@@ -554,19 +554,19 @@ test("record_schema_compliance enforces minimalist storylet shape and retired le
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      storyletRecord(legacyChoiceTemplate, "SLT-0005"),
-      storyletRecord(legacyShape, "SLT-0007"),
-      storyletRecord(invalidMoveFamily, "SLT-0008"),
-      storyletRecord(invalidOrigin, "SLT-0009"),
-      storyletRecord(invalidActionFamily, "SLT-0010")
+      storyletRecord(legacyChoiceTemplate, "SLT-5"),
+      storyletRecord(legacyShape, "SLT-7"),
+      storyletRecord(invalidMoveFamily, "SLT-8"),
+      storyletRecord(invalidOrigin, "SLT-9"),
+      storyletRecord(invalidActionFamily, "SLT-10")
     ])
   );
 
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0005" && verdict.code === "record_schema_compliance.additionalProperties"));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0007" && verdict.code === "record_schema_compliance.additionalProperties"));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0008" && verdict.message.includes("/move_family")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0009" && verdict.message.includes("/provenance/origin")));
-  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-0010" && verdict.message.includes("/exit_options/0/action_family")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-5" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-7" && verdict.code === "record_schema_compliance.additionalProperties"));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-8" && verdict.message.includes("/move_family")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-9" && verdict.message.includes("/provenance/origin")));
+  assert.ok(result.some((verdict) => verdict.location.node_id === "SLT-10" && verdict.message.includes("/exit_options/0/action_family")));
 });
 
 test("record_schema_compliance ignores derived index nodes that share authority node types", async () => {
@@ -579,7 +579,7 @@ test("record_schema_compliance ignores derived index nodes that share authority 
       record("section", "animalia:WORLD_KERNEL.md:Genre Contract:0", "WORLD_KERNEL.md", {
         body: "## Genre Contract"
       }),
-      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", validCf)
+      record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", validCf)
     ])
   );
 
@@ -620,7 +620,7 @@ test("record_schema_compliance preserves historical full-world CFs without new s
   const result = await recordSchemaCompliance.run(
     {},
     context([
-      record("canon_fact_record", "CF-0001", "_source/canon/CF-0001.yaml", {
+      record("canon_fact_record", "CF-1", "_source/canon/CF-1.yaml", {
         ...validCf,
         type: "capability"
       })
@@ -662,8 +662,8 @@ function readFixture(filename: string): string {
 
 function completeStorylet(): Record<string, unknown> {
   return {
-    id: "SLT-0001",
-    story_id: "STORY-001",
+    id: "SLT-1",
+    story_id: "STORY-1",
     scope: {
       visibility: "global_author_pool",
       branch_id: null
@@ -701,7 +701,7 @@ function completeStorylet(): Record<string, unknown> {
       {
         action_family: "communicate",
         surface_hint: "Ask one bounded follow-up question.",
-        likely_effects: ["OBL-0001"]
+        likely_effects: ["OBL-1"]
       }
     ],
     saliency: {
@@ -719,7 +719,7 @@ function completeStorylet(): Record<string, unknown> {
   };
 }
 
-function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "SLT-0001")) {
+function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?? "SLT-1")) {
   return record("storylet_record", id, `stories/red-bunny/_source/storylets/${id}.yaml`, {
     ...parsed,
     id
@@ -729,8 +729,8 @@ function storyletRecord(parsed: Record<string, unknown>, id = String(parsed.id ?
 function storyFactRecord(overrides: Record<string, unknown>, id: string) {
   return record("story_fact_record", id, `stories/red-bunny/_source/facts/${id}.yaml`, {
     id,
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
     statement: "The gate is damaged.",
     derived_from: [],
     ...overrides
@@ -740,13 +740,13 @@ function storyFactRecord(overrides: Record<string, unknown>, id: string) {
 function storyObligationRecord(overrides: Record<string, unknown>, id: string) {
   return record("obligation_record", id, `stories/red-bunny/_source/obligations/${id}.yaml`, {
     id,
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
     status: "open",
     obligation_kind: "promise",
     description: "Mara owes Ren a guarded answer.",
-    owed_by: "STENT-0001",
-    owed_to: "STENT-0002",
+    owed_by: "STENT-1",
+    owed_to: "STENT-2",
     trigger_to_close: "Mara gives Ren a truthful answer or transfers the debt.",
     ...overrides
   });
@@ -755,13 +755,13 @@ function storyObligationRecord(overrides: Record<string, unknown>, id: string) {
 function storyConsequenceRecord(overrides: Record<string, unknown>, id: string) {
   return record("consequence_record", id, `stories/red-bunny/_source/consequences/${id}.yaml`, {
     id,
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
     status: "pending",
     consequence_kind: "public_pressure",
     description: "The public accusation will alter how witnesses respond.",
     resolves_when: "The accusation is answered or displaced by stronger evidence.",
-    derived_from: ["SE-0001"],
+    derived_from: ["SE-1"],
     ...overrides
   });
 }

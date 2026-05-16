@@ -1,17 +1,17 @@
 {
-  "originating_spec": "archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md",
-  "archived_spec": "archive/specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md",
-  "last_ticket": "archive/tickets/SPEC35STOPIPEIG-009.md",
-  "last_result": "spec_archived",
-  "last_work_commit": "7bd848b2560cc923aedc32626f517730b9b69f0b",
+  "originating_spec": "specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
+  "archived_spec": "archive/specs/SPEC-36-story-pipeline-ninth-iteration-fixes.md",
+  "last_ticket": "archive/tickets/SPEC36STOPIPNIN-003.md",
+  "last_result": "completed_archived_and_spec_archived",
+  "last_work_commit": "8509aebadde2496584bc420efc8095f5689e187f",
   "last_state_commit": "self",
   "next_target": null,
   "queue": [],
-  "phase": "completed",
+  "phase": "complete",
   "in_progress_ticket": null,
   "owned_dirty_summary": null,
   "blocked": false,
   "blocker": null,
-  "dirty_state": "clean tracked worktree after final spec archive commit; expected ignored artifacts include user-local briefs/worlds/world-proposals content, .claude/settings.local.json, and tool dist/node_modules outputs including tools/validators/, tools/world-mcp/, tools/patch-engine/, and tools/hooks/",
-  "updated_at": "2026-05-16"
+  "dirty_state": "clean tracked worktree after state commit; expected ignored artifacts include tools/validators/dist, tools/validators/node_modules, tools/world-mcp/dist, tools/world-mcp/node_modules, tools/world-mcp/.secret, tools/patch-engine/dist, tools/patch-engine/node_modules, tools/hooks/dist, tools/hooks/logs, and tools/hooks/node_modules from package proof",
+  "updated_at": "2026-05-17"
 }

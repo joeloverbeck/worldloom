@@ -5,7 +5,7 @@ import { RELATIONSHIP_AXES } from "../../src/rules/_shared/predicate-dsl-grammar
 import { recordSchemaCompliance } from "../../src/structural/record-schema-compliance.js";
 import { context, record } from "./helpers.js";
 
-const FILE_PATH = "stories/test-story/_source/relationships/SREL-0001.yaml";
+const FILE_PATH = "stories/test-story/_source/relationships/SREL-1.yaml";
 
 test("record_schema_compliance accepts every contract SREL axis value", async () => {
   for (const axis of RELATIONSHIP_AXES) {
@@ -47,8 +47,8 @@ test("record_schema_compliance accepts structured SREL direction variants", asyn
     {
       direction: {
         kind: "directed",
-        from: "STENT-0001",
-        to: "STENT-0002"
+        from: "STENT-1",
+        to: "STENT-2"
       }
     },
     {
@@ -75,20 +75,20 @@ test("record_schema_compliance rejects illegal structured SREL direction variant
       direction: {
         kind: "directed",
         from: null,
-        to: "STENT-0002"
+        to: "STENT-2"
       }
     },
     {
       direction: {
         kind: "directed",
-        from: "STENT-0001",
+        from: "STENT-1",
         to: null
       }
     },
     {
       direction: {
         kind: "bidirectional",
-        from: "STENT-0001",
+        from: "STENT-1",
         to: null
       }
     },
@@ -96,7 +96,7 @@ test("record_schema_compliance rejects illegal structured SREL direction variant
       direction: {
         kind: "bidirectional",
         from: null,
-        to: "STENT-0002"
+        to: "STENT-2"
       }
     }
   ];
@@ -118,18 +118,18 @@ test("record_schema_compliance rejects illegal structured SREL direction variant
 
 function relationshipRecord(parsed: Record<string, unknown>) {
   return {
-    ...record("relationship_record_story", "test-story:SREL-0001", FILE_PATH, parsed),
+    ...record("relationship_record_story", "test-story:SREL-1", FILE_PATH, parsed),
     story_slug: "test-story"
   };
 }
 
 function validRelationship(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
-    id: "SREL-0001",
-    story_id: "STORY-001",
-    created_at_page: "PG-0001",
+    id: "SREL-1",
+    story_id: "STORY-1",
+    created_at_page: "PG-1",
     axis: "trust",
-    participants: ["STENT-0001", "STENT-0002"],
+    participants: ["STENT-1", "STENT-2"],
     direction: {
       kind: "bidirectional",
       from: null,

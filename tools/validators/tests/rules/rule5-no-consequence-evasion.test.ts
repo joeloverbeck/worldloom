@@ -27,8 +27,8 @@ test("rule5_no_consequence_evasion matches CF required_world_updates to SEC ops 
           {
             op: "create_cf_record",
             target_world: "test",
-            target_file: "_source/canon/CF-0001.yaml",
-            payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INSTITUTIONS"] } }
+            target_file: "_source/canon/CF-1.yaml",
+            payload: { cf_record: { ...completeCf, id: "CF-1", required_world_updates: ["INSTITUTIONS"] } }
           }
         ]
       } as unknown as PatchPlanEnvelope
@@ -47,8 +47,8 @@ test("rule5_no_consequence_evasion matches CF required_world_updates to SEC ops 
           {
             op: "create_cf_record",
             target_world: "test",
-            target_file: "_source/canon/CF-0001.yaml",
-            payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INSTITUTIONS"] } }
+            target_file: "_source/canon/CF-1.yaml",
+            payload: { cf_record: { ...completeCf, id: "CF-1", required_world_updates: ["INSTITUTIONS"] } }
           },
           {
             op: "create_sec_record",
@@ -76,8 +76,8 @@ test("rule5_no_consequence_evasion matches append_extension SEC ops by file_clas
             {
               op: "create_cf_record",
               target_world: "test",
-              target_file: "_source/canon/CF-0001.yaml",
-              payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: [fileClass] } }
+              target_file: "_source/canon/CF-1.yaml",
+              payload: { cf_record: { ...completeCf, id: "CF-1", required_world_updates: [fileClass] } }
             },
             {
               op: "append_extension",
@@ -85,8 +85,8 @@ test("rule5_no_consequence_evasion matches append_extension SEC ops by file_clas
               payload: {
                 target_record_id: secId,
                 extension: {
-                  originating_cf: "CF-0001",
-                  change_id: "CH-0001",
+                  originating_cf: "CF-1",
+                  change_id: "CH-1",
                   date: "2026-04-26",
                   label: "Pilot extension",
                   body: "Extension body."
@@ -113,8 +113,8 @@ test("rule5_no_consequence_evasion ignores non-SEC append_extension targets", as
           {
             op: "create_cf_record",
             target_world: "test",
-            target_file: "_source/canon/CF-0001.yaml",
-            payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INSTITUTIONS"] } }
+            target_file: "_source/canon/CF-1.yaml",
+            payload: { cf_record: { ...completeCf, id: "CF-1", required_world_updates: ["INSTITUTIONS"] } }
           },
           {
             op: "append_extension",
@@ -122,8 +122,8 @@ test("rule5_no_consequence_evasion ignores non-SEC append_extension targets", as
             payload: {
               target_record_id: "INV-ONT-1",
               extension: {
-                originating_cf: "CF-0001",
-                change_id: "CH-0001",
+                originating_cf: "CF-1",
+                change_id: "CH-1",
                 date: "2026-04-26",
                 label: "Invariant extension",
                 body: "Extension body."
@@ -149,8 +149,8 @@ test("rule5_no_consequence_evasion explains that required_world_updates is SEC-o
           {
             op: "create_cf_record",
             target_world: "test",
-            target_file: "_source/canon/CF-0001.yaml",
-            payload: { cf_record: { ...completeCf, id: "CF-0001", required_world_updates: ["INVARIANTS"] } }
+            target_file: "_source/canon/CF-1.yaml",
+            payload: { cf_record: { ...completeCf, id: "CF-1", required_world_updates: ["INVARIANTS"] } }
           },
           {
             op: "append_extension",
@@ -159,8 +159,8 @@ test("rule5_no_consequence_evasion explains that required_world_updates is SEC-o
             payload: {
               target_record_id: "ONT-2",
               extension: {
-                originating_cf: "CF-0001",
-                change_id: "CH-0001",
+                originating_cf: "CF-1",
+                change_id: "CH-1",
                 date: "2026-04-26",
                 label: "Invariant extension",
                 body: "Extension body."

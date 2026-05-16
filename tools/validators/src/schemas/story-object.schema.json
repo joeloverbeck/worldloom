@@ -4,16 +4,16 @@
   "type": "object",
   "required": ["id", "story_id", "created_at_page", "label", "description", "owner", "current_location"],
   "properties": {
-    "id": { "type": "string", "pattern": "^STOBJ-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
-    "created_at_page": { "type": "string", "pattern": "^PG-[0-9]+$" },
-    "supersedes": { "type": ["string", "null"], "pattern": "^STOBJ-[0-9]+$" },
+    "id": { "type": "string", "pattern": "^STOBJ-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
+    "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^STOBJ-(0|[1-9][0-9]*)$" },
     "label": { "type": "string", "minLength": 1 },
     "description": { "type": "string", "minLength": 1 },
-    "owner": { "type": ["string", "null"], "pattern": "^(STENT-[0-9]+|group:[A-Za-z0-9 _:-]+|public)$" },
+    "owner": { "type": ["string", "null"], "pattern": "^(STENT-(0|[1-9][0-9]*)|group:[A-Za-z0-9 _:-]+|public)$" },
     "current_location": {
       "type": "string",
-      "pattern": "^(STLOC-[0-9]+|offstage|unknown|carried_by:STENT-[0-9]+)$"
+      "pattern": "^(STLOC-(0|[1-9][0-9]*)|offstage|unknown|carried_by:STENT-(0|[1-9][0-9]*))$"
     }
   },
   "additionalProperties": false

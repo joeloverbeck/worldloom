@@ -18,25 +18,25 @@ function createDb(): Database.Database {
   db.exec(readFileSync(path.join(MIGRATIONS, "002_scoped_references.sql"), "utf8"));
   db.exec(readFileSync(path.join(MIGRATIONS, "004_story_bundle_scope.sql"), "utf8"));
   seedNode(db, {
-    nodeId: "alpha:BEL-0001",
+    nodeId: "alpha:BEL-1",
     nodeType: "belief_record",
-    filePath: "stories/alpha/_source/beliefs/BEL-0001.yaml",
+    filePath: "stories/alpha/_source/beliefs/BEL-1.yaml",
     storySlug: "alpha",
     parsed: {
-      id: "BEL-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0002"
+      id: "BEL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-2"
     }
   });
   seedNode(db, {
-    nodeId: "alpha:PG-0002",
+    nodeId: "alpha:PG-2",
     nodeType: "page_record",
-    filePath: "stories/alpha/_source/pages/PG-0002.yaml",
+    filePath: "stories/alpha/_source/pages/PG-2.yaml",
     storySlug: "alpha",
     parsed: {
-      id: "PG-0002",
-      story_id: "STORY-001",
-      state_snapshot: { active_records: { BEL: ["BEL-0001"] } }
+      id: "PG-2",
+      story_id: "STORY-1",
+      state_snapshot: { active_records: { BEL: ["BEL-1"] } }
     }
   });
   return db;
@@ -58,8 +58,8 @@ test("pre-apply read surface reads BEL records by indexed node type", async () =
       record_type: "page_record"
     });
 
-    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-0001"]);
-    assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-0002"]);
+    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-1"]);
+    assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-2"]);
   } finally {
     db.close();
   }
@@ -81,8 +81,8 @@ test("full-world CLI read surface reads BEL records without affecting other type
       record_type: "page_record"
     });
 
-    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-0001"]);
-    assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-0002"]);
+    assert.deepEqual(beliefs.map((record) => record.node_id), ["alpha:BEL-1"]);
+    assert.deepEqual(pages.map((record) => record.node_id), ["alpha:PG-2"]);
   } finally {
     db.close();
   }

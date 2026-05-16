@@ -57,11 +57,11 @@ function cleanPlan(overrides: Record<string, unknown> = {}) {
       {
         op: "create_cf_record" as const,
         target_world: "seeded",
-        target_file: "_source/canon/CF-0001.yaml",
+        target_file: "_source/canon/CF-1.yaml",
         payload: {
           cf_record: {
             ...completeCf,
-            id: "CF-0001",
+            id: "CF-1",
             required_world_updates: ["INSTITUTIONS"],
             ...overrides
           }
@@ -72,7 +72,7 @@ function cleanPlan(overrides: Record<string, unknown> = {}) {
         target_world: "seeded",
         target_file: "_source/institutions/SEC-INS-001.yaml",
         payload: {
-          sec_record: { ...validSection, id: "SEC-INS-001", touched_by_cf: ["CF-0001"] }
+          sec_record: { ...validSection, id: "SEC-INS-001", touched_by_cf: ["CF-1"] }
         }
       }
     ]
@@ -110,6 +110,14 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "audit_only_se_shape"
     );
     assert.equal(auditOnlyExecution?.status, "skipped");
+    const causalDependencyExecution = result.executions.find(
+      (execution) => execution.name === "causal_dependency_threat_scan"
+    );
+    assert.equal(causalDependencyExecution?.status, "skipped");
+    const expectedWitnessExecution = result.executions.find(
+      (execution) => execution.name === "expected_witness_coverage"
+    );
+    assert.equal(expectedWitnessExecution?.status, "skipped");
     const sltCreatedAtPageExecution = result.executions.find(
       (execution) => execution.name === "slt_created_at_page_origin_consistency"
     );
@@ -122,10 +130,10 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
       (execution) => execution.name === "canon_baseline_drift"
     );
     assert.equal(canonBaselineDriftExecution?.status, "skipped");
-    const expectedWitnessExecution = result.executions.find(
+    const nonPropagationExecution = result.executions.find(
       (execution) => execution.name === "non_propagation_tag_shape"
     );
-    assert.equal(expectedWitnessExecution?.status, "skipped");
+    assert.equal(nonPropagationExecution?.status, "skipped");
     const proposalPackageExecution = result.executions.find(
       (execution) => execution.name === "proposal_package_shape"
     );
@@ -155,10 +163,12 @@ test("validatePatchPlan returns no verdicts for a clean pre-apply plan", async (
         row !== recursiveClosureExecution &&
         row !== snapshotIntegrityExecution &&
         row !== auditOnlyExecution &&
+        row !== causalDependencyExecution &&
         row !== sltCreatedAtPageExecution &&
         row !== canonDriftEvidenceExecution &&
         row !== canonBaselineDriftExecution &&
         row !== expectedWitnessExecution &&
+        row !== nonPropagationExecution &&
         row !== proposalPackageExecution &&
         row !== validationTraceExecution &&
         row !== branchIsolationExecution &&
@@ -186,7 +196,7 @@ test("validatePatchPlan accepts matching retrieval record_kind and rejects misma
       rejected.verdicts.some(
         (verdict) =>
           verdict.validator === "record_schema_compliance" &&
-          verdict.location.node_id === "CF-0001" &&
+          verdict.location.node_id === "CF-1" &&
           verdict.code === "record_schema_compliance.const"
       )
     );
@@ -195,7 +205,7 @@ test("validatePatchPlan accepts matching retrieval record_kind and rejects misma
 
 test("validatePatchPlan applies current CF safety blocks only to changed pre-apply records", async () => {
   await withTempRoot(async () => {
-    seedIndexedCf("CF-0002", { ...completeCf, id: "CF-0002", type: "capability" });
+    seedIndexedCf("CF-2", { ...completeCf, id: "CF-2", type: "capability" });
 
     const result = await validatePatchPlan(cleanPlan({
       type: "capability",
@@ -205,12 +215,12 @@ test("validatePatchPlan applies current CF safety blocks only to changed pre-app
 
     assert.ok(!result.verdicts.some(
       (verdict) =>
-        verdict.location.node_id === "CF-0002" &&
+        verdict.location.node_id === "CF-2" &&
         verdict.code.startsWith("record_schema_compliance.missing_")
     ));
     assert.ok(!result.verdicts.some(
       (verdict) =>
-        verdict.location.node_id === "CF-0001" &&
+        verdict.location.node_id === "CF-1" &&
         verdict.code.startsWith("record_schema_compliance.missing_")
     ));
   });
@@ -250,8 +260,8 @@ test("validatePatchPlan skips storylet predicate parsing until story-bundle ops 
 test("validatePatchPlan runs storylet predicate parsing for Shape B storylet ops", async () => {
   await withTempRoot(async () => {
     const plan = storyletPlan({
-      id: "SLT-0001",
-      story_id: "STORY-001",
+      id: "SLT-1",
+      story_id: "STORY-1",
       preconditions: {
         hard: [{ pred: "unknown_predicate", op: "==", value: true }]
       }
@@ -271,14 +281,14 @@ test("validatePatchPlan resolves same-envelope CNSQ references for storylet pred
   await withTempRoot(async () => {
     const storylet = completeStoryletRecord();
     storylet.preconditions = {
-      hard: [{ pred: "record_active", record: "CNSQ-0001" }],
+      hard: [{ pred: "record_active", record: "CNSQ-1" }],
       soft: []
     };
     const plan = storyletPlan(storylet) as unknown as { patches: unknown[] };
     plan.patches.unshift(storyPatch("create_cnsq_record", "consequences", {
-      id: "CNSQ-0001",
-      story_id: "STORY-001",
-      created_at_page: "PG-0001"
+      id: "CNSQ-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1"
     }));
 
     const result = await validatePatchPlan(plan as unknown as PatchPlanEnvelope);
@@ -291,7 +301,7 @@ test("validatePatchPlan resolves same-envelope CNSQ references for storylet pred
       (verdict) =>
         verdict.validator === "storylet_predicate_dsl_parsability" &&
         verdict.code === "predicate.unresolved_reference" &&
-        verdict.message.includes("CNSQ-0001")
+        verdict.message.includes("CNSQ-1")
     ));
   });
 });
@@ -300,7 +310,7 @@ test("validatePatchPlan rejects missing CNSQ references for storylet predicate p
   await withTempRoot(async () => {
     const storylet = completeStoryletRecord();
     storylet.preconditions = {
-      hard: [{ pred: "record_active", record: "CNSQ-0099" }],
+      hard: [{ pred: "record_active", record: "CNSQ-99" }],
       soft: []
     };
 
@@ -310,7 +320,7 @@ test("validatePatchPlan rejects missing CNSQ references for storylet predicate p
       (verdict) =>
         verdict.validator === "storylet_predicate_dsl_parsability" &&
         verdict.code === "predicate.unresolved_reference" &&
-        verdict.message.includes("CNSQ-0099")
+        verdict.message.includes("CNSQ-99")
     ));
   });
 });
@@ -318,7 +328,7 @@ test("validatePatchPlan rejects missing CNSQ references for storylet predicate p
 test("validatePatchPlan applies story-bundle record schemas to Shape B story ops", async () => {
   await withTempRoot(async () => {
     const plan = storyletPlan({
-      id: "SLT-0001",
+      id: "SLT-1",
       preconditions: {
         hard: []
       }
@@ -329,7 +339,7 @@ test("validatePatchPlan applies story-bundle record schemas to Shape B story ops
     assert.ok(result.verdicts.some(
       (verdict) =>
         verdict.validator === "record_schema_compliance" &&
-        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-1.yaml" &&
         verdict.code === "record_schema_compliance.required"
     ));
   });
@@ -368,7 +378,7 @@ test("validatePatchPlan rejects Shape B storylet ops missing schema-required fie
     assert.ok(result.verdicts.some(
       (verdict) =>
         verdict.validator === "record_schema_compliance" &&
-        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-0001.yaml" &&
+        verdict.location.file === "stories/marla-kern-seduction/_source/storylets/SLT-1.yaml" &&
         verdict.message.includes("mystery_policy")
     ));
   });
@@ -384,7 +394,7 @@ test("validatePatchPlan runs recursive reference closure for Shape B page ops", 
       (verdict) =>
         verdict.validator === "recursive_reference_closure" &&
         verdict.code === "recursive_reference_closure.branch_leak" &&
-        verdict.message.includes("SE-0009")
+        verdict.message.includes("SE-9")
     ));
   });
 });
@@ -412,7 +422,7 @@ function storyletPlan(record: Record<string, unknown>) {
     verdict: "ACCEPT",
     originating_skill: "storylet-pool-authoring",
     expected_id_allocations: {
-      slt_ids: [String(record.id ?? "SLT-0001")]
+      slt_ids: [String(record.id ?? "SLT-1")]
     },
     patches: [
       {
@@ -437,25 +447,25 @@ function pagePlanWithBranchLeak() {
     expected_id_allocations: {},
     patches: [
       storyPatch("create_pg_record", "pages", {
-        ...validPageFields("PG-0002"),
-        id: "PG-0002",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001", "PG-0002"],
-        state_snapshot: { objective_facts: ["SF-0001"] }
+        ...validPageFields("PG-2"),
+        id: "PG-2",
+        story_id: "STORY-1",
+        branch_path: ["PG-1", "PG-2"],
+        state_snapshot: { objective_facts: ["SF-1"] }
       }),
       storyPatch("create_sf_record", "facts", {
-        id: "SF-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002",
+        id: "SF-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2",
         statement: "The branch-local fact reaches a future event.",
         authority: "branch_local",
-        evidence: [{ event_id: "SE-0009" }]
+        evidence: [{ event_id: "SE-9" }]
       }),
       storyPatch("create_se_record", "events", {
-        id: "SE-0009",
-        story_id: "STORY-001",
+        id: "SE-9",
+        story_id: "STORY-1",
         event_kind: "selected_choice",
-        created_at_page: "PG-0099",
+        created_at_page: "PG-99",
         ops: []
       })
     ]
@@ -472,10 +482,10 @@ function pagePlanWithDanglingSnapshotReference() {
     expected_id_allocations: {},
     patches: [
       storyPatch("create_pg_record", "pages", {
-        ...validPageFields("PG-0002"),
-        id: "PG-0002",
-        story_id: "STORY-001",
-        branch_path: ["PG-0001", "PG-0002"],
+        ...validPageFields("PG-2"),
+        id: "PG-2",
+        story_id: "STORY-1",
+        branch_path: ["PG-1", "PG-2"],
         state_snapshot: {
           ...completeStateSnapshot(),
           objective_facts: ["SF-9999"]
@@ -495,16 +505,16 @@ function replaySafePagePlan() {
     expected_id_allocations: {},
     patches: [
       storyPatch("create_stloc_record", "locations", {
-        id: "STLOC-0001",
-        story_id: "STORY-001",
-        created_at_page: "PG-0002"
+        id: "STLOC-1",
+        story_id: "STORY-1",
+        created_at_page: "PG-2"
       }),
       storyPatch("create_slt_record", "storylets", completeStoryletRecord()),
       storyPatch("create_se_record", "events", {
-        id: "SE-0002",
-        story_id: "STORY-001",
+        id: "SE-2",
+        story_id: "STORY-1",
         event_kind: "selected_choice",
-        created_at_page: "PG-0002",
+        created_at_page: "PG-2",
         ops: [
           {
             op_id: "OP-0001",
@@ -516,15 +526,15 @@ function replaySafePagePlan() {
         ]
       }),
       storyPatch("create_pg_record", "pages", {
-        ...validPageFields("PG-0002"),
-        id: "PG-0002",
-        story_id: "STORY-001",
-        branch_path: ["PG-0002"],
-        applied_event_ops: ["SE-0002"],
+        ...validPageFields("PG-2"),
+        id: "PG-2",
+        story_id: "STORY-1",
+        branch_path: ["PG-2"],
+        applied_event_ops: ["SE-2"],
         state_snapshot: {
           ...completeStateSnapshot(),
           canon_revision: null,
-          current_location: "STLOC-0001",
+          current_location: "STLOC-1",
           applied_effect_variant: "partial-repair"
         }
       })
@@ -544,20 +554,20 @@ function pendingChildAfterRenderedParentPlan() {
   const plan = replaySafePagePlan();
   const eventPatch = plan.patches.find((patch) => patch.op === "create_se_record");
   const event = eventPatch?.payload.record as Record<string, unknown>;
-  event.id = "SE-0003";
-  event.created_at_page = "PG-0003";
+  event.id = "SE-3";
+  event.created_at_page = "PG-3";
 
   const pagePatch = plan.patches.find((patch) => patch.op === "create_pg_record");
   if (pagePatch === undefined) {
     throw new Error("replaySafePagePlan fixture must include a create_pg_record patch");
   }
-  pagePatch.target_file = "stories/marla-kern-seduction/_source/pages/PG-0003.yaml";
+  pagePatch.target_file = "stories/marla-kern-seduction/_source/pages/PG-3.yaml";
   const page = pagePatch.payload.record as Record<string, unknown>;
   const stateSnapshot = page.state_snapshot as Record<string, unknown>;
-  page.id = "PG-0003";
-  Object.assign(page, validPageFields("PG-0003"));
-  page.branch_path = ["PG-0001", "PG-0002", "PG-0003"];
-  page.applied_event_ops = ["SE-0003"];
+  page.id = "PG-3";
+  Object.assign(page, validPageFields("PG-3"));
+  page.branch_path = ["PG-1", "PG-2", "PG-3"];
+  page.applied_event_ops = ["SE-3"];
   return plan;
 }
 
@@ -596,8 +606,8 @@ function validPageFields(id: string): Record<string, unknown> {
 
 function completeStoryletRecord(): Record<string, unknown> {
   return {
-    id: "SLT-0001",
-    story_id: "STORY-001",
+    id: "SLT-1",
+    story_id: "STORY-1",
     scope: {
       visibility: "global_author_pool",
       branch_id: null
@@ -635,7 +645,7 @@ function completeStoryletRecord(): Record<string, unknown> {
       {
         action_family: "communicate",
         surface_hint: "Ask one bounded follow-up question.",
-        likely_effects: ["OBL-0001"]
+        likely_effects: ["OBL-1"]
       }
     ],
     saliency: {
@@ -655,7 +665,7 @@ function completeStoryletRecord(): Record<string, unknown> {
 
 function completeStateSnapshot(): Record<string, unknown> {
   return {
-    canon_revision: "CH-0001",
+    canon_revision: "CH-1",
     objective_facts: [],
     apparent_facts: [],
     disputed_facts: [],
@@ -672,7 +682,7 @@ function completeStateSnapshot(): Record<string, unknown> {
     relationships_current: [],
     intentions_current: [],
     cast_present: [],
-    current_location: "STLOC-0001",
+    current_location: "STLOC-1",
     accessible_locations: [],
     objects_in_scope: [],
     inventory_by_entity: {},

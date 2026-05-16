@@ -16,11 +16,11 @@
     "provenance"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^SLT-[0-9]+$" },
-    "story_id": { "type": "string", "pattern": "^STORY-[0-9]+$" },
+    "id": { "type": "string", "pattern": "^SLT-(0|[1-9][0-9]*)$" },
+    "story_id": { "type": "string", "pattern": "^STORY-(0|[1-9][0-9]*)$" },
     "supersedes": {
       "type": ["string", "null"],
-      "pattern": "^SLT-[0-9]+$"
+      "pattern": "^SLT-(0|[1-9][0-9]*)$"
     },
     "scope": {
       "type": "object",
@@ -32,14 +32,14 @@
         },
         "branch_id": {
           "type": ["string", "null"],
-          "pattern": "^BR-[0-9]+$"
+          "pattern": "^BR-(0|[1-9][0-9]*)$"
         },
         "visible_branch_path_prefix": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^PG-[0-9]+$"
+            "pattern": "^PG-(0|[1-9][0-9]*)$"
           }
         }
       },
@@ -53,7 +53,7 @@
           "then": {
             "required": ["visible_branch_path_prefix"],
             "properties": {
-              "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" },
+              "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" },
               "visible_branch_path_prefix": true
             }
           }
@@ -78,7 +78,7 @@
           "then": {
             "not": { "required": ["visible_branch_path_prefix"] },
             "properties": {
-              "branch_id": { "type": "string", "pattern": "^BR-[0-9]+$" }
+              "branch_id": { "type": "string", "pattern": "^BR-(0|[1-9][0-9]*)$" }
             }
           }
         }
@@ -86,7 +86,7 @@
     },
     "created_at_page": {
       "type": ["string", "null"],
-      "pattern": "^PG-[0-9]+$"
+      "pattern": "^PG-(0|[1-9][0-9]*)$"
     },
     "title": { "type": "string", "minLength": 1 },
     "move_family": {
@@ -217,7 +217,7 @@
       "properties": {
         "forbidden_resolutions": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^M-[0-9]+$" }
+          "items": { "type": "string", "pattern": "^M-(0|[1-9][0-9]*)$" }
         },
         "allowed_authority": {
           "type": "string",
@@ -241,7 +241,7 @@
   "$defs": {
     "effectReference": {
       "type": "string",
-      "pattern": "^(?:bound:[a-z][a-z0-9_-]*|[A-Z]+-[0-9]+)$"
+      "pattern": "^(?:bound:[a-z][a-z0-9_-]*|[A-Z]+-(0|[1-9][0-9]*))$"
     }
   },
   "additionalProperties": false

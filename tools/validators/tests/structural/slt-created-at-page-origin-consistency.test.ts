@@ -7,7 +7,7 @@ import { context, record } from "./helpers.js";
 test("slt_created_at_page_origin_consistency rejects runtime_jit storylets without a page id", async () => {
   const verdicts = await sltCreatedAtPageOriginConsistency.run(
     undefined,
-    context([storylet("SLT-0001", { created_at_page: null, provenance: { origin: "runtime_jit" } })])
+    context([storylet("SLT-1", { created_at_page: null, provenance: { origin: "runtime_jit" } })])
   );
 
   assert.ok(verdicts.some((verdict) => verdict.code === "slt_created_at_page_origin_mismatch"));
@@ -16,7 +16,7 @@ test("slt_created_at_page_origin_consistency rejects runtime_jit storylets witho
 test("slt_created_at_page_origin_consistency accepts author_batch storylets with null created_at_page", async () => {
   const verdicts = await sltCreatedAtPageOriginConsistency.run(
     undefined,
-    context([storylet("SLT-0002", { created_at_page: null, provenance: { origin: "author_batch" } })])
+    context([storylet("SLT-2", { created_at_page: null, provenance: { origin: "author_batch" } })])
   );
 
   assert.deepEqual(verdicts, []);
@@ -25,7 +25,7 @@ test("slt_created_at_page_origin_consistency accepts author_batch storylets with
 test("slt_created_at_page_origin_consistency accepts bootstrap_seed storylets with a page id", async () => {
   const verdicts = await sltCreatedAtPageOriginConsistency.run(
     undefined,
-    context([storylet("SLT-0003", { created_at_page: "PG-0001", provenance: { origin: "bootstrap_seed" } })])
+    context([storylet("SLT-3", { created_at_page: "PG-1", provenance: { origin: "bootstrap_seed" } })])
   );
 
   assert.deepEqual(verdicts, []);
@@ -46,7 +46,7 @@ function storylet(id: string, overrides: Record<string, unknown> = {}) {
   return {
     ...record("storylet_record", `test-story:${id}`, `stories/test-story/_source/storylets/${id}.yaml`, {
       id,
-      story_id: "STORY-001",
+      story_id: "STORY-1",
       scope: {
         visibility: "global_author_pool",
         branch_id: null
@@ -97,6 +97,6 @@ function patchPlan(op: "create_pg_record" | "create_slt_record") {
     verdict: "story_audit",
     originating_skill: "test",
     expected_id_allocations: {},
-    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "SLT-0001" } } }]
+    patches: [{ op, target_world: "test", payload: { story_slug: "test-story", record: { id: "SLT-1" } } }]
   };
 }
