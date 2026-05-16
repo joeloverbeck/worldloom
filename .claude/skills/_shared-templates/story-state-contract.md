@@ -314,8 +314,8 @@ created_at_page: PG-<integer> | null        # required for provenance.origin: ru
 title: string*
 move_family: orient | world_pressure | pursuit | investigation | disclosure | negotiation | bond_shift | status_shift | conflict | evasion | protection | resource_exchange | transformation | ritual_protocol | decision | recovery   # *
 preconditions:
-  hard: [<predicate>]*                 # see §5 closed predicate DSL
-  soft: [<predicate>]
+  hard: [<predicate object>]*          # see §5 closed predicate DSL emitted form
+  soft: [<predicate object>]
 beats:                                 # * 1-5 beats per block
   - beat_id: B1*
     function: setup | action | pressure | turn | consequence | exit   # *
@@ -710,6 +710,25 @@ A failed receipt blocks publication only if the attaching skill ran with `strict
 ## 5. Closed Predicate DSL
 
 `SLT.preconditions.hard | soft` use this closed grammar. No free-form predicate prose.
+The table below is compact notation for humans; actual SLT YAML emits flat
+predicate objects with `pred: <predicate_name>` plus predicate-specific fields.
+`pred` names are closed by `tools/validators/src/rules/_shared/predicate-dsl-grammar.ts`
+and exposed in the `tools/validators/src/schemas/story-storylet.schema.json`
+schema-discovery surface. Do not emit `predicate` / `args` wrapper objects.
+
+Canonical emitted form:
+
+```yaml
+preconditions:
+  hard:
+    - pred: record_active
+      record: STENT-1
+    - pred: any_belief
+      alias: public_belief
+      holder_role: witness
+      mode: believes
+  soft: []
+```
 
 | Predicate | Shape | Consumed by |
 |---|---|---|
