@@ -1,5 +1,6 @@
 import { auditOnlySeShape } from "../structural/audit-only-se-shape.js";
 import { branchIsolation } from "../structural/branch-isolation.js";
+import { canonBaselineDrift } from "../structural/canon-baseline-drift.js";
 import { canonDriftClassificationEvidence } from "../structural/canon-drift-classification-evidence.js";
 import { crossFileReference } from "../structural/cross-file-reference.js";
 import { expectedWitnessCoverage } from "../structural/expected-witness-coverage.js";
@@ -40,6 +41,7 @@ export const structuralValidators: readonly Validator[] = [
   observerFirewall,
   auditOnlySeShape,
   sltCreatedAtPageOriginConsistency,
+  canonBaselineDrift,
   canonDriftClassificationEvidence,
   expectedWitnessCoverage,
   snapshotReplayEquality,

@@ -6,7 +6,7 @@
 **Date**: 2026-05-16
 **Supersedes**: none (extends `archive/specs/SPEC-33-story-pipeline-seventh-iteration-fixes.md` §Risks "Missing audit-named validators")
 **Companion triage**: `docs/triage/2026-05-16-story-related-improvements-seventh-iteration-triage.md` — SPEC-34 is the validator-hardening follow-up named in the triage's "Cross-spec follow-ups" section under SPEC-33.
-**Implementation note (2026-05-16)**: D1 `branch_isolation` landed and was archived at `archive/tickets/SPEC34STOVALHAR-001.md`; D2 `observer_firewall` landed and was archived at `archive/tickets/SPEC34STOVALHAR-002.md` with schema-valid CHC enforcement focused on BEL grounding plus SLT holder consistency and defensive malformed-SF coverage; D3 `lie_promoted_silently` landed and was archived at `archive/tickets/SPEC34STOVALHAR-003.md` with same-package registry/inventory proof; D4 remains active under `tickets/SPEC34STOVALHAR-004.md`, with D5 as the capstone.
+**Implementation note (2026-05-16)**: D1 `branch_isolation` landed and was archived at `archive/tickets/SPEC34STOVALHAR-001.md`; D2 `observer_firewall` landed and was archived at `archive/tickets/SPEC34STOVALHAR-002.md` with schema-valid CHC enforcement focused on BEL grounding plus SLT holder consistency and defensive malformed-SF coverage; D3 `lie_promoted_silently` landed and was archived at `archive/tickets/SPEC34STOVALHAR-003.md` with same-package registry/inventory proof; D4 `canon_baseline_drift` landed and was archived at `archive/tickets/SPEC34STOVALHAR-004.md` with CH-window, closed-enum, registry, and full-suite proof; D5 remains active as the capstone.
 
 ## Problem Statement
 
