@@ -1,6 +1,6 @@
 # SPEC35STOPIPEIG-005: Downgrade causal_dependency_threat_scan skill prose to judgment-based review
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: MEDIUM
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` and `.claude/skills/branching-story-health-audit/SKILL.md` (skill prose only)
@@ -8,15 +8,15 @@
 
 ## Problem
 
-`tools/validators/src/public/registry.ts` registers 20 structural validators; none is `causal_dependency_threat_scan`. Grep across `tools/validators/src/{structural,rules}/` returns zero implementation matches. The name appears in skill prose as if it were a registered validator at:
-- `.claude/skills/branching-story-turn-cycle/SKILL.md:443` (Phase 9 step 8, "Causal dependency threat scan (`causal_dependency_threat_scan`)")
-- `.claude/skills/branching-story-turn-cycle/SKILL.md:495` (Rule 5 mechanism prose)
-- `.claude/skills/branching-story-turn-cycle/SKILL.md:510` (Rule 5 alignment table row)
-- `.claude/skills/branching-story-health-audit/SKILL.md:236` (Replay sub-checks)
+At intake, `tools/validators/src/public/registry.ts` registered 20 structural validators; none was `causal_dependency_threat_scan`. Grep across `tools/validators/src/{structural,rules}/` returned zero implementation matches. The name appeared in skill prose as if it were a registered validator at:
+- `.claude/skills/branching-story-turn-cycle/SKILL.md` Phase 9 step 8 ("Causal dependency threat scan (`causal_dependency_threat_scan`)")
+- `.claude/skills/branching-story-turn-cycle/SKILL.md` Rule 5 mechanism prose
+- `.claude/skills/branching-story-turn-cycle/SKILL.md` Rule 5 alignment table row
+- `.claude/skills/branching-story-health-audit/SKILL.md` Phase 2g replay sub-checks
 
 (Step 2 codebase validation confirmed zero references in `.claude/skills/_shared-templates/story-state-contract.md` and `docs/FOUNDATIONS.md` — the spec's contemplated FOUNDATIONS edit is unnecessary; scope refined to 4 references across 2 skill files.)
 
-This is documented-but-missing drift — skill prose promises a deterministic check that does not exist. Implementing the four subcases (`choice_dependency_clobbered`, `affordance_dependency_clobbered`, `obligation_counterparty_unavailable_without_transfer`, `slt_precondition_clobbered`) is multi-file new-feature work; deferred to validator-hardening-II per SPEC-35 §Risks & Open Questions. The immediate fix is to honestly frame the skill prose: it's a judgment-based pre-apply review with the planned validator named as a forward-pointer.
+This was documented-but-missing drift — skill prose promised a deterministic check that does not exist. Implementing the four subcases (`choice_dependency_clobbered`, `affordance_dependency_clobbered`, `obligation_counterparty_unavailable_without_transfer`, `slt_precondition_clobbered`) is multi-file new-feature work; deferred to validator-hardening-II per SPEC-35 §Risks & Open Questions. This ticket now honestly frames the skill prose as judgment-based pre-apply/replay review with the planned validator named as a forward-pointer.
 
 ## Assumption Reassessment (2026-05-16)
 
@@ -36,25 +36,25 @@ This is documented-but-missing drift — skill prose promises a deterministic ch
 2. No skill prose claims `causal_dependency_threat_scan` is a registered validator after this ticket lands → manual review of the 4 reference sites confirms framing.
 3. Skill files parse cleanly as markdown → no broken section headers, no unclosed code blocks.
 
-## What to Change
+## Landed Changes
 
 ### 1. Reframe references in `branching-story-turn-cycle/SKILL.md`
 
-- Line 443 (Phase 9 step 8): change the framing from "validator emits X" to a judgment-based-review framing with the forward-pointer. Specifically, replace the existing step's framing (`Causal dependency threat scan (causal_dependency_threat_scan)`) with `Causal dependency threat scan (judgment-based pre-apply review; full deterministic validator implementation deferred — see SPEC-35 §Risks & Open Questions)`. The step's substantive sub-check descriptions (the 4 subcases) remain unchanged.
-- Line 495 (Rule 5 mechanism prose): rephrase any "the validator rejects" language as "the operator's judgment-based review rejects" within the relevant sub-clause. Substantive content (the 4 subcases) unchanged.
-- Line 510 (Rule 5 alignment table row): in the table cell, change `\`causal_dependency_threat_scan\`` to `causal_dependency_threat_scan (judgment-based)` so the audit-trail row makes the deployment status visible.
+- Phase 9 step 8 now frames the causal dependency threat scan as a judgment-based pre-apply review and points to SPEC-35 §Risks & Open Questions for the deferred full deterministic validator.
+- Rule 5 mechanism prose now says the judgment-based causal dependency review rejects clobbered choices, affordances, obligations, and high-salience debt paths.
+- The Rule 5 alignment table marks `causal_dependency_threat_scan` as judgment-based so the audit-trail row makes the deployment status visible.
 
 ### 2. Reframe reference in `branching-story-health-audit/SKILL.md`
 
-- Line 236 (Replay sub-checks): change the framing from "validator sub-checks" to "judgment-based replay sub-checks (parallel to `branching-story-turn-cycle` Phase 9; full deterministic validator implementation deferred — see SPEC-35 §Risks & Open Questions)". The substantive sub-check descriptions remain unchanged.
+- Phase 2g now frames the replay surface as judgment-based sub-checks parallel to `branching-story-turn-cycle` Phase 9 and points to SPEC-35 §Risks & Open Questions for the deferred full deterministic validator.
 
 ### 3. No registry change
 
-The validator is not registered today; this deliverable does NOT add a registry entry. `tools/validators/src/public/registry.ts` is unchanged.
+The validator is not registered today; this deliverable did not add a registry entry. `tools/validators/src/public/registry.ts` is unchanged.
 
 ### 4. FOUNDATIONS unchanged (zero references)
 
-Step 2 verification confirmed FOUNDATIONS has zero references to `causal_dependency_threat_scan`. No edit needed.
+Step 2 verification confirmed FOUNDATIONS has zero exact `causal_dependency_threat_scan` references. No edit needed.
 
 ## Files to Touch
 
@@ -91,3 +91,19 @@ Step 2 verification confirmed FOUNDATIONS has zero references to `causal_depende
 
 1. `grep -nE 'causal_dependency_threat_scan' .claude/skills/branching-story-{turn-cycle,health-audit}/SKILL.md` — verification grep; expected to return matches WITH the "judgment-based" framing visible in surrounding context.
 2. Manual markdown review of the 4 reference sites to confirm framing.
+
+## Outcome
+
+Completed 2026-05-16. The two story-pipeline skill files now describe `causal_dependency_threat_scan` as judgment-based review/replay discipline with a SPEC-35 §Risks & Open Questions forward-pointer for the deferred deterministic validator. No validator registry, source, schema, FOUNDATIONS, or shared story-state contract changes were made.
+
+## Verification Result
+
+- `grep -nE 'causal_dependency_threat_scan' .claude/skills/branching-story-{turn-cycle,health-audit}/SKILL.md` returned three live skill hits, each with judgment-based/deferred-validator framing.
+- `rg -n "registered validator|validator emits|the validator rejects|validator sub-checks|Causal dependency threat" .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` returned only the reframed Phase 9 heading, with no stale registered-validator or validator-rejects wording.
+- `rg -n "causal_dependency_threat_scan|causal-dependency-threat-scan" tools/validators/src/structural tools/validators/src/rules` returned no implementation hits, confirming the registry/source boundary remains unchanged.
+- `git diff --check -- .claude/skills/branching-story-turn-cycle/SKILL.md .claude/skills/branching-story-health-audit/SKILL.md` passed.
+
+## Deviations
+
+- The spec's broader D5 discussion mentioned possible FOUNDATIONS treatment, but live reassessment found no exact `causal_dependency_threat_scan` hits in `docs/FOUNDATIONS.md`; FOUNDATIONS stayed unchanged.
+- The broader discovery sweep still finds historical/planning references in SPEC-35 and its triage doc. Those are not operational skill prose and remain valid provenance for the deferred validator-hardening-II work.

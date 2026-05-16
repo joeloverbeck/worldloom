@@ -13,6 +13,7 @@
 - 2026-05-16: D2 completed and archived in `archive/tickets/SPEC35STOPIPEIG-002.md`. `branch_isolation` now derives bundle-genesis records from root branch/page state instead of hardcoding `PG-0001`, and the validators package proof passed (`npm run build`, targeted branch-isolation test, full `npm test`).
 - 2026-05-16: D3 completed and archived in `archive/tickets/SPEC35STOPIPEIG-003.md`. `get_context_packet` now filters story-local seed IDs before context-packet assembly for story-pipeline task types while preserving the warning and all-story-local success path; the world-mcp package proof passed (`npm run build`, targeted story-pipeline context-packet test, full `npm test`).
 - 2026-05-16: D4 completed and archived in `archive/tickets/SPEC35STOPIPEIG-004.md`. The former witness-coverage validator is now registered as `non_propagation_tag_shape`, with source/test file renames, registry/test/README updates, active skill and triage wording aligned, stale compiled artifacts removed by a clean rebuild, and the validators package proof passed (`npm run build`, full `npm test`).
+- 2026-05-16: D5 completed and archived in `archive/tickets/SPEC35STOPIPEIG-005.md`. `causal_dependency_threat_scan` references in `branching-story-turn-cycle` and `branching-story-health-audit` now describe judgment-based pre-apply/replay review with a SPEC-35 §Risks & Open Questions forward-pointer; no validator registry/source, FOUNDATIONS, or shared contract edits were needed.
 
 ## Problem Statement
 
