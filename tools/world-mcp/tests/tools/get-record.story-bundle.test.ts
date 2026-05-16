@@ -17,7 +17,7 @@ test("getRecord resolves authored story-bundle ids through story_slug", async ()
 
     const result = await withRepoRoot(root, () =>
       getRecord({
-        record_id: "SLT-0021",
+        record_id: "SLT-21",
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
       })
@@ -25,9 +25,9 @@ test("getRecord resolves authored story-bundle ids through story_slug", async ()
 
     assert.ok("record" in result);
     assert.equal(result.record.record_kind, "storylet_record");
-    assert.equal(result.record.id, "SLT-0021");
+    assert.equal(result.record.id, "SLT-21");
     assert.equal(result.record.title, "Loft Choice");
-    assert.equal(result.file_path, "stories/opening-bells/_source/storylets/SLT-0021.yaml");
+    assert.equal(result.file_path, "stories/opening-bells/_source/storylets/SLT-21.yaml");
   } finally {
     destroyTempRepoRoot(root);
   }
@@ -40,7 +40,7 @@ test("getRecord rejects bundle-scoped ids without story_slug", async () => {
     buildStoryBundleWorld(root);
 
     const result = await withRepoRoot(root, () =>
-      getRecord({ record_id: "SLT-0021", world_slug: "seeded" })
+      getRecord({ record_id: "SLT-21", world_slug: "seeded" })
     );
 
     assert.ok("code" in result);
@@ -85,7 +85,7 @@ test("getRecord routes DA by story_slug presence", async () => {
           body: [
             "id: DA-0001",
             "title: Story Letter",
-            "created_at_page: PG-0001",
+            "created_at_page: PG-1",
             "supersedes: null",
             "summary: A story-local artifact.",
             ""
@@ -126,7 +126,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
 
     const field = await withRepoRoot(root, () =>
       getRecordField({
-        record_id: "SLT-0021",
+        record_id: "SLT-21",
         field_path: ["provenance", "created_at_page"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
@@ -134,14 +134,14 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
     const records = await withRepoRoot(root, () =>
       getRecords({
-        record_ids: ["SLT-0021", "PG-0001"],
+        record_ids: ["SLT-21", "PG-1"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
       })
     );
     const fields = await withRepoRoot(root, () =>
       getRecordsField({
-        record_ids: ["SLT-0021", "PG-0001"],
+        record_ids: ["SLT-21", "PG-1"],
         field_path: ["id"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
@@ -149,7 +149,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
     const ids = await withRepoRoot(root, () =>
       getRecordsField({
-        record_ids: ["SLT-0021", "PG-0001"],
+        record_ids: ["SLT-21", "PG-1"],
         field_path: ["id"],
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG
@@ -157,7 +157,7 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     );
 
     assert.ok("value" in field);
-    assert.equal(field.value, "PG-0001");
+    assert.equal(field.value, "PG-1");
 
     assert.ok(!("code" in records));
     assert.equal(records.delivery_status, "inline");
@@ -166,13 +166,13 @@ test("getRecordField and batch retrieval support story_slug", async () => {
     assert.ok(!("code" in fields));
     assert.deepEqual(
       fields.records.map((entry) => (entry.found ? entry.field_value : undefined)),
-      ["SLT-0021", "PG-0001"]
+      ["SLT-21", "PG-1"]
     );
 
     assert.ok(!("code" in ids));
     assert.deepEqual(
       ids.records.map((entry) => (entry.found ? entry.field_value : undefined)),
-      ["SLT-0021", "PG-0001"]
+      ["SLT-21", "PG-1"]
     );
   } finally {
     destroyTempRepoRoot(root);

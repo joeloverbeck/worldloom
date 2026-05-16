@@ -72,7 +72,7 @@ test("listRecords returns story-bundle records scoped by story_slug", async () =
 
     assert.ok(!("code" in result));
     assert.equal(result.total, 1);
-    assert.deepEqual(result.records.map((record) => record.record_id), ["SLT-0021"]);
+    assert.deepEqual(result.records.map((record) => record.record_id), ["SLT-21"]);
     const record = result.records[0] as Record<string, unknown>;
     assert.equal(record.record_kind, "storylet_record");
     assert.equal(record.title, "Loft Choice");
@@ -98,7 +98,7 @@ test("listRecords returns story status records scoped by story_slug", async () =
 
     assert.ok(!("code" in result));
     assert.equal(result.total, 1);
-    assert.deepEqual(result.records.map((record) => record.record_id), ["STSTAT-0001"]);
+    assert.deepEqual(result.records.map((record) => record.record_id), ["STSTAT-1"]);
     const record = result.records[0] as { body?: Record<string, unknown> };
     assert.equal(record.body?.record_kind, "story_status_record");
     assert.equal(record.body?.life, "alive");
@@ -148,8 +148,8 @@ test("listRecords isolates duplicate authored story ids across bundles", async (
 
     assert.ok(!("code" in current));
     assert.ok(!("code" in other));
-    assert.deepEqual(current.records.map((record) => record.record_id), ["SLT-0021"]);
-    assert.deepEqual(other.records.map((record) => record.record_id), ["SLT-0021"]);
+    assert.deepEqual(current.records.map((record) => record.record_id), ["SLT-21"]);
+    assert.deepEqual(other.records.map((record) => record.record_id), ["SLT-21"]);
     assert.equal((current.records[0] as Record<string, unknown>).title, "Loft Choice");
     assert.equal((other.records[0] as Record<string, unknown>).title, "Salt Thread Choice");
   } finally {

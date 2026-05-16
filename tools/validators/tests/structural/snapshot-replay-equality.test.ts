@@ -343,7 +343,6 @@ function recordsFor(pageSnapshot: Record<string, unknown>, pageHash: string) {
       id: "PG-0002",
       story_id: "STORY-001",
       parent_page_id: "PG-0001",
-      storylet_realized: "SLT-0001",
       applied_event_ops: ["SE-0002"],
       state_snapshot: pageSnapshot,
       state_hash: pageHash

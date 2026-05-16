@@ -19,7 +19,7 @@ This was SPEC-34 D1 immediate post-merge drift. The padded literal was almost ce
 3. Cross-skill boundary under audit: the `BR.root_page_id` field convention (story-state contract §4 Branch records) and the `PG.parent_page_id === null && turn_index === 0` invariant for root pages — load-bearing for genesis detection without relying on string literals.
 4. Rule 4 (No Globalization by Accident) and §Story Bundles §5 motivate this ticket: branch_isolation is the standalone deterministic validator that prevents branch-local records from leaking into global author-pool storylets (per SPEC-34 D1's intake). Restated: bundle-genesis records remain globally visible until superseded; branch-local records do not. The validator must correctly identify which records are bundle-genesis under the unpadded-ID convention.
 5. This ticket touches a structural validator (`branch_isolation`) that gates story-bundle record writes at engine pre-apply time — a Canon Safety Check surface for story records. The fix CORRECTS the firewall by recognizing legal bundle-genesis records (no false-positive flagging of legal global-storylet references); the validator does not interact with the Mystery Reserve firewall directly, so no MR weakening is possible from this change.
-6. Pre-edit validator package baseline passed: `npm test` from `tools/validators/` reported 303 passing tests. Existing branch-isolation positive fixtures needed `BR.root_page_id` on root branches to remain truthful under the new derivation; this is local fixture truthing, not the broader padded-ID sweep owned by `tickets/SPEC35STOPIPEIG-008.md`.
+6. Pre-edit validator package baseline passed: `npm test` from `tools/validators/` reported 303 passing tests. Existing branch-isolation positive fixtures needed `BR.root_page_id` on root branches to remain truthful under the new derivation; this is local fixture truthing, not the broader padded-ID sweep owned by `archive/tickets/SPEC35STOPIPEIG-008.md`.
 7. The originating spec progress note was stale after D2 landed, so `specs/SPEC-35-story-pipeline-eighth-iteration-fixes.md` was updated with a dated D2 completion note.
 
 ## Architecture Check
@@ -31,7 +31,7 @@ This was SPEC-34 D1 immediate post-merge drift. The padded literal was almost ce
 
 1. Branch-isolation validator allows global author-pool storylets to reference bundle-genesis records → fixture-driven test where `BR-1.root_page_id: PG-1`, `BEL-1.created_at_page: PG-1`, global `SLT-1` references `BEL-1` → expect validator to pass (recognize `BEL-1` as bundle-genesis).
 2. Hardcoded `PG-0001` literal removed → codebase grep-proof: `! grep -nE 'PG-0001' tools/validators/src/structural/branch-isolation.ts` returns zero matches.
-3. Existing branch-isolation tests still pass after local root-page fixture truthing; broader fixture refresh remains `tickets/SPEC35STOPIPEIG-008.md` → `npm test` in `tools/validators/`.
+3. Existing branch-isolation tests still pass after local root-page fixture truthing; broader fixture refresh remains `archive/tickets/SPEC35STOPIPEIG-008.md` → `npm test` in `tools/validators/`.
 
 ## Landed Changes
 
@@ -99,4 +99,4 @@ Completed 2026-05-16.
 ## Deviations
 
 - The first focused branch-isolation run after implementation failed an existing positive fixture because that fixture did not declare `BR.root_page_id`. The fixture was corrected locally because root-page-aware genesis detection now requires the schema field the test claimed to model.
-- Broader padded-ID fixture refresh remains out of scope and owned by `tickets/SPEC35STOPIPEIG-008.md`.
+- Broader padded-ID fixture refresh remains out of scope and owned by `archive/tickets/SPEC35STOPIPEIG-008.md`.

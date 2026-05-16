@@ -520,7 +520,6 @@ function replaySafePagePlan() {
         id: "PG-0002",
         story_id: "STORY-001",
         branch_path: ["PG-0002"],
-        storylet_realized: "SLT-0001",
         applied_event_ops: ["SE-0002"],
         state_snapshot: {
           ...completeStateSnapshot(),

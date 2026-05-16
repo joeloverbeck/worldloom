@@ -110,12 +110,12 @@ test("persisted context-packet summaries include story-bundle context summary", 
       story_slug: STORY_FIXTURE_SLUG,
       storylet_total: 50,
       visibility_filtered_storylet_count: 50,
-      open_obligation_ids: ["OBL-0001"],
-      active_thread_ids: ["THR-0001"],
-      longest_active_branch_path: ["PG-0001"],
-      recent_page_ids: ["PG-0001"],
-      mystery_ids: ["M-0001"],
-      cast_stent_ids: ["STENT-0002"],
+      open_obligation_ids: ["OBL-1"],
+      active_thread_ids: ["THR-1"],
+      longest_active_branch_path: ["PG-1"],
+      recent_page_ids: ["PG-1"],
+      mystery_ids: ["M-1"],
+      cast_stent_ids: ["STENT-2"],
       invariant_ids: ["INV-social-intimacy"]
     });
     assert.equal(result.story_bundle_context, null);

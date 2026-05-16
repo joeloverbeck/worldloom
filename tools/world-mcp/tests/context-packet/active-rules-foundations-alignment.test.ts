@@ -170,19 +170,19 @@ function seedCanonAdditionActiveRulesWorld(root: string): void {
         summary: largeSummary
       },
       {
-        node_id: "CF-0001",
+        node_id: "CF-1",
         world_slug: "seeded",
-        file_path: "_source/canon/CF-0001.yaml",
+        file_path: "_source/canon/CF-1.yaml",
         node_type: "canon_fact_record",
-        body: "id: CF-0001\nstatement: The salt levy shapes market days.\n",
+        body: "id: CF-1\nstatement: The salt levy shapes market days.\n",
         summary: largeSummary
       },
       {
-        node_id: "M-0001",
+        node_id: "M-1",
         world_slug: "seeded",
-        file_path: "_source/mystery-reserve/M-0001.yaml",
+        file_path: "_source/mystery-reserve/M-1.yaml",
         node_type: "mystery_reserve_entry",
-        body: "id: M-0001\nstatus: active\nwhat_is_unknown: Who first found the salt spring.\n",
+        body: "id: M-1\nstatus: active\nwhat_is_unknown: Who first found the salt spring.\n",
         summary: largeSummary
       },
       ...Array.from({ length: 12 }, (_, index) => ({
@@ -197,8 +197,8 @@ function seedCanonAdditionActiveRulesWorld(root: string): void {
     ],
     edges: [
       {
-        source_node_id: "CF-0001",
-        target_node_id: "M-0001",
+        source_node_id: "CF-1",
+        target_node_id: "M-1",
         edge_type: "firewall_for"
       }
     ]
@@ -215,7 +215,7 @@ test("canon_addition active rules use FOUNDATIONS validation rule names", async 
       getContextPacket({
         task_type: "canon_addition",
         world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
+        seed_nodes: ["CF-1"],
         token_budget: 100000
       })
     );
@@ -290,7 +290,7 @@ test("canon_addition persisted governing summary carries the same active rules",
       assembleContextPacket({
         task_type: "canon_addition",
         world_slug: "seeded",
-        seed_nodes: ["CF-0001"],
+        seed_nodes: ["CF-1"],
         token_budget: 100000
       })
     );

@@ -33,8 +33,8 @@ test("findNamedEntities returns story-local matches alongside canonical matches"
         match.match_kind
       ]),
       [
-        ["SLT-0021", "storylet_record", STORY_FIXTURE_SLUG, "Marla Kern", "canonical_entity"],
-        ["STENT-0002", "story_entity_record", STORY_FIXTURE_SLUG, "Marla Kern", "canonical_entity"]
+        ["SLT-21", "storylet_record", STORY_FIXTURE_SLUG, "Marla Kern", "canonical_entity"],
+        ["STENT-2", "story_entity_record", STORY_FIXTURE_SLUG, "Marla Kern", "canonical_entity"]
       ]
     );
   } finally {

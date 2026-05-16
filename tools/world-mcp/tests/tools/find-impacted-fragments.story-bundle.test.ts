@@ -16,7 +16,7 @@ test("findImpactedFragments resolves story-bundle authored ids with story_slug",
       findImpactedFragments({
         world_slug: "seeded",
         story_slug: STORY_FIXTURE_SLUG,
-        node_ids: ["SF-0001"]
+        node_ids: ["SF-1"]
       })
     );
 
@@ -34,7 +34,7 @@ test("findImpactedFragments rejects story-bundle authored ids without story_slug
     buildStoryBundleWorld(root);
 
     const result = await withRepoRoot(root, () =>
-      findImpactedFragments({ world_slug: "seeded", node_ids: ["SF-0001"] })
+      findImpactedFragments({ world_slug: "seeded", node_ids: ["SF-1"] })
     );
 
     assert.ok("code" in result);
