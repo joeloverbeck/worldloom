@@ -19,7 +19,7 @@ Four test files encode retired schema fields and/or padded IDs that contradict t
 - `tools/validators/tests/structural/snapshot-replay-equality.test.ts:346` — `storylet_realized`
 - `tools/validators/tests/structural/recursive-reference-closure.test.ts:311` and `:331` — `storylet_realized`
 
-The rot allows tests to pass while contracts have moved on, and it masked SPEC-34 D1's padded-`PG-0001` literal bug (SPEC35STOPIPEIG-002) from CI detection. The sweep covers all 4 files in one operation.
+The rot allows tests to pass while contracts have moved on, and it masked SPEC-34 D1's padded-`PG-0001` literal bug (`archive/tickets/SPEC35STOPIPEIG-002.md`) from CI detection. The sweep covers all 4 files in one operation.
 
 ## Assumption Reassessment (2026-05-16)
 
@@ -92,7 +92,7 @@ After all sweeps, re-run `npm test` in BOTH `tools/validators/` AND `tools/world
 
 - Changes to production code (validators, MCP tools) — fixture refresh only.
 - Changes to schema files (`tools/validators/src/schemas/`) — the schemas are authoritative; fixtures must match them.
-- New test cases beyond `archive/tickets/SPEC35STOPIPEIG-001.md` and SPEC35STOPIPEIG-002's coordinated fixtures.
+- New test cases beyond `archive/tickets/SPEC35STOPIPEIG-001.md` and `archive/tickets/SPEC35STOPIPEIG-002.md`'s coordinated fixtures.
 - Removing or archiving tests — only refreshing fixture data; tests that fail due to load-bearing retired-field dependencies are rewritten in place.
 
 ## Acceptance Criteria

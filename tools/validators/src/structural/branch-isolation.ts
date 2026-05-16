@@ -25,6 +25,7 @@ export const branchIsolation: Validator = {
 
     for (const storySlug of storySlugs) {
       const maps = recordMapsForStory(records, storySlug);
+      const rootPageIds = rootPageIdsForStory(maps);
 
       for (const page of maps.byType.get("page_record") ?? []) {
         const parsed = asPlainRecord(page.parsed);
@@ -43,7 +44,7 @@ export const branchIsolation: Validator = {
             continue;
           }
           const targetBranchId = owningBranchId(target, maps);
-          if (targetBranchId === undefined || pageBranchPath.has(targetBranchId) || isBundleGenesisRecord(target)) {
+          if (targetBranchId === undefined || pageBranchPath.has(targetBranchId) || isBundleGenesisRecord(target, rootPageIds)) {
             continue;
           }
           verdicts.push(branchIsolationViolation(page, parsed, reference, targetBranchId));
@@ -62,7 +63,7 @@ export const branchIsolation: Validator = {
             continue;
           }
           const target = maps.byId.get(reference.id);
-          if (target !== undefined && isBundleGenesisRecord(target)) {
+          if (target !== undefined && isBundleGenesisRecord(target, rootPageIds)) {
             continue;
           }
           if (target !== undefined && STORY_LOCAL_ID.test(reference.id)) {
@@ -156,8 +157,32 @@ function owningBranchId(record: IndexedRecord, maps: RecordMaps): string | undef
   return stringValue(asPlainRecord(maps.byId.get(createdAtPage)?.parsed).branch_id);
 }
 
-function isBundleGenesisRecord(record: IndexedRecord): boolean {
-  return stringValue(asPlainRecord(record.parsed).created_at_page) === "PG-0001";
+function rootPageIdsForStory(maps: RecordMaps): Set<string> {
+  const roots = new Set<string>();
+
+  for (const branch of maps.byType.get("branch_record") ?? []) {
+    const parsed = asPlainRecord(branch.parsed);
+    const parent = stringValue(parsed.parent_branch_id);
+    const rootPage = stringValue(parsed.root_page_id);
+    if ((parent === undefined || parent === "null") && rootPage !== undefined) {
+      roots.add(rootPage);
+    }
+  }
+
+  for (const page of maps.byType.get("page_record") ?? []) {
+    const parsed = asPlainRecord(page.parsed);
+    const id = stringValue(parsed.id);
+    if (parsed.parent_page_id === null && parsed.turn_index === 0 && id !== undefined) {
+      roots.add(id);
+    }
+  }
+
+  return roots;
+}
+
+function isBundleGenesisRecord(record: IndexedRecord, rootPageIds: ReadonlySet<string>): boolean {
+  const created = stringValue(asPlainRecord(record.parsed).created_at_page);
+  return created !== undefined && rootPageIds.has(created);
 }
 
 function globalStoryletStaticReferences(storylet: Record<string, unknown>): StoryReference[] {
