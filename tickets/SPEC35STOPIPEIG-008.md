@@ -61,7 +61,7 @@ The rot allows tests to pass while contracts have moved on, and it masked SPEC-3
 - Replace all padded IDs (`PG-0001`, `CHC-0001`, etc.) with unpadded equivalents.
 - Replace retired field references (`world_ent_id`, `derived_from_cf`, `chosen_choice_id`, `storylet_realized`) per the mapping above.
 - Preserve the existing test assertions; only the fixture data changes (unless a test's assertion was tied to a retired field name's presence — in which case the assertion is also updated to match the current schema).
-- Coordinate with SPEC35STOPIPEIG-001: the new fixture added by 001 is already in current-schema form; this ticket only refreshes pre-existing fixtures.
+- Coordinate with `archive/tickets/SPEC35STOPIPEIG-001.md`: the new fixture added by 001 is already in current-schema form; this ticket only refreshes pre-existing fixtures.
 
 ### 3. Sweep `tools/validators/tests/structural/snapshot-replay-equality.test.ts`
 
@@ -83,7 +83,7 @@ After all sweeps, re-run `npm test` in BOTH `tools/validators/` AND `tools/world
 ## Files to Touch
 
 - `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify)
-- `tools/validators/tests/structural/observer-firewall.test.ts` (modify — coordinate with SPEC35STOPIPEIG-001's new test fixture)
+- `tools/validators/tests/structural/observer-firewall.test.ts` (modify — coordinate with `archive/tickets/SPEC35STOPIPEIG-001.md`'s new test fixture)
 - `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify)
 - `tools/validators/tests/structural/recursive-reference-closure.test.ts` (modify)
 - Any additional files surfaced by the verification-step grep (operator-judgment; same sweep)
@@ -92,7 +92,7 @@ After all sweeps, re-run `npm test` in BOTH `tools/validators/` AND `tools/world
 
 - Changes to production code (validators, MCP tools) — fixture refresh only.
 - Changes to schema files (`tools/validators/src/schemas/`) — the schemas are authoritative; fixtures must match them.
-- New test cases beyond SPEC35STOPIPEIG-001 and SPEC35STOPIPEIG-002's coordinated fixtures.
+- New test cases beyond `archive/tickets/SPEC35STOPIPEIG-001.md` and SPEC35STOPIPEIG-002's coordinated fixtures.
 - Removing or archiving tests — only refreshing fixture data; tests that fail due to load-bearing retired-field dependencies are rewritten in place.
 
 ## Acceptance Criteria
@@ -115,7 +115,7 @@ After all sweeps, re-run `npm test` in BOTH `tools/validators/` AND `tools/world
 ### New/Modified Tests
 
 1. `tools/world-mcp/tests/tools/story-bundle-fixture.ts` (modify — fixture refresh).
-2. `tools/validators/tests/structural/observer-firewall.test.ts` (modify — coordinate with SPEC35STOPIPEIG-001).
+2. `tools/validators/tests/structural/observer-firewall.test.ts` (modify — coordinate with `archive/tickets/SPEC35STOPIPEIG-001.md`).
 3. `tools/validators/tests/structural/snapshot-replay-equality.test.ts` (modify — drop `storylet_realized`).
 4. `tools/validators/tests/structural/recursive-reference-closure.test.ts` (modify — drop `storylet_realized`).
 

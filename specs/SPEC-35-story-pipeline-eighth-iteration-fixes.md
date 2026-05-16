@@ -7,6 +7,10 @@
 **Supersedes**: none
 **Companion triage**: `docs/triage/2026-05-16-story-related-improvements-eighth-iteration-triage.md`
 
+## Implementation Progress
+
+- 2026-05-16: D1 completed and archived in `archive/tickets/SPEC35STOPIPEIG-001.md`. `observer_firewall` now resolves the current choice from the child page whose `input.resolved_event_id` matches the SE id, and the validators package proof passed (`npm run build`, targeted observer-firewall test, full `npm test`).
+
 ## Problem Statement
 
 `reports/story-related-improvements-eighth-iteration.md` is the eighth external review (ChatGPT-Pro, with GitHub code-search and file-viewing integration this iteration — unlike the seventh's docs-only access). It evaluated 9 findings (4 P1, 5 P2, 0 P0), proposed 8 amendments (A1–A8 plus an A9-area docs-hygiene item), produced a multi-tier validator/test plan (§11), a research-synthesis section (§12), and an anti-recommendations list (§13). The auditor's executive verdict — "architecture sound; remaining work is validators, MCP behavior, schema discovery, capability wording, and archive-reference hygiene; no new fields, no new managers" — survives intact.
