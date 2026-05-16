@@ -217,7 +217,7 @@
       "properties": {
         "forbidden_resolutions": {
           "type": "array",
-          "items": { "type": "string", "pattern": "^M-(0|[1-9][0-9]*)$" }
+          "items": { "type": "string", "pattern": "^M-[0-9]+$" }
         },
         "allowed_authority": {
           "type": "string",
@@ -241,7 +241,7 @@
   "$defs": {
     "effectReference": {
       "type": "string",
-      "pattern": "^(?:bound:[a-z][a-z0-9_-]*|[A-Z]+-(0|[1-9][0-9]*))$"
+      "pattern": "^(?:bound:[a-z][a-z0-9_-]*|[A-Z]+-[0-9]+)$"
     }
   },
   "additionalProperties": false

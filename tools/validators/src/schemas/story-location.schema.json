@@ -10,7 +10,7 @@
     "supersedes": { "type": ["string", "null"], "pattern": "^STLOC-(0|[1-9][0-9]*)$" },
     "label": { "type": "string", "minLength": 1 },
     "description": { "type": "string", "minLength": 1 },
-    "bound_ent": { "type": ["string", "null"], "pattern": "^ENT-(0|[1-9][0-9]*)$" }
+    "bound_ent": { "type": ["string", "null"], "pattern": "^ENT-[0-9]+$" }
   },
   "additionalProperties": false
 }

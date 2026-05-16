@@ -284,6 +284,152 @@ test("representative amended contract records validate against tightened schemas
   assert.deepEqual(result, []);
 });
 
+test("story schemas accept padded legacy cross-references but keep malformed references invalid", async () => {
+  const paddedReferenceRecords = [
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Mara",
+      bound_char_id: "CHAR-0005",
+      role_in_story: ["primary_actor"]
+    }),
+    storyRecord("story_fact_record", "SF-1", "facts", {
+      id: "SF-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      statement: "The gate was damaged.",
+      authority: "canon_linked",
+      derived_from: ["CF-0005", "STENT-0001"]
+    }),
+    storyRecord("story_status_record", "STSTAT-1", "status", {
+      id: "STSTAT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      entity: "STENT-0001",
+      life: "alive",
+      agency: "free",
+      location: "STLOC-0001",
+      derived_from: ["SE-0001", "CF-0005"]
+    }),
+    storyRecord("story_event_record", "SE-1", "events", {
+      id: "SE-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      parent_page_id: null,
+      event_kind: "selected_choice",
+      actor: "STENT-0001",
+      targets: ["STLOC-0001", "STOBJ-0001"],
+      commitment: {
+        selected_slt_id: "SLT-1",
+        selection_source: "author_pool",
+        alias_bindings: {
+          actor: "STENT-0001",
+          debt: "OBL-0001"
+        }
+      },
+      outcome_route: "accept",
+      world_logic_rationale: "The branch state permits this event.",
+      state_delta: {
+        create: ["SF-0001"],
+        supersede: ["BEL-0001"],
+        close: ["THR-0001"]
+      },
+      promotion_claims: [
+        {
+          source_record: "STSTAT-0001",
+          authority: "canon_candidate"
+        }
+      ]
+    }),
+    storyRecord("belief_record", "BEL-1", "beliefs", {
+      id: "BEL-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      holder: "STENT-0001",
+      claim: "Mara knows the gate is damaged.",
+      belief_mode: "knows",
+      truth_relation: "true",
+      confidence: "certain",
+      visibility: "shared",
+      basis: {
+        source_event: "SE-0001",
+        access_route: "direct_observation",
+        access_records: ["STENT-0001", "SE-0001"]
+      },
+      consequences: {
+        opens: ["OBL-0001"],
+        constrains_choices: ["CHC-0001"]
+      }
+    }),
+    storyRecord("choice_record", "CHC-1", "choices", {
+      id: "CHC-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      surface_label: "Fix the gate",
+      player_visible_intent: "Repair the gate before anyone comes through.",
+      target_or_action_families: ["make_change"],
+      likely_state_pressure: "safety and obligation",
+      associated_commitment_block: null,
+      grounded_in: {
+        records: ["STENT-0001", "STLOC-0001"],
+        affordance_ordinals: [0]
+      }
+    }),
+    storyRecord("story_storylet_record", "SLT-1", "storylets", {
+      id: "SLT-1",
+      story_id: "STORY-1",
+      scope: { visibility: "global_author_pool", branch_id: null },
+      title: "Repair the gate",
+      move_family: "make_change",
+      preconditions: { hard: [{ pred: "record_active", record: "STENT-0001" }] },
+      beats: [{ beat_id: "B1", function: "setup", instruction: "Mara examines the gate." }],
+      effects: { create: ["SF-0001"], supersede: ["BEL-0001"], close: ["THR-0001"] },
+      exit_options: [
+        {
+          action_family: "protect",
+          surface_hint: "Secure the gate",
+          likely_effects: ["CNSQ-0001"]
+        }
+      ],
+      saliency: { urgency: "medium", cooldown_pages: 0 },
+      mystery_policy: { allowed_authority: "apparent", forbidden_resolutions: ["M-0001"] },
+      provenance: { origin: "bootstrap_seed" }
+    })
+  ];
+
+  const paddedResult = await recordSchemaCompliance.run({}, context(paddedReferenceRecords));
+  assert.deepEqual(paddedResult, []);
+
+  const malformedResult = await recordSchemaCompliance.run({}, context([
+    storyRecord("story_entity_record", "STENT-1", "entities", {
+      id: "STENT-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      display_name: "Mara",
+      bound_char_id: "CHAR-X",
+      role_in_story: ["primary_actor"]
+    }),
+    storyRecord("story_fact_record", "SF-1", "facts", {
+      id: "SF-1",
+      story_id: "STORY-1",
+      created_at_page: "PG-1",
+      statement: "The gate was damaged.",
+      authority: "canon_linked",
+      derived_from: ["CF-"]
+    })
+  ]));
+
+  assert.ok(malformedResult.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/bound_char_id")
+  ));
+  assert.ok(malformedResult.some((verdict) =>
+    verdict.code === "record_schema_compliance.pattern" &&
+    verdict.message.includes("/derived_from/0")
+  ));
+});
+
 function readSchema(name: string): { required: string[]; properties: Record<string, unknown>; additionalProperties: unknown } {
   return JSON.parse(readFileSync(path.join(SCHEMA_ROOT, `${name}.schema.json`), "utf8"));
 }

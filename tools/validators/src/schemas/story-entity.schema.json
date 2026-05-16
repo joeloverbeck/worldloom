@@ -9,7 +9,7 @@
     "created_at_page": { "type": "string", "pattern": "^PG-(0|[1-9][0-9]*)$" },
     "supersedes": { "type": ["string", "null"], "pattern": "^STENT-(0|[1-9][0-9]*)$" },
     "display_name": { "type": "string", "minLength": 1 },
-    "bound_char_id": { "type": ["string", "null"], "pattern": "^CHAR-(0|[1-9][0-9]*)$" },
+    "bound_char_id": { "type": ["string", "null"], "pattern": "^CHAR-[0-9]+$" },
     "role_in_story": {
       "type": "array",
       "minItems": 1,

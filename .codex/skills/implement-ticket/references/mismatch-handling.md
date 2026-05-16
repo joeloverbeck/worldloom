@@ -35,6 +35,13 @@ Use a short 1 problem / 3 options / 1 recommendation escalation when:
 
 Do not silently weaken or broaden the ticket.
 
+## Same-seam widening examples
+
+Use these examples to keep top-level routing compact while still making escalation boundaries concrete:
+
+- same-seam / no escalation: a CLI ticket also needs the missing parser/helper module that the CLI path cannot function without.
+- boundary growth / escalate: a CLI ticket appears to require MCP wiring, hook orchestration, or a sibling validator/spec family that the active ticket did not already own.
+
 ## Narrowing rules
 
 When reassessment shows substrate is already live:
