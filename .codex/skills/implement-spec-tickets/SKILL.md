@@ -81,7 +81,7 @@ If the state file conflicts with the live repo, trust the live repo and patch th
 
 If the only conflict is stale `dirty_state` text and live `git status --short` proves the tracked worktree is clean or safely supersedes the old classification, state the stale classification explicitly and refresh it in the next state-file update. Do not create a pre-work state-only commit solely to correct stale dirt text when target selection, queue validity, ownership classification, and archival readiness are unaffected.
 
-`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
+`last_work_commit` means the commit that contains the ticket implementation, review/archive move, follow-up creation, and any applied child-skill hardening for the iteration. Record full commit SHAs in the JSON state file; short SHAs are acceptable in printed handoffs only. `last_state_commit` identifies how the state update was persisted: the same sha as `last_work_commit` when amended into that commit, `"self"` when committed separately as a state-file-only commit, or `"none"` when intentionally left uncommitted. Do not overload one field for both meanings. When `last_state_commit` is `"self"`, the printed handoff must report the actual state-only commit sha. On resume, validate `"self"` by checking the state file's containing commit or latest state-only commit in `git log`, not by expecting the JSON value to contain its own sha.
 
 ## Intake
 
@@ -209,6 +209,8 @@ Before committing:
 
 When `post-ticket-review` archived a ticket with `git mv`, do not try to stage the now-missing active ticket path by name. Stage the archive destination and other edited owned paths, then confirm the source deletion or rename is staged with `git diff --cached --name-status` before committing.
 
+If non-destructive git index commands needed for this harness step fail because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same staging or commit command with the required approval/escalation and record the retry in the handoff or final report. Do not use this as permission for destructive commands or for staging unrelated paths.
+
 If nothing changed after an iteration, do not create an empty commit. Record that there was no commit for that iteration and why.
 
 ### 6. Persist State And Prepare Context Reset
@@ -231,6 +233,8 @@ If the state file itself changes after the work commit, either:
 
 - amend it into the work commit before reporting the sha, then set `last_work_commit` and `last_state_commit` to that amended commit sha; or
 - commit it separately as a harness-state commit, then set `last_work_commit` to the implementation/archive commit and `last_state_commit` to `"self"`. Report the actual state-only commit sha in the handoff after the commit succeeds.
+
+When the remaining queue is empty and the next action is immediate final spec archival in the same context, a separate post-ticket state-only commit may be deferred until after the final spec archive commit. This deferral is allowed only when the tracked worktree is clean except for the state file, no reset boundary is being requested, no blocker exists, and the harness prints a compact checkpoint stating that it is proceeding directly to final spec archival. The final archived-spec state must still be persisted and committed before branch creation or push.
 
 When committing the state file separately with `last_state_commit: "self"`, write `dirty_state` as the expected state after that state-only commit succeeds. Do not record transient dirt for `.codex/run-state/implement-spec-tickets.json` itself unless intentionally leaving the state file uncommitted.
 
@@ -284,6 +288,8 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 7. Run hygiene over the spec archive move and reference repairs.
 8. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
 9. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+
+If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
 
 ## Branch And Push
 
