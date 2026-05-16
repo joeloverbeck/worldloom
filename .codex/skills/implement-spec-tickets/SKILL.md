@@ -293,13 +293,14 @@ When all originating-spec tickets are completed, reviewed, archived, and committ
 
 1. Re-read the originating spec.
 2. Confirm no active `tickets/*.md` still names the spec as active implementation work.
-3. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
-4. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
-5. Confirm the original `specs/` path no longer exists.
-6. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
-7. Run hygiene over the spec archive move and reference repairs.
-8. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
-9. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
+3. Inspect the spec's final verification or close-proof section. Run the final proof lanes it names, or explicitly classify why a named lane is superseded, unavailable, or not part of the accepted close boundary. Record the final proof results in `## Outcome` so the archived spec is self-contained.
+4. Update the spec status and `## Outcome` according to `docs/archival-workflow.md`.
+5. Move the spec to `archive/specs/`, preferring `git mv` when tracked and plain `mv` when untracked.
+6. Confirm the original `specs/` path no longer exists.
+7. Sweep active tickets, docs, specs, same-family archived tickets, and same-seam triage/report docs for stale active-spec path references. Repair actionable references to the archived path, including archived ticket `Deps`, current proof commands, and direct implementation-reference snippets that now point at the archived spec. Leave historical references only when clearly harmless or explicitly labelled as historical intake context.
+8. Run hygiene over the spec archive move and reference repairs.
+9. Commit the spec archive as its own finalization commit unless it is already included in the last ticket-family commit for a clear reason.
+10. Update `.codex/run-state/implement-spec-tickets.json` with `archived_spec`, `next_target: null`, an empty queue, `blocked: false`, the final commit sha, and clean dirty-state classification.
 
 If `git mv`, `git add`, or `git commit` fails during final archival because Codex cannot write the git index or reports a sandbox/read-only filesystem error, rerun the same non-destructive command with the required approval/escalation and record the first failure plus retry result. Do not widen the staged set while retrying.
 
@@ -311,6 +312,8 @@ After the final archive commit and any required final state-file persistence com
 2. Create a new branch from the current HEAD with a concise family name derived from the spec id or filename, for example `spec-31-story-contract-hardening`.
 3. Push the new branch to the configured remote.
 4. Report the branch name, pushed remote, commits created by the harness, archived spec path, archived ticket paths, and any follow-up tickets left active.
+
+This branch step labels the already-committed final `HEAD`. If preserving the starting local branch pointer matters for the repository, create or switch to the family branch before the first harness commit instead of waiting until finalization. Otherwise, creating the branch here is acceptable but the original local branch may already contain the harness commits.
 
 If branch creation or push fails because Codex cannot write the git ref in the sandbox, cannot resolve the remote host, or otherwise hits a clear sandbox/network restriction, rerun the same branch/push command with the required approval or escalation. Record both the first failure and the successful retry, or the remaining blocker if escalation still fails.
 
