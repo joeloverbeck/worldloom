@@ -144,7 +144,7 @@ The envelope JSON itself carries an `approval_token` field, but its value at env
 ```bash
 node tools/world-mcp/dist/src/cli/validate-patch-plan.js /tmp/<plan-id>.json
 node tools/world-mcp/dist/src/cli/sign-approval-token.js /tmp/<plan-id>.json > /tmp/<plan-id>.token
-node tools/world-mcp/dist/src/cli/submit-patch-plan.js /tmp/<plan-id>.json /tmp/<plan-id>.token
+node tools/world-mcp/dist/src/cli/submit-patch-plan.js /tmp/<plan-id>.json /tmp/<plan-id>.token > /tmp/<plan-id>.receipt.json
 ```
 
 Or via MCP:

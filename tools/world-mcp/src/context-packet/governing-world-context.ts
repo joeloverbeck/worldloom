@@ -108,8 +108,13 @@ const GOVERNING_FILE_PATHS: Record<TaskType, string[]> = {
 const ACTIVE_RULES: Record<TaskType, string[]> = {
   canon_addition: [
     "Rule 1: no floating facts",
-    "Rule 2: preserve causal integrity",
-    "Rule 7: preserve Mystery Reserve deliberately"
+    "Rule 2: no pure cosmetics",
+    "Rule 4: no globalization by accident",
+    "Rule 5: no consequence evasion",
+    "Rule 6: no silent retcons",
+    "Rule 7: preserve Mystery Reserve deliberately",
+    "Rule 11: no spectator castes by accident",
+    "Rule 12: no single-trace truths"
   ],
   character_generation: [
     "Rule 4: distribution discipline",
