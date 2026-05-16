@@ -475,11 +475,6 @@ The SAU report and RSP cards are markdown direct-write artifacts (not atomic `_s
 - **Schema minimalism per shared contract §2.** SAU report + RSP card shapes defined inline. No nice-to-have fields.
 - **Skills do not chain.** The audit never invokes `commitment-block-authoring`, `branching-story-turn-cycle`, `branching-story-prose-attach`, `story-fact-promotion-to-canon`, or `story-promotion-closeout`. RSP cards record sibling-handoff recommendations; the user separately invokes the named sibling with the RSP card path as input.
 - **Worktree discipline**: paths resolve from worktree root if invoked inside one.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 2d reads `BEL` records for belief / visibility health checks.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). This skill reads the BEL records that op can create.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 2d's BEL reads are schema-backed.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: `branching_story_health_audit` is registered in `TASK_TYPES`). The rename did not change this skill's task_type string.
 
 ## What is intentionally NOT in this skill
 

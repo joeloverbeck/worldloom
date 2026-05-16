@@ -384,11 +384,6 @@ Rules 1 / 2 / 3 / 5 / 6 / 11 / 12 are world-canon-mutation-surface rules enforce
 - **No post-adjudication closeout in this skill.** After canon-addition adjudicates, the user runs `story-promotion-closeout` to write the verdict back onto story-local records (supersession of SF / BEL / DA / STENT / SREL records that the canon-addition outcome implicates, with branch disposition recorded in the closeout ledger / INDEX surfaces).
 - **Skills do not chain.** This skill never invokes `canon-addition` or `story-promotion-closeout`. Phase 7 surfaces the recommendation; the user separately invokes the named sibling.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 1 reads `BEL` records as evidence for mystery_resolution / story_fact / character_outcome source kinds.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). This skill reads the BEL records that op can create.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 1's BEL evidence records are schema-backed.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: `story_fact_promotion_to_canon` is registered in `TASK_TYPES`). The rename did not change this skill's task_type string.
 
 ## Final Rule
 

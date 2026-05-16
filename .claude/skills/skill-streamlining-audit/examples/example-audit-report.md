@@ -39,7 +39,7 @@ A representative chat-only audit report emitted at Phase 8 against a hypothetica
 
 - **F-03** — LOW — *Off-by-N count: "§18 Scene direction — AUTHOR-WRITTEN five fields:" followed by six items.* — `references/phase-9-plan-construction.md:312-319` — The header claims five; the enumerated list under it has six (`action_beats`, `dialogue_beats`, `sensory_register`, `interiority_register`, `transition_marker`, `pacing_signature`). Trivial drift; reader confusion. Fix: update header to "six fields" OR drop one item.
 
-- **F-04** — LOW — *Vestigial `(NEW)` annotation from BSPAG-014 which merged 2026-04-22.* — `references/phase-7-5-visible-affordance-extraction.md:8`, `references/phase-7-5-visible-affordance-extraction.md:144` — The phase title and one rule both carry `(NEW)` markers from BSPAG-014's implementation ticket. The ticket merged 19 days ago; the marker now implies the content is in draft. Strip both markers.
+- **F-04** — LOW — *Vestigial `(NEW)` annotation from a prior implementation ticket which merged some weeks ago.* — `references/phase-7-5-visible-affordance-extraction.md:8`, `references/phase-7-5-visible-affordance-extraction.md:144` — The phase title and one rule both carry `(NEW)` markers from the implementation ticket. The ticket merged some time ago; the marker now implies the content is in draft. Strip both markers.
 
 ## Things that are NOT redundant or detrimental
 
@@ -70,5 +70,5 @@ Nothing should be deleted wholesale. The post-rework state has one concrete corr
 
 - **ACCEPT-and-create-tickets** → Phase 9 fires: 3 tickets (BSPAG-NNN-fix-hard-gate-gate-count, BSPAG-NNN-consolidate-cadence-policy-canonical-source, BSPAG-NNN-janitorial-sweep) plus a triage manifest (3 tickets ≥ 3 threshold).
 - **ACCEPT-report-only** → end the run; the user will commission edits later via separate steps.
-- **REVISE-narrow** → e.g., "downgrade F-04 from LOW to drop — the `(NEW)` markers are intentional pending BSPAG-019's completion".
+- **REVISE-narrow** → e.g., "downgrade F-04 from LOW to drop — the `(NEW)` markers are intentional pending a follow-up ticket's completion".
 - **REJECT** → end the run with no further action.

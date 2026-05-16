@@ -14,7 +14,7 @@ mcp__worldloom__get_context_packet(
 )
 ```
 
-`canon_facts_from_diegetic_artifacts` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile prioritizes the source artifact, referenced records, named-entity neighbors, canon facts, invariants, Mystery Reserve entries, and artifact-local section context while preserving the broad Phase 2 grounding scan.
+`canon_facts_from_diegetic_artifacts` is registered in the TASK_TYPES enum. Its ranking profile prioritizes the source artifact, referenced records, named-entity neighbors, canon facts, invariants, Mystery Reserve entries, and artifact-local section context while preserving the broad Phase 2 grounding scan.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phase 2 and Phase 6 expand on demand via record-addressed retrieval.
 

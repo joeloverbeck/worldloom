@@ -104,7 +104,7 @@ MCP retrieval tools inject `record_kind` into parsed-record responses for consum
 
 ### CH-record `affected_fact_ids` is required for any plan modifying an existing CF
 
-PATCHENG-003 unified the CH-record schema on `affected_fact_ids` as the single canonical CF-reference field. The retired `affected_cf_ids` alias is rejected by `tools/validators/src/schemas/change-log-entry.schema.json`.
+The CH-record schema uses `affected_fact_ids` as the single canonical CF-reference field; the retired `affected_cf_ids` alias is rejected by `tools/validators/src/schemas/change-log-entry.schema.json`.
 
 For any plan that modifies an existing CF — `append_modification_history_entry`, `append_extension` against an existing CF, `update_record_field` on an existing CF, or any other op that touches a pre-existing `_source/canon/CF-<integer>.yaml` — the CH-record's `affected_fact_ids` array MUST list every modified CF id alongside any newly-created CF ids. This matches the field read by `rule6_no_silent_retcons`, the genesis CH-1 template in `create-base-world`, and the worked example at `examples/accept-with-required-updates.md`.
 

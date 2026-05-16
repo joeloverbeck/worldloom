@@ -301,9 +301,9 @@ The original `SP-<integer>.md` ledger stays unchanged as the historical proposal
 
 ## Phase 5: Commit / Write — HARD-GATE fires
 
-1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record` (via PEENH-007 inheritance — now landed), `create_stent_record`, `create_ststat_record` (only when a source STSTAT in `proposal_evidence.source_records[]` needs amended-schema supersession), `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), and optionally `create_se_record` (when `emit_closeout_event: true`, with `event_kind: promotion_closeout` conforming to story-state contract §4.3a audit-only SE events). Branch disposition is recorded in the closeout ledger / INDEX surfaces, not as a `BR` record operation. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
+1. Build the patch plan covering all supersessions from Phase 2 as a single envelope. Operations include `create_sf_record`, `create_bel_record`, `create_stent_record`, `create_ststat_record` (only when a source STSTAT in `proposal_evidence.source_records[]` needs amended-schema supersession), `create_srel_record`, `append_story_diegetic_artifact_record` (for story-local DA supersessions, with `expected_id_allocations.story_da_ids`), and optionally `create_se_record` (when `emit_closeout_event: true`, with `event_kind: promotion_closeout` conforming to story-state contract §4.3a audit-only SE events). Branch disposition is recorded in the closeout ledger / INDEX surfaces, not as a `BR` record operation. Each op requires a `target_file` field naming the on-disk write path (e.g., `worlds/<world_slug>/stories/<story_slug>/_source/<class>/<ID>.yaml`); see `docs/MACHINE-FACING-LAYER.md` §`describe_envelope_schema` or invoke `mcp__worldloom__describe_envelope_schema(op_kind?)` at pre-flight for the machine-readable per-op shape.
 
-2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance` (BEL via VALENH-011 inheritance).
+2. Dry-run via `mcp__worldloom__validate_patch_plan`. Each new record passes `record_schema_compliance`.
 
 3. Present the complete deliverable summary to the user:
    - `SP-<integer>` id + verdict.
@@ -373,12 +373,6 @@ The `SP-<integer>-closeout.md` ledger schema is defined inline in Phase 4's temp
 - **Schema minimalism per shared contract §2 + FOUNDATIONS §Story Bundles §5b.** Superseding records must conform to the amended class schemas in shared contract §4. Ledger-only canon links, rejection disposition, archive disposition, and deferral notes stay in `SP-<integer>-closeout.md` / INDEX surfaces until a future contract amendment deliberately promotes a structured field.
 - **Skills do not chain.** Closeout never invokes `canon-addition` (already ran), `story-fact-promotion-to-canon` (already ran), or any other sibling. The user invokes closeout separately after canon-addition adjudicates.
 - **Worktree discipline**: if invoked inside a git worktree, all paths resolve from the worktree root.
-- **Known integration debt**:
-  - **MCPENH-040** (BEL allocator registration) — **Now landed** (verified at `tools/world-mcp/src/tools/allocate-next-id.ts`: `BEL` is registered in `ID_CLASS_FORMATS` and `STORY_SCOPED_ID_CLASS_DIRECTORIES`). Phase 2 supersedes BEL records during accepted-flavored verdicts.
-  - **PEENH-007** (`create_bel_record` patch op) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `create_bel_record` is listed in `OPERATION_KINDS`). Phase 2 + Phase 5 submit BEL supersession ops.
-  - **VALENH-011** (BEL `record_schema_compliance`) — **Now landed** (verified at `tools/validators/src/schemas/story-belief.schema.json` and `tools/validators/src/structural/utils.ts`: `belief_record` maps to `story-belief`). Phase 5 dry-run exercises BEL validator on each BEL supersession.
-  - **PEENH-008** (story-local DA supersession op for `source_kind: artifact_canonization`) — **Now landed** (verified at `tools/patch-engine/src/envelope/schema.ts`: `append_story_diegetic_artifact_record` and `story_da_ids` are listed; `tools/patch-engine/src/ops/create-story-record.ts` maps the op to `_source/artifacts/`). Phase 2 + Phase 5 use the existing story-local DA op.
-  - **MCPENH-041** (task_type rename) — **Now landed** (verified at `tools/world-mcp/src/ranking/profiles/index.ts`: rebuilt story-pipeline task types are registered in `TASK_TYPES`). Closeout does not use `get_context_packet` retrieval, so the rename has no closeout caller impact.
 
 ## What is intentionally NOT in this skill
 

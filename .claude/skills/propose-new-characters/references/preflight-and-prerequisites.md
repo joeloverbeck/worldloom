@@ -14,7 +14,7 @@ mcp__worldloom__get_context_packet(
 )
 ```
 
-`propose_new_characters` is registered in the TASK_TYPES enum by MCPENH-002. Its ranking profile prioritizes character/person-registry-adjacent records, named-entity neighbors, invariants, Mystery Reserve entries, and local section context while preserving broad reasoning across institutions, peoples-and-species, everyday-life, geography, and timeline domains.
+`propose_new_characters` is registered in the TASK_TYPES enum. Its ranking profile prioritizes character/person-registry-adjacent records, named-entity neighbors, invariants, Mystery Reserve entries, and local section context while preserving broad reasoning across institutions, peoples-and-species, everyday-life, geography, and timeline domains.
 
 Per `docs/CONTEXT-PACKET-CONTRACT.md`, the packet returns Kernel concepts + invariants + relevant CFs + named-entity neighbors + section context for the seed-local domains. It is the entry point, not the whole load — Phases 1–11 expand on demand via record-addressed retrieval.
 
