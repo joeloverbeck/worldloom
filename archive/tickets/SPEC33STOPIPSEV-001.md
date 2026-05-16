@@ -1,6 +1,6 @@
 # SPEC33STOPIPSEV-001: Replace turn-cycle seed derivation with schema-backed anchors
 
-**Status**: PENDING
+**Status**: COMPLETED
 **Priority**: HIGH
 **Effort**: Small
 **Engine Changes**: Yes — `.claude/skills/branching-story-turn-cycle/SKILL.md` skill-prose update; no tool/validator/patch-engine changes.
@@ -8,7 +8,7 @@
 
 ## Problem
 
-`.claude/skills/branching-story-turn-cycle/SKILL.md:147` derives world-scope `seed_nodes` via field names that do not exist in the shared story-state contract — `STENT.bound_ent_id` (only `STENT.bound_char_id` is defined at story-state-contract §4.5.1) and `STLOC.governing_section_id` (only `STLOC.bound_ent` is defined at §4.5.8). The skill prose is therefore un-executable as written. The MCP server's defensive guard (`STORY_LOCAL_SEED_NODE_PATTERN` + the `story_local_seed_nodes_ignored` warning per SPEC-31 D14, at `tools/world-mcp/src/tools/get-context-packet.ts:29-40`) bounds runtime damage by discarding any story-local IDs accidentally passed, but the skill prose remains the misleading source of truth for skill authors and future audits.
+At intake, `.claude/skills/branching-story-turn-cycle/SKILL.md` derived world-scope `seed_nodes` via field names that do not exist in the shared story-state contract — `STENT.bound_ent_id` (only `STENT.bound_char_id` is defined at story-state-contract §4.5.1) and `STLOC.governing_section_id` (only `STLOC.bound_ent` is defined at §4.5.8). The skill prose was therefore un-executable as written. The MCP server's defensive guard (`STORY_LOCAL_SEED_NODE_PATTERN` + the `story_local_seed_nodes_ignored` warning per SPEC-31 D14, at `tools/world-mcp/src/tools/get-context-packet.ts:29-40`) bounds runtime damage by discarding any story-local IDs accidentally passed, but the skill prose needed to stop presenting invalid fields as the source of truth for skill authors and future audits.
 
 ## Assumption Reassessment (2026-05-16)
 
@@ -28,11 +28,11 @@
 2. Replacement paragraph cites only contract-§4 fields → manual review against `_shared-templates/story-state-contract.md` §4.5.1 + §4.5.8.
 3. MCP server defensive guard unchanged → no edit to `tools/world-mcp/src/tools/get-context-packet.ts`; backstop preserved.
 
-## What to Change
+## Landed Changes
 
 ### 1. Replace seed-derivation paragraph in turn-cycle SKILL.md §World-State Prerequisites
 
-In `.claude/skills/branching-story-turn-cycle/SKILL.md` §World-State Prerequisites (line 147 region), replace the current seed-derivation paragraph with:
+In `.claude/skills/branching-story-turn-cycle/SKILL.md` §World-State Prerequisites, replaced the old seed-derivation paragraph with:
 
 ```
 Derive world-scope `seed_nodes` only from schema-backed anchors per the
@@ -58,7 +58,7 @@ warning is a defensive backstop, not a substitute for this discipline.
 
 ### 2. Add verification note at foot of §World-State Prerequisites
 
-Add a one-line note immediately after the replaced paragraph:
+Added a one-line note immediately after the replaced paragraph:
 
 ```
 Seed derivation conforms to story-state contract §4.5.1 (STENT) and §4.5.8
@@ -79,7 +79,7 @@ Seed derivation conforms to story-state contract §4.5.1 (STENT) and §4.5.8
 
 ### Tests That Must Pass
 
-1. `grep -n 'bound_ent_id\|governing_section_id' .claude/skills/branching-story-turn-cycle/SKILL.md` returns zero matches.
+1. `grep -n 'bound_ent_id\|governing_section_id' .claude/skills/branching-story-turn-cycle/SKILL.md` returns zero matches. In shell terms, exit 1 with no output is the expected success signal for this negative grep.
 2. `grep -n 'STENT.bound_char_id\|STLOC.bound_ent' .claude/skills/branching-story-turn-cycle/SKILL.md` returns matches in the replaced paragraph naming both canonical fields.
 3. Visual review confirms the new paragraph cites only fields defined in `_shared-templates/story-state-contract.md` §4.
 
@@ -99,3 +99,18 @@ Seed derivation conforms to story-state contract §4.5.1 (STENT) and §4.5.8
 1. `grep -n 'bound_ent_id\|governing_section_id' .claude/skills/branching-story-turn-cycle/SKILL.md` — must return zero matches.
 2. `grep -n 'STENT.bound_char_id\|STLOC.bound_ent' .claude/skills/branching-story-turn-cycle/SKILL.md` — must return matches in the §World-State Prerequisites region.
 3. Narrower command is appropriate because the fix is a single-paragraph prose edit; no functional code path executes seed-derivation prose, so no test runner exercises it. The full-pipeline verification surface is the shared story-state contract — its §4 schemas remain unchanged and authoritative.
+
+## Outcome
+
+Completed on 2026-05-16. The turn-cycle World-State Prerequisites now derive context-packet `seed_nodes` only from schema-backed anchors: `STENT.bound_char_id`, `STLOC.bound_ent`, parent unresolved mystery ids, parent CF ids from active mirrored `SF.derived_from[]`, and already-known active-period world-canon anchors. The invalid `STENT.bound_ent_id` and `STLOC.governing_section_id` references were removed. The paragraph now states that story-local IDs load through `story_slug`-scoped story-bundle retrieval and that the MCP `story_local_seed_nodes_ignored` warning is only a defensive backstop.
+
+## Verification Result
+
+1. `grep -n 'bound_ent_id\|governing_section_id' .claude/skills/branching-story-turn-cycle/SKILL.md` produced no output and exited 1, which is the expected success signal for this negative grep.
+2. `grep -n 'STENT.bound_char_id\|STLOC.bound_ent' .claude/skills/branching-story-turn-cycle/SKILL.md` returned the canonical field references in the replaced paragraph.
+3. Manual review checked `.claude/skills/_shared-templates/story-state-contract.md` §4.5.1 and §4.5.8: STENT defines `bound_char_id`, and STLOC defines `bound_ent`; neither unsupported field is part of the contract.
+4. Manual review checked `tools/world-mcp/src/tools/get-context-packet.ts`; the `story_local_seed_nodes_ignored` warning remains unchanged as the defensive runtime backstop.
+
+## Deviations
+
+None. The landed change stayed within the documented skill-prose boundary; no tool, validator, schema, patch-engine, or MCP runtime code changed.
