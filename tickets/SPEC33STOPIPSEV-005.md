@@ -85,7 +85,7 @@ Add `create_ststat_record` to the enumerated ops, mirroring the conditional STST
 - Patch-engine `create_ststat_record` implementation — already exists at `tools/patch-engine/src/envelope/schema.ts:76`; no engine changes required.
 - STSTAT schema at story-state-contract §4.5.13 — already canonical and unchanged.
 - Closeout output table (line 122) — already lists STSTAT correctly; not modified.
-- Other closeout sections (proposal-package paths, "now landed" provenance) — covered by SPEC33STOPIPSEV-004 (D4) and SPEC33STOPIPSEV-009 (D9). Same-file co-location: this ticket touches Phase 5 op list at line 297 region; SPEC33STOPIPSEV-009's closeout-portion touches line 297's inline PEENH-007 citation. Implementer must land 005 first so 009's edit applies to the modified op list (which now includes `create_ststat_record`).
+- Other closeout sections (proposal-package paths, "now landed" provenance) — proposal-package paths are covered by archive/tickets/SPEC33STOPIPSEV-004.md (D4), and provenance is covered by SPEC33STOPIPSEV-009 (D9). Same-file co-location: this ticket touches Phase 5 op list at line 297 region; SPEC33STOPIPSEV-009's closeout-portion touches line 297's inline PEENH-007 citation. Implementer must land 005 first so 009's edit applies to the modified op list (which now includes `create_ststat_record`).
 
 ## Acceptance Criteria
 

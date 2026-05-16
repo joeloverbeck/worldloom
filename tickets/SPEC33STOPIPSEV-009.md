@@ -105,7 +105,7 @@ Confirm every remaining match is immediately followed by `per archive/tickets/<f
 - The 5 archived ticket files (`archive/tickets/MCPENH-040-*.md`, `MCPENH-041-*.md`, `PEENH-007-*.md`, `PEENH-008-*.md`, `VALENH-011-*.md`) — already exist; not modified.
 - The 3 consuming skills with zero "now landed" claims (`bootstrap`, `turn-cycle`, `prose-attach`) — not modified.
 - Runtime `describe_capabilities` checks (option c in SPEC-33 §D9 — heavier discipline) — deferred per SPEC-33's key design decision; archived-ticket links are sufficient under current trust conditions.
-- Other closeout SKILL.md changes (proposal-package paths, STSTAT propagation) — covered by SPEC33STOPIPSEV-004 (D4) and SPEC33STOPIPSEV-005 (D5). Same-file co-location: this ticket's line 297 edit must land AFTER 005's Phase 5 op list expansion.
+- Other closeout SKILL.md changes (proposal-package paths, STSTAT propagation) — proposal-package paths are covered by archive/tickets/SPEC33STOPIPSEV-004.md (D4), and STSTAT propagation is covered by SPEC33STOPIPSEV-005 (D5). Same-file co-location: this ticket's line 297 edit must land AFTER 005's Phase 5 op list expansion.
 
 ## Acceptance Criteria
 

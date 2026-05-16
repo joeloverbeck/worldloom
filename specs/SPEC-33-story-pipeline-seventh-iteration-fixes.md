@@ -187,6 +187,8 @@ proposal_evidence:
 
 Closeout would fail to find `source_records[]` at the top level and silently mark disposition completeness on an empty set.
 
+**Implementation note (2026-05-16, SPEC33STOPIPSEV-004)**: live reassessment corrected this deliverable's field list before implementation. The producer skill and `.claude/skills/story-fact-promotion-to-canon/templates/proposal-package.yaml` nest `story_branch`, `source_kind`, and `source_records[]` under `proposal_evidence`, but keep `downstream_impact_report` and `contradiction_preference` as top-level proposal-package fields. The D4 implementation preserves those two top-level paths; remaining `proposal_evidence.contradiction_preference` / `proposal_evidence.downstream_impact_report` wording below is historical intake context, not the landed contract.
+
 **Change**:
 
 1. **Skill prose** (`.claude/skills/story-promotion-closeout/SKILL.md`, all occurrences): replace top-level references to `source_records[]`, `branch_path`, `source_kind`, `contradiction_preference`, `downstream_impact_report` with their nested forms:
