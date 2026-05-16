@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync
@@ -13,8 +14,10 @@ import test from "node:test";
 
 import Database from "better-sqlite3";
 
+import { parseWorldFile, syncWorldIndex } from "../src/commands/shared";
 import { openIndex, SchemaVersionMismatchError } from "../src/index/open";
 import { CURRENT_INDEX_VERSION } from "../src/schema/version";
+import { cleanup as cleanupAtomicRoot, createAtomicRepoRoot } from "./helpers/atomic-fixture";
 
 const INITIAL_MIGRATION_SQL = readFileSync(
   path.resolve(__dirname, "..", "..", "src", "schema", "migrations", "001_initial.sql"),
@@ -48,6 +51,91 @@ function createVersionOneIndex(root: string): void {
   }
 
   writeFileSync(versionPath, "1\n", "utf8");
+}
+
+function readMigration(version: number): string {
+  const migrationDirectory = path.resolve(__dirname, "..", "..", "src", "schema", "migrations");
+  const fileName = readdirSync(migrationDirectory).find((entry) =>
+    entry.startsWith(String(version).padStart(3, "0"))
+  );
+
+  assert.notEqual(fileName, undefined);
+
+  return readFileSync(path.join(migrationDirectory, fileName as string), "utf8");
+}
+
+function createIndexWithStaleWorldKernel(
+  root: string,
+  worldSlug: string,
+  recordedVersion: 4 | 5
+): void {
+  const indexDirectory = path.join(root, "worlds", worldSlug, "_index");
+  const databasePath = path.join(indexDirectory, "world.db");
+  const versionPath = path.join(indexDirectory, "index_version.txt");
+  const parsed = parseWorldFile(root, worldSlug, "WORLD_KERNEL.md");
+
+  mkdirSync(indexDirectory, { recursive: true });
+
+  const db = new Database(databasePath);
+  try {
+    db.exec([1, 2, 3, 4].map((version) => readMigration(version)).join("\n"));
+    db
+      .prepare(
+        `
+          INSERT INTO nodes (
+            node_id,
+            world_slug,
+            story_slug,
+            file_path,
+            heading_path,
+            byte_start,
+            byte_end,
+            line_start,
+            line_end,
+            node_type,
+            body,
+            content_hash,
+            anchor_checksum,
+            summary,
+            created_at_index_version
+          ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+        `
+      )
+      .run(
+        `${worldSlug}:WORLD_KERNEL.md:Genre Contract:0`,
+        worldSlug,
+        "WORLD_KERNEL.md",
+        "WORLD_KERNEL.md > Genre Contract",
+        0,
+        10,
+        1,
+        3,
+        "section",
+        "The old parser stored this row as a section.",
+        parsed.contentHash,
+        "stale-anchor",
+        4
+      );
+    db
+      .prepare("INSERT INTO anchor_checksums (node_id, anchor_form, checksum) VALUES (?, ?, ?)")
+      .run(`${worldSlug}:WORLD_KERNEL.md:Genre Contract:0`, "Genre Contract", "stale-anchor");
+    db
+      .prepare(
+        `
+          INSERT INTO file_versions (
+            world_slug,
+            file_path,
+            content_hash,
+            last_indexed_at
+          ) VALUES (?, ?, ?, ?)
+        `
+      )
+      .run(worldSlug, "WORLD_KERNEL.md", parsed.contentHash, "2026-05-16T00:00:00.000Z");
+  } finally {
+    db.close();
+  }
+
+  writeFileSync(versionPath, `${recordedVersion}\n`, "utf8");
 }
 
 test("openIndex creates the DB, sidecar, schema objects, and write pragmas", () => {
@@ -234,6 +322,117 @@ test("openIndex upgrades a version-1 index to the current schema version", () =>
   } finally {
     cleanup(root);
   }
+});
+
+function assertStaleWorldKernelSectionReparses(recordedVersion: 4 | 5): void {
+  const worldSlug = "fixture-world";
+  const root = createAtomicRepoRoot(worldSlug);
+  const worldKernelPath = path.join(root, "worlds", worldSlug, "WORLD_KERNEL.md");
+  writeFileSync(
+    worldKernelPath,
+    [
+      "# Fixture Kernel",
+      "",
+      "## Genre Contract",
+      "",
+      "A fixture world for migration testing.",
+      "",
+      "## Chronotope",
+      "",
+      "A harbor in test time."
+    ].join("\n"),
+    "utf8"
+  );
+
+  try {
+    createIndexWithStaleWorldKernel(root, worldSlug, recordedVersion);
+
+    const db = openIndex(root, worldSlug);
+    try {
+      const staleCount = db
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM nodes
+            WHERE world_slug = ?
+              AND file_path = 'WORLD_KERNEL.md'
+              AND node_type = 'section'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(staleCount.count, 0);
+
+      const fileVersionCount = db
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM file_versions
+            WHERE world_slug = ?
+              AND file_path = 'WORLD_KERNEL.md'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(fileVersionCount.count, 0);
+    } finally {
+      db.close();
+    }
+
+    const syncResult = syncWorldIndex(root, worldSlug);
+    assert.equal(syncResult.exitCode, 0);
+
+    const migrated = openIndex(root, worldSlug);
+    try {
+      const staleCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM nodes
+            WHERE world_slug = ?
+              AND file_path = 'WORLD_KERNEL.md'
+              AND node_type = 'section'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(staleCount.count, 0);
+
+      const narrativeCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM nodes
+            WHERE world_slug = ?
+              AND file_path = 'WORLD_KERNEL.md'
+              AND node_type = 'narrative_section'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(narrativeCount.count, 2);
+
+      const fileVersionCount = migrated
+        .prepare(
+          `
+            SELECT COUNT(*) AS count
+            FROM file_versions
+            WHERE world_slug = ?
+              AND file_path = 'WORLD_KERNEL.md'
+          `
+        )
+        .get(worldSlug) as { count: number };
+      assert.equal(fileVersionCount.count, 1);
+    } finally {
+      migrated.close();
+    }
+  } finally {
+    cleanupAtomicRoot(root);
+  }
+}
+
+test("parser-vocabulary migrations invalidate stale file versions before sync", () => {
+  assertStaleWorldKernelSectionReparses(4);
+});
+
+test("repair migration handles indexes that already recorded the v5 no-op migration", () => {
+  assertStaleWorldKernelSectionReparses(5);
 });
 
 test("version mismatches raise SchemaVersionMismatchError", () => {

@@ -58,6 +58,8 @@ The docs describe the intended steady-state contract, but any workflow should st
 | Inspect the patch-plan envelope and per-op payload contract before assembly | `describe_envelope_schema`, optionally filtered by `op_kind` |
 | Prove structural integrity | `world-validate <world> --structural` |
 
+`world-index` schema migrations are also responsible for parser-vocabulary staleness. When a schema-version bump changes the `node_type` emitted for unchanged source content, the migration file must delete the rows that would be reclassified, delete dependent rows, and clear the affected `file_versions` entries so the next `world-index sync` re-parses those files. Comment-only migrations are valid only when no existing rows would be reclassified; `world-index verify` can flag drift but does not auto-correct this class of stale indexed vocabulary.
+
 ## Retrieval Tool Scope
 
 | Tool | Reads |
