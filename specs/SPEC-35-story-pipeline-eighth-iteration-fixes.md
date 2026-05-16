@@ -17,6 +17,7 @@
 - 2026-05-16: D6 completed and archived in `archive/tickets/SPEC35STOPIPEIG-006.md`. `allocate_next_id` capability metadata now describes unpadded natural-integer IDs such as `<CLASS>-1`, with MCP-boundary `describe_capabilities` coverage in `tools/world-mcp/tests/server/dispatch.test.ts`; `tools/world-mcp` build and full `npm test` proof passed.
 - 2026-05-16: D7 completed and archived in `archive/tickets/SPEC35STOPIPEIG-007.md`. `create_bel_record` envelope discovery now resolves through the full `belief_record` schema instead of the old BEL ID-only generic wrapper, with `describe-envelope-schema` test coverage, README surface alignment, and `tools/world-mcp` build and full `npm test` proof passed.
 - 2026-05-16: D8 completed and archived in `archive/tickets/SPEC35STOPIPEIG-008.md`. Story-bundle fixtures and direct consumer assertions now use current STENT/SF/PG fields, string urgency, and unpadded fixture-owned IDs; validator fixtures no longer carry retired `storylet_realized`; `recursive_reference_closure` now follows current PG input references; validators and world-mcp build and full test proof passed.
+- 2026-05-16: D9 completed and archived in `archive/tickets/SPEC35STOPIPEIG-009.md`. The Machine-Facing Layer citations in `docs/FOUNDATIONS.md` now point to current tracked authorities for Retrieval MCP, Patch Engine, and Hooks; the docs-only proof passed (`archive/specs/` zero-hit grep in FOUNDATIONS, replacement path existence checks, and manual review).
 
 ## Problem Statement
 
